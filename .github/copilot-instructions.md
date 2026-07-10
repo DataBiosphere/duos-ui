@@ -3,7 +3,7 @@
 ## Project Overview
 
 DUOS UI is a React/TypeScript single-page application for the Data Use Oversight System. It uses Vite for
-bundling, ESLint for linting, TypeScript strict mode, and Cypress for component and e2e testing.
+bundling, ESLint for linting, TypeScript strict mode, Vitest + RTL for component testing, and Playwright for e2e testing.
 
 ## Data Library Filters and Nested Asset Rows
 
@@ -95,19 +95,17 @@ DAA-related UI and workflows are permanently enabled in this codebase.
 - Implement new DAA UI directly where appropriate.
 - Routes and views that support DAA functionality should remain active by default.
 
-## Component Test Conventions (Cypress)
+## Component Test Conventions (Vitest + RTL)
 
 - **Never use `new Date()` directly as a fixture value** in component tests where the formatted date is
   later asserted. Use a fixed `Date` object (e.g. `new Date('2026-04-30T12:00:00.000Z')`) so the assertion
   is deterministic and does not become flaky when the test runs around midnight or across timezones.
-- All new component test files go under `cypress/component/<feature-area>/`.
-- Stub all AJAX calls (`DAA`, `DAR`, `Collections`, etc.) using `cy.stub(Module, 'method').resolves(...)`.
-- Use `cy.initApplicationConfig()` in `beforeEach` for all component specs.
+- All new component test files go under `test/<feature-area>/`, mirroring the `src/` path.
+- Stub all AJAX calls using `vi.mock('src/libs/ajax/...', () => ({ ... }))`.
 
 ## Unit / Integration Test Conventions (Vitest)
 
-Vitest covers pure functions, hooks, and component-level rendering that doesn't need a real
-browser. Cypress component specs remain the home for browser-dependent behavior. Coverage is
+Vitest covers pure functions, hooks, and component-level rendering. Coverage is
 collected via V8 and reported on PRs (see `.github/workflows/component-tests.yml`).
 
 - All Vitest specs live under `test/`, mirroring the `src/` path of the unit under test
@@ -140,7 +138,7 @@ Before raising a pull request, ensure:
 2. `pnpm run type-check` exits with **0 errors**.
 3. All new code is covered by component tests with meaningful assertions.
 4. Using SonarQube for IDE, verify no new SonarQube bugs, issues, or vulnerabilities are introduced.
-5. `pnpm run cypress:run:component` exits with **0 failing specs**.
+5. `pnpm run test:e2e` exits with **0 failing specs**.
 6. `pnpm test` exits with **0 failing specs** (run `pnpm run test:coverage` to check coverage locally).
 
 

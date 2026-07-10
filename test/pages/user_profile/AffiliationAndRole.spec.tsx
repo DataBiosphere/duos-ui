@@ -1,13 +1,21 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import AffiliationAndRole from 'src/pages/user_profile/AffiliationAndRoles'
-import { DuosUser, InstitutionInterface } from 'src/types/model'
+import { DuosUser, InstitutionInterface, SigningOfficialUserWithData } from 'src/types/model'
+import { renderWithRouter as render } from '../../test-utils'
 
 vi.mock('src/libs/ajax/Institution', () => ({
   Institution: {
     getById: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/ajax/User', () => ({
+  User: {
+    getSOsForInstitution: vi.fn(),
+    getSOsForCurrentUser: vi.fn(),
   },
 }))
 
@@ -18,6 +26,7 @@ vi.mock('src/libs/utils', () => ({
 }))
 
 import { Institution } from 'src/libs/ajax/Institution'
+import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
 
 const institution: InstitutionInterface = { id: 1, name: 'Test Institution' } as InstitutionInterface
@@ -42,10 +51,20 @@ const user: DuosUser = {
   ],
 }
 
+const soWithData: SigningOfficialUserWithData = {
+  userId: 99,
+  displayName: 'Jane SO',
+  email: 'jane.so@broad.mit.edu',
+  institutionName: 'Broad Institute',
+  userData: { externalProfiles: {} },
+}
+
 describe('AffiliationAndRole', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Institution.getById).mockResolvedValue(institution)
+    vi.mocked(User.getSOsForInstitution).mockResolvedValue([])
+    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue([])
   })
 
   it('displays institution name when Institution.getById resolves with an institution', async () => {
@@ -93,6 +112,54 @@ describe('AffiliationAndRole', () => {
     render(<AffiliationAndRole user={null as unknown as DuosUser} />)
     await waitFor(() => {
       expect(Notifications.showError).not.toHaveBeenCalled()
+    })
+  })
+
+  it('calls getSOsForCurrentUser when user has an institutionId', async () => {
+    render(<AffiliationAndRole user={user} />)
+    await waitFor(() => {
+      expect(User.getSOsForCurrentUser).toHaveBeenCalled()
+      expect(User.getSOsForInstitution).not.toHaveBeenCalled()
+    })
+  })
+
+  it('calls getSOsForCurrentUser when user has no institutionId', async () => {
+    render(<AffiliationAndRole user={{ ...user, institutionId: undefined }} />)
+    await waitFor(() => {
+      expect(User.getSOsForCurrentUser).toHaveBeenCalled()
+      expect(User.getSOsForInstitution).not.toHaveBeenCalled()
+    })
+  })
+
+  it('renders name and email in table rows for each signing official', async () => {
+    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue([soWithData])
+    render(<AffiliationAndRole user={user} />)
+    await waitFor(() => {
+      expect(screen.getByRole('cell', { name: 'Jane SO' })).toBeInTheDocument()
+      expect(screen.getByRole('cell', { name: 'jane.so@broad.mit.edu' })).toBeInTheDocument()
+    })
+  })
+
+  it('renders the Name and Email column headers', async () => {
+    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue([soWithData])
+    render(<AffiliationAndRole user={user} />)
+    await waitFor(() => {
+      expect(screen.getByRole('columnheader', { name: 'Name' })).toBeInTheDocument()
+      expect(screen.getByRole('columnheader', { name: 'Email' })).toBeInTheDocument()
+    })
+  })
+
+  it('shows "No Signing Official found" when the API returns an empty array', async () => {
+    render(<AffiliationAndRole user={user} />)
+    await waitFor(() => {
+      expect(screen.getByText(/No Signing Official found/)).toBeInTheDocument()
+    })
+  })
+
+  it('renders the heading as "My Institution\'s Signing Official(s)"', async () => {
+    render(<AffiliationAndRole user={user} />)
+    await waitFor(() => {
+      expect(screen.getByText(/My Institution's Signing Official/)).toBeInTheDocument()
     })
   })
 })

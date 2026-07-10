@@ -1,4 +1,4 @@
-import { chain, filter, includes, isEmpty, isNil, map, values } from 'src/utils/NodashUtil'
+import { chain, filter, includes, isEmpty, isNil, map } from 'src/utils/NodashUtil'
 import { Match } from 'src/libs/ajax/Match'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { ElasticsearchQuery } from 'src/types/elastic'
@@ -33,7 +33,6 @@ export interface Bucket {
   votes: Record<string, VoteGroup>[]
   matchResults: MatchResult[]
   algorithmResult?: AlgorithmResult
-  isRP?: boolean // Whether this is an RP (Research Purpose) vote bucket
   dacs?: DacTerm[]
 }
 
@@ -55,7 +54,8 @@ interface VoteGroup {
  * Step 4: Pull all votes up to a top level bucket field for easier iteration
  * Step 5: Set the bucket key/label from the dataUse + dataset ids
  * Step 6: Coalesce the algorithm decision per bucket
- * Step 7: Prepend an RP Vote bucket for the DAC to vote on the research purpose
+ *
+ * Note that RP election votes are silently ignored as votes are no longer cast for them.
  */
 export const binCollectionToBuckets = async (collection: Pick<DarCollection, 'datasets'> & Partial<Pick<DarCollection, 'dars'>>, dacIds: number[] = []): Promise<Bucket[]> => {
   const buckets: Bucket[] = []
@@ -156,30 +156,17 @@ export const binCollectionToBuckets = async (collection: Pick<DarCollection, 'da
     b.algorithmResult = calculateAlgorithmResultForBucket(b)
   }
 
-  // Step 7: Populate RUS Vote bucket with RP votes and move to the top of the bucket array
-  const rpVotes = createRpVoteStructureFromBuckets(buckets)
-  buckets.unshift({
-    isRP: true,
-    key: 'RUS Vote',
-    votes: rpVotes,
-    label: '',
-    datasets: [],
-    datasetIds: [],
-    dataUses: [],
-    elections: [],
-    matchResults: [],
-  })
-
   return buckets
 }
 
 /**
- * Find all elections (in a dar) with a dataset id in the provided list of dataset ids
+ * Find all elections (in a dar) with a dataset id in the provided list of dataset ids.
+ * Ensures that all elections are DataAccess elections.
  */
 const findElectionsForDatasets = (dar: DataAccessRequest, datasetIds: number[]): Election[] => {
   return dar.elections
     ? Object.values(dar.elections)
-        .filter((e: Election) => datasetIds.includes(e.datasetId))
+        .filter((e: Election) => datasetIds.includes(e.datasetId) && e.electionType === 'DataAccess')
     : []
 }
 
@@ -288,46 +275,6 @@ export const shouldAbstain = (dataUse?: DataUseSummary): boolean => {
     || (dataUse?.secondary
       ? dataUse.secondary.map((dut: DataUseTerm) => dut.code).some(code => codeList.includes(code))
       : false)
-}
-
-/**
- * Create a structure of RP (research purpose) votes from all votes in a list of buckets.
- */
-const createRpVoteStructureFromBuckets = (buckets: Bucket[]): Array<{ rp: VoteGroup }> => {
-  // List of rp vote groups broken out by election into chair, member, and final votes.
-  const rpVotes: Array<{ rp: VoteGroup }> = []
-
-  const rpElectionVoteArrays: Vote[][] = chain(buckets)
-    .flatMap((b: Bucket) => b.elections)
-    .filter((e: Election) => e.electionType.toLowerCase() === 'rp')
-    .map((e: Election) => e.votes)
-    // election.votes is a hash of vote id => vote object
-    .map((hash: Record<string, Vote>) => values(hash))
-    .value()
-
-  for (const vArray of rpElectionVoteArrays) {
-    const rpVoteGroup: VoteGroup = {
-      chairpersonVotes: [],
-      memberVotes: [],
-      finalVotes: [],
-    }
-    for (const v of vArray) {
-      const lowerCaseType = v.type.toLowerCase()
-      switch (lowerCaseType) {
-        case 'chairperson':
-          rpVoteGroup.chairpersonVotes.push(v)
-          rpVoteGroup.finalVotes.push(v)
-          break
-        case 'dac':
-          rpVoteGroup.memberVotes.push(v)
-          break
-        default:
-          break
-      }
-    }
-    rpVotes.push({ rp: rpVoteGroup })
-  }
-  return rpVotes
 }
 
 /**
