@@ -63,21 +63,22 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
   )
 
   const tabCounts = tabCountsResult?.counts
+  const tabCountsResponse = tabCountsResult?.response
 
   // Derive the study-asset grid page from the shared tab-counts response using
   // the asset's own transformResponse (which client-side paginates and filters),
   // so a tab's badge and its grid are computed from one identical request and
   // can never disagree. Pagination stays client-side, so paging needs no refetch.
   const derivedStudyAssetData = useMemo(() => {
-    if (!isStudyAssetTab || !tabCountsResult?.response) {
+    if (!isStudyAssetTab || !tabCountsResponse) {
       return undefined
     }
     return currentAsset.transformResponse(
-      tabCountsResult.response,
+      tabCountsResponse,
       { page: urlState.page, pageSize: urlState.pageSize },
       urlState.filters,
     )
-  }, [isStudyAssetTab, tabCountsResult?.response, currentAsset, urlState.page, urlState.pageSize, urlState.filters])
+  }, [isStudyAssetTab, tabCountsResponse, currentAsset, urlState.page, urlState.pageSize, urlState.filters])
 
   const data = isStudyAssetTab ? derivedStudyAssetData : dataQueryResult
   const isFetching = isStudyAssetTab ? isCountsFetching : isDataFetching
