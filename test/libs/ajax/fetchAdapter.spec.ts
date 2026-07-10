@@ -105,7 +105,8 @@ describe('fetchAdapter - Fetch methods', () => {
     fetchMock.mockResolvedValue(new Response(mockBlob, { status: 200 }))
 
     const result = await fetchGet<Blob>('/api/file', { responseType: 'blob' })
-    expect(result.data).toBeInstanceOf(Blob)
+    expect(result.data?.constructor?.name).toBe('Blob')
+    expect(result.data.type).toContain('text/plain')
   })
 
   it('fetchGet - should return text when content-type is text/plain', async () => {

@@ -11,9 +11,10 @@ export default defineConfig({
     alias: aliases_from_tsconfig(),
   },
   test: {
-    css: true,
+    css: false,
     globals: true,
     environment: 'jsdom',
+    pool: 'vmThreads',
     include: ['test/**/*.{spec,test}.{js,jsx,ts,tsx}'],
     exclude: ['test/browser/**', 'test/e2e/**', 'build/**', 'node_modules/**', 'server/**'],
     coverage: {
