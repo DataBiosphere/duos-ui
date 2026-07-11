@@ -105,9 +105,9 @@ environment before cutting over.
   happens on the B2C-hosted login page, so there is no multi-client factory and
   no per-provider branching in the BFF. The session records the sub-provider
   from the B2C `id_token`'s `idp` claim for audit and observability.
-- **`openid-client` for all OAuth/OIDC operations** — library-maintained PKCE,
-  token exchange, and ID-token validation (signature, `iss`, `aud`, `exp`,
-  `nonce`) rather than hand-rolled crypto.
+- **`openid-client` (v6) for all OAuth/OIDC operations** — library-maintained
+  PKCE, token exchange, and ID-token validation (signature, `iss`, `aud`,
+  `exp`) rather than hand-rolled crypto.
 
 ## Target Architecture Sequence Diagrams
 
@@ -148,7 +148,7 @@ sequenceDiagram
         BFF->>PG: Read session — pkceVerifier, pkceState
         PG-->>BFF: session data
         BFF->>B2C: POST /token — code + code_verifier + client_id + client_secret
-        B2C-->>BFF: access_token, refresh_token, id_token, expires_at
+        B2C-->>BFF: access_token, refresh_token, id_token, expires_in
         Note over BFF: Extract sub-provider from id_token idp claim<br/>(google.com → 'google', otherwise 'microsoft')
         Note over BFF,PG: Tokens stored server-side — never sent to browser
         BFF->>PG: Store tokens + idp (sub-provider) in session: clear pkce fields
@@ -180,7 +180,7 @@ sequenceDiagram
 
         alt token expires within 60s
             BFF->>B2C: POST /token (grant_type=refresh_token)
-            B2C-->>BFF: new access_token, expires_at
+            B2C-->>BFF: new access_token, expires_in
             BFF->>PG: Update session with refreshed token
             PG-->>BFF: ok
         end
