@@ -47,7 +47,7 @@ async function buildSessionApp(pg: PostgresDb): Promise<FastifyInstance> {
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax', // Strict would strip the cookie from the OAuth callback redirect — see index.ts
       maxAge: 8 * 60 * 60 * 1000,
       path: '/',
     },
@@ -99,14 +99,16 @@ describe('session middleware (integration)', () => {
     expect(rows.size).toBe(0)
   })
 
-  it('sets an HttpOnly, SameSite=Strict cookie and persists the session on write', async () => {
+  it('sets an HttpOnly, SameSite=Lax cookie and persists the session on write', async () => {
     const res = await app.inject({ method: 'POST', url: '/login' })
     expect(res.statusCode).toBe(200)
 
     const cookie = res.cookies.find(c => c.name === 'sessionId')
     expect(cookie).toBeDefined()
     expect(cookie!.httpOnly).toBe(true)
-    expect(String(cookie!.sameSite).toLowerCase()).toBe('strict')
+    // Lax, not Strict: the cookie must survive the top-level redirect back
+    // from B2C to /auth/callback, which Strict would exclude.
+    expect(String(cookie!.sameSite).toLowerCase()).toBe('lax')
     expect(rows.size).toBe(1)
   })
 

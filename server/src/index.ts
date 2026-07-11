@@ -112,7 +112,13 @@ export async function buildApp(): Promise<AppInstance> {
       cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        // Lax, not Strict: the OAuth callback is a top-level redirect from
+        // B2C, and Strict cookies are withheld from any navigation initiated
+        // cross-site — the callback would arrive sessionless and lose the
+        // PKCE verifier/state. Lax still withholds the cookie from cross-site
+        // POSTs/fetches; CSRF tokens (Phase 5, pulled forward with the Phase 3
+        // proxy) cover state-changing routes in depth.
+        sameSite: 'lax',
         maxAge: Number(process.env.DUOS_SESSION_MAX_AGE_MS) || 8 * 60 * 60 * 1000,
         path: '/',
       },

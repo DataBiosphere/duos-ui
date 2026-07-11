@@ -20,8 +20,11 @@ After the migration the browser holds **zero tokens**:
 - The existing Fastify server becomes a BFF that owns the full OAuth 2.0
   authorization-code + PKCE flow against the identity provider.
 - Tokens live only in a server-side session backed by PostgreSQL. The browser
-  receives a single opaque session cookie (`HttpOnly`, `SameSite=Strict`,
-  `Secure`) that JavaScript cannot read.
+  receives a single opaque session cookie (`HttpOnly`, `SameSite=Lax`,
+  `Secure`) that JavaScript cannot read. Lax rather than Strict because the
+  OAuth callback arrives as a top-level redirect from B2C — Strict cookies are
+  withheld from cross-site-initiated navigations, which would strand the PKCE
+  state; CSRF tokens (Phase 5) protect state-changing routes in depth.
 - All API calls are proxied through the BFF, which attaches the
   `Authorization: Bearer` header server-side and transparently refreshes
   expiring tokens.
@@ -133,7 +136,7 @@ sequenceDiagram
         BFF->>BFF: Generate code_verifier, code_challenge (PKCE), state
         BFF->>PG: Store pkceVerifier, pkceState, returnTo in session
         PG-->>BFF: ok
-        BFF-->>B: 200 { redirectUrl } + Set-Cookie: sessionId (HttpOnly, Secure, SameSite=Strict)
+        BFF-->>B: 200 { redirectUrl } + Set-Cookie: sessionId (HttpOnly, Secure, SameSite=Lax)
 
         B->>B2C: GET /oauth2/v2.0/authorize?code_challenge=...&state=...&client_id=<duos-b2c-id>&p=<policy>
         Note over B2C: B2C login page — user selects Google or Microsoft
