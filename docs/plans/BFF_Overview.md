@@ -24,7 +24,8 @@ After the migration the browser holds **zero tokens**:
   `Secure`) that JavaScript cannot read. Lax rather than Strict because the
   OAuth callback arrives as a top-level redirect from B2C — Strict cookies are
   withheld from cross-site-initiated navigations, which would strand the PKCE
-  state; CSRF tokens (Phase 5) protect state-changing routes in depth.
+  state; CSRF tokens land with the endpoints they protect (Phases 2–4) and
+  Phase 5 verifies the coverage.
 - All API calls are proxied through the BFF, which attaches the
   `Authorization: Bearer` header server-side and transparently refreshes
   expiring tokens.
@@ -54,7 +55,7 @@ The work is split into seven phases, delivered in order.
 | 2 | Server-Side OAuth Flow | Implement the BFF auth routes (`/auth/login`, `/auth/callback`, `/auth/logout`, `/auth/me`) using `openid-client` against the single Azure B2C client, with PKCE; the callback extracts the sub-provider from the B2C `id_token`. Runs alongside the legacy client-side flow during rollout. | [DT-3607](https://broadworkbench.atlassian.net/browse/DT-3607) | |
 | 3 | API Proxy Layer | Add a reverse proxy so the client calls relative `/api/*` URLs; the server injects the Bearer token from the session and proactively refreshes tokens before expiry. | [DT-3608](https://broadworkbench.atlassian.net/browse/DT-3608) | |
 | 4 | Client Refactor | Remove all token handling from the React client: drop `oidc-client-ts` and localStorage token storage, switch the fetch layer to relative URLs, and replace the popup sign-in with a full-page redirect to the B2C login page (which presents the Google/Microsoft choice, unchanged). | [DT-3609](https://broadworkbench.atlassian.net/browse/DT-3609) | |
-| 5 | Security Hardening | Layer additional defenses: strict Content Security Policy, CSRF protection, session-fixation protection (session ID regeneration), token revocation on logout, SRI/third-party script audit, and rate limiting on auth endpoints. | [DT-3610](https://broadworkbench.atlassian.net/browse/DT-3610) | |
+| 5 | Security Hardening | Layer additional defenses: strict Content Security Policy, end-to-end verification of CSRF coverage (enforcement lands with the endpoints in Phases 2–4), session-fixation protection (session ID regeneration), token revocation on logout, SRI/third-party script audit, and rate limiting on auth endpoints. | [DT-3610](https://broadworkbench.atlassian.net/browse/DT-3610) | |
 | 6 | Testing, Observability & Rollout | E2E test coverage, auth/session metrics and alerting, and a config-driven (`bffEnabled` in `config.json`) per-environment cutover. The legacy flow is removed only after the new flow is stable in production. | [DT-3611](https://broadworkbench.atlassian.net/browse/DT-3611) | |
 
 ## Rollout strategy
