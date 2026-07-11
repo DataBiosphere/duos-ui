@@ -61,6 +61,22 @@ export async function buildApp(): Promise<AppInstance> {
   if (process.env.DUOS_DB_HOST) {
     fastify.log.info('[server] DUOS_DB_HOST is set — enabling BFF session infrastructure')
 
+    // Validated up front so a half-configured deployment fails at startup with
+    // an error naming the env var. pg.Pool connects lazily — without this, a
+    // pod missing one of these would boot, pass health checks, and only fail
+    // at the first session read/write.
+    for (const name of ['DUOS_DB_NAME', 'DUOS_DB_USER', 'DUOS_DB_PASSWORD'] as const) {
+      if (!process.env[name]) {
+        throw new Error(`BFF session infrastructure is enabled (DUOS_DB_HOST is set) but ${name} is unset — set it in .env.local locally, or the deployment env in k8s`)
+      }
+    }
+    // `||` not `??`: a blank DUOS_DB_PORT= line in .env.local must mean
+    // "default", not a NaN startup failure.
+    const dbPort = Number.parseInt(process.env.DUOS_DB_PORT?.trim() || '5432', 10)
+    if (Number.isNaN(dbPort)) {
+      throw new Error(`DUOS_DB_PORT is set to '${process.env.DUOS_DB_PORT}', which is not a number — unset it to use the default 5432, or set a valid port`)
+    }
+
     // App-level TLS to Postgres is on unless explicitly disabled. The only
     // deployments that should disable it are those where the transport is
     // already plaintext-on-loopback (a Cloud SQL Proxy sidecar in k8s, or the
@@ -75,7 +91,7 @@ export async function buildApp(): Promise<AppInstance> {
     await fastify.register(fastifyPostgres, {
       host: process.env.DUOS_DB_HOST,
       database: process.env.DUOS_DB_NAME,
-      port: Number.parseInt(process.env.DUOS_DB_PORT ?? '5432', 10),
+      port: dbPort,
       user: process.env.DUOS_DB_USER,
       password: process.env.DUOS_DB_PASSWORD,
       ssl: dbSsl ? { rejectUnauthorized: true } : false,

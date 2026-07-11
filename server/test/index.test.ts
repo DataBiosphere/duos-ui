@@ -43,10 +43,14 @@ vi.mock('@fastify/vite', () => {
 let app: FastifyInstance
 
 beforeEach(async () => {
-  // DUOS_DB_HOST gates the DB/cookie/session registration; set it so the
-  // default path below is the fully-configured one. Individual tests unset it
-  // to exercise the legacy (no-session-infra) path.
+  // DUOS_DB_HOST gates the DB/cookie/session registration; set the full DB
+  // config so the default path below is the fully-configured one. Individual
+  // tests unset vars to exercise the legacy and half-configured paths.
   process.env.DUOS_DB_HOST = 'localhost'
+  process.env.DUOS_DB_NAME = 'consent'
+  process.env.DUOS_DB_USER = 'postgres'
+  process.env.DUOS_DB_PASSWORD = 'password'
+  delete process.env.DUOS_DB_PORT
   process.env.DUOS_SESSION_SECRET = 'test-secret-that-is-at-least-32-characters'
   vi.clearAllMocks()
   // Do NOT call app.ready() here — it finalises the Fastify lifecycle and
@@ -174,6 +178,25 @@ describe('BFF env-config gating', () => {
 
     const { buildApp } = await import('../src/index.js')
     await expect(buildApp()).rejects.toThrow('DUOS_SESSION_SECRET')
+  })
+
+  // pg.Pool connects lazily, so a missing DB var would otherwise boot a
+  // healthy-looking pod that fails only at the first session read/write.
+  it.each(['DUOS_DB_NAME', 'DUOS_DB_USER', 'DUOS_DB_PASSWORD'])(
+    'fails loud when DUOS_DB_HOST is set but %s is missing',
+    async (name) => {
+      delete process.env[name]
+
+      const { buildApp } = await import('../src/index.js')
+      await expect(buildApp()).rejects.toThrow(name)
+    },
+  )
+
+  it('fails loud when DUOS_DB_PORT is not a number', async () => {
+    process.env.DUOS_DB_PORT = 'not-a-port'
+
+    const { buildApp } = await import('../src/index.js')
+    await expect(buildApp()).rejects.toThrow('DUOS_DB_PORT')
   })
 })
 
