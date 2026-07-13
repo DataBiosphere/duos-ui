@@ -41,6 +41,13 @@ export const isOnlyGRUorHMB = (dataUse: DataUseSummary) => {
   )
 }
 
+const RULE_TYPE_TO_CODE: Record<string, 'GRU' | 'HMB'> = {
+  GRU_V1: 'GRU',
+  GRU_DSV1: 'GRU',
+  HMB_V1: 'HMB',
+  HMB_DSV1: 'HMB',
+}
+
 export const getRadarEnabledDatasetsWithRules = async (datasets: DatasetTerm[]) => {
   if (isEmpty(datasets)) return
 
@@ -48,28 +55,32 @@ export const getRadarEnabledDatasetsWithRules = async (datasets: DatasetTerm[]) 
   const uniqueDacIds = Array.from(
     new Set(datasets.filter(dataset => dataset.dacId !== undefined).map(dataset => dataset.dacId)),
   )
-  const ruleTypesToMatch = new Set(['GRU_V1', 'HMB_V1', 'GRU_DSV1', 'HMB_DSV1'])
 
-  // Fetch DACbot rules for each unique DAC ID
-  const dacIdToRules: Record<number, DACbotRule[]> = {}
+  // Fetch DACbot rules for each unique DAC ID, tracking which specific data use code
+  // (GRU or HMB) each DAC has actually enabled auto-approval for
+  const dacIdToEnabledCodes: Record<number, Set<'GRU' | 'HMB'>> = {}
   await Promise.all(
     uniqueDacIds.map(async (dacId) => {
       const rules: DACbotRule[] = await Dac.fetchDACbotRules(dacId)
-      const matchingRules = rules.filter(
-        (rule: { activationDate: number, ruleType: string }) => rule.activationDate && ruleTypesToMatch.has(rule.ruleType),
+      const enabledCodes = new Set(
+        rules
+          .filter((rule: { activationDate: number, ruleType: string }) => rule.activationDate && RULE_TYPE_TO_CODE[rule.ruleType])
+          .map((rule: { ruleType: string }) => RULE_TYPE_TO_CODE[rule.ruleType]),
       )
-      if (matchingRules.length > 0) {
-        dacIdToRules[dacId] = matchingRules
+      if (enabledCodes.size > 0) {
+        dacIdToEnabledCodes[dacId] = enabledCodes
       }
     }),
   )
 
-  // Apply both DAC rule and DataUse (GRU/HMB) filters
+  // A dataset is only radar-enabled if its DAC has enabled auto-approval for that
+  // dataset's own clean GRU/HMB code, not merely enabled it for the other code
   return new Set(datasets
-    .filter((dataset: DatasetTerm) =>
-      dataset.dacId
-      && dacIdToRules[dataset.dacId]
-      && isOnlyGRUorHMB(dataset.dataUse),
-    )
+    .filter((dataset: DatasetTerm) => {
+      const enabledCodes = dataset.dacId ? dacIdToEnabledCodes[dataset.dacId] : undefined
+      return enabledCodes !== undefined
+        && isOnlyGRUorHMB(dataset.dataUse)
+        && enabledCodes.has(dataset.dataUse.primary[0].code as 'GRU' | 'HMB')
+    })
     .map((dataset: { datasetId: number }) => dataset.datasetId))
 }

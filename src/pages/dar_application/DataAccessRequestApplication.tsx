@@ -987,6 +987,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                       <DataAccessAgreements
                         datasets={selectedDatasets}
                         onDaaIdsChange={onDaaIdsChange}
+                        researcherDaaIds={(researcher as DuosUser).libraryCard?.daaIds}
                         isDraft={draftDar}
                         cancelAttest={() => {
                           setIsAttested(false)
