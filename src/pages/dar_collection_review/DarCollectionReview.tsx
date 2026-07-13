@@ -223,10 +223,10 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
     }
   }, [adminPage, navigate, collectionId])
 
-  // Remember, votes are contained within buckets, so updating final votes will update the bucket
-  // define updateFinalVote as a callback function so that its function definition can be updated alongside dataUseBucket
+  // Votes are grouped into buckets (by DataUse), so applying a final vote will update all votes in the  bucket.
+  // Define updateFinalVote as a callback function so that its function definition can be updated alongside dataUseBucket
   const updateFinalVoteFn = useCallback((key: string, votePayload: Record<string, unknown>, voteIds: number[]) => {
-    return updateFinalVote({ key, votePayload, voteIds, dataUseBuckets: dataUseBuckets as never, setDataUseBuckets: setDataUseBuckets as never })
+    return updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })
   }, [dataUseBuckets])
 
   useEffect(() => {
