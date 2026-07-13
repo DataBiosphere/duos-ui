@@ -5,7 +5,6 @@ import { BASE_URL } from './baseUrl'
 export const ROLES = ['ADMIN', 'CHAIR', 'MEMBER', 'RESEARCHER', 'SIGNING_OFFICIAL'] as const
 export type Role = typeof ROLES[number]
 
-// Ported from the deleted cypress/support/commands.js `cy.auth()`: mints a real
 // Google-signed access token from a per-role service account key (no interactive
 // OIDC redirect needed), for submission into the app's /backgroundsignin route.
 export const getAccessToken = async (role: Role): Promise<string> => {
