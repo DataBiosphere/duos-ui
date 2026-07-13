@@ -81,8 +81,36 @@ describe('DataAccessAgreements Component Tests', () => {
     }] as never)
     mountComponent({ datasets: [{ dataSetId: 1, datasetId: 1, dacId: 2 }] })
     await waitFor(() =>
-      expect(document.body).toHaveTextContent('By submitting this data access request and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below.'),
+      expect(document.body).toHaveTextContent('By submitting this data access request you agree to the data access agreements below'),
     )
+  })
+
+  it('shows the Signing Official approval message when the researcher is missing a required DAA', async () => {
+    vi.mocked(DAA.getDaas).mockResolvedValue([daa1, daa2] as never)
+    const { container } = mountComponent({
+      datasets: [
+        { dataSetId: 1, datasetId: 1, dacId: 2 },
+        { dataSetId: 2, datasetId: 2, dacId: 3 },
+      ],
+      researcherDaaIds: [100],
+    })
+    await waitFor(() => expect(container.querySelector('.dar-step-card')).toBeInTheDocument())
+    await waitFor(() =>
+      expect(document.body).toHaveTextContent('Your Institutional Signing Official must approve you'),
+    )
+  })
+
+  it('hides the Signing Official approval message when the researcher is already approved for all required DAAs', async () => {
+    vi.mocked(DAA.getDaas).mockResolvedValue([daa1, daa2] as never)
+    mountComponent({
+      datasets: [
+        { dataSetId: 1, datasetId: 1, dacId: 2 },
+        { dataSetId: 2, datasetId: 2, dacId: 3 },
+      ],
+      researcherDaaIds: [100, 101],
+    })
+    await waitFor(() => expect(document.body).toHaveTextContent('SharedDAA'))
+    expect(document.body).not.toHaveTextContent('Your Institutional Signing Official must approve you')
   })
 
   it('calls save when the save button is clicked', async () => {
