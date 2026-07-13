@@ -15,9 +15,14 @@ export const getAccessToken = async (role: Role): Promise<string> => {
     throw new Error(`Missing service account key env var ${envVar}`)
   }
 
+  // DUOS_AUTOMATION_*_SA holds whatever Secret Manager returns for these accounts, which
+  // is the service account key JSON wrapped in a { key: {...} } envelope, not the bare key.
+  const parsed = JSON.parse(keysJson)
+  const serviceAccountKey = parsed.key ?? parsed
+
   // fromJSON's return type covers every credential shape it supports, but a service
   // account key (what DUOS_AUTOMATION_*_SA holds) always yields a JWT client.
-  const client = auth.fromJSON(JSON.parse(keysJson)) as JWT
+  const client = auth.fromJSON(serviceAccountKey) as JWT
   client.scopes = ['email', 'profile']
   await client.request({ url: BASE_URL })
 
