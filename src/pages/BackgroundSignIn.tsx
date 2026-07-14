@@ -52,7 +52,11 @@ export default function BackgroundSignIn({ onSignIn, onError, bearerToken }: Rea
 
     const performLogin = () => {
       setLoading(true)
-      Storage.setOidcUser({ id_token: accessToken } as unknown as OidcUserType)
+      // Storage.userIsLogged() gates on profile.exp; this page accepts an opaque bearer
+      // token (not a decodable ID token), so there's no real expiry to read - assume the
+      // typical Google OAuth2 access token lifetime instead of leaving this permanently 0.
+      const oneHourFromNow = Math.floor(Date.now() / 1000) + 3600
+      Storage.setOidcUser({ id_token: accessToken, profile: { exp: oneHourFromNow } } as unknown as OidcUserType)
       getUser().then(
         (user) => {
           const enriched = Object.assign(user, setUserRoleStatuses(user, Storage))
