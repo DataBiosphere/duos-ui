@@ -7,14 +7,12 @@ export type AppEnvironment = 'prod' | 'staging' | 'local' | 'dev'
  * The environment hierarchy is:
  *  * prod
  *    * staging
- *      * alpha
  *      * dev
  *      * local
  */
 export const envGroups = {
   PROD_STAGING: ['prod', 'staging'],
   NON_PROD: ['local', 'dev', 'staging'],
-  NON_STAGING: ['local', 'dev'],
   DEV: ['local', 'dev'],
 } as const satisfies Record<string, readonly AppEnvironment[]>
 
@@ -24,10 +22,8 @@ export const envGroups = {
  * should be displayed or not based on current env.
  *
  * @example
- * // returns true when Storage.ENV === 'alpha' || 'dev' || 'local'
- * checkEnv(envGroups.NON_STAGING)
- * // returns false when Storage.ENV === 'staging' || 'prod'
- * checkEnv(envGroups.NON_STAGING)
+ * // returns true when Storage.ENV === 'dev' || 'local'
+ * checkEnv(envGroups.DEV)
  * @param envGroup
  * @returns {boolean}
  */

@@ -78,3 +78,29 @@ describe('AppRoutes — RoleBAC routes redirect unauthenticated users', () => {
     expect(container.querySelector('[data-cy="not-found"]')).not.toBeInTheDocument()
   })
 })
+
+describe('AppRoutes — /backgroundsignin is gated to DEV environments', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it('renders BackgroundSignIn when the current environment is dev', () => {
+    vi.spyOn(Storage, 'getEnv').mockReturnValue('dev')
+    const { container, getByText } = render(
+      <MemoryRouter initialEntries={['/backgroundsignin']}>
+        <AppRoutes isLogged={false} env="dev" />
+      </MemoryRouter>,
+    )
+    expect(getByText('Access Token')).toBeInTheDocument()
+    expect(container.querySelector('[data-cy="not-found"]')).not.toBeInTheDocument()
+  })
+
+  it('renders NotFound when the current environment is prod', () => {
+    vi.spyOn(Storage, 'getEnv').mockReturnValue('prod')
+    const { container, queryByText } = render(
+      <MemoryRouter initialEntries={['/backgroundsignin']}>
+        <AppRoutes isLogged={false} env="prod" />
+      </MemoryRouter>,
+    )
+    expect(container.querySelector('[data-cy="not-found"]')).toBeInTheDocument()
+    expect(queryByText('Access Token')).not.toBeInTheDocument()
+  })
+})
