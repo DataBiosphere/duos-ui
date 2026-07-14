@@ -90,6 +90,19 @@ export const greaterThanZeroValidator: Validator = {
   msg: 'Please enter a number greater than zero',
 }
 
+export const ACCEPTED_DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx']
+
+const fileExtension = (file: File): string => {
+  const dotIndex = file.name.lastIndexOf('.')
+  return dotIndex === -1 ? '' : file.name.slice(dotIndex).toLowerCase()
+}
+
+export const fileTypeValidator: Validator = {
+  id: 'fileType',
+  isValid: (val: unknown): boolean => !(val instanceof File) || ACCEPTED_DOCUMENT_EXTENSIONS.includes(fileExtension(val)),
+  msg: `Invalid file type. Please upload an accepted document format (${ACCEPTED_DOCUMENT_EXTENSIONS.join(', ')}).`,
+}
+
 const allValidators: Validator[] = [
   requiredValidator,
   urlValidator,
@@ -100,10 +113,14 @@ const allValidators: Validator[] = [
   dayJSValidator,
   uniqueValidator,
   greaterThanZeroValidator,
+  fileTypeValidator,
 ]
 
 export const validateFormValue = (formValue: unknown, validators: Validator[] | undefined): Validation => {
-  if (isEmpty(formValue) && !validators?.includes(requiredValidator)) {
+  // File objects have no own enumerable keys, so isEmpty() would wrongly treat a selected file as "empty"
+  // and skip validation below (e.g. fileTypeValidator would never run).
+  const isEmptyValue = !(formValue instanceof File) && isEmpty(formValue)
+  if (isEmptyValue && !validators?.includes(requiredValidator)) {
     return { valid: true }
   }
 

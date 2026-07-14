@@ -26,6 +26,7 @@ import {
   dayJSValidator,
   emailDomainValidator,
   emailValidator,
+  fileTypeValidator,
   isValid,
   NotUrlValidator,
   requiredValidator,
@@ -230,6 +231,7 @@ export const FormFieldTypes: Record<string, FormFieldTypeConfig> = {
       'hideTextBar',
       'hideInput',
       'readOnly',
+      'accept',
     ],
   },
   CHECKBOX: {
@@ -304,6 +306,7 @@ export const FormValidators: Record<string, Validator> = {
   EMAILDOMAIN: emailDomainValidator as Validator,
   DATE: dateValidator,
   DATEJS: dayJSValidator,
+  FILE_TYPE: fileTypeValidator,
 }
 
 // ----------------------------------------------------------------------------------------------------- //

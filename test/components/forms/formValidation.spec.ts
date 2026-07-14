@@ -9,6 +9,7 @@ import {
   dayJSValidator,
   uniqueValidator,
   emailDomainValidator,
+  fileTypeValidator,
   validateFormValue,
   validationMessage,
   isValid,
@@ -172,6 +173,33 @@ describe('Form Validator tests', () => {
     })
   })
 
+  describe('fileTypeValidator', () => {
+    it('rejects a file with a disallowed extension', () => {
+      const file = new File(['content'], 'photo.png', { type: 'image/png' })
+      expect(fileTypeValidator.isValid(file)).toBe(false)
+    })
+
+    it('accepts a .pdf file', () => {
+      const file = new File(['content'], 'letter.pdf', { type: 'application/pdf' })
+      expect(fileTypeValidator.isValid(file)).toBe(true)
+    })
+
+    it('accepts a .doc or .docx file', () => {
+      expect(fileTypeValidator.isValid(new File(['content'], 'letter.doc'))).toBe(true)
+      expect(fileTypeValidator.isValid(new File(['content'], 'letter.docx'))).toBe(true)
+    })
+
+    it('is case-insensitive about the extension', () => {
+      const file = new File(['content'], 'letter.PDF')
+      expect(fileTypeValidator.isValid(file)).toBe(true)
+    })
+
+    it('ignores non-File values', () => {
+      expect(fileTypeValidator.isValid('not-a-file')).toBe(true)
+      expect(fileTypeValidator.isValid(undefined)).toBe(true)
+    })
+  })
+
   describe('emailDomainValidator', () => {
     it('has a default msg when no institution is cached', () => {
       expect(emailDomainValidator.msg).toBe(
@@ -216,6 +244,24 @@ describe('Form Validator tests', () => {
 
     it('handles undefined validators gracefully', () => {
       const result = validateFormValue('anything', undefined)
+      expect(result.valid).toBe(true)
+    })
+
+    it('runs a non-required validator against a File value instead of treating it as empty', () => {
+      const file = new File(['content'], 'photo.png', { type: 'image/png' })
+      const result = validateFormValue(file, [fileTypeValidator])
+      expect(result.valid).toBe(false)
+      expect(result.failed).toContain('fileType')
+    })
+
+    it('returns valid:true for a File that passes the fileType validator', () => {
+      const file = new File(['content'], 'letter.pdf', { type: 'application/pdf' })
+      const result = validateFormValue(file, [fileTypeValidator])
+      expect(result.valid).toBe(true)
+    })
+
+    it('returns valid:true when no file is selected and the field is not required', () => {
+      const result = validateFormValue(undefined, [fileTypeValidator])
       expect(result.valid).toBe(true)
     })
   })
