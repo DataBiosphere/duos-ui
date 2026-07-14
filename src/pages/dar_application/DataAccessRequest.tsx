@@ -405,14 +405,20 @@ export default function DataAccessRequest(props: Readonly<DataAccessRequestProps
             <FormField
               type={FormFieldTypes.FILE}
               readOnly={readOnlyMode}
+              accept=".pdf,.doc,.docx"
               defaultValue={uploadedCollaborationLetter || {
                 name: formData.collaborationLetterName,
               }}
               id="collaborationLetter"
               validation={validation.collaborationLetter}
+              validators={[FormValidators.FILE_TYPE]}
               onValidationChange={onValidationChange}
               description="One or more of the datasets you selected requires collaboration (COL) with the primary study investigators(s) for use. Please upload documentation of your collaboration here."
-              onChange={({ value }: { value: File | undefined }) => updateCollaborationLetter(value)}
+              onChange={({ value, isValid }: { value: File | undefined, isValid: boolean }) => {
+                if (isValid) {
+                  updateCollaborationLetter(value)
+                }
+              }}
             />
           )}
 

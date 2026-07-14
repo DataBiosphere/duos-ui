@@ -74,6 +74,12 @@ vi.mock('src/libs/utils', async (importOriginal) => {
       ...original.Navigation,
       console: vi.fn(),
     },
+    Notifications: {
+      showError: vi.fn(),
+      showSuccess: vi.fn(),
+      showWarning: vi.fn(),
+      showInformation: vi.fn(),
+    },
   }
 })
 
@@ -86,6 +92,7 @@ import { DataSet } from 'src/libs/ajax/DataSet'
 import { Countries } from 'src/libs/ajax/Countries'
 import { NotificationService } from 'src/libs/notificationService'
 import { Metrics } from 'src/libs/ajax/Metrics'
+import { Notifications } from 'src/libs/utils'
 
 const darId = '011467b7-5544-499f-9210-3c2035810639'
 
@@ -258,6 +265,97 @@ describe('DataAccessRequestApplication', () => {
     await act(async () => {
       resolveSubmit({})
     })
+  })
+
+  const renderAndSaveDraft = async () => {
+    vi.mocked(Countries.getCountries).mockResolvedValue(['United States of America (the)', 'Canada'])
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(user as ReturnType<typeof Storage.getCurrentUser>)
+    vi.mocked(User.getMe).mockResolvedValue(user as Awaited<ReturnType<typeof User.getMe>>)
+    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue(userSigningOfficials as Awaited<ReturnType<typeof User.getSOsForCurrentUser>>)
+    vi.mocked(Collections.getCollectionById).mockResolvedValue(darCollection)
+    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue(datasets as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>)
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue(undefined)
+    vi.mocked(DAR.getPartialDarRequest).mockResolvedValue(darCollection.dars[darId])
+    vi.mocked(DAA.getDaas).mockResolvedValue([
+      {
+        daaId: 100,
+        createUserId: 1,
+        createDate: '1',
+        updateUserId: 1,
+        updateDate: '1',
+        initialDacId: 1,
+        dacs: [{ dacId: 1, dacName: 'Test DAC', email: 'dac@test.com' }],
+        file: { fileStorageObjectId: 1, entityId: '1', fileName: 'TestDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
+      },
+    ] as Awaited<ReturnType<typeof DAA.getDaas>>)
+    vi.mocked(Metrics.captureEvent).mockResolvedValue(undefined)
+    vi.mocked(DAR.uploadDARDocument).mockResolvedValue({ data: null })
+
+    await act(async () => {
+      render(
+        <MemoryRouter initialEntries={[`/dar_application/${darId}`]}>
+          <Routes>
+            <Route
+              path="/dar_application/:dataRequestId"
+              element={(
+                <DataAccessRequestApplication
+                  draftDar={true}
+                  isProgressReportApplication={false}
+                  existingDarsReadOnlyMode={false}
+                />
+              )}
+            />
+          </Routes>
+        </MemoryRouter>,
+      )
+    })
+
+    expect(screen.getByText('Data Access Request Application')).toBeInTheDocument()
+
+    await selectOptionByLabel('piCountryOfOperation', 'United States')
+    await selectOptionByLabel('signingOfficial', 'SO 1')
+    await typeById('itDirector', 'Some IT Director')
+    await typeById('itDirectorEmail', 'it@good.org')
+    await clickById('anvilUse_yes')
+    await typeById('projectTitle', 'Title')
+    await typeById('rus', 'asdf')
+    await typeById('nonTechRus', 'asdf asdf')
+    await fillDarDataUseCheckboxes()
+
+    await clickById('btn_saveDar')
+    expect(screen.getByText('Save changes?')).toBeInTheDocument()
+    await act(async () => {
+      fireEvent.click(document.getElementById('btn_submit')!)
+    })
+  }
+
+  it('surfaces the server validation message when saving a draft fails with a validation error', async () => {
+    const validationError = Object.assign(new Error('File name is invalid'), {
+      response: { data: { code: 400, message: 'File name is invalid' } },
+    })
+    vi.mocked(DAR.updateDarDraft).mockRejectedValue(validationError)
+
+    await renderAndSaveDraft()
+
+    await waitFor(() => {
+      expect(Notifications.showError).toHaveBeenCalled()
+    })
+
+    const call = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: React.ReactElement<{ children: string }> }
+    expect(call.text.props.children).toBe('File name is invalid')
+  })
+
+  it('falls back to the generic save-failure toast for an unexpected error', async () => {
+    vi.mocked(DAR.updateDarDraft).mockRejectedValue(new Error('network exploded'))
+
+    await renderAndSaveDraft()
+
+    await waitFor(() => {
+      expect(Notifications.showError).toHaveBeenCalled()
+    })
+
+    const call = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: string }
+    expect(call.text).toBe('Error saving Data Access Request. Please try again in a few moments.')
   })
 
   it('loads dataset/DAA snapshots in submitted read-only DAR review container', async () => {

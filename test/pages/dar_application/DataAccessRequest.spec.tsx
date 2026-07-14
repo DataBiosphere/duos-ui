@@ -191,6 +191,56 @@ describe('DataAccessRequest', () => {
     expect(document.getElementById('collaborationLetter')).not.toBeNull()
   })
 
+  it('sets the accept attribute and rejects an invalid file type on the collaboration letter upload', async () => {
+    const updateCollaborationLetter = vi.fn()
+    const formValidationChange = vi.fn()
+    await renderDataAccessRequest({
+      datasets: [makeDataset({ collaboratorRequired: true })],
+      updateCollaborationLetter,
+      formValidationChange,
+    })
+
+    const input = document.getElementById('collaborationLetter') as HTMLInputElement
+    expect(input.accept).toBe('.pdf,.doc,.docx')
+
+    const invalidFile = new File(['content'], 'photo.png', { type: 'image/png' })
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [invalidFile] } })
+    })
+
+    expect(updateCollaborationLetter).not.toHaveBeenCalled()
+    expect(formValidationChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: 'collaborationLetter',
+        validation: expect.objectContaining({ valid: false, failed: ['fileType'] }),
+      }),
+    )
+  })
+
+  it('stages a valid file type on the collaboration letter upload', async () => {
+    const updateCollaborationLetter = vi.fn()
+    const formValidationChange = vi.fn()
+    await renderDataAccessRequest({
+      datasets: [makeDataset({ collaboratorRequired: true })],
+      updateCollaborationLetter,
+      formValidationChange,
+    })
+
+    const input = document.getElementById('collaborationLetter') as HTMLInputElement
+    const validFile = new File(['content'], 'letter.pdf', { type: 'application/pdf' })
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [validFile] } })
+    })
+
+    expect(updateCollaborationLetter).toHaveBeenCalledWith(validFile)
+    expect(formValidationChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: 'collaborationLetter',
+        validation: expect.objectContaining({ valid: true }),
+      }),
+    )
+  })
+
   it('shows a download link for an already-uploaded IRB document in read-only mode and downloads it on click', async () => {
     await renderDataAccessRequest({
       readOnlyMode: true,
