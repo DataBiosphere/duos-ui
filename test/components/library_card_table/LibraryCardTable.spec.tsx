@@ -160,4 +160,38 @@ describe('Library Card Table Tests', () => {
       expect(screen.queryByText(card.userEmail)).not.toBeInTheDocument()
     })
   })
+
+  it('shows a loading state until the library cards prop is provided', async () => {
+    let view!: ReturnType<typeof render>
+    await act(async () => {
+      view = render(<LibraryCardTable />)
+    })
+
+    expect(document.querySelector('.table-loading-placeholder')).toBeInTheDocument()
+    expect(screen.queryByText('foo foo')).not.toBeInTheDocument()
+
+    await act(async () => {
+      view.rerender(<LibraryCardTable libraryCards={libraryCardList} />)
+    })
+
+    expect(document.querySelector('.table-loading-placeholder')).not.toBeInTheDocument()
+    expect(screen.getByText('foo foo')).toBeInTheDocument()
+  })
+
+  it('updates the displayed cards when the libraryCards prop changes', async () => {
+    let view!: ReturnType<typeof render>
+    await act(async () => {
+      view = render(<LibraryCardTable libraryCards={[libraryCardList[0]]} />)
+    })
+
+    expect(screen.getByText('foo foo')).toBeInTheDocument()
+    expect(screen.queryByText('bar bar')).not.toBeInTheDocument()
+
+    await act(async () => {
+      view.rerender(<LibraryCardTable libraryCards={[libraryCardList[1]]} />)
+    })
+
+    expect(screen.queryByText('foo foo')).not.toBeInTheDocument()
+    expect(screen.getByText('bar bar')).toBeInTheDocument()
+  })
 })
