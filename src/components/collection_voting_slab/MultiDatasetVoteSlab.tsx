@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo } from 'react'
 import { get, isEmpty, isNil } from 'src/utils/NodashUtil'
 import { Storage } from 'src/libs/storage'
 import { convertLabelToKey } from 'src/libs/utils'
@@ -166,10 +166,25 @@ export default function MultiDatasetVoteSlab({
   updateFinalVote,
   reloadFn,
 }: MultiDatasetVoteSlabProps) {
-  const [memberVotes, setMemberVotes] = useState<Vote[]>([])
-  const [chairVotes, setChairVotes] = useState<Vote[]>([])
-  const [dacVotes, setDacVotes] = useState<Vote[]>([])
-  const [isDMI, setIsDMI] = useState(false)
+  const dacVotes = useMemo(
+    () => extractDacDataAccessVotesFromBucket(bucket, Storage.getCurrentUser(), adminPage),
+    [bucket, adminPage],
+  )
+  const memberVotes = useMemo(
+    () => extractUserDataAccessVotesFromBucket(bucket, Storage.getCurrentUser(), false, adminPage),
+    [bucket, adminPage],
+  )
+  const chairVotes = useMemo(
+    () => extractUserDataAccessVotesFromBucket(bucket, Storage.getCurrentUser(), true, adminPage),
+    [bucket, adminPage],
+  )
+  const isDMI = useMemo(() => {
+    const sorted = Object.values(collection.dars).sort(
+      (a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime(),
+    )
+    const darData = sorted.at(0)?.data
+    return !!(darData && Object.keys(darData).includes('dmi'))
+  }, [collection.dars])
   const { algorithmResult } = bucket
   // Role labels are only shown when the user has both member and chair votes so the vote blocks can be quickly
   // distinguished from each other. If the user only has one type of vote, the label is not shown to reduce visual
@@ -181,24 +196,6 @@ export default function MultiDatasetVoteSlab({
     if (!isEmpty(chairVotes)) return 'My DAC Member\'s Votes (detail)'
     return 'Other DAC Member\'s Votes'
   }
-
-  React.useEffect(() => {
-    const sorted = Object.values(collection.dars).sort(
-      (a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime(),
-    )
-    const mostRecentDar = sorted.at(0)
-    const darData = mostRecentDar?.data
-
-    if (darData && Object.keys(darData).includes('dmi')) {
-      // oxlint-disable-next-line react/react-compiler
-      setIsDMI(true)
-    }
-
-    const user = Storage.getCurrentUser()
-    setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user, adminPage))
-    setMemberVotes(extractUserDataAccessVotesFromBucket(bucket, user, false, adminPage))
-    setChairVotes(extractUserDataAccessVotesFromBucket(bucket, user, true, adminPage))
-  }, [bucket, adminPage, collection.dars])
 
   return (
     <div style={styles.baseStyle} data-cy="dataset-vote-slab">
