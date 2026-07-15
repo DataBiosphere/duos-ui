@@ -1,27 +1,39 @@
-# This is an example compose file that can be used for local development.
-# Modify the config file in `volumes` to point to the desired environment, default id dev.
-# Ensure that the following configuration files have been created in the correct locations:
-#   * public/config.json
-#   * ca-bundle.crt
-#   * server.crt
-#   * server.key
-#   * site.conf
-# Ensure that /etc/hosts contains an entry for:
-# 	127.0.0.1	local.broadinstitute.org
-# Ensure that `public/config.json` is pointing to the correct env (not local), i.e.:
-#   ... "env": "dev", ...
+# Base compose file — shared by both local dev modes. Never run alone; see the
+# two modes below. Both are documented in full in DEVNOTES.md.
+#
+# Ensure the following configuration files exist in the project root:
+#   * public/config.json, ca-bundle.crt, server.crt, server.key, site.conf
+# Ensure /etc/hosts has:  127.0.0.1  local.dsde-dev.broadinstitute.org
 # Build:
 #   docker build . -t duos
-# Run:
-#   docker compose up -d
-# Test
-#   https://local.broadinstitute.org/
+#
+# Mode 1 — standalone (bundled Postgres stands in for the consent DB):
+#   docker compose --env-file .env.local up -d
+#   docker-compose.override.yaml is picked up automatically (Compose's default
+#   behavior when it sits next to this file) and adds the `db` service.
+#
+# Mode 2 — against a local `consent` compose stack instead (see DEVNOTES.md):
+#   docker compose --env-file .env.local -f docker-compose.yaml -f docker-compose.consent.yaml up -d
+#   Passing explicit -f files opts out of the automatic override.yaml merge,
+#   so the bundled `db` service is never defined and can't fight consent's
+#   `sqlproxy` for host port 5432.
+#
+# --env-file .env.local is required in both modes: the `${VAR:?...}`
+# placeholders below are resolved by Compose's own YAML interpolation, which
+# only reads a file literally named `.env` by default. `.env` is reserved for
+# real dev secrets (see .gitignore) and is never read by this stack.
+#
+# Test:
+#   https://local.dsde-dev.broadinstitute.org/
 services:
   app:
     image: duos:latest
     container_name: duos
-    ports:
-      - ${PORT:-8080}:${PORT:-8080}
+    # env_file here only feeds the *container's* runtime environment — it does
+    # NOT satisfy the `${VAR:?...}` interpolation below, which Compose resolves
+    # itself before the container starts (see the --env-file note above). Both
+    # must point at .env.local so the gitignored .env file (real dev secrets)
+    # is never pulled into this local stack.
     env_file:
       - path: .env.local
         required: false
@@ -30,6 +42,17 @@ services:
       PORT: ${PORT:-8080}
       FASTIFY_LOG_LEVEL: ${FASTIFY_LOG_LEVEL:-debug}
       DUOS_SESSION_MAX_AGE_MS: ${DUOS_SESSION_MAX_AGE_MS:-}
+      # DUOS_DB_HOST is intentionally NOT set here — it's mode-specific and
+      # comes from whichever overlay file is merged in (docker-compose.override.yaml
+      # sets it to `db`; docker-compose.consent.yaml sets it to host.docker.internal).
+      # Same for `ports`, `extra_hosts`, and `depends_on` below — all mode-specific,
+      # all live in the overlay files instead of here.
+      DUOS_DB_PORT: ${DUOS_DB_PORT:-5432}
+      DUOS_DB_NAME: ${DUOS_DB_NAME:-consent}
+      DUOS_DB_USER: ${DUOS_DB_USER:-consent}
+      DUOS_DB_PASSWORD: ${DUOS_DB_PASSWORD:?set DUOS_DB_PASSWORD in .env.local (copy .env.example)}
+      DUOS_DB_SSL: ${DUOS_DB_SSL:-false}
+      DUOS_SESSION_SECRET: ${DUOS_SESSION_SECRET:?set DUOS_SESSION_SECRET (32+ chars) in .env.local (copy .env.example)}
     volumes:
       - ./public/config.json:/usr/src/app/build/config.json
     command: ["node", "server/dist/index.js"]

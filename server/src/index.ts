@@ -8,6 +8,9 @@ import Fastify, { FastifyError, FastifyInstance } from 'fastify'
 import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
+import { createPgSessionStore } from './session/pgStore.js'
+import { configPath, readConfig } from './config.js'
+import './types/session.js'
 import FastifyVite from '@fastify/vite'
 
 const PROJECT_ROOT = path.join(import.meta.dirname, '..', '..')
@@ -17,7 +20,25 @@ const useHttps = isDev && !isCI
 
 type AppInstance = FastifyInstance<http.Server | https.Server>
 
+// Boolean env vars are coerced through one helper so a typo or unexpected
+// casing can't silently pick the insecure branch: only an explicit, recognized
+// "off" value returns false — anything unrecognized keeps the default.
+export function envBool(value: string | undefined, defaultValue: boolean): boolean {
+  const v = value?.trim().toLowerCase()
+  if (!v) return defaultValue
+  if (['true', '1', 'yes', 'on'].includes(v)) return true
+  if (['false', '0', 'no', 'off'].includes(v)) return false
+  return defaultValue
+}
+
 export async function buildApp(): Promise<AppInstance> {
+  // The app always sits behind exactly one reverse-proxy hop (the
+  // httpd-terra-proxy sidecar in k8s, or the `proxy` container in
+  // docker-compose) that terminates TLS and forwards plain HTTP. trustProxy: 1
+  // makes `request.protocol` honor that proxy's X-Forwarded-Proto header
+  // instead of falling back to the raw (unencrypted) socket — without it,
+  // @fastify/session silently refuses to persist sessions once cookie.secure
+  // is true, since it never sees `request.protocol === 'https'`.
   const fastify = (useHttps
     ? Fastify<https.Server>({
         https: {
@@ -25,37 +46,116 @@ export async function buildApp(): Promise<AppInstance> {
           cert: fs.readFileSync(path.join(PROJECT_ROOT, 'server.crt')),
         },
         logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' },
+        trustProxy: 1,
       })
-    : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' } })
+    : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' }, trustProxy: 1 })
   ) as AppInstance
 
-  // 1. DB pool — must be registered before session so app.pg is available to the store
-  await fastify.register(fastifyPostgres, {
-    host: process.env.DUOS_DB_HOST,
-    database: process.env.DUOS_DB_NAME,
-    port: Number.parseInt(process.env.DUOS_DB_PORT ?? '5432', 10),
-    user: process.env.DUOS_DB_USER,
-    password: process.env.DUOS_DB_PASSWORD,
-    ssl: { rejectUnauthorized: true },
-  })
+  // 1. DB pool + session — registered only when the deployment provides the
+  // BFF database configuration. Session infrastructure is deployment config
+  // (env vars via helmfile/compose), not a runtime flag: every pod of a given
+  // deployment behaves identically, with no network dependency at boot.
+  // Directing users to the BFF sign-in flow is a separate switch — the
+  // boolean `bffEnabled` in config.json, checked at startup (Phase 2+) — see
+  // docs/plans/BFF_Overview.md.
+  if (process.env.DUOS_DB_HOST) {
+    fastify.log.info('[server] DUOS_DB_HOST is set — enabling BFF session infrastructure')
 
-  // 2. Cookie + session — store: createPgSessionStore(fastify.pg) wired in next story
-  await fastify.register(fastifyCookie)
-  await fastify.register(fastifySession, {
-    secret: process.env.DUOS_SESSION_SECRET!,
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: Number(process.env.DUOS_SESSION_MAX_AGE_MS) || 8 * 60 * 60 * 1000,
-      path: '/',
-    },
-    saveUninitialized: false,
-    rolling: true,
-  })
+    // Validated up front so a half-configured deployment fails at startup with
+    // an error naming the env var. pg.Pool connects lazily — without this, a
+    // pod missing one of these would boot, pass health checks, and only fail
+    // at the first session read/write.
+    for (const name of ['DUOS_DB_NAME', 'DUOS_DB_USER', 'DUOS_DB_PASSWORD'] as const) {
+      if (!process.env[name]) {
+        throw new Error(`BFF session infrastructure is enabled (DUOS_DB_HOST is set) but ${name} is unset — set it in .env.local locally, or the deployment env in k8s`)
+      }
+    }
+    // `||` not `??`: a blank DUOS_DB_PORT= line in .env.local must mean
+    // "default", not a NaN startup failure.
+    const dbPort = Number.parseInt(process.env.DUOS_DB_PORT?.trim() || '5432', 10)
+    if (Number.isNaN(dbPort)) {
+      throw new Error(`DUOS_DB_PORT is set to '${process.env.DUOS_DB_PORT}', which is not a number — unset it to use the default 5432, or set a valid port`)
+    }
+
+    // App-level TLS to Postgres is on unless explicitly disabled. The only
+    // deployments that should disable it are those where the transport is
+    // already plaintext-on-loopback (a Cloud SQL Proxy sidecar in k8s, or the
+    // bundled `db` container in docker-compose) — there the Postgres end
+    // doesn't speak TLS and the connection would be rejected.
+    const dbSsl = envBool(process.env.DUOS_DB_SSL, true)
+    if (!dbSsl) {
+      fastify.log.warn('[server] DUOS_DB_SSL=false — connecting to Postgres without TLS; only safe when the transport is loopback (Cloud SQL Proxy sidecar or local docker network)')
+    }
+
+    // DB pool — must be registered before session so app.pg is available to the store
+    await fastify.register(fastifyPostgres, {
+      host: process.env.DUOS_DB_HOST,
+      database: process.env.DUOS_DB_NAME,
+      port: dbPort,
+      user: process.env.DUOS_DB_USER,
+      password: process.env.DUOS_DB_PASSWORD,
+      ssl: dbSsl ? { rejectUnauthorized: true } : false,
+    })
+
+    // Validated here so a misconfigured environment fails with an error naming
+    // the env var, instead of @fastify/session's generic "secret is required".
+    const sessionSecret = process.env.DUOS_SESSION_SECRET
+    if (!sessionSecret || sessionSecret.length < 32) {
+      throw new Error('BFF is enabled but DUOS_SESSION_SECRET is unset or shorter than 32 characters — set it in .env.local locally, or the deployment env in k8s')
+    }
+
+    // Cookie + session — the store reads fastify.pg registered above
+    await fastify.register(fastifyCookie)
+    await fastify.register(fastifySession, {
+      secret: sessionSecret,
+      store: createPgSessionStore(fastify.pg),
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        // Lax, not Strict: the OAuth callback is a top-level redirect from
+        // B2C, and Strict cookies are withheld from any navigation initiated
+        // cross-site — the callback would arrive sessionless and lose the
+        // PKCE verifier/state. Lax still withholds the cookie from cross-site
+        // POSTs/fetches; CSRF tokens (introduced with the endpoints they
+        // protect, Phases 2-4) cover state-changing routes.
+        sameSite: 'lax',
+        maxAge: Number(process.env.DUOS_SESSION_MAX_AGE_MS) || 8 * 60 * 60 * 1000,
+        path: '/',
+      },
+      saveUninitialized: false,
+      // No `rolling`: sessions get a fixed maxAge from creation. Rolling expiry
+      // would re-save the session (SELECT + UPSERT) on every session-bearing
+      // request just to bump `expire`. Phase 2 adds a throttled sliding expiry
+      // instead — re-save only when the session is near expiry.
+    })
+  }
+  else {
+    fastify.log.info('[server] DUOS_DB_HOST is not set — starting without DB/session infrastructure (legacy client-side auth)')
+  }
 
   // Health check — registered before Vite middleware so it always resolves
   fastify.get('/health', async () => ({ status: 'ok' }))
+
+  // Client config — intercepted via onRequest rather than a route, because
+  // @fastify/vite's production static plugin (wildcard: false) walks build/
+  // and registers its own explicit GET/HEAD route for every file it finds
+  // there, including config.json. A competing `fastify.get('/config.json', ...)`
+  // collides with that at startup (FST_ERR_DUPLICATED_ROUTE); onRequest fires
+  // before that nested route's handler regardless of which scope declared it,
+  // so this lets DUOS_API_URL override the static file's `apiUrl` without
+  // fighting Vite for the route — see config.ts for why.
+  // HEAD must be intercepted along with GET: the static plugin registers both,
+  // so a HEAD that fell through would describe the raw un-overridden file and
+  // disagree with GET's body (mismatched Content-Length for caches/validators).
+  // Node itself omits the body for HEAD responses; sending the same payload
+  // yields matching headers.
+  const configJsonPath = configPath(PROJECT_ROOT, isDev)
+  fastify.addHook('onRequest', async (request, reply) => {
+    if ((request.method === 'GET' || request.method === 'HEAD')
+      && (request.url === '/config.json' || request.url.startsWith('/config.json?'))) {
+      reply.send(await readConfig(configJsonPath, request.log))
+    }
+  })
 
   // Vite: dev → HMR middleware; prod → serves static build + SPA fallback
   await fastify.register(FastifyVite, {

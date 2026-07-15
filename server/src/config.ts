@@ -1,44 +1,49 @@
-import fs from 'node:fs'
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
-
-// The runtime config.json is mounted into build/ at deploy time.
-// Respect CONFIG_PATH so tests or local dev can point elsewhere.
-const CONFIG_PATH
-  = process.env.CONFIG_PATH
-    || path.join(import.meta.dirname, '..', '..', 'build', 'config.json')
-
-type Config = Record<string, unknown>
-
-let _config: Config | null = null
+import type { FastifyBaseLogger } from 'fastify'
 
 /**
- * Load and cache the runtime config.json.
- * Falls back to an empty object if the file is missing (e.g. during tests).
+ * Path to the static client config.json: `public/` in dev, `build/` once built
+ * (see Dockerfile). CONFIG_PATH overrides this directly — used by tests and as
+ * an escape hatch for non-standard layouts.
  */
-function getConfig(): Config {
-  if (_config) return _config
-  try {
-    _config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')) as Config
-  }
-  catch (err) {
-    console.warn(`[config] Could not read ${CONFIG_PATH}: ${(err as Error).message}`)
-    _config = {}
-  }
-  return _config
+export function configPath(projectRoot: string, isDev: boolean): string {
+  return process.env.CONFIG_PATH ?? path.join(projectRoot, isDev ? 'public' : 'build', 'config.json')
 }
 
 /**
- * Return a single config value, falling back to an env var then a default.
+ * Reads the static client config and overrides `apiUrl` with DUOS_API_URL when
+ * set, so local dev only has one value to change (DUOS_API_URL in .env/.env.local)
+ * instead of also hand-editing the static file's `apiUrl` to match. Deployed
+ * environments set DUOS_API_URL too (terra-helmfile envSecrets) — it MUST be
+ * the downstream consent API base URL, the same value the ConfigMap's
+ * config.json already carries as `apiUrl`, so the override is consistent there.
  *
- * @param key      - Key in config.json
- * @param envVar   - Optional env-var override (checked first)
- * @param fallback - Value returned when both sources are absent
+ * The merged result is cached for the life of the process — both inputs (the
+ * deploy-time config file and DUOS_API_URL) are fixed at startup, and this is
+ * fetched on every SPA page load. Failed reads are NOT cached: a missing or
+ * malformed file logs and errors per-request, and heals once the file appears.
  */
-function get(key: string, envVar?: string, fallback?: unknown): unknown {
-  if (envVar && process.env[envVar]) return process.env[envVar]
-  const v = getConfig()[key]
-  if (v !== undefined && v !== '') return v
-  return fallback
+let configPromise: Promise<Record<string, unknown>> | null = null
+
+export function readConfig(configPath: string, log: Pick<FastifyBaseLogger, 'error'>): Promise<Record<string, unknown>> {
+  configPromise ??= loadAndMerge(configPath).catch((err: unknown) => {
+    configPromise = null
+    log.error({ err }, `[config] Could not read ${configPath}`)
+    throw err
+  })
+  return configPromise
 }
 
-export { getConfig, get }
+async function loadAndMerge(configPath: string): Promise<Record<string, unknown>> {
+  const config = JSON.parse(await readFile(configPath, 'utf8')) as Record<string, unknown>
+  if (process.env.DUOS_API_URL) {
+    config.apiUrl = process.env.DUOS_API_URL
+  }
+  return config
+}
+
+// Test-only: clear the process-lifetime cache between cases.
+export const resetConfigCache = (): void => {
+  configPromise = null
+}
