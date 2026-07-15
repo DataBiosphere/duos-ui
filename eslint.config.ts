@@ -1,67 +1,34 @@
 import { defineConfig, globalIgnores } from 'eslint/config'
-import js from '@eslint/js'
-import globals from 'globals'
 import ts from 'typescript-eslint'
-import react from 'eslint-plugin-react'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
 import stylistic from '@stylistic/eslint-plugin'
 
 /*
-This config is a combination of the basic recommended React configs from Vite:
+This ESLint config is only for code formatting via @stylistic.
 
-- https://github.com/vitejs/vite/blob/main/packages/create-vite/template-react/eslint.config.js
-- https://github.com/vitejs/vite/blob/main/packages/create-vite/template-react-ts/eslint.config.js
+All React, Typescript, react-hooks, react-refresh, and other correctness linting
+has moved to oxlint (see .oxlintrc.json), which is faster and is the recommended
+approach for Vite projects. @stylistic currently has no oxlint equivalent, and
+typescript-eslint is only used to provide TS/TSX compatibility.
 
-This is required since the project uses both JSX and TSX. The other settings that are configured are:
+The switch to oxlint mirrors Vite's recommended React templates:
 
-- setting the ecmaVersion to match the one in the tsconfig.json
-- setting the React version to match the one in package.json
-- adding the stylistic plugin
-- a few overrides to the recommended rules:
-  - matching the typescript behavior for unused variables ( https://typescript-eslint.io/rules/no-unused-vars/ )
-  - disabling the React/prop-types rule
-  - allowing more than one JSX expression per line
+- https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react
+- https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts
 
 */
 export default defineConfig([
   globalIgnores(['build/**', 'server/dist/**']),
   {
-    extends: [
-      js.configs.recommended,
-      ts.configs.recommended,
-      react.configs.flat.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
-      stylistic.configs.recommended,
-    ],
     files: ['**/*.{js,jsx,ts,tsx}'],
+    extends: [stylistic.configs.recommended],
     languageOptions: {
+      parser: ts.parser,
       ecmaVersion: 2022,
-      globals: {
-        ...globals.browser,
-        ...globals.node,
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
       },
     },
-    settings: { react: { version: '18.3' } },
-    plugins: {
-      '@stylistic': stylistic,
-    },
     rules: {
-      'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          args: 'all',
-          argsIgnorePattern: '^_',
-          caughtErrors: 'all',
-          caughtErrorsIgnorePattern: '^_',
-          destructuredArrayIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          ignoreRestSiblings: true,
-        },
-      ],
-      'react/prop-types': 'off',
       '@stylistic/jsx-one-expression-per-line': ['off'],
     },
   },
