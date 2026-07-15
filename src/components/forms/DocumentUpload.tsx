@@ -722,7 +722,15 @@ export const DocumentUpload = ({
   styles,
 }: Props): React.JSX.Element => {
   const liveUpload = isLiveUpload ?? true
-  const [selectedType, setSelectedType] = useState<FileCategory | null>(null)
+  const allowedCategories = useMemo((): FileCategory[] => {
+    if (categories?.length) {
+      return [...new Set(categories)]
+    }
+    return DOCUMENT_TYPES.map(({ id }) => id)
+  }, [categories])
+  const [selectedType, setSelectedType] = useState<FileCategory | null>(
+    allowedCategories.length === 1 ? allowedCategories[0] : null,
+  )
   const [docs, setDocs] = useState<QueueEntry[]>([])
   const [isDragActive, setIsDragActive] = useState<boolean>(false)
   const [showDeleted, setShowDeleted] = useState<boolean>(deletedDocumentsView === 'all')
@@ -737,22 +745,16 @@ export const DocumentUpload = ({
   const progressTimersRef = useRef<Record<string, ReturnType<typeof globalThis.setInterval>>>({})
   const lastUploadedSnapshotRef = useRef<string>('')
 
-  const allowedCategories = useMemo((): FileCategory[] => {
-    if (categories?.length) {
-      return [...new Set(categories)]
-    }
-    return DOCUMENT_TYPES.map(({ id }) => id)
-  }, [categories])
-
-  useEffect(() => {
+  const [prevAllowedCategories, setPrevAllowedCategories] = useState(allowedCategories)
+  if (allowedCategories !== prevAllowedCategories) {
+    setPrevAllowedCategories(allowedCategories)
     if (allowedCategories.length === 1) {
-      // oxlint-disable-next-line react/react-compiler
       setSelectedType(allowedCategories[0])
-      return
     }
-
-    setSelectedType(current => current && allowedCategories.includes(current) ? current : null)
-  }, [allowedCategories])
+    else {
+      setSelectedType(current => (current && allowedCategories.includes(current)) ? current : null)
+    }
+  }
 
   const [prevDeletedDocumentsView, setPrevDeletedDocumentsView] = useState(deletedDocumentsView)
   if (deletedDocumentsView !== prevDeletedDocumentsView) {
