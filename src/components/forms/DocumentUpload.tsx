@@ -746,6 +746,7 @@ export const DocumentUpload = ({
 
   useEffect(() => {
     if (allowedCategories.length === 1) {
+      // oxlint-disable-next-line react/react-compiler
       setSelectedType(allowedCategories[0])
       return
     }
@@ -753,9 +754,11 @@ export const DocumentUpload = ({
     setSelectedType(current => current && allowedCategories.includes(current) ? current : null)
   }, [allowedCategories])
 
-  useEffect(() => {
+  const [prevDeletedDocumentsView, setPrevDeletedDocumentsView] = useState(deletedDocumentsView)
+  if (deletedDocumentsView !== prevDeletedDocumentsView) {
+    setPrevDeletedDocumentsView(deletedDocumentsView)
     setShowDeleted(deletedDocumentsView === 'all')
-  }, [deletedDocumentsView])
+  }
 
   const selectedCategory = selectedType
   const showTypeSelection = allowedCategories.length > 1

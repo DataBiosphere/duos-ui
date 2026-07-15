@@ -456,6 +456,57 @@ describe('DocumentUpload', () => {
     expect(screen.queryByText('deleted_daa_hidden_by_default.pdf')).not.toBeInTheDocument()
   })
 
+  it('re-syncs deleted visibility when the deletedDocumentsView prop changes', async () => {
+    const api = {
+      uploadDocument: vi.fn().mockResolvedValue({} as never),
+      deleteDocument: vi.fn().mockResolvedValue({} as never),
+      listDocuments: vi.fn().mockResolvedValue([
+        {
+          fileStorageObjectId: 961,
+          entityId: 'dac-96',
+          fileName: 'active_daa.pdf',
+          category: FileCategory.DATA_ACCESS_AGREEMENT,
+          mediaType: 'application/pdf',
+          createUserId: 1,
+          createDate: Date.now(),
+        },
+        {
+          fileStorageObjectId: 962,
+          entityId: 'dac-96',
+          fileName: 'deleted_daa_resync.pdf',
+          category: FileCategory.DATA_ACCESS_AGREEMENT,
+          mediaType: 'application/pdf',
+          createUserId: 1,
+          createDate: Date.now(),
+          deleted: true,
+        },
+      ]),
+    }
+
+    const element = (view: 'active' | 'all') => (
+      <DocumentUpload
+        entity={EntityType.DAC}
+        entityId="dac-96"
+        categories={[FileCategory.DATA_ACCESS_AGREEMENT]}
+        deletedDocumentsView={view}
+        api={api}
+      />
+    )
+
+    const { rerender } = render(element('active'))
+
+    await waitFor(() => expect(screen.getByText('active_daa.pdf')).toBeInTheDocument())
+    expect(screen.queryByText('deleted_daa_resync.pdf')).not.toBeInTheDocument()
+
+    // Changing the prop to 'all' should reveal deleted documents.
+    rerender(element('all'))
+    expect(screen.getByText('deleted_daa_resync.pdf')).toBeInTheDocument()
+
+    // Changing it back to 'active' should hide them again.
+    rerender(element('active'))
+    expect(screen.queryByText('deleted_daa_resync.pdf')).not.toBeInTheDocument()
+  })
+
   it('supports viewing documents and loading details from getDocument', async () => {
     const getDocumentStub = vi.fn().mockResolvedValue({
       fileStorageObjectId: 777,

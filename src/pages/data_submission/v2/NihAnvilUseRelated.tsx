@@ -90,6 +90,7 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
       if (input === NihAnvilUsePreSelectOptions.NO) {
         const translatedNoOption = { key: NihAnvilUse.key, value: NihAnvilUse.NO_NHGRI_NO_ANVIL, isValid: true }
         const newVal = structuredClone(study)
+        // oxlint-disable-next-line react/react-compiler
         cleanDownstreamProperties(newVal)
         setStudyPropertyByKey(newVal, setStudy, translatedNoOption, new NihAnvilUse(translatedNoOption.value))
       }
@@ -127,7 +128,7 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
       ? NihAnvilUsePreSelectOptions.NO
       : NihAnvilUsePreSelectOptions.YES
     if (preSelectorValue !== derivedPreSelectorValue) {
-      // oxlint-disable-next-line react-hooks/set-state-in-effect
+      // oxlint-disable-next-line react/react-compiler
       setPreSelectorValue(derivedPreSelectorValue)
     }
   }, [handlePreSelectorChange, preSelectorValue, study])

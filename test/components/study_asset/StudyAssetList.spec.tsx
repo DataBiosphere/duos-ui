@@ -189,4 +189,38 @@ describe('StudyAssetList', () => {
     const addBtn = document.getElementById('add-test-btn') as HTMLElement
     expect(addBtn.querySelector('.glyphicon-plus')).not.toBeInTheDocument()
   })
+
+  it('resets a row out of edit mode when an item is deleted', () => {
+    render(<StatefulWrapper initialItems={[...sampleItems]} columnsToShow={['name']} />)
+
+    // Put the first row into edit mode.
+    const row1 = screen.getByTestId('row-item1')
+    fireEvent.click(row1.querySelector('.glyphicon-pencil') as Element)
+    expect(screen.getByTestId('row-item1').querySelector('input')).toBeInTheDocument()
+
+    // Deleting the *other* row changes the item count, which should reset the
+    // per-row edit state so the first row leaves edit mode.
+    const row2 = screen.getByTestId('row-item2')
+    fireEvent.click(row2.querySelector('.glyphicon-trash') as Element)
+
+    expect(screen.getByTestId('row-item1').querySelector('input')).not.toBeInTheDocument()
+    expect(screen.getByTestId('row-item1')).toHaveTextContent('First Item')
+  })
+
+  it('resets a row out of view mode when an item is added', () => {
+    render(<StatefulWrapper initialItems={[...sampleItems]} columnsToShow={['name']} />)
+
+    // Put the first row into view mode.
+    const row1 = screen.getByTestId('row-item1')
+    fireEvent.click(row1.querySelector('.glyphicon-eye-open') as Element)
+    expect(screen.getByTestId('row-item1').querySelector('input')).toBeInTheDocument()
+
+    // Adding an item changes the item count, which should reset the per-row view
+    // state so the first row leaves view mode.
+    fireEvent.click(screen.getByRole('button', { name: /Add Test Item/i }))
+    fireEvent.click(screen.getByText('Save'))
+
+    expect(screen.getByTestId('row-item1').querySelector('input')).not.toBeInTheDocument()
+    expect(screen.getByTestId('row-item1')).toHaveTextContent('First Item')
+  })
 })

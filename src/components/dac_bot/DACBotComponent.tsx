@@ -183,6 +183,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
         Notifications.showError({ text: 'Failed to refresh DAC rules.' })
       }
     }
+    // oxlint-disable-next-line react/react-compiler
   }, [dacId, DACbotRules])
 
   useEffect(() => {

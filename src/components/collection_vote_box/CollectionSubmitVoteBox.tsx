@@ -157,7 +157,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
 
       const voteValues = votes.map(vote => vote.vote)
       if (allMatch(voteValues)) {
-        // oxlint-disable-next-line react-hooks/set-state-in-effect
+        // oxlint-disable-next-line react/react-compiler
         setVote(prevVote.vote ?? undefined)
         setSubmitted(true)
       }
