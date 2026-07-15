@@ -45,4 +45,4 @@ COPY --chmod=550 --chown=node:node --from=builder /tmp/server-deploy ./server
 COPY --chmod=444 --chown=node:node --from=builder /usr/src/app/package.json ./package.json
 USER node
 EXPOSE ${PORT}
-CMD ["node", "server/dist/index.js"]
+CMD ["node", "--enable-fips", "server/dist/index.js"]
