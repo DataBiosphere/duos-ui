@@ -61,7 +61,7 @@ const makeResponse = (
 ): ElasticsearchResponse => ({
   items: [],
   total: 0,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   aggregations: { studies: { buckets } as any },
 })
 

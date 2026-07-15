@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+/* oxlint-disable react-refresh/only-export-components */
 import MenuIcon from '@mui/icons-material/Menu'
 import { Box, IconButton } from '@mui/material'
 import Drawer from '@mui/material/Drawer'

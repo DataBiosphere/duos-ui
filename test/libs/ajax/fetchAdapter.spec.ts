@@ -324,6 +324,22 @@ describe('fetchAdapter - Fetch methods', () => {
     expect(error.message).toBe('File too large')
   })
 
+  it('fetchMultipart - should attach response.status and response.data on error, matching fetchRequest', async () => {
+    const formData = new FormData()
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ message: 'File name is invalid', code: 400 }), {
+        status: 400,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    const error = await fetchMultipart('/api/upload', formData).catch(e => e)
+    expect(error.response).toEqual({
+      status: 400,
+      data: { message: 'File name is invalid', code: 400 },
+    })
+  })
+
   it('fetchMultipart - should fall back to help desk message when no message field in error body', async () => {
     const formData = new FormData()
     fetchMock.mockResolvedValue(

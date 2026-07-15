@@ -249,16 +249,22 @@ async function fetchMultipartRequest<T>(
     throw new Error(`${error instanceof Error ? error.message : String(error)} ${HELP_DESK_MESSAGE}`, { cause: error })
   }
   if (!res.ok) {
-    let message = `Request failed with status ${res.status}. ${HELP_DESK_MESSAGE}`
+    interface ErrorData {
+      message?: string
+      code?: number
+    }
+    let errorData: ErrorData = {}
     try {
-      const errorData = await res.json() as { message?: string }
-      if (errorData?.message) message = errorData.message
+      errorData = await res.json() as ErrorData
     }
     catch {
       // ignore parse errors, use generic message
     }
+    const message = errorData.message || `Request failed with status ${res.status}. ${HELP_DESK_MESSAGE}`
     reportError(fullUrl, res.status)
-    throw new Error(message)
+    const error = new Error(message) as Error & { response: { status: number, data: ErrorData } }
+    error.response = { status: res.status, data: errorData }
+    throw error
   }
   return handleResponse<T>(res, fullUrl, 'json', method)
 }

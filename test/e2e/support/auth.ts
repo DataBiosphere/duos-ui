@@ -38,7 +38,7 @@ type AuthFixtures = {
 
 export const test = base.extend<AuthFixtures>({
   signInAs: async ({ page }, use) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture callback, not a React hook
+    // oxlint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture callback, not a React hook
     await use(async (role: Role) => {
       const accessToken = await getAccessToken(role)
       await page.goto('/backgroundsignin')

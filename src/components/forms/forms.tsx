@@ -34,12 +34,13 @@ import {
 
 // Dynamic component dispatch — resolved at runtime from FormFieldTypeConfig,
 // so prop types can't be known statically. React.ComponentType<any> is the standard escape hatch here.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyComponent = React.ComponentType<any>
 
 export interface Validation {
   valid?: boolean
   failed?: string[]
+  messages?: string[]
 }
 
 export interface Validator {
@@ -102,9 +103,9 @@ export interface FormFieldConfig {
   // Callers pass field-specific value types (e.g. string, boolean, string[]).
   // Tightening to FormFieldChangeEvent / FormValidationChangeEvent would require updating
   // all callers; tracked separately. The exported types document the runtime shape.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   onValidationChange?(event: any): void
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   onChange?(event: any): void
   disabled?: boolean
   ariaDescribedby?: string
@@ -125,13 +126,13 @@ interface FormTableConfig {
   enableAddingRow?: boolean
   addRowLabel?: string
   disabled?: boolean
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   onChange(event: any): void
   minLength?: number
   validation?: Record<string, Validation>[] | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   onValidationChange?(event: any): void
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any[]
   styleProps?: StyleProps
 }
@@ -139,7 +140,7 @@ interface FormTableConfig {
 // ----------------------------------------------------------------------------------------------------- //
 // ======                                  MAIN FORM FIELD TYPES                                  ====== //
 // ----------------------------------------------------------------------------------------------------- //
-// eslint-disable-next-line react-refresh/only-export-components
+// oxlint-disable-next-line react-refresh/only-export-components
 export const FormFieldTypes: Record<string, FormFieldTypeConfig> = {
   MULTITEXT: {
     defaultValue: [],
@@ -230,6 +231,7 @@ export const FormFieldTypes: Record<string, FormFieldTypeConfig> = {
       'hideTextBar',
       'hideInput',
       'readOnly',
+      'accept',
     ],
   },
   CHECKBOX: {
@@ -294,7 +296,7 @@ export const FormFieldTypes: Record<string, FormFieldTypeConfig> = {
 // ----------------------------------------------------------------------------------------------------- //
 // ======                                     FORM VALIDATORS                                     ====== //
 // ----------------------------------------------------------------------------------------------------- //
-// eslint-disable-next-line react-refresh/only-export-components
+// oxlint-disable-next-line react-refresh/only-export-components
 export const FormValidators: Record<string, Validator> = {
   REQUIRED: requiredValidator,
   URL: urlValidator,
@@ -367,7 +369,7 @@ export const FormField = (config: FormFieldConfig): React.JSX.Element => {
 
   React.useEffect(() => {
     if (defaultValue !== undefined) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // oxlint-disable-next-line react-hooks/set-state-in-effect
       setFormValue(defaultValue)
     }
   }, [defaultValue, type])
@@ -438,7 +440,7 @@ export const FormTable = (config: FormTableConfig): React.JSX.Element => {
     addRowButtonIconClassName = 'glyphicon glyphicon-plus',
     removeRowButtonIconClassName = 'glyphicon glyphicon-remove',
   } = styleProps
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   const [formValue, setFormValue] = useState<any[]>(defaultValue ?? [{}])
 
   const key = getKey(config)

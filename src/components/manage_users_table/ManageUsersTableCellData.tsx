@@ -107,9 +107,11 @@ export function institutionCellData({ userId, institution, label = 'insitution' 
   }
 }
 
-export default {
+const manageUsersTableCellData = {
   usernameCellData,
   emailCellData,
   permissionsCellData,
   institutionCellData,
 }
+
+export default manageUsersTableCellData

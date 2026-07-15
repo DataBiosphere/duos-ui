@@ -1,5 +1,5 @@
 export const fileDownload = (data: string | ArrayBuffer | ArrayBufferView | Blob, filename: string, mime?: string) => {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // oxlint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const blob = new Blob([data], { type: mime || 'application/octet-stream' })
   const blobUrl = URL.createObjectURL(blob)

@@ -70,7 +70,7 @@ function getDefaultAddEditProps(items: TestAsset[], closeAction: () => void, onC
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line @typescript-eslint/no-explicit-any
 function getDefaultRowProps(baseProps: any): TestRowProps {
   return baseProps as TestRowProps
 }
