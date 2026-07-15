@@ -8,13 +8,15 @@ import DatasetStatistics from 'src/pages/DatasetStatistics'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
-import { DatasetStatisticsDar } from 'src/types/model'
+import { DAC } from 'src/libs/ajax/DAC'
+import { DatasetStatisticsDar, DataUseSummary } from 'src/types/model'
 import { SnapshotSummaryModel } from 'src/types/tdrModel'
 
 // Mock the AJAX modules
 vi.mock('src/libs/ajax/DataSet')
 vi.mock('src/libs/ajax/DatasetMetrics')
 vi.mock('src/libs/ajax/TerraDataRepo')
+vi.mock('src/libs/ajax/DAC')
 
 // Mock fetch for config.json
 const mockConfig = {
@@ -57,7 +59,7 @@ const mockDatasetTerm = {
   dacApproval: true,
   approvedUserIds: [],
   piName: 'Dr. Test PI',
-  dataUse: { primary: [] },
+  dataUse: { primary: [] } as DataUseSummary,
   study: {
     studyId: 101,
     studyName: 'Test Study',
@@ -138,14 +140,17 @@ describe('DatasetStatistics', () => {
     dars = mockDarsResponse,
     tdrResponse = mockEmptyTdrResponse,
     tdrError,
+    dacRules = [],
   }: {
     dataset?: typeof mockDatasetTerm
     dars?: DatasetStatisticsDar[]
     tdrResponse?: ReturnType<typeof buildTdrResponse>
     tdrError?: Error
+    dacRules?: unknown[]
   } = {}) => {
     vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([dataset])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(dars)
+    vi.mocked(DAC.fetchDACbotRules).mockResolvedValue(dacRules as never)
 
     if (tdrError) {
       vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockRejectedValue(tdrError)
@@ -184,60 +189,93 @@ describe('DatasetStatistics', () => {
     expect(await screen.findByText('Dr. Test PI')).toBeTruthy()
   })
 
+  it('shows the instant approval badge when the dataset is radar-eligible', async () => {
+    renderDatasetStatistics({
+      dataset: { ...mockDatasetTerm, dataUse: { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [] } },
+      dacRules: [{
+        id: 1,
+        ruleType: 'GRU_V1',
+        description: 'Auto-approve GRU',
+        ruleState: 'AVAILABLE',
+        activationDate: Date.parse('2026-01-01'),
+        enabledByUserId: null,
+        displayName: null,
+        userEmail: null,
+      }],
+    })
+
+    expect(await screen.findByText('Instant approval eligible')).toBeInTheDocument()
+  })
+
+  it('does not show the instant approval badge when the dataset is not radar-eligible', async () => {
+    renderDatasetStatistics()
+
+    expect(await screen.findByText(/DUOS-000001 - Test Dataset/)).toBeTruthy()
+    expect(screen.queryByText('Instant approval eligible')).not.toBeInTheDocument()
+  })
+
   it('shows Data Location when no exportable snapshots are available', async () => {
     renderDatasetStatistics()
 
     expect(await screen.findByText(/Data Location/)).toBeTruthy()
     expect(await screen.findByText('TDR Location')).toBeTruthy()
-    expect(screen.queryByText('Export')).toBeNull()
+    expect(screen.queryByRole('button', { name: /export to/i })).toBeNull()
   })
 
-  it('shows export button when TDR returns a snapshot with reader role', async () => {
+  it('shows "Export to..." dropdown with a Terra option when TDR returns a snapshot with reader role', async () => {
     renderDatasetStatistics({ tdrResponse: mockTdrResponseWithSnapshot })
 
     expect(await screen.findByText(/Data Location/)).toBeTruthy()
     expect(await screen.findByText('TDR Location')).toBeTruthy()
-    const exportLink = await screen.findByText('Export')
-    expect(exportLink).toBeTruthy()
-    const anchor = exportLink?.closest('a')
+    const exportButton = await screen.findByRole('button', { name: /export to/i })
+    fireEvent.click(exportButton)
+
+    const terraItem = await screen.findByText('Terra')
+    const anchor = terraItem.closest('a')
     expect(anchor).toBeTruthy()
     expect(anchor?.getAttribute('href')).toContain('snapshot-abc')
   })
 
-  it('shows export button when TDR returns a snapshot with steward role', async () => {
+  it('shows "Export to..." dropdown with a Terra option when TDR returns a snapshot with steward role', async () => {
     renderDatasetStatistics({ tdrResponse: mockTdrResponseWithStewardSnapshot })
 
     expect(await screen.findByText('TDR Location')).toBeTruthy()
-    const exportLink = await screen.findByText('Export')
-    expect(exportLink).toBeTruthy()
-    const anchor = exportLink?.closest('a')
+    const exportButton = await screen.findByRole('button', { name: /export to/i })
+    fireEvent.click(exportButton)
+
+    const terraItem = await screen.findByText('Terra')
+    const anchor = terraItem.closest('a')
     expect(anchor?.getAttribute('href')).toContain('snapshot-xyz')
   })
 
-  it('does not show export button for snapshots without reader or steward role', async () => {
+  it('does not show export dropdown for snapshots without reader or steward role', async () => {
     renderDatasetStatistics({ tdrResponse: mockTdrResponseWithoutRole })
 
-    expect(screen.queryByText('Export')).toBeNull()
+    expect(screen.queryByRole('button', { name: /export to/i })).toBeNull()
     expect(await screen.findByText(/Data Location/)).toBeTruthy()
     expect(await screen.findByText('TDR Location')).toBeTruthy()
   })
 
-  it('shows a dropdown menu with an item per snapshot when multiple snapshots are available', async () => {
+  it('offers a Terra option per snapshot, differentiated by name, when multiple snapshots are returned', async () => {
     renderDatasetStatistics({ tdrResponse: mockTdrResponseWithMultipleSnapshots })
 
     expect(await screen.findByText('TDR Location')).toBeTruthy()
 
-    const exportButton = await screen.findByRole('button', { name: /export/i })
+    const exportButton = await screen.findByRole('button', { name: /export to/i })
     fireEvent.click(exportButton)
 
-    expect(await screen.findByText('Snapshot ABC')).toBeTruthy()
-    expect(await screen.findByText('Snapshot XYZ')).toBeTruthy()
+    expect(await screen.findAllByText('Terra')).toHaveLength(2)
+
+    const abcLink = screen.getByText('Snapshot ABC').closest('a')
+    const xyzLink = screen.getByText('Snapshot XYZ').closest('a')
+    expect(abcLink?.getAttribute('href')).toContain('snapshot-abc')
+    expect(xyzLink?.getAttribute('href')).toContain('snapshot-xyz')
   })
 
   it('handles TDR API errors gracefully and shows Data Location', async () => {
     renderDatasetStatistics({ tdrError: new Error('TDR API unavailable') })
 
-    expect(screen.queryByText('Export')).toBeNull()
+    expect(screen.queryByRole('button', { name: /export to/i })).toBeNull()
     expect(await screen.findByText(/Data Location/)).toBeTruthy()
     expect(await screen.findByText('TDR Location')).toBeTruthy()
   })
@@ -259,11 +297,11 @@ describe('DatasetStatistics', () => {
   })
 })
 
-// Cypress spec coverage — access management, field display, identifier variants
-describe('DatasetStatistics - Cypress spec', () => {
+// access management, field display, identifier variants
+describe('DatasetStatistics', () => {
   let queryClient: QueryClient
 
-  const cypressDataset = {
+  const mockDataset = {
     datasetId: 1975,
     name: 'ExternalAccessTestJL1',
     datasetName: 'ExternalAccessTestJL1',
@@ -290,10 +328,11 @@ describe('DatasetStatistics - Cypress spec', () => {
     updateUserId: 3351,
   }
 
-  const mount = (dataset: object, path = `/dataset/${cypressDataset.datasetIdentifier}`) => {
+  const mount = (dataset: object, path = `/dataset/${mockDataset.datasetIdentifier}`) => {
     vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([dataset as never])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue([])
     vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
+    vi.mocked(DAC.fetchDACbotRules).mockResolvedValue([])
     return render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={[path]}>
@@ -311,17 +350,17 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Renders the correct dataset from a DUOS-xxx identifier path parameter', async () => {
-    mount(cypressDataset)
-    expect(await screen.findByText(new RegExp(cypressDataset.datasetIdentifier))).toBeInTheDocument()
+    mount(mockDataset)
+    expect(await screen.findByText(new RegExp(mockDataset.datasetIdentifier))).toBeInTheDocument()
   })
 
   it('Renders the correct dataset from a DUOS-D{id} identifier path parameter', async () => {
-    mount(cypressDataset, `/dataset/DUOS-D${cypressDataset.datasetId}`)
-    expect(await screen.findByText(new RegExp(cypressDataset.datasetIdentifier))).toBeInTheDocument()
+    mount(mockDataset, `/dataset/DUOS-D${mockDataset.datasetId}`)
+    expect(await screen.findByText(new RegExp(mockDataset.datasetIdentifier))).toBeInTheDocument()
   })
 
   it('Displays Controlled Access Dataset Apply Button', async () => {
-    const controlled = { ...cypressDataset, accessManagement: 'controlled' }
+    const controlled = { ...mockDataset, accessManagement: 'controlled' }
     mount(controlled)
     await screen.findByText(new RegExp(controlled.datasetIdentifier))
     expect(document.body).toHaveTextContent(controlled.datasetName)
@@ -329,7 +368,7 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Displays External Access Language With Location', async () => {
-    const external = { ...cypressDataset, accessManagement: 'external', url: 'https://duos.org' }
+    const external = { ...mockDataset, accessManagement: 'external', url: 'https://duos.org' }
     mount(external)
     await screen.findByText(new RegExp(external.datasetIdentifier))
     expect(document.body).toHaveTextContent(external.datasetName)
@@ -339,7 +378,7 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Displays External Access Language Without Location', async () => {
-    const external = { ...cypressDataset, accessManagement: 'external' }
+    const external = { ...mockDataset, accessManagement: 'external' }
     mount(external)
     await screen.findByText(new RegExp(external.datasetIdentifier))
     expect(document.body).toHaveTextContent(external.datasetName)
@@ -350,7 +389,7 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Displays Open Access Language With Location', async () => {
-    const open = { ...cypressDataset, accessManagement: 'open', url: 'https://duos.org' }
+    const open = { ...mockDataset, accessManagement: 'open', url: 'https://duos.org' }
     mount(open)
     await screen.findByText(new RegExp(open.datasetIdentifier))
     expect(document.body).toHaveTextContent(open.datasetName)
@@ -359,7 +398,7 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Displays Open Access Language Without Location', async () => {
-    const open = { ...cypressDataset, accessManagement: 'open' }
+    const open = { ...mockDataset, accessManagement: 'open' }
     mount(open)
     await screen.findByText(new RegExp(open.datasetIdentifier))
     expect(document.body).toHaveTextContent(open.datasetName)
@@ -370,15 +409,15 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Displays with no additional properties', async () => {
-    mount(cypressDataset)
-    expect(await screen.findByText(new RegExp(cypressDataset.datasetIdentifier))).toBeInTheDocument()
+    mount(mockDataset)
+    expect(await screen.findByText(new RegExp(mockDataset.datasetIdentifier))).toBeInTheDocument()
   })
 
   it('Displays All Data Custodian Emails', async () => {
     const dataCustodians = ['foo@bar.com', 'bar@baz.com']
     const withCustodians = {
-      ...cypressDataset,
-      study: { ...cypressDataset.study, dataCustodianEmail: dataCustodians },
+      ...mockDataset,
+      study: { ...mockDataset.study, dataCustodianEmail: dataCustodians },
     }
     mount(withCustodians)
     expect(await screen.findByText(/Data Custodian/)).toBeInTheDocument()
@@ -388,37 +427,37 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Does not display the Data Use field for open datasets', async () => {
-    const open = { ...cypressDataset, accessManagement: 'open' }
+    const open = { ...mockDataset, accessManagement: 'open' }
     mount(open)
     await screen.findByText(new RegExp(open.datasetIdentifier))
     expect(screen.queryByText(/^Data Use/)).not.toBeInTheDocument()
   })
 
   it('Displays the Data Use field for controlled datasets', async () => {
-    const controlled = { ...cypressDataset, accessManagement: 'controlled' }
+    const controlled = { ...mockDataset, accessManagement: 'controlled' }
     mount(controlled)
     expect(await screen.findByText(/Data Use/)).toBeInTheDocument()
-    expect(await screen.findByText(new RegExp(cypressDataset.dataUse.primary[0].code))).toBeInTheDocument()
+    expect(await screen.findByText(new RegExp(mockDataset.dataUse.primary[0].code))).toBeInTheDocument()
   })
 
   it('Displays the Principal Investigator field', async () => {
-    mount(cypressDataset)
+    mount(mockDataset)
     expect(await screen.findByText(/Principal Investigator/)).toBeInTheDocument()
-    expect(await screen.findByText(cypressDataset.study.piName)).toBeInTheDocument()
+    expect(await screen.findByText(mockDataset.study.piName)).toBeInTheDocument()
   })
 
   it('Displays the Request Location field as a link when present', async () => {
     const requestLocationUrl = 'https://request.example.org/apply'
-    const withRequestLocation = { ...cypressDataset, requestLocation: requestLocationUrl }
+    const withRequestLocation = { ...mockDataset, requestLocation: requestLocationUrl }
     mount(withRequestLocation)
     expect(await screen.findByText(/Request Location/)).toBeInTheDocument()
     expect(document.querySelector(`a[href="${requestLocationUrl}"]`)).toBeInTheDocument()
   })
 
   it('Does not display the Request Location field when absent', async () => {
-    const withoutRequestLocation = { ...cypressDataset }
+    const withoutRequestLocation = { ...mockDataset }
     mount(withoutRequestLocation)
-    await screen.findByText(new RegExp(cypressDataset.datasetIdentifier))
+    await screen.findByText(new RegExp(mockDataset.datasetIdentifier))
     expect(screen.queryByText(/Request Location/)).not.toBeInTheDocument()
   })
 
@@ -431,12 +470,12 @@ describe('DatasetStatistics - Cypress spec', () => {
       expired: false,
       referenceId: 'abc',
     }]
-    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([cypressDataset as never])
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDataset as never])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(darsData)
     vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
     render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[`/dataset/${cypressDataset.datasetIdentifier}`]}>
+        <MemoryRouter initialEntries={[`/dataset/${mockDataset.datasetIdentifier}`]}>
           <Routes>
             <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
           </Routes>
@@ -449,7 +488,7 @@ describe('DatasetStatistics - Cypress spec', () => {
   })
 
   it('Displays message when no DARs exist', async () => {
-    mount(cypressDataset)
+    mount(mockDataset)
     expect(await screen.findByText(/No Data Access Requests have been created for this dataset/)).toBeInTheDocument()
   })
 
@@ -469,13 +508,13 @@ describe('DatasetStatistics - Cypress spec', () => {
       referenceId: 'abc',
     }]
 
-    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([cypressDataset as never])
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDataset as never])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(darsData)
     vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
 
     render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[`/dataset/${cypressDataset.datasetIdentifier}`]}>
+        <MemoryRouter initialEntries={[`/dataset/${mockDataset.datasetIdentifier}`]}>
           <Routes>
             <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
           </Routes>

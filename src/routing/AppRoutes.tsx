@@ -68,7 +68,7 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/tos_acceptance" element={<TermsOfServiceAcceptance />} />
       <Route path="/nih_dms_policy" element={<NIHDMSPolicyInfo />} />
       <Route path="/anvil_dms_policy" element={<AnVILDMSPolicyInfo />} />
-      <Route element={<EnvRoute env={envGroups.NON_STAGING} />}>
+      <Route element={<EnvRoute env={envGroups.DEV} />}>
         <Route path="/backgroundsignin" element={<BackgroundSignIn {...props} />} />
       </Route>
       <Route element={<Authenticated />}>

@@ -91,7 +91,7 @@ describe('ERA Commons Component', () => {
   })
 
   it('shows an error when auth token decoding fails', async () => {
-    // User.getMe returns no ERA data (mirrors Cypress "no-getMe" scenario where real getMe would fail,
+    // User.getMe returns no ERA data (mirrors "no-getMe" scenario where real getMe would fail,
     // leaving the component without any ERA authentication state — authenticate link remains visible)
     vi.mocked(User.getMe).mockResolvedValue({} as never)
     vi.mocked(AuthenticateNIH.getECMProviderAuthUrl).mockRejectedValue(new Error('token decode error'))

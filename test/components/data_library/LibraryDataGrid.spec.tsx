@@ -126,9 +126,9 @@ describe('LibraryDataGrid', () => {
     expect(screen.getByText('40')).toBeInTheDocument()
     expect(screen.getByText('Dataset 103')).toBeInTheDocument()
     expect(screen.getByText('20')).toBeInTheDocument()
-    expect(screen.getByText('Controlled').closest('.MuiChip-root')).toHaveClass('MuiChip-colorPrimary')
-    expect(screen.getByText('Open').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSuccess')
-    expect(screen.getByText('External').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSecondary')
+    expect(screen.getByText('via DUOS').closest('.MuiChip-root')).toHaveClass('MuiChip-colorPrimary')
+    expect(screen.getByText('Open Access').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSuccess')
+    expect(screen.getByText('External to DUOS').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSecondary')
   })
 
   it('renders loading state', () => {

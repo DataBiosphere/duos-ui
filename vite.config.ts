@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { aliases_from_tsconfig } from './aliases'
 
-const isCI = Boolean(process.env.CI || process.env.CYPRESS)
+const isCI = Boolean(process.env.CI)
 
 // Shared by `vite` (pnpm start) and `vite preview` (pnpm run serve).
 //

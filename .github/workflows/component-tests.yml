@@ -1,5 +1,5 @@
 on: [pull_request]
-name: Vitest and Cypress tests
+name: Vitest tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -31,51 +31,16 @@ jobs:
         run: pnpm run test:coverage
       - name: Run Vitest (server)
         run: pnpm -C server run test:coverage
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium --with-deps
+      - name: Run Vitest browser tests
+        run: pnpm run test:browser
       - name: Merge coverage reports
         run: node scripts/merge-coverage.mjs
       - name: Publish coverage report to PR
-        if: always()
+        if: success()
         uses: davelosert/vitest-coverage-report-action@3c054a2d2e2ca45446417ad5d6d5eb33092af8f1 # v2.12.1
         with:
           name: DUOS Coverage Report
           json-summary-path: coverage/coverage-summary.json
           json-final-path: coverage/coverage-final.json
-  cypress-run:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-      - run: echo "NODE_VERSION=$(sed -n 's/FROM node:\([0-9.]*\).*/\1/p' Dockerfile)" >> $GITHUB_ENV
-      - name: Install pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # 0e279bb959325dab635dd2c09392533439d90093
-        with:
-          version: 11.1.2
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-      - name: Install dependencies
-        run: pnpm ci && pnpm cypress install
-      - name : Cypress run component tests
-        uses: cypress-io/github-action@fa4a118725a8f001170d49631ea89e5d66fee626 # v7
-        with:
-          install: false
-          component: true
-          browser: chrome
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        if: failure()
-        with:
-          name: cypress-videos
-          path: cypress/videos
-          if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`

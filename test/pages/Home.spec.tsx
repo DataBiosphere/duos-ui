@@ -182,44 +182,14 @@ describe('Home page', () => {
     })
   })
 
-  describe('responsive layout', () => {
-    it('renders the logo grid as a centered, wrapping flex container', () => {
-      const { container } = renderHome(false)
-      const logoGrid = container.querySelector('.logo-grid') as HTMLElement
-      expect(logoGrid).toHaveStyle({
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-      })
-    })
-
-    it('defines a tablet breakpoint that shrinks the logo cards', () => {
-      const { container } = renderHome(false)
-      const styleTag = container.querySelector('style')
-      expect(styleTag?.textContent).toMatch(/@media \(max-width: 768px\)[^}]*\.logo-card\s*{[^}]*width: 280px/)
-    })
-
-    it('defines a mobile breakpoint that makes logo cards full width', () => {
-      const { container } = renderHome(false)
-      const styleTag = container.querySelector('style')
-      expect(styleTag?.textContent).toMatch(/@media \(max-width: 480px\)[^}]*\.logo-card\s*{[^}]*width: 100%/)
-    })
-  })
-
   describe('content sections', () => {
-    it('renders DUOS for DACs section', () => {
+    it.each([
+      'DUOS for DACs',
+      'DUOS for Signing Officials',
+      'Looking for Data?',
+    ])('renders "%s" section', (heading) => {
       renderHome(false)
-      expect(screen.getByText('DUOS for DACs')).toBeInTheDocument()
-    })
-
-    it('renders DUOS for Signing Officials section', () => {
-      renderHome(false)
-      expect(screen.getByText('DUOS for Signing Officials')).toBeInTheDocument()
-    })
-
-    it('renders Looking for data section', () => {
-      renderHome(false)
-      expect(screen.getByText('Looking for Data?')).toBeInTheDocument()
+      expect(screen.getByText(heading)).toBeInTheDocument()
     })
 
     it('opens contact modal when "Request a Meeting" is clicked', async () => {

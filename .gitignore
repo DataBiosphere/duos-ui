@@ -19,6 +19,9 @@ models.json
 
 # testing
 /coverage
+/test-results
+/playwright-report
+/test/e2e/fixtures/duos-automation*.json
 
 # production
 /build
@@ -35,12 +38,6 @@ yarn-debug.log*
 yarn-error.log*
 
 public/config.json
-/cypress/downloads/
-/cypress/videos/
-/cypress/fixtures/duos-automation*.json
-/cypress/screenshots
-cypress.env.json
-
 
 # Server
 ca-bundle.crt

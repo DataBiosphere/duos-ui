@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Pulls service account credentials for Cypress tests. Requires gcloud and jq.
+# Pulls service account credentials for e2e tests. Requires gcloud and jq.
 #
 # USAGE: ./scripts/render-accounts.sh
 #
@@ -15,7 +15,9 @@ researcher
 signing-official"
 
 PROJECT="broad-dsde-qa"
-OUTPUT_DIR="cypress/fixtures"
+OUTPUT_DIR="test/e2e/fixtures"
+
+mkdir -p "$OUTPUT_DIR"
 
 for ROLE in $LIST_OF_ROLES; do
   FILE="$OUTPUT_DIR/duos-automation-$ROLE.json"

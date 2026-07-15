@@ -36,8 +36,8 @@ const admin = {
   roles: [{ userId: 2, roleId: 4, name: 'Admin' }],
 } as unknown as DuosUser
 
-// Chair fixture: dacId=1 in the role, component is mounted with dacId=123 (mismatched,
-// as in the original Cypress spec). ManageRadar doesn't gate on role, so both admin and
+// Chair fixture: dacId=1 in the role, component is mounted with dacId=123 (mismatched).
+// ManageRadar doesn't gate on role, so both admin and
 // chair render identically — the setup call still exercises the setUserRoleStatuses path.
 const chair = {
   userId: 1,

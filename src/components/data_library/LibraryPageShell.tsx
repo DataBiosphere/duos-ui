@@ -4,6 +4,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
+import InstantApprovalBadge from 'src/components/data_library/InstantApprovalBadge'
 import { ExportableDatasets, TabConfig } from 'src/types/library'
 import { LibraryPageState } from 'src/hooks/useLibraryPageState'
 
@@ -107,6 +108,25 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
         </Box>
 
         <Box sx={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+            {isFetching
+              ? <Skeleton variant="text" width={120} sx={{ fontSize: '15px' }} />
+              : (
+                  <Typography
+                    sx={{
+                      color: 'primary.main',
+                      fontFamily: 'Montserrat, sans-serif',
+                      fontSize: '15px',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {(data?.total ?? 0).toLocaleString()}
+                    {' '}
+                    {data?.total === 1 ? currentAsset.label.singular : currentAsset.label.plural}
+                  </Typography>
+                )}
+            {radarEnabledDatasetIds !== undefined && <InstantApprovalBadge />}
+          </Box>
           <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
             <LibraryDataGrid
               assetType={urlState.tab}

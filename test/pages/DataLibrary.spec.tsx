@@ -30,7 +30,7 @@ const CONFIG_PATH = '/config.json'
 const DATA_GRID_ROW_SELECTOR = '.MuiDataGrid-row'
 const DATASETS_TAB_PATH = '/?tab=datasets'
 const DUOS_DATA_LIBRARY_TITLE = 'DUOS Data Library'
-const EXPORT_LABEL = 'Export'
+const EXPORT_LABEL = 'Export to...'
 const FOOTER_SELECTOR = '[data-cy="library-footer"]'
 const SEARCH_INPUT_SELECTOR = 'input[placeholder="Enter search terms"]'
 const SHOW_FILTERS_BUTTON_SELECTOR = '[aria-label="Show filters"]'
@@ -66,7 +66,9 @@ const hasTerm = (query: QueryClause, field: string, value: string | number | boo
   'term' in query && query.term?.[field] === value
 
 const getLabelControl = <T extends HTMLElement>(labelText: string, role: string): T => {
-  const label = screen.getByText(labelText).closest('label')
+  const label = screen.getAllByText(labelText)
+    .map(el => el.closest('label'))
+    .find((el): el is HTMLLabelElement => el !== null)
   expect(label).toBeInTheDocument()
   return within(label as HTMLElement).getByRole(role) as T
 }
@@ -246,6 +248,14 @@ describe('DataLibrary', () => {
     expect(await screen.findByText(DUOS_DATA_LIBRARY_TITLE)).toBeInTheDocument()
     expect(await screen.findByText(/Search, filter, and select datasets/)).toBeInTheDocument()
     expect(document.querySelector(SEARCH_INPUT_SELECTOR)).toBeInTheDocument()
+  })
+
+  it('shows an error message when the dataset query fails', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockRejectedValue(new Error('boom'))
+
+    renderLibrary(DATASETS_TAB_PATH)
+
+    expect(await screen.findByText('Error Loading Data', {}, { timeout: 5000 })).toBeInTheDocument()
   })
 
   it('renders filter categories', async () => {

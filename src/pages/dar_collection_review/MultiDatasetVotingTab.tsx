@@ -3,7 +3,7 @@ import { get, isNil } from 'src/utils/NodashUtil'
 import { Alert } from 'src/components/Alert'
 import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
 import MultiDatasetVoteSlab from 'src/components/collection_voting_slab/MultiDatasetVoteSlab'
-import ResearchProposalVoteSlab from 'src/components/collection_voting_slab/ResearchProposalSlab'
+import ResearchProposalSlab from 'src/components/collection_voting_slab/ResearchProposalSlab'
 import { User } from 'src/libs/ajax/User'
 import { Bucket } from 'src/utils/BucketUtils'
 import { DarCollection, DataAccessRequestData } from 'src/types/model'
@@ -134,9 +134,9 @@ export default function MultiDatasetVotingTab({
           id="missing_lc"
         />
       )}
-      <ResearchProposalVoteSlab
+      <ResearchProposalSlab
         darInfo={darInfo}
-        key="rp-vote"
+        key="rp-slab"
         isLoading={isLoading}
       />
       <div style={styles.title}>Datasets Requested by Data Use</div>

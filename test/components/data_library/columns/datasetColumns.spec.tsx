@@ -67,10 +67,10 @@ describe('datasetColumns — column order', () => {
 
 describe('datasetColumns — Access Management chip', () => {
   it.each([
-    ['controlled', 'Controlled', '.MuiChip-colorPrimary'],
-    ['open', 'Open', '.MuiChip-colorSuccess'],
-    ['external', 'External', '.MuiChip-colorSecondary'],
-    ['something-unknown', 'Unknown', '.MuiChip-colorDefault'],
+    ['controlled', 'via DUOS', '.MuiChip-colorPrimary'],
+    ['open', 'Open Access', '.MuiChip-colorSuccess'],
+    ['external', 'External to DUOS', '.MuiChip-colorSecondary'],
+    ['something-unknown', 'something-unknown', '.MuiChip-colorDefault'],
   ])('renders chip for %s access — correct label, color, and no Bolt icon', (value, label, colorClass) => {
     const { container } = renderCell('accessManagement', value)
     expect(screen.getByText(label)).toBeInTheDocument()

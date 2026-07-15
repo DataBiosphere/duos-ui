@@ -45,6 +45,7 @@ interface DataAccessAgreementsProps {
   cancelAttest: () => void
   datasets: Dataset[]
   onDaaIdsChange?: (daaIds: number[]) => void
+  researcherDaaIds?: number[]
 }
 
 export const DataAccessAgreements = ({
@@ -55,9 +56,14 @@ export const DataAccessAgreements = ({
   cancelAttest,
   datasets,
   onDaaIdsChange,
+  researcherDaaIds = [],
 }: DataAccessAgreementsProps) => {
   const [daas, setDaas] = useState<DAAObject[]>([])
   const memoizedDisplayedIds = useMemo(() => getDisplayedDaaIds(datasets, daas), [datasets, daas])
+  const missingDaaIds = useMemo(
+    () => memoizedDisplayedIds.filter(daaId => !researcherDaaIds.includes(daaId)),
+    [memoizedDisplayedIds, researcherDaaIds],
+  )
 
   useEffect(() => {
     const init = async () => {
@@ -83,7 +89,7 @@ export const DataAccessAgreements = ({
 
   return (
     <div className="dar-step-card">
-      <h2>Data Access Agreements (DAA)</h2>
+      <h2>Step 4: Data Access Agreements (DAA)</h2>
 
       <div className="form-group">
         <h3>DUOS Code of Conduct</h3>
@@ -130,8 +136,12 @@ export const DataAccessAgreements = ({
       <RequiredDAAs
         datasets={datasets}
         daas={daas}
-        agreementText="By submitting this data access request and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below."
+        agreementText="By submitting this data access request you agree to the data access agreements below"
       />
+
+      {missingDaaIds.length > 0 && (
+        <h4>Your Institutional Signing Official must approve you under each data access agreement above before your request can be reviewed by a data access committee.</h4>
+      )}
 
       <div className="flex flex-row" style={{ justifyContent: 'around', paddingTop: '4rem' }}>
         <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>

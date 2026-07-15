@@ -2,7 +2,7 @@ import { Styles } from 'src/libs/theme'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { Collections } from 'src/libs/ajax/Collections'
 import { DarCollectionSummary, Election, UserRoleName, Vote } from 'src/types/model'
-import { groupBy, isEmpty, isNil, cloneDeep } from 'src/utils/NodashUtil'
+import { groupBy, isNil, cloneDeep } from 'src/utils/NodashUtil'
 
 interface VotesByType {
   chairpersonVotes: Vote[]
@@ -16,7 +16,10 @@ interface ProcessedVotes extends Record<string, VotesByType> {
   dataAccess: VotesByType & Required<Pick<VotesByType, 'agreementVotes' | 'radarVotes'>>
 }
 
-type VoteArrayGroup = Partial<Record<'dataAccess', Partial<VotesByType>>>
+// One entry of a bucket's votes array, as produced by processVotesForBucket
+interface VoteGroup {
+  dataAccess?: Partial<VotesByType>
+}
 
 // Helper function for processDataUseBuckets, essentially organizes votes in a dar's elections by type
 export const processVotesForBucket = (darElections: Election[] = []): ProcessedVotes => {
@@ -67,7 +70,7 @@ export const processVotesForBucket = (darElections: Election[] = []): ProcessedV
 // Minimal shape of a bucket needed for vote extraction
 export interface VoteBucket {
   [key: string]: unknown
-  votes?: VoteArrayGroup[]
+  votes?: VoteGroup[]
 }
 
 // Gets data access votes from this bucket by members of this user's DAC
@@ -75,10 +78,7 @@ export interface VoteBucket {
 export const extractDacDataAccessVotesFromBucket = (bucket: VoteBucket | null | undefined, user: { userId: number }, adminPage?: boolean): Vote[] => {
   const votes = bucket?.votes ?? []
 
-  let memberVotesArrays = votes
-    .map(voteData => voteData.dataAccess)
-    .filter(dataAccessData => !isEmpty(dataAccessData))
-    .map(filteredData => filteredData?.memberVotes ?? [])
+  let memberVotesArrays = votes.map(voteData => voteData.dataAccess?.memberVotes ?? [])
 
   if (!adminPage) {
     memberVotesArrays = filterVoteArraysForUsersDac(memberVotesArrays, user)
@@ -283,7 +283,7 @@ export const approveCollectionFn = ({
 
 // helper function used in DarCollectionReview to update final vote on source of truth
 // done to trigger re-renders on parent and child components (vote summary bar, member tab, etc.)
-export const updateFinalVote = ({
+export const updateFinalVote = <T extends UpdatableVoteBucket>({
   key,
   votePayload,
   voteIds,
@@ -293,9 +293,9 @@ export const updateFinalVote = ({
   key: string
   votePayload: VotePayload | Record<string, unknown>
   voteIds: number[]
-  dataUseBuckets: UpdatableVoteBucket[]
-  setDataUseBuckets: (buckets: UpdatableVoteBucket[]) => void
-}): UpdatableVoteBucket[] | undefined => {
+  dataUseBuckets: T[]
+  setDataUseBuckets: (buckets: T[]) => void
+}): T[] | undefined => {
   if (!isVotePayload(votePayload)) {
     return undefined
   }
@@ -407,8 +407,6 @@ export const DarCollectionTableColumnOptions = {
   STATUS: 'status',
   ACTIONS: 'actions',
 } as const
-
-type VoteGroup = Record<string, VotesByType>
 
 interface VotePayload {
   vote: boolean

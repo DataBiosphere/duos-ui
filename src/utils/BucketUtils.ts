@@ -50,12 +50,10 @@ interface VoteGroup {
  *      a: Pull out the data use translations for the bucket's dataUse
  *      b: Populate translated dataUses
  * Step 2: Pull out match data based on dataset that the match data applies to.
- * Step 3: Pull all elections for those datasets into the buckets
+ * Step 3: Pull all Data Access elections for those datasets into the buckets
  * Step 4: Pull all votes up to a top level bucket field for easier iteration
  * Step 5: Set the bucket key/label from the dataUse + dataset ids
  * Step 6: Coalesce the algorithm decision per bucket
- *
- * Note that RP election votes are silently ignored as votes are no longer cast for them.
  */
 export const binCollectionToBuckets = async (collection: Pick<DarCollection, 'datasets'> & Partial<Pick<DarCollection, 'dars'>>, dacIds: number[] = []): Promise<Bucket[]> => {
   const buckets: Bucket[] = []

@@ -1,66 +1,39 @@
 # Testing
-We use [Cypress](https://docs.cypress.io/) for testing.
 
-Update an environment config file to test against:
-```
-cp config/base_config.json public/config.json
-``` 
+## Unit & Component Tests (Vitest + RTL)
 
-## Run All Tests
+Run all tests:
 ```
 pnpm test
 ```
 
-## Local Test Development
-
-Create a .local.env with the following
-
+Run in watch mode:
 ```
-HOST=local.dsde-dev.broadinstitute.org
-HTTPS=true
-SSL_CRT_FILE=server.crt
-SSL_KEY_FILE=server.key
+pnpm test:watch
 ```
 
-Update `baseUrl` in `cypress.config.js` and `url` in `cypress/support/commands.js` to 
+Run with coverage:
 ```
-https://local.dsde-dev.broadinstitute.org:3000
-```
-
-Set `env` to `local` in `config.json`
-
-Start a local server:
-```
-pnpm start
+pnpm test:coverage
 ```
 
-Generate configs locally
+## Browser Component Tests (Vitest + Playwright)
+
 ```
-./scripts/render-accounts.sh
+pnpm test:browser
 ```
 
-Open Cypress' interactive view:
+## E2E Tests (Playwright)
+
+Requires a built app served locally. Build first:
 ```
-    pnpm run cypress:open
+CI=false pnpm run build
 ```
 
-Run Cypress headless:
+Then run e2e tests (starts the preview server automatically):
 ```
-    pnpm run cypress:run
-```
-
-## Component Testing
-
-See https://www.cypress.io/blog/2021/04/06/introducing-the-cypress-component-test-runner/ for more detailed information
-
-This command opens a browser window with component tests visible. 
-You don't need to have a running server started, this will do that for you.
-(Note that specifying any port with `open-ct` will default to 3000, this seems to be a cypress bug) 
-```
-    pnpm exec cypress open
+pnpm run test:e2e
 ```
 
-This runs component tests headless:
-```
-    pnpm exec cypress run --component
-```
+The preview server runs at `https://local.dsde-dev.broadinstitute.org:3000`.
+You will need local SSL certificates (`server.key`, `server.crt`) for HTTPS.

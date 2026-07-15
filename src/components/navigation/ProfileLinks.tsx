@@ -38,6 +38,7 @@ export const ProfileLinks: React.FC<ProfileLinksProps> = (props) => {
     }}
     >
       <Typography
+        id="sel_user"
         onClick={handleOpenUserMenu}
         sx={[
           {

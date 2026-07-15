@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo'
 import { DataAccessAgreements } from 'src/pages/dar_application/DataAccessAgreements'
 import DataAccessRequest, { OntologyOption } from 'src/pages/dar_application/DataAccessRequest'
@@ -294,8 +294,19 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
   const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([])
   const [dataUseTranslations, setDataUseTranslations] = useState<(TranslationEntry | undefined)[][]>([])
 
+  // Guards the fire-and-forget promises below against resolving after unmount - without
+  // it, a late resolution (e.g. in a test that unmounts before the mock promise settles)
+  // can trip React's "document is not defined anymore" invariant during effect cleanup.
+  const isMountedRef = useRef(true)
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
   React.useEffect(() => {
     fetchAllDatasets(formData.datasetIds ?? []).then((datasets) => {
+      if (!isMountedRef.current) return
       setDatasets(datasets)
       setSelectedDatasets(datasets)
     })
@@ -308,6 +319,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
   useEffect(() => {
     translateDataUseRestrictionsFromDataUseArray(datasets.map(ds => ds.dataUse)).then((translations) => {
+      if (!isMountedRef.current) return
       setDataUseTranslations(translations)
     })
   }, [datasets])
@@ -317,16 +329,19 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
       try {
         if (existingDarsReadOnlyMode && collectionId) {
           const { createUser } = await getDarCollection(collectionId)
+          if (!isMountedRef.current) return
           setResearcher(createUser ?? {})
         }
         else {
           const response = await User.getMe()
           const signingOfficials = await User.getSOsForCurrentUser()
+          if (!isMountedRef.current) return
           setResearcher(response)
           setAllSigningOfficials(signingOfficials)
         }
       }
       catch {
+        if (!isMountedRef.current) return
         setShowDialogSave(false)
         Notifications.showError({ text: 'Error displaying user information. Please try again in a few moments.' })
       }
@@ -373,6 +388,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
   const init = useCallback(async () => {
     const nextFormData = await resolveInitialFormData()
+    if (!isMountedRef.current) return
 
     const isResearcherEmpty = isNil(researcher) || isEmpty(researcher)
     const researcherEmail = isResearcherEmpty ? '' : (researcher as DuosUser).email
@@ -410,9 +426,11 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     // eslint-disable-next-line react-hooks/set-state-in-effect
     init()
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
+      if (!isMountedRef.current) return
       setNotificationData(notificationData)
     })
     Countries.getCountries().then((isoCountriesData: string[]) => {
+      if (!isMountedRef.current) return
       setCountriesOfOperation(isoCountriesData)
     })
   }, [init])
@@ -969,6 +987,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                       <DataAccessAgreements
                         datasets={selectedDatasets}
                         onDaaIdsChange={onDaaIdsChange}
+                        researcherDaaIds={(researcher as DuosUser).libraryCard?.daaIds}
                         isDraft={draftDar}
                         cancelAttest={() => {
                           setIsAttested(false)
