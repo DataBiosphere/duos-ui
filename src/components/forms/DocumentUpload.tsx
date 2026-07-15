@@ -753,9 +753,11 @@ export const DocumentUpload = ({
     setSelectedType(current => current && allowedCategories.includes(current) ? current : null)
   }, [allowedCategories])
 
-  useEffect(() => {
+  const [prevDeletedDocumentsView, setPrevDeletedDocumentsView] = useState(deletedDocumentsView)
+  if (deletedDocumentsView !== prevDeletedDocumentsView) {
+    setPrevDeletedDocumentsView(deletedDocumentsView)
     setShowDeleted(deletedDocumentsView === 'all')
-  }, [deletedDocumentsView])
+  }
 
   const selectedCategory = selectedType
   const showTypeSelection = allowedCategories.length > 1
