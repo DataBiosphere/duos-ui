@@ -185,8 +185,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
                   loadOptions={loadOptions}
                   placeholder="Select a DUOS User..."
                   isOptionSelected={() => false} // Workaround to prevent odd react-select behavior where all dropdown options are highlighted
-                  /* oxlint-disable-next-line no-constant-binary-expression */
-                  getOptionLabel={(option: UserOption) => `${option.displayName} (${option.email})` || option.email || ''}
+                  getOptionLabel={(option: UserOption) => (option.displayName ? `${option.displayName} (${option.email})` : option.email || '')}
                 />
               </>
             )}
