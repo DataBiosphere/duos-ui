@@ -10,9 +10,10 @@ import * as oidc from 'openid-client'
  *
  * Discovery is cached for the life of the process: the B2C metadata is fixed
  * per deployment, and every /auth/* request needs it. Failed discovery is NOT
- * cached — a lookup that failed during a network blip logs and errors
- * per-request, and heals on the next call. index.ts warms this cache at
- * startup so the first login doesn't pay the discovery round-trip.
+ * cached — a lookup that failed during a network blip rejects per-request and
+ * heals on the next call (callers, e.g. index.ts's startup warm-up, decide
+ * whether/how to log). index.ts warms this cache at startup so the first
+ * login doesn't pay the discovery round-trip.
  */
 let oidcConfigPromise: Promise<oidc.Configuration> | null = null
 
