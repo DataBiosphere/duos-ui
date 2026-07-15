@@ -167,7 +167,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
   }, [electionIsExpanded])
 
   React.useEffect(() => {
-    // oxlint-disable-next-line react-hooks/set-state-in-effect
+    // oxlint-disable-next-line react/react-compiler
     setSortedElections(sortVisibleTable({
       list: processElectionRowData(electionsWithMemberVotes),
       sort,

@@ -127,7 +127,7 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
       ? NihAnvilUsePreSelectOptions.NO
       : NihAnvilUsePreSelectOptions.YES
     if (preSelectorValue !== derivedPreSelectorValue) {
-      // oxlint-disable-next-line react-hooks/set-state-in-effect
+      // oxlint-disable-next-line react/react-compiler
       setPreSelectorValue(derivedPreSelectorValue)
     }
   }, [handlePreSelectorChange, preSelectorValue, study])

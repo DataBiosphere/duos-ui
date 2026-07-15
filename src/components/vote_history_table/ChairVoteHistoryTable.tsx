@@ -93,7 +93,7 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
   }, [])
 
   React.useEffect(() => {
-    // oxlint-disable-next-line react-hooks/set-state-in-effect
+    // oxlint-disable-next-line react/react-compiler
     setSortedVotes(sortVisibleTable({
       list: processVoteHistoryRowData(voteHistory),
       sort,
