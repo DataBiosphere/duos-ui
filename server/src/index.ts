@@ -9,6 +9,7 @@ import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import { createPgSessionStore } from './session/pgStore.js'
+import { getOidcConfig } from './auth/oidcClient.js'
 import { configPath, readConfig } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -127,6 +128,15 @@ export async function buildApp(): Promise<AppInstance> {
       // would re-save the session (SELECT + UPSERT) on every session-bearing
       // request just to bump `expire`. Phase 2 adds a throttled sliding expiry
       // instead — re-save only when the session is near expiry.
+    })
+
+    // Warm the B2C OIDC discovery cache so the first login doesn't pay the
+    // discovery round-trip. Not awaited and never fatal — on failure the error
+    // is logged and getOidcConfig() retries lazily on first use; a genuinely
+    // missing env var will still fail every auth request loudly, with the
+    // error naming the variable.
+    getOidcConfig().catch((err: unknown) => {
+      fastify.log.error({ err }, '[auth] B2C OIDC discovery warm-up failed')
     })
   }
   else {
