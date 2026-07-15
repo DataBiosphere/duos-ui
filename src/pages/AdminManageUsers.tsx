@@ -21,7 +21,7 @@ export const AdminManageUsers = function AdminManageUsers() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // oxlint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true)
     getUserList()
       .then((users) => {

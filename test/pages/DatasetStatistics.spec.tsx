@@ -32,7 +32,7 @@ const mockConfig = {
 }
 
 const originalFetch = globalThis.fetch
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line @typescript-eslint/no-explicit-any
 globalThis.fetch = vi.fn((url: any) => {
   if (url === '/config.json' || url.endsWith?.('/config.json')) {
     return Promise.resolve(

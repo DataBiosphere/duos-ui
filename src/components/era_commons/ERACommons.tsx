@@ -65,7 +65,7 @@ export default function ERACommons({
       const authUrl = await AuthenticateNIH.getECMProviderAuthUrl(origin, redirectTo)
       globalThis.location.assign(authUrl)
     }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // oxlint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     catch (error: never) {
       const userEmail = currentUser?.email || 'unknown user'

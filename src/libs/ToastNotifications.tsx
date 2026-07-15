@@ -10,7 +10,7 @@ interface NotificationRequiredProps extends NotificationProps {
   text: string
   timeout: number
   layout: ToastPosition | SnackbarOrigin
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
 }
 
@@ -19,7 +19,7 @@ interface NotificationProps {
   text: string | React.ReactNode
   timeout?: number
   layout?: ToastPosition | SnackbarOrigin
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
 }
 

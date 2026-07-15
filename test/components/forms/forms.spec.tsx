@@ -20,7 +20,7 @@ vi.mock('src/components/DuosDatePicker', () => ({
       if (defaultValue != null && typeof (defaultValue as Dayjs).isValid === 'function' && !(defaultValue as Dayjs).isValid()) {
         onError('invalidDate', defaultValue)
       }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, [defaultValue])
     return (
       <input

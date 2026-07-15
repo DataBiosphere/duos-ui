@@ -39,7 +39,7 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
           return includes(dacDatasetIds, datasetId)
         })
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // oxlint-disable-next-line react-hooks/set-state-in-effect
     setFilteredDatasets(datasets)
     setDatasetCount(datasets.length)
     collapseView(datasets)

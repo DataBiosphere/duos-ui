@@ -27,6 +27,10 @@ jobs:
       - name: Install dependencies
         run: pnpm ci
       - name: Lint changed files
+        run: pnpm exec oxlint
+        env:
+          DESTINATION_REF: ${{ github.event.pull_request.base.ref }}
+      - name: Check formatting
         run: pnpm exec eslint
         env:
           DESTINATION_REF: ${{ github.event.pull_request.base.ref }}

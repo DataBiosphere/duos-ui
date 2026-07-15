@@ -312,7 +312,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     })
     if (!existingDarsReadOnlyMode) {
       const updatedTabs = [...ApplicationTabs, { name: 'Data Access Agreements (DAA)', id: DATA_ACCESS_AGREEMENTS_TAB_ID }]
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // oxlint-disable-next-line react-hooks/set-state-in-effect
       setApplicationTabs(updatedTabs)
     }
   }, [formData.datasetIds, existingDarsReadOnlyMode])
@@ -409,7 +409,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
         // if we are creating a new progress report, we need to add another tab for the application
         appTabs = [{ name: 'Progress Report ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
       }
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // oxlint-disable-next-line react-hooks/set-state-in-effect
       setApplicationTabs([...appTabs,
         ...reverseOrderedDARs.map((_dar, index) => {
           const whichPRIsThis = reverseOrderedDARs.length - index - 1
@@ -423,7 +423,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
   }, [formData.darCode, isProgressReportApplication, existingDarsReadOnlyMode, reverseOrderedDARs])
 
   React.useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // oxlint-disable-next-line react-hooks/set-state-in-effect
     init()
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
       if (!isMountedRef.current) return
