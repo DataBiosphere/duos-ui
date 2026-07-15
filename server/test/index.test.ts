@@ -28,7 +28,7 @@ vi.mock('@fastify/vite', () => {
     // FastifyViteDecoration isn't exported by @fastify/vite and requires
     // private symbol-keyed properties (kMode/kOptions), so a real value can't
     // be constructed here — this mock only needs the one method buildApp() calls.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     fastify.decorate('vite', { ready: vi.fn(async () => {}) } as any)
     fastify.decorateReply('html', vi.fn(() => ''))
   }
