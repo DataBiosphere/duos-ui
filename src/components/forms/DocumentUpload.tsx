@@ -746,6 +746,7 @@ export const DocumentUpload = ({
 
   useEffect(() => {
     if (allowedCategories.length === 1) {
+      // oxlint-disable-next-line react/react-compiler
       setSelectedType(allowedCategories[0])
       return
     }

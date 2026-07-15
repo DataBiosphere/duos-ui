@@ -84,6 +84,7 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
       },
       { data: row.datasetIdentifier, cellStyle: { width: '20%' }, label: 'Dataset ID', id: i },
       { data: formatDate(row.electionDate), cellStyle: { width: '15%' }, label: 'Election Date', id: i },
+      // oxlint-disable-next-line react/react-compiler
       { data: getVoteText(row.vote), cellStyle: { width: '10%' }, label: 'Vote', id: i },
       { data: row.displayName, cellStyle: { width: '15%' }, label: 'Name', id: i },
       { data: formatDate(row.updateDate), cellStyle: { width: '10%' }, label: 'Vote Date', id: i },
