@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box } from '@mui/material'
+import { Box, Skeleton, Typography } from '@mui/material'
 import { GridColDef } from '@mui/x-data-grid'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
@@ -40,6 +40,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
     error,
     isMetadataLoading,
     tabCounts,
+    currentAsset,
     filterSections,
     externalFilters,
     sortModel,
