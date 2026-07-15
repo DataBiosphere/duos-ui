@@ -8,6 +8,7 @@
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",
     "react/only-export-components": ["warn", { "allowConstantExport": true }],
+    "react/react-compiler": "warn",
     "typescript/no-explicit-any": "warn",
     "typescript/ban-ts-comment": "warn",
     "no-unused-vars": [
