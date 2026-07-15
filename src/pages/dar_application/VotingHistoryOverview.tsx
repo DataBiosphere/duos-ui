@@ -57,7 +57,7 @@ const VotingHistoryOverview: React.FC<VotingHistoryOverviewProps> = ({ dar, vote
   const handleRationaleClick = (idx: number) => {
     setExpandedRows((prev) => {
       const next = new Set(prev)
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      // oxlint-disable-next-line @typescript-eslint/no-unused-expressions
       next.has(idx) ? next.delete(idx) : next.add(idx)
       return next
     })

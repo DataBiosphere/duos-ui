@@ -41,7 +41,7 @@ vi.mock('src/pages/progress_reports/SummarySection', () => {
         researcherProp?.properties?.find(p => p.propertyKey === 'eraExpiration')?.propertyValue ?? '0',
       )
       onNihStatusUpdate?.(eraAuthorized && rawExpiry > Date.now())
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    }, []) // oxlint-disable-line react-hooks/exhaustive-deps
     return (
       <div data-testid="summary-section">
         <input

@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+/* oxlint-disable react-refresh/only-export-components */
 /* this is the standard pattern for context files that export both a provider component and a hook. */
 import React, { createContext, useContext, useMemo, useState } from 'react'
 

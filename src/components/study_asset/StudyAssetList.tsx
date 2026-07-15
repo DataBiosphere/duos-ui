@@ -68,14 +68,14 @@ export default function StudyAssetList<
 
   React.useEffect(() => {
     if (editState.length !== items.length) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // oxlint-disable-next-line react-hooks/set-state-in-effect
       setEditState(items.map(() => false))
     }
   }, [items, editState.length])
 
   React.useEffect(() => {
     if (viewState.length !== items.length) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // oxlint-disable-next-line react-hooks/set-state-in-effect
       setViewState(items.map(() => false))
     }
   }, [items, viewState.length])

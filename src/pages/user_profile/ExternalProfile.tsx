@@ -38,7 +38,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
     setExternalProfilesUpdate((previous) => {
       const next = structuredClone(previous)
       if (typeof key === 'string') {
-        next[key as keyof ExternalProfiles] = value as any // eslint-disable-line @typescript-eslint/no-explicit-any
+        next[key as keyof ExternalProfiles] = value as any // oxlint-disable-line @typescript-eslint/no-explicit-any
       }
       return next
     })

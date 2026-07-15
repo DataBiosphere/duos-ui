@@ -190,7 +190,7 @@ export default function MultiDatasetVoteSlab({
     const darData = mostRecentDar?.data
 
     if (darData && Object.keys(darData).includes('dmi')) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // oxlint-disable-next-line react-hooks/set-state-in-effect
       setIsDMI(true)
     }
 

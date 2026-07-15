@@ -48,7 +48,7 @@ describe('Config', () => {
       ['getTdrApiUrl', 'https://test.tdr.com'],
       ['getTerraUrl', 'https://test.terra.bio'],
     ] as const)('should get %s', async (method, expected) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line @typescript-eslint/no-explicit-any
       expect(await (Config[method] as any)()).toBe(expected)
     })
   })

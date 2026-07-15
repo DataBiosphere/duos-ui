@@ -25,7 +25,7 @@ vi.mock('@fastify/vite', () => {
     fastify.decorate('vite', { ready: vi.fn(async () => {}) })
     fastify.decorateReply('html', vi.fn(() => ''))
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   ;(plugin as any)[Symbol.for('skip-override')] = true
   return { default: plugin }
 })
