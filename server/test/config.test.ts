@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { configPath, readConfig, resetConfigCache } from '../src/config'
+import { configPath, readConfig, resetConfigCache } from '../src/config.js'
 
 describe('configPath', () => {
   afterEach(() => {

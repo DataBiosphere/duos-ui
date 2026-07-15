@@ -3,8 +3,8 @@ import Fastify, { type FastifyInstance } from 'fastify'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import type { PostgresDb } from '@fastify/postgres'
-import { createPgSessionStore } from '../src/session/pgStore'
-import '../src/types/session'
+import { createPgSessionStore } from '../src/session/pgStore.js'
+import '../src/types/session.js'
 
 // ---------------------------------------------------------------------------
 // In-memory stand-in for the `user_sessions` table. It honours the four SQL
