@@ -105,7 +105,7 @@ const styles = {
 // Components
 const DataUseSummary = ({ bucket }: DataUseSummaryProps) => {
   const dataUses = get(bucket, 'dataUses', [])
-  return isNil(dataUses) ? <></> : <div className="data-use-summary" style={styles.dataUses}>{DataUsePills(dataUses)}</div>
+  return isNil(dataUses) ? <></> : <div className="data-use-summary" style={styles.dataUses}><DataUsePills dataUses={dataUses} /></div>
 }
 
 const VoteInfoSubsection = ({

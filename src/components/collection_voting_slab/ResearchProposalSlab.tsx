@@ -72,7 +72,7 @@ const highlightedWords = [
 
 const DataUseSummary = ({ translatedDataUse }: { translatedDataUse: TranslatedDataUse }) => {
   const allDataUses = flatMap(keys(translatedDataUse), key => translatedDataUse[key])
-  return <div className="data-use-summary">{DataUsePills(allDataUses, true)}</div>
+  return <div className="data-use-summary"><DataUsePills dataUses={allDataUses} twoColumn /></div>
 }
 
 const CollapseExpandLink = ({ expanded, setExpanded }: { expanded: boolean, setExpanded: (v: boolean) => void }) => {
