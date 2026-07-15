@@ -163,7 +163,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
           },
         },
       },
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // oxlint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       MuiPickersYear: {
         styleOverrides: {

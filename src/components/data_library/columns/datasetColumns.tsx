@@ -2,9 +2,10 @@ import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
-import { DatasetTerm, getAccessManagementSummary } from 'src/types/model'
+import { DatasetTerm } from 'src/types/model'
 import { AccessManagement, ExportableDatasets } from 'src/types/library'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
+import RequestAccessButton from 'src/components/data_library/RequestAccessButton'
 import BoltIcon from '@mui/icons-material/Bolt'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 
@@ -14,6 +15,7 @@ import { validateHttpUrl } from 'src/utils/UrlUtils'
 export const makeDatasetColumns = (
   exportableDatasets: ExportableDatasets = {},
   radarEnabledDatasetIds: Set<number> = new Set(),
+  hasSelection: boolean = false,
 ): GridColDef<DatasetTerm>[] => [
   {
     field: 'datasetName',
@@ -46,43 +48,65 @@ export const makeDatasetColumns = (
   {
     field: 'accessManagement',
     headerName: 'Access',
-    width: 115,
+    width: 150,
     renderCell: (params) => {
-      const summary = getAccessManagementSummary(params.value)
       const isRadarEnabled = radarEnabledDatasetIds.has(params.row.datasetId)
+      const label = (() => {
+        switch (params.value) {
+          case 'open': return 'Open Access'
+          case 'controlled': return 'via DUOS'
+          case 'external': return 'External to DUOS'
+          default: return params.value
+        }
+      })()
+      const color = (() => {
+        switch (params.value) {
+          case AccessManagement.CONTROLLED: return 'primary'
+          case AccessManagement.OPEN: return 'success'
+          case AccessManagement.EXTERNAL: return 'secondary'
+          default: return 'default'
+        }
+      })()
+      const tooltipTitle = isRadarEnabled
+        ? 'Automatic request approvals available for datasets clearly within the data use terms.'
+        : ''
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
-          <Tooltip title={summary.description}>
+        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+          <Tooltip title={tooltipTitle}>
             <Chip
               label={(
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  {summary.name}
-                  {isRadarEnabled && (
-                    <Tooltip title="Automatic request approvals available for datasets clearly within the data use terms.">
-                      <BoltIcon sx={{ color: 'gold' }} />
-                    </Tooltip>
-                  )}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  {label}
+                  {isRadarEnabled && <BoltIcon sx={{ color: 'gold' }} />}
                 </Box>
               )}
               size="small"
-              color={
-                (() => {
-                  switch (params.value) {
-                    case AccessManagement.CONTROLLED:
-                      return 'primary'
-                    case AccessManagement.OPEN:
-                      return 'success'
-                    case AccessManagement.EXTERNAL:
-                      return 'secondary'
-                    default:
-                      return 'default'
-                  }
-                })()
-              }
+              color={color}
             />
           </Tooltip>
         </Box>
       )
+    },
+  },
+  {
+    field: 'requestLocation',
+    headerName: 'Request Path',
+    width: 180,
+    sortable: false,
+    renderCell: (params) => {
+      if (params.row.accessManagement === AccessManagement.OPEN) {
+        return '-'
+      }
+      if (params.row.accessManagement === AccessManagement.CONTROLLED) {
+        return <RequestAccessButton datasetId={params.row.datasetId} disabledForSelection={hasSelection} />
+      }
+      return params.value
+        ? (
+            <Link href={validateHttpUrl(params.value) ? params.value : undefined} target="_blank" rel="noopener noreferrer" underline="hover">
+              {params.value}
+            </Link>
+          )
+        : null
     },
   },
   {
@@ -103,7 +127,7 @@ export const makeDatasetColumns = (
       if (codes.length === 0) return null
 
       return (
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center', height: '100%' }}>
           {codes.slice(0, 2).map(code => (
             <Chip key={code} label={code} size="small" variant="outlined" />
           ))}
@@ -122,20 +146,6 @@ export const makeDatasetColumns = (
     headerName: 'DAC',
     width: 150,
     valueGetter: (_value, row) => row.dac?.dacName || '',
-  },
-  {
-    field: 'requestLocation',
-    headerName: 'Request Location',
-    width: 180,
-    sortable: false,
-    renderCell: params =>
-      params.value
-        ? (
-            <Link href={validateHttpUrl(params.value) ? params.value : undefined} target="_blank" rel="noopener noreferrer" underline="hover">
-              {params.value}
-            </Link>
-          )
-        : null,
   },
   {
     field: 'actions',

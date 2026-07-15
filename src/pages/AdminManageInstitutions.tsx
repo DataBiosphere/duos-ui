@@ -53,7 +53,7 @@ export default function AdminManageInstitutions() {
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // oxlint-disable-next-line react-hooks/set-state-in-effect
     setFilteredList(filter(institutionList, searchTerm))
   }, [searchTerm, institutionList])
 

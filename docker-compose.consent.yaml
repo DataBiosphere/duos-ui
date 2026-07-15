@@ -1,0 +1,39 @@
+# Mode 2 — against a local `consent` compose stack instead of the bundled
+# Postgres. Only merged in when explicitly passed via -f (see the run
+# instructions in docker-compose.yaml) — doing so opts out of Compose's
+# automatic docker-compose.override.yaml merge, so the bundled `db` service is
+# never defined and can't fight consent's `sqlproxy` for host port 5432.
+#
+# Real deployments run the BFF's `user_sessions` table in the same Postgres
+# consent already uses, not a separate database — the `consent` schema's
+# default role (`consent`) resolves unqualified table names (like
+# `user_sessions`) to the `consent` schema automatically via Postgres's
+# "$user" search_path convention, so no extra config is needed beyond pointing
+# at the right host. See DEVNOTES.md for the full walkthrough.
+services:
+  app:
+    # consent's own `app` service also publishes host port 8080, so this
+    # publishes to DUOS_HOST_PORT (18080 by default) instead. Only the
+    # host-side port changes — the container still listens on PORT internally,
+    # so `proxy`'s routing to `app:8080` is unaffected.
+    ports:
+      - ${DUOS_HOST_PORT:-18080}:${PORT:-8080}
+    environment:
+      # consent's sqlproxy publishes Postgres on host port 5432; DUOS_DB_USER/
+      # PASSWORD/NAME (set in .env.local, from the base file's defaults) must
+      # match its credentials, not the bundled `db` service's.
+      DUOS_DB_HOST: ${DUOS_DB_HOST:-host.docker.internal}
+    extra_hosts:
+      # Lets host.docker.internal resolve on native Linux Docker (already
+      # works out of the box on Docker Desktop for Mac/Windows).
+      - "host.docker.internal:host-gateway"
+      # `proxy` (in the base file) claims the hostname
+      # local.dsde-dev.broadinstitute.org on this compose network, so without
+      # this override, this container's own outbound requests to that
+      # hostname (e.g. DUOS_API_URL pointed at consent's proxy on :27443)
+      # resolve to duos-proxy's container IP instead of the host — and
+      # duos-proxy doesn't listen on that port. host.docker.internal isn't a
+      # substitute here: consent's proxy serves a cert valid only for this
+      # hostname, so TLS verification needs the request to still be made *to*
+      # this hostname, just resolved to the host instead of duos-proxy.
+      - "local.dsde-dev.broadinstitute.org:host-gateway"

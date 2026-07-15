@@ -32,7 +32,6 @@ import AdminManageInstitutions from 'src/pages/AdminManageInstitutions'
 import AdminManageLC from 'src/pages/AdminManageLC'
 import AdminManageDarCollections from 'src/pages/AdminManageDarCollections'
 import ManageDac from 'src/pages/manage_dac/ManageDac'
-import { ManageDacDatasets } from 'src/pages/manage_dac/ManageDacDatasets'
 import ManageRadar from 'src/pages/manage_dac/ManageRadar'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import DacProfile from 'src/pages/manage_dac/DacProfile'
@@ -69,7 +68,7 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/tos_acceptance" element={<TermsOfServiceAcceptance />} />
       <Route path="/nih_dms_policy" element={<NIHDMSPolicyInfo />} />
       <Route path="/anvil_dms_policy" element={<AnVILDMSPolicyInfo />} />
-      <Route element={<EnvRoute env={envGroups.NON_STAGING} />}>
+      <Route element={<EnvRoute env={envGroups.DEV} />}>
         <Route path="/backgroundsignin" element={<BackgroundSignIn {...props} />} />
       </Route>
       <Route element={<Authenticated />}>
@@ -119,7 +118,6 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />}>
           <Route path="/manage_dac" element={<ManageDac />} />
           <Route path="/manage_dac/:dacId" element={<DacProfile />} />
-          <Route path="/manage_dac_datasets" element={<ManageDacDatasets />} />
           <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.admin]} />}>

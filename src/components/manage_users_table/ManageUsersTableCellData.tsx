@@ -84,7 +84,7 @@ export function emailCellData({ userId, email, label = 'email' }: EmailCellDataP
 
 export function permissionsCellData({ userId, roles, libraryCard, label = 'permissions' }: PermissionsCellDataParams): CellData {
   const hasLibraryCard = !isNil(libraryCard)
-  const roleNames = roles.map((role): string => role.name).filter(name => name !== 'Researcher')
+  const roleNames = (roles ?? []).map((role): string => role.name).filter(name => name !== 'Researcher')
   const perms = hasLibraryCard ? roleNames.concat('LibraryCard') : roleNames
 
   // need to split, e.g., SigningOfficial -> Signing Official
@@ -107,9 +107,11 @@ export function institutionCellData({ userId, institution, label = 'insitution' 
   }
 }
 
-export default {
+const manageUsersTableCellData = {
   usernameCellData,
   emailCellData,
   permissionsCellData,
   institutionCellData,
 }
+
+export default manageUsersTableCellData

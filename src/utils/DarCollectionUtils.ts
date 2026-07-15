@@ -2,9 +2,7 @@ import { Styles } from 'src/libs/theme'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { Collections } from 'src/libs/ajax/Collections'
 import { DarCollectionSummary, Election, UserRoleName, Vote } from 'src/types/model'
-import { groupBy, isEmpty, isNil, cloneDeep } from 'src/utils/NodashUtil'
-
-export const rpVoteKey = 'RUS Vote'
+import { groupBy, isNil, cloneDeep } from 'src/utils/NodashUtil'
 
 interface VotesByType {
   chairpersonVotes: Vote[]
@@ -15,19 +13,16 @@ interface VotesByType {
 }
 
 interface ProcessedVotes extends Record<string, VotesByType> {
-  rp: VotesByType
   dataAccess: VotesByType & Required<Pick<VotesByType, 'agreementVotes' | 'radarVotes'>>
 }
 
-type VoteArrayGroup = Partial<Record<'rp' | 'dataAccess', Partial<VotesByType>>>
+// One entry of a bucket's votes array, as produced by processVotesForBucket
+interface VoteGroup {
+  dataAccess?: Partial<VotesByType>
+}
 
 // Helper function for processDataUseBuckets, essentially organizes votes in a dar's elections by type
 export const processVotesForBucket = (darElections: Election[] = []): ProcessedVotes => {
-  const rp: VotesByType = {
-    chairpersonVotes: [],
-    memberVotes: [],
-    finalVotes: [],
-  }
   const dataAccess: VotesByType & Required<Pick<VotesByType, 'agreementVotes' | 'radarVotes'>> = {
     finalVotes: [],
     memberVotes: [],
@@ -36,10 +31,8 @@ export const processVotesForBucket = (darElections: Election[] = []): ProcessedV
     radarVotes: [],
   }
   darElections.forEach((election) => {
-    const { electionType, votes, status } = election
-    const isRPElection = electionType === 'RP'
-    const targetVotes = isRPElection ? rp : dataAccess
-    const targetFinalType = isRPElection ? 'chairperson' : 'final'
+    if (election.electionType !== 'DataAccess') return
+    const { votes, status } = election
     // add field to each vote object to indicate election status
     const updatedVotes = Object.values(votes).map(vote => ({
       ...vote,
@@ -55,31 +48,29 @@ export const processVotesForBucket = (darElections: Election[] = []): ProcessedV
       const lowerCaseType = vote.type?.toLowerCase() ?? ''
       switch (lowerCaseType) {
         case 'radar_approve':
-          if (!isRPElection) {
-            dataAccess.radarVotes.push(vote)
-          }
+          dataAccess.radarVotes.push(vote)
           break
         case 'chairperson':
-          targetVotes.chairpersonVotes.push(vote)
+          dataAccess.chairpersonVotes.push(vote)
           break
         case 'dac':
-          targetVotes.memberVotes.push(vote)
+          dataAccess.memberVotes.push(vote)
+          break
+        case 'final':
+          dataAccess.finalVotes.push(vote)
           break
         default:
           break
       }
-      if (lowerCaseType === targetFinalType) {
-        targetVotes.finalVotes.push(vote)
-      }
     })
   })
-  return { rp, dataAccess }
+  return { dataAccess }
 }
 
 // Minimal shape of a bucket needed for vote extraction
 export interface VoteBucket {
   [key: string]: unknown
-  votes?: VoteArrayGroup[]
+  votes?: VoteGroup[]
 }
 
 // Gets data access votes from this bucket by members of this user's DAC
@@ -87,30 +78,12 @@ export interface VoteBucket {
 export const extractDacDataAccessVotesFromBucket = (bucket: VoteBucket | null | undefined, user: { userId: number }, adminPage?: boolean): Vote[] => {
   const votes = bucket?.votes ?? []
 
-  let memberVotesArrays = votes
-    .map(voteData => voteData.dataAccess)
-    .filter(dataAccessData => !isEmpty(dataAccessData))
-    .map(filteredData => filteredData?.memberVotes ?? [])
+  let memberVotesArrays = votes.map(voteData => voteData.dataAccess?.memberVotes ?? [])
 
   if (!adminPage) {
     memberVotesArrays = filterVoteArraysForUsersDac(memberVotesArrays, user)
   }
   return memberVotesArrays.flat()
-}
-
-// Gets rp votes from this bucket by members of this user's DAC
-// Note that filtering by DAC does not occur for users viewing through admin review page
-export const extractDacRPVotesFromBucket = (bucket: VoteBucket | null | undefined, user: { userId: number }, adminPage?: boolean): Vote[] => {
-  const votes = bucket?.votes ?? []
-  let rpVoteArrays = votes
-    .map(voteData => voteData.rp)
-    .filter(rpData => !isEmpty(rpData))
-    .map(filteredData => filteredData?.memberVotes ?? [])
-
-  if (!adminPage) {
-    rpVoteArrays = filterVoteArraysForUsersDac(rpVoteArrays, user)
-  }
-  return rpVoteArrays.flat()
 }
 
 // Applies filter to arrays of votes grouped by election and
@@ -146,32 +119,6 @@ export const extractUserDataAccessVotesFromBucket = (
   }
   else {
     return userDataAccessVotes.filter(vote => vote.userId === user.userId)
-  }
-}
-
-// Gets this user's rp votes from this bucket; chairperson votes if isChair is true, member votes if false
-// Note that filtering by DAC does not occur when viewing through the admin review page
-export const extractUserRPVotesFromBucket = (
-  bucket: VoteBucket | null | undefined,
-  user: { userId: number },
-  isChair = false,
-  adminPage = false,
-): Vote[] => {
-  const votes = bucket?.votes ?? []
-  const adminOrChair = adminPage || isChair
-  const userRPVotes = votes.flatMap((voteGroup) => {
-    if (adminOrChair) {
-      return voteGroup.rp?.chairpersonVotes || []
-    }
-    else {
-      return voteGroup.rp?.memberVotes || []
-    }
-  })
-  if (adminPage) {
-    return userRPVotes.filter(vote => !isNil(vote.vote))
-  }
-  else {
-    return userRPVotes.filter(vote => vote.userId === user.userId)
   }
 }
 
@@ -336,7 +283,7 @@ export const approveCollectionFn = ({
 
 // helper function used in DarCollectionReview to update final vote on source of truth
 // done to trigger re-renders on parent and child components (vote summary bar, member tab, etc.)
-export const updateFinalVote = ({
+export const updateFinalVote = <T extends UpdatableVoteBucket>({
   key,
   votePayload,
   voteIds,
@@ -346,30 +293,21 @@ export const updateFinalVote = ({
   key: string
   votePayload: VotePayload | Record<string, unknown>
   voteIds: number[]
-  dataUseBuckets: UpdatableVoteBucket[]
-  setDataUseBuckets: (buckets: UpdatableVoteBucket[]) => void
-}): UpdatableVoteBucket[] | undefined => {
+  dataUseBuckets: T[]
+  setDataUseBuckets: (buckets: T[]) => void
+}): T[] | undefined => {
   if (!isVotePayload(votePayload)) {
     return undefined
   }
 
   // clone entire bucket to trigger page re-render on bucket update (setDataUseBuckets)
   const clonedBuckets = cloneDeep(dataUseBuckets)
-  const isRPBucket = key.toLowerCase() === rpVoteKey.toLowerCase()
   const targetBucket = clonedBuckets.find(bucket => bucket.key.toLowerCase() === key.toLowerCase())
   if (!targetBucket) {
     return undefined
   }
-  // source of votes will differ depending on the bucket (rp vs non-rp), so determine the callback function for flow here
-  const voteObjectCallback = isRPBucket
-    ? (voteObj: VoteGroup) => voteObj.rp
-    : (voteObj: VoteGroup) => voteObj.dataAccess
-  // to keep local source of truth updated without a fetch, we will need to update both the final and the chairperson votes
-  // to make searching on the votes easier, concatenate and then flatten the finalVotes and chairpersonVotes into one array
-  // NOTE: For the RP bucket the chairperson votes and the final votes are the same (RP has no final vote)
-  // This was a conscious choice in order to keep processing the same between RP and non-RP buckets
   const votes = targetBucket.votes
-    .map(voteObjectCallback)
+    .map(voteObj => voteObj.dataAccess)
     .flatMap(voteObj => [...(voteObj?.finalVotes ?? []), ...(voteObj?.chairpersonVotes ?? [])])
 
   // perform in place update of vote and vote rationale based on voteIds arguments
@@ -469,8 +407,6 @@ export const DarCollectionTableColumnOptions = {
   STATUS: 'status',
   ACTIONS: 'actions',
 } as const
-
-type VoteGroup = Record<string, VotesByType>
 
 interface VotePayload {
   vote: boolean

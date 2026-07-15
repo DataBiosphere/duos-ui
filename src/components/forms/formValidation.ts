@@ -9,6 +9,7 @@ import { InstitutionInterface } from 'src/types/model'
 export interface Validation {
   valid?: boolean
   failed?: string[]
+  messages?: string[]
 }
 
 export interface Validator {
@@ -90,6 +91,19 @@ export const greaterThanZeroValidator: Validator = {
   msg: 'Please enter a number greater than zero',
 }
 
+export const ACCEPTED_DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx']
+
+const fileExtension = (file: File): string => {
+  const dotIndex = file.name.lastIndexOf('.')
+  return dotIndex === -1 ? '' : file.name.slice(dotIndex).toLowerCase()
+}
+
+export const fileTypeValidator = (acceptedExtensions: string[] = ACCEPTED_DOCUMENT_EXTENSIONS): Validator => ({
+  id: 'fileType',
+  isValid: (val: unknown): boolean => !(val instanceof File) || acceptedExtensions.includes(fileExtension(val)),
+  msg: `Invalid file type. Please upload an accepted document format (${acceptedExtensions.join(', ')}).`,
+})
+
 const allValidators: Validator[] = [
   requiredValidator,
   urlValidator,
@@ -100,14 +114,19 @@ const allValidators: Validator[] = [
   dayJSValidator,
   uniqueValidator,
   greaterThanZeroValidator,
+  fileTypeValidator(),
 ]
 
 export const validateFormValue = (formValue: unknown, validators: Validator[] | undefined): Validation => {
-  if (isEmpty(formValue) && !validators?.includes(requiredValidator)) {
+  // File objects have no own enumerable keys, so isEmpty() would wrongly treat a selected file as "empty"
+  // and skip validation below (e.g. fileTypeValidator would never run).
+  const isEmptyValue = !(formValue instanceof File) && isEmpty(formValue)
+  if (isEmptyValue && !validators?.includes(requiredValidator)) {
     return { valid: true }
   }
 
   const failedValidators: string[] = []
+  const failedMessages: string[] = []
 
   validators?.forEach((validator) => {
     let failed: boolean
@@ -120,12 +139,14 @@ export const validateFormValue = (formValue: unknown, validators: Validator[] | 
 
     if (failed) {
       failedValidators.push(validator.id)
+      failedMessages.push(validator.msg)
     }
   })
 
   return {
     valid: failedValidators.length === 0,
     failed: failedValidators,
+    messages: failedMessages,
   }
 }
 

@@ -105,7 +105,8 @@ describe('fetchAdapter - Fetch methods', () => {
     fetchMock.mockResolvedValue(new Response(mockBlob, { status: 200 }))
 
     const result = await fetchGet<Blob>('/api/file', { responseType: 'blob' })
-    expect(result.data).toBeInstanceOf(Blob)
+    expect(result.data?.constructor?.name).toBe('Blob')
+    expect(result.data.type).toContain('text/plain')
   })
 
   it('fetchGet - should return text when content-type is text/plain', async () => {
@@ -321,6 +322,22 @@ describe('fetchAdapter - Fetch methods', () => {
 
     const error = await fetchMultipart('/api/upload', formData).catch(e => e)
     expect(error.message).toBe('File too large')
+  })
+
+  it('fetchMultipart - should attach response.status and response.data on error, matching fetchRequest', async () => {
+    const formData = new FormData()
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ message: 'File name is invalid', code: 400 }), {
+        status: 400,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    const error = await fetchMultipart('/api/upload', formData).catch(e => e)
+    expect(error.response).toEqual({
+      status: 400,
+      data: { message: 'File name is invalid', code: 400 },
+    })
   })
 
   it('fetchMultipart - should fall back to help desk message when no message field in error body', async () => {

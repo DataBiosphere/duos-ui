@@ -162,7 +162,7 @@ export const DataLibrary: React.FC = () => {
         selectedDatasetIds,
         onSelectionChange: handleSelectionChange,
         exportableDatasets,
-        radarEnabledDatasetIds,
+        radarEnabledDatasetIds: urlState.tab === AssetType.DATASETS ? radarEnabledDatasetIds : undefined,
       }}
       footer={(
         <LibraryFooter

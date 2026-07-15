@@ -1,0 +1,41 @@
+# Mode 1 — standalone. Auto-merged by Compose whenever this file sits next to
+# docker-compose.yaml and you run `docker compose` without explicit -f flags.
+# Adds a bundled Postgres that stands in for the consent Cloud SQL instance,
+# so the BFF talks to a real database entirely within this stack, without
+# reaching dev or needing a local `consent` checkout. Mirrors the `sqlproxy`
+# service in consent/config. See docker-compose.consent.yaml for the other mode.
+#
+# REQUIRED before first start: place a consent database dump (which includes
+# the BFF `user_sessions` table) at config/consentdb.sql — the file is
+# gitignored and nothing provisions it for you. If it's absent, Docker silently
+# creates a *directory* at that path, Postgres skips init, the healthcheck
+# still passes, and you get a green stack with an empty database whose first
+# session write fails with an opaque "relation does not exist" error.
+services:
+  app:
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - ${PORT:-8080}:${PORT:-8080}
+    environment:
+      DUOS_DB_HOST: db
+
+  db:
+    image: postgres:16.13-alpine
+    container_name: duos-db
+    ports:
+      - 5432:5432
+    environment:
+      PGGSSENCMODE: disable
+      POSTGRES_DB: ${DUOS_DB_NAME:-consent}
+      POSTGRES_USER: ${DUOS_DB_USER:-consent}
+      POSTGRES_PASSWORD: ${DUOS_DB_PASSWORD:?set DUOS_DB_PASSWORD in .env.local (copy .env.example)}
+    volumes:
+      - ./config/consentdb.sql:/docker-entrypoint-initdb.d/consentdb.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DUOS_DB_USER:-consent} -d ${DUOS_DB_NAME:-consent}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: always

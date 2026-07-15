@@ -74,7 +74,7 @@ export function descriptionCellData({ description = '- -', dacId, label = 'dac-d
 }
 
 export function datasetsCellData({ dac, viewDatasets, label = 'dac-datasets' }: DatasetsCellDataParams): CellData {
-  const datasetCount = (dac.datasets ?? []).length
+  const datasetCount = (dac.datasets ?? []).filter(dataset => dataset.dacApproval).length
   return {
     isComponent: true,
     id: dac.dacId,
@@ -136,9 +136,11 @@ export function actionsCellData({ dac, deleteDac, userRole }: ActionsCellDataPar
   }
 }
 
-export default {
+const manageDacTableCellData = {
   nameCellData,
   descriptionCellData,
   datasetsCellData,
   actionsCellData,
 }
+
+export default manageDacTableCellData

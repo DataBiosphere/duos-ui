@@ -64,7 +64,7 @@ const ResearchPurposeRow = (props: Readonly<ResearchPurposeRowProps>) => {
 export interface ResearchPurposeStatementProps {
   darCode?: string | null
   formFieldChange: (change: FieldChange) => void
-  formData: Partial<CombinedDataAccessRequest>
+  formData: Omit<Partial<CombinedDataAccessRequest>, 'ontologies'>
   validation: RusErrors
   readOnlyMode?: boolean
   formValidationChange: (change: ValidationChange) => void
@@ -96,8 +96,6 @@ export default function ResearchPurposeStatement(props: Readonly<ResearchPurpose
       <fieldset disabled={!isEmpty(darCode)}>
 
         <div className="form-group">
-          <h3 style={{ marginTop: 0 }}>In order to ensure appropriate review, please answer the questions below:</h3>
-
           <h4>I am proposing to:</h4>
 
           <ResearchPurposeRow

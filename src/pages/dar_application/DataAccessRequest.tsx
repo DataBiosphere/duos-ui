@@ -2,6 +2,7 @@ import React from 'react'
 import { DAR } from 'src/libs/ajax/DAR'
 import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants'
+import { fileTypeValidator } from 'src/components/forms/formValidation'
 import {
   needsIrbApprovalDocument,
   needsCollaborationLetter,
@@ -18,7 +19,7 @@ import { Dayjs } from 'dayjs'
 
 const titleStyle: React.CSSProperties = { fontSize: '24px', fontWeight: 500, color: '#333333' }
 
-interface OntologyOption {
+export interface OntologyOption {
   id?: string
   key?: string
   value?: string
@@ -80,7 +81,7 @@ interface ValidationChange {
 export interface DataAccessRequestProps {
   formFieldChange: (change: FieldChange) => void
   batchFormFieldChange: (updates: Record<string, unknown>) => void
-  formData: Omit<Partial<CombinedDataAccessRequest>, 'ontologies'> & { ontologies: OntologyOption[] }
+  formData: Omit<Partial<CombinedDataAccessRequest>, 'ontologies'> & { ontologies?: OntologyOption[] }
   datasets: Dataset[]
   dataUseTranslations: (TranslationEntry | undefined)[][] | DataUse[]
   uploadedIrbDocument?: File | null
@@ -248,7 +249,7 @@ export default function DataAccessRequest(props: Readonly<DataAccessRequestProps
                 loadOptions={autocompleteOntologies}
                 validators={[FormValidators.REQUIRED]}
                 placeholder="Please enter one or more diseases"
-                defaultValue={formData.ontologies.map(formatOntologyForSelect)}
+                defaultValue={(formData.ontologies ?? []).map(formatOntologyForSelect)}
                 validation={validation.ontologies}
                 onValidationChange={onValidationChange}
                 onChange={({ key, value }: { key: string, value: OntologyOption[] }) => onChange({ key, value: value.map(formatOntologyForFormData) })}
@@ -405,14 +406,20 @@ export default function DataAccessRequest(props: Readonly<DataAccessRequestProps
             <FormField
               type={FormFieldTypes.FILE}
               readOnly={readOnlyMode}
+              accept=".pdf,.doc,.docx"
               defaultValue={uploadedCollaborationLetter || {
                 name: formData.collaborationLetterName,
               }}
               id="collaborationLetter"
               validation={validation.collaborationLetter}
+              validators={[fileTypeValidator(['.pdf', '.doc', '.docx'])]}
               onValidationChange={onValidationChange}
               description="One or more of the datasets you selected requires collaboration (COL) with the primary study investigators(s) for use. Please upload documentation of your collaboration here."
-              onChange={({ value }: { value: File | undefined }) => updateCollaborationLetter(value)}
+              onChange={({ value, isValid }: { value: File | undefined, isValid: boolean }) => {
+                if (isValid) {
+                  updateCollaborationLetter(value)
+                }
+              }}
             />
           )}
 

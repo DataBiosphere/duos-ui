@@ -11,7 +11,7 @@ const defaultSignal: AbortSignal = AbortSignal.timeout(30000)
 export const Metrics = {
   captureEvent: (
     event: MetricsEventName,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     details: Record<string, any> = {},
     signal: AbortSignal = defaultSignal,
   ) => captureEventFn(event, signal, details).catch(() => {
@@ -28,7 +28,7 @@ export const Metrics = {
  * @param {Object} [details={}] - The event details.
  * @returns {Promise} - A Promise that resolves when the event is captured.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line @typescript-eslint/no-explicit-any
 const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, details: object = {}): Promise<any> => {
   const isSignedIn = Storage.userIsLogged()
   const isRegistered = isSignedIn && Storage.getCurrentUser()
@@ -61,7 +61,7 @@ const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, deta
  * @param {AbortSignal} [signal] - The abort signal.
  * @returns {Promise} - A Promise that resolves when the profile is synced.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line @typescript-eslint/no-explicit-any
 const syncProfile = async (signal: AbortSignal): Promise<any> => {
   const url = `${await Config.getBardApiUrl()}/api/syncProfile`
   const headers = { Authorization: `Bearer ${Token.getToken()}` }
@@ -75,7 +75,7 @@ const syncProfile = async (signal: AbortSignal): Promise<any> => {
  * @param {AbortSignal} [signal] - The abort signal.
  * @returns {Promise} - A Promise that resolves when the user is identified.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line @typescript-eslint/no-explicit-any
 const identify = async (anonId: string, signal: AbortSignal): Promise<any> => {
   const body = { anonId }
 

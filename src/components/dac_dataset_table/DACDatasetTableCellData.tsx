@@ -143,7 +143,7 @@ export function statusCellData({ dataset, label = 'statusCellData' }: CellDataPa
   }
 }
 
-export default {
+const dacDatasetTableCellData = {
   duosIdCellData,
   duosPhsIdCellData,
   datasetNameCellData,
@@ -154,3 +154,5 @@ export default {
   statusCellData,
   nihCertificationLinkData,
 }
+
+export default dacDatasetTableCellData

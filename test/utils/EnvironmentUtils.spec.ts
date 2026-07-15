@@ -10,18 +10,17 @@ describe('EnvironmentUtils', () => {
   it('exposes expected environment groups', () => {
     expect(envGroups.PROD_STAGING).toEqual(['prod', 'staging'])
     expect(envGroups.NON_PROD).toEqual(['local', 'dev', 'staging'])
-    expect(envGroups.NON_STAGING).toEqual(['local', 'dev'])
     expect(envGroups.DEV).toEqual(['local', 'dev'])
   })
 
   it('checkEnv returns true when current env is in the group', () => {
     vi.spyOn(Storage, 'getEnv').mockReturnValue('dev')
-    expect(checkEnv(envGroups.NON_STAGING)).toBe(true)
+    expect(checkEnv(envGroups.DEV)).toBe(true)
   })
 
   it('checkEnv returns false when current env is not in the group', () => {
     vi.spyOn(Storage, 'getEnv').mockReturnValue('prod')
-    expect(checkEnv(envGroups.NON_STAGING)).toBe(false)
+    expect(checkEnv(envGroups.DEV)).toBe(false)
   })
 
   it('checkEnv returns false when current env is null', () => {

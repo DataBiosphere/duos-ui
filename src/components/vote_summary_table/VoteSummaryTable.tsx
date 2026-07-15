@@ -193,7 +193,7 @@ export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false 
         })
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // oxlint-disable-next-line react-hooks/set-state-in-effect
     setVisibleVotes(
       // sortVisibleTable requires TableCell — cast here (sorting API constraint, not rendering)
       sortVisibleTable({

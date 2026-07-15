@@ -4,7 +4,7 @@ import TabControl from 'src/components/TabControl'
 import { type TabStyleOverride } from 'src/components/SelectableText'
 import ReviewHeader from './ReviewHeader'
 import ApplicationInformation from './ApplicationInformation'
-import { compact, filter, get, isEmpty, map, toLower, uniq } from 'src/utils/NodashUtil'
+import { compact, get, isEmpty, map, toLower, uniq } from 'src/utils/NodashUtil'
 import { updateFinalVote } from 'src/utils/DarCollectionUtils'
 import { binCollectionToBuckets, Bucket } from 'src/utils/BucketUtils'
 import { Navigation, Notifications } from 'src/libs/utils'
@@ -69,8 +69,7 @@ const tabsForUser = (user: DuosUser, buckets: Bucket[], adminPage = false): Reco
       votingHistory: 'Voting History',
     }
   }
-  const dataAccessBuckets = filter(buckets, bucket => get(bucket, 'isRP') !== true) as Bucket[]
-  const allVoteRecords = dataAccessBuckets.flatMap(b => b.votes)
+  const allVoteRecords = buckets.flatMap(b => b.votes)
   const myMemberVotes = allVoteRecords
     .map(vr => vr['dataAccess'])
     .flatMap(vg => vg.memberVotes)
@@ -224,16 +223,16 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
     }
   }, [adminPage, navigate, collectionId])
 
-  // Remember, votes are contained within buckets, so updating final votes will update the bucket
-  // define updateFinalVote as a callback function so that its function definition can be updated alongside dataUseBucket
+  // Votes are grouped into buckets (by DataUse), so applying a final vote will update all votes in the  bucket.
+  // Define updateFinalVote as a callback function so that its function definition can be updated alongside dataUseBucket
   const updateFinalVoteFn = useCallback((key: string, votePayload: Record<string, unknown>, voteIds: number[]) => {
-    return updateFinalVote({ key, votePayload, voteIds, dataUseBuckets: dataUseBuckets as never, setDataUseBuckets: setDataUseBuckets as never })
+    return updateFinalVote({ key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets })
   }, [dataUseBuckets])
 
   useEffect(() => {
     try {
       // Intentionally setting loading state at effect start.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // oxlint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(true)
       setSubcomponentLoading(true)
       init()
@@ -248,7 +247,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
     try {
       if (toLower(selectedTab) === 'chair vote') {
         // Intentionally setting loading state when switching tabs.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+        // oxlint-disable-next-line react-hooks/set-state-in-effect
         setSubcomponentLoading(true)
         init()
       }
@@ -325,10 +324,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
             existingDarsReadOnlyMode={true}
             draftDar={false}
             isProgressReportApplication={false}
-            researcherProfile={researcherProfile}
             collection={collection}
-            adminPage={adminPage}
-            readOnly={readOnly}
           />
         )}
         {!adminPage && selectedTab === tabs.memberVote && (

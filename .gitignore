@@ -19,12 +19,16 @@ models.json
 
 # testing
 /coverage
+/test-results
+/playwright-report
+/test/e2e/fixtures/duos-automation*.json
 
 # production
 /build
 
 # misc
 .DS_Store
+.env
 .env.local
 .env.development.local
 .env.test.local
@@ -35,18 +39,15 @@ yarn-debug.log*
 yarn-error.log*
 
 public/config.json
-/cypress/downloads/
-/cypress/videos/
-/cypress/fixtures/duos-automation*.json
-/cypress/screenshots
-cypress.env.json
-
 
 # Server
 ca-bundle.crt
 server.crt
 server.key
 site.conf
+
+# Local consent DB dump loaded by the docker-compose `db` service
+config/consentdb.sql
 
 ## GHA Credentials
 gha-creds-*.json
