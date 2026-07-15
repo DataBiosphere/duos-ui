@@ -15,6 +15,7 @@ import { isValid, validateFormValue, validationMessage } from 'src/components/fo
 export interface Validation {
   valid?: boolean
   failed?: string[]
+  messages?: string[]
 }
 
 export interface Validator {
@@ -179,7 +180,7 @@ const errorMessages = (validation: Validation | undefined): React.ReactNode => {
     <div className="error-message fadein">
       <span className="glyphicon glyphicon-play" />
       {validation?.failed?.map((err, idx) => (
-        <div key={'error_message_' + idx}>{validationMessage(err)}</div>
+        <div key={'error_message_' + idx}>{validation?.messages?.[idx] ?? validationMessage(err)}</div>
       ))}
     </div>
   )

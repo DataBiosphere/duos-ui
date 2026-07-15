@@ -40,6 +40,7 @@ type AnyComponent = React.ComponentType<any>
 export interface Validation {
   valid?: boolean
   failed?: string[]
+  messages?: string[]
 }
 
 export interface Validator {
@@ -230,6 +231,7 @@ export const FormFieldTypes: Record<string, FormFieldTypeConfig> = {
       'hideTextBar',
       'hideInput',
       'readOnly',
+      'accept',
     ],
   },
   CHECKBOX: {

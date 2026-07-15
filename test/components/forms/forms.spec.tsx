@@ -152,16 +152,16 @@ describe('FormField - Tests', () => {
       fireEvent.change(input, { target: { value: 'a' } })
       expect(onValidationChange).toHaveBeenCalledWith({
         key: 'dataCustodianEmail',
-        validation: { valid: false, failed: ['email'] },
+        validation: { valid: false, failed: ['email'], messages: [FormValidators.EMAIL.msg] },
       })
 
       fireEvent.change(input, { target: { value: 'a@gmail.com' } })
-      expect(onValidationChange).toHaveBeenCalledWith({ key: 'dataCustodianEmail', validation: { valid: true, failed: [] } })
+      expect(onValidationChange).toHaveBeenCalledWith({ key: 'dataCustodianEmail', validation: { valid: true, failed: [], messages: [] } })
 
       fireEvent.change(input, { target: { value: '' } })
       expect(onValidationChange).toHaveBeenCalledWith({
         key: 'dataCustodianEmail',
-        validation: { valid: false, failed: ['email', 'required'] },
+        validation: { valid: false, failed: ['email', 'required'], messages: [FormValidators.EMAIL.msg, FormValidators.REQUIRED.msg] },
       })
     })
 
