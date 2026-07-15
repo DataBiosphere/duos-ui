@@ -282,7 +282,7 @@ export function consoleActionsCellData({ collection, goToVote, showConfirmationM
   }
 }
 
-export default {
+const darCollectionTableCellData = {
   projectTitleCellData,
   DacCellData,
   darCodeCellData,
@@ -294,3 +294,6 @@ export default {
   statusCellData,
   consoleActionsCellData,
 }
+
+// oxlint-disable-next-line react-refresh/only-export-components
+export default darCollectionTableCellData

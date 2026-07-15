@@ -136,9 +136,11 @@ export function actionsCellData({ dac, deleteDac, userRole }: ActionsCellDataPar
   }
 }
 
-export default {
+const manageDacTableCellData = {
   nameCellData,
   descriptionCellData,
   datasetsCellData,
   actionsCellData,
 }
+
+export default manageDacTableCellData
