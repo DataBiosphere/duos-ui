@@ -26,7 +26,6 @@ import {
   dayJSValidator,
   emailDomainValidator,
   emailValidator,
-  fileTypeValidator,
   isValid,
   NotUrlValidator,
   requiredValidator,
@@ -41,6 +40,7 @@ type AnyComponent = React.ComponentType<any>
 export interface Validation {
   valid?: boolean
   failed?: string[]
+  messages?: string[]
 }
 
 export interface Validator {
@@ -306,7 +306,6 @@ export const FormValidators: Record<string, Validator> = {
   EMAILDOMAIN: emailDomainValidator as Validator,
   DATE: dateValidator,
   DATEJS: dayJSValidator,
-  FILE_TYPE: fileTypeValidator,
 }
 
 // ----------------------------------------------------------------------------------------------------- //

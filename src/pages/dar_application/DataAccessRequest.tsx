@@ -2,6 +2,7 @@ import React from 'react'
 import { DAR } from 'src/libs/ajax/DAR'
 import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { FORM_TEXT_AREA_MAX_LENGTH } from 'src/components/forms/formConstants'
+import { fileTypeValidator } from 'src/components/forms/formValidation'
 import {
   needsIrbApprovalDocument,
   needsCollaborationLetter,
@@ -411,7 +412,7 @@ export default function DataAccessRequest(props: Readonly<DataAccessRequestProps
               }}
               id="collaborationLetter"
               validation={validation.collaborationLetter}
-              validators={[FormValidators.FILE_TYPE]}
+              validators={[fileTypeValidator(['.pdf', '.doc', '.docx'])]}
               onValidationChange={onValidationChange}
               description="One or more of the datasets you selected requires collaboration (COL) with the primary study investigators(s) for use. Please upload documentation of your collaboration here."
               onChange={({ value, isValid }: { value: File | undefined, isValid: boolean }) => {

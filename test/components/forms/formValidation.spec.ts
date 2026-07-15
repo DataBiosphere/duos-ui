@@ -176,27 +176,46 @@ describe('Form Validator tests', () => {
   describe('fileTypeValidator', () => {
     it('rejects a file with a disallowed extension', () => {
       const file = new File(['content'], 'photo.png', { type: 'image/png' })
-      expect(fileTypeValidator.isValid(file)).toBe(false)
+      expect(fileTypeValidator().isValid(file)).toBe(false)
     })
 
     it('accepts a .pdf file', () => {
       const file = new File(['content'], 'letter.pdf', { type: 'application/pdf' })
-      expect(fileTypeValidator.isValid(file)).toBe(true)
+      expect(fileTypeValidator().isValid(file)).toBe(true)
     })
 
     it('accepts a .doc or .docx file', () => {
-      expect(fileTypeValidator.isValid(new File(['content'], 'letter.doc'))).toBe(true)
-      expect(fileTypeValidator.isValid(new File(['content'], 'letter.docx'))).toBe(true)
+      expect(fileTypeValidator().isValid(new File(['content'], 'letter.doc'))).toBe(true)
+      expect(fileTypeValidator().isValid(new File(['content'], 'letter.docx'))).toBe(true)
     })
 
     it('is case-insensitive about the extension', () => {
       const file = new File(['content'], 'letter.PDF')
-      expect(fileTypeValidator.isValid(file)).toBe(true)
+      expect(fileTypeValidator().isValid(file)).toBe(true)
     })
 
     it('ignores non-File values', () => {
-      expect(fileTypeValidator.isValid('not-a-file')).toBe(true)
-      expect(fileTypeValidator.isValid(undefined)).toBe(true)
+      expect(fileTypeValidator().isValid('not-a-file')).toBe(true)
+      expect(fileTypeValidator().isValid(undefined)).toBe(true)
+    })
+
+    it('defaults to the document msg listing pdf/doc/docx', () => {
+      expect(fileTypeValidator().msg).toBe(
+        'Invalid file type. Please upload an accepted document format (.pdf, .doc, .docx).',
+      )
+    })
+
+    it('accepts a custom extension list per form', () => {
+      const validator = fileTypeValidator(['.png', '.jpg'])
+      expect(validator.isValid(new File(['content'], 'photo.png'))).toBe(true)
+      expect(validator.isValid(new File(['content'], 'letter.pdf'))).toBe(false)
+    })
+
+    it('reflects the custom extension list in its msg', () => {
+      const validator = fileTypeValidator(['.png', '.jpg'])
+      expect(validator.msg).toBe(
+        'Invalid file type. Please upload an accepted document format (.png, .jpg).',
+      )
     })
   })
 
@@ -249,20 +268,35 @@ describe('Form Validator tests', () => {
 
     it('runs a non-required validator against a File value instead of treating it as empty', () => {
       const file = new File(['content'], 'photo.png', { type: 'image/png' })
-      const result = validateFormValue(file, [fileTypeValidator])
+      const result = validateFormValue(file, [fileTypeValidator()])
       expect(result.valid).toBe(false)
       expect(result.failed).toContain('fileType')
     })
 
     it('returns valid:true for a File that passes the fileType validator', () => {
       const file = new File(['content'], 'letter.pdf', { type: 'application/pdf' })
-      const result = validateFormValue(file, [fileTypeValidator])
+      const result = validateFormValue(file, [fileTypeValidator()])
       expect(result.valid).toBe(true)
     })
 
     it('returns valid:true when no file is selected and the field is not required', () => {
-      const result = validateFormValue(undefined, [fileTypeValidator])
+      const result = validateFormValue(undefined, [fileTypeValidator()])
       expect(result.valid).toBe(true)
+    })
+
+    it('reports the failing message for each failed validator, in order', () => {
+      const result = validateFormValue('', [requiredValidator, urlValidator])
+      expect(result.failed).toEqual(['required', 'uri'])
+      expect(result.messages).toEqual([requiredValidator.msg, urlValidator.msg])
+    })
+
+    it('surfaces a per-form custom fileType message rather than the default one', () => {
+      const file = new File(['content'], 'letter.pdf', { type: 'application/pdf' })
+      const customValidator = fileTypeValidator(['.png', '.jpg'])
+      const result = validateFormValue(file, [customValidator])
+      expect(result.valid).toBe(false)
+      expect(result.messages).toEqual([customValidator.msg])
+      expect(result.messages).not.toEqual([fileTypeValidator().msg])
     })
   })
 

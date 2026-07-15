@@ -9,6 +9,7 @@ import { InstitutionInterface } from 'src/types/model'
 export interface Validation {
   valid?: boolean
   failed?: string[]
+  messages?: string[]
 }
 
 export interface Validator {
@@ -97,11 +98,11 @@ const fileExtension = (file: File): string => {
   return dotIndex === -1 ? '' : file.name.slice(dotIndex).toLowerCase()
 }
 
-export const fileTypeValidator: Validator = {
+export const fileTypeValidator = (acceptedExtensions: string[] = ACCEPTED_DOCUMENT_EXTENSIONS): Validator => ({
   id: 'fileType',
-  isValid: (val: unknown): boolean => !(val instanceof File) || ACCEPTED_DOCUMENT_EXTENSIONS.includes(fileExtension(val)),
-  msg: `Invalid file type. Please upload an accepted document format (${ACCEPTED_DOCUMENT_EXTENSIONS.join(', ')}).`,
-}
+  isValid: (val: unknown): boolean => !(val instanceof File) || acceptedExtensions.includes(fileExtension(val)),
+  msg: `Invalid file type. Please upload an accepted document format (${acceptedExtensions.join(', ')}).`,
+})
 
 const allValidators: Validator[] = [
   requiredValidator,
@@ -113,7 +114,7 @@ const allValidators: Validator[] = [
   dayJSValidator,
   uniqueValidator,
   greaterThanZeroValidator,
-  fileTypeValidator,
+  fileTypeValidator(),
 ]
 
 export const validateFormValue = (formValue: unknown, validators: Validator[] | undefined): Validation => {
@@ -125,6 +126,7 @@ export const validateFormValue = (formValue: unknown, validators: Validator[] | 
   }
 
   const failedValidators: string[] = []
+  const failedMessages: string[] = []
 
   validators?.forEach((validator) => {
     let failed: boolean
@@ -137,12 +139,14 @@ export const validateFormValue = (formValue: unknown, validators: Validator[] | 
 
     if (failed) {
       failedValidators.push(validator.id)
+      failedMessages.push(validator.msg)
     }
   })
 
   return {
     valid: failedValidators.length === 0,
     failed: failedValidators,
+    messages: failedMessages,
   }
 }
 
