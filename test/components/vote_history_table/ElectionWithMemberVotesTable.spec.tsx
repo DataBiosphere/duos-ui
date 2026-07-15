@@ -185,6 +185,21 @@ describe('ElectionWithMemberVotesTable', () => {
     expect(row2[5]).toHaveTextContent(/1 Yes/)
   })
 
+  it('re-derives the row order when the sort changes', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
+
+    // Default order is by election date descending: DUOS-00404, DUOS-00202, DUOS-00303.
+    // Clicking the "Dataset ID" header re-sorts ascending by identifier.
+    const datasetSortButton = container.querySelectorAll('.cell-sort')[1]
+    expect(datasetSortButton).toHaveTextContent('Dataset ID')
+    await user.click(datasetSortButton)
+
+    expect(container.querySelectorAll('.row-data-0 [role="cell"]')[1]).toHaveTextContent('DUOS-00202')
+    expect(container.querySelectorAll('.row-data-1 [role="cell"]')[1]).toHaveTextContent('DUOS-00303')
+    expect(container.querySelectorAll('.row-data-2 [role="cell"]')[1]).toHaveTextContent('DUOS-00404')
+  })
+
   it('expands and collapses election rows', async () => {
     const user = userEvent.setup()
     const { container } = render(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
