@@ -239,8 +239,14 @@ describe('DataAccessRequestApplication', () => {
       resolveSave({ referenceId: 'ref-123' })
     })
 
+    // The Addendum tab is not shown until the user attests.
+    expect(screen.queryByRole('tab', { name: /Addendum/i })).not.toBeInTheDocument()
+
     // Click "Attest"
     await clickById('btn_attest')
+
+    // Attesting reveals the Addendum tab.
+    expect(screen.getByRole('tab', { name: /Addendum/i })).toBeInTheDocument()
 
     // Now on Addendum tab, click "Submit"
     await clickById('btn_openSubmitModal')
