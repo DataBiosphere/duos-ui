@@ -1,4 +1,13 @@
 {
+  // Separate from tsconfig.json because the two configs need different
+  // `include` scopes, and `include` can only be set in a config file (not
+  // overridden via the tsc CLI). tsconfig.json includes test/ so tsc --noEmit
+  // (and editors, which auto-discover tsconfig.json) typecheck it too — but
+  // building with rootDir: "src" while test/ is included fails with TS6059
+  // ("File is not under 'rootDir'"), even under noEmit. Dropping rootDir
+  // instead would infer it as the common ancestor of src/ and test/, changing
+  // dist/index.js to dist/src/index.js (breaking package.json's "main" and
+  // the Dockerfile/compose CMD) and compiling test files into the prod image.
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
