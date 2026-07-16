@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { PostgresDb } from '@fastify/postgres'
-import { createPgSessionStore } from '../src/session/pgStore'
+import { createPgSessionStore } from '../src/session/pgStore.js'
 
 // ---------------------------------------------------------------------------
 // A minimal fake `app.pg` whose `query` is a vitest mock. createPgSessionStore

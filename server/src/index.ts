@@ -9,6 +9,7 @@ import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import { createPgSessionStore } from './session/pgStore.js'
+import { getOidcConfig } from './auth/oidcClient.js'
 import { configPath, readConfig } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -128,6 +129,19 @@ export async function buildApp(): Promise<AppInstance> {
       // request just to bump `expire`. Phase 2 adds a throttled sliding expiry
       // instead — re-save only when the session is near expiry.
     })
+
+    // Warm the B2C OIDC discovery cache so the first login doesn't pay the
+    // discovery round-trip. Gated on the Azure env vars being present: DB/
+    // session infra (this block) can be enabled ahead of B2C being configured
+    // during the phased rollout, and warming up against unset vars would log
+    // an error on every single startup for no benefit. Not awaited and never
+    // fatal either way — on failure the error is logged and getOidcConfig()
+    // retries lazily on first use.
+    if (process.env.DUOS_AZURE_ISSUER_URL && process.env.DUOS_AZURE_CLIENT_ID && process.env.DUOS_AZURE_CLIENT_SECRET) {
+      getOidcConfig().catch((err: unknown) => {
+        fastify.log.error({ err }, '[auth] B2C OIDC discovery warm-up failed')
+      })
+    }
   }
   else {
     fastify.log.info('[server] DUOS_DB_HOST is not set — starting without DB/session infrastructure (legacy client-side auth)')
