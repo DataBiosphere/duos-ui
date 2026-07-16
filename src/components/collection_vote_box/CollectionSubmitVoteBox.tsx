@@ -125,12 +125,16 @@ const allMatch = (values: (boolean | string | null | undefined)[]) => {
   })
 }
 
+const matchedVote = (votes: Vote[]): boolean | undefined =>
+  !isEmpty(votes) && allMatch(votes.map(v => v.vote)) ? (votes[0].vote ?? undefined) : undefined
+
+const votesSubmitted = (votes: Vote[]): boolean =>
+  !isEmpty(votes) && allMatch(votes.map(v => v.vote))
+
+const matchedRationale = (votes: Vote[]): string =>
+  !isEmpty(votes) && allMatch(votes.map(v => v.rationale)) ? (votes[0].rationale ?? '') : ''
+
 const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) => {
-  const [vote, setVote] = useState<boolean | undefined>()
-  const [rationale, setRationale] = useState<string>('')
-  const [submitted, setSubmitted] = useState<boolean>(false)
-  const [isRadar, setIsRadar] = useState<boolean>(false)
-  const [voteInProgress, setVoteInProgress] = useState<boolean>(false)
   const {
     question,
     votes,
@@ -143,6 +147,27 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
     reloadFn = () => {},
   } = props
 
+  const [vote, setVote] = useState<boolean | undefined>(() => matchedVote(votes))
+  const [rationale, setRationale] = useState<string>(() => matchedRationale(votes))
+  const [submitted, setSubmitted] = useState<boolean>(() => votesSubmitted(votes))
+  const [voteInProgress, setVoteInProgress] = useState<boolean>(false)
+
+  const isRadar = !isEmpty(votes) && votes.some(v => v.type === VOTE_TYPES.RADAR_APPROVE)
+
+  const [prevVotes, setPrevVotes] = useState(votes)
+  if (votes !== prevVotes) {
+    setPrevVotes(votes)
+    if (!isEmpty(votes)) {
+      if (allMatch(votes.map(v => v.vote))) {
+        setVote(votes[0].vote ?? undefined)
+        setSubmitted(true)
+      }
+      if (allMatch(votes.map(v => v.rationale))) {
+        setRationale(votes[0].rationale ?? '')
+      }
+    }
+  }
+
   const isElectionClosed = useMemo(() => {
     return votes.filter(v => v.electionStatus?.toLowerCase() === 'open').length === 0
   }, [votes])
@@ -150,27 +175,6 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
   const isVotingDisabled = useMemo(() => {
     return props.isDisabled || (isFinal && submitted) || adminPage
   }, [props.isDisabled, isFinal, submitted, adminPage])
-
-  React.useEffect(() => {
-    if (!isEmpty(votes)) {
-      const prevVote = votes[0]
-
-      const voteValues = votes.map(vote => vote.vote)
-      if (allMatch(voteValues)) {
-        // oxlint-disable-next-line react/react-compiler
-        setVote(prevVote.vote ?? undefined)
-        setSubmitted(true)
-      }
-
-      const rationaleValues = votes.map(vote => vote.rationale)
-      if (allMatch(rationaleValues)) {
-        setRationale(prevVote.rationale ?? '')
-      }
-
-      const radar = votes.some(vote => vote.type === VOTE_TYPES.RADAR_APPROVE)
-      setIsRadar(radar)
-    }
-  }, [votes])
 
   const updateVote = async (newVote: boolean, isChair: boolean) => {
     setVoteInProgress(true)

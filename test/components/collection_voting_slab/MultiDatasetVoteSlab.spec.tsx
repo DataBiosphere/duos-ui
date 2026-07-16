@@ -546,4 +546,62 @@ describe('MultiDatasetVoteSlab', () => {
       expect(screen.queryByTestId('collection-algorithm-decision')).not.toBeInTheDocument()
     })
   })
+
+  it('re-derives algorithm decision visibility when the collection prop changes', () => {
+    mockUser(100)
+    const element = (collectionProp: DarCollection) => (
+      <MultiDatasetVoteSlab
+        title="GROUP 1"
+        bucket={{
+          key: 'group-1',
+          datasets: [],
+          elections: [openElection2],
+          votes: [votesForOpenElection2],
+          algorithmResult: { createDate: new Date(), id: 1, result: 'Yes', rationales: [] },
+        } as never}
+        collection={collectionProp}
+        dacDatasetIds={[]}
+        isApprovalDisabled={false}
+        isLoading={false}
+        readOnly={false}
+        adminPage={false}
+        updateFinalVote={vi.fn()}
+        reloadFn={vi.fn()}
+      />
+    )
+
+    const { rerender } = render(element(collectionWithoutDMI))
+    expect(screen.getByTestId('collection-algorithm-decision')).toBeInTheDocument()
+
+    // Latest DAR now has a DMI -> algorithm decision should hide.
+    rerender(element(collection))
+    expect(screen.queryByTestId('collection-algorithm-decision')).not.toBeInTheDocument()
+  })
+
+  it('re-derives the vote section when the bucket prop changes', async () => {
+    mockUser(400)
+    const element = (bucket: unknown) => (
+      <MultiDatasetVoteSlab
+        title="GROUP 1"
+        bucket={bucket as never}
+        collection={collection}
+        dacDatasetIds={[]}
+        isApprovalDisabled={false}
+        isLoading={false}
+        readOnly={false}
+        adminPage={false}
+        updateFinalVote={vi.fn()}
+        reloadFn={vi.fn()}
+      />
+    )
+
+    const { rerender } = render(element({
+      key: 'group-1', datasets: [], elections: [openElection2], votes: [votesForOpenElection2],
+    }))
+    await waitFor(() => expect(screen.getByTestId('no-collection-vote-button')).toBeInTheDocument())
+
+    // A bucket where this user has no votes -> the vote section should disappear.
+    rerender(element({ key: 'group-1', datasets: [], elections: [], votes: [] }))
+    expect(screen.queryByTestId('no-collection-vote-button')).not.toBeInTheDocument()
+  })
 })
