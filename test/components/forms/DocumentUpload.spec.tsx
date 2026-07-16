@@ -335,6 +335,47 @@ describe('DocumentUpload', () => {
     })
   })
 
+  it('adjusts the selected type when the categories prop changes', async () => {
+    const api = {
+      uploadDocument: vi.fn().mockResolvedValue({} as never),
+      deleteDocument: vi.fn().mockResolvedValue({} as never),
+      listDocuments: vi.fn().mockResolvedValue([]),
+    }
+    const element = (categories: FileCategory[]) => (
+      <DocumentUpload entity={EntityType.DAR} entityId="dar-cat" categories={categories} api={api} />
+    )
+    const selectedType = () => document.querySelector('[data-cy="document-upload-selected-type"]')
+
+    const { rerender } = render(element([FileCategory.DATA_USE_LETTER, FileCategory.DATA_ACCESS_AGREEMENT]))
+    await userEvent.click(document.querySelector(`[data-cy="document-upload-type-${FileCategory.DATA_USE_LETTER}"]`)!)
+    expect(selectedType()).toHaveTextContent('Data Use Letter')
+
+    // Still allowed after the change -> selection is kept.
+    rerender(element([FileCategory.DATA_USE_LETTER, FileCategory.IRB_COLLABORATION_LETTER]))
+    expect(selectedType()).toHaveTextContent('Data Use Letter')
+
+    // No longer allowed -> selection is reset.
+    rerender(element([FileCategory.DATA_ACCESS_AGREEMENT, FileCategory.IRB_COLLABORATION_LETTER]))
+    expect(selectedType()).toBeNull()
+  })
+
+  it('auto-selects the type when the categories prop narrows to one option', async () => {
+    const api = {
+      uploadDocument: vi.fn().mockResolvedValue({} as never),
+      deleteDocument: vi.fn().mockResolvedValue({} as never),
+      listDocuments: vi.fn().mockResolvedValue([]),
+    }
+    const element = (categories: FileCategory[]) => (
+      <DocumentUpload entity={EntityType.DAR} entityId="dar-narrow" categories={categories} api={api} />
+    )
+
+    const { rerender } = render(element([FileCategory.DATA_USE_LETTER, FileCategory.DATA_ACCESS_AGREEMENT]))
+    expect(document.querySelector('[data-cy="document-upload-selected-type"]')).toBeNull()
+
+    rerender(element([FileCategory.DATA_ACCESS_AGREEMENT]))
+    expect(document.querySelector('[data-cy="document-upload-selected-type"]')).toHaveTextContent('Data Access Agreement')
+  })
+
   it('shows deleted documents when configured and keeps delete disabled', async () => {
     const api = {
       uploadDocument: vi.fn().mockResolvedValue({} as never),

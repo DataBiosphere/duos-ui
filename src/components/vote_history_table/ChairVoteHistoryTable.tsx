@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import SimpleTable from '../SimpleTable'
 import { VoteHistoryRow } from 'src/types/model'
 import { Styles } from 'src/libs/theme'
@@ -46,8 +46,33 @@ const styles = {
   },
 }
 
+const getVoteText = (vote: boolean | null | undefined) => {
+  if (vote === true) return 'Yes'
+  if (vote === false) return 'No'
+  return '--'
+}
+
+const processVoteHistoryRowData = (voteHistory: VoteHistoryRow[]) => {
+  if (!voteHistory) return []
+
+  return voteHistory.map((row: VoteHistoryRow, i) => [
+    {
+      data: row.progressReport ? 'Progress Report' : 'Initial DAR',
+      cellStyle: { width: '15%' },
+      label: 'Request Type',
+      id: i,
+    },
+    { data: row.datasetIdentifier, cellStyle: { width: '20%' }, label: 'Dataset ID', id: i },
+    { data: formatDate(row.electionDate), cellStyle: { width: '15%' }, label: 'Election Date', id: i },
+    { data: getVoteText(row.vote), cellStyle: { width: '10%' }, label: 'Vote', id: i },
+    { data: row.displayName, cellStyle: { width: '15%' }, label: 'Name', id: i },
+    { data: formatDate(row.updateDate), cellStyle: { width: '10%' }, label: 'Vote Date', id: i },
+    { data: row.type, cellStyle: { width: '15%' }, label: 'Vote Type', id: i },
+    { data: row.rationale || '--', cellStyle: { width: '15%' }, label: 'Rationale', id: i },
+  ])
+}
+
 const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHistory }) => {
-  const [sortedVotes, setSortedVotes] = useState<RowData[][]>([])
   const [sort, setSort] = useState({ colIndex: 5, dir: -1 }) // Default sort by voteDate descending
 
   const columnHeaderFormat = {
@@ -66,40 +91,13 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
     return [requestType, datasetIdentifier, electionDate, vote, name, voteDate, voteType, rationale]
   }
 
-  const getVoteText = (vote: boolean | null | undefined) => {
-    if (vote === true) return 'Yes'
-    if (vote === false) return 'No'
-    return '--'
-  }
-
-  const processVoteHistoryRowData = useCallback((voteHistory: VoteHistoryRow[]) => {
-    if (!voteHistory) return []
-
-    return voteHistory.map((row: VoteHistoryRow, i) => [
-      {
-        data: row.progressReport ? 'Progress Report' : 'Initial DAR',
-        cellStyle: { width: '15%' },
-        label: 'Request Type',
-        id: i,
-      },
-      { data: row.datasetIdentifier, cellStyle: { width: '20%' }, label: 'Dataset ID', id: i },
-      { data: formatDate(row.electionDate), cellStyle: { width: '15%' }, label: 'Election Date', id: i },
-      // oxlint-disable-next-line react/react-compiler
-      { data: getVoteText(row.vote), cellStyle: { width: '10%' }, label: 'Vote', id: i },
-      { data: row.displayName, cellStyle: { width: '15%' }, label: 'Name', id: i },
-      { data: formatDate(row.updateDate), cellStyle: { width: '10%' }, label: 'Vote Date', id: i },
-      { data: row.type, cellStyle: { width: '15%' }, label: 'Vote Type', id: i },
-      { data: row.rationale || '--', cellStyle: { width: '15%' }, label: 'Rationale', id: i },
-    ])
-  }, [])
-
-  React.useEffect(() => {
-    // oxlint-disable-next-line react/react-compiler
-    setSortedVotes(sortVisibleTable({
+  const sortedVotes = useMemo(
+    () => sortVisibleTable({
       list: processVoteHistoryRowData(voteHistory),
       sort,
-    }) as RowData[][])
-  }, [sort, voteHistory, processVoteHistoryRowData])
+    }) as RowData[][],
+    [sort, voteHistory],
+  )
 
   return (
     <SimpleTable

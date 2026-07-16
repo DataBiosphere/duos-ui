@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import SimpleTable, { type CellData } from '../SimpleTable'
 import { Styles } from 'src/libs/theme'
 import { isEmpty, isNil } from 'src/utils/NodashUtil'
@@ -160,8 +160,6 @@ function rationaleCellData({ rationale = '- -', voteId, label = 'rationale' }: {
 
 export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false }: Readonly<VoteSummaryTableProps>) {
   const [sort, setSort] = useState<SortConfig>({ colIndex: 0, dir: -1 })
-  const [visibleVotes, setVisibleVotes] = useState<CellData[][]>([])
-  const [tableSize, setTableSize] = useState(5)
 
   const [reminderSentState, setReminderSentState] = useState<Record<number, ReminderState>>({})
 
@@ -169,16 +167,16 @@ export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false 
     return reminderSentState[voteId]
   }, [reminderSentState])
 
-  const updateReminderState = (voteId: number, sentState: ReminderState) => {
+  const updateReminderState = useCallback((voteId: number, sentState: ReminderState) => {
     setReminderSentState((state) => {
       return {
         ...state,
         [voteId]: sentState,
       }
     })
-  }
+  }, [])
 
-  React.useEffect(() => {
+  const visibleVotes = useMemo<CellData[][]>(() => {
     const sendReminder = (voteId: number) => {
       updateReminderState(voteId, ReminderStates.SENDING)
 
@@ -193,18 +191,14 @@ export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false 
         })
     }
 
-    // oxlint-disable-next-line react/react-compiler
-    setVisibleVotes(
-      // sortVisibleTable requires TableCell — cast here (sorting API constraint, not rendering)
-      sortVisibleTable({
-        list: processVoteSummaryRowData({ dacVotes, isChair, getReminderSentState, sendReminder }) as unknown as TableCell[][],
-        sort,
-      }) as unknown as CellData[][],
-    )
-    if (!isEmpty(dacVotes)) {
-      setTableSize(dacVotes!.length)
-    }
-  }, [sort, dacVotes, isChair, getReminderSentState])
+    // sortVisibleTable requires TableCell — cast here (sorting API constraint, not rendering)
+    return sortVisibleTable({
+      list: processVoteSummaryRowData({ dacVotes, isChair, getReminderSentState, sendReminder }) as unknown as TableCell[][],
+      sort,
+    }) as unknown as CellData[][]
+  }, [sort, dacVotes, isChair, getReminderSentState, updateReminderState])
+
+  const tableSize = !isEmpty(dacVotes) ? dacVotes!.length : 5
 
   return (
     <SimpleTable
