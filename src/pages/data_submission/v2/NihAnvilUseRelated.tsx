@@ -44,6 +44,33 @@ export interface NihAnvilUseVisibleOptions {
   name: string
 }
 
+const cleanDownstreamProperties = (newVal: Study) => {
+  removeStudyPropertiesByKeys(newVal,
+    new Set(
+      [
+        PiInstitution.key,
+        NihGrantContractNumber.key,
+        NihICsSupportingStudy.key,
+        NihProgramOfficerName.key,
+        NihInstitutionCenterSubmission.key,
+        NihGenomicProgramAdministratorName.key,
+        MultiCenterStudy.key,
+        CollaboratingSites.key,
+        ControlledAccessRequiredForGenomicSummaryResultsGSR.key,
+        ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key,
+        AlternativeDataSharingPlan.key,
+        AlternativeDataSharingPlanReasons.key,
+        AlternativeDataSharingPlanExplanation.key,
+        AlternativeDataSharingPlanDataSubmitted.key,
+        AlternativeDataSharingPlanDataReleased.key,
+        DbGaPPhsID.key,
+        DbGaPStudyRegistrationName.key,
+        EmbargoReleaseDate.key,
+        SequencingCenter.key,
+      ]))
+  unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
+}
+
 export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
   const { setStudy, study } = props
   const [preSelectorValue, setPreSelectorValue] = React.useState<string | undefined>(() => {
@@ -58,39 +85,11 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
     getStudyPropertyValueByKey(study, 'nihAnvilUse'),
   )
 
-  const cleanDownstreamProperties = (newVal: Study) => {
-    removeStudyPropertiesByKeys(newVal,
-      new Set(
-        [
-          PiInstitution.key,
-          NihGrantContractNumber.key,
-          NihICsSupportingStudy.key,
-          NihProgramOfficerName.key,
-          NihInstitutionCenterSubmission.key,
-          NihGenomicProgramAdministratorName.key,
-          MultiCenterStudy.key,
-          CollaboratingSites.key,
-          ControlledAccessRequiredForGenomicSummaryResultsGSR.key,
-          ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key,
-          AlternativeDataSharingPlan.key,
-          AlternativeDataSharingPlanReasons.key,
-          AlternativeDataSharingPlanExplanation.key,
-          AlternativeDataSharingPlanDataSubmitted.key,
-          AlternativeDataSharingPlanDataReleased.key,
-          DbGaPPhsID.key,
-          DbGaPStudyRegistrationName.key,
-          EmbargoReleaseDate.key,
-          SequencingCenter.key,
-        ]))
-    unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
-  }
-
   const handlePreSelectorChange = React.useCallback(
     (input: string) => {
       if (input === NihAnvilUsePreSelectOptions.NO) {
         const translatedNoOption = { key: NihAnvilUse.key, value: NihAnvilUse.NO_NHGRI_NO_ANVIL, isValid: true }
         const newVal = structuredClone(study)
-        // oxlint-disable-next-line react/react-compiler
         cleanDownstreamProperties(newVal)
         setStudyPropertyByKey(newVal, setStudy, translatedNoOption, new NihAnvilUse(translatedNoOption.value))
       }
