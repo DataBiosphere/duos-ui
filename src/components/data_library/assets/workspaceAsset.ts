@@ -1,8 +1,36 @@
 import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, WorkspaceStudyAggregationResponse, QueryClause } from 'src/types/elastic'
-import { WorkspaceAsset, PaginationState, SortState } from 'src/types/library'
+import { FilterState, WorkspaceAsset, PaginationState, SortState } from 'src/types/library'
 import { makeWorkspaceColumns } from 'src/components/data_library/columns/workspaceColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+
+const includesIgnoreCase = (source: string | undefined, values: string[]) => {
+  if (values.length === 0) {
+    return true
+  }
+
+  const normalizedSource = source?.toLowerCase() || ''
+  return values.some(value => normalizedSource.includes(value.toLowerCase()))
+}
+
+// The Elasticsearch clauses for these filters only decide which *studies* enter
+// the shared aggregation; every workspace of a qualifying study comes back, so
+// each row must be re-checked here or the grid (and the tab-count badge derived
+// from this same function) includes workspaces that don't match the filter.
+const matchesWorkspaceFilters = (workspace: WorkspaceAsset, filters?: FilterState) => {
+  if (!filters) {
+    return true
+  }
+
+  if (
+    filters.workspaceTools.length > 0
+    && !(workspace.tools || []).some(tool => includesIgnoreCase(tool, filters.workspaceTools))
+  ) {
+    return false
+  }
+
+  return includesIgnoreCase(workspace.platform, filters.workspacePlatform)
+}
 
 export const workspaceAsset: AssetDefinition = {
   label: { singular: 'Workspace', plural: 'Workspaces' },
@@ -42,7 +70,7 @@ export const workspaceAsset: AssetDefinition = {
     }
   },
 
-  transformResponse(response: ElasticsearchResponse, pagination: PaginationState): LibraryPage {
+  transformResponse(response: ElasticsearchResponse, pagination: PaginationState, filters?: FilterState): LibraryPage {
     const studiesAgg = response.aggregations?.studies as WorkspaceStudyAggregationResponse | undefined
     const buckets = studiesAgg?.buckets || []
     const workspaces: WorkspaceAsset[] = []
@@ -53,7 +81,7 @@ export const workspaceAsset: AssetDefinition = {
       for (const [workspaceIndex, workspace] of studyWorkspaces.entries()) {
         // workspaceId may be absent from the indexed document; fall back to a
         // composite key so every row in the DataGrid has a unique id.
-        workspaces.push({
+        const row: WorkspaceAsset = {
           workspaceId: workspace.workspaceId || `${bucket.key}-${workspaceIndex}`,
           studyId: bucket.key,
           studyName: studyData.studyName || '',
@@ -64,7 +92,11 @@ export const workspaceAsset: AssetDefinition = {
           tools: workspace.tools || [],
           access: workspace.access || '',
           tags: workspace.tags || [],
-        })
+        }
+
+        if (matchesWorkspaceFilters(row, filters)) {
+          workspaces.push(row)
+        }
       }
     }
 

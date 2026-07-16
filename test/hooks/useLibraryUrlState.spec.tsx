@@ -166,6 +166,41 @@ describe('useLibraryUrlState', () => {
     const filters = JSON.parse(document.getElementById('filters')!.textContent!)
     expect(filters.clinicalTrialStatus).toEqual(['Recruiting', 'Active, not recruiting'])
   })
+
+  // NaN from a malformed param would serialize to null in the query JSON, and
+  // Elasticsearch rejects null range bounds / from / size — one bad hand-edited
+  // param would break every tab via the shared tab-counts query.
+  it('treats malformed numeric range params as unset instead of NaN', () => {
+    render(
+      <MemoryRouter initialEntries={['/?minParticipants=abc&maxParticipants=12']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.participantCount.min).toBeUndefined()
+    expect(filters.participantCount.max).toBe(12)
+  })
+
+  it('falls back to default pagination for malformed or out-of-range page params', () => {
+    render(
+      <MemoryRouter initialEntries={['/?page=abc&pageSize=xyz']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    expect(document.getElementById('page')!.textContent).toBe('0')
+    expect(document.getElementById('pageSize')!.textContent).toBe('25')
+  })
+
+  it('falls back to default pagination for negative or zero pagination params', () => {
+    render(
+      <MemoryRouter initialEntries={['/?page=-3&pageSize=0']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    expect(document.getElementById('page')!.textContent).toBe('0')
+    expect(document.getElementById('pageSize')!.textContent).toBe('25')
+  })
 })
 
 const BooleanFilterHarness = () => {

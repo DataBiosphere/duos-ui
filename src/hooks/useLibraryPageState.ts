@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
 import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
+import { computeTabCounts, STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
 import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, SortOrder } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
 import {
@@ -53,7 +53,7 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
   // tab, pagination and sort, so they are fetched once and reused as the user
   // pages, sorts, and switches tabs. Study-asset grids reuse its response too.
   const {
-    data: tabCountsResult,
+    data: tabCountsResponse,
     isFetching: isCountsFetching,
     error: countsError,
   } = useLibraryTabCounts(
@@ -62,8 +62,14 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
     urlState.query ?? '',
   )
 
-  const tabCounts = tabCountsResult?.counts
-  const tabCountsResponse = tabCountsResult?.response
+  // Badge counts are derived at render time from the shared response with the
+  // *current* filters — the same inputs the study-asset grids are derived from
+  // below — so a badge and its grid always agree, even while a refetch for new
+  // filters is in flight and the response is still the previous placeholder.
+  const tabCounts = useMemo(
+    () => (tabCountsResponse ? computeTabCounts(tabCountsResponse, urlState.filters) : undefined),
+    [tabCountsResponse, urlState.filters],
+  )
 
   // Derive the study-asset grid page from the shared tab-counts response using
   // the asset's own transformResponse (which client-side paginates and filters),
@@ -164,17 +170,23 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
   }, [urlState.sortField, urlState.sortOrder])
 
   // Keep the full filter set when switching tabs so filters applied on one tab
-  // remain active (and visible) on the others.
+  // remain active (and visible) on the others. The sort is cleared because sort
+  // fields are tab-specific: carrying e.g. a Publications `title` sort onto the
+  // Datasets tab would send Elasticsearch a sort on an unmapped field and fail
+  // the whole query.
   const handleTabChange = useCallback((newAssetType: AssetType) => {
-    updateUrlState({ tab: newAssetType, page: 0 })
+    updateUrlState({ tab: newAssetType, page: 0, sortField: undefined, sortOrder: undefined })
   }, [updateUrlState])
 
   const handleSearchChange = useCallback((query: string) => {
     updateUrlState({ query, page: 0 })
   }, [updateUrlState])
 
+  // Any filter change resets to the first page: the current page index can
+  // exceed the narrowed result set, which would render an empty grid while the
+  // count badge still shows matches.
   const handleFiltersChange = useCallback((newFilters: FilterState) => {
-    updateUrlState({ filters: newFilters })
+    updateUrlState({ filters: newFilters, page: 0 })
   }, [updateUrlState])
 
   const handleClearFilters = useCallback(() => {
@@ -183,7 +195,7 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
 
   // Remove a filter carried over from another tab without switching to it.
   const handleRemoveExternalFilter = useCallback((chip: ActiveFilterChip) => {
-    updateUrlState({ filters: removeFilterValue(urlState.filters, chip.key, chip.value) })
+    updateUrlState({ filters: removeFilterValue(urlState.filters, chip.key, chip.value), page: 0 })
   }, [updateUrlState, urlState.filters])
 
   const handleSortChange = useCallback((model: Array<{ field: string, sort: SortOrder | null }>) => {

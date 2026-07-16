@@ -72,6 +72,31 @@ const DATE_FILTER_PARAM_CONFIG: DateFilterParamConfig[] = [
   { key: 'fundingDate', startParam: 'fundingStartDate', endParam: 'fundingEndDate' },
 ]
 
+// Parse an integer URL param defensively: a malformed value (e.g. ?page=abc)
+// must become undefined, not NaN — NaN serializes to null in the JSON query
+// body and Elasticsearch rejects null range bounds / from / size, which would
+// otherwise break every tab at once via the shared tab-counts query.
+const parseIntParam = (value: string | null): number | undefined => {
+  if (!value) {
+    return undefined
+  }
+  const parsed = Number.parseInt(value)
+  return Number.isNaN(parsed) ? undefined : parsed
+}
+
+// Pagination params additionally fall back to their defaults when out of range
+// (negative page, non-positive page size) so a hand-edited URL can't produce a
+// negative `from` or an empty page slice.
+const parsePageParam = (searchParams: URLSearchParams): number => {
+  const page = parseIntParam(searchParams.get('page'))
+  return page !== undefined && page > 0 ? page : 0
+}
+
+const parsePageSizeParam = (searchParams: URLSearchParams): number => {
+  const pageSize = parseIntParam(searchParams.get('pageSize'))
+  return pageSize !== undefined && pageSize > 0 ? pageSize : 25
+}
+
 const parseArrayParamValues = (searchParams: URLSearchParams, param: string): string[] => {
   const values = searchParams.getAll(param).map(value => value.trim()).filter(Boolean)
 
@@ -104,8 +129,8 @@ const parseRangeFilters = (searchParams: URLSearchParams) => Object.fromEntries(
     const maxValue = searchParams.get(maxParam) ?? (legacyMaxParam ? searchParams.get(legacyMaxParam) : null)
 
     return [key, {
-      min: minValue ? Number.parseInt(minValue) : undefined,
-      max: maxValue ? Number.parseInt(maxValue) : undefined,
+      min: parseIntParam(minValue),
+      max: parseIntParam(maxValue),
     }]
   }),
 )
@@ -327,8 +352,8 @@ export const useLibraryUrlState = () => {
     library: searchParams.get('library') || 'duos',
     tab: (searchParams.get('tab') as AssetType) || AssetType.DATASETS,
     filters: parseFiltersFromUrl(searchParams),
-    page: Number.parseInt(searchParams.get('page') || '0'),
-    pageSize: Number.parseInt(searchParams.get('pageSize') || '25'),
+    page: parsePageParam(searchParams),
+    pageSize: parsePageSizeParam(searchParams),
     query: searchParams.get('query') || undefined,
     sortField: searchParams.get('sort') || undefined,
     sortOrder: (searchParams.get('order') as SortOrder) || undefined,

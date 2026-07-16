@@ -9,6 +9,7 @@ import {
   WorkspaceStudyAggregationBucket,
   QueryClause,
 } from 'src/types/elastic'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 const pagination: PaginationState = { page: 0, pageSize: 25 }
 
@@ -238,6 +239,43 @@ describe('workspaceAsset — transformResponse', () => {
     const result = workspaceAsset.transformResponse(response, pagination)
     expect(result.items).toHaveLength(0)
     expect(result.total).toBe(0)
+  })
+
+  // The ES clauses for these filters only decide which studies are aggregated;
+  // every workspace of a qualifying study comes back, so transformResponse must
+  // re-check each row or the grid and count badge include non-matching rows.
+  it('returns only workspaces matching the tools filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { workspaceId: 'w1', name: 'With Jupyter', tools: ['Jupyter', 'RStudio'] },
+        { workspaceId: 'w2', name: 'Without Jupyter', tools: ['Galaxy'] },
+      ]),
+    ])
+
+    const result = workspaceAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      workspaceTools: ['jupyter'],
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w1')
+  })
+
+  it('returns only workspaces matching the platform filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { workspaceId: 'w1', platform: 'Terra' },
+        { workspaceId: 'w2', platform: 'AnVIL' },
+      ]),
+    ])
+
+    const result = workspaceAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      workspacePlatform: ['Terra'],
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w1')
   })
 })
 

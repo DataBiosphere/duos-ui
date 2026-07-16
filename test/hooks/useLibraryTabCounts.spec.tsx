@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
+import { computeTabCounts } from 'src/hooks/libraryCounts'
 import { AssetType, FilterState, LibraryVersionNew } from 'src/types/library'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 import { DataSet } from 'src/libs/ajax/DataSet'
@@ -63,8 +64,10 @@ const TestComponent = ({
   filters: FilterState
   queryTerm?: string
 }) => {
+  // The hook returns the raw shared response; counts are derived from it with
+  // the current filters, exactly as useLibraryPageState does.
   const { data } = useLibraryTabCounts(libraryConfig, filters, queryTerm)
-  const counts = data?.counts
+  const counts = data ? computeTabCounts(data, filters) : undefined
   return (
     <div>
       <div data-testid="studies">{counts?.[AssetType.STUDIES] ?? 'none'}</div>

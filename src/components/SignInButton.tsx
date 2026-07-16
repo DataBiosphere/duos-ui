@@ -15,6 +15,7 @@ import { DuosUser } from 'src/types/model'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import 'src/styles/tooltip.css'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { extractError } from 'src/utils/ErrorUtils'
 
 interface ErrorInfo {
@@ -33,6 +34,7 @@ interface HttpError extends Error {
 
 export const SignInButton = () => {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({})
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isConsentDown, setIsConsentDown] = useState<boolean>(false)
@@ -71,6 +73,12 @@ export const SignInButton = () => {
       if (duosUser) {
         Storage.setCurrentUser(duosUser)
         setUserRoleStatuses(duosUser, Storage)
+        // Drop any query results cached before sign-in: cached library queries
+        // (data, tab counts, filter metadata) were built with the anonymous /
+        // previous user's role-based visibility clauses and would otherwise be
+        // served from cache under the new user's identity. Sign-out does the
+        // same in DuosHeader.signOut.
+        queryClient.clear()
         if (!duosUser.roles) {
           await ErrorReporter.report('roles not found for user: ' + duosUser.email)
         }
@@ -113,6 +121,8 @@ export const SignInButton = () => {
   const registerAndRedirectNewUser = async (redirectTo: string, shouldRedirect: boolean) => {
     const registeredUser: DuosUser = await User.registerUser()
     setUserRoleStatuses(registeredUser, Storage)
+    // New identity — same cache reset as the normal sign-in path above.
+    queryClient.clear()
     syncSignInOrRegistrationEvent(eventList.userRegister)
     navigate(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`)
   }

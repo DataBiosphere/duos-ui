@@ -4,21 +4,9 @@ import { ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/type
 import { FilterState, LibraryVersionNew } from 'src/types/library'
 import { ALL_SEARCH_FIELDS } from 'src/components/data_library/assets'
 import { buildCommonQueryClauses } from 'src/hooks/useLibraryData'
-import { buildCountAggregations, computeTabCounts, TabCounts } from 'src/hooks/libraryCounts'
+import { buildCountAggregations } from 'src/hooks/libraryCounts'
 
 export const LIBRARY_TAB_COUNTS_QUERY_KEY = 'library-tab-counts'
-
-/**
- * Result of the shared tab-counts query: the per-tab `counts` for the badges plus
- * the raw `response`. The response carries the full shared `studies` aggregation,
- * which every study-asset tab (all tabs except Studies and Datasets) renders its
- * grid from — so those tabs reuse this one response instead of issuing their own
- * full-corpus data query. See `useLibraryPageState`.
- */
-export interface LibraryTabCountsResult {
-  counts: TabCounts
-  response: ElasticsearchResponse
-}
 
 /**
  * Build the standalone `size: 0` Elasticsearch query that yields the counts for
@@ -42,7 +30,7 @@ const buildTabCountsQuery = (
 })
 
 /**
- * Fetch the item count for every Data Library tab in one request.
+ * Fetch the shared counts response for every Data Library tab in one request.
  *
  * The query uses the base clauses required to render each tab (study-exists
  * check, branded-library filter, search term over the union of every asset's
@@ -51,6 +39,12 @@ const buildTabCountsQuery = (
  *
  * The query does not depend on the active tab, pagination or sort, so the result
  * is cached and reused as the user pages, sorts, and switches tabs.
+ *
+ * The raw response is returned rather than precomputed counts: the caller
+ * (`useLibraryPageState`) derives both the badge counts and the study-asset
+ * grids from it with the *current* filters, so the two can never disagree —
+ * even while a refetch is in flight and this hook is serving the previous
+ * response as placeholder data.
  */
 export const useLibraryTabCounts = (
   libraryConfig: LibraryVersionNew,
@@ -64,7 +58,7 @@ export const useLibraryTabCounts = (
       filters,
       queryTerm,
     ],
-    queryFn: async (): Promise<LibraryTabCountsResult> => {
+    queryFn: async (): Promise<ElasticsearchResponse> => {
       const { queryChunks, filterQuery } = buildCommonQueryClauses(
         libraryConfig,
         filters,
@@ -72,10 +66,7 @@ export const useLibraryTabCounts = (
         ALL_SEARCH_FIELDS,
       )
       const query = buildTabCountsQuery(queryChunks, filterQuery, libraryConfig.showAllControlled)
-      const response = await DataSet.searchDatasetIndexV2(query)
-      // Return the raw response alongside the counts so study-asset grids can be
-      // rendered from the same shared `studies` aggregation without a second request.
-      return { counts: computeTabCounts(response, filters), response }
+      return DataSet.searchDatasetIndexV2(query)
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
