@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
 import { InstitutionInterface } from 'src/types/model'
 import { Styles } from '../libs/theme'
@@ -14,10 +14,16 @@ import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 
+const filterInstitutions = (list: InstitutionInterface[], value: string): InstitutionInterface[] => {
+  if (value) {
+    return getSearchFilterFunctions().institutions(value, list)
+  }
+  return list
+}
+
 export default function AdminManageInstitutions() {
   usePageTitle('Institutions')
   const [institutionList, setInstitutionList] = useState<InstitutionInterface[]>([])
-  const [filteredList, setFilteredList] = useState<InstitutionInterface[]>([])
   const [tableSize, setTableSize] = useState<number>(10)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -31,7 +37,6 @@ export default function AdminManageInstitutions() {
         setIsLoading(true)
         const listOfInstitutions = await InstitutionAPI.list()
         setInstitutionList(listOfInstitutions)
-        setFilteredList(listOfInstitutions)
         setIsLoading(false)
       }
       catch (error) {
@@ -45,21 +50,13 @@ export default function AdminManageInstitutions() {
     init()
   }, [])
 
-  const filter = (list: InstitutionInterface[], value: string): InstitutionInterface[] => {
-    if (value) {
-      return getSearchFilterFunctions().institutions(value, list)
-    }
-    return list
-  }
-
-  useEffect(() => {
-    // oxlint-disable-next-line react-hooks/set-state-in-effect
-    setFilteredList(filter(institutionList, searchTerm))
-  }, [searchTerm, institutionList])
+  const filteredList = useMemo(
+    () => filterInstitutions(institutionList, searchTerm),
+    [institutionList, searchTerm],
+  )
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
-    setFilteredList(filter(institutionList, value))
   }
 
   const addInstitution = () => {

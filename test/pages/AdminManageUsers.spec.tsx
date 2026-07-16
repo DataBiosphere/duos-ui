@@ -116,6 +116,12 @@ describe('AdminManageUsers', () => {
     })
   })
 
+  it('clears loading state after the fetch fails', async () => {
+    vi.mocked(User.list).mockRejectedValue(new Error('network error'))
+    await act(async () => render(<AdminManageUsers />))
+    expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-loading', 'false')
+  })
+
   it('opens the add user modal when the Add User button is clicked', async () => {
     vi.mocked(User.list).mockResolvedValue([])
     await act(async () => render(<AdminManageUsers />))

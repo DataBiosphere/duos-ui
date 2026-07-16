@@ -369,7 +369,7 @@ export const FormField = (config: FormFieldConfig): React.JSX.Element => {
 
   React.useEffect(() => {
     if (defaultValue !== undefined) {
-      // oxlint-disable-next-line react-hooks/set-state-in-effect
+      // oxlint-disable-next-line react/react-compiler
       setFormValue(defaultValue)
     }
   }, [defaultValue, type])

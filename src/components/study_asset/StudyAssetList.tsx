@@ -66,19 +66,12 @@ export default function StudyAssetList<
 
   const filteredColumnsToShow = columnsToShow.filter((c): c is keyof T => typeof c === 'string')
 
-  React.useEffect(() => {
-    if (editState.length !== items.length) {
-      // oxlint-disable-next-line react-hooks/set-state-in-effect
-      setEditState(items.map(() => false))
-    }
-  }, [items, editState.length])
-
-  React.useEffect(() => {
-    if (viewState.length !== items.length) {
-      // oxlint-disable-next-line react-hooks/set-state-in-effect
-      setViewState(items.map(() => false))
-    }
-  }, [items, viewState.length])
+  const [prevItemsLength, setPrevItemsLength] = useState(items.length)
+  if (items.length !== prevItemsLength) {
+    setPrevItemsLength(items.length)
+    setEditState(items.map(() => false))
+    setViewState(items.map(() => false))
+  }
 
   const toggleEditState = (index: number) => {
     setEditState((es) => {

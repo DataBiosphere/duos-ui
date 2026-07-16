@@ -232,7 +232,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
   useEffect(() => {
     try {
       // Intentionally setting loading state at effect start.
-      // oxlint-disable-next-line react-hooks/set-state-in-effect
+      // oxlint-disable-next-line react/react-compiler
       setIsLoading(true)
       setSubcomponentLoading(true)
       init()
@@ -247,7 +247,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
     try {
       if (toLower(selectedTab) === 'chair vote') {
         // Intentionally setting loading state when switching tabs.
-        // oxlint-disable-next-line react-hooks/set-state-in-effect
+        // oxlint-disable-next-line react/react-compiler
         setSubcomponentLoading(true)
         init()
       }

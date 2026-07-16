@@ -266,6 +266,77 @@ describe('DatasetsRequestedPanel - Tests', () => {
     expect(screen.getByText('+ View 2 more')).toBeInTheDocument()
   })
 
+  it('Re-derives the visible datasets when props change', () => {
+    const { rerender } = render(
+      <BrowserRouter>
+        <DatasetsRequestedPanel
+          bucketDatasets={bucketDatasets}
+          dacDatasetIds={[1, 2]}
+          dacs={dacs}
+          isLoading={false}
+          adminPage={false}
+        />
+      </BrowserRouter>,
+    )
+    expect(screen.getByText('(2)')).toBeInTheDocument()
+    let datasetList = document.querySelector('[data-cy=dataset-list]')
+    expect(datasetList?.textContent).toContain('DUOS-1')
+    expect(datasetList?.textContent).toContain('DUOS-2')
+    expect(datasetList?.textContent).not.toContain('DUOS-3')
+    expect(document.querySelector('[data-cy=collapse-expand-link]')).not.toBeInTheDocument()
+
+    // Changing dacDatasetIds should re-filter the list and re-introduce the expansion link.
+    rerender(
+      <BrowserRouter>
+        <DatasetsRequestedPanel
+          bucketDatasets={bucketDatasets}
+          dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
+          dacs={dacs}
+          isLoading={false}
+          adminPage={false}
+        />
+      </BrowserRouter>,
+    )
+    expect(screen.getByText('(7)')).toBeInTheDocument()
+    datasetList = document.querySelector('[data-cy=dataset-list]')
+    expect(datasetList?.textContent).toContain('DUOS-3')
+    expect(datasetList?.textContent).not.toContain('DUOS-6')
+    expect(screen.getByText('+ View 2 more')).toBeInTheDocument()
+  })
+
+  it('Keeps the expanded view when props change while expanded', () => {
+    const { rerender } = render(
+      <BrowserRouter>
+        <DatasetsRequestedPanel
+          bucketDatasets={bucketDatasets}
+          dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
+          dacs={dacs}
+          isLoading={false}
+          adminPage={false}
+        />
+      </BrowserRouter>,
+    )
+    fireEvent.click(screen.getByText('+ View 2 more'))
+    expect(document.querySelector('[data-cy=dataset-list]')?.textContent).toContain('DUOS-6')
+
+    // A prop change while expanded should keep showing all datasets beyond the
+    // collapsed capacity, not silently collapse the list.
+    rerender(
+      <BrowserRouter>
+        <DatasetsRequestedPanel
+          bucketDatasets={bucketDatasets}
+          dacDatasetIds={[1, 2, 3, 4, 5, 6]}
+          dacs={dacs}
+          isLoading={false}
+          adminPage={false}
+        />
+      </BrowserRouter>,
+    )
+    const datasetList = document.querySelector('[data-cy=dataset-list]')
+    expect(datasetList?.textContent).toContain('DUOS-6')
+    expect(screen.getByText('- View 1 less')).toBeInTheDocument()
+  })
+
   it('Renders filler dataset identifier if attribute is null', () => {
     render(
       <BrowserRouter>

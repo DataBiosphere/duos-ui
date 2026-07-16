@@ -18,11 +18,9 @@ export const AdminManageUsers = function AdminManageUsers() {
   const [searchText, setSearchText] = useState('')
   const [userList, setUserList] = useState<DuosUser[]>([])
   const [showAddUserModal, setShowAddUserModal] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // oxlint-disable-next-line react-hooks/set-state-in-effect
-    setIsLoading(true)
     getUserList()
       .then((users) => {
         setUserList(users)

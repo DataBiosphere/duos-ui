@@ -214,13 +214,13 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   // Hook to execute on initialization and card creation/deletion, applies filter on updated collection list
   React.useEffect(() => {
     const filteredList = isEmpty(searchText) ? libraryCards : lcFilterFunction(searchText, libraryCards)
-    // oxlint-disable-next-line react-hooks/set-state-in-effect
+    // oxlint-disable-next-line react/react-compiler
     setFilteredCards(filteredList)
   }, [searchText, libraryCards])
 
   // Hook that executes on prop load (initialization hook)
   React.useEffect(() => {
-    // oxlint-disable-next-line react-hooks/set-state-in-effect
+    // oxlint-disable-next-line react/react-compiler
     setLibraryCards(props.libraryCards ?? [])
     if (!isNil(props.libraryCards)) {
       setIsLoading(false)

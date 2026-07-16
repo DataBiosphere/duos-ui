@@ -112,11 +112,11 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
         {' '}is required to submit a Data Access Request (DAR).
       </p>
 
-      {ERACommons({
-        destination: 'profile',
-        onNihStatusUpdate: nihStatusUpdate,
-        header: false,
-      })}
+      <ERACommons
+        destination="profile"
+        onNihStatusUpdate={nihStatusUpdate}
+        header={false}
+      />
       <div style={{ marginTop: '20px' }} />
       <p style={subheadStyle}>Your Pre-Authorized Data Access Agreements</p>
       <p>
