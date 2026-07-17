@@ -54,8 +54,8 @@ importers:
         specifier: 19.2.7
         version: 19.2.7(react@19.2.7)
       react-dropzone:
-        specifier: 15.0.0
-        version: 15.0.0(react@19.2.7)
+        specifier: 17.0.0
+        version: 17.0.0(react@19.2.7)
       react-google-charts:
         specifier: 5.2.1
         version: 5.2.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -184,8 +184,8 @@ importers:
         specifier: 11.1.1
         version: 11.1.1
       '@fastify/static':
-        specifier: 9.1.3
-        version: 9.1.3
+        specifier: 10.1.0
+        version: 10.1.0
       '@fastify/vite':
         specifier: 9.1.1
         version: 9.1.1(fastify@5.10.0)(vite@8.1.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.0))
@@ -635,6 +635,9 @@ packages:
 
   '@fastify/session@11.1.1':
     resolution: {integrity: sha512-nuKwTHxh3eJsI4NJeXoYVGzXUsg+kH1WfHgS7IofVyVhmjc+A6qGr+29WQy8hYZiNtmCjfG415COpf5xTBkW4Q==}
+
+  '@fastify/static@10.1.0':
+    resolution: {integrity: sha512-iK/8TvRM/EgNOyQL+EpWu+x3aR6o4GWt+UI+27zmE7w6t/6d80mXqOtWLdEKQ13vL/g1Jry0ae2icj6GP7tGzA==}
 
   '@fastify/static@9.1.3':
     resolution: {integrity: sha512-aXrYtsiryLhRxRNaxNqsn7FUISeb7rB9q4eHUPIot5aeQBLNahnz1m6thzm7JWC1poSGXS9XrX8DvuMivp2hkQ==}
@@ -1487,6 +1490,10 @@ packages:
 
   content-disposition@1.1.0:
     resolution: {integrity: sha512-5jRCH9Z/+DRP7rkvY83B+yGIGX96OYdJmzngqnw2SBSxqCFPd0w2km3s5iawpGX8krnwSGmF0FW5Nhr0Hfai3g==}
+    engines: {node: '>=18'}
+
+  content-disposition@2.0.1:
+    resolution: {integrity: sha512-e+H0ZXHSWYrENhQzw1LPuP4oF5MzVKmDU6d3hxlvaPEYLLg62MxtQNPRx4SYSuYJSBUgnQIG4HIN2tEtNv7Dog==}
     engines: {node: '>=18'}
 
   convert-source-map@1.9.0:
@@ -2506,11 +2513,11 @@ packages:
     peerDependencies:
       react: ^19.2.7
 
-  react-dropzone@15.0.0:
-    resolution: {integrity: sha512-lGjYV/EoqEjEWPnmiSvH4v5IoIAwQM2W4Z1C0Q/Pw2xD0eVzKPS359BQTUMum+1fa0kH2nrKjuavmTPOGhpLPg==}
-    engines: {node: '>= 10.13'}
+  react-dropzone@17.0.0:
+    resolution: {integrity: sha512-yedj9VzdC/boq15u0XfzWRGX0Mqpb8dxy/TRDqOIFlISl8nhh38R9QKbztyFqxqLMwLdViVtLbXkv6x/b8gP8A==}
+    engines: {node: '>= 20'}
     peerDependencies:
-      react: '>= 16.8 || 18.0.0'
+      react: '>= 18'
 
   react-google-charts@5.2.1:
     resolution: {integrity: sha512-mCbPiObP8yWM5A9ogej7Qp3/HX4EzOwuEzUYvcfHtL98Xt4V/brD14KgfDzSNNtyD48MNXCpq5oVaYKt0ykQUQ==}
@@ -3491,6 +3498,16 @@ snapshots:
       fastify-plugin: 5.1.0
       safe-stable-stringify: 2.5.0
 
+  '@fastify/static@10.1.0':
+    dependencies:
+      '@fastify/accept-negotiator': 2.0.1
+      '@fastify/error': 4.2.0
+      '@fastify/send': 4.1.0
+      content-disposition: 2.0.1
+      fastify-plugin: 6.0.0
+      fastq: 1.20.1
+      glob: 13.0.6
+
   '@fastify/static@9.1.3':
     dependencies:
       '@fastify/accept-negotiator': 2.0.1
@@ -4270,6 +4287,8 @@ snapshots:
   comma-separated-tokens@2.0.3: {}
 
   content-disposition@1.1.0: {}
+
+  content-disposition@2.0.1: {}
 
   convert-source-map@1.9.0: {}
 
@@ -5443,11 +5462,10 @@ snapshots:
       react: 19.2.7
       scheduler: 0.27.0
 
-  react-dropzone@15.0.0(react@19.2.7):
+  react-dropzone@17.0.0(react@19.2.7):
     dependencies:
       attr-accept: 2.2.5
       file-selector: 2.1.2
-      prop-types: 15.8.1
       react: 19.2.7
 
   react-google-charts@5.2.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
