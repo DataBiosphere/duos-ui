@@ -19,7 +19,7 @@ function makeReply() {
 }
 
 function makeFetchResponse(status: number, body: unknown) {
-  return { status, json: vi.fn().mockResolvedValue(body) }
+  return { status, ok: status >= 200 && status < 300, json: vi.fn().mockResolvedValue(body) }
 }
 
 describe('getMe', () => {
@@ -52,7 +52,13 @@ describe('getMe', () => {
 
     expect(fetch).toHaveBeenCalledWith(
       `${ENV.DUOS_API_URL}/api/user/me`,
-      { headers: { Authorization: 'Bearer test-access-token' } },
+      {
+        headers: {
+          'Authorization': 'Bearer test-access-token',
+          'Accept': 'application/json',
+          'X-App-ID': 'DUOS',
+        },
+      },
     )
   })
 
@@ -80,6 +86,18 @@ describe('getMe', () => {
     expect(destroy).toHaveBeenCalled()
     expect(reply.status).toHaveBeenCalledWith(401)
     expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+  })
+
+  it('returns 502 without destroying the session when the upstream API errors with a non-401 status', async () => {
+    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(503, {}) as never)
+    const { request, destroy } = makeRequest({ accessToken: 'test-access-token' })
+    const reply = makeReply()
+
+    await getMe(request, reply)
+
+    expect(destroy).not.toHaveBeenCalled()
+    expect(reply.status).toHaveBeenCalledWith(502)
+    expect(reply.send).toHaveBeenCalledWith({ authenticated: false, error: 'upstream_unavailable' })
   })
 
   it('rejects with an error naming DUOS_API_URL when it is unset', async () => {

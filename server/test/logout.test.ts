@@ -134,4 +134,20 @@ describe('handleLogout', () => {
     expect(destroy).toHaveBeenCalled()
     expect(reply.status).toHaveBeenCalledWith(204)
   })
+
+  it('completes logout (audit stamp, session destroy, cookie clear) even when getOidcConfig() rejects', async () => {
+    const oidcClient = await import('../src/auth/oidcClient.js')
+    vi.mocked(oidcClient.getOidcConfig).mockRejectedValue(new Error('B2C discovery unreachable'))
+    const { request, query, destroy } = makeRequest({ sessionId: 'the-sid' })
+    const reply = makeReply()
+
+    await expect(handleLogout(request, reply)).resolves.toBeUndefined()
+
+    const oidc = await import('openid-client')
+    expect(oidc.tokenRevocation).not.toHaveBeenCalled()
+    expect(query).toHaveBeenCalledWith(expect.stringContaining('UPDATE user_session_audit'), ['the-sid'])
+    expect(destroy).toHaveBeenCalled()
+    expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
+    expect(reply.status).toHaveBeenCalledWith(204)
+  })
 })

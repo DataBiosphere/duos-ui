@@ -13,7 +13,11 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
   }
 
   const res = await fetch(`${requireEnv('DUOS_API_URL')}/api/user/me`, {
-    headers: { Authorization: `Bearer ${request.session.accessToken}` },
+    headers: {
+      'Authorization': `Bearer ${request.session.accessToken}`,
+      'Accept': 'application/json',
+      'X-App-ID': 'DUOS',
+    },
   })
 
   if (res.status === 401) {
@@ -21,6 +25,14 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     // whose access token it now rejects (expired, revoked) is dead weight.
     await request.session.destroy()
     reply.status(401).send({ authenticated: false })
+    return
+  }
+
+  if (!res.ok) {
+    // A non-401 failure (5xx, upstream outage) says nothing about whether the
+    // token itself is still valid — don't destroy the session or parse an
+    // error body as if it were a user profile.
+    reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
     return
   }
 

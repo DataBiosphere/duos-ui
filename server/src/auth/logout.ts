@@ -9,18 +9,27 @@ import { getOidcConfig } from './oidcClient.js'
  * best-effort on top of it.
  */
 export async function handleLogout(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-  const config = await getOidcConfig()
+  // Revocation is best-effort on top of session destruction (the primary
+  // logout control below) — a discovery failure here (network blip, missing
+  // Azure env var) must not stop logout from completing.
+  try {
+    const config = await getOidcConfig()
 
-  // B2C does not reliably expose a revocation_endpoint in its discovery
-  // document, so revocation is typically skipped here. v6: the endpoint is
-  // read from config.serverMetadata(), and revocation is tokenRevocation().
-  if (config.serverMetadata().revocation_endpoint) {
-    if (request.session.accessToken) {
-      await oidc.tokenRevocation(config, request.session.accessToken).catch(() => {})
+    // B2C does not reliably expose a revocation_endpoint in its discovery
+    // document, so revocation is typically skipped here. v6: the endpoint is
+    // read from config.serverMetadata(), and revocation is tokenRevocation().
+    if (config.serverMetadata().revocation_endpoint) {
+      if (request.session.accessToken) {
+        await oidc.tokenRevocation(config, request.session.accessToken).catch(() => {})
+      }
+      if (request.session.refreshToken) {
+        await oidc.tokenRevocation(config, request.session.refreshToken).catch(() => {})
+      }
     }
-    if (request.session.refreshToken) {
-      await oidc.tokenRevocation(config, request.session.refreshToken).catch(() => {})
-    }
+  }
+  catch {
+    // getOidcConfig() failed — skip revocation and fall through to session
+    // destruction below.
   }
 
   // user_session_audit + its sid_hash-keyed triggers are Epic 1 infrastructure
