@@ -1,9 +1,11 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { requireEnv } from './oidcClient.js'
 
+const UPSTREAM_TIMEOUT_MS = 5000
+
 /**
  * Confirms the user is authenticated against the upstream Consent API.
- * Returns safe user-profile fields and the active sub-provider — never the
+ * Forwards the upstream user profile and the active sub-provider — never the
  * tokens themselves, which stay server-side in the session.
  */
 export async function getMe(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -12,19 +14,31 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     return
   }
 
-  const res = await fetch(`${requireEnv('DUOS_API_URL')}/api/user/me`, {
-    headers: {
-      'Authorization': `Bearer ${request.session.accessToken}`,
-      'Accept': 'application/json',
-      'X-App-ID': 'DUOS',
-    },
-  })
+  const url = `${requireEnv('DUOS_API_URL')}/api/user/me`
+
+  let res: Response
+  try {
+    res = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${request.session.accessToken}`,
+        'Accept': 'application/json',
+        'X-App-ID': 'DUOS',
+      },
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+    })
+  }
+  catch {
+    // Network failure or timeout — same as any other upstream outage below:
+    // says nothing about the token's validity, so don't destroy the session.
+    reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
+    return
+  }
 
   if (res.status === 401) {
     // The upstream API is the source of truth for token validity — a session
     // whose access token it now rejects (expired, revoked) is dead weight.
     await request.session.destroy()
-    reply.status(401).send({ authenticated: false })
+    reply.clearCookie('sessionId').status(401).send({ authenticated: false })
     return
   }
 
@@ -36,7 +50,15 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     return
   }
 
-  const user = await res.json()
+  let user: unknown
+  try {
+    user = await res.json()
+  }
+  catch {
+    reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
+    return
+  }
+
   reply.send({
     authenticated: true,
     user,
