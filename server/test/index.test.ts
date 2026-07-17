@@ -58,6 +58,7 @@ vi.mock('../src/auth/me.js', () => ({
 // Setup
 // ---------------------------------------------------------------------------
 let app: FastifyInstance
+let defaultConfigDir: string
 
 beforeEach(async () => {
   // DUOS_DB_HOST gates the DB/cookie/session registration; set the full DB
@@ -70,6 +71,17 @@ beforeEach(async () => {
   delete process.env.DUOS_DB_PORT
   process.env.DUOS_SESSION_SECRET = 'test-secret-that-is-at-least-32-characters'
   vi.clearAllMocks()
+
+  // buildApp() reads config.json eagerly at startup (to gate the BFF auth
+  // routes on bffEnabled). public/config.json is a dev/deploy-time artifact
+  // that's gitignored and won't exist in a fresh checkout (e.g. CI) — point
+  // every test at an isolated fixture so this suite never depends on it.
+  defaultConfigDir = mkdtempSync(path.join(tmpdir(), 'duos-index-config-'))
+  process.env.CONFIG_PATH = path.join(defaultConfigDir, 'config.json')
+  writeFileSync(process.env.CONFIG_PATH, JSON.stringify({}))
+  const { resetConfigCache } = await import('../src/config.js')
+  resetConfigCache()
+
   // Do NOT call app.ready() here — it finalises the Fastify lifecycle and
   // prevents routes from being added inside individual tests.
   const { buildApp } = await import('../src/index.js')
@@ -78,6 +90,10 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await app.close()
+  delete process.env.CONFIG_PATH
+  const { resetConfigCache } = await import('../src/config.js')
+  resetConfigCache()
+  rmSync(defaultConfigDir, { recursive: true, force: true })
 })
 
 // ---------------------------------------------------------------------------
