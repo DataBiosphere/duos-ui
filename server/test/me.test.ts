@@ -13,9 +13,14 @@ function makeRequest(overrides: { accessToken?: string, idp?: 'google' | 'micros
 }
 
 function makeReply() {
-  const reply = { status: vi.fn(), send: vi.fn() }
+  const reply = { clearCookie: vi.fn(), status: vi.fn(), send: vi.fn() }
+  reply.clearCookie.mockReturnValue(reply)
   reply.status.mockReturnValue(reply)
-  return reply as unknown as FastifyReply & { status: ReturnType<typeof vi.fn>, send: ReturnType<typeof vi.fn> }
+  return reply as unknown as FastifyReply & {
+    clearCookie: ReturnType<typeof vi.fn>
+    status: ReturnType<typeof vi.fn>
+    send: ReturnType<typeof vi.fn>
+  }
 }
 
 function makeFetchResponse(status: number, body: unknown) {
@@ -58,6 +63,7 @@ describe('getMe', () => {
           'Accept': 'application/json',
           'X-App-ID': 'DUOS',
         },
+        signal: expect.any(AbortSignal),
       },
     )
   })
@@ -84,12 +90,38 @@ describe('getMe', () => {
     await getMe(request, reply)
 
     expect(destroy).toHaveBeenCalled()
+    expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
     expect(reply.status).toHaveBeenCalledWith(401)
     expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
   })
 
   it('returns 502 without destroying the session when the upstream API errors with a non-401 status', async () => {
     vi.mocked(fetch).mockResolvedValue(makeFetchResponse(503, {}) as never)
+    const { request, destroy } = makeRequest({ accessToken: 'test-access-token' })
+    const reply = makeReply()
+
+    await getMe(request, reply)
+
+    expect(destroy).not.toHaveBeenCalled()
+    expect(reply.status).toHaveBeenCalledWith(502)
+    expect(reply.send).toHaveBeenCalledWith({ authenticated: false, error: 'upstream_unavailable' })
+  })
+
+  it('returns 502 without destroying the session when the upstream fetch rejects (network failure or timeout)', async () => {
+    vi.mocked(fetch).mockRejectedValue(new Error('the operation was aborted'))
+    const { request, destroy } = makeRequest({ accessToken: 'test-access-token' })
+    const reply = makeReply()
+
+    await getMe(request, reply)
+
+    expect(destroy).not.toHaveBeenCalled()
+    expect(reply.status).toHaveBeenCalledWith(502)
+    expect(reply.send).toHaveBeenCalledWith({ authenticated: false, error: 'upstream_unavailable' })
+  })
+
+  it('returns 502 without destroying the session when the upstream body fails to parse as JSON', async () => {
+    const badBody = { status: 200, ok: true, json: vi.fn().mockRejectedValue(new Error('invalid JSON')) }
+    vi.mocked(fetch).mockResolvedValue(badBody as never)
     const { request, destroy } = makeRequest({ accessToken: 'test-access-token' })
     const reply = makeReply()
 

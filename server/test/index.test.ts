@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -37,10 +37,28 @@ vi.mock('@fastify/vite', () => {
   return { default: plugin }
 })
 
+// The auth handlers themselves are covered by their own dedicated test files
+// (login.test.ts, callback.test.ts, ...) — here we only need to know whether
+// buildApp() wired the route to the handler, so a stub that proves it was
+// called (and sends a response) is enough.
+vi.mock('../src/auth/login.js', () => ({
+  handleLogin: vi.fn(async (_req: FastifyRequest, reply: FastifyReply) => reply.send({ stub: 'login' })),
+}))
+vi.mock('../src/auth/callback.js', () => ({
+  handleCallback: vi.fn(async (_req: FastifyRequest, reply: FastifyReply) => reply.send({ stub: 'callback' })),
+}))
+vi.mock('../src/auth/logout.js', () => ({
+  handleLogout: vi.fn(async (_req: FastifyRequest, reply: FastifyReply) => reply.status(204).send()),
+}))
+vi.mock('../src/auth/me.js', () => ({
+  getMe: vi.fn(async (_req: FastifyRequest, reply: FastifyReply) => reply.send({ stub: 'me' })),
+}))
+
 // ---------------------------------------------------------------------------
 // Setup
 // ---------------------------------------------------------------------------
 let app: FastifyInstance
+let defaultConfigDir: string
 
 beforeEach(async () => {
   // DUOS_DB_HOST gates the DB/cookie/session registration; set the full DB
@@ -53,6 +71,17 @@ beforeEach(async () => {
   delete process.env.DUOS_DB_PORT
   process.env.DUOS_SESSION_SECRET = 'test-secret-that-is-at-least-32-characters'
   vi.clearAllMocks()
+
+  // buildApp() reads config.json eagerly at startup (to gate the BFF auth
+  // routes on bffEnabled). public/config.json is a dev/deploy-time artifact
+  // that's gitignored and won't exist in a fresh checkout (e.g. CI) — point
+  // every test at an isolated fixture so this suite never depends on it.
+  defaultConfigDir = mkdtempSync(path.join(tmpdir(), 'duos-index-config-'))
+  process.env.CONFIG_PATH = path.join(defaultConfigDir, 'config.json')
+  writeFileSync(process.env.CONFIG_PATH, JSON.stringify({}))
+  const { resetConfigCache } = await import('../src/config.js')
+  resetConfigCache()
+
   // Do NOT call app.ready() here — it finalises the Fastify lifecycle and
   // prevents routes from being added inside individual tests.
   const { buildApp } = await import('../src/index.js')
@@ -61,6 +90,10 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await app.close()
+  delete process.env.CONFIG_PATH
+  const { resetConfigCache } = await import('../src/config.js')
+  resetConfigCache()
+  rmSync(defaultConfigDir, { recursive: true, force: true })
 })
 
 // ---------------------------------------------------------------------------
@@ -132,6 +165,13 @@ describe('GET /config.json', () => {
     process.env.CONFIG_PATH = file
     process.env.DUOS_API_URL = 'https://local.dsde-dev.broadinstitute.org:27443'
 
+    // buildApp() now reads config.json eagerly at startup (to gate the BFF
+    // auth routes on bffEnabled) — the outer beforeEach's own buildApp() call
+    // already cached the real, un-overridden file before this test set
+    // CONFIG_PATH, so the cache must be cleared for this fixture to take effect.
+    const { resetConfigCache } = await import('../src/config.js')
+    resetConfigCache()
+
     const { buildApp } = await import('../src/index.js')
     const localApp = await buildApp()
 
@@ -197,6 +237,90 @@ describe('BFF env-config gating', () => {
 
     const { buildApp } = await import('../src/index.js')
     await expect(buildApp()).rejects.toThrow('DUOS_DB_PORT')
+  })
+})
+
+describe('BFF auth route registration', () => {
+  let dir: string
+
+  afterEach(async () => {
+    delete process.env.CONFIG_PATH
+    const { resetConfigCache } = await import('../src/config.js')
+    resetConfigCache()
+    // Guarded: rmSync(undefined) throws and would mask the real failure of a
+    // test that died before mkdtempSync assigned dir.
+    if (dir) rmSync(dir, { recursive: true, force: true })
+  })
+
+  // buildApp() reads config.json eagerly at startup (to gate the BFF auth
+  // routes on bffEnabled) and caches it process-wide — the outer beforeEach's
+  // own buildApp() call already cached the real, un-overridden file before
+  // any of these tests get to set CONFIG_PATH, so the cache must be cleared
+  // again right before building the app under test for the fixture to apply.
+  async function buildAppWithConfig(config: Record<string, unknown>) {
+    dir = mkdtempSync(path.join(tmpdir(), 'duos-bff-config-'))
+    const file = path.join(dir, 'config.json')
+    writeFileSync(file, JSON.stringify(config))
+    process.env.CONFIG_PATH = file
+
+    const { resetConfigCache } = await import('../src/config.js')
+    resetConfigCache()
+
+    const { buildApp } = await import('../src/index.js')
+    return buildApp()
+  }
+
+  it('registers all four /auth/* routes when bffEnabled is true', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const { handleLogin } = await import('../src/auth/login.js')
+    const { handleCallback } = await import('../src/auth/callback.js')
+    const { handleLogout } = await import('../src/auth/logout.js')
+    const { getMe } = await import('../src/auth/me.js')
+
+    await localApp.inject({ method: 'POST', url: '/auth/login' })
+    expect(handleLogin).toHaveBeenCalled()
+
+    await localApp.inject({ method: 'GET', url: '/auth/callback' })
+    expect(handleCallback).toHaveBeenCalled()
+
+    await localApp.inject({ method: 'POST', url: '/auth/logout' })
+    expect(handleLogout).toHaveBeenCalled()
+
+    await localApp.inject({ method: 'GET', url: '/auth/me' })
+    expect(getMe).toHaveBeenCalled()
+
+    await localApp.close()
+  })
+
+  // The app's setNotFoundHandler() serves the SPA shell (200) for any
+  // unmatched route, so an unregistered /auth/* route can't be distinguished
+  // from a registered one by status code alone — assert the handler itself
+  // was never invoked instead.
+  it('does not register the /auth/* routes when bffEnabled is explicitly false', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: false })
+
+    const { handleLogin } = await import('../src/auth/login.js')
+    await localApp.inject({ method: 'POST', url: '/auth/login' })
+    expect(handleLogin).not.toHaveBeenCalled()
+
+    await localApp.close()
+  })
+
+  it('does not register the /auth/* routes when bffEnabled is missing from config.json', async () => {
+    const localApp = await buildAppWithConfig({ apiUrl: 'https://consent.dsde-dev.broadinstitute.org' })
+
+    const { handleLogin } = await import('../src/auth/login.js')
+    await localApp.inject({ method: 'POST', url: '/auth/login' })
+    expect(handleLogin).not.toHaveBeenCalled()
+
+    await localApp.close()
+  })
+
+  it('fails loud when bffEnabled is true but DUOS_DB_HOST is not set', async () => {
+    delete process.env.DUOS_DB_HOST
+
+    await expect(buildAppWithConfig({ bffEnabled: true })).rejects.toThrow('DUOS_DB_HOST')
   })
 })
 

@@ -135,6 +135,19 @@ describe('handleLogout', () => {
     expect(reply.status).toHaveBeenCalledWith(204)
   })
 
+  it('completes logout (session destroy, cookie clear) even when the audit UPDATE rejects', async () => {
+    const { request, query, destroy } = makeRequest({ sessionId: 'the-sid' })
+    query.mockRejectedValue(new Error('connection terminated unexpectedly'))
+    const reply = makeReply()
+
+    await expect(handleLogout(request, reply)).resolves.toBeUndefined()
+
+    expect(query).toHaveBeenCalled()
+    expect(destroy).toHaveBeenCalled()
+    expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
+    expect(reply.status).toHaveBeenCalledWith(204)
+  })
+
   it('completes logout (audit stamp, session destroy, cookie clear) even when getOidcConfig() rejects', async () => {
     const oidcClient = await import('../src/auth/oidcClient.js')
     vi.mocked(oidcClient.getOidcConfig).mockRejectedValue(new Error('B2C discovery unreachable'))
