@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { FundingResourceAsset as FundingResourceRow, PaginationState, SortState } from 'src/types/library'
 import { ElasticsearchResponse, QueryClause } from 'src/types/elastic'
 import { fundingResourceAsset } from 'src/components/data_library/assets/fundingResourceAsset'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 const pagination: PaginationState = { page: 0, pageSize: 25 }
 
@@ -244,6 +245,28 @@ describe('fundingResourceAsset — transformResponse', () => {
     const result = fundingResourceAsset.transformResponse(response, pagination)
     expect(result.items).toHaveLength(0)
     expect(result.total).toBe(0)
+  })
+
+  // The ES clause for fundingDate only decides which studies are aggregated;
+  // every funding resource of a qualifying study comes back, so
+  // transformResponse must re-check each row or the grid and count badge
+  // include out-of-range rows.
+  it('returns only funding resources within the fundingDate range', () => {
+    const response = makeResponse([
+      makeBucket('1', [
+        { fundingId: 'f-too-early', startDate: '2018-01-01', endDate: '2019-01-01' },
+        { fundingId: 'f-in-range', startDate: '2021-01-01', endDate: '2022-06-30' },
+        { fundingId: 'f-too-late', startDate: '2021-01-01', endDate: '2026-01-01' },
+      ]),
+    ])
+
+    const result = fundingResourceAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      fundingDate: { startDate: '2020-01-01', endDate: '2023-12-31' },
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as FundingResourceRow).fundingId).toBe('f-in-range')
   })
 })
 

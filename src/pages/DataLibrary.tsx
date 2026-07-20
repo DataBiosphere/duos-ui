@@ -26,6 +26,12 @@ export const DataLibrary: React.FC = () => {
   const institutionId = user?.institution?.id
   const institutionName = user?.institution?.name
 
+  // Non-public studies are hidden from researchers. Chairpersons, Data
+  // Submitters, Admins, and Signing Officials retain full visibility.
+  const restrictToPublicVisibility = !(
+    user?.isChairPerson || user?.isDataSubmitter || user?.isAdmin || user?.isSigningOfficial
+  )
+
   useEffect(() => {
     const key = query === undefined ? '/datalibrary' : query.toLowerCase()
     if (key === 'myinstitution' && !institutionId) {
@@ -54,6 +60,7 @@ export const DataLibrary: React.FC = () => {
         description,
         featured: brand.featured,
         order: brand.order,
+        restrictToPublicVisibility,
       }
     }
 
@@ -63,8 +70,9 @@ export const DataLibrary: React.FC = () => {
       description,
       featured: true,
       order: 0,
+      restrictToPublicVisibility,
     }
-  }, [query, institutionId, institutionName])
+  }, [query, institutionId, institutionName, restrictToPublicVisibility])
 
   const pageState = useLibraryPageState(libraryConfig)
   const { urlState, data, currentAsset, handleSearchChange } = pageState

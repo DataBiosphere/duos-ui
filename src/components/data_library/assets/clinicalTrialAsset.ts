@@ -7,7 +7,7 @@ import {
 } from 'src/types/elastic'
 import { ClinicalTrialAsset, FilterState, PaginationState, SortState } from 'src/types/library'
 import { makeClinicalTrialColumns } from 'src/components/data_library/columns/clinicalTrialColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 import { ClinicalTrialInterventionType, ClinicalTrialPhase, ClinicalTrialStatus } from 'src/types/model'
 
 const includesIgnoreCase = (source: string | undefined, values: string[]) => {
@@ -86,20 +86,7 @@ export const clinicalTrialAsset: AssetDefinition = {
         },
       },
       aggs: {
-        studies: {
-          terms: {
-            field: 'study.studyId',
-            size: 10000,
-          },
-          aggs: {
-            study_details: {
-              top_hits: {
-                size: 1,
-                _source: ['study.*'],
-              },
-            },
-          },
-        },
+        studies: STUDIES_AGG,
       },
     }
   },

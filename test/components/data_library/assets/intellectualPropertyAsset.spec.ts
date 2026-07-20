@@ -9,6 +9,7 @@ import {
   IntellectualPropertyStudyAggregationBucket,
   QueryClause,
 } from 'src/types/elastic'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 const pagination: PaginationState = { page: 0, pageSize: 25 }
 
@@ -227,6 +228,27 @@ describe('intellectualPropertyAsset — transformResponse', () => {
     expect(page1.total).toBe(30)
     expect(page2.items).toHaveLength(10)
     expect((page2.items[0] as IntellectualPropertyAsset).ipId).toBe('ip-10')
+  })
+
+  // The ES clause for ipFiledDate only decides which studies are aggregated;
+  // every IP asset of a qualifying study comes back, so transformResponse must
+  // re-check each row or the grid and count badge include out-of-range rows.
+  it('returns only assets filed within the ipFiledDate range', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { ipId: 'ip-old', filingDate: '2019-05-01' },
+        { ipId: 'ip-in-range', filingDate: '2022-03-01' },
+        { ipId: 'ip-new', filingDate: '2025-01-01' },
+      ]),
+    ])
+
+    const result = intellectualPropertyAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      ipFiledDate: { after: '2020-01-01', before: '2023-12-31' },
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as IntellectualPropertyAsset).ipId).toBe('ip-in-range')
   })
 
   it('handles studies with no intellectualProperties assets', () => {

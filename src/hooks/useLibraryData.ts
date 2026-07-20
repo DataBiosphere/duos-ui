@@ -2,11 +2,10 @@ import { useQuery } from '@tanstack/react-query'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { ElasticsearchQuery, QueryClause } from 'src/types/elastic'
 import { AssetType, FilterState, LibraryVersionNew, PaginationState, SortState } from 'src/types/library'
-import { assetRegistry } from 'src/components/data_library/assets'
+import { ALL_SEARCH_FIELDS, assetRegistry } from 'src/components/data_library/assets'
 import {
-  buildFilterClausesForAsset,
+  buildActiveFilterClauses,
   EMPTY_FILTERS,
-  sanitizeFiltersForAsset,
 } from 'src/components/data_library/filterRegistry'
 
 export const LIBRARY_DATA_QUERY_KEY = 'library-data'
@@ -16,15 +15,19 @@ export const LIBRARY_DATA_QUERY_KEY = 'library-data'
  * the base `must` clauses (study-exists check + library filter + search term)
  * and the `filter` clauses derived from the filter panel.
  *
- * Asset-specific code (aggregations, pagination, sort) is handled by each
- * asset's own `buildQuery` method.
+ * Every active filter is applied regardless of which tab it was set on, so
+ * filter rules combine across tabs. Asset-specific code (aggregations,
+ * pagination, sort) is handled by each asset's own `buildQuery` method.
+ *
+ * `searchFields` defaults to the union of every asset's search fields
+ * (`ALL_SEARCH_FIELDS`) so the search term matches the same fields on every
+ * tab; this keeps the tab-count badges consistent with each tab's grid.
  */
-const buildCommonQueryClauses = (
-  assetType: AssetType,
+export const buildCommonQueryClauses = (
   libraryConfig: LibraryVersionNew,
   filters: FilterState,
   queryTerm: string,
-  searchFields: string[],
+  searchFields: string[] = ALL_SEARCH_FIELDS,
 ): { queryChunks: QueryClause[], filterQuery: QueryClause[] } => {
   const queryChunks: QueryClause[] = [
     { exists: { field: 'study' } },
@@ -32,6 +35,13 @@ const buildCommonQueryClauses = (
 
   if (libraryConfig.query) {
     queryChunks.push(libraryConfig.query as QueryClause)
+  }
+
+  // Hide studies not flagged for public visibility from the researcher-facing
+  // library. Privileged roles (Chairperson, Data Submitter, Admin, Signing
+  // Official) leave this flag unset so they still see non-public studies.
+  if (libraryConfig.restrictToPublicVisibility) {
+    queryChunks.push({ term: { 'study.publicVisibility': true } })
   }
 
   if (queryTerm.length > 0) {
@@ -44,7 +54,7 @@ const buildCommonQueryClauses = (
     })
   }
 
-  const filterQuery = buildFilterClausesForAsset(assetType, filters)
+  const filterQuery = buildActiveFilterClauses(filters)
 
   return { queryChunks, filterQuery }
 }
@@ -65,13 +75,16 @@ export const buildElasticsearchQuery = (
   sort?: SortState,
 ): ElasticsearchQuery => {
   const asset = assetRegistry[assetType]
+  // Search every asset's fields (not just this tab's) so a search term matches
+  // the same studies here and in the shared tab-counts query (`useLibraryTabCounts`),
+  // keeping each tab's grid consistent with its count badge.
   const { queryChunks, filterQuery } = buildCommonQueryClauses(
-    assetType,
     libraryConfig,
     filters,
     queryTerm,
-    asset.searchFields,
+    ALL_SEARCH_FIELDS,
   )
+
   return asset.buildQuery(queryChunks, filterQuery, pagination, sort, { showAllControlled: libraryConfig.showAllControlled })
 }
 
@@ -85,8 +98,8 @@ export const useLibraryData = (
   queryTerm: string,
   pagination: PaginationState,
   sort?: SortState,
+  options?: { enabled?: boolean },
 ) => {
-  const sanitizedFilters = sanitizeFiltersForAsset(assetType, filters)
   const emptyResult = {
     items: [],
     total: 0,
@@ -94,11 +107,15 @@ export const useLibraryData = (
   }
 
   return useQuery({
+    // Study-asset tabs render from the shared tab-counts query response, so their
+    // caller disables this query (`enabled: false`) to avoid a redundant
+    // full-corpus request. Studies and Datasets keep their own data query.
+    enabled: options?.enabled ?? true,
     queryKey: [
       LIBRARY_DATA_QUERY_KEY,
       libraryConfig.key,
       assetType,
-      sanitizedFilters,
+      filters,
       queryTerm,
       pagination,
       sort,
@@ -107,14 +124,14 @@ export const useLibraryData = (
       const query = buildElasticsearchQuery(
         libraryConfig,
         assetType,
-        sanitizedFilters,
+        filters,
         queryTerm,
         pagination,
         sort,
       )
 
       const response = await DataSet.searchDatasetIndexV2(query)
-      return assetRegistry[assetType].transformResponse(response, pagination, sanitizedFilters)
+      return assetRegistry[assetType].transformResponse(response, pagination, filters)
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,

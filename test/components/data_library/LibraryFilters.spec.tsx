@@ -37,6 +37,10 @@ const availableFilters: AvailableFilters = {
     { value: 'true', label: 'Yes' },
     { value: 'false', label: 'No' },
   ],
+  publicationsDatasetsCited: [
+    { value: 'true', label: 'Yes' },
+    { value: 'false', label: 'No' },
+  ],
   biospecimenPostMortemIntervalRange: { min: 0, max: 1000 },
   participantCountRange: { min: 0, max: 1000 },
 }
@@ -121,6 +125,13 @@ describe('LibraryFilters', () => {
     })))
   })
 
+  it('shows a participant minimum of 0 in the input rather than a blank field', async () => {
+    const user = userEvent.setup()
+    render(<LibraryFiltersWrapper filters={{ ...EMPTY_FILTERS, participantCount: { min: 0 } }} />)
+    await user.click(screen.getByText('Participants'))
+    expect(screen.getByLabelText('Minimum')).toHaveValue(0)
+  })
+
   it('shows skeletons when loading', () => {
     render(<LibraryFiltersWrapper loading={true} />)
     expect(document.querySelectorAll('.MuiSkeleton-root')).toHaveLength(3)
@@ -136,9 +147,116 @@ describe('LibraryFilters', () => {
         sections={getFilterSectionsForAsset(AssetType.PRESENTATIONS, availableFilters)}
       />,
     )
-    expect(screen.getByText('Datasets Cited?')).toBeInTheDocument()
+    expect(screen.getByText('Datasets Cited (Presentations)?')).toBeInTheDocument()
     expect(screen.queryByText('Participants')).not.toBeInTheDocument()
     expect(screen.queryByText('Access Request Process')).not.toBeInTheDocument()
+  })
+
+  it('renders removable chips for filters carried over from other tabs', async () => {
+    const user = userEvent.setup()
+    const onRemoveExternalFilter = vi.fn()
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.MODELS, availableFilters)}
+        externalFilters={[
+          { key: 'clinicalTrialStatus', sectionLabel: 'Status', valueLabel: 'Recruiting', value: 'Recruiting' },
+        ]}
+        onRemoveExternalFilter={onRemoveExternalFilter}
+      />,
+    )
+
+    expect(screen.getByText('Filters from other views')).toBeInTheDocument()
+    expect(screen.getByText('Status: Recruiting')).toBeInTheDocument()
+
+    await user.click(screen.getByTestId('CancelIcon'))
+    expect(onRemoveExternalFilter).toHaveBeenCalledWith(
+      { key: 'clinicalTrialStatus', sectionLabel: 'Status', valueLabel: 'Recruiting', value: 'Recruiting' },
+    )
+  })
+
+  it('shows the Clear button when only external filters are active', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.MODELS, availableFilters)}
+        externalFilters={[
+          { key: 'clinicalTrialStatus', sectionLabel: 'Status', valueLabel: 'Recruiting', value: 'Recruiting' },
+        ]}
+      />,
+    )
+    expect(screen.getByText('Clear')).toBeInTheDocument()
+  })
+
+  it('does not render the external-filters block when there are none', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.DATASETS, availableFilters)}
+      />,
+    )
+    expect(screen.queryByText('Filters from other views')).not.toBeInTheDocument()
+  })
+
+  it('shows an active-filter count indicator when the panel is collapsed', () => {
+    render(
+      <LibraryFilters
+        filters={{ ...EMPTY_FILTERS, accessManagement: ['controlled'] }}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.DATASETS, availableFilters)}
+        externalFilters={[
+          { key: 'clinicalTrialStatus', sectionLabel: 'Status', valueLabel: 'Recruiting', value: 'Recruiting' },
+        ]}
+        isOpen={false}
+        onToggle={vi.fn()}
+      />,
+    )
+    // One visible section value (accessManagement) + one external filter = 2.
+    expect(screen.getByLabelText('2 active filters')).toBeInTheDocument()
+    expect(screen.getByText('Filters active')).toBeInTheDocument()
+  })
+
+  it('counts a multi-value external filter once so the collapsed indicator is tab-independent', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.MODELS, availableFilters)}
+        externalFilters={[
+          { key: 'dac', sectionLabel: 'DAC', valueLabel: 'DAC A', value: 'A' },
+          { key: 'dac', sectionLabel: 'DAC', valueLabel: 'DAC B', value: 'B' },
+          { key: 'dac', sectionLabel: 'DAC', valueLabel: 'DAC C', value: 'C' },
+        ]}
+        isOpen={false}
+        onToggle={vi.fn()}
+      />,
+    )
+    // Three dac values are one filter category, so the indicator reads 1 — the
+    // same number the Datasets tab would show with dac as a visible section.
+    expect(screen.getByLabelText('1 active filters')).toBeInTheDocument()
+  })
+
+  it('shows "Show filters" with no indicator when collapsed and nothing is active', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.DATASETS, availableFilters)}
+        isOpen={false}
+        onToggle={vi.fn()}
+      />,
+    )
+    expect(screen.getByText('Show filters')).toBeInTheDocument()
+    expect(screen.queryByLabelText(/active filters/)).not.toBeInTheDocument()
   })
 
   it('shows post-mortem warning when range is set without a unit', async () => {

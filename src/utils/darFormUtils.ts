@@ -390,6 +390,9 @@ export const calcPublicationErrors = (newPublication: Partial<Publication>): Pub
     }
   }
   if (isStringEmpty(newPublication?.datasetCitation)) validation.datasetCitation = requiredError
+  if (newPublication?.citation === undefined || newPublication?.citation === null) {
+    validation.citation = requiredError
+  }
   if (isStringEmpty(newPublication?.journal)) validation.journal = requiredError
   if (isStringEmpty(newPublication?.doi)) validation.doi = requiredError
 
