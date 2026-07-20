@@ -1,8 +1,26 @@
 import { GridColDef } from '@mui/x-data-grid'
 import { FundingResourceStudyAggregationResponse, ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
-import { FundingResourceAsset, PaginationState, SortState } from 'src/types/library'
+import { FilterState, FundingResourceAsset, PaginationState, SortState } from 'src/types/library'
 import { makeFundingResourceColumns } from 'src/components/data_library/columns/fundingResourceColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+
+// The Elasticsearch clause for fundingDate only decides which *studies* enter
+// the shared aggregation; every funding resource of a qualifying study comes
+// back, so each row must be re-checked here or the grid (and the tab-count
+// badge derived from this same function) includes resources outside the range.
+// Mirrors the query semantics: startDate filter → resource starts on/after it,
+// endDate filter → resource ends on/before it.
+const matchesFundingResourceFilters = (funding: FundingResourceAsset, filters?: FilterState) => {
+  if (!filters) {
+    return true
+  }
+
+  const { startDate, endDate } = filters.fundingDate
+  if (startDate && (!funding.startDate || funding.startDate < startDate)) {
+    return false
+  }
+  return !(endDate && (!funding.endDate || funding.endDate > endDate))
+}
 
 export const fundingResourceAsset: AssetDefinition = {
   label: { singular: 'FundingResource', plural: 'FundingResources' },
@@ -37,25 +55,12 @@ export const fundingResourceAsset: AssetDefinition = {
         },
       },
       aggs: {
-        studies: {
-          terms: {
-            field: 'study.studyId',
-            size: 10000,
-          },
-          aggs: {
-            study_details: {
-              top_hits: {
-                size: 1,
-                _source: ['study.*'],
-              },
-            },
-          },
-        },
+        studies: STUDIES_AGG,
       },
     }
   },
 
-  transformResponse(response: ElasticsearchResponse, pagination: PaginationState): LibraryPage {
+  transformResponse(response: ElasticsearchResponse, pagination: PaginationState, filters?: FilterState): LibraryPage {
     const studiesAgg = response.aggregations?.studies as FundingResourceStudyAggregationResponse | undefined
     const buckets = studiesAgg?.buckets || []
     const fundingResources: FundingResourceAsset[] = []
@@ -66,7 +71,7 @@ export const fundingResourceAsset: AssetDefinition = {
       for (const [fundingResourceIndex, fundingResource] of studyFundingResources.entries()) {
         // fundingId may be absent from the indexed document; fall back to a
         // composite key so every row in the DataGrid has a unique id.
-        fundingResources.push({
+        const row: FundingResourceAsset = {
           fundingId: fundingResource.fundingId || `${bucket.key}-${fundingResourceIndex}`,
           studyId: bucket.key,
           studyName: studyData.studyName || '',
@@ -78,7 +83,11 @@ export const fundingResourceAsset: AssetDefinition = {
           endDate: fundingResource.endDate || '',
           url: fundingResource.url || '',
           tags: fundingResource.tags || [],
-        })
+        }
+
+        if (matchesFundingResourceFilters(row, filters)) {
+          fundingResources.push(row)
+        }
       }
     }
 

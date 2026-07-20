@@ -45,6 +45,7 @@ vi.mock('src/hooks/useLibraryPageState', () => ({
     handleTabChange: vi.fn(),
     handleFiltersChange: vi.fn(),
     handleClearFilters: vi.fn(),
+    handleRemoveExternalFilter: vi.fn(),
     handleSortChange: vi.fn(),
     handleToggleFilters: vi.fn(),
     updateUrlState: vi.fn(),
@@ -53,9 +54,10 @@ vi.mock('src/hooks/useLibraryPageState', () => ({
     error: null,
     isMetadataLoading: false,
     availableFilters: {},
+    tabCounts: undefined,
     currentAsset: { label: { singular: 'dataset', plural: 'datasets' } },
-    sanitizedFilters: {},
     filterSections: [],
+    externalFilters: [],
     sortModel: [],
   })),
 }))
@@ -228,6 +230,26 @@ describe('DatasetSubmissions', () => {
 
     await waitFor(() => {
       expect(showSuccessSpy).toHaveBeenCalledWith({ text: `Removed dataset 'Dataset One' successfully.` })
+    })
+  })
+
+  it('invalidates both the data grid and the tab-count queries after a successful delete', async () => {
+    vi.mocked(DataSet.deleteDataset).mockResolvedValue({ status: 200 })
+    vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => undefined)
+    const invalidateSpy = vi.spyOn(QueryClient.prototype, 'invalidateQueries')
+
+    renderComponent()
+    act(() => {
+      capturedOnDelete!({ datasetId: 7, datasetName: 'Dataset Seven' })
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Confirm/i }))
+
+    // libraryConfig.key is `submissions-${userId}`; both the grid rows and the
+    // tab-count badges are backed by separate queries and must both refetch so
+    // the Datasets badge does not keep showing the stale pre-delete count.
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['library-data', 'submissions-42'] })
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['library-tab-counts', 'submissions-42'] })
     })
   })
 

@@ -27,7 +27,7 @@ RUN pnpm exec vite build && node scripts/write-vite-config-json.mjs
 
 # Build server
 COPY server/src ./server/src
-COPY server/tsconfig.json ./server/tsconfig.json
+COPY server/tsconfig.json server/tsconfig.build.json ./server/
 RUN pnpm --filter duos-server run build
 
 # Create a self-contained prod-only server bundle (no devDeps, no workspace symlinks)

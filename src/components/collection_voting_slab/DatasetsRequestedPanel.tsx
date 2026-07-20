@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { filter, includes } from 'src/utils/NodashUtil'
 import { DacTerm, Dataset } from 'src/types/model'
 import SectionHeading from 'src/components/collection_voting_slab/SectionHeading'
@@ -14,46 +14,26 @@ type DatasetsRequestedPanelProps = {
 }
 
 export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProps) {
-  const [filteredDatasets, setFilteredDatasets] = useState<Dataset[]>([])
-  const [visibleDatasets, setVisibleDatasets] = useState<Dataset[]>([])
-  const [datasetCount, setDatasetCount] = useState<number>(0)
   const [expanded, setExpanded] = useState<boolean>(false)
   const collapsedDatasetCapacity = 5
   const { bucketDatasets, dacs, dacDatasetIds, isLoading, adminPage } = props
 
-  const collapseView = useCallback((datasets: Dataset[]) => {
-    const datasetsHiddenWhenCollapsed = datasets.length > collapsedDatasetCapacity
-
-    const collapsedViewDatasets = datasetsHiddenWhenCollapsed
-      ? datasets.slice(0, collapsedDatasetCapacity)
-      : datasets
-
-    setVisibleDatasets(collapsedViewDatasets)
-  }, [collapsedDatasetCapacity])
-
-  React.useEffect(() => {
-    const datasets = adminPage
+  const filteredDatasets = useMemo(() => {
+    return adminPage
       ? bucketDatasets
       : filter(bucketDatasets, (dataset: Dataset) => {
           const { datasetId } = dataset
           return includes(dacDatasetIds, datasetId)
         })
+  }, [adminPage, bucketDatasets, dacDatasetIds])
 
-    // oxlint-disable-next-line react-hooks/set-state-in-effect
-    setFilteredDatasets(datasets)
-    setDatasetCount(datasets.length)
-    collapseView(datasets)
-  }, [adminPage, bucketDatasets, dacDatasetIds, collapseView])
+  const datasetCount = filteredDatasets.length
+  const visibleDatasets = expanded
+    ? filteredDatasets
+    : filteredDatasets.slice(0, collapsedDatasetCapacity)
 
-  const expandDatasetList = () => {
-    setExpanded(true)
-    setVisibleDatasets(filteredDatasets)
-  }
-
-  const collapseDatasetList = () => {
-    setExpanded(false)
-    setVisibleDatasets(filteredDatasets.slice(0, collapsedDatasetCapacity))
-  }
+  const expandDatasetList = () => setExpanded(true)
+  const collapseDatasetList = () => setExpanded(false)
 
   return (
     <div style={{

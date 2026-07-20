@@ -39,13 +39,15 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
     isFetching,
     error,
     isMetadataLoading,
+    tabCounts,
     currentAsset,
-    sanitizedFilters,
     filterSections,
+    externalFilters,
     sortModel,
     handleTabChange,
     handleFiltersChange,
     handleClearFilters,
+    handleRemoveExternalFilter,
     handleSortChange,
     handleToggleFilters,
   } = pageState
@@ -78,7 +80,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
         <LibraryTabs
           value={urlState.tab}
           onChange={handleTabChange}
-          tabs={tabs}
+          tabs={tabs.map(tab => ({ ...tab, count: tabCounts?.[tab.key] }))}
         />
       </Box>
 
@@ -94,10 +96,12 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
           }}
         >
           <LibraryFilters
-            filters={sanitizedFilters}
+            filters={urlState.filters}
             onChange={handleFiltersChange}
             onClear={handleClearFilters}
             sections={filterSections}
+            externalFilters={externalFilters}
+            onRemoveExternalFilter={handleRemoveExternalFilter}
             loading={isMetadataLoading}
             isOpen={!urlState.hideFilters}
             onToggle={handleToggleFilters}

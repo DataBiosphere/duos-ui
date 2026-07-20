@@ -37,42 +37,42 @@ describe('DataUsePill', () => {
 
 describe('DataUsePills', () => {
   it('renders permission entries', () => {
-    render(<>{DataUsePills([permissionEntry])}</>)
+    render(<DataUsePills dataUses={[permissionEntry]} />)
     expect(screen.getByText('HMB')).toBeInTheDocument()
     expect(screen.getByText('Health/Medical/Biomedical research')).toBeInTheDocument()
   })
 
   it('renders modifier entries under a Modifiers heading', () => {
-    render(<>{DataUsePills([permissionEntry, modifierEntry])}</>)
+    render(<DataUsePills dataUses={[permissionEntry, modifierEntry]} />)
     expect(screen.getByText('Modifiers')).toBeInTheDocument()
     expect(screen.getByText('MDS')).toBeInTheDocument()
   })
 
   it('does not render the Modifiers heading when there are no modifier entries', () => {
-    render(<>{DataUsePills([permissionEntry])}</>)
+    render(<DataUsePills dataUses={[permissionEntry]} />)
     expect(screen.queryByText('Modifiers')).not.toBeInTheDocument()
   })
 
   it('renders two-column layout with Permissions heading when twoColumn=true', () => {
-    const { container } = render(<>{DataUsePills([permissionEntry], true)}</>)
+    const { container } = render(<DataUsePills dataUses={[permissionEntry]} twoColumn />)
     expect(screen.getByText('Permissions')).toBeInTheDocument()
     expect(container.querySelector('.permissions-uses')).toBeInTheDocument()
     expect(container.querySelector('.modifier-uses')).toBeInTheDocument()
   })
 
   it('renders modifier entries in twoColumn layout', () => {
-    render(<>{DataUsePills([permissionEntry, modifierEntry], true)}</>)
+    render(<DataUsePills dataUses={[permissionEntry, modifierEntry]} twoColumn />)
     expect(screen.getByText('Modifiers')).toBeInTheDocument()
     expect(screen.getByText('MDS')).toBeInTheDocument()
   })
 
   it('does not render the Modifiers heading in twoColumn layout when there are no modifier entries', () => {
-    render(<>{DataUsePills([permissionEntry], true)}</>)
+    render(<DataUsePills dataUses={[permissionEntry]} twoColumn />)
     expect(screen.queryByText('Modifiers')).not.toBeInTheDocument()
   })
 
   it('renders multiple entries of the same type', () => {
-    render(<>{DataUsePills([permissionEntry, permissionEntry2])}</>)
+    render(<DataUsePills dataUses={[permissionEntry, permissionEntry2]} />)
     expect(screen.getByText('HMB')).toBeInTheDocument()
     expect(screen.getByText('DS')).toBeInTheDocument()
   })

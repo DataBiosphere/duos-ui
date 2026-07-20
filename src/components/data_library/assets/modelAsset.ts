@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, ModelStudyAggregationResponse, QueryClause } from 'src/types/elastic'
 import { ModelAsset, PaginationState, SortState } from 'src/types/library'
 import { makeModelColumns } from 'src/components/data_library/columns/modelColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 
 export const modelAsset: AssetDefinition = {
   label: { singular: 'AI Model', plural: 'AI Models' },
@@ -39,20 +39,7 @@ export const modelAsset: AssetDefinition = {
         },
       },
       aggs: {
-        studies: {
-          terms: {
-            field: 'study.studyId',
-            size: 10000,
-          },
-          aggs: {
-            study_details: {
-              top_hits: {
-                size: 1,
-                _source: ['study.*'],
-              },
-            },
-          },
-        },
+        studies: STUDIES_AGG,
       },
     }
   },

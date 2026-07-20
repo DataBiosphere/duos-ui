@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ResearcherInfo from 'src/pages/dar_application/ResearcherInfo'
 import { DataAccessAgreements } from 'src/pages/dar_application/DataAccessAgreements'
 import DataAccessRequest, { OntologyOption } from 'src/pages/dar_application/DataAccessRequest'
@@ -202,7 +202,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
   const [isLoading, setIsLoading] = useState(true)
   const [isAttested, setIsAttested] = useState(false)
 
-  const [applicationTabs, setApplicationTabs] = useState<AppTab[]>([])
+  const [showAddendum, setShowAddendum] = useState(false)
 
   const [countriesOfOperation, setCountriesOfOperation] = useState<string[]>([])
 
@@ -310,12 +310,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
       setDatasets(datasets)
       setSelectedDatasets(datasets)
     })
-    if (!existingDarsReadOnlyMode) {
-      const updatedTabs = [...ApplicationTabs, { name: 'Data Access Agreements (DAA)', id: DATA_ACCESS_AGREEMENTS_TAB_ID }]
-      // oxlint-disable-next-line react-hooks/set-state-in-effect
-      setApplicationTabs(updatedTabs)
-    }
-  }, [formData.datasetIds, existingDarsReadOnlyMode])
+  }, [formData.datasetIds])
 
   useEffect(() => {
     translateDataUseRestrictionsFromDataUseArray(datasets.map(ds => ds.dataUse)).then((translations) => {
@@ -402,15 +397,14 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     setIsLoading(false)
   }, [researcher, existingDarsReadOnlyMode, resolveInitialFormData, batchFormFieldChange])
 
-  React.useEffect(() => {
+  const baseApplicationTabs = useMemo<AppTab[]>(() => {
     if (existingDarsReadOnlyMode) {
       let appTabs: AppTab[] = []
       if (isProgressReportApplication) {
         // if we are creating a new progress report, we need to add another tab for the application
         appTabs = [{ name: 'Progress Report ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
       }
-      // oxlint-disable-next-line react-hooks/set-state-in-effect
-      setApplicationTabs([...appTabs,
+      return [...appTabs,
         ...reverseOrderedDARs.map((_dar, index) => {
           const whichPRIsThis = reverseOrderedDARs.length - index - 1
           const isLast = index === reverseOrderedDARs.length - 1
@@ -418,12 +412,20 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
           return { name: itemLabel ?? '', id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
         }),
         { name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false },
-      ])
+      ]
     }
+    return [...ApplicationTabs, { name: 'Data Access Agreements (DAA)', id: DATA_ACCESS_AGREEMENTS_TAB_ID }]
   }, [formData.darCode, isProgressReportApplication, existingDarsReadOnlyMode, reverseOrderedDARs])
 
+  const applicationTabs = useMemo<AppTab[]>(
+    () => showAddendum
+      ? [...baseApplicationTabs, { name: 'Addendum', id: ADDENDUM_TAB_ID, showStep: false }]
+      : baseApplicationTabs,
+    [baseApplicationTabs, showAddendum],
+  )
+
   React.useEffect(() => {
-    // oxlint-disable-next-line react-hooks/set-state-in-effect
+    // oxlint-disable-next-line react/react-compiler
     init()
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
       if (!isMountedRef.current) return
@@ -468,22 +470,11 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
   }
 
   const addDucAddendumTab = () => {
-    const hasAddendumTab = applicationTabs.some(tab => tab.id === ADDENDUM_TAB_ID)
-    if (!hasAddendumTab) {
-      const tabs = [
-        ...applicationTabs,
-        { name: 'Addendum', id: ADDENDUM_TAB_ID, showStep: false },
-      ]
-      setApplicationTabs(tabs)
-    }
+    setShowAddendum(true)
   }
 
   const removeAddendumTab = () => {
-    const hasAddendumTab = applicationTabs.some(tab => tab.id === ADDENDUM_TAB_ID)
-    if (hasAddendumTab) {
-      const tabs = applicationTabs.filter(tab => tab.id !== ADDENDUM_TAB_ID)
-      setApplicationTabs(tabs)
-    }
+    setShowAddendum(false)
   }
 
   const attemptSubmit = async (): Promise<boolean> => {

@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { AssetType, FilterState, LibraryUrlState, SortOrder } from 'src/types/library'
 
 type ArrayFilterParamConfig = {
@@ -72,6 +72,31 @@ const DATE_FILTER_PARAM_CONFIG: DateFilterParamConfig[] = [
   { key: 'fundingDate', startParam: 'fundingStartDate', endParam: 'fundingEndDate' },
 ]
 
+// Parse an integer URL param defensively: a malformed value (e.g. ?page=abc)
+// must become undefined, not NaN — NaN serializes to null in the JSON query
+// body and Elasticsearch rejects null range bounds / from / size, which would
+// otherwise break every tab at once via the shared tab-counts query.
+const parseIntParam = (value: string | null): number | undefined => {
+  if (!value) {
+    return undefined
+  }
+  const parsed = Number.parseInt(value)
+  return Number.isNaN(parsed) ? undefined : parsed
+}
+
+// Pagination params additionally fall back to their defaults when out of range
+// (negative page, non-positive page size) so a hand-edited URL can't produce a
+// negative `from` or an empty page slice.
+const parsePageParam = (searchParams: URLSearchParams): number => {
+  const page = parseIntParam(searchParams.get('page'))
+  return page !== undefined && page > 0 ? page : 0
+}
+
+const parsePageSizeParam = (searchParams: URLSearchParams): number => {
+  const pageSize = parseIntParam(searchParams.get('pageSize'))
+  return pageSize !== undefined && pageSize > 0 ? pageSize : 25
+}
+
 const parseArrayParamValues = (searchParams: URLSearchParams, param: string): string[] => {
   const values = searchParams.getAll(param).map(value => value.trim()).filter(Boolean)
 
@@ -104,8 +129,8 @@ const parseRangeFilters = (searchParams: URLSearchParams) => Object.fromEntries(
     const maxValue = searchParams.get(maxParam) ?? (legacyMaxParam ? searchParams.get(legacyMaxParam) : null)
 
     return [key, {
-      min: minValue ? Number.parseInt(minValue) : undefined,
-      max: maxValue ? Number.parseInt(maxValue) : undefined,
+      min: parseIntParam(minValue),
+      max: parseIntParam(maxValue),
     }]
   }),
 )
@@ -183,25 +208,30 @@ const serializeDateFiltersToUrl = (filters: FilterState, searchParams: URLSearch
   })
 }
 
-const parseDatasetsCited = (searchParams: URLSearchParams) => {
-  const value = searchParams.get('datasetsCited')
-    ?? searchParams.get('presentationsDatasetsCited')
-    ?? searchParams.get('publicationsDatasetsCited')
-
-  return value === null ? undefined : value === 'true'
+const parseBooleanParam = (searchParams: URLSearchParams, params: string[]): boolean | undefined => {
+  for (const param of params) {
+    const value = searchParams.get(param)
+    if (value !== null) {
+      return value === 'true'
+    }
+  }
+  return undefined
 }
 
-const serializeDatasetsCitedToUrl = (filters: FilterState, searchParams: URLSearchParams) => {
-  if (filters.datasetsCited === undefined) {
-    searchParams.delete('datasetsCited')
-    searchParams.delete('presentationsDatasetsCited')
-    searchParams.delete('publicationsDatasetsCited')
-    return
-  }
+const serializeBooleanFilterToUrl = (
+  value: boolean | undefined,
+  param: string,
+  searchParams: URLSearchParams,
+  legacyParams: string[] = [],
+) => {
+  legacyParams.forEach(legacyParam => searchParams.delete(legacyParam))
 
-  searchParams.set('datasetsCited', filters.datasetsCited ? 'true' : 'false')
-  searchParams.delete('presentationsDatasetsCited')
-  searchParams.delete('publicationsDatasetsCited')
+  if (value === undefined) {
+    searchParams.delete(param)
+  }
+  else {
+    searchParams.set(param, value ? 'true' : 'false')
+  }
 }
 
 /**
@@ -212,7 +242,8 @@ const parseFiltersFromUrl = (searchParams: URLSearchParams): FilterState => {
     ...parseArrayFilters(searchParams),
     ...parseRangeFilters(searchParams),
     ...parseDateFilters(searchParams),
-    datasetsCited: parseDatasetsCited(searchParams),
+    datasetsCited: parseBooleanParam(searchParams, ['datasetsCited', 'presentationsDatasetsCited']),
+    publicationsDatasetsCited: parseBooleanParam(searchParams, ['publicationsDatasetsCited']),
   } as FilterState
 }
 
@@ -224,7 +255,8 @@ const serializeFiltersToUrl = (
   searchParams: URLSearchParams,
 ): void => {
   serializeArrayFiltersToUrl(filters, searchParams)
-  serializeDatasetsCitedToUrl(filters, searchParams)
+  serializeBooleanFilterToUrl(filters.datasetsCited, 'datasetsCited', searchParams, ['presentationsDatasetsCited'])
+  serializeBooleanFilterToUrl(filters.publicationsDatasetsCited, 'publicationsDatasetsCited', searchParams)
   serializeRangeFiltersToUrl(filters, searchParams)
   serializeDateFiltersToUrl(filters, searchParams)
 }
@@ -310,17 +342,23 @@ const applyHideFiltersUpdate = (updates: Partial<LibraryUrlState>, searchParams:
 export const useLibraryUrlState = () => {
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const state: LibraryUrlState = {
+  // react-router returns a stable `searchParams` reference per location, so
+  // memoising on it keeps `state` (and, critically, `state.filters`) referentially
+  // stable across unrelated re-renders. That preserves the React.memo on
+  // LibraryFilters and the downstream useMemo/useCallback in useLibraryPageState,
+  // which would otherwise recompute every render because a fresh filters object
+  // was parsed each time.
+  const state: LibraryUrlState = useMemo(() => ({
     library: searchParams.get('library') || 'duos',
     tab: (searchParams.get('tab') as AssetType) || AssetType.DATASETS,
     filters: parseFiltersFromUrl(searchParams),
-    page: Number.parseInt(searchParams.get('page') || '0'),
-    pageSize: Number.parseInt(searchParams.get('pageSize') || '25'),
+    page: parsePageParam(searchParams),
+    pageSize: parsePageSizeParam(searchParams),
     query: searchParams.get('query') || undefined,
     sortField: searchParams.get('sort') || undefined,
     sortOrder: (searchParams.get('order') as SortOrder) || undefined,
     hideFilters: searchParams.get('hideFilters') === 'true',
-  }
+  }), [searchParams])
 
   const updateState = useCallback((updates: Partial<LibraryUrlState>) => {
     const newParams = new URLSearchParams(searchParams)

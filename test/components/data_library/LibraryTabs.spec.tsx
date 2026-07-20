@@ -62,6 +62,26 @@ describe('LibraryTabs', () => {
     }
   })
 
+  it('renders the item count alongside the label when a count is provided', () => {
+    const tabsWithCounts = [
+      { key: AssetType.STUDIES, label: 'Studies', count: 1234 },
+      { key: AssetType.DATASETS, label: 'Datasets', count: 0 },
+    ]
+    render(<LibraryTabs value={AssetType.STUDIES} onChange={() => {}} tabs={tabsWithCounts} />)
+    // Counts render with locale formatting, including zero. Assert against
+    // toLocaleString() (not a hard-coded separator) so the expectation matches
+    // the runtime locale and the test isn't flaky under a non-en-US locale.
+    expect(screen.getByText((1234).toLocaleString())).toBeInTheDocument()
+    expect(screen.getByText((0).toLocaleString())).toBeInTheDocument()
+  })
+
+  it('omits the count when a tab has no count (e.g. still loading)', () => {
+    render(<LibraryTabs value={AssetType.STUDIES} onChange={() => {}} tabs={tabs} />)
+    // Accessible name stays just the label so nothing extra is announced.
+    expect(screen.getByRole('tab', { name: 'Studies' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Datasets' })).toBeInTheDocument()
+  })
+
   it('calls onChange with the tab key when a tab is clicked', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()

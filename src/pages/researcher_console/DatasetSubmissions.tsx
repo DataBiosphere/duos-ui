@@ -10,6 +10,7 @@ import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton'
 import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import { LIBRARY_DATA_QUERY_KEY } from 'src/hooks/useLibraryData'
+import { LIBRARY_TAB_COUNTS_QUERY_KEY } from 'src/hooks/useLibraryTabCounts'
 import LibraryPageShell from 'src/components/data_library/LibraryPageShell'
 import { makeSubmissionColumns } from 'src/components/data_library/columns/submissionColumns'
 import { ConfirmationDialog } from 'src/components/modals/ConfirmationDialog'
@@ -96,7 +97,12 @@ export default function DatasetSubmissions() {
     try {
       await DataSet.deleteDataset(term.datasetId)
       Notifications.showSuccess({ text: `Removed dataset '${term.datasetName}' successfully.` })
+      // Refetch both the grid rows and the tab-count badges: they are backed by
+      // separate queries, so invalidating only the data query drops the deleted
+      // row while the Datasets badge keeps showing the stale pre-delete count for
+      // up to its 5-minute staleTime.
       queryClient.invalidateQueries({ queryKey: [LIBRARY_DATA_QUERY_KEY, libraryConfig.key] })
+      queryClient.invalidateQueries({ queryKey: [LIBRARY_TAB_COUNTS_QUERY_KEY, libraryConfig.key] })
     }
     catch {
       Notifications.showError({ text: `Error removing dataset '${term.datasetName}'` })

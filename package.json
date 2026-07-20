@@ -36,7 +36,7 @@
     "query-string": "9.4.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "react-dropzone": "15.0.0",
+    "react-dropzone": "17.0.0",
     "react-google-charts": "5.2.1",
     "react-markdown": "10.1.0",
     "react-modal": "3.16.3",

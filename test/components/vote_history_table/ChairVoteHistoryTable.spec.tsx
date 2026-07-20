@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render } from '@testing-library/react'
+import { render, fireEvent } from '@testing-library/react'
 import ChairVoteHistoryTable from 'src/components/vote_history_table/ChairVoteHistoryTable'
 import { VoteHistoryRow } from 'src/types/model'
 
@@ -96,5 +96,19 @@ describe('ChairVoteHistoryTable', () => {
     expect(row2[5]).toHaveTextContent('2023-01-02')
     expect(row2[6]).toHaveTextContent('Chair')
     expect(row2[7]).toHaveTextContent('Rejected')
+  })
+
+  it('re-derives the row order when the sort changes', () => {
+    const { container } = render(<ChairVoteHistoryTable voteHistory={testData} />)
+
+    // Default order is by vote date descending: DUOS-00401, DUOS-00403, DUOS-00402.
+    // Clicking the "Dataset ID" header re-sorts ascending by identifier.
+    const datasetSortButton = container.querySelectorAll('.cell-sort')[1]
+    expect(datasetSortButton).toHaveTextContent('Dataset ID')
+    fireEvent.click(datasetSortButton)
+
+    expect(container.querySelectorAll('.row-data-0 [role="cell"]')[1]).toHaveTextContent('DUOS-00401')
+    expect(container.querySelectorAll('.row-data-1 [role="cell"]')[1]).toHaveTextContent('DUOS-00402')
+    expect(container.querySelectorAll('.row-data-2 [role="cell"]')[1]).toHaveTextContent('DUOS-00403')
   })
 })

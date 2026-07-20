@@ -45,7 +45,12 @@ export const DataUsePill = ({ dataUse, index }: DataUsePillProps) => {
   )
 }
 
-export const DataUsePills = (dataUses: TranslationEntry[], twoColumn = false) => {
+interface DataUsePillsProps {
+  readonly dataUses: TranslationEntry[]
+  readonly twoColumn?: boolean
+}
+
+export const DataUsePills = ({ dataUses, twoColumn = false }: DataUsePillsProps) => {
   const permissionsUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.permissions)
   const modifierUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.modifiers)
 

@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import {
   calcTablePageCount,
@@ -172,12 +172,25 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
   const [tableSize, setTableSize] = useState<number>(10)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [pageCount, setPageCount] = useState<number>(1)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [filteredCards, setFilteredCards] = useState<LibraryCard[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(isNil(props.libraryCards))
   const [visibleCards, setVisibleCards] = useState<LibraryCard[]>([])
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false)
   const [currentCard, setCurrentCard] = useState<LibraryCard>({} as LibraryCard)
   const [searchText, setSearchText] = useState<string>('')
+
+  const [prevPropsLibraryCards, setPrevPropsLibraryCards] = useState(props.libraryCards)
+  if (props.libraryCards !== prevPropsLibraryCards) {
+    setPrevPropsLibraryCards(props.libraryCards)
+    setLibraryCards(props.libraryCards ?? [])
+    if (!isNil(props.libraryCards)) {
+      setIsLoading(false)
+    }
+  }
+
+  const filteredCards = useMemo(
+    () => isEmpty(searchText) ? libraryCards : lcFilterFunction(searchText, libraryCards),
+    [searchText, libraryCards],
+  )
 
   const columnHeaderData: ColumnHeader[] = [
     columnHeaderFormat.researcher,
@@ -210,22 +223,6 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
     }
     init()
   }, [filteredCards, tableSize, currentPage, pageCount])
-
-  // Hook to execute on initialization and card creation/deletion, applies filter on updated collection list
-  React.useEffect(() => {
-    const filteredList = isEmpty(searchText) ? libraryCards : lcFilterFunction(searchText, libraryCards)
-    // oxlint-disable-next-line react-hooks/set-state-in-effect
-    setFilteredCards(filteredList)
-  }, [searchText, libraryCards])
-
-  // Hook that executes on prop load (initialization hook)
-  React.useEffect(() => {
-    // oxlint-disable-next-line react-hooks/set-state-in-effect
-    setLibraryCards(props.libraryCards ?? [])
-    if (!isNil(props.libraryCards)) {
-      setIsLoading(false)
-    }
-  }, [props.libraryCards])
 
   // Formats institution data to be used by SimpleTable component
   const processLCData = (cards: LibraryCard[] = []): TableCell[][] => {

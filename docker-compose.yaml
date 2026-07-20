@@ -55,7 +55,7 @@ services:
       DUOS_SESSION_SECRET: ${DUOS_SESSION_SECRET:?set DUOS_SESSION_SECRET (32+ chars) in .env.local (copy .env.example)}
     volumes:
       - ./public/config.json:/usr/src/app/build/config.json
-    command: ["node", "server/dist/index.js"]
+    command: ["node", "--enable-fips", "server/dist/index.js"]
     restart: always
 
   proxy:

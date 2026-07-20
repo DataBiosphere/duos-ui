@@ -399,8 +399,6 @@ export default function DataCustodianTable(props: DataCustodianTableProps): Reac
     }
   }
 
-  const dpaContent = ScrollableMarkdownContainer({ markdown: DpaMarkdown })
-
   return (
     <div style={Styles.PAGE}>
       <div style={{ marginLeft: '-7.5%' }}>
@@ -443,7 +441,7 @@ export default function DataCustodianTable(props: DataCustodianTableProps): Reac
             confirmType === confirmModalType.issue
               ? (
                   <div>
-                    {dpaContent}
+                    <ScrollableMarkdownContainer markdown={DpaMarkdown} />
                     {confirmationModalMsg}
                   </div>
                 )

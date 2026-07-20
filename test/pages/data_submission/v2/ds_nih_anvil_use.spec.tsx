@@ -2,7 +2,7 @@ import React from 'react'
 import { render, fireEvent, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { NihAnvilUseRelated, NihAnvilUseRelatedProps } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
-import { NihAnvilUse, NihAnvilUsePreSelectOptions, Study, StudyProperty } from 'src/pages/data_submission/v2/v2-models'
+import { NihAnvilUse, NihAnvilUsePreSelectOptions, PiInstitution, Study, StudyProperty } from 'src/pages/data_submission/v2/v2-models'
 
 const NIH_ANVIL_PRE_SELECTOR_ID = 'nihAnvilUse_pre_selector'
 const NIH_ANVIL_FIELD_ID = 'nihAnvilUse'
@@ -120,5 +120,22 @@ describe('NihAnvilUseRelated', () => {
 
     clickPreSelector(NihAnvilUsePreSelectOptions.YES)
     expect(queryById(NIH_ANVIL_FIELD_ID)).not.toBeNull()
+  })
+
+  it('clears downstream study properties when switching the pre-selector to NO', () => {
+    const setStudyMock = vi.fn()
+    const baseStudy = {
+      properties: [
+        new NihAnvilUse(NihAnvilUse.YES_NHGRI_YES_PHS_ID),
+        new PiInstitution(123),
+      ],
+    } as Study
+
+    render(<NihAnvilUseRelated study={baseStudy} setStudy={setStudyMock} />)
+
+    clickPreSelector(NihAnvilUsePreSelectOptions.NO)
+
+    const nextStudy = getNextStudyFromSetStudyCall(setStudyMock, baseStudy)
+    expect(nextStudy.properties?.some(prop => prop.key === PiInstitution.key)).toBe(false)
   })
 })

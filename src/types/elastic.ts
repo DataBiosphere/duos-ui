@@ -136,6 +136,19 @@ export interface CardinalityAggregation {
   }
 }
 
+/**
+ * A `filter` aggregation restricts the documents in its scope to those matching
+ * the given query clause and exposes them as a single `doc_count` bucket. Used
+ * by the tab-counts query to count datasets (which have their own
+ * approved-controlled visibility rules) within the shared request.
+ */
+export interface FilterAggregation {
+  filter: QueryClause
+  aggs?: {
+    [key: string]: AggregationDefinition
+  }
+}
+
 export type AggregationDefinition
   = TermsAggregation
     | CompositeAggregation
@@ -143,6 +156,7 @@ export type AggregationDefinition
     | ValueCountAggregation
     | SumAggregation
     | CardinalityAggregation
+    | FilterAggregation
 
 export interface AggregationBucket {
   key: string | number | { [key: string]: string | number }

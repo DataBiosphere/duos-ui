@@ -41,3 +41,15 @@ export const assetRegistry: Record<AssetType, AssetDefinition> = {
   [AssetType.INTELLECTUAL_PROPERTY]: intellectualPropertyAsset,
   [AssetType.FUNDING_RESOURCES]: fundingResourceAsset,
 }
+
+/**
+ * The union of every asset's search fields. The library search box matches this
+ * combined set on every tab, so a study surfaces wherever the term hits any of
+ * its assets. Critically, the tab-count badges derive every tab's count from a
+ * single shared query (see `computeTabCounts`); matching the same field set on
+ * every tab keeps those badges consistent with what each tab's grid shows,
+ * regardless of which tab is currently active.
+ */
+export const ALL_SEARCH_FIELDS: string[] = [
+  ...new Set(Object.values(assetRegistry).flatMap(asset => asset.searchFields)),
+]

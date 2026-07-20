@@ -2,13 +2,22 @@ import '@testing-library/jest-dom/vitest'
 import React from 'react'
 import { act } from 'react'
 import { fireEvent } from '@testing-library/react'
-import { vi, describe, it, expect, afterEach } from 'vitest'
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { ToastNotifications, ToastPosition } from 'src/libs/ToastNotifications'
+
+// Use fake timers for the whole suite so the Snackbar's autoHideDuration and
+// react-transition-group timers never fire after the test environment is torn
+// down (which otherwise throws "window is not defined" as an unhandled error).
+beforeEach(() => {
+  vi.useFakeTimers({ shouldAdvanceTime: true })
+})
 
 afterEach(() => {
   Array.from(document.body.children)
     .filter(el => el.querySelector('[data-cy="notification-alert"]') || el.querySelector('.MuiSnackbar-root'))
     .forEach(el => el.remove())
+  vi.clearAllTimers()
+  vi.useRealTimers()
 })
 
 describe('ToastNotifications', () => {

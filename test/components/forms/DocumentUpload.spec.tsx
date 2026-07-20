@@ -335,6 +335,47 @@ describe('DocumentUpload', () => {
     })
   })
 
+  it('adjusts the selected type when the categories prop changes', async () => {
+    const api = {
+      uploadDocument: vi.fn().mockResolvedValue({} as never),
+      deleteDocument: vi.fn().mockResolvedValue({} as never),
+      listDocuments: vi.fn().mockResolvedValue([]),
+    }
+    const element = (categories: FileCategory[]) => (
+      <DocumentUpload entity={EntityType.DAR} entityId="dar-cat" categories={categories} api={api} />
+    )
+    const selectedType = () => document.querySelector('[data-cy="document-upload-selected-type"]')
+
+    const { rerender } = render(element([FileCategory.DATA_USE_LETTER, FileCategory.DATA_ACCESS_AGREEMENT]))
+    await userEvent.click(document.querySelector(`[data-cy="document-upload-type-${FileCategory.DATA_USE_LETTER}"]`)!)
+    expect(selectedType()).toHaveTextContent('Data Use Letter')
+
+    // Still allowed after the change -> selection is kept.
+    rerender(element([FileCategory.DATA_USE_LETTER, FileCategory.IRB_COLLABORATION_LETTER]))
+    expect(selectedType()).toHaveTextContent('Data Use Letter')
+
+    // No longer allowed -> selection is reset.
+    rerender(element([FileCategory.DATA_ACCESS_AGREEMENT, FileCategory.IRB_COLLABORATION_LETTER]))
+    expect(selectedType()).toBeNull()
+  })
+
+  it('auto-selects the type when the categories prop narrows to one option', async () => {
+    const api = {
+      uploadDocument: vi.fn().mockResolvedValue({} as never),
+      deleteDocument: vi.fn().mockResolvedValue({} as never),
+      listDocuments: vi.fn().mockResolvedValue([]),
+    }
+    const element = (categories: FileCategory[]) => (
+      <DocumentUpload entity={EntityType.DAR} entityId="dar-narrow" categories={categories} api={api} />
+    )
+
+    const { rerender } = render(element([FileCategory.DATA_USE_LETTER, FileCategory.DATA_ACCESS_AGREEMENT]))
+    expect(document.querySelector('[data-cy="document-upload-selected-type"]')).toBeNull()
+
+    rerender(element([FileCategory.DATA_ACCESS_AGREEMENT]))
+    expect(document.querySelector('[data-cy="document-upload-selected-type"]')).toHaveTextContent('Data Access Agreement')
+  })
+
   it('shows deleted documents when configured and keeps delete disabled', async () => {
     const api = {
       uploadDocument: vi.fn().mockResolvedValue({} as never),
@@ -454,6 +495,57 @@ describe('DocumentUpload', () => {
     expect(toggle).toHaveTextContent('Hide deleted')
     await userEvent.click(toggle)
     expect(screen.queryByText('deleted_daa_hidden_by_default.pdf')).not.toBeInTheDocument()
+  })
+
+  it('re-syncs deleted visibility when the deletedDocumentsView prop changes', async () => {
+    const api = {
+      uploadDocument: vi.fn().mockResolvedValue({} as never),
+      deleteDocument: vi.fn().mockResolvedValue({} as never),
+      listDocuments: vi.fn().mockResolvedValue([
+        {
+          fileStorageObjectId: 961,
+          entityId: 'dac-96',
+          fileName: 'active_daa.pdf',
+          category: FileCategory.DATA_ACCESS_AGREEMENT,
+          mediaType: 'application/pdf',
+          createUserId: 1,
+          createDate: Date.now(),
+        },
+        {
+          fileStorageObjectId: 962,
+          entityId: 'dac-96',
+          fileName: 'deleted_daa_resync.pdf',
+          category: FileCategory.DATA_ACCESS_AGREEMENT,
+          mediaType: 'application/pdf',
+          createUserId: 1,
+          createDate: Date.now(),
+          deleted: true,
+        },
+      ]),
+    }
+
+    const element = (view: 'active' | 'all') => (
+      <DocumentUpload
+        entity={EntityType.DAC}
+        entityId="dac-96"
+        categories={[FileCategory.DATA_ACCESS_AGREEMENT]}
+        deletedDocumentsView={view}
+        api={api}
+      />
+    )
+
+    const { rerender } = render(element('active'))
+
+    await waitFor(() => expect(screen.getByText('active_daa.pdf')).toBeInTheDocument())
+    expect(screen.queryByText('deleted_daa_resync.pdf')).not.toBeInTheDocument()
+
+    // Changing the prop to 'all' should reveal deleted documents.
+    rerender(element('all'))
+    expect(screen.getByText('deleted_daa_resync.pdf')).toBeInTheDocument()
+
+    // Changing it back to 'active' should hide them again.
+    rerender(element('active'))
+    expect(screen.queryByText('deleted_daa_resync.pdf')).not.toBeInTheDocument()
   })
 
   it('supports viewing documents and loading details from getDocument', async () => {

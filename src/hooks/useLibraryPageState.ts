@@ -1,12 +1,15 @@
 import { useCallback, useMemo } from 'react'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
+import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType, AvailableFilters, FilterState, LibraryVersionNew, SortOrder } from 'src/types/library'
+import { computeTabCounts, STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
+import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, SortOrder } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
 import {
   EMPTY_FILTERS,
+  getExternalActiveFilters,
   getFilterSectionsForAsset,
-  sanitizeFiltersForAsset,
+  removeFilterValue,
 } from 'src/components/data_library/filterRegistry'
 import { AggregationResult } from 'src/types/elastic'
 import { BioSpecimenType, PostMortemIntervalUnit } from 'src/types/model'
@@ -21,7 +24,20 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
 
   const { data: metadata, isLoading: isMetadataLoading } = useLibraryMetadata(libraryConfig)
 
-  const { data, isFetching, error } = useLibraryData(
+  const currentAsset = useMemo(() => assetRegistry[urlState.tab], [urlState.tab])
+
+  // Every tab except Studies and Datasets renders from the identical shared
+  // `studies` aggregation that the tab-counts query already fetches. Those
+  // "study-asset" tabs therefore skip their own data query and derive their grid
+  // from that single shared response — one full-corpus request per interaction
+  // instead of two (the data query + the counts query returned the same corpus).
+  const isStudyAssetTab = STUDY_ASSET_TABS.includes(urlState.tab)
+
+  const {
+    data: dataQueryResult,
+    isFetching: isDataFetching,
+    error: dataError,
+  } = useLibraryData(
     libraryConfig,
     urlState.tab,
     urlState.filters,
@@ -30,7 +46,49 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
     urlState.sortField && urlState.sortOrder
       ? { field: urlState.sortField, order: urlState.sortOrder as SortOrder }
       : undefined,
+    { enabled: !isStudyAssetTab },
   )
+
+  // Tab counts come from a single dedicated query, independent of the active
+  // tab, pagination and sort, so they are fetched once and reused as the user
+  // pages, sorts, and switches tabs. Study-asset grids reuse its response too.
+  const {
+    data: tabCountsResponse,
+    isFetching: isCountsFetching,
+    error: countsError,
+  } = useLibraryTabCounts(
+    libraryConfig,
+    urlState.filters,
+    urlState.query ?? '',
+  )
+
+  // Badge counts are derived at render time from the shared response with the
+  // *current* filters — the same inputs the study-asset grids are derived from
+  // below — so a badge and its grid always agree, even while a refetch for new
+  // filters is in flight and the response is still the previous placeholder.
+  const tabCounts = useMemo(
+    () => (tabCountsResponse ? computeTabCounts(tabCountsResponse, urlState.filters) : undefined),
+    [tabCountsResponse, urlState.filters],
+  )
+
+  // Derive the study-asset grid page from the shared tab-counts response using
+  // the asset's own transformResponse (which client-side paginates and filters),
+  // so a tab's badge and its grid are computed from one identical request and
+  // can never disagree. Pagination stays client-side, so paging needs no refetch.
+  const derivedStudyAssetData = useMemo(() => {
+    if (!isStudyAssetTab || !tabCountsResponse) {
+      return undefined
+    }
+    return currentAsset.transformResponse(
+      tabCountsResponse,
+      { page: urlState.page, pageSize: urlState.pageSize },
+      urlState.filters,
+    )
+  }, [isStudyAssetTab, tabCountsResponse, currentAsset, urlState.page, urlState.pageSize, urlState.filters])
+
+  const data = isStudyAssetTab ? derivedStudyAssetData : dataQueryResult
+  const isFetching = isStudyAssetTab ? isCountsFetching : isDataFetching
+  const error = isStudyAssetTab ? countsError : dataError
 
   const availableFilters: AvailableFilters = useMemo(() => {
     const dacAgg = (metadata?.dac as AggregationResult)?.buckets || []
@@ -83,21 +141,25 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
         { value: 'true', label: 'Yes' },
         { value: 'false', label: 'No' },
       ],
+      publicationsDatasetsCited: [
+        { value: 'true', label: 'Yes' },
+        { value: 'false', label: 'No' },
+      ],
       biospecimenPostMortemIntervalRange: { min: 0, max: 1000000 },
       participantCountRange: { min: 0, max: 100000 },
     }
   }, [metadata, data?.items, urlState.tab])
 
-  const currentAsset = useMemo(() => assetRegistry[urlState.tab], [urlState.tab])
-
-  const sanitizedFilters = useMemo(
-    () => sanitizeFiltersForAsset(urlState.tab, urlState.filters),
-    [urlState.tab, urlState.filters],
-  )
-
   const filterSections = useMemo(
     () => getFilterSectionsForAsset(urlState.tab, availableFilters),
     [urlState.tab, availableFilters],
+  )
+
+  // Filters set on other tabs are kept in state so they persist across tab
+  // switches; surface them here so the panel can show them as removable chips.
+  const externalFilters = useMemo(
+    () => getExternalActiveFilters(urlState.tab, urlState.filters, availableFilters),
+    [urlState.tab, urlState.filters, availableFilters],
   )
 
   const sortModel = useMemo(() => {
@@ -107,25 +169,34 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
     return []
   }, [urlState.sortField, urlState.sortOrder])
 
+  // Keep the full filter set when switching tabs so filters applied on one tab
+  // remain active (and visible) on the others. The sort is cleared because sort
+  // fields are tab-specific: carrying e.g. a Publications `title` sort onto the
+  // Datasets tab would send Elasticsearch a sort on an unmapped field and fail
+  // the whole query.
   const handleTabChange = useCallback((newAssetType: AssetType) => {
-    updateUrlState({
-      tab: newAssetType,
-      page: 0,
-      filters: sanitizeFiltersForAsset(newAssetType, urlState.filters),
-    })
-  }, [updateUrlState, urlState.filters])
+    updateUrlState({ tab: newAssetType, page: 0, sortField: undefined, sortOrder: undefined })
+  }, [updateUrlState])
 
   const handleSearchChange = useCallback((query: string) => {
     updateUrlState({ query, page: 0 })
   }, [updateUrlState])
 
+  // Any filter change resets to the first page: the current page index can
+  // exceed the narrowed result set, which would render an empty grid while the
+  // count badge still shows matches.
   const handleFiltersChange = useCallback((newFilters: FilterState) => {
-    updateUrlState({ filters: sanitizeFiltersForAsset(urlState.tab, newFilters) })
-  }, [updateUrlState, urlState.tab])
+    updateUrlState({ filters: newFilters, page: 0 })
+  }, [updateUrlState])
 
   const handleClearFilters = useCallback(() => {
-    updateUrlState({ filters: sanitizeFiltersForAsset(urlState.tab, EMPTY_FILTERS), page: 0 })
-  }, [updateUrlState, urlState.tab])
+    updateUrlState({ filters: EMPTY_FILTERS, page: 0 })
+  }, [updateUrlState])
+
+  // Remove a filter carried over from another tab without switching to it.
+  const handleRemoveExternalFilter = useCallback((chip: ActiveFilterChip) => {
+    updateUrlState({ filters: removeFilterValue(urlState.filters, chip.key, chip.value), page: 0 })
+  }, [updateUrlState, urlState.filters])
 
   const handleSortChange = useCallback((model: Array<{ field: string, sort: SortOrder | null }>) => {
     if (model.length > 0 && model[0].sort) {
@@ -148,14 +219,16 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
     error,
     isMetadataLoading,
     availableFilters,
+    tabCounts,
     currentAsset,
-    sanitizedFilters,
     filterSections,
+    externalFilters,
     sortModel,
     handleTabChange,
     handleSearchChange,
     handleFiltersChange,
     handleClearFilters,
+    handleRemoveExternalFilter,
     handleSortChange,
     handleToggleFilters,
   }

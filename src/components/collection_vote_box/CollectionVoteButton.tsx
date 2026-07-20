@@ -42,34 +42,15 @@ export default function CollectionVoteButton({
   datacy,
   onError,
 }: CollectionVoteButtonProps) {
-  const [additionalStyle, setAdditionalStyle] = useState<React.CSSProperties>({})
+  const [isHovered, setIsHovered] = useState(false)
 
-  const updateStyle = useCallback((
-    backgroundColor: string,
-    labelColor: string,
-    showSelectedStyle: boolean,
-    disabled: boolean,
-  ) => {
-    setAdditionalStyle({
-      backgroundColor,
-      color: labelColor,
-      border: showSelectedStyle ? '0px' : '1px solid',
-      cursor: (showSelectedStyle && !disabled) ? 'pointer' : 'default',
-    })
-  }, [])
-
-  const defaultButtonStyle = useCallback(() => {
-    updateStyle(votingColors.default, styles.defaultLabelColor, false, disabled)
-  }, [disabled, updateStyle])
-
-  const selectedButtonStyle = useCallback(() => {
-    updateStyle(baseColor, votingColors.default, true, disabled)
-  }, [baseColor, disabled, updateStyle])
-
-  React.useEffect(() =>
-    // oxlint-disable-next-line react-hooks/set-state-in-effect
-    isSelected ? selectedButtonStyle() : defaultButtonStyle(),
-  [defaultButtonStyle, isSelected, selectedButtonStyle])
+  const showSelectedStyle = isSelected || isHovered
+  const additionalStyle: React.CSSProperties = {
+    backgroundColor: showSelectedStyle ? baseColor : votingColors.default,
+    color: showSelectedStyle ? votingColors.default : styles.defaultLabelColor,
+    border: showSelectedStyle ? '0px' : '1px solid',
+    cursor: (showSelectedStyle && !disabled) ? 'pointer' : 'default',
+  }
 
   const handleAsyncClick = useCallback(async () => {
     if (!disabled && onClick) {
@@ -84,8 +65,8 @@ export default function CollectionVoteButton({
       onClick={handleAsyncClick}
       disabled={disabled}
       onError={onError}
-      onMouseEnter={() => selectedButtonStyle()}
-      onMouseLeave={() => !isSelected && defaultButtonStyle()}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       hideOnSuccess={false}
     >
       {label}

@@ -2,18 +2,18 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, PublicationStudyAggregationResponse, QueryClause } from 'src/types/elastic'
 import { FilterState, PaginationState, PublicationAsset, SortState } from 'src/types/library'
 import { makePublicationColumns } from 'src/components/data_library/columns/publicationColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 
 const matchesPublicationFilters = (publication: PublicationAsset, filters?: FilterState) => {
   if (!filters) {
     return true
   }
 
-  if (filters.datasetsCited === undefined) {
+  if (filters.publicationsDatasetsCited === undefined) {
     return true
   }
 
-  return publication.citation === filters.datasetsCited
+  return publication.citation === filters.publicationsDatasetsCited
 }
 
 export const publicationAsset: AssetDefinition = {
@@ -49,20 +49,7 @@ export const publicationAsset: AssetDefinition = {
         },
       },
       aggs: {
-        studies: {
-          terms: {
-            field: 'study.studyId',
-            size: 10000,
-          },
-          aggs: {
-            study_details: {
-              top_hits: {
-                size: 1,
-                _source: ['study.*'],
-              },
-            },
-          },
-        },
+        studies: STUDIES_AGG,
       },
     }
   },

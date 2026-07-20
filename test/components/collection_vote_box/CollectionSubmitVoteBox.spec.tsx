@@ -310,4 +310,18 @@ describe('CollectionSubmitVoteBox - Tests', () => {
     await user.click(noBtn)
     expect(updateFinalVote).not.toHaveBeenCalled()
   })
+
+  it('re-syncs the vote and rationale when the votes prop changes', () => {
+    const { container, rerender } = render(
+      <CollectionSubmitVoteBox {...defaultProps} votes={votesMixed} isFinal={false} />,
+    )
+    // Mixed votes -> nothing selected, empty rationale.
+    expect(container.querySelector('[data-cy="yes-collection-vote-button"]')).toHaveStyle({ backgroundColor: votingColors.default })
+    expect(screen.getByRole('textbox')).toHaveValue('')
+
+    // All-matching "true" votes with a shared rationale -> re-derive selection + rationale.
+    rerender(<CollectionSubmitVoteBox {...defaultProps} votes={votesMatch} isFinal={false} />)
+    expect(container.querySelector('[data-cy="yes-collection-vote-button"]')).toHaveStyle({ backgroundColor: votingColors.yes })
+    expect(screen.getByRole('textbox')).toHaveValue('test')
+  })
 })

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Tabs, Tab, Box } from '@mui/material'
 import { LibraryTabsProps } from 'src/types/library'
+import { COUNT_BADGE_SX } from 'src/components/data_library/countBadgeStyles'
 
 export const LibraryTabs: React.FC<LibraryTabsProps> = ({
   value,
@@ -33,7 +34,20 @@ export const LibraryTabs: React.FC<LibraryTabsProps> = ({
           <Tab
             key={tab.key}
             value={tab.key}
-            label={tab.label}
+            label={(
+              <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {tab.label}
+                {tab.count !== undefined && (
+                  <Box
+                    component="span"
+                    aria-label={`${tab.count} items`}
+                    sx={{ ...COUNT_BADGE_SX, fontWeight: 'normal' }}
+                  >
+                    {tab.count.toLocaleString()}
+                  </Box>
+                )}
+              </Box>
+            )}
             sx={{
               textTransform: 'none',
               fontSize: '15px',

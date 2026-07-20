@@ -1,8 +1,10 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import VoteSummaryTable from 'src/components/vote_summary_table/VoteSummaryTable'
+import { Email } from 'src/libs/ajax/Email'
+import { Notifications } from 'src/libs/utils'
 
 vi.mock('src/libs/ajax/Email', () => ({
   Email: { sendReminderEmail: vi.fn() },
@@ -52,5 +54,24 @@ describe('VoteSummaryTable - Tests', () => {
     render(<VoteSummaryTable isLoading={true} />)
     expect(document.querySelector('.table-data')).toBeInTheDocument()
     expect(document.querySelector('.table-loading-placeholder')).toBeInTheDocument()
+  })
+
+  it('lets a chair send a reminder and re-derives the sending/sent state', async () => {
+    vi.mocked(Email.sendReminderEmail).mockResolvedValue(undefined as never)
+    const pendingVotes = [
+      { displayName: 'Jane Roe', voteId: 5, vote: undefined, updateDate: 1642032000000 },
+    ]
+    render(<VoteSummaryTable dacVotes={pendingVotes} isLoading={false} isChair={true} />)
+
+    const button = screen.getByRole('button', { name: /send reminder/i })
+    fireEvent.click(button)
+
+    // Reminder state change should re-derive the row into its "sending" state.
+    expect(screen.getByText('Sending...')).toBeInTheDocument()
+    expect(Email.sendReminderEmail).toHaveBeenCalledWith(5)
+
+    // Once the email resolves, the row re-derives into its "sent" state.
+    await waitFor(() => expect(screen.getByText('Sent Reminder')).toBeInTheDocument())
+    expect(Notifications.showSuccess).toHaveBeenCalledWith({ text: 'Successfully sent reminder.' })
   })
 })

@@ -1,8 +1,24 @@
 import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, IntellectualPropertyStudyAggregationResponse, QueryClause } from 'src/types/elastic'
-import { IntellectualPropertyAsset, PaginationState, SortState } from 'src/types/library'
+import { FilterState, IntellectualPropertyAsset, PaginationState, SortState } from 'src/types/library'
 import { makeIntellectualPropertyColumns } from 'src/components/data_library/columns/intellectualPropertyColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+
+// The Elasticsearch clause for ipFiledDate only decides which *studies* enter
+// the shared aggregation; every IP asset of a qualifying study comes back, so
+// each row must be re-checked here or the grid (and the tab-count badge derived
+// from this same function) includes assets filed outside the requested range.
+const matchesIntellectualPropertyFilters = (ip: IntellectualPropertyAsset, filters?: FilterState) => {
+  if (!filters) {
+    return true
+  }
+
+  const filingDate = ip.filingDate || ''
+  if (filters.ipFiledDate.after && filingDate < filters.ipFiledDate.after) {
+    return false
+  }
+  return !(filters.ipFiledDate.before && filingDate > filters.ipFiledDate.before)
+}
 
 export const intellectualPropertyAsset: AssetDefinition = {
   label: { singular: 'Intellectual Property', plural: 'Intellectual Properties' },
@@ -38,25 +54,12 @@ export const intellectualPropertyAsset: AssetDefinition = {
         },
       },
       aggs: {
-        studies: {
-          terms: {
-            field: 'study.studyId',
-            size: 10000,
-          },
-          aggs: {
-            study_details: {
-              top_hits: {
-                size: 1,
-                _source: ['study.*'],
-              },
-            },
-          },
-        },
+        studies: STUDIES_AGG,
       },
     }
   },
 
-  transformResponse(response: ElasticsearchResponse, pagination: PaginationState): LibraryPage {
+  transformResponse(response: ElasticsearchResponse, pagination: PaginationState, filters?: FilterState): LibraryPage {
     const studiesAgg = response.aggregations?.studies as IntellectualPropertyStudyAggregationResponse | undefined
     const buckets = studiesAgg?.buckets || []
     const items: IntellectualPropertyAsset[] = []
@@ -67,7 +70,7 @@ export const intellectualPropertyAsset: AssetDefinition = {
       for (const [ipIndex, ip] of studyIPs.entries()) {
         // ipId may be absent from the indexed document; fall back to a
         // composite key so every row in the DataGrid has a unique id.
-        items.push({
+        const row: IntellectualPropertyAsset = {
           ipId: ip.ipId || `${bucket.key}-${ipIndex}`,
           studyId: bucket.key,
           studyName: (studyData as { studyName?: string }).studyName || '',
@@ -80,7 +83,11 @@ export const intellectualPropertyAsset: AssetDefinition = {
           url: ip.url || '',
           contact: ip.contact || '',
           tags: ip.tags || [],
-        })
+        }
+
+        if (matchesIntellectualPropertyFilters(row, filters)) {
+          items.push(row)
+        }
       }
     }
 

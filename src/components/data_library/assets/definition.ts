@@ -8,7 +8,7 @@
  * components or hook.
  */
 import { GridColDef } from '@mui/x-data-grid'
-import { ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
+import { AggregationDefinition, ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
 import {
   ClinicalTrialAsset,
   BiospecimenAsset,
@@ -25,6 +25,34 @@ import {
   WorkspaceAsset,
 } from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
+
+/**
+ * The shared "aggregate every matching study, return its `study.*` source"
+ * aggregation. Every asset tab except Studies and Datasets renders its rows by
+ * flattening one of the `study.assets.*` arrays returned by this aggregation, so
+ * they all use the identical shape here. The tab-counts query (`libraryCounts`)
+ * reuses the same constant so a tab's badge is computed from a byte-identical
+ * aggregation to the one its grid renders — the single source of truth that keeps
+ * every study-asset badge in agreement with its grid.
+ *
+ * If this shape ever needs to change (size, `_source`, nested aggs), changing it
+ * here updates every study-asset grid AND the count query together, so they
+ * cannot silently diverge.
+ */
+export const STUDIES_AGG: AggregationDefinition = {
+  terms: {
+    field: 'study.studyId',
+    size: 10000,
+  },
+  aggs: {
+    study_details: {
+      top_hits: {
+        size: 1,
+        _source: ['study.*'],
+      },
+    },
+  },
+}
 
 /** Union of every row type that can appear in the DataGrid */
 export type LibraryRow = DatasetTerm | StudyAggregation | ModelAsset | WorkspaceAsset | ClinicalTrialAsset | BiospecimenAsset | PublicationAsset | PresentationAsset | IntellectualPropertyAsset | FundingResourceAsset

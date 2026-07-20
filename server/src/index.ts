@@ -9,6 +9,11 @@ import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import { createPgSessionStore } from './session/pgStore.js'
+import { getOidcConfig } from './auth/oidcClient.js'
+import { handleLogin } from './auth/login.js'
+import { handleCallback } from './auth/callback.js'
+import { handleLogout } from './auth/logout.js'
+import { getMe } from './auth/me.js'
 import { configPath, readConfig } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -51,12 +56,17 @@ export async function buildApp(): Promise<AppInstance> {
     : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' }, trustProxy: 1 })
   ) as AppInstance
 
+  // Path to the static client config.json — computed once so both the
+  // /config.json route below and the bffEnabled startup check read the same
+  // (memoized) config.
+  const configJsonPath = configPath(PROJECT_ROOT, isDev)
+
   // 1. DB pool + session — registered only when the deployment provides the
   // BFF database configuration. Session infrastructure is deployment config
   // (env vars via helmfile/compose), not a runtime flag: every pod of a given
   // deployment behaves identically, with no network dependency at boot.
   // Directing users to the BFF sign-in flow is a separate switch — the
-  // boolean `bffEnabled` in config.json, checked at startup (Phase 2+) — see
+  // boolean `bffEnabled` in config.json, checked at startup — see
   // docs/plans/BFF_Overview.md.
   if (process.env.DUOS_DB_HOST) {
     fastify.log.info('[server] DUOS_DB_HOST is set — enabling BFF session infrastructure')
@@ -128,9 +138,46 @@ export async function buildApp(): Promise<AppInstance> {
       // request just to bump `expire`. Phase 2 adds a throttled sliding expiry
       // instead — re-save only when the session is near expiry.
     })
+
+    // Warm the B2C OIDC discovery cache so the first login doesn't pay the
+    // discovery round-trip. Gated on the Azure env vars being present: DB/
+    // session infra (this block) can be enabled ahead of B2C being configured
+    // during the phased rollout, and warming up against unset vars would log
+    // an error on every single startup for no benefit. Not awaited and never
+    // fatal either way — on failure the error is logged and getOidcConfig()
+    // retries lazily on first use.
+    if (process.env.DUOS_AZURE_ISSUER_URL && process.env.DUOS_AZURE_CLIENT_ID && process.env.DUOS_AZURE_CLIENT_SECRET) {
+      getOidcConfig().catch((err: unknown) => {
+        fastify.log.error({ err }, '[auth] B2C OIDC discovery warm-up failed')
+      })
+    }
   }
   else {
     fastify.log.info('[server] DUOS_DB_HOST is not set — starting without DB/session infrastructure (legacy client-side auth)')
+  }
+
+  // 2. BFF auth routes — the cutover switch. Checked once at startup via the
+  // same readConfig() the /config.json route below serves, so the server and
+  // client agree on bffEnabled by construction. A missing key defaults to
+  // false and the routes stay dark — the fail-safe is the legacy
+  // client-side flow. See docs/plans/BFF_Overview.md § Rollout strategy.
+  const { bffEnabled } = await readConfig(configJsonPath, fastify.log)
+  if (bffEnabled === true) {
+    // The two switches are meant to be independent (session infra can be on
+    // ahead of cutover), but not in this direction: routing users into the
+    // BFF flow without the session infrastructure configured would register
+    // routes that 500 on first use instead of failing loudly at startup.
+    if (!process.env.DUOS_DB_HOST) {
+      throw new Error('bffEnabled is true in config.json but DUOS_DB_HOST is not set — the BFF auth routes require the session infrastructure to be configured')
+    }
+    fastify.log.info('[server] bffEnabled is true — registering BFF auth routes')
+    fastify.post('/auth/login', handleLogin)
+    fastify.get('/auth/callback', handleCallback)
+    fastify.post('/auth/logout', handleLogout)
+    fastify.get('/auth/me', getMe)
+  }
+  else {
+    fastify.log.info('[server] bffEnabled is not true — BFF auth routes disabled (legacy client-side auth)')
   }
 
   // Health check — registered before Vite middleware so it always resolves
@@ -149,7 +196,6 @@ export async function buildApp(): Promise<AppInstance> {
   // disagree with GET's body (mismatched Content-Length for caches/validators).
   // Node itself omits the body for HEAD responses; sending the same payload
   // yields matching headers.
-  const configJsonPath = configPath(PROJECT_ROOT, isDev)
   fastify.addHook('onRequest', async (request, reply) => {
     if ((request.method === 'GET' || request.method === 'HEAD')
       && (request.url === '/config.json' || request.url.startsWith('/config.json?'))) {
