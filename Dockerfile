@@ -13,9 +13,9 @@ ENV PATH=/usr/src/app/node_modules/.bin:$PATH
 # of source changes — pnpm ci only re-runs when package.json/lockfile change.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY server/package.json ./server/package.json
-RUN npm install -g corepack@0.35.0 && corepack enable && corepack prepare pnpm@11.1.2 --activate
+RUN npm install -g corepack@0.35.0 --ignore-scripts && corepack enable && corepack prepare pnpm@11.1.2 --activate
 RUN pnpm config set update-notifier false
-RUN pnpm ci --loglevel warn
+RUN pnpm ci --loglevel warn --ignore-scripts
 
 # Build frontend
 COPY src ./src
