@@ -33,16 +33,16 @@ RUN pnpm --filter duos-server run build
 # Create a self-contained prod-only server bundle (no devDeps, no workspace symlinks)
 RUN pnpm --filter duos-server deploy --prod --legacy /tmp/server-deploy
 
-# Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-debian-fips
-FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:3289da9ee7c03c4a6f317dcdd767722857d4b12c288edeea4ec4b6d152bd97a8
-ARG NODE_ENV=production
+# Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:26-debian-fips
+FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:a06715bf6ffaa7672caca4a5c5924ebec4f3100b0bbdbebd589857cfb57f986b
 ARG PORT=8080
 ENV NODE_ENV=${NODE_ENV}
 ENV PORT=${PORT}
+ENV OPENSSL_FORCE_FIPS_MODE=1
 WORKDIR /usr/src/app
 COPY --chmod=550 --chown=node:node --from=builder /usr/src/app/build ./build
 COPY --chmod=550 --chown=node:node --from=builder /tmp/server-deploy ./server
 COPY --chmod=444 --chown=node:node --from=builder /usr/src/app/package.json ./package.json
 USER node
 EXPOSE ${PORT}
-CMD ["node", "server/dist/index.js"]
+CMD ["node", "--enable-fips", "server/dist/index.js"]
