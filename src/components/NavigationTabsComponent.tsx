@@ -240,7 +240,7 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
       </ul>
 
       {/* Sub Tabs - only show if a valid subtab is selected */}
-      {tabs[selectedMenuTab as number]?.children && selectedSubTab >= 0 && (
+      {tabs[selectedMenuTab as number]?.children && selectedSubTab >= 0 && !tabs[selectedMenuTab]?.hideSubTabBar && (
         <Box className="duos-navigation-box navbar-sub">
           <Tabs
             value={selectedSubTab >= 0 ? selectedSubTab : false}

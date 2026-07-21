@@ -33,6 +33,8 @@ export interface Tab {
   search?: string
   children?: SubTab[]
   isRendered: (user: DuosUser) => boolean
+  /** Hides the white second-tier sub-tab bar for this console; its own page provides navigation instead. */
+  hideSubTabBar?: boolean
 }
 
 interface DuosHeaderState {
@@ -81,7 +83,7 @@ export const headerTabsConfig: Tab[] = [
   },
   {
     label: 'SO Console',
-    link: '/signing_official_console/library_cards',
+    link: '/signing_official_console/dashboard',
     children: [
       { label: 'Dashboard', link: '/signing_official_console/dashboard' },
       { label: 'Researcher Status', link: '/signing_official_console/library_cards' },
@@ -92,6 +94,7 @@ export const headerTabsConfig: Tab[] = [
       { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations' },
     ],
     isRendered: user => user.isSigningOfficial,
+    hideSubTabBar: true,
   },
   {
     label: 'DAC Chair Console',
