@@ -147,7 +147,7 @@ interface TemplateValidationError {
 
 type TemplateValidationResponse =
   | { valid: false, errors: TemplateValidationError[] }
-  | { valid: true, errors: [], draftId: string }
+  | { valid: true, errors: TemplateValidationError[], draftId: string }
 ```
 
 The service should return every independently actionable validation error in one response. Parser
