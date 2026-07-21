@@ -1,5 +1,5 @@
 # builder image
-FROM node:24.18.0-trixie AS builder
+FROM node:26.4.0-trixie AS builder
 LABEL maintainer="dsp-data-team@broadinstitute.org"
 
 # set working directory
@@ -13,9 +13,9 @@ ENV PATH=/usr/src/app/node_modules/.bin:$PATH
 # of source changes — pnpm ci only re-runs when package.json/lockfile change.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY server/package.json ./server/package.json
-RUN corepack enable && corepack prepare pnpm@11.1.2 --activate
+RUN npm install -g corepack@0.35.0 --ignore-scripts && corepack enable && corepack prepare pnpm@11.15.1 --activate
 RUN pnpm config set update-notifier false
-RUN pnpm ci --loglevel warn
+RUN pnpm ci --loglevel warn --ignore-scripts
 
 # Build frontend
 COPY src ./src
@@ -33,12 +33,13 @@ RUN pnpm --filter duos-server run build
 # Create a self-contained prod-only server bundle (no devDeps, no workspace symlinks)
 RUN pnpm --filter duos-server deploy --prod --legacy /tmp/server-deploy
 
-# Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:24-debian-fips
-FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:a8b21c4bf7c621fc5e973c124f93414a767941710a52c0e5f5b2232516d1bad8
+# Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:26-debian-fips
+FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:a06715bf6ffaa7672caca4a5c5924ebec4f3100b0bbdbebd589857cfb57f986b
 ARG NODE_ENV=production
 ARG PORT=8080
 ENV NODE_ENV=${NODE_ENV}
 ENV PORT=${PORT}
+ENV OPENSSL_FORCE_FIPS_MODE=1
 WORKDIR /usr/src/app
 COPY --chmod=550 --chown=node:node --from=builder /usr/src/app/build ./build
 COPY --chmod=550 --chown=node:node --from=builder /tmp/server-deploy ./server
