@@ -212,7 +212,7 @@ Follow the existing Resource → Service → DAO layering:
 6. Return both the UUID and `StudyDatasetSubmissionV1` draft type.
 7. Add `draftType` to generic draft-detail metadata instead of relying on a UUID or the concrete
    server class to imply the document type.
-8. Add `CHAIRPERSON` to the existing draft endpoint role annotations while preserving per-draft
+8. Add `Chairperson` to the existing draft endpoint role annotations while preserving per-draft
    ownership checks.
 9. Add the endpoint and updated draft-detail schemas to
    `src/main/resources/assets/api-docs.yaml`.
