@@ -314,7 +314,7 @@ survive `draft document → Study → submission payload` conversion.
 - Include row and column information where possible.
 - Create no draft for an invalid template.
 - Create exactly one authorized draft for a valid template.
-- Enforce `ADMIN`, `CHAIRPERSON`, and `DATASUBMITTER` roles while preserving owner-scoped draft
+- Enforce `Admin`, `Chairperson`, and `DataSubmitter` roles while preserving owner-scoped draft
   authorization.
 - Document and validate the endpoint in OpenAPI.
 
