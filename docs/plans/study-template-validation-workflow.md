@@ -534,7 +534,7 @@ and authentication requirements.
 
 **Acceptance criteria**
 
-- `ADMIN`, `CHAIRPERSON`, and `DATASUBMITTER` callers can validate templates and use the draft
+- `Admin`, `Chairperson`, and `DataSubmitter` callers can validate templates and use the draft
   endpoints according to existing ownership rules.
 - Unauthorized and unauthenticated callers receive the existing standard responses.
 - Missing, multiple, empty, and oversized file parts are rejected without draft creation.
