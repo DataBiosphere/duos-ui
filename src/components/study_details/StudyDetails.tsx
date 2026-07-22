@@ -116,7 +116,7 @@ export const StudyDetails = () => {
           setDatasetState({
             studyId,
             datasets: EMPTY_DATASETS,
-            error: error instanceof Error ? error : new Error('Unable to load datasets'),
+            error: error instanceof Error ? error : new Error('Unknown error'),
           })
         }
       })

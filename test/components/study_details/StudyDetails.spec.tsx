@@ -276,4 +276,12 @@ describe('Study details test', () => {
     expect(screen.queryByText('Participants:')).not.toBeInTheDocument()
     expect(document.querySelector('.MuiCircularProgress-root')).not.toBeInTheDocument()
   })
+
+  it('shows a non-duplicated fallback message for non-Error rejections', async () => {
+    vi.mocked(DataSet.searchDatasetIndex).mockRejectedValueOnce('unexpected rejection')
+    mountComponent()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Unable to load datasets: Unknown error')
+    expect(screen.getByRole('alert')).not.toHaveTextContent('Unable to load datasets: Unable to load datasets')
+  })
 })
