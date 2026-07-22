@@ -522,7 +522,7 @@ response documented in this plan. For valid templates, serialize the validated
 posted to the current registration endpoint after user edits. Invalid templates return structured
 errors and perform no database writes.
 
-Add `CHAIRPERSON` to the existing draft resource role annotations for parity with study
+Add `Chairperson` to the existing draft resource role annotations for parity with study
 registration. Do not weaken `DraftService` ownership checks or allow one non-admin user to read or
 modify another user's draft.
 
