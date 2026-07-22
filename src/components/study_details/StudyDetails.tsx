@@ -51,9 +51,7 @@ export const StudyDetails = () => {
     try {
       const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers) as EnumerateSnapshotModel
       if (snapshots.filteredTotal > 0) {
-        const datasetIdToSnapshot = chain(snapshots.items)
-          // Ignore any snapshots that a user does not have export (steward or reader) to
-          .filter((snapshot: SnapshotSummaryModel) => intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
+          .filter((snapshot: SnapshotSummaryModel) => intersection(snapshots.roleMap?.[snapshot.id] ?? [], ['steward', 'reader']).length > 0)
           .groupBy('duosId')
           .value()
         setExportableDatasets(datasetIdToSnapshot)
