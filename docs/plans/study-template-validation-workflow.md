@@ -114,8 +114,8 @@ file: <CSV>
 ```
 
 The typed path prevents this validator from becoming the implied validator for every future draft
-type. The endpoint should allow `ADMIN`, `CHAIRPERSON`, and `DATASUBMITTER`, matching study
-registration. Add `CHAIRPERSON` to the existing draft endpoints as well so all three roles can
+type. The endpoint should allow `Admin`, `Chairperson`, and `DataSubmitter`, matching study
+registration. Add `Chairperson` to the existing draft endpoints as well so all three roles can
 create, resume, update, attach files to, and delete their authorized drafts. Existing ownership and
 administrator authorization checks remain unchanged.
 
