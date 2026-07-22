@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetTerm, StudyTerm } from 'src/types/model'
 import { ElasticsearchQuery } from 'src/types/elastic'
@@ -20,25 +20,37 @@ interface SectionProps {
 const Section = ({ style, children }: React.PropsWithChildren<SectionProps>) =>
   <div style={{ paddingTop: 20, paddingRight: 100, ...style }}>{children}</div>
 
+const EMPTY_DATASETS: DatasetTerm[] = []
+const INITIAL_PAGINATION = { page: 0, pageSize: 25 }
+
 export const StudyDetails = () => {
   usePageTitle('Study Details')
   const params = useParams<{ studyId: string }>()
   const studyId = params.studyId
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error>()
-  const [datasets, setDatasets] = useState<DatasetTerm[]>([])
+  const [datasetState, setDatasetState] = useState<{
+    studyId?: string
+    datasets: DatasetTerm[]
+    error?: Error
+  }>({ datasets: EMPTY_DATASETS })
   const [exportableDatasets, setExportableDatasets] = useState<ExportableDatasets>({})
-  const [selectedDatasets, setSelectedDatasets] = useState<number[]>([])
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 25 })
-  const [sortModel, setSortModel] = useState<Array<{ field: string, sort: SortOrder | null }>>([])
+  const [selectionState, setSelectionState] = useState<{ studyId?: string, datasetIds: number[] }>({ datasetIds: [] })
+  const [paginationState, setPaginationState] = useState<{ studyId?: string, model: typeof INITIAL_PAGINATION }>({ model: INITIAL_PAGINATION })
+  const [sortState, setSortState] = useState<{ studyId?: string, model: Array<{ field: string, sort: SortOrder | null }> }>({ model: [] })
+
+  const loading = datasetState.studyId !== studyId
+  const error = loading ? undefined : datasetState.error
+  const datasets = loading ? EMPTY_DATASETS : datasetState.datasets
+  const selectedDatasets = selectionState.studyId === studyId ? selectionState.datasetIds : []
+  const paginationModel = paginationState.studyId === studyId ? paginationState.model : INITIAL_PAGINATION
+  const sortModel = sortState.studyId === studyId ? sortState.model : []
 
   const study: StudyTerm | undefined = datasets.length > 0 ? datasets[0].study : undefined
-  const selectedStudyIds = useMemo(() => Array.from(new Set(
+  const selectedStudyIds = Array.from(new Set(
     datasets
       .filter(dataset => selectedDatasets.includes(dataset.datasetId))
       .map(dataset => dataset.study.studyId),
-  )), [datasets, selectedDatasets])
+  ))
 
   const getExportableDatasets = async (datasets: DatasetTerm[]) => {
     if (datasets.length === 0) {
@@ -51,6 +63,7 @@ export const StudyDetails = () => {
     try {
       const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers) as EnumerateSnapshotModel
       if (snapshots.filteredTotal > 0) {
+        const datasetIdToSnapshot = chain(snapshots.items)
           .filter((snapshot: SnapshotSummaryModel) => intersection(snapshots.roleMap?.[snapshot.id] ?? [], ['steward', 'reader']).length > 0)
           .groupBy('duosId')
           .value()
@@ -66,6 +79,7 @@ export const StudyDetails = () => {
   }
 
   useEffect(() => {
+    let active = true
     const query = {
       from: 0,
       size: 10000,
@@ -93,14 +107,23 @@ export const StudyDetails = () => {
     }
     DataSet.searchDatasetIndex(query as ElasticsearchQuery)
       .then((datasets) => {
-        setDatasets(datasets)
-        setError(undefined)
+        if (active) {
+          setDatasetState({ studyId, datasets })
+        }
       })
-      .catch((error: Error) => {
-        setDatasets([])
-        setError(error)
+      .catch((error: unknown) => {
+        if (active) {
+          setDatasetState({
+            studyId,
+            datasets: EMPTY_DATASETS,
+            error: error instanceof Error ? error : new Error('Unable to load datasets'),
+          })
+        }
       })
-      .finally(() => setLoading(false))
+
+    return () => {
+      active = false
+    }
   }, [studyId])
 
   useEffect(() => {
@@ -110,9 +133,9 @@ export const StudyDetails = () => {
     init()
   }, [datasets])
 
-  const participantCount = datasets
-    .map(dataset => dataset.participantCount)
-    .reduce((partialSum, participants) => partialSum + participants, 0)
+  const participantCount = loading || error
+    ? undefined
+    : datasets.reduce((total, dataset) => total + dataset.participantCount, 0)
 
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start' }}>
@@ -141,7 +164,7 @@ export const StudyDetails = () => {
         <Section>
           {study?.description}
         </Section>
-        {!Number.isNaN(participantCount) && (
+        {participantCount !== undefined && !Number.isNaN(participantCount) && (
           <Section>
             <span style={{ fontWeight: 600 }}>Participants: </span>
             <span>
@@ -184,13 +207,13 @@ export const StudyDetails = () => {
               loading={loading}
               total={datasets.length}
               paginationModel={paginationModel}
-              onPaginationChange={setPaginationModel}
+              onPaginationChange={model => setPaginationState({ studyId, model })}
               paginationMode="client"
               sortModel={sortModel}
-              onSortChange={setSortModel}
+              onSortChange={model => setSortState({ studyId, model })}
               sortingMode="client"
               selectedDatasetIds={selectedDatasets}
-              onSelectionChange={setSelectedDatasets}
+              onSelectionChange={datasetIds => setSelectionState({ studyId, datasetIds })}
               exportableDatasets={exportableDatasets}
             />
           </div>
