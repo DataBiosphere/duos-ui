@@ -27,6 +27,8 @@ const LoadingOverlay = () => (
 interface LibraryDataGridExtendedProps extends LibraryDataGridProps {
   extraColumns?: GridColDef[]
   checkboxSelection?: boolean
+  paginationMode?: 'client' | 'server'
+  sortingMode?: 'client' | 'server'
 }
 
 export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
@@ -44,6 +46,8 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
   radarEnabledDatasetIds = EMPTY_RADAR_IDS,
   extraColumns,
   checkboxSelection = true,
+  paginationMode = 'server',
+  sortingMode,
 }) => {
   const asset = assetRegistry[assetType]
 
@@ -123,13 +127,13 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
       <DataGrid
         rows={data as LibraryRow[]}
         columns={columns}
-        rowCount={total}
+        rowCount={paginationMode === 'server' ? total : undefined}
         loading={loading}
         pageSizeOptions={[25, 50, 100]}
         paginationModel={paginationModel}
-        paginationMode="server"
+        paginationMode={paginationMode}
         onPaginationModelChange={onPaginationChange}
-        sortingMode={asset.sortingMode}
+        sortingMode={sortingMode ?? asset.sortingMode}
         sortModel={sortModel}
         onSortModelChange={(model) => {
           onSortChange(model.map(item => ({
