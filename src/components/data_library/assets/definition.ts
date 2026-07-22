@@ -68,6 +68,7 @@ export interface LibraryPage {
 export interface ColumnsProps {
   exportableDatasets?: ExportableDatasets
   radarEnabledDatasetIds?: Set<number>
+  soDarApprovalRequiredDatasetIds?: Set<number>
   /** Whether any datasets are currently selected — selection mode disables row-level request actions */
   hasSelection?: boolean
 }

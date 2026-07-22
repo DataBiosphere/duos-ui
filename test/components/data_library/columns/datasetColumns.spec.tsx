@@ -60,6 +60,7 @@ describe('datasetColumns — column order', () => {
       'participantCount',
       'dataUse',
       'dac',
+      'soApprovalModel',
       'actions',
     ])
   })
@@ -87,6 +88,25 @@ describe('datasetColumns — Access Management chip', () => {
       </MemoryRouter>,
     )
     expect(container.querySelector('svg[data-testid="BoltIcon"]')).toBeInTheDocument()
+  })
+})
+
+describe('datasetColumns — SO Approval column', () => {
+  it('shows the pre-authorization chip when the dataset is not in the per-DAR-approval set', () => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 })
+    expect(screen.getByText('Pre-Authorized Researchers')).toBeInTheDocument()
+    expect(container.querySelector('.MuiChip-root')).toBeInTheDocument()
+  })
+
+  it('shows the per-request-approval chip when the dataset is in the per-DAR-approval set', () => {
+    const soDarApprovalRequiredDatasetIds = new Set([1])
+    const col = makeDatasetColumns({}, new Set(), soDarApprovalRequiredDatasetIds).find(c => c.field === 'soApprovalModel')!
+    render(
+      <MemoryRouter>
+        {col.renderCell!(mockParams(undefined, { datasetId: 1 })) as React.ReactElement}
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('Per-Request Approval')).toBeInTheDocument()
   })
 })
 
@@ -121,7 +141,7 @@ describe('datasetColumns — Request Path column', () => {
   })
 
   it('disables the "Request Now" button when datasets are selected elsewhere on the page', () => {
-    const columnsWithSelection = makeDatasetColumns({}, new Set(), true)
+    const columnsWithSelection = makeDatasetColumns({}, new Set(), new Set(), true)
     renderCell('requestLocation', null, { accessManagement: 'controlled' }, columnsWithSelection)
     expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
   })

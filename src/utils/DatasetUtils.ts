@@ -48,6 +48,8 @@ const RULE_TYPE_TO_CODE: Record<string, 'GRU' | 'HMB'> = {
   HMB_DSV1: 'HMB',
 }
 
+const SO_DAR_APPROVAL_RULE_TYPE = 'REQUIRE_SO_DAR_APPROVAL'
+
 export const getRadarEnabledDatasetsWithRules = async (datasets: DatasetTerm[]) => {
   if (isEmpty(datasets)) return
 
@@ -82,5 +84,34 @@ export const getRadarEnabledDatasetsWithRules = async (datasets: DatasetTerm[]) 
         && isOnlyGRUorHMB(dataset.dataUse)
         && enabledCodes.has(dataset.dataUse.primary[0].code as 'GRU' | 'HMB')
     })
+    .map((dataset: { datasetId: number }) => dataset.datasetId))
+}
+
+/**
+ * Returns the IDs of datasets whose DAC requires the Signing Official named in a Data
+ * Access Request to approve that specific request before the DAC reviews it (the
+ * "per-DAR" authorization model). Datasets not in the returned set instead use the
+ * "pre-authorization" model, where Signing Officials pre-authorize researchers in advance.
+ */
+export const getSoDarApprovalRequiredDatasetIds = async (datasets: DatasetTerm[]): Promise<Set<number>> => {
+  if (isEmpty(datasets)) return new Set()
+
+  const uniqueDacIds = Array.from(
+    new Set(datasets.filter(dataset => dataset.dacId !== undefined).map(dataset => dataset.dacId)),
+  )
+
+  const dacIdsRequiringSoApproval = new Set<number>()
+  await Promise.all(
+    uniqueDacIds.map(async (dacId) => {
+      const rules: DACbotRule[] = await Dac.fetchDACbotRules(dacId)
+      const requiresSoApproval = rules.some(rule => rule.ruleType === SO_DAR_APPROVAL_RULE_TYPE && rule.enabledByUserId)
+      if (requiresSoApproval) {
+        dacIdsRequiringSoApproval.add(dacId)
+      }
+    }),
+  )
+
+  return new Set(datasets
+    .filter((dataset: DatasetTerm) => dataset.dacId !== undefined && dacIdsRequiringSoApproval.has(dataset.dacId))
     .map((dataset: { datasetId: number }) => dataset.datasetId))
 }

@@ -11,7 +11,7 @@ import eventList from 'src/libs/events'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'src/utils/NodashUtil'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
-import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils'
+import { getRadarEnabledDatasetsWithRules, getSoDarApprovalRequiredDatasetIds } from 'src/utils/DatasetUtils'
 import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import LibraryPageShell from 'src/components/data_library/LibraryPageShell'
 import LibraryFooter from 'src/components/data_library/LibraryFooter'
@@ -80,6 +80,7 @@ export const DataLibrary: React.FC = () => {
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
   const [exportableDatasets, setExportableDatasets] = useState<ExportableDatasets>({})
   const [radarEnabledDatasetIds, setRadarEnabledDatasetIds] = useState<Set<number>>(new Set())
+  const [soDarApprovalRequiredDatasetIds, setSoDarApprovalRequiredDatasetIds] = useState<Set<number>>(new Set())
 
   const selectedStudyIds = useMemo(() => {
     if (!data?.items) return []
@@ -142,8 +143,23 @@ export const DataLibrary: React.FC = () => {
       }
     }
 
+    const fetchSoDarApprovalRequired = async () => {
+      if (urlState.tab !== AssetType.DATASETS || !data?.items?.length) {
+        setSoDarApprovalRequiredDatasetIds(new Set())
+        return
+      }
+      try {
+        const soDarApprovalRequiredIds = await getSoDarApprovalRequiredDatasetIds(data.items as DatasetTerm[])
+        setSoDarApprovalRequiredDatasetIds(soDarApprovalRequiredIds)
+      }
+      catch {
+        setSoDarApprovalRequiredDatasetIds(new Set())
+      }
+    }
+
     fetchExportable()
     fetchRadarEnabled()
+    fetchSoDarApprovalRequired()
   }, [data?.items, urlState.tab])
 
   const header = (
@@ -171,6 +187,7 @@ export const DataLibrary: React.FC = () => {
         onSelectionChange: handleSelectionChange,
         exportableDatasets,
         radarEnabledDatasetIds: urlState.tab === AssetType.DATASETS ? radarEnabledDatasetIds : undefined,
+        soDarApprovalRequiredDatasetIds: urlState.tab === AssetType.DATASETS ? soDarApprovalRequiredDatasetIds : undefined,
       }}
       footer={(
         <LibraryFooter

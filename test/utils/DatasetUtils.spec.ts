@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { firstNonEmptyPropertyValue, getRadarEnabledDatasetsWithRules, isOnlyGRUorHMB } from 'src/utils/DatasetUtils'
+import { firstNonEmptyPropertyValue, getRadarEnabledDatasetsWithRules, getSoDarApprovalRequiredDatasetIds, isOnlyGRUorHMB } from 'src/utils/DatasetUtils'
 import type {
   Dataset,
   DataUseSummary,
@@ -280,5 +280,58 @@ describe('getRadarEnabledDatasetsWithRules', () => {
     ]
     const result = await getRadarEnabledDatasetsWithRules(datasets)
     expect(Array.from(result as Set<number>)).toEqual([])
+  })
+})
+
+describe('getSoDarApprovalRequiredDatasetIds', () => {
+  const minimalDataset: Omit<DatasetTerm, 'datasetId' | 'dacId'> = {
+    createUserId: 0,
+    createUserDisplayName: '',
+    datasetIdentifier: '',
+    deletable: false,
+    datasetName: '',
+    participantCount: 0,
+    dataLocation: '',
+    url: '',
+    dacApproval: false,
+    accessManagement: 'open',
+    approvedUserIds: [],
+    study: minimalStudy,
+    submitter: { userId: 0, displayName: '', institution: { id: 0, name: '' } },
+    updateUser: { userId: 0, displayName: '', institution: { id: 0, name: '' } },
+    dac: { dacId: 0, dacName: '', dacEmail: '' },
+    piName: '',
+    dataUse: { primary: [], secondary: [] },
+  }
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('flags datasets whose DAC has REQUIRE_SO_DAR_APPROVAL enabled', async () => {
+    vi.spyOn(DAC, 'fetchDACbotRules').mockImplementation((dacId: number) => {
+      if (dacId === 2) {
+        return Promise.resolve([{ ruleType: 'REQUIRE_SO_DAR_APPROVAL', enabledByUserId: 99 }] as never)
+      }
+      return Promise.resolve([{ ruleType: 'REQUIRE_SO_DAR_APPROVAL', enabledByUserId: null }] as never)
+    })
+    const datasets: DatasetTerm[] = [
+      { datasetId: 1, dacId: 2, ...minimalDataset },
+      { datasetId: 2, dacId: 3, ...minimalDataset },
+    ]
+    const result = await getSoDarApprovalRequiredDatasetIds(datasets)
+    expect(Array.from(result)).toEqual([1])
+  })
+
+  it('returns an empty set when no DAC requires SO approval', async () => {
+    vi.spyOn(DAC, 'fetchDACbotRules').mockResolvedValue([{ ruleType: 'REQUIRE_SO_DAR_APPROVAL', enabledByUserId: null }] as never)
+    const datasets: DatasetTerm[] = [{ datasetId: 1, dacId: 2, ...minimalDataset }]
+    const result = await getSoDarApprovalRequiredDatasetIds(datasets)
+    expect(Array.from(result)).toEqual([])
+  })
+
+  it('returns an empty set for an empty dataset list', async () => {
+    const result = await getSoDarApprovalRequiredDatasetIds([])
+    expect(Array.from(result)).toEqual([])
   })
 })

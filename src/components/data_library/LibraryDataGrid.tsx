@@ -10,6 +10,7 @@ import { LibraryDataGridProps } from 'src/types/library'
 import { assetRegistry, LibraryRow } from 'src/components/data_library/assets'
 
 const EMPTY_RADAR_IDS = new Set<number>()
+const EMPTY_SO_DAR_APPROVAL_IDS = new Set<number>()
 
 const LoadingOverlay = () => (
   <Box
@@ -42,6 +43,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
   onSelectionChange,
   exportableDatasets = {},
   radarEnabledDatasetIds = EMPTY_RADAR_IDS,
+  soDarApprovalRequiredDatasetIds = EMPTY_SO_DAR_APPROVAL_IDS,
   extraColumns,
   checkboxSelection = true,
 }) => {
@@ -50,14 +52,14 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
   const hasSelection = selectedDatasetIds.length > 0
 
   const columns = useMemo(() => {
-    const base = asset.makeColumns({ exportableDatasets, radarEnabledDatasetIds, hasSelection })
+    const base = asset.makeColumns({ exportableDatasets, radarEnabledDatasetIds, soDarApprovalRequiredDatasetIds, hasSelection })
     if (!extraColumns || extraColumns.length === 0) return base
     const extraFields = new Set(extraColumns.map(c => c.field))
     return [
       ...base.filter(col => !extraFields.has(col.field)),
       ...extraColumns,
     ]
-  }, [asset, exportableDatasets, radarEnabledDatasetIds, hasSelection, extraColumns])
+  }, [asset, exportableDatasets, radarEnabledDatasetIds, soDarApprovalRequiredDatasetIds, hasSelection, extraColumns])
 
   const getRowId = (row: LibraryRow) => asset.getRowId(row)
 

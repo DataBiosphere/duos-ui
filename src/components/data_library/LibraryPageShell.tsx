@@ -5,6 +5,7 @@ import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
 import InstantApprovalBadge from 'src/components/data_library/InstantApprovalBadge'
+import SoApprovalReminderBanner from 'src/components/data_library/SoApprovalReminderBanner'
 import { ExportableDatasets, TabConfig } from 'src/types/library'
 import { LibraryPageState } from 'src/hooks/useLibraryPageState'
 
@@ -15,6 +16,7 @@ interface GridExtras {
   checkboxSelection?: boolean
   exportableDatasets?: ExportableDatasets
   radarEnabledDatasetIds?: Set<number>
+  soDarApprovalRequiredDatasetIds?: Set<number>
 }
 
 interface LibraryPageShellProps {
@@ -59,6 +61,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
     checkboxSelection = true,
     exportableDatasets,
     radarEnabledDatasetIds,
+    soDarApprovalRequiredDatasetIds,
   } = gridExtras
 
   if (error) {
@@ -109,6 +112,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
         </Box>
 
         <Box sx={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <SoApprovalReminderBanner />
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
             {isFetching
               ? <Skeleton variant="text" width={120} sx={{ fontSize: '15px' }} />
@@ -144,6 +148,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
               onSelectionChange={onSelectionChange}
               exportableDatasets={exportableDatasets}
               radarEnabledDatasetIds={radarEnabledDatasetIds}
+              soDarApprovalRequiredDatasetIds={soDarApprovalRequiredDatasetIds}
               extraColumns={extraColumns}
               checkboxSelection={checkboxSelection}
             />

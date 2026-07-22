@@ -15,6 +15,7 @@ import { validateHttpUrl } from 'src/utils/UrlUtils'
 export const makeDatasetColumns = (
   exportableDatasets: ExportableDatasets = {},
   radarEnabledDatasetIds: Set<number> = new Set(),
+  soDarApprovalRequiredDatasetIds: Set<number> = new Set(),
   hasSelection: boolean = false,
 ): GridColDef<DatasetTerm>[] => [
   {
@@ -146,6 +147,29 @@ export const makeDatasetColumns = (
     headerName: 'DAC',
     width: 150,
     valueGetter: (_value, row) => row.dac?.dacName || '',
+  },
+  {
+    field: 'soApprovalModel',
+    headerName: 'SO Approval',
+    width: 190,
+    sortable: false,
+    renderCell: (params) => {
+      const isPerDarApproval = soDarApprovalRequiredDatasetIds.has(params.row.datasetId)
+      const label = isPerDarApproval ? 'Per-Request Approval' : 'Pre-Authorized Researchers'
+      const tooltipTitle = isPerDarApproval
+        ? 'This dataset\'s DAC requires the Signing Official named in each Data Access Request to approve that specific request before the DAC reviews it.'
+        : 'This dataset\'s DAC allows Signing Officials to pre-authorize researchers in advance, so approved researchers don\'t need separate per-request SO approval.'
+      const colorSx = isPerDarApproval
+        ? { bgcolor: '#cfe2ff', color: '#084298' }
+        : { bgcolor: '#d4edda', color: '#155724' }
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+          <Tooltip title={tooltipTitle}>
+            <Chip label={label} size="small" sx={{ ...colorSx, fontWeight: 600 }} />
+          </Tooltip>
+        </Box>
+      )
+    },
   },
   {
     field: 'actions',
