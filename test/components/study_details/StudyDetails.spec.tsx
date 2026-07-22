@@ -8,6 +8,7 @@ import { StudyDetails } from 'src/components/study_details/StudyDetails'
 import { Storage } from 'src/libs/storage'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { DuosUser, LibraryCard } from 'src/types/model'
+import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 
 vi.mock('src/libs/config', () => ({
   Config: {
@@ -222,6 +223,41 @@ describe('Study details test', () => {
     expect(await screen.findByText('Study 2 Dataset')).toBeInTheDocument()
     expect(screen.getAllByText('second study')).toHaveLength(2)
     expect(screen.queryByText(/dataset selected from/i)).not.toBeInTheDocument()
+  })
+
+  it('ignores exportable snapshots returned for a previous study', async () => {
+    const user = userEvent.setup()
+    const nextStudyDatasets = [{
+      ...datasets[0],
+      datasetId: 223456,
+      datasetIdentifier: 'DUOS-223456',
+      datasetName: 'Study 2 Dataset',
+      study: { ...datasets[0].study, studyId: 2, studyName: 'second study' },
+    }]
+    let resolvePreviousSnapshots: (response: unknown) => void = () => {}
+    const previousSnapshotRequest = new Promise((resolve) => {
+      resolvePreviousSnapshots = resolve
+    })
+    vi.mocked(DataSet.searchDatasetIndex)
+      .mockResolvedValueOnce(datasets as never)
+      .mockResolvedValueOnce(nextStudyDatasets as never)
+    vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds)
+      .mockReturnValueOnce(previousSnapshotRequest as never)
+      .mockResolvedValueOnce({ filteredTotal: 0, items: [], roleMap: {} } as never)
+
+    mountComponent(true)
+    await screen.findByText(datasets[0].datasetName)
+    await waitFor(() => expect(TerraDataRepo.listSnapshotsByDatasetIds).toHaveBeenCalledTimes(1))
+    await user.click(screen.getByRole('button', { name: 'View study 2' }))
+    await screen.findByText('Study 2 Dataset')
+    await waitFor(() => expect(TerraDataRepo.listSnapshotsByDatasetIds).toHaveBeenCalledTimes(2))
+
+    resolvePreviousSnapshots({
+      filteredTotal: 1,
+      items: [{ id: 'old-snapshot', name: 'Old Snapshot', duosId: 'DUOS-123456' }],
+      roleMap: { 'old-snapshot': ['reader'] },
+    })
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Export to...' })).not.toBeInTheDocument())
   })
 
   it('shows the appropriate data for fields', async () => {

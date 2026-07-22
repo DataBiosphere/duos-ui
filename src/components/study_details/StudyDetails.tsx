@@ -21,6 +21,7 @@ const Section = ({ style, children }: React.PropsWithChildren<SectionProps>) =>
   <div style={{ paddingTop: 20, paddingRight: 100, ...style }}>{children}</div>
 
 const EMPTY_DATASETS: DatasetTerm[] = []
+const EMPTY_EXPORTABLE_DATASETS: ExportableDatasets = {}
 const INITIAL_PAGINATION = { page: 0, pageSize: 25 }
 
 export const StudyDetails = () => {
@@ -33,7 +34,7 @@ export const StudyDetails = () => {
     datasets: DatasetTerm[]
     error?: Error
   }>({ datasets: EMPTY_DATASETS })
-  const [exportableDatasets, setExportableDatasets] = useState<ExportableDatasets>({})
+  const [exportableState, setExportableState] = useState<{ studyId?: string, data: ExportableDatasets }>({ data: EMPTY_EXPORTABLE_DATASETS })
   const [selectionState, setSelectionState] = useState<{ studyId?: string, datasetIds: number[] }>({ datasetIds: [] })
   const [paginationState, setPaginationState] = useState<{ studyId?: string, model: typeof INITIAL_PAGINATION }>({ model: INITIAL_PAGINATION })
   const [sortState, setSortState] = useState<{ studyId?: string, model: Array<{ field: string, sort: SortOrder | null }> }>({ model: [] })
@@ -41,6 +42,7 @@ export const StudyDetails = () => {
   const loading = datasetState.studyId !== studyId
   const error = loading ? undefined : datasetState.error
   const datasets = loading ? EMPTY_DATASETS : datasetState.datasets
+  const exportableDatasets = exportableState.studyId === studyId ? exportableState.data : EMPTY_EXPORTABLE_DATASETS
   const selectedDatasets = selectionState.studyId === studyId ? selectionState.datasetIds : []
   const paginationModel = paginationState.studyId === studyId ? paginationState.model : INITIAL_PAGINATION
   const sortModel = sortState.studyId === studyId ? sortState.model : []
@@ -51,32 +53,6 @@ export const StudyDetails = () => {
       .filter(dataset => selectedDatasets.includes(dataset.datasetId))
       .map(dataset => dataset.study.studyId),
   ))
-
-  const getExportableDatasets = async (datasets: DatasetTerm[]) => {
-    if (datasets.length === 0) {
-      setExportableDatasets({})
-      return
-    }
-
-    // Note the dataset identifier is in each sub-table row.
-    const datasetIdentifiers = datasets.map(row => row.datasetIdentifier)
-    try {
-      const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers) as EnumerateSnapshotModel
-      if (snapshots.filteredTotal > 0) {
-        const datasetIdToSnapshot = chain(snapshots.items)
-          .filter((snapshot: SnapshotSummaryModel) => intersection(snapshots.roleMap?.[snapshot.id] ?? [], ['steward', 'reader']).length > 0)
-          .groupBy('duosId')
-          .value()
-        setExportableDatasets(datasetIdToSnapshot)
-      }
-      else {
-        setExportableDatasets({})
-      }
-    }
-    catch {
-      setExportableDatasets({})
-    }
-  }
 
   useEffect(() => {
     let active = true
@@ -127,11 +103,36 @@ export const StudyDetails = () => {
   }, [studyId])
 
   useEffect(() => {
-    const init = async () => {
-      await getExportableDatasets(datasets)
+    if (datasets.length === 0) return
+
+    let active = true
+    const fetchExportableDatasets = async () => {
+      // Note the dataset identifier is in each sub-table row.
+      const datasetIdentifiers = datasets.map(row => row.datasetIdentifier)
+      try {
+        const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers) as EnumerateSnapshotModel
+        const data = snapshots.filteredTotal > 0
+          ? chain(snapshots.items)
+              .filter((snapshot: SnapshotSummaryModel) => intersection(snapshots.roleMap?.[snapshot.id] ?? [], ['steward', 'reader']).length > 0)
+              .groupBy('duosId')
+              .value()
+          : EMPTY_EXPORTABLE_DATASETS
+        if (active) {
+          setExportableState({ studyId, data })
+        }
+      }
+      catch {
+        if (active) {
+          setExportableState({ studyId, data: EMPTY_EXPORTABLE_DATASETS })
+        }
+      }
     }
-    init()
-  }, [datasets])
+    fetchExportableDatasets()
+
+    return () => {
+      active = false
+    }
+  }, [datasets, studyId])
 
   const participantCount = loading || error
     ? undefined
