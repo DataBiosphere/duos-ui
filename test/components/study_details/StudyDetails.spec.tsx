@@ -171,6 +171,14 @@ afterEach(() => {
 })
 
 describe('Study details test', () => {
+  it('does not show a participant total while datasets are loading', () => {
+    vi.mocked(DataSet.searchDatasetIndex).mockReturnValueOnce(new Promise(() => {}) as never)
+    mountComponent()
+
+    expect(document.querySelector('.MuiCircularProgress-root')).toBeInTheDocument()
+    expect(screen.queryByText('Participants:')).not.toBeInTheDocument()
+  })
+
   it('shows the appropriate data for fields', async () => {
     mountComponent()
     await screen.findByText(datasets[0].datasetName)
@@ -220,6 +228,7 @@ describe('Study details test', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Unable to load datasets: search failed')
     expect(screen.getByText('No datasets found matching your criteria')).toBeInTheDocument()
+    expect(screen.queryByText('Participants:')).not.toBeInTheDocument()
     expect(document.querySelector('.MuiCircularProgress-root')).not.toBeInTheDocument()
   })
 })

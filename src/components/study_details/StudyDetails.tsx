@@ -51,6 +51,7 @@ export const StudyDetails = () => {
     try {
       const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers) as EnumerateSnapshotModel
       if (snapshots.filteredTotal > 0) {
+        const datasetIdToSnapshot = chain(snapshots.items)
           .filter((snapshot: SnapshotSummaryModel) => intersection(snapshots.roleMap?.[snapshot.id] ?? [], ['steward', 'reader']).length > 0)
           .groupBy('duosId')
           .value()
@@ -110,9 +111,9 @@ export const StudyDetails = () => {
     init()
   }, [datasets])
 
-  const participantCount = datasets
-    .map(dataset => dataset.participantCount)
-    .reduce((partialSum, participants) => partialSum + participants, 0)
+  const participantCount = loading || error
+    ? undefined
+    : datasets.reduce((total, dataset) => total + dataset.participantCount, 0)
 
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start' }}>
@@ -141,7 +142,7 @@ export const StudyDetails = () => {
         <Section>
           {study?.description}
         </Section>
-        {!Number.isNaN(participantCount) && (
+        {participantCount !== undefined && !Number.isNaN(participantCount) && (
           <Section>
             <span style={{ fontWeight: 600 }}>Participants: </span>
             <span>
