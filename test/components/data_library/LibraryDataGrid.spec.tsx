@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { describe, it, expect, vi, beforeAll } from 'vitest'
 
 vi.mock('src/components/data_search/DatasetExportButton', () => {
@@ -9,7 +9,7 @@ vi.mock('src/components/data_search/DatasetExportButton', () => {
   return { DatasetExportButton, default: DatasetExportButton }
 })
 import '@testing-library/jest-dom/vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { LibraryDataGrid } from 'src/components/data_library/LibraryDataGrid'
@@ -99,26 +99,6 @@ const baseProps = {
   onSortChange: vi.fn(),
   selectedDatasetIds: [] as number[],
   onSelectionChange: vi.fn(),
-}
-
-const ClientGridHarness = ({ data }: { data: DatasetTerm[] }) => {
-  const [pagination, setPagination] = useState(paginationModel)
-  const [sort, setSort] = useState(sortModel)
-
-  return (
-    <LibraryDataGrid
-      assetType={AssetType.DATASETS}
-      data={data}
-      total={data.length}
-      {...baseProps}
-      paginationModel={pagination}
-      onPaginationChange={setPagination}
-      paginationMode="client"
-      sortModel={sort}
-      onSortChange={setSort}
-      sortingMode="client"
-    />
-  )
 }
 
 describe('LibraryDataGrid', () => {
@@ -251,40 +231,6 @@ describe('LibraryDataGrid', () => {
     const checkbox = container.querySelector('.MuiDataGrid-row[data-id="101"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
     await user.click(checkbox)
     expect(onSelectionChange).toHaveBeenCalledWith([101])
-  })
-
-  it('supports client-side sorting when all rows are loaded', async () => {
-    const user = userEvent.setup()
-    const { container } = mountGrid(
-      <ClientGridHarness data={[
-        makeDatasetTerm({ datasetId: 301, datasetName: 'Zulu Dataset' }),
-        makeDatasetTerm({ datasetId: 302, datasetName: 'Alpha Dataset' }),
-      ]}
-      />,
-    )
-
-    await user.click(screen.getByRole('columnheader', { name: /Dataset Name/ }))
-    await waitFor(() => {
-      const rows = Array.from(container.querySelectorAll('.MuiDataGrid-row'))
-      expect(rows[0]).toHaveTextContent('Alpha Dataset')
-      expect(rows[1]).toHaveTextContent('Zulu Dataset')
-    })
-  })
-
-  it('supports client-side pagination when all rows are loaded', async () => {
-    const user = userEvent.setup()
-    const clientDatasets = Array.from({ length: 26 }, (_, index) => makeDatasetTerm({
-      datasetId: index + 1,
-      datasetIdentifier: `DUOS-${index + 1}`,
-      datasetName: `Dataset ${index + 1}`,
-    }))
-    mountGrid(<ClientGridHarness data={clientDatasets} />)
-
-    expect(screen.getByText('Dataset 1')).toBeInTheDocument()
-    expect(screen.queryByText('Dataset 26')).not.toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Go to next page' }))
-    expect(await screen.findByText('Dataset 26')).toBeInTheDocument()
-    expect(screen.queryByText('Dataset 1')).not.toBeInTheDocument()
   })
 
   it('handles row selection for studies (mapping to dataset IDs)', async () => {

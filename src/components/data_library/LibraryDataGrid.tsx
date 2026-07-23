@@ -27,8 +27,6 @@ const LoadingOverlay = () => (
 interface LibraryDataGridExtendedProps extends LibraryDataGridProps {
   extraColumns?: GridColDef[]
   checkboxSelection?: boolean
-  paginationMode?: 'client' | 'server'
-  sortingMode?: 'client' | 'server'
 }
 
 export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
@@ -46,8 +44,6 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
   radarEnabledDatasetIds = EMPTY_RADAR_IDS,
   extraColumns,
   checkboxSelection = true,
-  paginationMode = 'server',
-  sortingMode,
 }) => {
   const asset = assetRegistry[assetType]
 
@@ -127,13 +123,13 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
       <DataGrid
         rows={data as LibraryRow[]}
         columns={columns}
-        rowCount={paginationMode === 'server' ? total : undefined}
+        rowCount={total}
         loading={loading}
         pageSizeOptions={[25, 50, 100]}
         paginationModel={paginationModel}
-        paginationMode={paginationMode}
+        paginationMode="server"
         onPaginationModelChange={onPaginationChange}
-        sortingMode={sortingMode ?? asset.sortingMode}
+        sortingMode={asset.sortingMode}
         sortModel={sortModel}
         onSortModelChange={(model) => {
           onSortChange(model.map(item => ({
@@ -143,6 +139,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
         }}
         checkboxSelection={checkboxSelection}
         disableRowSelectionOnClick
+        keepNonExistentRowsSelected
         rowSelectionModel={rowSelectionModel}
         onRowSelectionModelChange={handleSelectionChange}
         isRowSelectable={isRowSelectable}

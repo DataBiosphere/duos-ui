@@ -9,6 +9,8 @@ import { Storage } from 'src/libs/storage'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { DuosUser, LibraryCard } from 'src/types/model'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ElasticsearchQuery } from 'src/types/elastic'
 
 vi.mock('src/libs/config', () => ({
   Config: {
@@ -26,7 +28,7 @@ vi.mock('src/libs/ajax/TerraDataRepo', () => ({
 
 vi.mock('src/libs/ajax/DataSet', () => ({
   DataSet: {
-    searchDatasetIndex: vi.fn(),
+    searchDatasetIndexV2: vi.fn(),
   },
 }))
 
@@ -141,19 +143,44 @@ const datasets = [
   },
 ]
 
+const makeSearchResponse = (
+  pageDatasets = datasets,
+  total = pageDatasets.length,
+  participantCount = pageDatasets.reduce((sum, dataset) => sum + dataset.participantCount, 0),
+) => ({
+  hits: {
+    total: { value: total },
+    hits: pageDatasets.map(dataset => ({ _source: dataset })),
+  },
+  aggregations: {
+    study_details: {
+      hits: {
+        hits: pageDatasets.length > 0
+          ? [{ _source: { study: pageDatasets[0].study } }]
+          : [],
+      },
+    },
+    total_participants: { value: participantCount },
+  },
+})
+
 const StudySwitcher = () => {
   const navigate = useNavigate()
   return <button onClick={() => navigate('/studies/2')}>View study 2</button>
 }
 
+let queryClient: QueryClient
+
 const mountComponent = (withStudySwitcher = false) =>
   render(
-    <MemoryRouter initialEntries={['/studies/1']}>
-      {withStudySwitcher && <StudySwitcher />}
-      <Routes>
-        <Route path="/studies/:studyId" element={<StudyDetails />} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={['/studies/1']}>
+        {withStudySwitcher && <StudySwitcher />}
+        <Routes>
+          <Route path="/studies/:studyId" element={<StudyDetails />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 
 beforeAll(() => {
@@ -165,7 +192,12 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue(datasets as never)
+  queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  })
+  vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(makeSearchResponse() as never)
   vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({
     userId: 42,
     libraryCard: {} as LibraryCard,
@@ -173,13 +205,14 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  queryClient.clear()
   vi.restoreAllMocks()
   vi.clearAllMocks()
 })
 
 describe('Study details test', () => {
   it('does not show a participant total while datasets are loading', () => {
-    vi.mocked(DataSet.searchDatasetIndex).mockReturnValueOnce(new Promise(() => {}) as never)
+    vi.mocked(DataSet.searchDatasetIndexV2).mockReturnValueOnce(new Promise(() => {}) as never)
     mountComponent()
 
     expect(document.querySelector('.MuiCircularProgress-root')).toBeInTheDocument()
@@ -199,12 +232,12 @@ describe('Study details test', () => {
         studyName: 'second study',
       },
     }]
-    let resolveNextStudy: (datasets: typeof nextStudyDatasets) => void = () => {}
-    const nextStudyRequest = new Promise<typeof nextStudyDatasets>((resolve) => {
+    let resolveNextStudy: (response: ReturnType<typeof makeSearchResponse>) => void = () => {}
+    const nextStudyRequest = new Promise<ReturnType<typeof makeSearchResponse>>((resolve) => {
       resolveNextStudy = resolve
     })
-    vi.mocked(DataSet.searchDatasetIndex)
-      .mockResolvedValueOnce(datasets as never)
+    vi.mocked(DataSet.searchDatasetIndexV2)
+      .mockResolvedValueOnce(makeSearchResponse() as never)
       .mockReturnValueOnce(nextStudyRequest as never)
 
     const { container } = mountComponent(true)
@@ -219,7 +252,7 @@ describe('Study details test', () => {
     expect(document.querySelector('.MuiCircularProgress-root')).toBeInTheDocument()
     await waitFor(() => expect(screen.queryByText(/1 dataset selected from 1 study/i)).not.toBeInTheDocument())
 
-    resolveNextStudy(nextStudyDatasets)
+    resolveNextStudy(makeSearchResponse(nextStudyDatasets))
     expect(await screen.findByText('Study 2 Dataset')).toBeInTheDocument()
     expect(screen.getAllByText('second study')).toHaveLength(2)
     expect(screen.queryByText(/dataset selected from/i)).not.toBeInTheDocument()
@@ -238,9 +271,9 @@ describe('Study details test', () => {
     const previousSnapshotRequest = new Promise((resolve) => {
       resolvePreviousSnapshots = resolve
     })
-    vi.mocked(DataSet.searchDatasetIndex)
-      .mockResolvedValueOnce(datasets as never)
-      .mockResolvedValueOnce(nextStudyDatasets as never)
+    vi.mocked(DataSet.searchDatasetIndexV2)
+      .mockResolvedValueOnce(makeSearchResponse() as never)
+      .mockResolvedValueOnce(makeSearchResponse(nextStudyDatasets) as never)
     vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds)
       .mockReturnValueOnce(previousSnapshotRequest as never)
       .mockResolvedValueOnce({ filteredTotal: 0, items: [], roleMap: {} } as never)
@@ -275,6 +308,62 @@ describe('Study details test', () => {
     expect(document.querySelectorAll('[role=row]')).toHaveLength(datasets.length + 1)
   })
 
+  it('requests server-side pages for the current study without a fixed result cap', async () => {
+    const user = userEvent.setup()
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(makeSearchResponse(datasets, 26) as never)
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+
+    const initialQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[0][0] as ElasticsearchQuery
+    expect(initialQuery.from).toBe(0)
+    expect(initialQuery.size).toBe(25)
+    expect(initialQuery.size).not.toBe(10000)
+    expect(initialQuery.query?.bool.must).toContainEqual({ match: { 'study.studyId': '1' } })
+    expect(initialQuery.aggs).toHaveProperty('study_details')
+    expect(initialQuery.aggs).toHaveProperty('total_participants')
+
+    await user.click(screen.getByRole('button', { name: 'Go to next page' }))
+    await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalledTimes(2))
+    const nextPageQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[1][0] as ElasticsearchQuery
+    expect(nextPageQuery.from).toBe(25)
+    expect(nextPageQuery.size).toBe(25)
+  })
+
+  it('uses the dataset asset server-side sort mapping', async () => {
+    const user = userEvent.setup()
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+
+    await user.click(screen.getByRole('columnheader', { name: /Dataset Name/ }))
+    await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalledTimes(2))
+    const sortQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[1][0] as ElasticsearchQuery
+    expect(sortQuery.sort).toEqual([{ 'datasetName.keyword': { order: 'asc' } }])
+  })
+
+  it('preserves selected datasets across server-side pages', async () => {
+    const user = userEvent.setup()
+    const nextPageDatasets = [{
+      ...datasets[0],
+      datasetId: 223456,
+      datasetIdentifier: 'DUOS-223456',
+      datasetName: 'Next Page Dataset',
+    }]
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) =>
+      (query.from === 25
+        ? makeSearchResponse(nextPageDatasets, 26, 6)
+        : makeSearchResponse(datasets, 26, 6)) as never)
+
+    const { container } = mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    const checkbox = container.querySelector('.MuiDataGrid-row[data-id="123456"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    await user.click(checkbox)
+    expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Go to next page' }))
+    expect(await screen.findByText('Next Page Dataset')).toBeInTheDocument()
+    expect(screen.getByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
+  })
+
   it('selects controlled datasets, displays LibraryFooter, and applies for access', async () => {
     const user = userEvent.setup()
     const { container } = mountComponent()
@@ -304,7 +393,7 @@ describe('Study details test', () => {
   })
 
   it('shows the grid empty state and an error instead of remaining in loading state when loading fails', async () => {
-    vi.mocked(DataSet.searchDatasetIndex).mockRejectedValueOnce(new Error('search failed'))
+    vi.mocked(DataSet.searchDatasetIndexV2).mockRejectedValueOnce(new Error('search failed'))
     mountComponent()
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Unable to load datasets: search failed')
@@ -314,7 +403,7 @@ describe('Study details test', () => {
   })
 
   it('shows a non-duplicated fallback message for non-Error rejections', async () => {
-    vi.mocked(DataSet.searchDatasetIndex).mockRejectedValueOnce('unexpected rejection')
+    vi.mocked(DataSet.searchDatasetIndexV2).mockRejectedValueOnce('unexpected rejection')
     mountComponent()
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Unable to load datasets: Unknown error')
