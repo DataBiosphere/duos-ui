@@ -1,18 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import { DataSet } from 'src/libs/ajax/DataSet'
-import { DatasetTerm, StudyTerm } from 'src/types/model'
-import { ElasticsearchQuery } from 'src/types/elastic'
+import React, { useState } from 'react'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { makeDatasetTableHeader, makeDatasetTableRows } from 'src/components/data_search/DatasetSearchTableConstants'
-import SimpleTable from 'src/components/SimpleTable'
-import { Styles } from 'src/libs/theme'
-import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
-import { chain, Dictionary, intersection, isEmpty } from 'src/utils/NodashUtil'
-import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
-import { DatasetSearchFooter } from 'src/components/data_search/DatasetSearchFooter'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
+import LibraryFooter from 'src/components/data_library/LibraryFooter'
+import { AssetType, SortOrder, SortState } from 'src/types/library'
+import { useStudyDatasets, useStudyExportableDatasets } from 'src/hooks/useStudyDetailsData'
 
 interface SectionProps {
   style?: React.CSSProperties
@@ -21,118 +15,46 @@ interface SectionProps {
 const Section = ({ style, children }: React.PropsWithChildren<SectionProps>) =>
   <div style={{ paddingTop: 20, paddingRight: 100, ...style }}>{children}</div>
 
-const styles = {
-  row: {
-    display: 'flex',
-    alignItems: 'flex-start',
-  },
-  baseStyle: {
-    fontFamily: 'Montserrat',
-    fontSize: '1.4rem',
-    fontWeight: 400,
-    display: 'flex',
-    padding: '1rem 2%',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    whiteSpace: 'pre-wrap',
-    backgroundColor: 'white',
-    border: '1px solid #DEDEDE',
-    borderRadius: '4px',
-    textOverflow: 'ellipsis',
-    height: '4rem',
-    marginTop: 5,
-  },
-  columnStyle: {
-    ...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between',
-    fontFamily: 'Montserrat',
-    fontSize: '1.2rem',
-    fontWeight: 'bold',
-    letterSpacing: '0.2px',
-    backgroundColor: '#E2E8F4',
-    border: 'none',
-    textTransform: 'uppercase',
-    lineHeight: '16px',
-  },
-  containerOverride: {},
+const INITIAL_PAGINATION = { page: 0, pageSize: 25 }
+const EMPTY_PAGE = {
+  items: [],
+  total: 0,
+  study: undefined,
+  participantCount: undefined,
 }
 
-export const StudyDetails = () => {
-  usePageTitle('Study Details')
-  const params = useParams<{ studyId: string }>()
-  const studyId = params.studyId
+type StudySortModel = Array<{ field: string, sort: SortOrder | null }>
+
+const getErrorMessage = (error: unknown): string | undefined => {
+  if (error instanceof Error) return error.message
+  if (error) return 'Unknown error'
+  return undefined
+}
+
+interface StudyDetailsContentProps {
+  studyId: string
+}
+
+const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
-  const [datasets, setDatasets] = useState<DatasetTerm[]>([])
-  const [exportableDatasets, setExportableDatasets] = useState<Dictionary<SnapshotSummaryModel[]>>({})
   const [selectedDatasets, setSelectedDatasets] = useState<number[]>([])
-
-  const study: StudyTerm | undefined = datasets.length > 0 ? datasets[0].study : undefined
-  const headers = makeDatasetTableHeader(datasets, selectedDatasets, setSelectedDatasets, exportableDatasets)
-  const rowData = makeDatasetTableRows(datasets, headers)
-
-  const getExportableDatasets = async (datasets: DatasetTerm[]) => {
-    // Note the dataset identifier is in each sub-table row.
-    const datasetIdentifiers = datasets.map(row => row.datasetIdentifier)
-    const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers) as EnumerateSnapshotModel
-    if (snapshots.filteredTotal > 0) {
-      const datasetIdToSnapshot = chain(snapshots.items)
-        // Ignore any snapshots that a user does not have export (steward or reader) to
-        .filter((snapshot: { id: string }) => intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
-        .groupBy('duosId')
-        .value()
-      setExportableDatasets(datasetIdToSnapshot)
-    }
-  }
-
-  useEffect(() => {
-    const query = {
-      from: 0,
-      size: 10000,
-      query: {
-        bool: {
-          must: [
-            {
-              match: {
-                _index: 'dataset',
-              },
-            },
-            {
-              match: {
-                'study.studyId': studyId,
-              },
-            },
-            {
-              exists: {
-                field: 'study',
-              },
-            },
-          ],
-        },
-      },
-    }
-    DataSet.searchDatasetIndex(query as ElasticsearchQuery).then((datasets) => {
-      setDatasets(datasets)
-      setLoading(false)
-    })
-  }, [studyId, setDatasets])
-
-  useEffect(() => {
-    const init = async () => {
-      await getExportableDatasets(datasets)
-    }
-    init()
-  }, [datasets])
-
-  const participantCount = datasets
-    .map(dataset => dataset.participantCount)
-    .reduce((partialSum, participants) => partialSum + participants, 0)
-
-  if (loading) {
-    return <div>Loading</div>
-  }
+  const [paginationModel, setPaginationModel] = useState(INITIAL_PAGINATION)
+  const [sortModel, setSortModel] = useState<StudySortModel>([])
+  const sort: SortState | undefined = sortModel[0]?.sort
+    ? { field: sortModel[0].field, order: sortModel[0].sort }
+    : undefined
+  const { data = EMPTY_PAGE, isFetching: loading, error } = useStudyDatasets(studyId, paginationModel, sort)
+  const datasets = data.items
+  const study = data.study
+  const participantCount = data.participantCount
+  const { data: exportableDatasets } = useStudyExportableDatasets(studyId, datasets)
+  const selectedStudyIds = selectedDatasets.length > 0 && study
+    ? [study.studyId]
+    : []
+  const errorMessage = getErrorMessage(error)
 
   return (
-    <div style={styles.row}>
+    <div style={{ display: 'flex', alignItems: 'flex-start' }}>
       <div style={{ paddingLeft: 40 }}>
         <Link
           id="link_datalibrary"
@@ -148,8 +70,8 @@ export const StudyDetails = () => {
           Back to library
         </div>
         <div style={{ fontSize: 20, fontWeight: 600, paddingTop: 20 }}>
-          <Link to={`/DUOS-S${study?.studyId}`}>
-            DUOS-S{study?.studyId}
+          <Link to={`/DUOS-S${study?.studyId ?? studyId}`}>
+            DUOS-S{study?.studyId ?? studyId}
           </Link>
         </div>
         <div style={{ fontSize: 20, fontWeight: 600, paddingTop: 20 }}>
@@ -158,7 +80,7 @@ export const StudyDetails = () => {
         <Section>
           {study?.description}
         </Section>
-        {!Number.isNaN(participantCount) && (
+        {participantCount !== undefined && (
           <Section>
             <span style={{ fontWeight: 600 }}>Participants: </span>
             <span>
@@ -193,15 +115,37 @@ export const StudyDetails = () => {
           </Section>
         )}
         <div style={{ paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%' }}>
-          <SimpleTable
-            rowData={rowData}
-            columnHeaders={headers}
-            styles={styles}
-            tableSize={10}
-          />
+          {errorMessage && <div role="alert">Unable to load datasets: {errorMessage}</div>}
+          <div style={{ height: 600, marginTop: errorMessage ? 20 : 0 }}>
+            <LibraryDataGrid
+              assetType={AssetType.DATASETS}
+              data={datasets}
+              loading={loading}
+              total={data.total}
+              paginationModel={paginationModel}
+              onPaginationChange={setPaginationModel}
+              sortModel={sortModel}
+              onSortChange={setSortModel}
+              selectedDatasetIds={selectedDatasets}
+              onSelectionChange={setSelectedDatasets}
+              exportableDatasets={exportableDatasets}
+            />
+          </div>
         </div>
       </div>
-      {!isEmpty(selectedDatasets) && <DatasetSearchFooter selectedDatasets={selectedDatasets} datasets={datasets} onClick={() => applyForAccess(selectedDatasets, navigate)} />}
+      <LibraryFooter
+        selectedDatasetIds={selectedDatasets}
+        selectedStudyIds={selectedStudyIds}
+        onApplyForAccess={() => applyForAccess(selectedDatasets, navigate)}
+      />
     </div>
   )
+}
+
+export const StudyDetails = () => {
+  usePageTitle('Study Details')
+  const { studyId = '' } = useParams<{ studyId: string }>()
+
+  // Remount local grid state when navigating directly between study routes.
+  return <StudyDetailsContent key={studyId} studyId={studyId} />
 }

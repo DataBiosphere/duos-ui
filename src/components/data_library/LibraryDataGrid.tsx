@@ -139,6 +139,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
         }}
         checkboxSelection={checkboxSelection}
         disableRowSelectionOnClick
+        keepNonExistentRowsSelected
         rowSelectionModel={rowSelectionModel}
         onRowSelectionModelChange={handleSelectionChange}
         isRowSelectable={isRowSelectable}
