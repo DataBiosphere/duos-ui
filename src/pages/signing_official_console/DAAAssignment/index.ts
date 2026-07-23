@@ -13,6 +13,7 @@ export type { ResearcherViewProps } from './ResearcherView'
 export type { DAAViewProps } from './DAAView'
 export type {
   AuthStatus,
+  BulkConfirmState,
   ConfirmDialogState,
   DAAAccordionData,
   DAAResearcherRowData,

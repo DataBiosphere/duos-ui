@@ -10,7 +10,7 @@ import {
 import AuthStatusChip from './AuthStatusChip'
 import AuthActionButton from './AuthActionButton'
 import { AuthStatus, DAARowData } from './types'
-import { formatDateYYYYMMDD } from './researcherViewHelpers'
+import { daaLabel, formatDateYYYYMMDD } from './researcherViewHelpers'
 
 const FONT = 'Montserrat'
 
@@ -85,7 +85,7 @@ export default function ResearcherDAASubtable({
               <TableCell
                 sx={{ ...tableCellBodySx, fontWeight: 600, color: '#1a1a2e' }}
               >
-                {daa.file?.fileName ?? `DAA-${daa.daaId}`}
+                {daaLabel(daa)}
               </TableCell>
               <TableCell sx={tableCellBodySx}>{dacName}</TableCell>
               <TableCell sx={tableCellBodySx}>

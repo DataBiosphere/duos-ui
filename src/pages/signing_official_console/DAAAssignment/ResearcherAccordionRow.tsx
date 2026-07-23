@@ -8,6 +8,7 @@ import {
 } from '@mui/material'
 import { DuosUser } from 'src/types/model'
 import ResearcherDAASubtable from './ResearcherDAASubtable'
+import BulkActionButtons from './BulkActionButtons'
 import { DAARowData } from './types'
 
 const FONT = 'Montserrat'
@@ -20,6 +21,10 @@ interface ResearcherAccordionRowProps {
   onToggle: () => void
   onAuthorize: (daaId: number) => void
   onRevoke: (daaId: number) => void
+  /** Bulk "Approve All" — receives the ids of every not-yet-authorized DAA */
+  onApproveAll: (daaIds: number[]) => void
+  /** Bulk "Remove All" — receives the ids of every currently-authorized DAA */
+  onRemoveAll: (daaIds: number[]) => void
 }
 
 /**
@@ -36,8 +41,17 @@ export default function ResearcherAccordionRow({
   onToggle,
   onAuthorize,
   onRevoke,
+  onApproveAll,
+  onRemoveAll,
 }: Readonly<ResearcherAccordionRowProps>) {
   const researcherId = researcher.userId
+
+  const unauthorizedDaaIds = daaRows
+    .filter(r => r.status !== 'authorized')
+    .map(r => r.daa.daaId)
+  const authorizedDaaIds = daaRows
+    .filter(r => r.status === 'authorized')
+    .map(r => r.daa.daaId)
 
   return (
     <Paper
@@ -119,6 +133,13 @@ export default function ResearcherAccordionRow({
               No pre-auth status
             </Typography>
           )}
+          <BulkActionButtons
+            dataCyPrefix={`researcher-${researcherId}`}
+            approveAllDisabled={unauthorizedDaaIds.length === 0}
+            removeAllDisabled={authorizedDaaIds.length === 0}
+            onApproveAll={() => onApproveAll(unauthorizedDaaIds)}
+            onRemoveAll={() => onRemoveAll(authorizedDaaIds)}
+          />
         </Box>
       </Box>
 

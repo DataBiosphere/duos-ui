@@ -9,7 +9,7 @@ import {
   fetchMultipart,
   type FetchData,
 } from 'src/libs/ajax/fetchAdapter'
-import type { DAAObject } from 'src/types/model'
+import type { DAAObject, DaaBulkRelationResult } from 'src/types/model'
 
 type AuthConfig = ReturnType<typeof Config.authOpts>
 type DeleteBodyConfig<TBody> = AuthConfig & { data: TBody }
@@ -50,30 +50,34 @@ export const DAA = {
     return 200
   },
 
-  bulkAddUsersToDaa: async (daaId: number, userList: number[]): Promise<number> => {
+  bulkAddUsersToDaa: async (daaId: number, userList: number[]): Promise<DaaBulkRelationResult> => {
     const url = `${await Config.getApiUrl()}/api/daa/bulk/${daaId}`
-    await fetchPost<void, number[]>(url, userList, Config.authOpts())
-    return 200
+    const res = await fetchPost<DaaBulkRelationResult, { users: number[] }>(
+      url, { users: userList }, Config.authOpts(),
+    )
+    return res.data
   },
 
-  bulkRemoveUsersFromDaa: async (daaId: number, userList: number[]): Promise<number> => {
+  bulkRemoveUsersFromDaa: async (daaId: number, userList: number[]): Promise<DaaBulkRelationResult> => {
     const url = `${await Config.getApiUrl()}/api/daa/bulk/${daaId}`
-    const config: DeleteBodyConfig<number[]> = { ...Config.authOpts(), data: userList }
-    await fetchDelete<void>(url, config as FetchDeleteConfig<void>)
-    return 200
+    const config: DeleteBodyConfig<{ users: number[] }> = { ...Config.authOpts(), data: { users: userList } }
+    const res = await fetchDelete<DaaBulkRelationResult>(url, config as FetchDeleteConfig<DaaBulkRelationResult>)
+    return res.data
   },
 
-  bulkAddDaasToUser: async (userId: number, daaList: number[]): Promise<number> => {
+  bulkAddDaasToUser: async (userId: number, daaList: number[]): Promise<DaaBulkRelationResult> => {
     const url = `${await Config.getApiUrl()}/api/daa/bulk/user/${userId}`
-    await fetchPost<void, number[]>(url, daaList, Config.authOpts())
-    return 200
+    const res = await fetchPost<DaaBulkRelationResult, { daaList: number[] }>(
+      url, { daaList }, Config.authOpts(),
+    )
+    return res.data
   },
 
-  bulkRemoveDaasFromUser: async (userId: number, daaList: number[]): Promise<number> => {
+  bulkRemoveDaasFromUser: async (userId: number, daaList: number[]): Promise<DaaBulkRelationResult> => {
     const url = `${await Config.getApiUrl()}/api/daa/bulk/user/${userId}`
-    const config: DeleteBodyConfig<number[]> = { ...Config.authOpts(), data: daaList }
-    await fetchDelete<void>(url, config as FetchDeleteConfig<void>)
-    return 200
+    const config: DeleteBodyConfig<{ daaList: number[] }> = { ...Config.authOpts(), data: { daaList } }
+    const res = await fetchDelete<DaaBulkRelationResult>(url, config as FetchDeleteConfig<DaaBulkRelationResult>)
+    return res.data
   },
 
   getDaaFileById: async (daaId: number, daaFileName: string): Promise<void> => {

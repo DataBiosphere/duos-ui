@@ -15,11 +15,25 @@ import { Notifications, USER_ROLES } from 'src/libs/utils'
 import DAAAccordionRow from './DAAAccordionRow'
 import ResearcherViewLegend from './ResearcherViewLegend'
 import ResearcherViewConfirmDialog from './ResearcherViewConfirmDialog'
-import { buildDAAViewRows } from './researcherViewHelpers'
-import { ConfirmDialogState, DAAAccordionData } from './types'
+import BulkActionConfirmDialog from './BulkActionConfirmDialog'
+import { buildDAAViewRows, daaLabel } from './researcherViewHelpers'
+import { useBulkPreAuthorization } from './useBulkPreAuthorization'
+import { BulkConfirmState, ConfirmDialogState, DAAAccordionData } from './types'
 
 const FONT = 'Montserrat'
 const BRAND_BLUE = '#0948b7'
+
+/** Success toast text for a bulk action on a DAA card (researchers per DAA). */
+function bulkSuccessText(mode: 'approve' | 'remove', applied: number, daaLabelText: string): string {
+  const plural = applied === 1 ? '' : 's'
+  return mode === 'approve'
+    ? `Pre-authorized ${applied} researcher${plural} for ${daaLabelText}`
+    : `Removed pre-authorization for ${applied} researcher${plural} from ${daaLabelText}`
+}
+
+function bulkErrorText(mode: 'approve' | 'remove', daaLabelText: string): string {
+  return `Failed to ${mode === 'approve' ? 'approve' : 'remove'} all researchers for ${daaLabelText}`
+}
 
 export interface DAAViewProps {
   readonly researchers: readonly DuosUser[]
@@ -52,6 +66,7 @@ export default function DAAView({
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState<Record<number, boolean>>({})
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null)
+  const [bulkDialog, setBulkDialog] = useState<BulkConfirmState | null>(null)
 
   // ── Data ────────────────────────────────────────────────────────────────────
 
@@ -65,7 +80,7 @@ export default function DAAView({
     if (!term) return daaRows
     return daaRows.filter(
       row =>
-        (row.daa.file?.fileName?.toLowerCase() ?? '').includes(term)
+        daaLabel(row.daa).toLowerCase().includes(term)
         || row.dacName.toLowerCase().includes(term),
     )
   }, [daaRows, search])
@@ -139,6 +154,33 @@ export default function DAAView({
       })
     }
   }, [confirmDialog, refreshResearchers])
+
+  // ── Bulk handlers ─────────────────────────────────────────────────────────────
+
+  const openBulkDialog = useCallback(
+    (daaId: number, daaLabel: string, mode: 'approve' | 'remove', userIds: number[]) => {
+      if (userIds.length === 0) return
+      setBulkDialog({
+        scope: 'daa',
+        mode,
+        targetId: daaId,
+        targetLabel: daaLabel,
+        count: userIds.length,
+        ids: userIds,
+      })
+    },
+    [],
+  )
+
+  const handleBulkConfirm = useBulkPreAuthorization({
+    bulkDialog,
+    setBulkDialog,
+    refresh: refreshResearchers,
+    add: DAA.bulkAddUsersToDaa,
+    remove: DAA.bulkRemoveUsersFromDaa,
+    successText: bulkSuccessText,
+    errorText: bulkErrorText,
+  })
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -239,26 +281,45 @@ export default function DAAView({
             onAuthorize={researcherId => openAuthorizeDialog(
               row.daa.daaId,
               researcherId,
-              row.daa.file?.fileName ?? `DAA-${row.daa.daaId}`,
+              daaLabel(row.daa),
               row.researcherRows.find(r => r.researcher.userId === researcherId)
                 ?.researcher.displayName ?? String(researcherId),
             )}
             onRevoke={researcherId => openRevokeDialog(
               row.daa.daaId,
               researcherId,
-              row.daa.file?.fileName ?? `DAA-${row.daa.daaId}`,
+              daaLabel(row.daa),
               row.researcherRows.find(r => r.researcher.userId === researcherId)
                 ?.researcher.displayName ?? String(researcherId),
+            )}
+            onApproveAll={userIds => openBulkDialog(
+              row.daa.daaId,
+              daaLabel(row.daa),
+              'approve',
+              userIds,
+            )}
+            onRemoveAll={userIds => openBulkDialog(
+              row.daa.daaId,
+              daaLabel(row.daa),
+              'remove',
+              userIds,
             )}
           />
         ))}
       </Box>
 
-      {/* Confirmation dialog (shared with ResearcherView) */}
+      {/* Single-relationship confirmation dialog (shared with ResearcherView) */}
       <ResearcherViewConfirmDialog
         dialog={confirmDialog}
         onConfirm={handleConfirm}
         onCancel={() => setConfirmDialog(null)}
+      />
+
+      {/* Bulk Approve All / Remove All confirmation dialog */}
+      <BulkActionConfirmDialog
+        dialog={bulkDialog}
+        onConfirm={handleBulkConfirm}
+        onCancel={() => setBulkDialog(null)}
       />
     </Box>
   )
