@@ -106,6 +106,10 @@ describe('buildStudyDatasetsQuery', () => {
     expect(query.sort).toEqual([{ 'dac.dacName.keyword': { order: 'desc' } }])
     expect(query.aggs).toHaveProperty('study_details')
     expect(query.aggs).toHaveProperty('total_participants')
+    expect(query.aggs).not.toHaveProperty('access_management')
+    expect(query.aggs).not.toHaveProperty('data_use')
+    expect(query.aggs).not.toHaveProperty('data_type')
+    expect(query.aggs).not.toHaveProperty('dac')
   })
 })
 

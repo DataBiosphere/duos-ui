@@ -51,7 +51,6 @@ export const buildStudyDatasetsQuery = (
   return {
     ...query,
     aggs: {
-      ...query.aggs,
       study_details: {
         top_hits: {
           size: 1,
