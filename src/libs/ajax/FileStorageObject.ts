@@ -1,5 +1,5 @@
 import { Config } from 'src/libs/config'
-import { fetchDelete, fetchGet, fetchMultipart, fetchPut } from 'src/libs/ajax/fetchAdapter'
+import { fetchBlob, fetchDelete, fetchGet, fetchMultipart, fetchPut } from 'src/libs/ajax/fetchAdapter'
 import type { FileStorageObject as SharedFileStorageObject } from 'src/types/model'
 
 export enum FileCategory {
@@ -68,15 +68,7 @@ export async function getDocumentFile(
   id: number,
 ): Promise<Blob> {
   const url = `${await documentPath(entity, entityId, id)}/file`
-  const res = await fetchGet<Blob>(url, {
-    ...Config.authOpts(),
-    responseType: 'blob',
-    headers: {
-      ...Config.authOpts().headers,
-      Accept: 'application/octet-stream',
-    },
-  })
-  return res.data
+  return fetchBlob(url, Config.authOpts())
 }
 
 export async function listDocuments(

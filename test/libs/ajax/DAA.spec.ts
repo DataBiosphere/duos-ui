@@ -3,10 +3,11 @@ import { DAA } from 'src/libs/ajax/DAA'
 import { Config } from 'src/libs/config'
 import type { DAAObject } from 'src/types/model'
 import type { FetchData } from 'src/libs/ajax/fetchAdapter'
-import { fetchGet, fetchPost, fetchPut, fetchDelete, fetchMultipart } from 'src/libs/ajax/fetchAdapter'
+import { fetchBlob, fetchGet, fetchPost, fetchPut, fetchDelete, fetchMultipart } from 'src/libs/ajax/fetchAdapter'
 import * as FileDownload from 'src/utils/FileDownload'
 
 vi.mock('src/libs/ajax/fetchAdapter', () => ({
+  fetchBlob: vi.fn(),
   fetchGet: vi.fn(),
   fetchPost: vi.fn(),
   fetchPut: vi.fn(),
@@ -133,23 +134,30 @@ describe('DAA ajax', () => {
     )
   })
 
-  it('getDaaFileById fetches blob with octet-stream headers and triggers download', async () => {
+  it('getDaaFileById fetches a blob via fetchBlob and triggers download', async () => {
     const fakeBlob = new Blob(['fake-binary-content'], { type: 'application/octet-stream' })
-    vi.mocked(fetchGet).mockResolvedValue({ data: fakeBlob } as FetchData<Blob>)
+    vi.mocked(fetchBlob).mockResolvedValue(fakeBlob)
 
     await DAA.getDaaFileById(mockDaa.daaId, 'Sample_DAA.pdf')
 
-    expect(fetchGet).toHaveBeenCalledWith(
+    expect(fetchBlob).toHaveBeenCalledWith(
       `${apiUrl}/api/daa/${mockDaa.daaId}/file`,
-      expect.objectContaining({
-        responseType: 'blob',
-        headers: expect.objectContaining({
-          'Accept': 'application/octet-stream',
-          'Content-Type': 'application/octet-stream',
-        }),
-      }),
+      authHeaders,
     )
     expect(FileDownload.fileDownload).toHaveBeenCalledWith(fakeBlob, 'Sample_DAA.pdf')
+  })
+
+  it('getDaaFileBlob fetches a blob via fetchBlob and returns it', async () => {
+    const fakeBlob = new Blob(['fake-binary-content'], { type: 'application/octet-stream' })
+    vi.mocked(fetchBlob).mockResolvedValue(fakeBlob)
+
+    const result = await DAA.getDaaFileBlob(mockDaa.daaId)
+
+    expect(fetchBlob).toHaveBeenCalledWith(
+      `${apiUrl}/api/daa/${mockDaa.daaId}/file`,
+      authHeaders,
+    )
+    expect(result).toBe(fakeBlob)
   })
 
   it('createDaa returns null payload for null file', async () => {
