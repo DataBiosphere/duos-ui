@@ -16,6 +16,12 @@ const Section = ({ style, children }: React.PropsWithChildren<SectionProps>) =>
   <div style={{ paddingTop: 20, paddingRight: 100, ...style }}>{children}</div>
 
 const INITIAL_PAGINATION = { page: 0, pageSize: 25 }
+const EMPTY_PAGE = {
+  items: [],
+  total: 0,
+  study: undefined,
+  participantCount: undefined,
+}
 
 type StudySortModel = Array<{ field: string, sort: SortOrder | null }>
 
@@ -34,18 +40,16 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const [selectedDatasets, setSelectedDatasets] = useState<number[]>([])
   const [paginationModel, setPaginationModel] = useState(INITIAL_PAGINATION)
   const [sortModel, setSortModel] = useState<StudySortModel>([])
-  const handleSortChange = (model: StudySortModel) => setSortModel(model.slice(0, 1))
   const sort: SortState | undefined = sortModel[0]?.sort
     ? { field: sortModel[0].field, order: sortModel[0].sort }
     : undefined
-  const { data, isFetching: loading, error } = useStudyDatasets(studyId, paginationModel, sort)
-  const datasets = data?.items ?? []
-  const study = data?.study
-  const participantCount = data?.participantCount
+  const { data = EMPTY_PAGE, isFetching: loading, error } = useStudyDatasets(studyId, paginationModel, sort)
+  const datasets = data.items
+  const study = data.study
+  const participantCount = data.participantCount
   const { data: exportableDatasets } = useStudyExportableDatasets(studyId, datasets)
-  const numericStudyId = Number(studyId)
-  const selectedStudyIds = selectedDatasets.length > 0 && !Number.isNaN(numericStudyId)
-    ? [numericStudyId]
+  const selectedStudyIds = selectedDatasets.length > 0 && study
+    ? [study.studyId]
     : []
   const errorMessage = getErrorMessage(error)
 
@@ -76,7 +80,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
         <Section>
           {study?.description}
         </Section>
-        {participantCount !== undefined && !Number.isNaN(participantCount) && (
+        {participantCount !== undefined && (
           <Section>
             <span style={{ fontWeight: 600 }}>Participants: </span>
             <span>
@@ -117,11 +121,11 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
               assetType={AssetType.DATASETS}
               data={datasets}
               loading={loading}
-              total={data?.total ?? 0}
+              total={data.total}
               paginationModel={paginationModel}
               onPaginationChange={setPaginationModel}
               sortModel={sortModel}
-              onSortChange={handleSortChange}
+              onSortChange={setSortModel}
               selectedDatasetIds={selectedDatasets}
               onSelectionChange={setSelectedDatasets}
               exportableDatasets={exportableDatasets}
