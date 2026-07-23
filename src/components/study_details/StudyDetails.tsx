@@ -17,6 +17,8 @@ const Section = ({ style, children }: React.PropsWithChildren<SectionProps>) =>
 
 const INITIAL_PAGINATION = { page: 0, pageSize: 25 }
 
+type StudySortModel = Array<{ field: string, sort: SortOrder | null }>
+
 const getErrorMessage = (error: unknown): string | undefined => {
   if (error instanceof Error) return error.message
   if (error) return 'Unknown error'
@@ -31,7 +33,8 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const navigate = useNavigate()
   const [selectedDatasets, setSelectedDatasets] = useState<number[]>([])
   const [paginationModel, setPaginationModel] = useState(INITIAL_PAGINATION)
-  const [sortModel, setSortModel] = useState<Array<{ field: string, sort: SortOrder | null }>>([])
+  const [sortModel, setSortModel] = useState<StudySortModel>([])
+  const handleSortChange = (model: StudySortModel) => setSortModel(model.slice(0, 1))
   const sort: SortState | undefined = sortModel[0]?.sort
     ? { field: sortModel[0].field, order: sortModel[0].sort }
     : undefined
@@ -118,7 +121,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
               paginationModel={paginationModel}
               onPaginationChange={setPaginationModel}
               sortModel={sortModel}
-              onSortChange={setSortModel}
+              onSortChange={handleSortChange}
               selectedDatasetIds={selectedDatasets}
               onSelectionChange={setSelectedDatasets}
               exportableDatasets={exportableDatasets}

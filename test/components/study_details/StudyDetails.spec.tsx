@@ -329,15 +329,24 @@ describe('Study details test', () => {
     expect(nextPageQuery.size).toBe(25)
   })
 
-  it('uses the dataset asset server-side sort mapping', async () => {
+  it('uses the dataset asset server-side sort mapping with one active sort', async () => {
     const user = userEvent.setup()
     mountComponent()
     await screen.findByText(datasets[0].datasetName)
 
     await user.click(screen.getByRole('columnheader', { name: /Dataset Name/ }))
     await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalledTimes(2))
-    const sortQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[1][0] as ElasticsearchQuery
-    expect(sortQuery.sort).toEqual([{ 'datasetName.keyword': { order: 'asc' } }])
+    const datasetNameSortQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[1][0] as ElasticsearchQuery
+    expect(datasetNameSortQuery.sort).toEqual([{ 'datasetName.keyword': { order: 'asc' } }])
+
+    await user.keyboard('{Shift>}')
+    await user.click(screen.getByRole('columnheader', { name: /Identifier/ }))
+    await user.keyboard('{/Shift}')
+    await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalledTimes(3))
+    const identifierSortQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[2][0] as ElasticsearchQuery
+    expect(identifierSortQuery.sort).toEqual([{ 'datasetIdentifier.keyword': { order: 'asc' } }])
+    expect(screen.getByRole('columnheader', { name: /Dataset Name/ })).toHaveAttribute('aria-sort', 'none')
+    expect(screen.getByRole('columnheader', { name: /Identifier/ })).toHaveAttribute('aria-sort', 'ascending')
   })
 
   it('preserves selected datasets across server-side pages', async () => {
