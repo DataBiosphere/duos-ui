@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import {
   Box,
   Chip,
@@ -9,8 +9,9 @@ import {
 } from '@mui/material'
 import { DAAObject } from 'src/types/model'
 import DAAResearcherSubtable from './DAAResearcherSubtable'
+import BulkActionButtons from './BulkActionButtons'
 import { DAAResearcherRowData } from './types'
-import { formatDateYYYYMMDD } from './researcherViewHelpers'
+import { daaLabel, formatDateYYYYMMDD } from './researcherViewHelpers'
 
 const FONT = 'Montserrat'
 
@@ -24,6 +25,10 @@ interface DAAAccordionRowProps {
   onToggle: () => void
   onAuthorize: (researcherId: number) => void
   onRevoke: (researcherId: number) => void
+  /** Bulk "Approve All" — receives the ids of every not-yet-authorized researcher */
+  onApproveAll: (researcherIds: number[]) => void
+  /** Bulk "Remove All" — receives the ids of every currently-authorized researcher */
+  onRemoveAll: (researcherIds: number[]) => void
 }
 
 /**
@@ -47,10 +52,21 @@ export default function DAAAccordionRow({
   onToggle,
   onAuthorize,
   onRevoke,
+  onApproveAll,
+  onRemoveAll,
 }: Readonly<DAAAccordionRowProps>) {
   const daaId = daa.daaId
-  const daaLabel = daa.file?.fileName ?? `DAA-${daaId}`
+  const label = daaLabel(daa)
   const formattedEffectiveDate = formatDateYYYYMMDD(daa.createDate)
+
+  const unauthorizedUserIds = useMemo(
+    () => researcherRows.filter(r => r.status !== 'authorized').map(r => r.researcher.userId),
+    [researcherRows],
+  )
+  const authorizedUserIds = useMemo(
+    () => researcherRows.filter(r => r.status === 'authorized').map(r => r.researcher.userId),
+    [researcherRows],
+  )
 
   return (
     <Paper
@@ -88,7 +104,7 @@ export default function DAAAccordionRow({
             <Typography
               sx={{ fontFamily: FONT, fontWeight: 700, fontSize: 15, color: '#1a1a2e' }}
             >
-              {daaLabel}
+              {label}
             </Typography>
             <Typography
               sx={{ fontFamily: FONT, fontSize: 13, color: '#888', fontWeight: 400 }}
@@ -131,8 +147,15 @@ export default function DAAAccordionRow({
           </Typography>
         </Box>
 
-        {/* Right: authorized count badge + chevron */}
+        {/* Right: bulk actions + authorized count badge + chevron */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0, ml: 2 }}>
+          <BulkActionButtons
+            dataCyPrefix={`daa-${daaId}`}
+            approveAllDisabled={unauthorizedUserIds.length === 0}
+            removeAllDisabled={authorizedUserIds.length === 0}
+            onApproveAll={() => onApproveAll(unauthorizedUserIds)}
+            onRemoveAll={() => onRemoveAll(authorizedUserIds)}
+          />
           {authorizedCount > 0 && (
             <Chip
               label={`${authorizedCount} pre-authorized`}

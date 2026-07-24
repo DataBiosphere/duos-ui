@@ -47,3 +47,25 @@ export interface ConfirmDialogState {
   daaLabel: string
   action: 'authorize' | 'revoke'
 }
+
+/**
+ * State held while a *bulk* confirm dialog is open.
+ *
+ * Kept deliberately separate from {@link ConfirmDialogState} so the
+ * well-tested single-relationship flow stays untouched.
+ *
+ * - `scope: 'researcher'` — target is one researcher; `ids` are DAA ids.
+ * - `scope: 'daa'` — target is one DAA; `ids` are researcher (user) ids.
+ */
+export interface BulkConfirmState {
+  scope: 'researcher' | 'daa'
+  mode: 'approve' | 'remove'
+  /** userId when scope==='researcher', daaId when scope==='daa' */
+  targetId: number
+  /** Human-readable name of the target card (researcher name or DAA label) */
+  targetLabel: string
+  /** Number of relationships the action will affect */
+  count: number
+  /** The ids to send to the bulk endpoint (daaIds or userIds per scope) */
+  ids: number[]
+}
