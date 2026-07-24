@@ -128,6 +128,11 @@ describe('DAAView', () => {
   beforeEach(() => {
     refreshSpy = vi.fn()
     vi.spyOn(User, 'list').mockResolvedValue(mockResearchers)
+    // Stub the toasts so success/error paths don't spin up real React roots
+    // (createRoot on a body-appended div) that leak across tests. Individual
+    // tests may re-spy to assert on the toast text.
+    vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => undefined)
+    vi.spyOn(Notifications, 'showError').mockImplementation(() => undefined)
   })
 
   afterEach(() => vi.restoreAllMocks())
