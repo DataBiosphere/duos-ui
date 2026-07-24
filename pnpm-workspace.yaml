@@ -9,3 +9,5 @@ allowBuilds:
   esbuild: false
 allowedDeprecatedVersions:
   node-domexception: "1.0.0"
+minimumReleaseAgeExclude:
+  - find-my-way@9.6.1
