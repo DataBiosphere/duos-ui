@@ -43,9 +43,11 @@ export function useBulkPreAuthorization({
     const { mode, targetId, targetLabel, ids } = bulkDialog
     setBulkDialog(null)
     try {
-      const { applied } = await (mode === 'approve' ? add : remove)(targetId, ids)
+      const result = await (mode === 'approve' ? add : remove)(targetId, ids)
+      const applied = typeof (result as unknown as { applied?: unknown })?.applied === 'number'
+        ? (result as unknown as { applied: number }).applied
+        : ids.length
       Notifications.showSuccess({ text: successText(mode, applied, targetLabel) })
-      await refresh()
     }
     catch (error) {
       // Intentionally do not refresh on error, preserving the displayed state.
