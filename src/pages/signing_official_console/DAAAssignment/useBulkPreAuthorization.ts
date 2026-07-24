@@ -48,6 +48,7 @@ export function useBulkPreAuthorization({
         ? (result as unknown as { applied: number }).applied
         : ids.length
       Notifications.showSuccess({ text: successText(mode, applied, targetLabel) })
+      await refresh()
     }
     catch (error) {
       // Intentionally do not refresh on error, preserving the displayed state.
