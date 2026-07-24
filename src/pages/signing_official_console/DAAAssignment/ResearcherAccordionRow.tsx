@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import {
   Box,
   Chip,
@@ -46,12 +46,14 @@ export default function ResearcherAccordionRow({
 }: Readonly<ResearcherAccordionRowProps>) {
   const researcherId = researcher.userId
 
-  const unauthorizedDaaIds = daaRows
-    .filter(r => r.status !== 'authorized')
-    .map(r => r.daa.daaId)
-  const authorizedDaaIds = daaRows
-    .filter(r => r.status === 'authorized')
-    .map(r => r.daa.daaId)
+  const unauthorizedDaaIds = useMemo(
+    () => daaRows.filter(r => r.status !== 'authorized').map(r => r.daa.daaId),
+    [daaRows],
+  )
+  const authorizedDaaIds = useMemo(
+    () => daaRows.filter(r => r.status === 'authorized').map(r => r.daa.daaId),
+    [daaRows],
+  )
 
   return (
     <Paper

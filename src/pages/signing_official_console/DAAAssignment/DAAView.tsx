@@ -118,32 +118,32 @@ export default function DAAView({
   }, [allExpanded, filteredRows])
 
   const openAuthorizeDialog = useCallback(
-    (daaId: number, researcherId: number, daaLabel: string, researcherName: string) => {
-      setConfirmDialog({ daaId, researcherId, daaLabel, researcherName, action: 'authorize' })
+    (daaId: number, researcherId: number, daaLabelText: string, researcherName: string) => {
+      setConfirmDialog({ daaId, researcherId, daaLabel: daaLabelText, researcherName, action: 'authorize' })
     },
     [],
   )
 
   const openRevokeDialog = useCallback(
-    (daaId: number, researcherId: number, daaLabel: string, researcherName: string) => {
-      setConfirmDialog({ daaId, researcherId, daaLabel, researcherName, action: 'revoke' })
+    (daaId: number, researcherId: number, daaLabelText: string, researcherName: string) => {
+      setConfirmDialog({ daaId, researcherId, daaLabel: daaLabelText, researcherName, action: 'revoke' })
     },
     [],
   )
 
   const handleConfirm = useCallback(async () => {
     if (!confirmDialog) return
-    const { daaId, researcherId, researcherName, daaLabel, action } = confirmDialog
+    const { daaId, researcherId, researcherName, daaLabel: daaLabelText, action } = confirmDialog
     setConfirmDialog(null)
     try {
       if (action === 'authorize') {
         await DAA.createDaaLcLink(daaId, researcherId)
-        Notifications.showSuccess({ text: `Pre-authorized ${researcherName} for ${daaLabel}` })
+        Notifications.showSuccess({ text: `Pre-authorized ${researcherName} for ${daaLabelText}` })
       }
       else {
         await DAA.deleteDaaLcLink(daaId, researcherId)
         Notifications.showSuccess({
-          text: `Revoked access for ${researcherName} from ${daaLabel}`,
+          text: `Revoked access for ${researcherName} from ${daaLabelText}`,
         })
       }
       await refreshResearchers()
@@ -158,13 +158,13 @@ export default function DAAView({
   // ── Bulk handlers ─────────────────────────────────────────────────────────────
 
   const openBulkDialog = useCallback(
-    (daaId: number, daaLabel: string, mode: 'approve' | 'remove', userIds: number[]) => {
+    (daaId: number, daaLabelText: string, mode: 'approve' | 'remove', userIds: number[]) => {
       if (userIds.length === 0) return
       setBulkDialog({
         scope: 'daa',
         mode,
         targetId: daaId,
-        targetLabel: daaLabel,
+        targetLabel: daaLabelText,
         count: userIds.length,
         ids: userIds,
       })

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import {
   Box,
   Chip,
@@ -59,12 +59,14 @@ export default function DAAAccordionRow({
   const label = daaLabel(daa)
   const formattedEffectiveDate = formatDateYYYYMMDD(daa.createDate)
 
-  const unauthorizedUserIds = researcherRows
-    .filter(r => r.status !== 'authorized')
-    .map(r => r.researcher.userId)
-  const authorizedUserIds = researcherRows
-    .filter(r => r.status === 'authorized')
-    .map(r => r.researcher.userId)
+  const unauthorizedUserIds = useMemo(
+    () => researcherRows.filter(r => r.status !== 'authorized').map(r => r.researcher.userId),
+    [researcherRows],
+  )
+  const authorizedUserIds = useMemo(
+    () => researcherRows.filter(r => r.status === 'authorized').map(r => r.researcher.userId),
+    [researcherRows],
+  )
 
   return (
     <Paper

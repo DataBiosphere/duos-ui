@@ -44,8 +44,23 @@ export function useBulkPreAuthorization({
     setBulkDialog(null)
     try {
       const result = await (mode === 'approve' ? add : remove)(targetId, ids)
-      const applied = typeof (result as unknown as { applied?: unknown })?.applied === 'number'
-        ? (result as unknown as { applied: number }).applied
+
+      // Defensive: the atomic bulk endpoints are all-or-nothing, so `errors` is
+      // expected to be empty. If a partial-failure response ever populates it,
+      // surface the failure and refresh to reflect whatever actually changed
+      // rather than reporting success.
+      if (Array.isArray(result?.errors) && result.errors.length > 0) {
+        console.error(`Bulk ${mode} for ${targetLabel} reported errors`, result.errors)
+        Notifications.showError({ text: errorText(mode, targetLabel) })
+        await refresh()
+        return
+      }
+
+      // TODO(otchet-dt-3325): `applied` may be absent until the companion backend
+      // PR ships the field; fall back to the requested count until then. Drop this
+      // guard (and read `result.applied` directly) once the backend returns it.
+      const applied = typeof (result as { applied?: unknown })?.applied === 'number'
+        ? (result as { applied: number }).applied
         : ids.length
       Notifications.showSuccess({ text: successText(mode, applied, targetLabel) })
       await refresh()
