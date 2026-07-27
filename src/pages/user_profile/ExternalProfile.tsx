@@ -144,7 +144,9 @@ export default function ExternalProfile(props: ExternalProfileProps) {
       ORCID: externalProfilesUpdate.ORCID?.trim(),
       throughBio: externalProfilesUpdate.throughBio?.trim(),
       institutionalWebsite: externalProfilesUpdate.institutionalWebsite?.trim(),
-      otherUrls: externalProfilesUpdate.otherUrls?.map(url => url.trim()),
+      otherUrls: externalProfilesUpdate.otherUrls
+        ?.map(url => url.trim())
+        .filter(url => url !== ''),
     }
     const payload = { userData: { externalProfiles } }
     User.updateSelf(payload).then(() => {
