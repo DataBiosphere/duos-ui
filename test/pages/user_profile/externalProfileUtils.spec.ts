@@ -13,7 +13,7 @@ describe('getExternalProfileLinks', () => {
       { label: 'LinkedIn', url: 'https://www.linkedin.com/in/researcher' },
       { label: 'ORCID', url: 'https://orcid.org/0000-0000-0000-0001' },
       { label: 'Institutional Website', url: 'https://example.edu/researcher' },
-      { label: 'Other URL 2', url: 'https://example.com/profile' },
+      { label: 'Other URL 1', url: 'https://example.com/profile' },
     ])
   })
 })

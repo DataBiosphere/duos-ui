@@ -24,15 +24,16 @@ export const getExternalProfileLinks = (profiles: ExternalProfiles = {}): Extern
   const orcid = identifierUrl(profiles.ORCID, 'https://orcid.org/')
   const throughBio = identifierUrl(profiles.throughBio, 'https://through.bio/')
   const institutionalWebsite = urlValue(profiles.institutionalWebsite)
+  const otherUrls = (profiles.otherUrls ?? [])
+    .map(urlValue)
+    .filter((url): url is string => url !== undefined)
+    .map((url, index) => ({ label: `Other URL ${index + 1}`, url }))
   const links: Array<ExternalProfileLink | undefined> = [
     linkedIn ? { label: 'LinkedIn', url: linkedIn } : undefined,
     orcid ? { label: 'ORCID', url: orcid } : undefined,
     throughBio ? { label: 'Through.bio', url: throughBio } : undefined,
     institutionalWebsite ? { label: 'Institutional Website', url: institutionalWebsite } : undefined,
-    ...(profiles.otherUrls ?? []).map((value, index) => {
-      const url = urlValue(value)
-      return url ? { label: `Other URL ${index + 1}`, url } : undefined
-    }),
+    ...otherUrls,
   ]
 
   return links.filter((link): link is ExternalProfileLink => link !== undefined)
