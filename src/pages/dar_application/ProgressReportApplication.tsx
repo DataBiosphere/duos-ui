@@ -27,7 +27,7 @@ import {
 } from 'src/utils/darFormUtils'
 import { FormValidationState } from 'src/pages/dar_application/FormValidationState'
 import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { isEqual } from 'src/utils/NodashUtil'
 import 'src/pages/dar_application/DataAccessRequestApplication.css'
 type ProgressReportApplicationProps = {

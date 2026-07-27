@@ -2,7 +2,7 @@ import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router'
 import InstitutionTable, { InstitutionTableProps } from 'src/components/institution_table/InstitutionTable'
 import { DuosUser, InstitutionInterface } from 'src/types/model'
 

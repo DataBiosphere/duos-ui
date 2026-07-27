@@ -11,7 +11,7 @@ vi.mock('src/components/data_search/DatasetExportButton', () => {
 import '@testing-library/jest-dom/vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import { LibraryDataGrid } from 'src/components/data_library/LibraryDataGrid'
 import { AssetType, ExportableDatasets, SortOrder, StudyAggregation } from 'src/types/library'
 import { DatasetTerm, StudyTerm, UserTerm } from 'src/types/model'

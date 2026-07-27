@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { AssetType, ExportableDatasets, LibraryVersionNew, ALL_LIBRARY_TABS } from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
 import { applyForAccess } from 'src/utils/accessUtils'

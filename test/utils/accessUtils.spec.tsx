@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { DAR } from 'src/libs/ajax/DAR'
 import { Notifications } from 'src/libs/utils'
-import { NavigateFunction } from 'react-router-dom'
+import { NavigateFunction } from 'react-router'
 
 describe('accessUtils', () => {
   let navigateMock: ReturnType<typeof vi.fn>

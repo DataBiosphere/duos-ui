@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Box, Menu, MenuItem, PopoverOrigin, Typography } from '@mui/material'
 import { DuosUser } from 'src/types/model'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 interface ProfileLinksProps {
   currentUser: DuosUser

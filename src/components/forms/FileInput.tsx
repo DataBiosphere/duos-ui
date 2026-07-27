@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { ConfirmationDialog } from 'src/components/modals/ConfirmationDialog'
 import { FormFieldTitle } from 'src/components/forms/forms'
 import { FileStorageObject } from 'src/types/model'

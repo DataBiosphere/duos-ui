@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react'
 import { act, render, RenderOptions, fireEvent } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 
 type RouterRenderOptions = RenderOptions & {
   route?: string

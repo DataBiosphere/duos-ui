@@ -1,6 +1,6 @@
 import React from 'react'
 import { PageHeading } from '../components/PageHeading'
-import { Link, useLocation, Navigate } from 'react-router-dom'
+import { Link, useLocation, Navigate } from 'react-router'
 
 export default function NotFound() {
   const location = useLocation()

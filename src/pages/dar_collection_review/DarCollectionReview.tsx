@@ -17,7 +17,7 @@ import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
 import { APPROVED_VOTETYPES, ElectionStatus, ElectionType, userHasOpenDataAccessElection } from 'src/utils/DarUtils'
 import { extractError } from 'src/utils/ErrorUtils.js'
 import { Notification } from 'src/components/Notification.jsx'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { DarCollection, DuosUser, DataAccessRequestData } from 'src/types/model'
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import backArrowIcon from 'src/images/back_arrow.svg'
-import { Link, useParams, useNavigate } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'

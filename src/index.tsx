@@ -5,7 +5,7 @@ import 'src/styles/bootstrap_replacement.css'
 import App from 'src/App'
 import { Auth } from 'src/libs/auth/auth'
 import { OidcBroker } from 'src/libs/auth/oidcBroker'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router'
 
 const load = async () => {
   await Auth.initialize()
