@@ -2,7 +2,7 @@ import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import BiospecimenAddEdit from 'src/components/biospecimen_list/BiospecimenAddEdit'
 
 describe('BiospecimenAddEdit component', () => {

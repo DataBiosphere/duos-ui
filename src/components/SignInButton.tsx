@@ -14,7 +14,7 @@ import { OidcUser } from 'src/libs/auth/oidcBroker'
 import { DuosUser } from 'src/types/model'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import 'src/styles/tooltip.css'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { extractError } from 'src/utils/ErrorUtils'
 

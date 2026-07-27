@@ -5,7 +5,7 @@ import DACDatasetApprovalStatus from 'src/components/dac_dataset_table/DACDatase
 import { createDataUseDisplay, processDataUseCodes, TooltipPlacement } from 'src/utils/DataUseUtils'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetTerm } from 'src/types/model'
-import { NavigateFunction } from 'react-router-dom'
+import { NavigateFunction } from 'react-router'
 
 export const consoleTypes = { CHAIR: 'chair' } as const
 

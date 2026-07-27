@@ -12,7 +12,7 @@ import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOu
 import type { DacObject, Dataset, DatasetProperty } from 'src/types/model'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { Box, CircularProgress, Typography } from '@mui/material'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import { DataUseTranslation } from 'src/libs/dataUseTranslation'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 

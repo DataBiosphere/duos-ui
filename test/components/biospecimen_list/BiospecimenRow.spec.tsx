@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import BiospecimenRow from 'src/components/biospecimen_list/BiospecimenRow'
 import { Biospecimen, BioSpecimenPreservationMethod, BioSpecimenType } from 'src/types/model'
 

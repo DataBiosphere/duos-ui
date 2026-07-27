@@ -3,7 +3,7 @@ import { Auth } from 'src/libs/auth/auth'
 import { Storage } from 'src/libs/storage'
 import { TosService } from 'src/libs/TosService'
 import SimpleButton from 'src/components/SimpleButton'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 export default function TermsOfService() {
   const navigate = useNavigate()

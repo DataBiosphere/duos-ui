@@ -1,7 +1,7 @@
 import React from 'react'
 import { isNil, sortedUniq } from 'src/utils/NodashUtil'
 import { styles } from './manageUsersTableUtils'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import { UserRole, LibraryCard, InstitutionInterface } from 'src/types/model'
 

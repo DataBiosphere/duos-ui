@@ -6,7 +6,7 @@ import { DACDatasetsTable } from 'src/components/dac_dataset_table/DACDatasetsTa
 import { DatasetTerm } from 'src/types/model'
 import { DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants'
 
-vi.mock('react-router-dom', () => {
+vi.mock('react-router', () => {
   const navigate = vi.fn()
   return { useNavigate: () => navigate }
 })

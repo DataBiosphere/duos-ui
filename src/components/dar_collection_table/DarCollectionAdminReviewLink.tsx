@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router'
 import { styles } from 'src/utils/DarCollectionUtils'
 
 interface DarCollectionAdminReviewLinkProps {

@@ -6,7 +6,7 @@ import { Dataset } from 'src/types/model'
 
 const mockDataset = { datasetId: 7, datasetName: 'Test DS', dacId: 1, dataUse: {}, properties: [] } as unknown as Dataset
 
-vi.mock('react-router-dom', () => ({
+vi.mock('react-router', () => ({
   useParams: () => ({ datasetId: '7' }),
 }))
 

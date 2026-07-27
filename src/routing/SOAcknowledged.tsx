@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { AcknowledgementService } from 'src/libs/acknowledgements'
 import { Notifications } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
-import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router'
 import SigningOfficialDaaAgreementWrapper from 'src/components/SigningOfficialDaaAgreementWrapper'
 
 const SOAcknowledged = () => {

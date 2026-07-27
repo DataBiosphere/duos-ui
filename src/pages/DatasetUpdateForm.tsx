@@ -3,7 +3,7 @@ import { Notifications } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import DatasetUpdate from 'src/components/data_update/DatasetUpdate'
 import { DataSet } from 'src/libs/ajax/DataSet'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Dataset } from 'src/types/model'
 

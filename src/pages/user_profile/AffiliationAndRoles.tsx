@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
