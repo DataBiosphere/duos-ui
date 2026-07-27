@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
 import { DuosUser, InstitutionInterface, SigningOfficialUserWithData } from 'src/types/model'
+import SigningOfficialRequest from './SigningOfficialRequest'
+import './AffiliationAndRoles.css'
 
 interface AffiliationAndRoleProps {
   readonly user: DuosUser
@@ -55,32 +56,11 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
     verticalAlign: 'top',
   }
 
-  const subHeadStyle = {
-    color: '#000',
-    fontFamily: 'Montserrat',
-    fontSize: '16px',
-    fontStyle: 'normal',
-    fontWeight: '600',
-    lineHeight: 'normal',
-  }
-
   return (
-    <div>
-      <h1
-        style={{
-          color: '#01549F',
-          fontSize: '20px',
-          fontWeight: '600',
-          borderBottom: '1px solid #ddd',
-          paddingBottom: '8px',
-        }}
-      >
-        Affiliation & Role
-      </h1>
-      <div style={{ marginTop: '20px' }} />
+    <div className="affiliation-and-roles">
+      <h1>Affiliation & Role</h1>
       <div>
-        <p style={subHeadStyle}>My Institution</p>
-        <div style={{ marginTop: '15px' }} />
+        <p className="affiliation-and-roles-subheading">My Institution</p>
         {institution
           ? <div data-cy="institutional-affiliation">{institution.name}</div>
           : (
@@ -91,17 +71,10 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
                 {' '}
               </div>
             )}
-        <div style={{ marginTop: '15px' }} />
-        <p style={subHeadStyle}>My Role(s)</p>
+        <p className="affiliation-and-roles-subheading">My Role(s)</p>
         <p data-cy="user-roles">{roles}</p>
-        <Link
-          to="/request_role"
-          style={{ fontFamily: 'Montserrat', fontSize: '14px', color: '#00609f' }}
-        >
-          Request a new role
-        </Link>
-        <div style={{ marginTop: '15px' }} />
-        <p style={subHeadStyle}>My Institution&apos;s Signing Official(s)</p>
+        <SigningOfficialRequest user={user} />
+        <p className="affiliation-and-roles-subheading">My Institution&apos;s Signing Official(s)</p>
         <div style={{ marginTop: '10px' }} />
         {signingOfficialUsers.length === 0
           ? (

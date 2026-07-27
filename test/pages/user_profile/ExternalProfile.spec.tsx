@@ -40,11 +40,12 @@ beforeEach(() => {
 afterEach(() => vi.clearAllMocks())
 
 describe('ExternalProfile', () => {
-  it('renders update table with three columns', async () => {
+  it('renders current values first and editable fields second', async () => {
     render(<ExternalProfile {...editProps} />)
     await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue('abcdef'))
-    const headers = document.querySelectorAll('table thead tr th')
-    expect(headers).toHaveLength(3)
+    const linkedInRow = screen.getByLabelText('LinkedIn').closest('tr')
+    expect(linkedInRow?.querySelectorAll('td')).toHaveLength(2)
+    expect(linkedInRow).toHaveTextContent('https://www.linkedin.com/in/abcdef')
   })
 
   it('renders read-only table with two columns', async () => {
@@ -72,12 +73,12 @@ describe('ExternalProfile', () => {
     )
   })
 
-  it('performs URL validation for ORCID iD', async () => {
+  it('performs URL validation for ORCID', async () => {
     const user = userEvent.setup()
     render(<ExternalProfile {...editProps} />)
-    await waitFor(() => expect(screen.getByLabelText('ORCID iD')).toHaveValue('12345'))
-    await user.clear(screen.getByLabelText('ORCID iD'))
-    await user.type(screen.getByLabelText('ORCID iD'), 'testing')
+    await waitFor(() => expect(screen.getByLabelText('ORCID')).toHaveValue('12345'))
+    await user.clear(screen.getByLabelText('ORCID'))
+    await user.type(screen.getByLabelText('ORCID'), 'testing')
     await waitFor(() =>
       expect(screen.getByRole('link', { name: 'https://orcid.org/testing' })).toHaveAttribute('href', 'https://orcid.org/testing'),
     )
@@ -109,7 +110,7 @@ describe('ExternalProfile', () => {
     const user = userEvent.setup()
     render(<ExternalProfile {...editProps} />)
     await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue('abcdef'))
-    await user.click(document.querySelector('.btn-secondary')!)
+    await user.click(screen.getByRole('button', { name: '+ Add URL' }))
     const otherUrlInput = document.querySelector('input[name="Other URL 1"]') as HTMLInputElement
     await user.clear(otherUrlInput)
     await user.type(otherUrlInput, 'https://www.test.com')
@@ -122,7 +123,7 @@ describe('ExternalProfile', () => {
     const user = userEvent.setup()
     render(<ExternalProfile {...editProps} />)
     await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue('abcdef'))
-    await user.click(document.querySelector('.btn-secondary')!)
+    await user.click(screen.getByRole('button', { name: '+ Add URL' }))
     const otherUrlInput = document.querySelector('input[name="Other URL 1"]') as HTMLInputElement
     await user.clear(otherUrlInput)
     await user.type(otherUrlInput, 'not a url')
@@ -137,5 +138,22 @@ describe('ExternalProfile', () => {
     await waitFor(() => expect(document.querySelector('.btn-primary')).not.toBeDisabled())
     await user.click(document.querySelector('.btn-primary')!)
     await waitFor(() => expect(showErrorSpy).toHaveBeenCalled())
+  })
+
+  it('removes an Other URL from the saved payload', async () => {
+    const user = userEvent.setup()
+    render(<ExternalProfile {...editProps} />)
+    await waitFor(() => expect(screen.getByLabelText('Other URL 1')).toHaveValue('https://www.aol.com'))
+
+    await user.click(screen.getByRole('button', { name: 'Remove Other URL 1' }))
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => {
+      expect(User.updateSelf).toHaveBeenCalledWith({
+        userData: {
+          externalProfiles: expect.objectContaining({ otherUrls: [] }),
+        },
+      })
+    })
   })
 })

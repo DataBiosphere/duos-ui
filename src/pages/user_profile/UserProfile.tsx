@@ -14,6 +14,7 @@ import userProfileIcon from 'src/images/user-profile.png'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { DuosUser } from 'src/types/model'
 import PageHeading from 'src/components/PageHeading'
+import './UserProfile.css'
 
 export default function UserProfile() {
   usePageTitle('User Profile')
@@ -80,48 +81,23 @@ export default function UserProfile() {
   }, [])
 
   return (
-    <div
-      style={{
-        flexDirection: 'column',
-        padding: '50px 275px 70px',
-      }}
-    >
+    <main className="user-profile-page">
       <div className="header">
         <Notification notificationData={notificationData} />
-        <div
-          style={{
-            flexDirection: 'column',
-          }}
-        >
-          <div
-            style={{
-              marginBottom: '40px',
-            }}
-          >
+        <div>
+          <div>
             <PageHeading
               id="researcherProfile"
               color="common"
               title="Your Profile"
-              descriptionStyle={{ fontSize: '10000px' }}
               imgSrc={userProfileIcon}
               iconSize="large"
             />
           </div>
-          <div
-            style={{
-              display: 'flex',
-            }}
-          >
+          <div className="user-profile-intro">
             <img
               src={ga4ghLogo}
               alt="GA4GH Logo"
-              style={{
-                width: '166px',
-                height: '48px',
-                top: '213px',
-                left: '230px',
-                marginRight: '50px',
-              }}
             />
             <p>
               DUOS user profile components are based off of the GA4GH Passports specification Visa types. More information on the GA4GH Passports standard can be found{' '}
@@ -132,81 +108,68 @@ export default function UserProfile() {
           </div>
         </div>
       </div>
-      <h1
-        style={{
-          color: '#01549F',
-          fontSize: '20px',
-          fontWeight: '600',
-          marginBottom: '15px',
-          marginTop: '40px',
-          borderBottom: '1px solid #ddd',
-          paddingBottom: '8px',
-        }}
-      >
-        Full Name
-      </h1>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <FormField
-          type={FormFieldTypes.TEXT}
-          id="profileName"
-          title="Full Name"
-          hideTitle={true}
-          defaultValue={name}
-          onChange={updateRef}
-          style={{ width: '90%', marginTop: '10px',
-          }}
+      <section className="user-profile-section">
+        <h1 className="user-profile-section-heading">Full Name</h1>
+        <div className="user-profile-name-row">
+          <FormField
+            type={FormFieldTypes.TEXT}
+            id="profileName"
+            title="Full Name"
+            hideTitle={true}
+            defaultValue={name}
+            onChange={updateRef}
+            style={{ width: '100%' }}
+          />
+          <button
+            className="btn-primary common-background profile-save-button"
+            onClick={updateName}
+          >
+            Save
+          </button>
+        </div>
+        <div className="user-profile-field">
+          <FormField
+            type={FormFieldTypes.TEXT}
+            id="profileEmail"
+            title="Email Address"
+            hideTitle={true}
+            defaultValue={user.email}
+            disabled={true}
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className="user-profile-field">
+          <p>
+            Send me email notifications
+          </p>
+          <FormField
+            type={FormFieldTypes.YESNORADIOGROUP}
+            id="profileEmailEnabled"
+            title="Send me email notifications"
+            hideTitle={true}
+            defaultValue={user.emailPreference}
+            onChange={(field: { key: string, value: boolean, isValid: boolean }) => updateEmailPreference(field.value)}
+          />
+        </div>
+      </section>
+      <section className="user-profile-section user-profile-card">
+        <ExternalProfile
+          readonly={false}
         />
-        <button
-          className="f-right btn-primary common-background"
-          onClick={updateName}
-          style={{
-            marginTop: '10px',
-          }}
-        >
-          Save
-        </button>
-      </div>
-      <div style={{ marginTop: '10px' }} />
-      <FormField
-        type={FormFieldTypes.TEXT}
-        id="profileEmail"
-        title="Email Address"
-        hideTitle={true}
-        defaultValue={user.email}
-        disabled={true}
-      />
-      <div style={{ marginTop: '10px' }} />
-      <p
-        style={{
-          color: '#000',
-          fontSize: '16px',
-          fontWeight: '400',
-        }}
-      >
-        Send me email notifications
-      </p>
-      <FormField
-        type={FormFieldTypes.YESNORADIOGROUP}
-        id="profileEmailEnabled"
-        title="Send me email notifications"
-        hideTitle={true}
-        defaultValue={user.emailPreference}
-        onChange={(field: { key: string, value: boolean, isValid: boolean }) => updateEmailPreference(field.value)}
-      />
-      <div style={{ marginTop: '45px' }} />
-      <ExternalProfile
-        readonly={false}
-      />
-      <div style={{ marginTop: '45px' }} />
-      <AffiliationAndRoles
-        user={user as DuosUser}
-      />
-      <div style={{ marginTop: '115px' }} />
-      <ResearcherStatus
-        user={user as DuosUser}
-      />
-      <div style={{ marginTop: '60px' }} />
-      <AcceptedAcknowledgements />
-    </div>
+      </section>
+      <section className="user-profile-section user-profile-card">
+        <AffiliationAndRoles
+          user={user as DuosUser}
+        />
+      </section>
+      <section className="user-profile-section">
+        <ResearcherStatus
+          user={user as DuosUser}
+        />
+      </section>
+      <section className="user-profile-section">
+        <AcceptedAcknowledgements />
+      </section>
+    </main>
   )
 }

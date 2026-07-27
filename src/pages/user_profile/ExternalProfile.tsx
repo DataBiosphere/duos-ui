@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import './ExternalProfile.css'
 import RemoveCircleOutlinedIcon from '@mui/icons-material/RemoveCircleOutlined'
 import IconButton from '@mui/material/IconButton'
@@ -12,26 +12,32 @@ interface ExternalProfileProps {
   readonly readonly?: boolean
 }
 
+interface OtherUrlEntry {
+  id: string
+  value: string
+}
+
 export default function ExternalProfile(props: ExternalProfileProps) {
   const { readonly } = props
+  const nextOtherUrlId = useRef(0)
   const [externalProfilesUpdate, setExternalProfilesUpdate] = useState<ExternalProfiles>({})
   const [linkedIn, setLinkedIn] = useState<string>('')
   const [orcid, setOrcid] = useState<string>('')
   const [throughBio, setThroughBio] = useState<string>('')
   const [institutionalWebsite, setInstitutionalWebsite] = useState<string>('')
-  const [otherUrls, setOtherUrls] = useState<string[]>([])
+  const [otherUrls, setOtherUrls] = useState<OtherUrlEntry[]>([])
   const [invalidUrls, setInvalidUrls] = useState<Array<string>>([])
 
   const formattedLinkedIn = (profileId: string | undefined): string => {
-    return `https://www.linkedin.com/in/${profileId ?? ''}`
+    return validateHttpUrl(profileId) ?? `https://www.linkedin.com/in/${profileId ?? ''}`
   }
 
   const formattedOrcid = (profileId: string | undefined): string => {
-    return `https://orcid.org/${profileId ?? ''}`
+    return validateHttpUrl(profileId) ?? `https://orcid.org/${profileId ?? ''}`
   }
 
   const formattedThroughBio = (profileId: string | undefined): string => {
-    return `https://through.bio/${profileId ?? ''}`
+    return validateHttpUrl(profileId) ?? `https://through.bio/${profileId ?? ''}`
   }
 
   const onChange = ({ key, value }: { key: string, value: unknown }) => {
@@ -99,32 +105,29 @@ export default function ExternalProfile(props: ExternalProfileProps) {
     onChange({ key: institutionalWebsite, value })
   }
 
-  const onOtherUrlChange = (event: React.ChangeEvent<HTMLInputElement>, idx: number) => {
+  const onOtherUrlChange = (event: React.ChangeEvent<HTMLInputElement>, id: string) => {
     const value = event.target.value
-    handleValidity(event, `Other URL ${idx + 1}`)
-    const newUrls = [...otherUrls]
-    newUrls[idx] = value
+    handleValidity(event, id)
+    const newUrls = otherUrls.map(entry => entry.id === id ? { ...entry, value } : entry)
     setOtherUrls(newUrls)
-    onChange({ key: 'otherUrls', value: newUrls })
+    onChange({ key: 'otherUrls', value: newUrls.map(entry => entry.value) })
   }
 
   const addNewOtherUrl = () => {
-    const newUrls = [...otherUrls, '']
+    const newUrls = [
+      ...otherUrls,
+      { id: `other-url-${nextOtherUrlId.current++}`, value: '' },
+    ]
     setOtherUrls(newUrls)
-    onChange({ key: 'otherUrls', value: newUrls })
+    onChange({ key: 'otherUrls', value: newUrls.map(entry => entry.value) })
   }
 
-  const removeEntry = (idx: number) => {
-    const newUrls = [...otherUrls]
-    newUrls.splice(idx, 1)
+  const removeEntry = (id: string) => {
+    const newUrls = otherUrls.filter(entry => entry.id !== id)
     setOtherUrls(newUrls)
+    onChange({ key: 'otherUrls', value: newUrls.map(entry => entry.value) })
     setInvalidUrls((previous) => {
-      const next = [...previous]
-      const index = next.indexOf(`Other URL ${idx + 1}`)
-      if (index > -1) {
-        next.splice(index, 1)
-      }
-      return next
+      return previous.filter(invalidUrl => invalidUrl !== id)
     })
   }
 
@@ -144,7 +147,10 @@ export default function ExternalProfile(props: ExternalProfileProps) {
       setOrcid(externalProfiles?.ORCID ?? '')
       setThroughBio(externalProfiles?.throughBio ?? '')
       setInstitutionalWebsite(externalProfiles?.institutionalWebsite ?? '')
-      setOtherUrls(externalProfiles?.otherUrls ?? [])
+      setOtherUrls((externalProfiles?.otherUrls ?? []).map(value => ({
+        id: `other-url-${nextOtherUrlId.current++}`,
+        value,
+      })))
     }
 
     const init = async () => {
@@ -174,7 +180,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
 
   const getOrcidLink = () => {
     return (
-      readonly && !orcid ? <span>No ORCID iD provided</span> : getUrlLink(formattedOrcid(orcid))
+      readonly && !orcid ? <span>No ORCID provided</span> : getUrlLink(formattedOrcid(orcid))
     )
   }
 
@@ -209,12 +215,12 @@ export default function ExternalProfile(props: ExternalProfileProps) {
           <h4>External Profile</h4>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div style={{ fontWeight: 'bold' }}>LinkedIn</div><div>{getLinkedInLink()}</div>
-            <div style={{ fontWeight: 'bold' }}>ORCID iD</div><div>{getOrcidLink()}</div>
+            <div style={{ fontWeight: 'bold' }}>ORCID</div><div>{getOrcidLink()}</div>
             <div style={{ fontWeight: 'bold' }}>Through.bio</div><div>{getThroughBioLink()}</div>
             <div style={{ fontWeight: 'bold' }}>Institutional Website</div><div>{getInstitutionalWebsiteLink()}</div>
-            {otherUrls && otherUrls.length > 0 && otherUrls.map((url, index) => (
-              <React.Fragment key={index}>
-                <div>Other URL {index + 1}</div><div>{getUrlLink(url)}</div>
+            {otherUrls.length > 0 && otherUrls.map((entry, index) => (
+              <React.Fragment key={entry.id}>
+                <div>Other URL {index + 1}</div><div>{getUrlLink(entry.value)}</div>
               </React.Fragment>
             ))}
           </div>
@@ -223,89 +229,67 @@ export default function ExternalProfile(props: ExternalProfileProps) {
     : (
         <div className="external-profile">
           <div className="header-container">
-            <h1
-              style={{
-                color: '#01549F',
-                fontSize: '20px',
-                fontWeight: '600',
-                borderBottom: '1px solid #ddd',
-                paddingBottom: '8px',
-              }}
-            >
+            <h1>
               External Profiles
             </h1>
           </div>
-          <div style={{ marginTop: '20px' }} />
           <table>
-            <thead>
-              <tr>
-                <th>Site</th>
-                <th>ID</th>
-                <th>Link</th>
-              </tr>
-            </thead>
             <tbody>
               <tr>
                 <td>
-                  <label htmlFor="linkedIn">LinkedIn</label>
+                  <div className="external-profile-value external-profile-link-value">{getLinkedInLink()}</div>
                 </td>
                 <td>
                   <input
                     type="text"
                     id="linkedIn"
                     name="linkedIn"
+                    aria-label="LinkedIn"
                     placeholder="LinkedIn Profile User ID (e.g. https://www.linkedin.com/in/username)"
                     value={linkedIn}
                     onChange={onLinkedInChange}
                     minLength={2}
                   />
                 </td>
-                <td>
-                  { getLinkedInLink() }
-                </td>
               </tr>
               <tr>
                 <td>
-                  <label htmlFor="ORCID">ORCID iD</label>
+                  <div className="external-profile-value external-profile-link-value">{getOrcidLink()}</div>
                 </td>
                 <td>
                   <input
                     type="text"
                     id="ORCID"
                     name="ORCID"
-                    style={{ padding: '25px 15px', borderRadius: '4px', border: '1px solid #ccc', width: '400px', height: '34px', color: '#555555', backgroundColor: '#fff', transition: 'border-color ease-in-out .15s, box-shadow ease-in-out .15s' }}
-                    placeholder="ORCID iD (e.g. https://orcid.org/0000-0000-0000-0000)"
+                    aria-label="ORCID"
+                    placeholder="ORCID (e.g. https://orcid.org/0000-0000-0000-0000)"
                     value={orcid}
                     minLength={2}
                     onChange={onOrcidChange}
                   />
                 </td>
-                <td>
-                  { getOrcidLink() }
-                </td>
               </tr>
               <tr>
                 <td>
-                  <label htmlFor="throughBio">Through.bio</label>
+                  <div className="external-profile-value external-profile-link-value">{getThroughBioLink()}</div>
                 </td>
                 <td>
                   <input
                     type="text"
                     id="throughBio"
                     name="throughBio"
+                    aria-label="Through.bio"
                     placeholder="Through.bio profile ID (e.g. https://through.bio/<profile-id>)"
                     value={throughBio}
                     minLength={2}
                     onChange={onThroughBioChange}
                   />
                 </td>
-                <td>
-                  { getThroughBioLink() }
-                </td>
               </tr>
               <tr>
                 <td>
                   <label htmlFor="institutionalWebsite">Institutional Website</label>
+                  {institutionalWebsite && <div className="external-profile-value external-profile-link-value">{getInstitutionalWebsiteLink()}</div>}
                 </td>
                 <td>
                   <input
@@ -317,38 +301,37 @@ export default function ExternalProfile(props: ExternalProfileProps) {
                     onChange={onInstitutionalWebsiteChange}
                   />
                 </td>
-                <td>
-                  { getInstitutionalWebsiteLink() }
-                </td>
               </tr>
-              {otherUrls && otherUrls.length > 0 && otherUrls.map((url, index) => (
-                <tr key={index}>
+              {otherUrls.length > 0 && otherUrls.map((entry, index) => (
+                <tr key={entry.id}>
                   <td>
-                    <label htmlFor={`otherUrl${index}`}>Other URL {index + 1}</label>
+                    <div className="external-profile-value external-profile-link-value">{getUrlLink(entry.value)}</div>
                   </td>
                   <td>
-                    <input
-                      type="url"
-                      id={`otherUrl${index}`}
-                      name={`Other URL ${index + 1}`}
-                      placeholder="Other URL"
-                      value={url}
-                      onChange={(event) => {
-                        onOtherUrlChange(event, index)
-                      }}
-                      onBlur={(event) => { event.target.reportValidity() }}
-                    />
-                  </td>
-                  <td>
-                    && <IconButton aria-label="remove entry" onClick={() => { removeEntry(index) }}><RemoveCircleOutlinedIcon /></IconButton>
-                    { getUrlLink(url) }
+                    <div className="external-profile-input-with-action">
+                      <input
+                        type="url"
+                        id={`otherUrl${index}`}
+                        name={`Other URL ${index + 1}`}
+                        aria-label={`Other URL ${index + 1}`}
+                        placeholder="Other URL"
+                        value={entry.value}
+                        onChange={(event) => {
+                          onOtherUrlChange(event, entry.id)
+                        }}
+                        onBlur={(event) => { event.target.reportValidity() }}
+                      />
+                      <IconButton aria-label={`Remove Other URL ${index + 1}`} onClick={() => { removeEntry(entry.id) }}><RemoveCircleOutlinedIcon /></IconButton>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <button onClick={addNewOtherUrl} className="btn-secondary">Add URL</button>
-          <button style={{ marginLeft: '30px' }}disabled={invalidUrls.length > 0} onClick={onSaveClick} className="btn-primary">Save</button>
+          <div className="external-profile-actions">
+            <button type="button" onClick={addNewOtherUrl} className="external-profile-add-url">+ Add URL</button>
+            <button type="button" disabled={invalidUrls.length > 0} onClick={onSaveClick} className="btn-primary common-background profile-save-button">Save</button>
+          </div>
         </div>
       )
 }

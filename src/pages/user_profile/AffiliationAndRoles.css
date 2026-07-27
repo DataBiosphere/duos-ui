@@ -1,0 +1,39 @@
+.affiliation-and-roles h1 {
+  margin: 0 0 24px;
+  color: #01549f;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.affiliation-and-roles-subheading {
+  margin: 24px 0 12px;
+  color: #000;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.signing-official-request {
+  margin-top: 28px;
+}
+
+.signing-official-request h2 {
+  margin: 0 0 12px;
+  color: #000;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.signing-official-request p {
+  margin: 0 0 14px;
+  line-height: 1.45;
+}
+
+.signing-official-request-requirement {
+  font-style: italic;
+}
+
+.signing-official-request-button {
+  min-width: 126px;
+  height: 34px;
+  margin-bottom: 4px;
+}
