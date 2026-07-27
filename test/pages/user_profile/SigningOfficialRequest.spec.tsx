@@ -23,7 +23,7 @@ vi.mock('src/libs/utils', async (importOriginal) => {
 })
 
 const user: DuosUser = {
-  createDate: new Date(),
+  createDate: new Date('2026-04-30T12:00:00.000Z'),
   displayName: 'Test User',
   email: 'test@example.com',
   emailPreference: true,
