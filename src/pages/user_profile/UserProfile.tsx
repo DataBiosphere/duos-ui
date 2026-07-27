@@ -121,6 +121,7 @@ export default function UserProfile() {
             style={{ width: '100%' }}
           />
           <button
+            type="button"
             className="btn-primary common-background profile-save-button"
             onClick={updateName}
           >
