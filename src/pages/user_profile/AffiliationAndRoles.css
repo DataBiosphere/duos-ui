@@ -12,6 +12,10 @@
   font-weight: 600;
 }
 
+.affiliation-and-roles-request-link {
+  font-size: 14px;
+  color: #00609f;
+}
 .signing-official-request {
   margin-top: 28px;
 }
