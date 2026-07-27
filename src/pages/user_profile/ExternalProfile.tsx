@@ -18,8 +18,9 @@ interface OtherUrlEntry {
 }
 
 const formattedIdentifierUrl = (profileId: string | undefined, baseUrl: string): string => {
-  const normalizedProfileId = profileId?.trim().replace(/^\/+/, '') ?? ''
-  return validateHttpUrl(profileId) ?? `${baseUrl}${normalizedProfileId}`
+  const normalizedProfileValue = profileId?.trim() ?? ''
+  const normalizedProfileId = normalizedProfileValue.replace(/^\/+/, '')
+  return validateHttpUrl(normalizedProfileValue) ?? `${baseUrl}${normalizedProfileId}`
 }
 
 export default function ExternalProfile(props: ExternalProfileProps) {
@@ -137,7 +138,15 @@ export default function ExternalProfile(props: ExternalProfileProps) {
   }
 
   const onSaveClick = () => {
-    const payload = { userData: { externalProfiles: externalProfilesUpdate } }
+    const externalProfiles = {
+      ...externalProfilesUpdate,
+      linkedIn: externalProfilesUpdate.linkedIn?.trim(),
+      ORCID: externalProfilesUpdate.ORCID?.trim(),
+      throughBio: externalProfilesUpdate.throughBio?.trim(),
+      institutionalWebsite: externalProfilesUpdate.institutionalWebsite?.trim(),
+      otherUrls: externalProfilesUpdate.otherUrls?.map(url => url.trim()),
+    }
+    const payload = { userData: { externalProfiles } }
     User.updateSelf(payload).then(() => {
       Notifications.showSuccess({ text: 'External Profile updated successfully!' })
     }).catch (() => {
@@ -181,21 +190,21 @@ export default function ExternalProfile(props: ExternalProfileProps) {
   }, [readonly, props.userId])
 
   const getLinkedInLink = () => {
-    if (!linkedIn) {
+    if (!linkedIn.trim()) {
       return <span>{readonly ? 'No LinkedIn profile provided' : 'LinkedIn'}</span>
     }
     return getUrlLink(formattedLinkedIn(linkedIn))
   }
 
   const getOrcidLink = () => {
-    if (!orcid) {
+    if (!orcid.trim()) {
       return <span>{readonly ? 'No ORCID provided' : 'ORCID'}</span>
     }
     return getUrlLink(formattedOrcid(orcid))
   }
 
   const getThroughBioLink = () => {
-    if (!throughBio) {
+    if (!throughBio.trim()) {
       return <span>{readonly ? 'No Through.bio profile provided' : 'Through.bio'}</span>
     }
     return getUrlLink(formattedThroughBio(throughBio))
@@ -203,7 +212,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
 
   const getInstitutionalWebsiteLink = () => {
     return (
-      readonly && !institutionalWebsite ? <span>No institutional website provided</span> : getUrlLink(institutionalWebsite)
+      readonly && !institutionalWebsite.trim() ? <span>No institutional website provided</span> : getUrlLink(institutionalWebsite)
     )
   }
 
@@ -300,7 +309,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
               <tr>
                 <td>
                   <label htmlFor="institutionalWebsite">Institutional Website</label>
-                  {institutionalWebsite && <div className="external-profile-value external-profile-link-value">{getInstitutionalWebsiteLink()}</div>}
+                  {institutionalWebsite.trim() && <div className="external-profile-value external-profile-link-value">{getInstitutionalWebsiteLink()}</div>}
                 </td>
                 <td>
                   <input

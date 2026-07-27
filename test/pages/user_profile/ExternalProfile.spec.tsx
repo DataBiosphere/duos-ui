@@ -107,6 +107,64 @@ describe('ExternalProfile', () => {
     expect(screen.getByRole('link', { name: 'https://through.bio/through-bio-user' })).toBeInTheDocument()
   })
 
+  it('normalizes whitespace around complete profile URLs', async () => {
+    vi.mocked(User.getMe).mockResolvedValue({
+      ...mockData,
+      userData: {
+        externalProfiles: {
+          linkedIn: '  https://www.linkedin.com/in/linkedin-user  ',
+          ORCID: '  https://orcid.org/0000-0000-0000-0001  ',
+          throughBio: '  https://through.bio/through-bio-user  ',
+          otherUrls: [],
+        },
+      },
+    } as never)
+
+    render(<ExternalProfile {...editProps} />)
+
+    expect(await screen.findByRole('link', { name: 'https://www.linkedin.com/in/linkedin-user' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'https://orcid.org/0000-0000-0000-0001' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'https://through.bio/through-bio-user' })).toBeInTheDocument()
+  })
+
+  it('treats whitespace-only identifiers as empty and trims them when saving', async () => {
+    const user = userEvent.setup()
+    vi.mocked(User.getMe).mockResolvedValue({
+      ...mockData,
+      userData: {
+        externalProfiles: {
+          linkedIn: ' ',
+          ORCID: '  ',
+          throughBio: '\t',
+          institutionalWebsite: ' ',
+          otherUrls: ['  https://example.com/profile  '],
+        },
+      },
+    } as never)
+
+    render(<ExternalProfile {...editProps} />)
+
+    await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue(' '))
+    expect(screen.queryByRole('link', { name: 'https://www.linkedin.com/in/' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'https://orcid.org/' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'https://through.bio/' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => {
+      expect(User.updateSelf).toHaveBeenCalledWith({
+        userData: {
+          externalProfiles: {
+            linkedIn: '',
+            ORCID: '',
+            throughBio: '',
+            institutionalWebsite: '',
+            otherUrls: ['https://example.com/profile'],
+          },
+        },
+      })
+    })
+  })
+
   it('performs URL validation for LinkedIn', async () => {
     const user = userEvent.setup()
     render(<ExternalProfile {...editProps} />)
