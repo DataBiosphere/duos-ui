@@ -17,6 +17,11 @@ interface OtherUrlEntry {
   value: string
 }
 
+const formattedIdentifierUrl = (profileId: string | undefined, baseUrl: string): string => {
+  const normalizedProfileId = profileId?.trim().replace(/^\/+/, '') ?? ''
+  return validateHttpUrl(profileId) ?? `${baseUrl}${normalizedProfileId}`
+}
+
 export default function ExternalProfile(props: ExternalProfileProps) {
   const { readonly } = props
   const nextOtherUrlId = useRef(0)
@@ -29,15 +34,15 @@ export default function ExternalProfile(props: ExternalProfileProps) {
   const [invalidUrls, setInvalidUrls] = useState<Array<string>>([])
 
   const formattedLinkedIn = (profileId: string | undefined): string => {
-    return validateHttpUrl(profileId) ?? `https://www.linkedin.com/in/${profileId ?? ''}`
+    return formattedIdentifierUrl(profileId, 'https://www.linkedin.com/in/')
   }
 
   const formattedOrcid = (profileId: string | undefined): string => {
-    return validateHttpUrl(profileId) ?? `https://orcid.org/${profileId ?? ''}`
+    return formattedIdentifierUrl(profileId, 'https://orcid.org/')
   }
 
   const formattedThroughBio = (profileId: string | undefined): string => {
-    return validateHttpUrl(profileId) ?? `https://through.bio/${profileId ?? ''}`
+    return formattedIdentifierUrl(profileId, 'https://through.bio/')
   }
 
   const onChange = ({ key, value }: { key: string, value: unknown }) => {
@@ -142,6 +147,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
 
   useEffect(() => {
     const initializeExternalProfiles = (externalProfiles: ExternalProfiles) => {
+      setInvalidUrls([])
       setExternalProfilesUpdate(externalProfiles ?? {})
       setLinkedIn(externalProfiles?.linkedIn ?? '')
       setOrcid(externalProfiles?.ORCID ?? '')

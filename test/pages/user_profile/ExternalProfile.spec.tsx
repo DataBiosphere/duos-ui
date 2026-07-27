@@ -87,6 +87,26 @@ describe('ExternalProfile', () => {
     expect(screen.queryByRole('link', { name: 'https://through.bio/' })).not.toBeInTheDocument()
   })
 
+  it('normalizes leading slashes in profile identifiers', async () => {
+    vi.mocked(User.getMe).mockResolvedValue({
+      ...mockData,
+      userData: {
+        externalProfiles: {
+          linkedIn: '/linkedin-user',
+          ORCID: '/0000-0000-0000-0001',
+          throughBio: '/through-bio-user',
+          otherUrls: [],
+        },
+      },
+    } as never)
+
+    render(<ExternalProfile {...editProps} />)
+
+    expect(await screen.findByRole('link', { name: 'https://www.linkedin.com/in/linkedin-user' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'https://orcid.org/0000-0000-0000-0001' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'https://through.bio/through-bio-user' })).toBeInTheDocument()
+  })
+
   it('performs URL validation for LinkedIn', async () => {
     const user = userEvent.setup()
     render(<ExternalProfile {...editProps} />)
@@ -164,6 +184,20 @@ describe('ExternalProfile', () => {
     await user.clear(otherUrlInput)
     await user.type(otherUrlInput, 'not a url')
     await waitFor(() => expect(document.querySelector('.btn-primary')).toBeDisabled())
+  })
+
+  it('clears stale URL validation when profiles are reinitialized', async () => {
+    const user = userEvent.setup()
+    const { rerender } = render(<ExternalProfile {...editProps} userId={1} />)
+    await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue('abcdef'))
+    await user.click(screen.getByRole('button', { name: '+ Add URL' }))
+    const newOtherUrlInput = screen.getByLabelText('Other URL 2')
+    await user.type(newOtherUrlInput, 'not a url')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled())
+
+    rerender(<ExternalProfile {...editProps} userId={2} />)
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled())
   })
 
   it('shows error notification when update fails', async () => {
