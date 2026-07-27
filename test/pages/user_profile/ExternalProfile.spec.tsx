@@ -144,6 +144,17 @@ describe('ExternalProfile', () => {
     )
   })
 
+  it('labels a newly added Other URL row before a value is entered', async () => {
+    const user = userEvent.setup()
+    render(<ExternalProfile {...editProps} />)
+    await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue('abcdef'))
+
+    await user.click(screen.getByRole('button', { name: '+ Add URL' }))
+
+    const newOtherUrlInput = screen.getByLabelText('Other URL 2')
+    expect(newOtherUrlInput.closest('tr')).toHaveTextContent('Other URL 2')
+  })
+
   it('disables save button when there are invalid URLs', async () => {
     const user = userEvent.setup()
     render(<ExternalProfile {...editProps} />)

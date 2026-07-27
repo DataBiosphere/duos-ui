@@ -310,7 +310,9 @@ export default function ExternalProfile(props: ExternalProfileProps) {
               {otherUrls.length > 0 && otherUrls.map((entry, index) => (
                 <tr key={entry.id}>
                   <td>
-                    <div className="external-profile-value external-profile-link-value">{getUrlLink(entry.value)}</div>
+                    <div className="external-profile-value external-profile-link-value">
+                      {entry.value ? getUrlLink(entry.value) : <span>Other URL {index + 1}</span>}
+                    </div>
                   </td>
                   <td>
                     <div className="external-profile-input-with-action">
