@@ -50,8 +50,10 @@ export default function SigningOfficialRequest({ user }: SigningOfficialRequestP
       })
     }
     catch (error) {
+      const status = (error as ResponseError)?.response?.status
+      const statusPrefix = status ? `ERROR ${status}: ` : ''
       Notifications.showError({
-        text: `ERROR ${(error as ResponseError)?.response?.status} : Unable to request Signing Official status`,
+        text: `${statusPrefix}Unable to request Signing Official status`,
         layout: 'topRight',
       })
     }

@@ -66,6 +66,12 @@
     margin-top: 8px;
 }
 
+.external-profile-save-button {
+    min-width: 72px;
+    height: 34px;
+    padding-inline: 16px;
+}
+
 .external-profile td label {
     display: block;
     margin-bottom: 6px;

@@ -100,4 +100,18 @@ describe('SigningOfficialRequest', () => {
       expect.objectContaining({ text: 'Signing Official status request submitted successfully.' }),
     )
   })
+
+  it('omits an undefined status from network error notifications', async () => {
+    vi.mocked(User.getMe).mockRejectedValue(new Error('Network error'))
+    render(<SigningOfficialRequest user={user} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Attest & Request' }))
+
+    await waitFor(() => {
+      expect(Notifications.showError).toHaveBeenCalledWith({
+        text: 'Unable to request Signing Official status',
+        layout: 'topRight',
+      })
+    })
+  })
 })

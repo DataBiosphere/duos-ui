@@ -62,6 +62,31 @@ describe('ExternalProfile', () => {
     expect(screen.getByLabelText('LinkedIn')).not.toBeDisabled()
   })
 
+  it('renders labels instead of base URL links for empty identifier fields', async () => {
+    vi.mocked(User.getMe).mockResolvedValue({
+      ...mockData,
+      userData: {
+        externalProfiles: {
+          linkedIn: '',
+          ORCID: '',
+          throughBio: '',
+          institutionalWebsite: '',
+          otherUrls: [],
+        },
+      },
+    } as never)
+
+    render(<ExternalProfile {...editProps} />)
+
+    await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue(''))
+    expect(screen.getByText('LinkedIn')).toBeInTheDocument()
+    expect(screen.getByText('ORCID')).toBeInTheDocument()
+    expect(screen.getByText('Through.bio')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'https://www.linkedin.com/in/' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'https://orcid.org/' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'https://through.bio/' })).not.toBeInTheDocument()
+  })
+
   it('performs URL validation for LinkedIn', async () => {
     const user = userEvent.setup()
     render(<ExternalProfile {...editProps} />)

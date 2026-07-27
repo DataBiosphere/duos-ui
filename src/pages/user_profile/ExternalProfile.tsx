@@ -175,19 +175,24 @@ export default function ExternalProfile(props: ExternalProfileProps) {
   }, [readonly, props.userId])
 
   const getLinkedInLink = () => {
-    return readonly && !linkedIn ? <span>No LinkedIn profile provided</span> : getUrlLink(formattedLinkedIn(linkedIn))
+    if (!linkedIn) {
+      return <span>{readonly ? 'No LinkedIn profile provided' : 'LinkedIn'}</span>
+    }
+    return getUrlLink(formattedLinkedIn(linkedIn))
   }
 
   const getOrcidLink = () => {
-    return (
-      readonly && !orcid ? <span>No ORCID provided</span> : getUrlLink(formattedOrcid(orcid))
-    )
+    if (!orcid) {
+      return <span>{readonly ? 'No ORCID provided' : 'ORCID'}</span>
+    }
+    return getUrlLink(formattedOrcid(orcid))
   }
 
   const getThroughBioLink = () => {
-    return (
-      readonly && !throughBio ? <span>No Through.bio profile provided</span> : getUrlLink(formattedThroughBio(throughBio))
-    )
+    if (!throughBio) {
+      return <span>{readonly ? 'No Through.bio profile provided' : 'Through.bio'}</span>
+    }
+    return getUrlLink(formattedThroughBio(throughBio))
   }
 
   const getInstitutionalWebsiteLink = () => {
@@ -330,7 +335,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
           </table>
           <div className="external-profile-actions">
             <button type="button" onClick={addNewOtherUrl} className="external-profile-add-url">+ Add URL</button>
-            <button type="button" disabled={invalidUrls.length > 0} onClick={onSaveClick} className="btn-primary common-background profile-save-button">Save</button>
+            <button type="button" disabled={invalidUrls.length > 0} onClick={onSaveClick} className="btn-primary common-background external-profile-save-button">Save</button>
           </div>
         </div>
       )
