@@ -25,7 +25,6 @@ export default function SigningOfficialRequest({ user }: SigningOfficialRequestP
       if (externalProfileLinks.length < 2) {
         Notifications.showError({
           text: 'Please provide at least two External Profiles before requesting Signing Official status.',
-          layout: 'topRight',
         })
         return
       }
@@ -45,7 +44,6 @@ export default function SigningOfficialRequest({ user }: SigningOfficialRequestP
       await Support.createSupportRequest(ticket)
       Notifications.showSuccess({
         text: 'Signing Official status request submitted successfully.',
-        layout: 'topRight',
         timeout: 1500,
       })
     }
@@ -54,7 +52,6 @@ export default function SigningOfficialRequest({ user }: SigningOfficialRequestP
       const statusPrefix = status ? `ERROR ${status}: ` : ''
       Notifications.showError({
         text: `${statusPrefix}Unable to request Signing Official status`,
-        layout: 'topRight',
       })
     }
     finally {

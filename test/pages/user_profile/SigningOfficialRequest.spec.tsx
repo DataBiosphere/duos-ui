@@ -110,7 +110,6 @@ describe('SigningOfficialRequest', () => {
     await waitFor(() => {
       expect(Notifications.showError).toHaveBeenCalledWith({
         text: 'Unable to request Signing Official status',
-        layout: 'topRight',
       })
     })
   })
