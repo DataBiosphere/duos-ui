@@ -13,7 +13,6 @@ import CookiePolicy from 'src/pages/CookiePolicy'
 import TermsOfService from 'src/pages/TermsOfService'
 import TermsOfServiceAcceptance from 'src/pages/TermsOfServiceAcceptance'
 import { AnVILDMSPolicyInfo, NIHDMSPolicyInfo } from 'src/pages/DMSPolicyInfo'
-import RequestForm from 'src/pages/user_profile/RequestForm'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
 import DatasetStatistics from 'src/pages/DatasetStatistics'
 import RoleBAC from 'src/routing/RoleBAC'
@@ -73,7 +72,6 @@ const AppRoutes = (props: AppRoutesProps) => {
       </Route>
       <Route element={<Authenticated />}>
         <Route path="/profile" element={<UserProfile />} />
-        <Route path="/request_role" element={<RequestForm />} />
         <Route path="/datalibrary" element={<DataLibrary />}>
           <Route path=":query" element={<DataLibrary />} />
         </Route>
