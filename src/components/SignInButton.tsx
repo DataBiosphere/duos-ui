@@ -14,7 +14,7 @@ import { OidcUser } from 'src/libs/auth/oidcBroker'
 import { DuosUser } from 'src/types/model'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import 'src/styles/tooltip.css'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { extractError } from 'src/utils/ErrorUtils'
 
@@ -33,6 +33,7 @@ interface HttpError extends Error {
 }
 
 export const SignInButton = () => {
+  const location = useLocation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({})
@@ -54,14 +55,12 @@ export const SignInButton = () => {
         navigate(redirectPath)
       }
     }
-    else {
+    else if (isNil(redirectPath)) {
       // User has authenticated, but has not accepted ToS
-      if (isNil(redirectPath)) {
-        navigate(`/tos_acceptance`)
-      }
-      else {
-        navigate(`/tos_acceptance?redirectTo=${redirectPath}`)
-      }
+      navigate(`/tos_acceptance`)
+    }
+    else {
+      navigate(`/tos_acceptance?redirectTo=${redirectPath}`)
     }
   }
 
@@ -103,8 +102,8 @@ export const SignInButton = () => {
   }
 
   const getRedirectTo = (): string => {
-    const queryParams = new URLSearchParams(window.location.search)
-    return queryParams.get('redirectTo') || window.location.pathname
+    const queryParams = new URLSearchParams(location.search)
+    return queryParams.get('redirectTo') || location.pathname
   }
 
   const shouldRedirectTo = (page: string): boolean => page !== '/' && page !== '/home'
@@ -120,11 +119,12 @@ export const SignInButton = () => {
 
   const registerAndRedirectNewUser = async (redirectTo: string, shouldRedirect: boolean) => {
     const registeredUser: DuosUser = await User.registerUser()
+    const redirectParam = shouldRedirect ? `?redirectTo=${redirectTo}` : ''
     setUserRoleStatuses(registeredUser, Storage)
     // New identity — same cache reset as the normal sign-in path above.
     queryClient.clear()
     syncSignInOrRegistrationEvent(eventList.userRegister)
-    navigate(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`)
+    navigate(`/tos_acceptance${redirectParam}`)
   }
 
   const syncSignInOrRegistrationEvent = (event: MetricsEventName) => {
@@ -170,7 +170,7 @@ export const SignInButton = () => {
     try {
       await checkToSAndRedirect(shouldRedirect ? redirectTo : null)
     }
-    catch (_error) {
+    catch {
       await Auth.signOut()
     }
   }
@@ -252,6 +252,7 @@ export const SignInButton = () => {
                 <div style={tooltipStyle}>
                   <span>
                     DUOS is currently unavailable. Please check the
+                    {' '}
                     <a href="status">status page</a>
                     {' '}
                     for more details.

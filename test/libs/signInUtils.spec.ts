@@ -4,8 +4,8 @@ import { handleSignIn } from 'src/libs/signInUtils'
 describe('signInUtils', () => {
   describe('handleSignIn', () => {
     beforeEach(() => {
-      window.history.replaceState({}, '', '/')
-      vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+      globalThis.history.replaceState({}, '', '/')
+      vi.spyOn(globalThis, 'scrollTo').mockImplementation(() => {})
     })
 
     afterEach(() => {
@@ -13,10 +13,10 @@ describe('signInUtils', () => {
     })
 
     it('should set redirectTo parameter in URL', () => {
-      const replaceState = vi.spyOn(window.history, 'replaceState')
+      const replaceState = vi.spyOn(globalThis.history, 'replaceState')
       handleSignIn('/datalibrary')
       expect(replaceState).toHaveBeenCalled()
-      expect(window.location.search).toContain('redirectTo=%2Fdatalibrary')
+      expect(globalThis.location.search).toContain('redirectTo=%2Fdatalibrary')
     })
 
     it('should find and click the Sign In button if it exists', () => {
@@ -33,7 +33,7 @@ describe('signInUtils', () => {
     })
 
     it('should scroll to top if Sign In button is not found (fallback)', () => {
-      const scrollTo = vi.mocked(window.scrollTo)
+      const scrollTo = vi.mocked(globalThis.scrollTo)
 
       // Ensure no Sign In button exists
       document.querySelectorAll('button').forEach((button) => {
@@ -49,17 +49,17 @@ describe('signInUtils', () => {
     it.each(['/datalibrary', '/dashboard', '/profile', '/datasets'])(
       'should handle redirect path %s',
       (path) => {
-        window.history.replaceState({}, '', '/')
+        globalThis.history.replaceState({}, '', '/')
         handleSignIn(path)
-        expect(window.location.search).toContain(`redirectTo=${encodeURIComponent(path)}`)
+        expect(globalThis.location.search).toContain(`redirectTo=${encodeURIComponent(path)}`)
       },
     )
 
     it('should preserve existing query parameters when setting redirectTo', () => {
-      window.history.replaceState({}, '', '/?existingParam=value')
+      globalThis.history.replaceState({}, '', '/?existingParam=value')
       handleSignIn('/datalibrary')
-      expect(window.location.search).toContain('existingParam=value')
-      expect(window.location.search).toContain('redirectTo=%2Fdatalibrary')
+      expect(globalThis.location.search).toContain('existingParam=value')
+      expect(globalThis.location.search).toContain('redirectTo=%2Fdatalibrary')
     })
 
     it('should find Sign In button with extra whitespace', () => {

@@ -79,10 +79,10 @@ const LocationDisplay = () => {
   return <div data-testid="location">{pathname}</div>
 }
 
-const mountComponent = () =>
+const mountComponent = (initialEntries = ['/']) =>
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={initialEntries}>
         <SignInButton />
         <LocationDisplay />
       </MemoryRouter>
@@ -130,6 +130,20 @@ describe('Sign In: Component Loads', () => {
     expect(vi.mocked(Metrics.identify)).toHaveBeenCalled()
     expect(vi.mocked(Metrics.syncProfile)).toHaveBeenCalled()
     expect(vi.mocked(Metrics.captureEvent)).toHaveBeenCalled()
+  })
+
+  it('Sign In: Redirects to the route from the redirectTo query parameter', async () => {
+    const tosAcceptedUser = { userStatusInfo: userStatus, ...duosUser }
+    vi.mocked(Auth.signIn).mockResolvedValue(mockOidcUser)
+    vi.mocked(User.getMe).mockResolvedValue(tosAcceptedUser as never)
+    mountComponent(['/?redirectTo=/datalibrary'])
+
+    await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
+    await userEvent.click(screen.getByRole('button'))
+
+    await waitFor(() =>
+      expect(screen.getByTestId('location').textContent).toBe('/datalibrary'),
+    )
   })
 
   it('Sign In: No Roles Error Reporter Is Called', async () => {

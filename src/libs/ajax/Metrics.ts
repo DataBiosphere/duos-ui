@@ -43,8 +43,8 @@ const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, deta
       ...details,
       distinct_id: isRegistered ? undefined : Storage.getAnonymousId(),
       appId: 'DUOS',
-      hostname: window.location.hostname,
-      appPath: window.location.pathname,
+      hostname: globalThis.location.hostname,
+      appPath: globalThis.location.pathname,
       ...getDefaultProperties(),
     },
   }
