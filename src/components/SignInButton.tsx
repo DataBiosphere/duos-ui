@@ -14,7 +14,7 @@ import { OidcUser } from 'src/libs/auth/oidcBroker'
 import { DuosUser } from 'src/types/model'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import 'src/styles/tooltip.css'
-import { useLocation, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { extractError } from 'src/utils/ErrorUtils'
 
@@ -33,7 +33,6 @@ interface HttpError extends Error {
 }
 
 export const SignInButton = () => {
-  const location = useLocation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({})
@@ -102,8 +101,8 @@ export const SignInButton = () => {
   }
 
   const getRedirectTo = (): string => {
-    const queryParams = new URLSearchParams(location.search)
-    return queryParams.get('redirectTo') || location.pathname
+    const queryParams = new URLSearchParams(globalThis.location.search)
+    return queryParams.get('redirectTo') || globalThis.location.pathname
   }
 
   const shouldRedirectTo = (page: string): boolean => page !== '/' && page !== '/home'

@@ -75,14 +75,14 @@ const consentStatus = {
 
 // Helper: renders SignInButton inside a MemoryRouter and exposes the current location
 const LocationDisplay = () => {
-  const { pathname } = useLocation()
-  return <div data-testid="location">{pathname}</div>
+  const { pathname, search } = useLocation()
+  return <div data-testid="location">{pathname + search}</div>
 }
 
-const mountComponent = (initialEntries = ['/']) =>
+const mountComponent = () =>
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter initialEntries={initialEntries}>
+      <MemoryRouter>
         <SignInButton />
         <LocationDisplay />
       </MemoryRouter>
@@ -91,6 +91,7 @@ const mountComponent = (initialEntries = ['/']) =>
 
 describe('Sign In: Component Loads', () => {
   beforeEach(() => {
+    globalThis.history.replaceState({}, '', '/')
     vi.mocked(ServiceStatus.getConsentStatus).mockResolvedValue(consentStatus as never)
     vi.mocked(ServiceStatus.isConsentHealthy).mockResolvedValue(true)
     vi.mocked(ServiceStatus.isSamHealthy).mockResolvedValue(true)
@@ -132,17 +133,17 @@ describe('Sign In: Component Loads', () => {
     expect(vi.mocked(Metrics.captureEvent)).toHaveBeenCalled()
   })
 
-  it('Sign In: Redirects to the route from the redirectTo query parameter', async () => {
-    const tosAcceptedUser = { userStatusInfo: userStatus, ...duosUser }
+  it('Sign In: Preserves a redirectTo query parameter added outside the router', async () => {
     vi.mocked(Auth.signIn).mockResolvedValue(mockOidcUser)
-    vi.mocked(User.getMe).mockResolvedValue(tosAcceptedUser as never)
-    mountComponent(['/?redirectTo=/datalibrary'])
+    vi.mocked(User.getMe).mockResolvedValue(duosUser as never)
+    mountComponent()
+    globalThis.history.replaceState({}, '', '/?redirectTo=/datalibrary')
 
     await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
     await userEvent.click(screen.getByRole('button'))
 
     await waitFor(() =>
-      expect(screen.getByTestId('location').textContent).toBe('/datalibrary'),
+      expect(screen.getByTestId('location').textContent).toBe('/tos_acceptance?redirectTo=/datalibrary'),
     )
   })
 
