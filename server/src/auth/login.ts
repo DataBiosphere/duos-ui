@@ -52,7 +52,7 @@ export async function handleLogin(request: FastifyRequest, reply: FastifyReply):
   })
 
   // Persist the session BEFORE responding, so @fastify/session's async onSend
-  // save (pgStore.set) doesn't still be in flight when this async handler
+  // save (pgStore.set) isn't in flight when this async handler
   // resolves — otherwise Fastify's wrapThenable fires a second reply.send() and
   // the duplicate session write crashes with ERR_HTTP_HEADERS_SENT. See the
   // fuller note in callback.ts. (This race is why /auth/login was flaky.)
