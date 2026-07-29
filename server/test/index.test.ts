@@ -19,6 +19,21 @@ vi.mock('@fastify/session', () => ({
   default: vi.fn(async () => {}),
 }))
 
+// @fastify/csrf-protection: real registration needs the session/cookie
+// decorators, which are mocked away above. This stub only needs to provide the
+// two decorations index.ts references — a pass-through csrfProtection onRequest
+// hook (so the guarded /auth/logout route still reaches its handler here; the
+// real 403/token behaviour is covered in auth.test.ts) and generateCsrf.
+vi.mock('@fastify/csrf-protection', () => {
+  const plugin = async (fastify: FastifyInstance) => {
+    fastify.decorate('csrfProtection', async () => {})
+    fastify.decorateReply('generateCsrf', () => 'test-csrf-token')
+  }
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(plugin as any)[Symbol.for('skip-override')] = true
+  return { default: plugin }
+})
+
 // Mock @fastify/vite: decorate the instance so buildApp() can call vite.ready()
 // and setNotFoundHandler can call reply.html() without starting a real Vite server.
 vi.mock('@fastify/vite', () => {
