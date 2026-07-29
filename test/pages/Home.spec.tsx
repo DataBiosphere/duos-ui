@@ -115,7 +115,7 @@ describe('Home page', () => {
       await act(async () => {
         fireEvent.click(libraryLink)
       })
-      expect(handleSignIn).toHaveBeenCalledWith('/datalibrary')
+      expect(handleSignIn).toHaveBeenCalledWith('/datalibrary', expect.any(Function))
     })
   })
 

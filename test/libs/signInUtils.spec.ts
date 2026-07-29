@@ -1,22 +1,24 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { handleSignIn } from 'src/libs/signInUtils'
+import type { NavigateFunction } from 'react-router'
 
 describe('signInUtils', () => {
   describe('handleSignIn', () => {
+    const navigate = vi.fn() as unknown as NavigateFunction
+
     beforeEach(() => {
       globalThis.history.replaceState({}, '', '/')
       vi.spyOn(globalThis, 'scrollTo').mockImplementation(() => {})
+      vi.mocked(navigate).mockClear()
     })
 
     afterEach(() => {
       vi.restoreAllMocks()
     })
 
-    it('should set redirectTo parameter in URL', () => {
-      const replaceState = vi.spyOn(globalThis.history, 'replaceState')
-      handleSignIn('/datalibrary')
-      expect(replaceState).toHaveBeenCalled()
-      expect(globalThis.location.search).toContain('redirectTo=%2Fdatalibrary')
+    it('should replace the current route with the redirectTo parameter', () => {
+      handleSignIn('/datalibrary', navigate)
+      expect(navigate).toHaveBeenCalledWith('/?redirectTo=%2Fdatalibrary', { replace: true })
     })
 
     it('should find and click the Sign In button if it exists', () => {
@@ -26,7 +28,7 @@ describe('signInUtils', () => {
       button.addEventListener('click', clickSpy)
       document.body.appendChild(button)
 
-      handleSignIn('/datalibrary')
+      handleSignIn('/datalibrary', navigate)
 
       expect(clickSpy).toHaveBeenCalled()
       button.remove()
@@ -42,7 +44,7 @@ describe('signInUtils', () => {
         }
       })
 
-      handleSignIn('/dashboard')
+      handleSignIn('/dashboard', navigate)
       expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
     })
 
@@ -50,16 +52,21 @@ describe('signInUtils', () => {
       'should handle redirect path %s',
       (path) => {
         globalThis.history.replaceState({}, '', '/')
-        handleSignIn(path)
-        expect(globalThis.location.search).toContain(`redirectTo=${encodeURIComponent(path)}`)
+        handleSignIn(path, navigate)
+        expect(navigate).toHaveBeenCalledWith(
+          `/?redirectTo=${encodeURIComponent(path)}`,
+          { replace: true },
+        )
       },
     )
 
     it('should preserve existing query parameters when setting redirectTo', () => {
       globalThis.history.replaceState({}, '', '/?existingParam=value')
-      handleSignIn('/datalibrary')
-      expect(globalThis.location.search).toContain('existingParam=value')
-      expect(globalThis.location.search).toContain('redirectTo=%2Fdatalibrary')
+      handleSignIn('/datalibrary', navigate)
+      expect(navigate).toHaveBeenCalledWith(
+        '/?existingParam=value&redirectTo=%2Fdatalibrary',
+        { replace: true },
+      )
     })
 
     it('should find Sign In button with extra whitespace', () => {
@@ -69,7 +76,7 @@ describe('signInUtils', () => {
       button.addEventListener('click', clickSpy)
       document.body.appendChild(button)
 
-      handleSignIn('/datalibrary')
+      handleSignIn('/datalibrary', navigate)
 
       expect(clickSpy).toHaveBeenCalled()
       button.remove()
