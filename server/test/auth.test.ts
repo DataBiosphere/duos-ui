@@ -445,24 +445,30 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       const fake = makeInMemoryPg()
       const guardedApp = await buildAuthApp(fake.pg, errorLog)
 
+      // Each request must persist the session EXACTLY once. The double-send bug
+      // is a redundant onSend save racing the handler's own save(); measuring
+      // the store-write delta per request catches that directly. A regression
+      // (e.g. flipping `rolling` back on) makes onSend re-save the cookie-bearing
+      // callback request, so its delta would be 2.
+      const beforeLogin = fake.setSids.length
       const loginRes = await guardedApp.inject({ method: 'POST', url: '/auth/login' })
       expect(loginRes.statusCode).toBe(200)
+      expect(fake.setSids.length - beforeLogin).toBe(1)
       const cookie = sessionCookieHeader(loginRes)
 
+      const beforeCallback = fake.setSids.length
       const cbRes = await guardedApp.inject({
         method: 'GET',
         url: '/auth/callback?code=c&state=s',
         headers: { cookie },
       })
       expect(cbRes.statusCode).toBe(302)
+      expect(fake.setSids.length - beforeCallback).toBe(1)
 
       await guardedApp.close()
 
       const joined = errorLog.join('\n')
       expect(joined).not.toMatch(/already sent|ERR_HTTP_HEADERS_SENT|FST_ERR_REP/i)
-      // login must persist exactly once — a second onSend save would be the
-      // duplicate write that races into the double-send.
-      expect(fake.setSids.filter(sid => sid === fake.setSids[0]).length).toBeGreaterThanOrEqual(1)
     })
   })
 })
