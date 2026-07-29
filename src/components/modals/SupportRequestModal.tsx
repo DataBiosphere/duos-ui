@@ -22,7 +22,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import Dropzone from 'react-dropzone'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { Support } from 'src/libs/ajax/Support'
 import { Storage } from 'src/libs/storage'
 import { Notifications, isEmailAddress } from 'src/libs/utils'
@@ -42,13 +42,14 @@ interface RedirectLinkProps {
 
 const RedirectLink: React.FC<RedirectLinkProps> = (props) => {
   const { isLogged, closeHandler } = props
+  const navigate = useNavigate()
   return (
     <Link
       to={isLogged ? '/datalibrary' : '#'}
       onClick={(e) => {
         if (!isLogged) {
           e.preventDefault()
-          handleSignIn('/datalibrary')
+          handleSignIn('/datalibrary', navigate)
         }
         closeHandler()
       }}
@@ -325,9 +326,9 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
                     {hasAttachments && (
                       <Box>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center', mb: 1 }}>
-                          {formData.attachment.map((file, index) => (
+                          {formData.attachment.map(file => (
                             <Chip
-                              key={index}
+                              key={`${file.name}-${file.size}-${file.lastModified}`}
                               icon={<AttachFileIcon />}
                               label={file.name}
                               size="small"
