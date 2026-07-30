@@ -251,12 +251,18 @@ describe('refreshAccessToken', () => {
       expect(session.destroy).toHaveBeenCalledOnce()
     })
 
-    it('destroys the session when the store cannot be read', async () => {
-      const { request, session } = makeRequest({ storeError: new Error('connection terminated') })
+    it('destroys the session when the store cannot be read, and says so in the logs', async () => {
+      const storeError = new Error('connection terminated')
+      const { request, session } = makeRequest({ storeError })
 
       await expect(refreshAccessToken(request)).rejects.toThrow(RefreshFailedError)
 
       expect(session.destroy).toHaveBeenCalledOnce()
+      // Otherwise a DB outage is indistinguishable from an ended session.
+      expect(request.log.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ err: storeError }),
+        expect.stringContaining('session store unreadable'),
+      )
     })
   })
 

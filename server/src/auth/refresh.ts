@@ -151,7 +151,16 @@ async function doRefresh(
       // another pod may already have rotated the token, in which case
       // `invalid_grant` means "you lost the race", not "the session is dead".
       // Adopt the winner's tokens instead of destroying a healthy session.
-      const stored = await readStoredSession(request, sid).catch(() => null)
+      const stored = await readStoredSession(request, sid).catch((err: unknown) => {
+        // Swallowed on purpose — an unreadable store cannot distinguish a
+        // cross-pod winner from a genuinely dead session, and destroying is the
+        // conservative answer either way. Logged because it is otherwise
+        // indistinguishable from a store that confirmed this token is current,
+        // and it is the difference between "the user's session ended" and "the
+        // database was unreachable".
+        request.log.warn({ sid, err }, '[auth] session store unreadable while checking for a cross-pod refresh winner')
+        return null
+      })
       if (stored?.refreshToken && stored.refreshToken !== usedRefreshToken && stored.accessToken) {
         request.log.info({ sid }, '[auth] refresh lost a cross-pod race — adopting the stored tokens')
         return {
@@ -223,7 +232,10 @@ function readStoredSession(request: FastifyRequest, sid: string): Promise<Sessio
   return new Promise((resolve, reject) => {
     request.sessionStore.get(sid, (err: unknown, stored?: Session | null) => {
       if (err) {
-        reject(err instanceof Error ? err : new Error(String(err)))
+        // A non-Error rejection value is attached as `cause` rather than
+        // stringified into the message: store callbacks hand back plain objects,
+        // and String() would flatten those to '[object Object]'.
+        reject(err instanceof Error ? err : new Error('session store read failed', { cause: err }))
         return
       }
       resolve(stored ?? null)
