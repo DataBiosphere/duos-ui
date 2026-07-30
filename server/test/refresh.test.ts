@@ -4,8 +4,10 @@ import type { Configuration } from 'openid-client'
 import { ResponseBodyError } from 'openid-client'
 import { refreshAccessToken, RefreshFailedError, resetInFlightRefreshes } from '../src/auth/refresh.js'
 
-// Mock getOidcConfig() (network) but keep the real requireEnv() so its env-var
-// validation is exercised for real.
+// Only getOidcConfig() is replaced — left real it would attempt B2C discovery
+// over the network. The rest of the module is spread through rather than
+// stubbed out, so anything refresh.ts imports from it in future keeps its real
+// implementation instead of silently arriving as undefined.
 vi.mock('../src/auth/oidcClient.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../src/auth/oidcClient.js')>()
   return { ...actual, getOidcConfig: vi.fn() }
