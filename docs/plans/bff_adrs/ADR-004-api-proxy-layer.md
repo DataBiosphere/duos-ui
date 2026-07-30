@@ -17,14 +17,14 @@ Four properties of the current client decide it. All were confirmed against the
 code rather than assumed:
 
 **1. Real streaming traffic in both directions.** Uploads use `multipart/form-data`
-via `fetchMultipart` — [FileStorageObject.ts:40](../../src/libs/ajax/FileStorageObject.ts:40)
-(arbitrary user-selected `File`), [DataSet.ts:26](../../src/libs/ajax/DataSet.ts:26),
-[DataSet.ts:95](../../src/libs/ajax/DataSet.ts:95),
-[DataSet.ts:118](../../src/libs/ajax/DataSet.ts:118),
-[ProgressReport.ts:8](../../src/libs/ajax/ProgressReport.ts:8) — plus a binary
-`POST` to `/support/upload` ([Support.ts:74](../../src/libs/ajax/Support.ts:74)).
+via `fetchMultipart` — [FileStorageObject.ts:40](../../../src/libs/ajax/FileStorageObject.ts:40)
+(arbitrary user-selected `File`), [DataSet.ts:26](../../../src/libs/ajax/DataSet.ts:26),
+[DataSet.ts:95](../../../src/libs/ajax/DataSet.ts:95),
+[DataSet.ts:118](../../../src/libs/ajax/DataSet.ts:118),
+[ProgressReport.ts:8](../../../src/libs/ajax/ProgressReport.ts:8) — plus a binary
+`POST` to `/support/upload` ([Support.ts:74](../../../src/libs/ajax/Support.ts:74)).
 Downloads use `fetchBlob` in `DAA`, `DAR`, and `FileStorageObject`, and a
-`responseType: 'blob'` GET at [DataSet.ts:133](../../src/libs/ajax/DataSet.ts:133).
+`responseType: 'blob'` GET at [DataSet.ts:133](../../../src/libs/ajax/DataSet.ts:133).
 
 **2. Fastify parses nothing useful for a proxy.** Only `application/json` and
 `text/plain` have default parsers, so `multipart/form-data` and
@@ -88,16 +88,30 @@ proxy through without a session and without an injected `Authorization` header.
 Everything else 401s when there is no session. Without this, cutover breaks the
 signed-out status page and Contact Us form.
 
-**c. A wildcard content-type parser scoped to the proxy.** Registered inside the
-proxy plugin's encapsulation so `/auth/*` keeps normal JSON parsing:
+**c. Every content-type parser cleared inside the proxy's scope, then one
+wildcard pass-through.** A `'*'` parser alone is not enough: it is only a
+fallback. `ContentTypeParser.getParser` resolves the exact content type first,
+then the media type, then the regex list, and reaches the `'*'` entry last — so
+Fastify's built-in `application/json` and `text/plain` parsers keep winning, and
+those bodies are still buffered, still capped by `bodyLimit`, and still handed to
+the handler pre-parsed. Since DUOS posts JSON through the proxy on nearly every
+mutation, that is the common path, not an edge case.
 
 ```ts
+proxyScope.removeAllContentTypeParsers()
 proxyScope.addContentTypeParser('*', (_request, payload, done) => done(null, payload))
 ```
 
-The payload stays an unread stream, so bodies are neither buffered in memory nor
-measured against Fastify's 1 MB `bodyLimit`. Pair it with a header-only `getToken`
-for `@fastify/csrf-protection` so CSRF validation never needs a parsed body.
+Both calls are encapsulated — `plugin-override.js` rebuilds the parser table per
+plugin instance — so `/auth/*` keeps normal JSON parsing. Clearing wholesale is
+preferred over overriding `application/json` and `text/plain` individually:
+equivalent today, but it cannot be outflanked by a parser some future plugin
+registers in this scope.
+
+The payload then stays an unread stream, so bodies are neither buffered in memory
+nor measured against Fastify's 1 MB `bodyLimit`. Pair it with a header-only
+`getToken` for `@fastify/csrf-protection` so CSRF validation never needs a parsed
+body.
 
 **d. `await request.session.save()` in the refresh preHandler.** This is the
 Phase 2 lesson from `25a71a81`: saving before the reply leaves `@fastify/session`'s
@@ -139,4 +153,5 @@ revisiting only if the BFF ever needs to proxy a WebSocket upgrade.
   it later means changing `getApiUrl()` and the route together.
 - Transient refresh failures must map to 502, not 401 — a 401 would sign out a
   user whose session is healthy and whose upstream is merely briefly unreachable.
-  See `RefreshFailedError` in `../../../server/src/auth/refresh.ts`.
+  Story 3-B carries this as a distinct `RefreshFailedError` for the fatal case,
+  so the proxy has something to branch on.
