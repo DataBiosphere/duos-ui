@@ -49,6 +49,11 @@ export interface SamDetails {
   }
 }
 
+export interface EcmDetails {
+  ok: boolean
+  systems: Record<string, boolean>
+}
+
 export interface OntologyStatus extends BaseStatus {
   systems: {
     'deadlocks': SystemHealth
@@ -60,6 +65,7 @@ export interface OntologyStatus extends BaseStatus {
 export interface ConsentStatus extends BaseStatus {
   systems: {
     'deadlocks': SystemHealth
+    'ecm': SystemHealth & { details: EcmDetails }
     'elastic-search': SystemHealth
     'google-cloud-storage': SystemHealth
     'ontology': SystemHealth & { details: { ok: boolean, systems: OntologyStatus } }

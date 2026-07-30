@@ -10,7 +10,7 @@ test('Status page renders status indicators', async ({ page }) => {
   await page.goto('/')
   await page.getByText('Status').click()
   await expect(page.locator('#consent')).toBeVisible()
-  for (const href of ['#consent', '#sam']) {
+  for (const href of ['#consent', '#ecm', '#sam']) {
     await expect(
       page.locator(`a[href="${href}"]`).locator('xpath=..').locator('[data-testid="status-healthy"]'),
     ).toBeVisible({ timeout: 15000 })
