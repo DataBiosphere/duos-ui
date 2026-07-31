@@ -67,7 +67,8 @@ export default function UserProfile() {
   useEffect(() => {
     const init = async () => {
       try {
-        const user = Storage.getCurrentUser()
+        const user = await User.getMe()
+        setUserRoleStatuses(user, Storage)
         setUser(user)
         setName(user.displayName)
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'))
