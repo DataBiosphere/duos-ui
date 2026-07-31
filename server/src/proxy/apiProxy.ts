@@ -96,6 +96,18 @@ export const UNAUTHENTICATED_PATHS: ReadonlySet<string> = new Set([
 ])
 
 /**
+ * Methods CSRF enforcement does not apply to, per the usual definition of safe.
+ *
+ * A CSRF token cannot protect a GET in any case: `SameSite=Lax` deliberately
+ * sends the session cookie on top-level GET navigations, so a plain link would
+ * carry it. That makes any upstream endpoint which mutates state on GET
+ * forgeable, which is why story 3-D audits for them — see
+ * docs/plans/bff_state_changing_gets.md for the two that exist and what the
+ * residual risk actually is.
+ */
+const CSRF_EXEMPT_METHODS: ReadonlySet<string> = new Set(['GET', 'HEAD', 'OPTIONS'])
+
+/**
  * Strips the BFF prefix and the query string, yielding the upstream path.
  *
  * The query is dropped on purpose rather than forwarded here: `reply.from()`
@@ -128,6 +140,43 @@ type ProxyReply = FastifyReply<RouteGenericInterface, RawServerBase>
  * only, or `/auth/*` would lose its JSON parsing too.
  */
 export async function apiProxy(app: FastifyInstance): Promise<void> {
+  // Fail at startup rather than serve the proxy unguarded. The decorator comes
+  // from @fastify/csrf-protection, registered in index.ts; if the proxy were
+  // ever moved ahead of it, the alternative to this check is a route that
+  // accepts cookie-authenticated writes from any origin.
+  if (!app.hasDecorator('csrfProtection')) {
+    throw new Error('apiProxy requires @fastify/csrf-protection to be registered first — it enforces CSRF on unsafe methods and must not be registered without it')
+  }
+
+  /**
+   * CSRF on state-changing methods. The proxy turns every DUOS API write into a
+   * cookie-authenticated request, so this is a requirement of the proxy, not
+   * later hardening.
+   *
+   * Callback style, not `await`ed: `csrfProtection` takes a `done` callback and
+   * returns undefined, so awaiting it would call `next()` as undefined and throw
+   * a TypeError on the *passing* path — a failure that only shows up once a
+   * valid token arrives.
+   *
+   * The unauthenticated allowlist is exempt, and has to be. `POST
+   * /support/request` and `POST /support/upload` are the signed-out Contact Us
+   * form: with no session there is no CSRF secret, so enforcement would reject
+   * them with MissingCSRFSecretError. Exempting them costs nothing either —
+   * these endpoints carry no credential, so there is no authority for an
+   * attacker to borrow, which is the only thing CSRF protects.
+   */
+  const csrfForUnsafeMethods = (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    done: () => void,
+  ): void => {
+    if (CSRF_EXEMPT_METHODS.has(request.method) || UNAUTHENTICATED_PATHS.has(upstreamPath(request.url))) {
+      done()
+      return
+    }
+    app.csrfProtection(request, reply, done)
+  }
+
   // Cleared wholesale, then one wildcard pass-through. A `'*'` parser alone is
   // not enough: it is only the last resort. `getParser` resolves the exact
   // content type, then the media type, then the regex list, and reaches `'*'`

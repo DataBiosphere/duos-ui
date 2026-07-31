@@ -85,6 +85,9 @@ beforeEach(async () => {
   process.env.DUOS_DB_PASSWORD = 'password'
   delete process.env.DUOS_DB_PORT
   process.env.DUOS_SESSION_SECRET = 'test-secret-that-is-at-least-32-characters'
+  // Required once bffEnabled is true: /auth/me and the API proxy both forward
+  // to this upstream, and the proxy resolves it when it registers.
+  process.env.DUOS_API_URL = 'https://consent.dsde-dev.broadinstitute.org'
   vi.clearAllMocks()
 
   // buildApp() reads config.json eagerly at startup (to gate the BFF auth
@@ -330,6 +333,41 @@ describe('BFF auth route registration', () => {
     expect(handleLogin).not.toHaveBeenCalled()
 
     await localApp.close()
+  })
+
+  // The proxy route is gated on both switches, so a legacy deployment exposes
+  // no /duos-api surface at all. Asserted via the upstream call rather than the
+  // status code, because setNotFoundHandler() serves the SPA shell (200) for
+  // anything unmatched — an unregistered route and a registered one are
+  // indistinguishable by status alone.
+  it('registers the /duos-api proxy route when bffEnabled is true', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    // No session, so the proxy's own gate answers before any upstream call —
+    // which is itself proof the route exists and its preHandler ran.
+    const res = await localApp.inject({ method: 'GET', url: '/duos-api/api/dataset/1' })
+
+    expect(res.statusCode).toBe(401)
+    expect(res.json()).toEqual({ error: 'unauthenticated' })
+
+    await localApp.close()
+  })
+
+  it('does not register the /duos-api proxy route when bffEnabled is false', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: false })
+
+    const res = await localApp.inject({ method: 'GET', url: '/duos-api/api/dataset/1' })
+
+    // Falls through to the SPA fallback instead of the proxy's 401.
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  it('fails loud when bffEnabled is true but DUOS_API_URL is not set', async () => {
+    delete process.env.DUOS_API_URL
+
+    await expect(buildAppWithConfig({ bffEnabled: true })).rejects.toThrow('DUOS_API_URL')
   })
 
   it('fails loud when bffEnabled is true but DUOS_DB_HOST is not set', async () => {
