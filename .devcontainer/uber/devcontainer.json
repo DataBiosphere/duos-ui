@@ -1,6 +1,6 @@
 {
     "name": "Combined DUOS",
-    "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:dev-26-trixie",
+    "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:26-trixie",
     "workspaceFolder": "/workspaces",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/duos-ui,type=bind,consistency=cached",
     "mounts": [
