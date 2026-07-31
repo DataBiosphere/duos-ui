@@ -16,6 +16,7 @@
     "@fastify/cookie": "11.1.2",
     "@fastify/csrf-protection": "8.0.0",
     "@fastify/postgres": "6.1.0",
+    "@fastify/reply-from": "12.6.4",
     "@fastify/session": "11.1.2",
     "@fastify/static": "10.1.2",
     "@fastify/vite": "9.2.0",
