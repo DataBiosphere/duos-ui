@@ -147,8 +147,11 @@ describe('apiProxy', () => {
       [`${PROXY_PREFIX}/api/dataset/1`, '/api/dataset/1'],
       [`${PROXY_PREFIX}/status`, '/status'],
       [`${PROXY_PREFIX}/api/dar/v2?open=true`, '/api/dar/v2'],
-      // The prefix on its own has no upstream path to map to; '/' keeps it a
-      // valid URL rather than an empty source string.
+      [`${PROXY_PREFIX}/`, '/'],
+      // Defensive only. `/duos-api/*` does not match the bare prefix, so the
+      // router 404s `/duos-api` rather than delivering it here (the trailing
+      // slash above is the reachable form). Asserted so the exported helper is
+      // never the thing that hands `reply.from` an empty source string.
       [PROXY_PREFIX, '/'],
     ])('maps %s to %s', (url, expected) => {
       expect(upstreamPath(url)).toBe(expected)
@@ -232,6 +235,27 @@ describe('apiProxy', () => {
       unregistered.register(apiProxy)
 
       await expect(unregistered.ready()).rejects.toThrow(/DUOS_API_URL.*must be a bare origin/s)
+      await unregistered.close()
+    })
+
+    // A bare hostname is what a Helm value tends to look like, and it is the one
+    // malformed value new URL() rejects on its own — with a TypeError naming
+    // neither the variable nor the value, so the startup failure says nothing
+    // about what to fix. The scheme cases are separated from the path case
+    // because 'localhost:8000' parses as protocol 'localhost:' with pathname
+    // '8000', so a pathname check alone would report a missing scheme as a path.
+    it.each([
+      ['a bare hostname', 'duos-api.dsde-dev.broadinstitute.org', /not a valid URL/],
+      ['a host:port with no scheme', 'localhost:8000', /scheme is 'localhost:'/],
+      ['a non-HTTP scheme', 'ftp://duos-api.example.org', /scheme is 'ftp:'/],
+    ])('fails to register when DUOS_API_URL is %s, naming the variable', async (_case, value, expected) => {
+      process.env.DUOS_API_URL = value
+      const unregistered = Fastify({ logger: false })
+      unregistered.register(apiProxy)
+
+      const ready = expect(unregistered.ready()).rejects
+      await ready.toThrow(/^DUOS_API_URL is/)
+      await ready.toThrow(expected)
       await unregistered.close()
     })
   })

@@ -106,6 +106,10 @@ export const UNAUTHENTICATED_PATHS: ReadonlySet<string> = new Set([
 export function upstreamPath(url: string): string {
   const queryIndex = url.indexOf('?')
   const path = queryIndex === -1 ? url : url.slice(0, queryIndex)
+  // The `|| '/'` is defensive, not a routing case: `/duos-api/*` does not match
+  // the bare prefix, so `/duos-api` 404s before reaching here and `/duos-api/`
+  // already slices to '/'. It only guarantees this exported helper never hands
+  // `reply.from` an empty source string.
   return path.slice(PROXY_PREFIX.length) || '/'
 }
 
@@ -174,13 +178,35 @@ function onUpstreamTransportError(reply: ProxyReply, { error }: { error: Error }
  * fails its own "source must be a relative path string" guard. Checked at
  * registration so a bad value fails at startup naming the variable, rather than
  * 500ing every proxied request.
+ *
+ * All three ways to get it wrong have to name the variable, or the guard does
+ * not do the job it exists for. A missing scheme is the likeliest — a bare
+ * hostname is what a Helm value tends to look like — and `new URL()` rejects it
+ * with an unadorned `TypeError: Invalid URL` that mentions neither the variable
+ * nor the value. The protocol check is what separates `localhost:8000`
+ * (protocol `localhost:`, pathname `8000`) from a genuine path, which would
+ * otherwise be reported as "has a path".
  */
 function upstreamBase(): string {
   const base = requireEnv('DUOS_API_URL')
-  const { pathname } = new URL(base)
-  if (pathname !== '/') {
-    throw new Error(`DUOS_API_URL is '${base}', which has a path — it must be a bare origin (scheme, host, and port only), because the proxy appends the upstream path to it`)
+  const mustBeOrigin = 'it must be a bare origin (scheme, host, and port only), because the proxy appends the upstream path to it'
+
+  let parsed: URL
+  try {
+    parsed = new URL(base)
   }
+  catch {
+    throw new Error(`DUOS_API_URL is '${base}', which is not a valid URL — ${mustBeOrigin}. Include the scheme, e.g. https://duos.example.org`)
+  }
+
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+    throw new Error(`DUOS_API_URL is '${base}', whose scheme is '${parsed.protocol}' — ${mustBeOrigin}. Expected http or https, e.g. https://duos.example.org`)
+  }
+
+  if (parsed.pathname !== '/') {
+    throw new Error(`DUOS_API_URL is '${base}', which has a path — ${mustBeOrigin}`)
+  }
+
   return base
 }
 
