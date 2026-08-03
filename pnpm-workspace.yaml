@@ -8,8 +8,9 @@ overrides:
   # (GHSA-83w8-p2f5-377r / GHSA-8pvw-jcv7-9cmj). @fastify/vite@9.1.1 declares
   # ^9.1.2, but the advisory range is unbounded below so only >=10.1.2 clears audit.
   "@fastify/static": ">=10.1.2"
-  # DoS via unbounded brace expansion (GHSA-mh99-v99m-4gvg)
-  brace-expansion: ">=5.0.8"
+  # DoS via unbounded brace expansion (GHSA-mh99-v99m-4gvg), then again via
+  # unbounded intermediate arrays bypassing that fix (GHSA-rgw5-rvv9-x895).
+  brace-expansion: ">=5.0.9"
 
 allowBuilds:
   esbuild: false
