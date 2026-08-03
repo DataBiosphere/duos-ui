@@ -650,6 +650,44 @@ describe('apiProxy', () => {
       expect(res.body).toBe('col\tvalue')
     })
 
+    // The return leg of the trust boundary. A proxied response is served from
+    // the BFF's own origin, so an upstream Set-Cookie would be applied to that
+    // origin — overwriting `sessionId` with a value the DUOS API chose, which
+    // hands the user a different session or a broken one. Stripping it is what
+    // makes the request leg's refusal to forward the cookie worth anything.
+    it('does not forward an upstream set-cookie, even one naming the session cookie', async () => {
+      upstream.respondWith((_req, res) => {
+        res.writeHead(200, {
+          'content-type': 'application/json',
+          'set-cookie': ['sessionId=upstream-chosen-value; Path=/; HttpOnly', 'tracking=1'],
+        })
+        res.end('{"ok":true}')
+      })
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.statusCode).toBe(200)
+      expect(res.headers['set-cookie']).toBeUndefined()
+      // The body still arrives — the header is dropped, not the response.
+      expect(res.json()).toEqual({ ok: true })
+    })
+
+    // Same reasoning: scoped to the BFF origin, so an upstream response could
+    // clear the session cookie and the user's local state along with it.
+    it('does not forward an upstream clear-site-data', async () => {
+      upstream.respondWith((_req, res) => {
+        res.writeHead(200, { 'content-type': 'application/json', 'clear-site-data': '"cookies", "storage"' })
+        res.end('{"ok":true}')
+      })
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.headers['clear-site-data']).toBeUndefined()
+      expect(res.json()).toEqual({ ok: true })
+    })
+
     // reply-from leaves a refused connection at 500, which index.ts's error
     // handler would render as its generic "An unexpected error occurred" —
     // reading as a BFF bug rather than an upstream outage.

@@ -152,7 +152,7 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
   })
 
   app.all(`${PROXY_PREFIX}/*`, { preHandler: ensureUpstreamAuth }, (request, reply) => {
-    reply.from(upstreamPath(request.url), { rewriteRequestHeaders, onError: onUpstreamTransportError })
+    reply.from(upstreamPath(request.url), { rewriteRequestHeaders, rewriteHeaders, onError: onUpstreamTransportError })
   })
 }
 
@@ -316,4 +316,35 @@ function forwardedFor(request: ProxyRequest, inbound: string | string[] | undefi
   }
   const chain = Array.isArray(inbound) ? inbound.join(', ') : inbound
   return chain ? `${chain}, ${request.ip}` : request.ip
+}
+
+/**
+ * The headers the browser actually sees — the return leg of the trust boundary.
+ *
+ * The rule is that the upstream may not write to this origin's state. A proxied
+ * response is served from the BFF's own origin, so anything the DUOS API sends
+ * here is applied as though the BFF had sent it:
+ *
+ *   set-cookie      — lands on the BFF origin, so an upstream response could
+ *                     overwrite `sessionId` and hand the user a different
+ *                     session (or a broken one). The request leg already
+ *                     refuses to forward that cookie upstream; letting the
+ *                     upstream set it back would undo the point of doing so.
+ *   clear-site-data — clears cookies, storage and cache for the BFF origin,
+ *                     which would sign the user out and wipe local state.
+ *
+ * Deliberately still forwarded, because they are not origin state and the client
+ * needs them: `content-encoding` and `content-type` (a gzip body has to arrive
+ * declared as one), `cache-control`, `etag`, `content-disposition` for the
+ * document downloads. `strict-transport-security` and `www-authenticate` are the
+ * two near misses — the first is origin *policy* rather than state and belongs
+ * to the ingress, the second only matters once story 3-E decides what an
+ * upstream 401 means; neither is stripped here.
+ */
+function rewriteHeaders(headers: IncomingHttpHeaders): IncomingHttpHeaders {
+  // Omitted by destructuring rather than deleted, for the same reason as the
+  // request leg: `headers` is the upstream's own `res.headers`, which reply-from
+  // may hand back on a retry.
+  const { 'set-cookie': setCookie, 'clear-site-data': clearSiteData, ...forwarded } = headers
+  return forwarded
 }
