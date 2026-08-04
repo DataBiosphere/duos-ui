@@ -389,7 +389,7 @@ describe('BFF auth route registration', () => {
       getToken?.({ headers } as unknown as FastifyRequest)
 
     expect(read({ 'x-csrf-token': 'the-token' })).toBe('the-token')
-    // The four spellings the plugin's own default would have accepted.
+    // The three other spellings the plugin's own default would have accepted.
     expect(read({ 'csrf-token': 'the-token' })).toBeUndefined()
     expect(read({ 'xsrf-token': 'the-token' })).toBeUndefined()
     expect(read({ 'x-xsrf-token': 'the-token' })).toBeUndefined()
