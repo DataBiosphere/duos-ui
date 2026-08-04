@@ -10,6 +10,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { createPgSessionStore } from './session/pgStore.js'
+import { csrfPluginOptions } from './auth/csrf.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
 import { handleCallback } from './auth/callback.js'
@@ -162,16 +163,11 @@ export async function buildApp(): Promise<AppInstance> {
     // as same-site — a compromised sibling could still forge cookie-bearing
     // POSTs. CSRF tokens don't depend on the registrable domain. The secret is
     // stored in the session, so it must be registered after @fastify/session.
-    await fastify.register(fastifyCsrf, {
-      sessionPlugin: '@fastify/session',
-      // Header only, narrowed from the plugin's default (which also accepts
-      // `body._csrf` and three other header spellings). Two reasons, per
-      // ADR-004(c): bodies passing through the proxy are never parsed, so a
-      // body-borne token could not be read there without buffering the upload
-      // it is attached to; and one documented spelling is a clearer contract
-      // than four, matching what /auth/csrf-token tells the client to send.
-      getToken: request => request.headers['x-csrf-token'] as string | undefined,
-    })
+    //
+    // The options — including the header-only `getToken` narrowing — live in
+    // auth/csrf.ts so the test harnesses register the plugin exactly as this
+    // does. Inline, they drifted: see that file.
+    await fastify.register(fastifyCsrf, csrfPluginOptions)
 
     // Warm the B2C OIDC discovery cache so the first login doesn't pay the
     // discovery round-trip. Gated on the Azure env vars being present: DB/

@@ -7,6 +7,7 @@ import Fastify, { type FastifyInstance } from 'fastify'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
+import { csrfPluginOptions } from '../src/auth/csrf.js'
 import { RefreshFailedError } from '../src/auth/refresh.js'
 import { CSRF_EXEMPT_UNSAFE_REQUESTS, PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
 
@@ -106,7 +107,9 @@ const SESSION_COOKIE = 'sessionId'
  * check depends on, and registering the real `@fastify/csrf-protection` (rather
  * than stubbing `csrfProtection`) is the only way the CSRF tests below mean
  * anything. `@fastify/session`'s default MemoryStore stands in for the Postgres
- * store; `getToken` mirrors index.ts so the header-only contract is exercised.
+ * store; the CSRF options are imported from the same module index.ts registers
+ * with, rather than restated here — restating them is what let the header-only
+ * narrowing go untested through story 3-D.
  *
  * `seed` is written onto `request.session` on every request, which stands in for
  * having completed the OAuth flow. Omit it for a caller with no access token.
@@ -120,10 +123,7 @@ async function buildAppShell(): Promise<FastifyInstance> {
     saveUninitialized: false,
     rolling: false,
   })
-  await app.register(fastifyCsrf, {
-    sessionPlugin: '@fastify/session',
-    getToken: request => request.headers['x-csrf-token'] as string | undefined,
-  })
+  await app.register(fastifyCsrf, csrfPluginOptions)
   // Mirrors index.ts's /auth/csrf-token — the only way a client gets a token,
   // and therefore the only way these tests can produce a valid one.
   app.get('/auth/csrf-token', async (_request, reply) => reply.send({ token: reply.generateCsrf() }))
@@ -353,17 +353,52 @@ describe('apiProxy', () => {
   // The proxy turns every DUOS API write into a cookie-authenticated request,
   // so without this any site could drive them using a signed-in victim's cookie.
   describe('CSRF enforcement', () => {
+    /**
+     * The plugin rejects for two different reasons, both with a 403, and the
+     * tests below assert which one they got rather than the status alone —
+     * otherwise a case meant to exercise one path can silently drift onto the
+     * other, which review of story 3-D found had already happened to the
+     * no-token cases.
+     *
+     * `MISSING_SECRET` means the request had no session to verify against, so
+     * enforcement never got as far as the token. `INVALID_TOKEN` means there was
+     * a secret and the token did not verify against it — including when
+     * `getToken` found no token at all. The codes are Fastify's default error
+     * serialisation, which is what this harness (no error handler of its own)
+     * exposes.
+     */
+    const MISSING_SECRET = 'FST_CSRF_MISSING_SECRET'
+    const INVALID_TOKEN = 'FST_CSRF_INVALID_TOKEN'
+
+    // No cookie, so every request builds a fresh session with no CSRF secret in
+    // it. That is the signed-out attacker's request, and it stops at the secret.
     it.each(['POST', 'PUT', 'PATCH', 'DELETE'] as const)(
-      'rejects %s with no token, without calling the upstream',
+      'rejects %s from a caller with no session secret, without calling the upstream',
       async (method) => {
         app = await buildProxyApp(freshSession())
 
         const res = await app.inject({ method, url: `${PROXY_PREFIX}/api/dataset/1` })
 
         expect(res.statusCode).toBe(403)
+        expect(res.json()).toMatchObject({ code: MISSING_SECRET })
         expect(upstream.received).toHaveLength(0)
       },
     )
+
+    // The case the four above do NOT cover: a real signed-in session that has a
+    // secret, on a request that simply carries no token — a client that forgot
+    // the header rather than an attacker with no session. One method is enough;
+    // that the guard applies to all four is established above.
+    it('rejects an unsafe method that has a session secret but sends no token', async () => {
+      app = await buildProxyApp(freshSession())
+      const { cookie } = await csrfCredentials(app)
+
+      const res = await app.inject({ method: 'POST', url: `${PROXY_PREFIX}/api/dataset/1`, headers: { cookie } })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toMatchObject({ code: INVALID_TOKEN })
+      expect(upstream.received).toHaveLength(0)
+    })
 
     it.each(['POST', 'PUT', 'PATCH', 'DELETE'] as const)('accepts %s with a valid token', async (method) => {
       app = await buildProxyApp(freshSession())
@@ -385,11 +420,13 @@ describe('apiProxy', () => {
       })
 
       expect(res.statusCode).toBe(403)
+      expect(res.json()).toMatchObject({ code: INVALID_TOKEN })
       expect(upstream.received).toHaveLength(0)
     })
 
     // The secret lives in the session, so a token lifted from another browser is
-    // worthless without that browser's cookie.
+    // worthless without that browser's cookie. Rejected for want of a secret
+    // rather than a bad token — the token itself is never reached.
     it('rejects a valid token presented without its session cookie', async () => {
       app = await buildProxyApp(freshSession())
       const { token } = await csrfCredentials(app)
@@ -401,11 +438,15 @@ describe('apiProxy', () => {
       })
 
       expect(res.statusCode).toBe(403)
+      expect(res.json()).toMatchObject({ code: MISSING_SECRET })
       expect(upstream.received).toHaveLength(0)
     })
 
-    // index.ts narrows getToken to this one header. The plugin's default would
-    // also accept `csrf-token`, `xsrf-token` and `x-xsrf-token`.
+    // `csrfPluginOptions` narrows getToken to one header. The plugin's default
+    // would also accept `csrf-token`, `xsrf-token` and `x-xsrf-token`, so with
+    // the narrowing gone this request would be accepted — which is what makes
+    // this the test that pins it. index.test.ts pins the other half: that
+    // buildApp() registers the plugin with those options at all.
     it('does not accept the token under an alternative header spelling', async () => {
       app = await buildProxyApp(freshSession())
       const { token, cookie } = await csrfCredentials(app)
@@ -416,7 +457,10 @@ describe('apiProxy', () => {
         headers: { cookie, 'csrf-token': token },
       })
 
+      // The secret is present and no token was found, so this is the
+      // failed-verification path, not the missing-secret one.
       expect(res.statusCode).toBe(403)
+      expect(res.json()).toMatchObject({ code: INVALID_TOKEN })
     })
 
     it.each(['GET', 'HEAD', 'OPTIONS'] as const)('does not require a token on %s', async (method) => {

@@ -19,13 +19,23 @@ vi.mock('@fastify/session', () => ({
   default: vi.fn(async () => {}),
 }))
 
+// The options buildApp() hands @fastify/csrf-protection, recorded by the mock
+// below. hoisted so the mock factory (which vitest lifts above the imports) can
+// close over it. Undefined until a build reaches the registration — i.e. until
+// bffEnabled and DUOS_DB_HOST are both set.
+const csrfRegistration = vi.hoisted(() => ({ options: undefined as { getToken?: (request: FastifyRequest) => string | undefined } | undefined }))
+
 // @fastify/csrf-protection: real registration needs the session/cookie
 // decorators, which are mocked away above. This stub only needs to provide the
 // two decorations index.ts references — a pass-through csrfProtection onRequest
 // hook (so the guarded /auth/logout route still reaches its handler here; the
-// real 403/token behaviour is covered in auth.test.ts) and generateCsrf.
+// real 403/token behaviour is covered in auth.test.ts) and generateCsrf. It also
+// records the options it was registered with, which is the only place the
+// *production* CSRF configuration can be asserted: everywhere else stands the
+// plugin up itself.
 vi.mock('@fastify/csrf-protection', () => {
-  const plugin = async (fastify: FastifyInstance) => {
+  const plugin = async (fastify: FastifyInstance, options: typeof csrfRegistration.options) => {
+    csrfRegistration.options = options
     fastify.decorate('csrfProtection', async () => {})
     fastify.decorateReply('generateCsrf', () => 'test-csrf-token')
   }
@@ -360,6 +370,29 @@ describe('BFF auth route registration', () => {
 
     // Falls through to the SPA fallback instead of the proxy's 401.
     expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  // The header-only narrowing is a production-only property: apiProxy.test.ts and
+  // auth.test.ts register the plugin themselves, so neither can prove buildApp()
+  // passes it. Without this, deleting `getToken` from auth/csrf.ts left all 215
+  // tests green — the gap review of story 3-D found. Asserted behaviourally
+  // rather than by object identity, so wrapping or spreading the options stays
+  // fine and only a change in what the plugin would read fails.
+  it('registers CSRF protection with the header-only getToken', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const getToken = csrfRegistration.options?.getToken
+    expect(getToken).toBeTypeOf('function')
+    const read = (headers: Record<string, string>): string | undefined =>
+      getToken?.({ headers } as unknown as FastifyRequest)
+
+    expect(read({ 'x-csrf-token': 'the-token' })).toBe('the-token')
+    // The four spellings the plugin's own default would have accepted.
+    expect(read({ 'csrf-token': 'the-token' })).toBeUndefined()
+    expect(read({ 'xsrf-token': 'the-token' })).toBeUndefined()
+    expect(read({ 'x-xsrf-token': 'the-token' })).toBeUndefined()
 
     await localApp.close()
   })
