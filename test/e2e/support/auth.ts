@@ -39,9 +39,10 @@ type AuthFixtures = {
 }
 
 export const test = base.extend<AuthFixtures>({
-  signInAs: async ({ page }, use) => {
-    // oxlint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture callback, not a React hook
-    await use(async (role: Role) => {
+  // Playwright passes this callback positionally; it's named `provideSignIn` rather than
+  // the conventional `use` so linters don't mistake the call for React's `use()` hook.
+  signInAs: async ({ page }, provideSignIn) => {
+    await provideSignIn(async (role: Role) => {
       const accessToken = await getAccessToken(role)
       await page.goto('/backgroundsignin')
       await page.locator('textarea[name="accessToken"]').fill(accessToken)
