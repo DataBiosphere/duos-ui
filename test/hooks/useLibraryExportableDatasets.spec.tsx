@@ -123,9 +123,12 @@ describe('useLibraryExportableDatasets', () => {
     expect(result.current.data).toEqual({})
   })
 
-  it('reuses the cached result for the same identifiers after remounting', async () => {
+  it('reuses the cached result when the same identifiers are reordered', async () => {
     vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(emptyResponse)
-    const datasets = [makeDataset(1, 'DUOS-000001')]
+    const datasets = [
+      makeDataset(2, 'DUOS-000002'),
+      makeDataset(1, 'DUOS-000001'),
+    ]
 
     const firstRender = renderHook(
       () => useLibraryExportableDatasets(datasets, true),
@@ -135,12 +138,16 @@ describe('useLibraryExportableDatasets', () => {
     firstRender.unmount()
 
     const secondRender = renderHook(
-      () => useLibraryExportableDatasets(datasets, true),
+      () => useLibraryExportableDatasets([...datasets].reverse(), true),
       { wrapper },
     )
     await waitFor(() => expect(secondRender.result.current.isSuccess).toBe(true))
 
     expect(secondRender.result.current.data).toEqual({})
     expect(TerraDataRepo.listSnapshotsByDatasetIds).toHaveBeenCalledTimes(1)
+    expect(TerraDataRepo.listSnapshotsByDatasetIds).toHaveBeenCalledWith([
+      'DUOS-000001',
+      'DUOS-000002',
+    ])
   })
 })

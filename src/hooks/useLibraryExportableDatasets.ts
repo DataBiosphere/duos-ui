@@ -17,7 +17,7 @@ export const useLibraryExportableDatasets = (
     datasets
       .map(dataset => dataset.datasetIdentifier)
       .filter((identifier): identifier is string => Boolean(identifier)),
-  )]
+  )].sort((a, b) => a.localeCompare(b))
 
   return useQuery({
     queryKey: [LIBRARY_EXPORTS_QUERY_KEY, datasetIdentifiers],
