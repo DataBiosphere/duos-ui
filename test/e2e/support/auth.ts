@@ -1,5 +1,5 @@
 import { auth, JWT } from 'google-auth-library'
-import { test as base } from '@playwright/test'
+import { test as base, expect } from '@playwright/test'
 import { BASE_URL } from './baseUrl'
 
 export const ROLES = ['ADMIN', 'CHAIR', 'MEMBER', 'RESEARCHER', 'SIGNING_OFFICIAL'] as const
@@ -44,7 +44,10 @@ export const test = base.extend<AuthFixtures>({
       await page.goto('/backgroundsignin')
       await page.locator('textarea[name="accessToken"]').fill(accessToken)
       await page.locator('input[type="submit"]').click()
-      await page.waitForLoadState('networkidle')
+      // Sign-in redirects client-side to whichever console the role lands on
+      // (Navigation.console), so assert we've left this page rather than guessing the
+      // destination or waiting on network idle.
+      await expect(page).not.toHaveURL(/backgroundsignin/)
     })
   },
 })
