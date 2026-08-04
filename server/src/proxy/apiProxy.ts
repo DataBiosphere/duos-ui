@@ -200,7 +200,10 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
     undici: { connections: UPSTREAM_POOL_CONNECTIONS },
   })
 
-  app.all(`${PROXY_PREFIX}/*`, { preHandler: ensureUpstreamAuth }, (request, reply) => {
+  app.all(`${PROXY_PREFIX}/*`, {
+    onRequest: csrfForUnsafeMethods,
+    preHandler: ensureUpstreamAuth,
+  }, (request, reply) => {
     reply.from(upstreamPath(request.url), { rewriteRequestHeaders, rewriteHeaders, onError: onUpstreamTransportError })
   })
 }

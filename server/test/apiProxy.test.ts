@@ -308,7 +308,7 @@ describe('apiProxy', () => {
       ['a non-HTTP scheme', 'ftp://duos-api.example.org', /scheme is 'ftp:'/],
     ])('fails to register when DUOS_API_URL is %s, naming the variable', async (_case, value, expected) => {
       process.env.DUOS_API_URL = value
-      const unregistered = Fastify({ logger: false })
+      const unregistered = await buildAppShell()
       unregistered.register(apiProxy)
 
       const ready = expect(unregistered.ready()).rejects
@@ -838,7 +838,14 @@ describe('apiProxy', () => {
       const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
       expect(res.statusCode).toBe(200)
-      expect(res.headers['set-cookie']).toBeUndefined()
+      // Asserted against the upstream's values rather than as "no set-cookie at
+      // all": @fastify/session sets its own `sessionId` on the way out, so an
+      // absence check would pass or fail on the BFF's own cookie. What matters is
+      // that neither upstream cookie survives — including the one that shares the
+      // session cookie's name, which is the whole point of the test.
+      const forwarded = res.cookies.map(cookie => cookie.value)
+      expect(forwarded).not.toContain('upstream-chosen-value')
+      expect(res.cookies.map(cookie => cookie.name)).not.toContain('tracking')
       // The body still arrives — the header is dropped, not the response.
       expect(res.json()).toEqual({ ok: true })
     })
