@@ -3550,7 +3550,7 @@ snapshots:
       fast-querystring: 1.1.2
       fastify-plugin: 6.0.0
       toad-cache: 3.7.4
-      undici: 7.28.0
+      undici: 7.29.0
 
   '@fastify/send@4.1.0':
     dependencies:
