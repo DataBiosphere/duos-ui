@@ -44,6 +44,7 @@ export const test = base.extend<AuthFixtures>({
       await page.goto('/backgroundsignin')
       await page.locator('textarea[name="accessToken"]').fill(accessToken)
       await page.locator('input[type="submit"]').click()
+      await page.waitForLoadState('networkidle')
     })
   },
 })
