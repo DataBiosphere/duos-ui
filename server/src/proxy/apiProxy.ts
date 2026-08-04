@@ -102,8 +102,8 @@ export const UNAUTHENTICATED_PATHS: ReadonlySet<string> = new Set([
  * sends the session cookie on top-level GET navigations, so a plain link would
  * carry it. That makes any upstream endpoint which mutates state on GET
  * forgeable, which is why story 3-D audits for them — see
- * docs/plans/bff_state_changing_gets.md for the two that exist and what the
- * residual risk actually is.
+ * docs/plans/bff_adrs/ADR-009-state-changing-gets.md for the two that exist and
+ * why they are proxied anyway.
  */
 const CSRF_EXEMPT_METHODS: ReadonlySet<string> = new Set(['GET', 'HEAD', 'OPTIONS'])
 

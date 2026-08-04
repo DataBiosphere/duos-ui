@@ -113,6 +113,11 @@ environment before cutting over.
   streams multipart uploads and document downloads instead of buffering them,
   and keeps the auth gate, token refresh, and upstream-401 handling as ordinary
   route hooks. See [ADR-004](bff_adrs/ADR-004-api-proxy-layer.md).
+- **State-changing GETs are proxied, not blocked** — `SameSite=Lax` is required by
+  the OAuth callback redirect, and a CSRF token cannot guard a GET, which leaves
+  two upstream endpoints forgeable by a link. Blocking either one breaks the app,
+  so the residual risk is accepted and the fix belongs upstream. See
+  [ADR-009](bff_adrs/ADR-009-state-changing-gets.md).
 
 ## Target Architecture Sequence Diagrams
 
