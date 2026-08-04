@@ -428,7 +428,7 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
                 <div className="audience-card-actions">
                   <a
                     id="blog-support-so-link"
-                    href="https://duos.blog/help/preauthorize_researchers_librarycards/"
+                    href="https://duos.blog/help/signingofficialguide/"
                     target="_blank"
                     rel="noreferrer"
                     className="audience-cta-primary"

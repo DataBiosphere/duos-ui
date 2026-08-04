@@ -9,5 +9,5 @@ test('Home page loads correctly', async ({ page }) => {
   await expect(page.getByText('Looking for data')).toBeVisible()
   await expect(page.getByText('Data Libraries in DUOS')).toBeVisible()
   await expect(page.locator('#blog-support-dac-link')).toHaveAttribute('href', 'https://duos.blog/help/dacguide/')
-  await expect(page.locator('#blog-support-so-link')).toHaveAttribute('href', 'https://duos.blog/help/preauthorize_researchers_librarycards/')
+  await expect(page.locator('#blog-support-so-link')).toHaveAttribute('href', 'https://duos.blog/help/signingofficialguide/')
 })
