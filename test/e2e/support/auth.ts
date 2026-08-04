@@ -1,6 +1,5 @@
-import { auth, JWT } from 'google-auth-library'
+import { JWT } from 'google-auth-library'
 import { test as base, expect } from '@playwright/test'
-import { BASE_URL } from './baseUrl'
 
 export const ROLES = ['ADMIN', 'CHAIR', 'MEMBER', 'RESEARCHER', 'SIGNING_OFFICIAL'] as const
 export type Role = typeof ROLES[number]
@@ -19,11 +18,14 @@ export const getAccessToken = async (role: Role): Promise<string> => {
   const parsed = JSON.parse(keysJson)
   const serviceAccountKey = parsed.key ?? parsed
 
-  // fromJSON's return type covers every credential shape it supports, but a service
-  // account key (what DUOS_AUTOMATION_*_SA holds) always yields a JWT client.
-  const client = auth.fromJSON(serviceAccountKey) as JWT
-  client.scopes = ['email', 'profile']
-  await client.request({ url: BASE_URL })
+  // Construct JWT directly; DUOS_AUTOMATION_*_SA is always a service account key, so the
+  // credential-type-specific constructor is the right fit.
+  const client = new JWT({
+    email: serviceAccountKey.client_email,
+    key: serviceAccountKey.private_key,
+    scopes: ['email', 'profile'],
+  })
+  await client.authorize()
 
   const accessToken = client.credentials.access_token
   if (!accessToken) {
