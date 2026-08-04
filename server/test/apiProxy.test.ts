@@ -8,7 +8,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { RefreshFailedError } from '../src/auth/refresh.js'
-import { PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
+import { CSRF_EXEMPT_UNSAFE_REQUESTS, PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
 
 // refreshAccessToken is replaced so the tests never reach B2C; RefreshFailedError
 // stays the real class so the proxy's instanceof branch is exercised rather than
@@ -442,6 +442,49 @@ describe('apiProxy', () => {
 
       expect(res.statusCode).toBe(200)
       expect(upstream.last().url).toBe(path)
+    })
+
+    // Pinned as a set for the same reason as UNAUTHENTICATED_PATHS below: adding
+    // an entry waives CSRF for a state-changing request, which should have to
+    // appear as a deliberate edit to this list in review.
+    it('exempts exactly the two signed-out Contact Us POSTs', () => {
+      expect([...CSRF_EXEMPT_UNSAFE_REQUESTS].sort()).toEqual([
+        'POST /support/request',
+        'POST /support/upload',
+      ])
+    })
+
+    // The regression this pins: keying the exemption on UNAUTHENTICATED_PATHS
+    // instead would waive CSRF here too, because that set also holds these
+    // read-only endpoints. Harmless today — allowlisted paths get no injected
+    // Authorization, so a forged write borrows no authority — but the exemption
+    // should not depend on that holding somewhere else in the file.
+    it.each(['/status', '/oauth2/configuration', '/tos/text/duos'])(
+      'still requires a token on POST %s, though the path is on the unauthenticated allowlist',
+      async (path) => {
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({
+          method: 'POST',
+          url: `${PROXY_PREFIX}${path}`,
+          headers: { 'content-type': 'application/json' },
+          payload: '{}',
+        })
+
+        expect(res.statusCode).toBe(403)
+        expect(upstream.received).toHaveLength(0)
+      },
+    )
+
+    // Method is half the key, so the exemption does not generalise from the POST
+    // the Contact Us form actually sends to every unsafe method on that path.
+    it.each(['PUT', 'PATCH', 'DELETE'] as const)('still requires a token on %s /support/request', async (method) => {
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method, url: `${PROXY_PREFIX}/support/request` })
+
+      expect(res.statusCode).toBe(403)
+      expect(upstream.received).toHaveLength(0)
     })
 
     // Better a startup failure than a proxy quietly accepting writes from any

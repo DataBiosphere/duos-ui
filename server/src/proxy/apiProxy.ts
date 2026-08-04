@@ -108,6 +108,31 @@ export const UNAUTHENTICATED_PATHS: ReadonlySet<string> = new Set([
 const CSRF_EXEMPT_METHODS: ReadonlySet<string> = new Set(['GET', 'HEAD', 'OPTIONS'])
 
 /**
+ * The only *unsafe* requests exempt from CSRF: the signed-out Contact Us form.
+ *
+ * Keyed on method and path together, and deliberately narrower than
+ * `UNAUTHENTICATED_PATHS` — that set also holds read-only endpoints (`/status`,
+ * `/oauth2/configuration`, `/tos/text/duos`), so keying the exemption on it would
+ * waive CSRF for an unsafe method against any of them.
+ *
+ * Nothing is exploitable either way today: allowlisted paths get no injected
+ * `Authorization` and the caller's own cookie and `authorization` are stripped
+ * before forwarding, so a forged write to one of them reaches the upstream
+ * unauthenticated — a request anyone can already make without a victim, borrowing
+ * no authority, which is the only thing CSRF protects. But that safety lives in
+ * `rewriteRequestHeaders`, not here, and a path-keyed exemption would widen
+ * silently if the allowlist or the token logic ever changed.
+ *
+ * Drift fails closed: an unauthenticated POST added to `UNAUTHENTICATED_PATHS`
+ * but not here is rejected with `MissingCSRFSecretError` — loud and caught in
+ * tests — rather than quietly exempted.
+ */
+export const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
+  'POST /support/request',
+  'POST /support/upload',
+])
+
+/**
  * Strips the BFF prefix and the query string, yielding the upstream path.
  *
  * The query is dropped on purpose rather than forwarded here: `reply.from()`
@@ -158,19 +183,19 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
    * a TypeError on the *passing* path — a failure that only shows up once a
    * valid token arrives.
    *
-   * The unauthenticated allowlist is exempt, and has to be. `POST
-   * /support/request` and `POST /support/upload` are the signed-out Contact Us
-   * form: with no session there is no CSRF secret, so enforcement would reject
-   * them with MissingCSRFSecretError. Exempting them costs nothing either —
-   * these endpoints carry no credential, so there is no authority for an
-   * attacker to borrow, which is the only thing CSRF protects.
+   * The two signed-out Contact Us POSTs are exempt, and have to be: with no
+   * session there is no CSRF secret, so enforcement would reject them with
+   * MissingCSRFSecretError. They are named individually rather than taken from
+   * `UNAUTHENTICATED_PATHS` — see `CSRF_EXEMPT_UNSAFE_REQUESTS`.
    */
   const csrfForUnsafeMethods = (
     request: FastifyRequest,
     reply: FastifyReply,
     done: () => void,
   ): void => {
-    if (CSRF_EXEMPT_METHODS.has(request.method) || UNAUTHENTICATED_PATHS.has(upstreamPath(request.url))) {
+    const exempt = CSRF_EXEMPT_METHODS.has(request.method)
+      || CSRF_EXEMPT_UNSAFE_REQUESTS.has(`${request.method} ${upstreamPath(request.url)}`)
+    if (exempt) {
       done()
       return
     }
