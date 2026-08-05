@@ -1,6 +1,7 @@
 import React from 'react'
 import { ExternalProfiles } from 'src/types/model'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
+import { formattedLinkedIn, formattedOrcid, formattedThroughBio } from 'src/utils/ExternalProfileUtils'
 
 export interface SigningOfficialReadOnlyCardProps {
   name: string
@@ -8,10 +9,6 @@ export interface SigningOfficialReadOnlyCardProps {
   institutionName?: string
   externalProfiles?: ExternalProfiles
 }
-
-const formattedLinkedIn = (profileId: string): string => `https://www.linkedin.com/in/${profileId}`
-const formattedOrcid = (profileId: string): string => `https://orcid.org/${profileId}`
-const formattedThroughBio = (profileId: string): string => `https://through.bio/${profileId}`
 
 const dtStyle = { fontWeight: 'bold' as const }
 const ddStyle = { margin: 0 }
@@ -72,7 +69,6 @@ export default function SigningOfficialReadOnlyCard(props: Readonly<SigningOffic
 
         {hasExternalProfiles && (
           <>
-            <dt style={{ ...dtStyle, gridColumn: '1 / -1', marginTop: '0.5rem' }}>External Profile</dt>
             {externalProfiles?.linkedIn && (
               <ProfileLink label="LinkedIn" url={formattedLinkedIn(externalProfiles.linkedIn)} />
             )}
