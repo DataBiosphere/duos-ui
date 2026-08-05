@@ -18,6 +18,23 @@ describe('CollectionVoteYesButton', () => {
     expect(screen.getByText('Yes')).toBeInTheDocument()
   })
 
+  it('renders "Yes as Member" when roleLabel="Member" is provided', async () => {
+    await act(async () => {
+      render(<CollectionVoteYesButton onClick={vi.fn().mockResolvedValue(undefined)} roleLabel="Member" />)
+    })
+
+    expect(screen.getByText('Yes as Member')).toBeInTheDocument()
+    expect(screen.queryByText('Yes')).not.toBeInTheDocument()
+  })
+
+  it('renders "Yes as Chair" when roleLabel="Chair" is provided', async () => {
+    await act(async () => {
+      render(<CollectionVoteYesButton onClick={vi.fn().mockResolvedValue(undefined)} roleLabel="Chair" />)
+    })
+
+    expect(screen.getByText('Yes as Chair')).toBeInTheDocument()
+  })
+
   it('renders the CheckCircleOutlined icon', async () => {
     await act(async () => {
       render(<CollectionVoteYesButton onClick={vi.fn().mockResolvedValue(undefined)} />)

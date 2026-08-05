@@ -36,7 +36,7 @@ describe('CollectionAlgorithmDecision component', () => {
     const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result: 'No', id }} />)
     const subtitle = container.querySelector(`#collection-${id}-subtitle`) as HTMLElement
     expect(subtitle).toBeInTheDocument()
-    expect(subtitle.textContent).toContain('DUOS Algorithm Decision')
+    expect(subtitle.textContent).toContain('DUOS Algorithm Suggested Decision')
   })
 
   it('renders "N/A" if result is an empty string', () => {

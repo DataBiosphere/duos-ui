@@ -47,32 +47,44 @@ export default function CollectionAlgorithmDecision(props: Readonly<CollectionAl
   const containerProps = {
     id: `collection-algorithm-id-${id}`,
     style: {
-      padding: '4%',
-      justifyContent: 'space-around',
       fontFamily: 'Montserrat',
       width: '100%',
+      display: 'flex',
+      flexDirection: 'column' as const,
+      rowGap: '0.2rem',
       ...styleOverride,
     },
   }
 
   return (
     <div {...containerProps} data-cy="collection-algorithm-decision">
-      <div style={{ flex: 1, padding: '1%' }}>
-        <h5 id={`collection-${id}-subtitle`} style={{ fontFamily: 'Montserrat', fontWeight: 800, fontSize: 17, color: '#333F52' }}>DUOS Algorithm Decision</h5>
-        <div style={{ fontSize: '1.5rem' }}>
-          <span id={`collection-${id}-decision-label`} style={{ paddingRight: '1%', color: '#333F52' }}>Decision:</span>
-          <span id={`collection-${id}-decision-value`} style={{ fontWeight: 400 }}>{getResult(result)}</span>
-        </div>
-        <div style={{ fontSize: '1.5rem' }}>
-          <span id={`collection-${id}-reason-label`} style={{ paddingRight: '1%', color: '#333F52' }}>Reason:</span>
-          <span id={`collection-${id}-reason-value`} style={{ fontWeight: 400 }}>
-            {isEmpty(rationales) ? 'N/A' : rationales.map(r => <p key={r}>{r}</p>)}
-          </span>
-        </div>
-        <div style={{ fontSize: '1.5rem' }}>
-          <span id={`collection-${id}-date-label`} style={{ paddingRight: '1%', color: '#333F52' }}>Date:</span>
-          <span id={`collection-${id}-date-value`} style={{ fontWeight: 400 }}>{isNil(createDate) ? 'N/A' : formatDate(createDate)}</span>
-        </div>
+      <h5
+        id={`collection-${id}-subtitle`}
+        style={{
+          fontFamily: 'Montserrat',
+          fontWeight: 800,
+          fontSize: 13,
+          color: '#333F52',
+          textTransform: 'uppercase',
+          letterSpacing: '0.02em',
+          margin: 0,
+        }}
+      >
+        DUOS Algorithm Suggested Decision
+      </h5>
+      <div style={{ fontSize: '1.2rem' }}>
+        <span id={`collection-${id}-decision-label`} style={{ paddingRight: '0.3rem', color: '#333F52' }}>Decision:</span>
+        <span id={`collection-${id}-decision-value`} style={{ fontWeight: 400 }}>{getResult(result)}</span>
+      </div>
+      <div style={{ fontSize: '1.2rem' }}>
+        <span id={`collection-${id}-reason-label`} style={{ paddingRight: '0.3rem', color: '#333F52' }}>Reason:</span>
+        <span id={`collection-${id}-reason-value`} style={{ fontWeight: 400 }}>
+          {isEmpty(rationales) ? 'N/A' : rationales.map(r => <p key={r} style={{ margin: 0 }}>{r}</p>)}
+        </span>
+      </div>
+      <div style={{ fontSize: '1.2rem' }}>
+        <span id={`collection-${id}-date-label`} style={{ paddingRight: '0.3rem', color: '#333F52' }}>Date:</span>
+        <span id={`collection-${id}-date-value`} style={{ fontWeight: 400 }}>{isNil(createDate) ? 'N/A' : formatDate(createDate)}</span>
       </div>
     </div>
   )

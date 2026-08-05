@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { isEmpty, isNil } from 'src/utils/NodashUtil'
 import CollectionVoteYesButton from './CollectionVoteYesButton'
 import CollectionVoteNoButton from './CollectionVoteNoButton'
+import './CollectionSubmitVoteBox.css'
 import { Notifications } from 'src/libs/utils'
 import { Votes } from 'src/libs/ajax/Votes'
 import radarIcon from 'src/images/google-svg/radar.svg'
@@ -20,60 +21,62 @@ interface CollectionSubmitVoteBoxProps {
   bucketKey: string
   updateFinalVote: (bucketKey: string, voteData: { vote: boolean, rationale: string }, voteIds: number[]) => void
   reloadFn?: () => void
+  roleLabel?: string
 }
 
 interface VoteSubsectionHeadingProps {
   vote: boolean | undefined
   adminPage?: boolean
-  isFinal: boolean
   isVotingDisabled: boolean
   isRadar: boolean
 }
 
-const styles = {
+const styles: Record<string, React.CSSProperties> = {
   baseStyle: {
     fontFamily: 'Montserrat',
     fontWeight: 'bold',
     color: '#333F52',
     display: 'flex',
     flexDirection: 'column',
-    rowGap: '2rem',
-    marginTop: '-20px',
+    rowGap: '0.5rem',
   },
   question: {
-    marginTop: '18px',
-    fontSize: 17,
+    fontSize: 14,
+    fontWeight: 700,
     color: '#333F52',
-  },
-  content: {
-    display: 'flex',
-    justifyContent: 'flex-start',
-    columnGap: '5rem',
-    padding: '0 15px',
   },
   subsection: {
     display: 'flex',
+    flexDirection: 'column',
+    rowGap: '0.3rem',
   },
   voteButtons: {
     display: 'flex',
-    columnGap: '1rem',
+    columnGap: '0.7rem',
   },
   rationaleTextArea: {
     borderRadius: '4px',
     fontWeight: '500',
     color: '#181818A6',
-    width: '45rem',
+    fontSize: '1.2rem',
+    width: '100%',
+    maxWidth: '32rem',
   },
   rationaleTitle: {
     fontWeight: 'bold',
-    marginRight: '1rem',
+    fontSize: '1.2rem',
+  },
+  chairVoteCaveat: {
+    fontStyle: 'italic',
+    fontWeight: 400,
+    color: '#8a8a8a',
+    fontSize: '1.1rem',
   },
 }
 
 const VoteSubsectionHeading: React.FC<VoteSubsectionHeadingProps> = ({
   vote,
   adminPage,
-  isFinal,
   isVotingDisabled,
   isRadar,
 }) => {
@@ -95,8 +98,6 @@ const VoteSubsectionHeading: React.FC<VoteSubsectionHeadingProps> = ({
     heading = voteResultText
   }
 
-  const votableChairView = !adminPage && !isVotingDisabled && isFinal
-
   const radarSpan = isRadar
     ? (
         <img
@@ -113,8 +114,6 @@ const VoteSubsectionHeading: React.FC<VoteSubsectionHeadingProps> = ({
     <div data-cy="vote-subsection-heading">
       {radarSpan}
       {heading}
-      {votableChairView
-        && <span style={{ fontWeight: 'normal' }}>(Vote and Rationale cannot be updated after submitting)</span>}
     </div>
   )
 }
@@ -145,6 +144,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
     bucketKey,
     updateFinalVote,
     reloadFn = () => {},
+    roleLabel,
   } = props
 
   const [vote, setVote] = useState<boolean | undefined>(() => matchedVote(votes))
@@ -175,6 +175,8 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
   const isVotingDisabled = useMemo(() => {
     return props.isDisabled || (isFinal && submitted) || adminPage
   }, [props.isDisabled, isFinal, submitted, adminPage])
+
+  const votableChairView = !adminPage && !isVotingDisabled && isFinal
 
   const updateVote = async (newVote: boolean, isChair: boolean) => {
     setVoteInProgress(true)
@@ -225,74 +227,54 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
 
   return (
     <div
-      style={{ marginLeft: '3rem', paddingBottom: '2%', ...styles.baseStyle as React.CSSProperties }}
+      style={styles.baseStyle}
       data-cy="collection-vote-box"
     >
-      <table>
-        <thead>
-          <tr>
-            <th>
-              {question && <div style={styles.question}>{question}</div>}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <div>
-                <VoteSubsectionHeading
-                  vote={vote}
-                  adminPage={adminPage}
-                  isFinal={isFinal}
-                  isVotingDisabled={isVotingDisabled}
-                  isRadar={isRadar}
-                />
-                <div style={styles.voteButtons}>
-                  {!isVotingDisabled && (
-                    <CollectionVoteYesButton
-                      onClick={async () => await updateVote(true, !!updateFinalVote)}
-                      onError={(error: unknown) => onVoteError(error, !!updateFinalVote)}
-                      disabled={voteInProgress || isVotingDisabled || isApprovalDisabled || isLoading || isElectionClosed}
-                      isSelected={vote === true}
-                    />
-                  )}
-                  {!isVotingDisabled && (
-                    <CollectionVoteNoButton
-                      onClick={async () => await updateVote(false, !!updateFinalVote)}
-                      onError={(error: unknown) => onVoteError(error, !!updateFinalVote)}
-                      disabled={voteInProgress || isLoading || isVotingDisabled || isElectionClosed}
-                      isSelected={vote === false}
-                    />
-                  )}
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div style={styles.subsection}>
-                <span style={styles.rationaleTitle}>Rationale (optional):</span>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div style={styles.subsection}>
-                <textarea
-                  name="Rationale Input"
-                  value={rationale}
-                  placeholder={isVotingDisabled ? '' : 'Optional: Enter your comments and describe your rationale prior to voting.'}
-                  onChange={e => setRationale(e.target.value)}
-                  onBlur={updateRationale}
-                  style={styles.rationaleTextArea}
-                  rows={4}
-                  disabled={isVotingDisabled || isLoading}
-                />
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      {question && <div style={styles.question}>{question}</div>}
+      <VoteSubsectionHeading
+        vote={vote}
+        adminPage={adminPage}
+        isVotingDisabled={isVotingDisabled}
+        isRadar={isRadar}
+      />
+      <div style={styles.subsection}>
+        <span style={styles.rationaleTitle}>Rationale (optional):</span>
+        <textarea
+          name="Rationale Input"
+          value={rationale}
+          placeholder={isVotingDisabled ? '' : 'Optional: Enter your comments and describe your rationale prior to voting.'}
+          onChange={e => setRationale(e.target.value)}
+          onBlur={updateRationale}
+          style={styles.rationaleTextArea}
+          rows={3}
+          disabled={isVotingDisabled || isLoading}
+        />
+      </div>
+      <div className="vote-buttons" style={styles.voteButtons}>
+        {!isVotingDisabled && (
+          <CollectionVoteYesButton
+            onClick={async () => await updateVote(true, !!updateFinalVote)}
+            onError={(error: unknown) => onVoteError(error, !!updateFinalVote)}
+            disabled={voteInProgress || isVotingDisabled || isApprovalDisabled || isLoading || isElectionClosed}
+            isSelected={vote === true}
+            roleLabel={roleLabel}
+          />
+        )}
+        {!isVotingDisabled && (
+          <CollectionVoteNoButton
+            onClick={async () => await updateVote(false, !!updateFinalVote)}
+            onError={(error: unknown) => onVoteError(error, !!updateFinalVote)}
+            disabled={voteInProgress || isLoading || isVotingDisabled || isElectionClosed}
+            isSelected={vote === false}
+            roleLabel={roleLabel}
+          />
+        )}
+      </div>
+      {votableChairView && (
+        <div style={styles.chairVoteCaveat} data-cy="chair-vote-caveat">
+          (Vote and Rationale cannot be updated after submitting)
+        </div>
+      )}
     </div>
   )
 }

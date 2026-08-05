@@ -1,35 +1,43 @@
 import React, { useCallback, useMemo, useState } from 'react'
+import { Tooltip as ReactTooltip } from 'react-tooltip'
 import SimpleTable, { type CellData } from '../SimpleTable'
 import { Styles } from 'src/libs/theme'
 import { isEmpty, isNil } from 'src/utils/NodashUtil'
-import { formatDate, Notifications, sortVisibleTable, type TableCell } from 'src/libs/utils'
+import { formatDate, Notifications } from 'src/libs/utils'
 import { Email } from 'src/libs/ajax/Email'
+import { ChatBubbleOutlineOutlined } from '@mui/icons-material'
+
+const RATIONALE_TOOLTIP_ID = 'vote-summary-rationale-tooltip'
 
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
-    fontSize: '1.4rem',
+    fontSize: '1.25rem',
     fontWeight: 400,
     color: '#333F52',
     backgroundColor: '#FFFFFF',
     display: 'flex',
-    padding: '1rem 2%',
-    lineHeight: '2rem',
+    padding: '0.5rem 1%',
+    lineHeight: '1.6rem',
     justifyContent: 'space-between',
     alignItems: 'center',
     whiteSpace: 'pre-line' as const,
   },
   columnStyle: {
     ...Styles.TABLE.HEADER_ROW, fontFamily: 'Montserrat',
-    fontSize: '1.4rem',
+    fontSize: '1.2rem',
     color: '#333F52',
     justifyContent: 'space-between',
   },
   cellWidths: {
-    vote: '10%',
-    name: '15%',
-    date: '10%',
-    rationale: '50%',
+    // Rationale is fixed-width (icon only, see below), so the remaining space is maximized for
+    // vote/name/date to cut down on multi-line wrapping of names and dates.
+    vote: '15%',
+    name: '40%',
+    date: '20%',
+    // Rationale now only ever holds a small icon (see rationaleCellData below), so it just needs to
+    // fit the "Rationale" header on one line rather than reserve room for long text.
+    rationale: '6rem',
   },
   containerOverride: {
     marginTop: '0',
@@ -39,11 +47,30 @@ const styles = {
   },
 }
 
+// Cells must be able to shrink and wrap below their content's natural width — otherwise long
+// names/rationales refuse to shrink in a narrow container and visually spill over neighboring cells.
+const wrapSafeCellStyle: React.CSSProperties = {
+  minWidth: 0,
+  overflowWrap: 'anywhere',
+  wordBreak: 'break-word',
+}
+
+// The rationale column holds a fixed-size icon and a short "Rationale" header — it should never
+// shrink narrower than that header text, nor wrap it to a second line. It's centered in its column
+// and given extra right padding so it doesn't sit flush against the table's right edge.
+const rationaleColumnStyle: React.CSSProperties = {
+  width: styles.cellWidths.rationale,
+  flexShrink: 0,
+  whiteSpace: 'nowrap',
+  textAlign: 'center',
+  paddingRight: '1rem',
+}
+
 const columnHeaderFormat = {
-  vote: { label: 'Vote', cellStyle: { width: styles.cellWidths.vote }, sortable: true },
-  name: { label: 'Name', cellStyle: { width: styles.cellWidths.name }, sortable: true },
-  date: { label: 'Date', cellStyle: { width: styles.cellWidths.date }, sortable: true },
-  rationale: { label: 'Rationale', cellStyle: { width: styles.cellWidths.rationale }, sortable: true },
+  vote: { label: 'Vote', cellStyle: { width: styles.cellWidths.vote, ...wrapSafeCellStyle } },
+  name: { label: 'Name', cellStyle: { width: styles.cellWidths.name, ...wrapSafeCellStyle } },
+  date: { label: 'Date', cellStyle: { width: styles.cellWidths.date, ...wrapSafeCellStyle } },
+  rationale: { label: 'Rationale', cellStyle: rationaleColumnStyle },
 }
 
 const ReminderStates = {
@@ -67,11 +94,6 @@ interface VoteSummaryTableProps {
   isLoading?: boolean
   isChair?: boolean
   adminPage?: boolean
-}
-
-interface SortConfig {
-  colIndex: number
-  dir: number
 }
 
 const columnHeaderData = () => {
@@ -143,24 +165,35 @@ function voteCellData({ vote, voteId, isChair, reminderSentState, sendReminder, 
       ? reminderLink({ reminderSentState, sendReminder })
       : voteToString(vote)
   )
-  return { data, id: voteId, label }
+  return { data, id: voteId, label, style: wrapSafeCellStyle }
 }
 
 function nameCellData({ name = '- -', voteId, label = 'name' }: { name?: string, voteId: number, label?: string }): CellData {
-  return { data: name, id: voteId, label }
+  return { data: name, id: voteId, label, style: wrapSafeCellStyle }
 }
 
 function dateCellData({ date, voteId, label = 'date' }: { date: string | null | undefined, voteId: number, label?: string }): CellData {
-  return { data: date ?? '- -', id: voteId, label }
+  return { data: date ?? '- -', id: voteId, label, style: wrapSafeCellStyle }
 }
 
-function rationaleCellData({ rationale = '- -', voteId, label = 'rationale' }: { rationale?: string | null, voteId: number, label?: string }): CellData {
-  return { data: rationale ?? '- -', id: voteId, label }
+function rationaleCellData({ rationale, voteId, label = 'rationale' }: { rationale?: string | null, voteId: number, label?: string }): CellData {
+  const hasRationale = !isNil(rationale) && rationale.trim().length > 0
+  const data = hasRationale
+    ? (
+        <span
+          data-tooltip-id={RATIONALE_TOOLTIP_ID}
+          data-tooltip-content={rationale}
+          aria-label={`Rationale: ${rationale}`}
+          style={{ display: 'inline-flex', cursor: 'default' }}
+        >
+          <ChatBubbleOutlineOutlined style={{ fontSize: '1.6rem', color: '#0948B7' }} />
+        </span>
+      )
+    : '- -'
+  return { data, id: voteId, label, style: rationaleColumnStyle }
 }
 
 export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false }: Readonly<VoteSummaryTableProps>) {
-  const [sort, setSort] = useState<SortConfig>({ colIndex: 0, dir: -1 })
-
   const [reminderSentState, setReminderSentState] = useState<Record<number, ReminderState>>({})
 
   const getReminderSentState = useCallback((voteId: number): ReminderState => {
@@ -191,24 +224,21 @@ export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false 
         })
     }
 
-    // sortVisibleTable requires TableCell — cast here (sorting API constraint, not rendering)
-    return sortVisibleTable({
-      list: processVoteSummaryRowData({ dacVotes, isChair, getReminderSentState, sendReminder }) as unknown as TableCell[][],
-      sort,
-    }) as unknown as CellData[][]
-  }, [sort, dacVotes, isChair, getReminderSentState, updateReminderState])
+    return processVoteSummaryRowData({ dacVotes, isChair, getReminderSentState, sendReminder })
+  }, [dacVotes, isChair, getReminderSentState, updateReminderState])
 
   const tableSize = !isEmpty(dacVotes) ? dacVotes!.length : 5
 
   return (
-    <SimpleTable
-      isLoading={isLoading}
-      rowData={visibleVotes}
-      columnHeaders={columnHeaderData()}
-      tableSize={tableSize}
-      styles={styles}
-      sort={sort}
-      onSort={setSort}
-    />
+    <>
+      <SimpleTable
+        isLoading={isLoading}
+        rowData={visibleVotes}
+        columnHeaders={columnHeaderData()}
+        tableSize={tableSize}
+        styles={styles}
+      />
+      <ReactTooltip id={RATIONALE_TOOLTIP_ID} place="top" className="tooltip-wrapper" />
+    </>
   )
 }

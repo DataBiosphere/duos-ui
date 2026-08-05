@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { get, isEmpty, isNil } from 'src/utils/NodashUtil'
 import { Storage } from 'src/libs/storage'
 import { convertLabelToKey } from 'src/libs/utils'
@@ -45,24 +45,13 @@ interface VoteInfoSubsectionProps {
   readonly currentUserVotes: Vote[]
   readonly bucket: Bucket
   readonly isChair: boolean
+  readonly roleLabel?: string
   readonly isApprovalDisabled: boolean
   readonly isLoading: boolean
   readonly readOnly: boolean
   readonly adminPage: boolean
   readonly updateFinalVote: (...args: unknown[]) => void
   readonly reloadFn: (...args: unknown[]) => void
-}
-
-const roleLabel: React.CSSProperties = {
-  fontFamily: 'Montserrat',
-  fontSize: 13,
-  fontWeight: 800,
-  color: '#333F52',
-  textTransform: 'uppercase',
-  letterSpacing: '0.06em',
-  marginLeft: '30px',
-  marginTop: '18px',
-  marginBottom: '-10px',
 }
 
 // Styles
@@ -73,33 +62,69 @@ const styles = {
     fontWeight: 'bold',
     borderRadius: '0 8px 8px 8px',
     border: '#84a3db 2px solid',
-    padding: '20px',
-    td: {
-      padding: '10px 10px 20px 20px',
-    },
+    padding: '0.9rem 1.1rem',
   },
-  slabTitle: {
-    display: 'flex',
-    paddingBottom: '15px',
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    columnGap: '1.4rem',
+    alignItems: 'start',
   },
-  slatTitleText: {
+  column: {
     display: 'flex',
-    fontSize: 17,
+    flexDirection: 'column' as const,
+    rowGap: '0.4rem',
+    minWidth: 0,
+  },
+  columnBordered: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    rowGap: '0.4rem',
+    minWidth: 0,
+    borderLeft: '1px solid rgba(31, 59, 80, 0.15)',
+    paddingLeft: '1.1rem',
+  },
+  columnHeading: {
     fontWeight: 800,
-    height: '32px',
-    paddingLeft: '-10%',
+    fontSize: 13,
     color: '#333F52',
-    marginTop: '-5px',
-    columnGap: '2rem',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.02em',
   },
-  question: {
-    fontSize: 17,
+  voteLabel: {
+    fontWeight: 400,
+    fontSize: 13,
     color: '#333F52',
-    marginLeft: '30px',
+  },
+  voteInfo: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    rowGap: '0.4rem',
+  },
+  chairVoteSectionDivider: {
+    borderTop: '1px solid rgba(31, 59, 80, 0.15)',
+    paddingTop: '0.6rem',
+    marginTop: '0.2rem',
   },
   dataUses: {},
-  voteInfo: {},
-  chairVoteInfo: {},
+  // Columns 3 ("My DAC's Votes") and 4 ("DUOS Algorithm") share this sub-grid so the vote detail
+  // table can expand to span both of them while still sitting immediately below the pie chart when
+  // collapsed - a plain 4-column grid row would size to the tallest column (the Vote column) and
+  // leave a visual gap before the detail table instead.
+  dacAndAlgorithmWrapper: {
+    gridColumn: '3 / span 2',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    columnGap: '1.4rem',
+    rowGap: '0.4rem',
+    alignItems: 'start',
+  },
+  memberVoteDetailWrapper: {
+    gridColumn: '1',
+  },
+  memberVoteDetailWrapperExpanded: {
+    gridColumn: '1 / span 2',
+  },
 }
 
 // Components
@@ -112,6 +137,7 @@ const VoteInfoSubsection = ({
   currentUserVotes,
   bucket,
   isChair,
+  roleLabel,
   isApprovalDisabled,
   isLoading,
   readOnly,
@@ -126,36 +152,32 @@ const VoteInfoSubsection = ({
 
   return (
     <div style={styles.voteInfo}>
-      <div>
-        {!adminPage && !allOpenElections && !readOnly && (
-          <Alert
-            id="vote-disabled-alert"
-            description="Voting is disabled since this election is not open."
-            title="Voting is disabled since this election is not open."
-            type="danger"
-          />
-        )}
-      </div>
-      <div>
-        <CollectionSubmitVoteBox
-          votes={currentUserVotes}
-          isFinal={isChair}
-          isDisabled={adminPage || readOnly || isEmpty(currentUserVotes) || !allOpenElections}
-          isApprovalDisabled={isApprovalDisabled}
-          isLoading={isLoading}
-          adminPage={adminPage}
-          bucketKey={convertLabelToKey(get(bucket, 'key', 'collection-submit-vote-box'))}
-          updateFinalVote={updateFinalVote}
-          reloadFn={reloadFn}
+      {!adminPage && !allOpenElections && !readOnly && (
+        <Alert
+          id="vote-disabled-alert"
+          description="Voting is disabled since this election is not open."
+          title="Voting is disabled since this election is not open."
+          type="danger"
         />
-      </div>
+      )}
+      <CollectionSubmitVoteBox
+        votes={currentUserVotes}
+        isFinal={isChair}
+        isDisabled={adminPage || readOnly || isEmpty(currentUserVotes) || !allOpenElections}
+        isApprovalDisabled={isApprovalDisabled}
+        isLoading={isLoading}
+        adminPage={adminPage}
+        bucketKey={convertLabelToKey(get(bucket, 'key', 'collection-submit-vote-box'))}
+        updateFinalVote={updateFinalVote}
+        reloadFn={reloadFn}
+        roleLabel={roleLabel}
+      />
     </div>
   )
 }
 
 // Main Component
 export default function MultiDatasetVoteSlab({
-  title,
   bucket,
   collection,
   dacDatasetIds,
@@ -185,64 +207,63 @@ export default function MultiDatasetVoteSlab({
     const darData = sorted.at(0)?.data
     return !!(darData && Object.keys(darData).includes('dmi'))
   }, [collection.dars])
+  const [memberVoteDetailExpanded, setMemberVoteDetailExpanded] = useState(false)
   const { algorithmResult } = bucket
-  // Role labels are only shown when the user has both member and chair votes so the vote blocks can be quickly
-  // distinguished from each other. If the user only has one type of vote, the label is not shown to reduce visual
-  // clutter.
-  const showRoleLabels = !isEmpty(memberVotes) && !isEmpty(chairVotes)
+  const hasMemberVotes = !isEmpty(memberVotes)
+  const hasChairVotes = !isEmpty(chairVotes)
 
   const getMemberVoteSectionTitle = () => {
     if (adminPage) return 'DAC Member Votes'
-    if (!isEmpty(chairVotes)) return 'My DAC Member\'s Votes (detail)'
+    if (!isEmpty(chairVotes)) return 'My DAC\'s Votes (Detail)'
     return 'Other DAC Member\'s Votes'
   }
 
   return (
     <div style={styles.baseStyle} data-cy="dataset-vote-slab">
-      <div style={{ display: 'inline' }}>
-        <table className="layout-table" style={{ width: '-webkit-fill-available' }}>
-          <thead><tr><th /></tr></thead>
-          <tbody>
-            <tr>
-              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
-                <div style={styles.slabTitle} key={convertLabelToKey(get(bucket, 'key', 'slab-title'))}>
-                  <span style={styles.slatTitleText}>{title}</span>
-                </div>
-                <DataUseSummary bucket={bucket} />
-              </td>
-              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
-                {!isEmpty(memberVotes) && (
-                  <>
-                    {showRoleLabels && <div style={roleLabel}>Member</div>}
-                    <div style={styles.question}><p>Should data access be granted to this applicant?</p></div>
-                    <VoteInfoSubsection currentUserVotes={memberVotes} bucket={bucket} isChair={false} isApprovalDisabled={false} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
-                  </>
-                )}
-                {!isEmpty(chairVotes) && (
-                  <>
-                    {showRoleLabels && <div style={roleLabel}>Chair</div>}
-                    <div style={styles.question}><p>Should data access be granted to this applicant?</p></div>
-                    <VoteInfoSubsection currentUserVotes={chairVotes} bucket={bucket} isChair={true} isApprovalDisabled={isApprovalDisabled} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
-                  </>
-                )}
-              </td>
-            </tr>
-            <tr>
-              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
-                <ChairVoteInfo dacVotes={dacVotes} isChair={!isEmpty(chairVotes)} adminPage={adminPage} />
-              </td>
-              <td style={{ width: '50%', verticalAlign: 'text-top' }}>
-                {!isDMI && !isEmpty(algorithmResult) && (
-                  <CollectionAlgorithmDecision algorithmResult={algorithmResult} />
-                )}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div style={{ paddingLeft: '20px' }}>
-          <MemberVoteSummary dacVotes={dacVotes} title={getMemberVoteSectionTitle()} isLoading={isLoading} adminPage={adminPage} isChair={!isEmpty(chairVotes)} />
+      <DatasetsRequestedPanel dacDatasetIds={dacDatasetIds} bucketDatasets={bucket.datasets} dacs={bucket.dacs} isLoading={isLoading} adminPage={adminPage} />
+      <div style={styles.grid}>
+        <div style={styles.column}>
+          <span style={styles.columnHeading}>Data Use Terms</span>
+          <DataUseSummary bucket={bucket} />
         </div>
-        <DatasetsRequestedPanel dacDatasetIds={dacDatasetIds} bucketDatasets={bucket.datasets} dacs={bucket.dacs} isLoading={isLoading} adminPage={adminPage} />
+        <div style={styles.columnBordered}>
+          {(hasMemberVotes || hasChairVotes) && (
+            <span style={styles.columnHeading}>Should data access be granted?</span>
+          )}
+          <span style={styles.voteLabel}>Vote:</span>
+          {hasMemberVotes && (
+            <VoteInfoSubsection currentUserVotes={memberVotes} bucket={bucket} isChair={false} roleLabel="Member" isApprovalDisabled={false} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
+          )}
+          {hasChairVotes && (
+            <div
+              className={hasMemberVotes ? 'chair-vote-divider' : undefined}
+              style={hasMemberVotes ? styles.chairVoteSectionDivider : undefined}
+            >
+              <VoteInfoSubsection currentUserVotes={chairVotes} bucket={bucket} isChair={true} roleLabel="Chair" isApprovalDisabled={isApprovalDisabled} isLoading={isLoading} readOnly={readOnly} adminPage={adminPage} updateFinalVote={updateFinalVote} reloadFn={reloadFn} />
+            </div>
+          )}
+        </div>
+        <div style={styles.dacAndAlgorithmWrapper}>
+          <div style={styles.columnBordered}>
+            <ChairVoteInfo dacVotes={dacVotes} isChair={!isEmpty(chairVotes)} adminPage={adminPage} />
+          </div>
+          <div style={styles.columnBordered}>
+            {!isDMI && !isEmpty(algorithmResult) && (
+              <CollectionAlgorithmDecision algorithmResult={algorithmResult} />
+            )}
+          </div>
+          <div style={memberVoteDetailExpanded ? styles.memberVoteDetailWrapperExpanded : styles.memberVoteDetailWrapper}>
+            <MemberVoteSummary
+              dacVotes={dacVotes}
+              title={getMemberVoteSectionTitle()}
+              isLoading={isLoading}
+              adminPage={adminPage}
+              isChair={!isEmpty(chairVotes)}
+              expanded={memberVoteDetailExpanded}
+              onToggle={() => setMemberVoteDetailExpanded(expanded => !expanded)}
+            />
+          </div>
+        </div>
       </div>
     </div>
   )
