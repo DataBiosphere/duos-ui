@@ -208,6 +208,16 @@ const renderLibrary = (path = '/') => render(
   </QueryClientProvider>,
 )
 
+const renderLibraryInStrictMode = (path = '/') => render(
+  <QueryClientProvider client={queryClient}>
+    <MemoryRouter initialEntries={[path]}>
+      <React.StrictMode>
+        <DataLibrary />
+      </React.StrictMode>
+    </MemoryRouter>
+  </QueryClientProvider>,
+)
+
 const renderBranded = (path: string) => render(
   <QueryClientProvider client={queryClient}>
     <MemoryRouter initialEntries={[path]}>
@@ -540,6 +550,16 @@ describe('DataLibrary', () => {
   })
 
   describe('Export functionality', () => {
+    it('queries TDR only once for the displayed datasets', async () => {
+      vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockTdrSnapshotResponse('snapshot-abc', 'reader'))
+
+      renderLibraryInStrictMode(DATASETS_TAB_PATH)
+
+      expect(await screen.findByText(EXPORT_LABEL)).toBeInTheDocument()
+      expect(TerraDataRepo.listSnapshotsByDatasetIds).toHaveBeenCalledTimes(1)
+      expect(TerraDataRepo.listSnapshotsByDatasetIds).toHaveBeenCalledWith(['DUOS-000001'])
+    })
+
     it('does not show export buttons when TDR returns no snapshots', async () => {
       vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(emptyTdrResponse)
       renderLibrary(DATASETS_TAB_PATH)
