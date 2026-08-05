@@ -1,6 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
+import '@testing-library/jest-dom/vitest'
 import ReviewHeader from 'src/pages/dar_collection_review/ReviewHeader'
 import { User } from 'src/libs/ajax/User'
 
@@ -199,7 +200,9 @@ describe('ReviewHeader - Tests', () => {
       'signing-official-column',
       'it-cloud-column',
     ])
-    expect(screen.getAllByText('None listed')).toHaveLength(3)
+    // Scoped to the facts container: the narrative section renders its own "None listed"
+    // placeholder for DUO terms, which is not one of the people/IT placeholders under test.
+    expect(within(factsContainer as HTMLElement).getAllByText('None listed')).toHaveLength(3)
   })
 
   it('renders AnVIL, local computing, and cloud computing facts', () => {
@@ -485,5 +488,108 @@ describe('ReviewHeader - Tests', () => {
     expect(container.querySelector('#signing-official-orcid-fact')).toBeNull()
     expect(container.querySelector('#signing-official-through-bio-fact')).toBeNull()
     expect(container.querySelector('#signing-official-institutional-website-fact')).toBeNull()
+  })
+
+  it('renders the Non-Technical Summary and Research Use Statement (Narrative) columns', () => {
+    const { container } = render(
+      <ReviewHeader
+        approvedDatasets={[]}
+        darInfo={{ nonTechRus: 'test non-technical summary', rus: 'test narrative rus' }}
+      />,
+    )
+    expect(container.querySelector('#non-technical-summary-column')).toHaveTextContent('Non-Technical Summary')
+    expect(container.querySelector('.non-technical-summary-textbox')).toHaveTextContent('test non-technical summary')
+    expect(container.querySelector('#rus-narrative-column')).toHaveTextContent('Research Use Statement (Narrative)')
+    expect(container.querySelector('.rus-textbox')).toHaveTextContent('test narrative rus')
+  })
+
+  it('renders "None provided" for Non-Technical Summary and RUS narrative when absent', () => {
+    const { container } = render(<ReviewHeader approvedDatasets={[]} darInfo={{}} />)
+    expect(container.querySelector('.non-technical-summary-textbox')).toHaveTextContent('None provided')
+    expect(container.querySelector('.rus-textbox')).toHaveTextContent('None provided')
+  })
+
+  it('shows a scroll-affordance hint when narrative content overflows its box', () => {
+    const originalScrollHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'scrollHeight')
+    const originalClientHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientHeight')
+    Object.defineProperty(HTMLElement.prototype, 'scrollHeight', { configurable: true, value: 400 })
+    Object.defineProperty(HTMLElement.prototype, 'clientHeight', { configurable: true, value: 200 })
+
+    try {
+      const { container } = render(
+        <ReviewHeader approvedDatasets={[]} darInfo={{ rus: 'a long research use statement' }} />,
+      )
+      const rusColumn = container.querySelector('#rus-narrative-column')
+      expect(rusColumn?.querySelector('.scroll-hint-chevron')).toBeInTheDocument()
+    }
+    finally {
+      if (originalScrollHeight) Object.defineProperty(HTMLElement.prototype, 'scrollHeight', originalScrollHeight)
+      else delete (HTMLElement.prototype as unknown as Record<string, unknown>).scrollHeight
+      if (originalClientHeight) Object.defineProperty(HTMLElement.prototype, 'clientHeight', originalClientHeight)
+      else delete (HTMLElement.prototype as unknown as Record<string, unknown>).clientHeight
+    }
+  })
+
+  it('does not show a scroll-affordance hint when content fits within the box', () => {
+    const { container } = render(
+      <ReviewHeader approvedDatasets={[]} darInfo={{ rus: 'short' }} />,
+    )
+    const rusColumn = container.querySelector('#rus-narrative-column')
+    expect(rusColumn?.querySelector('.scroll-hint-chevron')).not.toBeInTheDocument()
+  })
+
+  it('renders the RUS in DUO Terms column with translated codes', () => {
+    const { container } = render(
+      <ReviewHeader
+        approvedDatasets={[]}
+        darInfo={{ hmb: true }}
+      />,
+    )
+    expect(container.querySelector('#rus-duo-terms-column')).toHaveTextContent('Research Use Statement (DUO Terms)')
+    expect(container.querySelector('#duo-primary-0-fact')).toHaveTextContent('HMB')
+  })
+
+  it('renders "None listed" in the DUO Terms column when no darInfo is provided', () => {
+    const { container } = render(<ReviewHeader approvedDatasets={[]} />)
+    const duoColumn = container.querySelector('#rus-duo-terms-column')
+    expect(duoColumn).toHaveTextContent('None listed')
+  })
+
+  it('renders manual-review DUO terms (e.g. POA) in light red text', () => {
+    const { container } = render(
+      <ReviewHeader approvedDatasets={[]} darInfo={{ poa: true }} />,
+    )
+    const poaCard = container.querySelector('#duo-primary-0-fact')
+    expect(poaCard).toHaveTextContent('POA')
+    const description = poaCard?.querySelector('span:last-child') as HTMLElement
+    expect(description.style.color).toBe('rgb(229, 115, 115)')
+  })
+
+  it('does not apply the manual-review color to terms that do not require review', () => {
+    const { container } = render(
+      <ReviewHeader approvedDatasets={[]} darInfo={{ hmb: true }} />,
+    )
+    const hmbCard = container.querySelector('#duo-primary-0-fact')
+    const description = hmbCard?.querySelector('span:last-child') as HTMLElement
+    expect(description.style.color).not.toBe('rgb(229, 115, 115)')
+  })
+
+  it('renders primary DUO term pills in a blue shade', () => {
+    const { container } = render(<ReviewHeader approvedDatasets={[]} darInfo={{ hmb: true }} />)
+    const badge = container.querySelector('#duo-primary-0-fact span:first-child') as HTMLElement
+    expect(badge.style.backgroundColor).toBe('rgb(0, 96, 159)')
+  })
+
+  it('renders secondary DUO term pills in a lighter blue shade', () => {
+    const { container } = render(<ReviewHeader approvedDatasets={[]} darInfo={{ hmb: true, methods: true }} />)
+    const badge = container.querySelector('#duo-secondary-0-fact span:first-child') as HTMLElement
+    expect(badge.textContent).toBe('MDS')
+    expect(badge.style.backgroundColor).toBe('rgb(122, 184, 224)')
+  })
+
+  it('renders manual-review DUO term pills (e.g. POA) in red', () => {
+    const { container } = render(<ReviewHeader approvedDatasets={[]} darInfo={{ poa: true }} />)
+    const badge = container.querySelector('#duo-primary-0-fact span:first-child') as HTMLElement
+    expect(badge.style.backgroundColor).toBe('rgb(219, 84, 84)')
   })
 })

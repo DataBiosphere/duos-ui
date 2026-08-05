@@ -3,7 +3,6 @@ import { User } from 'src/libs/ajax/User'
 import TabControl from 'src/components/TabControl'
 import { type TabStyleOverride } from 'src/components/SelectableText'
 import ReviewHeader from './ReviewHeader'
-import ApplicationInformation from './ApplicationInformation'
 import { compact, get, isEmpty, map, toLower, uniq } from 'src/utils/NodashUtil'
 import { updateFinalVote } from 'src/utils/DarCollectionUtils'
 import { binCollectionToBuckets, Bucket } from 'src/utils/BucketUtils'
@@ -14,6 +13,7 @@ import { Collections } from 'src/libs/ajax/Collections'
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication'
 import VotingHistory from './VotingHistory'
 import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
+import { Theme } from 'src/libs/theme'
 import { APPROVED_VOTETYPES, ElectionStatus, ElectionType, userHasOpenDataAccessElection } from 'src/utils/DarUtils'
 import { extractError } from 'src/utils/ErrorUtils.js'
 import { Notification } from 'src/components/Notification.jsx'
@@ -26,44 +26,43 @@ interface DarCollectionReviewProps {
   readOnly?: boolean
 }
 
-const tabContainerColor = 'rgb(115,154,164)'
+const tabContainerColor = 'white'
 
 const tabStyleOverride: TabStyleOverride = {
   baseStyle: {
     fontFamily: 'Montserrat',
-    fontSize: 'clamp(1.2rem, 2vw, 1.6rem)',
+    fontSize: 'clamp(1.15rem, 1.9vw, 1.4rem)',
     width: 'fit-content',
-    fontWeight: 600,
-    border: '0px',
     display: 'flex',
     justifyContent: 'center',
     whiteSpace: 'nowrap',
-    padding: '1%',
+    padding: '0.9rem 0.2rem',
   },
   tabSelected: {
-    backgroundColor: 'white',
-    color: tabContainerColor,
-    border: '0px black solid !important',
-    borderRadius: '5px 5px 0px 0px',
+    backgroundColor: 'transparent',
+    color: Theme.palette.primary,
+    fontWeight: 600,
+    borderBottom: `2px solid ${Theme.palette.secondary}`,
   },
   tabUnselected: {
-    backgroundColor: tabContainerColor,
-    color: 'white',
-    border: '0px !important',
+    backgroundColor: 'transparent',
+    color: '#7c8a94',
+    fontWeight: 400,
+    borderBottom: '2px solid transparent',
   },
   tabContainer: {
     backgroundColor: tabContainerColor,
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '0.6rem',
-    border: '0px',
+    columnGap: '2.2rem',
+    borderBottom: '1px solid rgba(31, 59, 80, 0.15)',
+    padding: '0 0.4rem',
   },
 }
 
 const tabsForUser = (user: DuosUser, buckets: Bucket[], adminPage = false): Record<string, string> => {
   if (adminPage) {
     return {
-      applicationInformation: 'Application Information',
       fullDAR: 'Full DAR',
       chairVote: 'Chair Vote',
       votingHistory: 'Voting History',
@@ -78,10 +77,12 @@ const tabsForUser = (user: DuosUser, buckets: Bucket[], adminPage = false): Reco
     .map(vr => vr['dataAccess'])
     .flatMap(vg => vg.chairpersonVotes)
     .filter(v => v.userId === user.userId)
-  const updatedTabs: Record<string, string> = { applicationInformation: 'Application Information', fullDAR: 'Full DAR' }
+  // The Vote tab, when present, is always the left-most tab.
+  const updatedTabs: Record<string, string> = {}
   if (!isEmpty(myMemberVotes)) {
     updatedTabs.memberVote = 'Vote'
   }
+  updatedTabs.fullDAR = 'Full DAR'
   // Only show a standalone Chair Vote tab when the user has no member votes;
   // when both exist, chair voting is folded into the Member Vote tab.
   if (!isEmpty(myChairVotes) && isEmpty(myMemberVotes)) {
@@ -166,10 +167,9 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
   const [isLoading, setIsLoading] = useState(true)
   const [subcomponentLoading, setSubcomponentLoading] = useState(true)
   const [tabs, setTabs] = useState<Record<string, string>>({
-    applicationInformation: 'Application Information',
     fullDAR: 'Full DAR',
   })
-  const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation)
+  const [selectedTab, setSelectedTab] = useState(tabs.fullDAR)
   const [researcherProfile, setResearcherProfile] = useState<DuosUser | Record<string, never>>({})
   const [dataUseBuckets, setDataUseBuckets] = useState<Bucket[]>([])
   const [dacIds, setDacIds] = useState<number[]>([])
@@ -287,6 +287,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
           referenceId={referenceIdForDocuments}
           collaborationLetterLocation={darInfo.collaborationLetterLocation}
           collaborationLetterName={darInfo.collaborationLetterName}
+          darInfo={darInfo}
         />
         <AILLMWarningBanner darInfo={darInfo} />
         {canVote === false && (
@@ -307,13 +308,6 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
           styleOverride={tabStyleOverride}
           isDisabled={isLoading || subcomponentLoading}
         />
-        {selectedTab === tabs.applicationInformation && (
-          <ApplicationInformation
-            nonTechSummary={darInfo.nonTechRus}
-            rus={darInfo.rus}
-            isLoading={subcomponentLoading}
-          />
-        )}
         {selectedTab === tabs.fullDAR && (
           <DataAccessRequestApplication
             existingDarsReadOnlyMode={true}

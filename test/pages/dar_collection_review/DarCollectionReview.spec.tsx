@@ -264,9 +264,18 @@ describe('DAR Review', () => {
     await waitFor(() => expect(screen.getByText('Vote')).toBeInTheDocument())
 
     expect(screen.getByText('Voting History')).toBeInTheDocument()
-    expect(screen.getByText('Application Information')).toBeInTheDocument()
     expect(screen.getByText('Full DAR')).toBeInTheDocument()
     expect(screen.queryByText('Chair Vote')).not.toBeInTheDocument()
+  })
+
+  it('renders the Vote tab as the left-most tab for Chairs', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(chair)
+    const { container } = renderReview({ adminPage: false })
+
+    await waitFor(() => expect(screen.getByText('Vote')).toBeInTheDocument())
+
+    const tabLabels = Array.from(container.querySelectorAll('.tab-list button')).map(tab => tab.textContent)
+    expect(tabLabels[0]).toBe('Vote')
   })
 
   it('shows dataset list when Vote tab is clicked (Chair)', async () => {
@@ -288,7 +297,6 @@ describe('DAR Review', () => {
     await waitFor(() => expect(screen.getByText('Vote')).toBeInTheDocument())
 
     expect(screen.getByText('Voting History')).toBeInTheDocument()
-    expect(screen.getByText('Application Information')).toBeInTheDocument()
     expect(screen.getByText('Full DAR')).toBeInTheDocument()
     expect(screen.queryByText('Chair Vote')).not.toBeInTheDocument()
   })
@@ -297,12 +305,11 @@ describe('DAR Review', () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(researcher)
     renderReview({ adminPage: false })
 
-    await waitFor(() => expect(screen.getByText('Application Information')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Full DAR')).toBeInTheDocument())
 
     expect(screen.queryByText('Voting History')).not.toBeInTheDocument()
     expect(screen.queryByText('Chair Vote')).not.toBeInTheDocument()
     expect(screen.queryByText('Vote')).not.toBeInTheDocument()
-    expect(screen.getByText('Full DAR')).toBeInTheDocument()
   })
 
   it('renders Chair Vote tab (not Vote) for Admins', async () => {
@@ -312,7 +319,6 @@ describe('DAR Review', () => {
     await waitFor(() => expect(screen.getByText('Chair Vote')).toBeInTheDocument())
 
     expect(screen.getByText('Voting History')).toBeInTheDocument()
-    expect(screen.getByText('Application Information')).toBeInTheDocument()
     expect(screen.getByText('Full DAR')).toBeInTheDocument()
     expect(screen.queryByText('Member')).not.toBeInTheDocument()
   })
