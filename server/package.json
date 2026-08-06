@@ -19,7 +19,7 @@
     "@fastify/reply-from": "12.6.4",
     "@fastify/session": "11.1.2",
     "@fastify/static": "10.1.2",
-    "@fastify/vite": "9.2.0",
+    "@fastify/vite": "10.0.0",
     "fastify": "5.11.0",
     "open": "11.0.0",
     "openid-client": "6.8.4"
