@@ -93,25 +93,14 @@ export const headerTabsConfig: Tab[] = [
     isRendered: user => user.isSigningOfficial,
   },
   {
-    label: 'DAC Chair Console',
-    link: '/chair_console',
-    search: 'chair_console',
+    label: 'DAC Console',
+    link: '/dac_console',
+    search: 'dac_console',
     children: [
-      { label: 'Data Access Requests', link: '/chair_console' },
-      { label: 'Manage DACs', link: '/manage_dac' },
-      { label: 'My DAC\'s Datasets', link: '/dac_datasets' },
-    ],
-    isRendered: user => user.isChairPerson,
-  },
-  {
-    label: 'DAC Member Console',
-    link: '/member_console',
-    search: 'member_console',
-    children: [
-      { label: 'Data Access Requests', link: '/member_console' },
+      { label: 'Dashboard', link: '/dac_console' },
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
     ],
-    isRendered: user => user.isMember,
+    isRendered: user => user.isChairPerson || user.isMember,
   },
   {
     label: 'Researcher Console',

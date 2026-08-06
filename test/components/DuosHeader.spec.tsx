@@ -140,17 +140,21 @@ describe('DuosHeader', () => {
     })
   })
 
-  describe('Authenticated DAC Chair', () => {
-    it('displays DAC Chair Console tab', async () => {
-      await mountHeader('/chair_console', { ...mockUser, isChairPerson: true, isResearcher: false })
-      expect(screen.getByRole('tab', { name: 'DAC Chair Console' })).toBeInTheDocument()
+  describe('Authenticated DAC Console', () => {
+    it('displays DAC Console tab for a chairperson', async () => {
+      await mountHeader('/dac_console', { ...mockUser, isChairPerson: true, isResearcher: false })
+      expect(screen.getByRole('tab', { name: 'DAC Console' })).toBeInTheDocument()
     })
-  })
 
-  describe('Authenticated DAC Member', () => {
-    it('displays DAC Member Console tab', async () => {
-      await mountHeader('/member_console', { ...mockUser, isMember: true, isResearcher: false })
-      expect(screen.getByRole('tab', { name: 'DAC Member Console' })).toBeInTheDocument()
+    it('displays DAC Console tab for a member', async () => {
+      await mountHeader('/dac_console', { ...mockUser, isMember: true, isResearcher: false })
+      expect(screen.getByRole('tab', { name: 'DAC Console' })).toBeInTheDocument()
+    })
+
+    it('displays collapsed subtabs (Dashboard, Data Library)', async () => {
+      await mountHeader('/dac_console', { ...mockUser, isChairPerson: true, isResearcher: false })
+      expect(screen.getByRole('tab', { name: 'Dashboard' })).toBeInTheDocument()
+      expect(screen.getByRole('tab', { name: 'Data Library' })).toBeInTheDocument()
     })
   })
 

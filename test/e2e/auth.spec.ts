@@ -4,8 +4,8 @@ import type { Role } from './support/auth'
 // Each role's console, per headerTabsConfig in src/components/DuosHeader.tsx.
 const CONSOLE_LABEL: Record<Role, string> = {
   ADMIN: 'Admin Console',
-  CHAIR: 'DAC Chair Console',
-  MEMBER: 'DAC Member Console',
+  CHAIR: 'DAC Console',
+  MEMBER: 'DAC Console',
   RESEARCHER: 'Researcher Console',
   SIGNING_OFFICIAL: 'SO Console',
 }

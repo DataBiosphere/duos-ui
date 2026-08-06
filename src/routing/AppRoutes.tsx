@@ -36,9 +36,9 @@ import EditDac from 'src/pages/manage_dac/EditDac'
 import DacProfile from 'src/pages/manage_dac/DacProfile'
 import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions'
 import DatasetUpdateForm from 'src/pages/DatasetUpdateForm'
-import ChairConsole from 'src/pages/ChairConsole'
+import DACConsole from 'src/pages/DACConsole'
+import DACDashboard from 'src/pages/DACDashboard'
 import DACDatasets from 'src/pages/DACDatasets'
-import MemberConsole from 'src/pages/MemberConsole'
 import SOAcknowledged from 'src/routing/SOAcknowledged'
 import SigningOfficialLibraryCards from 'src/pages/signing_official_console/SigningOfficialLibraryCards'
 import SigningOfficialDarRequests from 'src/pages/signing_official_console/SigningOfficialDarRequests'
@@ -97,8 +97,9 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
           <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
         </Route>
-        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member]} />}>
-          <Route path="/member_console" element={<MemberConsole />} />
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]} />}>
+          <Route path="/dac_console" element={<DACDashboard />} />
+          <Route path="/dac_console_dar_requests" element={<DACConsole />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.signingOfficial]} />}>
           <Route element={<SOAcknowledged />}>
@@ -110,7 +111,6 @@ const AppRoutes = (props: AppRoutesProps) => {
           </Route>
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
-          <Route path="/chair_console" element={<ChairConsole />} />
           <Route path="/dac_datasets" element={<DACDatasets />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />}>
