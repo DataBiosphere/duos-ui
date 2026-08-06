@@ -1,0 +1,13 @@
+templateVersion,recordType,recordId,parentRecordId,field,value
+1,study,study,,studyName,
+1,study,study,,studyDescription,Synthetic invalid field example.
+1,study,study,,dataTypes,"[""Genomic""]"
+1,study,study,,publicVisibility,yes
+1,study,study,,nihAnvilUse,Unknown AnVIL choice
+1,study,study,,piName,Synthetic Investigator
+1,study,study,,piEmail,not-an-email
+1,study,study,,embargoReleaseDate,2026-02-30
+1,consentGroup,dataset-controlled,study,consentGroupName,Synthetic Invalid Dataset
+1,consentGroup,dataset-controlled,study,accessManagement,controlled
+1,consentGroup,dataset-controlled,study,generalResearchUse,true
+1,consentGroup,dataset-controlled,study,numberOfParticipants,12

@@ -1,0 +1,10 @@
+templateVersion,recordType,recordId,parentRecordId,field,value
+1,study,study,,studyName,Synthetic Minimal Study
+1,study,study,,studyDescription,A synthetic study used only for contract tests.
+1,study,study,,dataTypes,"[""Genomic""]"
+1,study,study,,publicVisibility,true
+1,study,study,,nihAnvilUse,I am not NHGRI funded and do not plan to store data in AnVIL
+1,study,study,,piName,Synthetic Investigator
+1,consentGroup,dataset-open,study,consentGroupName,Synthetic Open Dataset
+1,consentGroup,dataset-open,study,accessManagement,open
+1,consentGroup,dataset-open,study,numberOfParticipants,10

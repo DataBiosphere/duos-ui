@@ -1,0 +1,30 @@
+[
+  {
+    "row": 2,
+    "column": "value",
+    "message": "Study Name is required"
+  },
+  {
+    "row": 5,
+    "column": "value",
+    "message": "publicVisibility must be true or false"
+  },
+  {
+    "row": 6,
+    "column": "value",
+    "message": "Unknown nihAnvilUse value: Unknown AnVIL choice"
+  },
+  {
+    "row": 8,
+    "column": "value",
+    "message": "PI Email is not a valid email address"
+  },
+  {
+    "row": 9,
+    "column": "value",
+    "message": "Embargo Release Date is not a valid date"
+  },
+  {
+    "message": "Data Access Committee is required unless Access Management is open or external"
+  }
+]

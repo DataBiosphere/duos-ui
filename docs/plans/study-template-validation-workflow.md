@@ -66,6 +66,10 @@ Implementation requires a versioned, canonical CSV fixture that defines:
 
 The parser and its tests should use the same committed fixtures. Template-format validation must happen before field-level business validation.
 
+DT-3869 finalizes this prerequisite in the
+[canonical duos-ui contract and fixture specification](../study-template-v1.md). Its synthetic
+fixtures live under `test/fixtures/study-template/v1`.
+
 The v1 CSV will not carry uploaded files or filename-only placeholders. In particular,
 `nihInstitutionalCertificationFileName` and `alternativeDataSharingPlanFileName` are excluded. The
 populated draft form will show the corresponding upload controls empty so the user can attach files

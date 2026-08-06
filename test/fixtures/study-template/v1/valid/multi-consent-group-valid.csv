@@ -1,0 +1,31 @@
+templateVersion,recordType,recordId,parentRecordId,field,value
+1,study,study,,studyName,Synthetic Multi-Dataset Study
+1,study,study,,studyType,Observational
+1,study,study,,studyDescription,"A synthetic study with multiple datasets, quoted values, and non-file assets."
+1,study,study,,dataTypes,"[""Genomic"",""Phenotypic""]"
+1,study,study,,phenotypeIndication,Synthetic condition
+1,study,study,,species,Homo sapiens
+1,study,study,,piName,Synthetic Investigator
+1,study,study,,piEmail,investigator@example.org
+1,study,study,,dataCustodianEmail,"[""custodian.one@example.org"",""custodian.two@example.org""]"
+1,study,study,,publicVisibility,false
+1,study,study,,nihAnvilUse,I am not NHGRI funded and do not plan to store data in AnVIL
+1,study,study,,submittingToAnvil,false
+1,study,study,,multiCenterStudy,true
+1,study,study,,collaboratingSites,"[""Synthetic Site One"",""Synthetic Site Two""]"
+1,study,study,,controlledAccessRequiredForGenomicSummaryResultsGSR,false
+1,study,study,,alternativeDataSharingPlan,false
+1,consentGroup,dataset-open,study,consentGroupName,Synthetic Open Dataset
+1,consentGroup,dataset-open,study,accessManagement,open
+1,consentGroup,dataset-open,study,numberOfParticipants,20
+1,consentGroup,dataset-open,study,dataLocation,Terra Workspace
+1,consentGroup,dataset-open,study,url,https://example.org/data/synthetic-open
+1,consentGroup,dataset-controlled,study,consentGroupName,Synthetic Controlled Dataset
+1,consentGroup,dataset-controlled,study,accessManagement,controlled
+1,consentGroup,dataset-controlled,study,generalResearchUse,true
+1,consentGroup,dataset-controlled,study,npu,true
+1,consentGroup,dataset-controlled,study,dataAccessCommitteeId,1
+1,consentGroup,dataset-controlled,study,numberOfParticipants,30
+1,consentGroup,dataset-controlled,study,fileTypes,"[{""fileType"":""Genome"",""functionalEquivalence"":""Synthetic reference build""}]"
+1,asset,workspace-synthetic,study,workspaces,"{""name"":""Synthetic Analysis Workspace"",""platform"":""Terra"",""url"":""https://example.org/workspaces/synthetic"",""description"":""Synthetic workspace for fixture tests"",""cloud"": [""GCP""],""tools"": [""Notebook""],""access"":""controlled"",""tags"": [""synthetic""]}"
+1,asset,publication-synthetic,study,publications,"{""title"":""Synthetic Study Results"",""publishedDate"":""2026-01-15"",""authors"": [{""name"":""Synthetic Author"",""orcId"":""0000-0000-0000-0000""}],""datasetCitation"":""Synthetic Open Dataset"",""citation"":true,""journal"":""Journal of Synthetic Examples"",""doi"":""10.0000/example.synthetic"",""url"":""https://example.org/publications/synthetic"",""tags"": [""synthetic""]}"
