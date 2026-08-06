@@ -21,18 +21,32 @@ const styles: Record<string, React.CSSProperties> = {
   },
   titleRow: {
     marginBottom: '0.8rem',
+    flexWrap: 'nowrap',
+    minWidth: 0,
   },
   titleText: {
     fontWeight: 700,
     fontSize: 'clamp(1.8rem, 3.2vw, 2.4rem)',
     color: Theme.palette.primary,
-    overflowWrap: 'anywhere',
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
+  },
+  projectTitleText: {
+    fontWeight: 700,
+    fontSize: 'clamp(1.8rem, 3.2vw, 2.4rem)',
+    color: Theme.palette.primary,
+    whiteSpace: 'nowrap',
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   readOnlyTag: {
     fontWeight: 400,
     fontSize: 'clamp(1.1rem, 1.8vw, 1.4rem)',
     color: '#6b6b6b',
     marginLeft: '0.4rem',
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
   },
   approvedDatasetsRow: {
     marginBottom: '0.4rem',
@@ -199,23 +213,40 @@ export default function ReviewHeader({
   collaborationLetterName,
   researcherExternalProfiles,
 }: Readonly<ReviewHeaderProps>) {
-  const [selectedSO, setSelectedSO] = useState<SigningOfficialUserWithData | null>(null)
+  const soLookupKey = researcherInstitutionId && signingOfficialEmail
+    ? `${researcherInstitutionId}:${signingOfficialEmail}`
+    : undefined
+  const [selectedSOResult, setSelectedSOResult] = useState<{
+    lookupKey: string
+    signingOfficial: SigningOfficialUserWithData | null
+  } | null>(null)
 
   useEffect(() => {
-    if (!researcherInstitutionId || !signingOfficialEmail) return
+    if (!researcherInstitutionId || !signingOfficialEmail || !soLookupKey) return
+    let cancelled = false
     const loadSO = async () => {
       try {
         const sos = await User.getSOsForInstitution(researcherInstitutionId)
         const match = sos.find(so => so.email === signingOfficialEmail)
-        setSelectedSO(match ?? null)
+        if (!cancelled) {
+          setSelectedSOResult({ lookupKey: soLookupKey, signingOfficial: match ?? null })
+        }
       }
       catch {
-        setSelectedSO(null)
+        if (!cancelled) {
+          setSelectedSOResult({ lookupKey: soLookupKey, signingOfficial: null })
+        }
       }
     }
     void loadSO()
-  }, [researcherInstitutionId, signingOfficialEmail])
+    return () => {
+      cancelled = true
+    }
+  }, [researcherInstitutionId, signingOfficialEmail, soLookupKey])
 
+  const selectedSO = selectedSOResult && selectedSOResult.lookupKey === soLookupKey
+    ? selectedSOResult.signingOfficial
+    : null
   const hasSigningOfficial = Boolean(signingOfficialName || signingOfficialEmail)
   const hasCollaborationLetter = Boolean(referenceId && collaborationLetterLocation && collaborationLetterName)
   const soName = selectedSO ? selectedSO.displayName : signingOfficialName
@@ -230,7 +261,7 @@ export default function ReviewHeader({
           <div className="title-row" style={appliedTitleRowStyle}>
             <span className="dar-code" style={styles.titleText}>{darCode}</span>
             <span aria-hidden="true" style={styles.titleText}>:</span>
-            <span className="collection-project-title" style={styles.titleText}>{projectTitle}</span>
+            <span className="collection-project-title" style={styles.projectTitleText} title={projectTitle}>{projectTitle}</span>
             {readOnly && <span className="read-only-tag" style={styles.readOnlyTag}>(read-only)</span>}
           </div>
           <div className="secondary-header-row" style={appliedApprovedDatasetsRowStyle}>
