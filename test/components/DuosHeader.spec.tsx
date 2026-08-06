@@ -120,9 +120,8 @@ describe('DuosHeader', () => {
 
     it('displays correct subtabs for researcher', async () => {
       await mountHeader('/datalibrary', mockUser)
+      expect(screen.getByRole('tab', { name: 'Dashboard' })).toBeInTheDocument()
       expect(screen.getByRole('tab', { name: 'Data Library' })).toBeInTheDocument()
-      expect(screen.getByRole('tab', { name: 'Data Access Requests' })).toBeInTheDocument()
-      expect(screen.getByRole('tab', { name: 'My Dataset Approvals' })).toBeInTheDocument()
     })
   })
 

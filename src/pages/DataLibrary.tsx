@@ -5,7 +5,7 @@ import { DatasetTerm } from 'src/types/model'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { getBrandedLibrary } from 'src/libs/libraryVersions'
 import { Storage } from 'src/libs/storage'
-import { Notifications } from 'src/libs/utils'
+import { isRestrictedToPublicVisibility, Notifications } from 'src/libs/utils'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
@@ -26,11 +26,7 @@ export const DataLibrary: React.FC = () => {
   const institutionId = user?.institution?.id
   const institutionName = user?.institution?.name
 
-  // Non-public studies are hidden from researchers. Chairpersons, Data
-  // Submitters, Admins, and Signing Officials retain full visibility.
-  const restrictToPublicVisibility = !(
-    user?.isChairPerson || user?.isDataSubmitter || user?.isAdmin || user?.isSigningOfficial
-  )
+  const restrictToPublicVisibility = isRestrictedToPublicVisibility(user)
 
   useEffect(() => {
     const key = query === undefined ? '/datalibrary' : query.toLowerCase()

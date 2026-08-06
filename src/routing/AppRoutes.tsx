@@ -19,6 +19,7 @@ import DatasetStatistics from 'src/pages/DatasetStatistics'
 import RoleBAC from 'src/routing/RoleBAC'
 import { USER_ROLES } from 'src/libs/utils'
 import ResearcherConsole from 'src/pages/researcher_console/ResearcherConsole'
+import ResearcherDashboard from 'src/pages/researcher_console/ResearcherDashboard'
 import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrants'
 import DarCollectionReview from 'src/pages/dar_collection_review/DarCollectionReview'
 import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication'
@@ -81,6 +82,7 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route path="/studies/:studyId" element={<StudyDetails />} />
         <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
+          <Route path="/researcher_console_dashboard" element={<ResearcherDashboard />} />
           <Route path="/researcher_console" element={<ResearcherConsole />} />
           <Route path="/datasets" element={<ControlledAccessGrants />} />
           <Route path="/dar_collection/:collectionId" element={<DarCollectionReview adminPage={false} readOnly={false} />} />

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined'
@@ -9,13 +8,15 @@ import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
 import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined'
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
-import OpenInNewOutlinedIcon from '@mui/icons-material/OpenInNewOutlined'
 import { isNil } from 'src/utils/NodashUtil'
 import { Styles } from 'src/libs/theme'
 import { Storage } from 'src/libs/storage'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { headerTabsConfig } from 'src/components/DuosHeader'
-import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
+import ConsoleDashboardGrid, { ConsoleDashboardTileMeta } from 'src/components/dashboard/ConsoleDashboardGrid'
+import ConsoleDashboardTitle from 'src/components/dashboard/ConsoleDashboardTitle'
+import ConsoleDashboardResources, { ConsoleDashboardResource } from 'src/components/dashboard/ConsoleDashboardResources'
+import ConsoleDashboardPromo from 'src/components/dashboard/ConsoleDashboardPromo'
 import { hasDataSubmitterRole, Notifications, USER_ROLES } from 'src/libs/utils'
 import { User } from 'src/libs/ajax/User'
 import { Collections } from 'src/libs/ajax/Collections'
@@ -30,13 +31,7 @@ import { AssetType, LibraryVersionNew } from 'src/types/library'
 import { DAAObject } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
 
-interface TileMeta {
-  icon: React.ComponentType
-  description: string
-  statLabels: string[]
-}
-
-const tileMetaByLink: Record<string, TileMeta> = {
+const tileMetaByLink: Record<string, ConsoleDashboardTileMeta> = {
   '/signing_official_console/library_cards': {
     icon: PeopleAltOutlinedIcon,
     description: 'Manage researchers who request data on behalf of your institution.',
@@ -69,14 +64,7 @@ const tileMetaByLink: Record<string, TileMeta> = {
   },
 }
 
-interface HelpfulResource {
-  icon: React.ComponentType
-  label: string
-  description: string
-  href: string
-}
-
-const helpfulResources: HelpfulResource[] = [
+const helpfulResources: ConsoleDashboardResource[] = [
   {
     icon: MenuBookOutlinedIcon,
     label: 'Signing Official Guide',
@@ -140,10 +128,8 @@ const fetchInstitutionLibraryTotals = async (institutionId?: number, institution
 
 export default function SigningOfficialDashboard(): React.JSX.Element {
   usePageTitle('Dashboard')
-  const location = useLocation()
 
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [showContactModal, setShowContactModal] = useState<boolean>(false)
   const [statValuesByLink, setStatValuesByLink] = useState<Record<string, Record<string, number>>>({})
 
   useEffect(() => {
@@ -220,263 +206,27 @@ export default function SigningOfficialDashboard(): React.JSX.Element {
 
   return (
     <div style={Styles.PAGE}>
-      <style>
-        {`
-        .so-dashboard-title {
-          font-family: Montserrat, sans-serif;
-          font-weight: 600;
-          font-size: 2.8rem;
-          color: #1F3B50;
-          max-width: 900px;
-          margin: 2rem auto 0;
-        }
-        .so-dashboard-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 1.5rem;
-          max-width: 900px;
-          margin: 2rem auto;
-        }
-        .so-dashboard-tile {
-          display: flex;
-          align-items: flex-start;
-          gap: 1rem;
-          background: #ffffff;
-          border: 1.5px solid rgba(0, 0, 0, 0.08);
-          border-radius: 12px;
-          padding: 1.75rem;
-          box-sizing: border-box;
-          text-decoration: none;
-          cursor: pointer;
-          transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-        }
-        .so-dashboard-tile:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
-          border-color: rgba(0, 0, 0, 0.18);
-        }
-        .so-dashboard-tile-icon-wrap {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          background: rgba(0, 96, 159, 0.08);
-          color: #00609f;
-          flex-shrink: 0;
-        }
-        .so-dashboard-tile-label {
-          font-family: Montserrat, sans-serif;
-          font-size: 18px;
-          font-weight: 600;
-          color: #1F3B50;
-          margin: 0 0 0.35rem;
-        }
-        .so-dashboard-tile-description {
-          font-family: Montserrat, sans-serif;
-          font-size: 14px;
-          color: #6b7280;
-          margin: 0;
-          line-height: 1.4;
-        }
-        .so-dashboard-tile-stats {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 1.25rem;
-          margin-top: 1rem;
-        }
-        .so-dashboard-stat {
-          display: flex;
-          flex-direction: column;
-        }
-        .so-dashboard-stat-value {
-          font-family: Montserrat, sans-serif;
-          font-size: 20px;
-          font-weight: 700;
-          color: #00609f;
-        }
-        .so-dashboard-stat-label {
-          font-family: Montserrat, sans-serif;
-          font-size: 12px;
-          font-weight: 500;
-          color: #6b7280;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-        }
-        .so-dashboard-section-heading {
-          font-family: Montserrat, sans-serif;
-          font-size: 20px;
-          font-weight: 600;
-          color: #1F3B50;
-          max-width: 900px;
-          margin: 3rem auto 1rem;
-        }
-        .so-dashboard-resource-link {
-          display: flex;
-          align-items: flex-start;
-          gap: 1rem;
-          background: #ffffff;
-          border: 1.5px solid rgba(0, 0, 0, 0.08);
-          border-radius: 12px;
-          padding: 1.25rem 1.5rem;
-          box-sizing: border-box;
-          text-decoration: none;
-          cursor: pointer;
-          transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-        }
-        .so-dashboard-resource-link:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
-          border-color: rgba(0, 0, 0, 0.18);
-        }
-        .so-dashboard-resource-label {
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
-          font-family: Montserrat, sans-serif;
-          font-size: 16px;
-          font-weight: 600;
-          color: #1F3B50;
-          margin: 0 0 0.3rem;
-        }
-        .so-dashboard-resource-label svg {
-          font-size: 16px;
-          color: #9ca3af;
-        }
-        .so-dashboard-resource-description {
-          font-family: Montserrat, sans-serif;
-          font-size: 13px;
-          color: #6b7280;
-          margin: 0;
-          line-height: 1.4;
-        }
-        .so-dashboard-promo {
-          max-width: 900px;
-          margin: 1.5rem auto 2rem;
-          background: #1F3B50;
-          border-radius: 12px;
-          padding: 2rem 2.25rem;
-          box-sizing: border-box;
-        }
-        .so-dashboard-promo-heading {
-          font-family: Montserrat, sans-serif;
-          font-size: 18px;
-          font-weight: 600;
-          color: #ffffff;
-          margin: 0 0 0.75rem;
-        }
-        .so-dashboard-promo-text {
-          font-family: Montserrat, sans-serif;
-          font-size: 14px;
-          color: #d7e2ea;
-          line-height: 1.6;
-          margin: 0 0 0.75rem;
-        }
-        .so-dashboard-promo-button {
-          font-family: Montserrat, sans-serif;
-          font-size: 14px;
-          font-weight: 600;
-          color: #1F3B50;
-          background: #ffffff;
-          border: none;
-          border-radius: 6px;
-          padding: 10px 22px;
-          cursor: pointer;
-          margin-top: 0.5rem;
-        }
-        @media (max-width: 600px) {
-          .so-dashboard-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-        `}
-      </style>
-      <h1 className="so-dashboard-title">Signing Official Console</h1>
-      <div className="so-dashboard-grid">
-        {tiles.map((tile) => {
-          const meta = tileMetaByLink[tile.link]
-          const Icon = meta?.icon
-          const statLabels = meta?.statLabels ?? []
-          const values = statValuesByLink[tile.link] ?? {}
-          return (
-            <Link key={tile.link} to={tile.link} className="so-dashboard-tile">
-              {Icon && (
-                <span className="so-dashboard-tile-icon-wrap">
-                  <Icon />
-                </span>
-              )}
-              <span>
-                <p className="so-dashboard-tile-label">{tile.label}</p>
-                {meta?.description && (
-                  <p className="so-dashboard-tile-description">{meta.description}</p>
-                )}
-                {statLabels.length > 0 && (
-                  <div className="so-dashboard-tile-stats">
-                    {statLabels.map(label => (
-                      <div key={label} className="so-dashboard-stat">
-                        <span className="so-dashboard-stat-value">{isLoading ? '–' : (values[label] ?? '–')}</span>
-                        <span className="so-dashboard-stat-label">{label}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </span>
-            </Link>
-          )
-        })}
-      </div>
+      <ConsoleDashboardTitle>Signing Official Console</ConsoleDashboardTitle>
+      <ConsoleDashboardGrid
+        tiles={tiles}
+        tileMetaByLink={tileMetaByLink}
+        statValuesByLink={statValuesByLink}
+        isLoading={isLoading}
+      />
 
-      <h2 className="so-dashboard-section-heading">Helpful Resources for Signing Officials</h2>
-      <div className="so-dashboard-grid">
-        {helpfulResources.map((resource) => {
-          const Icon = resource.icon
-          return (
-            <a
-              key={resource.href}
-              href={resource.href}
-              target="_blank"
-              rel="noreferrer"
-              className="so-dashboard-resource-link"
-            >
-              <span className="so-dashboard-tile-icon-wrap">
-                <Icon />
-              </span>
-              <span>
-                <p className="so-dashboard-resource-label">
-                  {resource.label}
-                  <OpenInNewOutlinedIcon />
-                </p>
-                <p className="so-dashboard-resource-description">{resource.description}</p>
-              </span>
-            </a>
-          )
-        })}
-      </div>
+      <ConsoleDashboardResources
+        heading="Helpful Resources for Signing Officials"
+        resources={helpfulResources}
+      />
 
-      <div className="so-dashboard-promo">
-        <p className="so-dashboard-promo-heading">Get more out of DUOS</p>
-        <p className="so-dashboard-promo-text">
-          Signing Officials can use DUOS to curate and share their institution&#39;s datasets with the
-          research community. You can also leverage DUOS alongside Terra to meet NIH requirements
-          for analyzing and storing controlled-access data.
-        </p>
-        <p className="so-dashboard-promo-text">
-          Reach out if you&#39;d like to learn more about either of these.
-        </p>
-        <button
-          type="button"
-          className="so-dashboard-promo-button"
-          onClick={() => setShowContactModal(true)}
-        >
-          Contact Us
-        </button>
-      </div>
-
-      <SupportRequestModal
-        showModal={showContactModal}
-        onCloseRequest={() => setShowContactModal(false)}
-        url={location.pathname}
+      <ConsoleDashboardPromo
+        heading="Get more out of DUOS"
+        paragraphs={[
+          'Signing Officials can use DUOS to curate and share their institution\'s datasets with the '
+          + 'research community. You can also leverage DUOS alongside Terra to meet NIH requirements '
+          + 'for analyzing and storing controlled-access data.',
+          'Reach out if you\'d like to learn more about either of these.',
+        ]}
       />
     </div>
   )
