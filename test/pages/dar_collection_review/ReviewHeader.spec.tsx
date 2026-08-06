@@ -231,9 +231,7 @@ describe('ReviewHeader - Tests', () => {
   })
 
   it('renders the signing official name and email from props when API returns no match', async () => {
-    await act(async () => {
-      render(<ReviewHeader {...soBaseProps} />)
-    })
+    render(<ReviewHeader {...soBaseProps} />)
 
     expect(await screen.findByText('John SO')).toBeTruthy()
     expect(await screen.findByText('john.so@broad.mit.edu')).toBeTruthy()
@@ -248,9 +246,7 @@ describe('ReviewHeader - Tests', () => {
       userData: {},
     }])
 
-    await act(async () => {
-      render(<ReviewHeader {...soBaseProps} />)
-    })
+    render(<ReviewHeader {...soBaseProps} />)
 
     expect(await screen.findByText('Broad Institute')).toBeTruthy()
     expect(await screen.findByText('John SO')).toBeTruthy()
@@ -307,9 +303,7 @@ describe('ReviewHeader - Tests', () => {
   })
 
   it('calls getSOsForInstitution with the researcher institution id', async () => {
-    await act(async () => {
-      render(<ReviewHeader {...soBaseProps} />)
-    })
+    render(<ReviewHeader {...soBaseProps} />)
 
     await screen.findByText('John SO')
     expect(User.getSOsForInstitution).toHaveBeenCalledWith(42)
@@ -326,15 +320,12 @@ describe('ReviewHeader - Tests', () => {
   })
 
   it('renders the signing official email as a mailto link, matching the researcher fact structure', async () => {
-    let container: HTMLElement | undefined
-    await act(async () => {
-      container = render(<ReviewHeader {...soBaseProps} />).container
-    })
+    const { container } = render(<ReviewHeader {...soBaseProps} />)
 
     const link = await screen.findByRole('link', { name: /Email John SO/ })
     expect(link.getAttribute('href')).toBe('mailto:john.so@broad.mit.edu')
-    expect(container?.querySelector('#signing-official-name-fact')?.textContent).toContain('John SO')
-    expect(container?.querySelector('#signing-official-email-fact')).toBeTruthy()
+    expect(container.querySelector('#signing-official-name-fact')?.textContent).toContain('John SO')
+    expect(container.querySelector('#signing-official-email-fact')).toBeTruthy()
   })
 
   it('renders the IT Director email', () => {
@@ -426,9 +417,7 @@ describe('ReviewHeader - Tests', () => {
       userData: { externalProfiles: { linkedIn: 'johnso' } },
     }])
 
-    await act(async () => {
-      render(<ReviewHeader {...soBaseProps} />)
-    })
+    render(<ReviewHeader {...soBaseProps} />)
 
     expect(await screen.findByRole('link', { name: /LinkedIn/ })).toBeTruthy()
     expect(screen.queryByText('External Profile')).toBeNull()
