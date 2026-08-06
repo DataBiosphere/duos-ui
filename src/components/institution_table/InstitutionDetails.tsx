@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { InstitutionInterface } from 'src/types/model'
 import backArrowIcon from 'src/images/back_arrow.svg'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router'
 import { Institution as InstitutionAPI } from 'src/libs/ajax/Institution'
 import { Button, TextField } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'

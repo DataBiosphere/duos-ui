@@ -8,6 +8,7 @@ import Fastify, { FastifyError, FastifyInstance } from 'fastify'
 import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
+import fastifyCsrf from '@fastify/csrf-protection'
 import { createPgSessionStore } from './session/pgStore.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
@@ -133,11 +134,34 @@ export async function buildApp(): Promise<AppInstance> {
         path: '/',
       },
       saveUninitialized: false,
-      // No `rolling`: sessions get a fixed maxAge from creation. Rolling expiry
-      // would re-save the session (SELECT + UPSERT) on every session-bearing
-      // request just to bump `expire`. Phase 2 adds a throttled sliding expiry
-      // instead — re-save only when the session is near expiry.
+      // `rolling: false` — MUST be set explicitly: @fastify/session defaults it
+      // to true. Two reasons it matters here:
+      //   1. Behavior: sessions get a fixed maxAge from creation. Rolling expiry
+      //      would re-save the session (SELECT + UPSERT) on every session-bearing
+      //      request just to bump `expire`. Phase 2 adds a throttled sliding
+      //      expiry instead — re-save only when the session is near expiry.
+      //   2. Correctness: with rolling on, the onSend save hook fires an async
+      //      DB write on every request that carries a session cookie, even when
+      //      the handler already called `request.session.save()` and nothing
+      //      else mutated the session. That async onSend leaves `reply.sent`
+      //      false when the async route handler resolves, so Fastify's
+      //      wrapThenable fires a SECOND reply.send(); the later save's writeHead
+      //      then throws ERR_HTTP_HEADERS_SENT and crashes the process. With
+      //      rolling off (+ saveUninitialized off + the pre-response save() in
+      //      the auth handlers), onSend finds the session unmodified and skips
+      //      the write synchronously, so the reply is fully sent before the
+      //      handler promise resolves and no second send happens.
+      rolling: false,
     })
+
+    // CSRF protection for cookie-authenticated, state-changing auth routes
+    // (currently POST /auth/logout). SameSite=Lax withholds the session cookie
+    // from cross-site POSTs, but is not sufficient alone here: dev/staging live
+    // under *.broadinstitute.org, where SameSite treats every sibling subdomain
+    // as same-site — a compromised sibling could still forge cookie-bearing
+    // POSTs. CSRF tokens don't depend on the registrable domain. The secret is
+    // stored in the session, so it must be registered after @fastify/session.
+    await fastify.register(fastifyCsrf, { sessionPlugin: '@fastify/session' })
 
     // Warm the B2C OIDC discovery cache so the first login doesn't pay the
     // discovery round-trip. Gated on the Azure env vars being present: DB/
@@ -173,7 +197,17 @@ export async function buildApp(): Promise<AppInstance> {
     fastify.log.info('[server] bffEnabled is true — registering BFF auth routes')
     fastify.post('/auth/login', handleLogin)
     fastify.get('/auth/callback', handleCallback)
-    fastify.post('/auth/logout', handleLogout)
+    // The client fetches this after sign-in and echoes the token in an
+    // X-CSRF-Token header on unsafe auth requests. The CSRF secret lives in the
+    // session, so calling this creates/updates a session row — the client
+    // should only call it once authenticated (see Epic 4, story 4-D). After
+    // session rotation (Epic 5, 5-D) the pre-auth secret is discarded, so the
+    // client must (re)fetch this once login completes.
+    fastify.get('/auth/csrf-token', async (_request, reply) => reply.send({ token: reply.generateCsrf() }))
+    // /auth/login is deliberately exempt: it is pre-authentication (no token to
+    // have fetched yet), and login CSRF is neutralized by the PKCE state binding
+    // the flow to the session. /auth/me is a safe GET. Only logout is guarded.
+    fastify.post('/auth/logout', { onRequest: fastify.csrfProtection }, handleLogout)
     fastify.get('/auth/me', getMe)
   }
   else {

@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router'
 import { NavigationTabsComponent } from 'src/components/NavigationTabsComponent'
 import { DuosUser } from 'src/types/model'
 

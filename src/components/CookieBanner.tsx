@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { CookieUtils } from 'src/utils/CookieUtils'
 import Tooltip from '@mui/material/Tooltip'
 import './CookieBanner.css'

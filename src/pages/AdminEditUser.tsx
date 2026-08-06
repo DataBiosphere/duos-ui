@@ -6,7 +6,7 @@ import { ResearcherReview } from 'src/components/ResearcherReview'
 import editUserIcon from 'src/images/icon_edit_user.png'
 import { PageHeading } from 'src/components/PageHeading'
 import { extractError } from 'src/utils/ErrorUtils'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import ExternalProfile from 'src/pages/user_profile/ExternalProfile'
 import { DuosUser } from 'src/types/model'
 

@@ -7,7 +7,7 @@ import { DatasetTerm } from 'src/types/model'
 
 const mockNavigate = vi.fn()
 
-vi.mock('react-router-dom', () => ({
+vi.mock('react-router', () => ({
   Link: ({ children, onClick, ...props }: React.PropsWithChildren<{ onClick?: () => void, id?: string, className?: string, to?: string, style?: React.CSSProperties }>) => (
     <a onClick={onClick} {...props}>{children}</a>
   ),

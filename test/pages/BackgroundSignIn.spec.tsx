@@ -2,7 +2,7 @@ import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import BackgroundSignIn from 'src/pages/BackgroundSignIn'
 import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
@@ -10,8 +10,8 @@ import { Navigation } from 'src/libs/utils'
 
 const mockNavigate = vi.fn()
 
-vi.mock('react-router-dom', async (importActual) => {
-  const actual = await importActual<typeof import('react-router-dom')>()
+vi.mock('react-router', async (importActual) => {
+  const actual = await importActual<typeof import('react-router')>()
   return {
     ...actual,
     useNavigate: () => mockNavigate,

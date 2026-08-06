@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { DAA } from 'src/libs/ajax/DAA'
 import { Config } from 'src/libs/config'
-import type { DAAObject } from 'src/types/model'
+import type { DAAObject, DaaBulkRelationResult } from 'src/types/model'
 import type { FetchData } from 'src/libs/ajax/fetchAdapter'
-import { fetchGet, fetchPost, fetchPut, fetchDelete, fetchMultipart } from 'src/libs/ajax/fetchAdapter'
+import { fetchBlob, fetchGet, fetchPost, fetchPut, fetchDelete, fetchMultipart } from 'src/libs/ajax/fetchAdapter'
 import * as FileDownload from 'src/utils/FileDownload'
 
 vi.mock('src/libs/ajax/fetchAdapter', () => ({
+  fetchBlob: vi.fn(),
   fetchGet: vi.fn(),
   fetchPost: vi.fn(),
   fetchPut: vi.fn(),
@@ -87,69 +88,80 @@ describe('DAA ajax', () => {
     expect(fetchDelete).toHaveBeenCalledWith(`${apiUrl}/api/daa/${mockDaa.daaId}/2001`, authHeaders)
   })
 
-  it('bulkAddUsersToDaa sends a POST request with user ids and returns 200', async () => {
+  it('bulkAddUsersToDaa sends a POST request with user ids and returns the result body', async () => {
     const users = [1, 2, 3]
-    vi.mocked(fetchPost).mockResolvedValue({} as FetchData<void>)
+    const summary: DaaBulkRelationResult = { requested: 3, applied: 3, skipped: 0, errors: [] }
+    vi.mocked(fetchPost).mockResolvedValue({ data: summary } as FetchData<DaaBulkRelationResult>)
 
     const result = await DAA.bulkAddUsersToDaa(mockDaa.daaId, users)
 
-    expect(result).toBe(200)
-    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/daa/bulk/${mockDaa.daaId}`, users, authHeaders)
+    expect(result).toEqual(summary)
+    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/daa/bulk/${mockDaa.daaId}`, { users }, authHeaders)
   })
 
-  it('bulkRemoveUsersFromDaa sends a DELETE request with user ids in body and returns 200', async () => {
+  it('bulkRemoveUsersFromDaa sends a DELETE request with user ids in body and returns the result body', async () => {
     const users = [3, 4]
-    vi.mocked(fetchDelete).mockResolvedValue({} as FetchData<void>)
+    const summary: DaaBulkRelationResult = { requested: 2, applied: 2, skipped: 0, errors: [] }
+    vi.mocked(fetchDelete).mockResolvedValue({ data: summary } as FetchData<DaaBulkRelationResult>)
 
     const result = await DAA.bulkRemoveUsersFromDaa(mockDaa.daaId, users)
 
-    expect(result).toBe(200)
+    expect(result).toEqual(summary)
     expect(fetchDelete).toHaveBeenCalledWith(
       `${apiUrl}/api/daa/bulk/${mockDaa.daaId}`,
-      expect.objectContaining({ data: users }),
+      expect.objectContaining({ data: { users } }),
     )
   })
 
-  it('bulkAddDaasToUser sends a POST request with daa ids and returns 200', async () => {
+  it('bulkAddDaasToUser sends a POST request with daa ids and returns the result body', async () => {
     const daas = [10, 11]
-    vi.mocked(fetchPost).mockResolvedValue({} as FetchData<void>)
+    const summary: DaaBulkRelationResult = { requested: 2, applied: 2, skipped: 0, errors: [] }
+    vi.mocked(fetchPost).mockResolvedValue({ data: summary } as FetchData<DaaBulkRelationResult>)
 
     const result = await DAA.bulkAddDaasToUser(2001, daas)
 
-    expect(result).toBe(200)
-    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/daa/bulk/user/2001`, daas, authHeaders)
+    expect(result).toEqual(summary)
+    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/daa/bulk/user/2001`, { daaList: daas }, authHeaders)
   })
 
-  it('bulkRemoveDaasFromUser sends a DELETE request with daa ids in body and returns 200', async () => {
+  it('bulkRemoveDaasFromUser sends a DELETE request with daa ids in body and returns the result body', async () => {
     const daas = [10, 11]
-    vi.mocked(fetchDelete).mockResolvedValue({} as FetchData<void>)
+    const summary: DaaBulkRelationResult = { requested: 2, applied: 2, skipped: 0, errors: [] }
+    vi.mocked(fetchDelete).mockResolvedValue({ data: summary } as FetchData<DaaBulkRelationResult>)
 
     const result = await DAA.bulkRemoveDaasFromUser(2001, daas)
 
-    expect(result).toBe(200)
+    expect(result).toEqual(summary)
     expect(fetchDelete).toHaveBeenCalledWith(
       `${apiUrl}/api/daa/bulk/user/2001`,
-      expect.objectContaining({ data: daas }),
+      expect.objectContaining({ data: { daaList: daas } }),
     )
   })
 
-  it('getDaaFileById fetches blob with octet-stream headers and triggers download', async () => {
+  it('getDaaFileById fetches a blob via fetchBlob and triggers download', async () => {
     const fakeBlob = new Blob(['fake-binary-content'], { type: 'application/octet-stream' })
-    vi.mocked(fetchGet).mockResolvedValue({ data: fakeBlob } as FetchData<Blob>)
+    vi.mocked(fetchBlob).mockResolvedValue(fakeBlob)
 
     await DAA.getDaaFileById(mockDaa.daaId, 'Sample_DAA.pdf')
 
-    expect(fetchGet).toHaveBeenCalledWith(
+    expect(fetchBlob).toHaveBeenCalledWith(
       `${apiUrl}/api/daa/${mockDaa.daaId}/file`,
-      expect.objectContaining({
-        responseType: 'blob',
-        headers: expect.objectContaining({
-          'Accept': 'application/octet-stream',
-          'Content-Type': 'application/octet-stream',
-        }),
-      }),
+      authHeaders,
     )
     expect(FileDownload.fileDownload).toHaveBeenCalledWith(fakeBlob, 'Sample_DAA.pdf')
+  })
+
+  it('getDaaFileBlob fetches a blob via fetchBlob and returns it', async () => {
+    const fakeBlob = new Blob(['fake-binary-content'], { type: 'application/octet-stream' })
+    vi.mocked(fetchBlob).mockResolvedValue(fakeBlob)
+
+    const result = await DAA.getDaaFileBlob(mockDaa.daaId)
+
+    expect(fetchBlob).toHaveBeenCalledWith(
+      `${apiUrl}/api/daa/${mockDaa.daaId}/file`,
+      authHeaders,
+    )
+    expect(result).toBe(fakeBlob)
   })
 
   it('createDaa returns null payload for null file', async () => {

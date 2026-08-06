@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { act, render, screen, fireEvent, within } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router'
 import { DataLocation, DataLocationComponentProps, DataLocationInfo } from 'src/components/forms/DataLocation'
 
 const baseProps: DataLocationComponentProps = {

@@ -2,6 +2,7 @@ import { fileDownload } from 'src/utils/FileDownload'
 import { Config } from 'src/libs/config'
 import { isFileEmpty } from 'src/libs/utils'
 import {
+  fetchBlob,
   fetchGet,
   fetchPost,
   fetchPut,
@@ -9,21 +10,11 @@ import {
   fetchMultipart,
   type FetchData,
 } from 'src/libs/ajax/fetchAdapter'
-import type { DAAObject } from 'src/types/model'
+import type { DAAObject, DaaBulkRelationResult } from 'src/types/model'
 
 type AuthConfig = ReturnType<typeof Config.authOpts>
 type DeleteBodyConfig<TBody> = AuthConfig & { data: TBody }
 type FetchDeleteConfig<T> = Parameters<typeof fetchDelete<T>>[1]
-
-type DaaBinaryDownloadConfig = {
-  responseType: 'blob'
-  headers: {
-    'Authorization': string
-    'Accept': string
-    'X-App-ID': string
-    'Content-Type': 'application/octet-stream'
-  }
-}
 
 export const DAA = {
   getDaas: async (): Promise<DAAObject[]> => {
@@ -50,62 +41,45 @@ export const DAA = {
     return 200
   },
 
-  bulkAddUsersToDaa: async (daaId: number, userList: number[]): Promise<number> => {
+  bulkAddUsersToDaa: async (daaId: number, userList: number[]): Promise<DaaBulkRelationResult> => {
     const url = `${await Config.getApiUrl()}/api/daa/bulk/${daaId}`
-    await fetchPost<void, number[]>(url, userList, Config.authOpts())
-    return 200
+    const res = await fetchPost<DaaBulkRelationResult, { users: number[] }>(
+      url, { users: userList }, Config.authOpts(),
+    )
+    return res.data
   },
 
-  bulkRemoveUsersFromDaa: async (daaId: number, userList: number[]): Promise<number> => {
+  bulkRemoveUsersFromDaa: async (daaId: number, userList: number[]): Promise<DaaBulkRelationResult> => {
     const url = `${await Config.getApiUrl()}/api/daa/bulk/${daaId}`
-    const config: DeleteBodyConfig<number[]> = { ...Config.authOpts(), data: userList }
-    await fetchDelete<void>(url, config as FetchDeleteConfig<void>)
-    return 200
+    const config: DeleteBodyConfig<{ users: number[] }> = { ...Config.authOpts(), data: { users: userList } }
+    const res = await fetchDelete<DaaBulkRelationResult>(url, config as FetchDeleteConfig<DaaBulkRelationResult>)
+    return res.data
   },
 
-  bulkAddDaasToUser: async (userId: number, daaList: number[]): Promise<number> => {
+  bulkAddDaasToUser: async (userId: number, daaList: number[]): Promise<DaaBulkRelationResult> => {
     const url = `${await Config.getApiUrl()}/api/daa/bulk/user/${userId}`
-    await fetchPost<void, number[]>(url, daaList, Config.authOpts())
-    return 200
+    const res = await fetchPost<DaaBulkRelationResult, { daaList: number[] }>(
+      url, { daaList }, Config.authOpts(),
+    )
+    return res.data
   },
 
-  bulkRemoveDaasFromUser: async (userId: number, daaList: number[]): Promise<number> => {
+  bulkRemoveDaasFromUser: async (userId: number, daaList: number[]): Promise<DaaBulkRelationResult> => {
     const url = `${await Config.getApiUrl()}/api/daa/bulk/user/${userId}`
-    const config: DeleteBodyConfig<number[]> = { ...Config.authOpts(), data: daaList }
-    await fetchDelete<void>(url, config as FetchDeleteConfig<void>)
-    return 200
+    const config: DeleteBodyConfig<{ daaList: number[] }> = { ...Config.authOpts(), data: { daaList } }
+    const res = await fetchDelete<DaaBulkRelationResult>(url, config as FetchDeleteConfig<DaaBulkRelationResult>)
+    return res.data
   },
 
   getDaaFileById: async (daaId: number, daaFileName: string): Promise<void> => {
-    const auth = Config.authOpts()
-    const authOpts: DaaBinaryDownloadConfig = {
-      ...auth,
-      responseType: 'blob',
-      headers: {
-        ...auth.headers,
-        'Content-Type': 'application/octet-stream',
-        'Accept': 'application/octet-stream',
-      },
-    }
     const url = `${await Config.getApiUrl()}/api/daa/${daaId}/file`
-    const res = await fetchGet<Blob>(url, authOpts)
-    fileDownload(res.data, daaFileName)
+    const blob = await fetchBlob(url, Config.authOpts())
+    fileDownload(blob, daaFileName)
   },
 
   getDaaFileBlob: async (daaId: number): Promise<Blob> => {
-    const auth = Config.authOpts()
-    const authOpts: DaaBinaryDownloadConfig = {
-      ...auth,
-      responseType: 'blob',
-      headers: {
-        ...auth.headers,
-        'Content-Type': 'application/octet-stream',
-        'Accept': 'application/octet-stream',
-      },
-    }
     const url = `${await Config.getApiUrl()}/api/daa/${daaId}/file`
-    const res = await fetchGet<Blob>(url, authOpts)
-    return res.data
+    return fetchBlob(url, Config.authOpts())
   },
 
   createDaa: async (file: File | null | undefined, dacId: number): Promise<FetchData<DAAObject | null>> => {

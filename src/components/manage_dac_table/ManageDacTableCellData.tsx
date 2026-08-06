@@ -4,7 +4,7 @@ import { styles } from './manageDacTableUtils'
 import TableIconButton from 'src/components/TableIconButton'
 import { Styles } from 'src/libs/theme'
 import { Delete } from '@mui/icons-material'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import editPencilIcon from 'src/images/edit_pencil.svg'
 import type { DacObject } from 'src/types/model'
 

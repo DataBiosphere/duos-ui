@@ -1,6 +1,6 @@
 import React from 'react'
 import { Storage } from 'src/libs/storage'
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router'
 
 const Authenticated = () => {
   const location = useLocation()

@@ -40,13 +40,15 @@ async function discover(): Promise<oidc.Configuration> {
 /**
  * Validated here so a misconfigured environment fails with an error naming the
  * env var, instead of a TypeError from `new URL(undefined)` or an opaque B2C
- * rejection at token exchange. Exported so other `/auth/*` handlers (e.g.
- * `login.ts`'s `DUOS_OAUTH_REDIRECT_URI`) fail the same way.
+ * rejection at token exchange. Exported so the rest of the BFF fails the same
+ * way — `login.ts`'s `DUOS_OAUTH_REDIRECT_URI`, the proxy's `DUOS_API_URL` —
+ * which is why the message says "the BFF" rather than naming the OAuth flow:
+ * not every caller is part of it.
  */
 export function requireEnv(name: string): string {
   const value = process.env[name]
   if (!value) {
-    throw new Error(`${name} is unset but is required for the BFF OAuth flow — set it in .env.local locally, or the deployment env in k8s`)
+    throw new Error(`${name} is unset but is required by the BFF — set it in .env.local locally, or the deployment env in k8s`)
   }
   return value
 }

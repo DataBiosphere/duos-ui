@@ -1,0 +1,72 @@
+.user-profile-page {
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  padding: 50px clamp(24px, 10vw, 140px) 70px;
+}
+
+.user-profile-intro {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  margin-top: 32px;
+}
+
+.user-profile-intro img {
+  width: 166px;
+  height: 48px;
+  flex: 0 0 auto;
+}
+
+.user-profile-section {
+  margin-top: 48px;
+}
+
+.user-profile-card {
+  padding: 28px 32px 32px;
+  border: 1px solid #d9e4f2;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgb(34 74 120 / 5%);
+}
+
+.user-profile-section-heading {
+  margin: 0 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ddd;
+  color: #01549f;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.user-profile-name-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-profile-field {
+  margin-top: 16px;
+}
+
+.profile-save-button {
+  min-width: 72px;
+  height: 34px;
+  padding-inline: 16px;
+}
+
+@media (max-width: 700px) {
+  .user-profile-page {
+    padding-inline: 20px;
+  }
+
+  .user-profile-intro {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .user-profile-name-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}

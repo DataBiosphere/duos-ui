@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import NotFound from 'src/pages/NotFound'
 
 const StudyDetailsComponent = () => <div data-testid="study-details-page">Study Details Page</div>

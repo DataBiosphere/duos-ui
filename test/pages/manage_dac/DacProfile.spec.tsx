@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router'
 import DacProfile from 'src/pages/manage_dac/DacProfile'
 import { DAC } from 'src/libs/ajax/DAC'
 import { DataUseTranslation } from 'src/libs/dataUseTranslation'

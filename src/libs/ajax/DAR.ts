@@ -4,7 +4,7 @@ import { Config } from 'src/libs/config'
 import { isFileEmpty } from 'src/libs/utils'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
-import { fetchGet, fetchMultipart, fetchPost, fetchPut, fetchDelete, FetchData } from 'src/libs/ajax/fetchAdapter'
+import { fetchBlob, fetchGet, fetchMultipart, fetchPost, fetchPut, fetchDelete, FetchData } from 'src/libs/ajax/fetchAdapter'
 import { DataAccessRequest, OntologyEntry } from 'src/types/model'
 
 export interface DatasetDaaSnapshot {
@@ -120,18 +120,9 @@ export const DAR = {
    * @param fileName The filename to save as
    */
   downloadDARDocument: async (referenceId: string, fileType: string, fileName: string): Promise<void> => {
-    const authOpts = {
-      ...Config.authOpts(),
-      responseType: 'blob' as const,
-      headers: {
-        ...Config.authOpts().headers,
-        'Content-Type': 'application/octet-stream',
-        'Accept': 'application/octet-stream',
-      },
-    }
     const url = `${await Config.getApiUrl()}/api/dar/v2/${referenceId}/${fileType}`
-    const res = await fetchGet<Blob>(url, authOpts)
-    fileDownload(res.data, fileName)
+    const blob = await fetchBlob(url, Config.authOpts())
+    fileDownload(blob, fileName)
   },
 
   /**
@@ -141,18 +132,8 @@ export const DAR = {
    * @returns The document as a Blob
    */
   getDARDocumentAsBlob: async (referenceId: string, fileType: string): Promise<Blob> => {
-    const authOpts = {
-      ...Config.authOpts(),
-      responseType: 'blob' as const,
-      headers: {
-        ...Config.authOpts().headers,
-        'Content-Type': 'application/octet-stream',
-        'Accept': 'application/octet-stream',
-      },
-    }
     const url = `${await Config.getApiUrl()}/api/dar/v2/${referenceId}/${fileType}`
-    const res = await fetchGet<Blob>(url, authOpts)
-    return res.data
+    return fetchBlob(url, Config.authOpts())
   },
 
   /**

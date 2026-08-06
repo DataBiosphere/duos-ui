@@ -5,7 +5,7 @@ import { ExpandMore, ExpandLess } from '@mui/icons-material'
 import Actions from 'src/components/dar_collection_table/Actions'
 import DarCollectionAdminReviewLink from 'src/components/dar_collection_table/DarCollectionAdminReviewLink'
 import { consoleTypes, styles } from 'src/utils/DarCollectionUtils'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { DarCollectionSummary } from 'src/types/model'
 import 'src/components/dar_collection_table/dar_collection_table.css'
 

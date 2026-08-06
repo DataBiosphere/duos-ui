@@ -2,7 +2,7 @@ import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router'
 import { AdminEditUser } from 'src/pages/AdminEditUser'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
@@ -10,8 +10,8 @@ import { DuosUser, UserRole } from 'src/types/model'
 
 const mockNavigate = vi.fn()
 
-vi.mock('react-router-dom', async (importActual) => {
-  const actual = await importActual<typeof import('react-router-dom')>()
+vi.mock('react-router', async (importActual) => {
+  const actual = await importActual<typeof import('react-router')>()
   return {
     ...actual,
     useNavigate: () => mockNavigate,

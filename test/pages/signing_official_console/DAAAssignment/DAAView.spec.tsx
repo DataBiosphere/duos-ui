@@ -10,8 +10,16 @@ import {
 } from 'src/pages/signing_official_console/DAAAssignment/researcherViewHelpers'
 import { DAA } from 'src/libs/ajax/DAA'
 import { User } from 'src/libs/ajax/User'
-import { DuosUser, DAAObject } from 'src/types/model'
+import { Notifications } from 'src/libs/utils'
+import { DuosUser, DAAObject, DaaBulkRelationResult } from 'src/types/model'
 import { makeDaa, makeResearcher } from './fixtures'
+
+const bulkResult = (applied: number): DaaBulkRelationResult => ({
+  requested: applied,
+  applied,
+  skipped: 0,
+  errors: [],
+})
 
 const mockDaas: DAAObject[] = [
   makeDaa({ broadDaa: true, daaId: 1, fileName: 'Default DUOS DAA', dacId: 10 }),
@@ -120,6 +128,11 @@ describe('DAAView', () => {
   beforeEach(() => {
     refreshSpy = vi.fn()
     vi.spyOn(User, 'list').mockResolvedValue(mockResearchers)
+    // Stub the toasts so success/error paths don't spin up real React roots
+    // (createRoot on a body-appended div) that leak across tests. Individual
+    // tests may re-spy to assert on the toast text.
+    vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => undefined)
+    vi.spyOn(Notifications, 'showError').mockImplementation(() => undefined)
   })
 
   afterEach(() => vi.restoreAllMocks())
@@ -283,5 +296,77 @@ describe('DAAView', () => {
     const { container } = mount()
     await user.click(container.querySelector('[data-cy="daa-accordion-toggle-1"]') as HTMLElement)
     expect(container.querySelector('[data-cy="daa-authorized-by-2"]')).toHaveTextContent('—')
+  })
+
+  // ── Bulk Approve All / Remove All ──────────────────────────────────────────
+
+  // DAA 2 has no authorized researchers → both users (ids 1 & 2) are "remaining".
+  it('opens the bulk dialog with the remaining-researcher count when Approve All is clicked', async () => {
+    const user = userEvent.setup()
+    const { container } = mount()
+    await user.click(container.querySelector('[data-cy="bulk-approve-all-daa-2"]') as HTMLElement)
+    const dialog = document.body.querySelector('[data-cy="bulk-confirm-dialog"]')
+    expect(dialog).toBeInTheDocument()
+    expect(dialog).toHaveTextContent('all 2 remaining researchers under GTEx Access Agreement?')
+  })
+
+  it('calls bulkAddUsersToDaa with exactly the unauthorized ids and refreshes on confirm', async () => {
+    const bulkAdd = vi.spyOn(DAA, 'bulkAddUsersToDaa').mockResolvedValue(bulkResult(2))
+    const user = userEvent.setup()
+    const { container } = mount()
+    await user.click(container.querySelector('[data-cy="bulk-approve-all-daa-2"]') as HTMLElement)
+    await user.click(document.body.querySelector('[data-cy="bulk-confirm-dialog-confirm"]') as HTMLElement)
+    await waitFor(() => expect(bulkAdd).toHaveBeenCalledWith(2, [1, 2]))
+    await waitFor(() => expect(User.list).toHaveBeenCalled())
+  })
+
+  it('success toast reflects the applied count from the server response, not the client-side count', async () => {
+    // ids sent = [1, 2] (count 2), but the server reports 5 applied — the toast must echo the server.
+    vi.spyOn(DAA, 'bulkAddUsersToDaa').mockResolvedValue(bulkResult(5))
+    const successSpy = vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => undefined)
+    const user = userEvent.setup()
+    const { container } = mount()
+    await user.click(container.querySelector('[data-cy="bulk-approve-all-daa-2"]') as HTMLElement)
+    await user.click(document.body.querySelector('[data-cy="bulk-confirm-dialog-confirm"]') as HTMLElement)
+    await waitFor(() =>
+      expect(successSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ text: expect.stringContaining('5 researchers') }),
+      ))
+  })
+
+  it('calls bulkRemoveUsersFromDaa with exactly the authorized ids on confirm', async () => {
+    // DAA 1 has one authorized researcher (user 1).
+    const bulkRemove = vi.spyOn(DAA, 'bulkRemoveUsersFromDaa').mockResolvedValue(bulkResult(1))
+    const user = userEvent.setup()
+    const { container } = mount()
+    await user.click(container.querySelector('[data-cy="bulk-remove-all-daa-1"]') as HTMLElement)
+    await user.click(document.body.querySelector('[data-cy="bulk-confirm-dialog-confirm"]') as HTMLElement)
+    await waitFor(() => expect(bulkRemove).toHaveBeenCalledWith(1, [1]))
+    await waitFor(() => expect(User.list).toHaveBeenCalled())
+  })
+
+  it('makes no API call when the bulk dialog is cancelled', async () => {
+    const bulkAdd = vi.spyOn(DAA, 'bulkAddUsersToDaa').mockResolvedValue(bulkResult(2))
+    const user = userEvent.setup()
+    const { container } = mount()
+    await user.click(container.querySelector('[data-cy="bulk-approve-all-daa-2"]') as HTMLElement)
+    await user.click(document.body.querySelector('[data-cy="bulk-confirm-dialog-cancel"]') as HTMLElement)
+    expect(document.body.querySelector('[data-cy="bulk-confirm-dialog"]')).not.toBeInTheDocument()
+    expect(bulkAdd).not.toHaveBeenCalled()
+  })
+
+  it('does not refresh when the bulk call fails (preserves displayed state)', async () => {
+    vi.spyOn(DAA, 'bulkAddUsersToDaa').mockRejectedValue(new Error('boom'))
+    const user = userEvent.setup()
+    const { container } = mount()
+    await user.click(container.querySelector('[data-cy="bulk-approve-all-daa-2"]') as HTMLElement)
+    await user.click(document.body.querySelector('[data-cy="bulk-confirm-dialog-confirm"]') as HTMLElement)
+    await waitFor(() => expect(DAA.bulkAddUsersToDaa).toHaveBeenCalled())
+    expect(User.list).not.toHaveBeenCalled()
+  })
+
+  it('disables Remove All for a DAA with no authorized researchers', () => {
+    const { container } = mount()
+    expect(container.querySelector('[data-cy="bulk-remove-all-daa-2"]')).toBeDisabled()
   })
 })

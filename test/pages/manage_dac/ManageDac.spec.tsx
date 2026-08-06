@@ -2,7 +2,7 @@ import React from 'react'
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router'
 import Modal from 'react-modal'
 import ManageDac from 'src/pages/manage_dac/ManageDac'
 import { DAC } from 'src/libs/ajax/DAC'
@@ -50,7 +50,7 @@ vi.mock('src/components/modals/ConfirmationModal', () => ({
 let mockDacDatasetsImpl: (dacId: number) => Promise<Dataset[]> = () => Promise.resolve([])
 
 vi.mock('src/components/manage_dac_table/ManageDacTable', async () => {
-  const { Link } = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
+  const { Link } = await vi.importActual<typeof import('react-router')>('react-router')
 
   const MockTable = ({
     dacs,

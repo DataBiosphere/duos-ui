@@ -25,6 +25,10 @@ vi.mock('src/libs/utils', () => ({
   },
 }))
 
+vi.mock('src/pages/user_profile/SigningOfficialRequest', () => ({
+  default: () => <div data-testid="signing-official-request" />,
+}))
+
 import { Institution } from 'src/libs/ajax/Institution'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
@@ -161,5 +165,11 @@ describe('AffiliationAndRole', () => {
     await waitFor(() => {
       expect(screen.getByText(/My Institution's Signing Official/)).toBeInTheDocument()
     })
+  })
+
+  it('renders the Signing Official request inside the Affiliation & Role section', () => {
+    render(<AffiliationAndRole user={user} />)
+
+    expect(screen.getByTestId('signing-official-request')).toBeInTheDocument()
   })
 })

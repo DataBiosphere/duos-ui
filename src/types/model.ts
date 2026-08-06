@@ -121,6 +121,21 @@ export interface DAAObject {
   dacs: Array<DacObject>
 }
 
+/**
+ * Result body returned by the atomic bulk pre-authorization endpoints
+ * (`/api/daa/bulk/...`). The backend operation is all-or-nothing with respect to
+ * failure, so `errors` is always empty on a returned summary. `applied` counts only
+ * the relationships that actually changed; requested items already in the desired
+ * state (re-adding an existing pre-authorization, or removing one that was never
+ * present) are no-ops counted under `skipped`, so `applied + skipped === requested`.
+ */
+export interface DaaBulkRelationResult {
+  requested: number
+  applied: number
+  skipped: number
+  errors: string[]
+}
+
 export interface DacObject {
   dacId?: number
   dacName?: string

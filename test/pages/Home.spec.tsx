@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import Home from 'src/pages/Home'
 
 vi.mock('src/libs/libraryVersions', () => ({
@@ -115,7 +115,7 @@ describe('Home page', () => {
       await act(async () => {
         fireEvent.click(libraryLink)
       })
-      expect(handleSignIn).toHaveBeenCalledWith('/datalibrary')
+      expect(handleSignIn).toHaveBeenCalledWith('/datalibrary', expect.any(Function))
     })
   })
 

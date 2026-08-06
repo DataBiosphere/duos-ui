@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DAC } from 'src/libs/ajax/DAC'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import { isNil } from 'src/utils/NodashUtil'
 import Button from '@mui/material/Button'
 import { Tooltip as ReactTooltip } from 'react-tooltip'

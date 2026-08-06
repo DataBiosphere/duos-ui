@@ -1,5 +1,6 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import {
+  fetchBlob,
   fetchGet,
   fetchPost,
   fetchPut,
@@ -107,6 +108,33 @@ describe('fetchAdapter - Fetch methods', () => {
     const result = await fetchGet<Blob>('/api/file', { responseType: 'blob' })
     expect(result.data?.constructor?.name).toBe('Blob')
     expect(result.data.type).toContain('text/plain')
+  })
+
+  it('fetchBlob - should GET a blob with an octet-stream Accept header', async () => {
+    const mockBlob = new Blob(['binary'], { type: 'application/octet-stream' })
+    fetchMock.mockResolvedValue(new Response(mockBlob, { status: 200 }))
+
+    const result = await fetchBlob('/api/file')
+
+    expect(result?.constructor?.name).toBe('Blob')
+    const [url, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+    expect(url).toBe('/api/file')
+    expect(options.method).toBe('GET')
+    expect(options.headers?.Accept).toBe('application/octet-stream')
+    // The old hand-rolled blob configs overrode Content-Type to octet-stream on a
+    // bodyless GET; fetchBlob drops that and inherits the adapter's standard default,
+    // exactly like every other fetchGet call.
+    expect(options.headers?.['Content-Type']).not.toBe('application/octet-stream')
+  })
+
+  it('fetchBlob - should let the caller override the Accept header', async () => {
+    const mockBlob = new Blob(['pdf'], { type: 'application/pdf' })
+    fetchMock.mockResolvedValue(new Response(mockBlob, { status: 200 }))
+
+    await fetchBlob('/api/file', { headers: { Accept: 'application/pdf' } })
+
+    const [, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+    expect(options.headers?.Accept).toBe('application/pdf')
   })
 
   it('fetchGet - should return text when content-type is text/plain', async () => {
