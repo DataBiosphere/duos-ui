@@ -1,5 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import '@testing-library/jest-dom/vitest'
 import { act, render, screen } from '@testing-library/react'
 import ReviewHeader from 'src/pages/dar_collection_review/ReviewHeader'
 
@@ -40,9 +41,9 @@ describe('ReviewHeader - Tests', () => {
       />,
     )
 
-    expect(screen.getByText('DAR-100')).toBeTruthy()
-    expect(screen.getByText('Title')).toBeTruthy()
-    expect(screen.getByText('No datasets approved')).toBeTruthy()
+    expect(screen.getByText('DAR-100')).toBeInTheDocument()
+    expect(screen.getByText('Title')).toBeInTheDocument()
+    expect(screen.getByText('No datasets approved')).toBeInTheDocument()
   })
 
   it('keeps the DAR code and project title on one consistently styled line', () => {
@@ -398,6 +399,21 @@ describe('ReviewHeader - Tests', () => {
     expect(screen.getByRole('link', { name: /LinkedIn/ }).getAttribute('href')).toBe('https://www.linkedin.com/in/janedoe')
     expect(screen.getByRole('link', { name: /ORCID/ }).getAttribute('href')).toBe('https://orcid.org/0000-0002-1825-0097')
     expect(screen.getByRole('link', { name: /Through.bio/ }).getAttribute('href')).toBe('https://through.bio/janedoe')
+  })
+
+  it('renders a non-HTTP external profile value as plain text, not a link', () => {
+    const { container } = render(
+      <ReviewHeader
+        approvedDatasets={[]}
+        researcherExternalProfiles={{
+          institutionalWebsite: 'broad.mit.edu',
+        }}
+      />,
+    )
+
+    const fact = container.querySelector('#researcher-institutional-website-fact')
+    expect(fact?.textContent).toContain('broad.mit.edu')
+    expect(fact?.querySelector('a')).toBeNull()
   })
 
   it('does not render researcher external profile facts when absent', () => {

@@ -8,6 +8,13 @@ import { Theme } from 'src/libs/theme'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 import { formattedLinkedIn, formattedOrcid, formattedThroughBio } from 'src/utils/ExternalProfileUtils'
 
+const factsColumnStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  rowGap: '0.7rem',
+  minWidth: 0,
+}
+
 const styles: Record<string, React.CSSProperties> = {
   containerRow: {
     margin: '0rem 1.2rem',
@@ -69,17 +76,9 @@ const styles: Record<string, React.CSSProperties> = {
     rowGap: '1.2rem',
     alignItems: 'start',
   },
-  factsColumn: {
-    display: 'flex',
-    flexDirection: 'column',
-    rowGap: '0.7rem',
-    minWidth: 0,
-  },
+  factsColumn: factsColumnStyle,
   factsColumnBordered: {
-    display: 'flex',
-    flexDirection: 'column',
-    rowGap: '0.7rem',
-    minWidth: 0,
+    ...factsColumnStyle,
     borderLeft: '1px solid rgba(31, 59, 80, 0.15)',
     paddingLeft: '1.6rem',
   },
@@ -282,7 +281,7 @@ export default function ReviewHeader({
                 <div className="fact-item" style={styles.factItem} id="researcher-email-fact">
                   <span style={styles.factLabel}>Email:</span>
                   <span style={styles.factValue}>
-                    <a href={`mailto:${email}`} aria-label={`Email ${userName}: ${email}`}>{email}</a>
+                    <a href={`mailto:${email}`} aria-label={`Email ${userName || 'researcher'}: ${email}`}>{email}</a>
                   </span>
                 </div>
               )}
@@ -337,15 +336,17 @@ export default function ReviewHeader({
               {hasSigningOfficial
                 ? (
                     <div id="signing-official-fact" style={styles.factsColumn}>
-                      <div className="fact-item" style={styles.factItem} id="signing-official-name-fact">
-                        <span style={styles.factLabel}>Signing Official:</span>
-                        <span style={styles.factValue}>{soName}</span>
-                      </div>
+                      {soName && (
+                        <div className="fact-item" style={styles.factItem} id="signing-official-name-fact">
+                          <span style={styles.factLabel}>Signing Official:</span>
+                          <span style={styles.factValue}>{soName}</span>
+                        </div>
+                      )}
                       {soEmail && (
                         <div className="fact-item" style={styles.factItem} id="signing-official-email-fact">
                           <span style={styles.factLabel}>Email:</span>
                           <span style={styles.factValue}>
-                            <a href={`mailto:${soEmail}`} aria-label={`Email ${soName}: ${soEmail}`}>{soEmail}</a>
+                            <a href={`mailto:${soEmail}`} aria-label={`Email ${soName || 'signing official'}: ${soEmail}`}>{soEmail}</a>
                           </span>
                         </div>
                       )}
