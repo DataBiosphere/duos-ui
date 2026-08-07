@@ -394,7 +394,7 @@ updated to match.
 Two smaller clarifications also came out of that review. The size limit is 5 MiB (5,242,880 bytes),
 enforced by the import endpoint itself — the shared `Resource#validateFileDetails` check is the OWASP
 `FileValidator` default of 500 MB, which is far too permissive to be a useful bound on a text
-template. And the RFC 4180 decision below is kept, but the contract now documents Excel and Google
+template. And the RFC 4180 decision above is kept, but the contract now documents Excel and Google
 Sheets export behavior explicitly and rejects a non-comma delimiter with a message naming the
 detected character instead of reporting a missing header.
 
