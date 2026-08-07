@@ -15,7 +15,7 @@ import { RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
 import { GENERIC_ERROR_BODY } from '../errors.js'
 
 /**
- * The BFF API proxy (Phase 3, stories 3-C, 3-D and 3-E).
+ * The BFF API proxy (Phase 3).
  *
  * Every DUOS API call the client makes is forwarded from here with the session's
  * B2C access token attached, so the browser never holds a bearer token. The
@@ -48,7 +48,7 @@ import { GENERIC_ERROR_BODY } from '../errors.js'
 /**
  * The BFF-side prefix. `/duos-api/api/dataset/1` → `${DUOS_API_URL}/api/dataset/1`.
  *
- * Public API surface between client and BFF: Epic 4 makes `getApiUrl()` return
+ * Public API surface between client and BFF: Phase 4 makes `getApiUrl()` return
  * this, at which point all 104 call sites keep their literal paths. Changing it
  * later means changing both ends together.
  */
@@ -134,7 +134,7 @@ export const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
  * The `error` code a CSRF rejection returns, and the one thing about a proxy
  * error the client branches on (ADR-010).
  *
- * Epic 4's fetch layer refetches a token and retries once when it sees this, and
+ * Phase 4's fetch layer refetches a token and retries once when it sees this, and
  * only when it sees this. Status alone cannot carry that signal: an upstream
  * authorization denial is an ordinary proxied response and also arrives as a
  * 403, so retrying on the status would replay every write the DUOS API refused.
@@ -145,7 +145,7 @@ export const CSRF_ERROR_CODE = 'csrf_validation_failed'
  * The two ways `@fastify/csrf-protection` rejects a request, mapped to the
  * reason the BFF publishes. `FST_CSRF_MISSING_SECRET` means there was no session
  * to verify against, so enforcement stopped before the token — including the
- * shape a session rotation that discards the secret (Epic 5, 5-D) will produce.
+ * shape a session rotation that discards the secret (Phase 5, 5-D) will produce.
  * `FST_CSRF_INVALID_TOKEN` means there was a secret and the token did not verify
  * against it.
  *
@@ -188,7 +188,7 @@ const CSRF_REJECTION_REASONS: ReadonlyMap<string, string> = new Map([
  *
  * Safe for the client — `fetch` ignores both headers, and every document path is
  * a `fetchBlob` download initiated by the SPA's own document. Verified against
- * the call sites; re-check when Epic 4 rewrites the fetch layer. See the epic's
+ * the call sites; re-check when Phase 4 rewrites the fetch layer. See the epic's
  * story 3-E(b) for the full argument and for what this costs (direct navigation
  * to the upstream's Swagger UI renders inert).
  */
