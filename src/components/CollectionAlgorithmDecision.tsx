@@ -79,7 +79,11 @@ export default function CollectionAlgorithmDecision(props: Readonly<CollectionAl
       <div style={{ fontSize: '1.2rem' }}>
         <span id={`collection-${id}-reason-label`} style={{ paddingRight: '0.3rem', color: '#333F52' }}>Reason:</span>
         <span id={`collection-${id}-reason-value`} style={{ fontWeight: 400 }}>
-          {isEmpty(rationales) ? 'N/A' : rationales.map(r => <p key={r} style={{ margin: 0 }}>{r}</p>)}
+          {isEmpty(rationales)
+            ? 'N/A'
+            : rationales.map(r => (
+                <span key={r} style={{ display: 'block' }}>{r}</span>
+              ))}
         </span>
       </div>
       <div style={{ fontSize: '1.2rem' }}>
