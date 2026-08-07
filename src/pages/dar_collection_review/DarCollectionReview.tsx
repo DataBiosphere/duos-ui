@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
 import TabControl from 'src/components/TabControl'
 import { type TabStyleOverride } from 'src/components/SelectableText'
@@ -170,6 +170,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
     fullDAR: 'Full DAR',
   })
   const [selectedTab, setSelectedTab] = useState(tabs.fullDAR)
+  const initialTabSelected = useRef(false)
   const [researcherProfile, setResearcherProfile] = useState<DuosUser | Record<string, never>>({})
   const [dataUseBuckets, setDataUseBuckets] = useState<Bucket[]>([])
   const [dacIds, setDacIds] = useState<number[]>([])
@@ -208,7 +209,14 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
       setDarInfo(darInfo ?? {})
       setResearcherProfile(researcherProfile)
       setApprovedDatasets(approvedDatasetNames)
-      setTabs(tabsForUser(user, processedBuckets, adminPage))
+      const updatedTabs = tabsForUser(user, processedBuckets, adminPage)
+      setTabs(updatedTabs)
+      // Open on the left-most tab (Vote when the user has one). Guarded so the Chair Vote
+      // tab's re-init does not pull the user back off the tab they just opened.
+      if (!initialTabSelected.current) {
+        initialTabSelected.current = true
+        setSelectedTab(Object.values(updatedTabs)[0])
+      }
       setDacIds(dacIds)
       setIsLoading(false)
       setSubcomponentLoading(false)

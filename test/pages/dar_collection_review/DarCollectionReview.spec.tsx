@@ -295,6 +295,25 @@ describe('DAR Review', () => {
     expect(await screen.findByText('Sleep Apnea')).toBeInTheDocument()
   })
 
+  it('opens on the Vote tab without clicking when the user has one', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(chair)
+    renderReview({ adminPage: false })
+
+    // Vote is the left-most tab, so its content renders on load with no interaction.
+    expect(await screen.findByText('Sleep Apnea')).toBeInTheDocument()
+  })
+
+  it('opens on Full DAR when the user has no Vote tab', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(researcher)
+    const { container } = renderReview({ adminPage: false })
+
+    await screen.findByText('Full DAR')
+    const tabLabels = Array.from(container.querySelectorAll('.tab-list button')).map(tab => tab.textContent)
+
+    expect(tabLabels[0]).toBe('Full DAR')
+    expect(screen.queryByText('Sleep Apnea')).not.toBeInTheDocument()
+  })
+
   it('renders Vote tab (not Chair Vote) for Members', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(member)
     renderReview({ adminPage: false })
