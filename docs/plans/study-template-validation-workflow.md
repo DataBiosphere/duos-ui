@@ -629,10 +629,11 @@ the Ticket 3 endpoint and render expected validation results separately from req
 a v1 requirement rather than a convenience: product confirmed producers get the template from the
 DUOS UI, and the v1 contract expresses every structured value as a row, so a hand-built file means
 keeping `recordType`, `recordId`, and `parentRecordId` consistent across dozens of rows. The
-generated CSV must carry the canonical header, one row per offered field with `templateVersion`,
-escape any `value` cell whose first non-whitespace character is `=`, `+`, `-`, or `@` so the file is not a CSV-injection vector in the producer's
-spreadsheet application. Generating it in the browser from a committed field manifest is sufficient;
-no Consent endpoint is required.
+generated CSV must carry the canonical header and one row per offered field, with `templateVersion`,
+`recordType`, `recordId`, `parentRecordId`, and `field` populated and `value` left empty. It must
+also escape any `value` cell whose first non-whitespace character is `=`, `+`, `-`, or `@`, so the
+file is not a CSV-injection vector in the producer's spreadsheet application. Generating it in the
+browser from a committed field manifest is sufficient; no Consent endpoint is required.
 
 The selected file remains visible after validation errors. Users can remove it, select a replacement,
 and retry without leaving the page. A valid response navigates to
