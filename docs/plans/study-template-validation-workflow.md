@@ -55,11 +55,17 @@ This work does not include:
 
 ## Prerequisite: template specification
 
+**Status: resolved.** The canonical contract is `docs/study-template-v1.md` in `consent`, delivered
+by [consent#3004](https://github.com/DataBiosphere/consent/pull/3004) with fixtures under
+`src/test/resources/fixtures/study-template/v1`. That document is authoritative for the layout; this
+plan defers to it wherever the two disagree. The decisions it settled are summarized under
+"Contract outcomes" below, and the affected tickets have been updated to match.
+
 Implementation requires a versioned, canonical CSV fixture that defines:
 
 - Required and optional headers.
 - The mapping from each CSV field to the `StudyRegistrationRequest` wire contract.
-- Encodings for arrays, booleans, dates, consent groups, and study assets.
+- Encodings for arrays, booleans, dates, consent groups, and file types.
 - Whether unknown headers are ignored, warned about, or rejected.
 - Maximum upload size and supported MIME types.
 - How the template version is identified.
@@ -278,8 +284,9 @@ Draft mode should:
 - Fetch the authorized draft by UUID.
 - Verify `meta.draftType` is `StudyDatasetSubmissionV1` before reading the document.
 - Convert the registration-shaped draft document into the UI `Study` model.
-- Populate scalar fields, study properties, consent groups, and supported non-file assets.
+- Populate scalar fields, study properties, consent groups, and their file types.
 - Leave file upload controls empty so the user can add required documents before submission.
+- Leave asset sections untouched; v1 templates carry no assets.
 - Use the title **Draft Study Registration Form**.
 - Allow the user to review and edit all populated values.
 - Submit through the existing study-creation path.
@@ -327,7 +334,7 @@ survive `draft document → Study → submission payload` conversion.
 - A replacement file can be selected and validated.
 - Request failures remain on the page and can be retried.
 - Successful validation navigates using the returned typed draft reference.
-- Draft loading populates representative scalar, property, consent-group, and non-file asset fields.
+- Draft loading populates representative scalar, property, consent-group, and file-type fields.
 - File upload controls remain empty and usable after draft loading.
 - A draft whose metadata is not `StudyDatasetSubmissionV1` is rejected before hydration.
 - Missing or unauthorized drafts show a recoverable loading error.
@@ -352,10 +359,10 @@ versions.
 
 | Decision | Options | Recommended answer |
 | --- | --- | --- |
-| CSV layout | A. One wide row with numbered consent-group and asset columns.<br>B. Record-type rows, where each row identifies itself as study, consent group, or asset.<br>C. Multiple related CSV files delivered in a ZIP archive. | **B if no template has been distributed yet.** Record-type rows represent one-to-many data without numbered-column limits and still use one uploaded CSV. If users already have an approved template, preserve that layout as v1 instead of redesigning it in this ticket. |
+| CSV layout | A. One wide row with numbered consent-group and asset columns.<br>B. Record-type rows, where each row identifies itself as study, consent group, or asset.<br>C. Multiple related CSV files delivered in a ZIP archive. | **Settled: B.** No template had been distributed, and product confirmed producers will download one from the DUOS UI, so there was no existing layout to preserve. Record types are `study`, `consentGroup`, and `fileType`. |
 | Versioning | A. Infer the version from headers.<br>B. Require a `templateVersion` field.<br>C. Support only an unversioned layout. | **B.** Require a major version such as `1`; reject unsupported major versions with an actionable error. Header inference is useful only as a fallback for a pre-existing unversioned template. |
 | CSV dialect and encoding | A. RFC 4180-style comma-separated UTF-8.<br>B. Auto-detect comma, tab, and semicolon delimiters.<br>C. Accept spreadsheet-specific encodings. | **A.** Use comma delimiters, standard quoting, CRLF or LF line endings, and UTF-8; tolerate a UTF-8 BOM. Auto-detection makes malformed files harder to diagnose consistently. |
-| Maximum upload size | A. 1 MB.<br>B. 5 MB.<br>C. 10 MB or more. | **B.** Five MB is generous for registration metadata while bounding memory, parsing time, and abuse. Revisit the limit using observed template sizes. |
+| Maximum upload size | A. 1 MB.<br>B. 5 MB.<br>C. 10 MB or more. | **Settled: B, as 5 MiB (5,242,880 bytes).** Generous for registration metadata while bounding memory, parsing time, and abuse: a 100-consent-group study is roughly 300 KB. Enforced by the import endpoint, not by the shared upload check. Revisit using observed template sizes. |
 | Empty upload and MIME checks | A. Trust the filename extension.<br>B. Require `.csv`, permit common CSV MIME types, and inspect the content.<br>C. Require exactly `text/csv`. | **B.** Browsers and operating systems report CSV MIME types inconsistently. Reject empty files and non-`.csv` names, then rely on safe parsing rather than MIME alone. |
 | File-backed registration fields | A. Put filenames in the CSV without the files.<br>B. Upload related files as draft attachments.<br>C. Exclude file fields and let users upload documents on the populated draft form. | **C.** A filename without file content is misleading, while multi-file draft attachment handling materially expands this ticket. Leave both file controls empty on the draft page. |
 | Unknown columns or record fields | A. Ignore them.<br>B. Return warnings but continue.<br>C. Reject them. | **C for a recognized template version.** Unknown fields usually indicate a misspelled header or a newer unsupported template. Reject them rather than silently dropping user data. |
@@ -370,6 +377,26 @@ versions.
 | Abandoned draft retention | A. Retain indefinitely.<br>B. Add a 30-day TTL in this work.<br>C. Reuse the current draft lifecycle and address retention consistently for all draft types. | **C.** Do not add template-only retention semantics. Confirm the current operational policy; if no acceptable policy exists, create a separate platform-level draft-retention ticket before production rollout. |
 | Authorized workflow roles | A. Match study creation and include administrators, chairpersons, and data submitters.<br>B. Match the previous draft APIs and exclude chairpersons.<br>C. Data submitters only. | **A.** Keep feature parity across study-registration user groups. Add chairpersons to existing draft endpoints while preserving ownership checks. |
 | Feature rollout | A. Release backend and UI simultaneously without a flag.<br>B. Deploy the backend first, then release the UI entry point.<br>C. Add a permanent feature flag. | **B.** The endpoint is inert until the UI calls it, allowing Consent to deploy first without permanent flag complexity. |
+
+## Contract outcomes
+
+Ticket 1 is delivered by [consent#3004](https://github.com/DataBiosphere/consent/pull/3004). Four
+decisions taken during its review change the scope of later tickets, and the tickets below have been
+updated to match.
+
+| Decision | Outcome | Tickets affected |
+| --- | --- | --- |
+| No JSON anywhere in the template | Structured wire values are expressed as rows. Scalar arrays repeat their row once per item; `fileTypes`, the only wire array of objects, becomes a `fileType` record type parented to a consent group. | 1, 2, 5 |
+| Non-file assets excluded from v1 | Asset payloads nest (`authors`, `presenter`, `maintainer`), so a JSON-free encoding would need dotted paths or second-level child records. Assets are optional and additive, so nothing is blocked; they are the first v2 candidate. | 1, 2, 5 |
+| `alternativeDataSharingPlan*` excluded entirely | Not just the filename field. The template cannot carry the plan document, so importing the flags alone still returns the user to the form. | 1, 2, 5 |
+| Template is downloaded from the DUOS UI | Producers do not hand-build the file. With every structured value now a row, the download is a v1 requirement rather than a convenience. | 4 |
+
+Two smaller clarifications also came out of that review. The size limit is 5 MiB (5,242,880 bytes),
+enforced by the import endpoint itself — the shared `Resource#validateFileDetails` check is the OWASP
+`FileValidator` default of 500 MB and does not bound this upload usefully. And the RFC 4180 decision
+below is kept, but the contract now documents Excel and Google Sheets export behavior explicitly and
+rejects a non-comma delimiter with a message naming the detected character instead of reporting a
+missing header.
 
 ## Jira-ready implementation tickets
 
@@ -397,9 +424,9 @@ templates.
 **Description**
 
 Resolve the decisions above with product, design, and API owners. Define how study fields,
-consent groups, datasets, and supported non-file assets are represented. Produce a field mapping
-from the CSV contract to the `StudyRegistrationRequest` wire contract and identify which existing
-registration rules apply to each field.
+consent groups, datasets, and file types are represented. Produce a field mapping from the CSV
+contract to the `StudyRegistrationRequest` wire contract and identify which existing registration
+rules apply to each field.
 
 Commit only synthetic examples. At minimum, provide a minimal valid template, a representative
 multi-consent-group template, and invalid examples for structural and field-level errors. Place the
@@ -408,12 +435,17 @@ browser or end-to-end tests cannot consume the same source.
 
 **Acceptance criteria**
 
-- The v1 layout, required version marker, CSV dialect, encoding, and 5 MB limit are documented.
+- The v1 layout, required version marker, CSV dialect, encoding, and 5 MiB limit are documented.
 - Every supported CSV field maps to the `StudyRegistrationRequest` wire contract or is explicitly
   marked as template-only metadata.
 - Required and optional fields are identified.
-- Array, Boolean, date, empty-value, consent-group, and asset encodings are defined.
+- Array, Boolean, date, empty-value, consent-group, and file-type encodings are defined, with no
+  JSON encoding anywhere in the template.
 - File-backed fields are excluded, and the contract states that files must be added on the draft form.
+- The whole `alternativeDataSharingPlan*` group and all non-file assets are excluded from v1, with
+  the reasons recorded.
+- Spreadsheet compatibility is documented for Excel and Google Sheets exports, including BOM, CRLF,
+  and the rejection of non-comma delimiters.
 - Unknown fields, duplicate fields, empty files, and unsupported versions have defined behavior.
 - At least two valid and four invalid synthetic fixtures are committed.
 - Expected structured validation errors are recorded for each invalid fixture.
@@ -470,9 +502,14 @@ content, or stack traces in logs or responses.
 
 - Valid canonical fixtures map deterministically to `StudyRegistrationRequest`.
 - CRLF and LF line endings, quoted delimiters, escaped quotes, and a UTF-8 BOM are supported.
-- Empty files, files over 5 MB, malformed CSV, unsupported versions, missing fields, duplicate
+- Empty files, files over 5 MiB, malformed CSV, unsupported versions, missing fields, duplicate
   fields, and unknown fields return actionable errors.
-- Boolean, date, enum, array, consent-group, and supported asset values are validated.
+- A non-comma delimiter in the header is reported as such rather than as a missing header.
+- Boolean, date, enum, scalar-array, consent-group, and file-type values are validated.
+- Scalar arrays are assembled from repeated rows in file order; an empty item or a repeated item
+  value within one field is an error.
+- `fileType` records attach to the consent group named by `parentRecordId`; an unknown parent is
+  rejected as an orphan.
 - Filename-only and file-content fields are rejected as unsupported template fields.
 - All independent errors are returned up to the cap, with truncation explicitly reported.
 - `StudyRegistrationRequestValidator` is reused rather than reimplemented.
@@ -573,20 +610,30 @@ and authentication requirements.
 
 **Repository:** `duos-ui`
 
-**Suggested size:** 5 points
+**Suggested size:** 8 points
 
 **Dependencies:** Ticket 1; may develop against the Ticket 3 contract before deployment
 
 **Summary**
 
-Allow authorized study-registration users to upload, validate, remove, and replace a study CSV
-template with immediate feedback.
+Let authorized study-registration users download a blank v1 template, then upload, validate, remove,
+and replace a filled-in one with immediate feedback.
 
 **Description**
 
 Add an **UPLOAD TEMPLATE** action alongside **ADD DATASET** on My Data Submissions and route it to a
 dedicated upload page. Preserve the manual registration action. Add a typed multipart API client for
 the Ticket 3 endpoint and render expected validation results separately from request failures.
+
+**Template download.** The upload page must also offer a **Download blank template** action. This is
+a v1 requirement rather than a convenience: product confirmed producers get the template from the
+DUOS UI, and the v1 contract expresses every structured value as a row, so a hand-built file means
+keeping `recordType`, `recordId`, and `parentRecordId` consistent across dozens of rows. The
+generated CSV must carry the canonical header, one row per offered field with `templateVersion`,
+`recordType`, `recordId`, `parentRecordId`, and `field` populated and `value` left empty, and must
+escape leading `=`, `+`, `-`, and `@` so the file is not a CSV-injection vector in the producer's
+spreadsheet application. Generating it in the browser from a committed field manifest is sufficient;
+no Consent endpoint is required.
 
 The selected file remains visible after validation errors. Users can remove it, select a replacement,
 and retry without leaving the page. A valid response navigates to
@@ -595,7 +642,12 @@ and retry without leaving the page. A valid response navigates to
 **Acceptance criteria**
 
 - Data submitters, chairpersons, and administrators can access the action and route.
-- The picker requests `.csv` files and communicates the 5 MB limit before upload.
+- A **Download blank template** action on the upload page produces a v1 CSV whose header, record
+  scaffold, and `templateVersion` match the canonical contract, with every `value` cell empty.
+- The downloaded file round-trips: filling in values and uploading it without structural edits
+  passes validation.
+- Formula-prefix characters in generated cells are escaped.
+- The picker requests `.csv` files and communicates the 5 MiB limit before upload.
 - Validate is disabled until a file is selected.
 - Clicking Validate disables duplicate requests and shows the existing loading spinner.
 - All structured errors render with row and column context when available.
@@ -613,6 +665,9 @@ and retry without leaving the page. A valid response navigates to
 - API client multipart and response typing tests.
 - Component tests for idle, pending, validation-error, request-error, replacement, and success
   states.
+- Template-generation tests covering header fidelity, empty `value` cells, and formula escaping.
+- A round-trip test asserting the generated template validates once values are supplied, using the
+  canonical fixtures as the expected shape.
 - Routing and role-visibility tests.
 - Accessibility assertions for labels, live results, disabled state, and busy state.
 
@@ -644,9 +699,10 @@ Add the explicit `/data_submission_form/draft/study-dataset/:draftId` route and 
 the existing generic draft read and delete endpoints. Extend `DataSubmissionFormV2` with an
 explicit draft mode instead of treating a UUID as a persisted study ID. After loading, require
 `meta.draftType === 'StudyDatasetSubmissionV1'` before mapping the registration-shaped document
-into the UI `Study` model. Populate scalar fields, study properties, consent groups, and supported
-non-file assets. Keep institutional-certification and alternative-sharing-plan upload controls
-empty and available for the user.
+into the UI `Study` model. Populate scalar fields, study properties, consent groups, and their file
+types. v1 templates carry no assets and no alternative-sharing-plan fields, so those sections load
+empty and remain editable. Keep institutional-certification and alternative-sharing-plan upload
+controls empty and available for the user.
 
 Users can review and edit the populated form before using the existing create-study action. After
 creation succeeds, delete the source draft. If creation fails, retain the draft. If cleanup fails,
@@ -667,7 +723,7 @@ report it independently without presenting the created study as failed.
   submitted or deleted through this workflow.
 - The page title identifies the registration as a draft.
 - Every v1 template field supported by Ticket 1 populates the corresponding form control.
-- Consent groups and supported non-file assets retain their ordering and relationships.
+- Consent groups and their file types retain their ordering and relationships.
 - `draft document → Study → submission payload` round trips all supported fields without semantic
   data loss.
 - File upload controls are empty after hydration and accept files before study creation.
@@ -683,7 +739,7 @@ report it independently without presenting the created study as failed.
 **Tests**
 
 - Unit tests for both mapper directions and round-trip behavior.
-- Form tests for representative scalar, property, consent-group, non-file asset, file-control, and
+- Form tests for representative scalar, property, consent-group, file-type, file-control, and
   `data` values.
 - Route-mode, wrong-draft-type, and authorization-error tests.
 - Submission tests for success, create failure, and cleanup failure.
@@ -748,4 +804,4 @@ adding template-only cleanup behavior here.
 
 - A new platform-wide retention implementation.
 - Supporting template v2.
-- Performance testing beyond the documented 5 MB request limit.
+- Performance testing beyond the documented 5 MiB request limit.
