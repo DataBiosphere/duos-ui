@@ -201,7 +201,7 @@ describe('ReviewHeader - Tests', () => {
       'signing-official-column',
       'it-cloud-column',
     ])
-    expect(screen.getAllByText('None listed')).toHaveLength(2)
+    expect(screen.getAllByText('None listed')).toHaveLength(3)
   })
 
   it('renders AnVIL, local computing, and cloud computing facts', () => {
@@ -329,9 +329,15 @@ describe('ReviewHeader - Tests', () => {
     expect(container.querySelector('#signing-official-email-fact')).toBeTruthy()
   })
 
-  it('renders the IT Director email', () => {
+  it('renders the IT Director email as a mailto link', () => {
     render(<ReviewHeader approvedDatasets={[]} itDirectorEmail="it@broad.mit.edu" />)
-    expect(screen.getByText('it@broad.mit.edu')).toBeTruthy()
+    const link = screen.getByRole('link', { name: /Email IT Director/ })
+    expect(link.getAttribute('href')).toBe('mailto:it@broad.mit.edu')
+  })
+
+  it('renders a "None listed" placeholder for the IT Director when absent', () => {
+    const { container } = render(<ReviewHeader approvedDatasets={[]} />)
+    expect(container.querySelector('#it-director-fact')?.textContent).toContain('None listed')
   })
 
   it('renders the collaboration letter download link when all fields are present', () => {

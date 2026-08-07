@@ -374,12 +374,14 @@ export default function ReviewHeader({
             </div>
             <div className="facts-column" style={styles.factsColumnBordered} id="it-cloud-column">
               <span style={styles.columnHeading}>IT/Cloud Info</span>
-              {itDirectorEmail && (
-                <div className="fact-item" style={styles.factItem} id="it-director-fact">
-                  <span style={styles.factLabel}>IT Director:</span>
-                  <span style={styles.factValue}>{itDirectorEmail}</span>
-                </div>
-              )}
+              <div className="fact-item" style={styles.factItem} id="it-director-fact">
+                <span style={styles.factLabel}>IT Director:</span>
+                <span style={itDirectorEmail ? styles.factValue : styles.factValueMuted}>
+                  {itDirectorEmail
+                    ? <a href={`mailto:${itDirectorEmail}`} aria-label={`Email IT Director: ${itDirectorEmail}`}>{itDirectorEmail}</a>
+                    : 'None listed'}
+                </span>
+              </div>
               <div className="fact-item" style={styles.factItem} id="anvil-storage-fact">
                 <span style={styles.factLabel}>AnVIL Storage & Analysis Only:</span>
                 <span style={styles.factValue}>{anvilStorage ? 'Yes' : 'No'}</span>
