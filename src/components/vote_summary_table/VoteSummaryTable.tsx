@@ -180,14 +180,15 @@ function rationaleCellData({ rationale, voteId, label = 'rationale' }: { rationa
   const hasRationale = !isNil(rationale) && rationale.trim().length > 0
   const data = hasRationale
     ? (
-        <span
+        <button
+          type="button"
           data-tooltip-id={RATIONALE_TOOLTIP_ID}
           data-tooltip-content={rationale}
           aria-label={`Rationale: ${rationale}`}
-          style={{ display: 'inline-flex', cursor: 'default' }}
+          style={{ display: 'inline-flex', cursor: 'help', background: 'none', border: 'none', padding: 0 }}
         >
           <ChatBubbleOutlineOutlined style={{ fontSize: '1.6rem', color: '#0948B7' }} />
-        </span>
+        </button>
       )
     : '- -'
   return { data, id: voteId, label, style: rationaleColumnStyle }
