@@ -320,7 +320,7 @@ function ScrollableBox({
 
   return (
     <div style={styles.scrollableWrapper}>
-      <div ref={contentRef} className={className} id={id} style={boxStyle}>
+      <div ref={contentRef} className={className} id={id} style={boxStyle} role="region" tabIndex={0}>
         {children}
       </div>
       {isScrollable && (
