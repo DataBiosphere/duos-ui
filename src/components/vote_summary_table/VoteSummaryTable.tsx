@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useId, useMemo, useState } from 'react'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import SimpleTable, { type CellData } from '../SimpleTable'
 import { Styles } from 'src/libs/theme'
@@ -6,8 +6,6 @@ import { isEmpty, isNil } from 'src/utils/NodashUtil'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { Email } from 'src/libs/ajax/Email'
 import { ChatBubbleOutlineOutlined } from '@mui/icons-material'
-
-const RATIONALE_TOOLTIP_ID = 'vote-summary-rationale-tooltip'
 
 const styles = {
   baseStyle: {
@@ -106,11 +104,13 @@ const processVoteSummaryRowData = ({
   isChair,
   getReminderSentState,
   sendReminder,
+  rationaleTooltipId,
 }: {
   dacVotes?: DacVoteRow[]
   isChair: boolean
   getReminderSentState: (voteId: number) => ReminderState
   sendReminder: (voteId: number) => void
+  rationaleTooltipId: string
 }): CellData[][] => {
   if (!isNil(dacVotes)) {
     return dacVotes.map((dacVote) => {
@@ -125,7 +125,7 @@ const processVoteSummaryRowData = ({
         }),
         nameCellData({ name: displayName, voteId }),
         dateCellData({ date: lastUpdated ?? formatDate(dacVote.updateDate), voteId }),
-        rationaleCellData({ rationale, voteId }),
+        rationaleCellData({ rationale, voteId, tooltipId: rationaleTooltipId }),
       ]
     })
   }
@@ -176,13 +176,13 @@ function dateCellData({ date, voteId, label = 'date' }: { date: string | null | 
   return { data: date ?? '- -', id: voteId, label, style: wrapSafeCellStyle }
 }
 
-function rationaleCellData({ rationale, voteId, label = 'rationale' }: { rationale?: string | null, voteId: number, label?: string }): CellData {
+function rationaleCellData({ rationale, voteId, tooltipId, label = 'rationale' }: { rationale?: string | null, voteId: number, tooltipId: string, label?: string }): CellData {
   const hasRationale = !isNil(rationale) && rationale.trim().length > 0
   const data = hasRationale
     ? (
         <button
           type="button"
-          data-tooltip-id={RATIONALE_TOOLTIP_ID}
+          data-tooltip-id={tooltipId}
           data-tooltip-content={rationale}
           aria-label={`Rationale: ${rationale}`}
           style={{ display: 'inline-flex', cursor: 'help', background: 'none', border: 'none', padding: 0 }}
@@ -195,6 +195,7 @@ function rationaleCellData({ rationale, voteId, label = 'rationale' }: { rationa
 }
 
 export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false }: Readonly<VoteSummaryTableProps>) {
+  const rationaleTooltipId = useId()
   const [reminderSentState, setReminderSentState] = useState<Record<number, ReminderState>>({})
 
   const getReminderSentState = useCallback((voteId: number): ReminderState => {
@@ -225,8 +226,8 @@ export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false 
         })
     }
 
-    return processVoteSummaryRowData({ dacVotes, isChair, getReminderSentState, sendReminder })
-  }, [dacVotes, isChair, getReminderSentState, updateReminderState])
+    return processVoteSummaryRowData({ dacVotes, isChair, getReminderSentState, sendReminder, rationaleTooltipId })
+  }, [dacVotes, isChair, getReminderSentState, updateReminderState, rationaleTooltipId])
 
   const tableSize = !isEmpty(dacVotes) ? dacVotes!.length : 5
 
@@ -239,7 +240,7 @@ export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false 
         tableSize={tableSize}
         styles={styles}
       />
-      <ReactTooltip id={RATIONALE_TOOLTIP_ID} place="top" className="tooltip-wrapper" />
+      <ReactTooltip id={rationaleTooltipId} place="top" className="tooltip-wrapper" />
     </>
   )
 }
