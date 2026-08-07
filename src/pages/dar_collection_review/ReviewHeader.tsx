@@ -252,7 +252,6 @@ export default function ReviewHeader({
     ? selectedSOResult.signingOfficial
     : null
   const hasSigningOfficial = Boolean(signingOfficialName || signingOfficialEmail)
-  const hasCollaborationLetter = Boolean(referenceId && collaborationLetterLocation && collaborationLetterName)
   const soName = selectedSO ? selectedSO.displayName : signingOfficialName
   const soEmail = selectedSO ? selectedSO.email : signingOfficialEmail
   const soInstitutionName = selectedSO?.institutionName
@@ -415,12 +414,12 @@ export default function ReviewHeader({
               )}
             </div>
           </div>
-          {hasCollaborationLetter && (
+          {referenceId && collaborationLetterLocation && collaborationLetterName && (
             <div className="document-link-container" style={styles.documentLinkRow}>
               <div id="collab-letter">
                 <DownloadLink
                   label="Download Collaboration Letter"
-                  onDownload={async () => { await DAR.downloadDARDocument(referenceId as string, 'collaborationDocument', collaborationLetterName as string) }}
+                  onDownload={async () => { await DAR.downloadDARDocument(referenceId, 'collaborationDocument', collaborationLetterName) }}
                 />
               </div>
             </div>
