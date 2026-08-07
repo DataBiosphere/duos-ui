@@ -301,14 +301,16 @@ function ScrollableBox({
   className,
   id,
   fadeColor,
+  label,
 }: Readonly<{
   children: React.ReactNode
   boxStyle: React.CSSProperties
   className: string
   id?: string
   fadeColor: string
+  label: string
 }>) {
-  const contentRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLElement>(null)
   const [isScrollable, setIsScrollable] = useState(false)
 
   // Intentionally runs on every render (no deps) to re-measure overflow as content changes.
@@ -320,9 +322,15 @@ function ScrollableBox({
 
   return (
     <div style={styles.scrollableWrapper}>
-      <div ref={contentRef} className={className} id={id} style={boxStyle} role="region" tabIndex={0}>
+      <section
+        ref={contentRef}
+        className={className}
+        id={id}
+        style={boxStyle}
+        aria-label={label}
+      >
         {children}
-      </div>
+      </section>
       {isScrollable && (
         <>
           <div aria-hidden="true" style={{ ...styles.scrollFadeOverlay, background: `linear-gradient(rgba(255, 255, 255, 0), ${fadeColor})` }} />
@@ -593,19 +601,19 @@ export default function ReviewHeader({
           <div className="narrative-section-container" style={styles.narrativeSectionContainer}>
             <div className="facts-column" style={styles.factsColumn} id="non-technical-summary-column">
               <span style={styles.columnHeading}>Non-Technical Summary</span>
-              <ScrollableBox className="non-technical-summary-textbox" boxStyle={styles.narrativeTextBox} fadeColor="white">
+              <ScrollableBox className="non-technical-summary-textbox" boxStyle={styles.narrativeTextBox} fadeColor="white" label="Non-Technical Summary">
                 {darInfo?.nonTechRus || <span style={styles.factValueMuted}>None provided</span>}
               </ScrollableBox>
             </div>
             <div className="facts-column" style={styles.factsColumnBordered} id="rus-narrative-column">
               <span style={styles.columnHeading}>Research Use Statement (Narrative)</span>
-              <ScrollableBox className="rus-textbox" boxStyle={styles.narrativeTextBox} fadeColor="white">
+              <ScrollableBox className="rus-textbox" boxStyle={styles.narrativeTextBox} fadeColor="white" label="Research Use Statement (Narrative)">
                 {darInfo?.rus || <span style={styles.factValueMuted}>None provided</span>}
               </ScrollableBox>
             </div>
             <div className="facts-column" style={styles.factsColumnBordered} id="rus-duo-terms-column">
               <span style={styles.columnHeading}>Research Use Statement (DUO Terms)</span>
-              <ScrollableBox className="rus-duo-terms-box" boxStyle={styles.duoTermsBox} fadeColor={Theme.palette.background.secondary}>
+              <ScrollableBox className="rus-duo-terms-box" boxStyle={styles.duoTermsBox} fadeColor={Theme.palette.background.secondary} label="Research Use Statement (DUO Terms)">
                 {hasDuoTerms
                   ? (
                       <>
