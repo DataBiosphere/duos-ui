@@ -9,7 +9,8 @@ import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { csrfPluginOptions } from '../src/auth/csrf.js'
 import { RefreshFailedError } from '../src/auth/refresh.js'
-import { CSRF_EXEMPT_UNSAFE_REQUESTS, PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
+import { GENERIC_ERROR_BODY } from '../src/errors.js'
+import { CSRF_ERROR_CODE, CSRF_EXEMPT_UNSAFE_REQUESTS, PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
 
 // refreshAccessToken is replaced so the tests never reach B2C; RefreshFailedError
 // stays the real class so the proxy's instanceof branch is exercised rather than
@@ -400,12 +401,18 @@ describe('apiProxy', () => {
      * `MISSING_SECRET` means the request had no session to verify against, so
      * enforcement never got as far as the token. `INVALID_TOKEN` means there was
      * a secret and the token did not verify against it — including when
-     * `getToken` found no token at all. The codes are Fastify's default error
-     * serialisation, which is what this harness (no error handler of its own)
-     * exposes.
+     * `getToken` found no token at all.
+     *
+     * These are the proxy's own reasons, not the plugin's error codes. Until
+     * story 3-E these assertions read `code: 'FST_CSRF_INVALID_TOKEN'` off
+     * Fastify's default error serialisation — which was never a decision, just
+     * what a harness with no error handler happened to expose. ADR-010 replaced
+     * it with the body below; `error` is what the client branches on and `reason`
+     * is what a human reads.
      */
-    const MISSING_SECRET = 'FST_CSRF_MISSING_SECRET'
-    const INVALID_TOKEN = 'FST_CSRF_INVALID_TOKEN'
+    const MISSING_SECRET = 'missing_secret'
+    const INVALID_TOKEN = 'invalid_token'
+    const rejection = (reason: string) => ({ error: CSRF_ERROR_CODE, reason })
 
     // No cookie, so every request builds a fresh session with no CSRF secret in
     // it. That is the signed-out attacker's request, and it stops at the secret.
@@ -417,7 +424,7 @@ describe('apiProxy', () => {
         const res = await app.inject({ method, url: `${PROXY_PREFIX}/api/dataset/1` })
 
         expect(res.statusCode).toBe(403)
-        expect(res.json()).toMatchObject({ code: MISSING_SECRET })
+        expect(res.json()).toEqual(rejection(MISSING_SECRET))
         expect(upstream.received).toHaveLength(0)
       },
     )
@@ -433,7 +440,7 @@ describe('apiProxy', () => {
       const res = await app.inject({ method: 'POST', url: `${PROXY_PREFIX}/api/dataset/1`, headers: { cookie } })
 
       expect(res.statusCode).toBe(403)
-      expect(res.json()).toMatchObject({ code: INVALID_TOKEN })
+      expect(res.json()).toEqual(rejection(INVALID_TOKEN))
       expect(upstream.received).toHaveLength(0)
     })
 
@@ -457,7 +464,7 @@ describe('apiProxy', () => {
       })
 
       expect(res.statusCode).toBe(403)
-      expect(res.json()).toMatchObject({ code: INVALID_TOKEN })
+      expect(res.json()).toEqual(rejection(INVALID_TOKEN))
       expect(upstream.received).toHaveLength(0)
     })
 
@@ -475,7 +482,7 @@ describe('apiProxy', () => {
       })
 
       expect(res.statusCode).toBe(403)
-      expect(res.json()).toMatchObject({ code: MISSING_SECRET })
+      expect(res.json()).toEqual(rejection(MISSING_SECRET))
       expect(upstream.received).toHaveLength(0)
     })
 
@@ -497,7 +504,7 @@ describe('apiProxy', () => {
       // The secret is present and no token was found, so this is the
       // failed-verification path, not the missing-secret one.
       expect(res.statusCode).toBe(403)
-      expect(res.json()).toMatchObject({ code: INVALID_TOKEN })
+      expect(res.json()).toEqual(rejection(INVALID_TOKEN))
     })
 
     it.each(['GET', 'HEAD', 'OPTIONS'] as const)('does not require a token on %s', async (method) => {
@@ -1170,6 +1177,98 @@ describe('apiProxy', () => {
 
       expect(res.statusCode).toBe(401)
       expect(res.headers['www-authenticate']).toBeUndefined()
+    })
+  })
+
+  /**
+   * Story 3-E(c) / ADR-010 — what a failure inside the proxy scope looks like to
+   * the browser.
+   *
+   * The scope is encapsulated (`removeAllContentTypeParsers` must not escape it),
+   * so it does not inherit the root instance's error handler and index.ts sets
+   * that one after registering the proxy anyway. The shape below is therefore a
+   * decision the plugin makes for itself, and these are the tests that hold it
+   * to that rather than to whatever the plugin ordering happens to produce.
+   */
+  describe('the error shape', () => {
+    /**
+     * An app whose proxy scope also holds a route that throws, standing in for a
+     * bug on a proxy path — there is no natural one to provoke, since the auth
+     * gate answers its own failures and `onUpstreamTransportError` answers
+     * reply-from's.
+     *
+     * `apiProxy` is called on the scope rather than registered into it, so the
+     * throwing route lands in the same context as the proxy's routes and hooks
+     * and is answered by the same error handler. The root handler is registered
+     * afterwards, exactly as index.ts does it, which is the ordering the whole
+     * decision turns on.
+     */
+    async function buildAppWithRootErrorHandler(): Promise<FastifyInstance> {
+      const app = await buildAppShell()
+      await app.register(async (scope) => {
+        await apiProxy(scope)
+        scope.get(`${PROXY_PREFIX}-boom`, async () => {
+          throw new Error('a stack trace and an internal path')
+        })
+      })
+      app.setErrorHandler((_err, _request, reply) =>
+        reply.status(500).send({ error: 'the root handler answered' }))
+      app.get('/boom', async () => {
+        throw new Error('a stack trace and an internal path')
+      })
+      return app
+    }
+
+    it('sanitises an unexpected proxy-scope error instead of returning its message', async () => {
+      app = await buildAppWithRootErrorHandler()
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}-boom` })
+
+      expect(res.statusCode).toBe(500)
+      expect(res.json()).toEqual(GENERIC_ERROR_BODY)
+      expect(res.payload).not.toContain('a stack trace and an internal path')
+    })
+
+    // The root handler still owns everything outside the proxy. Asserted in the
+    // same app as the case above so the two cannot be read as different setups:
+    // one registration order, two scopes, two answers.
+    it('leaves errors outside the proxy scope to the root handler', async () => {
+      app = await buildAppWithRootErrorHandler()
+
+      const res = await app.inject({ method: 'GET', url: '/boom' })
+
+      expect(res.json()).toEqual({ error: 'the root handler answered' })
+    })
+
+    // The regression this whole decision exists to prevent: index.ts registering
+    // its handler after the proxy must not be what determines the proxy's shape.
+    // Before ADR-010 this request returned Fastify's default body, message and
+    // all, purely because of that ordering.
+    it('is not affected by a root error handler registered after the proxy', async () => {
+      app = await buildAppWithRootErrorHandler()
+
+      const res = await app.inject({ method: 'POST', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toEqual({ error: CSRF_ERROR_CODE, reason: 'missing_secret' })
+    })
+
+    // The client's discriminator has to be the body, not the status: an upstream
+    // authorization denial is an ordinary proxied response and arrives as a 403
+    // too. Retrying on the status alone would replay every write the DUOS API
+    // refused, which is why Epic 4 keys its one retry on `error` instead.
+    it('passes an upstream 403 through with its own body, unlike a CSRF rejection', async () => {
+      upstream.respondWith((_req, res) => {
+        res.writeHead(403, { 'content-type': 'application/json' })
+        res.end('{"code":403,"message":"User is not an admin"}')
+      })
+      app = await buildProxyApp(freshSession())
+
+      const res = await injectWithCsrf(app, { method: 'POST', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toEqual({ code: 403, message: 'User is not an admin' })
+      expect(res.json()).not.toHaveProperty('error', CSRF_ERROR_CODE)
     })
   })
 })

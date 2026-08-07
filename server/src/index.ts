@@ -10,6 +10,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { createPgSessionStore } from './session/pgStore.js'
+import { GENERIC_ERROR_BODY } from './errors.js'
 import { csrfPluginOptions } from './auth/csrf.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
@@ -273,10 +274,18 @@ export async function buildApp(): Promise<AppInstance> {
   // but does not register routes; we wire the catch-all ourselves.
   fastify.setNotFoundHandler((_req, reply) => reply.html())
 
-  // Error handler — suppresses stack traces from responses
-  fastify.setErrorHandler((err: FastifyError, _req, reply) => {
-    fastify.log.error({ err }, '[server] Unhandled error:')
-    return reply.status(err.statusCode ?? 500).send({ error: 'An unexpected error occurred.' })
+  // Error handler — suppresses stack traces from responses.
+  //
+  // Applies to this instance and every plugin that shares it, which is all of
+  // them bar one: each @fastify/* plugin registered above wraps itself in
+  // `fastify-plugin`, so they run in this scope and inherit this handler
+  // regardless of where the call sits. `apiProxy` is the single exception —
+  // deliberately not wrapped, so it is a child context that captured Fastify's
+  // default before this line ran and declares its own handler instead. That is
+  // a decision, not an accident of ordering: see ADR-010.
+  fastify.setErrorHandler((err: FastifyError, request, reply) => {
+    request.log.error({ err }, '[server] Unhandled error:')
+    return reply.status(err.statusCode ?? 500).send(GENERIC_ERROR_BODY)
   })
 
   return fastify

@@ -1,5 +1,6 @@
 import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 import type {
+  FastifyError,
   FastifyInstance,
   FastifyReply,
   FastifyRequest,
@@ -11,6 +12,7 @@ import type {
 import fastifyReplyFrom from '@fastify/reply-from'
 import { requireEnv } from '../auth/oidcClient.js'
 import { RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
+import { GENERIC_ERROR_BODY } from '../errors.js'
 
 /**
  * The BFF API proxy (Phase 3, stories 3-C, 3-D and 3-E).
@@ -129,6 +131,46 @@ export const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
 ])
 
 /**
+ * The `error` code a CSRF rejection returns, and the one thing about a proxy
+ * error the client is meant to branch on (ADR-010).
+ *
+ * Epic 4's fetch layer refetches a token and retries once when it sees this, and
+ * only when it sees this. Status alone cannot carry that signal: an upstream
+ * authorization denial is an ordinary proxied response and also arrives as a
+ * 403, so retrying on the status would replay every write the DUOS API refused.
+ *
+ * Named for the check that failed rather than for either cause, because both
+ * causes below mean the same thing to the client.
+ */
+export const CSRF_ERROR_CODE = 'csrf_validation_failed'
+
+/**
+ * The two ways `@fastify/csrf-protection` rejects a request, mapped to the
+ * reason the BFF publishes for each.
+ *
+ * `FST_CSRF_MISSING_SECRET` means the request carried no session to verify
+ * against, so enforcement stopped before it reached the token — the signed-out
+ * caller, and the shape a session rotation that discards the secret (Epic 5,
+ * 5-D) will produce. `FST_CSRF_INVALID_TOKEN` means there was a secret and the
+ * token did not verify against it, including when `getToken` found no token at
+ * all.
+ *
+ * The plugin's own code is deliberately not what goes on the wire, for two
+ * reasons. It is `@fastify/csrf-protection` internals, renameable on a major
+ * bump, and a client branching on it would break silently. And the `code` field
+ * of an error body already means something else to this client:
+ * `DataAccessRequestApplication.tsx` reads it as "the upstream sent a structured
+ * error, so its `message` is safe to render as markdown". So the distinction
+ * travels under a key of the BFF's own, and is there for a human reading a
+ * network tab or a support ticket — the client branches on `error`, never on
+ * this.
+ */
+const CSRF_REJECTION_REASONS: ReadonlyMap<string, string> = new Map([
+  ['FST_CSRF_MISSING_SECRET', 'missing_secret'],
+  ['FST_CSRF_INVALID_TOKEN', 'invalid_token'],
+])
+
+/**
  * Strips the BFF prefix and the query string, yielding the upstream path.
  *
  * The query is dropped on purpose rather than forwarded here: `reply.from()`
@@ -202,6 +244,40 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
   if (!app.hasDecorator('csrfProtection')) {
     throw new Error('apiProxy requires @fastify/csrf-protection to be registered first — it enforces CSRF on unsafe methods and must not be registered without it')
   }
+
+  /**
+   * The proxy scope's error shape (story 3-E, ADR-010).
+   *
+   * Declared here rather than inherited from the root instance, and that is not
+   * a preference: a child context copies the error handler that exists when it
+   * is created, and index.ts calls `setErrorHandler` *after* it registers this
+   * plugin. Without this line the scope keeps Fastify's default handler, which
+   * puts `err.message` on the wire for an unexpected 500 while every other route
+   * in the app returns the generic body. Moving index.ts's call above the
+   * registration would fix that half, but it would also flatten the CSRF
+   * rejection into the same generic body — and that one the client has to be
+   * able to recognise, since a 403 through this proxy is otherwise an upstream
+   * authorization denial passed through as an ordinary response.
+   *
+   * So: CSRF rejections keep a stable, BFF-owned code, and everything else is
+   * indistinguishable from a failure anywhere else in the app. `reply.from`'s
+   * transport failures never arrive here — `onUpstreamTransportError` answers
+   * those — so the second branch is reached only by a bug on a proxy path.
+   */
+  app.setErrorHandler((err: FastifyError, request, reply) => {
+    const reason = err.code === undefined ? undefined : CSRF_REJECTION_REASONS.get(err.code)
+    if (reason !== undefined) {
+      // Logged at info, not error: a rejected token is the guard working, and
+      // the commonest cause is a client whose token went stale. `err.code` is
+      // kept here — this is where the plugin's own identifier belongs.
+      request.log.info({ err }, '[proxy] CSRF validation failed — rejecting')
+      // 403 stated rather than taken from `err.statusCode`, because it is part
+      // of the contract ADR-010 pins, not a detail of the plugin that raised it.
+      return reply.status(403).send({ error: CSRF_ERROR_CODE, reason })
+    }
+    request.log.error({ err }, '[proxy] unhandled error')
+    return reply.status(err.statusCode ?? 500).send(GENERIC_ERROR_BODY)
+  })
 
   /**
    * CSRF on state-changing methods. The proxy turns every DUOS API write into a
