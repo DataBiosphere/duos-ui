@@ -2,6 +2,7 @@
 
 **Status:** Accepted (2026-07-31) &nbsp;|&nbsp; **Phase:** 3, story 3-D
 **Related:** [ADR-004](ADR-004-api-proxy-layer.md) (the proxy layer this applies to)
+**Upstream follow-up:** [DT-3945](https://broadworkbench.atlassian.net/browse/DT-3945) — remove the sync side effect from `GET /api/user/me` (see [The real fix is upstream](#the-real-fix-is-upstream--tracked-as-dt-3945))
 
 ---
 
@@ -58,7 +59,7 @@ out of the attacker's reach. So this is a write-only, low-severity, partly
 non-deterministic CSRF, and its worst outcome is user-recoverable — the victim
 can re-link their account.
 
-### The real fix is upstream
+### The real fix is upstream — tracked as [DT-3945](https://broadworkbench.atlassian.net/browse/DT-3945)
 
 It is small: make the sync side effect a `POST`, or move it out of
 `GET /api/user/me` so reading a profile stops writing one. That is a Consent API
