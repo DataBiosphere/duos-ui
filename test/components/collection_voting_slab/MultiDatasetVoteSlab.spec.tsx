@@ -173,7 +173,6 @@ const renderSlab = (
 ) =>
   render(
     <MultiDatasetVoteSlab
-      title="GROUP 1"
       bucket={{ key: 'group-1', datasets: [], elections: [], votes: [], ...bucketOverrides } as never}
       collection={collection}
       dacDatasetIds={[]}
@@ -688,7 +687,6 @@ describe('MultiDatasetVoteSlab', () => {
     mockUser(100)
     const element = (collectionProp: DarCollection) => (
       <MultiDatasetVoteSlab
-        title="GROUP 1"
         bucket={{
           key: 'group-1',
           datasets: [],
@@ -719,7 +717,6 @@ describe('MultiDatasetVoteSlab', () => {
     mockUser(400)
     const element = (bucket: unknown) => (
       <MultiDatasetVoteSlab
-        title="GROUP 1"
         bucket={bucket as never}
         collection={collection}
         dacDatasetIds={[]}

@@ -19,9 +19,7 @@ describe('CollectionVoteNoButton', () => {
   })
 
   it('renders "No as Member" when roleLabel="Member" is provided', async () => {
-    await act(async () => {
-      render(<CollectionVoteNoButton onClick={vi.fn().mockResolvedValue(undefined)} roleLabel="Member" />)
-    })
+    render(<CollectionVoteNoButton onClick={vi.fn().mockResolvedValue(undefined)} roleLabel="Member" />)
 
     expect(screen.getByText('No as Member')).toBeInTheDocument()
     expect(screen.queryByText('No')).not.toBeInTheDocument()
@@ -93,9 +91,7 @@ describe('CollectionVoteNoButton', () => {
   })
 
   it('shows white background when isSelected=false', async () => {
-    await act(async () => {
-      render(<CollectionVoteNoButton onClick={vi.fn().mockResolvedValue(undefined)} isSelected={false} />)
-    })
+    render(<CollectionVoteNoButton onClick={vi.fn().mockResolvedValue(undefined)} isSelected={false} />)
 
     expect(screen.getByRole('button')).toHaveStyle({ backgroundColor: votingColors.default })
   })

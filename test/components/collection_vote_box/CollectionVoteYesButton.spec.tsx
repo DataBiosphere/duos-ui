@@ -28,9 +28,7 @@ describe('CollectionVoteYesButton', () => {
   })
 
   it('renders "Yes as Chair" when roleLabel="Chair" is provided', async () => {
-    await act(async () => {
-      render(<CollectionVoteYesButton onClick={vi.fn().mockResolvedValue(undefined)} roleLabel="Chair" />)
-    })
+    render(<CollectionVoteYesButton onClick={vi.fn().mockResolvedValue(undefined)} roleLabel="Chair" />)
 
     expect(screen.getByText('Yes as Chair')).toBeInTheDocument()
   })
@@ -93,9 +91,7 @@ describe('CollectionVoteYesButton', () => {
   })
 
   it('shows white background when isSelected=false', async () => {
-    await act(async () => {
-      render(<CollectionVoteYesButton onClick={vi.fn().mockResolvedValue(undefined)} isSelected={false} />)
-    })
+    render(<CollectionVoteYesButton onClick={vi.fn().mockResolvedValue(undefined)} isSelected={false} />)
 
     expect(screen.getByRole('button')).toHaveStyle({ backgroundColor: votingColors.default })
   })

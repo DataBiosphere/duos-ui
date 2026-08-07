@@ -25,7 +25,6 @@ type Bucket = {
 }
 
 interface MultiDatasetVoteSlabProps {
-  readonly title: string
   readonly bucket: Bucket
   readonly collection: DarCollection
   readonly dacDatasetIds?: number[]
