@@ -1,6 +1,5 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import '@testing-library/jest-dom/vitest'
 import { act, render, screen } from '@testing-library/react'
 import ReviewHeader from 'src/pages/dar_collection_review/ReviewHeader'
 
@@ -41,9 +40,9 @@ describe('ReviewHeader - Tests', () => {
       />,
     )
 
-    expect(screen.getByText('DAR-100')).toBeInTheDocument()
-    expect(screen.getByText('Title')).toBeInTheDocument()
-    expect(screen.getByText('No datasets approved')).toBeInTheDocument()
+    expect(screen.getByText('DAR-100')).toBeTruthy()
+    expect(screen.getByText('Title')).toBeTruthy()
+    expect(screen.getByText('No datasets approved')).toBeTruthy()
   })
 
   it('keeps the DAR code and project title on one consistently styled line', () => {
