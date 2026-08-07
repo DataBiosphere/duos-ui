@@ -2,6 +2,7 @@ import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { act, render, screen } from '@testing-library/react'
 import ReviewHeader from 'src/pages/dar_collection_review/ReviewHeader'
+import { User } from 'src/libs/ajax/User'
 
 vi.mock('src/libs/ajax/User', () => ({
   User: {
@@ -14,8 +15,6 @@ vi.mock('src/libs/ajax/DAR', () => ({
     downloadDARDocument: vi.fn(),
   },
 }))
-
-import { User } from 'src/libs/ajax/User'
 
 const soBaseProps = {
   approvedDatasets: [],
@@ -429,6 +428,24 @@ describe('ReviewHeader - Tests', () => {
     expect(container.querySelector('#researcher-institutional-website-fact')).toBeNull()
   })
 
+  it('treats whitespace-only researcher external profile values as absent', () => {
+    const { container } = render(
+      <ReviewHeader
+        approvedDatasets={[]}
+        researcherExternalProfiles={{
+          linkedIn: '   ',
+          ORCID: '   ',
+          throughBio: '   ',
+          institutionalWebsite: '   ',
+        }}
+      />,
+    )
+    expect(container.querySelector('#researcher-linkedin-fact')).toBeNull()
+    expect(container.querySelector('#researcher-orcid-fact')).toBeNull()
+    expect(container.querySelector('#researcher-through-bio-fact')).toBeNull()
+    expect(container.querySelector('#researcher-institutional-website-fact')).toBeNull()
+  })
+
   it('does not render an "External Profile" heading in the Signing Official section', async () => {
     vi.mocked(User.getSOsForInstitution).mockResolvedValue([{
       userId: 7,
@@ -443,5 +460,30 @@ describe('ReviewHeader - Tests', () => {
     expect(await screen.findByRole('link', { name: /LinkedIn/ })).toBeTruthy()
     expect(screen.queryByText('External Profile')).toBeNull()
     expect(screen.queryByText('External Profiles')).toBeNull()
+  })
+
+  it('treats whitespace-only signing official external profile values as absent', async () => {
+    vi.mocked(User.getSOsForInstitution).mockResolvedValue([{
+      userId: 7,
+      displayName: 'John SO',
+      email: 'john.so@broad.mit.edu',
+      institutionName: 'Broad Institute',
+      userData: {
+        externalProfiles: {
+          linkedIn: '   ',
+          ORCID: '   ',
+          throughBio: '   ',
+          institutionalWebsite: '   ',
+        },
+      },
+    }])
+
+    const { container } = render(<ReviewHeader {...soBaseProps} />)
+
+    await screen.findByText('John SO')
+    expect(container.querySelector('#signing-official-linkedin-fact')).toBeNull()
+    expect(container.querySelector('#signing-official-orcid-fact')).toBeNull()
+    expect(container.querySelector('#signing-official-through-bio-fact')).toBeNull()
+    expect(container.querySelector('#signing-official-institutional-website-fact')).toBeNull()
   })
 })

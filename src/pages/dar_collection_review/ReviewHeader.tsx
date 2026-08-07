@@ -145,6 +145,11 @@ const getCloudUseText = (cloudComputing: boolean, cloudProvider: string): string
   return isEmpty(cloudProvider) || cloudProvider === '- -' ? 'Yes' : `Yes (${cloudProvider})`
 }
 
+const trimmedOrUndefined = (value?: string): string | undefined => {
+  const trimmed = value?.trim()
+  return trimmed || undefined
+}
+
 function ProfileFactLink({ label, url, id }: Readonly<{ label: string, url: string, id: string }>) {
   const validUrl = validateHttpUrl(url)
   return (
@@ -253,6 +258,15 @@ export default function ReviewHeader({
   const soInstitutionName = selectedSO?.institutionName
   const soExternalProfiles = selectedSO?.userData?.externalProfiles
 
+  const researcherLinkedIn = trimmedOrUndefined(researcherExternalProfiles?.linkedIn)
+  const researcherOrcid = trimmedOrUndefined(researcherExternalProfiles?.ORCID)
+  const researcherThroughBio = trimmedOrUndefined(researcherExternalProfiles?.throughBio)
+  const researcherInstitutionalWebsite = trimmedOrUndefined(researcherExternalProfiles?.institutionalWebsite)
+  const soLinkedIn = trimmedOrUndefined(soExternalProfiles?.linkedIn)
+  const soOrcid = trimmedOrUndefined(soExternalProfiles?.ORCID)
+  const soThroughBio = trimmedOrUndefined(soExternalProfiles?.throughBio)
+  const soInstitutionalWebsite = trimmedOrUndefined(soExternalProfiles?.institutionalWebsite)
+
   return (
     <>
       {!isLoading && (
@@ -291,17 +305,17 @@ export default function ReviewHeader({
                   <span style={styles.factValue}>{institutionName}</span>
                 </div>
               )}
-              {researcherExternalProfiles?.linkedIn && (
-                <ProfileFactLink label="LinkedIn" id="researcher-linkedin-fact" url={formattedLinkedIn(researcherExternalProfiles.linkedIn)} />
+              {researcherLinkedIn && (
+                <ProfileFactLink label="LinkedIn" id="researcher-linkedin-fact" url={formattedLinkedIn(researcherLinkedIn)} />
               )}
-              {researcherExternalProfiles?.ORCID && (
-                <ProfileFactLink label="ORCID iD" id="researcher-orcid-fact" url={formattedOrcid(researcherExternalProfiles.ORCID)} />
+              {researcherOrcid && (
+                <ProfileFactLink label="ORCID iD" id="researcher-orcid-fact" url={formattedOrcid(researcherOrcid)} />
               )}
-              {researcherExternalProfiles?.throughBio && (
-                <ProfileFactLink label="Through.bio" id="researcher-through-bio-fact" url={formattedThroughBio(researcherExternalProfiles.throughBio)} />
+              {researcherThroughBio && (
+                <ProfileFactLink label="Through.bio" id="researcher-through-bio-fact" url={formattedThroughBio(researcherThroughBio)} />
               )}
-              {researcherExternalProfiles?.institutionalWebsite && (
-                <ProfileFactLink label="Institutional Website" id="researcher-institutional-website-fact" url={researcherExternalProfiles.institutionalWebsite} />
+              {researcherInstitutionalWebsite && (
+                <ProfileFactLink label="Institutional Website" id="researcher-institutional-website-fact" url={researcherInstitutionalWebsite} />
               )}
             </div>
             <div className="facts-column" style={styles.factsColumnBordered} id="collaborators-column">
@@ -356,17 +370,17 @@ export default function ReviewHeader({
                           <span style={styles.factValue}>{soInstitutionName}</span>
                         </div>
                       )}
-                      {soExternalProfiles?.linkedIn && (
-                        <ProfileFactLink label="LinkedIn" id="signing-official-linkedin-fact" url={formattedLinkedIn(soExternalProfiles.linkedIn)} />
+                      {soLinkedIn && (
+                        <ProfileFactLink label="LinkedIn" id="signing-official-linkedin-fact" url={formattedLinkedIn(soLinkedIn)} />
                       )}
-                      {soExternalProfiles?.ORCID && (
-                        <ProfileFactLink label="ORCID iD" id="signing-official-orcid-fact" url={formattedOrcid(soExternalProfiles.ORCID)} />
+                      {soOrcid && (
+                        <ProfileFactLink label="ORCID iD" id="signing-official-orcid-fact" url={formattedOrcid(soOrcid)} />
                       )}
-                      {soExternalProfiles?.throughBio && (
-                        <ProfileFactLink label="Through.bio" id="signing-official-through-bio-fact" url={formattedThroughBio(soExternalProfiles.throughBio)} />
+                      {soThroughBio && (
+                        <ProfileFactLink label="Through.bio" id="signing-official-through-bio-fact" url={formattedThroughBio(soThroughBio)} />
                       )}
-                      {soExternalProfiles?.institutionalWebsite && (
-                        <ProfileFactLink label="Institutional Website" id="signing-official-institutional-website-fact" url={soExternalProfiles.institutionalWebsite} />
+                      {soInstitutionalWebsite && (
+                        <ProfileFactLink label="Institutional Website" id="signing-official-institutional-website-fact" url={soInstitutionalWebsite} />
                       )}
                     </div>
                   )

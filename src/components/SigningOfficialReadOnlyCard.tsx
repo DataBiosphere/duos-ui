@@ -21,6 +21,11 @@ const dlStyle = {
   margin: 0,
 }
 
+const trimmedOrUndefined = (value?: string): string | undefined => {
+  const trimmed = value?.trim()
+  return trimmed || undefined
+}
+
 function ProfileLink({ label, url }: Readonly<{ label: string, url: string }>) {
   const validUrl = validateHttpUrl(url)
   return (
@@ -42,12 +47,12 @@ function ProfileLink({ label, url }: Readonly<{ label: string, url: string }>) {
 export default function SigningOfficialReadOnlyCard(props: Readonly<SigningOfficialReadOnlyCardProps>) {
   const { name, email, institutionName, externalProfiles } = props
 
-  const hasExternalProfiles = Boolean(
-    externalProfiles?.linkedIn
-    || externalProfiles?.ORCID
-    || externalProfiles?.throughBio
-    || externalProfiles?.institutionalWebsite,
-  )
+  const linkedIn = trimmedOrUndefined(externalProfiles?.linkedIn)
+  const orcid = trimmedOrUndefined(externalProfiles?.ORCID)
+  const throughBio = trimmedOrUndefined(externalProfiles?.throughBio)
+  const institutionalWebsite = trimmedOrUndefined(externalProfiles?.institutionalWebsite)
+
+  const hasExternalProfiles = Boolean(linkedIn || orcid || throughBio || institutionalWebsite)
 
   return (
     <section aria-label={`Signing Official: ${name}`} style={{ marginTop: '0.5rem' }}>
@@ -69,17 +74,17 @@ export default function SigningOfficialReadOnlyCard(props: Readonly<SigningOffic
 
         {hasExternalProfiles && (
           <>
-            {externalProfiles?.linkedIn && (
-              <ProfileLink label="LinkedIn" url={formattedLinkedIn(externalProfiles.linkedIn)} />
+            {linkedIn && (
+              <ProfileLink label="LinkedIn" url={formattedLinkedIn(linkedIn)} />
             )}
-            {externalProfiles?.ORCID && (
-              <ProfileLink label="ORCID iD" url={formattedOrcid(externalProfiles.ORCID)} />
+            {orcid && (
+              <ProfileLink label="ORCID iD" url={formattedOrcid(orcid)} />
             )}
-            {externalProfiles?.throughBio && (
-              <ProfileLink label="Through.bio" url={formattedThroughBio(externalProfiles.throughBio)} />
+            {throughBio && (
+              <ProfileLink label="Through.bio" url={formattedThroughBio(throughBio)} />
             )}
-            {externalProfiles?.institutionalWebsite && (
-              <ProfileLink label="Institutional Website" url={externalProfiles.institutionalWebsite} />
+            {institutionalWebsite && (
+              <ProfileLink label="Institutional Website" url={institutionalWebsite} />
             )}
           </>
         )}
