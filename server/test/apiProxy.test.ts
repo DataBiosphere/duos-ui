@@ -996,6 +996,119 @@ describe('apiProxy', () => {
       expect(res.json()).toEqual({ ok: true })
     })
 
+    /**
+     * Story 3-E(b) — a user-uploaded document served back through the proxy comes
+     * from the SPA's own origin, so it must not be able to execute there.
+     *
+     * The `text/html` case is the threat itself: a `.html` uploaded as a DAA or
+     * DAR document, fetched by a top-level navigation that carries the
+     * `SameSite=Lax` session cookie.
+     */
+    describe('response hardening', () => {
+      const respondWithUploadedHtml = (): void => {
+        upstream.respondWith((_req, res) => {
+          res.writeHead(200, { 'content-type': 'text/html' })
+          res.end('<script>fetch("/duos-api/api/user/me")</script>')
+        })
+      }
+
+      it('neuters an uploaded document served back as text/html', async () => {
+        respondWithUploadedHtml()
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/daa/1/file` })
+
+        expect(res.headers['x-content-type-options']).toBe('nosniff')
+        expect(res.headers['content-security-policy']).toBe('sandbox')
+      })
+
+      // An upstream that sends either header must not be able to relax it — the
+      // BFF's value is the one that reaches the browser.
+      it('overrides an upstream that sends a weaker policy of its own', async () => {
+        upstream.respondWith((_req, res) => {
+          res.writeHead(200, {
+            'content-type': 'text/html',
+            'content-security-policy': 'default-src \'self\' \'unsafe-inline\'',
+            'x-content-type-options': 'sniff-away',
+          })
+          res.end('<p>hello</p>')
+        })
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/daa/1/file` })
+
+        expect(res.headers['content-security-policy']).toBe('sandbox')
+        expect(res.headers['x-content-type-options']).toBe('nosniff')
+      })
+
+      // The headers are inert to the client — `fetch` ignores both, and a blob
+      // download is initiated by the SPA's own document — so adding them cannot
+      // disturb the document paths that motivated them. Binary rather than text
+      // so a byte-for-byte comparison means something.
+      it('leaves a blob download byte-for-byte intact', async () => {
+        const document = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37, 0x00, 0xff, 0xfe, 0x0a])
+        upstream.respondWith((_req, res) => {
+          res.writeHead(200, {
+            'content-type': 'application/pdf',
+            'content-length': String(document.length),
+            'content-disposition': 'attachment; filename="daa.pdf"',
+          })
+          res.end(document)
+        })
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/daa/1/file` })
+
+        expect(res.rawPayload.equals(document)).toBe(true)
+        expect(res.headers['content-disposition']).toBe('attachment; filename="daa.pdf"')
+        expect(res.headers['x-content-type-options']).toBe('nosniff')
+      })
+
+      // Applied in onSend rather than rewriteHeaders precisely so the replies the
+      // proxy writes itself are covered too, and so it lands after
+      // `onUpstreamResponse`'s header-strip loop — which, keyed on the upstream's
+      // header names, would otherwise take the BFF's own values with it whenever
+      // the upstream happened to send either name.
+      it('hardens a reply the proxy writes itself, not only a proxied one', async () => {
+        upstream.respondWith((_req, res) => {
+          res.writeHead(401, {
+            'content-type': 'text/plain',
+            'content-security-policy': 'default-src \'self\'',
+            'x-content-type-options': 'nosniff',
+          })
+          res.end('Unauthorized')
+        })
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+        // The BFF's own 401, with the upstream's headers stripped off it.
+        expect(res.statusCode).toBe(401)
+        expect(res.json()).toEqual({ error: 'session_expired' })
+        expect(res.headers['x-content-type-options']).toBe('nosniff')
+        expect(res.headers['content-security-policy']).toBe('sandbox')
+      })
+
+      /**
+       * The hook must stay inside the proxy's encapsulation.
+       *
+       * If it escaped to the root instance it would land on the SPA's own HTML,
+       * where `sandbox` means an opaque origin and no scripts — the entire app
+       * dead, in a way no proxy test would notice. `/auth/csrf-token` stands in
+       * for a root-scope route here because it is the one the shell registers;
+       * in production the responses that matter are index.html and `/auth/*`.
+       */
+      it('does not leak the headers onto routes outside the proxy scope', async () => {
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: '/auth/csrf-token' })
+
+        expect(res.statusCode).toBe(200)
+        expect(res.headers['content-security-policy']).toBeUndefined()
+        expect(res.headers['x-content-type-options']).toBeUndefined()
+      })
+    })
+
     // reply-from leaves a refused connection at 500, which index.ts's error
     // handler would render as its generic "An unexpected error occurred" —
     // reading as a BFF bug rather than an upstream outage.

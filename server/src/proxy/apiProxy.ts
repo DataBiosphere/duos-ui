@@ -171,6 +171,63 @@ const CSRF_REJECTION_REASONS: ReadonlyMap<string, string> = new Map([
 ])
 
 /**
+ * Added to every proxied response, so nothing the upstream returns can execute
+ * on the SPA's origin (story 3-E(b)).
+ *
+ * **Why the proxy creates this problem.** DUOS serves user-uploaded documents
+ * back through the API — `GET /api/daa/{id}/file`, DAR documents,
+ * `FileStorageObject` documents. Proxied, those are served *from the BFF's own
+ * origin*. A top-level navigation to `/duos-api/api/daa/{id}/file` carries the
+ * `SameSite=Lax` session cookie, the proxy injects the bearer, and the browser
+ * renders attacker-uploaded markup on the origin that holds the session.
+ * `HttpOnly` is no help: the script does not need to read the cookie, only to
+ * make same-origin requests back through the proxy with it.
+ *
+ * This is genuinely new with the proxy. Today the same file comes from the
+ * Consent API's origin, where a cookie-less top-level navigation simply 401s.
+ *
+ *   x-content-type-options — no MIME sniffing, so an `.html` uploaded as
+ *                            `application/octet-stream` is not promoted to a
+ *                            document by the browser guessing at its bytes.
+ *   content-security-policy — `sandbox` with no tokens is the maximally
+ *                            restrictive form: opaque origin, no scripts, no
+ *                            forms, no same-origin access. A document that does
+ *                            get rendered can do nothing with this origin.
+ *
+ * **Safe to apply to everything.** Verified against the call sites rather than
+ * assumed: every document path is consumed with `fetchBlob` and handed to
+ * `fileDownload` (`DAA.ts`, `DAR.ts`, `FileStorageObject.ts`), and there is no
+ * top-level navigation, `href`, or `src` pointing at an API URL anywhere in
+ * `src/` — even `/api-docs/ISO-3166-countries.json` is fetched (`Countries.ts`).
+ * `fetch` ignores both headers entirely, and a blob download is initiated by the
+ * SPA's own document, so neither can reach the client. Re-check when Epic 4
+ * rewrites the fetch layer.
+ *
+ * **What it does cost.** Anything reached by navigating a browser at a proxied
+ * path renders inert — the upstream's Swagger UI under `/api-docs/*` being the
+ * realistic example. No client code does that; an operator poking at the proxy
+ * by hand would notice.
+ *
+ * Deliberately not added: forcing `content-disposition: attachment` for content
+ * types outside a safe list. `sandbox` already makes a rendered document
+ * harmless, so it buys little, and it is the piece most likely to break a future
+ * inline preview. ADR-009's deferred `Sec-Fetch-Mode: navigate` rejection would
+ * close the same vector at the request leg; these are worth having regardless,
+ * since they do not depend on a decision that has not been taken.
+ *
+ * **Applied in `onSend`, not `rewriteHeaders`.** The story sketched it on the
+ * latter, which reaches only the responses that come from the upstream. `onSend`
+ * runs for every reply the scope produces — including the 401 that replaces a
+ * rejected one, whose header-strip loop would otherwise have to except these two
+ * by name, and the proxy's own 401/403/500/502 bodies. Uniform is both easier to
+ * state and easier to test than "every response except the ones the BFF wrote".
+ */
+const RESPONSE_HARDENING: Readonly<IncomingHttpHeaders> = {
+  'x-content-type-options': 'nosniff',
+  'content-security-policy': 'sandbox',
+}
+
+/**
  * Strips the BFF prefix and the query string, yielding the upstream path.
  *
  * The query is dropped on purpose rather than forwarded here: `reply.from()`
@@ -307,6 +364,21 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
     }
     app.csrfProtection(request, reply, done)
   }
+
+  // Nothing the upstream returns may execute on this origin — see
+  // RESPONSE_HARDENING. Set here rather than merged into `rewriteHeaders` so it
+  // covers every reply the scope writes, not only the ones proxied back from the
+  // upstream, and so it lands after `onUpstreamResponse` has stripped the
+  // upstream's headers off a replaced 401.
+  //
+  // Callback style with a bare `done()`: an async onSend returning undefined
+  // would be read as "no change", but the callback form says so without relying
+  // on that, and it must not touch the payload — it is a stream on the proxied
+  // path.
+  app.addHook('onSend', (_request, reply, _payload, done) => {
+    reply.headers(RESPONSE_HARDENING)
+    done()
+  })
 
   // Cleared wholesale, then one wildcard pass-through. A `'*'` parser alone is
   // not enough: it is only the last resort. `getParser` resolves the exact
@@ -536,6 +608,10 @@ function forwardedFor(request: ProxyRequest, inbound: string | string[] | undefi
  * origin *policy* rather than state and belongs to the ingress, but relaying the
  * upstream's copy changes nothing about this origin that the ingress has not
  * already settled, so it is left alone.
+ *
+ * What this function does *not* do is add anything: `RESPONSE_HARDENING` is
+ * applied in an `onSend` hook instead, so it also covers the replies the proxy
+ * writes itself. See its comment.
  */
 function rewriteHeaders(headers: IncomingHttpHeaders): IncomingHttpHeaders {
   // Omitted by destructuring rather than deleted, for the same reason as the
@@ -600,7 +676,8 @@ function onUpstreamResponse(request: ProxyRequest, reply: ProxyReply, res: Upstr
   // and anything the BFF set is kept. `connection` is the one exception:
   // reply-from sets it to `close` when the upstream answered before the request
   // body was fully read, which is about this connection rather than about the
-  // response being discarded.
+  // response being discarded. The `RESPONSE_HARDENING` pair needs no exception —
+  // it is applied in `onSend`, which runs after this.
   for (const name of Object.keys(upstreamHeaders(res))) {
     if (name !== 'connection') {
       reply.removeHeader(name)
