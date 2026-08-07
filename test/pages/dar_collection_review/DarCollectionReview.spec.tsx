@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { MemoryRouter, Routes, Route } from 'react-router'
 import DarCollectionReview from 'src/pages/dar_collection_review/DarCollectionReview'
@@ -11,6 +11,11 @@ import { Match } from 'src/libs/ajax/Match'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
 import { DarCollection, Dataset, DatasetTerm, DuosUser, MatchResult } from 'src/types/model'
+
+// Default tab, so it mounts in every test; its /config.json fetch rejects unhandled under Node.
+vi.mock('src/pages/dar_application/DataAccessRequestApplication', () => ({
+  default: () => null,
+}))
 
 vi.mock('src/libs/ajax/Collections', () => ({
   Collections: {
@@ -261,7 +266,7 @@ describe('DAR Review', () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(chair)
     renderReview({ adminPage: false })
 
-    await waitFor(() => expect(screen.getByText('Vote')).toBeInTheDocument())
+    expect(await screen.findByText('Vote')).toBeInTheDocument()
 
     expect(screen.getByText('Voting History')).toBeInTheDocument()
     expect(screen.getByText('Full DAR')).toBeInTheDocument()
@@ -272,7 +277,7 @@ describe('DAR Review', () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(chair)
     const { container } = renderReview({ adminPage: false })
 
-    await waitFor(() => expect(screen.getByText('Vote')).toBeInTheDocument())
+    expect(await screen.findByText('Vote')).toBeInTheDocument()
 
     const tabLabels = Array.from(container.querySelectorAll('.tab-list button')).map(tab => tab.textContent)
     expect(tabLabels[0]).toBe('Vote')
@@ -282,19 +287,19 @@ describe('DAR Review', () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(chair)
     renderReview({ adminPage: false })
 
-    await waitFor(() => expect(screen.getByText('Vote')).toBeInTheDocument())
+    expect(await screen.findByText('Vote')).toBeInTheDocument()
     expect(screen.queryByTestId('dataset-list')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByText('Vote'))
 
-    await waitFor(() => expect(screen.getByText('Sleep Apnea')).toBeInTheDocument())
+    expect(await screen.findByText('Sleep Apnea')).toBeInTheDocument()
   })
 
   it('renders Vote tab (not Chair Vote) for Members', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(member)
     renderReview({ adminPage: false })
 
-    await waitFor(() => expect(screen.getByText('Vote')).toBeInTheDocument())
+    expect(await screen.findByText('Vote')).toBeInTheDocument()
 
     expect(screen.getByText('Voting History')).toBeInTheDocument()
     expect(screen.getByText('Full DAR')).toBeInTheDocument()
@@ -305,7 +310,7 @@ describe('DAR Review', () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(researcher)
     renderReview({ adminPage: false })
 
-    await waitFor(() => expect(screen.getByText('Full DAR')).toBeInTheDocument())
+    expect(await screen.findByText('Full DAR')).toBeInTheDocument()
 
     expect(screen.queryByText('Voting History')).not.toBeInTheDocument()
     expect(screen.queryByText('Chair Vote')).not.toBeInTheDocument()
@@ -316,7 +321,7 @@ describe('DAR Review', () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(admin)
     renderReview({ adminPage: true })
 
-    await waitFor(() => expect(screen.getByText('Chair Vote')).toBeInTheDocument())
+    expect(await screen.findByText('Chair Vote')).toBeInTheDocument()
 
     expect(screen.getByText('Voting History')).toBeInTheDocument()
     expect(screen.getByText('Full DAR')).toBeInTheDocument()
