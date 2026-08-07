@@ -5,8 +5,11 @@ import type { AddressInfo } from 'node:net'
 import { gzipSync } from 'node:zlib'
 import Fastify, { type FastifyInstance } from 'fastify'
 import fastifyCookie from '@fastify/cookie'
+import fastifySession from '@fastify/session'
+import fastifyCsrf from '@fastify/csrf-protection'
+import { csrfPluginOptions } from '../src/auth/csrf.js'
 import { RefreshFailedError } from '../src/auth/refresh.js'
-import { PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
+import { CSRF_EXEMPT_UNSAFE_REQUESTS, PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
 
 // refreshAccessToken is replaced so the tests never reach B2C; RefreshFailedError
 // stays the real class so the proxy's instanceof branch is exercised rather than
@@ -90,32 +93,87 @@ async function startUpstream(): Promise<Upstream> {
   }
 }
 
-interface FakeSession {
+interface SessionSeed {
   accessToken?: string
   tokenExpiry?: number
 }
 
+/** The @fastify/session default, and what index.ts and me.ts clear by name. */
+const SESSION_COOKIE = 'sessionId'
+
 /**
- * An app carrying just enough of the real one for the proxy to run:
- * `@fastify/cookie` (the fatal-refresh path calls `reply.clearCookie`) and
- * `trustProxy` (index.ts always sets it, and it is what populates
- * `request.ips`).
+ * An app assembled the way index.ts's BFF block does it — cookie, then session,
+ * then CSRF, then the proxy. That order is what the proxy's own registration
+ * check depends on, and registering the real `@fastify/csrf-protection` (rather
+ * than stubbing `csrfProtection`) is the only way the CSRF tests below mean
+ * anything. `@fastify/session`'s default MemoryStore stands in for the Postgres
+ * store; the CSRF options are imported from the same module index.ts registers
+ * with, rather than restated here — restating them is what let the header-only
+ * narrowing go untested through story 3-D.
  *
- * The session is attached by a hook rather than by registering
- * `@fastify/session`, which would need a Postgres store. `session: undefined`
- * leaves `request.session` unset, which is what a deployment without the BFF
- * database configured actually looks like.
+ * `seed` is written onto `request.session` on every request, which stands in for
+ * having completed the OAuth flow. Omit it for a caller with no access token.
  */
-async function buildProxyApp(session?: FakeSession): Promise<FastifyInstance> {
+async function buildAppShell(): Promise<FastifyInstance> {
   const app = Fastify({ logger: false, trustProxy: 1 })
   await app.register(fastifyCookie)
-  if (session) {
+  await app.register(fastifySession, {
+    secret: 'a-test-session-secret-at-least-32-characters-long',
+    cookie: { secure: false, path: '/' },
+    saveUninitialized: false,
+    rolling: false,
+  })
+  await app.register(fastifyCsrf, csrfPluginOptions)
+  // Mirrors index.ts's /auth/csrf-token — the only way a client gets a token,
+  // and therefore the only way these tests can produce a valid one.
+  app.get('/auth/csrf-token', async (_request, reply) => reply.send({ token: reply.generateCsrf() }))
+  return app
+}
+
+async function buildProxyApp(seed?: SessionSeed): Promise<FastifyInstance> {
+  const app = await buildAppShell()
+  if (seed) {
     app.addHook('onRequest', async (request) => {
-      ;(request as { session?: FakeSession }).session = session
+      Object.assign(request.session, seed)
     })
   }
   await app.register(apiProxy)
   return app
+}
+
+/**
+ * A token and the session cookie it is bound to, obtained the way a client
+ * would. The token alone is not enough — the secret it verifies against lives in
+ * the session, so the cookie has to come back with it.
+ */
+async function csrfCredentials(app: FastifyInstance): Promise<{ token: string, cookie: string }> {
+  const res = await app.inject({ method: 'GET', url: '/auth/csrf-token' })
+  const sessionCookie = res.cookies.find(cookie => cookie.name === SESSION_COOKIE)
+  if (!sessionCookie) {
+    throw new Error('the CSRF token endpoint set no session cookie')
+  }
+  return {
+    token: res.json<{ token: string }>().token,
+    cookie: `${SESSION_COOKIE}=${sessionCookie.value}`,
+  }
+}
+
+/**
+ * An unsafe-method request carrying what a real client would: the CSRF token and
+ * the session cookie it is bound to. Used by every test whose subject is
+ * something other than CSRF itself, so those stay readable.
+ */
+async function injectWithCsrf(
+  app: FastifyInstance,
+  opts: { method: 'POST' | 'PUT' | 'PATCH' | 'DELETE', url: string, headers?: Record<string, string>, payload?: string | Buffer },
+) {
+  const { token, cookie } = await csrfCredentials(app)
+  return app.inject({
+    method: opts.method,
+    url: opts.url,
+    payload: opts.payload,
+    headers: { ...opts.headers, cookie, 'x-csrf-token': token },
+  })
 }
 
 describe('apiProxy', () => {
@@ -137,7 +195,7 @@ describe('apiProxy', () => {
   })
 
   /** A session comfortably outside the refresh window. */
-  const freshSession = (accessToken = 'session-access-token'): FakeSession => ({
+  const freshSession = (accessToken = 'session-access-token'): SessionSeed => ({
     accessToken,
     tokenExpiry: nowSeconds() + 3600,
   })
@@ -181,7 +239,7 @@ describe('apiProxy', () => {
     it('forwards the method', async () => {
       app = await buildProxyApp(freshSession())
 
-      await app.inject({ method: 'DELETE', url: `${PROXY_PREFIX}/api/dataset/1` })
+      await injectWithCsrf(app, { method: 'DELETE', url: `${PROXY_PREFIX}/api/dataset/1` })
 
       expect(upstream.last().method).toBe('DELETE')
     })
@@ -219,7 +277,7 @@ describe('apiProxy', () => {
   describe('the upstream base URL', () => {
     it('fails to register when DUOS_API_URL is unset, naming the variable', async () => {
       delete process.env.DUOS_API_URL
-      const unregistered = Fastify({ logger: false })
+      const unregistered = await buildAppShell()
       unregistered.register(apiProxy)
 
       await expect(unregistered.ready()).rejects.toThrow('DUOS_API_URL')
@@ -231,7 +289,7 @@ describe('apiProxy', () => {
     // guard — so every proxied request would 500. Better to fail at startup.
     it('fails to register when DUOS_API_URL carries a path', async () => {
       process.env.DUOS_API_URL = `${upstream.origin}/consent`
-      const unregistered = Fastify({ logger: false })
+      const unregistered = await buildAppShell()
       unregistered.register(apiProxy)
 
       await expect(unregistered.ready()).rejects.toThrow(/DUOS_API_URL.*must be a bare origin/s)
@@ -250,7 +308,7 @@ describe('apiProxy', () => {
       ['a non-HTTP scheme', 'ftp://duos-api.example.org', /scheme is 'ftp:'/],
     ])('fails to register when DUOS_API_URL is %s, naming the variable', async (_case, value, expected) => {
       process.env.DUOS_API_URL = value
-      const unregistered = Fastify({ logger: false })
+      const unregistered = await buildAppShell()
       unregistered.register(apiProxy)
 
       const ready = expect(unregistered.ready()).rejects
@@ -261,7 +319,7 @@ describe('apiProxy', () => {
   })
 
   describe('the authentication gate', () => {
-    it('returns 401 without calling the upstream when there is no session at all', async () => {
+    it('returns 401 without calling the upstream for a caller with no session', async () => {
       app = await buildProxyApp()
 
       const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
@@ -271,6 +329,9 @@ describe('apiProxy', () => {
       expect(upstream.received).toHaveLength(0)
     })
 
+    // A session that exists but never completed the OAuth flow — @fastify/session
+    // always hands the handler a session object, so "no session" and "no token"
+    // are the same check.
     it('returns 401 without calling the upstream when the session holds no access token', async () => {
       app = await buildProxyApp({ tokenExpiry: nowSeconds() + 3600 })
 
@@ -286,6 +347,199 @@ describe('apiProxy', () => {
       await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
       expect(upstream.last().headers.authorization).toBe('Bearer the-session-token')
+    })
+  })
+
+  // The proxy turns every DUOS API write into a cookie-authenticated request,
+  // so without this any site could drive them using a signed-in victim's cookie.
+  describe('CSRF enforcement', () => {
+    /**
+     * The plugin rejects for two different reasons, both with a 403, and the
+     * tests below assert which one they got rather than the status alone —
+     * otherwise a case meant to exercise one path can silently drift onto the
+     * other, which review of story 3-D found had already happened to the
+     * no-token cases.
+     *
+     * `MISSING_SECRET` means the request had no session to verify against, so
+     * enforcement never got as far as the token. `INVALID_TOKEN` means there was
+     * a secret and the token did not verify against it — including when
+     * `getToken` found no token at all. The codes are Fastify's default error
+     * serialisation, which is what this harness (no error handler of its own)
+     * exposes.
+     */
+    const MISSING_SECRET = 'FST_CSRF_MISSING_SECRET'
+    const INVALID_TOKEN = 'FST_CSRF_INVALID_TOKEN'
+
+    // No cookie, so every request builds a fresh session with no CSRF secret in
+    // it. That is the signed-out attacker's request, and it stops at the secret.
+    it.each(['POST', 'PUT', 'PATCH', 'DELETE'] as const)(
+      'rejects %s from a caller with no session secret, without calling the upstream',
+      async (method) => {
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method, url: `${PROXY_PREFIX}/api/dataset/1` })
+
+        expect(res.statusCode).toBe(403)
+        expect(res.json()).toMatchObject({ code: MISSING_SECRET })
+        expect(upstream.received).toHaveLength(0)
+      },
+    )
+
+    // The case the four above do NOT cover: a real signed-in session that has a
+    // secret, on a request that simply carries no token — a client that forgot
+    // the header rather than an attacker with no session. One method is enough;
+    // that the guard applies to all four is established above.
+    it('rejects an unsafe method that has a session secret but sends no token', async () => {
+      app = await buildProxyApp(freshSession())
+      const { cookie } = await csrfCredentials(app)
+
+      const res = await app.inject({ method: 'POST', url: `${PROXY_PREFIX}/api/dataset/1`, headers: { cookie } })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toMatchObject({ code: INVALID_TOKEN })
+      expect(upstream.received).toHaveLength(0)
+    })
+
+    it.each(['POST', 'PUT', 'PATCH', 'DELETE'] as const)('accepts %s with a valid token', async (method) => {
+      app = await buildProxyApp(freshSession())
+
+      const res = await injectWithCsrf(app, { method, url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.statusCode).toBe(200)
+      expect(upstream.received).toHaveLength(1)
+    })
+
+    it('rejects a token that does not verify against the session secret', async () => {
+      app = await buildProxyApp(freshSession())
+      const { cookie } = await csrfCredentials(app)
+
+      const res = await app.inject({
+        method: 'POST',
+        url: `${PROXY_PREFIX}/api/dataset/1`,
+        headers: { cookie, 'x-csrf-token': 'not-the-real-token' },
+      })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toMatchObject({ code: INVALID_TOKEN })
+      expect(upstream.received).toHaveLength(0)
+    })
+
+    // The secret lives in the session, so a token lifted from another browser is
+    // worthless without that browser's cookie. Rejected for want of a secret
+    // rather than a bad token — the token itself is never reached.
+    it('rejects a valid token presented without its session cookie', async () => {
+      app = await buildProxyApp(freshSession())
+      const { token } = await csrfCredentials(app)
+
+      const res = await app.inject({
+        method: 'POST',
+        url: `${PROXY_PREFIX}/api/dataset/1`,
+        headers: { 'x-csrf-token': token },
+      })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toMatchObject({ code: MISSING_SECRET })
+      expect(upstream.received).toHaveLength(0)
+    })
+
+    // `csrfPluginOptions` narrows getToken to one header. The plugin's default
+    // would also accept `csrf-token`, `xsrf-token` and `x-xsrf-token`, so with
+    // the narrowing gone this request would be accepted — which is what makes
+    // this the test that pins it. index.test.ts pins the other half: that
+    // buildApp() registers the plugin with those options at all.
+    it('does not accept the token under an alternative header spelling', async () => {
+      app = await buildProxyApp(freshSession())
+      const { token, cookie } = await csrfCredentials(app)
+
+      const res = await app.inject({
+        method: 'POST',
+        url: `${PROXY_PREFIX}/api/dataset/1`,
+        headers: { cookie, 'csrf-token': token },
+      })
+
+      // The secret is present and no token was found, so this is the
+      // failed-verification path, not the missing-secret one.
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toMatchObject({ code: INVALID_TOKEN })
+    })
+
+    it.each(['GET', 'HEAD', 'OPTIONS'] as const)('does not require a token on %s', async (method) => {
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method, url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.statusCode).toBe(200)
+    })
+
+    // Both are the signed-out Contact Us form. With no session there is no CSRF
+    // secret, so enforcing here would reject them outright — and there is nothing
+    // to protect, because they carry no credential for an attacker to borrow.
+    it.each(['/support/request', '/support/upload'])('exempts the unauthenticated POST %s', async (path) => {
+      app = await buildProxyApp()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: `${PROXY_PREFIX}${path}`,
+        headers: { 'content-type': 'application/json' },
+        payload: '{"subject":"help"}',
+      })
+
+      expect(res.statusCode).toBe(200)
+      expect(upstream.last().url).toBe(path)
+    })
+
+    // Pinned as a set for the same reason as UNAUTHENTICATED_PATHS below: adding
+    // an entry waives CSRF for a state-changing request, which should have to
+    // appear as a deliberate edit to this list in review.
+    it('exempts exactly the two signed-out Contact Us POSTs', () => {
+      expect([...CSRF_EXEMPT_UNSAFE_REQUESTS].sort()).toEqual([
+        'POST /support/request',
+        'POST /support/upload',
+      ])
+    })
+
+    // The regression this pins: keying the exemption on UNAUTHENTICATED_PATHS
+    // instead would waive CSRF here too, because that set also holds these
+    // read-only endpoints. Harmless today — allowlisted paths get no injected
+    // Authorization, so a forged write borrows no authority — but the exemption
+    // should not depend on that holding somewhere else in the file.
+    it.each(['/status', '/oauth2/configuration', '/tos/text/duos'])(
+      'still requires a token on POST %s, though the path is on the unauthenticated allowlist',
+      async (path) => {
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({
+          method: 'POST',
+          url: `${PROXY_PREFIX}${path}`,
+          headers: { 'content-type': 'application/json' },
+          payload: '{}',
+        })
+
+        expect(res.statusCode).toBe(403)
+        expect(upstream.received).toHaveLength(0)
+      },
+    )
+
+    // Method is half the key, so the exemption does not generalise from the POST
+    // the Contact Us form actually sends to every unsafe method on that path.
+    it.each(['PUT', 'PATCH', 'DELETE'] as const)('still requires a token on %s /support/request', async (method) => {
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method, url: `${PROXY_PREFIX}/support/request` })
+
+      expect(res.statusCode).toBe(403)
+      expect(upstream.received).toHaveLength(0)
+    })
+
+    // Better a startup failure than a proxy quietly accepting writes from any
+    // origin because the plugin order changed.
+    it('refuses to register when @fastify/csrf-protection is absent', async () => {
+      const unguarded = Fastify({ logger: false })
+      await unguarded.register(fastifyCookie)
+      unguarded.register(apiProxy)
+
+      await expect(unguarded.ready()).rejects.toThrow(/@fastify\/csrf-protection/)
+      await unguarded.close()
     })
   })
 
@@ -377,16 +631,15 @@ describe('apiProxy', () => {
     })
 
     it('sends the token the refresh installed, not the stale one', async () => {
-      const session: FakeSession = { accessToken: 'stale-token', tokenExpiry: nowSeconds() }
       const { refreshAccessToken } = await import('../src/auth/refresh.js')
       // The real refreshAccessToken mutates request.session in place; mirroring
       // that here proves the handler reads the token after the refresh rather
       // than capturing it beforehand.
-      vi.mocked(refreshAccessToken).mockImplementation(async () => {
-        session.accessToken = 'renewed-token'
-        session.tokenExpiry = nowSeconds() + 3600
+      vi.mocked(refreshAccessToken).mockImplementation(async (request) => {
+        request.session.accessToken = 'renewed-token'
+        request.session.tokenExpiry = nowSeconds() + 3600
       })
-      app = await buildProxyApp(session)
+      app = await buildProxyApp({ accessToken: 'stale-token', tokenExpiry: nowSeconds() })
 
       await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
@@ -404,7 +657,7 @@ describe('apiProxy', () => {
       expect(res.json()).toEqual({ error: 'session_expired' })
       // Otherwise the browser keeps presenting a sid whose row is already gone.
       expect(res.cookies).toEqual(expect.arrayContaining([
-        expect.objectContaining({ name: 'sessionId', value: '' }),
+        expect.objectContaining({ name: SESSION_COOKIE, value: '' }),
       ]))
       expect(upstream.received).toHaveLength(0)
     })
@@ -420,7 +673,11 @@ describe('apiProxy', () => {
 
       expect(res.statusCode).toBe(502)
       expect(res.json()).toEqual({ error: 'upstream_unavailable' })
-      expect(res.cookies).toEqual([])
+      // The distinction that matters: the session survives, so unlike the fatal
+      // path above nothing clears the cookie out from under the browser.
+      expect(res.cookies).not.toEqual(expect.arrayContaining([
+        expect.objectContaining({ name: SESSION_COOKIE, value: '' }),
+      ]))
       expect(upstream.received).toHaveLength(0)
     })
   })
@@ -542,7 +799,7 @@ describe('apiProxy', () => {
       // Key order and spacing survive only if the body was never parsed.
       const payload = '{"b":1,"a":  2}'
 
-      await app.inject({
+      await injectWithCsrf(app, {
         method: 'POST',
         url: `${PROXY_PREFIX}/api/dataset/search`,
         headers: { 'content-type': 'application/json' },
@@ -557,7 +814,7 @@ describe('apiProxy', () => {
       app = await buildProxyApp(freshSession())
       const body = '--boundary\r\nContent-Disposition: form-data; name="file"; filename="a.txt"\r\n\r\nhello\r\n--boundary--\r\n'
 
-      const res = await app.inject({
+      const res = await injectWithCsrf(app, {
         method: 'POST',
         url: `${PROXY_PREFIX}/api/dataset/v3`,
         headers: { 'content-type': 'multipart/form-data; boundary=boundary' },
@@ -591,7 +848,7 @@ describe('apiProxy', () => {
       app = await buildProxyApp(freshSession())
       const body = Buffer.alloc(2 * 1024 * 1024, 'a')
 
-      const res = await app.inject({
+      const res = await injectWithCsrf(app, {
         method: 'POST',
         url: `${PROXY_PREFIX}/api/dataset/v3`,
         headers: { 'content-type': 'application/octet-stream' },
@@ -668,7 +925,14 @@ describe('apiProxy', () => {
       const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
       expect(res.statusCode).toBe(200)
-      expect(res.headers['set-cookie']).toBeUndefined()
+      // Asserted against the upstream's values rather than as "no set-cookie at
+      // all": @fastify/session sets its own `sessionId` on the way out, so an
+      // absence check would pass or fail on the BFF's own cookie. What matters is
+      // that neither upstream cookie survives — including the one that shares the
+      // session cookie's name, which is the whole point of the test.
+      const forwarded = res.cookies.map(cookie => cookie.value)
+      expect(forwarded).not.toContain('upstream-chosen-value')
+      expect(res.cookies.map(cookie => cookie.name)).not.toContain('tracking')
       // The body still arrives — the header is dropped, not the response.
       expect(res.json()).toEqual({ ok: true })
     })
