@@ -61,36 +61,28 @@ the root handler returns.
 ```
 
 Both plugin codes are allowlisted — `FST_CSRF_MISSING_SECRET` and
-`FST_CSRF_INVALID_TOKEN` — and both map to the same `error`, because both mean
-the same thing to the client: refetch the token and retry once. The `reason`
-distinguishes them for a human reading a network tab or a support ticket; a
-missing secret is what a session rotation that discards the secret (Phase 5, 5-D)
-will look like, which is worth being able to see without server logs.
+`FST_CSRF_INVALID_TOKEN` — and both map to the same `error`, because both call
+for the same single retry. `reason` is diagnostic, not contractual: it separates
+the two for a human reading a network tab (a missing secret is what a Phase 5
+session rotation will look like), and it is what lets the tests assert *which*
+rejection fired — the drift story 3-D's review caught, where cases meant to
+exercise one path had silently moved onto the other.
 
-`error` is named for the check that failed rather than for either cause, so
-neither half is mislabelled. The generic body is shared as `GENERIC_ERROR_BODY`
-in `server/src/errors.ts` rather than written out in both handlers: the point of
-the second branch is that the browser cannot tell which scope failed, and two
-string literals drift invisibly — both would still return *a* generic body, just
-not the same one.
+The generic body is shared as `GENERIC_ERROR_BODY` in `server/src/errors.ts`
+rather than written out in both handlers: the point of the second branch is that
+the browser cannot tell which scope failed, and two string literals drift
+invisibly.
 
 ### The plugin's error code is not on the wire
 
-`FST_CSRF_*` stays in the log line and out of the response. Two reasons:
-
-1. It is `@fastify/csrf-protection` internals, renameable on a major bump. A
-   client branching on it breaks silently.
-2. `code` in an error body already means something else to this client.
-   [`DataAccessRequestApplication.tsx:559`](../../../src/pages/dar_application/DataAccessRequestApplication.tsx)
-   reads it as *"the upstream sent a structured error, so its `message` is safe
-   to render as markdown"*. Putting a Fastify identifier there gives the field a
-   third meaning, in a codebase that already types it inconsistently
-   (`code?: number` in `fetchAdapter.ts` and `types/model.ts`, `code?: string` at
-   that call site).
-
-Nothing breaks today either way — the CSRF body carries no `message`, so that
-call site's `&&` short-circuits — but publishing under a BFF-owned key costs
-nothing and needs no client type change at all.
+`FST_CSRF_*` stays in the log line and out of the response. It is
+`@fastify/csrf-protection` internals, renameable on a major bump — and `code` in
+an error body already means something else to this client:
+[`DataAccessRequestApplication.tsx:559`](../../../src/pages/dar_application/DataAccessRequestApplication.tsx)
+reads it as *"the upstream sent a structured error, so its `message` is safe to
+render as markdown"*. Nothing breaks either way, since the CSRF body carries no
+`message`, but publishing under a BFF-owned key costs nothing and needs no client
+type change.
 
 ## Alternatives rejected
 
@@ -98,25 +90,19 @@ nothing and needs no client type change at all.
 and it does fix the leaked message. Rejected because it flattens the CSRF
 rejection into the generic body, which is the one distinction the client needs.
 
-Worth recording accurately, since it is the obvious objection to the option
-actually chosen: the blast radius of moving that line is **exactly the proxy
-scope, nothing more**. Every plugin `index.ts` registers before it —
-`@fastify/postgres`, `@fastify/cookie`, `@fastify/session`,
-`@fastify/csrf-protection`, `@fastify/vite` — wraps itself in `fastify-plugin`
-and therefore runs in the root scope, inheriting the handler wherever the call
-sits. `apiProxy` is the only encapsulated child in the app. The case against
-this option is the 403 ambiguity alone; it is not a risky change, just a lossy
-one.
+Recorded accurately because it is the obvious objection to the option chosen:
+the blast radius of moving that line is **exactly the proxy scope**. Every plugin
+registered before it wraps itself in `fastify-plugin` and so already runs in the
+root scope, `@fastify/vite` included; `apiProxy` is the only encapsulated child
+in the app. The case against it is the 403 ambiguity alone — lossy, not risky.
 
 **Leave the incidental shape and document it.** Rejected: the leaked `message`
 on an unexpected 500 is a real (if minor) disclosure, and a shape that depends
-on plugin registration order is one refactor away from changing without anyone
-noticing.
+on plugin registration order is one refactor away from changing silently.
 
-**Reject CSRF failures in the `onRequest` hook instead of an error handler** —
-intercepting `csrfProtection`'s `done(err)` and replying directly. Works for the
-expected case, but leaves the unexpected-500 sanitising still to be solved, so it
-is the same amount of code in two places instead of one.
+**Reject CSRF failures in the `onRequest` hook instead of an error handler.**
+Works for the expected case, but leaves the unexpected-500 sanitising still to be
+solved — the same amount of code in two places instead of one.
 
 ## Consequences
 
@@ -130,11 +116,11 @@ is the same amount of code in two places instead of one.
   carries the real error and the request id.
 - `reply.from`'s transport failures never reach this handler —
   `onUpstreamTransportError` answers those with 502 `upstream_unavailable` — so
-  the generic branch is reached only by a bug on a proxy path.
+  the generic branch means a bug on a proxy path.
 - The five CSRF assertions added by story 3-D's review were pinning Fastify's
-  default serialisation (`code: 'FST_CSRF_INVALID_TOKEN'`), which their own
-  comment admitted was "what this harness exposes". They now assert the body
-  above, against a harness that registers the app's real handler ordering.
+  default serialisation, which their own comment admitted was "what this harness
+  exposes". They now assert the body above, against a harness that registers the
+  app's real handler ordering.
 
 ## Revisit when
 

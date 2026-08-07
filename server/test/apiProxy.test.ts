@@ -1005,40 +1005,25 @@ describe('apiProxy', () => {
      * `SameSite=Lax` session cookie.
      */
     describe('response hardening', () => {
-      const respondWithUploadedHtml = (): void => {
-        upstream.respondWith((_req, res) => {
-          res.writeHead(200, { 'content-type': 'text/html' })
-          res.end('<script>fetch("/duos-api/api/user/me")</script>')
-        })
-      }
-
+      // The threat itself: a `.html` uploaded as a DAA document, fetched by a
+      // top-level navigation that carries the SameSite=Lax session cookie. The
+      // upstream sends weaker versions of both headers, so this also pins that an
+      // upstream cannot relax what the BFF applies.
       it('neuters an uploaded document served back as text/html', async () => {
-        respondWithUploadedHtml()
-        app = await buildProxyApp(freshSession())
-
-        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/daa/1/file` })
-
-        expect(res.headers['x-content-type-options']).toBe('nosniff')
-        expect(res.headers['content-security-policy']).toBe('sandbox')
-      })
-
-      // An upstream that sends either header must not be able to relax it — the
-      // BFF's value is the one that reaches the browser.
-      it('overrides an upstream that sends a weaker policy of its own', async () => {
         upstream.respondWith((_req, res) => {
           res.writeHead(200, {
             'content-type': 'text/html',
             'content-security-policy': 'default-src \'self\' \'unsafe-inline\'',
             'x-content-type-options': 'sniff-away',
           })
-          res.end('<p>hello</p>')
+          res.end('<script>fetch("/duos-api/api/user/me")</script>')
         })
         app = await buildProxyApp(freshSession())
 
         const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/daa/1/file` })
 
-        expect(res.headers['content-security-policy']).toBe('sandbox')
         expect(res.headers['x-content-type-options']).toBe('nosniff')
+        expect(res.headers['content-security-policy']).toBe('sandbox')
       })
 
       // The headers are inert to the client — `fetch` ignores both, and a blob
@@ -1146,9 +1131,13 @@ describe('apiProxy', () => {
       })
     }
 
-    it('returns its own 401 in place of the upstream response', async () => {
+    // The whole behaviour in one case, because it is one behaviour: the user is
+    // signed out. Splitting it would repeat the setup three times to assert three
+    // halves of the same outcome.
+    it('signs the user out — its own 401, session destroyed, cookie cleared', async () => {
       rejectingUpstream()
       app = await buildProxyApp(freshSession())
+      const session = trackSession(app)
 
       const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
@@ -1156,19 +1145,15 @@ describe('apiProxy', () => {
       // The BFF's vocabulary, not the upstream's: the client distinguishes this
       // from `unauthenticated` (never had a session) and `upstream_unavailable`.
       expect(res.json()).toEqual({ error: 'session_expired' })
-    })
-
-    it('destroys the session', async () => {
-      rejectingUpstream()
-      app = await buildProxyApp(freshSession())
-      const session = trackSession(app)
-
-      await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
-
       expect(await session.stored()).toBeNull()
+      // Without clearing it the browser keeps presenting a sid whose row is
+      // already gone, and every later request silently starts a new empty session.
+      expect(res.cookies).toEqual(expect.arrayContaining([
+        expect.objectContaining({ name: SESSION_COOKIE, value: '' }),
+      ]))
     })
 
-    // The control for the assertion above: the same lookup finds a row when the
+    // The control for the destroy above: the same lookup finds a row when the
     // upstream is happy, so "no row" means destroyed rather than never-written.
     it('leaves the session alone when the upstream is happy', async () => {
       app = await buildProxyApp(freshSession())
@@ -1177,19 +1162,6 @@ describe('apiProxy', () => {
       await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
       expect(await session.stored()).not.toBeNull()
-    })
-
-    it('clears the session cookie', async () => {
-      rejectingUpstream()
-      app = await buildProxyApp(freshSession())
-
-      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
-
-      // Otherwise the browser keeps presenting a sid whose row is already gone,
-      // and every later request silently starts a new empty session.
-      expect(res.cookies).toEqual(expect.arrayContaining([
-        expect.objectContaining({ name: SESSION_COOKIE, value: '' }),
-      ]))
     })
 
     it('ends the session on a rejected write as well as a read', async () => {
@@ -1243,21 +1215,6 @@ describe('apiProxy', () => {
     // "not for you" to a request it authenticated fine, and signing the user out
     // of a session it just accepted would be a regression the client would feel
     // as a random logout.
-    it('passes a 403 through without touching the session', async () => {
-      upstream.respondWith((_req, res) => {
-        res.writeHead(403, { 'content-type': 'application/json' })
-        res.end('{"message":"Forbidden"}')
-      })
-      app = await buildProxyApp(freshSession())
-      const session = trackSession(app)
-
-      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
-
-      expect(res.statusCode).toBe(403)
-      expect(res.json()).toEqual({ message: 'Forbidden' })
-      expect(await session.stored()).not.toBeNull()
-    })
-
     // An allowlisted path is proxied with no token at all, so its 401 is about
     // the upstream's own state — it says nothing about the caller's session, and
     // signing them out over it would be a logout triggered by an unrelated
@@ -1376,12 +1333,16 @@ describe('apiProxy', () => {
         res.end('{"code":403,"message":"User is not an admin"}')
       })
       app = await buildProxyApp(freshSession())
+      const session = trackSession(app)
 
       const res = await injectWithCsrf(app, { method: 'POST', url: `${PROXY_PREFIX}/api/dataset/1` })
 
       expect(res.statusCode).toBe(403)
       expect(res.json()).toEqual({ code: 403, message: 'User is not an admin' })
       expect(res.json()).not.toHaveProperty('error', CSRF_ERROR_CODE)
+      // Only a 401 ends the session — a denial is about this request, not the
+      // token that carried it.
+      expect(await session.stored()).not.toBeNull()
     })
   })
 })

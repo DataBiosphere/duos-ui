@@ -132,38 +132,32 @@ export const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
 
 /**
  * The `error` code a CSRF rejection returns, and the one thing about a proxy
- * error the client is meant to branch on (ADR-010).
+ * error the client branches on (ADR-010).
  *
  * Epic 4's fetch layer refetches a token and retries once when it sees this, and
  * only when it sees this. Status alone cannot carry that signal: an upstream
  * authorization denial is an ordinary proxied response and also arrives as a
  * 403, so retrying on the status would replay every write the DUOS API refused.
- *
- * Named for the check that failed rather than for either cause, because both
- * causes below mean the same thing to the client.
  */
 export const CSRF_ERROR_CODE = 'csrf_validation_failed'
 
 /**
  * The two ways `@fastify/csrf-protection` rejects a request, mapped to the
- * reason the BFF publishes for each.
+ * reason the BFF publishes. `FST_CSRF_MISSING_SECRET` means there was no session
+ * to verify against, so enforcement stopped before the token — including the
+ * shape a session rotation that discards the secret (Epic 5, 5-D) will produce.
+ * `FST_CSRF_INVALID_TOKEN` means there was a secret and the token did not verify
+ * against it.
  *
- * `FST_CSRF_MISSING_SECRET` means the request carried no session to verify
- * against, so enforcement stopped before it reached the token — the signed-out
- * caller, and the shape a session rotation that discards the secret (Epic 5,
- * 5-D) will produce. `FST_CSRF_INVALID_TOKEN` means there was a secret and the
- * token did not verify against it, including when `getToken` found no token at
- * all.
+ * Both map to the same `error`, since both call for the same single retry;
+ * `reason` is diagnostic, and the tests below are its other consumer — asserting
+ * which rejection fired is what stops a case meant to exercise one path from
+ * silently drifting onto the other, as story 3-D's review found had happened.
  *
- * The plugin's own code is deliberately not what goes on the wire, for two
- * reasons. It is `@fastify/csrf-protection` internals, renameable on a major
- * bump, and a client branching on it would break silently. And the `code` field
- * of an error body already means something else to this client:
- * `DataAccessRequestApplication.tsx` reads it as "the upstream sent a structured
- * error, so its `message` is safe to render as markdown". So the distinction
- * travels under a key of the BFF's own, and is there for a human reading a
- * network tab or a support ticket — the client branches on `error`, never on
- * this.
+ * The plugin's own code stays off the wire: it is renameable internals, and
+ * `code` in an error body already means something else to this client
+ * (`DataAccessRequestApplication.tsx` reads it as "the upstream sent a structured
+ * error, so render its `message`").
  */
 const CSRF_REJECTION_REASONS: ReadonlyMap<string, string> = new Map([
   ['FST_CSRF_MISSING_SECRET', 'missing_secret'],
@@ -171,56 +165,32 @@ const CSRF_REJECTION_REASONS: ReadonlyMap<string, string> = new Map([
 ])
 
 /**
- * Added to every proxied response, so nothing the upstream returns can execute
- * on the SPA's origin (story 3-E(b)).
+ * Added to every response the proxy scope emits, so nothing the upstream returns
+ * can execute on the SPA's origin (story 3-E(b)).
  *
- * **Why the proxy creates this problem.** DUOS serves user-uploaded documents
- * back through the API — `GET /api/daa/{id}/file`, DAR documents,
- * `FileStorageObject` documents. Proxied, those are served *from the BFF's own
- * origin*. A top-level navigation to `/duos-api/api/daa/{id}/file` carries the
- * `SameSite=Lax` session cookie, the proxy injects the bearer, and the browser
- * renders attacker-uploaded markup on the origin that holds the session.
- * `HttpOnly` is no help: the script does not need to read the cookie, only to
- * make same-origin requests back through the proxy with it.
+ * The proxy introduces this risk. DUOS serves user-uploaded documents back
+ * through the API, and proxied they come from the BFF's *own* origin: a
+ * top-level navigation to one carries the `SameSite=Lax` session cookie, the
+ * proxy injects the bearer, and the browser renders attacker-uploaded markup on
+ * the origin that holds the session. `HttpOnly` does not help — the script needs
+ * to make same-origin requests with the cookie, not to read it.
  *
- * This is genuinely new with the proxy. Today the same file comes from the
- * Consent API's origin, where a cookie-less top-level navigation simply 401s.
+ * `sandbox` with no tokens gives any document that does get rendered an opaque
+ * origin and no scripts; `nosniff` stops one being promoted to a document by the
+ * browser guessing at its bytes. Unconditional, and overriding an upstream that
+ * sends either header, because the safety must not depend on the content type
+ * the upstream chose to declare.
  *
- *   x-content-type-options — no MIME sniffing, so an `.html` uploaded as
- *                            `application/octet-stream` is not promoted to a
- *                            document by the browser guessing at its bytes.
- *   content-security-policy — `sandbox` with no tokens is the maximally
- *                            restrictive form: opaque origin, no scripts, no
- *                            forms, no same-origin access. A document that does
- *                            get rendered can do nothing with this origin.
+ * Applied in `onSend` rather than `rewriteHeaders`, which reaches only the
+ * responses that come back from the upstream: `onSend` runs after
+ * `onUpstreamResponse` strips the upstream's headers off a replaced 401, and
+ * covers the replies the proxy writes for itself.
  *
- * **Safe to apply to everything.** Verified against the call sites rather than
- * assumed: every document path is consumed with `fetchBlob` and handed to
- * `fileDownload` (`DAA.ts`, `DAR.ts`, `FileStorageObject.ts`), and there is no
- * top-level navigation, `href`, or `src` pointing at an API URL anywhere in
- * `src/` — even `/api-docs/ISO-3166-countries.json` is fetched (`Countries.ts`).
- * `fetch` ignores both headers entirely, and a blob download is initiated by the
- * SPA's own document, so neither can reach the client. Re-check when Epic 4
- * rewrites the fetch layer.
- *
- * **What it does cost.** Anything reached by navigating a browser at a proxied
- * path renders inert — the upstream's Swagger UI under `/api-docs/*` being the
- * realistic example. No client code does that; an operator poking at the proxy
- * by hand would notice.
- *
- * Deliberately not added: forcing `content-disposition: attachment` for content
- * types outside a safe list. `sandbox` already makes a rendered document
- * harmless, so it buys little, and it is the piece most likely to break a future
- * inline preview. ADR-009's deferred `Sec-Fetch-Mode: navigate` rejection would
- * close the same vector at the request leg; these are worth having regardless,
- * since they do not depend on a decision that has not been taken.
- *
- * **Applied in `onSend`, not `rewriteHeaders`.** The story sketched it on the
- * latter, which reaches only the responses that come from the upstream. `onSend`
- * runs for every reply the scope produces — including the 401 that replaces a
- * rejected one, whose header-strip loop would otherwise have to except these two
- * by name, and the proxy's own 401/403/500/502 bodies. Uniform is both easier to
- * state and easier to test than "every response except the ones the BFF wrote".
+ * Safe for the client — `fetch` ignores both headers, and every document path is
+ * a `fetchBlob` download initiated by the SPA's own document. Verified against
+ * the call sites; re-check when Epic 4 rewrites the fetch layer. See the epic's
+ * story 3-E(b) for the full argument and for what this costs (direct navigation
+ * to the upstream's Swagger UI renders inert).
  */
 const RESPONSE_HARDENING: Readonly<IncomingHttpHeaders> = {
   'x-content-type-options': 'nosniff',
@@ -303,23 +273,16 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
   }
 
   /**
-   * The proxy scope's error shape (story 3-E, ADR-010).
+   * The proxy scope's error shape — see ADR-010 for the decision and the
+   * alternatives.
    *
-   * Declared here rather than inherited from the root instance, and that is not
-   * a preference: a child context copies the error handler that exists when it
-   * is created, and index.ts calls `setErrorHandler` *after* it registers this
-   * plugin. Without this line the scope keeps Fastify's default handler, which
-   * puts `err.message` on the wire for an unexpected 500 while every other route
-   * in the app returns the generic body. Moving index.ts's call above the
-   * registration would fix that half, but it would also flatten the CSRF
-   * rejection into the same generic body — and that one the client has to be
-   * able to recognise, since a 403 through this proxy is otherwise an upstream
-   * authorization denial passed through as an ordinary response.
-   *
-   * So: CSRF rejections keep a stable, BFF-owned code, and everything else is
-   * indistinguishable from a failure anywhere else in the app. `reply.from`'s
+   * Declared here because an encapsulated scope copies the error handler that
+   * exists when it is created, and index.ts sets the app's *after* registering
+   * this plugin. CSRF rejections keep a stable, BFF-owned code because the
+   * client has to tell them from an upstream 403; everything else is
+   * indistinguishable from a failure elsewhere in the app. `reply.from`'s
    * transport failures never arrive here — `onUpstreamTransportError` answers
-   * those — so the second branch is reached only by a bug on a proxy path.
+   * those — so the second branch means a bug on a proxy path.
    */
   app.setErrorHandler((err: FastifyError, request, reply) => {
     const reason = err.code === undefined ? undefined : CSRF_REJECTION_REASONS.get(err.code)
@@ -366,15 +329,11 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
   }
 
   // Nothing the upstream returns may execute on this origin — see
-  // RESPONSE_HARDENING. Set here rather than merged into `rewriteHeaders` so it
-  // covers every reply the scope writes, not only the ones proxied back from the
-  // upstream, and so it lands after `onUpstreamResponse` has stripped the
-  // upstream's headers off a replaced 401.
+  // RESPONSE_HARDENING for why it is here rather than in `rewriteHeaders`.
   //
-  // Callback style with a bare `done()`: an async onSend returning undefined
-  // would be read as "no change", but the callback form says so without relying
-  // on that, and it must not touch the payload — it is a stream on the proxied
-  // path.
+  // Callback style with a bare `done()`: the payload must be passed through
+  // untouched — it is a stream on the proxied path — and the callback form says
+  // so without relying on how an async hook treats an undefined return.
   app.addHook('onSend', (_request, reply, _payload, done) => {
     reply.headers(RESPONSE_HARDENING)
     done()
@@ -655,10 +614,10 @@ function onUpstreamResponse(request: ProxyRequest, reply: ProxyReply, res: Upstr
 
   // The upstream's 401 body is replaced by the reply below, but it still has to
   // be read: an unconsumed response keeps its undici socket checked out of the
-  // pool. Drained rather than destroyed so the connection stays reusable — a 401
-  // body is a sentence of JSON. The error listener is required, not defensive:
-  // an 'error' on a stream with no listener is an unhandled exception, and
-  // reply-from's default path only gets one because `reply.send` attaches it.
+  // pool. Drained rather than destroyed because draining preserves connection
+  // reuse. The error listener is required, not defensive: an 'error' on a stream
+  // with no listener is an unhandled exception, and reply-from's default path
+  // only gets one because `reply.send` attaches it.
   res.stream.on('error', (err: Error) => {
     request.log.debug({ err }, '[proxy] discarded upstream 401 body errored')
   })
