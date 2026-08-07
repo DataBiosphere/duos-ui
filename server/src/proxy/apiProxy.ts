@@ -198,6 +198,38 @@ const RESPONSE_HARDENING: Readonly<IncomingHttpHeaders> = {
 }
 
 /**
+ * Connection-specific response header fields, stripped on the way back because
+ * they describe the BFF↔upstream hop rather than the response (RFC 9110 §7.6.1
+ * — a proxy must not forward them, since the browser↔BFF connection is a
+ * different one with different parameters).
+ *
+ * Not a theoretical list. `keep-alive` is emitted *automatically* by Node's HTTP
+ * server on any keep-alive connection, so a Node upstream leaks its own socket
+ * timeout to every browser on every proxied response until this strips it.
+ *
+ * `proxy-authenticate` is the one with teeth, and it is the reason this set is
+ * not merely tidiness: it is `www-authenticate`'s proxy-side twin, so relaying it
+ * would reintroduce on the BFF's origin exactly the credential prompt that header
+ * is stripped below to prevent. Stripping one and forwarding the other was an
+ * inconsistency, not a decision.
+ *
+ * `connection` and `transfer-encoding` are deliberately absent: both are framing
+ * the HTTP layer owns, and neither reaches the browser with the upstream's value
+ * anyway. reply-from sets `connection` itself (see `onUpstreamResponse`, which
+ * preserves it for that reason), and an upstream `transfer-encoding` is
+ * renormalised by undici and Fastify to match the framing actually used on the
+ * way out — verified rather than assumed, and pinned by a test below.
+ */
+const CONNECTION_SPECIFIC_RESPONSE_HEADERS: ReadonlySet<string> = new Set([
+  'keep-alive',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailer',
+  'upgrade',
+])
+
+/**
  * Strips the BFF prefix and the query string, yielding the upstream path.
  *
  * The query is dropped on purpose rather than forwarded here: `reply.from()`
@@ -568,6 +600,10 @@ function forwardedFor(request: ProxyRequest, inbound: string | string[] | undefi
  * upstream's copy changes nothing about this origin that the ingress has not
  * already settled, so it is left alone.
  *
+ * The other class it drops is `CONNECTION_SPECIFIC_RESPONSE_HEADERS` — not origin
+ * state but the wrong hop, and `proxy-authenticate` among them for the same
+ * reason `www-authenticate` is named above.
+ *
  * What this function does *not* do is add anything: `RESPONSE_HARDENING` is
  * applied in an `onSend` hook instead, so it also covers the replies the proxy
  * writes itself. See its comment.
@@ -575,14 +611,20 @@ function forwardedFor(request: ProxyRequest, inbound: string | string[] | undefi
 function rewriteHeaders(headers: IncomingHttpHeaders): IncomingHttpHeaders {
   // Omitted by destructuring rather than deleted, for the same reason as the
   // request leg: `headers` is the upstream's own `res.headers`, which reply-from
-  // may hand back on a retry.
+  // may hand back on a retry. The connection-specific set is filtered rather
+  // than destructured because those six share one reason, where the three above
+  // each have their own.
   const {
     'set-cookie': setCookie,
     'clear-site-data': clearSiteData,
     'www-authenticate': wwwAuthenticate,
     ...forwarded
   } = headers
-  return forwarded
+  return Object.fromEntries(
+    // Node lower-cases incoming header names, so a direct lookup is the whole
+    // comparison — no case folding needed.
+    Object.entries(forwarded).filter(([name]) => !CONNECTION_SPECIFIC_RESPONSE_HEADERS.has(name)),
+  )
 }
 
 /**

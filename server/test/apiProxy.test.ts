@@ -997,6 +997,112 @@ describe('apiProxy', () => {
     })
 
     /**
+     * The hop-by-hop class, as distinct from the origin-state one above: these
+     * describe the BFF↔upstream connection, not the response, so relaying them
+     * tells the browser about a connection it is not on.
+     */
+    describe('connection-specific headers', () => {
+      // `proxy-authenticate` is why this matters rather than being tidiness: it is
+      // `www-authenticate`'s proxy-side twin, and a `Basic` challenge relayed to
+      // the browser pops a native credential dialog on the BFF's own origin —
+      // exactly what stripping `www-authenticate` exists to prevent.
+      it('never forwards an upstream proxy-authenticate challenge', async () => {
+        upstream.respondWith((_req, res) => {
+          res.writeHead(407, {
+            'content-type': 'application/json',
+            'proxy-authenticate': 'Basic realm="upstream-proxy"',
+          })
+          res.end('{"message":"Proxy Authentication Required"}')
+        })
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+        expect(res.headers['proxy-authenticate']).toBeUndefined()
+        // The status and body still reach the client — the header is dropped, not
+        // the response, so a misconfigured upstream is still diagnosable.
+        expect(res.statusCode).toBe(407)
+        expect(res.json()).toEqual({ message: 'Proxy Authentication Required' })
+      })
+
+      it.each(['keep-alive', 'proxy-authorization', 'te', 'trailer', 'upgrade'])(
+        'does not forward an upstream %s',
+        async (header) => {
+          upstream.respondWith((_req, res) => {
+            res.writeHead(200, { 'content-type': 'application/json', [header]: 'upstream-hop-value' })
+            res.end('{"ok":true}')
+          })
+          app = await buildProxyApp(freshSession())
+
+          const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+          expect(res.headers[header]).toBeUndefined()
+          expect(res.json()).toEqual({ ok: true })
+        },
+      )
+
+      // The case that makes this a real bug rather than a contrived one: Node's
+      // HTTP server adds `Keep-Alive: timeout=5` by itself on any keep-alive
+      // connection, so an upstream that never sets the header still sends one.
+      // Before the strip, every proxied response carried the upstream's socket
+      // timeout to the browser.
+      it('does not forward the keep-alive an upstream emits without being asked', async () => {
+        upstream.respondWith((_req, res) => {
+          res.writeHead(200, { 'content-type': 'application/json' })
+          res.end('{"ok":true}')
+        })
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+        expect(res.headers['keep-alive']).toBeUndefined()
+      })
+
+      /**
+       * `connection` and `transfer-encoding` are the two the story's checklist
+       * names, and the two `CONNECTION_SPECIFIC_RESPONSE_HEADERS` deliberately
+       * leaves out: the HTTP layer owns the framing, so the upstream's values
+       * never reach the browser regardless of this module. Pinned because that
+       * is a property of undici and Fastify rather than of the code here — if it
+       * stopped holding, the strip set is where the fix would belong, and this is
+       * the test that would say so.
+       *
+       * The upstream keeps its connection alive and streams its body, which is
+       * what a real one does; the reply carries the framing Fastify chose for the
+       * body it actually wrote, not the upstream's.
+       */
+      it('gives the browser the transport hop\'s own framing, not the upstream\'s', async () => {
+        upstream.respondWith((_req, res) => {
+          res.writeHead(200, { 'content-type': 'application/json', 'connection': 'keep-alive' })
+          res.write('{"streamed":')
+          res.end('true}')
+        })
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+        // The upstream said keep-alive; this hop is its own to describe.
+        expect(res.headers.connection).not.toBe('keep-alive')
+        expect(res.headers['transfer-encoding']).toBe('chunked')
+        // Chunked framing, and the streamed body reassembled from it.
+        expect(res.json()).toEqual({ streamed: true })
+      })
+
+      // The strip is on the upstream's headers, not a blanket denylist, so a
+      // header the BFF itself needs to send is unaffected even when its name is
+      // in the set. Nothing sets these today; this pins that the mechanism is
+      // keyed on where the header came from.
+      it('leaves the origin-state and hardening headers the BFF sets in place', async () => {
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+        expect(res.headers['x-content-type-options']).toBe('nosniff')
+        expect(res.cookies.map(cookie => cookie.name)).toContain(SESSION_COOKIE)
+      })
+    })
+
+    /**
      * Story 3-E(b) — a user-uploaded document served back through the proxy comes
      * from the SPA's own origin, so it must not be able to execute there.
      *
