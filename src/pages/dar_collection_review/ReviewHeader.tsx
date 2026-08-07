@@ -56,15 +56,17 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'nowrap',
     flexShrink: 0,
   },
-  approvedDatasetsRow: {
-    marginBottom: '0.4rem',
-  },
   approvedDatasetsText: {
     fontStyle: 'italic',
     fontWeight: 400,
     fontSize: 'clamp(1.05rem, 1.7vw, 1.25rem)',
     color: '#6b6b6b',
-    overflowWrap: 'anywhere',
+    marginLeft: '0.8rem',
+    // Shares the nowrap title row with the project title, so it truncates rather than overflowing.
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    minWidth: 0,
   },
   factsContainer: {
     margin: '0.8rem 1.2rem 1.5rem',
@@ -226,7 +228,6 @@ const styles: Record<string, React.CSSProperties> = {
 }
 
 const appliedTitleRowStyle: React.CSSProperties = { ...styles.containerRow, ...styles.titleRow }
-const appliedApprovedDatasetsRowStyle: React.CSSProperties = { ...styles.containerRow, ...styles.approvedDatasetsRow }
 
 const getApprovedDatasetsText = (approvedDatasets: string[]): string => {
   if (approvedDatasets.length > 0) {
@@ -459,11 +460,9 @@ export default function ReviewHeader({
             <span aria-hidden="true" style={styles.titleText}>:</span>
             <span className="collection-project-title" style={styles.projectTitleText} title={projectTitle}>{projectTitle}</span>
             {readOnly && <span className="read-only-tag" style={styles.readOnlyTag}>(read-only)</span>}
-          </div>
-          <div className="secondary-header-row" style={appliedApprovedDatasetsRowStyle}>
-            <p style={styles.approvedDatasetsText}>
+            <span className="approved-datasets-text" style={styles.approvedDatasetsText} title={getApprovedDatasetsText(approvedDatasets)}>
               {getApprovedDatasetsText(approvedDatasets)}
-            </p>
+            </span>
           </div>
           <div className="application-facts-container" style={styles.factsContainer}>
             <div className="facts-column" style={styles.factsColumn} id="researcher-info-column">
@@ -645,9 +644,7 @@ export default function ReviewHeader({
         <div className="header-skeleton-loader">
           <div className="title-row-skeleton" style={appliedTitleRowStyle}>
             <div className="text-placeholder" style={{ width: '35rem', height: '2.5rem', marginBottom: '0.5rem' }}></div>
-          </div>
-          <div style={styles.containerRow}>
-            <div className="text-placeholder" style={{ width: '16rem', height: '3rem', marginBottom: '1.5rem' }}></div>
+            <div className="text-placeholder" style={{ width: '16rem', height: '2.5rem', marginBottom: '0.5rem' }}></div>
           </div>
           <div style={styles.factsContainer}>
             <div className="text-placeholder" style={{ width: '90%', height: '2.4rem' }}></div>

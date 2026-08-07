@@ -72,6 +72,17 @@ describe('ReviewHeader - Tests', () => {
     expect(screen.getByText('2 Datasets approved: Dataset1, Dataset2')).toBeTruthy()
   })
 
+  it('renders the approved-datasets text inline within the title row', () => {
+    const { container } = render(
+      <ReviewHeader darCode="DAR-100" projectTitle="Title" approvedDatasets={['Dataset1']} />,
+    )
+    const titleRow = container.querySelector('.title-row')
+
+    expect(titleRow?.querySelector('.approved-datasets-text')).toBeInTheDocument()
+    expect(titleRow).toHaveTextContent('1 Dataset approved: Dataset1')
+    expect(container.querySelector('.secondary-header-row')).toBeNull()
+  })
+
   it('Renders read-only tag next to the title when readOnly prop is true', () => {
     render(
       <ReviewHeader
