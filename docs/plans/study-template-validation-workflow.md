@@ -635,6 +635,10 @@ also escape any `value` cell whose first non-whitespace character is `=`, `+`, `
 file is not a CSV-injection vector in the producer's spreadsheet application. Generating it in the
 browser from a committed field manifest is sufficient; no Consent endpoint is required.
 
+Render the action with the shared `DownloadLink` component (`src/components/DownloadLink.tsx`), which
+is the canonical control for file downloads in this UI. Do not use `button button-white` for it; that
+class is reserved for non-download secondary actions.
+
 The selected file remains visible after validation errors. Users can remove it, select a replacement,
 and retry without leaving the page. A valid response navigates to
 `/data_submission_form/draft/study-dataset/:draftId` using the returned typed reference.
@@ -668,6 +672,10 @@ and retry without leaving the page. A valid response navigates to
 - Template-generation tests covering header fidelity, empty `value` cells, and formula escaping.
 - A round-trip test asserting the generated template validates once values are supplied, using the
   canonical fixtures as the expected shape.
+- New specs follow the repo conventions: `test/<feature-area>/*.spec.tsx` mirroring the `src/` path,
+  `renderWithRouter` from `test/test-utils.tsx` for anything touching the router, no
+  `@testing-library/jest-dom` matchers, and fixed dates rather than `new Date()` in any fixture that
+  feeds an assertion.
 - Routing and role-visibility tests.
 - Accessibility assertions for labels, live results, disabled state, and busy state.
 
