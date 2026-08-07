@@ -96,6 +96,43 @@ export const UNAUTHENTICATED_PATHS: ReadonlySet<string> = new Set([
 ])
 
 /**
+ * Methods CSRF enforcement does not apply to, per the usual definition of safe.
+ *
+ * A CSRF token cannot protect a GET in any case: `SameSite=Lax` deliberately
+ * sends the session cookie on top-level GET navigations, so a plain link would
+ * carry it. That makes any upstream endpoint which mutates state on GET
+ * forgeable, which is why story 3-D audits for them — see
+ * docs/plans/bff_adrs/ADR-009-state-changing-gets.md for the two that exist and
+ * why they are proxied anyway.
+ */
+const CSRF_EXEMPT_METHODS: ReadonlySet<string> = new Set(['GET', 'HEAD', 'OPTIONS'])
+
+/**
+ * The only *unsafe* requests exempt from CSRF: the signed-out Contact Us form.
+ *
+ * Keyed on method and path together, and deliberately narrower than
+ * `UNAUTHENTICATED_PATHS` — that set also holds read-only endpoints (`/status`,
+ * `/oauth2/configuration`, `/tos/text/duos`), so keying the exemption on it would
+ * waive CSRF for an unsafe method against any of them.
+ *
+ * Nothing is exploitable either way today: allowlisted paths get no injected
+ * `Authorization` and the caller's own cookie and `authorization` are stripped
+ * before forwarding, so a forged write to one of them reaches the upstream
+ * unauthenticated — a request anyone can already make without a victim, borrowing
+ * no authority, which is the only thing CSRF protects. But that safety lives in
+ * `rewriteRequestHeaders`, not here, and a path-keyed exemption would widen
+ * silently if the allowlist or the token logic ever changed.
+ *
+ * Drift fails closed: an unauthenticated POST added to `UNAUTHENTICATED_PATHS`
+ * but not here is rejected with `MissingCSRFSecretError` — loud and caught in
+ * tests — rather than quietly exempted.
+ */
+export const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
+  'POST /support/request',
+  'POST /support/upload',
+])
+
+/**
  * Strips the BFF prefix and the query string, yielding the upstream path.
  *
  * The query is dropped on purpose rather than forwarded here: `reply.from()`
@@ -128,6 +165,43 @@ type ProxyReply = FastifyReply<RouteGenericInterface, RawServerBase>
  * only, or `/auth/*` would lose its JSON parsing too.
  */
 export async function apiProxy(app: FastifyInstance): Promise<void> {
+  // Fail at startup rather than serve the proxy unguarded. The decorator comes
+  // from @fastify/csrf-protection, registered in index.ts; if the proxy were
+  // ever moved ahead of it, the alternative to this check is a route that
+  // accepts cookie-authenticated writes from any origin.
+  if (!app.hasDecorator('csrfProtection')) {
+    throw new Error('apiProxy requires @fastify/csrf-protection to be registered first — it enforces CSRF on unsafe methods and must not be registered without it')
+  }
+
+  /**
+   * CSRF on state-changing methods. The proxy turns every DUOS API write into a
+   * cookie-authenticated request, so this is a requirement of the proxy, not
+   * later hardening.
+   *
+   * Callback style, not `await`ed: `csrfProtection` takes a `done` callback and
+   * returns undefined, so awaiting it would call `next()` as undefined and throw
+   * a TypeError on the *passing* path — a failure that only shows up once a
+   * valid token arrives.
+   *
+   * The two signed-out Contact Us POSTs are exempt, and have to be: with no
+   * session there is no CSRF secret, so enforcement would reject them with
+   * MissingCSRFSecretError. They are named individually rather than taken from
+   * `UNAUTHENTICATED_PATHS` — see `CSRF_EXEMPT_UNSAFE_REQUESTS`.
+   */
+  const csrfForUnsafeMethods = (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    done: () => void,
+  ): void => {
+    const exempt = CSRF_EXEMPT_METHODS.has(request.method)
+      || CSRF_EXEMPT_UNSAFE_REQUESTS.has(`${request.method} ${upstreamPath(request.url)}`)
+    if (exempt) {
+      done()
+      return
+    }
+    app.csrfProtection(request, reply, done)
+  }
+
   // Cleared wholesale, then one wildcard pass-through. A `'*'` parser alone is
   // not enough: it is only the last resort. `getParser` resolves the exact
   // content type, then the media type, then the regex list, and reaches `'*'`
@@ -151,7 +225,10 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
     undici: { connections: UPSTREAM_POOL_CONNECTIONS },
   })
 
-  app.all(`${PROXY_PREFIX}/*`, { preHandler: ensureUpstreamAuth }, (request, reply) => {
+  app.all(`${PROXY_PREFIX}/*`, {
+    onRequest: csrfForUnsafeMethods,
+    preHandler: ensureUpstreamAuth,
+  }, (request, reply) => {
     reply.from(upstreamPath(request.url), { rewriteRequestHeaders, rewriteHeaders, onError: onUpstreamTransportError })
   })
 }

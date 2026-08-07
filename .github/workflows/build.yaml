@@ -60,7 +60,7 @@ jobs:
         service_account: 'dsp-artifact-registry-push@dsp-artifact-registry.iam.gserviceaccount.com'
     # authenticate to GAR docker repo
     - name: Docker Login
-      uses: 'docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7' # v4
+      uses: 'docker/login-action@dbcb813823bdd20940b903addbd779551569679f' # v4
       with:
         registry: 'us-central1-docker.pkg.dev'
         username: 'oauth2accesstoken'
@@ -74,7 +74,7 @@ jobs:
         SHA_TAG: ${{ steps.construct-tags.outputs.sha-tag }}
         ENVIRONMENT_TAG: ${{ steps.construct-tags.outputs.environment-tag }}
   report-to-sherlock:
-    uses: broadinstitute/sherlock/.github/workflows/client-report-app-version.yaml@b8bc16e5c447bd81f38eb78c18205c9f5af26902 # main
+    uses: broadinstitute/sherlock/.github/workflows/client-report-app-version.yaml@3f7e4897588653961643bfd7166c949b311c932e # main
     needs: [ tag-build-push ]
     with:
       new-version: ${{ needs.tag-build-push.outputs.sherlock-version }}
@@ -84,7 +84,7 @@ jobs:
       id-token: 'write'
   set-version-in-dev:
     if: github.event_name == 'push'
-    uses: broadinstitute/sherlock/.github/workflows/client-set-environment-app-version.yaml@b8bc16e5c447bd81f38eb78c18205c9f5af26902 # main
+    uses: broadinstitute/sherlock/.github/workflows/client-set-environment-app-version.yaml@3f7e4897588653961643bfd7166c949b311c932e # main
     needs: [ tag-build-push, report-to-sherlock ]
     with:
       new-version: ${{ needs.tag-build-push.outputs.sherlock-version }}

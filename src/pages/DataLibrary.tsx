@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { AssetType, ExportableDatasets, LibraryVersionNew, ALL_LIBRARY_TABS } from 'src/types/library'
+import { AssetType, LibraryVersionNew, ALL_LIBRARY_TABS } from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { getBrandedLibrary } from 'src/libs/libraryVersions'
@@ -8,11 +8,9 @@ import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
-import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
-import { chain, intersection } from 'src/utils/NodashUtil'
-import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils'
 import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
+import { useLibraryExportableDatasets } from 'src/hooks/useLibraryExportableDatasets'
 import LibraryPageShell from 'src/components/data_library/LibraryPageShell'
 import LibraryFooter from 'src/components/data_library/LibraryFooter'
 import TableHeaderSection from 'src/components/TableHeaderSection'
@@ -78,8 +76,13 @@ export const DataLibrary: React.FC = () => {
   const { urlState, data, currentAsset, handleSearchChange } = pageState
 
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
-  const [exportableDatasets, setExportableDatasets] = useState<ExportableDatasets>({})
   const [radarEnabledDatasetIds, setRadarEnabledDatasetIds] = useState<Set<number>>(new Set())
+
+  const datasets = urlState.tab === AssetType.DATASETS && data?.items ? data.items as DatasetTerm[] : []
+  const { data: exportableDatasets = {} } = useLibraryExportableDatasets(
+    datasets,
+    urlState.tab === AssetType.DATASETS,
+  )
 
   const selectedStudyIds = useMemo(() => {
     if (!data?.items) return []
@@ -95,34 +98,6 @@ export const DataLibrary: React.FC = () => {
   }
 
   useEffect(() => {
-    const fetchExportable = async () => {
-      if (urlState.tab !== AssetType.DATASETS || !data?.items?.length) {
-        setExportableDatasets({})
-        return
-      }
-      const datasetIdentifiers = (data.items as DatasetTerm[]).map(d => d.datasetIdentifier).filter(Boolean)
-      if (datasetIdentifiers.length === 0) {
-        setExportableDatasets({})
-        return
-      }
-      try {
-        const result: EnumerateSnapshotModel = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers)
-        if (result.filteredTotal > 0) {
-          const mapped = chain(result.items)
-            .filter((snapshot: SnapshotSummaryModel) => intersection(result.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
-            .groupBy('duosId')
-            .value()
-          setExportableDatasets(mapped)
-        }
-        else {
-          setExportableDatasets({})
-        }
-      }
-      catch {
-        setExportableDatasets({})
-      }
-    }
-
     const fetchRadarEnabled = async () => {
       if (urlState.tab !== AssetType.DATASETS || !data?.items?.length) {
         setRadarEnabledDatasetIds(new Set())
@@ -142,7 +117,6 @@ export const DataLibrary: React.FC = () => {
       }
     }
 
-    fetchExportable()
     fetchRadarEnabled()
   }, [data?.items, urlState.tab])
 
