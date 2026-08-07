@@ -3,7 +3,7 @@ import http from 'node:http'
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { gzipSync } from 'node:zlib'
-import Fastify, { type FastifyInstance } from 'fastify'
+import Fastify, { type FastifyInstance, type FastifyRequest, type Session } from 'fastify'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
@@ -139,6 +139,43 @@ async function buildProxyApp(seed?: SessionSeed): Promise<FastifyInstance> {
   }
   await app.register(apiProxy)
   return app
+}
+
+/**
+ * Whether the session a request used still exists once the request is over.
+ *
+ * That is the question story 3-E's tests are really asking, and it cannot be read
+ * off the response: `buildProxyApp`'s seed hook hands every request a session, so
+ * a follow-up inject would find a live one either way. With
+ * `saveUninitialized: false` the row is written by `@fastify/session`'s onSend
+ * hook, which skips a session destroyed mid-request — so "is there a row for the
+ * sid this request used" is what separates destroyed from intact, and the
+ * upstream-is-happy case is asserted alongside as the control.
+ */
+function trackSession(app: FastifyInstance): { stored: () => Promise<Session | null> } {
+  let sid: string | undefined
+  let store: FastifyRequest['sessionStore'] | undefined
+  // A root onRequest hook, so it runs before the route's own hooks and therefore
+  // before anything the proxy does to the session.
+  app.addHook('onRequest', async (request) => {
+    sid = request.session.sessionId
+    store = request.sessionStore
+  })
+  return {
+    stored: () => new Promise((resolve, reject) => {
+      if (!sid || !store) {
+        reject(new Error('no request reached the session-tracking hook'))
+        return
+      }
+      store.get(sid, (err: unknown, session?: Session | null) => {
+        if (err) {
+          reject(err instanceof Error ? err : new Error('session store read failed'))
+          return
+        }
+        resolve(session ?? null)
+      })
+    }),
+  }
 }
 
 /**
@@ -975,6 +1012,164 @@ describe('apiProxy', () => {
       const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
       expect(res.statusCode).toBe(503)
+    })
+  })
+
+  // Story 3-E. The upstream is the authority on whether the token this proxy
+  // injected is any good; a session it rejects cannot recover on its own.
+  describe('an upstream 401', () => {
+    /** An upstream that rejects everything, the way it would a revoked token. */
+    const rejectingUpstream = (headers: Record<string, string> = {}): void => {
+      upstream.respondWith((_req, res) => {
+        res.writeHead(401, { 'content-type': 'application/json', ...headers })
+        res.end('{"message":"Unauthorized"}')
+      })
+    }
+
+    it('returns its own 401 in place of the upstream response', async () => {
+      rejectingUpstream()
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.statusCode).toBe(401)
+      // The BFF's vocabulary, not the upstream's: the client distinguishes this
+      // from `unauthenticated` (never had a session) and `upstream_unavailable`.
+      expect(res.json()).toEqual({ error: 'session_expired' })
+    })
+
+    it('destroys the session', async () => {
+      rejectingUpstream()
+      app = await buildProxyApp(freshSession())
+      const session = trackSession(app)
+
+      await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(await session.stored()).toBeNull()
+    })
+
+    // The control for the assertion above: the same lookup finds a row when the
+    // upstream is happy, so "no row" means destroyed rather than never-written.
+    it('leaves the session alone when the upstream is happy', async () => {
+      app = await buildProxyApp(freshSession())
+      const session = trackSession(app)
+
+      await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(await session.stored()).not.toBeNull()
+    })
+
+    it('clears the session cookie', async () => {
+      rejectingUpstream()
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      // Otherwise the browser keeps presenting a sid whose row is already gone,
+      // and every later request silently starts a new empty session.
+      expect(res.cookies).toEqual(expect.arrayContaining([
+        expect.objectContaining({ name: SESSION_COOKIE, value: '' }),
+      ]))
+    })
+
+    it('ends the session on a rejected write as well as a read', async () => {
+      rejectingUpstream()
+      app = await buildProxyApp(freshSession())
+      const session = trackSession(app)
+
+      const res = await injectWithCsrf(app, {
+        method: 'POST',
+        url: `${PROXY_PREFIX}/api/dataset/1`,
+        headers: { 'content-type': 'application/json' },
+        payload: '{"name":"a dataset"}',
+      })
+
+      expect(res.statusCode).toBe(401)
+      expect(res.json()).toEqual({ error: 'session_expired' })
+      expect(await session.stored()).toBeNull()
+    })
+
+    // The upstream headers reply-from copied onto the reply describe the body
+    // being discarded. `content-type` is the fatal one: Fastify only serialises
+    // an object payload when the content type is JSON or unset, so a `text/plain`
+    // 401 would otherwise reach the socket as an un-serialised object and throw
+    // FST_ERR_REP_INVALID_PAYLOAD_TYPE — a 500 in place of the 401.
+    it('does not leave the upstream response headers describing the reply that replaces it', async () => {
+      const compressed = gzipSync(Buffer.from('token rejected'))
+      upstream.respondWith((_req, res) => {
+        res.writeHead(401, {
+          'content-type': 'text/plain',
+          'content-encoding': 'gzip',
+          'content-length': String(compressed.length),
+          'etag': '"upstream-401"',
+        })
+        res.end(compressed)
+      })
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.statusCode).toBe(401)
+      expect(res.json()).toEqual({ error: 'session_expired' })
+      expect(res.headers['content-type']).toMatch(/^application\/json/)
+      // A stale gzip label the browser would fail to decode, and a length and
+      // validator for a body nobody received.
+      expect(res.headers['content-encoding']).toBeUndefined()
+      expect(res.headers.etag).toBeUndefined()
+      expect(res.headers['content-length']).toBe(String(res.rawPayload.length))
+    })
+
+    // Only a 401 says the token was rejected. A 403 is the upstream answering
+    // "not for you" to a request it authenticated fine, and signing the user out
+    // of a session it just accepted would be a regression the client would feel
+    // as a random logout.
+    it('passes a 403 through without touching the session', async () => {
+      upstream.respondWith((_req, res) => {
+        res.writeHead(403, { 'content-type': 'application/json' })
+        res.end('{"message":"Forbidden"}')
+      })
+      app = await buildProxyApp(freshSession())
+      const session = trackSession(app)
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toEqual({ message: 'Forbidden' })
+      expect(await session.stored()).not.toBeNull()
+    })
+
+    // An allowlisted path is proxied with no token at all, so its 401 is about
+    // the upstream's own state — it says nothing about the caller's session, and
+    // signing them out over it would be a logout triggered by an unrelated
+    // endpoint.
+    it('passes through untouched on an allowlisted path, session intact', async () => {
+      rejectingUpstream()
+      app = await buildProxyApp(freshSession())
+      const session = trackSession(app)
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/status` })
+
+      expect(res.statusCode).toBe(401)
+      expect(res.json()).toEqual({ message: 'Unauthorized' })
+      expect(await session.stored()).not.toBeNull()
+      expect(res.cookies).not.toEqual(expect.arrayContaining([
+        expect.objectContaining({ name: SESSION_COOKIE, value: '' }),
+      ]))
+    })
+
+    // Relayed to the browser this describes a bearer scheme the client cannot
+    // satisfy — it holds a cookie, not a token — and a `Basic` challenge would
+    // pop a native credential dialog on the BFF's own origin. Asserted on the
+    // pass-through path because that is the one where the upstream's headers
+    // survive at all; the replaced 401 above drops every one of them.
+    it('never forwards an upstream WWW-Authenticate challenge', async () => {
+      rejectingUpstream({ 'www-authenticate': 'Basic realm="DUOS API"' })
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/status` })
+
+      expect(res.statusCode).toBe(401)
+      expect(res.headers['www-authenticate']).toBeUndefined()
     })
   })
 })

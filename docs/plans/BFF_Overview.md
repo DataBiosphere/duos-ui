@@ -292,8 +292,17 @@ sequenceDiagram
         end
 
         BFF->>API: GET /api/user/me + Authorization: Bearer <b2c-token> + X-App-ID: DUOS
-        API-->>BFF: 200 user data
-        BFF-->>B: 200 user data
+
+        alt upstream accepts the token
+            API-->>BFF: 200 user data
+            BFF-->>B: 200 user data
+        else upstream rejects the token
+            API-->>BFF: 401
+            Note over BFF: The upstream is the authority on the token —<br/>a session it rejects cannot recover
+            BFF->>PG: Delete session row
+            PG-->>BFF: ok
+            BFF-->>B: 401 { error: 'session_expired' } + cleared sessionId cookie
+        end
     end
 ```
 
