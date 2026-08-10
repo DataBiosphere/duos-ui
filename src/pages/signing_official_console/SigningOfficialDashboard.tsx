@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
+import { Box, Button, Card, Typography } from '@mui/material'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined'
@@ -19,7 +20,6 @@ import { SigningOfficial, SigningOfficialDashboardSummary } from 'src/libs/ajax/
 import { extractError } from 'src/utils/ErrorUtils'
 import { useNavigationState } from 'src/contexts/NavigationStateContext'
 import { SO_CONSOLE_SECTIONS } from './signingOfficialConsoleRoutes'
-import './SigningOfficialDashboard.css'
 
 interface Stat {
   label: string
@@ -103,14 +103,164 @@ const resources = [
   },
 ]
 
-// Brand colors come from the shared theme rather than being re-typed in the stylesheet, which is
-// what lets SigningOfficialDashboard.css reference them as var(--so-*).
-const themeVariables = {
-  '--so-primary': Theme.palette.primary,
-  '--so-secondary': Theme.palette.secondary,
-  '--so-secondary-background': Theme.palette.background.secondary,
-  '--so-surface': Theme.palette.white,
-} as React.CSSProperties
+// Brand colors come from the shared theme; these three have no palette equivalent. Font family is
+// left to inherit, since both the page and the MUI theme already resolve to Montserrat.
+const MUTED_TEXT = '#6b7280'
+const FOCUS_RING = '#2fa4e7'
+const PROMO_TEXT = '#d7e2ea'
+
+const focusRing = {
+  '&:focus-visible': {
+    outline: `3px solid ${FOCUS_RING}`,
+    outlineOffset: '3px',
+  },
+}
+
+const contentWidth = { maxWidth: '900px', mx: 'auto' }
+
+const titleStyle = {
+  ...contentWidth,
+  mt: '2rem',
+  mb: '10px',
+  color: Theme.palette.primary,
+  fontSize: '2.8rem',
+  fontWeight: 600,
+  lineHeight: 'normal',
+}
+
+const headingStyle = {
+  ...contentWidth,
+  mt: '3rem',
+  mb: '10px',
+  color: Theme.palette.primary,
+  fontSize: '20px',
+  fontWeight: 600,
+  lineHeight: 'normal',
+}
+
+const gridStyle = {
+  ...contentWidth,
+  display: 'grid',
+  // The stylesheet dropped to a single column under 600px, which is the MUI `sm` breakpoint.
+  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' },
+  gap: '1.5rem',
+  mt: '2rem',
+  mb: '2rem',
+}
+
+const cardStyle = {
+  'display': 'flex',
+  'alignItems': 'flex-start',
+  'gap': '1rem',
+  'padding': '1.5rem',
+  'border': '1.5px solid rgb(0 0 0 / 8%)',
+  'borderRadius': '12px',
+  'background': Theme.palette.white,
+  'color': 'inherit',
+  'textDecoration': 'none',
+  'transition': 'transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease',
+  '&:hover': {
+    transform: 'translateY(-4px)',
+    borderColor: 'rgb(0 0 0 / 18%)',
+    boxShadow: '0 8px 24px rgb(0 0 0 / 13%)',
+  },
+  ...focusRing,
+}
+
+const cardIconStyle = {
+  display: 'flex',
+  flex: '0 0 48px',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '48px',
+  height: '48px',
+  borderRadius: '50%',
+  background: Theme.palette.background.secondary,
+  color: Theme.palette.secondary,
+}
+
+const cardTitleStyle = {
+  display: 'block',
+  mb: '.35rem',
+  color: Theme.palette.primary,
+  fontSize: '18px',
+  fontWeight: 600,
+  lineHeight: 'normal',
+}
+
+const descriptionStyle = {
+  display: 'block',
+  color: MUTED_TEXT,
+  fontSize: '14px',
+  lineHeight: 1.4,
+}
+
+const externalIconStyle = {
+  ml: '.4rem',
+  color: MUTED_TEXT,
+  fontSize: '16px',
+  verticalAlign: 'middle',
+}
+
+const statsStyle = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '1.25rem',
+  mt: '1rem',
+}
+
+const statValueStyle = {
+  color: Theme.palette.secondary,
+  fontSize: '20px',
+  fontWeight: 700,
+  lineHeight: 'normal',
+}
+
+const statLabelStyle = {
+  color: MUTED_TEXT,
+  fontSize: '12px',
+  fontWeight: 500,
+  lineHeight: 'normal',
+  letterSpacing: '.04em',
+  textTransform: 'uppercase',
+}
+
+const promoStyle = {
+  ...contentWidth,
+  boxSizing: 'border-box',
+  mt: '1.5rem',
+  mb: '2rem',
+  padding: '2rem 2.25rem',
+  borderRadius: '12px',
+  background: Theme.palette.primary,
+  color: PROMO_TEXT,
+  fontSize: '14px',
+  lineHeight: 1.6,
+}
+
+const promoHeadingStyle = {
+  mt: 0,
+  mb: '10px',
+  color: Theme.palette.white,
+  fontSize: '18px',
+  fontWeight: 500,
+  lineHeight: 1.1,
+}
+
+const promoButtonStyle = {
+  'mt': '.5rem',
+  'padding': '10px 22px',
+  'border': 0,
+  'borderRadius': '6px',
+  'background': Theme.palette.white,
+  'color': Theme.palette.primary,
+  'fontSize': '14px',
+  'fontWeight': 600,
+  'lineHeight': 'normal',
+  'textTransform': 'none',
+  '&:hover': { background: Theme.palette.white },
+  ...focusRing,
+}
 
 export default function SigningOfficialDashboard(): React.JSX.Element {
   usePageTitle('Dashboard')
@@ -133,23 +283,25 @@ export default function SigningOfficialDashboard(): React.JSX.Element {
   }, [error])
 
   return (
-    <div style={{ ...Styles.PAGE, ...themeVariables }}>
-      <h1 className="so-dashboard-title">Signing Official Console</h1>
-      <div className="so-dashboard-grid">
+    <Box sx={{ ...Styles.PAGE }}>
+      <Typography component="h1" sx={titleStyle}>Signing Official Console</Typography>
+      <Box sx={gridStyle}>
         {tileMeta.map((tile) => {
           const Icon = tile.icon
           return (
-            <Link
+            <Card
+              variant="outlined"
               key={tile.link}
+              component={Link}
               to={tile.link}
               state={{ selectedMenuTab: activeTab }}
-              className="so-dashboard-card"
+              sx={cardStyle}
             >
-              <span className="so-dashboard-icon"><Icon /></span>
+              <Box component="span" sx={cardIconStyle}><Icon /></Box>
               <span>
-                <span className="so-dashboard-card-title">{tile.label}</span>
-                <span className="so-dashboard-description">{tile.description}</span>
-                <span className="so-dashboard-stats">
+                <Typography component="span" sx={cardTitleStyle}>{tile.label}</Typography>
+                <Typography component="span" sx={descriptionStyle}>{tile.description}</Typography>
+                <Box component="span" sx={statsStyle}>
                   {tile.stats.map((stat: Stat) => {
                     // The en-dash alone tells a screen reader nothing, so the accessible name
                     // always spells out the label and either the count or why it is missing.
@@ -165,52 +317,64 @@ export default function SigningOfficialDashboard(): React.JSX.Element {
                       valueDescription = 'unavailable'
                     }
                     return (
-                      <span key={stat.label} className="so-dashboard-stat">
-                        <span
-                          className="so-dashboard-stat-value"
+                      <Box component="span" key={stat.label} sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography
+                          component="span"
+                          sx={statValueStyle}
                           aria-label={`${stat.label}: ${valueDescription}`}
                         >
                           {value ?? '–'}
-                        </span>
-                        <span className="so-dashboard-stat-label" aria-hidden="true">{stat.label}</span>
-                      </span>
+                        </Typography>
+                        <Typography component="span" sx={statLabelStyle} aria-hidden="true">{stat.label}</Typography>
+                      </Box>
                     )
                   })}
-                </span>
+                </Box>
               </span>
-            </Link>
+            </Card>
           )
         })}
-      </div>
+      </Box>
 
-      <h2 className="so-dashboard-heading">Helpful Resources for Signing Officials</h2>
-      <div className="so-dashboard-grid">
+      <Typography component="h2" sx={headingStyle}>Helpful Resources for Signing Officials</Typography>
+      <Box sx={gridStyle}>
         {resources.map((resource) => {
           const Icon = resource.icon
           return (
-            <a key={resource.href} href={resource.href} target="_blank" rel="noopener noreferrer" className="so-dashboard-card">
-              <span className="so-dashboard-icon"><Icon /></span>
+            <Card
+              variant="outlined"
+              key={resource.href}
+              component="a"
+              href={resource.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={cardStyle}
+            >
+              <Box component="span" sx={cardIconStyle}><Icon /></Box>
               <span>
-                <span className="so-dashboard-card-title">{resource.label}<OpenInNewOutlinedIcon /></span>
-                <span className="so-dashboard-description">{resource.description}</span>
+                <Typography component="span" sx={cardTitleStyle}>
+                  {resource.label}
+                  <OpenInNewOutlinedIcon sx={externalIconStyle} />
+                </Typography>
+                <Typography component="span" sx={descriptionStyle}>{resource.description}</Typography>
               </span>
-            </a>
+            </Card>
           )
         })}
-      </div>
+      </Box>
 
-      <section className="so-dashboard-promo">
-        <h2>Get more out of DUOS</h2>
+      <Box component="section" sx={promoStyle}>
+        <Typography component="h2" sx={promoHeadingStyle}>Get more out of DUOS</Typography>
         <p>Signing Officials can use DUOS to curate and share their institution&apos;s datasets with the research community. You can also leverage DUOS alongside Terra to meet NIH requirements for analyzing and storing controlled-access data.</p>
         <p>Reach out if you&apos;d like to learn more about either of these.</p>
-        <button type="button" onClick={() => setShowContactModal(true)}>Contact Us</button>
-      </section>
+        <Button type="button" onClick={() => setShowContactModal(true)} sx={promoButtonStyle}>Contact Us</Button>
+      </Box>
 
       <SupportRequestModal
         showModal={showContactModal}
         onCloseRequest={() => setShowContactModal(false)}
         url={window.location.href}
       />
-    </div>
+    </Box>
   )
 }
