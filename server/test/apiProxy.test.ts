@@ -141,19 +141,10 @@ async function buildProxyApp(seed?: SessionSeed): Promise<FastifyInstance> {
   return app
 }
 
-/**
- * Whether the session a request used still exists once the request is over.
- *
- * It cannot be read off the response: `buildProxyApp`'s seed hook hands every
- * request a session, so a follow-up inject finds a live one either way. With
- * `saveUninitialized: false` the row is written by `@fastify/session`'s onSend
- * hook, which skips a session destroyed mid-request — so "is there a row for the
- * sid this request used" is what separates destroyed from intact.
- */
+// Capture the request's original session ID before the proxy can destroy it.
 function trackSession(app: FastifyInstance): { stored: () => Promise<Session | null> } {
   let sid: string | undefined
   let store: FastifyRequest['sessionStore'] | undefined
-  // A root onRequest hook, so it runs before anything the proxy does.
   app.addHook('onRequest', async (request) => {
     sid = request.session.sessionId
     store = request.sessionStore
@@ -387,21 +378,6 @@ describe('apiProxy', () => {
   // The proxy turns every DUOS API write into a cookie-authenticated request,
   // so without this any site could drive them using a signed-in victim's cookie.
   describe('CSRF enforcement', () => {
-    /**
-     * The plugin rejects for two different reasons, both with a 403, and the
-     * tests below assert which one they got rather than the status alone —
-     * otherwise a case meant to exercise one path can silently drift onto the
-     * other, which review of story 3-D found had already happened to the
-     * no-token cases.
-     *
-     * `MISSING_SECRET` means the request had no session to verify against, so
-     * enforcement never got as far as the token. `INVALID_TOKEN` means there was
-     * a secret and the token did not verify against it — including when
-     * `getToken` found no token at all.
-     *
-     * These are the proxy's own reasons (ADR-010), not the plugin's error codes:
-     * `error` is what the client branches on, `reason` is what a human reads.
-     */
     const MISSING_SECRET = 'missing_secret'
     const INVALID_TOKEN = 'invalid_token'
     const rejection = (reason: string) => ({ error: CSRF_ERROR_CODE, reason })
@@ -988,12 +964,7 @@ describe('apiProxy', () => {
       expect(res.json()).toEqual({ ok: true })
     })
 
-    // The hop-by-hop class, as distinct from the origin-state one above: these
-    // describe the BFF↔upstream connection, not the response.
     describe('connection-specific headers', () => {
-      // `proxy-authenticate` is `www-authenticate`'s proxy-side twin: a `Basic`
-      // challenge relayed to the browser pops a native credential dialog on the
-      // BFF's own origin.
       it('never forwards an upstream proxy-authenticate challenge', async () => {
         upstream.respondWith((_req, res) => {
           res.writeHead(407, {
@@ -1007,8 +978,6 @@ describe('apiProxy', () => {
         const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
         expect(res.headers['proxy-authenticate']).toBeUndefined()
-        // The header is dropped, not the response, so a misconfigured upstream
-        // is still diagnosable.
         expect(res.statusCode).toBe(407)
         expect(res.json()).toEqual({ message: 'Proxy Authentication Required' })
       })
@@ -1029,8 +998,6 @@ describe('apiProxy', () => {
         },
       )
 
-      // Node's HTTP server adds `Keep-Alive: timeout=5` by itself, so an upstream
-      // that never sets the header still leaks its socket timeout to the browser.
       it('does not forward the keep-alive an upstream emits without being asked', async () => {
         upstream.respondWith((_req, res) => {
           res.writeHead(200, { 'content-type': 'application/json' })
@@ -1043,14 +1010,6 @@ describe('apiProxy', () => {
         expect(res.headers['keep-alive']).toBeUndefined()
       })
 
-      /**
-       * `connection` and `transfer-encoding` are the two
-       * `CONNECTION_SPECIFIC_RESPONSE_HEADERS` deliberately leaves out: the HTTP
-       * layer owns the framing, so the upstream's values never reach the browser
-       * regardless of this module. Pinned because that is a property of undici
-       * and Fastify rather than of the code here — if it stopped holding, the
-       * strip set is where the fix would belong.
-       */
       it('gives the browser the transport hop\'s own framing, not the upstream\'s', async () => {
         upstream.respondWith((_req, res) => {
           res.writeHead(200, { 'content-type': 'application/json', 'connection': 'keep-alive' })
@@ -1061,14 +1020,11 @@ describe('apiProxy', () => {
 
         const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
-        // The upstream said keep-alive; this hop is its own to describe.
         expect(res.headers.connection).not.toBe('keep-alive')
         expect(res.headers['transfer-encoding']).toBe('chunked')
         expect(res.json()).toEqual({ streamed: true })
       })
 
-      // The strip is keyed on where a header came from, not a blanket denylist,
-      // so one the BFF sets itself survives even if the upstream sent the name too.
       it('leaves the origin-state and hardening headers the BFF sets in place', async () => {
         app = await buildProxyApp(freshSession())
 
@@ -1079,13 +1035,7 @@ describe('apiProxy', () => {
       })
     })
 
-    // A user-uploaded document served back through the proxy comes from the SPA's
-    // own origin, so it must not be able to execute there.
     describe('response hardening', () => {
-      // The threat itself: a `.html` uploaded as a DAA document, fetched by a
-      // top-level navigation that carries the SameSite=Lax session cookie. The
-      // upstream sends weaker versions of both headers, so this also pins that it
-      // cannot relax what the BFF applies.
       it('neuters an uploaded document served back as text/html', async () => {
         upstream.respondWith((_req, res) => {
           res.writeHead(200, {
@@ -1103,9 +1053,6 @@ describe('apiProxy', () => {
         expect(res.headers['content-security-policy']).toBe('sandbox')
       })
 
-      // The headers are inert to the client — `fetch` ignores both, and a blob
-      // download is initiated by the SPA's own document — so they cannot disturb
-      // the document paths that motivated them.
       it('leaves a blob download byte-for-byte intact', async () => {
         const document = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37, 0x00, 0xff, 0xfe, 0x0a])
         upstream.respondWith((_req, res) => {
@@ -1125,9 +1072,6 @@ describe('apiProxy', () => {
         expect(res.headers['x-content-type-options']).toBe('nosniff')
       })
 
-      // Why onSend rather than rewriteHeaders: it lands after
-      // `onUpstreamResponse`'s header-strip loop, which is keyed on the
-      // upstream's header names and would otherwise take the BFF's values with it.
       it('hardens a reply the proxy writes itself, not only a proxied one', async () => {
         upstream.respondWith((_req, res) => {
           res.writeHead(401, {
@@ -1141,17 +1085,12 @@ describe('apiProxy', () => {
 
         const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
-        // The BFF's own 401, with the upstream's headers stripped off it.
         expect(res.statusCode).toBe(401)
         expect(res.json()).toEqual({ error: 'session_expired' })
         expect(res.headers['x-content-type-options']).toBe('nosniff')
         expect(res.headers['content-security-policy']).toBe('sandbox')
       })
 
-      // The hook must stay inside the proxy's encapsulation: escaped to the root
-      // instance it would land on the SPA's own HTML, where `sandbox` means an
-      // opaque origin and no scripts — the entire app dead, in a way no proxy
-      // test would notice. `/auth/csrf-token` stands in for a root-scope route.
       it('does not leak the headers onto routes outside the proxy scope', async () => {
         app = await buildProxyApp(freshSession())
 
@@ -1189,10 +1128,7 @@ describe('apiProxy', () => {
     })
   })
 
-  // The upstream is the authority on whether the token this proxy injected is
-  // any good; a session it rejects cannot recover on its own.
   describe('an upstream 401', () => {
-    /** An upstream that rejects everything, the way it would a revoked token. */
     const rejectingUpstream = (headers: Record<string, string> = {}): void => {
       upstream.respondWith((_req, res) => {
         res.writeHead(401, { 'content-type': 'application/json', ...headers })
@@ -1200,7 +1136,6 @@ describe('apiProxy', () => {
       })
     }
 
-    // One case, because it is one behaviour: the user is signed out.
     it('signs the user out — its own 401, session destroyed, cookie cleared', async () => {
       rejectingUpstream()
       app = await buildProxyApp(freshSession())
@@ -1209,8 +1144,6 @@ describe('apiProxy', () => {
       const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
       expect(res.statusCode).toBe(401)
-      // The BFF's vocabulary, not the upstream's: the client distinguishes this
-      // from `unauthenticated` (never had a session) and `upstream_unavailable`.
       expect(res.json()).toEqual({ error: 'session_expired' })
       expect(await session.stored()).toBeNull()
       expect(res.cookies).toEqual(expect.arrayContaining([
@@ -1218,8 +1151,6 @@ describe('apiProxy', () => {
       ]))
     })
 
-    // The control for the destroy above: the same lookup finds a row when the
-    // upstream is happy, so "no row" means destroyed rather than never-written.
     it('leaves the session alone when the upstream is happy', async () => {
       app = await buildProxyApp(freshSession())
       const session = trackSession(app)
@@ -1246,9 +1177,6 @@ describe('apiProxy', () => {
       expect(await session.stored()).toBeNull()
     })
 
-    // `content-type` is the fatal one: Fastify only serialises an object payload
-    // when the content type is JSON or unset, so a `text/plain` 401 would throw
-    // FST_ERR_REP_INVALID_PAYLOAD_TYPE — a 500 in place of the 401.
     it('does not leave the upstream response headers describing the reply that replaces it', async () => {
       const compressed = gzipSync(Buffer.from('token rejected'))
       upstream.respondWith((_req, res) => {
@@ -1272,9 +1200,6 @@ describe('apiProxy', () => {
       expect(res.headers['content-length']).toBe(String(res.rawPayload.length))
     })
 
-    // An allowlisted path is proxied with no token at all, so its 401 says
-    // nothing about the caller's session — signing them out over it would be a
-    // logout triggered by an unrelated endpoint.
     it('passes through untouched on an allowlisted path, session intact', async () => {
       rejectingUpstream()
       app = await buildProxyApp(freshSession())
@@ -1290,9 +1215,6 @@ describe('apiProxy', () => {
       ]))
     })
 
-    // A `Basic` challenge relayed to the browser would pop a native credential
-    // dialog on the BFF's own origin. Asserted on the pass-through path because
-    // that is the one where the upstream's headers survive at all.
     it('never forwards an upstream WWW-Authenticate challenge', async () => {
       rejectingUpstream({ 'www-authenticate': 'Basic realm="DUOS API"' })
       app = await buildProxyApp(freshSession())
@@ -1304,22 +1226,7 @@ describe('apiProxy', () => {
     })
   })
 
-  /**
-   * ADR-010 — what a failure inside the proxy scope looks like to the browser.
-   *
-   * The scope is encapsulated, so it does not inherit the root error handler,
-   * which index.ts registers after the proxy anyway. These tests hold the shape
-   * to the plugin's own decision rather than to that ordering.
-   */
   describe('the error shape', () => {
-    /**
-     * An app whose proxy scope also holds a route that throws, standing in for a
-     * bug on a proxy path — there is no natural one to provoke, since the auth
-     * gate answers its own failures and `onUpstreamTransportError` answers
-     * reply-from's. `apiProxy` is called on the scope rather than registered into
-     * it so the throwing route shares the proxy's context, and the root handler
-     * is registered afterwards exactly as index.ts does it.
-     */
     async function buildAppWithRootErrorHandler(): Promise<FastifyInstance> {
       const app = await buildAppShell()
       await app.register(async (scope) => {
@@ -1346,8 +1253,6 @@ describe('apiProxy', () => {
       expect(res.payload).not.toContain('a stack trace and an internal path')
     })
 
-    // Asserted in the same app as the case above: one registration order, two
-    // scopes, two answers.
     it('leaves errors outside the proxy scope to the root handler', async () => {
       app = await buildAppWithRootErrorHandler()
 
@@ -1356,9 +1261,6 @@ describe('apiProxy', () => {
       expect(res.json()).toEqual({ error: 'the root handler answered' })
     })
 
-    // The regression this decision exists to prevent: before ADR-010 this
-    // request returned Fastify's default body, message and all, purely because
-    // index.ts registers its handler after the proxy.
     it('is not affected by a root error handler registered after the proxy', async () => {
       app = await buildAppWithRootErrorHandler()
 
@@ -1368,9 +1270,6 @@ describe('apiProxy', () => {
       expect(res.json()).toEqual({ error: CSRF_ERROR_CODE, reason: 'missing_secret' })
     })
 
-    // The client's discriminator has to be the body, not the status: an upstream
-    // authorization denial arrives as a 403 too, and retrying on the status
-    // alone would replay every write the DUOS API refused.
     it('passes an upstream 403 through with its own body, unlike a CSRF rejection', async () => {
       upstream.respondWith((_req, res) => {
         res.writeHead(403, { 'content-type': 'application/json' })
@@ -1384,8 +1283,6 @@ describe('apiProxy', () => {
       expect(res.statusCode).toBe(403)
       expect(res.json()).toEqual({ code: 403, message: 'User is not an admin' })
       expect(res.json()).not.toHaveProperty('error', CSRF_ERROR_CODE)
-      // Only a 401 ends the session — a denial is about this request, not the
-      // token that carried it.
       expect(await session.stored()).not.toBeNull()
     })
   })

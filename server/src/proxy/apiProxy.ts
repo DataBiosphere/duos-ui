@@ -127,69 +127,21 @@ export const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
   'POST /support/upload',
 ])
 
-/**
- * The one thing about a proxy error the client branches on (ADR-010): Phase 4's
- * fetch layer refetches a token and retries once on it. The status cannot carry
- * that signal — an upstream authorization denial also arrives as a 403, so
- * retrying on the status would replay every write the DUOS API refused.
- */
+// A 403 alone is ambiguous because the upstream can also deny writes.
 export const CSRF_ERROR_CODE = 'csrf_validation_failed'
 
-/**
- * `@fastify/csrf-protection`'s rejections, mapped to the reason the BFF
- * publishes. Both share one `error`, since both call for the same single retry;
- * `reason` is diagnostic, and lets a test assert which path actually fired.
- *
- * The plugin's own code stays off the wire: it is renameable internals, and
- * `code` in an error body already means something else to this client
- * (`DataAccessRequestApplication.tsx` reads it as "the upstream sent a structured
- * error, so render its `message`").
- */
 const CSRF_REJECTION_REASONS: ReadonlyMap<string, string> = new Map([
   ['FST_CSRF_MISSING_SECRET', 'missing_secret'],
   ['FST_CSRF_INVALID_TOKEN', 'invalid_token'],
 ])
 
-/**
- * Added to every response the proxy scope emits, so nothing the upstream returns
- * can execute on the SPA's origin.
- *
- * The proxy introduces this risk: DUOS serves user-uploaded documents back
- * through the API, and proxied they come from the BFF's *own* origin, so a
- * top-level navigation to one renders attacker-uploaded markup on the origin
- * holding the session. `sandbox` gives such a document an opaque origin and no
- * scripts; `nosniff` stops one being promoted to a document by content sniffing.
- * Unconditional, and overriding an upstream that sends either header, because
- * the safety must not depend on the content type the upstream declared.
- *
- * Applied in `onSend` rather than `rewriteHeaders`, which reaches only responses
- * that came back from the upstream: `onSend` runs after `onUpstreamResponse`
- * strips the upstream's headers off a replaced 401, and covers the replies the
- * proxy writes for itself.
- *
- * Inert for the client — `fetch` ignores both, and every document path is a
- * `fetchBlob` download. Re-check when Phase 4 rewrites the fetch layer.
- */
+// Proxied uploads are served from the SPA's origin, so they must not execute there.
 const RESPONSE_HARDENING: Readonly<IncomingHttpHeaders> = {
   'x-content-type-options': 'nosniff',
   'content-security-policy': 'sandbox',
 }
 
-/**
- * Stripped on the way back: they describe the BFF↔upstream hop rather than the
- * response (RFC 9110 §7.6.1), and the browser is on a different connection.
- *
- * Not a theoretical list. Node's HTTP server emits `keep-alive` automatically,
- * so a Node upstream leaks its own socket timeout to every browser until this
- * strips it; `proxy-authenticate` is `www-authenticate`'s proxy-side twin, and
- * relaying it reintroduces on the BFF's origin exactly the credential prompt
- * that header is stripped below to prevent.
- *
- * `connection` and `transfer-encoding` are deliberately absent: reply-from sets
- * `connection` itself (see `onUpstreamResponse`, which preserves it for that
- * reason), and an upstream `transfer-encoding` is renormalised by undici and
- * Fastify to the framing actually used on the way out — pinned by a test.
- */
+// These describe the upstream hop, not the browser connection (RFC 9110 §7.6.1).
 const CONNECTION_SPECIFIC_RESPONSE_HEADERS: ReadonlySet<string> = new Set([
   'keep-alive',
   'proxy-authenticate',
@@ -217,12 +169,6 @@ export function upstreamPath(url: string): string {
   return path.slice(PROXY_PREFIX.length) || '/'
 }
 
-/**
- * The token this proxy will inject for a request, or undefined when it injects
- * none. Shared by the request leg (which sets the header) and the response leg
- * (which reads an upstream 401 as a verdict on it), so only requests that
- * borrowed the session's authority are signed out by a 401.
- */
 function injectedAccessToken(request: ProxyRequest): string | undefined {
   if (UNAUTHENTICATED_PATHS.has(upstreamPath(request.url))) {
     return undefined
@@ -239,17 +185,9 @@ function injectedAccessToken(request: ProxyRequest): string | undefined {
 type ProxyRequest = FastifyRequest<RequestGenericInterface, RawServerBase>
 type ProxyReply = FastifyReply<RouteGenericInterface, RawServerBase>
 
-/**
- * What `reply.from` hands `onResponse`: the upstream reply, body still unread.
- *
- * Mirrors reply-from's own `RawServerResponse`, because the hook's parameter
- * position is contravariant and rejects anything wider — inaccuracy included.
- * The declared `ServerResponse` is really undici's incoming response, so
- * `statusCode` and `stream` line up but `headers` is undeclared.
- */
+// reply-from types this as a ServerResponse even though the stream is incoming.
 type UpstreamResponse = RawReplyDefaultExpression<RawServerBase> & { stream: IncomingMessage }
 
-/** The upstream's response headers, which `UpstreamResponse` cannot declare. */
 function upstreamHeaders(res: UpstreamResponse): IncomingHttpHeaders {
   return (res as unknown as { headers: IncomingHttpHeaders }).headers
 }
@@ -268,22 +206,11 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
     throw new Error('apiProxy requires @fastify/csrf-protection to be registered first — it enforces CSRF on unsafe methods and must not be registered without it')
   }
 
-  /**
-   * The proxy scope's error shape (ADR-010). Declared here because an
-   * encapsulated scope copies whatever error handler exists when it is created,
-   * and index.ts sets the app's *after* registering this plugin.
-   *
-   * reply.from's transport failures never arrive here — `onUpstreamTransportError`
-   * answers those — so the generic branch means a bug on a proxy path.
-   */
+  // Encapsulation prevents the root handler registered later from applying here.
   app.setErrorHandler((err: FastifyError, request, reply) => {
     const reason = err.code === undefined ? undefined : CSRF_REJECTION_REASONS.get(err.code)
     if (reason !== undefined) {
-      // Info, not error: a rejected token is the guard working, usually against
-      // a client whose token went stale.
       request.log.info({ err }, '[proxy] CSRF validation failed — rejecting')
-      // 403 stated rather than taken from `err.statusCode`: part of the contract
-      // ADR-010 pins, not a detail of the plugin that raised it.
       return reply.status(403).send({ error: CSRF_ERROR_CODE, reason })
     }
     request.log.error({ err }, '[proxy] unhandled error')
@@ -319,9 +246,6 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
     app.csrfProtection(request, reply, done)
   }
 
-  // See RESPONSE_HARDENING for why a hook rather than `rewriteHeaders`. Callback
-  // style so the payload — a stream on the proxied path — passes through
-  // untouched, rather than relying on how an async hook reads an undefined return.
   app.addHook('onSend', (_request, reply, _payload, done) => {
     reply.headers(RESPONSE_HARDENING)
     done()
@@ -564,87 +488,41 @@ function rewriteHeaders(headers: IncomingHttpHeaders): IncomingHttpHeaders {
     'www-authenticate': wwwAuthenticate,
     ...forwarded
   } = headers
-  // Node lower-cases incoming header names, so a direct lookup needs no folding.
   return Object.fromEntries(
     Object.entries(forwarded).filter(([name]) => !CONNECTION_SPECIFIC_RESPONSE_HEADERS.has(name)),
   )
 }
 
-/**
- * The upstream's verdict on the token this proxy injected.
- *
- * A 401 means the DUOS API rejected that access token — expired early, revoked,
- * or issued to a user it no longer knows — even though the session looked valid
- * enough for `ensureUpstreamAuth` to forward the request. It cannot recover on
- * its own, so it is destroyed and the browser gets a 401 to redirect on, exactly
- * as `/auth/me` does on the same verdict. Not new behaviour: the legacy client
- * already signs out on any 401 from the DUOS API
- * (`fetchAdapter.handleResponse` → `redirectOnLogout`). Its `GET /api/user/me`
- * exemption is not carried over — that exists to stop a *client-side* redirect
- * loop on the auth probe, and me.ts already destroys on it.
- *
- * Everything else streams through untouched, which is all reply-from's default
- * `onResponse` does by this point: the (rewritten) headers and status are on the
- * reply already, so only the body is left.
- */
 function onUpstreamResponse(request: ProxyRequest, reply: ProxyReply, res: UpstreamResponse): void {
   if (res.statusCode !== 401 || injectedAccessToken(request) === undefined) {
     reply.send(res.stream)
     return
   }
 
-  // The discarded 401 body still has to be read: an unconsumed response keeps
-  // its undici socket checked out of the pool. Drained rather than destroyed,
-  // which preserves connection reuse. The error listener is required, not
-  // defensive — an 'error' with no listener is an unhandled exception, and
-  // reply-from's default path only gets one because `reply.send` attaches it.
+  // Drain the replaced response so undici can reuse its socket.
   res.stream.on('error', (err: Error) => {
     request.log.debug({ err }, '[proxy] discarded upstream 401 body errored')
   })
   res.stream.resume()
 
-  // The upstream headers reply-from already copied onto the reply describe a
-  // body that is no longer being sent. `content-type` alone is fatal: Fastify
-  // only serialises an object payload when the type is JSON or unset, so an
-  // upstream `text/plain` 401 would throw FST_ERR_REP_INVALID_PAYLOAD_TYPE. The
-  // rest merely mislead — a gzip label, a stale etag, a length for a body nobody
-  // received.
-  //
-  // Keyed off `res.headers` so only what came from the upstream goes, except
-  // `connection`: reply-from sets that to `close` when the upstream answered
-  // before the request body was read, which describes this connection rather
-  // than the discarded response.
+  // Remove metadata for the discarded body; preserve reply-from's connection header.
   for (const name of Object.keys(upstreamHeaders(res))) {
     if (name !== 'connection') {
       reply.removeHeader(name)
     }
   }
 
-  // Not awaited: reply-from's onResponse is synchronous and ignores what it
-  // returns, so an unhandled rejection would take the pod down with it.
-  // `endRejectedSession` resolves every failure into a reply of its own.
+  // reply-from's onResponse callback is synchronous.
   void endRejectedSession(request, reply)
 }
 
-/**
- * Destroys the session the upstream just rejected, then answers the browser.
- *
- * Replying after the destroy resolves is what keeps `@fastify/session`'s onSend
- * hook out of the way: `destroy()` nulls `request.session`, so the hook finds
- * nothing to save rather than writing the dead session back on the way out.
- */
 async function endRejectedSession(request: ProxyRequest, reply: ProxyReply): Promise<void> {
   try {
     await request.session.destroy()
     request.log.info('[proxy] upstream rejected the session access token — session destroyed, returning 401')
   }
   catch (err: unknown) {
-    // The row is left to expire on its own schedule, and the 401 still goes out:
-    // a 500 would only tell the client to retry a request that can earn another
-    // 401, and the cleared cookie stops this browser presenting the sid anyway.
     request.log.error({ err }, '[proxy] upstream rejected the session access token but the session could not be destroyed — returning 401 anyway')
   }
-  // Cleared for the same reason the fatal-refresh path does: with the row gone,
-  // a browser still presenting the sid gets a new empty session every request.
   reply.clearCookie('sessionId').status(401).send({ error: 'session_expired' })
 }
