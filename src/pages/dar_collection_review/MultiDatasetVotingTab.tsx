@@ -44,7 +44,6 @@ const DatasetVoteSlabs = ({
 }: DatasetVoteSlabsProps): React.ReactNode => {
   return dataBuckets.map(bucket => (
     <MultiDatasetVoteSlab
-      title={bucket.label}
       bucket={bucket as never}
       collection={collection as DarCollection}
       dacDatasetIds={dacDatasetIds}

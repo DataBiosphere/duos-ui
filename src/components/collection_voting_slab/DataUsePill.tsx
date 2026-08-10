@@ -5,29 +5,44 @@ import { ControlledAccessType, TranslationEntry } from 'src/libs/dataUseTranslat
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
-    fontSize: '1.4rem',
-    margin: '1rem 0 1rem 0',
+    fontSize: '1.25rem',
+    margin: '0.35rem 0',
     display: 'flex',
-    gap: '1.5rem',
+    gap: '0.8rem',
     alignItems: 'center',
   },
   code: {
     color: '#FFFFFF',
-    backgroundColor: '#0948B7',
     fontWeight: 'bold',
-    height: '32px',
-    minWidth: '53px',
+    fontSize: '1.1rem',
+    height: '24px',
+    minWidth: '42px',
     borderRadius: '5rem',
     alignItems: 'center',
     justifyContent: 'center',
     display: 'flex',
+    flexShrink: 0,
+  },
+  codePrimary: {
+    backgroundColor: '#00609f',
+  },
+  codeSecondary: {
+    backgroundColor: '#7ab8e0',
+  },
+  codeManualReview: {
+    backgroundColor: '#db5454',
   },
   subheading: {
     fontWeight: 'bold',
+    fontSize: '1.2rem',
+    margin: '0.4rem 0 0.1rem',
   },
   description: {
     color: '#333F52',
     fontWeight: '500',
+  },
+  descriptionManualReview: {
+    color: '#e57373',
   },
 } as const
 
@@ -37,10 +52,26 @@ interface DataUsePillProps {
 }
 
 export const DataUsePill = ({ dataUse, index }: DataUsePillProps) => {
+  const isPrimary = dataUse?.type === ControlledAccessType.permissions
   return (
     <div key={`data_use_pill_${dataUse.type}_${dataUse.code}_${index}`} style={styles.baseStyle}>
-      <span style={styles.code}>{isNil(dataUse) ? [] : [dataUse.code]}</span>
-      <span style={styles.description}>{isNil(dataUse) ? [] : [dataUse.description]}</span>
+      <span
+        style={{
+          ...styles.code,
+          ...(isPrimary ? styles.codePrimary : styles.codeSecondary),
+          ...(dataUse?.manualReview ? styles.codeManualReview : {}),
+        }}
+      >
+        {isNil(dataUse) ? [] : [dataUse.code]}
+      </span>
+      <span
+        style={{
+          ...styles.description,
+          ...(dataUse?.manualReview ? styles.descriptionManualReview : {}),
+        }}
+      >
+        {isNil(dataUse) ? [] : [dataUse.description]}
+      </span>
     </div>
   )
 }
@@ -79,17 +110,9 @@ export const DataUsePills = ({ dataUses, twoColumn = false }: DataUsePillsProps)
 
   return (
     <div>
-      {permissionsUses.map((dataUse, idx) => (
+      {[...permissionsUses, ...modifierUses].map((dataUse, idx) => (
         <DataUsePill dataUse={dataUse} key={`${dataUse.code}-${idx}`} index={idx} />
       ))}
-      {modifierUses.length > 0 && (
-        <div>
-          <h3 style={styles.subheading}>{ControlledAccessType.modifiers}</h3>
-          {modifierUses.map((dataUse, idx) => (
-            <DataUsePill dataUse={dataUse} key={`${dataUse.code}-${idx}`} index={idx} />
-          ))}
-        </div>
-      )}
     </div>
   )
 }

@@ -10,16 +10,16 @@ const styles = {
     justifyContent: 'center',
   },
   icon: {
-    fontSize: '28px',
-    margin: '2.5%',
+    fontSize: '20px',
+    marginRight: '0.4rem',
   },
 } as const
 
-const Label = () => {
+const Label = ({ roleLabel }: Readonly<{ roleLabel?: string }>) => {
   return (
     <span style={styles.label}>
       <CancelOutlined style={styles.icon} />
-      No
+      {roleLabel ? `No as ${roleLabel}` : 'No'}
     </span>
   )
 }
@@ -29,13 +29,14 @@ interface CollectionVoteNoButtonProps {
   readonly disabled?: boolean
   readonly isSelected?: boolean
   readonly onError?: (error: unknown) => void
+  readonly roleLabel?: string
 }
 
-export default function CollectionVoteNoButton({ onClick, disabled, isSelected, onError }: CollectionVoteNoButtonProps) {
+export default function CollectionVoteNoButton({ onClick, disabled, isSelected, onError, roleLabel }: CollectionVoteNoButtonProps) {
   return (
     <CollectionVoteButton
       datacy="no-collection-vote-button"
-      label={<Label />}
+      label={<Label roleLabel={roleLabel} />}
       onClick={onClick}
       baseColor={votingColors.no}
       disabled={disabled}

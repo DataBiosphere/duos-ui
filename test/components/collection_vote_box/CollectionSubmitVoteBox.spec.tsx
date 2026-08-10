@@ -169,7 +169,7 @@ describe('CollectionSubmitVoteBox - Tests', () => {
     const user = userEvent.setup()
     const { container } = mountComponent({ votes: votesMixed, isFinal: true })
 
-    expect(container.querySelector('[data-cy="vote-subsection-heading"]')).toHaveTextContent(
+    expect(container.querySelector('[data-cy="chair-vote-caveat"]')).toHaveTextContent(
       '(Vote and Rationale cannot be updated after submitting)',
     )
     expect(container.querySelector('[data-cy="yes-collection-vote-button"]')).toHaveStyle({ backgroundColor: votingColors.default })
@@ -179,6 +179,20 @@ describe('CollectionSubmitVoteBox - Tests', () => {
     await waitFor(() => expect(container.querySelector('[data-cy="vote-subsection-heading"]')).toHaveTextContent('NO'))
     expect(container.querySelector('[data-cy="yes-collection-vote-button"]')).not.toBeInTheDocument()
     expect(container.querySelector('[data-cy="no-collection-vote-button"]')).not.toBeInTheDocument()
+    expect(container.querySelector('[data-cy="chair-vote-caveat"]')).not.toBeInTheDocument()
+  })
+
+  it('renders the vote/rationale caveat in light grey italic text below the vote buttons', () => {
+    const { container } = mountComponent({ votes: votesMixed, isFinal: true })
+    const caveat = container.querySelector('[data-cy="chair-vote-caveat"]') as HTMLElement
+    expect(caveat).toHaveTextContent('(Vote and Rationale cannot be updated after submitting)')
+    expect(caveat.style.fontStyle).toBe('italic')
+    expect(caveat.style.color).toBe('rgb(138, 138, 138)')
+  })
+
+  it('does not render the vote/rationale caveat for non-final (member) vote boxes', () => {
+    const { container } = mountComponent({ votes: votesMixed, isFinal: false })
+    expect(container.querySelector('[data-cy="chair-vote-caveat"]')).not.toBeInTheDocument()
   })
 
   it('renders vote result text instead of buttons when vote values match and isFinal is true', () => {
@@ -309,6 +323,26 @@ describe('CollectionSubmitVoteBox - Tests', () => {
     expect(noBtn).toBeDisabled()
     await user.click(noBtn)
     expect(updateFinalVote).not.toHaveBeenCalled()
+  })
+
+  it('renders role-labeled vote buttons when roleLabel is provided', () => {
+    mountComponent({ votes: votesMixed, isFinal: false, roleLabel: 'Member' })
+    expect(screen.getByText('Yes as Member')).toBeInTheDocument()
+    expect(screen.getByText('No as Member')).toBeInTheDocument()
+  })
+
+  it('renders plain Yes/No vote buttons when roleLabel is not provided', () => {
+    mountComponent({ votes: votesMixed, isFinal: false })
+    expect(screen.getByText('Yes')).toBeInTheDocument()
+    expect(screen.getByText('No')).toBeInTheDocument()
+  })
+
+  it('renders the Rationale section above the vote buttons', () => {
+    const { container } = mountComponent({ votes: votesMixed, isFinal: false })
+    const rationaleTitle = screen.getByText('Rationale (optional):')
+    const yesButton = container.querySelector('[data-cy="yes-collection-vote-button"]')!
+    // DOCUMENT_POSITION_FOLLOWING (4) means yesButton comes after rationaleTitle in the DOM.
+    expect(rationaleTitle.compareDocumentPosition(yesButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('re-syncs the vote and rationale when the votes prop changes', () => {
