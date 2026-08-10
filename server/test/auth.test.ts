@@ -6,6 +6,7 @@ import fastifyCsrf from '@fastify/csrf-protection'
 import type { PostgresDb } from '@fastify/postgres'
 import type { Configuration } from 'openid-client'
 import { createPgSessionStore } from '../src/session/pgStore.js'
+import { csrfPluginOptions } from '../src/auth/csrf.js'
 import { handleLogin } from '../src/auth/login.js'
 import { handleCallback } from '../src/auth/callback.js'
 import { handleLogout } from '../src/auth/logout.js'
@@ -122,9 +123,12 @@ async function buildAuthApp(pg: PostgresDb, errorLog?: string[]): Promise<Fastif
     saveUninitialized: false,
     rolling: false,
   })
-  // Real CSRF plugin — mirrors index.ts. Registered after @fastify/session so
-  // the token secret lives in the session.
-  await app.register(fastifyCsrf, { sessionPlugin: '@fastify/session' })
+  // Real CSRF plugin, registered with index.ts's own options — after
+  // @fastify/session, so the token secret lives in the session. The options are
+  // imported rather than restated: registered with the plugin's bare defaults,
+  // as this was through story 3-D, these tests would have accepted a token in
+  // the body or under three other header spellings that production rejects.
+  await app.register(fastifyCsrf, csrfPluginOptions)
 
   app.post('/auth/login', handleLogin)
   app.get('/auth/callback', handleCallback)

@@ -10,11 +10,13 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { createPgSessionStore } from './session/pgStore.js'
+import { csrfPluginOptions } from './auth/csrf.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
 import { handleCallback } from './auth/callback.js'
 import { handleLogout } from './auth/logout.js'
 import { getMe } from './auth/me.js'
+import { apiProxy } from './proxy/apiProxy.js'
 import { configPath, readConfig } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -161,7 +163,11 @@ export async function buildApp(): Promise<AppInstance> {
     // as same-site — a compromised sibling could still forge cookie-bearing
     // POSTs. CSRF tokens don't depend on the registrable domain. The secret is
     // stored in the session, so it must be registered after @fastify/session.
-    await fastify.register(fastifyCsrf, { sessionPlugin: '@fastify/session' })
+    //
+    // The options — including the header-only `getToken` narrowing — live in
+    // auth/csrf.ts so the test harnesses register the plugin exactly as this
+    // does. Inline, they drifted: see that file.
+    await fastify.register(fastifyCsrf, csrfPluginOptions)
 
     // Warm the B2C OIDC discovery cache so the first login doesn't pay the
     // discovery round-trip. Gated on the Azure env vars being present: DB/
@@ -194,7 +200,15 @@ export async function buildApp(): Promise<AppInstance> {
     if (!process.env.DUOS_DB_HOST) {
       throw new Error('bffEnabled is true in config.json but DUOS_DB_HOST is not set — the BFF auth routes require the session infrastructure to be configured')
     }
-    fastify.log.info('[server] bffEnabled is true — registering BFF auth routes')
+    // Both /auth/me and the API proxy forward to this upstream, so a cutover
+    // without it is a deployment that boots, passes health checks, and then
+    // fails on the first user request. Checked here rather than left to the
+    // proxy's own requireEnv so the error arrives at startup, next to the
+    // switch that made it mandatory.
+    if (!process.env.DUOS_API_URL) {
+      throw new Error('bffEnabled is true in config.json but DUOS_API_URL is not set — /auth/me and the API proxy both forward to it')
+    }
+    fastify.log.info('[server] bffEnabled is true — registering BFF auth routes and the API proxy')
     fastify.post('/auth/login', handleLogin)
     fastify.get('/auth/callback', handleCallback)
     // The client fetches this after sign-in and echoes the token in an
@@ -209,6 +223,15 @@ export async function buildApp(): Promise<AppInstance> {
     // the flow to the session. /auth/me is a safe GET. Only logout is guarded.
     fastify.post('/auth/logout', { onRequest: fastify.csrfProtection }, handleLogout)
     fastify.get('/auth/me', getMe)
+
+    // The API proxy (Phase 3). Registered here, inside both switches, rather
+    // than alongside /health: it depends on @fastify/cookie, @fastify/session
+    // and @fastify/csrf-protection, all of which are registered above only when
+    // DUOS_DB_HOST is set. Gating it on bffEnabled too keeps it dark until
+    // cutover — the client does not call /duos-api until Epic 4 points
+    // getApiUrl() at it — so a deployment running the legacy client-side flow
+    // exposes no proxy route at all.
+    await fastify.register(apiProxy)
   }
   else {
     fastify.log.info('[server] bffEnabled is not true — BFF auth routes disabled (legacy client-side auth)')

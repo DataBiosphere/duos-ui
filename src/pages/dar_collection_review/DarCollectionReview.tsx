@@ -261,7 +261,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
 
   return (
     <div className="collection-review-page">
-      <div className="review-page-header" style={{ width: 'min(100%, 120rem)', margin: '0 auto', padding: '0 clamp(1rem, 3vw, 2rem)' }}>
+      <div className="review-page-header" style={{ padding: '0 clamp(0.8rem, 2.5vw, 2.2rem)' }}>
         <ReviewHeader
           darCode={get(collection, 'darCode') || '- -'}
           projectTitle={get(darInfo, 'projectTitle') || '- -'}
@@ -270,6 +270,23 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
           approvedDatasets={approvedDatasets}
           isLoading={isLoading}
           readOnly={readOnly || adminPage}
+          email={get(researcherProfile, 'email')}
+          researcherExternalProfiles={get(researcherProfile, 'userData.externalProfiles')}
+          externalCollaborators={darInfo.externalCollaborators}
+          internalCollaborators={darInfo.internalCollaborators}
+          internalLabStaff={darInfo.labCollaborators}
+          signingOfficialName={darInfo.signingOfficial}
+          signingOfficialEmail={darInfo.signingOfficialEmail}
+          researcherInstitutionId={get(researcherProfile, 'institutionId')}
+          itDirectorEmail={darInfo.itDirector}
+          anvilStorage={darInfo.anvilUse}
+          localComputing={darInfo.localUse}
+          cloudComputing={darInfo.cloudUse}
+          cloudProvider={darInfo.cloudProvider}
+          cloudProviderDescription={darInfo.cloudProviderDescription}
+          referenceId={referenceIdForDocuments}
+          collaborationLetterLocation={darInfo.collaborationLetterLocation}
+          collaborationLetterName={darInfo.collaborationLetterName}
         />
         <AILLMWarningBanner darInfo={darInfo} />
         {canVote === false && (
@@ -292,31 +309,9 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
         />
         {selectedTab === tabs.applicationInformation && (
           <ApplicationInformation
-            institution={get(researcherProfile, 'institution.name')}
-            researcher={get(researcherProfile, 'displayName')}
-            email={get(researcherProfile, 'email')}
             nonTechSummary={darInfo.nonTechRus}
-            isLoading={subcomponentLoading}
-            collection={collection}
-            dataUseBuckets={dataUseBuckets}
-            externalCollaborators={darInfo.externalCollaborators}
-            internalCollaborators={darInfo.internalCollaborators}
-            signingOfficialName={darInfo.signingOfficial}
-            signingOfficialEmail={darInfo.signingOfficialEmail}
-            researcherInstitutionId={get(researcherProfile, 'institutionId')}
-            itDirectorEmail={darInfo.itDirector}
-            internalLabStaff={darInfo.labCollaborators}
-            anvilStorage={darInfo.anvilUse}
-            localComputing={darInfo.localUse}
-            cloudComputing={darInfo.cloudUse}
-            cloudProvider={darInfo.cloudProvider}
-            cloudProviderDescription={darInfo.cloudProviderDescription}
             rus={darInfo.rus}
-            referenceId={referenceIdForDocuments}
-            irbDocumentLocation={darInfo.irbDocumentLocation}
-            collaborationLetterLocation={darInfo.collaborationLetterLocation}
-            irbDocumentName={darInfo.irbDocumentName}
-            collaborationLetterName={darInfo.collaborationLetterName}
+            isLoading={subcomponentLoading}
           />
         )}
         {selectedTab === tabs.fullDAR && (
