@@ -23,8 +23,8 @@ const bulkResult = (applied: number): DaaBulkRelationResult => ({
 })
 
 const mockDaas: DAAObject[] = [
-  makeDaa({ broadDaa: true, daaId: 1, fileName: 'Default DUOS DAA', dacId: 10 }),
-  makeDaa({ broadDaa: false, daaId: 2, fileName: 'GTEx Access Agreement', dacId: 20 }),
+  makeDaa({ daaId: 1, fileName: 'Default DUOS DAA', dacId: 10 }),
+  makeDaa({ daaId: 2, fileName: 'GTEx Access Agreement', dacId: 20 }),
 ]
 
 const mockResearchers: DuosUser[] = [
@@ -46,18 +46,18 @@ const mockResearchers: DuosUser[] = [
 describe('ResearcherView pure helpers', () => {
   describe('getDacName', () => {
     it('returns the DAC name from daa.dacs', () => {
-      const daa = makeDaa({ broadDaa: true, daaId: 1, fileName: 'Test DAA', dacId: 10 })
+      const daa = makeDaa({ daaId: 1, fileName: 'Test DAA', dacId: 10 })
       expect(getDacName(daa)).toBe('DAC-10')
     })
 
     it('returns — when dacs array is empty', () => {
-      const daa = { ...makeDaa({ broadDaa: true, daaId: 1, fileName: 'Test DAA', dacId: 10 }), dacs: [] }
+      const daa = { ...makeDaa({ daaId: 1, fileName: 'Test DAA', dacId: 10 }), dacs: [] }
       expect(getDacName(daa)).toBe('—')
     })
 
     it('joins multiple DAC names', () => {
       const daa: DAAObject = {
-        ...makeDaa({ broadDaa: true, daaId: 1, fileName: 'Multi DAA', dacId: 10 }),
+        ...makeDaa({ daaId: 1, fileName: 'Multi DAA', dacId: 10 }),
         dacs: [
           { dacId: 10, name: 'DAC A' },
           { dacId: 20, name: 'DAC B' },

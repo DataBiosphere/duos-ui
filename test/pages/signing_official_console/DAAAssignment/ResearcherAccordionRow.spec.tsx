@@ -17,12 +17,12 @@ const mockResearcher: DuosUser = makeResearcher({
 
 const mockDaaRows: DAARowData[] = [
   {
-    daa: makeDaa({ broadDaa: true, daaId: 1, fileName: 'Default DUOS DAA' }),
+    daa: makeDaa({ daaId: 1, fileName: 'Default DUOS DAA' }),
     dacName: 'NHGRI DAC',
     status: 'authorized',
   },
   {
-    daa: makeDaa({ broadDaa: false, daaId: 2, fileName: 'GTEx Agreement' }),
+    daa: makeDaa({ daaId: 2, fileName: 'GTEx Agreement' }),
     dacName: 'GTEx DAC',
     status: 'not_requested',
   },

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Routes } from 'react-router'
+import { Navigate, Route, Routes } from 'react-router'
 import Home from 'src/pages/Home'
 import UserProfile from 'src/pages/user_profile/UserProfile'
 import Authenticated from 'src/routing/Authenticated'
@@ -40,6 +40,7 @@ import ChairConsole from 'src/pages/ChairConsole'
 import DACDatasets from 'src/pages/DACDatasets'
 import MemberConsole from 'src/pages/MemberConsole'
 import SOAcknowledged from 'src/routing/SOAcknowledged'
+import SigningOfficialDashboard from 'src/pages/signing_official_console/SigningOfficialDashboard'
 import SigningOfficialLibraryCards from 'src/pages/signing_official_console/SigningOfficialLibraryCards'
 import SigningOfficialDarRequests from 'src/pages/signing_official_console/SigningOfficialDarRequests'
 import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs'
@@ -102,6 +103,8 @@ const AppRoutes = (props: AppRoutesProps) => {
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.signingOfficial]} />}>
           <Route element={<SOAcknowledged />}>
+            <Route path="/signing_official_console" element={<Navigate to="/signing_official_console/dashboard" replace />} />
+            <Route path="/signing_official_console/dashboard" element={<SigningOfficialDashboard />} />
             <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
             <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />
             <Route path="/signing_official_console/dar_approvals" element={<SigningOfficialDarApprovals />} />
