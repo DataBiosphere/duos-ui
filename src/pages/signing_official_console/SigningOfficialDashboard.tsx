@@ -154,15 +154,23 @@ export default function SigningOfficialDashboard(): React.JSX.Element {
                     // The en-dash alone tells a screen reader nothing, so the accessible name
                     // always spells out the label and either the count or why it is missing.
                     const value = isFetching || error || !data ? null : stat.value(data)
+                    let valueDescription: string
+                    if (value !== null) {
+                      valueDescription = `${value}`
+                    }
+                    else if (isFetching) {
+                      valueDescription = 'loading'
+                    }
+                    else {
+                      valueDescription = 'unavailable'
+                    }
                     return (
                       <span key={stat.label} className="so-dashboard-stat">
                         <span
                           className="so-dashboard-stat-value"
-                          aria-label={value === null
-                            ? `${stat.label}: ${isFetching ? 'loading' : 'unavailable'}`
-                            : `${stat.label}: ${value}`}
+                          aria-label={`${stat.label}: ${valueDescription}`}
                         >
-                          {value === null ? '–' : value}
+                          {value ?? '–'}
                         </span>
                         <span className="so-dashboard-stat-label" aria-hidden="true">{stat.label}</span>
                       </span>
