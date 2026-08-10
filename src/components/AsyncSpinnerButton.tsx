@@ -84,9 +84,10 @@ export const AsyncSpinnerButton: React.FC<AsyncSpinnerButtonProps> = ({
     ...style,
   }
 
-  const buttonText = typeof children === 'string' ? children : 'Button'
-  const effectiveAriaLabel = ariaLabel || buttonText
-  const effectiveDataCy = dataCy || `async-action-button-${buttonText.toLowerCase().replace(/\s+/g, '-')}`
+  const buttonText = typeof children === 'string' ? children : ''
+  // Element children name the button through their own text; labeling them "Button" would hide it.
+  const effectiveAriaLabel = ariaLabel || buttonText || undefined
+  const effectiveDataCy = dataCy || `async-action-button-${(buttonText || 'button').toLowerCase().replace(/\s+/g, '-')}`
 
   return (
     <button
