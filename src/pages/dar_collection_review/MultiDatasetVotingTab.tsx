@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { get, isNil } from 'src/utils/NodashUtil'
 import { Alert } from 'src/components/Alert'
-import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
+import ManualReviewWarningBanner from 'src/components/ManualReviewWarningBanner'
 import MultiDatasetVoteSlab from 'src/components/collection_voting_slab/MultiDatasetVoteSlab'
 import { User } from 'src/libs/ajax/User'
 import { Bucket } from 'src/utils/BucketUtils'
@@ -115,7 +115,7 @@ export default function MultiDatasetVotingTab({
 
   return (
     <div style={styles.baseStyle}>
-      <AILLMWarningBanner darInfo={darInfo} />
+      <ManualReviewWarningBanner darInfo={darInfo} />
       {dataAccessApprovalDisabled() && !readOnly && (
         <Alert
           type="danger"

@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
 import TabControl from 'src/components/TabControl'
-import { type TabStyleOverride } from 'src/components/SelectableText'
 import ReviewHeader from './ReviewHeader'
+import { tabContainerColor, tabStyleOverride } from './reviewTabStyles'
 import { compact, get, isEmpty, map, toLower, uniq } from 'src/utils/NodashUtil'
 import { updateFinalVote } from 'src/utils/DarCollectionUtils'
 import { binCollectionToBuckets, Bucket } from 'src/utils/BucketUtils'
@@ -12,8 +12,7 @@ import MultiDatasetVotingTab from './MultiDatasetVotingTab'
 import { Collections } from 'src/libs/ajax/Collections'
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication'
 import VotingHistory from './VotingHistory'
-import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
-import { Theme } from 'src/libs/theme'
+import ManualReviewWarningBanner from 'src/components/ManualReviewWarningBanner'
 import { APPROVED_VOTETYPES, ElectionStatus, ElectionType, userHasOpenDataAccessElection } from 'src/utils/DarUtils'
 import { extractError } from 'src/utils/ErrorUtils.js'
 import { Notification } from 'src/components/Notification.jsx'
@@ -24,40 +23,6 @@ import { DarCollection, DuosUser, DataAccessRequestData } from 'src/types/model'
 interface DarCollectionReviewProps {
   adminPage?: boolean
   readOnly?: boolean
-}
-
-const tabContainerColor = 'white'
-
-const tabStyleOverride: TabStyleOverride = {
-  baseStyle: {
-    fontFamily: 'Montserrat',
-    fontSize: 'clamp(1.15rem, 1.9vw, 1.4rem)',
-    width: 'fit-content',
-    display: 'flex',
-    justifyContent: 'center',
-    whiteSpace: 'nowrap',
-    padding: '0.9rem 0.2rem',
-  },
-  tabSelected: {
-    backgroundColor: 'transparent',
-    color: Theme.palette.primary,
-    fontWeight: 600,
-    borderBottom: `2px solid ${Theme.palette.secondary}`,
-  },
-  tabUnselected: {
-    backgroundColor: 'transparent',
-    color: '#7c8a94',
-    fontWeight: 400,
-    borderBottom: '2px solid transparent',
-  },
-  tabContainer: {
-    backgroundColor: tabContainerColor,
-    display: 'flex',
-    flexWrap: 'wrap',
-    columnGap: '2.2rem',
-    borderBottom: '1px solid rgba(31, 59, 80, 0.15)',
-    padding: '0 0.4rem',
-  },
 }
 
 const tabsForUser = (user: DuosUser, buckets: Bucket[], adminPage = false): Record<string, string> => {
@@ -297,7 +262,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
           collaborationLetterName={darInfo.collaborationLetterName}
           darInfo={darInfo}
         />
-        <AILLMWarningBanner darInfo={darInfo} />
+        <ManualReviewWarningBanner darInfo={darInfo} />
         {canVote === false && (
           <Notification
             customStyle={{ paddingLeft: 0 }}

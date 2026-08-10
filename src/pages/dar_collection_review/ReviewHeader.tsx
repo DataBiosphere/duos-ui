@@ -7,7 +7,7 @@ import { DataAccessRequestData, DataUseTerm, ExternalProfiles, SigningOfficialUs
 import { Theme } from 'src/libs/theme'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 import { formattedLinkedIn, formattedOrcid, formattedThroughBio } from 'src/utils/ExternalProfileUtils'
-import { DarInfo, DataUseTranslation } from 'src/libs/dataUseTranslation'
+import { darInfoDataUseTerms } from 'src/libs/dataUseTranslation'
 
 const factsColumnStyle: React.CSSProperties = {
   display: 'flex',
@@ -248,6 +248,10 @@ const getCloudUseText = (cloudComputing: boolean, cloudProvider: string): string
   return isEmpty(cloudProvider) || cloudProvider === '- -' ? 'Yes' : `Yes (${cloudProvider})`
 }
 
+// Terms needing manual review lead their group so they stay visible without scrolling the box.
+const manualReviewFirst = (terms: DataUseTerm[]): DataUseTerm[] =>
+  terms.toSorted((a, b) => Number(b.manualReview ?? false) - Number(a.manualReview ?? false))
+
 const trimmedOrUndefined = (value?: string): string | undefined => {
   const trimmed = value?.trim()
   return trimmed || undefined
@@ -446,9 +450,9 @@ export default function ReviewHeader({
   const soThroughBio = trimmedOrUndefined(soExternalProfiles?.throughBio)
   const soInstitutionalWebsite = trimmedOrUndefined(soExternalProfiles?.institutionalWebsite)
 
-  const { primary: primaryDuoTerms = [], secondary: secondaryDuoTerms = [] } = darInfo
-    ? DataUseTranslation.translateDarInfo(darInfo as DarInfo)
-    : { primary: [], secondary: [] }
+  const { primary, secondary } = darInfoDataUseTerms(darInfo)
+  const primaryDuoTerms = manualReviewFirst(primary)
+  const secondaryDuoTerms = manualReviewFirst(secondary)
   const hasDuoTerms = !isEmpty(primaryDuoTerms) || !isEmpty(secondaryDuoTerms)
 
   return (

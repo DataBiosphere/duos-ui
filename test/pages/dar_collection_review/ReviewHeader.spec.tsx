@@ -202,8 +202,9 @@ describe('ReviewHeader - Tests', () => {
 
   it('renders the four facts columns in the required order and placeholders for missing people', () => {
     const { container } = render(<ReviewHeader approvedDatasets={[]} />)
-    const factsContainer = container.querySelector('.application-facts-container')
-    const columnIds = Array.from(factsContainer?.children ?? []).map(child => child.id)
+    const factsContainer = container.querySelector<HTMLElement>('.application-facts-container')
+    expect(factsContainer).not.toBeNull()
+    const columnIds = Array.from(factsContainer!.children).map(child => child.id)
 
     expect(columnIds).toEqual([
       'researcher-info-column',
@@ -213,7 +214,7 @@ describe('ReviewHeader - Tests', () => {
     ])
     // Scoped to the facts container: the narrative section renders its own "None listed"
     // placeholder for DUO terms, which is not one of the people/IT placeholders under test.
-    expect(within(factsContainer as HTMLElement).getAllByText('None listed')).toHaveLength(3)
+    expect(within(factsContainer!).getAllByText('None listed')).toHaveLength(3)
   })
 
   it('renders AnVIL, local computing, and cloud computing facts', () => {
@@ -602,5 +603,61 @@ describe('ReviewHeader - Tests', () => {
     const { container } = render(<ReviewHeader approvedDatasets={[]} darInfo={{ poa: true }} />)
     const badge = container.querySelector('#duo-primary-0-fact span:first-child') as HTMLElement
     expect(badge.style.backgroundColor).toBe('rgb(219, 84, 84)')
+  })
+
+  it('renders "None listed" in the DUO Terms column for an empty darInfo', () => {
+    const { container } = render(<ReviewHeader approvedDatasets={[]} darInfo={{}} />)
+    const duoColumn = container.querySelector('#rus-duo-terms-column')
+    expect(duoColumn).toHaveTextContent('None listed')
+    expect(duoColumn?.querySelector('.duo-term-card')).toBeNull()
+  })
+
+  it('flags every manual-review term when they span primary and secondary data uses', () => {
+    const { container } = render(
+      <ReviewHeader
+        approvedDatasets={[]}
+        darInfo={{
+          other: true,
+          otherText: 'Some other primary purpose',
+          methods: true,
+          aiLlmUse: true,
+          illegalBehavior: true,
+          stigmatizedDiseases: true,
+          vulnerablePopulation: true,
+        }}
+      />,
+    )
+    const duoColumn = container.querySelector<HTMLElement>('#rus-duo-terms-column')
+    expect(duoColumn).not.toBeNull()
+
+    const cards = Array.from(duoColumn!.querySelectorAll<HTMLElement>('.duo-term-card'))
+    const redCards = cards.filter(card =>
+      card.querySelector<HTMLElement>('span:first-child')?.style.backgroundColor === 'rgb(219, 84, 84)',
+    )
+
+    expect(redCards).toHaveLength(5)
+    expect(redCards.map(card => card.textContent)).toEqual([
+      expect.stringContaining('Some other primary purpose'),
+      expect.stringContaining('Artificial Intelligence (AI) or Large Language Models (LLMs)'),
+      expect.stringContaining('illegal behaviors'),
+      expect.stringContaining('stigmatizing illnesses'),
+      expect.stringContaining('vulnerable population'),
+    ])
+    // MDS and NPU do not require review, so they keep the non-review styling.
+    expect(cards).toHaveLength(7)
+  })
+
+  it('lists manual-review terms first within each group so they are not scrolled out of view', () => {
+    const { container } = render(
+      <ReviewHeader
+        approvedDatasets={[]}
+        darInfo={{ diseases: true, other: true, otherText: 'Manual review purpose', methods: true, aiLlmUse: true }}
+      />,
+    )
+
+    expect(container.querySelector('#duo-primary-0-fact span:first-child')?.textContent).toBe('OTHER')
+    expect(container.querySelector('#duo-primary-1-fact span:first-child')?.textContent).toBe('DS')
+    expect(container.querySelector('#duo-secondary-0-fact span:first-child')?.textContent).toBe('AI')
+    expect(container.querySelector('#duo-secondary-1-fact span:first-child')?.textContent).toBe('MDS')
   })
 })

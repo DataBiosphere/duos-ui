@@ -61,8 +61,9 @@ export default function SelectableText({ label, setSelected, selectedType, style
   )
 
   const style = useMemo(() => {
-    if (isHovered) return utilizedHoverStyle
-    return selectedType === label ? utilizedSelectedStyle : utilizedUnselectedStyle
+    const stateStyle = selectedType === label ? utilizedSelectedStyle : utilizedUnselectedStyle
+    // Hover layers on top of the state style so a hovered tab keeps its selected/unselected cues.
+    return isHovered ? { ...stateStyle, ...utilizedHoverStyle } : stateStyle
   }, [isHovered, selectedType, label, utilizedSelectedStyle, utilizedUnselectedStyle, utilizedHoverStyle])
 
   return (

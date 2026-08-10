@@ -48,6 +48,30 @@ describe('SelectableText', () => {
     expect(div.style.cursor).toBe('')
   })
 
+  it('keeps the selected style while hovered', () => {
+    const { container } = renderTab({ selectedType: 'Reviews' })
+    const btn = container.firstChild as HTMLElement
+
+    fireEvent.mouseEnter(btn)
+    expect(btn.style.cursor).toBe('pointer')
+    expect(btn.style.borderBottomColor).toBe('green')
+  })
+
+  it('does not change the font weight on hover when tabHover keeps it unset', () => {
+    const { container } = renderTab({
+      selectedType: 'Other',
+      styleOverride: {
+        tabUnselected: { fontWeight: 400 },
+        tabHover: { color: 'blue', cursor: 'pointer' },
+      },
+    })
+    const btn = container.firstChild as HTMLElement
+
+    fireEvent.mouseEnter(btn)
+    expect(btn.style.fontWeight).toBe('400')
+    expect(btn.style.color).toBe('blue')
+  })
+
   it('calls setSelected with the label when clicked', () => {
     const setSelected = vi.fn()
     renderTab({ setSelected })

@@ -1,7 +1,7 @@
 import { isNil, isEmpty, filter, join, concat, clone, uniq, head } from 'src/utils/NodashUtil'
 import { OntologyService } from './ontologyService'
 import { Notifications } from './utils'
-import { DataUse, DataUseSummary, DataUseTerm } from '../types/model'
+import { DataAccessRequestData, DataUse, DataUseSummary, DataUseTerm } from '../types/model'
 
 export const ControlledAccessType = {
   permissions: 'Permissions',
@@ -583,4 +583,19 @@ export const DataUseTranslation = {
     return dataUseSummary
   },
   translateDataUseRestrictions,
+}
+
+type PartialDarInfo = Partial<DarInfo> | Partial<DataAccessRequestData>
+
+// An absent or empty darInfo has no terms; translateDarInfo would otherwise fall back to "OTHER: Not provided".
+export const darInfoDataUseTerms = (darInfo?: PartialDarInfo): Required<DataUseSummary> => {
+  if (isNil(darInfo) || isEmpty(darInfo)) return { primary: [], secondary: [] }
+  const { primary = [], secondary = [] } = DataUseTranslation.translateDarInfo(darInfo as DarInfo)
+  return { primary, secondary }
+}
+
+// Flat list of terms a reviewer must manually review, primary terms first.
+export const manualReviewDataUseTerms = (darInfo?: PartialDarInfo): DataUseTerm[] => {
+  const { primary, secondary } = darInfoDataUseTerms(darInfo)
+  return [...primary, ...secondary].filter(term => term.manualReview)
 }
