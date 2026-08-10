@@ -18,6 +18,21 @@ describe('CollectionVoteNoButton', () => {
     expect(screen.getByText('No')).toBeInTheDocument()
   })
 
+  it('renders "No as Member" when roleLabel="Member" is provided', async () => {
+    render(<CollectionVoteNoButton onClick={vi.fn().mockResolvedValue(undefined)} roleLabel="Member" />)
+
+    expect(screen.getByText('No as Member')).toBeInTheDocument()
+    expect(screen.queryByText('No')).not.toBeInTheDocument()
+  })
+
+  it('renders "No as Chair" when roleLabel="Chair" is provided', async () => {
+    await act(async () => {
+      render(<CollectionVoteNoButton onClick={vi.fn().mockResolvedValue(undefined)} roleLabel="Chair" />)
+    })
+
+    expect(screen.getByText('No as Chair')).toBeInTheDocument()
+  })
+
   it('renders the CancelOutlined icon', async () => {
     await act(async () => {
       render(<CollectionVoteNoButton onClick={vi.fn().mockResolvedValue(undefined)} />)
@@ -76,9 +91,7 @@ describe('CollectionVoteNoButton', () => {
   })
 
   it('shows white background when isSelected=false', async () => {
-    await act(async () => {
-      render(<CollectionVoteNoButton onClick={vi.fn().mockResolvedValue(undefined)} isSelected={false} />)
-    })
+    render(<CollectionVoteNoButton onClick={vi.fn().mockResolvedValue(undefined)} isSelected={false} />)
 
     expect(screen.getByRole('button')).toHaveStyle({ backgroundColor: votingColors.default })
   })

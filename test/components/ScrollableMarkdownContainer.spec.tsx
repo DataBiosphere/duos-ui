@@ -17,10 +17,6 @@ vi.mock('react-markdown', () => ({
   },
 }))
 
-vi.mock('dompurify', () => ({
-  default: { sanitize: (text: string) => text },
-}))
-
 const mockFetch = (content: string) => {
   global.fetch = vi.fn().mockResolvedValue({
     ok: true,

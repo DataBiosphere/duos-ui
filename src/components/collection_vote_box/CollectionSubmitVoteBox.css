@@ -1,0 +1,12 @@
+/* Kept here rather than as an inline style so the media query below can override it without !important. */
+.vote-buttons {
+  display: flex;
+  gap: 0.7rem;
+}
+
+@media (max-width: 1024px) {
+  .vote-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

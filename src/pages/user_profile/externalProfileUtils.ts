@@ -1,5 +1,6 @@
 import { ExternalProfiles } from 'src/types/model'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
+import { normalizeIdentifierUrl } from 'src/utils/ExternalProfileUtils'
 
 export interface ExternalProfileLink {
   label: string
@@ -8,10 +9,7 @@ export interface ExternalProfileLink {
 
 const identifierUrl = (value: string | undefined, baseUrl: string): string | undefined => {
   const trimmedValue = value?.trim()
-  if (!trimmedValue) {
-    return undefined
-  }
-  return validateHttpUrl(trimmedValue) ?? `${baseUrl}${trimmedValue.replace(/^\/+/, '')}`
+  return trimmedValue ? normalizeIdentifierUrl(trimmedValue, baseUrl) : undefined
 }
 
 const urlValue = (value: string | undefined): string | undefined => {

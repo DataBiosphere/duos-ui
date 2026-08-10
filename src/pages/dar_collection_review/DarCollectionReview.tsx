@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
 import TabControl from 'src/components/TabControl'
-import { type TabStyleOverride } from 'src/components/SelectableText'
 import ReviewHeader from './ReviewHeader'
-import ApplicationInformation from './ApplicationInformation'
+import { reviewTabsSx, tabContainerColor } from './reviewTabStyles'
 import { compact, get, isEmpty, map, toLower, uniq } from 'src/utils/NodashUtil'
 import { updateFinalVote } from 'src/utils/DarCollectionUtils'
 import { binCollectionToBuckets, Bucket } from 'src/utils/BucketUtils'
@@ -13,7 +12,7 @@ import MultiDatasetVotingTab from './MultiDatasetVotingTab'
 import { Collections } from 'src/libs/ajax/Collections'
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication'
 import VotingHistory from './VotingHistory'
-import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
+import ManualReviewWarningBanner from 'src/components/ManualReviewWarningBanner'
 import { APPROVED_VOTETYPES, ElectionStatus, ElectionType, userHasOpenDataAccessElection } from 'src/utils/DarUtils'
 import { extractError } from 'src/utils/ErrorUtils.js'
 import { Notification } from 'src/components/Notification.jsx'
@@ -26,44 +25,9 @@ interface DarCollectionReviewProps {
   readOnly?: boolean
 }
 
-const tabContainerColor = 'rgb(115,154,164)'
-
-const tabStyleOverride: TabStyleOverride = {
-  baseStyle: {
-    fontFamily: 'Montserrat',
-    fontSize: 'clamp(1.2rem, 2vw, 1.6rem)',
-    width: 'fit-content',
-    fontWeight: 600,
-    border: '0px',
-    display: 'flex',
-    justifyContent: 'center',
-    whiteSpace: 'nowrap',
-    padding: '1%',
-  },
-  tabSelected: {
-    backgroundColor: 'white',
-    color: tabContainerColor,
-    border: '0px black solid !important',
-    borderRadius: '5px 5px 0px 0px',
-  },
-  tabUnselected: {
-    backgroundColor: tabContainerColor,
-    color: 'white',
-    border: '0px !important',
-  },
-  tabContainer: {
-    backgroundColor: tabContainerColor,
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '0.6rem',
-    border: '0px',
-  },
-}
-
 const tabsForUser = (user: DuosUser, buckets: Bucket[], adminPage = false): Record<string, string> => {
   if (adminPage) {
     return {
-      applicationInformation: 'Application Information',
       fullDAR: 'Full DAR',
       chairVote: 'Chair Vote',
       votingHistory: 'Voting History',
@@ -78,10 +42,12 @@ const tabsForUser = (user: DuosUser, buckets: Bucket[], adminPage = false): Reco
     .map(vr => vr['dataAccess'])
     .flatMap(vg => vg.chairpersonVotes)
     .filter(v => v.userId === user.userId)
-  const updatedTabs: Record<string, string> = { applicationInformation: 'Application Information', fullDAR: 'Full DAR' }
+  // The Vote tab, when present, is always the left-most tab.
+  const updatedTabs: Record<string, string> = {}
   if (!isEmpty(myMemberVotes)) {
     updatedTabs.memberVote = 'Vote'
   }
+  updatedTabs.fullDAR = 'Full DAR'
   // Only show a standalone Chair Vote tab when the user has no member votes;
   // when both exist, chair voting is folded into the Member Vote tab.
   if (!isEmpty(myChairVotes) && isEmpty(myMemberVotes)) {
@@ -166,10 +132,10 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
   const [isLoading, setIsLoading] = useState(true)
   const [subcomponentLoading, setSubcomponentLoading] = useState(true)
   const [tabs, setTabs] = useState<Record<string, string>>({
-    applicationInformation: 'Application Information',
     fullDAR: 'Full DAR',
   })
-  const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation)
+  const [selectedTab, setSelectedTab] = useState(tabs.fullDAR)
+  const initialTabSelected = useRef(false)
   const [researcherProfile, setResearcherProfile] = useState<DuosUser | Record<string, never>>({})
   const [dataUseBuckets, setDataUseBuckets] = useState<Bucket[]>([])
   const [dacIds, setDacIds] = useState<number[]>([])
@@ -208,7 +174,14 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
       setDarInfo(darInfo ?? {})
       setResearcherProfile(researcherProfile)
       setApprovedDatasets(approvedDatasetNames)
-      setTabs(tabsForUser(user, processedBuckets, adminPage))
+      const updatedTabs = tabsForUser(user, processedBuckets, adminPage)
+      setTabs(updatedTabs)
+      // Open on the left-most tab (Vote when the user has one). Guarded so the Chair Vote
+      // tab's re-init does not pull the user back off the tab they just opened.
+      if (!initialTabSelected.current) {
+        initialTabSelected.current = true
+        setSelectedTab(Object.values(updatedTabs)[0])
+      }
       setDacIds(dacIds)
       setIsLoading(false)
       setSubcomponentLoading(false)
@@ -261,7 +234,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
 
   return (
     <div className="collection-review-page">
-      <div className="review-page-header" style={{ width: 'min(100%, 120rem)', margin: '0 auto', padding: '0 clamp(1rem, 3vw, 2rem)' }}>
+      <div className="review-page-header" style={{ padding: '0 clamp(0.8rem, 2.5vw, 2.2rem)' }}>
         <ReviewHeader
           darCode={get(collection, 'darCode') || '- -'}
           projectTitle={get(darInfo, 'projectTitle') || '- -'}
@@ -270,8 +243,26 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
           approvedDatasets={approvedDatasets}
           isLoading={isLoading}
           readOnly={readOnly || adminPage}
+          email={get(researcherProfile, 'email')}
+          researcherExternalProfiles={get(researcherProfile, 'userData.externalProfiles')}
+          externalCollaborators={darInfo.externalCollaborators}
+          internalCollaborators={darInfo.internalCollaborators}
+          internalLabStaff={darInfo.labCollaborators}
+          signingOfficialName={darInfo.signingOfficial}
+          signingOfficialEmail={darInfo.signingOfficialEmail}
+          researcherInstitutionId={get(researcherProfile, 'institutionId')}
+          itDirectorEmail={darInfo.itDirector}
+          anvilStorage={darInfo.anvilUse}
+          localComputing={darInfo.localUse}
+          cloudComputing={darInfo.cloudUse}
+          cloudProvider={darInfo.cloudProvider}
+          cloudProviderDescription={darInfo.cloudProviderDescription}
+          referenceId={referenceIdForDocuments}
+          collaborationLetterLocation={darInfo.collaborationLetterLocation}
+          collaborationLetterName={darInfo.collaborationLetterName}
+          darInfo={darInfo}
         />
-        <AILLMWarningBanner darInfo={darInfo} />
+        <ManualReviewWarningBanner darInfo={darInfo} />
         {canVote === false && (
           <Notification
             customStyle={{ paddingLeft: 0 }}
@@ -287,38 +278,9 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
           isLoading={isLoading}
-          styleOverride={tabStyleOverride}
+          sx={reviewTabsSx}
           isDisabled={isLoading || subcomponentLoading}
         />
-        {selectedTab === tabs.applicationInformation && (
-          <ApplicationInformation
-            institution={get(researcherProfile, 'institution.name')}
-            researcher={get(researcherProfile, 'displayName')}
-            email={get(researcherProfile, 'email')}
-            nonTechSummary={darInfo.nonTechRus}
-            isLoading={subcomponentLoading}
-            collection={collection}
-            dataUseBuckets={dataUseBuckets}
-            externalCollaborators={darInfo.externalCollaborators}
-            internalCollaborators={darInfo.internalCollaborators}
-            signingOfficialName={darInfo.signingOfficial}
-            signingOfficialEmail={darInfo.signingOfficialEmail}
-            researcherInstitutionId={get(researcherProfile, 'institutionId')}
-            itDirectorEmail={darInfo.itDirector}
-            internalLabStaff={darInfo.labCollaborators}
-            anvilStorage={darInfo.anvilUse}
-            localComputing={darInfo.localUse}
-            cloudComputing={darInfo.cloudUse}
-            cloudProvider={darInfo.cloudProvider}
-            cloudProviderDescription={darInfo.cloudProviderDescription}
-            rus={darInfo.rus}
-            referenceId={referenceIdForDocuments}
-            irbDocumentLocation={darInfo.irbDocumentLocation}
-            collaborationLetterLocation={darInfo.collaborationLetterLocation}
-            irbDocumentName={darInfo.irbDocumentName}
-            collaborationLetterName={darInfo.collaborationLetterName}
-          />
-        )}
         {selectedTab === tabs.fullDAR && (
           <DataAccessRequestApplication
             existingDarsReadOnlyMode={true}

@@ -141,6 +141,8 @@ export default function ERACommons({
                 onClick={deleteNihAccount}
                 onError={displayError}
                 data-cy="era-delete-icon"
+                // Icon-only, so it needs an explicit name rather than one derived from content.
+                aria-label={`Clear ${accountLabel} account link`}
                 style={{
                   cursor: 'pointer',
                   color: '#333',

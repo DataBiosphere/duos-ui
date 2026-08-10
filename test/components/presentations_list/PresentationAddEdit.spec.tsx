@@ -1,7 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
-import '@testing-library/jest-dom/vitest'
-import { render, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 vi.mock('src/components/DuosDatePicker', () => ({
@@ -26,31 +25,41 @@ import { Presentation } from 'src/types/model'
 
 describe('PresentationAddEdit component', () => {
   it('opens add form and enforces validation disabling save then adds', async () => {
-    const user = userEvent.setup()
-    const collected: Presentation[] = []
-    const { container } = render(
+    // delay: null skips the timer between keystrokes; ~138 chars here otherwise times out on CI.
+    const user = userEvent.setup({ delay: null })
+    const closeAction = vi.fn()
+    const onPresentationChange = vi.fn()
+
+    render(
       <PresentationAddEdit
         id={-1}
         presentations={[]}
-        closeAction={vi.fn()}
-        onPresentationChange={(items) => { collected.splice(0, collected.length, ...items) }}
+        closeAction={closeAction}
+        onPresentationChange={onPresentationChange}
       />,
     )
-    await user.type(container.querySelector('#title')!, 'New Title')
-    const dateInput = container.querySelector('#date') as HTMLInputElement
-    fireEvent.change(dateInput, { target: { value: '2024-01-15' } })
-    await user.type(container.querySelector('#url')!, 'https://example.org/new')
-    await user.type(container.querySelector('#authors')!, 'Author One; Author Two')
-    await user.type(container.querySelector('#datasetCitation')!, 'Dataset Y')
-    await user.click(container.querySelector('input[type="radio"]')!)
-    await user.type(container.querySelector('#presenterName')!, 'Presenter X')
-    await user.type(container.querySelector('#presenterEmail')!, 'presenterx@example.org')
-    await user.type(container.querySelector('#event')!, 'Event 2024')
-    await user.type(container.querySelector('#location')!, 'Location Z')
-    await user.type(container.querySelector('#format')!, 'Poster')
-    await user.type(container.querySelector('#access')!, 'Public')
-    await user.click(container.querySelector('.collaborator-form-add-save-button')!)
-    expect(collected).toHaveLength(1)
-    expect(collected[0].title).toBe('New Title')
-  })
+
+    await user.type(screen.getByLabelText(/Presentation Title/i) as HTMLInputElement, 'New Title')
+    await user.type(screen.getByLabelText(/Presentation Date/i) as HTMLInputElement, '2024-01-15')
+    await user.type(screen.getByLabelText(/Presentation URL/i) as HTMLInputElement, 'https://example.org/new')
+    await user.type(screen.getByLabelText(/Authors/i) as HTMLInputElement, 'Author One; Author Two')
+    await user.type(screen.getByLabelText(/Dataset Citation/i) as HTMLInputElement, 'Dataset Y')
+    await user.click(screen.getByRole('radio', { name: 'Yes' }))
+    await user.type(screen.getByLabelText(/Presenter Name/i) as HTMLInputElement, 'Presenter X')
+    await user.type(screen.getByLabelText(/Presenter Email/i) as HTMLInputElement, 'presenterx@example.org')
+    await user.type(screen.getByLabelText(/Event/i) as HTMLInputElement, 'Event 2024')
+    await user.type(screen.getByLabelText(/Location/i) as HTMLInputElement, 'Location Z')
+    await user.type(screen.getByLabelText(/Format/i) as HTMLInputElement, 'Poster')
+    await user.type(screen.getByLabelText(/Access/i) as HTMLInputElement, 'Public')
+    await user.click(screen.getByRole('button', { name: 'Add' }))
+
+    await waitFor(() => {
+      expect(onPresentationChange).toHaveBeenCalledTimes(1)
+    })
+
+    const changedPresentations = onPresentationChange.mock.calls[0][0] as Presentation[]
+    expect(changedPresentations).toHaveLength(1)
+    expect(changedPresentations[0].title).toBe('New Title')
+    expect(closeAction).toHaveBeenCalledTimes(1)
+  }, 15000)
 })

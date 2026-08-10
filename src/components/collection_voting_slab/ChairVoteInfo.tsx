@@ -1,5 +1,4 @@
 import React from 'react'
-import { isNil } from 'src/utils/NodashUtil'
 import VotesPieChart from 'src/components/common/VotesPieChart'
 import { Vote } from 'src/types/model'
 
@@ -7,7 +6,7 @@ const styles = {
   chairVoteInfo: {
     display: 'flex',
     flexDirection: 'column',
-    rowGap: '1.5rem',
+    rowGap: '0.5rem',
     fontWeight: 'bold',
   },
 } as const
@@ -19,7 +18,7 @@ interface ChairVoteInfoProps {
 }
 
 export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }: ChairVoteInfoProps) => {
-  return (isChair && dacVotes.some(v => !isNil(v.vote))) && (
+  return Boolean(isChair) && (
     <div
       style={styles.chairVoteInfo}
       data-cy="chair-vote-info"
@@ -27,12 +26,18 @@ export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }: ChairVot
       <div
         style={{
           backgroundColor: '#FFFFFF',
-          padding: '1% 0',
-          marginTop: '10%',
+          padding: '0.3rem 0',
         }}
       >
         <div
-          style={{ fontSize: 17, color: '#333F52', fontFamily: 'Montserrat' }}
+          style={{
+            fontSize: 13,
+            fontWeight: 800,
+            color: '#333F52',
+            fontFamily: 'Montserrat',
+            textTransform: 'uppercase',
+            letterSpacing: '0.02em',
+          }}
         >
           {adminPage ? 'DAC Votes (summary)' : `My DAC's Votes (summary)`}
         </div>
