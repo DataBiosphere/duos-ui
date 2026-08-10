@@ -68,6 +68,12 @@ interface SigningOfficialTableProps {
   readonly researchers: DuosUser[]
 }
 
+/** Edited list plus the provided list it was derived from, so staleness is impossible by construction. */
+interface ResearcherEdits {
+  source: DuosUser[]
+  researchers: DuosUser[]
+}
+
 type ConfirmationAction = 'issue-library-card' | 'deactivate-library-card' | 'issue-data-submitter' | 'remove-data-submitter'
 
 interface ShowConfirmationModalParams {
@@ -309,18 +315,18 @@ const processResearcherRowData = (
 }
 
 export default function SigningOfficialTable(props: SigningOfficialTableProps): React.JSX.Element {
-  // Local edits layered over the provided list, reset when the prop changes. Adjusting state during
-  // render avoids the cascading re-render an effect-based mirror causes.
-  const [editedResearchers, setEditedResearchers] = useState<DuosUser[] | null>(null)
-  const [providedResearchers, setProvidedResearchers] = useState<DuosUser[]>(props.researchers)
-  if (props.researchers !== providedResearchers) {
-    setProvidedResearchers(props.researchers)
-    setEditedResearchers(null)
-  }
-  const researchers = editedResearchers ?? props.researchers
-  const setResearchers = setEditedResearchers
+  // Local edits carry the provided list they were made against, so an edit is ignored once the prop
+  // changes rather than having to be reset. That keeps the two from drifting out of sync.
+  const [edits, setEdits] = useState<ResearcherEdits | null>(null)
+  const currentEdits = edits?.source === props.researchers ? edits : null
+  const researchers = currentEdits?.researchers ?? props.researchers
+  const setResearchers = (next: DuosUser[]): void =>
+    setEdits({ source: props.researchers, researchers: next })
   const updateResearchers = (update: (current: DuosUser[]) => DuosUser[]): void =>
-    setEditedResearchers(current => update(current ?? props.researchers))
+    setEdits(previous => ({
+      source: props.researchers,
+      researchers: update(previous?.source === props.researchers ? previous.researchers : props.researchers),
+    }))
 
   const [tableSize, setTableSize] = useState<number>(10)
   const [currentPage, setCurrentPage] = useState<number>(1)

@@ -5,6 +5,12 @@ import { Theme } from 'src/libs/theme'
 
 export type MarkdownLoadState = 'loading' | 'loaded' | 'error'
 
+interface MarkdownResult {
+  markdown: string
+  text: string
+  state: Exclude<MarkdownLoadState, 'loading'>
+}
+
 interface ScrollableMarkdownContainerProps {
   markdown: string
   /** Lets callers gate an action on the document being visible — see the DPA attestation flow. */
@@ -52,17 +58,13 @@ const containerStyle: React.CSSProperties = {
 const errorStyle: React.CSSProperties = { color: Theme.palette.error }
 
 export default function ScrollableMarkdownContainer({ markdown, onLoadStateChange }: Readonly<ScrollableMarkdownContainerProps>) {
-  const [text, setText] = useState<string>('')
-  const [loadState, setLoadState] = useState<MarkdownLoadState>('loading')
-  const [requestedMarkdown, setRequestedMarkdown] = useState<string>(markdown)
-
-  // Cleared as the prop changes, so a new document never shows the previous one's body and callers
-  // are never told 'loaded' while a different document is still in flight.
-  if (markdown !== requestedMarkdown) {
-    setRequestedMarkdown(markdown)
-    setText('')
-    setLoadState('loading')
-  }
+  // The result carries the document it belongs to, so a result for a previous `markdown` is ignored
+  // rather than reset. A new document therefore cannot show the previous one's body, and callers
+  // cannot be told 'loaded' while a different document is still in flight.
+  const [result, setResult] = useState<MarkdownResult | null>(null)
+  const currentResult = result?.markdown === markdown ? result : null
+  const loadState: MarkdownLoadState = currentResult?.state ?? 'loading'
+  const text = currentResult?.text ?? ''
 
   useEffect(() => {
     let isMounted = true
@@ -70,15 +72,14 @@ export default function ScrollableMarkdownContainer({ markdown, onLoadStateChang
       try {
         const md = await loadMarkdown(markdown)
         if (isMounted) {
-          setText(md)
-          setLoadState('loaded')
+          setResult({ markdown, text: md, state: 'loaded' })
         }
       }
       catch (error) {
         // Surfaced rather than swallowed silently: callers render this inside consent flows.
         console.error(`Unable to load markdown document ${markdown}:`, error)
         if (isMounted) {
-          setLoadState('error')
+          setResult({ markdown, text: '', state: 'error' })
         }
       }
     }

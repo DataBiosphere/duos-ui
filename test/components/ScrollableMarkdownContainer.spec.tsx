@@ -102,6 +102,38 @@ describe('ScrollableMarkdownContainer', () => {
     expect(onLoadStateChange).toHaveBeenLastCalledWith('loaded')
   })
 
+  it('shows no stale body and reports loading again when the markdown prop changes', async () => {
+    let resolveSecond: (value: Response) => void = () => undefined
+    const secondResponse = new Promise<Response>((resolve) => {
+      resolveSecond = resolve
+    })
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce({ ok: true, text: () => Promise.resolve('First body') } as unknown as Response)
+      .mockReturnValueOnce(secondResponse)
+    const onLoadStateChange = vi.fn()
+
+    let rerender!: ReturnType<typeof render>['rerender']
+    await act(async () => {
+      ;({ rerender } = render(<ScrollableMarkdownContainer markdown="/one.md" onLoadStateChange={onLoadStateChange} />))
+    })
+    expect(screen.getByTestId('markdown-link').textContent).toContain('First body')
+    expect(onLoadStateChange).toHaveBeenLastCalledWith('loaded')
+
+    await act(async () => {
+      rerender(<ScrollableMarkdownContainer markdown="/two.md" onLoadStateChange={onLoadStateChange} />)
+    })
+
+    // The first document's body must not linger while the second is still in flight.
+    expect(screen.getByTestId('markdown-link').textContent).not.toContain('First body')
+    expect(onLoadStateChange).toHaveBeenLastCalledWith('loading')
+
+    await act(async () => {
+      resolveSecond({ ok: true, text: () => Promise.resolve('Second body') } as unknown as Response)
+    })
+    expect(screen.getByTestId('markdown-link').textContent).toContain('Second body')
+    expect(onLoadStateChange).toHaveBeenLastCalledWith('loaded')
+  })
+
   it('reports an error state and explains the gap when the document cannot be loaded', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 404 } as unknown as Response)
     const onLoadStateChange = vi.fn()
