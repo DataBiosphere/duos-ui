@@ -6,7 +6,7 @@ import { BrowserRouter } from 'react-router'
 import {
   usernameCellData,
   emailCellData,
-  permissionsCellData,
+  rolesCellData,
   institutionCellData,
 } from 'src/components/manage_users_table/ManageUsersTableCellData'
 import { UserRole, LibraryCard, InstitutionInterface } from 'src/types/model'
@@ -63,17 +63,17 @@ describe('emailCellData', () => {
   })
 })
 
-describe('permissionsCellData', () => {
+describe('rolesCellData', () => {
   it('shows None when no roles and no library card', () => {
-    const result = permissionsCellData({ userId: 1, roles: [] })
+    const result = rolesCellData({ userId: 1, roles: [] })
     expect(result.data).toBe('None')
     expect(result.id).toBe(1)
-    expect(result.label).toBe('permissions')
+    expect(result.label).toBe('roles')
     expect(result.isComponent).toBe(true)
   })
 
   it('filters out the Researcher role', () => {
-    const result = permissionsCellData({
+    const result = rolesCellData({
       userId: 1,
       roles: [makeRole('Researcher'), makeRole('Admin')],
     })
@@ -82,7 +82,7 @@ describe('permissionsCellData', () => {
   })
 
   it('formats role names by inserting spaces before uppercase letters', () => {
-    const result = permissionsCellData({
+    const result = rolesCellData({
       userId: 1,
       roles: [makeRole('SigningOfficial')],
     })
@@ -90,7 +90,7 @@ describe('permissionsCellData', () => {
   })
 
   it('appends Library Card when a library card is present', () => {
-    const result = permissionsCellData({
+    const result = rolesCellData({
       userId: 1,
       roles: [],
       libraryCard: makeLibraryCard(),
@@ -99,7 +99,7 @@ describe('permissionsCellData', () => {
   })
 
   it('shows None when Researcher is the only role and no library card', () => {
-    const result = permissionsCellData({
+    const result = rolesCellData({
       userId: 1,
       roles: [makeRole('Researcher')],
     })
@@ -107,7 +107,7 @@ describe('permissionsCellData', () => {
   })
 
   it('accepts a custom label', () => {
-    const result = permissionsCellData({ userId: 1, roles: [], label: 'custom-perms' })
+    const result = rolesCellData({ userId: 1, roles: [], label: 'custom-perms' })
     expect(result.label).toBe('custom-perms')
   })
 })

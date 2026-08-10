@@ -26,7 +26,7 @@ interface EmailCellDataParams {
   label?: string
 }
 
-interface PermissionsCellDataParams {
+interface RolesCellDataParams {
   userId: number
   roles: UserRole[]
   libraryCard?: LibraryCard
@@ -82,7 +82,7 @@ export function emailCellData({ userId, email, label = 'email' }: EmailCellDataP
   }
 }
 
-export function permissionsCellData({ userId, roles, libraryCard, label = 'permissions' }: PermissionsCellDataParams): CellData {
+export function rolesCellData({ userId, roles, libraryCard, label = 'roles' }: RolesCellDataParams): CellData {
   const hasLibraryCard = !isNil(libraryCard)
   const roleNames = (roles ?? []).map((role): string => role.name).filter(name => name !== 'Researcher')
   const perms = hasLibraryCard ? roleNames.concat('LibraryCard') : roleNames
@@ -110,7 +110,7 @@ export function institutionCellData({ userId, institution, label = 'insitution' 
 const manageUsersTableCellData = {
   usernameCellData,
   emailCellData,
-  permissionsCellData,
+  rolesCellData,
   institutionCellData,
 }
 
