@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import Chip from '@mui/material/Chip'
+import Paper from '@mui/material/Paper'
+import Typography from '@mui/material/Typography'
 import { isEmpty } from 'src/utils/NodashUtil'
 import { DAR } from 'src/libs/ajax/DAR'
 import { DownloadLink } from 'src/components/DownloadLink'
 import { User } from 'src/libs/ajax/User'
-import { ExternalProfiles, SigningOfficialUserWithData } from 'src/types/model'
+import { DataAccessRequestData, DataUseTerm, ExternalProfiles, SigningOfficialUserWithData } from 'src/types/model'
 import { Theme } from 'src/libs/theme'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 import { formattedLinkedIn, formattedOrcid, formattedThroughBio } from 'src/utils/ExternalProfileUtils'
+import { darInfoDataUseTerms } from 'src/libs/dataUseTranslation'
 
 const factsColumnStyle: React.CSSProperties = {
   display: 'flex',
@@ -55,15 +59,17 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'nowrap',
     flexShrink: 0,
   },
-  approvedDatasetsRow: {
-    marginBottom: '0.4rem',
-  },
   approvedDatasetsText: {
     fontStyle: 'italic',
     fontWeight: 400,
     fontSize: 'clamp(1.05rem, 1.7vw, 1.25rem)',
     color: '#6b6b6b',
-    overflowWrap: 'anywhere',
+    marginLeft: '0.8rem',
+    // Shares the nowrap title row with the project title, so it truncates rather than overflowing.
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    minWidth: 0,
   },
   factsContainer: {
     margin: '0.8rem 1.2rem 1.5rem',
@@ -118,13 +124,64 @@ const styles: Record<string, React.CSSProperties> = {
     fontStyle: 'italic',
     color: '#6b6b6b',
   },
+  narrativeSectionContainer: {
+    margin: '0 1.2rem 1.5rem',
+    padding: '1.2rem 1.8rem',
+    backgroundColor: Theme.palette.background.secondary,
+    borderRadius: '8px',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    columnGap: '2rem',
+    rowGap: '1.2rem',
+    alignItems: 'start',
+  },
+  narrativeTextBox: {
+    backgroundColor: 'white',
+    borderRadius: '6px',
+    padding: '1rem 1.2rem',
+    fontSize: 'clamp(1.2rem, 2vw, 1.5rem)',
+    lineHeight: 1.5,
+    overflowWrap: 'anywhere',
+    maxHeight: '14rem',
+    overflowY: 'auto',
+  },
+  duoTermsBox: {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: '0.7rem',
+    maxHeight: '14rem',
+    overflowY: 'auto',
+    paddingRight: '0.4rem',
+  },
+  scrollableWrapper: {
+    position: 'relative',
+  },
+  scrollFadeOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '2.8rem',
+    pointerEvents: 'none',
+    borderRadius: '0 0 6px 6px',
+  },
+  scrollHintChevron: {
+    position: 'absolute',
+    bottom: '0.1rem',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    fontSize: '1.3rem',
+    lineHeight: 1,
+    color: Theme.palette.primary,
+    fontWeight: 700,
+    pointerEvents: 'none',
+  },
   documentLinkRow: {
     margin: '0 1.2rem 1.5rem',
   },
 }
 
 const appliedTitleRowStyle: React.CSSProperties = { ...styles.containerRow, ...styles.titleRow }
-const appliedApprovedDatasetsRowStyle: React.CSSProperties = { ...styles.containerRow, ...styles.approvedDatasetsRow }
 
 const getApprovedDatasetsText = (approvedDatasets: string[]): string => {
   if (approvedDatasets.length > 0) {
@@ -145,6 +202,10 @@ const getCloudUseText = (cloudComputing: boolean, cloudProvider: string): string
   return isEmpty(cloudProvider) || cloudProvider === '- -' ? 'Yes' : `Yes (${cloudProvider})`
 }
 
+// Terms needing manual review lead their group so they stay visible without scrolling the box.
+const manualReviewFirst = (terms: DataUseTerm[]): DataUseTerm[] =>
+  terms.toSorted((a, b) => Number(b.manualReview ?? false) - Number(a.manualReview ?? false))
+
 const trimmedOrUndefined = (value?: string): string | undefined => {
   const trimmed = value?.trim()
   return trimmed || undefined
@@ -160,6 +221,93 @@ function ProfileFactLink({ label, url, id }: Readonly<{ label: string, url: stri
           ? <a href={validUrl} target="_blank" rel="noopener noreferrer" aria-label={`${label}: ${url}`}>{url}</a>
           : url}
       </span>
+    </div>
+  )
+}
+
+const duoCodeColor = (isPrimary: boolean, manualReview: boolean): string => {
+  if (manualReview) return '#db5454'
+  return isPrimary ? Theme.palette.secondary : '#7ab8e0'
+}
+
+function DuoTermCard({ term, id, isPrimary }: Readonly<{ term: DataUseTerm, id: string, isPrimary: boolean }>) {
+  const manualReview = Boolean(term.manualReview)
+  return (
+    <Paper
+      variant="outlined"
+      className="duo-term-card"
+      id={id}
+      data-manual-review={String(manualReview)}
+      sx={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        columnGap: '0.8rem',
+        padding: '0.6rem 0.9rem',
+        borderColor: isPrimary ? Theme.palette.primary : 'divider',
+      }}
+    >
+      <Chip
+        label={term.code}
+        size="small"
+        sx={{ flexShrink: 0, fontWeight: 700, color: 'white', backgroundColor: duoCodeColor(isPrimary, manualReview) }}
+      />
+      <Typography
+        sx={{
+          fontSize: 'clamp(1.15rem, 1.9vw, 1.4rem)',
+          fontWeight: isPrimary ? 700 : 400,
+          color: manualReview ? '#e57373' : '#333f52',
+          overflowWrap: 'anywhere',
+          minWidth: 0,
+        }}
+      >
+        {term.description}
+      </Typography>
+    </Paper>
+  )
+}
+
+function ScrollableBox({
+  children,
+  boxStyle,
+  className,
+  id,
+  fadeColor,
+  label,
+}: Readonly<{
+  children: React.ReactNode
+  boxStyle: React.CSSProperties
+  className: string
+  id?: string
+  fadeColor: string
+  label: string
+}>) {
+  const contentRef = useRef<HTMLElement>(null)
+  const [isScrollable, setIsScrollable] = useState(false)
+
+  // Intentionally runs on every render (no deps) to re-measure overflow as content changes.
+  // oxlint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const el = contentRef.current
+    if (el) setIsScrollable(el.scrollHeight > el.clientHeight + 1)
+  })
+
+  return (
+    <div style={styles.scrollableWrapper}>
+      <section
+        ref={contentRef}
+        className={className}
+        id={id}
+        style={boxStyle}
+        aria-label={label}
+      >
+        {children}
+      </section>
+      {isScrollable && (
+        <>
+          <div aria-hidden="true" style={{ ...styles.scrollFadeOverlay, background: `linear-gradient(rgba(255, 255, 255, 0), ${fadeColor})` }} />
+          <span aria-hidden="true" className="scroll-hint-chevron" style={styles.scrollHintChevron}>&#9662;</span>
+        </>
+      )}
     </div>
   )
 }
@@ -189,6 +337,7 @@ export interface ReviewHeaderProps {
   collaborationLetterLocation?: string
   collaborationLetterName?: string
   researcherExternalProfiles?: ExternalProfiles
+  darInfo?: Partial<DataAccessRequestData>
 }
 
 export default function ReviewHeader({
@@ -216,6 +365,7 @@ export default function ReviewHeader({
   collaborationLetterLocation,
   collaborationLetterName,
   researcherExternalProfiles,
+  darInfo,
 }: Readonly<ReviewHeaderProps>) {
   const soLookupKey = researcherInstitutionId && signingOfficialEmail
     ? `${researcherInstitutionId}:${signingOfficialEmail}`
@@ -266,6 +416,11 @@ export default function ReviewHeader({
   const soThroughBio = trimmedOrUndefined(soExternalProfiles?.throughBio)
   const soInstitutionalWebsite = trimmedOrUndefined(soExternalProfiles?.institutionalWebsite)
 
+  const { primary, secondary } = darInfoDataUseTerms(darInfo)
+  const primaryDuoTerms = manualReviewFirst(primary)
+  const secondaryDuoTerms = manualReviewFirst(secondary)
+  const hasDuoTerms = !isEmpty(primaryDuoTerms) || !isEmpty(secondaryDuoTerms)
+
   return (
     <>
       {!isLoading && (
@@ -275,11 +430,9 @@ export default function ReviewHeader({
             <span aria-hidden="true" style={styles.titleText}>:</span>
             <span className="collection-project-title" style={styles.projectTitleText} title={projectTitle}>{projectTitle}</span>
             {readOnly && <span className="read-only-tag" style={styles.readOnlyTag}>(read-only)</span>}
-          </div>
-          <div className="secondary-header-row" style={appliedApprovedDatasetsRowStyle}>
-            <p style={styles.approvedDatasetsText}>
+            <span className="approved-datasets-text" style={styles.approvedDatasetsText} title={getApprovedDatasetsText(approvedDatasets)}>
               {getApprovedDatasetsText(approvedDatasets)}
-            </p>
+            </span>
           </div>
           <div className="application-facts-container" style={styles.factsContainer}>
             <div className="facts-column" style={styles.factsColumn} id="researcher-info-column">
@@ -414,6 +567,37 @@ export default function ReviewHeader({
               )}
             </div>
           </div>
+          <div className="narrative-section-container" style={styles.narrativeSectionContainer}>
+            <div className="facts-column" style={styles.factsColumn} id="non-technical-summary-column">
+              <span style={styles.columnHeading}>Non-Technical Summary</span>
+              <ScrollableBox className="non-technical-summary-textbox" boxStyle={styles.narrativeTextBox} fadeColor="white" label="Non-Technical Summary">
+                {darInfo?.nonTechRus || <span style={styles.factValueMuted}>None provided</span>}
+              </ScrollableBox>
+            </div>
+            <div className="facts-column" style={styles.factsColumnBordered} id="rus-narrative-column">
+              <span style={styles.columnHeading}>Research Use Statement (Narrative)</span>
+              <ScrollableBox className="rus-textbox" boxStyle={styles.narrativeTextBox} fadeColor="white" label="Research Use Statement (Narrative)">
+                {darInfo?.rus || <span style={styles.factValueMuted}>None provided</span>}
+              </ScrollableBox>
+            </div>
+            <div className="facts-column" style={styles.factsColumnBordered} id="rus-duo-terms-column">
+              <span style={styles.columnHeading}>Research Use Statement (DUO Terms)</span>
+              <ScrollableBox className="rus-duo-terms-box" boxStyle={styles.duoTermsBox} fadeColor={Theme.palette.background.secondary} label="Research Use Statement (DUO Terms)">
+                {hasDuoTerms
+                  ? (
+                      <>
+                        {primaryDuoTerms.map((term, idx) => (
+                          <DuoTermCard term={term} id={`duo-primary-${idx}-fact`} isPrimary key={`duo-primary-${term.code}-${idx}`} />
+                        ))}
+                        {secondaryDuoTerms.map((term, idx) => (
+                          <DuoTermCard term={term} id={`duo-secondary-${idx}-fact`} isPrimary={false} key={`duo-secondary-${term.code}-${idx}`} />
+                        ))}
+                      </>
+                    )
+                  : <span style={styles.factValueMuted}>None listed</span>}
+              </ScrollableBox>
+            </div>
+          </div>
           {referenceId && collaborationLetterLocation && collaborationLetterName && (
             <div className="document-link-container" style={styles.documentLinkRow}>
               <div id="collab-letter">
@@ -430,9 +614,7 @@ export default function ReviewHeader({
         <div className="header-skeleton-loader">
           <div className="title-row-skeleton" style={appliedTitleRowStyle}>
             <div className="text-placeholder" style={{ width: '35rem', height: '2.5rem', marginBottom: '0.5rem' }}></div>
-          </div>
-          <div style={styles.containerRow}>
-            <div className="text-placeholder" style={{ width: '16rem', height: '3rem', marginBottom: '1.5rem' }}></div>
+            <div className="text-placeholder" style={{ width: '16rem', height: '2.5rem', marginBottom: '0.5rem' }}></div>
           </div>
           <div style={styles.factsContainer}>
             <div className="text-placeholder" style={{ width: '90%', height: '2.4rem' }}></div>

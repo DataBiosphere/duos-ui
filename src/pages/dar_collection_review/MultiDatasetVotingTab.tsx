@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { get, isNil } from 'src/utils/NodashUtil'
 import { Alert } from 'src/components/Alert'
-import AILLMWarningBanner from 'src/components/AILLMWarningBanner'
+import ManualReviewWarningBanner from 'src/components/ManualReviewWarningBanner'
 import MultiDatasetVoteSlab from 'src/components/collection_voting_slab/MultiDatasetVoteSlab'
-import ResearchProposalSlab from 'src/components/collection_voting_slab/ResearchProposalSlab'
 import { User } from 'src/libs/ajax/User'
 import { Bucket } from 'src/utils/BucketUtils'
 import { DarCollection, DataAccessRequestData } from 'src/types/model'
@@ -71,14 +70,6 @@ const styles = {
     flexDirection: 'column' as const,
     rowGap: '35px',
   },
-  title: {
-    color: '#333F52',
-    fontFamily: 'Montserrat',
-    fontSize: 17,
-    fontWeight: 'bold',
-    paddingBottom: '20px',
-    paddingTop: '35px',
-  },
   firstTitle: {
     color: '#333F52',
     fontFamily: 'Montserrat',
@@ -124,8 +115,7 @@ export default function MultiDatasetVotingTab({
 
   return (
     <div style={styles.baseStyle}>
-      <AILLMWarningBanner darInfo={darInfo} />
-      <div style={styles.firstTitle}>Research Use Statement</div>
+      <ManualReviewWarningBanner darInfo={darInfo} />
       {dataAccessApprovalDisabled() && !readOnly && (
         <Alert
           type="danger"
@@ -134,12 +124,7 @@ export default function MultiDatasetVotingTab({
           id="missing_lc"
         />
       )}
-      <ResearchProposalSlab
-        darInfo={darInfo}
-        key="rp-slab"
-        isLoading={isLoading}
-      />
-      <div style={styles.title}>Datasets Requested by Data Use</div>
+      <div style={styles.firstTitle}>Datasets Requested - Grouped by Matching Data Use Terms</div>
       <div style={styles.slabs}>
         <DatasetVoteSlabs
           dataBuckets={buckets}
