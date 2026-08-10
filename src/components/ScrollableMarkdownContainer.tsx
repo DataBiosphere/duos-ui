@@ -22,7 +22,13 @@ const loadMarkdown = (markdown: string): Promise<string> => {
   }
 
   const markdownRequest = fetch(markdown)
-    .then(res => res.text())
+    .then((res) => {
+      // Without this an error page would be cached as the document body for the rest of the session.
+      if (!res.ok) {
+        throw new Error(`Failed to load ${markdown}: ${res.status}`)
+      }
+      return res.text()
+    })
     .catch((error: unknown) => {
       markdownCache.delete(markdown)
       throw error
@@ -37,9 +43,15 @@ export default function ScrollableMarkdownContainer({ markdown }: Readonly<Scrol
   useEffect(() => {
     let isMounted = true
     const init = async (): Promise<void> => {
-      const md = await loadMarkdown(markdown)
-      if (isMounted) {
-        setText(md)
+      try {
+        const md = await loadMarkdown(markdown)
+        if (isMounted) {
+          setText(md)
+        }
+      }
+      catch (error) {
+        // Surfaced rather than swallowed silently: callers render this inside consent flows.
+        console.error(`Unable to load markdown document ${markdown}:`, error)
       }
     }
     void init()

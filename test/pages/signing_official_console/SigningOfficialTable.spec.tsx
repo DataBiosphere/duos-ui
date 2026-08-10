@@ -121,7 +121,7 @@ const rowFor = async (name: string): Promise<HTMLElement> => {
 describe('SigningOfficialTable', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ text: vi.fn().mockResolvedValue('Data Provider Agreement') }))
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: vi.fn().mockResolvedValue('Data Provider Agreement') }))
     let appRoot = document.getElementById('root')
     if (!appRoot) {
       appRoot = document.createElement('div')
@@ -139,7 +139,7 @@ describe('SigningOfficialTable', () => {
 
     const row = await rowFor(mockResearcher1.displayName)
     expect(within(row).getAllByText('Inactive')).toHaveLength(2)
-    expect(within(row).getByRole('switch', { name: 'Access Status' })).not.toBeChecked()
+    expect(within(row).getByRole('switch', { name: /^Access Status/ })).not.toBeChecked()
   })
 
   it('shows Active status and checked toggle for researcher with a library card', async () => {
@@ -147,14 +147,22 @@ describe('SigningOfficialTable', () => {
 
     const row = await rowFor(mockResearcher3.displayName)
     expect(within(row).getByText('Active')).toBeInTheDocument()
-    expect(within(row).getByRole('switch', { name: 'Access Status' })).toBeChecked()
+    expect(within(row).getByRole('switch', { name: /^Access Status/ })).toBeChecked()
   })
 
   it('shows separate Access Status and Submitter Status notices', async () => {
     renderTable()
 
     expect(await screen.findAllByText('Access Status', { selector: 'b' })).toHaveLength(2)
-    expect(screen.getByText('Submitter Status', { selector: 'b' })).toBeTruthy()
+    expect(screen.getByText('Submitter Status', { selector: 'b' })).toBeInTheDocument()
+  })
+
+  it('names the switches per row so screen reader users can tell the rows apart', async () => {
+    renderTable()
+
+    const row = await rowFor(mockResearcher1.displayName)
+    expect(within(row).getByRole('switch', { name: `Access Status for ${mockResearcher1.displayName}` })).toBeInTheDocument()
+    expect(within(row).getByRole('switch', { name: `Submitter Status for ${mockResearcher1.displayName}` })).toBeInTheDocument()
   })
 
   it('displays an error message when activating a researcher fails', async () => {
@@ -165,7 +173,7 @@ describe('SigningOfficialTable', () => {
     renderTable()
 
     const row = await rowFor(mockResearcher1.displayName)
-    fireEvent.click(within(row).getByRole('switch', { name: 'Access Status' }))
+    fireEvent.click(within(row).getByRole('switch', { name: /^Access Status/ }))
     fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }))
 
     await waitFor(() => {
@@ -174,7 +182,7 @@ describe('SigningOfficialTable', () => {
 
     const updatedRow = await rowFor(mockResearcher1.displayName)
     expect(within(updatedRow).getAllByText('Inactive')).toHaveLength(2)
-    expect(within(updatedRow).getByRole('switch', { name: 'Access Status' })).not.toBeChecked()
+    expect(within(updatedRow).getByRole('switch', { name: /^Access Status/ })).not.toBeChecked()
   })
 
   it('displays a success message when activating a researcher succeeds', async () => {
@@ -189,7 +197,7 @@ describe('SigningOfficialTable', () => {
     renderTable()
 
     const row = await rowFor(mockResearcher1.displayName)
-    fireEvent.click(within(row).getByRole('switch', { name: 'Access Status' }))
+    fireEvent.click(within(row).getByRole('switch', { name: /^Access Status/ }))
     fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }))
 
     await waitFor(() => {
@@ -198,7 +206,7 @@ describe('SigningOfficialTable', () => {
 
     const updatedRow = await rowFor(mockResearcher1.displayName)
     expect(within(updatedRow).getByText('Active')).toBeInTheDocument()
-    expect(within(updatedRow).getByRole('switch', { name: 'Access Status' })).toBeChecked()
+    expect(within(updatedRow).getByRole('switch', { name: /^Access Status/ })).toBeChecked()
   })
 
   it('displays a success message when deactivating a researcher succeeds', async () => {
@@ -207,7 +215,7 @@ describe('SigningOfficialTable', () => {
     renderTable()
 
     const row = await rowFor(mockResearcher3.displayName)
-    fireEvent.click(within(row).getByRole('switch', { name: 'Access Status' }))
+    fireEvent.click(within(row).getByRole('switch', { name: /^Access Status/ }))
     fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }))
 
     await waitFor(() => {
@@ -218,7 +226,7 @@ describe('SigningOfficialTable', () => {
 
     const updatedRow = await rowFor(mockResearcher3.displayName)
     expect(within(updatedRow).getAllByText('Inactive')).toHaveLength(2)
-    expect(within(updatedRow).getByRole('switch', { name: 'Access Status' })).not.toBeChecked()
+    expect(within(updatedRow).getByRole('switch', { name: /^Access Status/ })).not.toBeChecked()
   })
 
   it('displays an error message when deactivating a researcher fails', async () => {
@@ -229,7 +237,7 @@ describe('SigningOfficialTable', () => {
     renderTable()
 
     const row = await rowFor(mockResearcher3.displayName)
-    fireEvent.click(within(row).getByRole('switch', { name: 'Access Status' }))
+    fireEvent.click(within(row).getByRole('switch', { name: /^Access Status/ }))
     fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }))
 
     await waitFor(() => {
@@ -240,21 +248,21 @@ describe('SigningOfficialTable', () => {
 
     const updatedRow = await rowFor(mockResearcher3.displayName)
     expect(within(updatedRow).getByText('Active')).toBeInTheDocument()
-    expect(within(updatedRow).getByRole('switch', { name: 'Access Status' })).toBeChecked()
+    expect(within(updatedRow).getByRole('switch', { name: /^Access Status/ })).toBeChecked()
   })
 
   it('does not change researcher status when confirmation is cancelled', async () => {
     renderTable()
 
     const row = await rowFor(mockResearcher1.displayName)
-    fireEvent.click(within(row).getByRole('switch', { name: 'Access Status' }))
+    fireEvent.click(within(row).getByRole('switch', { name: /^Access Status/ }))
     fireEvent.click(await screen.findByRole('button', { name: 'Cancel' }))
 
     expect(LibraryCardApi.createLibraryCard).not.toHaveBeenCalled()
 
     const updatedRow = await rowFor(mockResearcher1.displayName)
     expect(within(updatedRow).getAllByText('Inactive')).toHaveLength(2)
-    expect(within(updatedRow).getByRole('switch', { name: 'Access Status' })).not.toBeChecked()
+    expect(within(updatedRow).getByRole('switch', { name: /^Access Status/ })).not.toBeChecked()
   })
 
   it('issues and removes Data Submitter status from the table', async () => {
@@ -265,14 +273,16 @@ describe('SigningOfficialTable', () => {
     renderTable()
 
     let row = await rowFor(mockResearcher1.displayName)
-    fireEvent.click(within(row).getByRole('switch', { name: 'Submitter Status' }))
+    fireEvent.click(within(row).getByRole('switch', { name: /^Submitter Status/ }))
     expect(await screen.findByText('Issue Data Submitter')).toBeInTheDocument()
+    // The SO is attesting to the agreement, so it has to actually be in the modal.
+    expect(await screen.findByText('Data Provider Agreement')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
     await waitFor(() => expect(User.addRoleToUser).toHaveBeenCalledWith(mockResearcher1.userId, 8))
 
     row = await rowFor(mockResearcher1.displayName)
-    expect(within(row).getByRole('switch', { name: 'Submitter Status' })).toBeChecked()
-    fireEvent.click(within(row).getByRole('switch', { name: 'Submitter Status' }))
+    expect(within(row).getByRole('switch', { name: /^Submitter Status/ })).toBeChecked()
+    fireEvent.click(within(row).getByRole('switch', { name: /^Submitter Status/ }))
     fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }))
     await waitFor(() => expect(User.deleteRoleFromUser).toHaveBeenCalledWith(mockResearcher1.userId, 8))
   })

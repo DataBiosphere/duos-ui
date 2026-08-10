@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { Switch } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { Styles, Theme } from 'src/libs/theme'
@@ -6,7 +6,7 @@ import { cloneDeep, findIndex, isNil } from 'src/utils/NodashUtil'
 import SimpleTable from 'src/components/SimpleTable'
 import PaginationBar from 'src/components/PaginationBar'
 import SearchBar from 'src/components/SearchBar'
-import { getSearchFilterFunctions, hasDataSubmitterRole, Notifications, recalculateVisibleTable, ROLES, searchOnFilteredList } from 'src/libs/utils'
+import { calcTablePageCount, calcVisibleWindow, getSearchFilterFunctions, hasDataSubmitterRole, Notifications, ROLES } from 'src/libs/utils'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import { LibraryCard } from 'src/libs/ajax/LibraryCard'
 import { User } from 'src/libs/ajax/User'
@@ -24,12 +24,30 @@ const statusNoticeStyle: React.CSSProperties = {
   gap: '1rem',
   flex: 1,
   padding: '1.5rem',
-  border: '1px solid #b9d5ec',
+  border: `1px solid ${Theme.palette.background.secondary}`,
   borderRadius: '1.2rem',
-  backgroundColor: '#eaf3fb',
-  color: '#4e6278',
+  backgroundColor: Theme.palette.background.secondary,
+  color: Theme.palette.primary,
   lineHeight: 1.45,
 }
+
+const noticeIconSx = { color: Theme.palette.secondary, fontSize: '2.8rem', flex: '0 0 auto', marginTop: '0.1rem' }
+const noticeGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  gap: '1.5rem',
+  margin: '1.5rem 0 0 2rem',
+}
+
+// Hoisted so each row does not allocate a new sx/style object, which MUI would re-serialise per render.
+const statusSwitchSx = {
+  '& .MuiSwitch-switchBase.Mui-checked': { color: Theme.palette.success },
+  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: Theme.palette.success },
+}
+const statusCellStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '0.5rem' }
+const statusLabelBase: React.CSSProperties = { fontWeight: 600, fontSize: '1.45rem', fontFamily: 'Montserrat' }
+const activeStatusLabelStyle: React.CSSProperties = { ...statusLabelBase, color: Theme.palette.success }
+const inactiveStatusLabelStyle: React.CSSProperties = { ...statusLabelBase, color: Theme.legacy.color }
 
 type TableRowId = number | string
 
@@ -50,11 +68,46 @@ interface SigningOfficialTableProps {
   readonly researchers: DuosUser[]
 }
 
+type ConfirmationAction = 'issue-library-card' | 'deactivate-library-card' | 'issue-data-submitter' | 'remove-data-submitter'
+
 interface ShowConfirmationModalParams {
   card: SelectedLibraryCard
-  message: React.ReactNode
-  title: string
-  action: 'issue-library-card' | 'deactivate-library-card' | 'issue-data-submitter' | 'remove-data-submitter'
+  action: ConfirmationAction
+}
+
+// Title and body are derived from the action at render time rather than parked in state as JSX.
+const confirmationTitles: Record<ConfirmationAction, string> = {
+  'issue-library-card': 'Activate Researcher',
+  'deactivate-library-card': 'Deactivate Researcher',
+  'issue-data-submitter': 'Issue Data Submitter',
+  'remove-data-submitter': 'Remove Data Submitter',
+}
+
+// The agreement bodies need more room than a plain confirmation prompt.
+const isAgreementAction = (action: ConfirmationAction): boolean =>
+  action === 'issue-library-card' || action === 'issue-data-submitter'
+
+const ConfirmationMessage = ({ action }: Readonly<{ action: ConfirmationAction }>): React.JSX.Element => {
+  switch (action) {
+    case 'issue-library-card':
+      return (
+        <div>
+          <LibraryCardAgreementTermsDownload />
+          {'By clicking \'Confirm\' you agree to the terms of the agreements above for this user. Are you sure you want to activate this researcher?'}
+        </div>
+      )
+    case 'deactivate-library-card':
+      return <div>Are you sure you want to deactivate this researcher?</div>
+    case 'issue-data-submitter':
+      return (
+        <div>
+          <ScrollableMarkdownContainer markdown={DpaMarkdown} />
+          Are you sure you want to make this person a Data Submitter?
+        </div>
+      )
+    default:
+      return <div>Are you sure you want to remove this Data Submitter?</div>
+  }
 }
 
 interface LibraryCardCellProps {
@@ -62,7 +115,7 @@ interface LibraryCardCellProps {
   showConfirmationModal: (params: ShowConfirmationModalParams) => void
 }
 
-interface DataSubmitterCellProps extends LibraryCardCellProps {}
+type DataSubmitterCellProps = LibraryCardCellProps
 
 interface TableCell {
   data: React.ReactNode
@@ -104,6 +157,29 @@ const columnHeaderFormat = {
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers
 
+const researcherName = (researcher: DuosUser): string => researcher.displayName ?? researcher.email
+
+/**
+ * The Submitter toggle reads `roles`, so the change is applied locally rather than relying on the
+ * response to carry it — these endpoints may answer with an empty body.
+ */
+const applyDataSubmitterRole = (
+  researchers: DuosUser[],
+  userId: number,
+  shouldIssue: boolean,
+  updatedUser?: DuosUser,
+): DuosUser[] =>
+  researchers.map((researcher) => {
+    if (researcher.userId !== userId) {
+      return researcher
+    }
+    const existingRoles = researcher.roles ?? []
+    const roles = shouldIssue
+      ? [...existingRoles, { roleId: ROLES.dataSubmitter.roleId, name: ROLES.dataSubmitter.name, userId }]
+      : existingRoles.filter(role => role.roleId !== ROLES.dataSubmitter.roleId)
+    return { ...researcher, ...updatedUser, roles }
+  })
+
 const LibraryCardCell = ({
   researcher,
   showConfirmationModal,
@@ -114,12 +190,7 @@ const LibraryCardCell = ({
 
   const handleToggle = (): void => {
     if (isActive) {
-      showConfirmationModal({
-        card: card,
-        message: 'Are you sure you want to deactivate this researcher?',
-        title: 'Deactivate Researcher',
-        action: 'deactivate-library-card',
-      })
+      showConfirmationModal({ card, action: 'deactivate-library-card' })
     }
     else {
       showConfirmationModal({
@@ -128,13 +199,6 @@ const LibraryCardCell = ({
           userEmail: researcher.email,
           userName: researcher.displayName,
         },
-        message: (
-          <div>
-            <LibraryCardAgreementTermsDownload />
-            {'By clicking \'Confirm\' you agree to the terms of the agreements above for this user. Are you sure you want to activate this researcher?'}
-          </div>
-        ),
-        title: 'Activate Researcher',
         action: 'issue-library-card',
       })
     }
@@ -146,28 +210,16 @@ const LibraryCardCell = ({
     style: {},
     label: 'lc-status',
     data: (
-      <div
-        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-        key={`lc-status-cell-${id}`}
-      >
+      <div style={statusCellStyle} key={`lc-status-cell-${id}`}>
         <Switch
-          slotProps={{ input: { 'aria-label': 'Access Status' } }}
+          // Named per row so screen reader users can tell the rows apart.
+          slotProps={{ input: { 'aria-label': `Access Status for ${researcherName(researcher)}` } }}
           checked={isActive}
           onChange={handleToggle}
           size="small"
-          sx={{
-            '& .MuiSwitch-switchBase.Mui-checked': { color: Theme.palette.success },
-            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: Theme.palette.success },
-          }}
+          sx={statusSwitchSx}
         />
-        <span
-          style={{
-            color: isActive ? Theme.palette.success : 'rgb(128, 128, 128)',
-            fontWeight: 600,
-            fontSize: '1.45rem',
-            fontFamily: 'Montserrat',
-          }}
-        >
+        <span style={isActive ? activeStatusLabelStyle : inactiveStatusLabelStyle}>
           {isActive ? 'Active' : 'Inactive'}
         </span>
       </div>
@@ -185,25 +237,19 @@ const DataSubmitterCell = ({ researcher, showConfirmationModal }: DataSubmitterC
     style: {},
     label: 'data-submitter-status',
     data: (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} key={`data-submitter-status-cell-${id}`}>
+      <div style={statusCellStyle} key={`data-submitter-status-cell-${id}`}>
         <Switch
-          slotProps={{ input: { 'aria-label': 'Submitter Status' } }}
+          // Named per row so screen reader users can tell the rows apart.
+          slotProps={{ input: { 'aria-label': `Submitter Status for ${researcherName(researcher)}` } }}
           checked={isActive}
           onChange={() => showConfirmationModal({
             card: { userId: researcher.userId, userEmail: researcher.email, userName: researcher.displayName },
-            message: isActive
-              ? 'Are you sure you want to remove this Data Submitter?'
-              : <div><ScrollableMarkdownContainer markdown={DpaMarkdown} />Are you sure you want to make this person a Data Submitter?</div>,
-            title: isActive ? 'Remove Data Submitter' : 'Issue Data Submitter',
             action: isActive ? 'remove-data-submitter' : 'issue-data-submitter',
           })}
           size="small"
-          sx={{
-            '& .MuiSwitch-switchBase.Mui-checked': { color: Theme.palette.success },
-            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: Theme.palette.success },
-          }}
+          sx={statusSwitchSx}
         />
-        <span style={{ color: isActive ? Theme.palette.success : 'rgb(128, 128, 128)', fontWeight: 600, fontSize: '1.45rem', fontFamily: 'Montserrat' }}>
+        <span style={isActive ? activeStatusLabelStyle : inactiveStatusLabelStyle}>
           {isActive ? 'Active' : 'Inactive'}
         </span>
       </div>
@@ -231,19 +277,52 @@ const displayNameCell = (displayName: string, id: TableRowId): TableCell => {
   }
 }
 
+const columnHeaderData = [
+  columnHeaderFormat.name,
+  columnHeaderFormat.email,
+  columnHeaderFormat.libraryCard,
+  columnHeaderFormat.dataSubmitter,
+  // columnHeaderFormat.activeDARs -> add this back in when back-end supports this
+]
+
+const processResearcherRowData = (
+  researchers: DuosUser[],
+  showConfirmationModal: (params: ShowConfirmationModalParams) => void,
+): TableCell[][] => {
+  return researchers.map((researcher) => {
+    const { displayName } = researcher
+    const email = researcher.email
+    const id = researcher.userId
+    return [
+      displayNameCell(displayName, id),
+      emailCell(email, id),
+      LibraryCardCell({ researcher, showConfirmationModal }),
+      DataSubmitterCell({ researcher, showConfirmationModal }),
+      // activeDarCountCell(count, id)
+    ]
+  })
+}
+
 export default function SigningOfficialTable(props: SigningOfficialTableProps): React.JSX.Element {
-  const [researchers, setResearchers] = useState<DuosUser[]>(props.researchers)
+  // Local edits layered over the provided list, reset when the prop changes. Adjusting state during
+  // render avoids the cascading re-render an effect-based mirror causes.
+  const [editedResearchers, setEditedResearchers] = useState<DuosUser[] | null>(null)
+  const [providedResearchers, setProvidedResearchers] = useState<DuosUser[]>(props.researchers)
+  if (props.researchers !== providedResearchers) {
+    setProvidedResearchers(props.researchers)
+    setEditedResearchers(null)
+  }
+  const researchers = editedResearchers ?? props.researchers
+  const setResearchers = setEditedResearchers
+  const updateResearchers = (update: (current: DuosUser[]) => DuosUser[]): void =>
+    setEditedResearchers(current => update(current ?? props.researchers))
+
   const [tableSize, setTableSize] = useState<number>(10)
   const [currentPage, setCurrentPage] = useState<number>(1)
-  const [pageCount, setPageCount] = useState<number>(1)
-  const [filteredResearchers, setFilteredResearchers] = useState<DuosUser[]>([])
-  const [visibleResearchers, setVisibleResearchers] = useState<DuosUser[]>([])
   const [selectedCard, setSelectedCard] = useState<SelectedLibraryCard | null>(null)
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
-  const [confirmationModalMsg, setConfirmationModalMsg] = useState<React.ReactNode>('')
-  const [confirmationTitle, setConfirmationTitle] = useState<string>('')
-  const [confirmationAction, setConfirmationAction] = useState<ShowConfirmationModalParams['action']>('deactivate-library-card')
+  const [confirmationAction, setConfirmationAction] = useState<ConfirmationAction>('deactivate-library-card')
   const { signingOfficial, isLoading } = props
 
   // Search function for SearchBar component, function defined in utils
@@ -252,48 +331,26 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
     setCurrentPage(1)
   }, [])
 
-  const showConfirmationModal = ({ card, message, title, action }: ShowConfirmationModalParams): void => {
+  // Stable so the memoised row data below is not rebuilt on every render.
+  const showConfirmationModal = useCallback(({ card, action }: ShowConfirmationModalParams): void => {
     setSelectedCard(card)
     setShowConfirmation(true)
-    setConfirmationModalMsg(message)
-    setConfirmationTitle(title)
     setConfirmationAction(action)
-  }
+  }, [])
 
-  // init hook, need to make ajax calls here
-  useEffect(() => {
-    const init = async (): Promise<void> => {
-      try {
-        setResearchers(props.researchers)
-      }
-      catch {
-        Notifications.showError({ text: 'Failed to initialize researcher table' })
-      }
-    }
-    void init()
-  }, [props.researchers])
-
-  useEffect(() => {
-    searchOnFilteredList(
-      searchText,
-      researchers,
-      researcherFilterFunction,
-      setFilteredResearchers,
-    )
+  // Filtering and paging are derived, so a keystroke costs one render rather than a cascade of effects.
+  const filteredResearchers = useMemo(() => {
+    const terms = searchText.split(' ').filter(term => term.length > 0)
+    return terms.reduce((list, term) => researcherFilterFunction(term, list), researchers)
   }, [researchers, searchText])
 
-  useEffect(() => {
-    recalculateVisibleTable({
-      tableSize, pageCount,
-      filteredList: filteredResearchers,
-      currentPage,
-      setPageCount,
-      setCurrentPage,
-      setVisibleList: setVisibleResearchers,
-    }).catch(() => {
-      Notifications.showError({ text: 'Failed to update researcher table' })
-    })
-  }, [tableSize, pageCount, filteredResearchers, currentPage])
+  const pageCount = useMemo(() => calcTablePageCount(tableSize, filteredResearchers), [tableSize, filteredResearchers])
+  // Clamped during render rather than corrected by an effect that also depends on what it sets.
+  const visiblePage = Math.min(currentPage, pageCount)
+  const visibleResearchers = useMemo(
+    () => calcVisibleWindow(visiblePage, tableSize, filteredResearchers),
+    [visiblePage, tableSize, filteredResearchers],
+  )
 
   const goToPage = useCallback((value: number) => {
     if (value >= 1 && value <= pageCount) {
@@ -310,41 +367,18 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
   const paginationBar = (
     <PaginationBar
       pageCount={pageCount}
-      currentPage={currentPage}
+      currentPage={visiblePage}
       tableSize={tableSize}
       goToPage={goToPage}
       changeTableSize={changeTableSize}
     />
   )
 
-  const processResearcherRowData = (researchers: DuosUser[]): TableCell[][] => {
-    return researchers.map((researcher) => {
-      const { displayName } = researcher
-      const email = researcher.email
-      const id = researcher.userId
-      return [
-        displayNameCell(displayName, id),
-        emailCell(email, id),
-        LibraryCardCell({
-          researcher,
-          showConfirmationModal,
-        }),
-        DataSubmitterCell({
-          researcher,
-          showConfirmationModal,
-        }),
-        // activeDarCountCell(count, id)
-      ]
-    })
-  }
-
-  const columnHeaderData = [
-    columnHeaderFormat.name,
-    columnHeaderFormat.email,
-    columnHeaderFormat.libraryCard,
-    columnHeaderFormat.dataSubmitter,
-    // columnHeaderFormat.activeDARs -> add this back in when back-end supports this
-  ]
+  // Memoised so a re-render that changes neither the visible rows nor the handler reuses the cells.
+  const rowData = useMemo(
+    () => processResearcherRowData(visibleResearchers, showConfirmationModal),
+    [visibleResearchers, showConfirmationModal],
+  )
 
   const issueLibraryCards = async (
     cards: LibraryCardRequest[],
@@ -445,12 +479,23 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
       const updatedUser = shouldIssue
         ? await User.addRoleToUser(userId, ROLES.dataSubmitter.roleId)
         : await User.deleteRoleFromUser(userId, ROLES.dataSubmitter.roleId)
-      setResearchers(researchers.map(researcher => researcher.userId === userId ? { ...researcher, ...updatedUser } : researcher))
+      updateResearchers(current => applyDataSubmitterRole(current, userId, shouldIssue, updatedUser))
       setShowConfirmation(false)
       Notifications.showSuccess({ text: `${shouldIssue ? 'Issued' : 'Removed'} ${messageName} ${shouldIssue ? 'as' : 'as a'} Data Submitter` })
     }
     catch (error) {
       Notifications.showError({ text: `Error ${shouldIssue ? 'issuing' : 'removing'} ${messageName} as a Data Submitter: ${extractError(error)}` })
+    }
+  }
+
+  const handleConfirm = (card: SelectedLibraryCard): Promise<void> => {
+    switch (confirmationAction) {
+      case 'issue-library-card':
+        return issueLibraryCards([card], researchers)
+      case 'deactivate-library-card':
+        return deactivateLibraryCard(card, researchers)
+      default:
+        return updateDataSubmitter(card, confirmationAction === 'issue-data-submitter')
     }
   }
 
@@ -462,16 +507,16 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
             title="Researcher Status"
             description="Use the table below to change the active status of your institution's researchers."
           />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '1.5rem', margin: '1.5rem 0 0 2em' }}>
+          <div style={noticeGridStyle}>
             <div style={statusNoticeStyle}>
-              <InfoOutlinedIcon aria-hidden="true" sx={{ color: '#0872b9', fontSize: '2.8rem', flex: '0 0 auto', marginTop: '0.1rem' }} />
+              <InfoOutlinedIcon aria-hidden="true" sx={noticeIconSx} />
               <div>
                 Deactivating a researcher&apos;s <b>Access Status</b> will disable them from submitting access requests, and suspend their access to any data approved by a DAC in DUOS.<br />
                 Researchers who log into DUOS with a valid institutional email will automatically be Active for <b>Access Status</b>, since subsequent requests will require Signing Official involvement.
               </div>
             </div>
             <div style={statusNoticeStyle}>
-              <InfoOutlinedIcon aria-hidden="true" sx={{ color: '#0872b9', fontSize: '2.8rem', flex: '0 0 auto', marginTop: '0.1rem' }} />
+              <InfoOutlinedIcon aria-hidden="true" sx={noticeIconSx} />
               <div>
                 By issuing <b>Submitter Status</b>, you are authorizing researchers from your institution to register and share data in DUOS. Data registered in DUOS can be either <b>Open Access</b> or <b>Controlled Access</b>.<br /><br />
                 Controlled access data registered in DUOS can be managed by a DAC within DUOS or by an external system that the dataset information in DUOS links to. To register controlled access data with a DAC in DUOS, the data submitter may need to provide the receiving DAC with documentation and/or agreements. These agreements can be submitted during the DUOS registration process or handled externally through direct communication with the DAC. DUOS is not responsible for the content, review, offer, or acceptance of such agreements.
@@ -486,7 +531,7 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
 
       <SimpleTable
         isLoading={isLoading}
-        rowData={processResearcherRowData(visibleResearchers)}
+        rowData={rowData}
         columnHeaders={columnHeaderData}
         styles={styles}
         tableSize={tableSize}
@@ -496,17 +541,12 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
         <ConfirmationModal
           showConfirmation={showConfirmation}
           closeConfirmation={() => setShowConfirmation(false)}
-          title={confirmationTitle}
-          // The issue modal requires a larger view than normal
-          styleOverride={confirmationAction === 'issue-library-card' || confirmationAction === 'issue-data-submitter' ? { minWidth: '725px', minHeight: '475px' } : {}}
-          message={<div>{confirmationModalMsg}</div>}
+          title={confirmationTitles[confirmationAction]}
+          // The agreement modals require a larger view than a plain confirmation prompt
+          styleOverride={isAgreementAction(confirmationAction) ? { minWidth: '725px', minHeight: '475px' } : {}}
+          message={<ConfirmationMessage action={confirmationAction} />}
           header={`${selectedCard.userName ?? selectedCard.userEmail} - `}
-          onConfirm={() =>
-            confirmationAction === 'issue-library-card'
-              ? issueLibraryCards([selectedCard], researchers)
-              : confirmationAction === 'deactivate-library-card'
-                ? deactivateLibraryCard(selectedCard, researchers)
-                : updateDataSubmitter(selectedCard, confirmationAction === 'issue-data-submitter')}
+          onConfirm={() => handleConfirm(selectedCard)}
         />
       )}
     </div>

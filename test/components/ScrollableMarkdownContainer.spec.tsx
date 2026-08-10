@@ -23,6 +23,7 @@ vi.mock('dompurify', () => ({
 
 const mockFetch = (content: string) => {
   global.fetch = vi.fn().mockResolvedValue({
+    ok: true,
     text: () => Promise.resolve(content),
   } as unknown as Response)
 }
