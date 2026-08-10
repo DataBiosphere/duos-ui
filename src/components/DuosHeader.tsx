@@ -86,7 +86,6 @@ export const headerTabsConfig: Tab[] = [
       { label: 'Researcher Status', link: '/signing_official_console/library_cards' },
       { label: 'Data Access Requests', link: '/signing_official_console/dar_requests' },
       { label: 'DAR Approvals', link: '/signing_official_console/dar_approvals' },
-      { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
       { label: 'My Datasets', link: '/datalibrary/myinstitution' },
       { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations' },
     ],

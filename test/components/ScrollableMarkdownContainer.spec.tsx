@@ -81,6 +81,19 @@ describe('ScrollableMarkdownContainer', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(2)
   })
 
+  it('reuses the loaded markdown when the same document is reopened', async () => {
+    mockFetch('Cached content')
+
+    const first = render(<ScrollableMarkdownContainer markdown="/cached.md" />)
+    await act(async () => undefined)
+    first.unmount()
+
+    render(<ScrollableMarkdownContainer markdown="/cached.md" />)
+    await act(async () => undefined)
+
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+  })
+
   it('renders links with target="_blank" via the a component override', async () => {
     mockFetch('[Link](https://example.com)')
 

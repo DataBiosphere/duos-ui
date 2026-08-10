@@ -13,16 +13,39 @@ const MarkdownLink = (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
 
 const markdownComponents = { a: MarkdownLink }
 
+const markdownCache = new Map<string, Promise<string>>()
+
+const loadMarkdown = (markdown: string): Promise<string> => {
+  const cachedMarkdown = markdownCache.get(markdown)
+  if (cachedMarkdown) {
+    return cachedMarkdown
+  }
+
+  const markdownRequest = fetch(markdown)
+    .then(res => res.text())
+    .catch((error: unknown) => {
+      markdownCache.delete(markdown)
+      throw error
+    })
+  markdownCache.set(markdown, markdownRequest)
+  return markdownRequest
+}
+
 export default function ScrollableMarkdownContainer({ markdown }: Readonly<ScrollableMarkdownContainerProps>) {
   const [text, setText] = useState<string>('')
 
   useEffect(() => {
-    const init = async () => {
-      const res = await fetch(markdown)
-      const md = await res.text()
-      setText(md)
+    let isMounted = true
+    const init = async (): Promise<void> => {
+      const md = await loadMarkdown(markdown)
+      if (isMounted) {
+        setText(md)
+      }
     }
-    init()
+    void init()
+    return () => {
+      isMounted = false
+    }
   }, [markdown])
 
   const generateContent = (markdownText: string): React.ReactElement => (

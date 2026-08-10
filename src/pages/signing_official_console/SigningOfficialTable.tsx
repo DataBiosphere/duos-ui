@@ -1,19 +1,35 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Switch } from '@mui/material'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { Styles, Theme } from 'src/libs/theme'
 import { cloneDeep, findIndex, isNil } from 'src/utils/NodashUtil'
 import SimpleTable from 'src/components/SimpleTable'
 import PaginationBar from 'src/components/PaginationBar'
 import SearchBar from 'src/components/SearchBar'
-import { getSearchFilterFunctions, Notifications, recalculateVisibleTable, searchOnFilteredList } from 'src/libs/utils'
+import { getSearchFilterFunctions, hasDataSubmitterRole, Notifications, recalculateVisibleTable, ROLES, searchOnFilteredList } from 'src/libs/utils'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import { LibraryCard } from 'src/libs/ajax/LibraryCard'
-import { confirmModalType } from 'src/libs/libraryCardUtils'
+import { User } from 'src/libs/ajax/User'
 import { LibraryCardAgreementTermsDownload } from 'src/components/LibraryCardAgreementTermsDownload'
 import { processLibraryCards } from 'src/utils/LibraryCardUtils'
 import { extractError } from 'src/utils/ErrorUtils'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { DuosUser, DuosUserWithInstitutionId, LibraryCard as LibraryCardModel } from 'src/types/model'
+import ScrollableMarkdownContainer from 'src/components/ScrollableMarkdownContainer'
+
+const DpaMarkdown = new URL('../../assets/DPA.md', import.meta.url).href
+
+const statusNoticeStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: '1rem',
+  flex: 1,
+  padding: '1.5rem',
+  border: '1px solid #b9d5ec',
+  borderRadius: '1.2rem',
+  backgroundColor: '#eaf3fb',
+  color: '#4e6278',
+  lineHeight: 1.45,
+}
 
 type TableRowId = number | string
 
@@ -38,13 +54,15 @@ interface ShowConfirmationModalParams {
   card: SelectedLibraryCard
   message: React.ReactNode
   title: string
-  confirmType: string
+  action: 'issue-library-card' | 'deactivate-library-card' | 'issue-data-submitter' | 'remove-data-submitter'
 }
 
 interface LibraryCardCellProps {
   researcher: DuosUser
   showConfirmationModal: (params: ShowConfirmationModalParams) => void
 }
+
+interface DataSubmitterCellProps extends LibraryCardCellProps {}
 
 interface TableCell {
   data: React.ReactNode
@@ -70,7 +88,8 @@ const styles = {
   cellWidths: {
     email: '25%',
     name: '20%',
-    libraryCard: '25%',
+    libraryCard: '20%',
+    dataSubmitter: '20%',
   },
 }
 
@@ -78,7 +97,8 @@ const styles = {
 const columnHeaderFormat = {
   email: { label: 'Email', cellStyle: { width: styles.cellWidths.email } },
   name: { label: 'Researcher', cellStyle: { width: styles.cellWidths.name } },
-  libraryCard: { label: 'Status', cellStyle: { width: styles.cellWidths.libraryCard } },
+  libraryCard: { label: 'Access Status', cellStyle: { width: styles.cellWidths.libraryCard } },
+  dataSubmitter: { label: 'Submitter Status', cellStyle: { width: styles.cellWidths.dataSubmitter } },
   // activeDARs: {label: 'Active DARs', cellStyle: {width: styles.cellWidths.activeDARs}}
 }
 
@@ -98,7 +118,7 @@ const LibraryCardCell = ({
         card: card,
         message: 'Are you sure you want to deactivate this researcher?',
         title: 'Deactivate Researcher',
-        confirmType: confirmModalType.delete,
+        action: 'deactivate-library-card',
       })
     }
     else {
@@ -115,7 +135,7 @@ const LibraryCardCell = ({
           </div>
         ),
         title: 'Activate Researcher',
-        confirmType: confirmModalType.issue,
+        action: 'issue-library-card',
       })
     }
   }
@@ -131,6 +151,7 @@ const LibraryCardCell = ({
         key={`lc-status-cell-${id}`}
       >
         <Switch
+          slotProps={{ input: { 'aria-label': 'Access Status' } }}
           checked={isActive}
           onChange={handleToggle}
           size="small"
@@ -147,6 +168,42 @@ const LibraryCardCell = ({
             fontFamily: 'Montserrat',
           }}
         >
+          {isActive ? 'Active' : 'Inactive'}
+        </span>
+      </div>
+    ),
+  }
+}
+
+const DataSubmitterCell = ({ researcher, showConfirmationModal }: DataSubmitterCellProps): TableCell => {
+  const id = researcher.userId
+  const isActive = hasDataSubmitterRole(researcher)
+
+  return {
+    isComponent: true,
+    id,
+    style: {},
+    label: 'data-submitter-status',
+    data: (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} key={`data-submitter-status-cell-${id}`}>
+        <Switch
+          slotProps={{ input: { 'aria-label': 'Submitter Status' } }}
+          checked={isActive}
+          onChange={() => showConfirmationModal({
+            card: { userId: researcher.userId, userEmail: researcher.email, userName: researcher.displayName },
+            message: isActive
+              ? 'Are you sure you want to remove this Data Submitter?'
+              : <div><ScrollableMarkdownContainer markdown={DpaMarkdown} />Are you sure you want to make this person a Data Submitter?</div>,
+            title: isActive ? 'Remove Data Submitter' : 'Issue Data Submitter',
+            action: isActive ? 'remove-data-submitter' : 'issue-data-submitter',
+          })}
+          size="small"
+          sx={{
+            '& .MuiSwitch-switchBase.Mui-checked': { color: Theme.palette.success },
+            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: Theme.palette.success },
+          }}
+        />
+        <span style={{ color: isActive ? Theme.palette.success : 'rgb(128, 128, 128)', fontWeight: 600, fontSize: '1.45rem', fontFamily: 'Montserrat' }}>
           {isActive ? 'Active' : 'Inactive'}
         </span>
       </div>
@@ -186,26 +243,21 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
   const [searchText, setSearchText] = useState<string>('')
   const [confirmationModalMsg, setConfirmationModalMsg] = useState<React.ReactNode>('')
   const [confirmationTitle, setConfirmationTitle] = useState<string>('')
-  const [confirmType, setConfirmType] = useState<string>(confirmModalType.delete)
+  const [confirmationAction, setConfirmationAction] = useState<ShowConfirmationModalParams['action']>('deactivate-library-card')
   const { signingOfficial, isLoading } = props
 
   // Search function for SearchBar component, function defined in utils
   const handleSearchChange = useCallback((searchTerms: string) => {
     setSearchText(searchTerms)
-    searchOnFilteredList(
-      searchTerms,
-      researchers,
-      researcherFilterFunction,
-      setFilteredResearchers,
-    )
-  }, [researchers])
+    setCurrentPage(1)
+  }, [])
 
-  const showConfirmationModal = ({ card, message, title, confirmType }: ShowConfirmationModalParams): void => {
+  const showConfirmationModal = ({ card, message, title, action }: ShowConfirmationModalParams): void => {
     setSelectedCard(card)
     setShowConfirmation(true)
     setConfirmationModalMsg(message)
     setConfirmationTitle(title)
-    setConfirmType(confirmType)
+    setConfirmationAction(action)
   }
 
   // init hook, need to make ajax calls here
@@ -277,6 +329,10 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
           researcher,
           showConfirmationModal,
         }),
+        DataSubmitterCell({
+          researcher,
+          showConfirmationModal,
+        }),
         // activeDarCountCell(count, id)
       ]
     })
@@ -286,6 +342,7 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
     columnHeaderFormat.name,
     columnHeaderFormat.email,
     columnHeaderFormat.libraryCard,
+    columnHeaderFormat.dataSubmitter,
     // columnHeaderFormat.activeDARs -> add this back in when back-end supports this
   ]
 
@@ -381,19 +438,46 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
     }
   }
 
+  const updateDataSubmitter = async (selectedCard: SelectedLibraryCard, shouldIssue: boolean): Promise<void> => {
+    const { userId, userName, userEmail } = selectedCard
+    const messageName = userName ?? userEmail
+    try {
+      const updatedUser = shouldIssue
+        ? await User.addRoleToUser(userId, ROLES.dataSubmitter.roleId)
+        : await User.deleteRoleFromUser(userId, ROLES.dataSubmitter.roleId)
+      setResearchers(researchers.map(researcher => researcher.userId === userId ? { ...researcher, ...updatedUser } : researcher))
+      setShowConfirmation(false)
+      Notifications.showSuccess({ text: `${shouldIssue ? 'Issued' : 'Removed'} ${messageName} ${shouldIssue ? 'as' : 'as a'} Data Submitter` })
+    }
+    catch (error) {
+      Notifications.showError({ text: `Error ${shouldIssue ? 'issuing' : 'removing'} ${messageName} as a Data Submitter: ${extractError(error)}` })
+    }
+  }
+
   return (
     <div style={{ ...Styles.PAGE }}>
       <div style={{ marginLeft: '-7.5%' }}>
         <div>
           <TableHeaderSection
             title="Researcher Status"
-            description={(
-              <>
-                <div>Use the table below to change the active status of your institution&apos;s researchers.</div>
-                <div>Deactivating a researcher will disable them from submitting access requests, and suspend their access to any data approved by a DAC in DUOS.</div>
-              </>
-            )}
+            description="Use the table below to change the active status of your institution's researchers."
           />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '1.5rem', margin: '1.5rem 0 0 2em' }}>
+            <div style={statusNoticeStyle}>
+              <InfoOutlinedIcon aria-hidden="true" sx={{ color: '#0872b9', fontSize: '2.8rem', flex: '0 0 auto', marginTop: '0.1rem' }} />
+              <div>
+                Deactivating a researcher&apos;s <b>Access Status</b> will disable them from submitting access requests, and suspend their access to any data approved by a DAC in DUOS.<br />
+                Researchers who log into DUOS with a valid institutional email will automatically be Active for <b>Access Status</b>, since subsequent requests will require Signing Official involvement.
+              </div>
+            </div>
+            <div style={statusNoticeStyle}>
+              <InfoOutlinedIcon aria-hidden="true" sx={{ color: '#0872b9', fontSize: '2.8rem', flex: '0 0 auto', marginTop: '0.1rem' }} />
+              <div>
+                By issuing <b>Submitter Status</b>, you are authorizing researchers from your institution to register and share data in DUOS. Data registered in DUOS can be either <b>Open Access</b> or <b>Controlled Access</b>.<br /><br />
+                Controlled access data registered in DUOS can be managed by a DAC within DUOS or by an external system that the dataset information in DUOS links to. To register controlled access data with a DAC in DUOS, the data submitter may need to provide the receiving DAC with documentation and/or agreements. These agreements can be submitted during the DUOS registration process or handled externally through direct communication with the DAC. DUOS is not responsible for the content, review, offer, or acceptance of such agreements.
+              </div>
+            </div>
+          </div>
         </div>
         <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
           <SearchBar handleSearchChange={handleSearchChange} />
@@ -414,13 +498,15 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
           closeConfirmation={() => setShowConfirmation(false)}
           title={confirmationTitle}
           // The issue modal requires a larger view than normal
-          styleOverride={confirmType === confirmModalType.issue ? { minWidth: '725px', minHeight: '475px' } : {}}
+          styleOverride={confirmationAction === 'issue-library-card' || confirmationAction === 'issue-data-submitter' ? { minWidth: '725px', minHeight: '475px' } : {}}
           message={<div>{confirmationModalMsg}</div>}
           header={`${selectedCard.userName ?? selectedCard.userEmail} - `}
           onConfirm={() =>
-            confirmType === confirmModalType.delete
-              ? deactivateLibraryCard(selectedCard, researchers)
-              : issueLibraryCards([selectedCard], researchers)}
+            confirmationAction === 'issue-library-card'
+              ? issueLibraryCards([selectedCard], researchers)
+              : confirmationAction === 'deactivate-library-card'
+                ? deactivateLibraryCard(selectedCard, researchers)
+                : updateDataSubmitter(selectedCard, confirmationAction === 'issue-data-submitter')}
         />
       )}
     </div>
