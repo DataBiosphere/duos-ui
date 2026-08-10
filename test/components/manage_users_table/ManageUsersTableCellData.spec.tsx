@@ -107,8 +107,8 @@ describe('rolesCellData', () => {
   })
 
   it('accepts a custom label', () => {
-    const result = rolesCellData({ userId: 1, roles: [], label: 'custom-perms' })
-    expect(result.label).toBe('custom-perms')
+    const result = rolesCellData({ userId: 1, roles: [], label: 'custom-roles' })
+    expect(result.label).toBe('custom-roles')
   })
 })
 
@@ -118,7 +118,7 @@ describe('institutionCellData', () => {
     const result = institutionCellData({ userId: 1, institution })
     expect(result.data).toBe('Test University')
     expect(result.id).toBe(1)
-    expect(result.label).toBe('insitution')
+    expect(result.label).toBe('institution')
     expect(result.isComponent).toBe(true)
   })
 

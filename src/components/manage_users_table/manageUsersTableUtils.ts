@@ -15,8 +15,8 @@ export const styles = {
     borderRadius: '4px',
     margin: '0.5% 0',
   },
-  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    justifyContent: 'space-between',
+  columnStyle: {
+    ...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between',
     color: '#7B7B7B',
     fontFamily: 'Montserrat',
     fontSize: '1.2rem',
@@ -25,7 +25,7 @@ export const styles = {
     textTransform: 'uppercase',
     backgroundColor: 'B8CDD3',
     border: 'none',
-  }),
+  },
   cellWidth: {
     username: '20%',
     usernameMargin: '5%',
@@ -33,16 +33,16 @@ export const styles = {
     emailMargin: '5%',
     institution: '20%',
     institutionMargin: '5%',
-    perms: '20%',
+    roles: '20%',
   },
   color: {
     username: '#000000',
     email: '#000000',
-    perms: '#000000',
+    roles: '#000000',
   },
   fontSize: {
     username: '1.6rem',
     email: '1.4rem',
-    perms: '1.4rem',
+    roles: '1.4rem',
   },
 }
