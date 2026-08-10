@@ -80,7 +80,7 @@ const columnHeaderConfig: Record<string, ColumnConfig> = {
   roles: {
     label: 'Roles',
     cellStyle: {
-      width: styles.cellWidth.perms,
+      width: styles.cellWidth.roles,
     },
     cellDataFn: cellData.rolesCellData,
     sortable: false,
