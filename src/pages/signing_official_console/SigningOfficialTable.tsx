@@ -15,7 +15,7 @@ import { processLibraryCards } from 'src/utils/LibraryCardUtils'
 import { extractError } from 'src/utils/ErrorUtils'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { DuosUser, DuosUserWithInstitutionId, LibraryCard as LibraryCardModel } from 'src/types/model'
-import ScrollableMarkdownContainer from 'src/components/ScrollableMarkdownContainer'
+import ScrollableMarkdownContainer, { MarkdownLoadState } from 'src/components/ScrollableMarkdownContainer'
 
 const DpaMarkdown = new URL('../../assets/DPA.md', import.meta.url).href
 
@@ -87,7 +87,12 @@ const confirmationTitles: Record<ConfirmationAction, string> = {
 const isAgreementAction = (action: ConfirmationAction): boolean =>
   action === 'issue-library-card' || action === 'issue-data-submitter'
 
-const ConfirmationMessage = ({ action }: Readonly<{ action: ConfirmationAction }>): React.JSX.Element => {
+interface ConfirmationMessageProps {
+  action: ConfirmationAction
+  onAgreementLoadStateChange: (state: MarkdownLoadState) => void
+}
+
+const ConfirmationMessage = ({ action, onAgreementLoadStateChange }: Readonly<ConfirmationMessageProps>): React.JSX.Element => {
   switch (action) {
     case 'issue-library-card':
       return (
@@ -101,7 +106,7 @@ const ConfirmationMessage = ({ action }: Readonly<{ action: ConfirmationAction }
     case 'issue-data-submitter':
       return (
         <div>
-          <ScrollableMarkdownContainer markdown={DpaMarkdown} />
+          <ScrollableMarkdownContainer markdown={DpaMarkdown} onLoadStateChange={onAgreementLoadStateChange} />
           Are you sure you want to make this person a Data Submitter?
         </div>
       )
@@ -323,6 +328,9 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
   const [confirmationAction, setConfirmationAction] = useState<ConfirmationAction>('deactivate-library-card')
+  // The Data Submitter agreement is the attestation itself, so confirming before it renders would
+  // record agreement to terms the Signing Official never saw.
+  const [agreementLoadState, setAgreementLoadState] = useState<MarkdownLoadState>('loading')
   const { signingOfficial, isLoading } = props
 
   // Search function for SearchBar component, function defined in utils
@@ -336,6 +344,8 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
     setSelectedCard(card)
     setShowConfirmation(true)
     setConfirmationAction(action)
+    // Each open re-reports its own load state, so start from scratch.
+    setAgreementLoadState('loading')
   }, [])
 
   // Filtering and paging are derived, so a keystroke costs one render rather than a cascade of effects.
@@ -544,8 +554,9 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
           title={confirmationTitles[confirmationAction]}
           // The agreement modals require a larger view than a plain confirmation prompt
           styleOverride={isAgreementAction(confirmationAction) ? { minWidth: '725px', minHeight: '475px' } : {}}
-          message={<ConfirmationMessage action={confirmationAction} />}
+          message={<ConfirmationMessage action={confirmationAction} onAgreementLoadStateChange={setAgreementLoadState} />}
           header={`${selectedCard.userName ?? selectedCard.userEmail} - `}
+          confirmDisabled={confirmationAction === 'issue-data-submitter' && agreementLoadState !== 'loaded'}
           onConfirm={() => handleConfirm(selectedCard)}
         />
       )}

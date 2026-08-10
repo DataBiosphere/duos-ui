@@ -2,9 +2,14 @@ import ReactMarkdown from 'react-markdown'
 import DOMPurify from 'dompurify'
 import React, { useEffect, useState } from 'react'
 import { isEmpty } from 'src/utils/NodashUtil'
+import { Theme } from 'src/libs/theme'
+
+export type MarkdownLoadState = 'loading' | 'loaded' | 'error'
 
 interface ScrollableMarkdownContainerProps {
   markdown: string
+  /** Lets callers gate an action on the document being visible — see the DPA attestation flow. */
+  onLoadStateChange?: (state: MarkdownLoadState) => void
 }
 
 const MarkdownLink = (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
@@ -37,8 +42,19 @@ const loadMarkdown = (markdown: string): Promise<string> => {
   return markdownRequest
 }
 
-export default function ScrollableMarkdownContainer({ markdown }: Readonly<ScrollableMarkdownContainerProps>) {
+const containerStyle: React.CSSProperties = {
+  maxWidth: '700px',
+  minWidth: '700px',
+  maxHeight: '200px',
+  overflow: 'auto',
+  marginBottom: '25px',
+}
+
+const errorStyle: React.CSSProperties = { color: Theme.palette.error }
+
+export default function ScrollableMarkdownContainer({ markdown, onLoadStateChange }: Readonly<ScrollableMarkdownContainerProps>) {
   const [text, setText] = useState<string>('')
+  const [loadState, setLoadState] = useState<MarkdownLoadState>('loading')
 
   useEffect(() => {
     let isMounted = true
@@ -47,11 +63,15 @@ export default function ScrollableMarkdownContainer({ markdown }: Readonly<Scrol
         const md = await loadMarkdown(markdown)
         if (isMounted) {
           setText(md)
+          setLoadState('loaded')
         }
       }
       catch (error) {
         // Surfaced rather than swallowed silently: callers render this inside consent flows.
         console.error(`Unable to load markdown document ${markdown}:`, error)
+        if (isMounted) {
+          setLoadState('error')
+        }
       }
     }
     void init()
@@ -59,6 +79,10 @@ export default function ScrollableMarkdownContainer({ markdown }: Readonly<Scrol
       isMounted = false
     }
   }, [markdown])
+
+  useEffect(() => {
+    onLoadStateChange?.(loadState)
+  }, [loadState, onLoadStateChange])
 
   const generateContent = (markdownText: string): React.ReactElement => (
     <ReactMarkdown components={markdownComponents}>
@@ -69,16 +93,10 @@ export default function ScrollableMarkdownContainer({ markdown }: Readonly<Scrol
   const content = generateContent(text)
 
   return (
-    <div
-      style={{
-        maxWidth: '700px',
-        minWidth: '700px',
-        maxHeight: '200px',
-        overflow: 'auto',
-        marginBottom: '25px',
-      }}
-    >
-      {!isEmpty(content) && content}
+    <div style={containerStyle}>
+      {loadState === 'error'
+        ? <div style={errorStyle} role="alert">This document could not be loaded. Please close this dialog and try again.</div>
+        : !isEmpty(content) && content}
     </div>
   )
 }

@@ -265,6 +265,35 @@ describe('SigningOfficialTable', () => {
     expect(within(updatedRow).getByRole('switch', { name: /^Access Status/ })).not.toBeChecked()
   })
 
+  it('blocks confirmation while the Data Submitter agreement has not rendered', async () => {
+    // A failed agreement load must not let the SO attest to terms they never saw.
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 404 }))
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    renderTable()
+
+    const row = await rowFor(mockResearcher1.displayName)
+    fireEvent.click(within(row).getByRole('switch', { name: /^Submitter Status/ }))
+
+    const confirmButton = await screen.findByRole('button', { name: 'Confirm' })
+    await waitFor(() => expect(confirmButton).toBeDisabled())
+    expect(await screen.findByRole('alert')).toHaveTextContent('could not be loaded')
+
+    fireEvent.click(confirmButton)
+    expect(User.addRoleToUser).not.toHaveBeenCalled()
+    consoleError.mockRestore()
+  })
+
+  it('enables confirmation once the Data Submitter agreement has rendered', async () => {
+    renderTable()
+
+    const row = await rowFor(mockResearcher1.displayName)
+    fireEvent.click(within(row).getByRole('switch', { name: /^Submitter Status/ }))
+
+    await screen.findByText('Data Provider Agreement')
+    expect(screen.getByRole('button', { name: 'Confirm' })).not.toBeDisabled()
+  })
+
   it('issues and removes Data Submitter status from the table', async () => {
     const updatedSubmitter = user({ ...mockResearcher1, isDataSubmitter: true, roles: [role(), role({ roleId: 8, name: 'DataSubmitter' })] })
     vi.mocked(User.addRoleToUser).mockResolvedValue(updatedSubmitter)

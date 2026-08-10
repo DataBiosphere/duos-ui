@@ -95,6 +95,46 @@ describe('ScrollableMarkdownContainer', () => {
     expect(global.fetch).toHaveBeenCalledTimes(1)
   })
 
+  it('reports its load state so callers can gate on the document being visible', async () => {
+    mockFetch('Agreement body')
+    const onLoadStateChange = vi.fn()
+
+    render(<ScrollableMarkdownContainer markdown="/state.md" onLoadStateChange={onLoadStateChange} />)
+    expect(onLoadStateChange).toHaveBeenCalledWith('loading')
+
+    await act(async () => undefined)
+    expect(onLoadStateChange).toHaveBeenLastCalledWith('loaded')
+  })
+
+  it('reports an error state and explains the gap when the document cannot be loaded', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 404 } as unknown as Response)
+    const onLoadStateChange = vi.fn()
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    render(<ScrollableMarkdownContainer markdown="/missing.md" onLoadStateChange={onLoadStateChange} />)
+    await act(async () => undefined)
+
+    expect(onLoadStateChange).toHaveBeenLastCalledWith('error')
+    expect(screen.getByRole('alert').textContent).toContain('could not be loaded')
+    consoleError.mockRestore()
+  })
+
+  it('retries a failed document rather than caching the failure', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 } as unknown as Response)
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    const failed = render(<ScrollableMarkdownContainer markdown="/flaky.md" />)
+    await act(async () => undefined)
+    failed.unmount()
+
+    mockFetch('Recovered content')
+    render(<ScrollableMarkdownContainer markdown="/flaky.md" />)
+    await act(async () => undefined)
+
+    expect(screen.getByTestId('markdown-link').textContent).toContain('Recovered content')
+    consoleError.mockRestore()
+  })
+
   it('renders links with target="_blank" via the a component override', async () => {
     mockFetch('[Link](https://example.com)')
 
