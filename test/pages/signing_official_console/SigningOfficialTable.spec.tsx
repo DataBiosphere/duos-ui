@@ -291,7 +291,9 @@ describe('SigningOfficialTable', () => {
     fireEvent.click(within(row).getByRole('switch', { name: /^Submitter Status/ }))
 
     await screen.findByText('Data Provider Agreement')
-    expect(screen.getByRole('button', { name: 'Confirm' })).not.toBeDisabled()
+    // The container reports its load state to the table after committing, so Confirm is enabled on
+    // the following render rather than the one that shows the text.
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Confirm' })).not.toBeDisabled())
   })
 
   it('issues and removes Data Submitter status from the table', async () => {
@@ -306,7 +308,10 @@ describe('SigningOfficialTable', () => {
     expect(await screen.findByText('Issue Data Submitter')).toBeInTheDocument()
     // The SO is attesting to the agreement, so it has to actually be in the modal.
     expect(await screen.findByText('Data Provider Agreement')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
+    // Confirm stays disabled until the agreement has been reported as rendered.
+    const issueConfirm = screen.getByRole('button', { name: 'Confirm' })
+    await waitFor(() => expect(issueConfirm).not.toBeDisabled())
+    fireEvent.click(issueConfirm)
     await waitFor(() => expect(User.addRoleToUser).toHaveBeenCalledWith(mockResearcher1.userId, 8))
 
     row = await rowFor(mockResearcher1.displayName)

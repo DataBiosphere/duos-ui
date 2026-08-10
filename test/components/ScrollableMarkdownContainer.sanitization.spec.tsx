@@ -13,15 +13,21 @@ import ScrollableMarkdownContainer from 'src/components/ScrollableMarkdownContai
 
 const mockFetch = (content: string) => {
   global.fetch = vi.fn().mockResolvedValue({
+    ok: true,
     text: () => Promise.resolve(content),
   } as unknown as Response)
 }
 
+// The component caches loaded documents by url, so each case needs its own url — reusing one would
+// serve the first case's body to every later case.
+let documentCount = 0
+
 const renderMarkdown = async (markdownSource: string): Promise<HTMLElement> => {
   mockFetch(markdownSource)
+  documentCount += 1
   let container!: HTMLElement
   await act(async () => {
-    ;({ container } = render(<ScrollableMarkdownContainer markdown="/doc.md" />))
+    ;({ container } = render(<ScrollableMarkdownContainer markdown={`/doc-${documentCount}.md`} />))
   })
   return container
 }

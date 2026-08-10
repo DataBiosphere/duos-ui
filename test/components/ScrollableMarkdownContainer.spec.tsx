@@ -59,8 +59,8 @@ describe('ScrollableMarkdownContainer', () => {
 
   it('re-fetches when the markdown prop changes', async () => {
     const fetchSpy = vi.fn()
-      .mockResolvedValueOnce({ text: () => Promise.resolve('First') } as unknown as Response)
-      .mockResolvedValueOnce({ text: () => Promise.resolve('Second') } as unknown as Response)
+      .mockResolvedValueOnce({ ok: true, text: () => Promise.resolve('First') } as unknown as Response)
+      .mockResolvedValueOnce({ ok: true, text: () => Promise.resolve('Second') } as unknown as Response)
     global.fetch = fetchSpy
 
     let rerender: ReturnType<typeof render>['rerender']

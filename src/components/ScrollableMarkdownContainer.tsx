@@ -54,6 +54,15 @@ const errorStyle: React.CSSProperties = { color: Theme.palette.error }
 export default function ScrollableMarkdownContainer({ markdown, onLoadStateChange }: Readonly<ScrollableMarkdownContainerProps>) {
   const [text, setText] = useState<string>('')
   const [loadState, setLoadState] = useState<MarkdownLoadState>('loading')
+  const [requestedMarkdown, setRequestedMarkdown] = useState<string>(markdown)
+
+  // Cleared as the prop changes, so a new document never shows the previous one's body and callers
+  // are never told 'loaded' while a different document is still in flight.
+  if (markdown !== requestedMarkdown) {
+    setRequestedMarkdown(markdown)
+    setText('')
+    setLoadState('loading')
+  }
 
   useEffect(() => {
     let isMounted = true
