@@ -77,7 +77,7 @@ const columnHeaderConfig: Record<string, ColumnConfig> = {
     cellDataFn: cellData.institutionCellData,
     sortable: false,
   },
-  perms: {
+  roles: {
     label: 'Roles',
     cellStyle: {
       width: styles.cellWidth.perms,
