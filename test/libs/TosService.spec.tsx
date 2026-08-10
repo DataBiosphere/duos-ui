@@ -100,6 +100,62 @@ describe('TosService', () => {
     })
   })
 
+  // ── getFormattedText: sanitization ─────────────────────────────────────────
+  //
+  // The ToS body is fetched from Sam and rendered without an explicit sanitizer,
+  // so these tests pin the react-markdown defaults we rely on. They fail if
+  // `rehype-raw`, a custom `urlTransform`, or raw-HTML rendering is ever added.
+
+  describe('getFormattedText sanitization', () => {
+    const renderToS = async (markdown: string) => {
+      vi.mocked(ToS.getDUOSText).mockResolvedValue(markdown)
+      const element = await TosService.getFormattedText()
+      return render(element).container
+    }
+
+    it.each([
+      ['<script>', '<script>window.__pwned = true</script>', 'script'],
+      ['<img onerror>', '<img src=x onerror="window.__pwned = true">', 'img'],
+      ['<iframe>', '<iframe src="https://evil.test"></iframe>', 'iframe'],
+      ['<svg onload>', '<svg onload="window.__pwned = true"></svg>', 'svg'],
+    ])('escapes a raw %s tag instead of rendering it', async (_label, markdown, selector) => {
+      const container = await renderToS(markdown)
+
+      expect(container.querySelector(selector)).toBeNull()
+      expect((window as unknown as Record<string, unknown>).__pwned).toBeUndefined()
+    })
+
+    it.each([
+      ['javascript:', '[click](javascript:alert(1))'],
+      ['mixed-case javascript:', '[click](JaVaScRiPt:alert(1))'],
+      ['entity-encoded javascript:', '[click](&#106;avascript:alert(1))'],
+      ['vbscript:', '[click](vbscript:msgbox(1))'],
+    ])('strips a %s scheme from link hrefs', async (_label, markdown) => {
+      const container = await renderToS(markdown)
+
+      const link = container.querySelector('a')
+      expect(link).not.toBeNull()
+      expect(link?.getAttribute('href')).toBe('')
+      expect(link?.getAttribute('href')).not.toMatch(/javascript:|vbscript:/i)
+    })
+
+    it('strips a data: URL from an image src', async () => {
+      const container = await renderToS(
+        '![x](data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==)',
+      )
+
+      const img = container.querySelector('img')
+      expect(img).not.toBeNull()
+      expect(img?.getAttribute('src')).toBeNull()
+    })
+
+    it('still renders safe https links untouched', async () => {
+      const container = await renderToS('[terms](https://duos.org/terms)')
+
+      expect(container.querySelector('a')?.getAttribute('href')).toBe('https://duos.org/terms')
+    })
+  })
+
   // ── acceptTos ─────────────────────────────────────────────────────────────
 
   describe('acceptTos', () => {

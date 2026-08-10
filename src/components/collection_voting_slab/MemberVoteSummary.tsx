@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { collapseVotesByUser } from 'src/utils/DarCollectionUtils'
 import VoteSummaryTable from 'src/components/vote_summary_table/VoteSummaryTable'
 import { ExpandLess, ExpandMore } from '@mui/icons-material'
@@ -10,6 +10,8 @@ interface MemberVoteSummaryProps {
   readonly title?: string
   readonly adminPage?: boolean
   readonly isChair?: boolean
+  readonly expanded: boolean
+  readonly onToggle: () => void
 }
 
 export const MemberVoteSummary = ({
@@ -18,29 +20,28 @@ export const MemberVoteSummary = ({
   adminPage = false,
   isChair = false,
   dacVotes,
+  expanded,
+  onToggle,
 }: MemberVoteSummaryProps) => {
-  const [showMemberVotes, setShowMemberVotes] = useState(false)
-
   return (
     <div style={{
-      marginBottom: '10px',
-      borderRadius: '8px 8px 8px 8px',
-      border: '#84a3db 2px solid',
-      padding: '20px 20px 20px 20px',
+      borderRadius: '6px',
+      border: '1px solid #d0d0d0',
+      padding: '0.6rem 0.9rem',
     }}
     >
       <button
         type="button"
-        className={`sort-icon ${showMemberVotes ? 'sort-icon-up' : 'sort-icon-down'}`}
-        style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: '100%' }}
-        onClick={() => setShowMemberVotes(!showMemberVotes)}
+        className={`sort-icon ${expanded ? 'sort-icon-up' : 'sort-icon-down'}`}
+        style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: '100%', fontSize: '1.3rem', fontWeight: 700 }}
+        onClick={onToggle}
         id="show-member-vote-dropdown"
-        aria-expanded={showMemberVotes}
+        aria-expanded={expanded}
       >
-        <span style={{ display: 'flex' }}>{showMemberVotes ? <ExpandLess /> : <ExpandMore />}</span>
+        <span style={{ display: 'flex' }}>{expanded ? <ExpandLess /> : <ExpandMore />}</span>
         <span>{title}</span>
       </button>
-      {showMemberVotes && (
+      {expanded && (
         <VoteSummaryTable
           dacVotes={collapseVotesByUser(dacVotes)}
           isLoading={isLoading}

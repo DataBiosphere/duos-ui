@@ -1,5 +1,4 @@
 import ReactMarkdown from 'react-markdown'
-import DOMPurify from 'dompurify'
 import React, { CSSProperties } from 'react'
 import { ToS, ToSStatus } from './ajax/ToS'
 import { UserStatusInfo } from 'src/types/model'
@@ -48,7 +47,7 @@ export const TosService = {
       <ReactMarkdown
         components={{ a: props => <a target="_blank" {...props} /> }}
       >
-        {DOMPurify.sanitize(text)}
+        {text}
       </ReactMarkdown>
     )
   },

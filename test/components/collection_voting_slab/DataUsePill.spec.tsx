@@ -33,6 +33,23 @@ describe('DataUsePill', () => {
     render(<DataUsePill dataUse={permissionEntry} index={0} />)
     expect(screen.getByText('Health/Medical/Biomedical research')).toBeInTheDocument()
   })
+
+  it('renders a primary (Permissions) pill in the darker blue shade', () => {
+    render(<DataUsePill dataUse={permissionEntry} index={0} />)
+    expect(screen.getByText('HMB').style.backgroundColor).toBe('rgb(0, 96, 159)')
+  })
+
+  it('renders a secondary (Modifiers) pill in the lighter blue shade', () => {
+    render(<DataUsePill dataUse={modifierEntry} index={0} />)
+    expect(screen.getByText('MDS').style.backgroundColor).toBe('rgb(122, 184, 224)')
+  })
+
+  it('renders a manual-review pill and description in red', () => {
+    const manualReviewEntry: TranslationEntry = { ...permissionEntry, manualReview: true }
+    render(<DataUsePill dataUse={manualReviewEntry} index={0} />)
+    expect(screen.getByText('HMB').style.backgroundColor).toBe('rgb(219, 84, 84)')
+    expect(screen.getByText('Health/Medical/Biomedical research').style.color).toBe('rgb(229, 115, 115)')
+  })
 })
 
 describe('DataUsePills', () => {
@@ -42,15 +59,10 @@ describe('DataUsePills', () => {
     expect(screen.getByText('Health/Medical/Biomedical research')).toBeInTheDocument()
   })
 
-  it('renders modifier entries under a Modifiers heading', () => {
+  it('renders modifier entries as flat pills without a Modifiers heading', () => {
     render(<DataUsePills dataUses={[permissionEntry, modifierEntry]} />)
-    expect(screen.getByText('Modifiers')).toBeInTheDocument()
-    expect(screen.getByText('MDS')).toBeInTheDocument()
-  })
-
-  it('does not render the Modifiers heading when there are no modifier entries', () => {
-    render(<DataUsePills dataUses={[permissionEntry]} />)
     expect(screen.queryByText('Modifiers')).not.toBeInTheDocument()
+    expect(screen.getByText('MDS')).toBeInTheDocument()
   })
 
   it('renders two-column layout with Permissions heading when twoColumn=true', () => {

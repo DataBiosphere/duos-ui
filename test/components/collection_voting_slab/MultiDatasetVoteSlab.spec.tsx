@@ -173,7 +173,6 @@ const renderSlab = (
 ) =>
   render(
     <MultiDatasetVoteSlab
-      title="GROUP 1"
       bucket={{ key: 'group-1', datasets: [], elections: [], votes: [], ...bucketOverrides } as never}
       collection={collection}
       dacDatasetIds={[]}
@@ -203,7 +202,7 @@ beforeEach(() => {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('MultiDatasetVoteSlab', () => {
-  it('renders data use pills', () => {
+  it('renders data use pills under a "Data Use Terms" heading, without a Modifiers sub-heading', () => {
     mockUser(1)
     renderSlab({
       dataUses: [
@@ -214,13 +213,48 @@ describe('MultiDatasetVoteSlab', () => {
       elections: [],
     })
 
+    expect(screen.getByText('Data Use Terms')).toBeInTheDocument()
     expect(screen.getByText('GRU')).toBeInTheDocument()
     expect(screen.getByText('Use is permitted for any research purpose')).toBeInTheDocument()
     expect(screen.getByText('HMB')).toBeInTheDocument()
     expect(screen.getByText('Use is permitted for a health, medical, or biomedical research purpose')).toBeInTheDocument()
-    expect(screen.getByText(ControlledAccessType.modifiers)).toBeInTheDocument()
     expect(screen.getByText('NCU')).toBeInTheDocument()
     expect(screen.getByText('The dataset will be used in a study related to a commercial purpose.')).toBeInTheDocument()
+    expect(screen.queryByText(ControlledAccessType.modifiers)).not.toBeInTheDocument()
+  })
+
+  it('places the member vote detail table immediately below the summary graph, in the same column', () => {
+    mockUser(200)
+    renderSlab({
+      elections: [closedElection],
+      votes: [votesForClosedElection],
+    })
+
+    const chairVoteInfo = screen.getByTestId('chair-vote-info')
+    const toggle = screen.getByRole('button', { name: /DAC/i })
+    // ChairVoteInfo and the detail table are both grid items in the same "My DAC's Votes /
+    // DUOS Algorithm" sub-grid, so the detail table sits directly below the pie chart
+    // regardless of how tall the Vote column is.
+    expect(chairVoteInfo.parentElement?.parentElement).toBe(toggle.closest('div')?.parentElement?.parentElement)
+    expect(chairVoteInfo.compareDocumentPosition(toggle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('lets the detail table expand rightward under the DUOS Algorithm section', () => {
+    mockUser(200)
+    renderSlab({
+      elections: [closedElection],
+      votes: [votesForClosedElection],
+    })
+
+    const toggle = screen.getByRole('button', { name: /DAC/i })
+    const detailWrapper = toggle.closest('div')?.parentElement as HTMLElement
+    expect(detailWrapper.style.gridColumn).toBe('1')
+
+    fireEvent.click(toggle)
+    expect(detailWrapper.style.gridColumn).toBe('1 / span 2')
+
+    fireEvent.click(toggle)
+    expect(detailWrapper.style.gridColumn).toBe('1')
   })
 
   it('shows NO selected in the member section when all member votes are false', async () => {
@@ -306,6 +340,64 @@ describe('MultiDatasetVoteSlab', () => {
     expect(screen.getByRole('textbox')).toBeDisabled()
   })
 
+  it('renders a single shared question and distinct role-labeled buttons when the user has both member and chair votes', async () => {
+    // userId 200 (Sarah): member votes (false, false) always show buttons since member voting is never final;
+    // chair votes (true, false) are mixed → not yet submitted → chair buttons also show.
+    mockUser(200)
+    renderSlab({
+      elections: [openElection1, openElection2],
+      votes: [votesForOpenElection1, votesForOpenElection2],
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Yes as Member')).toBeInTheDocument()
+      expect(screen.getByText('No as Member')).toBeInTheDocument()
+      expect(screen.getByText('Yes as Chair')).toBeInTheDocument()
+      expect(screen.getByText('No as Chair')).toBeInTheDocument()
+    })
+    expect(screen.getByText('Should data access be granted?')).toBeInTheDocument()
+    expect(screen.getByText('Vote:')).toBeInTheDocument()
+  })
+
+  it('renders "Vote:" on its own line below the question, un-bolded', () => {
+    mockUser(400)
+    renderSlab({
+      elections: [openElection2, closedElection],
+      votes: [votesForOpenElection2, votesForClosedElection],
+    })
+
+    const question = screen.getByText('Should data access be granted?')
+    const voteLabel = screen.getByText('Vote:')
+    // DOCUMENT_POSITION_FOLLOWING (4) means voteLabel comes after question in the DOM.
+    expect(question.compareDocumentPosition(voteLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(voteLabel.style.fontWeight).toBe('400')
+  })
+
+  it('renders a faint divider between the member and chair vote sections when both are present', async () => {
+    mockUser(200)
+    const { container } = renderSlab({
+      elections: [openElection1, openElection2],
+      votes: [votesForOpenElection1, votesForOpenElection2],
+    })
+
+    await waitFor(() => {
+      expect(container.querySelector('.chair-vote-divider')).toBeInTheDocument()
+    })
+  })
+
+  it('does not render a divider when only the chair vote section is present', async () => {
+    mockUser(500)
+    const { container } = renderSlab({
+      elections: [openElection1, openElection2],
+      votes: [votesForOpenElection1, votesForOpenElection2],
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Yes as Chair')).toBeInTheDocument()
+    })
+    expect(container.querySelector('.chair-vote-divider')).not.toBeInTheDocument()
+  })
+
   it('does not render a vote section when the user has no votes in the bucket', () => {
     // userId 999 does not appear in any votes
     mockUser(999)
@@ -317,6 +409,10 @@ describe('MultiDatasetVoteSlab', () => {
     expect(screen.queryByTestId('yes-collection-vote-button')).not.toBeInTheDocument()
     expect(screen.queryByTestId('no-collection-vote-button')).not.toBeInTheDocument()
     expect(screen.queryByTestId('vote-subsection-heading')).not.toBeInTheDocument()
+    // The "Vote" column heading always renders, but the question is only appended when there is
+    // actually a vote (member or chair) to weigh in on.
+    expect(screen.getByText('Vote:')).toBeInTheDocument()
+    expect(screen.queryByText(/Should data access be granted/)).not.toBeInTheDocument()
   })
 
   it('shows vote buttons when at least one election is open', async () => {
@@ -367,7 +463,7 @@ describe('MultiDatasetVoteSlab', () => {
     expect(screen.queryByTestId('chair-vote-info')).not.toBeInTheDocument()
   })
 
-  it('does not render the DAC vote summary pie chart when the user is a chair but has no DAC member votes in the bucket', () => {
+  it('renders "My DAC\'s Votes" for a chair even when there are no DAC member votes in the bucket', () => {
     // userId 500 is in chairpersonVotes but not in any memberVotes → dacVotes = []
     mockUser(500)
     renderSlab({
@@ -375,7 +471,7 @@ describe('MultiDatasetVoteSlab', () => {
       votes: [votesForOpenElection1],
     })
 
-    expect(screen.queryByTestId('chair-vote-info')).not.toBeInTheDocument()
+    expect(screen.getByTestId('chair-vote-info')).toBeInTheDocument()
   })
 
   it('renders the DAC vote summary pie chart when the user is a chair with DAC member votes in the bucket', async () => {
@@ -391,6 +487,23 @@ describe('MultiDatasetVoteSlab', () => {
     })
   })
 
+  it('expands the member vote detail table in place without moving it out of its column', () => {
+    mockUser(999)
+    renderSlab()
+
+    const toggle = screen.getByRole('button', { name: /DAC/i })
+    const wrapper = toggle.parentElement as HTMLElement
+
+    expect(screen.queryByTestId('simple-table')).not.toBeInTheDocument()
+
+    fireEvent.click(toggle)
+    expect(screen.getByTestId('simple-table')).toBeInTheDocument()
+    expect(toggle.parentElement).toBe(wrapper)
+
+    fireEvent.click(toggle)
+    expect(screen.queryByTestId('simple-table')).not.toBeInTheDocument()
+  })
+
   it('does not show vote summary table rows for elections outside the user\'s DAC', async () => {
     // userId 100 (Joe) is in election2 memberVotes but not in closedElection memberVotes
     mockUser(100)
@@ -401,14 +514,15 @@ describe('MultiDatasetVoteSlab', () => {
 
     expect(screen.queryByTestId('simple-table')).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByText(/DAC Member/))
+    fireEvent.click(screen.getByRole('button', { name: /DAC/i }))
 
     await waitFor(() => expect(screen.getByTestId('simple-table')).toBeInTheDocument())
 
     const table = screen.getByTestId('simple-table')
-    expect(table).toHaveTextContent('test1')
-    expect(table).toHaveTextContent('test2')
-    expect(table).not.toHaveTextContent('test3')
+    const tooltipContents = Array.from(table.querySelectorAll('[data-tooltip-content]')).map(el => el.getAttribute('data-tooltip-content') ?? '')
+    expect(tooltipContents.some(content => content.includes('test1'))).toBe(true)
+    expect(tooltipContents.some(content => content.includes('test2'))).toBe(true)
+    expect(tooltipContents.some(content => content.includes('test3'))).toBe(false)
   })
 
   it('collapses rows when the same user has the same vote across multiple elections', async () => {
@@ -419,13 +533,13 @@ describe('MultiDatasetVoteSlab', () => {
       votes: [votesForOpenElection2, votesForOpenElection2],
     })
 
-    fireEvent.click(screen.getByText(/DAC Member/))
+    fireEvent.click(screen.getByRole('button', { name: /DAC/i }))
 
     await waitFor(() => expect(screen.getByTestId('simple-table')).toBeInTheDocument())
 
     const table = screen.getByTestId('simple-table')
     expect(table).toHaveTextContent('Sarah')
-    expect(table).toHaveTextContent('test1')
+    expect(table.querySelector('[data-tooltip-content*="test1"]')).toBeInTheDocument()
   })
 
   it('appends rationales when the same user has the same vote but different rationales across elections', async () => {
@@ -436,14 +550,15 @@ describe('MultiDatasetVoteSlab', () => {
       votes: [votesForOpenElection1, votesForOpenElection2],
     })
 
-    fireEvent.click(screen.getByText(/DAC Member/))
+    fireEvent.click(screen.getByRole('button', { name: /DAC/i }))
 
     await waitFor(() => expect(screen.getByTestId('simple-table')).toBeInTheDocument())
 
     const table = screen.getByTestId('simple-table')
     expect(table).toHaveTextContent('Joe')
-    expect(table).toHaveTextContent('test1')
-    expect(table).toHaveTextContent('test2')
+    const rationaleTooltip = table.querySelector('[data-tooltip-content*="test1"]')
+    expect(rationaleTooltip).toBeInTheDocument()
+    expect(rationaleTooltip?.getAttribute('data-tooltip-content')).toContain('test2')
   })
 
   it('does not include "undefined" in displayed rationale values', async () => {
@@ -454,13 +569,16 @@ describe('MultiDatasetVoteSlab', () => {
       votes: [votesForOpenElection2, votesForClosedElection],
     })
 
-    fireEvent.click(screen.getByText(/DAC Member/))
+    fireEvent.click(screen.getByRole('button', { name: /DAC/i }))
 
     await waitFor(() => expect(screen.getByTestId('simple-table')).toBeInTheDocument())
 
-    expect(screen.getByTestId('simple-table')).not.toHaveTextContent('undefined')
-    expect(screen.getByTestId('simple-table')).toHaveTextContent('Sarah')
-    expect(screen.getByTestId('simple-table')).toHaveTextContent('test1')
+    const table = screen.getByTestId('simple-table')
+    expect(table).not.toHaveTextContent('undefined')
+    expect(table).toHaveTextContent('Sarah')
+    const tooltipContents = Array.from(table.querySelectorAll('[data-tooltip-content]')).map(el => el.getAttribute('data-tooltip-content') ?? '')
+    expect(tooltipContents.some(content => content.includes('undefined'))).toBe(false)
+    expect(tooltipContents.some(content => content.includes('test1'))).toBe(true)
   })
 
   it('renders separate rows when the same user has different votes across elections', async () => {
@@ -471,7 +589,7 @@ describe('MultiDatasetVoteSlab', () => {
       votes: [votesForOpenElection1, votesForOpenElection2],
     })
 
-    fireEvent.click(screen.getByText(/DAC Member/))
+    fireEvent.click(screen.getByRole('button', { name: /DAC/i }))
 
     await waitFor(() => expect(screen.getByTestId('simple-table')).toBeInTheDocument())
 
@@ -489,7 +607,7 @@ describe('MultiDatasetVoteSlab', () => {
       votes: [votesForOpenElection2],
     })
 
-    fireEvent.click(screen.getByText(/DAC Member/))
+    fireEvent.click(screen.getByRole('button', { name: /DAC/i }))
 
     await waitFor(() => expect(screen.getByTestId('simple-table')).toBeInTheDocument())
 
@@ -507,7 +625,7 @@ describe('MultiDatasetVoteSlab', () => {
       votes: [votesForOpenElection2],
     })
 
-    fireEvent.click(screen.getByText(/DAC Member/))
+    fireEvent.click(screen.getByRole('button', { name: /DAC/i }))
 
     await waitFor(() => expect(screen.getByTestId('simple-table')).toBeInTheDocument())
 
@@ -534,6 +652,24 @@ describe('MultiDatasetVoteSlab', () => {
     })
   })
 
+  it('places "My DAC\'s Votes" before the DUOS Algorithm Decision section (columns swapped)', async () => {
+    // userId 200 (Sarah) has chair votes in closedElection → "My DAC's Votes" renders.
+    mockUser(200)
+    renderSlab(
+      {
+        elections: [closedElection],
+        votes: [votesForClosedElection],
+        algorithmResult: { createDate: new Date(), id: 1, result: 'Yes', rationales: [] },
+      },
+      { collection: collectionWithoutDMI },
+    )
+
+    const chairVoteInfo = await screen.findByTestId('chair-vote-info')
+    const algorithmDecision = screen.getByTestId('collection-algorithm-decision')
+    // DOCUMENT_POSITION_FOLLOWING (4) means algorithmDecision comes after chairVoteInfo in the DOM.
+    expect(chairVoteInfo.compareDocumentPosition(algorithmDecision) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
   it('does not render the algorithm decision when the latest DAR has a DMI', async () => {
     mockUser(100)
     renderSlab({
@@ -551,7 +687,6 @@ describe('MultiDatasetVoteSlab', () => {
     mockUser(100)
     const element = (collectionProp: DarCollection) => (
       <MultiDatasetVoteSlab
-        title="GROUP 1"
         bucket={{
           key: 'group-1',
           datasets: [],
@@ -582,7 +717,6 @@ describe('MultiDatasetVoteSlab', () => {
     mockUser(400)
     const element = (bucket: unknown) => (
       <MultiDatasetVoteSlab
-        title="GROUP 1"
         bucket={bucket as never}
         collection={collection}
         dacDatasetIds={[]}

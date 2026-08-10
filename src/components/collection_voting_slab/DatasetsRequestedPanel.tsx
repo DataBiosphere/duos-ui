@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { filter, includes } from 'src/utils/NodashUtil'
 import { DacTerm, Dataset } from 'src/types/model'
+import { Theme } from 'src/libs/theme'
 import SectionHeading from 'src/components/collection_voting_slab/SectionHeading'
 import DatasetList from 'src/components/collection_voting_slab/DatasetList'
 import CollapseExpandLink from 'src/components/collection_voting_slab/CollapsibleExpandLink'
@@ -38,13 +39,16 @@ export default function DatasetsRequestedPanel(props: DatasetsRequestedPanelProp
   return (
     <div style={{
       fontFamily: 'Montserrat',
-      fontSize: '1.4rem',
+      fontSize: '1.3rem',
       fontWeight: '500',
       color: '#333F52',
-      padding: '15px 25px',
+      marginBottom: '0.6rem',
+      padding: '0.6rem 0.9rem',
       display: 'flex',
       flexDirection: 'column',
-      rowGap: '1.5rem',
+      rowGap: '0.5rem',
+      backgroundColor: Theme.palette.background.secondary,
+      borderRadius: '6px',
     }}
     >
       <SectionHeading isLoading={isLoading} datasetCount={datasetCount} />
