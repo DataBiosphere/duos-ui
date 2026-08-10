@@ -68,10 +68,10 @@ session rotation will look like), and it is what lets the tests assert *which*
 rejection fired — the drift story 3-D's review caught, where cases meant to
 exercise one path had silently moved onto the other.
 
-The generic body is shared as `GENERIC_ERROR_BODY` in `server/src/errors.ts`
-rather than written out in both handlers: the point of the second branch is that
-the browser cannot tell which scope failed, and two string literals drift
-invisibly.
+The generic body, `{ "error": "An unexpected error occurred." }`, is written out
+inline in both handlers rather than shared from a constant: with only two call
+sites and no risk of drift beyond a literal string, the shared symbol cost more
+to look up than it saved.
 
 ### The plugin's error code is not on the wire
 

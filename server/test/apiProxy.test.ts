@@ -9,7 +9,6 @@ import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { csrfPluginOptions } from '../src/auth/csrf.js'
 import { RefreshFailedError } from '../src/auth/refresh.js'
-import { GENERIC_ERROR_BODY } from '../src/errors.js'
 import { CSRF_ERROR_CODE, CSRF_EXEMPT_UNSAFE_REQUESTS, PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
 
 // refreshAccessToken is replaced so the tests never reach B2C; RefreshFailedError
@@ -1343,7 +1342,7 @@ describe('apiProxy', () => {
       const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}-boom` })
 
       expect(res.statusCode).toBe(500)
-      expect(res.json()).toEqual(GENERIC_ERROR_BODY)
+      expect(res.json()).toEqual({ error: 'An unexpected error occurred.' })
       expect(res.payload).not.toContain('a stack trace and an internal path')
     })
 

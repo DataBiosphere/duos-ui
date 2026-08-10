@@ -12,7 +12,6 @@ import type {
 import fastifyReplyFrom from '@fastify/reply-from'
 import { requireEnv } from '../auth/oidcClient.js'
 import { RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
-import { GENERIC_ERROR_BODY } from '../errors.js'
 
 /**
  * The BFF API proxy (Phase 3).
@@ -288,7 +287,7 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
       return reply.status(403).send({ error: CSRF_ERROR_CODE, reason })
     }
     request.log.error({ err }, '[proxy] unhandled error')
-    return reply.status(err.statusCode ?? 500).send(GENERIC_ERROR_BODY)
+    return reply.status(err.statusCode ?? 500).send({ error: 'An unexpected error occurred.' })
   })
 
   /**

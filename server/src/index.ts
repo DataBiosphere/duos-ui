@@ -10,7 +10,6 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { createPgSessionStore } from './session/pgStore.js'
-import { GENERIC_ERROR_BODY } from './errors.js'
 import { csrfPluginOptions } from './auth/csrf.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
@@ -278,7 +277,7 @@ export async function buildApp(): Promise<AppInstance> {
   // proxy's — that scope is encapsulated and declares its own (ADR-010).
   fastify.setErrorHandler((err: FastifyError, request, reply) => {
     request.log.error({ err }, '[server] Unhandled error:')
-    return reply.status(err.statusCode ?? 500).send(GENERIC_ERROR_BODY)
+    return reply.status(err.statusCode ?? 500).send({ error: 'An unexpected error occurred.' })
   })
 
   return fastify
