@@ -25,7 +25,8 @@ import { Presentation } from 'src/types/model'
 
 describe('PresentationAddEdit component', () => {
   it('opens add form and enforces validation disabling save then adds', async () => {
-    const user = userEvent.setup()
+    // delay: null skips the timer between keystrokes; ~138 chars here otherwise times out on CI.
+    const user = userEvent.setup({ delay: null })
     const closeAction = vi.fn()
     const onPresentationChange = vi.fn()
 
@@ -60,5 +61,5 @@ describe('PresentationAddEdit component', () => {
     expect(changedPresentations).toHaveLength(1)
     expect(changedPresentations[0].title).toBe('New Title')
     expect(closeAction).toHaveBeenCalledTimes(1)
-  })
+  }, 15000)
 })
