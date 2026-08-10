@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router'
+import { useQuery } from '@tanstack/react-query'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined'
@@ -10,73 +11,78 @@ import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
 import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined'
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import OpenInNewOutlinedIcon from '@mui/icons-material/OpenInNewOutlined'
-import { isNil } from 'src/utils/NodashUtil'
-import { Styles } from 'src/libs/theme'
-import { Storage } from 'src/libs/storage'
+import { Styles, Theme } from 'src/libs/theme'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import { headerTabsConfig } from 'src/components/DuosHeader'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
-import { hasDataSubmitterRole, Notifications, USER_ROLES } from 'src/libs/utils'
-import { User } from 'src/libs/ajax/User'
-import { Collections } from 'src/libs/ajax/Collections'
-import { DataSet } from 'src/libs/ajax/DataSet'
-import { DAA } from 'src/libs/ajax/DAA'
-import { buildResearcherRows } from 'src/pages/signing_official_console/DAAAssignment'
-import { getBrandedLibrary } from 'src/libs/libraryVersions'
-import { buildElasticsearchQuery } from 'src/hooks/useLibraryData'
-import { assetRegistry } from 'src/components/data_library/assets'
-import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
-import { AssetType, LibraryVersionNew } from 'src/types/library'
-import { DAAObject } from 'src/types/model'
+import { Notifications } from 'src/libs/utils'
+import { SigningOfficial, SigningOfficialDashboardSummary } from 'src/libs/ajax/SigningOfficial'
 import { extractError } from 'src/utils/ErrorUtils'
+import { useNavigationState } from 'src/contexts/NavigationStateContext'
+import { SO_CONSOLE_SECTIONS } from './signingOfficialConsoleRoutes'
+import './SigningOfficialDashboard.css'
 
-interface TileMeta {
-  icon: React.ComponentType
-  description: string
-  statLabels: string[]
+interface Stat {
+  label: string
+  value: (summary: SigningOfficialDashboardSummary) => number
 }
 
-const tileMetaByLink: Record<string, TileMeta> = {
-  '/signing_official_console/library_cards': {
+const tileMeta = [
+  {
+    ...SO_CONSOLE_SECTIONS[0],
     icon: PeopleAltOutlinedIcon,
     description: 'Manage researchers who request data on behalf of your institution.',
-    statLabels: ['Active', 'Inactive'],
+    stats: [
+      { label: 'Active', value: (s: SigningOfficialDashboardSummary) => s.researcherStatus.active },
+      { label: 'Inactive', value: (s: SigningOfficialDashboardSummary) => s.researcherStatus.inactive },
+    ],
   },
-  '/signing_official_console/dar_requests': {
+  {
+    ...SO_CONSOLE_SECTIONS[1],
     icon: DescriptionOutlinedIcon,
     description: 'Review data access requests submitted by researchers at your institution.',
-    statLabels: ['Total', 'Approved', 'Denied', 'Pending'],
+    stats: [
+      { label: 'Total', value: (s: SigningOfficialDashboardSummary) => s.darRequests.total },
+      { label: 'Approved', value: (s: SigningOfficialDashboardSummary) => s.darRequests.approved },
+      { label: 'Canceled', value: (s: SigningOfficialDashboardSummary) => s.darRequests.canceled },
+      { label: 'In Process', value: (s: SigningOfficialDashboardSummary) => s.darRequests.inProcess },
+    ],
   },
-  '/signing_official_console/dar_approvals': {
+  {
+    ...SO_CONSOLE_SECTIONS[2],
     icon: FactCheckOutlinedIcon,
     description: 'Approve or reject data access request applications awaiting your signature.',
-    statLabels: ['Total', 'Awaiting SO Action'],
+    stats: [
+      { label: 'Total', value: (s: SigningOfficialDashboardSummary) => s.darApprovals.total },
+      { label: 'Awaiting SO Action', value: (s: SigningOfficialDashboardSummary) => s.darApprovals.awaitingSoAction },
+    ],
   },
-  '/signing_official_console/data_submitters': {
+  {
+    ...SO_CONSOLE_SECTIONS[3],
     icon: GroupOutlinedIcon,
     description: 'Manage the researchers who submit data on behalf of your institution.',
-    statLabels: ['Approved'],
+    stats: [{ label: 'Approved', value: (s: SigningOfficialDashboardSummary) => s.dataSubmitters.approved }],
   },
-  '/datalibrary/myinstitution': {
+  {
+    ...SO_CONSOLE_SECTIONS[4],
     icon: StorageOutlinedIcon,
     description: 'Browse the datasets and studies registered by your institution.',
-    statLabels: ['Datasets', 'Studies'],
+    stats: [
+      { label: 'Datasets', value: (s: SigningOfficialDashboardSummary) => s.institutionLibrary.datasets },
+      { label: 'Studies', value: (s: SigningOfficialDashboardSummary) => s.institutionLibrary.studies },
+    ],
   },
-  '/signing_official_console/researchers_daa_associations': {
+  {
+    ...SO_CONSOLE_SECTIONS[5],
     icon: HandshakeOutlinedIcon,
     description: 'Manage Data Access Agreement associations for your researchers.',
-    statLabels: ['Agreements', 'Researchers Approved'],
+    stats: [
+      { label: 'Agreements', value: (s: SigningOfficialDashboardSummary) => s.daaAssociations.agreements },
+      { label: 'Researchers Approved', value: (s: SigningOfficialDashboardSummary) => s.daaAssociations.researchersApproved },
+    ],
   },
-}
+]
 
-interface HelpfulResource {
-  icon: React.ComponentType
-  label: string
-  description: string
-  href: string
-}
-
-const helpfulResources: HelpfulResource[] = [
+const resources = [
   {
     icon: MenuBookOutlinedIcon,
     label: 'Signing Official Guide',
@@ -97,386 +103,105 @@ const helpfulResources: HelpfulResource[] = [
   },
 ]
 
-// Some DAAs aren't mapped to any DAC and aren't selectable for pre-authorization;
-// mirrors the filtering in ManageResearcherDAAs.tsx so the counts match that page.
-const filterAssignableDaas = (daas: Array<DAAObject & { broadDaa?: boolean }>): DAAObject[] =>
-  daas.filter((daa) => {
-    const hasMappedDac = Array.isArray(daa.dacs) && daa.dacs.length > 0
-    return Boolean(daa.broadDaa) || hasMappedDac
-  })
-
-interface InstitutionLibraryTotals {
-  datasetTotal: number
-  studyTotal: number
-}
-
-const fetchInstitutionLibraryTotals = async (institutionId?: number, institutionName?: string): Promise<InstitutionLibraryTotals | undefined> => {
-  if (isNil(institutionId)) {
-    return undefined
-  }
-  const brand = getBrandedLibrary(institutionId, institutionName, 'myinstitution')
-  const libraryConfig: LibraryVersionNew = {
-    key: 'myinstitution',
-    query: brand?.query,
-    icon: brand?.icon || undefined,
-    title: brand?.title ?? 'My Institution\'s Data Library',
-    featured: brand?.featured ?? false,
-    order: brand?.order ?? 999,
-    restrictToPublicVisibility: false,
-  }
-  const datasetPagination = { page: 0, pageSize: 0 }
-  // Studies use a composite aggregation whose `size` is derived from pagination and must be >= 1,
-  // unlike the plain hit-count query datasets use — a pageSize of 0 here is rejected by Elasticsearch.
-  const studyPagination = { page: 0, pageSize: 1 }
-  const [datasetResponse, studyResponse] = await Promise.all([
-    DataSet.searchDatasetIndexV2(buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, EMPTY_FILTERS, '', datasetPagination)),
-    DataSet.searchDatasetIndexV2(buildElasticsearchQuery(libraryConfig, AssetType.STUDIES, EMPTY_FILTERS, '', studyPagination)),
-  ])
-  return {
-    datasetTotal: datasetResponse.total,
-    studyTotal: assetRegistry[AssetType.STUDIES].transformResponse(studyResponse, studyPagination).total,
-  }
-}
+// Brand colors come from the shared theme rather than being re-typed in the stylesheet, which is
+// what lets SigningOfficialDashboard.css reference them as var(--so-*).
+const themeVariables = {
+  '--so-primary': Theme.palette.primary,
+  '--so-secondary': Theme.palette.secondary,
+  '--so-secondary-background': Theme.palette.background.secondary,
+  '--so-surface': Theme.palette.white,
+} as React.CSSProperties
 
 export default function SigningOfficialDashboard(): React.JSX.Element {
   usePageTitle('Dashboard')
-  const location = useLocation()
-
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [showContactModal, setShowContactModal] = useState<boolean>(false)
-  const [statValuesByLink, setStatValuesByLink] = useState<Record<string, Record<string, number>>>({})
+  const { activeTab } = useNavigationState()
+  const [showContactModal, setShowContactModal] = useState(false)
+  const { data, isFetching, error } = useQuery({
+    queryKey: ['signing-official-dashboard-summary'],
+    queryFn: SigningOfficial.getDashboardSummary,
+    staleTime: 0,
+    retry: false,
+    refetchOnMount: 'always',
+  })
 
   useEffect(() => {
-    const init = async (): Promise<void> => {
-      try {
-        setIsLoading(true)
-        const currentUser = Storage.getCurrentUser()
-
-        const [researchers, collections, libraryTotals, daas] = await Promise.all([
-          User.list(USER_ROLES.signingOfficial),
-          Collections.getCollectionSummariesByRoleName(USER_ROLES.signingOfficial),
-          fetchInstitutionLibraryTotals(currentUser?.institution?.id, currentUser?.institution?.name),
-          DAA.getDaas(),
-        ])
-        const assignableDaas = filterAssignableDaas(daas)
-        const approvedResearcherCount = buildResearcherRows(researchers, assignableDaas)
-          .filter(row => row.authorizedCount > 0).length
-
-        const activeResearcherCount = researchers.filter(researcher => !isNil(researcher.libraryCard)).length
-        const inactiveResearcherCount = researchers.length - activeResearcherCount
-
-        const approvedDarCount = collections.filter(collection => collection.status === 'Complete').length
-        const deniedDarCount = collections.filter(collection => collection.status === 'Canceled').length
-        const pendingDarCount = collections.length - approvedDarCount - deniedDarCount
-
-        const totalApprovalsCount = collections.filter(collection =>
-          collection.requiresSOApproval || collection.actions.includes('Review_Progress_Report')).length
-        const awaitingSOActionCount = collections.filter(collection => collection.actions.includes('Approve')).length
-
-        const approvedDataSubmitterCount = researchers.filter(hasDataSubmitterRole).length
-
-        setStatValuesByLink({
-          '/signing_official_console/library_cards': {
-            Active: activeResearcherCount,
-            Inactive: inactiveResearcherCount,
-          },
-          '/signing_official_console/dar_requests': {
-            Total: collections.length,
-            Approved: approvedDarCount,
-            Denied: deniedDarCount,
-            Pending: pendingDarCount,
-          },
-          '/signing_official_console/dar_approvals': {
-            'Total': totalApprovalsCount,
-            'Awaiting SO Action': awaitingSOActionCount,
-          },
-          '/signing_official_console/data_submitters': {
-            Approved: approvedDataSubmitterCount,
-          },
-          '/signing_official_console/researchers_daa_associations': {
-            'Agreements': assignableDaas.length,
-            'Researchers Approved': approvedResearcherCount,
-          },
-          ...(!isNil(libraryTotals) && {
-            '/datalibrary/myinstitution': {
-              Datasets: libraryTotals.datasetTotal,
-              Studies: libraryTotals.studyTotal,
-            },
-          }),
-        })
-        setIsLoading(false)
-      }
-      catch (error) {
-        const message = extractError(error)
-        Notifications.showError({ text: `Error: Unable to load dashboard statistics: ${message}` })
-        setIsLoading(false)
-      }
+    if (error) {
+      Notifications.showError({
+        text: `Error: Unable to load dashboard statistics: ${extractError(error)}`,
+      })
     }
-    init()
-  }, [])
-
-  const soConsoleTab = headerTabsConfig.find(tab => tab.label === 'SO Console')
-  const tiles = (soConsoleTab?.children ?? []).filter(child => child.label !== 'Dashboard')
+  }, [error])
 
   return (
-    <div style={Styles.PAGE}>
-      <style>
-        {`
-        .so-dashboard-title {
-          font-family: Montserrat, sans-serif;
-          font-weight: 600;
-          font-size: 2.8rem;
-          color: #1F3B50;
-          max-width: 900px;
-          margin: 2rem auto 0;
-        }
-        .so-dashboard-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 1.5rem;
-          max-width: 900px;
-          margin: 2rem auto;
-        }
-        .so-dashboard-tile {
-          display: flex;
-          align-items: flex-start;
-          gap: 1rem;
-          background: #ffffff;
-          border: 1.5px solid rgba(0, 0, 0, 0.08);
-          border-radius: 12px;
-          padding: 1.75rem;
-          box-sizing: border-box;
-          text-decoration: none;
-          cursor: pointer;
-          transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-        }
-        .so-dashboard-tile:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
-          border-color: rgba(0, 0, 0, 0.18);
-        }
-        .so-dashboard-tile-icon-wrap {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          background: rgba(0, 96, 159, 0.08);
-          color: #00609f;
-          flex-shrink: 0;
-        }
-        .so-dashboard-tile-label {
-          font-family: Montserrat, sans-serif;
-          font-size: 18px;
-          font-weight: 600;
-          color: #1F3B50;
-          margin: 0 0 0.35rem;
-        }
-        .so-dashboard-tile-description {
-          font-family: Montserrat, sans-serif;
-          font-size: 14px;
-          color: #6b7280;
-          margin: 0;
-          line-height: 1.4;
-        }
-        .so-dashboard-tile-stats {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 1.25rem;
-          margin-top: 1rem;
-        }
-        .so-dashboard-stat {
-          display: flex;
-          flex-direction: column;
-        }
-        .so-dashboard-stat-value {
-          font-family: Montserrat, sans-serif;
-          font-size: 20px;
-          font-weight: 700;
-          color: #00609f;
-        }
-        .so-dashboard-stat-label {
-          font-family: Montserrat, sans-serif;
-          font-size: 12px;
-          font-weight: 500;
-          color: #6b7280;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-        }
-        .so-dashboard-section-heading {
-          font-family: Montserrat, sans-serif;
-          font-size: 20px;
-          font-weight: 600;
-          color: #1F3B50;
-          max-width: 900px;
-          margin: 3rem auto 1rem;
-        }
-        .so-dashboard-resource-link {
-          display: flex;
-          align-items: flex-start;
-          gap: 1rem;
-          background: #ffffff;
-          border: 1.5px solid rgba(0, 0, 0, 0.08);
-          border-radius: 12px;
-          padding: 1.25rem 1.5rem;
-          box-sizing: border-box;
-          text-decoration: none;
-          cursor: pointer;
-          transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-        }
-        .so-dashboard-resource-link:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
-          border-color: rgba(0, 0, 0, 0.18);
-        }
-        .so-dashboard-resource-label {
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
-          font-family: Montserrat, sans-serif;
-          font-size: 16px;
-          font-weight: 600;
-          color: #1F3B50;
-          margin: 0 0 0.3rem;
-        }
-        .so-dashboard-resource-label svg {
-          font-size: 16px;
-          color: #9ca3af;
-        }
-        .so-dashboard-resource-description {
-          font-family: Montserrat, sans-serif;
-          font-size: 13px;
-          color: #6b7280;
-          margin: 0;
-          line-height: 1.4;
-        }
-        .so-dashboard-promo {
-          max-width: 900px;
-          margin: 1.5rem auto 2rem;
-          background: #1F3B50;
-          border-radius: 12px;
-          padding: 2rem 2.25rem;
-          box-sizing: border-box;
-        }
-        .so-dashboard-promo-heading {
-          font-family: Montserrat, sans-serif;
-          font-size: 18px;
-          font-weight: 600;
-          color: #ffffff;
-          margin: 0 0 0.75rem;
-        }
-        .so-dashboard-promo-text {
-          font-family: Montserrat, sans-serif;
-          font-size: 14px;
-          color: #d7e2ea;
-          line-height: 1.6;
-          margin: 0 0 0.75rem;
-        }
-        .so-dashboard-promo-button {
-          font-family: Montserrat, sans-serif;
-          font-size: 14px;
-          font-weight: 600;
-          color: #1F3B50;
-          background: #ffffff;
-          border: none;
-          border-radius: 6px;
-          padding: 10px 22px;
-          cursor: pointer;
-          margin-top: 0.5rem;
-        }
-        @media (max-width: 600px) {
-          .so-dashboard-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-        `}
-      </style>
+    <div style={{ ...Styles.PAGE, ...themeVariables }}>
       <h1 className="so-dashboard-title">Signing Official Console</h1>
       <div className="so-dashboard-grid">
-        {tiles.map((tile) => {
-          const meta = tileMetaByLink[tile.link]
-          const Icon = meta?.icon
-          const statLabels = meta?.statLabels ?? []
-          const values = statValuesByLink[tile.link] ?? {}
+        {tileMeta.map((tile) => {
+          const Icon = tile.icon
           return (
-            <Link key={tile.link} to={tile.link} className="so-dashboard-tile">
-              {Icon && (
-                <span className="so-dashboard-tile-icon-wrap">
-                  <Icon />
-                </span>
-              )}
+            <Link
+              key={tile.link}
+              to={tile.link}
+              state={{ selectedMenuTab: activeTab }}
+              className="so-dashboard-card"
+            >
+              <span className="so-dashboard-icon"><Icon /></span>
               <span>
-                <p className="so-dashboard-tile-label">{tile.label}</p>
-                {meta?.description && (
-                  <p className="so-dashboard-tile-description">{meta.description}</p>
-                )}
-                {statLabels.length > 0 && (
-                  <div className="so-dashboard-tile-stats">
-                    {statLabels.map(label => (
-                      <div key={label} className="so-dashboard-stat">
-                        <span className="so-dashboard-stat-value">{isLoading ? '–' : (values[label] ?? '–')}</span>
-                        <span className="so-dashboard-stat-label">{label}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <span className="so-dashboard-card-title">{tile.label}</span>
+                <span className="so-dashboard-description">{tile.description}</span>
+                <span className="so-dashboard-stats">
+                  {tile.stats.map((stat: Stat) => {
+                    // The en-dash alone tells a screen reader nothing, so the accessible name
+                    // always spells out the label and either the count or why it is missing.
+                    const value = isFetching || error || !data ? null : stat.value(data)
+                    return (
+                      <span key={stat.label} className="so-dashboard-stat">
+                        <span
+                          className="so-dashboard-stat-value"
+                          aria-label={value === null
+                            ? `${stat.label}: ${isFetching ? 'loading' : 'unavailable'}`
+                            : `${stat.label}: ${value}`}
+                        >
+                          {value === null ? '–' : value}
+                        </span>
+                        <span className="so-dashboard-stat-label" aria-hidden="true">{stat.label}</span>
+                      </span>
+                    )
+                  })}
+                </span>
               </span>
             </Link>
           )
         })}
       </div>
 
-      <h2 className="so-dashboard-section-heading">Helpful Resources for Signing Officials</h2>
+      <h2 className="so-dashboard-heading">Helpful Resources for Signing Officials</h2>
       <div className="so-dashboard-grid">
-        {helpfulResources.map((resource) => {
+        {resources.map((resource) => {
           const Icon = resource.icon
           return (
-            <a
-              key={resource.href}
-              href={resource.href}
-              target="_blank"
-              rel="noreferrer"
-              className="so-dashboard-resource-link"
-            >
-              <span className="so-dashboard-tile-icon-wrap">
-                <Icon />
-              </span>
+            <a key={resource.href} href={resource.href} target="_blank" rel="noopener noreferrer" className="so-dashboard-card">
+              <span className="so-dashboard-icon"><Icon /></span>
               <span>
-                <p className="so-dashboard-resource-label">
-                  {resource.label}
-                  <OpenInNewOutlinedIcon />
-                </p>
-                <p className="so-dashboard-resource-description">{resource.description}</p>
+                <span className="so-dashboard-card-title">{resource.label}<OpenInNewOutlinedIcon /></span>
+                <span className="so-dashboard-description">{resource.description}</span>
               </span>
             </a>
           )
         })}
       </div>
 
-      <div className="so-dashboard-promo">
-        <p className="so-dashboard-promo-heading">Get more out of DUOS</p>
-        <p className="so-dashboard-promo-text">
-          Signing Officials can use DUOS to curate and share their institution&#39;s datasets with the
-          research community. You can also leverage DUOS alongside Terra to meet NIH requirements
-          for analyzing and storing controlled-access data.
-        </p>
-        <p className="so-dashboard-promo-text">
-          Reach out if you&#39;d like to learn more about either of these.
-        </p>
-        <button
-          type="button"
-          className="so-dashboard-promo-button"
-          onClick={() => setShowContactModal(true)}
-        >
-          Contact Us
-        </button>
-      </div>
+      <section className="so-dashboard-promo">
+        <h2>Get more out of DUOS</h2>
+        <p>Signing Officials can use DUOS to curate and share their institution&apos;s datasets with the research community. You can also leverage DUOS alongside Terra to meet NIH requirements for analyzing and storing controlled-access data.</p>
+        <p>Reach out if you&apos;d like to learn more about either of these.</p>
+        <button type="button" onClick={() => setShowContactModal(true)}>Contact Us</button>
+      </section>
 
       <SupportRequestModal
         showModal={showContactModal}
         onCloseRequest={() => setShowContactModal(false)}
-        url={location.pathname}
+        url={window.location.href}
       />
     </div>
   )

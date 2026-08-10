@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Routes } from 'react-router'
+import { Navigate, Route, Routes } from 'react-router'
 import Home from 'src/pages/Home'
 import UserProfile from 'src/pages/user_profile/UserProfile'
 import Authenticated from 'src/routing/Authenticated'
@@ -103,6 +103,7 @@ const AppRoutes = (props: AppRoutesProps) => {
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.signingOfficial]} />}>
           <Route element={<SOAcknowledged />}>
+            <Route path="/signing_official_console" element={<Navigate to="/signing_official_console/dashboard" replace />} />
             <Route path="/signing_official_console/dashboard" element={<SigningOfficialDashboard />} />
             <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
             <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />

@@ -4,6 +4,7 @@ import { Box, IconButton } from '@mui/material'
 import Drawer from '@mui/material/Drawer'
 import React, { useEffect, useState } from 'react'
 import { NavigationTabsComponent } from 'src/components/NavigationTabsComponent'
+import { SubTab, visibleSubTabs } from 'src/components/navigation/subTabVisibility'
 import DuosLogo from 'src/images/duos-network-logo.svg'
 import contactUsStandard from 'src/images/navbar_icon_contact_us.svg'
 import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg'
@@ -18,14 +19,9 @@ import { useLocation, useNavigate } from 'react-router'
 import { DuosUser } from 'src/types/model'
 import { useNavigationState } from 'src/contexts/NavigationStateContext'
 import { useQueryClient } from '@tanstack/react-query'
+import { SO_CONSOLE_SECTIONS, SO_DASHBOARD_ROUTE } from 'src/pages/signing_official_console/signingOfficialConsoleRoutes'
 
-interface SubTab {
-  label: string
-  link: string
-  search?: string
-  isRendered?: (user: DuosUser) => boolean
-  isRenderedForUser?: (user: DuosUser) => boolean
-}
+export type { SubTab }
 
 export interface Tab {
   label: string
@@ -33,8 +29,6 @@ export interface Tab {
   search?: string
   children?: SubTab[]
   isRendered: (user: DuosUser) => boolean
-  /** Hides the white second-tier sub-tab bar for this console; its own page provides navigation instead. */
-  hideSubTabBar?: boolean
 }
 
 interface DuosHeaderState {
@@ -83,18 +77,12 @@ export const headerTabsConfig: Tab[] = [
   },
   {
     label: 'SO Console',
-    link: '/signing_official_console/dashboard',
+    link: SO_DASHBOARD_ROUTE,
     children: [
-      { label: 'Dashboard', link: '/signing_official_console/dashboard' },
-      { label: 'Researcher Status', link: '/signing_official_console/library_cards' },
-      { label: 'Data Access Requests', link: '/signing_official_console/dar_requests' },
-      { label: 'DAR Approvals', link: '/signing_official_console/dar_approvals' },
-      { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
-      { label: 'My Institution\'s Data Library', link: '/datalibrary/myinstitution' },
-      { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations' },
+      { label: 'Dashboard', link: SO_DASHBOARD_ROUTE, hideSubTabBar: true },
+      ...SO_CONSOLE_SECTIONS,
     ],
     isRendered: user => user.isSigningOfficial,
-    hideSubTabBar: true,
   },
   {
     label: 'DAC Chair Console',
@@ -326,10 +314,9 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
 
   // populate initialSubTab
   if (initialTab !== -1) {
-    // Only consider subtabs that should be rendered for the user
-    const renderedSubtabs = tabs[initialTab].children?.filter(
-      subtab => (subtab.isRenderedForUser ?? subtab.isRendered ?? (() => true))(currentUser),
-    ) || []
+    // Only consider subtabs that should be rendered for the user. Shared with the sub-tab bar so
+    // this index always refers to the same list that gets rendered.
+    const renderedSubtabs = visibleSubTabs(tabs[initialTab].children, currentUser)
     // Find index of matching subtab
     initialSubTab = renderedSubtabs.findIndex(
       subtab => subtab.link === location.pathname || (subtab.search && location.pathname.includes(subtab.search)),

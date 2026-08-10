@@ -22,11 +22,11 @@ const bulkResult = (applied: number): DaaBulkRelationResult => ({
 })
 
 const mockDaas: DAAObject[] = [
-  makeDaa({ broadDaa: true, daaId: 1, fileName: 'Default DUOS DAA', dacId: 10 }),
-  makeDaa({ broadDaa: false, daaId: 2, fileName: 'GTEx Access Agreement', dacId: 20 }),
+  makeDaa({ daaId: 1, fileName: 'Default DUOS DAA', dacId: 10 }),
+  makeDaa({ daaId: 2, fileName: 'GTEx Access Agreement', dacId: 20 }),
 ]
 
-const recentDaa = makeDaa({ broadDaa: false, daaId: 3, fileName: 'Recent Agreement', dacId: 30 })
+const recentDaa = makeDaa({ daaId: 3, fileName: 'Recent Agreement', dacId: 30 })
 const recentDaaWithDate: DAAObject = {
   ...recentDaa,
   updateDate: new Date().toISOString(),

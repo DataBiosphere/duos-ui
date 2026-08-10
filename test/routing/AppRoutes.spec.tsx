@@ -39,6 +39,8 @@ const roleBACRoutes: string[] = [
   '/dataset_update/1',
   '/dar_vote_review/1',
   '/member_console',
+  '/signing_official_console',
+  '/signing_official_console/dashboard',
   '/signing_official_console/library_cards',
   '/signing_official_console/dar_requests',
   '/signing_official_console/dar_approvals',

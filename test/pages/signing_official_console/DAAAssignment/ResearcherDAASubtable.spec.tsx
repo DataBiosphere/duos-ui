@@ -10,19 +10,19 @@ import { makeDaa } from './fixtures'
 const mockDaaRows: DAARowData[] = [
   {
     daa: {
-      ...makeDaa({ broadDaa: true, daaId: 1, fileName: 'Default DUOS DAA' }),
+      ...makeDaa({ daaId: 1, fileName: 'Default DUOS DAA' }),
       createDate: 1705276800 as unknown as string,
     },
     dacName: 'NHGRI DAC',
     status: 'authorized',
   },
   {
-    daa: makeDaa({ broadDaa: false, daaId: 2, fileName: 'GTEx Access Agreement' }),
+    daa: makeDaa({ daaId: 2, fileName: 'GTEx Access Agreement' }),
     dacName: 'GTEx DAC',
     status: 'not_requested',
   },
   {
-    daa: makeDaa({ broadDaa: false, daaId: 3, fileName: 'eMERGE Institutional Agreement' }),
+    daa: makeDaa({ daaId: 3, fileName: 'eMERGE Institutional Agreement' }),
     dacName: 'eMERGE DAC',
     status: 'not_requested',
   },
