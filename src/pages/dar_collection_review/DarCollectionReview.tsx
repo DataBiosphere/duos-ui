@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
 import TabControl from 'src/components/TabControl'
 import ReviewHeader from './ReviewHeader'
-import { tabContainerColor, tabStyleOverride } from './reviewTabStyles'
+import { reviewTabsSx, tabContainerColor } from './reviewTabStyles'
 import { compact, get, isEmpty, map, toLower, uniq } from 'src/utils/NodashUtil'
 import { updateFinalVote } from 'src/utils/DarCollectionUtils'
 import { binCollectionToBuckets, Bucket } from 'src/utils/BucketUtils'
@@ -278,7 +278,7 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
           isLoading={isLoading}
-          styleOverride={tabStyleOverride}
+          sx={reviewTabsSx}
           isDisabled={isLoading || subcomponentLoading}
         />
         {selectedTab === tabs.fullDAR && (

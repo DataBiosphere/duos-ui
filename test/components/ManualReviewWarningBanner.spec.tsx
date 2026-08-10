@@ -74,15 +74,13 @@ describe('ManualReviewWarningBanner Component', () => {
     ])
   })
 
-  it('keeps the warning styling and icon', () => {
+  it('renders as a MUI warning alert with an icon', () => {
     const { container } = render(<ManualReviewWarningBanner darInfo={{ hmb: true, aiLlmUse: true }} />)
 
     const banner = container.querySelector(bannerSelector) as HTMLElement
     expect(banner).not.toBeNull()
-    // TODO: no Vitest equivalent for CSS computed style assertions like cy.get().should('have.css', ...)
-    // Inline styles are set directly on the element; check style attribute presence instead
-    expect(banner.style.backgroundColor).toBe('rgb(255, 243, 205)')
-    expect(banner.style.borderRadius).toBe('8px')
-    expect(banner.querySelector('svg')).not.toBeNull()
+    expect(banner).toHaveClass('MuiAlert-root', 'MuiAlert-colorWarning')
+    expect(screen.getByRole('alert')).toBe(banner)
+    expect(banner.querySelector('.MuiAlert-icon svg')).not.toBeNull()
   })
 })

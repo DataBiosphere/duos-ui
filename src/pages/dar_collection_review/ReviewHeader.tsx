@@ -1,4 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
+import Chip from '@mui/material/Chip'
+import Paper from '@mui/material/Paper'
+import Typography from '@mui/material/Typography'
 import { isEmpty } from 'src/utils/NodashUtil'
 import { DAR } from 'src/libs/ajax/DAR'
 import { DownloadLink } from 'src/components/DownloadLink'
@@ -150,55 +153,6 @@ const styles: Record<string, React.CSSProperties> = {
     overflowY: 'auto',
     paddingRight: '0.4rem',
   },
-  duoTermCard: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    columnGap: '0.8rem',
-    backgroundColor: 'white',
-    borderRadius: '6px',
-    padding: '0.6rem 0.9rem',
-  },
-  duoTermCardPrimary: {
-    boxShadow: `0 0 0 1.5px ${Theme.palette.primary}`,
-  },
-  duoTermCardSecondary: {
-    boxShadow: '0 0 0 1px rgba(31, 59, 80, 0.2)',
-  },
-  duoCodeBadge: {
-    flexShrink: 0,
-    minWidth: '3.4rem',
-    borderRadius: '999px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.1rem',
-    fontWeight: 700,
-    color: 'white',
-    padding: '0.25rem 0.7rem',
-  },
-  duoCodeBadgePrimary: {
-    backgroundColor: Theme.palette.secondary,
-  },
-  duoCodeBadgeSecondary: {
-    backgroundColor: '#7ab8e0',
-  },
-  duoCodeBadgeManualReview: {
-    backgroundColor: '#db5454',
-  },
-  duoDescription: {
-    fontSize: 'clamp(1.15rem, 1.9vw, 1.4rem)',
-    fontWeight: 400,
-    color: '#333f52',
-    overflowWrap: 'anywhere',
-    flex: 1,
-    minWidth: 0,
-  },
-  duoDescriptionPrimary: {
-    fontWeight: 700,
-  },
-  duoDescriptionManualReview: {
-    color: '#e57373',
-  },
   scrollableWrapper: {
     position: 'relative',
   },
@@ -271,32 +225,44 @@ function ProfileFactLink({ label, url, id }: Readonly<{ label: string, url: stri
   )
 }
 
+const duoCodeColor = (isPrimary: boolean, manualReview: boolean): string => {
+  if (manualReview) return '#db5454'
+  return isPrimary ? Theme.palette.secondary : '#7ab8e0'
+}
+
 function DuoTermCard({ term, id, isPrimary }: Readonly<{ term: DataUseTerm, id: string, isPrimary: boolean }>) {
+  const manualReview = Boolean(term.manualReview)
   return (
-    <div
+    <Paper
+      variant="outlined"
       className="duo-term-card"
       id={id}
-      style={{ ...styles.duoTermCard, ...(isPrimary ? styles.duoTermCardPrimary : styles.duoTermCardSecondary) }}
+      data-manual-review={String(manualReview)}
+      sx={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        columnGap: '0.8rem',
+        padding: '0.6rem 0.9rem',
+        borderColor: isPrimary ? Theme.palette.primary : 'divider',
+      }}
     >
-      <span
-        style={{
-          ...styles.duoCodeBadge,
-          ...(isPrimary ? styles.duoCodeBadgePrimary : styles.duoCodeBadgeSecondary),
-          ...(term.manualReview ? styles.duoCodeBadgeManualReview : {}),
-        }}
-      >
-        {term.code}
-      </span>
-      <span
-        style={{
-          ...styles.duoDescription,
-          ...(isPrimary ? styles.duoDescriptionPrimary : {}),
-          ...(term.manualReview ? styles.duoDescriptionManualReview : {}),
+      <Chip
+        label={term.code}
+        size="small"
+        sx={{ flexShrink: 0, fontWeight: 700, color: 'white', backgroundColor: duoCodeColor(isPrimary, manualReview) }}
+      />
+      <Typography
+        sx={{
+          fontSize: 'clamp(1.15rem, 1.9vw, 1.4rem)',
+          fontWeight: isPrimary ? 700 : 400,
+          color: manualReview ? '#e57373' : '#333f52',
+          overflowWrap: 'anywhere',
+          minWidth: 0,
         }}
       >
         {term.description}
-      </span>
-    </div>
+      </Typography>
+    </Paper>
   )
 }
 

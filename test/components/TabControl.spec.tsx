@@ -8,53 +8,49 @@ import TabControl from 'src/components/TabControl'
 const labels = ['Tab One', 'Tab Two', 'Tab Three']
 
 describe('TabControl', () => {
-  it('renders a button for each label', () => {
+  it('renders a tab for each label', () => {
     render(<TabControl labels={labels} selectedTab="Tab One" setSelectedTab={vi.fn()} />)
-    labels.forEach(label => expect(screen.getByRole('button', { name: label })).toBeInTheDocument())
+    labels.forEach(label => expect(screen.getByRole('tab', { name: label })).toBeInTheDocument())
+  })
+
+  it('exposes the tabs as a tablist for assistive technology', () => {
+    render(<TabControl labels={labels} selectedTab="Tab One" setSelectedTab={vi.fn()} />)
+    expect(screen.getByRole('tablist')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Tab One' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Tab Two' })).toHaveAttribute('aria-selected', 'false')
   })
 
   it('calls setSelectedTab with the clicked label', async () => {
     const setSelectedTab = vi.fn()
     render(<TabControl labels={labels} selectedTab="Tab One" setSelectedTab={setSelectedTab} />)
-    await userEvent.click(screen.getByRole('button', { name: 'Tab Two' }))
+    await userEvent.click(screen.getByRole('tab', { name: 'Tab Two' }))
     expect(setSelectedTab).toHaveBeenCalledWith('Tab Two')
   })
 
-  it('renders loading placeholders instead of buttons when isLoading is true', () => {
+  it('renders loading placeholders instead of tabs when isLoading is true', () => {
     render(<TabControl labels={labels} selectedTab="Tab One" setSelectedTab={vi.fn()} isLoading={true} />)
-    expect(screen.queryAllByRole('button')).toHaveLength(0)
+    expect(screen.queryAllByRole('tab')).toHaveLength(0)
     expect(document.querySelectorAll('.text-placeholder')).toHaveLength(labels.length)
   })
 
-  it('renders buttons when isLoading is false', () => {
+  it('renders tabs when isLoading is false', () => {
     render(<TabControl labels={labels} selectedTab="Tab One" setSelectedTab={vi.fn()} isLoading={false} />)
-    expect(screen.getAllByRole('button')).toHaveLength(labels.length)
+    expect(screen.getAllByRole('tab')).toHaveLength(labels.length)
   })
 
-  it('disables all buttons when isDisabled is true', () => {
+  it('disables all tabs when isDisabled is true', () => {
     render(<TabControl labels={labels} selectedTab="Tab One" setSelectedTab={vi.fn()} isDisabled={true} />)
-    screen.getAllByRole('button').forEach(btn => expect(btn).toBeDisabled())
+    screen.getAllByRole('tab').forEach(tab => expect(tab).toBeDisabled())
   })
 
-  it('does not disable buttons when isDisabled is false', () => {
+  it('does not disable tabs when isDisabled is false', () => {
     render(<TabControl labels={labels} selectedTab="Tab One" setSelectedTab={vi.fn()} isDisabled={false} />)
-    screen.getAllByRole('button').forEach(btn => expect(btn).not.toBeDisabled())
+    screen.getAllByRole('tab').forEach(tab => expect(tab).not.toBeDisabled())
   })
 
-  it('applies tabContainer styleOverride to the container div', () => {
-    const styleOverride = { tabContainer: { backgroundColor: 'red' } }
-    const { container } = render(
-      <TabControl labels={labels} selectedTab="Tab One" setSelectedTab={vi.fn()} styleOverride={styleOverride} />,
-    )
-    const tabList = container.querySelector('.tab-list') as HTMLElement
-    expect(tabList.style.backgroundColor).toBe('red')
-  })
-
-  it('falls back to the default container style when no tabContainer override is given', () => {
-    const { container } = render(<TabControl labels={labels} selectedTab="Tab One" setSelectedTab={vi.fn()} />)
-    const tabList = container.querySelector('.tab-list') as HTMLElement
-    expect(tabList.style.backgroundColor).toBe('white')
-    expect(tabList.style.display).toBe('flex')
+  it('selects no tab when the selected label is not among the tabs', () => {
+    render(<TabControl labels={labels} selectedTab="Not A Tab" setSelectedTab={vi.fn()} />)
+    screen.getAllByRole('tab').forEach(tab => expect(tab).toHaveAttribute('aria-selected', 'false'))
   })
 
   it('renders the tab-list container', () => {

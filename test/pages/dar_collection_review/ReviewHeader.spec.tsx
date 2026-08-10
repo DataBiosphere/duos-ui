@@ -567,42 +567,26 @@ describe('ReviewHeader - Tests', () => {
     expect(duoColumn).toHaveTextContent('None listed')
   })
 
-  it('renders manual-review DUO terms (e.g. POA) in light red text', () => {
+  it('marks manual-review DUO terms (e.g. POA) as needing review', () => {
     const { container } = render(
       <ReviewHeader approvedDatasets={[]} darInfo={{ poa: true }} />,
     )
     const poaCard = container.querySelector('#duo-primary-0-fact')
     expect(poaCard).toHaveTextContent('POA')
-    const description = poaCard?.querySelector('span:last-child') as HTMLElement
-    expect(description.style.color).toBe('rgb(229, 115, 115)')
+    expect(poaCard).toHaveAttribute('data-manual-review', 'true')
   })
 
-  it('does not apply the manual-review color to terms that do not require review', () => {
+  it('does not mark terms that do not require review', () => {
     const { container } = render(
       <ReviewHeader approvedDatasets={[]} darInfo={{ hmb: true }} />,
     )
-    const hmbCard = container.querySelector('#duo-primary-0-fact')
-    const description = hmbCard?.querySelector('span:last-child') as HTMLElement
-    expect(description.style.color).not.toBe('rgb(229, 115, 115)')
+    expect(container.querySelector('#duo-primary-0-fact')).toHaveAttribute('data-manual-review', 'false')
   })
 
-  it('renders primary DUO term pills in a blue shade', () => {
-    const { container } = render(<ReviewHeader approvedDatasets={[]} darInfo={{ hmb: true }} />)
-    const badge = container.querySelector('#duo-primary-0-fact span:first-child') as HTMLElement
-    expect(badge.style.backgroundColor).toBe('rgb(0, 96, 159)')
-  })
-
-  it('renders secondary DUO term pills in a lighter blue shade', () => {
+  it('renders each DUO code as a chip on its term card', () => {
     const { container } = render(<ReviewHeader approvedDatasets={[]} darInfo={{ hmb: true, methods: true }} />)
-    const badge = container.querySelector('#duo-secondary-0-fact span:first-child') as HTMLElement
-    expect(badge.textContent).toBe('MDS')
-    expect(badge.style.backgroundColor).toBe('rgb(122, 184, 224)')
-  })
-
-  it('renders manual-review DUO term pills (e.g. POA) in red', () => {
-    const { container } = render(<ReviewHeader approvedDatasets={[]} darInfo={{ poa: true }} />)
-    const badge = container.querySelector('#duo-primary-0-fact span:first-child') as HTMLElement
-    expect(badge.style.backgroundColor).toBe('rgb(219, 84, 84)')
+    expect(container.querySelector('#duo-primary-0-fact .MuiChip-label')?.textContent).toBe('HMB')
+    expect(container.querySelector('#duo-secondary-0-fact .MuiChip-label')?.textContent).toBe('MDS')
   })
 
   it('renders "None listed" in the DUO Terms column for an empty darInfo', () => {
@@ -631,12 +615,10 @@ describe('ReviewHeader - Tests', () => {
     expect(duoColumn).not.toBeNull()
 
     const cards = Array.from(duoColumn!.querySelectorAll<HTMLElement>('.duo-term-card'))
-    const redCards = cards.filter(card =>
-      card.querySelector<HTMLElement>('span:first-child')?.style.backgroundColor === 'rgb(219, 84, 84)',
-    )
+    const flagged = cards.filter(card => card.dataset.manualReview === 'true')
 
-    expect(redCards).toHaveLength(5)
-    expect(redCards.map(card => card.textContent)).toEqual([
+    expect(flagged).toHaveLength(5)
+    expect(flagged.map(card => card.textContent)).toEqual([
       expect.stringContaining('Some other primary purpose'),
       expect.stringContaining('Artificial Intelligence (AI) or Large Language Models (LLMs)'),
       expect.stringContaining('illegal behaviors'),
@@ -655,9 +637,9 @@ describe('ReviewHeader - Tests', () => {
       />,
     )
 
-    expect(container.querySelector('#duo-primary-0-fact span:first-child')?.textContent).toBe('OTHER')
-    expect(container.querySelector('#duo-primary-1-fact span:first-child')?.textContent).toBe('DS')
-    expect(container.querySelector('#duo-secondary-0-fact span:first-child')?.textContent).toBe('AI')
-    expect(container.querySelector('#duo-secondary-1-fact span:first-child')?.textContent).toBe('MDS')
+    expect(container.querySelector('#duo-primary-0-fact .MuiChip-label')?.textContent).toBe('OTHER')
+    expect(container.querySelector('#duo-primary-1-fact .MuiChip-label')?.textContent).toBe('DS')
+    expect(container.querySelector('#duo-secondary-0-fact .MuiChip-label')?.textContent).toBe('AI')
+    expect(container.querySelector('#duo-secondary-1-fact .MuiChip-label')?.textContent).toBe('MDS')
   })
 })
