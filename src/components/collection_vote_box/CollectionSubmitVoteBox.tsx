@@ -50,10 +50,6 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     rowGap: '0.3rem',
   },
-  voteButtons: {
-    display: 'flex',
-    columnGap: '0.7rem',
-  },
   rationaleTextArea: {
     borderRadius: '4px',
     fontWeight: '500',
@@ -250,7 +246,7 @@ const CollectionSubmitVoteBox: React.FC<CollectionSubmitVoteBoxProps> = (props) 
           disabled={isVotingDisabled || isLoading}
         />
       </div>
-      <div className="vote-buttons" style={styles.voteButtons}>
+      <div className="vote-buttons">
         {!isVotingDisabled && (
           <CollectionVoteYesButton
             onClick={async () => await updateVote(true, !!updateFinalVote)}
