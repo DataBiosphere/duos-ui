@@ -140,5 +140,28 @@ describe('ScrollableMarkdownContainer sanitization', () => {
 
       expect(container.querySelector('a')?.getAttribute('target')).toBe('_blank')
     })
+
+    it('pairs the new tab with rel="noopener noreferrer"', async () => {
+      // Without rel, the opened page can navigate back through window.opener.
+      const container = await renderMarkdown('[ok](https://example.com)')
+
+      expect(container.querySelector('a')?.getAttribute('rel')).toBe('noopener noreferrer')
+    })
+
+    it('escapes a raw anchor rather than rendering one whose target and rel it controls', async () => {
+      const container = await renderMarkdown('<a href="https://example.com" target="_self" rel="opener">click</a>')
+
+      expect(container.querySelector('a')).toBeNull()
+      expect(container.textContent).toContain('target="_self"')
+    })
+
+    it('keeps target and rel on links that carry other attributes', async () => {
+      const container = await renderMarkdown('[ok](https://example.com "Title")')
+      const anchor = container.querySelector('a')
+
+      expect(anchor?.getAttribute('title')).toBe('Title')
+      expect(anchor?.getAttribute('target')).toBe('_blank')
+      expect(anchor?.getAttribute('rel')).toBe('noopener noreferrer')
+    })
   })
 })

@@ -17,8 +17,10 @@ interface ScrollableMarkdownContainerProps {
   onLoadStateChange?: (state: MarkdownLoadState) => void
 }
 
+// target and rel come after the spread so document content cannot override them: without rel the
+// opened page can reach back through window.opener.
 const MarkdownLink = (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-  <a target="_blank" {...props} />
+  <a {...props} target="_blank" rel="noopener noreferrer" />
 )
 
 const markdownComponents = { a: MarkdownLink }

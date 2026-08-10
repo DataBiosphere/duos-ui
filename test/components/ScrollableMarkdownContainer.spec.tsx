@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import ScrollableMarkdownContainer from 'src/components/ScrollableMarkdownContainer'
 
@@ -112,25 +112,19 @@ describe('ScrollableMarkdownContainer', () => {
       .mockReturnValueOnce(secondResponse)
     const onLoadStateChange = vi.fn()
 
-    let rerender!: ReturnType<typeof render>['rerender']
-    await act(async () => {
-      ;({ rerender } = render(<ScrollableMarkdownContainer markdown="/one.md" onLoadStateChange={onLoadStateChange} />))
-    })
-    expect(screen.getByTestId('markdown-link').textContent).toContain('First body')
+    // render and rerender flush their own updates, so findBy/waitFor carry the async waiting.
+    const { rerender } = render(<ScrollableMarkdownContainer markdown="/one.md" onLoadStateChange={onLoadStateChange} />)
+    await waitFor(() => expect(screen.getByTestId('markdown-link').textContent).toContain('First body'))
     expect(onLoadStateChange).toHaveBeenLastCalledWith('loaded')
 
-    await act(async () => {
-      rerender(<ScrollableMarkdownContainer markdown="/two.md" onLoadStateChange={onLoadStateChange} />)
-    })
+    rerender(<ScrollableMarkdownContainer markdown="/two.md" onLoadStateChange={onLoadStateChange} />)
 
     // The first document's body must not linger while the second is still in flight.
     expect(screen.getByTestId('markdown-link').textContent).not.toContain('First body')
     expect(onLoadStateChange).toHaveBeenLastCalledWith('loading')
 
-    await act(async () => {
-      resolveSecond({ ok: true, text: () => Promise.resolve('Second body') } as unknown as Response)
-    })
-    expect(screen.getByTestId('markdown-link').textContent).toContain('Second body')
+    resolveSecond({ ok: true, text: () => Promise.resolve('Second body') } as unknown as Response)
+    await waitFor(() => expect(screen.getByTestId('markdown-link').textContent).toContain('Second body'))
     expect(onLoadStateChange).toHaveBeenLastCalledWith('loaded')
   })
 
