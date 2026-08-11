@@ -3,7 +3,6 @@ import { Box } from '@mui/material'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined'
-import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined'
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined'
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
@@ -26,10 +25,12 @@ const tileMeta: ConsoleDashboardTileMeta<SigningOfficialDashboardSummary>[] = [
   {
     ...SO_CONSOLE_SECTIONS[0],
     icon: PeopleAltOutlinedIcon,
-    description: 'Manage researchers who request data on behalf of your institution.',
+    // Data Submitter management lives on this page too, so its count is reported here.
+    description: 'Manage researchers who request or submit data on behalf of your institution.',
     stats: [
       { label: 'Active', value: s => s?.researcherStatus?.active },
       { label: 'Inactive', value: s => s?.researcherStatus?.inactive },
+      { label: 'Data Submitters', value: s => s?.dataSubmitters?.approved },
     ],
   },
   {
@@ -54,12 +55,6 @@ const tileMeta: ConsoleDashboardTileMeta<SigningOfficialDashboardSummary>[] = [
   },
   {
     ...SO_CONSOLE_SECTIONS[3],
-    icon: GroupOutlinedIcon,
-    description: 'Manage the researchers who submit data on behalf of your institution.',
-    stats: [{ label: 'Approved', value: s => s?.dataSubmitters?.approved }],
-  },
-  {
-    ...SO_CONSOLE_SECTIONS[4],
     icon: StorageOutlinedIcon,
     description: 'Browse the datasets and studies registered by your institution.',
     stats: [
@@ -68,7 +63,7 @@ const tileMeta: ConsoleDashboardTileMeta<SigningOfficialDashboardSummary>[] = [
     ],
   },
   {
-    ...SO_CONSOLE_SECTIONS[5],
+    ...SO_CONSOLE_SECTIONS[4],
     icon: HandshakeOutlinedIcon,
     description: 'Manage Data Access Agreement associations for your researchers.',
     stats: [

@@ -45,7 +45,6 @@ import SigningOfficialDashboard from 'src/pages/signing_official_console/Signing
 import SigningOfficialLibraryCards from 'src/pages/signing_official_console/SigningOfficialLibraryCards'
 import SigningOfficialDarRequests from 'src/pages/signing_official_console/SigningOfficialDarRequests'
 import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs'
-import SigningOfficialDataSubmitters from 'src/pages/signing_official_console/SigningOfficialDataSubmitters'
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
 import { DataLibrary } from 'src/pages/DataLibrary'
@@ -110,7 +109,6 @@ const AppRoutes = (props: AppRoutesProps) => {
             <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
             <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />
             <Route path="/signing_official_console/dar_approvals" element={<SigningOfficialDarApprovals />} />
-            <Route path="/signing_official_console/data_submitters" element={<SigningOfficialDataSubmitters />} />
             <Route path="/signing_official_console/researchers_daa_associations" element={<ManageResearcherDAAs />} />
           </Route>
         </Route>
