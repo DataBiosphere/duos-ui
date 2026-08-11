@@ -1,83 +1,125 @@
-# Load test — BFF API proxy
+# BFF proxy load testing
 
-Epic 3, story 3-H. Measures what the proxy layer costs and where it stops
-scaling: latency and throughput under concurrent session load, and whether the
-`@fastify/postgres` pool behind the session store holds up.
+This harness measures the BFF API proxy under concurrent load. It focuses on:
+
+- latency and throughput through `apiProxy`;
+- request and response streaming;
+- the Postgres pool used by the session store; and
+- backpressure from the proxy's upstream socket pool.
+
+It was created for Phase 3, story 3-H.
+
+> [!IMPORTANT]
+> This is a local diagnostic tool, not a CI benchmark. Absolute latency varies
+> with the host, virtualization, other workloads, and the Node version. Proxy
+> correctness remains covered by `apiProxy.test.ts`; this harness is for
+> understanding capacity and the shape of the performance curve.
+
+## Quick start
+
+Run the default authenticated-read scenario with in-memory sessions:
 
 ```bash
-pnpm test:load                                   # read scenario, in-memory sessions
-pnpm test:load -- --scenario all --store postgres
+pnpm test:load
 ```
 
-A breached threshold exits non-zero. That is for the person running it — **this
-is not wired into CI and should not be**: absolute latency depends on the host,
-its other tenants, the runner's virtualization and the Node version, so a
-threshold tight enough to catch a regression would fail on a noisy runner and
-one loose enough to survive one would catch nothing. Correctness of what the
-proxy returns is `apiProxy.test.ts`'s job (101 cases); this run's job is the
-shape of the curve.
+Run every scenario against Postgres:
 
-## What it stands up
-
+```bash
+DUOS_DB_HOST=localhost DUOS_DB_SSL=false \
+  pnpm test:load -- --scenario all --store postgres
 ```
+
+Add one millisecond of simulated database latency in each direction:
+
+```bash
+DUOS_DB_HOST=localhost DUOS_DB_SSL=false \
+  pnpm test:load -- --store postgres --db-latency 1
+```
+
+## Headline results
+
+Reference runs on an Apple M2 Max found that:
+
+- the proxy added about 2 ms of median latency in this setup;
+- the default Postgres pool of 10 connections supported roughly 2,900 req/s
+  with a simulated 2 ms database round trip;
+- increasing the Postgres pool beyond 20 connections produced no consistent
+  improvement; and
+- the 128-socket upstream pool provides intentional backpressure and becomes
+  the throughput ceiling well before the Node process does.
+
+These results support keeping both production pool sizes unchanged. Full
+measurements and interpretation are recorded below.
+
+## Test topology
+
+```text
 process 1: autocannon worker threads
-      │  N seeded sessions, each with its own cookie and CSRF token
+      │  seeded sessions, each with its own cookie and CSRF token
       ▼
-process 2: Fastify — cookie → session → csrf → apiProxy    ← the code under test
+process 2: Fastify — cookie → session → CSRF → apiProxy
       │                        │
       │ session SELECT         │ reply.from()
       ▼                        ▼
-Postgres (own process)    process 3: stub DUOS API
+Postgres                  process 3: stub DUOS API
 ```
 
-**Three processes, not one.** The stub upstream is forked rather than started
-in-process, because parsing requests and writing responses is real work on a
-real event loop even when the bodies are pre-allocated. Sharing the BFF's loop
-with it makes the stub's service time indistinguishable from the proxy's — and
-it did: an earlier single-process draft of this harness reported a "process
-ceiling" of ~6,100 req/s that was really the stub competing for the loop, and
-made the in-memory session store look 20% *slower* than Postgres. Both numbers
-moved once the stub was moved out. Load generation is likewise in worker
-threads.
+The driver, BFF, and stub upstream do not share a Node event loop. This matters
+because parsing requests and writing responses consume event-loop time even
+when response bodies are pre-allocated. An earlier single-process harness made
+the stub's work look like proxy overhead and produced misleading conclusions.
 
-The target is assembled the way `index.ts`'s `if (process.env.DUOS_DB_HOST)`
-block assembles it, in the same order. What is deliberately missing is
-everything that is not in a `/duos-api/*` request's path: `@fastify/vite`, the
-SPA fallback, `/config.json`.
+The Fastify target registers Postgres, cookies, sessions, CSRF protection, and
+`apiProxy` in the same order as `index.ts`. It omits components that are not on
+a `/duos-api/*` request path, including `@fastify/vite`, the SPA fallback, and
+`/config.json`.
 
-Two things the harness fakes, and how:
+The harness substitutes two external dependencies:
 
-- **Sessions** come from a seeding route (`POST /__load/seed`) that writes a
-  real session through the real store and hands back the cookie — standing in
-  for a completed OAuth flow. Access tokens expire an hour out, so no request
-  in a run enters the refresh path.
-- **The upstream** is a stub `http.Server` with a fixed `--upstream-latency`
-  and pre-allocated bodies. Before each scenario is measured, one request is
-  sent through the proxy and compared byte-for-byte with what the stub serves,
-  so a run cannot report throughput for a fast but wrong response.
+- **Authentication:** `POST /__load/seed` creates a real session through the
+  configured session store and returns its cookie and CSRF token. Its access
+  token expires an hour later, keeping the refresh path out of the benchmark.
+- **DUOS API:** a small HTTP server returns fixed-latency, pre-allocated bodies.
+  Before measuring a scenario, the harness verifies one proxied response
+  byte-for-byte against the stub's response.
 
-## Running against Postgres
+## Run modes
 
-`--store postgres` needs a database with the BFF's `user_sessions` table and the
-`DUOS_DB_*` variables pointing at it. `.env.local` is loaded automatically —
-**but two of its values will be wrong here**, because they describe the route to
-Postgres from *inside* a container while this harness runs on the host:
+### In-memory sessions
+
+This is the default and requires no external services:
 
 ```bash
-# Against a docker compose consent (or duos) stack:
-DUOS_DB_HOST=localhost DUOS_DB_SSL=false pnpm test:load -- --scenario all --store postgres
+pnpm test:load
+pnpm test:load -- --scenario all
 ```
 
-`DUOS_DB_HOST=host.docker.internal` does not resolve on the host, and
-`DUOS_DB_SSL` defaults to on while the compose Postgres does not speak TLS. The
-harness checks both before the run and says which one it hit; the seeding route
-would otherwise report only a 500.
+Use it when the proxy and upstream socket pool are the systems of interest.
 
-The run deletes the session rows it created when it finishes, so pointing it at
-a real `consent` database leaves nothing behind.
+### Postgres sessions
 
-Any Postgres will do — a compose stack, a `consent` checkout, or a throwaway
-cluster:
+Use `--store postgres` to include the production session store in the request
+path. The database must contain the BFF's `user_sessions` table, and the
+`DUOS_DB_*` variables must point to it.
+
+When using a Docker Compose database, override two common `.env.local` values:
+
+```bash
+DUOS_DB_HOST=localhost DUOS_DB_SSL=false \
+  pnpm test:load -- --scenario all --store postgres
+```
+
+The overrides are necessary because:
+
+- `host.docker.internal` describes a route from a container, but this harness
+  runs on the host; and
+- Compose Postgres does not use TLS, while `DUOS_DB_SSL` defaults to enabled.
+
+The harness validates both settings before running and deletes the session rows
+it creates when it finishes.
+
+For a scratch database, the required schema is:
 
 ```sql
 CREATE TABLE user_sessions (
@@ -90,158 +132,173 @@ CREATE TABLE user_sessions (
 CREATE INDEX idx_session_expire ON user_sessions (expire);
 ```
 
-(A copy of the Consent Liquibase changeset, for standing up a scratch database.
-Consent owns the real schema.)
+This is copied from the Consent Liquibase changeset for local setup; Consent
+continues to own the production schema.
 
-**`--db-latency <ms>` is what makes the pool question answerable.** A session
-`SELECT` against a Postgres on loopback costs ~0.2 ms, so a pool of *one*
-connection sustains several thousand requests per second and no pool size is
-ever the constraint — a fact about the laptop, not about the deployment, which
-reaches Cloud SQL through a proxy sidecar. The flag inserts a delaying TCP relay
-in front of Postgres (one-way, so a query pays twice it), which holds a pooled
-connection checked out for a realistic round trip while leaving `pgStore` and
-`@fastify/postgres` untouched.
+#### Simulating database latency
 
-## Against a deployed BFF
+A loopback session query takes roughly 0.2 ms, so even a one-connection pool can
+serve thousands of requests per second. That says little about a deployment
+reaching Cloud SQL through a proxy sidecar.
+
+Use `--db-latency <ms>` to insert a delaying TCP relay in front of Postgres:
+
+```bash
+DUOS_DB_HOST=localhost DUOS_DB_SSL=false \
+  pnpm test:load -- --store postgres --db-latency 1
+```
+
+The value is one-way latency, so `--db-latency 1` adds approximately 2 ms to a
+query round trip. The relay keeps the pooled connection checked out while
+delaying traffic, leaving `pgStore` and `@fastify/postgres` unchanged.
+
+### Deployed BFF
+
+The harness can also drive a signed-in session in development or staging:
 
 ```bash
 pnpm test:load -- --target https://duos.dsde-dev.broadinstitute.org \
   --cookie 'sessionId=…' --csrf-token '…'
 ```
 
-Sign in with a browser, copy the `sessionId` cookie and a token from
-`GET /auth/csrf-token`. This drives one real session against the real upstream:
-no stub, no seeding, no pool sampling, and no `download` scenario worth running
-(it would move gigabytes off the real API). Point it at dev or staging, never at
-production.
+Sign in through a browser, copy the `sessionId` cookie, and obtain a CSRF token
+from `GET /auth/csrf-token`.
 
-**A remote run reports end-to-end latency for that environment, not proxy
-overhead.** The budgets below are stated as overhead above the upstream's own
-latency, and nothing here can measure that latency independently while it is
-also loading the proxy — so they are not applied, and only errors, non-2xx and
-timeouts can fail a remote run.
+A remote run uses one real session and the real upstream. It has no seeding,
+stub, or pool sampling. Avoid the `download` scenario, which can transfer
+gigabytes, and never target production.
 
-## Scenarios and thresholds
+Remote results describe end-to-end environment latency, not isolated proxy
+overhead. Because upstream latency cannot be measured independently during the
+run, remote verdicts check only non-2xx responses, connection errors, and
+timeouts; they do not apply the local p99 budgets.
 
-| scenario    | what it puts under pressure                                    | default connections |
-|-------------|----------------------------------------------------------------|---------------------|
-| `read`      | small authenticated GET — one session `SELECT`, one upstream hop | 100                 |
-| `write`     | CSRF verification and a streamed 4 KB request body              | 100                 |
-| `download`  | a 5 MB response through `reply.from` — streaming, not buffering | 20                  |
-| `anonymous` | an allowlisted path: no session, so no database                 | 100                 |
+## Scenarios and verdicts
 
-A scenario fails on any non-2xx, any connection error or timeout, any response
-body that was not the upstream's, or a p99 above `upstream-latency +
-p99BudgetMs` (`scenarios.ts`). The budgets are stated as overhead *above* the
-measured upstream floor rather than as absolute latency, and are deliberately
-loose — 100 ms against a measured 3–20 ms — for the reason in the opening
-section.
+| Scenario | What it exercises | Default connections |
+|---|---|---:|
+| `read` | Authenticated small GET: one session lookup and one upstream hop | 100 |
+| `write` | CSRF verification and a streamed 4 KB request body | 100 |
+| `download` | A 5 MB response streamed through `reply.from` | 20 |
+| `anonymous` | An allowlisted request with no session or database access | 100 |
 
-## Results — 2026-08-10
+A local scenario fails if it observes:
 
-Apple M2 Max, 12 cores, 32 GB, Node 26.6.0. Driver, BFF, stub and Postgres are
-separate processes but share one machine, so absolute ceilings are the host's
-rather than a pod's; the ratios and the shapes of the curves are the
-transferable part. 50 sessions, 20 s per scenario after a 3 s warmup, 20 ms stub
-upstream, defaults otherwise (`pg` pool `max: 10`, 128 upstream sockets).
+- a non-2xx response;
+- a connection error or timeout;
+- a response body that differs from the upstream body; or
+- p99 latency above `upstream latency + p99BudgetMs` from `scenarios.ts`.
 
-**A — Postgres on loopback**
+The latency budgets are deliberately loose. They are intended to expose a
+change in the curve, not enforce an absolute number from one machine.
 
-| scenario    | conns | req/s | MB/s  | p50   | p99   | non-2xx | errors | bad body | pool max/waiting |
-|-------------|-------|-------|-------|-------|-------|---------|--------|----------|------------------|
-| `read`      | 100   | 4243  | 9.1   | 22ms  | 39ms  | 0       | 0      | 0        | 10/78            |
-| `write`     | 100   | 4107  | 8.8   | 22ms  | 51ms  | 0       | 0      | 0        | 10/51            |
-| `download`  | 20    | 138   | 691.8 | 147ms | 195ms | 0       | 0      | 0        | 10/5             |
-| `anonymous` | 100   | 4490  | 9.6   | 22ms  | 25ms  | 0       | 0      | 0        | 10/0             |
+## Reference results — 2026-08-10
 
-**B — the same, with a 2 ms round-trip database (`--db-latency 1`)**
+Environment: Apple M2 Max, 12 cores, 32 GB, Node 26.6.0. The driver, BFF, stub,
+and Postgres ran as separate processes on the same machine.
 
-| scenario    | conns | req/s | MB/s  | p50   | p99   | non-2xx | errors | bad body | pool max/waiting |
-|-------------|-------|-------|-------|-------|-------|---------|--------|----------|------------------|
-| `read`      | 100   | 3045  | 6.5   | 32ms  | 42ms  | 0       | 0      | 0        | 10/90            |
-| `write`     | 100   | 2898  | 6.2   | 34ms  | 41ms  | 0       | 0      | 0        | 10/48            |
-| `download`  | 20    | 132   | 660.0 | 151ms | 206ms | 0       | 0      | 0        | 10/9             |
-| `anonymous` | 100   | 4461  | 9.6   | 22ms  | 27ms  | 0       | 0      | 0        | 10/0             |
+Unless noted otherwise, each run used 50 sessions, a 3-second warmup, 20 seconds
+of measurement, a 20 ms stub upstream, the default Postgres pool of 10, and 128
+upstream sockets.
 
-### What the numbers say
+### All scenarios
 
-**The proxy costs about two milliseconds.** Against a 20 ms upstream, `read`
-sits at 22 ms p50 — and `anonymous`, which skips the session store entirely, is
-the same. `write` is indistinguishable from `read` despite carrying a 4 KB body
-and a CSRF check, which is the evidence that the wildcard content-type parser
-streams bodies rather than buffering them (ADR-004). `download` moves 5 MB
-bodies at ~690 MB/s with 20 in flight, which is loopback bandwidth: the proxy is
-not a copy in the middle.
+Postgres on loopback:
 
-**The session store costs 5% on a loopback database and a third on a remote
-one.** `read` against `anonymous`: 4243 vs 4490 req/s in run A, 3045 vs 4461 in
-run B. The in-memory store is ~4% faster than loopback Postgres (4471–4513 vs
-4313–4325, interleaved), which is the expected direction and the size to expect
-of it.
+| Scenario | Conns | Req/s | MB/s | p50 | p99 | Non-2xx | Errors | Bad body | Pool max/waiting |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `read` | 100 | 4,243 | 9.1 | 22 ms | 39 ms | 0 | 0 | 0 | 10/78 |
+| `write` | 100 | 4,107 | 8.8 | 22 ms | 51 ms | 0 | 0 | 0 | 10/51 |
+| `download` | 20 | 138 | 691.8 | 147 ms | 195 ms | 0 | 0 | 0 | 10/5 |
+| `anonymous` | 100 | 4,490 | 9.6 | 22 ms | 25 ms | 0 | 0 | 0 | 10/0 |
 
-**The pg pool holds at its default, and the load test can tell the difference.**
-`max: 10` never turned into a failed request at any concurrency tried. Its
-`waiting` high-water mark reaches 90, but against a 0.2 ms query that queue is
-not latency — it drains faster than it builds. With a realistic 2 ms round trip
-it does start to cost:
+The same run with a simulated 2 ms database round trip
+(`--db-latency 1`):
 
-| `--pg-pool-max` (2 ms DB, 100 conns) | 10   | 20   | 32   | 64   |
-|--------------------------------------|------|------|------|------|
-| req/s                                | 2924 | 3751 | 3545 | 3777 |
-| p50                                  | 33ms | 25ms | 26ms | 25ms |
+| Scenario | Conns | Req/s | MB/s | p50 | p99 | Non-2xx | Errors | Bad body | Pool max/waiting |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `read` | 100 | 3,045 | 6.5 | 32 ms | 42 ms | 0 | 0 | 0 | 10/90 |
+| `write` | 100 | 2,898 | 6.2 | 34 ms | 41 ms | 0 | 0 | 0 | 10/48 |
+| `download` | 20 | 132 | 660.0 | 151 ms | 206 ms | 0 | 0 | 0 | 10/9 |
+| `anonymous` | 100 | 4,461 | 9.6 | 22 ms | 27 ms | 0 | 0 | 0 | 10/0 |
 
-~22% of throughput and 8 ms of p50, with no further gain above 20. **No change
-is proposed**: 2900 req/s per pod against a remote database is orders of
-magnitude above DUOS's load, and every connection here is a backend on the
-Consent database. The rule to remember is that a pod's session-store ceiling is
-roughly `pool_size ÷ query_round_trip`.
+## Interpreting the results
 
-**`UPSTREAM_POOL_CONNECTIONS = 128` is a real throughput ceiling, not a
-formality.** Whenever in-flight requests exceed the socket pool, a pod is capped
-at `sockets ÷ upstream latency` — and the measurement tracks that product
-closely (400 client connections, memory store, `--upstream-pool`):
+### Proxy overhead and streaming
 
-| req/s        | 32 sockets | 64   | 128   | 256   |
-|--------------|------------|------|-------|-------|
-| 20 ms upstream  | 1437    | 2901 | 5849  | 10302 |
-| 50 ms upstream  | 569     | 1200 | 2449  | 4886  |
-| 100 ms upstream | 270     | 589  | 1232  | 2459  |
+Against a 20 ms upstream, both `read` and `anonymous` had a 22 ms median. In
+this setup, the proxy therefore added approximately 2 ms at the median, and the
+session lookup was not visible until database latency was introduced.
 
-Every cell is 85–95% of `sockets ÷ latency`. The process itself saturates near
-**11,400 req/s** (0 ms upstream, 256 sockets; 512 sockets does not beat it), so
-at the shipped 128 the sockets bind first at every upstream latency worth
-caring about. **128 stays** — it caps a pod at ~6,400 req/s against a 20 ms
-upstream and ~1,280 against a 100 ms one, both far above what DUOS sees, and it
-is the backpressure that stops a slow upstream from consuming file descriptors
-without limit. Raising it is a decision about a ceiling nobody is near, and the
-formula above is how to size it if that changes.
+`write` performed similarly to `read` despite its CSRF check and 4 KB body. The
+`download` scenario moved 5 MB bodies at about 690 MB/s with 20 requests in
+flight. Together, these results support the intended streaming behavior from
+ADR-004 rather than request or response buffering.
 
-*(An earlier single-process version of this harness concluded the opposite —
-that the socket pool never bound — from a plateau at ~6,100 req/s that turned
-out to be the stub upstream sharing the BFF's event loop. That plateau sat close
-enough to `128 ÷ 20 ms` to look like a coincidence worth ignoring. It was not a
-coincidence, and the fix was to fork the stub.)*
+### Session-store cost and Postgres pool size
 
-**Past the socket pool, latency grows in proportion and throughput does not.**
-At 20 ms upstream with the shipped 128 sockets:
+On loopback, authenticated `read` reached 4,243 req/s compared with 4,490 req/s
+for `anonymous`, a difference of about 5%. With a 2 ms database round trip,
+authenticated throughput fell to 3,045 req/s while `anonymous` remained at
+4,461 req/s.
 
-| connections | 50   | 100  | 200  | 400  |
-|-------------|------|------|------|------|
-| req/s       | 2141 | 4401 | 5725 | 5788 |
-| p50         | 23ms | 22ms | 34ms | 67ms |
+Changing the Postgres pool size under a 2 ms database round trip produced:
 
-The queue past ~200 concurrent requests is in front of the pod, which is what a
-horizontal pod autoscaler is for.
+| Pool size | 10 | 20 | 32 | 64 |
+|---|---:|---:|---:|---:|
+| Req/s | 2,924 | 3,751 | 3,545 | 3,777 |
+| p50 | 33 ms | 25 ms | 26 ms | 25 ms |
 
-### Not covered
+Moving from 10 to 20 connections improved throughput by about 22% and reduced
+p50 by 8 ms, with no consistent gain above 20. No production change is
+proposed: roughly 2,900 req/s per pod is far above expected DUOS traffic, and
+each additional connection consumes a backend on the Consent database.
 
-- **The refresh path.** It needs a live B2C token endpoint; stubbing one would
-  measure the stub. Single-flight under concurrency is covered by
-  `refresh.test.ts` (story 3-G), including an N-way concurrent burst.
-- **Multi-pod behavior.** One BFF process, one pool. Cross-pod refresh races and
-  session-store contention are reasoned about in story 3-B, not measured here.
-- **A real network.** Everything is on loopback: no TLS termination, no ingress,
-  no sidecar. Use `--target` against a deployed environment for that.
-- **Per-request body verification.** One request per scenario is checked
-  byte-for-byte before the run; autocannon's own `expectBody` cannot be combined
-  with the per-session request templates the run needs.
+As a sizing approximation:
+
+```text
+session-store ceiling ≈ pool size ÷ database query round trip
+```
+
+### Upstream socket pool
+
+With 400 client connections and in-memory sessions, throughput closely followed
+the upstream pool's theoretical ceiling:
+
+| Upstream latency | 32 sockets | 64 sockets | 128 sockets | 256 sockets |
+|---|---:|---:|---:|---:|
+| 20 ms | 1,437 req/s | 2,901 req/s | 5,849 req/s | 10,302 req/s |
+| 50 ms | 569 req/s | 1,200 req/s | 2,449 req/s | 4,886 req/s |
+| 100 ms | 270 req/s | 589 req/s | 1,232 req/s | 2,459 req/s |
+
+Each measurement reached 85–95% of `socket count ÷ upstream latency`. The Node
+process itself saturated near 11,400 req/s with a zero-latency upstream and 256
+sockets; increasing to 512 sockets did not improve it.
+
+The shipped pool of 128 sockets therefore provides meaningful backpressure. It
+caps a pod near 6,400 req/s with a 20 ms upstream and 1,280 req/s with a 100 ms
+upstream—both well above expected DUOS traffic—while preventing a slow upstream
+from causing unbounded file-descriptor growth.
+
+At 20 ms upstream latency with 128 sockets, increasing client concurrency
+showed the expected queueing behavior:
+
+| Client connections | 50 | 100 | 200 | 400 |
+|---|---:|---:|---:|---:|
+| Req/s | 2,141 | 4,401 | 5,725 | 5,788 |
+| p50 | 23 ms | 22 ms | 34 ms | 67 ms |
+
+Past roughly 200 concurrent requests, throughput flattened while latency grew.
+That queue belongs in front of the pod, where horizontal scaling can address it.
+
+## What this harness does not cover
+
+- **Token refresh:** exercising it requires a live B2C token endpoint.
+  Concurrent single-flight behavior is covered by `refresh.test.ts`.
+- **Multiple BFF pods:** this harness runs one BFF process and one connection
+  pool. It does not measure cross-pod refresh races or session-store contention.
+- **A production network:** local runs do not include TLS termination, ingress,
+  or a sidecar. Use remote mode to measure an actual environment.
+- **Every response during the timed run:** the harness verifies one response
+  per scenario byte-for-byte before measuring. Autocannon's `expectBody` cannot
+  be combined with the per-session request templates used here.
