@@ -9,8 +9,6 @@ import { DAAObject, DuosUser } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 
-type DAAObjectWithBroadFlag = DAAObject & { broadDaa?: boolean }
-
 export default function ManageResearcherDAAs(): React.JSX.Element {
   const [researchers, setResearchers] = useState<DuosUser[]>([])
   const [daas, setDaas] = useState<DAAObject[]>([])
@@ -23,12 +21,10 @@ export default function ManageResearcherDAAs(): React.JSX.Element {
       try {
         const researcherList = await User.list(USER_ROLES.signingOfficial)
         setResearchers(researcherList)
-        const daaList: DAAObjectWithBroadFlag[] = await DAA.getDaas()
-        // There are DAAs that are not mapped to any DAC so we can ignore those.
-        const filteredDAAList = daaList.filter((daa) => {
-          const hasMappedDac = Array.isArray(daa.dacs) && daa.dacs.length > 0
-          return Boolean(daa.broadDaa) || hasMappedDac
-        })
+        const daaList: DAAObject[] = await DAA.getDaas()
+        // A DAA is always associated with the DAC that uploaded it, even when it is not that DAC's
+        // active agreement. Anything with no DAC at all is legacy data we can ignore.
+        const filteredDAAList = daaList.filter(daa => Array.isArray(daa.dacs) && daa.dacs.length > 0)
         setDaas(filteredDAAList)
       }
       catch (error) {

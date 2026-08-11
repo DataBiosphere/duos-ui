@@ -77,12 +77,12 @@ const columnHeaderConfig: Record<string, ColumnConfig> = {
     cellDataFn: cellData.institutionCellData,
     sortable: false,
   },
-  perms: {
-    label: 'Permissions',
+  roles: {
+    label: 'Roles',
     cellStyle: {
-      width: styles.cellWidth.perms,
+      width: styles.cellWidth.roles,
     },
-    cellDataFn: cellData.permissionsCellData,
+    cellDataFn: cellData.rolesCellData,
     sortable: false,
   },
 }

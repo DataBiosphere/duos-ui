@@ -107,9 +107,9 @@ describe('researcherViewHelpers', () => {
       const researcher = makeResearcher({ userId: 10, displayName: 'Test User', email: 'test@duos.org' })
       researcher.libraryCard!.daaIds = [1]
       const rows = buildDAARows(researcher, [
-        makeDaa({ broadDaa: true, daaId: 1 }),
-        makeDaa({ broadDaa: false, daaId: 1 }),
-        makeDaa({ broadDaa: false, daaId: 2 }),
+        makeDaa({ daaId: 1 }),
+        makeDaa({ daaId: 1 }),
+        makeDaa({ daaId: 2 }),
       ])
       expect(rows).toHaveLength(2)
       expect(rows.map(row => row.daa.daaId)).toEqual([1, 2])

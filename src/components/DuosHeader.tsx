@@ -4,6 +4,7 @@ import { Box, IconButton } from '@mui/material'
 import Drawer from '@mui/material/Drawer'
 import React, { useEffect, useState } from 'react'
 import { NavigationTabsComponent } from 'src/components/NavigationTabsComponent'
+import { SubTab, visibleSubTabs } from 'src/components/navigation/subTabVisibility'
 import DuosLogo from 'src/images/duos-network-logo.svg'
 import contactUsStandard from 'src/images/navbar_icon_contact_us.svg'
 import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg'
@@ -18,14 +19,10 @@ import { useLocation, useNavigate } from 'react-router'
 import { DuosUser } from 'src/types/model'
 import { useNavigationState } from 'src/contexts/NavigationStateContext'
 import { useQueryClient } from '@tanstack/react-query'
+import { SO_CONSOLE_SECTIONS, SO_DASHBOARD_ROUTE } from 'src/pages/signing_official_console/signingOfficialConsoleRoutes'
+import { RESEARCHER_CONSOLE_SECTIONS, RESEARCHER_DASHBOARD_ROUTE } from 'src/pages/researcher_console/researcherConsoleRoutes'
 
-interface SubTab {
-  label: string
-  link: string
-  search?: string
-  isRendered?: (user: DuosUser) => boolean
-  isRenderedForUser?: (user: DuosUser) => boolean
-}
+export type { SubTab }
 
 export interface Tab {
   label: string
@@ -81,13 +78,10 @@ export const headerTabsConfig: Tab[] = [
   },
   {
     label: 'SO Console',
-    link: '/signing_official_console/library_cards',
+    link: SO_DASHBOARD_ROUTE,
     children: [
-      { label: 'Researcher Status', link: '/signing_official_console/library_cards' },
-      { label: 'Data Access Requests', link: '/signing_official_console/dar_requests' },
-      { label: 'DAR Approvals', link: '/signing_official_console/dar_approvals' },
-      { label: 'My Datasets', link: '/datalibrary/myinstitution' },
-      { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations' },
+      { label: 'Dashboard', link: SO_DASHBOARD_ROUTE, hideSubTabBar: true },
+      ...SO_CONSOLE_SECTIONS,
     ],
     isRendered: user => user.isSigningOfficial,
   },
@@ -114,13 +108,19 @@ export const headerTabsConfig: Tab[] = [
   },
   {
     label: 'Researcher Console',
-    link: '/datalibrary',
+    // Lands on the Dashboard like the SO Console; `search` keeps the console highlighted
+    // anywhere in the Data Library. `Navigation.console` sends a researcher to this same `link`
+    // at sign-in, so the Dashboard is also the post-login landing page.
+    link: RESEARCHER_DASHBOARD_ROUTE,
     search: 'datalibrary',
     children: [
+      { label: 'Dashboard', link: RESEARCHER_DASHBOARD_ROUTE },
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
-      { label: 'Data Access Requests', link: '/researcher_console' },
-      { label: 'My Dataset Approvals', link: '/datasets' },
-      { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: user => user?.isDataSubmitter },
+      // The Dashboard is by design the only advertised route to these pages, so they stay out of
+      // the sub-tab bar. They are still registered here because isChildTabMatch reads the raw
+      // children: without an entry their URLs match no tab at all, and the header falls back to
+      // highlighting whichever console the user happens to have first.
+      ...RESEARCHER_CONSOLE_SECTIONS.map(section => ({ ...section, isRendered: () => false })),
     ],
     isRendered: user => user.isResearcher && !isOnlySigningOfficial(user),
   },
@@ -321,10 +321,9 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
 
   // populate initialSubTab
   if (initialTab !== -1) {
-    // Only consider subtabs that should be rendered for the user
-    const renderedSubtabs = tabs[initialTab].children?.filter(
-      subtab => (subtab.isRenderedForUser ?? subtab.isRendered ?? (() => true))(currentUser),
-    ) || []
+    // Only consider subtabs that should be rendered for the user. Shared with the sub-tab bar so
+    // this index always refers to the same list that gets rendered.
+    const renderedSubtabs = visibleSubTabs(tabs[initialTab].children, currentUser)
     // Find index of matching subtab
     initialSubTab = renderedSubtabs.findIndex(
       subtab => subtab.link === location.pathname || (subtab.search && location.pathname.includes(subtab.search)),
