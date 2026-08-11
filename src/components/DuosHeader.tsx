@@ -20,6 +20,7 @@ import { DuosUser } from 'src/types/model'
 import { useNavigationState } from 'src/contexts/NavigationStateContext'
 import { useQueryClient } from '@tanstack/react-query'
 import { SO_CONSOLE_SECTIONS, SO_DASHBOARD_ROUTE } from 'src/pages/signing_official_console/signingOfficialConsoleRoutes'
+import { RESEARCHER_CONSOLE_SECTIONS, RESEARCHER_DASHBOARD_ROUTE } from 'src/pages/researcher_console/researcherConsoleRoutes'
 
 export type { SubTab }
 
@@ -107,13 +108,19 @@ export const headerTabsConfig: Tab[] = [
   },
   {
     label: 'Researcher Console',
-    link: '/datalibrary',
+    // Lands on the Dashboard like the SO Console; `search` keeps the console highlighted
+    // anywhere in the Data Library. `Navigation.console` sends a researcher to this same `link`
+    // at sign-in, so the Dashboard is also the post-login landing page.
+    link: RESEARCHER_DASHBOARD_ROUTE,
     search: 'datalibrary',
     children: [
+      { label: 'Dashboard', link: RESEARCHER_DASHBOARD_ROUTE },
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
-      { label: 'Data Access Requests', link: '/researcher_console' },
-      { label: 'My Dataset Approvals', link: '/datasets' },
-      { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: user => user?.isDataSubmitter },
+      // The Dashboard is by design the only advertised route to these pages, so they stay out of
+      // the sub-tab bar. They are still registered here because isChildTabMatch reads the raw
+      // children: without an entry their URLs match no tab at all, and the header falls back to
+      // highlighting whichever console the user happens to have first.
+      ...RESEARCHER_CONSOLE_SECTIONS.map(section => ({ ...section, isRendered: () => false })),
     ],
     isRendered: user => user.isResearcher && !isOnlySigningOfficial(user),
   },
