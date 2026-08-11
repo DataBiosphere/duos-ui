@@ -41,7 +41,8 @@ export interface UserRole {
   roleId: number
   name: UserRoleName
   userId: number
-  userRoleId: number
+  // Server-assigned join id. Absent for a role the client has just granted and not yet refetched.
+  userRoleId?: number
   dacId?: number
 }
 

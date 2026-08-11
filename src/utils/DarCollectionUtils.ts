@@ -356,7 +356,6 @@ export const styles = {
     fontWeight: 'bold',
     letterSpacing: '0.2px',
     textTransform: 'uppercase',
-    backgroundColor: 'B8CDD3',
     border: 'none',
   },
   cellWidth: {

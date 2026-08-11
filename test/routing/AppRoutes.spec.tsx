@@ -46,7 +46,6 @@ const roleBACRoutes: string[] = [
   '/signing_official_console/library_cards',
   '/signing_official_console/dar_requests',
   '/signing_official_console/dar_approvals',
-  '/signing_official_console/data_submitters',
   '/signing_official_console/researchers_daa_associations',
   '/dac_datasets',
   '/manage_dac',

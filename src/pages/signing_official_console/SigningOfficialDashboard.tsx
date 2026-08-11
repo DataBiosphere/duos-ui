@@ -2,7 +2,6 @@ import React from 'react'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined'
-import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined'
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined'
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
@@ -17,10 +16,12 @@ const tileMeta: ConsoleDashboardTileMeta<SigningOfficialDashboardSummary>[] = [
   {
     ...SO_CONSOLE_SECTIONS[0],
     icon: PeopleAltOutlinedIcon,
-    description: 'Manage researchers who request data on behalf of your institution.',
+    // Data Submitter management lives on this page too, so its count is reported here.
+    description: 'Manage researchers who request or submit data on behalf of your institution.',
     stats: [
       { label: 'Active', value: summary => summary.researcherStatus?.active },
       { label: 'Inactive', value: summary => summary.researcherStatus?.inactive },
+      { label: 'Data Submitters', value: summary => summary.dataSubmitters?.approved },
     ],
   },
   {
@@ -59,7 +60,7 @@ const tileMeta: ConsoleDashboardTileMeta<SigningOfficialDashboardSummary>[] = [
     ],
   },
   {
-    ...SO_CONSOLE_SECTIONS[5],
+    ...SO_CONSOLE_SECTIONS[4],
     icon: HandshakeOutlinedIcon,
     description: 'Manage Data Access Agreement associations for your researchers.',
     stats: [

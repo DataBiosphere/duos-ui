@@ -119,9 +119,10 @@ collected via V8 and reported on PRs (see `.github/workflows/component-tests.yml
   inline.
 - Wrap renders/interactions that trigger async state in `await act(async () => { ... })`, and prefer
   `findBy*` queries over manual waits.
-- **Do not use `@testing-library/jest-dom` matchers** (`toBeInTheDocument`, `toHaveAttribute`, etc.) —
-  they are not set up. Assert with `.toBeTruthy()`, `.toBeNull()`, `.textContent`, and
-  `.getAttribute(...)`, matching existing specs.
+- `@testing-library/jest-dom` matchers (`toBeInTheDocument`, `toHaveAttribute`, `toBeChecked`, etc.)
+  are available in specs that import `'@testing-library/jest-dom/vitest'`. Add that import when you
+  use them, and keep a single style within a file — do not mix `toBeInTheDocument()` with
+  `toBeTruthy()` on adjacent assertions.
 - Mock modules with `vi.mock('src/libs/...', () => ({ ... }))` and stub functions with
   `vi.fn().mockResolvedValue(...)`. Call `vi.clearAllMocks()` in `beforeEach`.
 - Build fixtures with small factory helpers (e.g. `buildSnapshot(id, name)`) instead of repeating
