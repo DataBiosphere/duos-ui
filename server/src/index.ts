@@ -100,7 +100,13 @@ export async function buildApp(): Promise<AppInstance> {
       fastify.log.warn('[server] DUOS_DB_SSL=false — connecting to Postgres without TLS; only safe when the transport is loopback (Cloud SQL Proxy sidecar or local docker network)')
     }
 
-    // DB pool — must be registered before session so app.pg is available to the store
+    // DB pool — must be registered before session so app.pg is available to the
+    // store. `max` is left at pg's default of 10, measured rather than assumed:
+    // story 3-H held ~2900 req/s per pod at 100 concurrent sessions against a
+    // database two milliseconds away, ~22% below what a pool of 20 reaches. The
+    // ceiling is roughly `max ÷ query_round_trip`; raise it only against a
+    // measurement, since every connection here is a backend on the Consent
+    // database.
     await fastify.register(fastifyPostgres, {
       host: process.env.DUOS_DB_HOST,
       database: process.env.DUOS_DB_NAME,

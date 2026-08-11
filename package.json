@@ -17,6 +17,7 @@
     "lint:fix": "oxlint --fix && eslint . --fix",
     "type-check": "tsc --noEmit",
     "test:e2e": "playwright test",
+    "test:load": "tsx --env-file-if-exists=.env.local server/test/load/run.ts",
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "test:browser:coverage": "vitest run --coverage --config vitest.browser.config.ts"
   },
