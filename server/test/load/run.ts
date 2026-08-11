@@ -1,7 +1,6 @@
 import { parseArgs } from 'node:util'
 import autocannon from 'autocannon'
 import { BLOB_PATH, blobBody, forkStubUpstream, jsonBody } from './upstream.js'
-import type { ForkedUpstream } from './upstream.js'
 import { startLoadTarget } from './harness.js'
 import type { LoadTarget, PoolSnapshot, SeededSession } from './harness.js'
 import { startDelayedRelay } from './dbLatency.js'
@@ -167,27 +166,16 @@ async function verifyScenarioBody(scenario: Scenario, origin: string, session: S
   }
 }
 
-async function runScenario(
-  scenario: Scenario,
-  origin: string,
-  sessions: SeededSession[],
-  target: LoadTarget | undefined,
-  /**
-   * Undefined against a deployed BFF, where the numbers are end-to-end: the
-   * budgets are proxy overhead above the upstream's own latency, and a remote
-   * run cannot measure that latency independently while it loads the proxy.
-   * Only the correctness checks below survive there.
-   */
-  latencyBudgetMs: number | undefined,
-): Promise<Verdict> {
+async function runScenario(scenario: Scenario, loadRun: LoadRun): Promise<Verdict> {
+  const latencyBudgetMs = loadRun.latencyBudgetFor(scenario)
   const connections = connectionsOverride ?? scenario.defaultConnections
   // One template per session, cycled by each connection, so N sessions are in
   // flight at once. An anonymous scenario ignores the session it is handed.
-  const requests = (scenario.needsSession ? sessions : [{ cookie: '', csrfToken: '' }])
+  const requests = (scenario.needsSession ? loadRun.sessions : [{ cookie: '', csrfToken: '' }])
     .map(session => scenario.request(session))
 
   const run = (duration: number): Promise<autocannon.Result> => autocannon({
-    url: origin,
+    url: loadRun.origin,
     connections,
     duration,
     workers: workers > 0 ? workers : undefined,
@@ -201,7 +189,7 @@ async function runScenario(
   // its sockets, neither of which a steady-state service pays for.
   if (warmupSeconds > 0) await run(warmupSeconds)
 
-  const stopSampling = samplePool(target)
+  const stopSampling = samplePool(loadRun.target)
   const result = await run(durationSeconds)
   const pool = stopSampling()
 
@@ -249,70 +237,109 @@ function report(verdicts: Verdict[]): void {
   }
 }
 
-async function main(): Promise<number> {
-  const remote = options.target
-  let upstream: ForkedUpstream | undefined
+/**
+ * Everything the scenario loop needs, from either mode.
+ *
+ * The point of the type is that the loop has no idea which one it got: the two
+ * differences between a local target and a deployed one — that only a stub's
+ * body is known in advance, and that only a stub's latency can be subtracted to
+ * leave proxy overhead — are settled here as a no-op and an undefined, rather
+ * than as `if (remote)` at all three places that would otherwise care.
+ */
+interface LoadRun {
+  origin: string
+  sessions: SeededSession[]
+  /** Undefined against a deployed BFF: no pool to sample. */
+  target: LoadTarget | undefined
+  latencyBudgetFor: (scenario: Scenario) => number | undefined
+  verifyBody: (scenario: Scenario) => Promise<void>
+  close: () => Promise<void>
+}
+
+function startRemoteRun(origin: string): LoadRun {
+  // No seeding route on a deployed BFF, so the one session comes from a real
+  // browser sign-in — which measures the proxy, not session-store concurrency.
+  if (!options.cookie) throw new Error('--target requires --cookie (a real signed-in sessionId cookie)')
+  console.log(`target: ${origin} (remote — no stub upstream, no pool sampling)`)
+  console.log('latency below is end-to-end for this environment, not proxy overhead; only errors and non-2xx can fail the run')
+
+  return {
+    origin,
+    sessions: [{ cookie: options.cookie, csrfToken: options['csrf-token'] ?? '' }],
+    target: undefined,
+    latencyBudgetFor: () => undefined,
+    // A real upstream's body is not known here, so there is nothing to compare.
+    verifyBody: () => Promise.resolve(),
+    close: () => Promise.resolve(),
+  }
+}
+
+async function startLocalRun(): Promise<LoadRun> {
+  if (dbLatencyMs > 0 && storeOption !== 'postgres') {
+    throw new Error('--db-latency only applies to --store postgres')
+  }
+
+  const upstream = await forkStubUpstream({ latencyMs: upstreamLatencyMs, jsonBytes, blobBytes })
   let relay: DelayedRelay | undefined
   let target: LoadTarget | undefined
+  const close = async (): Promise<void> => {
+    await target?.close()
+    await relay?.close()
+    await upstream.close()
+  }
+
+  // The creator owns the teardown, including on the way out: a stub is forked
+  // first, so an unreachable database would otherwise leave that child running
+  // and the runner waiting on it forever.
+  try {
+    if (dbLatencyMs > 0) {
+      relay = await startDelayedRelay({
+        host: process.env.DUOS_DB_HOST ?? '127.0.0.1',
+        port: Number.parseInt(process.env.DUOS_DB_PORT?.trim() || '5432', 10),
+      }, dbLatencyMs)
+    }
+    const started = await startLoadTarget({
+      upstreamOrigin: upstream.origin,
+      store: storeOption,
+      pgPoolMax,
+      undiciConnections,
+      dbAddress: relay ? { host: '127.0.0.1', port: relay.port } : undefined,
+    })
+    target = started
+    const sessions = await started.seedSessions(sessionCount)
+
+    const db = relay ? `  db: +${dbLatencyMs}ms each way` : ''
+    const pool = undiciConnections ? `  upstream pool: ${undiciConnections}` : ''
+    console.log(`target: ${started.origin}  upstream: ${upstream.origin} (+${upstreamLatencyMs}ms, own process)  store: ${storeOption}${db}${pool}  sessions: ${sessions.length}`)
+
+    return {
+      origin: started.origin,
+      sessions,
+      target: started,
+      latencyBudgetFor: scenario => upstreamLatencyMs + scenario.p99BudgetMs,
+      verifyBody: scenario => verifyScenarioBody(scenario, started.origin, sessions[0]),
+      close,
+    }
+  }
+  catch (err: unknown) {
+    await close()
+    throw err
+  }
+}
+
+async function main(): Promise<number> {
+  const loadRun = options.target ? startRemoteRun(options.target) : await startLocalRun()
   const verdicts: Verdict[] = []
 
-  // Setup is inside the try, not before it: a stub is forked first, so anything
-  // that throws after that — an unreachable database, a bad flag — would
-  // otherwise leave the child running and the runner waiting on it forever.
   try {
-    let origin: string
-    let sessions: SeededSession[]
-
-    if (remote) {
-      // No seeding route on a deployed BFF, so the one session comes from a real
-      // browser sign-in — which measures the proxy, not session-store concurrency.
-      if (!options.cookie) throw new Error('--target requires --cookie (a real signed-in sessionId cookie)')
-      origin = remote
-      sessions = [{ cookie: options.cookie, csrfToken: options['csrf-token'] ?? '' }]
-      console.log(`target: ${origin} (remote — no stub upstream, no pool sampling)`)
-      console.log('latency below is end-to-end for this environment, not proxy overhead; only errors and non-2xx can fail the run')
-    }
-    else {
-      if (dbLatencyMs > 0 && storeOption !== 'postgres') {
-        throw new Error('--db-latency only applies to --store postgres')
-      }
-      upstream = await forkStubUpstream({
-        latencyMs: upstreamLatencyMs,
-        jsonBytes,
-        blobBytes,
-      })
-      if (dbLatencyMs > 0) {
-        relay = await startDelayedRelay({
-          host: process.env.DUOS_DB_HOST ?? '127.0.0.1',
-          port: Number.parseInt(process.env.DUOS_DB_PORT?.trim() || '5432', 10),
-        }, dbLatencyMs)
-      }
-      target = await startLoadTarget({
-        upstreamOrigin: upstream.origin,
-        store: storeOption,
-        pgPoolMax,
-        undiciConnections,
-        dbAddress: relay ? { host: '127.0.0.1', port: relay.port } : undefined,
-      })
-      origin = target.origin
-      sessions = await target.seedSessions(sessionCount)
-      const db = relay ? `  db: +${dbLatencyMs}ms each way` : ''
-      const pool = options['upstream-pool'] ? `  upstream pool: ${options['upstream-pool']}` : ''
-      console.log(`target: ${origin}  upstream: ${upstream.origin} (+${upstreamLatencyMs}ms, own process)  store: ${storeOption}${db}${pool}  sessions: ${sessions.length}`)
-    }
-
     for (const scenario of scenarios) {
       console.log(`\n▸ ${scenario.name}: ${scenario.description}`)
-      // Only against the stub: a real upstream's body is not known here.
-      if (!remote) await verifyScenarioBody(scenario, origin, sessions[0])
-      const budget = remote ? undefined : upstreamLatencyMs + scenario.p99BudgetMs
-      verdicts.push(await runScenario(scenario, origin, sessions, target, budget))
+      await loadRun.verifyBody(scenario)
+      verdicts.push(await runScenario(scenario, loadRun))
     }
   }
   finally {
-    await target?.close()
-    await relay?.close()
-    await upstream?.close()
+    await loadRun.close()
   }
 
   report(verdicts)
