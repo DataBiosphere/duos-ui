@@ -291,7 +291,6 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
         )}
         {!adminPage && selectedTab === tabs.memberVote && (
           <MultiDatasetVotingTab
-            darInfo={darInfo}
             collection={collection}
             buckets={dataUseBuckets}
             isChair={false}
@@ -303,7 +302,6 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
         )}
         {selectedTab === tabs.chairVote && (
           <MultiDatasetVotingTab
-            darInfo={darInfo}
             collection={collection}
             buckets={dataUseBuckets}
             isChair={true}
