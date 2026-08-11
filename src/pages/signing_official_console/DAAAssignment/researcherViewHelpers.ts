@@ -69,6 +69,15 @@ export function getAuthorizedBy(researcher: DuosUser, daaId: number): string | u
 }
 
 /**
+ * Human-readable label for a DAA. Uses the uploaded file's name, falling back to
+ * a stable `DAA-<id>` token when no file name is available. Single source of truth
+ * for the DAA label shown across the DAA-assignment views, dialogs, and toasts.
+ */
+export function daaLabel(daa: DAAObject): string {
+  return daa.file?.fileName ?? `DAA-${daa.daaId}`
+}
+
+/**
  * Returns the display name for a DAA's associated DAC(s).
  * Joins multiple DAC names with " / " when a DAA spans more than one DAC.
  */

@@ -31,6 +31,8 @@ interface ConfirmationModalProps {
   header: React.ReactNode
   onConfirm: () => Promise<void>
   styleOverride?: React.CSSProperties
+  /** Blocks confirmation while the message is not yet safe to act on, e.g. an unloaded agreement. */
+  confirmDisabled?: boolean
 }
 
 const ConfirmationModal = ({
@@ -41,6 +43,7 @@ const ConfirmationModal = ({
   header,
   onConfirm,
   styleOverride = {},
+  confirmDisabled = false,
 }: Readonly<ConfirmationModalProps>) => {
   const closeFn = () => closeConfirmation()
 
@@ -55,6 +58,7 @@ const ConfirmationModal = ({
       <SecondaryButton variant="outlined" className="confirmation-modal-secondary-button" onClick={closeFn}>Cancel</SecondaryButton>
       <AsyncSpinnerButton
         onClick={onConfirm}
+        disabled={confirmDisabled}
         className="confirmation-modal-primary-button"
         style={{
           fontFamily: 'Montserrat, sans-serif',

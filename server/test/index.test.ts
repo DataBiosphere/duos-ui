@@ -19,6 +19,31 @@ vi.mock('@fastify/session', () => ({
   default: vi.fn(async () => {}),
 }))
 
+// The options buildApp() hands @fastify/csrf-protection, recorded by the mock
+// below. hoisted so the mock factory (which vitest lifts above the imports) can
+// close over it. Undefined until a build reaches the registration — i.e. until
+// bffEnabled and DUOS_DB_HOST are both set.
+const csrfRegistration = vi.hoisted(() => ({ options: undefined as { getToken?: (request: FastifyRequest) => string | undefined } | undefined }))
+
+// @fastify/csrf-protection: real registration needs the session/cookie
+// decorators, which are mocked away above. This stub only needs to provide the
+// two decorations index.ts references — a pass-through csrfProtection onRequest
+// hook (so the guarded /auth/logout route still reaches its handler here; the
+// real 403/token behaviour is covered in auth.test.ts) and generateCsrf. It also
+// records the options it was registered with, which is the only place the
+// *production* CSRF configuration can be asserted: everywhere else stands the
+// plugin up itself.
+vi.mock('@fastify/csrf-protection', () => {
+  const plugin = async (fastify: FastifyInstance, options: typeof csrfRegistration.options) => {
+    csrfRegistration.options = options
+    fastify.decorate('csrfProtection', async () => {})
+    fastify.decorateReply('generateCsrf', () => 'test-csrf-token')
+  }
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(plugin as any)[Symbol.for('skip-override')] = true
+  return { default: plugin }
+})
+
 // Mock @fastify/vite: decorate the instance so buildApp() can call vite.ready()
 // and setNotFoundHandler can call reply.html() without starting a real Vite server.
 vi.mock('@fastify/vite', () => {
@@ -70,6 +95,9 @@ beforeEach(async () => {
   process.env.DUOS_DB_PASSWORD = 'password'
   delete process.env.DUOS_DB_PORT
   process.env.DUOS_SESSION_SECRET = 'test-secret-that-is-at-least-32-characters'
+  // Required once bffEnabled is true: /auth/me and the API proxy both forward
+  // to this upstream, and the proxy resolves it when it registers.
+  process.env.DUOS_API_URL = 'https://consent.dsde-dev.broadinstitute.org'
   vi.clearAllMocks()
 
   // buildApp() reads config.json eagerly at startup (to gate the BFF auth
@@ -315,6 +343,64 @@ describe('BFF auth route registration', () => {
     expect(handleLogin).not.toHaveBeenCalled()
 
     await localApp.close()
+  })
+
+  // The proxy route is gated on both switches, so a legacy deployment exposes
+  // no /duos-api surface at all. Asserted via the upstream call rather than the
+  // status code, because setNotFoundHandler() serves the SPA shell (200) for
+  // anything unmatched — an unregistered route and a registered one are
+  // indistinguishable by status alone.
+  it('registers the /duos-api proxy route when bffEnabled is true', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    // No session, so the proxy's own gate answers before any upstream call —
+    // which is itself proof the route exists and its preHandler ran.
+    const res = await localApp.inject({ method: 'GET', url: '/duos-api/api/dataset/1' })
+
+    expect(res.statusCode).toBe(401)
+    expect(res.json()).toEqual({ error: 'unauthenticated' })
+
+    await localApp.close()
+  })
+
+  it('does not register the /duos-api proxy route when bffEnabled is false', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: false })
+
+    const res = await localApp.inject({ method: 'GET', url: '/duos-api/api/dataset/1' })
+
+    // Falls through to the SPA fallback instead of the proxy's 401.
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  // The header-only narrowing is a production-only property: apiProxy.test.ts and
+  // auth.test.ts register the plugin themselves, so neither can prove buildApp()
+  // passes it. Without this, deleting `getToken` from auth/csrf.ts left all 215
+  // tests green — the gap review of story 3-D found. Asserted behaviourally
+  // rather than by object identity, so wrapping or spreading the options stays
+  // fine and only a change in what the plugin would read fails.
+  it('registers CSRF protection with the header-only getToken', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const getToken = csrfRegistration.options?.getToken
+    expect(getToken).toBeTypeOf('function')
+    const read = (headers: Record<string, string>): string | undefined =>
+      getToken?.({ headers } as unknown as FastifyRequest)
+
+    expect(read({ 'x-csrf-token': 'the-token' })).toBe('the-token')
+    // The three other spellings the plugin's own default would have accepted.
+    expect(read({ 'csrf-token': 'the-token' })).toBeUndefined()
+    expect(read({ 'xsrf-token': 'the-token' })).toBeUndefined()
+    expect(read({ 'x-xsrf-token': 'the-token' })).toBeUndefined()
+
+    await localApp.close()
+  })
+
+  it('fails loud when bffEnabled is true but DUOS_API_URL is not set', async () => {
+    delete process.env.DUOS_API_URL
+
+    await expect(buildAppWithConfig({ bffEnabled: true })).rejects.toThrow('DUOS_API_URL')
   })
 
   it('fails loud when bffEnabled is true but DUOS_DB_HOST is not set', async () => {

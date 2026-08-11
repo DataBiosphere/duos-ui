@@ -1,5 +1,6 @@
+/* oxlint-disable react-refresh/only-export-components */
 import React, { useCallback, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Box } from '@mui/material'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 import { Notifications } from 'src/libs/utils'
@@ -30,6 +31,31 @@ const SUBMISSION_TAB_TYPES = new Set<AssetType>([
 ])
 const SUBMISSION_TABS: TabConfig[] = ALL_LIBRARY_TABS.filter(t => SUBMISSION_TAB_TYPES.has(t.key))
 
+// Scopes a library query to datasets/studies the user submitted or is the data custodian for.
+// The dashboard's Data Submissions stat counts the same records, applying this rule server-side.
+// Takes the two identifiers rather than the user so its memo can depend on those primitives:
+// Storage.getCurrentUser() JSON.parses a new object every render, and a memo keyed on that object
+// never hits.
+const buildSubmissionOwnershipQuery = (userId: number | undefined, email: string | undefined): unknown => {
+  if (!userId && !email) return undefined
+  return {
+    bool: {
+      should: [
+        ...(userId
+          ? [
+              { term: { createUserId: userId } },
+              { term: { 'study.dataSubmitterId': userId } },
+            ]
+          : []),
+        ...(email
+          ? [{ term: { 'study.dataCustodianEmail': email } }]
+          : []),
+      ],
+      minimum_should_match: 1,
+    },
+  }
+}
+
 interface DeleteDialogTerm {
   datasetId: number
   datasetName: string
@@ -44,25 +70,10 @@ export default function DatasetSubmissions() {
 
   const user = Storage.getCurrentUser()
 
-  const userOwnershipQuery = useMemo(() => {
-    if (!user?.userId && !user?.email) return undefined
-    return {
-      bool: {
-        should: [
-          ...(user.userId
-            ? [
-                { term: { createUserId: user.userId } },
-                { term: { 'study.dataSubmitterId': user.userId } },
-              ]
-            : []),
-          ...(user.email
-            ? [{ term: { 'study.dataCustodianEmail': user.email } }]
-            : []),
-        ],
-        minimum_should_match: 1,
-      },
-    }
-  }, [user?.userId, user?.email])
+  const userOwnershipQuery = useMemo(
+    () => buildSubmissionOwnershipQuery(user?.userId, user?.email),
+    [user?.userId, user?.email],
+  )
 
   const libraryConfig: LibraryVersionNew = useMemo(() => ({
     key: `submissions-${user?.userId ?? 'anonymous'}`,

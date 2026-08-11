@@ -8,12 +8,15 @@ import Fastify, { FastifyError, FastifyInstance } from 'fastify'
 import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
+import fastifyCsrf from '@fastify/csrf-protection'
 import { createPgSessionStore } from './session/pgStore.js'
+import { csrfPluginOptions } from './auth/csrf.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
 import { handleCallback } from './auth/callback.js'
 import { handleLogout } from './auth/logout.js'
 import { getMe } from './auth/me.js'
+import { apiProxy } from './proxy/apiProxy.js'
 import { configPath, readConfig } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -133,11 +136,38 @@ export async function buildApp(): Promise<AppInstance> {
         path: '/',
       },
       saveUninitialized: false,
-      // No `rolling`: sessions get a fixed maxAge from creation. Rolling expiry
-      // would re-save the session (SELECT + UPSERT) on every session-bearing
-      // request just to bump `expire`. Phase 2 adds a throttled sliding expiry
-      // instead — re-save only when the session is near expiry.
+      // `rolling: false` — MUST be set explicitly: @fastify/session defaults it
+      // to true. Two reasons it matters here:
+      //   1. Behavior: sessions get a fixed maxAge from creation. Rolling expiry
+      //      would re-save the session (SELECT + UPSERT) on every session-bearing
+      //      request just to bump `expire`. Phase 2 adds a throttled sliding
+      //      expiry instead — re-save only when the session is near expiry.
+      //   2. Correctness: with rolling on, the onSend save hook fires an async
+      //      DB write on every request that carries a session cookie, even when
+      //      the handler already called `request.session.save()` and nothing
+      //      else mutated the session. That async onSend leaves `reply.sent`
+      //      false when the async route handler resolves, so Fastify's
+      //      wrapThenable fires a SECOND reply.send(); the later save's writeHead
+      //      then throws ERR_HTTP_HEADERS_SENT and crashes the process. With
+      //      rolling off (+ saveUninitialized off + the pre-response save() in
+      //      the auth handlers), onSend finds the session unmodified and skips
+      //      the write synchronously, so the reply is fully sent before the
+      //      handler promise resolves and no second send happens.
+      rolling: false,
     })
+
+    // CSRF protection for cookie-authenticated, state-changing auth routes
+    // (currently POST /auth/logout). SameSite=Lax withholds the session cookie
+    // from cross-site POSTs, but is not sufficient alone here: dev/staging live
+    // under *.broadinstitute.org, where SameSite treats every sibling subdomain
+    // as same-site — a compromised sibling could still forge cookie-bearing
+    // POSTs. CSRF tokens don't depend on the registrable domain. The secret is
+    // stored in the session, so it must be registered after @fastify/session.
+    //
+    // The options — including the header-only `getToken` narrowing — live in
+    // auth/csrf.ts so the test harnesses register the plugin exactly as this
+    // does. Inline, they drifted: see that file.
+    await fastify.register(fastifyCsrf, csrfPluginOptions)
 
     // Warm the B2C OIDC discovery cache so the first login doesn't pay the
     // discovery round-trip. Gated on the Azure env vars being present: DB/
@@ -170,11 +200,38 @@ export async function buildApp(): Promise<AppInstance> {
     if (!process.env.DUOS_DB_HOST) {
       throw new Error('bffEnabled is true in config.json but DUOS_DB_HOST is not set — the BFF auth routes require the session infrastructure to be configured')
     }
-    fastify.log.info('[server] bffEnabled is true — registering BFF auth routes')
+    // Both /auth/me and the API proxy forward to this upstream, so a cutover
+    // without it is a deployment that boots, passes health checks, and then
+    // fails on the first user request. Checked here rather than left to the
+    // proxy's own requireEnv so the error arrives at startup, next to the
+    // switch that made it mandatory.
+    if (!process.env.DUOS_API_URL) {
+      throw new Error('bffEnabled is true in config.json but DUOS_API_URL is not set — /auth/me and the API proxy both forward to it')
+    }
+    fastify.log.info('[server] bffEnabled is true — registering BFF auth routes and the API proxy')
     fastify.post('/auth/login', handleLogin)
     fastify.get('/auth/callback', handleCallback)
-    fastify.post('/auth/logout', handleLogout)
+    // The client fetches this after sign-in and echoes the token in an
+    // X-CSRF-Token header on unsafe auth requests. The CSRF secret lives in the
+    // session, so calling this creates/updates a session row — the client
+    // should only call it once authenticated (see Epic 4, story 4-D). After
+    // session rotation (Epic 5, 5-D) the pre-auth secret is discarded, so the
+    // client must (re)fetch this once login completes.
+    fastify.get('/auth/csrf-token', async (_request, reply) => reply.send({ token: reply.generateCsrf() }))
+    // /auth/login is deliberately exempt: it is pre-authentication (no token to
+    // have fetched yet), and login CSRF is neutralized by the PKCE state binding
+    // the flow to the session. /auth/me is a safe GET. Only logout is guarded.
+    fastify.post('/auth/logout', { onRequest: fastify.csrfProtection }, handleLogout)
     fastify.get('/auth/me', getMe)
+
+    // The API proxy (Phase 3). Registered here, inside both switches, rather
+    // than alongside /health: it depends on @fastify/cookie, @fastify/session
+    // and @fastify/csrf-protection, all of which are registered above only when
+    // DUOS_DB_HOST is set. Gating it on bffEnabled too keeps it dark until
+    // cutover — the client does not call /duos-api until Epic 4 points
+    // getApiUrl() at it — so a deployment running the legacy client-side flow
+    // exposes no proxy route at all.
+    await fastify.register(apiProxy)
   }
   else {
     fastify.log.info('[server] bffEnabled is not true — BFF auth routes disabled (legacy client-side auth)')
@@ -216,9 +273,9 @@ export async function buildApp(): Promise<AppInstance> {
   // but does not register routes; we wire the catch-all ourselves.
   fastify.setNotFoundHandler((_req, reply) => reply.html())
 
-  // Error handler — suppresses stack traces from responses
-  fastify.setErrorHandler((err: FastifyError, _req, reply) => {
-    fastify.log.error({ err }, '[server] Unhandled error:')
+  // The encapsulated proxy declares its own error handler (ADR-010).
+  fastify.setErrorHandler((err: FastifyError, request, reply) => {
+    request.log.error({ err }, '[server] Unhandled error:')
     return reply.status(err.statusCode ?? 500).send({ error: 'An unexpected error occurred.' })
   })
 

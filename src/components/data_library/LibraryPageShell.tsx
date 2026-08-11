@@ -25,6 +25,8 @@ interface LibraryPageShellProps {
   header: React.ReactNode
   gridExtras?: GridExtras
   footer?: React.ReactNode
+  /** Only the Data Library surfaces the Signing Official authorization model */
+  showSoApprovalReminder?: boolean
 }
 
 export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
@@ -33,6 +35,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
   header,
   gridExtras = {},
   footer,
+  showSoApprovalReminder = false,
 }) => {
   const {
     urlState,
@@ -112,7 +115,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
         </Box>
 
         <Box sx={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <SoApprovalReminderBanner />
+          {showSoApprovalReminder && <SoApprovalReminderBanner />}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
             {isFetching
               ? <Skeleton variant="text" width={120} sx={{ fontSize: '15px' }} />

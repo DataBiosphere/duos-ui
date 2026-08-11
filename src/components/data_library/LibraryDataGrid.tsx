@@ -10,7 +10,6 @@ import { LibraryDataGridProps } from 'src/types/library'
 import { assetRegistry, LibraryRow } from 'src/components/data_library/assets'
 
 const EMPTY_RADAR_IDS = new Set<number>()
-const EMPTY_SO_DAR_APPROVAL_IDS = new Set<number>()
 
 const LoadingOverlay = () => (
   <Box
@@ -43,7 +42,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
   onSelectionChange,
   exportableDatasets = {},
   radarEnabledDatasetIds = EMPTY_RADAR_IDS,
-  soDarApprovalRequiredDatasetIds = EMPTY_SO_DAR_APPROVAL_IDS,
+  soDarApprovalRequiredDatasetIds,
   extraColumns,
   checkboxSelection = true,
 }) => {
@@ -141,6 +140,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
         }}
         checkboxSelection={checkboxSelection}
         disableRowSelectionOnClick
+        keepNonExistentRowsSelected
         rowSelectionModel={rowSelectionModel}
         onRowSelectionModelChange={handleSelectionChange}
         isRowSelectable={isRowSelectable}

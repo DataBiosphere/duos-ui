@@ -5,7 +5,7 @@ import 'src/styles/bootstrap_replacement.css'
 import App from 'src/App'
 import { Auth } from 'src/libs/auth/auth'
 import { OidcBroker } from 'src/libs/auth/oidcBroker'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router'
 
 const load = async () => {
   await Auth.initialize()
@@ -18,8 +18,8 @@ const load = async () => {
   //   5a. Logging in from the home page
   //   5b. Logging in from a link, i.e. `<origin>/dataLibrary`
   //   5c. Logging in from a link with a `redirectTo` query param, i.e. `<origin>?redirectTo=/dataLibrary`
-  if (window.location.pathname.startsWith('/redirect-from-oauth')) {
-    await OidcBroker.getUserManager().signinPopupCallback(window.location.href)
+  if (globalThis.location.pathname.startsWith('/redirect-from-oauth')) {
+    await OidcBroker.getUserManager().signinPopupCallback(globalThis.location.href)
   }
   const container = document.getElementById('root')
   const root = createRoot(container!)

@@ -5,7 +5,7 @@ import SimpleTable from 'src/components/SimpleTable'
 import cellData, { CellData, CellDataParams } from 'src/components/dac_dataset_table/DACDatasetTableCellData'
 import { styles, DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants'
 import { goToPage as updatePage, recalculateVisibleTable } from 'src/libs/utils'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { DatasetTerm } from 'src/types/model'
 
 interface SortConfig {

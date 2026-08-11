@@ -1,7 +1,7 @@
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import React from 'react'
 import { InstitutionInterface, SimplifiedDuosUser } from 'src/types/model'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { Storage } from 'src/libs/storage'
 import { isEmpty } from 'src/utils/NodashUtil'
 
@@ -127,7 +127,6 @@ export const tableStyles = {
     fontWeight: 'bold',
     letterSpacing: '0.2px',
     textTransform: 'uppercase',
-    backgroundColor: 'B8CDD3',
     border: 'none',
   },
 }

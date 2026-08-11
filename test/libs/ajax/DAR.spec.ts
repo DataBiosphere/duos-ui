@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Config } from 'src/libs/config'
-import { fetchDelete, fetchGet, fetchMultipart, fetchPost, fetchPut } from 'src/libs/ajax/fetchAdapter'
+import { fetchBlob, fetchDelete, fetchGet, fetchMultipart, fetchPost, fetchPut } from 'src/libs/ajax/fetchAdapter'
 import { DAR } from 'src/libs/ajax/DAR'
 import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
 
@@ -12,6 +12,7 @@ vi.mock('src/libs/config', () => ({
 }))
 
 vi.mock('src/libs/ajax/fetchAdapter', () => ({
+  fetchBlob: vi.fn(),
   fetchGet: vi.fn(),
   fetchPost: vi.fn(),
   fetchPut: vi.fn(),
@@ -68,6 +69,7 @@ describe('DAR', () => {
     vi.mocked(fetchPut).mockResolvedValue({ data: buildDar() })
     vi.mocked(fetchDelete).mockResolvedValue({ data: undefined })
     vi.mocked(fetchMultipart).mockResolvedValue({ data: buildDar() })
+    vi.mocked(fetchBlob).mockResolvedValue(new Blob([]))
     const { isFileEmpty } = await import('src/libs/utils')
     vi.mocked(isFileEmpty).mockReturnValue(false)
   })
@@ -302,31 +304,25 @@ describe('DAR', () => {
     it('fetches the document as a blob and triggers fileDownload', async () => {
       const { fileDownload } = await import('src/utils/FileDownload')
       const blob = new Blob(['pdf content'], { type: 'application/pdf' })
-      vi.mocked(fetchGet).mockResolvedValue({ data: blob })
+      vi.mocked(fetchBlob).mockResolvedValue(blob)
 
       await DAR.downloadDARDocument('ref-001', 'irbDocument', 'irb.pdf')
 
-      expect(fetchGet).toHaveBeenCalledWith(
+      expect(fetchBlob).toHaveBeenCalledWith(
         'https://duos.example.org/api/dar/v2/ref-001/irbDocument',
-        expect.objectContaining({
-          responseType: 'blob',
-          headers: expect.objectContaining({
-            'Content-Type': 'application/octet-stream',
-            'Accept': 'application/octet-stream',
-          }),
-        }),
+        headers,
       )
       expect(fileDownload).toHaveBeenCalledWith(blob, 'irb.pdf')
     })
 
     it('propagates fetch failures', async () => {
-      vi.mocked(fetchGet).mockRejectedValueOnce(new Error('network failure'))
+      vi.mocked(fetchBlob).mockRejectedValueOnce(new Error('network failure'))
       await expect(DAR.downloadDARDocument('ref-001', 'irbDocument', 'irb.pdf')).rejects.toThrow('network failure')
     })
 
     it('propagates ConsentError rejections so callers can extract a useful error', async () => {
       const consentError = { message: 'Document not found', code: 404 }
-      vi.mocked(fetchGet).mockRejectedValueOnce(consentError)
+      vi.mocked(fetchBlob).mockRejectedValueOnce(consentError)
       const error = await DAR.downloadDARDocument('ref-001', 'irbDocument', 'irb.pdf').then(
         () => { throw new Error('expected rejection') },
         e => e,
@@ -339,25 +335,25 @@ describe('DAR', () => {
   describe('getDARDocumentAsBlob', () => {
     it('fetches the document as a blob and returns it', async () => {
       const blob = new Blob(['pdf content'], { type: 'application/pdf' })
-      vi.mocked(fetchGet).mockResolvedValue({ data: blob })
+      vi.mocked(fetchBlob).mockResolvedValue(blob)
 
       const result = await DAR.getDARDocumentAsBlob('ref-001', 'irbDocument')
 
-      expect(fetchGet).toHaveBeenCalledWith(
+      expect(fetchBlob).toHaveBeenCalledWith(
         'https://duos.example.org/api/dar/v2/ref-001/irbDocument',
-        expect.objectContaining({ responseType: 'blob' }),
+        headers,
       )
       expect(result).toBe(blob)
     })
 
     it('propagates fetch failures', async () => {
-      vi.mocked(fetchGet).mockRejectedValueOnce(new Error('network failure'))
+      vi.mocked(fetchBlob).mockRejectedValueOnce(new Error('network failure'))
       await expect(DAR.getDARDocumentAsBlob('ref-001', 'irbDocument')).rejects.toThrow('network failure')
     })
 
     it('propagates ConsentError rejections so callers can extract a useful error', async () => {
       const consentError = { message: 'Document not found', code: 404 }
-      vi.mocked(fetchGet).mockRejectedValueOnce(consentError)
+      vi.mocked(fetchBlob).mockRejectedValueOnce(consentError)
       const error = await DAR.getDARDocumentAsBlob('ref-001', 'irbDocument').then(
         () => { throw new Error('expected rejection') },
         e => e,

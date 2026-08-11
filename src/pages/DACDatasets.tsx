@@ -7,7 +7,7 @@ import { DACDatasetsTable } from 'src/components/dac_dataset_table/DACDatasetsTa
 import { DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants.js'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from 'src/libs/utils'
 import { consoleTypes } from 'src/components/dac_dataset_table/DACDatasetTableCellData'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton'

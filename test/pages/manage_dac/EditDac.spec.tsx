@@ -2,7 +2,7 @@ import React from 'react'
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router'
 import Modal from 'react-modal'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import { DAC } from 'src/libs/ajax/DAC'
@@ -12,8 +12,6 @@ import { Institution } from 'src/libs/ajax/Institution'
 import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
 import type { DAAObject, DacObject, DuosUser } from 'src/types/model'
-
-type DAAObjectWithBroadFlag = DAAObject & { broadDaa?: boolean }
 
 vi.mock('src/libs/ajax/DAC')
 vi.mock('src/libs/ajax/DAA')
@@ -205,11 +203,10 @@ const existingDac = {
       category: 'dataAccessAgreement', mediaType: 'application/octet-stream',
       createUserId: 5146, createDate: 1713386755554,
     },
-    broadDaa: true,
   },
 } as unknown as DacObject
 
-const createMockBroadDaa = (overrides: Partial<DAAObjectWithBroadFlag> = {}): DAAObjectWithBroadFlag => ({
+const createMockDaa = (overrides: Partial<DAAObject> = {}): DAAObject => ({
   daaId: 1,
   createUserId: 3479,
   createDate: '2024-08-27T00:00:00Z',
@@ -229,11 +226,11 @@ const createMockBroadDaa = (overrides: Partial<DAAObjectWithBroadFlag> = {}): DA
   ...overrides,
 })
 
-const broadDaaList = [createMockBroadDaa()]
+const mockDaaList = [createMockDaa()]
 
-const buildExistingDaas = (): DAAObjectWithBroadFlag[] => [
-  createMockBroadDaa(),
-  createMockBroadDaa({
+const buildExistingDaas = (): DAAObject[] => [
+  createMockDaa(),
+  createMockDaa({
     daaId: 2,
     initialDacId: existingDac.dacId as number,
     file: {
@@ -328,7 +325,7 @@ describe('EditDAC Tests', () => {
 
   it('Chairs cannot create a DAC', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(chairUser)
-    vi.mocked(DAA.getDaas).mockResolvedValue(broadDaaList)
+    vi.mocked(DAA.getDaas).mockResolvedValue(mockDaaList)
     vi.mocked(DAA.addDaaToDac).mockResolvedValue(200 as never)
     vi.mocked(DAC.create).mockResolvedValue(existingDac as never)
     const { container } = mountCreateEditDac()
@@ -349,7 +346,7 @@ describe('EditDAC Tests', () => {
 
   it('Does not auto-select a DAA when creating a new DAC', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
-    vi.mocked(DAA.getDaas).mockResolvedValue(broadDaaList)
+    vi.mocked(DAA.getDaas).mockResolvedValue(mockDaaList)
     const { container } = mountCreateEditDac()
 
     await waitFor(() => {
@@ -363,7 +360,7 @@ describe('EditDAC Tests', () => {
     const createdChair = { userId: 7001, displayName: 'New Chair User', email: 'new-chair@broadinstitute.org' } as DuosUser
 
     vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
-    vi.mocked(DAA.getDaas).mockResolvedValue(broadDaaList)
+    vi.mocked(DAA.getDaas).mockResolvedValue(mockDaaList)
     vi.mocked(DAC.create).mockResolvedValue({ ...existingDac, dacId: 99 } as never)
     vi.mocked(DAA.addDaaToDac).mockResolvedValue(200 as never)
     vi.mocked(User.create).mockResolvedValue(createdChair as never)
@@ -432,7 +429,7 @@ describe('EditDAC Tests', () => {
 
   it('Shows error when saving a new DAC without selecting a data access agreement', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
-    vi.mocked(DAA.getDaas).mockResolvedValue(broadDaaList)
+    vi.mocked(DAA.getDaas).mockResolvedValue(mockDaaList)
     vi.mocked(DAC.create).mockResolvedValue(existingDac as never)
     const { container } = mountCreateEditDac()
 
@@ -455,10 +452,10 @@ describe('EditDAC Tests', () => {
     const customFileName = 'new-custom-daa.pdf'
 
     vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
-    vi.mocked(DAA.getDaas).mockResolvedValue(broadDaaList)
+    vi.mocked(DAA.getDaas).mockResolvedValue(mockDaaList)
     vi.mocked(DAA.addDaaToDac).mockResolvedValue(200 as never)
     vi.mocked(DAC.create).mockResolvedValue({ ...existingDac, dacId: 99 } as never)
-    vi.mocked(DAA.createDaa).mockResolvedValue({ data: { ...broadDaaList[0], daaId: 55 } } as never)
+    vi.mocked(DAA.createDaa).mockResolvedValue({ data: { ...mockDaaList[0], daaId: 55 } } as never)
     const { container } = mountCreateEditDac()
 
     await waitFor(() => {
@@ -514,7 +511,7 @@ describe('EditDAC Tests', () => {
 
   it('Creates and selects uploaded DAA immediately when editing an existing DAC', async () => {
     const existingDaas = buildExistingDaas()
-    const daa77 = createMockBroadDaa({ daaId: 77, initialDacId: 1 })
+    const daa77 = createMockDaa({ daaId: 77, initialDacId: 1 })
 
     vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
     vi.mocked(DAC.get).mockResolvedValue(existingDac as never)
@@ -523,7 +520,7 @@ describe('EditDAC Tests', () => {
       .mockResolvedValue([...existingDaas, daa77])
     vi.mocked(DAC.update).mockResolvedValue(existingDac as never)
     vi.mocked(DAA.addDaaToDac).mockResolvedValue(200 as never)
-    vi.mocked(DAA.createDaa).mockResolvedValue({ data: { ...broadDaaList[0], daaId: 77 } } as never)
+    vi.mocked(DAA.createDaa).mockResolvedValue({ data: { ...mockDaaList[0], daaId: 77 } } as never)
     const { container } = mountExistingEditDac(existingDac.dacId as number)
 
     await waitFor(() => {
@@ -555,14 +552,14 @@ describe('EditDAC Tests', () => {
 
   it('Creates one DAA per uploaded file when creating a new DAC with multiple files', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
-    vi.mocked(DAA.getDaas).mockResolvedValue(broadDaaList)
+    vi.mocked(DAA.getDaas).mockResolvedValue(mockDaaList)
     vi.mocked(DAA.addDaaToDac).mockResolvedValue(200 as never)
     vi.mocked(DAC.create).mockResolvedValue({ ...existingDac, dacId: 99 } as never)
     vi.mocked(DAA.createDaa)
-      .mockResolvedValueOnce({ data: { ...broadDaaList[0], daaId: 201 } } as never)
-      .mockResolvedValueOnce({ data: { ...broadDaaList[0], daaId: 202 } } as never)
-      .mockResolvedValueOnce({ data: { ...broadDaaList[0], daaId: 203 } } as never)
-      .mockResolvedValueOnce({ data: { ...broadDaaList[0], daaId: 204 } } as never)
+      .mockResolvedValueOnce({ data: { ...mockDaaList[0], daaId: 201 } } as never)
+      .mockResolvedValueOnce({ data: { ...mockDaaList[0], daaId: 202 } } as never)
+      .mockResolvedValueOnce({ data: { ...mockDaaList[0], daaId: 203 } } as never)
+      .mockResolvedValueOnce({ data: { ...mockDaaList[0], daaId: 204 } } as never)
     const { container } = mountCreateEditDac()
 
     await waitFor(() => {
@@ -587,14 +584,14 @@ describe('EditDAC Tests', () => {
 
   it('Shows per-file error and continues creating remaining DAAs when one uploaded file fails', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
-    vi.mocked(DAA.getDaas).mockResolvedValue(broadDaaList)
+    vi.mocked(DAA.getDaas).mockResolvedValue(mockDaaList)
     vi.mocked(DAA.addDaaToDac).mockResolvedValue(200 as never)
     vi.mocked(DAC.create).mockResolvedValue({ ...existingDac, dacId: 99 } as never)
     vi.mocked(DAA.createDaa)
-      .mockResolvedValueOnce({ data: { ...broadDaaList[0], daaId: 301, broadDaa: false } } as never)
+      .mockResolvedValueOnce({ data: { ...mockDaaList[0], daaId: 301 } } as never)
       .mockRejectedValueOnce(new Error('upload failed'))
-      .mockResolvedValueOnce({ data: { ...broadDaaList[0], daaId: 303, broadDaa: false } } as never)
-      .mockResolvedValueOnce({ data: { ...broadDaaList[0], daaId: 304, broadDaa: false } } as never)
+      .mockResolvedValueOnce({ data: { ...mockDaaList[0], daaId: 303 } } as never)
+      .mockResolvedValueOnce({ data: { ...mockDaaList[0], daaId: 304 } } as never)
     const { container } = mountCreateEditDac()
 
     await waitFor(() => {
@@ -637,16 +634,14 @@ describe('EditDAC Tests', () => {
 
     it('shows owned and shared DAA counts in tab labels', async () => {
       const existingDaas = [
-        createMockBroadDaa({ daaId: 1, initialDacId: 99, broadDaa: true }),
-        createMockBroadDaa({
+        createMockDaa({ daaId: 1, initialDacId: 99 }),
+        createMockDaa({
           daaId: 2,
-          broadDaa: false,
           initialDacId: existingDac.dacId as number,
           file: { fileStorageObjectId: 2, entityId: '2', fileName: 'custom-daa.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
         }),
-        createMockBroadDaa({
+        createMockDaa({
           daaId: 3,
-          broadDaa: false,
           initialDacId: 100,
           file: { fileStorageObjectId: 3, entityId: '3', fileName: 'shared-daa-2.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
         }),
@@ -666,10 +661,9 @@ describe('EditDAC Tests', () => {
 
     it('defaults to shared tab if no DAA assigned', async () => {
       const daasWithoutAssignment = [
-        createMockBroadDaa({ daaId: 1, initialDacId: 99, broadDaa: true }),
-        createMockBroadDaa({
+        createMockDaa({ daaId: 1, initialDacId: 99 }),
+        createMockDaa({
           daaId: 2,
-          broadDaa: false,
           initialDacId: existingDac.dacId as number,
           file: { fileStorageObjectId: 2, entityId: '2', fileName: 'custom-daa.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
         }),
@@ -689,11 +683,11 @@ describe('EditDAC Tests', () => {
     })
 
     it('defaults to owned tab if selected DAA is owned by this DAC', async () => {
-      const ownedDaa = createMockBroadDaa({
-        daaId: 2, broadDaa: false, initialDacId: existingDac.dacId as number,
+      const ownedDaa = createMockDaa({
+        daaId: 2, initialDacId: existingDac.dacId as number,
         file: { fileStorageObjectId: 2, entityId: '2', fileName: 'custom-daa.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
       })
-      const daasWithSelection = [...broadDaaList, ownedDaa]
+      const daasWithSelection = [...mockDaaList, ownedDaa]
       const dacWithAssignment = { ...existingDac, associatedDaa: ownedDaa }
 
       vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
@@ -710,8 +704,8 @@ describe('EditDAC Tests', () => {
     })
 
     it('defaults to shared tab if selected DAA is shared from another DAC', async () => {
-      const sharedDaa = createMockBroadDaa({
-        daaId: 5, broadDaa: false, initialDacId: 99,
+      const sharedDaa = createMockDaa({
+        daaId: 5, initialDacId: 99,
         file: { fileStorageObjectId: 5, entityId: '5', fileName: 'shared-daa.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
       })
       const daasWithSelection = [...buildExistingDaas(), sharedDaa]
@@ -753,8 +747,8 @@ describe('EditDAC Tests', () => {
     })
 
     it('can select DAA from shared tab', async () => {
-      const sharedDaa = createMockBroadDaa({
-        daaId: 5, broadDaa: false, initialDacId: 99,
+      const sharedDaa = createMockDaa({
+        daaId: 5, initialDacId: 99,
         file: { fileStorageObjectId: 5, entityId: '5', fileName: 'shared-daa.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
       })
       const daasWithSelection = [...buildExistingDaas(), sharedDaa]
@@ -786,7 +780,7 @@ describe('EditDAC Tests', () => {
 
     it('newly uploaded DAA appears in owned tab and is auto-selected', async () => {
       const existingDaas = buildExistingDaas()
-      const daa88 = createMockBroadDaa({ daaId: 88, broadDaa: false, initialDacId: existingDac.dacId as number })
+      const daa88 = createMockDaa({ daaId: 88, initialDacId: existingDac.dacId as number })
 
       vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
       vi.mocked(DAC.get).mockResolvedValue(existingDac as never)
@@ -794,7 +788,7 @@ describe('EditDAC Tests', () => {
         .mockResolvedValueOnce(existingDaas)
         .mockResolvedValue([...existingDaas, daa88])
       vi.mocked(DAA.createDaa).mockResolvedValue({
-        data: { ...broadDaaList[0], daaId: 88, broadDaa: false, initialDacId: existingDac.dacId },
+        data: { ...mockDaaList[0], daaId: 88, initialDacId: existingDac.dacId },
       } as never)
       const { container } = mountExistingEditDac(existingDac.dacId as number)
 
@@ -815,7 +809,7 @@ describe('EditDAC Tests', () => {
     })
 
     it('shows empty state for owned tab when no custom DAAs exist', async () => {
-      const daasWithoutOwned = [createMockBroadDaa({ daaId: 1, initialDacId: 99, broadDaa: true })]
+      const daasWithoutOwned = [createMockDaa({ daaId: 1, initialDacId: 99 })]
       vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
       vi.mocked(DAC.get).mockResolvedValue(existingDac as never)
       vi.mocked(DAA.getDaas).mockResolvedValue(daasWithoutOwned)
@@ -834,8 +828,8 @@ describe('EditDAC Tests', () => {
 
     it('shows empty state for shared tab when no shared DAAs exist', async () => {
       const daasAllOwned = [
-        createMockBroadDaa({ daaId: 1, initialDacId: existingDac.dacId as number }),
-        createMockBroadDaa({
+        createMockDaa({ daaId: 1, initialDacId: existingDac.dacId as number }),
+        createMockDaa({
           daaId: 2, initialDacId: existingDac.dacId as number,
           file: { fileStorageObjectId: 2, entityId: '2', fileName: 'custom.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
         }),
@@ -858,8 +852,8 @@ describe('EditDAC Tests', () => {
 
     it('download button works for DAA in owned tab', async () => {
       const ownedDaas = [
-        createMockBroadDaa({
-          daaId: 2, broadDaa: false, initialDacId: existingDac.dacId as number,
+        createMockDaa({
+          daaId: 2, initialDacId: existingDac.dacId as number,
           file: { fileStorageObjectId: 2, entityId: '2', fileName: 'custom-daa.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
         }),
       ]
@@ -879,8 +873,8 @@ describe('EditDAC Tests', () => {
     })
 
     it('download button works for DAA in shared tab', async () => {
-      const sharedDaa = createMockBroadDaa({
-        daaId: 5, broadDaa: false, initialDacId: 99,
+      const sharedDaa = createMockDaa({
+        daaId: 5, initialDacId: 99,
         file: { fileStorageObjectId: 5, entityId: '5', fileName: 'shared-daa.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
       })
       const daasWithSelection = [...buildExistingDaas(), sharedDaa]

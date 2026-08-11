@@ -2,7 +2,7 @@ import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import { makeMockParams } from './columnTestUtils'
 import { makeDatasetColumns } from 'src/components/data_library/columns/datasetColumns'
 import { Storage } from 'src/libs/storage'
@@ -60,9 +60,13 @@ describe('datasetColumns — column order', () => {
       'participantCount',
       'dataUse',
       'dac',
-      'soApprovalModel',
       'actions',
     ])
+  })
+
+  it('includes the SO Approval column when per-DAR-approval data is supplied', () => {
+    const fields = makeDatasetColumns({}, new Set(), new Set()).map(c => c.field)
+    expect(fields).toContain('soApprovalModel')
   })
 })
 
@@ -92,8 +96,12 @@ describe('datasetColumns — Access Management chip', () => {
 })
 
 describe('datasetColumns — SO Approval column', () => {
+  it('omits the column entirely when no per-DAR-approval data is supplied', () => {
+    expect(makeDatasetColumns().find(c => c.field === 'soApprovalModel')).toBeUndefined()
+  })
+
   it('shows the pre-authorization chip when the dataset is not in the per-DAR-approval set', () => {
-    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 })
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, makeDatasetColumns({}, new Set(), new Set()))
     expect(screen.getByText('Pre-Authorized Researchers')).toBeInTheDocument()
     expect(container.querySelector('.MuiChip-root')).toBeInTheDocument()
   })

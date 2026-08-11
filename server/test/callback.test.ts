@@ -42,6 +42,7 @@ function makeRequest(overrides: {
       pkceVerifier: 'pkceVerifier' in overrides ? overrides.pkceVerifier : 'test-verifier',
       pkceState: 'pkceState' in overrides ? overrides.pkceState : 'test-state',
       returnTo: overrides.returnTo,
+      save: vi.fn().mockResolvedValue(undefined),
     },
   } as unknown as FastifyRequest
 }
@@ -169,6 +170,20 @@ describe('handleCallback', () => {
     await handleCallback(makeRequest(), reply)
 
     expect(reply.redirect).toHaveBeenCalledWith('/')
+  })
+
+  it('persists the session before redirecting (guards the ERR_HTTP_HEADERS_SENT double-send fix)', async () => {
+    const request = makeRequest()
+    const reply = makeReply()
+
+    await handleCallback(request, reply)
+
+    // Saving before responding makes @fastify/session's onSend save synchronous,
+    // so Fastify does not fire a second reply.send(). If the save moves after
+    // the redirect (or is removed), the async onSend race returns.
+    const save = vi.mocked(request.session.save as () => Promise<void>)
+    expect(save).toHaveBeenCalled()
+    expect(save.mock.invocationCallOrder[0]).toBeLessThan(reply.redirect.mock.invocationCallOrder[0])
   })
 
   it('rejects with an error naming DUOS_OAUTH_REDIRECT_URI when it is unset', async () => {

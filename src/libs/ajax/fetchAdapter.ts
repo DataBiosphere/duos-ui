@@ -305,6 +305,20 @@ export const fetchGet = <T>(
   config: FetchRequestConfig = {},
 ) => fetchRequest<T>({ url, ...config, method: 'GET' })
 
+export const fetchBlob = async (
+  url: string,
+  config: FetchRequestConfig = {},
+): Promise<Blob> => {
+  const res = await fetchRequest<Blob>({
+    url,
+    ...config,
+    method: 'GET',
+    responseType: 'blob',
+    headers: { Accept: 'application/octet-stream', ...config.headers },
+  })
+  return res.data
+}
+
 export const fetchPost = <T, TBody = unknown>(
   url: string,
   data?: TBody,

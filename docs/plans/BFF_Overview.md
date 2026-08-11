@@ -52,11 +52,11 @@ The work is split into seven phases, delivered in order.
 |---|---|---|---|---|
 | 0 | Environment Configuration | Provision OAuth clients/app registrations for each identity provider and deliver server-side credentials and configuration (client secrets, session secret, database and issuer config) to the deployment environments. | [DT-3605](https://broadworkbench.atlassian.net/browse/DT-3605) | ✅ |
 | 1 | Server Foundation & Session Infrastructure | Add session middleware to the Fastify server with a PostgreSQL-backed session store, automated expired-session cleanup, and a metadata-only session audit trail. No user-visible changes. | [DT-3606](https://broadworkbench.atlassian.net/browse/DT-3606) | ✅ |
-| 2 | Server-Side OAuth Flow | Implement the BFF auth routes (`/auth/login`, `/auth/callback`, `/auth/logout`, `/auth/me`) using `openid-client` against the single Azure B2C client, with PKCE; the callback extracts the sub-provider from the B2C `id_token`. Runs alongside the legacy client-side flow during rollout. | [DT-3607](https://broadworkbench.atlassian.net/browse/DT-3607) | |
-| 3 | API Proxy Layer | Add a reverse proxy so the client calls relative `/api/*` URLs; the server injects the Bearer token from the session and proactively refreshes tokens before expiry. | [DT-3608](https://broadworkbench.atlassian.net/browse/DT-3608) | |
-| 4 | Client Refactor | Remove all token handling from the React client: drop `oidc-client-ts` and localStorage token storage, switch the fetch layer to relative URLs, and replace the popup sign-in with a full-page redirect to the B2C login page (which presents the Google/Microsoft choice, unchanged). | [DT-3609](https://broadworkbench.atlassian.net/browse/DT-3609) | |
-| 5 | Security Hardening | Layer additional defenses: strict Content Security Policy, end-to-end verification of CSRF coverage (enforcement lands with the endpoints in Phases 2–4), session-fixation protection (session ID regeneration), token revocation on logout, SRI/third-party script audit, and rate limiting on auth endpoints. | [DT-3610](https://broadworkbench.atlassian.net/browse/DT-3610) | |
-| 6 | Testing, Observability & Rollout | E2E test coverage, auth/session metrics and alerting, and a config-driven (`bffEnabled` in `config.json`) per-environment cutover. The legacy flow is removed only after the new flow is stable in production. | [DT-3611](https://broadworkbench.atlassian.net/browse/DT-3611) | |
+| 2 | Server-Side OAuth Flow | Implement the BFF auth routes (`/auth/login`, `/auth/callback`, `/auth/logout`, `/auth/me`) using `openid-client` against the single Azure B2C client, with PKCE; the callback extracts the sub-provider from the B2C `id_token`. Runs alongside the legacy client-side flow during rollout. | [DT-3607](https://broadworkbench.atlassian.net/browse/DT-3607) | ✅ |
+| 3 | API Proxy Layer | Add a reverse proxy so the client calls relative `/duos-api/*` URLs; the server injects the Bearer token from the session and proactively refreshes tokens before expiry. | [DT-3608](https://broadworkbench.atlassian.net/browse/DT-3608) |        |
+| 4 | Client Refactor | Remove all token handling from the React client: drop `oidc-client-ts` and localStorage token storage, switch the fetch layer to relative URLs, and replace the popup sign-in with a full-page redirect to the B2C login page (which presents the Google/Microsoft choice, unchanged). | [DT-3609](https://broadworkbench.atlassian.net/browse/DT-3609) |        |
+| 5 | Security Hardening | Layer additional defenses: strict Content Security Policy, end-to-end verification of CSRF coverage (enforcement lands with the endpoints in Phases 2–4), session-fixation protection (session ID regeneration), token revocation on logout, SRI/third-party script audit, and rate limiting on auth endpoints. | [DT-3610](https://broadworkbench.atlassian.net/browse/DT-3610) |        |
+| 6 | Testing, Observability & Rollout | E2E test coverage, auth/session metrics and alerting, and a config-driven (`bffEnabled` in `config.json`) per-environment cutover. The legacy flow is removed only after the new flow is stable in production. | [DT-3611](https://broadworkbench.atlassian.net/browse/DT-3611) |        |
 
 ## Rollout strategy
 
@@ -94,18 +94,138 @@ environment before cutting over.
 > Status: as of Phase 1 nothing reads `bffEnabled` yet — the flag-gated
 > routing lands with the Phase 2 auth routes.
 
-## Key architectural decisions
+## Architecture decision records
 
-- **PostgreSQL-backed sessions** — reuses existing infrastructure, survives
-  restarts, supports horizontal scaling, and allows server-side revocation
-  (stateless encrypted cookies cannot).
-- **Full-page redirect instead of popup** — required by the BFF callback model,
-  and eliminates the COOP (`Cross-Origin-Opener-Policy`) breakage that affects
-  popup-based flows.
-- **Single Azure B2C OIDC client** — provider selection (Google vs. Microsoft)
-  happens on the B2C-hosted login page, so there is no multi-client factory and
-  no per-provider branching in the BFF. The session records the sub-provider
-  from the B2C `id_token`'s `idp` claim for audit and observability.
+One sequence, numbered continuously. ADR-001 through ADR-008 were settled with
+the migration plan and are summarised below; the ones that needed fuller
+treatment — because they were resolved during implementation, with alternatives
+and residual risk worth recording — have their own files under
+[`bff_adrs/`](bff_adrs/). That is why the directory holds 004, 009 and 010 rather
+than 001 through 003: the numbers belong to this list, not to the directory.
+
+| ADR | Decision | Phase |
+|---|---|---|
+| [001](#adr-001--postgresql-backed-sessions-via-fastifysession) | PostgreSQL-backed sessions via `@fastify/session` | 1 |
+| [002](#adr-002--full-page-redirect-for-oauth-instead-of-popup) | Full-page redirect for OAuth instead of popup | 2, 4 |
+| [003](#adr-003--remove-oidc-client-ts-entirely-in-phase-4) | Remove `oidc-client-ts` entirely | 4 |
+| [004](#adr-004--fastifyreply-from-on-a-duos-api-prefix-for-the-proxy) | `@fastify/reply-from` on a `/duos-api` prefix for the proxy | 3 |
+| [005](#adr-005--single-authcallback-route) | Single `/auth/callback` route | 2 |
+| [006](#adr-006--lazy-oidc-client-initialization-with-startup-warm-up) | Lazy OIDC client init with startup warm-up | 2 |
+| [007](#adr-007--idp-stored-in-session-as-sub-provider) | `idp` stored as sub-provider, from the B2C `id_token` claim | 2 |
+| [008](#adr-008--azure-b2c-as-single-oidc-entry-point) | Azure B2C as the single OIDC entry point | 0, 2 |
+| [009](#adr-009--state-changing-upstream-gets-are-proxied-not-blocked) | State-changing upstream GETs are proxied, not blocked | 3 |
+| [010](#adr-010--the-proxy-scope-declares-its-own-error-shape) | The proxy scope declares its own error shape | 3, 4 |
+
+### ADR-001 — PostgreSQL-backed sessions via `@fastify/session`
+
+Sessions must survive restarts and work across horizontally scaled pods, which
+rules out an in-memory store. PostgreSQL is already DUOS infrastructure, so the
+BFF uses `@fastify/postgres` for pool management with a thin
+`createPgSessionStore`, and app-level TLS (`ssl: { rejectUnauthorized: true }`)
+unless the transport is already loopback. `@fastify/secure-session` (stateless
+encrypted cookies) was rejected: it cannot invalidate a session server-side,
+which is exactly what logout has to do.
+
+### ADR-002 — Full-page redirect for OAuth instead of popup
+
+The existing `oidc-client-ts` popup is incompatible with a server-side callback
+handler, and it also breaks in practice: the IdP response sets
+`Cross-Origin-Opener-Policy: same-origin`, which severs the `window.opener`
+reference the library needs to deliver the token back to the parent, so sign-in
+fails silently. The popup existed to avoid losing client-side state across a
+navigation, but the session cookie survives the redirect naturally and a
+`returnTo` field in the session restores the user's destination. A full-page
+redirect is unaffected by COOP headers on the IdP's domain.
+
+### ADR-003 — Remove `oidc-client-ts` entirely in Phase 4
+
+The library's event system is only used for client-side token expiry, which
+server-side proactive refresh (60 s before expiry, in the proxy) makes
+unnecessary. It is removed rather than left in place: keeping it invites reuse of
+its `WebStorageStateStore`, which would re-introduce the vulnerability this
+migration exists to close.
+
+### ADR-004 — `@fastify/reply-from` on a `/duos-api` prefix for the proxy
+
+**Full record:** [bff_adrs/ADR-004-api-proxy-layer.md](bff_adrs/ADR-004-api-proxy-layer.md)
+— resolved in story 3-A, with the alternatives and sub-decisions.
+
+`@fastify/reply-from` inside a route the BFF declares itself, rather than
+`@fastify/http-proxy` or a hand-rolled `fetch` proxy. It streams multipart
+uploads and document downloads instead of buffering them, and declaring the route
+keeps the auth gate, the single-flight refresh, and upstream-401 handling as
+ordinary route hooks. One `/duos-api` prefix maps to the upstream root, because 9
+of the client's paths are not under `/api`; bodies pass through unparsed, so CSRF
+must read its token from a header.
+
+### ADR-005 — Single `/auth/callback` route
+
+With one OIDC client there is nothing to disambiguate at the callback, so there
+is one route and one `DUOS_OAUTH_REDIRECT_URI` — no per-provider routing and no
+additional redirect URIs to register.
+
+### ADR-006 — Lazy OIDC client initialization with startup warm-up
+
+`discovery()` costs an HTTP round-trip to B2C's `.well-known` document, which
+would land on the first user's sign-in. The client is warmed at startup and
+cached, but a failed warm-up is logged and non-fatal, with lazy initialization as
+the fallback — so first-login latency is paid once without making B2C
+availability a hard startup dependency.
+
+### ADR-007 — `idp` stored in session as sub-provider
+
+With a single B2C client, the session's `idp` field does not record which OIDC
+client was used; it records which provider the user picked on the B2C login page,
+derived from the `id_token`'s `idp` claim at callback (`google.com` → `'google'`,
+otherwise `'microsoft'`). It feeds the audit trail, observability, and
+`/auth/me` — not client selection, and not refresh, which B2C handles uniformly.
+Parsing the access token's `iss` on every request was rejected: it adds CPU cost
+per request and assumes the B2C access token stays a parseable JWT, which is not
+guaranteed.
+
+### ADR-008 — Azure B2C as single OIDC entry point
+
+v1 proposed two OIDC clients (Google and B2C) with an `idp` parameter on
+`/auth/login`, which required a multi-client factory, provider-selection UI in
+DUOS, and per-provider integration tests. v2 lets B2C's existing login page make
+that choice instead: one client, one scope string, no branching, and the sign-in
+UX users see today is unchanged. Consent already accepts B2C tokens for
+Microsoft users, so extending that to Google-federated users is a known-working
+path, and the B2C policy already federates both providers — no policy change.
+
+**Trade-off accepted:** Google-federated users get B2C-issued rather than
+Google-issued tokens. The raw Google `idp_access_token` that `oidc-client-ts`
+stores today is not forwarded to Consent under either approach, since the proxy
+always forwards the primary `access_token`. A later move to Entra External ID
+changes `DUOS_AZURE_ISSUER_URL` and its siblings, not the BFF's structure.
+
+### ADR-009 — State-changing upstream GETs are proxied, not blocked
+
+**Full record:** [bff_adrs/ADR-009-state-changing-gets.md](bff_adrs/ADR-009-state-changing-gets.md)
+— the audit behind it, both endpoints, and the residual-risk analysis.
+
+`SameSite=Lax` is required by the OAuth callback redirect and a CSRF token cannot
+guard a GET, which leaves two upstream endpoints that mutate state on GET
+forgeable by a plain link. Blocking either breaks the app — one is how the client
+learns who the user is — so the residual risk is accepted, documented, and the
+real fix (making the side effect a POST) belongs upstream in Consent.
+
+### ADR-010 — The proxy scope declares its own error shape
+
+**Full record:** [bff_adrs/ADR-010-proxy-error-shape.md](bff_adrs/ADR-010-proxy-error-shape.md)
+— the experiment behind it, the alternatives, and what the client keys on.
+
+The proxy is an encapsulated plugin, so it captured Fastify's default error
+handler and never inherits the app's sanitizing one. Rather than reorder the
+registrations, the proxy declares its own: CSRF rejections return
+`{ error: 'csrf_validation_failed', reason }` and everything else returns the
+same generic body as the rest of the app. The client needs that one code because
+403 is otherwise ambiguous through the proxy — an upstream authorization denial
+arrives as a 403 too, as an ordinary proxied response — so Phase 4 keys its single
+refetch-and-retry on the body, not the status.
+
+### Decisions not tracked as ADRs
+
 - **`openid-client` (v6) for all OAuth/OIDC operations** — library-maintained
   PKCE, token exchange, and ID-token validation (signature, `iss`, `aud`,
   `exp`) rather than hand-rolled crypto.
@@ -175,7 +295,7 @@ sequenceDiagram
     rect rgb(235, 255, 235)
         Note over B,API: Authenticated API Request
 
-        B->>BFF: GET /api/user/me [cookie: sessionId]
+        B->>BFF: GET /duos-api/api/user/me [cookie: sessionId]
         BFF->>PG: Read session — accessToken, tokenExpiry
         PG-->>BFF: session data
 
@@ -187,8 +307,17 @@ sequenceDiagram
         end
 
         BFF->>API: GET /api/user/me + Authorization: Bearer <b2c-token> + X-App-ID: DUOS
-        API-->>BFF: 200 user data
-        BFF-->>B: 200 user data
+
+        alt upstream accepts the token
+            API-->>BFF: 200 user data
+            BFF-->>B: 200 user data
+        else upstream rejects the token
+            API-->>BFF: 401
+            Note over BFF: The upstream is the authority on the token —<br/>a session it rejects cannot recover
+            BFF->>PG: Delete session row
+            PG-->>BFF: ok
+            BFF-->>B: 401 { error: 'session_expired' } + cleared sessionId cookie
+        end
     end
 ```
 

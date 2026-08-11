@@ -104,6 +104,25 @@ describe('SigningOfficialReadOnlyCard', () => {
     expect(screen.getByText('LinkedIn')).toBeTruthy()
   })
 
+  it('treats whitespace-only external profile values as absent', () => {
+    render(
+      <SigningOfficialReadOnlyCard
+        {...baseProps}
+        externalProfiles={{
+          linkedIn: '   ',
+          ORCID: '   ',
+          throughBio: '   ',
+          institutionalWebsite: '   ',
+        }}
+      />,
+    )
+    expect(screen.queryByText('External Profile')).toBeNull()
+    expect(screen.queryByText('LinkedIn')).toBeNull()
+    expect(screen.queryByText('ORCID iD')).toBeNull()
+    expect(screen.queryByText('Through.bio')).toBeNull()
+    expect(screen.queryByText('Institutional Website')).toBeNull()
+  })
+
   it('has an accessible section label including the SO name', () => {
     const { container } = render(<SigningOfficialReadOnlyCard {...baseProps} />)
     const section = container.querySelector('section')

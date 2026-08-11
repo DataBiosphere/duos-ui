@@ -1,6 +1,5 @@
-import { auth, JWT } from 'google-auth-library'
-import { test as base } from '@playwright/test'
-import { BASE_URL } from './baseUrl'
+import { JWT } from 'google-auth-library'
+import { test as base, expect } from '@playwright/test'
 
 export const ROLES = ['ADMIN', 'CHAIR', 'MEMBER', 'RESEARCHER', 'SIGNING_OFFICIAL'] as const
 export type Role = typeof ROLES[number]
@@ -19,11 +18,14 @@ export const getAccessToken = async (role: Role): Promise<string> => {
   const parsed = JSON.parse(keysJson)
   const serviceAccountKey = parsed.key ?? parsed
 
-  // fromJSON's return type covers every credential shape it supports, but a service
-  // account key (what DUOS_AUTOMATION_*_SA holds) always yields a JWT client.
-  const client = auth.fromJSON(serviceAccountKey) as JWT
-  client.scopes = ['email', 'profile']
-  await client.request({ url: BASE_URL })
+  // Construct JWT directly; DUOS_AUTOMATION_*_SA is always a service account key, so the
+  // credential-type-specific constructor is the right fit.
+  const client = new JWT({
+    email: serviceAccountKey.client_email,
+    key: serviceAccountKey.private_key,
+    scopes: ['email', 'profile'],
+  })
+  await client.authorize()
 
   const accessToken = client.credentials.access_token
   if (!accessToken) {
@@ -37,13 +39,18 @@ type AuthFixtures = {
 }
 
 export const test = base.extend<AuthFixtures>({
-  signInAs: async ({ page }, use) => {
-    // oxlint-disable-next-line react-hooks/rules-of-hooks -- Playwright's fixture callback, not a React hook
-    await use(async (role: Role) => {
+  // Playwright passes this callback positionally; it's named `provideSignIn` rather than
+  // the conventional `use` so linters don't mistake the call for React's `use()` hook.
+  signInAs: async ({ page }, provideSignIn) => {
+    await provideSignIn(async (role: Role) => {
       const accessToken = await getAccessToken(role)
       await page.goto('/backgroundsignin')
       await page.locator('textarea[name="accessToken"]').fill(accessToken)
       await page.locator('input[type="submit"]').click()
+      // Sign-in redirects client-side to whichever console the role lands on
+      // (Navigation.console), so assert we've left this page rather than guessing the
+      // destination or waiting on network idle.
+      await expect(page).not.toHaveURL(/backgroundsignin/)
     })
   },
 })

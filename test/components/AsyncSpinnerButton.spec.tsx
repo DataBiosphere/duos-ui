@@ -27,6 +27,33 @@ describe('AsyncSpinnerButton', () => {
     expect(button).not.toBeDisabled()
   })
 
+  it('takes its accessible name from element children instead of labelling them "Button"', () => {
+    const mockOnClick = vi.fn().mockResolvedValue(undefined)
+    render(
+      <AsyncSpinnerButton onClick={mockOnClick}>
+        <span>
+          <svg aria-hidden="true" />
+          Yes as Chair
+        </span>
+      </AsyncSpinnerButton>,
+    )
+
+    expect(screen.getByRole('button', { name: 'Yes as Chair' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Button' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Yes as Chair' })).not.toHaveAttribute('aria-label')
+  })
+
+  it('still honours an explicit aria-label over element children', () => {
+    const mockOnClick = vi.fn().mockResolvedValue(undefined)
+    render(
+      <AsyncSpinnerButton onClick={mockOnClick} aria-label="Clear account link">
+        <span className="glyphicon glyphicon-remove-circle" />
+      </AsyncSpinnerButton>,
+    )
+
+    expect(screen.getByRole('button', { name: 'Clear account link' })).toBeInTheDocument()
+  })
+
   it('applies custom style and className', async () => {
     const mockOnClick = vi.fn().mockResolvedValue(undefined)
     const customStyle = { backgroundColor: 'red', color: 'white' }

@@ -75,8 +75,8 @@ vi.mock('src/libs/storage', () => ({
 }))
 
 const navigateMock = vi.fn()
-vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('react-router-dom')>()
+vi.mock('react-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router')>()
   return { ...actual, useNavigate: () => navigateMock }
 })
 
@@ -128,6 +128,11 @@ describe('DatasetSubmissions', () => {
   it('renders the ADD DATASET button', () => {
     renderComponent()
     expect(screen.getByRole('button', { name: /ADD DATASET/i })).toBeInTheDocument()
+  })
+
+  it('does not render the Signing Official approval reminder — that is Data Library only', () => {
+    const { container } = renderComponent()
+    expect(container.querySelector('[data-cy="so-approval-reminder-banner"]')).not.toBeInTheDocument()
   })
 
   it('renders controlled access description text', () => {

@@ -17,12 +17,12 @@ const mockResearcher: DuosUser = makeResearcher({
 
 const mockDaaRows: DAARowData[] = [
   {
-    daa: makeDaa({ broadDaa: true, daaId: 1, fileName: 'Default DUOS DAA' }),
+    daa: makeDaa({ daaId: 1, fileName: 'Default DUOS DAA' }),
     dacName: 'NHGRI DAC',
     status: 'authorized',
   },
   {
-    daa: makeDaa({ broadDaa: false, daaId: 2, fileName: 'GTEx Agreement' }),
+    daa: makeDaa({ daaId: 2, fileName: 'GTEx Agreement' }),
     dacName: 'GTEx DAC',
     status: 'not_requested',
   },
@@ -32,11 +32,15 @@ describe('ResearcherAccordionRow', () => {
   let authorizeSpy: (daaId: number) => void
   let revokeSpy: (daaId: number) => void
   let toggleSpy: () => void
+  let approveAllSpy: (daaIds: number[]) => void
+  let removeAllSpy: (daaIds: number[]) => void
 
   beforeEach(() => {
     authorizeSpy = vi.fn()
     revokeSpy = vi.fn()
     toggleSpy = vi.fn()
+    approveAllSpy = vi.fn()
+    removeAllSpy = vi.fn()
   })
 
   const mount = (overrides: Partial<React.ComponentProps<typeof ResearcherAccordionRow>> = {}) =>
@@ -49,6 +53,8 @@ describe('ResearcherAccordionRow', () => {
         onToggle={toggleSpy}
         onAuthorize={authorizeSpy}
         onRevoke={revokeSpy}
+        onApproveAll={approveAllSpy}
+        onRemoveAll={removeAllSpy}
         {...overrides}
       />,
     )
@@ -86,5 +92,46 @@ describe('ResearcherAccordionRow', () => {
     expect(container.querySelector('[data-cy="daa-subtable"]')).toBeInTheDocument()
     expect(container.querySelector('[data-cy="daa-row-1"]')).toBeInTheDocument()
     expect(container.querySelector('[data-cy="daa-row-2"]')).toBeInTheDocument()
+  })
+
+  // ── Bulk actions ──────────────────────────────────────────────────────────
+
+  it('calls onApproveAll with only the unauthorized DAA ids, without toggling', async () => {
+    const user = userEvent.setup()
+    const { container } = mount()
+    await user.click(container.querySelector('[data-cy="bulk-approve-all-researcher-42"]') as HTMLElement)
+    expect(approveAllSpy).toHaveBeenCalledWith([2])
+    expect(toggleSpy).not.toHaveBeenCalled()
+  })
+
+  it('calls onRemoveAll with only the authorized DAA ids, without toggling', async () => {
+    const user = userEvent.setup()
+    const { container } = mount()
+    await user.click(container.querySelector('[data-cy="bulk-remove-all-researcher-42"]') as HTMLElement)
+    expect(removeAllSpy).toHaveBeenCalledWith([1])
+    expect(toggleSpy).not.toHaveBeenCalled()
+  })
+
+  it('disables Approve All when every DAA is already authorized', () => {
+    const allAuthorized = mockDaaRows.map(r => ({ ...r, status: 'authorized' as const }))
+    const { container } = mount({ daaRows: allAuthorized })
+    expect(container.querySelector('[data-cy="bulk-approve-all-researcher-42"]')).toBeDisabled()
+    expect(container.querySelector('[data-cy="bulk-remove-all-researcher-42"]')).not.toBeDisabled()
+  })
+
+  it('disables Remove All when no DAA is authorized', () => {
+    const noneAuthorized = mockDaaRows.map(r => ({ ...r, status: 'not_requested' as const }))
+    const { container } = mount({ daaRows: noneAuthorized })
+    expect(container.querySelector('[data-cy="bulk-remove-all-researcher-42"]')).toBeDisabled()
+    expect(container.querySelector('[data-cy="bulk-approve-all-researcher-42"]')).not.toBeDisabled()
+  })
+
+  it('a disabled bulk button does nothing when clicked', async () => {
+    // pointerEventsCheck off: MUI disabled buttons set pointer-events:none.
+    const user = userEvent.setup({ pointerEventsCheck: 0 })
+    const allAuthorized = mockDaaRows.map(r => ({ ...r, status: 'authorized' as const }))
+    const { container } = mount({ daaRows: allAuthorized })
+    await user.click(container.querySelector('[data-cy="bulk-approve-all-researcher-42"]') as HTMLElement)
+    expect(approveAllSpy).not.toHaveBeenCalled()
   })
 })

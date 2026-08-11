@@ -1,7 +1,7 @@
 import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router'
 import { DatasetTerm } from 'src/types/model'
 import { AccessManagement, ExportableDatasets } from 'src/types/library'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
@@ -9,13 +9,37 @@ import RequestAccessButton from 'src/components/data_library/RequestAccessButton
 import BoltIcon from '@mui/icons-material/Bolt'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 
+const makeSoApprovalColumn = (soDarApprovalRequiredDatasetIds: Set<number>): GridColDef<DatasetTerm> => ({
+  field: 'soApprovalModel',
+  headerName: 'SO Approval',
+  width: 190,
+  sortable: false,
+  renderCell: (params) => {
+    const isPerDarApproval = soDarApprovalRequiredDatasetIds.has(params.row.datasetId)
+    const label = isPerDarApproval ? 'Per-Request Approval' : 'Pre-Authorized Researchers'
+    const tooltipTitle = isPerDarApproval
+      ? 'This dataset\'s DAC requires the Signing Official named in each Data Access Request to approve that specific request before the DAC reviews it.'
+      : 'This dataset\'s DAC allows Signing Officials to pre-authorize researchers in advance, so approved researchers don\'t need separate per-request SO approval.'
+    const colorSx = isPerDarApproval
+      ? { bgcolor: '#cfe2ff', color: '#084298' }
+      : { bgcolor: '#d4edda', color: '#155724' }
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+        <Tooltip title={tooltipTitle}>
+          <Chip label={label} size="small" sx={{ ...colorSx, fontWeight: 600 }} />
+        </Tooltip>
+      </Box>
+    )
+  },
+})
+
 /**
  * Column definitions for dataset view
  */
 export const makeDatasetColumns = (
   exportableDatasets: ExportableDatasets = {},
   radarEnabledDatasetIds: Set<number> = new Set(),
-  soDarApprovalRequiredDatasetIds: Set<number> = new Set(),
+  soDarApprovalRequiredDatasetIds?: Set<number>,
   hasSelection: boolean = false,
 ): GridColDef<DatasetTerm>[] => [
   {
@@ -148,29 +172,8 @@ export const makeDatasetColumns = (
     width: 150,
     valueGetter: (_value, row) => row.dac?.dacName || '',
   },
-  {
-    field: 'soApprovalModel',
-    headerName: 'SO Approval',
-    width: 190,
-    sortable: false,
-    renderCell: (params) => {
-      const isPerDarApproval = soDarApprovalRequiredDatasetIds.has(params.row.datasetId)
-      const label = isPerDarApproval ? 'Per-Request Approval' : 'Pre-Authorized Researchers'
-      const tooltipTitle = isPerDarApproval
-        ? 'This dataset\'s DAC requires the Signing Official named in each Data Access Request to approve that specific request before the DAC reviews it.'
-        : 'This dataset\'s DAC allows Signing Officials to pre-authorize researchers in advance, so approved researchers don\'t need separate per-request SO approval.'
-      const colorSx = isPerDarApproval
-        ? { bgcolor: '#cfe2ff', color: '#084298' }
-        : { bgcolor: '#d4edda', color: '#155724' }
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-          <Tooltip title={tooltipTitle}>
-            <Chip label={label} size="small" sx={{ ...colorSx, fontWeight: 600 }} />
-          </Tooltip>
-        </Box>
-      )
-    },
-  },
+  // Omitted entirely when the page has no DAC rule data — an empty set would mislabel every row
+  ...(soDarApprovalRequiredDatasetIds ? [makeSoApprovalColumn(soDarApprovalRequiredDatasetIds)] : []),
   {
     field: 'actions',
     headerName: 'Actions',

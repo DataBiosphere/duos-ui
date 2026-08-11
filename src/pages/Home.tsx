@@ -7,7 +7,7 @@ import dacIcon from 'src/images/dac_icon.svg'
 import signingOfficialIcon from 'src/images/icon_add_user.png'
 import datasetIcon from 'src/images/icon_dataset_.png'
 import { OverflowTooltip } from 'src/components/Tooltips'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { getLibraryVersions } from 'src/libs/libraryVersions'
 import { handleSignIn } from 'src/libs/signInUtils'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
@@ -108,6 +108,7 @@ const CheckIcon = ({ color }: { color: string }) => (
 
 const Home = ({ isLogged }: Readonly<HomeProps>) => {
   const location = useLocation()
+  const navigate = useNavigate()
   const [showContactModal, setShowContactModal] = useState(false)
 
   const featuredLibraries = useMemo(() => {
@@ -427,7 +428,7 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
                 <div className="audience-card-actions">
                   <a
                     id="blog-support-so-link"
-                    href="https://duos.blog/help/preauthorize_researchers_librarycards/"
+                    href="https://duos.blog/help/signingofficialguide/"
                     target="_blank"
                     rel="noreferrer"
                     className="audience-cta-primary"
@@ -466,7 +467,7 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
                   <button
                     type="button"
                     className="audience-cta-primary audience-cta-primary-teal"
-                    onClick={() => handleSignIn('/datalibrary')}
+                    onClick={() => handleSignIn('/datalibrary', navigate)}
                   >
                     Sign In to Browse Data
                   </button>
@@ -517,7 +518,7 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
                             onClick={(e) => {
                               if (!isLogged) {
                                 e.preventDefault()
-                                handleSignIn(libraryPath)
+                                handleSignIn(libraryPath, navigate)
                               }
                             }}
                             style={{ textDecoration: 'none', display: 'flex', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}

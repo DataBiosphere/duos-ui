@@ -25,18 +25,14 @@ describe('ChairVoteInfo', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('renders nothing when no votes have been cast', () => {
-    const { container } = render(
-      <ChairVoteInfo dacVotes={[notYetVoted]} isChair={true} />,
-    )
-    expect(container).toBeEmptyDOMElement()
+  it('renders even when no votes have been cast yet', () => {
+    render(<ChairVoteInfo dacVotes={[notYetVoted]} isChair={true} />)
+    expect(document.querySelector('[data-cy="chair-vote-info"]')).toBeInTheDocument()
   })
 
-  it('renders nothing when dacVotes is empty', () => {
-    const { container } = render(
-      <ChairVoteInfo dacVotes={[]} isChair={true} />,
-    )
-    expect(container).toBeEmptyDOMElement()
+  it('renders even when dacVotes is empty', () => {
+    render(<ChairVoteInfo dacVotes={[]} isChair={true} />)
+    expect(document.querySelector('[data-cy="chair-vote-info"]')).toBeInTheDocument()
   })
 
   it('renders the vote info when isChair is true and votes have been cast', () => {

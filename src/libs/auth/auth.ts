@@ -42,5 +42,5 @@ export const Auth = {
 
 export const redirectOnLogout = () => {
   Auth.signOut()
-  window.location.href = `/home?redirectTo=${window.location.pathname}`
+  globalThis.location.href = `/home?redirectTo=${globalThis.location.pathname}`
 }

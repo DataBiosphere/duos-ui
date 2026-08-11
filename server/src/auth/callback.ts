@@ -44,6 +44,16 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
   delete request.session.pkceVerifier
   delete request.session.pkceState
 
+  // Persist the session BEFORE responding. Otherwise, @fastify/session saves it
+  // in an async onSend hook (pgStore.set is a DB round-trip); since this handler
+  // is async, its promise resolves while that save is still in flight, so
+  // reply.sent is still false and Fastify's wrapThenable fires a SECOND
+  // reply.send() — a duplicate onSend/session-save whose late writeHead throws
+  // ERR_HTTP_HEADERS_SENT and crashes the process. Saving here resets the
+  // session's modified-hash, so onSend finds it unmodified, skips the async
+  // store write, and completes synchronously — no second send.
+  await request.session.save()
+
   // returnTo was validated to a same-origin path by safeReturnTo() at login —
   // only sanitized values ever reach the session.
   reply.redirect(request.session.returnTo ?? '/')

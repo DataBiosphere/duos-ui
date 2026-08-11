@@ -12,9 +12,10 @@ import {
 } from 'src/libs/ajax/FileStorageObject'
 import { Config } from 'src/libs/config'
 import type { FetchData } from 'src/libs/ajax/fetchAdapter'
-import { fetchGet, fetchPut, fetchDelete, fetchMultipart } from 'src/libs/ajax/fetchAdapter'
+import { fetchBlob, fetchGet, fetchPut, fetchDelete, fetchMultipart } from 'src/libs/ajax/fetchAdapter'
 
 vi.mock('src/libs/ajax/fetchAdapter', () => ({
+  fetchBlob: vi.fn(),
   fetchGet: vi.fn(),
   fetchPut: vi.fn(),
   fetchDelete: vi.fn(),
@@ -99,19 +100,16 @@ describe('FileStorageObject ajax', () => {
   })
 
   describe('getDocumentFile', () => {
-    it('sends GET with blob responseType and returns a Blob', async () => {
+    it('fetches the file via fetchBlob and returns a Blob', async () => {
       const fakeBlob = new Blob(['file content'], { type: 'application/pdf' })
-      vi.mocked(fetchGet).mockResolvedValue({ data: fakeBlob } as FetchData<Blob>)
+      vi.mocked(fetchBlob).mockResolvedValue(fakeBlob)
 
       const result = await getDocumentFile(EntityType.STUDY, '7', 2)
 
       expect(result).toBeInstanceOf(Blob)
-      expect(fetchGet).toHaveBeenCalledWith(
+      expect(fetchBlob).toHaveBeenCalledWith(
         '/api/document/study/7/2/file',
-        expect.objectContaining({
-          responseType: 'blob',
-          headers: expect.objectContaining({ Accept: 'application/octet-stream' }),
-        }),
+        authHeaders,
       )
     })
   })
