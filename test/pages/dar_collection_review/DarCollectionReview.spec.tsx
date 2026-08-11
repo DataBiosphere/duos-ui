@@ -100,6 +100,7 @@ const dar = {
         rus: 'One good RUS\n',
         nonTechRus: 'One non-technical RUS\n',
         diseases: true,
+        stigmatizedDiseases: true,
         aiLlmUse: false,
         darCode: 'DAR-XXX',
         createDate: 1667971415440,
@@ -262,6 +263,16 @@ beforeEach(() => {
 })
 
 describe('DAR Review', () => {
+  it('renders one manual-review warning while the Vote tab is open', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(chair)
+    renderReview({ adminPage: false })
+
+    const alerts = await screen.findAllByRole('alert')
+    const banners = alerts.filter(alert => alert.getAttribute('data-cy') === 'manual-review-warning-banner')
+
+    expect(banners).toHaveLength(1)
+  })
+
   it('renders Vote tab (not Chair Vote) for Chairs', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(chair)
     renderReview({ adminPage: false })
