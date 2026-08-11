@@ -97,11 +97,11 @@ environment before cutting over.
 ## Architecture decision records
 
 One sequence, numbered continuously. ADR-001 through ADR-008 were settled with
-the migration plan and are summarised below; the two that needed fuller
+the migration plan and are summarised below; the ones that needed fuller
 treatment — because they were resolved during implementation, with alternatives
 and residual risk worth recording — have their own files under
-[`bff_adrs/`](bff_adrs/). That is why the directory holds 004 and 009 rather than
-001 and 002: the numbers belong to this list, not to the directory.
+[`bff_adrs/`](bff_adrs/). That is why the directory holds 004, 009 and 010 rather
+than 001 through 003: the numbers belong to this list, not to the directory.
 
 | ADR | Decision | Phase |
 |---|---|---|
@@ -114,6 +114,7 @@ and residual risk worth recording — have their own files under
 | [007](#adr-007--idp-stored-in-session-as-sub-provider) | `idp` stored as sub-provider, from the B2C `id_token` claim | 2 |
 | [008](#adr-008--azure-b2c-as-single-oidc-entry-point) | Azure B2C as the single OIDC entry point | 0, 2 |
 | [009](#adr-009--state-changing-upstream-gets-are-proxied-not-blocked) | State-changing upstream GETs are proxied, not blocked | 3 |
+| [010](#adr-010--the-proxy-scope-declares-its-own-error-shape) | The proxy scope declares its own error shape | 3, 4 |
 
 ### ADR-001 — PostgreSQL-backed sessions via `@fastify/session`
 
@@ -209,6 +210,20 @@ forgeable by a plain link. Blocking either breaks the app — one is how the cli
 learns who the user is — so the residual risk is accepted, documented, and the
 real fix (making the side effect a POST) belongs upstream in Consent.
 
+### ADR-010 — The proxy scope declares its own error shape
+
+**Full record:** [bff_adrs/ADR-010-proxy-error-shape.md](bff_adrs/ADR-010-proxy-error-shape.md)
+— the experiment behind it, the alternatives, and what the client keys on.
+
+The proxy is an encapsulated plugin, so it captured Fastify's default error
+handler and never inherits the app's sanitizing one. Rather than reorder the
+registrations, the proxy declares its own: CSRF rejections return
+`{ error: 'csrf_validation_failed', reason }` and everything else returns the
+same generic body as the rest of the app. The client needs that one code because
+403 is otherwise ambiguous through the proxy — an upstream authorization denial
+arrives as a 403 too, as an ordinary proxied response — so Phase 4 keys its single
+refetch-and-retry on the body, not the status.
+
 ### Decisions not tracked as ADRs
 
 - **`openid-client` (v6) for all OAuth/OIDC operations** — library-maintained
@@ -292,8 +307,17 @@ sequenceDiagram
         end
 
         BFF->>API: GET /api/user/me + Authorization: Bearer <b2c-token> + X-App-ID: DUOS
-        API-->>BFF: 200 user data
-        BFF-->>B: 200 user data
+
+        alt upstream accepts the token
+            API-->>BFF: 200 user data
+            BFF-->>B: 200 user data
+        else upstream rejects the token
+            API-->>BFF: 401
+            Note over BFF: The upstream is the authority on the token —<br/>a session it rejects cannot recover
+            BFF->>PG: Delete session row
+            PG-->>BFF: ok
+            BFF-->>B: 401 { error: 'session_expired' } + cleared sessionId cookie
+        end
     end
 ```
 

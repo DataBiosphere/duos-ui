@@ -273,9 +273,9 @@ export async function buildApp(): Promise<AppInstance> {
   // but does not register routes; we wire the catch-all ourselves.
   fastify.setNotFoundHandler((_req, reply) => reply.html())
 
-  // Error handler — suppresses stack traces from responses
-  fastify.setErrorHandler((err: FastifyError, _req, reply) => {
-    fastify.log.error({ err }, '[server] Unhandled error:')
+  // The encapsulated proxy declares its own error handler (ADR-010).
+  fastify.setErrorHandler((err: FastifyError, request, reply) => {
+    request.log.error({ err }, '[server] Unhandled error:')
     return reply.status(err.statusCode ?? 500).send({ error: 'An unexpected error occurred.' })
   })
 

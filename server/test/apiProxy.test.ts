@@ -3,13 +3,13 @@ import http from 'node:http'
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { gzipSync } from 'node:zlib'
-import Fastify, { type FastifyInstance } from 'fastify'
+import Fastify, { type FastifyInstance, type FastifyRequest, type Session } from 'fastify'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { csrfPluginOptions } from '../src/auth/csrf.js'
 import { RefreshFailedError } from '../src/auth/refresh.js'
-import { CSRF_EXEMPT_UNSAFE_REQUESTS, PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
+import { CSRF_ERROR_CODE, CSRF_EXEMPT_UNSAFE_REQUESTS, PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
 
 // refreshAccessToken is replaced so the tests never reach B2C; RefreshFailedError
 // stays the real class so the proxy's instanceof branch is exercised rather than
@@ -139,6 +139,31 @@ async function buildProxyApp(seed?: SessionSeed): Promise<FastifyInstance> {
   }
   await app.register(apiProxy)
   return app
+}
+
+// Capture the request's original session ID before the proxy can destroy it.
+function trackSession(app: FastifyInstance): { stored: () => Promise<Session | null> } {
+  let sid: string | undefined
+  let store: FastifyRequest['sessionStore'] | undefined
+  app.addHook('onRequest', async (request) => {
+    sid = request.session.sessionId
+    store = request.sessionStore
+  })
+  return {
+    stored: () => new Promise((resolve, reject) => {
+      if (!sid || !store) {
+        reject(new Error('no request reached the session-tracking hook'))
+        return
+      }
+      store.get(sid, (err: unknown, session?: Session | null) => {
+        if (err) {
+          reject(err instanceof Error ? err : new Error('session store read failed'))
+          return
+        }
+        resolve(session ?? null)
+      })
+    }),
+  }
 }
 
 /**
@@ -353,22 +378,9 @@ describe('apiProxy', () => {
   // The proxy turns every DUOS API write into a cookie-authenticated request,
   // so without this any site could drive them using a signed-in victim's cookie.
   describe('CSRF enforcement', () => {
-    /**
-     * The plugin rejects for two different reasons, both with a 403, and the
-     * tests below assert which one they got rather than the status alone —
-     * otherwise a case meant to exercise one path can silently drift onto the
-     * other, which review of story 3-D found had already happened to the
-     * no-token cases.
-     *
-     * `MISSING_SECRET` means the request had no session to verify against, so
-     * enforcement never got as far as the token. `INVALID_TOKEN` means there was
-     * a secret and the token did not verify against it — including when
-     * `getToken` found no token at all. The codes are Fastify's default error
-     * serialisation, which is what this harness (no error handler of its own)
-     * exposes.
-     */
-    const MISSING_SECRET = 'FST_CSRF_MISSING_SECRET'
-    const INVALID_TOKEN = 'FST_CSRF_INVALID_TOKEN'
+    const MISSING_SECRET = 'missing_secret'
+    const INVALID_TOKEN = 'invalid_token'
+    const rejection = (reason: string) => ({ error: CSRF_ERROR_CODE, reason })
 
     // No cookie, so every request builds a fresh session with no CSRF secret in
     // it. That is the signed-out attacker's request, and it stops at the secret.
@@ -380,7 +392,7 @@ describe('apiProxy', () => {
         const res = await app.inject({ method, url: `${PROXY_PREFIX}/api/dataset/1` })
 
         expect(res.statusCode).toBe(403)
-        expect(res.json()).toMatchObject({ code: MISSING_SECRET })
+        expect(res.json()).toEqual(rejection(MISSING_SECRET))
         expect(upstream.received).toHaveLength(0)
       },
     )
@@ -396,7 +408,7 @@ describe('apiProxy', () => {
       const res = await app.inject({ method: 'POST', url: `${PROXY_PREFIX}/api/dataset/1`, headers: { cookie } })
 
       expect(res.statusCode).toBe(403)
-      expect(res.json()).toMatchObject({ code: INVALID_TOKEN })
+      expect(res.json()).toEqual(rejection(INVALID_TOKEN))
       expect(upstream.received).toHaveLength(0)
     })
 
@@ -420,7 +432,7 @@ describe('apiProxy', () => {
       })
 
       expect(res.statusCode).toBe(403)
-      expect(res.json()).toMatchObject({ code: INVALID_TOKEN })
+      expect(res.json()).toEqual(rejection(INVALID_TOKEN))
       expect(upstream.received).toHaveLength(0)
     })
 
@@ -438,7 +450,7 @@ describe('apiProxy', () => {
       })
 
       expect(res.statusCode).toBe(403)
-      expect(res.json()).toMatchObject({ code: MISSING_SECRET })
+      expect(res.json()).toEqual(rejection(MISSING_SECRET))
       expect(upstream.received).toHaveLength(0)
     })
 
@@ -460,7 +472,7 @@ describe('apiProxy', () => {
       // The secret is present and no token was found, so this is the
       // failed-verification path, not the missing-secret one.
       expect(res.statusCode).toBe(403)
-      expect(res.json()).toMatchObject({ code: INVALID_TOKEN })
+      expect(res.json()).toEqual(rejection(INVALID_TOKEN))
     })
 
     it.each(['GET', 'HEAD', 'OPTIONS'] as const)('does not require a token on %s', async (method) => {
@@ -952,6 +964,144 @@ describe('apiProxy', () => {
       expect(res.json()).toEqual({ ok: true })
     })
 
+    describe('connection-specific headers', () => {
+      it('never forwards an upstream proxy-authenticate challenge', async () => {
+        upstream.respondWith((_req, res) => {
+          res.writeHead(407, {
+            'content-type': 'application/json',
+            'proxy-authenticate': 'Basic realm="upstream-proxy"',
+          })
+          res.end('{"message":"Proxy Authentication Required"}')
+        })
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+        expect(res.headers['proxy-authenticate']).toBeUndefined()
+        expect(res.statusCode).toBe(407)
+        expect(res.json()).toEqual({ message: 'Proxy Authentication Required' })
+      })
+
+      it.each(['keep-alive', 'proxy-authorization', 'te', 'trailer', 'upgrade'])(
+        'does not forward an upstream %s',
+        async (header) => {
+          upstream.respondWith((_req, res) => {
+            res.writeHead(200, { 'content-type': 'application/json', [header]: 'upstream-hop-value' })
+            res.end('{"ok":true}')
+          })
+          app = await buildProxyApp(freshSession())
+
+          const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+          expect(res.headers[header]).toBeUndefined()
+          expect(res.json()).toEqual({ ok: true })
+        },
+      )
+
+      it('does not forward the keep-alive an upstream emits without being asked', async () => {
+        upstream.respondWith((_req, res) => {
+          res.writeHead(200, { 'content-type': 'application/json' })
+          res.end('{"ok":true}')
+        })
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+        expect(res.headers['keep-alive']).toBeUndefined()
+      })
+
+      it('gives the browser the transport hop\'s own framing, not the upstream\'s', async () => {
+        upstream.respondWith((_req, res) => {
+          res.writeHead(200, { 'content-type': 'application/json', 'connection': 'keep-alive' })
+          res.write('{"streamed":')
+          res.end('true}')
+        })
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+        expect(res.headers.connection).not.toBe('keep-alive')
+        expect(res.headers['transfer-encoding']).toBe('chunked')
+        expect(res.json()).toEqual({ streamed: true })
+      })
+
+      it('leaves the origin-state and hardening headers the BFF sets in place', async () => {
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+        expect(res.headers['x-content-type-options']).toBe('nosniff')
+        expect(res.cookies.map(cookie => cookie.name)).toContain(SESSION_COOKIE)
+      })
+    })
+
+    describe('response hardening', () => {
+      it('neuters an uploaded document served back as text/html', async () => {
+        upstream.respondWith((_req, res) => {
+          res.writeHead(200, {
+            'content-type': 'text/html',
+            'content-security-policy': 'default-src \'self\' \'unsafe-inline\'',
+            'x-content-type-options': 'sniff-away',
+          })
+          res.end('<script>fetch("/duos-api/api/user/me")</script>')
+        })
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/daa/1/file` })
+
+        expect(res.headers['x-content-type-options']).toBe('nosniff')
+        expect(res.headers['content-security-policy']).toBe('sandbox')
+      })
+
+      it('leaves a blob download byte-for-byte intact', async () => {
+        const document = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37, 0x00, 0xff, 0xfe, 0x0a])
+        upstream.respondWith((_req, res) => {
+          res.writeHead(200, {
+            'content-type': 'application/pdf',
+            'content-length': String(document.length),
+            'content-disposition': 'attachment; filename="daa.pdf"',
+          })
+          res.end(document)
+        })
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/daa/1/file` })
+
+        expect(res.rawPayload.equals(document)).toBe(true)
+        expect(res.headers['content-disposition']).toBe('attachment; filename="daa.pdf"')
+        expect(res.headers['x-content-type-options']).toBe('nosniff')
+      })
+
+      it('hardens a reply the proxy writes itself, not only a proxied one', async () => {
+        upstream.respondWith((_req, res) => {
+          res.writeHead(401, {
+            'content-type': 'text/plain',
+            'content-security-policy': 'default-src \'self\'',
+            'x-content-type-options': 'nosniff',
+          })
+          res.end('Unauthorized')
+        })
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+        expect(res.statusCode).toBe(401)
+        expect(res.json()).toEqual({ error: 'session_expired' })
+        expect(res.headers['x-content-type-options']).toBe('nosniff')
+        expect(res.headers['content-security-policy']).toBe('sandbox')
+      })
+
+      it('does not leak the headers onto routes outside the proxy scope', async () => {
+        app = await buildProxyApp(freshSession())
+
+        const res = await app.inject({ method: 'GET', url: '/auth/csrf-token' })
+
+        expect(res.statusCode).toBe(200)
+        expect(res.headers['content-security-policy']).toBeUndefined()
+        expect(res.headers['x-content-type-options']).toBeUndefined()
+      })
+    })
+
     // reply-from leaves a refused connection at 500, which index.ts's error
     // handler would render as its generic "An unexpected error occurred" —
     // reading as a BFF bug rather than an upstream outage.
@@ -975,6 +1125,165 @@ describe('apiProxy', () => {
       const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
       expect(res.statusCode).toBe(503)
+    })
+  })
+
+  describe('an upstream 401', () => {
+    const rejectingUpstream = (headers: Record<string, string> = {}): void => {
+      upstream.respondWith((_req, res) => {
+        res.writeHead(401, { 'content-type': 'application/json', ...headers })
+        res.end('{"message":"Unauthorized"}')
+      })
+    }
+
+    it('signs the user out — its own 401, session destroyed, cookie cleared', async () => {
+      rejectingUpstream()
+      app = await buildProxyApp(freshSession())
+      const session = trackSession(app)
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.statusCode).toBe(401)
+      expect(res.json()).toEqual({ error: 'session_expired' })
+      expect(await session.stored()).toBeNull()
+      expect(res.cookies).toEqual(expect.arrayContaining([
+        expect.objectContaining({ name: SESSION_COOKIE, value: '' }),
+      ]))
+    })
+
+    it('leaves the session alone when the upstream is happy', async () => {
+      app = await buildProxyApp(freshSession())
+      const session = trackSession(app)
+
+      await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(await session.stored()).not.toBeNull()
+    })
+
+    it('ends the session on a rejected write as well as a read', async () => {
+      rejectingUpstream()
+      app = await buildProxyApp(freshSession())
+      const session = trackSession(app)
+
+      const res = await injectWithCsrf(app, {
+        method: 'POST',
+        url: `${PROXY_PREFIX}/api/dataset/1`,
+        headers: { 'content-type': 'application/json' },
+        payload: '{"name":"a dataset"}',
+      })
+
+      expect(res.statusCode).toBe(401)
+      expect(res.json()).toEqual({ error: 'session_expired' })
+      expect(await session.stored()).toBeNull()
+    })
+
+    it('does not leave the upstream response headers describing the reply that replaces it', async () => {
+      const compressed = gzipSync(Buffer.from('token rejected'))
+      upstream.respondWith((_req, res) => {
+        res.writeHead(401, {
+          'content-type': 'text/plain',
+          'content-encoding': 'gzip',
+          'content-length': String(compressed.length),
+          'etag': '"upstream-401"',
+        })
+        res.end(compressed)
+      })
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.statusCode).toBe(401)
+      expect(res.json()).toEqual({ error: 'session_expired' })
+      expect(res.headers['content-type']).toMatch(/^application\/json/)
+      expect(res.headers['content-encoding']).toBeUndefined()
+      expect(res.headers.etag).toBeUndefined()
+      expect(res.headers['content-length']).toBe(String(res.rawPayload.length))
+    })
+
+    it('passes through untouched on an allowlisted path, session intact', async () => {
+      rejectingUpstream()
+      app = await buildProxyApp(freshSession())
+      const session = trackSession(app)
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/status` })
+
+      expect(res.statusCode).toBe(401)
+      expect(res.json()).toEqual({ message: 'Unauthorized' })
+      expect(await session.stored()).not.toBeNull()
+      expect(res.cookies).not.toEqual(expect.arrayContaining([
+        expect.objectContaining({ name: SESSION_COOKIE, value: '' }),
+      ]))
+    })
+
+    it('never forwards an upstream WWW-Authenticate challenge', async () => {
+      rejectingUpstream({ 'www-authenticate': 'Basic realm="DUOS API"' })
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/status` })
+
+      expect(res.statusCode).toBe(401)
+      expect(res.headers['www-authenticate']).toBeUndefined()
+    })
+  })
+
+  describe('the error shape', () => {
+    async function buildAppWithRootErrorHandler(): Promise<FastifyInstance> {
+      const app = await buildAppShell()
+      await app.register(async (scope) => {
+        await apiProxy(scope)
+        scope.get(`${PROXY_PREFIX}-boom`, async () => {
+          throw new Error('a stack trace and an internal path')
+        })
+      })
+      app.setErrorHandler((_err, _request, reply) =>
+        reply.status(500).send({ error: 'the root handler answered' }))
+      app.get('/boom', async () => {
+        throw new Error('a stack trace and an internal path')
+      })
+      return app
+    }
+
+    it('sanitises an unexpected proxy-scope error instead of returning its message', async () => {
+      app = await buildAppWithRootErrorHandler()
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}-boom` })
+
+      expect(res.statusCode).toBe(500)
+      expect(res.json()).toEqual({ error: 'An unexpected error occurred.' })
+      expect(res.payload).not.toContain('a stack trace and an internal path')
+    })
+
+    it('leaves errors outside the proxy scope to the root handler', async () => {
+      app = await buildAppWithRootErrorHandler()
+
+      const res = await app.inject({ method: 'GET', url: '/boom' })
+
+      expect(res.json()).toEqual({ error: 'the root handler answered' })
+    })
+
+    it('is not affected by a root error handler registered after the proxy', async () => {
+      app = await buildAppWithRootErrorHandler()
+
+      const res = await app.inject({ method: 'POST', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toEqual({ error: CSRF_ERROR_CODE, reason: 'missing_secret' })
+    })
+
+    it('passes an upstream 403 through with its own body, unlike a CSRF rejection', async () => {
+      upstream.respondWith((_req, res) => {
+        res.writeHead(403, { 'content-type': 'application/json' })
+        res.end('{"code":403,"message":"User is not an admin"}')
+      })
+      app = await buildProxyApp(freshSession())
+      const session = trackSession(app)
+
+      const res = await injectWithCsrf(app, { method: 'POST', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toEqual({ code: 403, message: 'User is not an admin' })
+      expect(res.json()).not.toHaveProperty('error', CSRF_ERROR_CODE)
+      expect(await session.stored()).not.toBeNull()
     })
   })
 })
