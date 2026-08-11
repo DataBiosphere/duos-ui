@@ -11,7 +11,7 @@ export const LibraryFooter: React.FC<LibraryFooterProps> = ({
   const hasSelection = selectedDatasetIds.length > 0
   const datasetText = selectedDatasetIds.length === 1 ? 'dataset' : 'datasets'
   const studyText = selectedStudyIds.length === 1 ? 'study' : 'studies'
-  const hasLibraryCard = Storage.getCurrentUser()?.libraryCard != null
+  const hasActiveResearcherStatus = Storage.getCurrentUser()?.libraryCard != null
 
   return (
     <Slide direction="up" in={hasSelection} mountOnEnter unmountOnExit>
@@ -38,7 +38,7 @@ export const LibraryFooter: React.FC<LibraryFooterProps> = ({
           {selectedStudyIds.length} {studyText}
         </Typography>
         <Tooltip
-          title={hasLibraryCard ? '' : 'A Library Card is required to apply for data access'}
+          title={hasActiveResearcherStatus ? '' : 'Active Researcher Status is required to apply for data access'}
           slotProps={{
             tooltip: {
               sx: {
@@ -54,7 +54,7 @@ export const LibraryFooter: React.FC<LibraryFooterProps> = ({
               size="large"
               onClick={onApplyForAccess}
               sx={{ fontWeight: 600 }}
-              disabled={!hasLibraryCard}
+              disabled={!hasActiveResearcherStatus}
             >
               Apply for Access
             </Button>

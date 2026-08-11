@@ -38,7 +38,7 @@ describe('RequestAccessButton', () => {
     navigate.mockReset()
   })
 
-  it('renders an enabled "Request Now" button when the user has a library card', () => {
+  it('renders an enabled "Request Now" button when the user has Active Researcher Status', () => {
     getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
 
     render(<RequestAccessButton datasetId={101} />)
@@ -47,7 +47,7 @@ describe('RequestAccessButton', () => {
     expect(button).not.toBeDisabled()
   })
 
-  it('renders a disabled button when the user has no library card', () => {
+  it('renders a disabled button when the user does not have Active Researcher Status', () => {
     getCurrentUserSpy.mockReturnValue(buildUser(undefined))
 
     render(<RequestAccessButton datasetId={101} />)
@@ -55,14 +55,14 @@ describe('RequestAccessButton', () => {
     expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
   })
 
-  it('shows a library card tooltip on hover when the user has no library card', async () => {
+  it('shows an Active Researcher Status tooltip when the user does not have it', async () => {
     getCurrentUserSpy.mockReturnValue(buildUser(undefined))
 
     render(<RequestAccessButton datasetId={101} />)
 
     fireEvent.mouseOver(screen.getByRole('button', { name: 'Request Now' }).parentElement as HTMLElement)
 
-    expect(await screen.findByText('A Library Card is required to apply for data access')).toBeInTheDocument()
+    expect(await screen.findByText('Active Researcher Status is required to apply for data access')).toBeInTheDocument()
   })
 
   it('creates a DAR draft for the dataset and navigates to the application on click', async () => {
@@ -79,7 +79,7 @@ describe('RequestAccessButton', () => {
     })
   })
 
-  it('is disabled with a selection tooltip when disabledForSelection is set, even with a library card', async () => {
+  it('is disabled with a selection tooltip when disabledForSelection is set, even with Active Researcher Status', async () => {
     getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
 
     render(<RequestAccessButton datasetId={101} disabledForSelection />)
