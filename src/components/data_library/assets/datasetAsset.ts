@@ -137,7 +137,7 @@ export const datasetAsset: AssetDefinition = {
     return makeDatasetColumns(
       props?.exportableDatasets,
       props?.radarEnabledDatasetIds,
-      props?.soDarApprovalRequiredDatasetIds,
+      props?.soApprovalModelByDatasetId,
       props?.hasSelection,
     ) as GridColDef[]
   },

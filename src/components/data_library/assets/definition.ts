@@ -20,6 +20,7 @@ import {
   PaginationState,
   PresentationAsset,
   PublicationAsset,
+  SoApprovalModel,
   SortState,
   StudyAggregation,
   WorkspaceAsset,
@@ -68,7 +69,7 @@ export interface LibraryPage {
 export interface ColumnsProps {
   exportableDatasets?: ExportableDatasets
   radarEnabledDatasetIds?: Set<number>
-  soDarApprovalRequiredDatasetIds?: Set<number>
+  soApprovalModelByDatasetId?: Map<number, SoApprovalModel>
   /** Whether any datasets are currently selected — selection mode disables row-level request actions */
   hasSelection?: boolean
 }

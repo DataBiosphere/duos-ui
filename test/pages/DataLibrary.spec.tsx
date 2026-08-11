@@ -260,6 +260,15 @@ describe('DataLibrary', () => {
     expect(document.querySelector(SEARCH_INPUT_SELECTOR)).toBeInTheDocument()
   })
 
+  // Requirement 2: the SO reminder is page-level, not tied to the Datasets tab
+  it.each([
+    ['the default tab', '/'],
+    ['the Datasets tab', DATASETS_TAB_PATH],
+  ])('shows the Signing Official approval reminder on %s', async (_label, path) => {
+    renderLibrary(path)
+    expect(await screen.findByText(/require Signing Officials to approve/)).toBeInTheDocument()
+  })
+
   it('shows an error message when the dataset query fails', async () => {
     vi.mocked(DataSet.searchDatasetIndexV2).mockRejectedValue(new Error('boom'))
 

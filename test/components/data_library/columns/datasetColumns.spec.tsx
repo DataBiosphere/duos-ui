@@ -7,6 +7,7 @@ import { makeMockParams } from './columnTestUtils'
 import { makeDatasetColumns } from 'src/components/data_library/columns/datasetColumns'
 import { Storage } from 'src/libs/storage'
 import { DatasetTerm, DuosUser, LibraryCard } from 'src/types/model'
+import { SoApprovalModel } from 'src/types/library'
 
 const makeRow = (overrides: Partial<DatasetTerm> = {}): DatasetTerm => ({
   datasetId: 1,
@@ -64,8 +65,8 @@ describe('datasetColumns — column order', () => {
     ])
   })
 
-  it('includes the SO Approval column when per-DAR-approval data is supplied', () => {
-    const fields = makeDatasetColumns({}, new Set(), new Set()).map(c => c.field)
+  it('includes the SO Approval column when authorization-model data is supplied', () => {
+    const fields = makeDatasetColumns({}, new Set(), new Map()).map(c => c.field)
     expect(fields).toContain('soApprovalModel')
   })
 })
@@ -96,25 +97,44 @@ describe('datasetColumns — Access Management chip', () => {
 })
 
 describe('datasetColumns — SO Approval column', () => {
-  it('omits the column entirely when no per-DAR-approval data is supplied', () => {
+  const columnsFor = (model: SoApprovalModel) =>
+    makeDatasetColumns({}, new Set(), new Map([[1, model]]))
+
+  it('omits the column entirely when no authorization-model data is supplied', () => {
     expect(makeDatasetColumns().find(c => c.field === 'soApprovalModel')).toBeUndefined()
   })
 
-  it('shows the pre-authorization chip when the dataset is not in the per-DAR-approval set', () => {
-    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, makeDatasetColumns({}, new Set(), new Set()))
+  it('shows the pre-authorization chip for a pre-authorized dataset', () => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor('pre-authorized'))
     expect(screen.getByText('Pre-Authorized Researchers')).toBeInTheDocument()
     expect(container.querySelector('.MuiChip-root')).toBeInTheDocument()
   })
 
-  it('shows the per-request-approval chip when the dataset is in the per-DAR-approval set', () => {
-    const soDarApprovalRequiredDatasetIds = new Set([1])
-    const col = makeDatasetColumns({}, new Set(), soDarApprovalRequiredDatasetIds).find(c => c.field === 'soApprovalModel')!
-    render(
-      <MemoryRouter>
-        {col.renderCell!(mockParams(undefined, { datasetId: 1 })) as React.ReactElement}
-      </MemoryRouter>,
-    )
+  it('shows the per-request-approval chip for a per-DAR dataset', () => {
+    renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor('per-dar'))
     expect(screen.getByText('Per-Request Approval')).toBeInTheDocument()
+  })
+
+  // Requirement 8: a DAC whose rules failed to load must not be labeled with either model
+  it('renders nothing when the dataset\'s authorization model is unknown', () => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor('unknown'))
+    expect(container.querySelector('.MuiChip-root')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pre-Authorized Researchers')).not.toBeInTheDocument()
+    expect(screen.queryByText('Per-Request Approval')).not.toBeInTheDocument()
+  })
+
+  it('renders nothing for a dataset missing from the map', () => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 999 }, columnsFor('per-dar'))
+    expect(container.querySelector('.MuiChip-root')).not.toBeInTheDocument()
+  })
+
+  // Requirement 6: hovering the indicator explains the model
+  it.each([
+    ['per-dar', /requires the Signing Official named in each Data Access Request/],
+    ['pre-authorized', /allows Signing Officials to pre-authorize researchers in advance/],
+  ] as const)('exposes an explanatory tooltip for the %s model', (model, expectedText) => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor(model))
+    expect(container.querySelector('.MuiChip-root')).toHaveAccessibleName(expectedText)
   })
 })
 
@@ -149,7 +169,7 @@ describe('datasetColumns — Request Path column', () => {
   })
 
   it('disables the "Request Now" button when datasets are selected elsewhere on the page', () => {
-    const columnsWithSelection = makeDatasetColumns({}, new Set(), new Set(), true)
+    const columnsWithSelection = makeDatasetColumns({}, new Set(), undefined, true)
     renderCell('requestLocation', null, { accessManagement: 'controlled' }, columnsWithSelection)
     expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
   })

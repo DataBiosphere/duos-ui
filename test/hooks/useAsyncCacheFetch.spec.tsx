@@ -12,8 +12,12 @@ function TestAsyncCacheFetch<T>({ fetchFn }: Readonly<TestAsyncCacheFetchProps<T
   const [result, setResult] = useState<T | null>(null)
 
   const handleFetch = async () => {
-    const data = await fetchWithCache('test', fetchFn)
-    setResult(data)
+    try {
+      setResult(await fetchWithCache('test', fetchFn))
+    }
+    catch {
+      setResult(null)
+    }
   }
 
   const handleClear = () => {
@@ -47,6 +51,25 @@ describe('useAsyncCacheFetch', () => {
     expect(screen.getByTestId('result').textContent).toBe('fetched-data')
 
     expect(fetchFn).toHaveBeenCalledTimes(1)
+  })
+
+  it('retries after a failed fetch instead of caching the rejection', async () => {
+    const fetchFn = vi.fn()
+      .mockRejectedValueOnce(new Error('boom'))
+      .mockResolvedValue('fetched-data')
+    render(<TestAsyncCacheFetch fetchFn={fetchFn} />)
+
+    // First attempt fails; the in-flight entry must not survive it
+    await act(async () => {
+      fireEvent.click(screen.getByText('Fetch'))
+    })
+    expect(screen.getByTestId('result').textContent).toBe('')
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Fetch'))
+    })
+    expect(screen.getByTestId('result').textContent).toBe('fetched-data')
+    expect(fetchFn).toHaveBeenCalledTimes(2)
   })
 
   it('clears cache and refetches', async () => {

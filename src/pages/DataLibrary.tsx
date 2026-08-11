@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { AssetType, LibraryVersionNew, ALL_LIBRARY_TABS } from 'src/types/library'
+import { AssetType, LibraryVersionNew, ALL_LIBRARY_TABS, SoApprovalModel } from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { getBrandedLibrary } from 'src/libs/libraryVersions'
@@ -8,9 +8,10 @@ import { Storage } from 'src/libs/storage'
 import { isRestrictedToPublicVisibility, Notifications } from 'src/libs/utils'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
-import { getRadarEnabledDatasetsWithRules, getSoDarApprovalRequiredDatasetIds } from 'src/utils/DatasetUtils'
+import { getRadarEnabledDatasetsWithRules, getSoApprovalModelByDatasetId } from 'src/utils/DatasetUtils'
 import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import { useLibraryExportableDatasets } from 'src/hooks/useLibraryExportableDatasets'
+import { useDacRules } from 'src/hooks/useDacRules'
 import LibraryPageShell from 'src/components/data_library/LibraryPageShell'
 import LibraryFooter from 'src/components/data_library/LibraryFooter'
 import TableHeaderSection from 'src/components/TableHeaderSection'
@@ -73,7 +74,10 @@ export const DataLibrary: React.FC = () => {
 
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
   const [radarEnabledDatasetIds, setRadarEnabledDatasetIds] = useState<Set<number>>(new Set())
-  const [soDarApprovalRequiredDatasetIds, setSoDarApprovalRequiredDatasetIds] = useState<Set<number>>(new Set())
+  const [soApprovalModelByDatasetId, setSoApprovalModelByDatasetId] = useState<Map<number, SoApprovalModel>>(new Map())
+
+  // One cached rules fetch per DAC, shared by the radar and Signing Official lookups below
+  const fetchDacRules = useDacRules()
 
   const datasets = urlState.tab === AssetType.DATASETS && data?.items ? data.items as DatasetTerm[] : []
   const { data: exportableDatasets = {} } = useLibraryExportableDatasets(
@@ -106,7 +110,7 @@ export const DataLibrary: React.FC = () => {
         return
       }
       try {
-        const radarEnabledIds = await getRadarEnabledDatasetsWithRules(data.items as DatasetTerm[])
+        const radarEnabledIds = await getRadarEnabledDatasetsWithRules(data.items as DatasetTerm[], fetchDacRules)
         setRadarEnabledDatasetIds(new Set(radarEnabledIds))
       }
       catch {
@@ -114,23 +118,22 @@ export const DataLibrary: React.FC = () => {
       }
     }
 
-    const fetchSoDarApprovalRequired = async () => {
+    const fetchSoApprovalModels = async () => {
       if (urlState.tab !== AssetType.DATASETS || !data?.items?.length) {
-        setSoDarApprovalRequiredDatasetIds(new Set())
+        setSoApprovalModelByDatasetId(new Map())
         return
       }
       try {
-        const soDarApprovalRequiredIds = await getSoDarApprovalRequiredDatasetIds(data.items as DatasetTerm[])
-        setSoDarApprovalRequiredDatasetIds(soDarApprovalRequiredIds)
+        setSoApprovalModelByDatasetId(await getSoApprovalModelByDatasetId(data.items as DatasetTerm[], fetchDacRules))
       }
       catch {
-        setSoDarApprovalRequiredDatasetIds(new Set())
+        setSoApprovalModelByDatasetId(new Map())
       }
     }
 
     fetchRadarEnabled()
-    fetchSoDarApprovalRequired()
-  }, [data?.items, urlState.tab])
+    fetchSoApprovalModels()
+  }, [data?.items, urlState.tab, fetchDacRules])
 
   const header = (
     <>
@@ -158,7 +161,7 @@ export const DataLibrary: React.FC = () => {
         onSelectionChange: handleSelectionChange,
         exportableDatasets,
         radarEnabledDatasetIds: urlState.tab === AssetType.DATASETS ? radarEnabledDatasetIds : undefined,
-        soDarApprovalRequiredDatasetIds: urlState.tab === AssetType.DATASETS ? soDarApprovalRequiredDatasetIds : undefined,
+        soApprovalModelByDatasetId: urlState.tab === AssetType.DATASETS ? soApprovalModelByDatasetId : undefined,
       }}
       footer={(
         <LibraryFooter

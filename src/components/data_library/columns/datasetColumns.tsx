@@ -3,19 +3,22 @@ import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router'
 import { DatasetTerm } from 'src/types/model'
-import { AccessManagement, ExportableDatasets } from 'src/types/library'
+import { AccessManagement, ExportableDatasets, SoApprovalModel } from 'src/types/library'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
 import RequestAccessButton from 'src/components/data_library/RequestAccessButton'
 import BoltIcon from '@mui/icons-material/Bolt'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 
-const makeSoApprovalColumn = (soDarApprovalRequiredDatasetIds: Set<number>): GridColDef<DatasetTerm> => ({
+const makeSoApprovalColumn = (soApprovalModelByDatasetId: Map<number, SoApprovalModel>): GridColDef<DatasetTerm> => ({
   field: 'soApprovalModel',
   headerName: 'SO Approval',
   width: 190,
   sortable: false,
   renderCell: (params) => {
-    const isPerDarApproval = soDarApprovalRequiredDatasetIds.has(params.row.datasetId)
+    const model = soApprovalModelByDatasetId.get(params.row.datasetId)
+    // Blank beats a guess when the DAC's rules couldn't be loaded
+    if (model === undefined || model === 'unknown') return null
+    const isPerDarApproval = model === 'per-dar'
     const label = isPerDarApproval ? 'Per-Request Approval' : 'Pre-Authorized Researchers'
     const tooltipTitle = isPerDarApproval
       ? 'This dataset\'s DAC requires the Signing Official named in each Data Access Request to approve that specific request before the DAC reviews it.'
@@ -39,7 +42,7 @@ const makeSoApprovalColumn = (soDarApprovalRequiredDatasetIds: Set<number>): Gri
 export const makeDatasetColumns = (
   exportableDatasets: ExportableDatasets = {},
   radarEnabledDatasetIds: Set<number> = new Set(),
-  soDarApprovalRequiredDatasetIds?: Set<number>,
+  soApprovalModelByDatasetId?: Map<number, SoApprovalModel>,
   hasSelection: boolean = false,
 ): GridColDef<DatasetTerm>[] => [
   {
@@ -172,8 +175,8 @@ export const makeDatasetColumns = (
     width: 150,
     valueGetter: (_value, row) => row.dac?.dacName || '',
   },
-  // Omitted entirely when the page has no DAC rule data — an empty set would mislabel every row
-  ...(soDarApprovalRequiredDatasetIds ? [makeSoApprovalColumn(soDarApprovalRequiredDatasetIds)] : []),
+  // Omitted entirely when the page has no DAC rule data, rather than rendering an empty column
+  ...(soApprovalModelByDatasetId ? [makeSoApprovalColumn(soApprovalModelByDatasetId)] : []),
   {
     field: 'actions',
     headerName: 'Actions',

@@ -131,8 +131,8 @@ describe('DatasetSubmissions', () => {
   })
 
   it('does not render the Signing Official approval reminder — that is Data Library only', () => {
-    const { container } = renderComponent()
-    expect(container.querySelector('[data-cy="so-approval-reminder-banner"]')).not.toBeInTheDocument()
+    renderComponent()
+    expect(screen.queryByText(/require Signing Officials to approve/)).not.toBeInTheDocument()
   })
 
   it('renders controlled access description text', () => {

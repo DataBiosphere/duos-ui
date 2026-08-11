@@ -187,6 +187,14 @@ export interface LibraryTabsProps {
 
 export type ExportableDatasets = { [duosId: string]: SnapshotSummaryModel[] }
 
+/**
+ * Which Signing Official authorization model a dataset's DAC uses. 'per-dar' means the SO
+ * named in each Data Access Request must approve that request before the DAC reviews it;
+ * 'pre-authorized' means the SO authorizes researchers in advance instead. 'unknown' means
+ * the DAC's rules could not be loaded, so neither model may be asserted.
+ */
+export type SoApprovalModel = 'per-dar' | 'pre-authorized' | 'unknown'
+
 export interface LibraryDataGridProps {
   assetType: AssetType
   data: unknown[]
@@ -203,7 +211,7 @@ export interface LibraryDataGridProps {
   onSelectionChange: (selectedIds: number[]) => void
   exportableDatasets?: ExportableDatasets
   radarEnabledDatasetIds?: Set<number>
-  soDarApprovalRequiredDatasetIds?: Set<number>
+  soApprovalModelByDatasetId?: Map<number, SoApprovalModel>
 }
 
 export interface StudyAggregation {

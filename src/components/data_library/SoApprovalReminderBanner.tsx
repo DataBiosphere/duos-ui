@@ -2,7 +2,14 @@ import React from 'react'
 import { Box, Typography } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
-export const SoApprovalReminderBanner: React.FC = () => (
+interface SoApprovalReminderBannerProps {
+  /** Only the Datasets tab carries the per-dataset SO Approval column to point at */
+  showsPerDatasetIndicator?: boolean
+}
+
+export const SoApprovalReminderBanner: React.FC<SoApprovalReminderBannerProps> = ({
+  showsPerDatasetIndicator = false,
+}) => (
   <Box
     data-cy="so-approval-reminder-banner"
     sx={{
@@ -20,8 +27,7 @@ export const SoApprovalReminderBanner: React.FC = () => (
     <InfoOutlinedIcon sx={{ color: '#0d6efd', fontSize: 20, flexShrink: 0 }} />
     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
       Data access committees require Signing Officials to approve either the researcher or individual requests before they review.
-      {' '}
-      Each dataset below indicates which approval model applies.
+      {showsPerDatasetIndicator && ' Each dataset below indicates which approval model applies.'}
     </Typography>
   </Box>
 )

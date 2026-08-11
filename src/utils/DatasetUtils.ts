@@ -2,6 +2,7 @@ import { Dataset, DatasetProperty, DatasetTerm, DataUseSummary, StudyProperty } 
 import { isEmpty } from 'src/utils/NodashUtil'
 import { DAC as Dac } from 'src/libs/ajax/DAC'
 import { DACbotRule } from 'src/components/dac_bot/DACBotComponent'
+import { SoApprovalModel } from 'src/types/library'
 
 export const firstNonEmptyPropertyValue = (dataset: Partial<Dataset>, propertyNames: string[]): string => {
   for (const propertyName of propertyNames) {
@@ -50,7 +51,17 @@ const RULE_TYPE_TO_CODE: Record<string, 'GRU' | 'HMB'> = {
 
 const SO_DAR_APPROVAL_RULE_TYPE = 'REQUIRE_SO_DAR_APPROVAL'
 
-export const getRadarEnabledDatasetsWithRules = async (datasets: DatasetTerm[]) => {
+/**
+ * How DACbot rules are loaded for a DAC. Callers pass the cached fetcher from `useDacRules`
+ * so repeated lookups — and the separate radar and Signing Official passes — share one request
+ * per DAC; the default keeps these helpers usable outside a React component.
+ */
+export type DacRulesFetcher = (dacId: number) => Promise<DACbotRule[]>
+
+export const getRadarEnabledDatasetsWithRules = async (
+  datasets: DatasetTerm[],
+  fetchDacRules: DacRulesFetcher = Dac.fetchDACbotRules,
+) => {
   if (isEmpty(datasets)) return
 
   // Get unique DAC IDs from datasets that have a DAC ID
@@ -63,7 +74,7 @@ export const getRadarEnabledDatasetsWithRules = async (datasets: DatasetTerm[]) 
   const dacIdToEnabledCodes: Record<number, Set<'GRU' | 'HMB'>> = {}
   await Promise.all(
     uniqueDacIds.map(async (dacId) => {
-      const rules: DACbotRule[] = await Dac.fetchDACbotRules(dacId)
+      const rules: DACbotRule[] = await fetchDacRules(dacId)
       const enabledCodes = new Set(
         rules
           .filter((rule: { activationDate: number, ruleType: string }) => rule.activationDate && RULE_TYPE_TO_CODE[rule.ruleType])
@@ -88,30 +99,41 @@ export const getRadarEnabledDatasetsWithRules = async (datasets: DatasetTerm[]) 
 }
 
 /**
- * Returns the IDs of datasets whose DAC requires the Signing Official named in a Data
- * Access Request to approve that specific request before the DAC reviews it (the
- * "per-DAR" authorization model). Datasets not in the returned set instead use the
- * "pre-authorization" model, where Signing Officials pre-authorize researchers in advance.
+ * Maps every supplied dataset to its DAC's Signing Official authorization model. Rules are
+ * fetched per DAC and resolved independently, so one failing DAC leaves only its own datasets
+ * 'unknown' rather than mislabeling the whole grid.
  */
-export const getSoDarApprovalRequiredDatasetIds = async (datasets: DatasetTerm[]): Promise<Set<number>> => {
-  if (isEmpty(datasets)) return new Set()
+export const getSoApprovalModelByDatasetId = async (
+  datasets: DatasetTerm[],
+  fetchDacRules: DacRulesFetcher = Dac.fetchDACbotRules,
+): Promise<Map<number, SoApprovalModel>> => {
+  const modelByDatasetId = new Map<number, SoApprovalModel>()
+  if (isEmpty(datasets)) return modelByDatasetId
 
   const uniqueDacIds = Array.from(
     new Set(datasets.filter(dataset => dataset.dacId !== undefined).map(dataset => dataset.dacId)),
   )
 
-  const dacIdsRequiringSoApproval = new Set<number>()
-  await Promise.all(
-    uniqueDacIds.map(async (dacId) => {
-      const rules: DACbotRule[] = await Dac.fetchDACbotRules(dacId)
-      const requiresSoApproval = rules.some(rule => rule.ruleType === SO_DAR_APPROVAL_RULE_TYPE && rule.enabledByUserId)
-      if (requiresSoApproval) {
-        dacIdsRequiringSoApproval.add(dacId)
-      }
-    }),
-  )
+  const modelByDacId = new Map<number, SoApprovalModel>()
+  const outcomes = await Promise.allSettled(uniqueDacIds.map(dacId => fetchDacRules(dacId)))
+  outcomes.forEach((outcome, index) => {
+    const dacId = uniqueDacIds[index]
+    if (outcome.status === 'rejected') {
+      modelByDacId.set(dacId, 'unknown')
+      return
+    }
+    const rules: DACbotRule[] = outcome.value
+    const requiresSoApproval = rules.some(rule => rule.ruleType === SO_DAR_APPROVAL_RULE_TYPE && rule.enabledByUserId)
+    modelByDacId.set(dacId, requiresSoApproval ? 'per-dar' : 'pre-authorized')
+  })
 
-  return new Set(datasets
-    .filter((dataset: DatasetTerm) => dataset.dacId !== undefined && dacIdsRequiringSoApproval.has(dataset.dacId))
-    .map((dataset: { datasetId: number }) => dataset.datasetId))
+  datasets.forEach((dataset) => {
+    // A dataset with no DAC has no per-DAR approval step to satisfy
+    const model = dataset.dacId === undefined
+      ? 'pre-authorized'
+      : modelByDacId.get(dataset.dacId) ?? 'unknown'
+    modelByDatasetId.set(dataset.datasetId, model)
+  })
+
+  return modelByDatasetId
 }

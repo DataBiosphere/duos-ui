@@ -6,7 +6,7 @@ import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
 import InstantApprovalBadge from 'src/components/data_library/InstantApprovalBadge'
 import SoApprovalReminderBanner from 'src/components/data_library/SoApprovalReminderBanner'
-import { ExportableDatasets, TabConfig } from 'src/types/library'
+import { ExportableDatasets, SoApprovalModel, TabConfig } from 'src/types/library'
 import { LibraryPageState } from 'src/hooks/useLibraryPageState'
 
 interface GridExtras {
@@ -16,7 +16,7 @@ interface GridExtras {
   checkboxSelection?: boolean
   exportableDatasets?: ExportableDatasets
   radarEnabledDatasetIds?: Set<number>
-  soDarApprovalRequiredDatasetIds?: Set<number>
+  soApprovalModelByDatasetId?: Map<number, SoApprovalModel>
 }
 
 interface LibraryPageShellProps {
@@ -64,7 +64,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
     checkboxSelection = true,
     exportableDatasets,
     radarEnabledDatasetIds,
-    soDarApprovalRequiredDatasetIds,
+    soApprovalModelByDatasetId,
   } = gridExtras
 
   if (error) {
@@ -115,7 +115,9 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
         </Box>
 
         <Box sx={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          {showSoApprovalReminder && <SoApprovalReminderBanner />}
+          {showSoApprovalReminder && (
+            <SoApprovalReminderBanner showsPerDatasetIndicator={soApprovalModelByDatasetId !== undefined} />
+          )}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
             {isFetching
               ? <Skeleton variant="text" width={120} sx={{ fontSize: '15px' }} />
@@ -151,7 +153,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
               onSelectionChange={onSelectionChange}
               exportableDatasets={exportableDatasets}
               radarEnabledDatasetIds={radarEnabledDatasetIds}
-              soDarApprovalRequiredDatasetIds={soDarApprovalRequiredDatasetIds}
+              soApprovalModelByDatasetId={soApprovalModelByDatasetId}
               extraColumns={extraColumns}
               checkboxSelection={checkboxSelection}
             />

@@ -17,10 +17,15 @@ function useAsyncCacheFetch<K extends string | number, V>(
         return fetchingRef.current[id] as Promise<V>
       }
       fetchingRef.current[id] = fetchFn(id)
-      const result = await fetchingRef.current[id]!
-      cacheRef.current[id] = result
-      fetchingRef.current[id] = undefined
-      return result
+      try {
+        const result = await fetchingRef.current[id]!
+        cacheRef.current[id] = result
+        return result
+      }
+      finally {
+        // Cleared on failure too, so a transient error doesn't poison the key for good
+        fetchingRef.current[id] = undefined
+      }
     },
     [],
   )
