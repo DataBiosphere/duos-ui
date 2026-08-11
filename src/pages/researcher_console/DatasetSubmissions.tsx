@@ -1,6 +1,6 @@
 /* oxlint-disable react-refresh/only-export-components */
 import React, { useCallback, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Box } from '@mui/material'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 import { Notifications } from 'src/libs/utils'

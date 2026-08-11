@@ -1,7 +1,7 @@
 import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router'
 import { DatasetTerm } from 'src/types/model'
 import { AccessManagement, ExportableDatasets } from 'src/types/library'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'

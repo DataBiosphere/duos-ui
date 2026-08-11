@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { ErrorOutlined, TaskAltOutlined } from '@mui/icons-material'
-import { ConsentStatus, SamDetails, ServiceStatus } from 'src/libs/ajax/ServiceStatus'
+import { ConsentStatus, EcmDetails, SamDetails, ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 
 const Status = () => {
   const [consentStatus, setConsentStatus] = useState<ConsentStatus | undefined>(undefined)
+  const [ecmStatus, setEcmStatus] = useState<EcmDetails | undefined>(undefined)
   const [samStatus, setSamStatus] = useState<SamDetails | undefined>(undefined)
 
   useEffect(() => {
     const fetchStatus = async () => {
       const consentData = await ServiceStatus.getConsentStatus()
       setConsentStatus(consentData)
+      setEcmStatus(consentData?.systems?.ecm?.details)
       setSamStatus(consentData?.systems?.sam?.details)
     }
     fetchStatus()
@@ -19,6 +21,7 @@ const Status = () => {
   const unhealthyState = <ErrorOutlined data-testid="status-unhealthy" sx={{ marginLeft: '2rem', verticalAlign: 'middle', fontSize: '24px', color: 'red' }} />
 
   const consentHealthy = consentStatus?.ok ? healthyState : unhealthyState
+  const ecmHealthy = ecmStatus?.ok ? healthyState : unhealthyState
   const samHealthy = samStatus?.ok ? healthyState : unhealthyState
 
   return (
@@ -30,6 +33,11 @@ const Status = () => {
           {consentHealthy}
         </li>
         <li>
+          <a href="#ecm">ECM</a>
+          {' '}
+          {ecmHealthy}
+        </li>
+        <li>
           <a href="#sam">Sam</a>
           {' '}
           {samHealthy}
@@ -38,6 +46,8 @@ const Status = () => {
       <hr />
       <h2 id="consent">Consent Status</h2>
       <pre>{JSON.stringify(consentStatus, null, 4)}</pre>
+      <h2 id="ecm">ECM Status</h2>
+      <pre>{JSON.stringify(ecmStatus, null, 4)}</pre>
     </div>
   )
 }

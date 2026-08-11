@@ -24,9 +24,9 @@ describe('ManageResearcherDAAs', () => {
       daaDetails: [{ daaId: 1 }, { daaId: 2 }],
     })])
     vi.spyOn(DAA, 'getDaas').mockResolvedValue([
-      makeDaa({ daaId: 1, broadDaa: false, mapped: true }),
-      makeDaa({ daaId: 2, broadDaa: true, mapped: false }),
-      makeDaa({ daaId: 3, broadDaa: false, mapped: false }),
+      makeDaa({ daaId: 1, mapped: true }),
+      makeDaa({ daaId: 2, mapped: false }),
+      makeDaa({ daaId: 3, mapped: false }),
     ])
 
     const { container } = render(<ManageResearcherDAAs />)
@@ -35,7 +35,8 @@ describe('ManageResearcherDAAs', () => {
 
     const user = userEvent.setup()
     await user.click(container.querySelector('[data-cy="researcher-row-toggle-1"]') as HTMLElement)
-    expect(container.querySelectorAll('[data-cy^="daa-row-"]')).toHaveLength(2)
+    // The researcher holds DAAs 1 and 2, but 2 has no DAC mapping so only 1 is shown.
+    expect(container.querySelectorAll('[data-cy^="daa-row-"]')).toHaveLength(1)
   })
 
   it('shows an error notification when initial data load fails', async () => {

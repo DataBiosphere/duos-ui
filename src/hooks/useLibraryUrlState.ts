@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import { useCallback, useMemo } from 'react'
 import { AssetType, FilterState, LibraryUrlState, SortOrder } from 'src/types/library'
 

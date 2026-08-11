@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useCallback, useRef, useState } from 'react'
 import loadingIndicator from '../../images/loading-indicator.svg'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { ConfirmationDialog } from '../../components/modals/ConfirmationDialog'
 import { FormFieldTitle } from '../../components/forms/forms'
 import { FileStorageObject } from 'src/types/model'

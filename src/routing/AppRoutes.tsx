@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router'
 import Home from 'src/pages/Home'
 import UserProfile from 'src/pages/user_profile/UserProfile'
 import Authenticated from 'src/routing/Authenticated'
@@ -13,7 +13,6 @@ import CookiePolicy from 'src/pages/CookiePolicy'
 import TermsOfService from 'src/pages/TermsOfService'
 import TermsOfServiceAcceptance from 'src/pages/TermsOfServiceAcceptance'
 import { AnVILDMSPolicyInfo, NIHDMSPolicyInfo } from 'src/pages/DMSPolicyInfo'
-import RequestForm from 'src/pages/user_profile/RequestForm'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
 import DatasetStatistics from 'src/pages/DatasetStatistics'
 import RoleBAC from 'src/routing/RoleBAC'
@@ -75,7 +74,6 @@ const AppRoutes = (props: AppRoutesProps) => {
       </Route>
       <Route element={<Authenticated />}>
         <Route path="/profile" element={<UserProfile />} />
-        <Route path="/request_role" element={<RequestForm />} />
         <Route path="/datalibrary" element={<DataLibrary />}>
           <Route path=":query" element={<DataLibrary />} />
         </Route>
@@ -107,6 +105,7 @@ const AppRoutes = (props: AppRoutesProps) => {
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.signingOfficial]} />}>
           <Route element={<SOAcknowledged />}>
+            <Route path="/signing_official_console" element={<Navigate to="/signing_official_console/dashboard" replace />} />
             <Route path="/signing_official_console/dashboard" element={<SigningOfficialDashboard />} />
             <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
             <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />

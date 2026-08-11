@@ -2,7 +2,7 @@ import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { act, render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router'
 import { CookieBanner } from 'src/components/CookieBanner'
 import { CookieUtils } from 'src/utils/CookieUtils'
 

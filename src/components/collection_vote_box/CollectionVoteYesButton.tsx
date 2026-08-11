@@ -10,16 +10,16 @@ const styles = {
     justifyContent: 'center',
   },
   icon: {
-    fontSize: '28px',
-    margin: '2.5%',
+    fontSize: '20px',
+    marginRight: '0.4rem',
   },
 } as const
 
-const Label = () => {
+const Label = ({ roleLabel }: Readonly<{ roleLabel?: string }>) => {
   return (
     <span style={styles.label}>
       <CheckCircleOutlined style={styles.icon} />
-      Yes
+      {roleLabel ? `Yes as ${roleLabel}` : 'Yes'}
     </span>
   )
 }
@@ -29,13 +29,14 @@ interface CollectionVoteYesButtonProps {
   readonly disabled?: boolean
   readonly isSelected?: boolean
   readonly onError?: (error: unknown) => void
+  readonly roleLabel?: string
 }
 
-export default function CollectionVoteYesButton({ onClick, disabled, isSelected, onError }: CollectionVoteYesButtonProps) {
+export default function CollectionVoteYesButton({ onClick, disabled, isSelected, onError, roleLabel }: CollectionVoteYesButtonProps) {
   return (
     <CollectionVoteButton
       datacy="yes-collection-vote-button"
-      label={<Label />}
+      label={<Label roleLabel={roleLabel} />}
       onClick={onClick}
       baseColor={votingColors.yes}
       disabled={disabled}

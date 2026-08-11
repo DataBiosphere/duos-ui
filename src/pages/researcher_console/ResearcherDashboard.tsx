@@ -124,10 +124,10 @@ const helpfulResources: ConsoleDashboardResource[] = [
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 
 interface LibraryTotals {
-  Studies: number
-  Datasets: number
+  'Studies': number
+  'Datasets': number
   'AI Models': number
-  Workspaces: number
+  'Workspaces': number
   [key: string]: number
 }
 
@@ -150,7 +150,7 @@ const fetchLibraryTotals = async (restrictToPublicVisibility: boolean): Promise<
       return assetRegistry[assetType].transformResponse(response, pagination).total
     }),
   )
-  return { Studies: studies, Datasets: datasets, 'AI Models': models, Workspaces: workspaces }
+  return { 'Studies': studies, 'Datasets': datasets, 'AI Models': models, 'Workspaces': workspaces }
 }
 
 const fetchSubmissionTotal = async (user: DuosUser): Promise<number | undefined> => {
@@ -221,9 +221,9 @@ export default function ResearcherDashboard(): React.JSX.Element {
             Pending: pendingDarCount,
           },
           '/datasets': {
-            Active: activeCount,
+            'Active': activeCount,
             'Expiring in 30 Days': expiringSoonCount,
-            Expired: expiredCount,
+            'Expired': expiredCount,
           },
           ...(!isNil(submissionTotal) && {
             '/dataset_submissions': {

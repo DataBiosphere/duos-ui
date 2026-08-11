@@ -15,11 +15,25 @@ import { Notifications, USER_ROLES } from 'src/libs/utils'
 import ResearcherAccordionRow from './ResearcherAccordionRow'
 import ResearcherViewLegend from './ResearcherViewLegend'
 import ResearcherViewConfirmDialog from './ResearcherViewConfirmDialog'
-import { ConfirmDialogState, DAARowData, ResearcherRowData } from './types'
-import { buildResearcherRows } from './researcherViewHelpers'
+import BulkActionConfirmDialog from './BulkActionConfirmDialog'
+import { BulkConfirmState, ConfirmDialogState, DAARowData, ResearcherRowData } from './types'
+import { buildResearcherRows, daaLabel } from './researcherViewHelpers'
+import { useBulkPreAuthorization } from './useBulkPreAuthorization'
 
 const FONT = 'Montserrat'
 const BRAND_BLUE = '#0948b7'
+
+/** Success toast text for a bulk action on a researcher card (DAAs per researcher). */
+function bulkSuccessText(mode: 'approve' | 'remove', applied: number, researcherLabel: string): string {
+  const plural = applied === 1 ? '' : 's'
+  return mode === 'approve'
+    ? `Pre-authorized ${researcherLabel} for ${applied} DAA${plural}`
+    : `Removed pre-authorization for ${researcherLabel} from ${applied} DAA${plural}`
+}
+
+function bulkErrorText(mode: 'approve' | 'remove', researcherLabel: string): string {
+  return `Failed to ${mode === 'approve' ? 'approve' : 'remove'} all DAAs for ${researcherLabel}`
+}
 
 export interface ResearcherViewProps {
   readonly researchers: readonly DuosUser[]
@@ -49,6 +63,7 @@ export default function ResearcherView({
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState<Record<number, boolean>>({})
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null)
+  const [bulkDialog, setBulkDialog] = useState<BulkConfirmState | null>(null)
 
   // ── Data ────────────────────────────────────────────────────────────────────
 
@@ -102,13 +117,12 @@ export default function ResearcherView({
 
   const openAuthorizeDialog = useCallback(
     (researcher: Readonly<DuosUser>, daaId: number, daaRows: readonly DAARowData[]) => {
-      const daaLabel
-        = daaRows.find(r => r.daa.daaId === daaId)?.daa.file?.fileName ?? `DAA-${daaId}`
+      const daa = daaRows.find(r => r.daa.daaId === daaId)?.daa
       setConfirmDialog({
         daaId,
         researcherId: researcher.userId,
         researcherName: researcher.displayName ?? researcher.email,
-        daaLabel,
+        daaLabel: daa ? daaLabel(daa) : `DAA-${daaId}`,
         action: 'authorize',
       })
     },
@@ -117,13 +131,12 @@ export default function ResearcherView({
 
   const openRevokeDialog = useCallback(
     (researcher: Readonly<DuosUser>, daaId: number, daaRows: readonly DAARowData[]) => {
-      const daaLabel
-        = daaRows.find(r => r.daa.daaId === daaId)?.daa.file?.fileName ?? `DAA-${daaId}`
+      const daa = daaRows.find(r => r.daa.daaId === daaId)?.daa
       setConfirmDialog({
         daaId,
         researcherId: researcher.userId,
         researcherName: researcher.displayName ?? researcher.email,
-        daaLabel,
+        daaLabel: daa ? daaLabel(daa) : `DAA-${daaId}`,
         action: 'revoke',
       })
     },
@@ -153,6 +166,33 @@ export default function ResearcherView({
       })
     }
   }, [confirmDialog, refreshResearchers])
+
+  // ── Bulk handlers ─────────────────────────────────────────────────────────────
+
+  const openBulkDialog = useCallback(
+    (researcher: Readonly<DuosUser>, mode: 'approve' | 'remove', daaIds: number[]) => {
+      if (daaIds.length === 0) return
+      setBulkDialog({
+        scope: 'researcher',
+        mode,
+        targetId: researcher.userId,
+        targetLabel: researcher.displayName ?? researcher.email,
+        count: daaIds.length,
+        ids: daaIds,
+      })
+    },
+    [],
+  )
+
+  const handleBulkConfirm = useBulkPreAuthorization({
+    bulkDialog,
+    setBulkDialog,
+    refresh: refreshResearchers,
+    add: DAA.bulkAddDaasToUser,
+    remove: DAA.bulkRemoveDaasFromUser,
+    successText: bulkSuccessText,
+    errorText: bulkErrorText,
+  })
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -250,15 +290,24 @@ export default function ResearcherView({
             onToggle={() => toggleRow(row.researcher.userId)}
             onAuthorize={daaId => openAuthorizeDialog(row.researcher, daaId, row.daaRows)}
             onRevoke={daaId => openRevokeDialog(row.researcher, daaId, row.daaRows)}
+            onApproveAll={daaIds => openBulkDialog(row.researcher, 'approve', daaIds)}
+            onRemoveAll={daaIds => openBulkDialog(row.researcher, 'remove', daaIds)}
           />
         ))}
       </Box>
 
-      {/* Confirmation dialog */}
+      {/* Single-relationship confirmation dialog */}
       <ResearcherViewConfirmDialog
         dialog={confirmDialog}
         onConfirm={handleConfirm}
         onCancel={() => setConfirmDialog(null)}
+      />
+
+      {/* Bulk Approve All / Remove All confirmation dialog */}
+      <BulkActionConfirmDialog
+        dialog={bulkDialog}
+        onConfirm={handleBulkConfirm}
+        onCancel={() => setBulkDialog(null)}
       />
     </Box>
   )

@@ -15,4 +15,7 @@ test('Status page renders status indicators', async ({ page }) => {
       page.locator(`a[href="${href}"]`).locator('xpath=..').locator('[data-testid="status-healthy"]'),
     ).toBeVisible({ timeout: 15000 })
   }
+  await expect(
+    page.locator('a[href="#ecm"]').locator('xpath=..').locator('[data-testid^="status-"]'),
+  ).toBeVisible({ timeout: 15000 })
 })

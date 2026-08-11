@@ -48,7 +48,7 @@ describe('handleLogin', () => {
   }
 
   function makeRequest(query: Record<string, unknown> = {}): FastifyRequest {
-    return { session: {}, query } as unknown as FastifyRequest
+    return { session: { save: vi.fn().mockResolvedValue(undefined) }, query } as unknown as FastifyRequest
   }
 
   function makeReply(): FastifyReply & { send: ReturnType<typeof vi.fn> } {
@@ -113,6 +113,20 @@ describe('handleLogin', () => {
     await handleLogin(makeRequest(), reply)
 
     expect(reply.send).toHaveBeenCalledWith({ redirectUrl: 'https://duosdev.b2clogin.com/authorize?foo=bar' })
+  })
+
+  it('persists the session before responding (guards the double-send race that made login flaky)', async () => {
+    const request = makeRequest()
+    const reply = makeReply()
+
+    await handleLogin(request, reply)
+
+    // Saving before reply.send makes @fastify/session's onSend save synchronous,
+    // so Fastify does not fire a second reply.send(). See callback.ts for the
+    // full ERR_HTTP_HEADERS_SENT explanation.
+    const save = vi.mocked(request.session.save as () => Promise<void>)
+    expect(save).toHaveBeenCalled()
+    expect(save.mock.invocationCallOrder[0]).toBeLessThan(reply.send.mock.invocationCallOrder[0])
   })
 
   it.each(['DUOS_OAUTH_REDIRECT_URI', 'DUOS_AZURE_CLIENT_ID'])(

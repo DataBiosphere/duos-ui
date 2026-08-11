@@ -1,6 +1,6 @@
 import React from 'react'
 import { Biospecimen } from 'src/types/model'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 interface BiospecimenAddEditProps {
   readonly id: number

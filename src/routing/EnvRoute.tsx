@@ -1,5 +1,5 @@
 import React from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router'
 import { checkEnv } from 'src/utils/EnvironmentUtils'
 import NotFound from 'src/pages/NotFound'
 

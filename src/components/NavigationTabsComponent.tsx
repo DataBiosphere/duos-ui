@@ -1,11 +1,11 @@
 import Box from '@mui/material/Box'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import { isFunction, isNil } from 'src/utils/NodashUtil'
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import SignInButton from 'src/components/SignInButton.js'
 import { Tab as TabItem } from 'src/components/DuosHeader'
+import { visibleSubTabs } from 'src/components/navigation/subTabVisibility'
 import { DuosUser } from 'src/types/model'
 import { ProfileLinks } from 'src/components/navigation/ProfileLinks'
 
@@ -96,6 +96,7 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
 
   const selectedMenuTab = initialTab
   const selectedSubTab = initialSubTab
+  const renderedSubTabs = visibleSubTabs(tabs[selectedMenuTab]?.children, currentUser)
 
   return (
     <div className={`navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`}>
@@ -240,38 +241,32 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
       </ul>
 
       {/* Sub Tabs - only show if a valid subtab is selected */}
-      {tabs[selectedMenuTab as number]?.children && selectedSubTab >= 0 && !tabs[selectedMenuTab]?.hideSubTabBar && (
-        <Box className="duos-navigation-box navbar-sub">
-          <Tabs
-            value={selectedSubTab >= 0 ? selectedSubTab : false}
-            variant="scrollable"
-            scrollButtons="auto"
-            orientation={orientation}
-            sx={{ '& .MuiTabs-indicator': { background: '#00609f' } }}
-            onChange={onSubtabChange}
-          >
-            {tabs[selectedMenuTab as number].children?.map((tab, tabIndex) => {
-              // Default to displaying the sub tab if no render function exists for it
-              const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered(currentUser))) ? true : tab.isRendered(currentUser)
-              const isRenderedForUser = (!isFunction(tab.isRenderedForUser) || isNil(tab.isRenderedForUser(currentUser)))
-                ? true
-                : tab.isRenderedForUser(currentUser)
-              return (isRendered && isRenderedForUser)
-                ? (
-                    <Tab
-                      key={`${tab.link}_${tabIndex}`}
-                      label={tab.label}
-                      style={selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab}
-                      to={{ pathname: tab.link }}
-                      state={{ selectedMenuTab: selectedMenuTab }}
-                      component={Link}
-                    />
-                  )
-                : null
-            })}
-          </Tabs>
-        </Box>
-      )}
+      {renderedSubTabs.length > 0
+        && selectedSubTab >= 0
+        && !renderedSubTabs[selectedSubTab]?.hideSubTabBar
+        && (
+          <Box className="duos-navigation-box navbar-sub">
+            <Tabs
+              value={selectedSubTab >= 0 ? selectedSubTab : false}
+              variant="scrollable"
+              scrollButtons="auto"
+              orientation={orientation}
+              sx={{ '& .MuiTabs-indicator': { background: '#00609f' } }}
+              onChange={onSubtabChange}
+            >
+              {renderedSubTabs.map((tab, tabIndex) => (
+                <Tab
+                  key={`${tab.link}_${tabIndex}`}
+                  label={tab.label}
+                  style={selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab}
+                  to={{ pathname: tab.link }}
+                  state={{ selectedMenuTab: selectedMenuTab }}
+                  component={Link}
+                />
+              ))}
+            </Tabs>
+          </Box>
+        )}
     </div>
   )
 }

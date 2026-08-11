@@ -31,7 +31,7 @@ import { Countries } from 'src/libs/ajax/Countries'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview'
 import { ElectionStatus, VOTE_TYPES } from 'src/utils/DarUtils'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import {
   CombinedDataAccessRequest,
   DarCollection,

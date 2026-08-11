@@ -1,7 +1,7 @@
 import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router'
 import { IntellectualPropertyAsset } from 'src/types/library'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 

@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router'
 import { NavigationTabsComponent } from 'src/components/NavigationTabsComponent'
 import { DuosUser } from 'src/types/model'
 
@@ -46,7 +46,7 @@ const mockTabs = [
 
 const renderComponent = (propsOverride: Record<string, unknown> = {}) => {
   const onSubtabChange = vi.fn()
-  const { container } = render(
+  const { container, unmount } = render(
     <BrowserRouter>
       <NavigationTabsComponent
         orientation="horizontal"
@@ -69,7 +69,7 @@ const renderComponent = (propsOverride: Record<string, unknown> = {}) => {
       />
     </BrowserRouter>,
   )
-  return { container, onSubtabChange }
+  return { container, unmount, onSubtabChange }
 }
 
 describe('NavigationTabsComponent', () => {
@@ -93,6 +93,45 @@ describe('NavigationTabsComponent', () => {
     renderComponent()
     expect(screen.getByRole('tab', { name: 'SubTab 1' })).toBeVisible()
     expect(screen.getByRole('tab', { name: 'SubTab 2' })).toBeVisible()
+  })
+
+  it('hides the subtab bar only when the selected subtab requests it', () => {
+    const dashboardTabs = [{
+      ...mockTabs[0],
+      children: [
+        { label: 'Dashboard', link: '/tab1/dashboard', hideSubTabBar: true },
+        { label: 'Section', link: '/tab1/section' },
+      ],
+    }]
+
+    const { container } = renderComponent({
+      tabs: dashboardTabs,
+      initialTab: 0,
+      initialSubTab: 0,
+    })
+
+    expect(container.querySelector('.navbar-sub')).not.toBeInTheDocument()
+  })
+
+  it('resolves hideSubTabBar against the rendered subtabs, not the raw children', () => {
+    // selectedSubTab is an index into the *visible* subtabs, so with the first child hidden,
+    // index 0 is 'Section' - which does not hide the bar - and index 1 is 'Dashboard', which does.
+    const tabsWithHiddenChild = [{
+      ...mockTabs[0],
+      children: [
+        { label: 'Hidden', link: '/tab1/hidden', isRenderedForUser: () => false },
+        { label: 'Section', link: '/tab1/section' },
+        { label: 'Dashboard', link: '/tab1/dashboard', hideSubTabBar: true },
+      ],
+    }]
+
+    const visible = renderComponent({ tabs: tabsWithHiddenChild, initialTab: 0, initialSubTab: 0 })
+    expect(visible.container.querySelector('.navbar-sub')).toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Hidden' })).not.toBeInTheDocument()
+    visible.unmount()
+
+    const hidden = renderComponent({ tabs: tabsWithHiddenChild, initialTab: 0, initialSubTab: 1 })
+    expect(hidden.container.querySelector('.navbar-sub')).not.toBeInTheDocument()
   })
 
   it('displays sign-in button when not logged in and horizontal', () => {

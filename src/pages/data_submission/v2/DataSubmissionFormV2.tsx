@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'

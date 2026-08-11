@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 import OpenInNewOutlinedIcon from '@mui/icons-material/OpenInNewOutlined'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 

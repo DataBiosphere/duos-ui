@@ -5,7 +5,7 @@ import { DataSet } from 'src/libs/ajax/DataSet'
 import { DAR } from 'src/libs/ajax/DAR'
 import { DAC } from 'src/libs/ajax/DAC'
 import { Notifications } from 'src/libs/utils'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { Dataset, DataUse, DacObject, DatasetProperty, OntologyEntry } from 'src/types/model'
 
 interface DatasetFormProperties {

@@ -2,7 +2,7 @@ import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Box, Button, Chip, IconButton } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router'
 import { DatasetTerm } from 'src/types/model'
 import { getApprovalStatus } from 'src/libs/utils'
 

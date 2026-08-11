@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom/vitest'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router'
 import UserProfile from 'src/pages/user_profile/UserProfile'
 import { DuosUser } from 'src/types/model'
 
@@ -16,6 +16,7 @@ vi.mock('src/libs/storage', () => ({
 
 vi.mock('src/libs/ajax/User', () => ({
   User: {
+    getMe: vi.fn(),
     updateSelf: vi.fn(),
   },
 }))
@@ -44,7 +45,11 @@ vi.mock('src/pages/user_profile/AffiliationAndRoles', () => ({
 }))
 
 vi.mock('src/pages/user_profile/ResearcherStatus', () => ({
-  default: () => <div data-testid="researcher-status" />,
+  default: ({ user }: { user: DuosUser }) => (
+    <div data-testid="researcher-status">
+      {user.libraryCard ? 'Active' : 'Inactive'}
+    </div>
+  ),
 }))
 
 vi.mock('src/pages/user_profile/AcceptedAcknowledgements', () => ({
@@ -134,6 +139,7 @@ describe('UserProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser)
+    vi.mocked(User.getMe).mockResolvedValue(mockUser)
     vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue(null)
   })
 
@@ -145,12 +151,36 @@ describe('UserProfile', () => {
     })
   })
 
-  it('displays user name and email loaded from Storage on mount', async () => {
+  it('displays user name and email loaded from the API on mount', async () => {
     renderUserProfile()
 
     await waitFor(() => {
+      expect(User.getMe).toHaveBeenCalledOnce()
       expect(screen.getByDisplayValue('Test User')).toBeInTheDocument()
       expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument()
+    })
+  })
+
+  it('shows the current researcher status when cached user data is stale', async () => {
+    const currentUser = {
+      ...mockUser,
+      libraryCard: {
+        id: 1,
+        userId: mockUser.userId,
+        userName: mockUser.displayName,
+        userEmail: mockUser.email,
+        createDate: new Date(),
+        createUserId: 2,
+        daaIds: [],
+      },
+    }
+    vi.mocked(User.getMe).mockResolvedValue(currentUser)
+
+    renderUserProfile()
+
+    await waitFor(() => {
+      expect(screen.getByTestId('researcher-status')).toHaveTextContent('Active')
+      expect(Storage.getCurrentUser).not.toHaveBeenCalled()
     })
   })
 
@@ -199,9 +229,7 @@ describe('UserProfile', () => {
   })
 
   it('shows an error notification when initialization fails', async () => {
-    vi.mocked(Storage.getCurrentUser).mockImplementation(() => {
-      throw new Error('storage error')
-    })
+    vi.mocked(User.getMe).mockRejectedValue(new Error('API error'))
 
     renderUserProfile()
 

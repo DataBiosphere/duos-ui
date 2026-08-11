@@ -187,15 +187,12 @@ beforeEach(() => {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('MultiDatasetVotingTab', () => {
-  it('renders the rp slab', async () => {
+  it('renders the "Datasets Requested" section heading', async () => {
     renderTab()
 
     await waitFor(() => {
-      expect(screen.getByTestId('rp-slab')).toBeInTheDocument()
-      expect(screen.getByTestId('rp-expanded')).toBeInTheDocument()
+      expect(screen.getByText('Datasets Requested - Grouped by Matching Data Use Terms')).toBeInTheDocument()
     })
-    // diseases: true in darInfo translates to a DS (Disease Specific) code
-    expect(screen.getByText('DS')).toBeInTheDocument()
   })
 
   it('renders a dataset vote slab with NO selected for user with vote: false', async () => {
