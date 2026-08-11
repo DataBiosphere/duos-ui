@@ -8,20 +8,7 @@ import type { DelayedRelay } from './dbLatency.js'
 import { SCENARIOS, scenarioByName } from './scenarios.js'
 import type { Scenario } from './scenarios.js'
 
-/**
- * Load test for the BFF API proxy — epic 3, story 3-H.
- *
- *   pnpm test:load                                          # read, memory store
- *   pnpm test:load -- --scenario all --store postgres
- *   pnpm test:load -- --target https://duos.dsde-dev.broadinstitute.org \
- *       --cookie 'sessionId=…' --csrf-token '…'
- *
- * See ./README.md for what it measures, what the thresholds mean, and the
- * results that closed the story. Exits non-zero when a threshold is breached.
- */
-
-// The pool counters are instantaneous rather than cumulative, so a coarse
-// interval reads a briefly saturated pool as one that was never busy.
+// Pool counters are instantaneous, so sample frequently enough to catch bursts.
 const POOL_SAMPLE_INTERVAL_MS = 50
 
 interface PoolHighWater {
@@ -37,9 +24,7 @@ interface Verdict {
 }
 
 const options = parseArgs({
-  // pnpm forwards the `--` verbatim, and parseArgs reads everything after one
-  // as positional. Dropping it makes both invocations work; there are no
-  // positional arguments either way.
+  // pnpm may forward `--`, which parseArgs would treat as the end of options.
   args: process.argv.slice(2).filter(arg => arg !== '--'),
   options: {
     'scenario': { type: 'string', default: 'read' },
@@ -47,34 +32,22 @@ const options = parseArgs({
     'connections': { type: 'string' },
     'duration': { type: 'string', default: '20' },
     'warmup': { type: 'string', default: '3' },
-    // Worker threads, so the driver does not compete with the server for the
-    // main thread. 0 keeps everything in-process.
     'workers': { type: 'string', default: '2' },
     'store': { type: 'string', default: 'memory' },
     'pg-pool-max': { type: 'string' },
-    // Overrides UPSTREAM_POOL_CONNECTIONS, whose effect is only visible when the
-    // upstream is slow enough for `pool ÷ latency` to bind before the process does.
     'upstream-pool': { type: 'string' },
-    // One-way — see dbLatency.ts.
     'db-latency': { type: 'string', default: '0' },
     'upstream-latency': { type: 'string', default: '20' },
     'json-bytes': { type: 'string', default: '2048' },
     'blob-bytes': { type: 'string', default: String(5 * 1024 * 1024) },
-    // Remote mode: drive an already-deployed BFF instead of a local target.
     'target': { type: 'string' },
     'cookie': { type: 'string' },
     'csrf-token': { type: 'string' },
   },
 }).values
 
-/**
- * Bounds are checked here rather than where the values are used: a count of zero
- * reaches `sessions[0]` or autocannon's own validator instead, several seconds
- * and one forked stub later.
- */
 interface Bounds {
   min: number
-  /** Counts are whole; latencies and durations need not be. */
   whole?: boolean
 }
 
@@ -103,7 +76,6 @@ function parseStore(value: string | undefined): 'memory' | 'postgres' {
 const storeOption = parseStore(options.store)
 
 const upstreamLatencyMs = required(options['upstream-latency'], 'upstream-latency', { min: 0 })
-// At least one: every session-bearing scenario needs a cookie to send.
 const sessionCount = required(options.sessions, 'sessions', { min: 1, whole: true })
 const durationSeconds = required(options.duration, 'duration', { min: 1 })
 const warmupSeconds = required(options.warmup, 'warmup', { min: 0 })
@@ -116,10 +88,6 @@ const pgPoolMax = number(options['pg-pool-max'], 'pg-pool-max', { min: 1, whole:
 const undiciConnections = number(options['upstream-pool'], 'upstream-pool', { min: 1, whole: true })
 const scenarios = options.scenario === 'all' ? SCENARIOS : [scenarioByName(options.scenario ?? 'read')]
 
-/**
- * A run with a fine p99 and `maxWaiting` at zero has not proven the pool is big
- * enough — only that this load did not need more than it had.
- */
 function samplePool(target: LoadTarget | undefined): () => PoolHighWater | undefined {
   const initial = target?.poolSnapshot()
   if (!target || !initial) return () => undefined
@@ -142,13 +110,7 @@ function samplePool(target: LoadTarget | undefined): () => PoolHighWater | undef
   }
 }
 
-/**
- * One request through the proxy, asserted byte-for-byte against what the stub
- * serves, before the scenario is measured. Throughput numbers say nothing about
- * whether the bytes were right, and autocannon cannot check a body while it is
- * cycling per-session request templates (`expectBody` and `requests` are
- * mutually exclusive), so the check happens once, here.
- */
+// autocannon cannot combine expectBody with per-session request templates.
 async function verifyScenarioBody(scenario: Scenario, origin: string, session: SeededSession): Promise<void> {
   const template = scenario.request(session)
   const response = await fetch(`${origin}${template.path}`, {
@@ -169,8 +131,6 @@ async function verifyScenarioBody(scenario: Scenario, origin: string, session: S
 async function runScenario(scenario: Scenario, loadRun: LoadRun): Promise<Verdict> {
   const latencyBudgetMs = loadRun.latencyBudgetFor(scenario)
   const connections = connectionsOverride ?? scenario.defaultConnections
-  // One template per session, cycled by each connection, so N sessions are in
-  // flight at once. An anonymous scenario ignores the session it is handed.
   const requests = (scenario.needsSession ? loadRun.sessions : [{ cookie: '', csrfToken: '' }])
     .map(session => scenario.request(session))
 
@@ -181,12 +141,10 @@ async function runScenario(scenario: Scenario, loadRun: LoadRun): Promise<Verdic
     workers: workers > 0 ? workers : undefined,
     requests,
     title: scenario.name,
-    // A timeout should mean the BFF stopped answering, not that it was slow.
     timeout: 30,
   })
 
-  // Discarded: the first seconds measure the JIT and the undici pool opening
-  // its sockets, neither of which a steady-state service pays for.
+  // Exclude JIT and connection-pool startup from steady-state measurements.
   if (warmupSeconds > 0) await run(warmupSeconds)
 
   const stopSampling = samplePool(loadRun.target)
@@ -237,19 +195,9 @@ function report(verdicts: Verdict[]): void {
   }
 }
 
-/**
- * Everything the scenario loop needs, from either mode.
- *
- * The point of the type is that the loop has no idea which one it got: the two
- * differences between a local target and a deployed one — that only a stub's
- * body is known in advance, and that only a stub's latency can be subtracted to
- * leave proxy overhead — are settled here as a no-op and an undefined, rather
- * than as `if (remote)` at all three places that would otherwise care.
- */
 interface LoadRun {
   origin: string
   sessions: SeededSession[]
-  /** Undefined against a deployed BFF: no pool to sample. */
   target: LoadTarget | undefined
   latencyBudgetFor: (scenario: Scenario) => number | undefined
   verifyBody: (scenario: Scenario) => Promise<void>
@@ -257,8 +205,6 @@ interface LoadRun {
 }
 
 function startRemoteRun(origin: string): LoadRun {
-  // No seeding route on a deployed BFF, so the one session comes from a real
-  // browser sign-in — which measures the proxy, not session-store concurrency.
   if (!options.cookie) throw new Error('--target requires --cookie (a real signed-in sessionId cookie)')
   console.log(`target: ${origin} (remote — no stub upstream, no pool sampling)`)
   console.log('latency below is end-to-end for this environment, not proxy overhead; only errors and non-2xx can fail the run')
@@ -268,7 +214,6 @@ function startRemoteRun(origin: string): LoadRun {
     sessions: [{ cookie: options.cookie, csrfToken: options['csrf-token'] ?? '' }],
     target: undefined,
     latencyBudgetFor: () => undefined,
-    // A real upstream's body is not known here, so there is nothing to compare.
     verifyBody: () => Promise.resolve(),
     close: () => Promise.resolve(),
   }
@@ -288,9 +233,7 @@ async function startLocalRun(): Promise<LoadRun> {
     await upstream.close()
   }
 
-  // The creator owns the teardown, including on the way out: a stub is forked
-  // first, so an unreachable database would otherwise leave that child running
-  // and the runner waiting on it forever.
+  // Setup failures must not leave the already-forked stub running.
   try {
     if (dbLatencyMs > 0) {
       relay = await startDelayedRelay({
@@ -346,6 +289,5 @@ async function main(): Promise<number> {
   return verdicts.some(verdict => verdict.failures.length > 0) ? 1 : 0
 }
 
-// No process.exit(): it can truncate a redirected report mid-write, and with
-// every server closed above there is nothing left holding the loop open.
+// process.exit() can truncate redirected output.
 process.exitCode = await main()

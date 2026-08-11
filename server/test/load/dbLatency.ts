@@ -1,20 +1,7 @@
 import net from 'node:net'
 import type { AddressInfo } from 'node:net'
 
-/**
- * A TCP relay that delays every byte in both directions, standing in for the
- * network between the pod and Cloud SQL (story 3-H).
- *
- * Against a loopback Postgres a session `SELECT` costs ~0.2 ms, so a pool of
- * *one* connection sustains thousands of requests per second and pool size is
- * never the constraint — a fact about the laptop, not the deployment.
- *
- * Delaying at the socket rather than around the query is what makes it
- * faithful: the pooled connection stays checked out for the whole round trip,
- * so pool occupancy is real and `pgStore` and `@fastify/postgres` are unmodified.
- *
- * `delayMs` is one-way, so a query pays twice it.
- */
+/** Delays traffic in both directions; `delayMs` is one-way latency. */
 export interface DelayedRelay {
   port: number
   close: () => Promise<void>
@@ -36,7 +23,6 @@ export async function startDelayedRelay(
     from.on('close', () => {
       setTimeout(() => to.destroy(), delayMs)
     })
-    // A relay that threw on a peer's reset would take the run down with it.
     from.on('error', () => from.destroy())
   }
 

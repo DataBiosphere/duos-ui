@@ -62,16 +62,8 @@ export const REFRESH_WINDOW_SECONDS = 60
  * Bounded rather than undici's unbounded default (`connections: null` lets a
  * Pool open Clients without limit): a request burst should queue on a fixed
  * socket pool instead of consuming file descriptors until the pod runs out.
- * Timeouts stay at undici's 5-minute defaults, which large dataset uploads and
- * document downloads need.
- *
- * The bound is also a per-pod throughput ceiling of `connections ÷ upstream
- * latency`, and story 3-H measured that it is the constraint that binds first:
- * ~6400 req/s against a 20 ms upstream, ~1280 against a 100 ms one, where the
- * process itself does not saturate until ~11k. Both are orders of magnitude
- * above observed load, so 128 stays — but that formula is how to size it if
- * that ever stops being true. Overridable so the load test can measure the
- * curve rather than assume it; see server/test/load/README.md.
+ * This caps throughput at roughly `connections ÷ upstream latency`; measured
+ * capacity remains well above expected load. See server/test/load/README.md.
  */
 export const UPSTREAM_POOL_CONNECTIONS = 128
 
