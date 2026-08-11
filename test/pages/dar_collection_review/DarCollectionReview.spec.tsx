@@ -267,9 +267,10 @@ describe('DAR Review', () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(chair)
     renderReview({ adminPage: false })
 
-    const warnings = await screen.findAllByText(/This Data Access Request includes a data use term that requires manual review/)
+    const alerts = await screen.findAllByRole('alert')
+    const banners = alerts.filter(alert => alert.getAttribute('data-cy') === 'manual-review-warning-banner')
 
-    expect(warnings).toHaveLength(1)
+    expect(banners).toHaveLength(1)
   })
 
   it('renders Vote tab (not Chair Vote) for Chairs', async () => {
