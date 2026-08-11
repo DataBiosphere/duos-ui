@@ -1,8 +1,10 @@
-import type { IncomingHttpHeaders } from 'node:http'
+import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 import type {
+  FastifyError,
   FastifyInstance,
   FastifyReply,
   FastifyRequest,
+  RawReplyDefaultExpression,
   RawServerBase,
   RequestGenericInterface,
   RouteGenericInterface,
@@ -12,7 +14,7 @@ import { requireEnv } from '../auth/oidcClient.js'
 import { RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
 
 /**
- * The BFF API proxy (Phase 3, story 3-C).
+ * The BFF API proxy (Phase 3).
  *
  * Every DUOS API call the client makes is forwarded from here with the session's
  * B2C access token attached, so the browser never holds a bearer token. The
@@ -34,23 +36,16 @@ import { RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
  *     page and the Contact Us form depend on it, so they proxy through with no
  *     session and no injected `Authorization`.
  *
- * Deliberately not here: CSRF enforcement on unsafe methods (story 3-D, an
- * `onRequest` hook on this route) and destroying the session when the upstream
- * itself returns 401 (story 3-E, an `onResponse` hook on `reply.from`).
- *
- * Nor is the plugin registered on the app until 3-D — and when it is, it belongs
- * inside index.ts's `if (process.env.DUOS_DB_HOST)` block, under the same
- * `bffEnabled === true` gate as the `/auth/*` routes. That is not just symmetry
- * with those routes: the fatal-refresh path below calls `reply.clearCookie`,
- * which is a `@fastify/cookie` decorator, and index.ts registers that plugin
- * only inside the DUOS_DB_HOST block. Registered outside it, a dead refresh
- * token would raise a TypeError instead of returning 401.
+ * Registered inside index.ts's `if (process.env.DUOS_DB_HOST)` block, under the
+ * same `bffEnabled === true` gate as the `/auth/*` routes — not just for
+ * symmetry: the session-ending paths below call `reply.clearCookie`, a
+ * `@fastify/cookie` decorator index.ts registers only inside that block.
  */
 
 /**
  * The BFF-side prefix. `/duos-api/api/dataset/1` → `${DUOS_API_URL}/api/dataset/1`.
  *
- * Public API surface between client and BFF: Epic 4 makes `getApiUrl()` return
+ * Public API surface between client and BFF: Phase 4 makes `getApiUrl()` return
  * this, at which point all 104 call sites keep their literal paths. Changing it
  * later means changing both ends together.
  */
@@ -96,6 +91,67 @@ export const UNAUTHENTICATED_PATHS: ReadonlySet<string> = new Set([
 ])
 
 /**
+ * Methods CSRF enforcement does not apply to, per the usual definition of safe.
+ *
+ * A CSRF token cannot protect a GET in any case: `SameSite=Lax` deliberately
+ * sends the session cookie on top-level GET navigations, so a plain link would
+ * carry it. That makes any upstream endpoint which mutates state on GET
+ * forgeable, which is why story 3-D audits for them — see
+ * docs/plans/bff_adrs/ADR-009-state-changing-gets.md for the two that exist and
+ * why they are proxied anyway.
+ */
+const CSRF_EXEMPT_METHODS: ReadonlySet<string> = new Set(['GET', 'HEAD', 'OPTIONS'])
+
+/**
+ * The only *unsafe* requests exempt from CSRF: the signed-out Contact Us form.
+ *
+ * Keyed on method and path together, and deliberately narrower than
+ * `UNAUTHENTICATED_PATHS` — that set also holds read-only endpoints (`/status`,
+ * `/oauth2/configuration`, `/tos/text/duos`), so keying the exemption on it would
+ * waive CSRF for an unsafe method against any of them.
+ *
+ * Nothing is exploitable either way today: allowlisted paths get no injected
+ * `Authorization` and the caller's own cookie and `authorization` are stripped
+ * before forwarding, so a forged write to one of them reaches the upstream
+ * unauthenticated — a request anyone can already make without a victim, borrowing
+ * no authority, which is the only thing CSRF protects. But that safety lives in
+ * `rewriteRequestHeaders`, not here, and a path-keyed exemption would widen
+ * silently if the allowlist or the token logic ever changed.
+ *
+ * Drift fails closed: an unauthenticated POST added to `UNAUTHENTICATED_PATHS`
+ * but not here is rejected with `MissingCSRFSecretError` — loud and caught in
+ * tests — rather than quietly exempted.
+ */
+export const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
+  'POST /support/request',
+  'POST /support/upload',
+])
+
+// A 403 alone is ambiguous because the upstream can also deny writes.
+export const CSRF_ERROR_CODE = 'csrf_validation_failed'
+
+const CSRF_REJECTION_REASONS: ReadonlyMap<string, string> = new Map([
+  ['FST_CSRF_MISSING_SECRET', 'missing_secret'],
+  ['FST_CSRF_INVALID_TOKEN', 'invalid_token'],
+])
+
+// Proxied uploads are served from the SPA's origin, so they must not execute there.
+const RESPONSE_HARDENING: Readonly<IncomingHttpHeaders> = {
+  'x-content-type-options': 'nosniff',
+  'content-security-policy': 'sandbox',
+}
+
+// These describe the upstream hop, not the browser connection (RFC 9110 §7.6.1).
+const CONNECTION_SPECIFIC_RESPONSE_HEADERS: ReadonlySet<string> = new Set([
+  'keep-alive',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailer',
+  'upgrade',
+])
+
+/**
  * Strips the BFF prefix and the query string, yielding the upstream path.
  *
  * The query is dropped on purpose rather than forwarded here: `reply.from()`
@@ -113,14 +169,28 @@ export function upstreamPath(url: string): string {
   return path.slice(PROXY_PREFIX.length) || '/'
 }
 
+function injectedAccessToken(request: ProxyRequest): string | undefined {
+  if (UNAUTHENTICATED_PATHS.has(upstreamPath(request.url))) {
+    return undefined
+  }
+  return request.session?.accessToken
+}
+
 /**
  * `reply.from`'s hooks are typed against `RawServerBase` — the http/http2 union
- * — rather than this app's concrete server, so the two callbacks below have to
- * be too, or they are rejected as contravariantly incompatible. Nothing either
- * one touches differs between the two server types.
+ * — rather than this app's concrete server, so the callbacks below have to be
+ * too, or they are rejected as contravariantly incompatible. Nothing any of them
+ * touches differs between the two server types.
  */
 type ProxyRequest = FastifyRequest<RequestGenericInterface, RawServerBase>
 type ProxyReply = FastifyReply<RouteGenericInterface, RawServerBase>
+
+// reply-from types this as a ServerResponse even though the stream is incoming.
+type UpstreamResponse = RawReplyDefaultExpression<RawServerBase> & { stream: IncomingMessage }
+
+function upstreamHeaders(res: UpstreamResponse): IncomingHttpHeaders {
+  return (res as unknown as { headers: IncomingHttpHeaders }).headers
+}
 
 /**
  * Registers the proxy. Not wrapped in `fastify-plugin` — the encapsulation is
@@ -128,6 +198,59 @@ type ProxyReply = FastifyReply<RouteGenericInterface, RawServerBase>
  * only, or `/auth/*` would lose its JSON parsing too.
  */
 export async function apiProxy(app: FastifyInstance): Promise<void> {
+  // Fail at startup rather than serve the proxy unguarded. The decorator comes
+  // from @fastify/csrf-protection, registered in index.ts; if the proxy were
+  // ever moved ahead of it, the alternative to this check is a route that
+  // accepts cookie-authenticated writes from any origin.
+  if (!app.hasDecorator('csrfProtection')) {
+    throw new Error('apiProxy requires @fastify/csrf-protection to be registered first — it enforces CSRF on unsafe methods and must not be registered without it')
+  }
+
+  // Encapsulation prevents the root handler registered later from applying here.
+  app.setErrorHandler((err: FastifyError, request, reply) => {
+    const reason = err.code === undefined ? undefined : CSRF_REJECTION_REASONS.get(err.code)
+    if (reason !== undefined) {
+      request.log.info({ err }, '[proxy] CSRF validation failed — rejecting')
+      return reply.status(403).send({ error: CSRF_ERROR_CODE, reason })
+    }
+    request.log.error({ err }, '[proxy] unhandled error')
+    return reply.status(err.statusCode ?? 500).send({ error: 'An unexpected error occurred.' })
+  })
+
+  /**
+   * CSRF on state-changing methods. The proxy turns every DUOS API write into a
+   * cookie-authenticated request, so this is a requirement of the proxy, not
+   * later hardening.
+   *
+   * Callback style, not `await`ed: `csrfProtection` takes a `done` callback and
+   * returns undefined, so awaiting it would call `next()` as undefined and throw
+   * a TypeError on the *passing* path — a failure that only shows up once a
+   * valid token arrives.
+   *
+   * The two signed-out Contact Us POSTs are exempt, and have to be: with no
+   * session there is no CSRF secret, so enforcement would reject them with
+   * MissingCSRFSecretError. They are named individually rather than taken from
+   * `UNAUTHENTICATED_PATHS` — see `CSRF_EXEMPT_UNSAFE_REQUESTS`.
+   */
+  const csrfForUnsafeMethods = (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    done: () => void,
+  ): void => {
+    const exempt = CSRF_EXEMPT_METHODS.has(request.method)
+      || CSRF_EXEMPT_UNSAFE_REQUESTS.has(`${request.method} ${upstreamPath(request.url)}`)
+    if (exempt) {
+      done()
+      return
+    }
+    app.csrfProtection(request, reply, done)
+  }
+
+  app.addHook('onSend', (_request, reply, _payload, done) => {
+    reply.headers(RESPONSE_HARDENING)
+    done()
+  })
+
   // Cleared wholesale, then one wildcard pass-through. A `'*'` parser alone is
   // not enough: it is only the last resort. `getParser` resolves the exact
   // content type, then the media type, then the regex list, and reaches `'*'`
@@ -151,8 +274,16 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
     undici: { connections: UPSTREAM_POOL_CONNECTIONS },
   })
 
-  app.all(`${PROXY_PREFIX}/*`, { preHandler: ensureUpstreamAuth }, (request, reply) => {
-    reply.from(upstreamPath(request.url), { rewriteRequestHeaders, rewriteHeaders, onError: onUpstreamTransportError })
+  app.all(`${PROXY_PREFIX}/*`, {
+    onRequest: csrfForUnsafeMethods,
+    preHandler: ensureUpstreamAuth,
+  }, (request, reply) => {
+    reply.from(upstreamPath(request.url), {
+      rewriteRequestHeaders,
+      rewriteHeaders,
+      onResponse: onUpstreamResponse,
+      onError: onUpstreamTransportError,
+    })
   })
 }
 
@@ -285,8 +416,7 @@ function rewriteRequestHeaders(request: ProxyRequest, headers: IncomingHttpHeade
   //   x-csrf-token — consumed by the BFF (story 3-D); meaningless upstream.
   const { cookie, authorization, 'x-csrf-token': csrfToken, ...forwarded } = headers
 
-  const upstream = upstreamPath(request.url)
-  const accessToken = UNAUTHENTICATED_PATHS.has(upstream) ? undefined : request.session?.accessToken
+  const accessToken = injectedAccessToken(request)
 
   return {
     ...forwarded,
@@ -332,19 +462,67 @@ function forwardedFor(request: ProxyRequest, inbound: string | string[] | undefi
  *                     upstream set it back would undo the point of doing so.
  *   clear-site-data — clears cookies, storage and cache for the BFF origin,
  *                     which would sign the user out and wipe local state.
+ *   www-authenticate — a challenge for a bearer scheme this origin no longer
+ *                     uses: the browser holds a session cookie and has no token
+ *                     to re-present, and a `Basic` challenge would pop a native
+ *                     credential dialog on the BFF's origin. Stripped on every
+ *                     status, since the 401s an allowlisted path passes through
+ *                     carry it too.
  *
  * Deliberately still forwarded, because they are not origin state and the client
  * needs them: `content-encoding` and `content-type` (a gzip body has to arrive
  * declared as one), `cache-control`, `etag`, `content-disposition` for the
- * document downloads. `strict-transport-security` and `www-authenticate` are the
- * two near misses — the first is origin *policy* rather than state and belongs
- * to the ingress, the second only matters once story 3-E decides what an
- * upstream 401 means; neither is stripped here.
+ * document downloads. `strict-transport-security` is the near miss — origin
+ * *policy* rather than state, already settled by the ingress, so left alone.
+ *
+ * The second class dropped is the wrong hop rather than origin state; see
+ * `CONNECTION_SPECIFIC_RESPONSE_HEADERS`.
  */
 function rewriteHeaders(headers: IncomingHttpHeaders): IncomingHttpHeaders {
   // Omitted by destructuring rather than deleted, for the same reason as the
   // request leg: `headers` is the upstream's own `res.headers`, which reply-from
   // may hand back on a retry.
-  const { 'set-cookie': setCookie, 'clear-site-data': clearSiteData, ...forwarded } = headers
-  return forwarded
+  const {
+    'set-cookie': setCookie,
+    'clear-site-data': clearSiteData,
+    'www-authenticate': wwwAuthenticate,
+    ...forwarded
+  } = headers
+  return Object.fromEntries(
+    Object.entries(forwarded).filter(([name]) => !CONNECTION_SPECIFIC_RESPONSE_HEADERS.has(name)),
+  )
+}
+
+function onUpstreamResponse(request: ProxyRequest, reply: ProxyReply, res: UpstreamResponse): void {
+  if (res.statusCode !== 401 || injectedAccessToken(request) === undefined) {
+    reply.send(res.stream)
+    return
+  }
+
+  // Drain the replaced response so undici can reuse its socket.
+  res.stream.on('error', (err: Error) => {
+    request.log.debug({ err }, '[proxy] discarded upstream 401 body errored')
+  })
+  res.stream.resume()
+
+  // Remove metadata for the discarded body; preserve reply-from's connection header.
+  for (const name of Object.keys(upstreamHeaders(res))) {
+    if (name !== 'connection') {
+      reply.removeHeader(name)
+    }
+  }
+
+  // reply-from's onResponse callback is synchronous.
+  void endRejectedSession(request, reply)
+}
+
+async function endRejectedSession(request: ProxyRequest, reply: ProxyReply): Promise<void> {
+  try {
+    await request.session.destroy()
+    request.log.info('[proxy] upstream rejected the session access token — session destroyed, returning 401')
+  }
+  catch (err: unknown) {
+    request.log.error({ err }, '[proxy] upstream rejected the session access token but the session could not be destroyed — returning 401 anyway')
+  }
+  reply.clearCookie('sessionId').status(401).send({ error: 'session_expired' })
 }

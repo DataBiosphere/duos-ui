@@ -10,7 +10,7 @@ import { isNil } from 'src/utils/NodashUtil'
 import { Styles } from 'src/libs/theme'
 import { Storage } from 'src/libs/storage'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import ConsoleDashboardGrid, { ConsoleDashboardTile, ConsoleDashboardTileMeta } from 'src/components/dashboard/ConsoleDashboardGrid'
+import ConsoleDashboardGrid from 'src/components/dashboard/ConsoleDashboardGrid'
 import ConsoleDashboardResources, { ConsoleDashboardResource } from 'src/components/dashboard/ConsoleDashboardResources'
 import ConsoleDashboardPromo from 'src/components/dashboard/ConsoleDashboardPromo'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
@@ -24,6 +24,18 @@ import { AssetType, LibraryVersionNew } from 'src/types/library'
 import { DuosUser } from 'src/types/model'
 import { ElasticsearchQuery } from 'src/types/elastic'
 import { extractError } from 'src/utils/ErrorUtils'
+
+interface ConsoleDashboardTileMeta {
+  icon: React.ComponentType
+  description: string
+  statLabels: string[]
+}
+
+interface DACDashboardTile {
+  label: string
+  link: string
+  isRenderedForUser?: (user: DuosUser) => boolean
+}
 
 const tileMetaByLink: Record<string, ConsoleDashboardTileMeta> = {
   '/dac_console_dar_requests': {
@@ -51,7 +63,7 @@ const tileMetaByLink: Record<string, ConsoleDashboardTileMeta> = {
 // These pages no longer have their own top-nav sub-tabs; the Dashboard is now
 // the only place DAC members/chairs navigate to them from, so the tile list
 // lives here instead of being derived from headerTabsConfig.
-const DASHBOARD_TILES: Array<ConsoleDashboardTile & { isRenderedForUser?: (user: DuosUser) => boolean }> = [
+const DASHBOARD_TILES: DACDashboardTile[] = [
   { label: 'Data Access Requests', link: '/dac_console_dar_requests' },
   { label: 'Manage DACs', link: '/manage_dac', isRenderedForUser: user => user?.isChairPerson },
   { label: 'My DAC\'s Datasets', link: '/dac_datasets', isRenderedForUser: user => user?.isChairPerson },
@@ -80,10 +92,10 @@ const helpfulResources: ConsoleDashboardResource[] = [
 ]
 
 interface LibraryTotals {
-  Studies: number
-  Datasets: number
+  'Studies': number
+  'Datasets': number
   'AI Models': number
-  Workspaces: number
+  'Workspaces': number
   [key: string]: number
 }
 
@@ -106,7 +118,7 @@ const fetchLibraryTotals = async (restrictToPublicVisibility: boolean): Promise<
       return assetRegistry[assetType].transformResponse(response, pagination).total
     }),
   )
-  return { Studies: studies, Datasets: datasets, 'AI Models': models, Workspaces: workspaces }
+  return { 'Studies': studies, 'Datasets': datasets, 'AI Models': models, 'Workspaces': workspaces }
 }
 
 const fetchDacDatasetTotal = async (user: DuosUser): Promise<number> => {
@@ -157,10 +169,10 @@ export default function DACDashboard(): React.JSX.Element {
 
         setStatValuesByLink({
           '/dac_console_dar_requests': {
-            Total: collections.length,
-            Approved: approvedCount,
-            Denied: deniedCount,
-            Pending: pendingCount,
+            'Total': collections.length,
+            'Approved': approvedCount,
+            'Denied': deniedCount,
+            'Pending': pendingCount,
             'Awaiting My Vote': awaitingMyVoteCount,
           },
           '/datalibrary': libraryTotals,
@@ -183,14 +195,26 @@ export default function DACDashboard(): React.JSX.Element {
   }, [])
 
   const currentUser = Storage.getCurrentUser()
-  const tiles = DASHBOARD_TILES.filter(tile => tile.isRenderedForUser?.(currentUser) ?? true)
+  const tiles = DASHBOARD_TILES
+    .filter(tile => tile.isRenderedForUser?.(currentUser) ?? true)
+    .map((tile) => {
+      const meta = tileMetaByLink[tile.link]
+      return {
+        label: tile.label,
+        link: tile.link,
+        icon: meta.icon,
+        description: meta.description,
+        stats: meta.statLabels.map(label => ({
+          label,
+          value: statValuesByLink[tile.link]?.[label] ?? null,
+        })),
+      }
+    })
 
   return (
     <div style={Styles.PAGE}>
       <ConsoleDashboardGrid
         tiles={tiles}
-        tileMetaByLink={tileMetaByLink}
-        statValuesByLink={statValuesByLink}
         isLoading={isLoading}
       />
 

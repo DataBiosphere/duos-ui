@@ -2,7 +2,6 @@ import { DAAObject, DuosUser } from 'src/types/model'
 
 interface DaaOptions {
   daaId: number
-  broadDaa?: boolean
   fileName?: string
   dacId?: number
   mapped?: boolean
@@ -22,13 +21,11 @@ interface ResearcherOptions {
 
 export function makeDaa({
   daaId,
-  broadDaa = false,
   fileName = `DAA-${daaId}.pdf`,
   dacId = 10,
   mapped = true,
-}: DaaOptions): DAAObject & { broadDaa?: boolean } {
+}: DaaOptions): DAAObject {
   return {
-    broadDaa,
     daaId,
     createUserId: 1,
     createDate: '2024-01-15',

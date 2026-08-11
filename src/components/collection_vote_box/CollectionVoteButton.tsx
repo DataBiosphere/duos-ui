@@ -4,14 +4,16 @@ import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton'
 
 const styles = {
   baseStyle: {
-    height: '45px',
-    width: '94px',
+    height: '38px',
+    width: 'auto',
+    minWidth: '84px',
+    padding: '0 0.9rem',
     borderRadius: '5px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '18px',
-    marginTop: '15px',
+    whiteSpace: 'nowrap',
+    fontSize: '15px',
   },
   defaultLabelColor: '#333F52',
 } as const

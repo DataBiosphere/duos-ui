@@ -29,7 +29,7 @@ When adding a new filter:
 
 ## Download Links — Use `DownloadLink` for All File Downloads
 
-The shared `DownloadLink` component (`src/components/DownloadLink.jsx`) is the single canonical way to render
+The shared `DownloadLink` component (`src/components/DownloadLink.tsx`) is the single canonical way to render
 file download actions in this UI. It renders a link-style control with a download icon and consistent
 `Theme.palette.link` colour.
 
@@ -81,11 +81,12 @@ for (const daa of daaList) {
 
 ## DAR (Data Access Request) Snapshot API
 
-`DAR.getDatasetDaaSnapshots(referenceId)` (`src/libs/ajax/DAR.js`) fetches the dataset–DAA relationship
+`DAR.getDatasetDaaSnapshots(referenceId)` (`src/libs/ajax/DAR.ts`) fetches the dataset–DAA relationship
 snapshot for a submitted DAR. The response is an array; each element may use either a flat shape
 (`datasetId`, `daaId`, `daaFileName` as top-level fields) or a nested shape (`dataset.datasetId`,
-`daa.daaId`, `daa.file.fileName`). The `DatasetDaaSnapshotRelationships` component
-(`src/pages/dar_application/DatasetDaaSnapshotRelationships.tsx`) normalises both shapes.
+`daa.daaId`, `daa.file.fileName`). `SelectableDatasets`
+(`src/pages/dar_application/SelectableDatasets.tsx`) normalises both shapes, via the
+`getSnapshotDatasetId`, `getSnapshotDaaId`, and `getSnapshotDaaFileName` helpers.
 
 ## DAA Is Always Enabled
 

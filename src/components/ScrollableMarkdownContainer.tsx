@@ -1,5 +1,4 @@
 import ReactMarkdown from 'react-markdown'
-import DOMPurify from 'dompurify'
 import React, { useEffect, useState } from 'react'
 import { isEmpty } from 'src/utils/NodashUtil'
 
@@ -27,7 +26,7 @@ export default function ScrollableMarkdownContainer({ markdown }: Readonly<Scrol
 
   const generateContent = (markdownText: string): React.ReactElement => (
     <ReactMarkdown components={markdownComponents}>
-      {DOMPurify.sanitize(markdownText)}
+      {markdownText}
     </ReactMarkdown>
   )
 

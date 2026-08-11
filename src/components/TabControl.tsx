@@ -1,58 +1,55 @@
 import React from 'react'
-import SelectableText, { TabStyleOverride } from './SelectableText'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
+import { SxProps, Theme as MuiTheme } from '@mui/material/styles'
 
 export interface TabControlProps {
   labels: string[]
   selectedTab: string
   setSelectedTab: (label: string) => void
   isLoading?: boolean
-  styleOverride?: TabStyleOverride
+  sx?: SxProps<MuiTheme>
   isDisabled?: boolean
 }
 
-const defaultTabContainerStyle: React.CSSProperties = {
-  display: 'flex',
-  backgroundColor: 'white',
-  border: '0px',
+const baseTabsSx: SxProps<MuiTheme> = {
+  'backgroundColor': 'white',
+  '& .MuiTab-root': { textTransform: 'none' },
 }
 
-export default function TabControl({ labels, selectedTab, setSelectedTab, isLoading = false, styleOverride = {}, isDisabled }: Readonly<TabControlProps>) {
-  // styleOverride may include:
-  //  tabSelected - style when selected
-  //  tabUnselected - style when not selected
-  //  tabHover - style on hover (inherit to keep unchanged)
-  //  tabContainer - overrides the outer container style
-  const tabContainerStyle = React.useMemo<React.CSSProperties>(
-    () => styleOverride.tabContainer ?? defaultTabContainerStyle,
-    [styleOverride.tabContainer],
-  )
+export default function TabControl({ labels, selectedTab, setSelectedTab, isLoading = false, sx, isDisabled }: Readonly<TabControlProps>) {
+  if (isLoading) {
+    return (
+      <div className="tab-list" style={{ display: 'flex', backgroundColor: 'white' }}>
+        {labels.map(label => (
+          <div
+            className="text-placeholder"
+            key={`${label}-placeholder`}
+            style={{ width: '23rem', height: '5rem', marginRight: '2rem' }}
+          />
+        ))}
+      </div>
+    )
+  }
 
   return (
-    <div style={tabContainerStyle} className="tab-list">
-      {labels.map(label =>
-        isLoading
-          ? (
-              <div
-                className="text-placeholder"
-                key={`${label}-placeholder`}
-                style={{
-                  width: '23rem',
-                  height: '5rem',
-                  marginRight: '2rem',
-                }}
-              />
-            )
-          : (
-              <SelectableText
-                label={label}
-                key={`${label}-button`}
-                setSelected={setSelectedTab}
-                selectedType={selectedTab}
-                styleOverride={styleOverride}
-                isDisabled={isDisabled}
-              />
-            ),
-      )}
-    </div>
+    <Tabs
+      className="tab-list"
+      // MUI warns on a value matching no tab, which happens while the tab set is still resolving.
+      value={labels.includes(selectedTab) ? selectedTab : false}
+      onChange={(_event, label: string) => setSelectedTab(label)}
+      variant="scrollable"
+      scrollButtons={false}
+      sx={[baseTabsSx, ...(Array.isArray(sx) ? sx : [sx])]}
+    >
+      {labels.map(label => (
+        <Tab
+          key={`${label}-tab`}
+          label={label}
+          value={label}
+          disabled={isDisabled}
+        />
+      ))}
+    </Tabs>
   )
 }

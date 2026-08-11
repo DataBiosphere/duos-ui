@@ -865,6 +865,11 @@ export const hasDataSubmitterRole = (user: DuosUser): boolean => {
   return !isNil(dsRole)
 }
 
+// Non-public studies are hidden from researchers; Chairpersons, Data Submitters,
+// Admins, and Signing Officials retain full visibility.
+export const isRestrictedToPublicVisibility = (user: DuosUser | undefined): boolean =>
+  !(user?.isChairPerson || user?.isDataSubmitter || user?.isAdmin || user?.isSigningOfficial)
+
 export const partition = <T>(array: T[], size: number): T[][] => {
   const result: T[][] = []
   for (let i = 0; i < array.length; i += size) {

@@ -1,6 +1,7 @@
 import React from 'react'
 import { ExternalProfiles } from 'src/types/model'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
+import { formattedLinkedIn, formattedOrcid, formattedThroughBio } from 'src/utils/ExternalProfileUtils'
 
 export interface SigningOfficialReadOnlyCardProps {
   name: string
@@ -8,10 +9,6 @@ export interface SigningOfficialReadOnlyCardProps {
   institutionName?: string
   externalProfiles?: ExternalProfiles
 }
-
-const formattedLinkedIn = (profileId: string): string => `https://www.linkedin.com/in/${profileId}`
-const formattedOrcid = (profileId: string): string => `https://orcid.org/${profileId}`
-const formattedThroughBio = (profileId: string): string => `https://through.bio/${profileId}`
 
 const dtStyle = { fontWeight: 'bold' as const }
 const ddStyle = { margin: 0 }
@@ -22,6 +19,11 @@ const dlStyle = {
   rowGap: '0.25rem',
   alignItems: 'baseline',
   margin: 0,
+}
+
+const trimmedOrUndefined = (value?: string): string | undefined => {
+  const trimmed = value?.trim()
+  return trimmed || undefined
 }
 
 function ProfileLink({ label, url }: Readonly<{ label: string, url: string }>) {
@@ -45,12 +47,12 @@ function ProfileLink({ label, url }: Readonly<{ label: string, url: string }>) {
 export default function SigningOfficialReadOnlyCard(props: Readonly<SigningOfficialReadOnlyCardProps>) {
   const { name, email, institutionName, externalProfiles } = props
 
-  const hasExternalProfiles = Boolean(
-    externalProfiles?.linkedIn
-    || externalProfiles?.ORCID
-    || externalProfiles?.throughBio
-    || externalProfiles?.institutionalWebsite,
-  )
+  const linkedIn = trimmedOrUndefined(externalProfiles?.linkedIn)
+  const orcid = trimmedOrUndefined(externalProfiles?.ORCID)
+  const throughBio = trimmedOrUndefined(externalProfiles?.throughBio)
+  const institutionalWebsite = trimmedOrUndefined(externalProfiles?.institutionalWebsite)
+
+  const hasExternalProfiles = Boolean(linkedIn || orcid || throughBio || institutionalWebsite)
 
   return (
     <section aria-label={`Signing Official: ${name}`} style={{ marginTop: '0.5rem' }}>
@@ -72,18 +74,17 @@ export default function SigningOfficialReadOnlyCard(props: Readonly<SigningOffic
 
         {hasExternalProfiles && (
           <>
-            <dt style={{ ...dtStyle, gridColumn: '1 / -1', marginTop: '0.5rem' }}>External Profile</dt>
-            {externalProfiles?.linkedIn && (
-              <ProfileLink label="LinkedIn" url={formattedLinkedIn(externalProfiles.linkedIn)} />
+            {linkedIn && (
+              <ProfileLink label="LinkedIn" url={formattedLinkedIn(linkedIn)} />
             )}
-            {externalProfiles?.ORCID && (
-              <ProfileLink label="ORCID iD" url={formattedOrcid(externalProfiles.ORCID)} />
+            {orcid && (
+              <ProfileLink label="ORCID iD" url={formattedOrcid(orcid)} />
             )}
-            {externalProfiles?.throughBio && (
-              <ProfileLink label="Through.bio" url={formattedThroughBio(externalProfiles.throughBio)} />
+            {throughBio && (
+              <ProfileLink label="Through.bio" url={formattedThroughBio(throughBio)} />
             )}
-            {externalProfiles?.institutionalWebsite && (
-              <ProfileLink label="Institutional Website" url={externalProfiles.institutionalWebsite} />
+            {institutionalWebsite && (
+              <ProfileLink label="Institutional Website" url={institutionalWebsite} />
             )}
           </>
         )}
