@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { Box } from '@mui/material'
 import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined'
@@ -12,56 +14,76 @@ import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined'
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined'
 import DatasetOutlinedIcon from '@mui/icons-material/DatasetOutlined'
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined'
-import { isNil } from 'src/utils/NodashUtil'
 import { Styles } from 'src/libs/theme'
 import { Storage } from 'src/libs/storage'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import ConsoleDashboardGrid, { ConsoleDashboardTile, ConsoleDashboardTileMeta } from 'src/components/dashboard/ConsoleDashboardGrid'
-import ConsoleDashboardResources, { ConsoleDashboardResource } from 'src/components/dashboard/ConsoleDashboardResources'
+import ConsoleDashboardGrid from 'src/components/dashboard/ConsoleDashboardGrid'
 import ConsoleDashboardPromo from 'src/components/dashboard/ConsoleDashboardPromo'
-import { isRestrictedToPublicVisibility, Notifications, USER_ROLES } from 'src/libs/utils'
-import { User } from 'src/libs/ajax/User'
-import { Collections } from 'src/libs/ajax/Collections'
-import { DataSet } from 'src/libs/ajax/DataSet'
-import { buildElasticsearchQuery } from 'src/hooks/useLibraryData'
-import { assetRegistry } from 'src/components/data_library/assets'
-import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
-import { AssetType, LibraryVersionNew } from 'src/types/library'
+import ConsoleDashboardResources, { ConsoleDashboardResource } from 'src/components/dashboard/ConsoleDashboardResources'
+import ConsoleDashboardTitle from 'src/components/dashboard/ConsoleDashboardTitle'
+import { Notifications } from 'src/libs/utils'
+import { Researcher, ResearcherDashboardSummary } from 'src/libs/ajax/Researcher'
 import { DuosUser } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
-import { SUBMISSION_TAB_TYPES, buildSubmissionOwnershipQuery } from 'src/pages/researcher_console/DatasetSubmissions'
 
-const tileMetaByLink: Record<string, ConsoleDashboardTileMeta> = {
-  '/datalibrary': {
-    icon: LibraryBooksOutlinedIcon,
-    description: 'Browse and search datasets, studies, and other assets available in DUOS.',
-    statLabels: ['Studies', 'Datasets', 'AI Models', 'Workspaces'],
-  },
-  '/researcher_console': {
-    icon: DescriptionOutlinedIcon,
-    description: 'Track the data access requests you have submitted.',
-    statLabels: ['Total', 'Approved', 'Denied', 'Pending'],
-  },
-  '/datasets': {
-    icon: AssignmentTurnedInOutlinedIcon,
-    description: 'View your current dataset approvals and when access expires.',
-    statLabels: ['Active', 'Expiring in 30 Days', 'Expired'],
-  },
-  '/dataset_submissions': {
-    icon: CloudUploadOutlinedIcon,
-    description: 'Track the status of datasets you have registered in DUOS.',
-    statLabels: ['Total'],
-  },
+interface Stat {
+  label: string
+  value: (summary: ResearcherDashboardSummary) => number
 }
 
-// These pages no longer have their own top-nav sub-tabs; the Dashboard is now
-// the only place researchers navigate to them from, so the tile list lives
-// here instead of being derived from headerTabsConfig.
-const DASHBOARD_TILES: Array<ConsoleDashboardTile & { isRenderedForUser?: (user: DuosUser) => boolean }> = [
-  { label: 'Data Library', link: '/datalibrary' },
-  { label: 'Data Access Requests', link: '/researcher_console' },
-  { label: 'My Dataset Approvals', link: '/datasets' },
-  { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: user => user?.isDataSubmitter },
+// These pages no longer have top-nav sub-tabs; the Dashboard is the only route to them, so the
+// tile list lives here rather than being derived from headerTabsConfig.
+const tileMeta: Array<{
+  label: string
+  link: string
+  icon: React.ComponentType
+  description: string
+  stats: Stat[]
+  isRenderedForUser?: (user: DuosUser) => boolean
+}> = [
+  {
+    label: 'Data Library',
+    link: '/datalibrary',
+    icon: LibraryBooksOutlinedIcon,
+    description: 'Browse and search datasets, studies, and other assets available in DUOS.',
+    stats: [
+      { label: 'Studies', value: s => s.dataLibrary.studies },
+      { label: 'Datasets', value: s => s.dataLibrary.datasets },
+      { label: 'AI Models', value: s => s.dataLibrary.models },
+      { label: 'Workspaces', value: s => s.dataLibrary.workspaces },
+    ],
+  },
+  {
+    label: 'Data Access Requests',
+    link: '/researcher_console',
+    icon: DescriptionOutlinedIcon,
+    description: 'Track the data access requests you have submitted.',
+    stats: [
+      { label: 'Total', value: s => s.darRequests.total },
+      { label: 'Approved', value: s => s.darRequests.approved },
+      { label: 'Canceled', value: s => s.darRequests.canceled },
+      { label: 'In Process', value: s => s.darRequests.inProcess },
+    ],
+  },
+  {
+    label: 'My Dataset Approvals',
+    link: '/datasets',
+    icon: AssignmentTurnedInOutlinedIcon,
+    description: 'View your current dataset approvals and when access expires.',
+    stats: [
+      { label: 'Active', value: s => s.datasetApprovals.active },
+      { label: 'Expiring in 30 Days', value: s => s.datasetApprovals.expiringSoon },
+      { label: 'Expired', value: s => s.datasetApprovals.expired },
+    ],
+  },
+  {
+    label: 'Data Submissions',
+    link: '/dataset_submissions',
+    icon: CloudUploadOutlinedIcon,
+    description: 'Track the status of datasets you have registered in DUOS.',
+    stats: [{ label: 'Total', value: s => s.dataSubmissions.total }],
+    isRenderedForUser: user => user?.isDataSubmitter,
+  },
 ]
 
 const helpfulResources: ConsoleDashboardResource[] = [
@@ -121,138 +143,42 @@ const helpfulResources: ConsoleDashboardResource[] = [
   },
 ]
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000
-
-interface LibraryTotals {
-  'Studies': number
-  'Datasets': number
-  'AI Models': number
-  'Workspaces': number
-  [key: string]: number
-}
-
-const fetchLibraryTotals = async (restrictToPublicVisibility: boolean): Promise<LibraryTotals> => {
-  const libraryConfig: LibraryVersionNew = {
-    key: 'duos',
-    title: 'DUOS Data Library',
-    featured: true,
-    order: 0,
-    restrictToPublicVisibility,
-  }
-  const [studies, datasets, models, workspaces] = await Promise.all(
-    [AssetType.STUDIES, AssetType.DATASETS, AssetType.MODELS, AssetType.WORKSPACES].map(async (assetType) => {
-      // Some asset types (e.g. Studies) derive their count from a composite
-      // aggregation whose size must be >= 1, so a plain pageSize of 0 is rejected.
-      const pagination = { page: 0, pageSize: 1 }
-      const response = await DataSet.searchDatasetIndexV2(
-        buildElasticsearchQuery(libraryConfig, assetType, EMPTY_FILTERS, '', pagination),
-      )
-      return assetRegistry[assetType].transformResponse(response, pagination).total
-    }),
-  )
-  return { 'Studies': studies, 'Datasets': datasets, 'AI Models': models, 'Workspaces': workspaces }
-}
-
-const fetchSubmissionTotal = async (user: DuosUser): Promise<number | undefined> => {
-  const query = buildSubmissionOwnershipQuery(user)
-  if (isNil(query)) {
-    return undefined
-  }
-  const libraryConfig: LibraryVersionNew = {
-    key: `dashboard-submissions-${user.userId}`,
-    title: 'My Data Submissions',
-    featured: true,
-    order: 0,
-    query,
-    showAllControlled: true,
-  }
-  const pagination = { page: 0, pageSize: 1 }
-  const totals = await Promise.all(
-    Array.from(SUBMISSION_TAB_TYPES).map(async (assetType) => {
-      const response = await DataSet.searchDatasetIndexV2(
-        buildElasticsearchQuery(libraryConfig, assetType, EMPTY_FILTERS, '', pagination),
-      )
-      return assetRegistry[assetType].transformResponse(response, pagination).total
-    }),
-  )
-  return totals.reduce((sum, total) => sum + total, 0)
-}
-
 export default function ResearcherDashboard(): React.JSX.Element {
   usePageTitle('Dashboard')
-
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [statValuesByLink, setStatValuesByLink] = useState<Record<string, Record<string, number>>>({})
+  const { data, isFetching, error } = useQuery({
+    queryKey: ['researcher-dashboard-summary'],
+    queryFn: Researcher.getDashboardSummary,
+    staleTime: 0,
+    retry: false,
+    refetchOnMount: 'always',
+  })
 
   useEffect(() => {
-    const init = async (): Promise<void> => {
-      try {
-        setIsLoading(true)
-        const currentUser = Storage.getCurrentUser()
-        const restrictToPublicVisibility = isRestrictedToPublicVisibility(currentUser)
-
-        const [libraryTotals, collections, approvedDatasets, submissionTotal] = await Promise.all([
-          fetchLibraryTotals(restrictToPublicVisibility),
-          Collections.getCollectionSummariesByRoleName(USER_ROLES.researcher),
-          User.getApprovedDatasets(),
-          currentUser?.isDataSubmitter
-            ? fetchSubmissionTotal(currentUser)
-            : Promise.resolve(undefined),
-        ])
-
-        const approvedDarCount = collections.filter(collection => collection.status === 'Complete').length
-        const deniedDarCount = collections.filter(collection => collection.status === 'Canceled').length
-        const pendingDarCount = collections.length - approvedDarCount - deniedDarCount
-
-        const now = Date.now()
-        const in30Days = now + 30 * MS_PER_DAY
-        const expiredCount = approvedDatasets.filter(dataset => dataset.expirationDate < now).length
-        const expiringSoonCount = approvedDatasets.filter(
-          dataset => dataset.expirationDate >= now && dataset.expirationDate <= in30Days,
-        ).length
-        const activeCount = approvedDatasets.length - expiredCount
-
-        setStatValuesByLink({
-          '/datalibrary': libraryTotals,
-          '/researcher_console': {
-            Total: collections.length,
-            Approved: approvedDarCount,
-            Denied: deniedDarCount,
-            Pending: pendingDarCount,
-          },
-          '/datasets': {
-            'Active': activeCount,
-            'Expiring in 30 Days': expiringSoonCount,
-            'Expired': expiredCount,
-          },
-          ...(!isNil(submissionTotal) && {
-            '/dataset_submissions': {
-              Total: submissionTotal,
-            },
-          }),
-        })
-        setIsLoading(false)
-      }
-      catch (error) {
-        const message = extractError(error)
-        Notifications.showError({ text: `Error: Unable to load dashboard statistics: ${message}` })
-        setIsLoading(false)
-      }
+    if (error) {
+      Notifications.showError({
+        text: `Error: Unable to load dashboard statistics: ${extractError(error)}`,
+      })
     }
-    init()
-  }, [])
+  }, [error])
 
+  // Hide cached counts while a refetch is in flight so stale and fresh numbers never mix.
+  const summary = isFetching || error ? undefined : data
   const currentUser = Storage.getCurrentUser()
-  const tiles = DASHBOARD_TILES.filter(tile => tile.isRenderedForUser?.(currentUser) ?? true)
+  const tiles = tileMeta
+    .filter(tile => tile.isRenderedForUser?.(currentUser) ?? true)
+    .map(tile => ({
+      ...tile,
+      stats: tile.stats.map(stat => ({
+        label: stat.label,
+        value: summary ? stat.value(summary) : null,
+      })),
+    }))
 
   return (
-    <div style={Styles.PAGE}>
-      <ConsoleDashboardGrid
-        tiles={tiles}
-        tileMetaByLink={tileMetaByLink}
-        statValuesByLink={statValuesByLink}
-        isLoading={isLoading}
-      />
+    <Box sx={{ ...Styles.PAGE }}>
+      <ConsoleDashboardTitle>Researcher Console</ConsoleDashboardTitle>
+
+      <ConsoleDashboardGrid tiles={tiles} isLoading={isFetching} />
 
       <ConsoleDashboardResources
         heading="Helpful Resources for Researchers"
@@ -268,6 +194,6 @@ export default function ResearcherDashboard(): React.JSX.Element {
           'Reach out if you\'d like to learn more about either of these.',
         ]}
       />
-    </div>
+    </Box>
   )
 }

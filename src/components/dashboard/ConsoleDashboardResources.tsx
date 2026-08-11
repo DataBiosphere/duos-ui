@@ -1,15 +1,25 @@
 import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router'
+import { Link } from 'react-router'
+import { Box, Card, Typography } from '@mui/material'
 import OpenInNewOutlinedIcon from '@mui/icons-material/OpenInNewOutlined'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
+import { useNavigationState } from 'src/contexts/NavigationStateContext'
+import {
+  cardIconStyle,
+  cardStyle,
+  cardTitleStyle,
+  descriptionStyle,
+  externalIconStyle,
+  gridStyle,
+  headingStyle,
+} from './dashboardStyles'
 
 export interface ConsoleDashboardResource {
   icon: React.ComponentType
   label: string
   description: string
-  // Exactly one of these should be set: `href` for an external link (opens in a
-  // new tab), `to` for in-app navigation, or `action: 'contactUs'` to open the
-  // support request modal instead of navigating anywhere.
+  // Set exactly one: `href` (external, new tab), `to` (in-app), or `action: 'contactUs'`
+  // (opens the support modal instead of navigating).
   href?: string
   to?: string
   action?: 'contactUs'
@@ -24,123 +34,78 @@ export default function ConsoleDashboardResources({
   heading,
   resources,
 }: ConsoleDashboardResourcesProps): React.JSX.Element {
-  const location = useLocation()
-  const [showContactModal, setShowContactModal] = useState<boolean>(false)
+  const { activeTab } = useNavigationState()
+  const [showContactModal, setShowContactModal] = useState(false)
 
   return (
     <>
-      <style>
-        {`
-        .console-dashboard-section-heading {
-          font-family: Montserrat, sans-serif;
-          font-size: 20px;
-          font-weight: 600;
-          color: #1F3B50;
-          max-width: 900px;
-          margin: 3rem auto 1rem;
-        }
-        .console-dashboard-resource-link {
-          display: flex;
-          align-items: flex-start;
-          gap: 1rem;
-          width: 100%;
-          background: #ffffff;
-          border: 1.5px solid rgba(0, 0, 0, 0.08);
-          border-radius: 12px;
-          padding: 1.25rem 1.5rem;
-          box-sizing: border-box;
-          text-decoration: none;
-          text-align: left;
-          font: inherit;
-          cursor: pointer;
-          transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-        }
-        .console-dashboard-resource-link:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
-          border-color: rgba(0, 0, 0, 0.18);
-        }
-        .console-dashboard-resource-label {
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
-          font-family: Montserrat, sans-serif;
-          font-size: 16px;
-          font-weight: 600;
-          color: #1F3B50;
-          margin: 0 0 0.3rem;
-        }
-        .console-dashboard-resource-label svg {
-          font-size: 16px;
-          color: #9ca3af;
-        }
-        .console-dashboard-resource-description {
-          font-family: Montserrat, sans-serif;
-          font-size: 13px;
-          color: #6b7280;
-          margin: 0;
-          line-height: 1.4;
-        }
-        `}
-      </style>
-      <h2 className="console-dashboard-section-heading">{heading}</h2>
-      <div className="console-dashboard-grid">
+      <Typography component="h2" sx={headingStyle}>{heading}</Typography>
+      <Box sx={gridStyle}>
         {resources.map((resource) => {
           const Icon = resource.icon
           const content = (
             <>
-              <span className="console-dashboard-tile-icon-wrap">
-                <Icon />
-              </span>
+              <Box component="span" sx={cardIconStyle}><Icon /></Box>
               <span>
-                <p className="console-dashboard-resource-label">
+                <Typography component="span" sx={cardTitleStyle}>
                   {resource.label}
-                  {resource.href && <OpenInNewOutlinedIcon />}
-                </p>
-                <p className="console-dashboard-resource-description">{resource.description}</p>
+                  {resource.href && <OpenInNewOutlinedIcon sx={externalIconStyle} />}
+                </Typography>
+                <Typography component="span" sx={descriptionStyle}>{resource.description}</Typography>
               </span>
             </>
           )
 
           if (resource.action === 'contactUs') {
             return (
-              <button
+              <Card
+                variant="outlined"
                 key={resource.label}
+                component="button"
                 type="button"
-                className="console-dashboard-resource-link"
                 onClick={() => setShowContactModal(true)}
+                sx={cardStyle}
               >
                 {content}
-              </button>
+              </Card>
             )
           }
 
           if (resource.to) {
             return (
-              <Link key={resource.label} to={resource.to} className="console-dashboard-resource-link">
+              <Card
+                variant="outlined"
+                key={resource.label}
+                component={Link}
+                to={resource.to}
+                state={{ selectedMenuTab: activeTab }}
+                sx={cardStyle}
+              >
                 {content}
-              </Link>
+              </Card>
             )
           }
 
           return (
-            <a
+            <Card
+              variant="outlined"
               key={resource.label}
+              component="a"
               href={resource.href}
               target="_blank"
-              rel="noreferrer"
-              className="console-dashboard-resource-link"
+              rel="noopener noreferrer"
+              sx={cardStyle}
             >
               {content}
-            </a>
+            </Card>
           )
         })}
-      </div>
+      </Box>
 
       <SupportRequestModal
         showModal={showContactModal}
         onCloseRequest={() => setShowContactModal(false)}
-        url={location.pathname}
+        url={window.location.href}
       />
     </>
   )

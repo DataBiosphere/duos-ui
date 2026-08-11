@@ -19,7 +19,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { AssetType, ALL_LIBRARY_TABS, LibraryVersionNew, TabConfig } from 'src/types/library'
 import { DuosUser } from 'src/types/model'
 
-export const SUBMISSION_TAB_TYPES = new Set<AssetType>([
+const SUBMISSION_TAB_TYPES = new Set<AssetType>([
   AssetType.STUDIES,
   AssetType.DATASETS,
   AssetType.MODELS,
@@ -33,8 +33,8 @@ export const SUBMISSION_TAB_TYPES = new Set<AssetType>([
 const SUBMISSION_TABS: TabConfig[] = ALL_LIBRARY_TABS.filter(t => SUBMISSION_TAB_TYPES.has(t.key))
 
 // Scopes a library query to datasets/studies the user submitted or is the data custodian for.
-// Shared with ResearcherDashboard so its Data Submissions stat counts the same records this page lists.
-export const buildSubmissionOwnershipQuery = (user: Pick<DuosUser, 'userId' | 'email'> | undefined): unknown => {
+// The dashboard's Data Submissions stat counts the same records, applying this rule server-side.
+const buildSubmissionOwnershipQuery = (user: Pick<DuosUser, 'userId' | 'email'> | undefined): unknown => {
   if (!user?.userId && !user?.email) return undefined
   return {
     bool: {

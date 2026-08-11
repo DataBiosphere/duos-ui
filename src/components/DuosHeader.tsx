@@ -107,7 +107,9 @@ export const headerTabsConfig: Tab[] = [
   },
   {
     label: 'Researcher Console',
-    link: '/datalibrary',
+    // Lands on the Dashboard like the SO Console; `search` keeps the console highlighted
+    // anywhere in the Data Library.
+    link: '/researcher_console_dashboard',
     search: 'datalibrary',
     children: [
       { label: 'Dashboard', link: '/researcher_console_dashboard' },
