@@ -26,7 +26,7 @@ interface EmailCellDataParams {
   label?: string
 }
 
-interface PermissionsCellDataParams {
+interface RolesCellDataParams {
   userId: number
   roles: UserRole[]
   libraryCard?: LibraryCard
@@ -82,23 +82,23 @@ export function emailCellData({ userId, email, label = 'email' }: EmailCellDataP
   }
 }
 
-export function permissionsCellData({ userId, roles, libraryCard, label = 'permissions' }: PermissionsCellDataParams): CellData {
+export function rolesCellData({ userId, roles, libraryCard, label = 'roles' }: RolesCellDataParams): CellData {
   const hasLibraryCard = !isNil(libraryCard)
-  const roleNames = (roles ?? []).map((role): string => role.name).filter(name => name !== 'Researcher')
-  const perms = hasLibraryCard ? roleNames.concat('LibraryCard') : roleNames
+  const filteredRoleNames = (roles ?? []).map((role): string => role.name).filter(name => name !== 'Researcher')
+  const roleNames = hasLibraryCard ? filteredRoleNames.concat('LibraryCard') : filteredRoleNames
 
   // need to split, e.g., SigningOfficial -> Signing Official
-  const formattedPerms = perms.map(perm => perm.replace(/([A-Z])/g, ' $1').trim())
+  const formattedRoles = roleNames.map(role => role.replace(/([A-Z])/g, ' $1').trim())
 
   return {
     isComponent: true,
-    data: sortedUniq(formattedPerms).join('   ') || 'None',
+    data: sortedUniq(formattedRoles).join('   ') || 'None',
     label,
     id: userId,
   }
 }
 
-export function institutionCellData({ userId, institution, label = 'insitution' }: InstitutionCellDataParams): CellData {
+export function institutionCellData({ userId, institution, label = 'institution' }: InstitutionCellDataParams): CellData {
   return {
     isComponent: true,
     data: institution?.name ?? 'N/A',
@@ -110,7 +110,7 @@ export function institutionCellData({ userId, institution, label = 'insitution' 
 const manageUsersTableCellData = {
   usernameCellData,
   emailCellData,
-  permissionsCellData,
+  rolesCellData,
   institutionCellData,
 }
 
