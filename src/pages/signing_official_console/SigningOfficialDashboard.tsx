@@ -46,12 +46,6 @@ const tileMeta: ConsoleDashboardTileMeta<SigningOfficialDashboardSummary>[] = [
   },
   {
     ...SO_CONSOLE_SECTIONS[3],
-    icon: GroupOutlinedIcon,
-    description: 'Manage the researchers who submit data on behalf of your institution.',
-    stats: [{ label: 'Approved', value: summary => summary.dataSubmitters?.approved }],
-  },
-  {
-    ...SO_CONSOLE_SECTIONS[4],
     icon: StorageOutlinedIcon,
     description: 'Browse the datasets and studies registered by your institution.',
     stats: [

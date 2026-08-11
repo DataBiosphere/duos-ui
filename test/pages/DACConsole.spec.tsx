@@ -252,9 +252,7 @@ describe('DACConsole', () => {
       await act(async () => renderWithRouter(<DACConsole />))
       expect(screen.getByText('DAR-1')).toBeInTheDocument()
       expect(screen.getByText('DAR-2')).toBeInTheDocument()
-      await act(async () => {
-        fireEvent.change(screen.getByRole('textbox', { name: 'search' }), { target: { value: 'DAR-1' } })
-      })
+      fireEvent.change(screen.getByRole('textbox', { name: 'search' }), { target: { value: 'DAR-1' } })
       expect(screen.getByText('DAR-1')).toBeInTheDocument()
       expect(screen.queryByText('DAR-2')).not.toBeInTheDocument()
     })
