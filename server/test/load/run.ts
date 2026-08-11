@@ -68,15 +68,28 @@ const options = parseArgs({
   },
 }).values
 
-const number = (value: string | undefined, name: string): number | undefined => {
+/**
+ * Bounds are checked here rather than where the values are used: a count of zero
+ * reaches `sessions[0]` or autocannon's own validator instead, several seconds
+ * and one forked stub later.
+ */
+interface Bounds {
+  min: number
+  /** Counts are whole; latencies and durations need not be. */
+  whole?: boolean
+}
+
+const number = (value: string | undefined, name: string, bounds: Bounds): number | undefined => {
   if (value === undefined) return undefined
   const parsed = Number(value)
   if (!Number.isFinite(parsed)) throw new Error(`--${name} is '${value}', which is not a number`)
+  if (bounds.whole && !Number.isInteger(parsed)) throw new Error(`--${name} is '${value}', which is not a whole number`)
+  if (parsed < bounds.min) throw new Error(`--${name} is ${parsed}, below the minimum of ${bounds.min}`)
   return parsed
 }
 
-const required = (value: string | undefined, name: string): number => {
-  const parsed = number(value, name)
+const required = (value: string | undefined, name: string, bounds: Bounds): number => {
+  const parsed = number(value, name, bounds)
   if (parsed === undefined) throw new Error(`--${name} is required`)
   return parsed
 }
@@ -90,14 +103,18 @@ function parseStore(value: string | undefined): 'memory' | 'postgres' {
 
 const storeOption = parseStore(options.store)
 
-const upstreamLatencyMs = required(options['upstream-latency'], 'upstream-latency')
-const sessionCount = required(options.sessions, 'sessions')
-const durationSeconds = required(options.duration, 'duration')
-const warmupSeconds = required(options.warmup, 'warmup')
-const workers = required(options.workers, 'workers')
-const dbLatencyMs = required(options['db-latency'], 'db-latency')
-const jsonBytes = required(options['json-bytes'], 'json-bytes')
-const blobBytes = required(options['blob-bytes'], 'blob-bytes')
+const upstreamLatencyMs = required(options['upstream-latency'], 'upstream-latency', { min: 0 })
+// At least one: every session-bearing scenario needs a cookie to send.
+const sessionCount = required(options.sessions, 'sessions', { min: 1, whole: true })
+const durationSeconds = required(options.duration, 'duration', { min: 1 })
+const warmupSeconds = required(options.warmup, 'warmup', { min: 0 })
+const workers = required(options.workers, 'workers', { min: 0, whole: true })
+const dbLatencyMs = required(options['db-latency'], 'db-latency', { min: 0 })
+const jsonBytes = required(options['json-bytes'], 'json-bytes', { min: 1, whole: true })
+const blobBytes = required(options['blob-bytes'], 'blob-bytes', { min: 0, whole: true })
+const connectionsOverride = number(options.connections, 'connections', { min: 1, whole: true })
+const pgPoolMax = number(options['pg-pool-max'], 'pg-pool-max', { min: 1, whole: true })
+const undiciConnections = number(options['upstream-pool'], 'upstream-pool', { min: 1, whole: true })
 const scenarios = options.scenario === 'all' ? SCENARIOS : [scenarioByName(options.scenario ?? 'read')]
 
 /**
@@ -163,7 +180,7 @@ async function runScenario(
    */
   latencyBudgetMs: number | undefined,
 ): Promise<Verdict> {
-  const connections = number(options.connections, 'connections') ?? scenario.defaultConnections
+  const connections = connectionsOverride ?? scenario.defaultConnections
   // One template per session, cycled by each connection, so N sessions are in
   // flight at once. An anonymous scenario ignores the session it is handed.
   const requests = (scenario.needsSession ? sessions : [{ cookie: '', csrfToken: '' }])
@@ -273,8 +290,8 @@ async function main(): Promise<number> {
       target = await startLoadTarget({
         upstreamOrigin: upstream.origin,
         store: storeOption,
-        pgPoolMax: number(options['pg-pool-max'], 'pg-pool-max'),
-        undiciConnections: number(options['upstream-pool'], 'upstream-pool'),
+        pgPoolMax,
+        undiciConnections,
         dbAddress: relay ? { host: '127.0.0.1', port: relay.port } : undefined,
       })
       origin = target.origin
