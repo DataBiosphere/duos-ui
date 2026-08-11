@@ -8,21 +8,12 @@ import type { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdr
 vi.mock('src/libs/config', () => ({
   Config: {
     getTdrApiUrl: vi.fn(),
-    authOpts: vi.fn(),
   },
 }))
 
 vi.mock('src/libs/ajax/fetchAdapter', () => ({
   fetchGet: vi.fn(),
 }))
-
-const headers = {
-  headers: {
-    'Authorization': 'Bearer token',
-    'Accept': 'application/json',
-    'X-App-ID': 'DUOS',
-  },
-}
 
 const buildSnapshot = (id: string, name: string): SnapshotSummaryModel => ({
   id,
@@ -45,7 +36,6 @@ describe('TerraDataRepo', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Config.getTdrApiUrl).mockResolvedValue('https://tdr.example.org')
-    vi.mocked(Config.authOpts).mockReturnValue(headers)
     vi.mocked(fetchGet).mockResolvedValue({ data: buildEnumerateSnapshotModel() })
   })
 
@@ -59,10 +49,9 @@ describe('TerraDataRepo', () => {
       const result = await TerraDataRepo.listSnapshotsByDatasetIds(['DUOS-000001'])
 
       expect(Config.getTdrApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
+      // No client-side auth options — the request is sent with the url only
       expect(fetchGet).toHaveBeenCalledWith(
         'https://tdr.example.org/api/repository/v1/snapshots?limit=1000&duosDatasetIds=DUOS-000001',
-        headers,
       )
       expect(result.items).toEqual([snapshot])
       expect(result.filteredTotal).toBe(1)

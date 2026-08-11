@@ -15,25 +15,25 @@ import {
 export const User = {
   getMe: async (): Promise<DuosUser> => {
     const url = `${await Config.getApiUrl()}/api/user/me`
-    const res = await fetchGet<DuosUser>(url, Config.authOpts())
+    const res = await fetchGet<DuosUser>(url)
     return res.data
   },
 
   getById: async (id: number): Promise<DuosUser> => {
     const url = `${await Config.getApiUrl()}/api/user/${id}`
-    const res = await fetchGet<DuosUser>(url, Config.authOpts())
+    const res = await fetchGet<DuosUser>(url)
     return res.data
   },
 
   list: async (roleName: 'Admin' | 'SigningOfficial'): Promise<DuosUser[]> => {
     const url = `${await Config.getApiUrl()}/api/user/role/${roleName}`
-    const res = await fetchGet<DuosUser[]>(url, Config.authOpts())
+    const res = await fetchGet<DuosUser[]>(url)
     return res.data
   },
 
   create: async (request: CreateDuosUserRequest): Promise<DuosUser | false | undefined> => {
     const url = `${await Config.getApiUrl()}/api/user/create`
-    const res = await fetchPost<DuosUser, CreateDuosUserRequest>(url, request, Config.authOpts())
+    const res = await fetchPost<DuosUser, CreateDuosUserRequest>(url, request)
     return res.data
   },
 
@@ -41,7 +41,7 @@ export const User = {
     const url = `${await Config.getApiUrl()}/api/user`
     // We should not be updating the user's create date, associated institution, or library cards
     try {
-      const res = await fetchPut<DuosUser, UpdateDuosUserRequestV1>(url, payload, Config.authOpts())
+      const res = await fetchPut<DuosUser, UpdateDuosUserRequestV1>(url, payload)
       return res.data
     }
     catch {
@@ -62,7 +62,7 @@ export const User = {
     unset(filteredUser, 'updatedUser.libraryCard')
 
     try {
-      const res = await fetchPut<DuosUser, UpdateDuosUserRequestV2>(url, filteredUser, Config.authOpts())
+      const res = await fetchPut<DuosUser, UpdateDuosUserRequestV2>(url, filteredUser)
       return res.data
     }
     catch {
@@ -72,49 +72,49 @@ export const User = {
 
   registerUser: async (): Promise<DuosUser> => {
     const url = `${await Config.getApiUrl()}/api/user`
-    const res = await fetchPost<DuosUser>(url, undefined, Config.authOpts())
+    const res = await fetchPost<DuosUser>(url, undefined)
     return res.data
   },
 
   getSOsForCurrentUser: async (): Promise<SimplifiedDuosUser[]> => {
     const url = `${await Config.getApiUrl()}/api/user/signing-officials`
-    const res = await fetchGet<SimplifiedDuosUser[]>(url, Config.authOpts())
+    const res = await fetchGet<SimplifiedDuosUser[]>(url)
     return res.data
   },
 
   getSOsForInstitution: async (institutionId: number): Promise<SigningOfficialUserWithData[]> => {
     const url = `${await Config.getApiUrl()}/api/user/institution/${institutionId}/signing-officials`
-    const res = await fetchGet<SigningOfficialUserWithData[]>(url, Config.authOpts())
+    const res = await fetchGet<SigningOfficialUserWithData[]>(url)
     return res.data
   },
 
   addRoleToUser: async (userId: number, roleId: number): Promise<DuosUser> => {
     const url = `${await Config.getApiUrl()}/api/user/${userId}/${roleId}`
-    const res = await fetchPut<DuosUser>(url, null, Config.authOpts())
+    const res = await fetchPut<DuosUser>(url, null)
     return res.data
   },
 
   deleteRoleFromUser: async (userId: number, roleId: number): Promise<DuosUser> => {
     const url = `${await Config.getApiUrl()}/api/user/${userId}/${roleId}`
-    const res = await fetchDelete<DuosUser>(url, Config.authOpts())
+    const res = await fetchDelete<DuosUser>(url)
     return res.data
   },
 
   getUserRelevantDatasets: async (): Promise<Dataset[]> => {
     const url = `${await Config.getApiUrl()}/api/user/me/dac/datasets/v2`
-    const res = await fetchGet<Dataset[]>(url, Config.authOpts())
+    const res = await fetchGet<Dataset[]>(url)
     return res.data
   },
 
   getAcknowledgements: async (): Promise<AcknowledgementMap> => {
     const url = `${await Config.getApiUrl()}/api/user/acknowledgements`
-    const res = await fetchGet<AcknowledgementMap>(url, Config.authOpts())
+    const res = await fetchGet<AcknowledgementMap>(url)
     return res.data
   },
 
   getAcknowledgement: async (key: string): Promise<Acknowledgement> => {
     const url = `${await Config.getApiUrl()}/api/user/acknowledgements/${key}`
-    const res = await fetchGet<Acknowledgement>(url, Config.authOpts())
+    const res = await fetchGet<Acknowledgement>(url)
     return res.data
   },
 
@@ -123,13 +123,13 @@ export const User = {
       return {}
     }
     const url = `${await Config.getApiUrl()}/api/user/acknowledgements`
-    const res = await fetchPost<AcknowledgementMap, string[]>(url, keys, Config.authOpts())
+    const res = await fetchPost<AcknowledgementMap, string[]>(url, keys)
     return res.data
   },
 
   getApprovedDatasets: async (): Promise<ApprovedDataset[]> => {
     const url = `${await Config.getApiUrl()}/api/user/me/researcher/datasets`
-    const res = await fetchGet<ApprovedDataset[]>(url, Config.authOpts())
+    const res = await fetchGet<ApprovedDataset[]>(url)
     return res.data
   },
 }

@@ -8,21 +8,12 @@ import type { MatchResult } from 'src/types/model'
 vi.mock('src/libs/config', () => ({
   Config: {
     getApiUrl: vi.fn(),
-    authOpts: vi.fn(),
   },
 }))
 
 vi.mock('src/libs/ajax/fetchAdapter', () => ({
   fetchGet: vi.fn(),
 }))
-
-const headers = {
-  headers: {
-    'Authorization': 'Bearer token',
-    'Accept': 'application/json',
-    'X-App-ID': 'DUOS',
-  },
-}
 
 const matchResult: MatchResult = {
   consent: 'consent-001',
@@ -39,19 +30,17 @@ describe('Match', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Config.getApiUrl).mockResolvedValue('https://duos.example.org')
-    vi.mocked(Config.authOpts).mockReturnValue(headers)
     vi.mocked(fetchGet).mockResolvedValue({ data: [matchResult] })
   })
 
   describe('findMatchBatch', () => {
-    it('fetches match results for the given purpose IDs with auth options', async () => {
+    it('fetches match results for the given purpose IDs', async () => {
       const result = await Match.findMatchBatch(['ref-001', 'ref-002'])
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/match/purpose/batch',
-        { ...headers, params: { purposeIds: 'ref-001,ref-002' } },
+        { params: { purposeIds: 'ref-001,ref-002' } },
       )
       expect(result).toEqual([matchResult])
     })
@@ -61,7 +50,7 @@ describe('Match', () => {
 
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/match/purpose/batch',
-        { ...headers, params: { purposeIds: 'ref-001,ref-002' } },
+        { params: { purposeIds: 'ref-001,ref-002' } },
       )
     })
 
@@ -72,7 +61,7 @@ describe('Match', () => {
 
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/match/purpose/batch',
-        { ...headers, params: { purposeIds: '' } },
+        { params: { purposeIds: '' } },
       )
       expect(result).toEqual([])
     })

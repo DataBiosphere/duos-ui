@@ -1,10 +1,9 @@
 import { v4 as uuid } from 'uuid'
 import { DuosUser } from 'src/types/model'
-import { OidcUser as OidcUserType } from 'src/libs/auth/oidcBroker'
+import { getSessionInfo } from 'src/libs/auth/session'
 
 // Storage Variables
 const CurrentUser = 'CurrentUser'
-const OidcUser = 'OidcUser'
 const UserSettings = 'UserSettings'
 const anonymousId = 'anonymousId'
 const ENV = 'env'
@@ -31,41 +30,19 @@ const DEFAULT_DUOS_USER: DuosUser = {
   userId: 0,
 }
 
-const DEFAULT_OIDC_USER: OidcUserType = {
-  access_token: '', get expires_in(): number | undefined {
-    return undefined
-  },
-  session_state: null,
-  state: undefined,
-  token_type: '',
-  get expired(): boolean | undefined {
-    return undefined
-  },
-  get scopes(): string[] {
-    return []
-  },
-  toStorageString(): string {
-    return ''
-  },
-  profile: {
-    email_verified: false,
-    idp: '',
-    idp_access_token: '',
-    tid: '',
-    ver: '',
-    sub: '',
-    iss: '',
-    aud: '',
-    exp: 0,
-    iat: 0,
-  },
+/**
+ * Whether the user has an active BFF session. Async because the session lives
+ * server-side: the answer is `GET /auth/me` (cached per page load in
+ * session.ts), not a localStorage read — the browser no longer holds tokens.
+ */
+export const userIsLogged = async (): Promise<boolean> => {
+  return (await getSessionInfo()).authenticated
 }
 
 export const Storage = {
   clearStorage: (): void => {
     localStorage.clear()
     localStorage.setItem(CurrentUser, JSON.stringify(DEFAULT_DUOS_USER))
-    localStorage.setItem(OidcUser, JSON.stringify(DEFAULT_OIDC_USER))
   },
 
   setCurrentUser: (data: DuosUser): void => {
@@ -99,21 +76,6 @@ export const Storage = {
     }
     userSettings[id][key] = value
     localStorage.setItem(UserSettings, JSON.stringify(userSettings))
-  },
-
-  setOidcUser: (oidcUser: OidcUserType): void => {
-    localStorage.setItem(OidcUser, JSON.stringify(oidcUser))
-  },
-
-  getOidcUser: (): OidcUserType => {
-    const user = localStorage.getItem(OidcUser)
-    return user ? JSON.parse(user) : DEFAULT_OIDC_USER
-  },
-
-  userIsLogged: (): boolean => {
-    const user = Storage.getOidcUser()
-    const expTime = user.profile?.exp ?? 0
-    return expTime > Math.floor(Date.now() / 1000)
   },
 
   setData: (key: string, value: unknown): void => {

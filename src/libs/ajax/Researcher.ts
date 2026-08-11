@@ -19,7 +19,7 @@ export interface ResearcherDashboardSummary {
 export const Researcher = {
   getDashboardSummary: async (): Promise<ResearcherDashboardSummary> => {
     const url = `${await Config.getApiUrl()}/api/researcher/dashboard-summary`
-    const response = await fetchGet<ResearcherDashboardSummary>(url, Config.authOpts())
+    const response = await fetchGet<ResearcherDashboardSummary>(url)
     return response.data
   },
 }

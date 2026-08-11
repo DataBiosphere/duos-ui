@@ -1,12 +1,19 @@
 import { getDefaultProperties } from '@databiosphere/bard-client'
 
 import { Storage } from 'src/libs/storage'
-import { Config, Token } from 'src/libs/config'
+import { Config } from 'src/libs/config'
 import { MetricsEventName } from 'src/libs/events'
 import { retryFetchPost } from 'src/libs/ajax/fetchAdapter'
 
 // Set default timeout for all metrics calls to 30 seconds
 const defaultSignal: AbortSignal = AbortSignal.timeout(30000)
+
+// BFF NOTE: Bard is a separate upstream that the BFF proxy does not cover, and
+// with the BFF the browser no longer holds a bearer token to authenticate
+// with. Events are therefore captured anonymously against the persistent
+// anonymousId. The authenticated identify/syncProfile calls are inert until a
+// server-side Bard proxy route exists — a known gap in the Phase 4 plan,
+// flagged for follow-up rather than silently 401ing against Bard.
 
 export const Metrics = {
   captureEvent: (
@@ -21,7 +28,7 @@ export const Metrics = {
 }
 
 /**
- * Captures an event with its details.
+ * Captures an event with its details, anonymously via the persistent anonymousId.
  *
  * @param {string} event - The event name.
  * @param {AbortSignal} [signal] - The abort signal.
@@ -30,10 +37,7 @@ export const Metrics = {
  */
 // oxlint-disable-next-line @typescript-eslint/no-explicit-any
 const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, details: object = {}): Promise<any> => {
-  const isSignedIn = Storage.userIsLogged()
-  const isRegistered = isSignedIn && Storage.getCurrentUser()
-
-  if (!isRegistered && !Storage.getAnonymousId()) {
+  if (!Storage.getAnonymousId()) {
     Storage.setAnonymousId()
   }
 
@@ -41,7 +45,7 @@ const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, deta
     event,
     properties: {
       ...details,
-      distinct_id: isRegistered ? undefined : Storage.getAnonymousId(),
+      distinct_id: Storage.getAnonymousId(),
       appId: 'DUOS',
       hostname: globalThis.location.hostname,
       appPath: globalThis.location.pathname,
@@ -50,37 +54,34 @@ const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, deta
   }
 
   const url = `${await Config.getBardApiUrl()}/api/event`
-  const headers = isRegistered ? { Authorization: `Bearer ${Token.getToken()}` } : undefined
 
-  return retryFetchPost(url, body, { headers, signal })
+  return retryFetchPost(url, body, { signal })
 }
 
 /**
- * Syncs the user profile.
+ * Syncs the user profile. Requires an Authorization header Bard-side, which
+ * the client can no longer produce — inert until Bard is proxied by the BFF.
  *
  * @param {AbortSignal} [signal] - The abort signal.
  * @returns {Promise} - A Promise that resolves when the profile is synced.
  */
 // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-const syncProfile = async (signal: AbortSignal): Promise<any> => {
-  const url = `${await Config.getBardApiUrl()}/api/syncProfile`
-  const headers = { Authorization: `Bearer ${Token.getToken()}` }
-  return retryFetchPost(url, undefined, { headers, signal }).catch(() => {})
+const syncProfile = async (_signal: AbortSignal): Promise<any> => {
+  // No client-side token to authenticate with — see BFF NOTE above.
+  return Promise.resolve()
 }
 
 /**
- * Identifies the user with an anonymous ID.
+ * Identifies the user with an anonymous ID. Requires an Authorization header
+ * Bard-side, which the client can no longer produce — inert until Bard is
+ * proxied by the BFF.
  *
  * @param {string} anonId - The anonymous ID.
  * @param {AbortSignal} [signal] - The abort signal.
  * @returns {Promise} - A Promise that resolves when the user is identified.
  */
 // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-const identify = async (anonId: string, signal: AbortSignal): Promise<any> => {
-  const body = { anonId }
-
-  const url = `${await Config.getBardApiUrl()}/api/identify`
-  const headers = { Authorization: `Bearer ${Token.getToken()}` }
-
-  return retryFetchPost(url, body, { headers, signal }).catch(() => {})
+const identify = async (_anonId: string, _signal: AbortSignal): Promise<any> => {
+  // No client-side token to authenticate with — see BFF NOTE above.
+  return Promise.resolve()
 }

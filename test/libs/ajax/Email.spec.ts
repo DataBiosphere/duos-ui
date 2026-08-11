@@ -7,7 +7,6 @@ import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
 vi.mock('src/libs/config', () => ({
   Config: {
     getApiUrl: vi.fn(),
-    authOpts: vi.fn(),
   },
 }))
 
@@ -15,32 +14,21 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
   fetchPost: vi.fn(),
 }))
 
-const headers = {
-  headers: {
-    'Authorization': 'Bearer token',
-    'Accept': 'application/json',
-    'X-App-ID': 'DUOS',
-  },
-}
-
 describe('Email', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Config.getApiUrl).mockResolvedValue('https://duos.example.org')
-    vi.mocked(Config.authOpts).mockReturnValue(headers)
     vi.mocked(fetchPost).mockResolvedValue({ data: undefined })
   })
 
   describe('sendReminderEmail', () => {
-    it('posts to the reminder endpoint with auth options', async () => {
+    it('posts to the reminder endpoint', async () => {
       await Email.sendReminderEmail(42)
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchPost).toHaveBeenCalledWith(
         'https://duos.example.org/api/emailNotifier/reminderMessage/42',
         undefined,
-        headers,
       )
     })
 

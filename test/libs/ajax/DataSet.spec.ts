@@ -7,8 +7,6 @@ import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
 vi.mock('src/libs/config', () => ({
   Config: {
     getApiUrl: vi.fn(),
-    authOpts: vi.fn(),
-    multiPartOpts: vi.fn(),
   },
 }))
 
@@ -22,22 +20,6 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
 vi.mock('src/utils/FileDownload', () => ({
   fileDownload: vi.fn(),
 }))
-
-const headers = {
-  headers: {
-    'Authorization': 'Bearer token',
-    'Accept': 'application/json',
-    'X-App-ID': 'DUOS',
-  },
-}
-
-const multiPartHeaders = {
-  headers: {
-    'Authorization': 'Bearer token',
-    'Content-Type': 'multipart/form-data',
-    'X-App-ID': 'DUOS',
-  },
-}
 
 const buildDataset = (overrides = {}) => ({
   datasetId: 1,
@@ -77,8 +59,6 @@ describe('DataSet', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Config.getApiUrl).mockResolvedValue('https://duos.example.org')
-    vi.mocked(Config.authOpts).mockReturnValue(headers)
-    vi.mocked(Config.multiPartOpts).mockReturnValue(multiPartHeaders)
     vi.mocked(fetchGet).mockResolvedValue({ data: undefined })
     vi.mocked(fetchPost).mockResolvedValue({ data: undefined })
     vi.mocked(fetchDelete).mockResolvedValue({ data: undefined })
@@ -93,7 +73,6 @@ describe('DataSet', () => {
 
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/dataset/datasetNames',
-        headers,
       )
       expect(result).toEqual(['Dataset A', 'Dataset B'])
     })
@@ -126,7 +105,6 @@ describe('DataSet', () => {
       expect(fetchMultipart).toHaveBeenCalledWith(
         'https://duos.example.org/api/dataset/v3',
         formData,
-        multiPartHeaders,
       )
       expect(result).toEqual(dataset)
     })
@@ -157,7 +135,6 @@ describe('DataSet', () => {
 
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/dataset/batch?ids=1&ids=2',
-        headers,
       )
       expect(result).toEqual(datasets)
     })
@@ -191,7 +168,7 @@ describe('DataSet', () => {
       expect(fetchPost).toHaveBeenCalledWith(
         'https://duos.example.org/api/dataset/search/index',
         query,
-        headers,
+        {},
       )
       expect(result).toEqual(results)
     })
@@ -205,7 +182,7 @@ describe('DataSet', () => {
       expect(fetchPost).toHaveBeenCalledWith(
         'https://duos.example.org/api/dataset/search/index',
         query,
-        { ...headers, signal },
+        { signal },
       )
     })
 
@@ -238,7 +215,6 @@ describe('DataSet', () => {
       expect(fetchPost).toHaveBeenCalledWith(
         'https://duos.example.org/api/dataset/search/index/v2',
         query,
-        headers,
       )
       expect(result).toEqual(esResponse)
     })
@@ -269,7 +245,6 @@ describe('DataSet', () => {
 
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/dataset/v2/42',
-        headers,
       )
       expect(result).toEqual(dataset)
     })
@@ -299,7 +274,6 @@ describe('DataSet', () => {
 
       expect(fetchDelete).toHaveBeenCalledWith(
         'https://duos.example.org/api/dataset/7',
-        headers,
       )
       expect(result).toEqual({ status: 200 })
     })
@@ -332,7 +306,7 @@ describe('DataSet', () => {
       expect(fetchMultipart).toHaveBeenCalledWith(
         'https://duos.example.org/api/dataset/v3/3',
         formData,
-        multiPartHeaders,
+        {},
         'PUT',
       )
       expect(result).toEqual(dataset)
@@ -364,7 +338,6 @@ describe('DataSet', () => {
 
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/dataset/study/10',
-        headers,
       )
       expect(result).toEqual(study)
     })
@@ -397,7 +370,7 @@ describe('DataSet', () => {
       expect(fetchMultipart).toHaveBeenCalledWith(
         'https://duos.example.org/api/dataset/study/10',
         formData,
-        multiPartHeaders,
+        {},
         'PUT',
       )
       expect(result).toEqual(study)
@@ -436,7 +409,6 @@ describe('DataSet', () => {
       expect(fetchGet).toHaveBeenNthCalledWith(
         1,
         'https://duos.example.org/api/dataset/v2/5',
-        headers,
       )
       expect(fetchGet).toHaveBeenNthCalledWith(
         2,

@@ -7,8 +7,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DuosHeader, { headerTabsConfig } from 'src/components/DuosHeader'
 import { visibleSubTabs } from 'src/components/navigation/subTabVisibility'
 import { Storage } from 'src/libs/storage'
+import { useUserIsLogged } from 'src/hooks/useSession'
 import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 import { DuosUser } from 'src/types/model'
+
+vi.mock('src/hooks/useSession', () => ({
+  useUserIsLogged: vi.fn(),
+}))
 
 vi.mock('src/libs/notificationService', () => ({
   NotificationService: {
@@ -83,7 +88,8 @@ const defaultUser: DuosUser = {
 afterEach(() => vi.restoreAllMocks())
 
 const mountHeader = async (path: string, user?: DuosUser) => {
-  vi.spyOn(Storage, 'userIsLogged').mockReturnValue(!!user)
+  // Auth state comes from the BFF session probe now, not localStorage.
+  vi.mocked(useUserIsLogged).mockReturnValue(!!user)
   vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(user ?? defaultUser)
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(

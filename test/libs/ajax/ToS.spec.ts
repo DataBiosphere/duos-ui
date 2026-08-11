@@ -12,14 +12,12 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
 }))
 
 const apiUrl = 'https://api.example.test'
-const authHeaders = { headers: { 'Authorization': 'Bearer test-token', 'Accept': 'application/json', 'X-App-ID': 'DUOS' } } as ReturnType<typeof Config.authOpts>
 const textPlainHeaders = { headers: { Accept: 'text/plain' } } as ReturnType<typeof Config.textPlain>
 
 describe('ToS ajax module', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(Config, 'getApiUrl').mockResolvedValue(apiUrl)
-    vi.spyOn(Config, 'authOpts').mockReturnValue(authHeaders)
     vi.spyOn(Config, 'textPlain').mockReturnValue(textPlainHeaders)
   })
 
@@ -48,7 +46,7 @@ describe('ToS ajax module', () => {
     const result = await ToS.acceptToS()
 
     expect(result).toEqual(expected)
-    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/sam/register/self/tos`, {}, authHeaders)
+    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/sam/register/self/tos`, {})
   })
 
   it('rejectToS deletes and returns ToSStatus', async () => {
@@ -63,6 +61,6 @@ describe('ToS ajax module', () => {
     const result = await ToS.rejectToS()
 
     expect(result).toEqual(expected)
-    expect(fetchDelete).toHaveBeenCalledWith(`${apiUrl}/api/sam/register/self/tos`, authHeaders)
+    expect(fetchDelete).toHaveBeenCalledWith(`${apiUrl}/api/sam/register/self/tos`)
   })
 })

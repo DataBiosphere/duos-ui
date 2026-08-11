@@ -8,21 +8,12 @@ import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
 vi.mock('src/libs/config', () => ({
   Config: {
     getApiUrl: vi.fn(),
-    authOpts: vi.fn(),
   },
 }))
 
 vi.mock('src/libs/ajax/fetchAdapter', () => ({
   fetchGet: vi.fn(),
 }))
-
-const headers = {
-  headers: {
-    'Authorization': 'Bearer token',
-    'Accept': 'application/json',
-    'X-App-ID': 'DUOS',
-  },
-}
 
 const buildDar = (darCode: string): DatasetStatisticsDar => ({
   updateDate: 1700000000000,
@@ -37,22 +28,19 @@ describe('DatasetMetrics', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Config.getApiUrl).mockResolvedValue('https://duos.example.org')
-    vi.mocked(Config.authOpts).mockReturnValue(headers)
     vi.mocked(fetchGet).mockResolvedValue({ data: [] })
   })
 
   describe('getDatasetStats', () => {
-    it('gets from the dar-summaries endpoint with auth options and returns the data', async () => {
+    it('gets from the dar-summaries endpoint and returns the data', async () => {
       const dars = [buildDar('DAR-1'), buildDar('DAR-2')]
       vi.mocked(fetchGet).mockResolvedValueOnce({ data: dars })
 
       const result = await DatasetMetrics.getDatasetStats(123)
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/metrics/dar-summaries/123',
-        headers,
       )
       expect(result).toEqual(dars)
     })

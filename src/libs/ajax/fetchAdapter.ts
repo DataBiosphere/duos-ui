@@ -1,7 +1,7 @@
 import { redirectOnLogout } from 'src/libs/auth/auth'
+import { CSRF_HEADER, getCsrfToken, resetCsrfToken } from 'src/libs/auth/csrf'
 import eventList from 'src/libs/events'
 import { Metrics } from 'src/libs/ajax/Metrics'
-import { Storage } from 'src/libs/storage'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
 import { Config } from 'src/libs/config'
@@ -64,6 +64,61 @@ export const reportError = async (url: string, status: number): Promise<void> =>
   ErrorReporter.report(msg)
 }
 
+const UNSAFE_METHODS: ReadonlySet<Method> = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
+
+// BFF-bound requests are same-origin relative URLs. Absolute URLs (Bard, ECM,
+// TDR) must never see our CSRF token — it is meaningless there and not theirs
+// to read.
+const needsCsrf = (url: string, method: Method): boolean =>
+  UNSAFE_METHODS.has(method) && url.startsWith('/')
+
+/**
+ * A CSRF rejection is identified by the body, NOT by the 403 status alone: an
+ * upstream authorization denial from the DUOS API is an ordinary proxied
+ * response and arrives as a 403 too, so retrying on the status would replay
+ * every write the API refused. The BFF also sends
+ * `reason: 'missing_secret' | 'invalid_token'` alongside — that is for a human
+ * reading a network tab; both reasons call for the same single retry.
+ */
+const isCsrfRejection = async (res: Response): Promise<boolean> => {
+  if (res.status !== 403) return false
+  try {
+    const body = await res.clone().json() as { error?: string }
+    return body.error === 'csrf_validation_failed'
+  }
+  catch {
+    return false
+  }
+}
+
+/**
+ * Performs the fetch, attaching X-CSRF-Token to unsafe BFF-bound requests. A
+ * csrf_validation_failed rejection means the cached token's server-side secret
+ * is gone (session rotation at login, destruction at logout), so the token is
+ * refetched once and the request retried — exactly once, so a genuine
+ * rejection still surfaces.
+ */
+async function fetchWithCsrf(
+  fullUrl: string,
+  method: Method,
+  headers: HeadersMap,
+  makeInit: (finalHeaders: HeadersMap) => MinimalRequestInit,
+): Promise<Response> {
+  const fetchFn = fetch as unknown as (input: string, init?: unknown) => Promise<Response>
+  const attempt = async (): Promise<Response> => {
+    const finalHeaders = needsCsrf(fullUrl, method)
+      ? { ...headers, [CSRF_HEADER]: await getCsrfToken() }
+      : headers
+    return fetchFn(fullUrl, makeInit(finalHeaders))
+  }
+  let res = await attempt()
+  if (needsCsrf(fullUrl, method) && await isCsrfRejection(res)) {
+    resetCsrfToken()
+    res = await attempt()
+  }
+  return res
+}
+
 function buildUrlWithParams(url: string, params?: Params): string {
   if (!params || Object.keys(params).length === 0) return url
   const query = new URLSearchParams(
@@ -87,13 +142,10 @@ async function handleResponse<T>(
       // Record relevant 401 logouts to Bard / Mixpanel.
       // This gives systematic, empirical data to assess premature logout issues.
       // More context: https://github.com/DataBiosphere/duos-ui/pull/3389
-      const oidcUser = Storage.getOidcUser()
-      const expiresOn = oidcUser?.profile?.exp ?? null
-      const currentTime = Math.floor(Date.now() / 1000)
+      // Token expiry fields are gone with the BFF — expiry is server-side now,
+      // and a 401 here means the BFF session itself was rejected.
       await Metrics.captureEvent(eventList.userAutoLogout401, {
-        expires_on: expiresOn,
-        current_time: currentTime,
-        time_until_expires: expiresOn === null ? null : expiresOn - currentTime,
+        current_time: Math.floor(Date.now() / 1000),
         endpoint_url: url,
       }, AbortSignal.timeout(1000)) // Wait <= 1s, abort if log slower
       redirectOnLogout()
@@ -177,17 +229,14 @@ async function fetchRequest<T>(
     ? headers
     : { 'Content-Type': 'application/json', ...headers }
 
-  const fetchOptions: MinimalRequestInit = {
-    method,
-    headers: finalHeaders,
-    credentials,
-    body: getRequestBody((data || undefined) as unknown as object | undefined, isMultipart),
-    signal,
-  }
-
   try {
-    const fetchFn = fetch as unknown as (input: string, init?: unknown) => Promise<Response>
-    const res = await fetchFn(fullUrl, fetchOptions)
+    const res = await fetchWithCsrf(fullUrl, method, finalHeaders, headers => ({
+      method,
+      headers,
+      credentials,
+      body: getRequestBody((data || undefined) as unknown as object | undefined, isMultipart),
+      signal,
+    }))
     return handleResponse<T>(res, fullUrl, responseType, method)
   }
   catch (error) {
@@ -224,18 +273,15 @@ async function fetchMultipartRequest<T>(
     delete cleanHeaders['Content-Type']
   }
 
-  const fetchOptions: MinimalRequestInit = {
-    method,
-    headers: cleanHeaders,
-    credentials,
-    body: getRequestBody<FormData>(data, true),
-    signal,
-  }
-
-  const fetchFn = fetch as unknown as (input: string, init?: unknown) => Promise<Response>
   let res: Response
   try {
-    res = await fetchFn(fullUrl, fetchOptions)
+    res = await fetchWithCsrf(fullUrl, method, cleanHeaders, headers => ({
+      method,
+      headers,
+      credentials,
+      body: getRequestBody<FormData>(data, true),
+      signal,
+    }))
   }
   catch (error) {
     // TypeError = network-level failure (offline, invalid URL, CORS, etc.) that never reached the server

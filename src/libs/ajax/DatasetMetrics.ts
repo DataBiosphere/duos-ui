@@ -10,7 +10,7 @@ export const DatasetMetrics = {
    */
   getDatasetStats: async (datasetId: number): Promise<DatasetStatisticsDar[]> => {
     const url = `${await Config.getApiUrl()}/api/metrics/dar-summaries/${datasetId}`
-    const res = await fetchGet<DatasetStatisticsDar[]>(url, Config.authOpts())
+    const res = await fetchGet<DatasetStatisticsDar[]>(url)
     return res.data
   },
 }

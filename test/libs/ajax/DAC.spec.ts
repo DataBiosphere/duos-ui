@@ -14,7 +14,6 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
 }))
 
 const apiUrl = 'https://api.example.test'
-const authHeaders = { headers: { 'Authorization': 'Bearer test-token', 'Accept': 'application/json', 'X-App-ID': 'DUOS' } } as ReturnType<typeof Config.authOpts>
 
 const mockDac: DacObject = {
   dacId: 42,
@@ -100,7 +99,6 @@ describe('DAC ajax', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(Config, 'getApiUrl').mockResolvedValue(apiUrl)
-    vi.spyOn(Config, 'authOpts').mockReturnValue(authHeaders)
   })
 
   afterEach(() => {
@@ -114,7 +112,7 @@ describe('DAC ajax', () => {
       const result = await DAC.list()
 
       expect(result).toEqual([mockDac])
-      expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/dac`, authHeaders)
+      expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/dac`)
     })
 
     it('includes withUsers query param when it is provided', async () => {
@@ -123,7 +121,7 @@ describe('DAC ajax', () => {
       const result = await DAC.list(true)
 
       expect(result).toEqual([mockDac])
-      expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/dac?withUsers=true`, authHeaders)
+      expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/dac?withUsers=true`)
     })
   })
 
@@ -136,7 +134,6 @@ describe('DAC ajax', () => {
     expect(fetchPost).toHaveBeenCalledWith(
       `${apiUrl}/api/dac`,
       { name: mockDac.name, description: mockDac.description, email: mockDac.email },
-      authHeaders,
     )
   })
 
@@ -149,7 +146,6 @@ describe('DAC ajax', () => {
     expect(fetchPut).toHaveBeenCalledWith(
       `${apiUrl}/api/dac`,
       { dacId: mockDac.dacId, name: mockDac.name, description: mockDac.description, email: mockDac.email },
-      authHeaders,
     )
   })
 
@@ -159,7 +155,7 @@ describe('DAC ajax', () => {
     const result = await DAC.delete(mockDac.dacId!)
 
     expect(result).toEqual({ status: 200 })
-    expect(fetchDelete).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}`, authHeaders)
+    expect(fetchDelete).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}`)
   })
 
   it('get retrieves a single DAC', async () => {
@@ -168,7 +164,7 @@ describe('DAC ajax', () => {
     const result = await DAC.get(mockDac.dacId!)
 
     expect(result).toEqual(mockDac)
-    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}`, authHeaders)
+    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}`)
   })
 
   it('datasets retrieves the DAC datasets', async () => {
@@ -177,7 +173,7 @@ describe('DAC ajax', () => {
     const result = await DAC.datasets(mockDac.dacId!)
 
     expect(result).toEqual([mockDataset])
-    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}/datasets`, authHeaders)
+    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}/datasets`)
   })
 
   it('autocompleteUsers retrieves matching users', async () => {
@@ -186,7 +182,7 @@ describe('DAC ajax', () => {
     const result = await DAC.autocompleteUsers('chair')
 
     expect(result).toEqual(mockUsers)
-    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/dac/users/chair`, authHeaders)
+    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/dac/users/chair`)
   })
 
   it('addDacChair posts to the chair endpoint and returns 200', async () => {
@@ -195,7 +191,7 @@ describe('DAC ajax', () => {
     const result = await DAC.addDacChair(mockDac.dacId!, 2001)
 
     expect(result).toBe(200)
-    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}/chair/2001`, undefined, authHeaders)
+    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}/chair/2001`, undefined)
   })
 
   it('removeDacChair deletes from the chair endpoint and returns 200', async () => {
@@ -204,7 +200,7 @@ describe('DAC ajax', () => {
     const result = await DAC.removeDacChair(mockDac.dacId!, 2001)
 
     expect(result).toBe(200)
-    expect(fetchDelete).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}/chair/2001`, authHeaders)
+    expect(fetchDelete).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}/chair/2001`)
   })
 
   it('updateApprovalStatus sends the approval payload and returns the updated dataset', async () => {
@@ -216,7 +212,6 @@ describe('DAC ajax', () => {
     expect(fetchPut).toHaveBeenCalledWith(
       `${apiUrl}/api/dac/${mockDac.dacId}/dataset/${mockDataset.datasetId}`,
       { approval: true },
-      authHeaders,
     )
   })
 
@@ -226,7 +221,7 @@ describe('DAC ajax', () => {
     const result = await DAC.addDacMember(mockDac.dacId!, 2001)
 
     expect(result).toBe(200)
-    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}/member/2001`, undefined, authHeaders)
+    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}/member/2001`, undefined)
   })
 
   it('removeDacMember deletes from the member endpoint and returns 200', async () => {
@@ -235,7 +230,7 @@ describe('DAC ajax', () => {
     const result = await DAC.removeDacMember(mockDac.dacId!, 2001)
 
     expect(result).toBe(200)
-    expect(fetchDelete).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}/member/2001`, authHeaders)
+    expect(fetchDelete).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}/member/2001`)
   })
 
   it('fetchDACbotRules returns the rules list', async () => {
@@ -244,7 +239,7 @@ describe('DAC ajax', () => {
     const result = await DAC.fetchDACbotRules(mockDac.dacId!)
 
     expect(result).toEqual([mockRule])
-    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}/rules`, authHeaders)
+    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/dac/${mockDac.dacId}/rules`)
   })
 
   it('toggleDACbotRule toggles a rule and returns the updated rule', async () => {
@@ -257,7 +252,6 @@ describe('DAC ajax', () => {
     expect(fetchPut).toHaveBeenCalledWith(
       `${apiUrl}/api/dac/${mockDac.dacId}/rules/${mockRule.id}/toggle`,
       undefined,
-      authHeaders,
     )
   })
 

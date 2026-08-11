@@ -11,10 +11,9 @@ import {
   type Params,
 } from 'src/libs/ajax/fetchAdapter'
 import { Metrics } from 'src/libs/ajax/Metrics'
-import { Storage } from 'src/libs/storage'
 import { Config } from 'src/libs/config'
 import { redirectOnLogout } from 'src/libs/auth/auth'
-import type { OidcUser } from 'src/libs/auth/oidcBroker'
+import { getCsrfToken, resetCsrfToken } from 'src/libs/auth/csrf'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import eventList from 'src/libs/events'
 
@@ -31,14 +30,14 @@ vi.mock('src/libs/ajax/Metrics', () => ({
   },
 }))
 
-vi.mock('src/libs/storage', () => ({
-  Storage: {
-    getOidcUser: vi.fn(),
-  },
-}))
-
 vi.mock('src/libs/auth/auth', () => ({
   redirectOnLogout: vi.fn(),
+}))
+
+vi.mock('src/libs/auth/csrf', () => ({
+  CSRF_HEADER: 'X-CSRF-Token',
+  getCsrfToken: vi.fn(),
+  resetCsrfToken: vi.fn(),
 }))
 
 vi.mock('src/libs/ErrorReporter', () => ({
@@ -64,6 +63,7 @@ describe('fetchAdapter - Fetch methods', () => {
     vi.mocked(Config.getBardApiUrl).mockResolvedValue('https://bard.example.org')
     vi.mocked(Config.getApiUrl).mockResolvedValue('https://consent.example.org')
     vi.mocked(ErrorReporter.report).mockResolvedValue(undefined)
+    vi.mocked(getCsrfToken).mockResolvedValue('test-csrf-token')
   })
 
   afterEach(() => {
@@ -277,6 +277,121 @@ describe('fetchAdapter - Fetch methods', () => {
     await fetchMultipart('/api/upload', formData, { params: { tag: 'important' } })
     const [url] = fetchMock.mock.calls[0]
     expect(url).toContain('tag=important')
+  })
+
+  describe('CSRF protection', () => {
+    it('attaches X-CSRF-Token to unsafe BFF-bound (relative URL) requests', async () => {
+      fetchMock.mockResolvedValue(
+        new Response(JSON.stringify({}), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+      await fetchPost('/duos-api/api/items', { key: 'value' })
+      const [, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+      expect(options.headers?.['X-CSRF-Token']).toBe('test-csrf-token')
+    })
+
+    it('does not attach X-CSRF-Token to GET requests', async () => {
+      fetchMock.mockResolvedValue(
+        new Response(JSON.stringify({}), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+      await fetchGet('/duos-api/api/items')
+      const [, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+      expect(options.headers?.['X-CSRF-Token']).toBeUndefined()
+      expect(getCsrfToken).not.toHaveBeenCalled()
+    })
+
+    it('does not attach X-CSRF-Token to absolute (non-BFF) URLs', async () => {
+      fetchMock.mockResolvedValue(
+        new Response(JSON.stringify({}), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+      await fetchPost('https://bard.example.org/api/event', { event: 'test' })
+      const [, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+      expect(options.headers?.['X-CSRF-Token']).toBeUndefined()
+      expect(getCsrfToken).not.toHaveBeenCalled()
+    })
+
+    it('attaches X-CSRF-Token to multipart POSTs on relative URLs', async () => {
+      const formData = new FormData()
+      fetchMock.mockResolvedValue(
+        new Response(JSON.stringify({}), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+      await fetchMultipart('/duos-api/api/upload', formData)
+      const [, options] = fetchMock.mock.calls[0] as [string, StubOptions]
+      expect(options.headers?.['X-CSRF-Token']).toBe('test-csrf-token')
+    })
+
+    it('refetches the token and retries exactly once on csrf_validation_failed', async () => {
+      vi.mocked(getCsrfToken)
+        .mockResolvedValueOnce('stale-token')
+        .mockResolvedValueOnce('fresh-token')
+      fetchMock
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ error: 'csrf_validation_failed', reason: 'missing_secret' }), {
+            status: 403,
+            headers: { 'content-type': 'application/json' },
+          }),
+        )
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ ok: true }), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          }),
+        )
+
+      const result = await fetchPost<{ ok: boolean }>('/duos-api/api/items', { key: 'value' })
+
+      expect(result.data).toEqual({ ok: true })
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+      expect(resetCsrfToken).toHaveBeenCalledOnce()
+      const [, retryOptions] = fetchMock.mock.calls[1] as [string, StubOptions]
+      expect(retryOptions.headers?.['X-CSRF-Token']).toBe('fresh-token')
+    })
+
+    it('surfaces a repeated csrf_validation_failed rejection after one retry', async () => {
+      fetchMock.mockImplementation(() =>
+        Promise.resolve(
+          new Response(JSON.stringify({ error: 'csrf_validation_failed', reason: 'invalid_token' }), {
+            status: 403,
+            headers: { 'content-type': 'application/json' },
+          }),
+        ),
+      )
+
+      const error = await fetchPost('/duos-api/api/items', {}).catch(e => e)
+
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+      expect(error.response.status).toBe(403)
+    })
+
+    it('does not retry an ordinary upstream 403 denial', async () => {
+      fetchMock.mockResolvedValue(
+        new Response(JSON.stringify({ message: 'Forbidden' }), {
+          status: 403,
+          headers: { 'content-type': 'application/json' },
+        }),
+      )
+
+      const error = await fetchPost('/duos-api/api/items', {}).catch(e => e)
+
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+      expect(resetCsrfToken).not.toHaveBeenCalled()
+      expect(error.response.status).toBe(403)
+    })
   })
 
   it('should merge custom headers with defaults', async () => {
@@ -777,7 +892,6 @@ describe('retryFetchPost', () => {
 
 describe('fetchAdapter - 401 Bard metric logging', () => {
   let fetchMock: ReturnType<typeof vi.fn>
-  const mockExpTime = Math.floor(Date.now() / 1000) + 3600 // 1h from now
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -787,9 +901,6 @@ describe('fetchAdapter - 401 Bard metric logging', () => {
     vi.mocked(Config.getBardApiUrl).mockResolvedValue('https://bard.example.org')
     vi.mocked(Metrics.captureEvent).mockResolvedValue(undefined)
     vi.mocked(redirectOnLogout).mockReturnValue(undefined)
-    vi.mocked(Storage.getOidcUser).mockReturnValue({
-      profile: { exp: mockExpTime, sub: '', iss: '', aud: '', iat: 0 },
-    } as unknown as OidcUser)
   })
 
   afterEach(() => {
@@ -809,12 +920,40 @@ describe('fetchAdapter - 401 Bard metric logging', () => {
     expect(Metrics.captureEvent).toHaveBeenCalledOnce()
     const [event, details] = vi.mocked(Metrics.captureEvent).mock.calls[0]
     expect(event).toBe(eventList.userAutoLogout401)
-    expect(details).toHaveProperty('expires_on', mockExpTime)
     expect(details).toHaveProperty('current_time')
     expect(typeof (details as Record<string, unknown>).current_time).toBe('number')
-    expect(details).toHaveProperty('time_until_expires')
-    expect(typeof (details as Record<string, unknown>).time_until_expires).toBe('number')
     expect(details).toHaveProperty('endpoint_url', 'https://consent.example.org/api/something')
+    expect(redirectOnLogout).toHaveBeenCalledOnce()
+  })
+
+  it('should fire the metric and redirect on 401 from the BFF proxy prefix', async () => {
+    vi.mocked(Config.getApiUrl).mockResolvedValue('/duos-api')
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ error: 'session_expired' }), {
+        status: 401,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    await fetchGet('/duos-api/api/something').catch(() => {})
+
+    expect(Metrics.captureEvent).toHaveBeenCalledOnce()
+    expect(redirectOnLogout).toHaveBeenCalledOnce()
+  })
+
+  it('should NOT fire the metric on 401 for the BFF-proxied auth probe', async () => {
+    vi.mocked(Config.getApiUrl).mockResolvedValue('/duos-api')
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ error: 'unauthenticated' }), {
+        status: 401,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    await fetchGet('/duos-api/api/user/me').catch(() => {})
+
+    expect(Metrics.captureEvent).not.toHaveBeenCalled()
+    expect(redirectOnLogout).not.toHaveBeenCalled()
   })
 
   it('should NOT fire Bard metric on 401 for GET /api/user/me', async () => {
@@ -843,26 +982,6 @@ describe('fetchAdapter - 401 Bard metric logging', () => {
 
     expect(Metrics.captureEvent).not.toHaveBeenCalled()
     expect(redirectOnLogout).not.toHaveBeenCalled()
-  })
-
-  it('should include null expires_on when OIDC user has no exp', async () => {
-    vi.mocked(Storage.getOidcUser).mockReturnValue({
-      profile: { sub: '', iss: '', aud: '', iat: 0 },
-    } as unknown as OidcUser)
-
-    fetchMock.mockResolvedValue(
-      new Response(JSON.stringify({ message: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'content-type': 'application/json' },
-      }),
-    )
-
-    await fetchGet('https://consent.example.org/api/something').catch(() => {})
-
-    expect(Metrics.captureEvent).toHaveBeenCalledOnce()
-    const [, details] = vi.mocked(Metrics.captureEvent).mock.calls[0]
-    expect(details).toHaveProperty('expires_on', null)
-    expect(details).toHaveProperty('time_until_expires', null)
   })
 
   it('should NOT fire Bard metric on 401 from non-DUOS API', async () => {

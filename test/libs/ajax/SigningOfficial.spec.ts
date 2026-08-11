@@ -6,18 +6,9 @@ import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 vi.mock('src/libs/ajax/fetchAdapter', () => ({ fetchGet: vi.fn() }))
 
 describe('SigningOfficial ajax', () => {
-  const authOptions = {
-    headers: {
-      'Authorization': 'Bearer token',
-      'Accept': 'application/json',
-      'X-App-ID': 'DUOS',
-    },
-  }
-
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(Config, 'getApiUrl').mockResolvedValue('https://api.example.test')
-    vi.spyOn(Config, 'authOpts').mockReturnValue(authOptions)
   })
 
   it('gets and returns the dashboard summary', async () => {
@@ -34,7 +25,6 @@ describe('SigningOfficial ajax', () => {
     await expect(SigningOfficial.getDashboardSummary()).resolves.toEqual(summary)
     expect(fetchGet).toHaveBeenCalledWith(
       'https://api.example.test/api/signing-official/dashboard-summary',
-      authOptions,
     )
   })
 })

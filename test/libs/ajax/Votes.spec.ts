@@ -10,13 +10,11 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
 }))
 
 const apiUrl = 'https://api.example.test'
-const authHeaders = { headers: { 'Authorization': 'Bearer test-token', 'Accept': 'application/json', 'X-App-ID': 'DUOS' } } as ReturnType<typeof Config.authOpts>
 
 describe('Votes ajax', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(Config, 'getApiUrl').mockResolvedValue(apiUrl)
-    vi.spyOn(Config, 'authOpts').mockReturnValue(authHeaders)
   })
 
   afterEach(() => {
@@ -39,7 +37,6 @@ describe('Votes ajax', () => {
     expect(fetchPut).toHaveBeenCalledWith(
       `${apiUrl}/api/votes`,
       { vote: true, rationale: 'Approved', voteIds },
-      authHeaders,
     )
   })
 
@@ -58,7 +55,6 @@ describe('Votes ajax', () => {
     expect(fetchPut).toHaveBeenCalledWith(
       `${apiUrl}/api/votes/rationale`,
       { rationale, voteIds },
-      authHeaders,
     )
   })
 })

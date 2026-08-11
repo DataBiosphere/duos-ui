@@ -26,7 +26,6 @@ vi.mock('src/libs/ajax/User', () => ({
 
 vi.mock('src/libs/storage', () => ({
   Storage: {
-    setOidcUser: vi.fn(),
     clearStorage: vi.fn(),
     setCurrentUser: vi.fn(),
   },
@@ -40,8 +39,6 @@ vi.mock('src/libs/utils', async (importActual) => {
     setUserRoleStatuses: vi.fn(user => user),
   }
 })
-
-vi.mock('src/libs/auth/oidcBroker', () => ({}))
 
 vi.mock('src/components/SpinnerComponent', () => ({
   SpinnerComponent: ({ loadingImage }: { loadingImage: string }) =>
@@ -97,10 +94,11 @@ describe('BackgroundSignIn', () => {
     expect(screen.getByTestId('spinner')).toBeInTheDocument()
   })
 
-  it('calls User.getMe and Storage.setOidcUser when bearerToken is provided', async () => {
+  // The browser no longer stores tokens — a pasted token only triggers the
+  // getMe probe; the BFF injects the session's token server-side.
+  it('calls User.getMe when bearerToken is provided', async () => {
     vi.mocked(User.getMe).mockResolvedValue(mockUser as never)
     await act(async () => renderComponent({ bearerToken: 'abc123' }))
-    expect(Storage.setOidcUser).toHaveBeenCalledTimes(1)
     expect(User.getMe).toHaveBeenCalledTimes(1)
   })
 
@@ -159,13 +157,12 @@ describe('BackgroundSignIn', () => {
     await act(async () => {
       fireEvent.submit(screen.getByRole('form'))
     })
-    expect(Storage.setOidcUser).toHaveBeenCalledTimes(1)
     expect(User.getMe).toHaveBeenCalledTimes(1)
   })
 
   it('picks up a token from the URL query parameter', async () => {
     vi.mocked(User.getMe).mockResolvedValue(mockUser as never)
     await act(async () => renderComponent({}, '/backgroundsignin?token=url-token'))
-    expect(Storage.setOidcUser).toHaveBeenCalledTimes(1)
+    expect(User.getMe).toHaveBeenCalledTimes(1)
   })
 })

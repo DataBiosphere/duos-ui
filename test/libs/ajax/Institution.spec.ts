@@ -8,7 +8,6 @@ import type { DuosUser, InstitutionInterface } from 'src/types/model'
 vi.mock('src/libs/config', () => ({
   Config: {
     getApiUrl: vi.fn(),
-    authOpts: vi.fn(),
   },
 }))
 
@@ -19,14 +18,6 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
   fetchPatch: vi.fn(),
   fetchDelete: vi.fn(),
 }))
-
-const headers = {
-  headers: {
-    'Authorization': 'Bearer token',
-    'Accept': 'application/json',
-    'X-App-ID': 'DUOS',
-  },
-}
 
 const mockInstitution: InstitutionInterface = {
   id: 1,
@@ -41,7 +32,6 @@ describe('Institution', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Config.getApiUrl).mockResolvedValue('https://duos.example.org')
-    vi.mocked(Config.authOpts).mockReturnValue(headers)
     vi.mocked(fetchGet).mockResolvedValue({ data: [mockInstitution] })
     vi.mocked(fetchPost).mockResolvedValue({ data: mockInstitution })
     vi.mocked(fetchPut).mockResolvedValue({ data: mockInstitution })
@@ -50,14 +40,12 @@ describe('Institution', () => {
   })
 
   describe('list', () => {
-    it('gets the institutions endpoint with auth options and returns the list', async () => {
+    it('gets the institutions endpoint and returns the list', async () => {
       const result = await Institution.list()
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/institutions',
-        headers,
       )
       expect(result).toEqual([mockInstitution])
     })
@@ -80,16 +68,14 @@ describe('Institution', () => {
   })
 
   describe('getById', () => {
-    it('gets the institution by ID endpoint with auth options and returns the institution', async () => {
+    it('gets the institution by ID endpoint and returns the institution', async () => {
       vi.mocked(fetchGet).mockResolvedValueOnce({ data: mockInstitution })
 
       const result = await Institution.getById(1)
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/institutions/1',
-        headers,
       )
       expect(result).toEqual(mockInstitution)
     })
@@ -112,17 +98,15 @@ describe('Institution', () => {
   })
 
   describe('postInstitution', () => {
-    it('posts to the institutions endpoint with the payload and auth options and returns the created institution', async () => {
+    it('posts to the institutions endpoint with the payload and returns the created institution', async () => {
       const payload = { name: 'New Institute' }
 
       const result = await Institution.postInstitution(payload)
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchPost).toHaveBeenCalledWith(
         'https://duos.example.org/api/institutions',
         payload,
-        headers,
       )
       expect(result).toEqual(mockInstitution)
     })
@@ -145,17 +129,15 @@ describe('Institution', () => {
   })
 
   describe('putInstitution', () => {
-    it('puts to the institution by ID endpoint with the payload and auth options and returns the updated institution', async () => {
+    it('puts to the institution by ID endpoint with the payload and returns the updated institution', async () => {
       const payload = { name: 'Updated Institute' }
 
       const result = await Institution.putInstitution(1, payload)
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchPut).toHaveBeenCalledWith(
         'https://duos.example.org/api/institutions/1',
         payload,
-        headers,
       )
       expect(result).toEqual(mockInstitution)
     })
@@ -178,17 +160,15 @@ describe('Institution', () => {
   })
 
   describe('patchInstitution', () => {
-    it('patches the institution by ID endpoint with the payload and auth options and returns the updated institution', async () => {
+    it('patches the institution by ID endpoint with the payload and returns the updated institution', async () => {
       const payload = { name: 'Patched Institute' }
 
       const result = await Institution.patchInstitution(1, payload)
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchPatch).toHaveBeenCalledWith(
         'https://duos.example.org/api/institutions/1',
         payload,
-        headers,
       )
       expect(result).toEqual(mockInstitution)
     })
@@ -211,14 +191,12 @@ describe('Institution', () => {
   })
 
   describe('deleteInstitution', () => {
-    it('deletes the institution by ID endpoint with auth options and returns the deleted institution', async () => {
+    it('deletes the institution by ID endpoint and returns the deleted institution', async () => {
       const result = await Institution.deleteInstitution(1)
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchDelete).toHaveBeenCalledWith(
         'https://duos.example.org/api/institutions/1',
-        headers,
       )
       expect(result).toEqual(mockInstitution)
     })

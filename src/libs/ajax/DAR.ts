@@ -26,7 +26,7 @@ export const DAR = {
    */
   getPartialDarRequest: async (darId: string): Promise<DataAccessRequest> => {
     const url = `${await Config.getApiUrl()}/api/dar/v2/${darId}`
-    const res = await fetchGet<DataAccessRequest>(url, Config.authOpts())
+    const res = await fetchGet<DataAccessRequest>(url)
     return res.data
   },
 
@@ -39,7 +39,7 @@ export const DAR = {
   updateDarDraft: async (dar: Record<string, unknown>, referenceId: string): Promise<DataAccessRequest> => {
     Metrics.captureEvent(eventList.dar, { action: 'update' })
     const url = `${await Config.getApiUrl()}/api/dar/v2/draft/${referenceId}`
-    const res = await fetchPut<DataAccessRequest>(url, dar, Config.authOpts())
+    const res = await fetchPut<DataAccessRequest>(url, dar)
     return res.data
   },
 
@@ -52,7 +52,7 @@ export const DAR = {
     // noinspection ES6MissingAwait
     Metrics.captureEvent(eventList.dar, { action: 'draft' })
     const url = `${await Config.getApiUrl()}/api/dar/v2/draft`
-    const res = await fetchPost<DataAccessRequest>(url, dar, Config.authOpts())
+    const res = await fetchPost<DataAccessRequest>(url, dar)
     return res.data
   },
 
@@ -63,7 +63,7 @@ export const DAR = {
    */
   deleteDar: async (darId: string): Promise<{ status: number }> => {
     const url = `${await Config.getApiUrl()}/api/dar/v2/${darId}`
-    await fetchDelete(url, Config.authOpts())
+    await fetchDelete(url)
     return { status: 200 }
   },
 
@@ -78,7 +78,7 @@ export const DAR = {
     Metrics.captureEvent(eventList.dar, { action: 'submit' })
     const filteredDar = omit(dar, ['createDate', 'data_access_request_id'])
     const url = `${await Config.getApiUrl()}/api/dar/v2`
-    const res = await fetchPost<DataAccessRequest>(url, filteredDar, Config.authOpts())
+    const res = await fetchPost<DataAccessRequest>(url, filteredDar)
     return res.data
   },
 
@@ -89,7 +89,7 @@ export const DAR = {
    */
   getAutoCompleteOT: async (partial: string | string[]): Promise<OntologyEntry[]> => {
     const url = `${await Config.getApiUrl()}/ontology/autocomplete?q=${partial}`
-    const res = await fetchGet<OntologyEntry[]>(url, Config.authOpts())
+    const res = await fetchGet<OntologyEntry[]>(url)
     return res.data
   },
 
@@ -105,7 +105,7 @@ export const DAR = {
     }
     const url = `${await Config.getApiUrl()}/ontology/search?ids=${ids}`
     try {
-      const res = await fetchGet<OntologyEntry[]>(url, Config.authOpts())
+      const res = await fetchGet<OntologyEntry[]>(url)
       return res.data
     }
     catch {
@@ -121,7 +121,7 @@ export const DAR = {
    */
   downloadDARDocument: async (referenceId: string, fileType: string, fileName: string): Promise<void> => {
     const url = `${await Config.getApiUrl()}/api/dar/v2/${referenceId}/${fileType}`
-    const blob = await fetchBlob(url, Config.authOpts())
+    const blob = await fetchBlob(url)
     fileDownload(blob, fileName)
   },
 
@@ -133,7 +133,7 @@ export const DAR = {
    */
   getDARDocumentAsBlob: async (referenceId: string, fileType: string): Promise<Blob> => {
     const url = `${await Config.getApiUrl()}/api/dar/v2/${referenceId}/${fileType}`
-    return fetchBlob(url, Config.authOpts())
+    return fetchBlob(url)
   },
 
   /**
@@ -145,7 +145,7 @@ export const DAR = {
    */
   getDatasetDaaSnapshots: async (referenceId: string): Promise<DatasetDaaSnapshot[]> => {
     const url = `${await Config.getApiUrl()}/api/dar/v2/${referenceId}/dataset-daa-snapshots`
-    const res = await fetchGet<DatasetDaaSnapshot[]>(url, Config.authOpts())
+    const res = await fetchGet<DatasetDaaSnapshot[]>(url)
     return res.data
   },
 
@@ -162,12 +162,11 @@ export const DAR = {
       return { data: null }
     }
     else {
-      const authOpts = Config.authOpts()
       // Do not set Content-Type for FormData; browser will set it
       const formData = new FormData()
       formData.append('file', file)
       const url = `${await Config.getApiUrl()}/api/dar/v2/${darId}/${fileType}`
-      return fetchMultipart<DataAccessRequest>(url, formData, authOpts)
+      return fetchMultipart<DataAccessRequest>(url, formData)
     }
   },
 
@@ -178,7 +177,7 @@ export const DAR = {
    */
   approveCloseout: async (referenceId: string): Promise<number> => {
     const url = `${await Config.getApiUrl()}/api/dar/${referenceId}/approveCloseout`
-    await fetchPut<void>(url, {}, Config.authOpts())
+    await fetchPut<void>(url, {})
     return 200
   },
 }

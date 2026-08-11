@@ -91,7 +91,7 @@ describe('handleLogin', () => {
     expect(request.session.returnTo).toBe('/')
   })
 
-  it('builds the authorization URL with the configured redirect_uri, B2C scope quirk, and S256 PKCE params', async () => {
+  it('builds the authorization URL with the configured redirect_uri, B2C scope quirk, S256 PKCE params, and a forced login prompt', async () => {
     await handleLogin(makeRequest(), makeReply())
 
     const oidc = await import('openid-client')
@@ -101,6 +101,9 @@ describe('handleLogin', () => {
       code_challenge: 'test-challenge',
       code_challenge_method: 'S256',
       state: 'test-state',
+      // prompt=login forces the B2C login screen even when B2C's own SSO
+      // cookie survives a DUOS sign-out (front-channel logout is epic-5, 5-I).
+      prompt: 'login',
     })
 
     const oidcClient = await import('../src/auth/oidcClient.js')

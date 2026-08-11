@@ -1,7 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { Storage } from 'src/libs/storage'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { Storage, userIsLogged } from 'src/libs/storage'
+import { getSessionInfo } from 'src/libs/auth/session'
 import { DuosUser } from 'src/types/model'
-import { OidcUser } from 'src/libs/auth/oidcBroker'
+
+vi.mock('src/libs/auth/session', () => ({
+  getSessionInfo: vi.fn(),
+}))
 
 const mockUser: DuosUser = {
   createDate: new Date(),
@@ -20,6 +24,7 @@ const mockUser: DuosUser = {
 }
 
 beforeEach(() => {
+  vi.clearAllMocks()
   localStorage.clear()
 })
 
@@ -32,9 +37,15 @@ describe('Storage', () => {
     it('should clear all localStorage items and set defaults', () => {
       localStorage.setItem('test', 'value')
       Storage.clearStorage()
-      expect(localStorage.length).toBeGreaterThan(0)
+      expect(localStorage.getItem('test')).toBeNull()
       expect(Storage.getCurrentUser()).not.toBeNull()
-      expect(Storage.getOidcUser()).not.toBeNull()
+      expect(Storage.getCurrentUser().userId).toBe(0)
+    })
+
+    it('should not persist any token material', () => {
+      Storage.clearStorage()
+      const keys = Object.keys(localStorage)
+      expect(keys).toEqual(['CurrentUser'])
     })
   })
 
@@ -73,68 +84,15 @@ describe('Storage', () => {
     })
   })
 
-  describe('OIDC User operations', () => {
-    it('should set and get oidc user', () => {
-      const user: Partial<OidcUser> = {
-        access_token: 'abc123',
-        token_type: 'Bearer',
-        profile: {
-          email_verified: true,
-          idp: 'test',
-          idp_access_token: '',
-          tid: '',
-          ver: '1.0',
-          sub: 'user123',
-          iss: 'issuer',
-          aud: 'audience',
-          exp: Math.floor(Date.now() / 1000) + 3600,
-          iat: Math.floor(Date.now() / 1000),
-        },
-      }
-      Storage.setOidcUser(user as OidcUser)
-      expect(Storage.getOidcUser().access_token).toBe('abc123')
-    })
-
-    it('should return default oidc user when not set', () => {
-      const retrieved = Storage.getOidcUser()
-      expect(retrieved).not.toBeNull()
-      expect(retrieved.access_token).toBe('')
-    })
-  })
-
   describe('userIsLogged', () => {
-    it('should return true when user is logged in with valid token', () => {
-      const user: Partial<OidcUser> = {
-        access_token: 'valid',
-        token_type: 'Bearer',
-        profile: {
-          email_verified: false,
-          idp: '', idp_access_token: '', tid: '', ver: '', sub: '', iss: '', aud: '',
-          exp: Math.floor(Date.now() / 1000) + 3600,
-          iat: Math.floor(Date.now() / 1000),
-        },
-      }
-      Storage.setOidcUser(user as OidcUser)
-      expect(Storage.userIsLogged()).toBe(true)
+    it('should return true when the BFF session probe reports authenticated', async () => {
+      vi.mocked(getSessionInfo).mockResolvedValue({ authenticated: true, idp: 'google' })
+      await expect(userIsLogged()).resolves.toBe(true)
     })
 
-    it('should return false when token is expired', () => {
-      const user: Partial<OidcUser> = {
-        access_token: 'expired',
-        token_type: 'Bearer',
-        profile: {
-          email_verified: false,
-          idp: '', idp_access_token: '', tid: '', ver: '', sub: '', iss: '', aud: '',
-          exp: Math.floor(Date.now() / 1000) - 3600,
-          iat: Math.floor(Date.now() / 1000),
-        },
-      }
-      Storage.setOidcUser(user as OidcUser)
-      expect(Storage.userIsLogged()).toBe(false)
-    })
-
-    it('should return false when oidc user is not set', () => {
-      expect(Storage.userIsLogged()).toBe(false)
+    it('should return false when the BFF session probe reports unauthenticated', async () => {
+      vi.mocked(getSessionInfo).mockResolvedValue({ authenticated: false })
+      await expect(userIsLogged()).resolves.toBe(false)
     })
   })
 

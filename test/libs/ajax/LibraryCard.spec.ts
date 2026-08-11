@@ -8,7 +8,6 @@ import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
 vi.mock('src/libs/config', () => ({
   Config: {
     getApiUrl: vi.fn(),
-    authOpts: vi.fn(),
   },
 }))
 
@@ -17,14 +16,6 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
   fetchPost: vi.fn(),
   fetchDelete: vi.fn(),
 }))
-
-const headers = {
-  headers: {
-    'Authorization': 'Bearer token',
-    'Accept': 'application/json',
-    'X-App-ID': 'DUOS',
-  },
-}
 
 const mockCard: LibraryCardModel = {
   id: 1,
@@ -39,21 +30,18 @@ describe('LibraryCard', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Config.getApiUrl).mockResolvedValue('https://duos.example.org')
-    vi.mocked(Config.authOpts).mockReturnValue(headers)
     vi.mocked(fetchGet).mockResolvedValue({ data: [mockCard] })
     vi.mocked(fetchPost).mockResolvedValue({ data: mockCard })
     vi.mocked(fetchDelete).mockResolvedValue({ data: mockCard })
   })
 
   describe('getAllLibraryCards', () => {
-    it('fetches the library cards endpoint with auth options and returns data', async () => {
+    it('fetches the library cards endpoint and returns data', async () => {
       const result = await LibraryCard.getAllLibraryCards()
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/libraryCards',
-        headers,
       )
       expect(result).toEqual([mockCard])
     })
@@ -81,15 +69,13 @@ describe('LibraryCard', () => {
   })
 
   describe('createLibraryCard', () => {
-    it('posts to the library cards endpoint with the card payload and auth options', async () => {
+    it('posts to the library cards endpoint with the card payload', async () => {
       const result = await LibraryCard.createLibraryCard(mockCard)
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchPost).toHaveBeenCalledWith(
         'https://duos.example.org/api/libraryCards',
         mockCard,
-        headers,
       )
       expect(result).toEqual(mockCard)
     })
@@ -117,14 +103,12 @@ describe('LibraryCard', () => {
   })
 
   describe('deleteLibraryCard', () => {
-    it('deletes the library card at the correct endpoint with auth options', async () => {
+    it('deletes the library card at the correct endpoint', async () => {
       const result = await LibraryCard.deleteLibraryCard(1)
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchDelete).toHaveBeenCalledWith(
         'https://duos.example.org/api/libraryCards/1',
-        headers,
       )
       expect(result).toEqual(mockCard)
     })

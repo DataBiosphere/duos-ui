@@ -49,6 +49,13 @@ export async function handleLogin(request: FastifyRequest, reply: FastifyReply):
     code_challenge: await pkce.challenge(verifier),
     code_challenge_method: 'S256',
     state,
+    // Force the B2C login screen even when B2C still holds an SSO cookie.
+    // /auth/logout destroys only the BFF session — without this, a signed-out
+    // user clicking Sign In is silently re-authenticated by B2C's own session,
+    // which matters on shared workstations (DUOS gates dbGaP data). The legacy
+    // client forced the same thing via oidcBroker's `prompt: 'consent login'`.
+    // True B2C session termination (front-channel logout) is epic-5, 5-I.
+    prompt: 'login',
   })
 
   // Persist the session BEFORE responding, so @fastify/session's async onSend

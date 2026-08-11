@@ -19,7 +19,7 @@ export const Votes = {
       voteIds: voteIds,
     }
     const url = `${await Config.getApiUrl()}/api/votes`
-    const res = await fetchPut<Vote[]>(url, voteUpdate, Config.authOpts())
+    const res = await fetchPut<Vote[]>(url, voteUpdate)
     return res.data
   },
 
@@ -38,7 +38,7 @@ export const Votes = {
       voteIds: voteIds,
     }
     const url = `${await Config.getApiUrl()}/api/votes/rationale`
-    const res = await fetchPut<Vote[]>(url, rationaleUpdate, Config.authOpts())
+    const res = await fetchPut<Vote[]>(url, rationaleUpdate)
     return res.data
   },
 }

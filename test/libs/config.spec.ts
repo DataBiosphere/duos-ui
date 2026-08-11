@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
-import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
-import { Storage } from 'src/libs/storage'
+import { Config, getEnv, getApiUrl, getConsentApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, isBffEnabled, jsonBody, textPlain } from 'src/libs/config'
 
 const mockConfig = {
   env: 'test',
@@ -11,6 +10,7 @@ const mockConfig = {
   tag: 'v1.0.0-test',
   tdrApiUrl: 'https://test.tdr.com',
   terraUrl: 'https://test.terra.bio',
+  bffEnabled: true,
 }
 
 // configPromise is module-level and caches after the first fetch — mock fetch once for all tests
@@ -38,7 +38,9 @@ describe('Config', () => {
 
     it.each([
       ['getEnv', 'test'],
-      ['getApiUrl', 'https://test.api.com'],
+      // bffEnabled is true in mockConfig, so the API base is the BFF proxy prefix
+      ['getApiUrl', '/duos-api'],
+      ['getConsentApiUrl', 'https://test.api.com'],
       ['getBardApiUrl', 'https://test.bard.com'],
       ['getEcmApiUrl', 'https://test.ecm.com'],
       ['getECMUrl', 'https://test.ecm.com'],
@@ -51,12 +53,17 @@ describe('Config', () => {
       // oxlint-disable-next-line @typescript-eslint/no-explicit-any
       expect(await (Config[method] as any)()).toBe(expected)
     })
+
+    it('should report bffEnabled', async () => {
+      expect(await Config.isBffEnabled()).toBe(true)
+    })
   })
 
   describe('Exported functions', () => {
     it.each([
       ['getEnv', getEnv, 'test'],
-      ['getApiUrl', getApiUrl, 'https://test.api.com'],
+      ['getApiUrl', getApiUrl, '/duos-api'],
+      ['getConsentApiUrl', getConsentApiUrl, 'https://test.api.com'],
       ['getBardApiUrl', getBardApiUrl, 'https://test.bard.com'],
       ['getEcmApiUrl', getEcmApiUrl, 'https://test.ecm.com'],
       ['getECMUrl', getECMUrl, 'https://test.ecm.com'],
@@ -68,61 +75,18 @@ describe('Config', () => {
     ] as const)('%s should return correct value', async (_name, fn, expected) => {
       expect(await fn()).toBe(expected)
     })
-  })
 
-  describe('Token', () => {
-    it('should prefer idp_access_token from profile when available', () => {
-      const idpToken = 'idp-access-token-123'
-      vi.spyOn(Storage, 'getOidcUser').mockReturnValue({ profile: { idp_access_token: idpToken }, id_token: 'fallback-token' } as ReturnType<typeof Storage.getOidcUser>)
-      expect(Token.getToken()).toBe(idpToken)
-    })
-
-    it('should fall back to id_token when idp_access_token is not available', () => {
-      const mockToken = 'test-token-123'
-      vi.spyOn(Storage, 'getOidcUser').mockReturnValue({ profile: {}, id_token: mockToken } as ReturnType<typeof Storage.getOidcUser>)
-      expect(Token.getToken()).toBe(mockToken)
-    })
-
-    it('should fall back to id_token when profile is not present', () => {
-      const mockToken = 'test-token-123'
-      vi.spyOn(Storage, 'getOidcUser').mockReturnValue({ id_token: mockToken } as ReturnType<typeof Storage.getOidcUser>)
-      expect(Token.getToken()).toBe(mockToken)
-    })
-
-    it('should return undefined when no token is available', () => {
-      vi.spyOn(Storage, 'getOidcUser').mockReturnValue(null as unknown as ReturnType<typeof Storage.getOidcUser>)
-      expect(Token.getToken()).toBeUndefined()
+    it('isBffEnabled should return true when config.json says so', async () => {
+      expect(await isBffEnabled()).toBe(true)
     })
   })
 
-  describe('authOpts', () => {
-    it('should create auth options with provided token', () => {
-      const token = 'custom-token'
-      expect(authOpts(token)).toEqual({
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-          'X-App-ID': 'DUOS',
-        },
-      })
-    })
-
-    it('should create auth options with idp_access_token from storage if not provided', () => {
-      const mockToken = 'idp-access-token'
-      vi.spyOn(Storage, 'getOidcUser').mockReturnValue({ profile: { idp_access_token: mockToken }, id_token: 'fallback-token' } as ReturnType<typeof Storage.getOidcUser>)
-      const opts = authOpts()
-      expect(opts.headers['Authorization']).toBe(`Bearer ${mockToken}`)
-      expect(opts.headers['Accept']).toBe('application/json')
-      expect(opts.headers['X-App-ID']).toBe('DUOS')
-    })
-
-    it('should create auth options with id_token from storage when idp_access_token is not present', () => {
-      const mockToken = 'storage-token'
-      vi.spyOn(Storage, 'getOidcUser').mockReturnValue({ id_token: mockToken } as ReturnType<typeof Storage.getOidcUser>)
-      const opts = authOpts()
-      expect(opts.headers['Authorization']).toBe(`Bearer ${mockToken}`)
-      expect(opts.headers['Accept']).toBe('application/json')
-      expect(opts.headers['X-App-ID']).toBe('DUOS')
+  describe('token helpers are gone', () => {
+    it('no longer exposes authOpts / multiPartOpts / Token on the Config instance', () => {
+      // The BFF holds the tokens server-side; nothing in the client builds an
+      // Authorization header anymore.
+      expect((Config as unknown as Record<string, unknown>).authOpts).toBeUndefined()
+      expect((Config as unknown as Record<string, unknown>).multiPartOpts).toBeUndefined()
     })
   })
 
@@ -149,37 +113,6 @@ describe('Config', () => {
     })
   })
 
-  describe('multiPartOpts', () => {
-    it('should create multipart options with provided token', () => {
-      const token = 'custom-token'
-      expect(multiPartOpts(token)).toEqual({
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-          'X-App-ID': 'DUOS',
-        },
-      })
-    })
-
-    it('should create multipart options with idp_access_token from storage if not provided', () => {
-      const mockToken = 'idp-access-token'
-      vi.spyOn(Storage, 'getOidcUser').mockReturnValue({ profile: { idp_access_token: mockToken }, id_token: 'fallback-token' } as ReturnType<typeof Storage.getOidcUser>)
-      const opts = multiPartOpts()
-      expect(opts.headers['Authorization']).toBe(`Bearer ${mockToken}`)
-      expect(opts.headers['Content-Type']).toBe('multipart/form-data')
-      expect(opts.headers['X-App-ID']).toBe('DUOS')
-    })
-
-    it('should create multipart options with id_token from storage when idp_access_token is not present', () => {
-      const mockToken = 'storage-token'
-      vi.spyOn(Storage, 'getOidcUser').mockReturnValue({ id_token: mockToken } as ReturnType<typeof Storage.getOidcUser>)
-      const opts = multiPartOpts()
-      expect(opts.headers['Authorization']).toBe(`Bearer ${mockToken}`)
-      expect(opts.headers['Content-Type']).toBe('multipart/form-data')
-      expect(opts.headers['X-App-ID']).toBe('DUOS')
-    })
-  })
-
   describe('textPlain', () => {
     it('should create text/plain options', () => {
       expect(textPlain()).toEqual({
@@ -192,21 +125,11 @@ describe('Config', () => {
   })
 
   describe('Config instance method wrappers', () => {
-    it('authOpts method should call authOpts function', () => {
-      const token = 'test-token'
-      expect(Config.authOpts(token).headers['Authorization']).toBe(`Bearer ${token}`)
-    })
-
     it('jsonBody method should call jsonBody function', () => {
       const body = { test: 'data' }
       const opts = Config.jsonBody(body)
       expect(opts.body).toBe(JSON.stringify(body))
       expect(opts.headers['Content-Type']).toBe('application/json')
-    })
-
-    it('multiPartOpts method should call multiPartOpts function', () => {
-      const token = 'test-token'
-      expect(Config.multiPartOpts(token).headers['Content-Type']).toBe('multipart/form-data')
     })
 
     it('textPlain method should call textPlain function', () => {

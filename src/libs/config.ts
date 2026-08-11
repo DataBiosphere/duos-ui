@@ -1,5 +1,3 @@
-import { Storage } from 'src/libs/storage'
-
 interface ConfigType {
   env: string
   apiUrl: string
@@ -9,7 +7,17 @@ interface ConfigType {
   tag: string
   tdrApiUrl: string
   terraUrl: string
+  bffEnabled?: boolean
 }
+
+/**
+ * The BFF-side proxy prefix. Must match PROXY_PREFIX in
+ * server/src/proxy/apiProxy.ts — it is the public API surface between client
+ * and BFF: `/duos-api/api/dataset/1` is forwarded to
+ * `${DUOS_API_URL}/api/dataset/1` with the session's access token attached
+ * server-side. Changing it means changing both ends together.
+ */
+const BFF_PROXY_PREFIX = '/duos-api'
 
 let configPromise: Promise<ConfigType> | null = null
 
@@ -31,6 +39,10 @@ class ConfigClass {
 
   async getApiUrl(): Promise<string> {
     return getApiUrl()
+  }
+
+  async getConsentApiUrl(): Promise<string> {
+    return getConsentApiUrl()
   }
 
   async getBardApiUrl(): Promise<string> {
@@ -65,16 +77,12 @@ class ConfigClass {
     return getTerraUrl()
   }
 
-  authOpts(token: string | undefined = Token.getToken()) {
-    return authOpts(token)
+  async isBffEnabled(): Promise<boolean> {
+    return isBffEnabled()
   }
 
   jsonBody(body: unknown) {
     return jsonBody(body)
-  }
-
-  multiPartOpts(token: string | undefined = Token.getToken()) {
-    return multiPartOpts(token)
   }
 
   textPlain() {
@@ -89,7 +97,32 @@ export const getEnv = async (): Promise<string> => {
   return config.env
 }
 
+/**
+ * Whether this environment has cut over to the BFF. The server registers the
+ * /auth/* routes and the API proxy from the same config.json key, so both
+ * sides agree by construction.
+ */
+export const isBffEnabled = async (): Promise<boolean> => {
+  const config = await loadConfig()
+  return config.bffEnabled === true
+}
+
+/**
+ * The base URL for DUOS API calls. In a BFF environment this is the
+ * same-origin proxy prefix — requests are relative, carry the session cookie,
+ * and the BFF attaches the access token server-side. In a legacy environment
+ * it is the absolute Consent URL from config.json.
+ */
 export const getApiUrl = async (): Promise<string> => {
+  return (await isBffEnabled()) ? BFF_PROXY_PREFIX : getConsentApiUrl()
+}
+
+/**
+ * The absolute Consent URL, regardless of BFF cutover. Only for calls that
+ * must not go through the BFF proxy: the unauthenticated `/feature` endpoint
+ * is consulted pre-login, and the proxy returns 401 for sessionless requests.
+ */
+export const getConsentApiUrl = async (): Promise<string> => {
   const config = await loadConfig()
   return config.apiUrl
 }
@@ -133,35 +166,9 @@ export const getTerraUrl = async (): Promise<string> => {
   return config.terraUrl
 }
 
-export const Token = {
-  // Note that there are multiple tokens available in OidcUser. There is an encoded JWT stored in id_token,
-  // access_token, and refresh_token. There is also a Google OAuth2 access token stored in profile.idp_access_token
-  // Favor the idp_access_token which bypasses all AzureB2C error cases and fall back to the regular id_token if the
-  // Google token is not present.
-  getToken: () => {
-    return Storage.getOidcUser()?.profile?.idp_access_token || Storage.getOidcUser()?.id_token
-  },
-}
-
-export const authOpts = (token: string | undefined = Token.getToken()) => ({
-  headers: {
-    'Authorization': `Bearer ${token}`,
-    'Accept': 'application/json',
-    'X-App-ID': 'DUOS',
-  },
-})
-
 export const jsonBody = (body: unknown) => ({
   body: JSON.stringify(body),
   headers: { 'Content-Type': 'application/json' },
-})
-
-export const multiPartOpts = (token: string | undefined = Token.getToken()) => ({
-  headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'multipart/form-data',
-    'X-App-ID': 'DUOS',
-  },
 })
 
 export const textPlain = () => ({

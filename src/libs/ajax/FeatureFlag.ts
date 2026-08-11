@@ -8,16 +8,20 @@ export interface FeatureFlag {
   updateDate: number
 }
 
+// Deliberately kept at the absolute Consent URL (getConsentApiUrl) rather than
+// migrated to the BFF proxy: the /feature endpoint is unauthenticated and
+// consulted pre-login, and the BFF proxy returns 401 for sessionless requests.
+
 export async function getAllFeatureFlags(): Promise<Record<string, FeatureFlag> | FeatureFlag[]> {
-  const url = `${await Config.getApiUrl()}/feature`
-  const res = await fetchGet<Record<string, FeatureFlag> | FeatureFlag[]>(url, Config.authOpts())
+  const url = `${await Config.getConsentApiUrl()}/feature`
+  const res = await fetchGet<Record<string, FeatureFlag> | FeatureFlag[]>(url)
   return res.data
 }
 
 export async function getFeatureFlag(key: string): Promise<FeatureFlag | undefined> {
-  const url = `${await Config.getApiUrl()}/feature/${encodeURIComponent(key)}`
+  const url = `${await Config.getConsentApiUrl()}/feature/${encodeURIComponent(key)}`
   try {
-    const res = await fetchGet<FeatureFlag>(url, Config.authOpts())
+    const res = await fetchGet<FeatureFlag>(url)
     return res.data
   }
   catch {

@@ -14,13 +14,14 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
   fetchGet: vi.fn(),
 }))
 
-const authHeaders = { headers: { Authorization: 'Bearer test' } } as ReturnType<typeof Config.authOpts>
+const consentUrl = 'https://consent.example.test'
 
 describe('FeatureFlag ajax', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.spyOn(Config, 'getApiUrl').mockResolvedValue('')
-    vi.spyOn(Config, 'authOpts').mockReturnValue(authHeaders)
+    // /feature is unauthenticated and pre-login, so it stays on the absolute
+    // Consent URL rather than the BFF proxy
+    vi.spyOn(Config, 'getConsentApiUrl').mockResolvedValue(consentUrl)
   })
 
   afterEach(() => {
@@ -35,7 +36,7 @@ describe('FeatureFlag ajax', () => {
       const result = await getAllFeatureFlags()
 
       expect(result).toEqual(response)
-      expect(fetchGet).toHaveBeenCalledWith('/feature', authHeaders)
+      expect(fetchGet).toHaveBeenCalledWith(`${consentUrl}/feature`)
     })
   })
 
@@ -47,7 +48,7 @@ describe('FeatureFlag ajax', () => {
       const result = await getFeatureFlag('someFlag')
 
       expect(result).toEqual(mockFlag)
-      expect(fetchGet).toHaveBeenCalledWith('/feature/someFlag', authHeaders)
+      expect(fetchGet).toHaveBeenCalledWith(`${consentUrl}/feature/someFlag`)
     })
 
     it('returns undefined when per-key endpoint errors', async () => {

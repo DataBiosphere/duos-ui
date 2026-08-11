@@ -24,7 +24,7 @@ export const ToS = {
    */
   acceptToS: async (): Promise<UserStatusInfo> => {
     const url = `${await Config.getApiUrl()}/api/sam/register/self/tos`
-    const res = await fetchPost<UserStatusInfo>(url, {}, Config.authOpts())
+    const res = await fetchPost<UserStatusInfo>(url, {})
     return res.data
   },
 
@@ -34,7 +34,7 @@ export const ToS = {
    */
   rejectToS: async (): Promise<ToSStatus> => {
     const url = `${await Config.getApiUrl()}/api/sam/register/self/tos`
-    const res = await fetchDelete<ToSStatus>(url, Config.authOpts())
+    const res = await fetchDelete<ToSStatus>(url)
     return res.data
   },
 }

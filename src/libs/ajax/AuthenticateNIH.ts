@@ -1,6 +1,5 @@
 import { Config } from 'src/libs/config'
 import { fetchGet, fetchPost, fetchDelete } from 'src/libs/ajax/fetchAdapter'
-import { merge } from 'src/utils/NodashUtil'
 import { DuosUser } from 'src/types/model'
 
 /**
@@ -15,10 +14,18 @@ interface LinkInfo {
   }
 }
 
+/**
+ * BFF NOTE: the DUOS-API-bound calls here (deleteAccountLinkage, getSyncedUser)
+ * go through the BFF proxy, which attaches the session's access token
+ * server-side. The two ECM-bound calls hit a separate upstream the proxy does
+ * not cover — with no client-side token they are sent unauthenticated, which
+ * ECM will reject until a server-side ECM proxy route exists (a known gap in
+ * the Phase 4 plan, flagged for follow-up).
+ */
 export const AuthenticateNIH = {
   deleteAccountLinkage: async (): Promise<void> => {
     const url = `${await Config.getApiUrl()}/api/nih`
-    await fetchDelete<void>(url, Config.authOpts())
+    await fetchDelete<void>(url)
   },
 
   getECMProviderAuthUrl: async (
@@ -27,8 +34,7 @@ export const AuthenticateNIH = {
   ): Promise<string | URL> => {
     const url = `${await Config.getECMUrl()}/api/oauth/v1/${provider}/authorization-url?redirectUri=${redirectUri}`
     // ECM returns `text/plain` and expects `Accept: */*`
-    const authOpts = merge({}, Config.authOpts(), { headers: { Accept: '*/*' } })
-    const res = await fetchPost<string | URL>(url, { redirectTo }, authOpts)
+    const res = await fetchPost<string | URL>(url, { redirectTo }, { headers: { Accept: '*/*' } })
     if (res?.data) {
       return res.data
     }
@@ -40,13 +46,13 @@ export const AuthenticateNIH = {
     state: string,
   ): Promise<LinkInfo | undefined> => {
     const url = `${await Config.getECMUrl()}/api/oauth/v1/${provider}/oauthcode?state=${state}&oauthcode=${code}`
-    const res = await fetchPost<LinkInfo | undefined>(url, null, Config.authOpts())
+    const res = await fetchPost<LinkInfo | undefined>(url, null)
     return res?.data
   },
 
   getSyncedUser: async (): Promise<DuosUser> => {
     const url = `${await Config.getApiUrl()}/api/nih/sync`
-    const res = await fetchGet<DuosUser>(url, Config.authOpts())
+    const res = await fetchGet<DuosUser>(url)
     return res.data
   },
 }

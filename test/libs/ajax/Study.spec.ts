@@ -7,7 +7,6 @@ import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
 vi.mock('src/libs/config', () => ({
   Config: {
     getApiUrl: vi.fn(),
-    authOpts: vi.fn(),
   },
 }))
 
@@ -15,19 +14,10 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
   fetchGet: vi.fn(),
 }))
 
-const headers = {
-  headers: {
-    'Authorization': 'Bearer token',
-    'Accept': 'application/json',
-    'X-App-ID': 'DUOS',
-  },
-}
-
 describe('Study', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Config.getApiUrl).mockResolvedValue('https://duos.example.org')
-    vi.mocked(Config.authOpts).mockReturnValue(headers)
     vi.mocked(fetchGet).mockResolvedValue({ data: [] })
   })
 
@@ -39,10 +29,8 @@ describe('Study', () => {
       const result = await Study.getStudyNames()
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
-      expect(Config.authOpts).toHaveBeenCalledOnce()
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/dataset/studyNames',
-        headers,
       )
       expect(result).toEqual(names)
     })

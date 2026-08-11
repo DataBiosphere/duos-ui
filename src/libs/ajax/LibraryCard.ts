@@ -9,7 +9,7 @@ export const LibraryCard = {
    */
   getAllLibraryCards: async (): Promise<LibraryCardModel[]> => {
     const url = `${await Config.getApiUrl()}/api/libraryCards`
-    const res = await fetchGet<LibraryCardModel[]>(url, Config.authOpts())
+    const res = await fetchGet<LibraryCardModel[]>(url)
     return res.data
   },
 
@@ -20,7 +20,7 @@ export const LibraryCard = {
    */
   createLibraryCard: async (card: LibraryCardModel): Promise<LibraryCardModel> => {
     const url = `${await Config.getApiUrl()}/api/libraryCards`
-    const res = await fetchPost<LibraryCardModel, LibraryCardModel>(url, card, Config.authOpts())
+    const res = await fetchPost<LibraryCardModel, LibraryCardModel>(url, card)
     return res.data
   },
 
@@ -31,7 +31,7 @@ export const LibraryCard = {
    */
   deleteLibraryCard: async (id: number): Promise<LibraryCardModel> => {
     const url = `${await Config.getApiUrl()}/api/libraryCards/${id}`
-    const res = await fetchDelete<LibraryCardModel>(url, Config.authOpts())
+    const res = await fetchDelete<LibraryCardModel>(url)
     return res.data
   },
 }

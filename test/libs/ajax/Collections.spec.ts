@@ -13,7 +13,6 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
 
 const apiUrl = 'https://api.example.test'
 const roleName: UserRoleName = 'Researcher'
-const authHeaders = { headers: { Authorization: 'Bearer test-token' } } as ReturnType<typeof Config.authOpts>
 
 const mockCollection: DarCollection = {
   darCollectionId: 1,
@@ -49,7 +48,6 @@ describe('Collections ajax', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(Config, 'getApiUrl').mockResolvedValue(apiUrl)
-    vi.spyOn(Config, 'authOpts').mockReturnValue(authHeaders)
   })
 
   afterEach(() => {
@@ -87,7 +85,6 @@ describe('Collections ajax', () => {
       expect(fetchPut).toHaveBeenCalledWith(
         `${apiUrl}/api/collections/1/resubmit`,
         {},
-        authHeaders,
       )
     })
 
@@ -105,7 +102,7 @@ describe('Collections ajax', () => {
       const result = await Collections.getCollectionById(1)
 
       expect(result).toEqual(mockCollection)
-      expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/collections/1`, authHeaders)
+      expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/collections/1`)
     })
 
     it('throws on a 403 response', async () => {
@@ -122,7 +119,7 @@ describe('Collections ajax', () => {
       const result = await Collections.getCollectionByIdWithElectionHistory(1)
 
       expect(result).toEqual(mockCollection)
-      expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/collections/1/electionHistory`, authHeaders)
+      expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/collections/1/electionHistory`)
     })
 
     it('throws on a 500 response', async () => {
@@ -139,7 +136,7 @@ describe('Collections ajax', () => {
       const result = await Collections.getCollectionSummariesByRoleName(roleName)
 
       expect(result).toEqual([mockSummary])
-      expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/collections/role/Researcher/summary`, authHeaders)
+      expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/collections/role/Researcher/summary`)
     })
 
     it('returns an empty array when the server returns []', async () => {
@@ -158,7 +155,7 @@ describe('Collections ajax', () => {
       const result = await Collections.getCollectionSummaryByRoleNameAndId({ roleName, id: 1 })
 
       expect(result).toEqual(mockSummary)
-      expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/collections/role/Researcher/summary/1`, authHeaders)
+      expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/collections/role/Researcher/summary/1`)
     })
 
     it('throws on a 404 response', async () => {
@@ -175,7 +172,7 @@ describe('Collections ajax', () => {
       const result = await Collections.openElectionsById(1)
 
       expect(result).toEqual(mockCollection)
-      expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/collections/1/election`, {}, authHeaders)
+      expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/collections/1/election`, {})
     })
 
     it('throws on a 500 response', async () => {
@@ -192,7 +189,7 @@ describe('Collections ajax', () => {
       const result = await Collections.approveCollectionById(1)
 
       expect(result).toEqual(mockCollection)
-      expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/collections/1/approve`, {}, authHeaders)
+      expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/collections/1/approve`, {})
     })
 
     it('throws on a 403 response', async () => {

@@ -8,7 +8,7 @@ export const Study = {
    */
   getStudyNames: async (): Promise<string[]> => {
     const url = `${await Config.getApiUrl()}/api/dataset/studyNames`
-    const res = await fetchGet<string[]>(url, Config.authOpts())
+    const res = await fetchGet<string[]>(url)
     return res.data
   },
 }

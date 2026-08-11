@@ -9,6 +9,6 @@ export const Email = {
    */
   sendReminderEmail: async (voteId: number): Promise<void> => {
     const url = `${await Config.getApiUrl()}/api/emailNotifier/reminderMessage/${voteId}`
-    await fetchPost<void>(url, undefined, Config.authOpts())
+    await fetchPost<void>(url, undefined)
   },
 }

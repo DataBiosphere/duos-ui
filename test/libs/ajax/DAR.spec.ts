@@ -7,7 +7,6 @@ import { extractConsentError, extractError } from 'src/utils/ErrorUtils'
 vi.mock('src/libs/config', () => ({
   Config: {
     getApiUrl: vi.fn(),
-    authOpts: vi.fn(),
   },
 }))
 
@@ -32,14 +31,6 @@ vi.mock('src/libs/utils', () => ({
   isFileEmpty: vi.fn(),
 }))
 
-const headers = {
-  headers: {
-    'Authorization': 'Bearer token',
-    'Accept': 'application/json',
-    'X-App-ID': 'DUOS',
-  },
-}
-
 const buildDar = (overrides = {}) => ({
   id: 1,
   referenceId: 'ref-001',
@@ -63,7 +54,6 @@ describe('DAR', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     vi.mocked(Config.getApiUrl).mockResolvedValue('https://duos.example.org')
-    vi.mocked(Config.authOpts).mockReturnValue(headers)
     vi.mocked(fetchGet).mockResolvedValue({ data: buildDar() })
     vi.mocked(fetchPost).mockResolvedValue({ data: buildDar() })
     vi.mocked(fetchPut).mockResolvedValue({ data: buildDar() })
@@ -83,7 +73,6 @@ describe('DAR', () => {
 
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/dar/v2/ref-abc',
-        headers,
       )
       expect(result).toEqual(dar)
     })
@@ -118,7 +107,6 @@ describe('DAR', () => {
       expect(fetchPut).toHaveBeenCalledWith(
         'https://duos.example.org/api/dar/v2/draft/ref-001',
         payload,
-        headers,
       )
       expect(result).toEqual(dar)
     })
@@ -153,7 +141,6 @@ describe('DAR', () => {
       expect(fetchPost).toHaveBeenCalledWith(
         'https://duos.example.org/api/dar/v2/draft',
         payload,
-        headers,
       )
       expect(result.referenceId).toBe('ref-new')
     })
@@ -181,7 +168,6 @@ describe('DAR', () => {
 
       expect(fetchDelete).toHaveBeenCalledWith(
         'https://duos.example.org/api/dar/v2/ref-001',
-        headers,
       )
       expect(result).toEqual({ status: 200 })
     })
@@ -220,7 +206,6 @@ describe('DAR', () => {
       expect(fetchPost).toHaveBeenCalledWith(
         'https://duos.example.org/api/dar/v2',
         postedBody,
-        headers,
       )
       expect(result).toEqual(dar)
     })
@@ -251,7 +236,6 @@ describe('DAR', () => {
 
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/ontology/autocomplete?q=HP:',
-        headers,
       )
       expect(result).toEqual(entries)
     })
@@ -282,7 +266,6 @@ describe('DAR', () => {
 
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/ontology/search?ids=HP:0000001',
-        headers,
       )
       expect(result).toEqual(entries)
     })
@@ -310,7 +293,6 @@ describe('DAR', () => {
 
       expect(fetchBlob).toHaveBeenCalledWith(
         'https://duos.example.org/api/dar/v2/ref-001/irbDocument',
-        headers,
       )
       expect(fileDownload).toHaveBeenCalledWith(blob, 'irb.pdf')
     })
@@ -341,7 +323,6 @@ describe('DAR', () => {
 
       expect(fetchBlob).toHaveBeenCalledWith(
         'https://duos.example.org/api/dar/v2/ref-001/irbDocument',
-        headers,
       )
       expect(result).toBe(blob)
     })
@@ -372,7 +353,6 @@ describe('DAR', () => {
 
       expect(fetchGet).toHaveBeenCalledWith(
         'https://duos.example.org/api/dar/v2/ref-001/dataset-daa-snapshots',
-        headers,
       )
       expect(result).toEqual(snapshots)
     })
@@ -407,7 +387,6 @@ describe('DAR', () => {
       expect(fetchMultipart).toHaveBeenCalledWith(
         'https://duos.example.org/api/dar/v2/ref-001/irbDocument',
         expect.any(FormData),
-        headers,
       )
       expect(result.data).toEqual(dar)
     })
@@ -449,7 +428,6 @@ describe('DAR', () => {
       expect(fetchPut).toHaveBeenCalledWith(
         'https://duos.example.org/api/dar/ref-001/approveCloseout',
         {},
-        headers,
       )
     })
 

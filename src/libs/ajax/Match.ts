@@ -12,7 +12,7 @@ export const Match = {
   findMatchBatch: async (purposeIdsArr: string[] = []): Promise<MatchResult[]> => {
     const purposeIds = uniq(purposeIdsArr).join(',')
     const url = `${await Config.getApiUrl()}/api/match/purpose/batch`
-    const config = { ...Config.authOpts(), params: { purposeIds } }
+    const config = { params: { purposeIds } }
     const res = await fetchGet<MatchResult[]>(url, config)
     return res.data
   },

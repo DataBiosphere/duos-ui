@@ -18,7 +18,7 @@ import { Notification } from './Notification'
 import { useLocation, useNavigate } from 'react-router'
 import { DuosUser } from 'src/types/model'
 import { useNavigationState } from 'src/contexts/NavigationStateContext'
-import { useQueryClient } from '@tanstack/react-query'
+import { useUserIsLogged } from 'src/hooks/useSession'
 import { SO_CONSOLE_SECTIONS, SO_DASHBOARD_ROUTE } from 'src/pages/signing_official_console/signingOfficialConsoleRoutes'
 import { RESEARCHER_CONSOLE_SECTIONS, RESEARCHER_DASHBOARD_ROUTE } from 'src/pages/researcher_console/researcherConsoleRoutes'
 
@@ -160,7 +160,6 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   })
 
   const { activeTab, setActiveTab } = useNavigationState()
-  const queryClient = useQueryClient()
 
   useEffect(() => {
     const fetchNotificationData = async (): Promise<void> => {
@@ -181,9 +180,9 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   const signOut = (): void => {
-    queryClient.clear()
-    navigate('/home')
     toggleDrawer(false)
+    // Auth.signOut destroys the BFF session and reloads to '/', which also
+    // drops the in-memory query cache — no queryClient.clear() needed.
     void Auth.signOut()
   }
 
@@ -218,7 +217,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     toggleDrawer(false)
   }
 
-  const isLogged = Storage.userIsLogged()
+  const isLogged = useUserIsLogged() ?? false
   let currentUser: DuosUser = {
     createDate: new Date(),
     displayName: '',

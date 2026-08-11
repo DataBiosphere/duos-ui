@@ -5,7 +5,6 @@ import { Navigation, setUserRoleStatuses } from 'src/libs/utils'
 import { useNavigate, useLocation } from 'react-router'
 import { SpinnerComponent } from 'src/components/SpinnerComponent'
 import loadingImage from 'src/images/loading-indicator.svg'
-import { OidcUser as OidcUserType } from 'src/libs/auth/oidcBroker'
 import { DuosUser } from 'src/types/model'
 
 export interface BackgroundSignInProps {
@@ -52,11 +51,11 @@ export default function BackgroundSignIn({ onSignIn, onError, bearerToken }: Rea
 
     const performLogin = () => {
       setLoading(true)
-      // Storage.userIsLogged() gates on profile.exp; this page accepts an opaque bearer
-      // token (not a decodable ID token), so there's no real expiry to read - assume the
-      // typical Google OAuth2 access token lifetime instead of leaving this permanently 0.
-      const oneHourFromNow = Math.floor(Date.now() / 1000) + 3600
-      Storage.setOidcUser({ id_token: accessToken, profile: { exp: oneHourFromNow } } as unknown as OidcUserType)
+      // BFF NOTE: the browser no longer holds tokens, so a pasted bearer token
+      // cannot be attached to API calls — the BFF proxy injects the session's
+      // token server-side and strips any client-supplied Authorization header.
+      // This dev-only page now just probes /api/user/me with whatever session
+      // exists; the e2e auth strategy that used it is revisited in Epic 6.
       getUser().then(
         (user) => {
           const enriched = Object.assign(user, setUserRoleStatuses(user, Storage))

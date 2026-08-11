@@ -17,7 +17,7 @@ export interface SigningOfficialDashboardSummary {
 export const SigningOfficial = {
   getDashboardSummary: async (): Promise<SigningOfficialDashboardSummary> => {
     const url = `${await Config.getApiUrl()}/api/signing-official/dashboard-summary`
-    const response = await fetchGet<SigningOfficialDashboardSummary>(url, Config.authOpts())
+    const response = await fetchGet<SigningOfficialDashboardSummary>(url)
     return response.data
   },
 }

@@ -29,7 +29,11 @@ export const TerraDataRepo = {
     const snapshotPromises = partitionedIdentifiers.map((sublist) => {
       // 1000 should be safe with only 70 DUOS IDs.
       const url = `${rootTdrApiUrl}/api/repository/v1/snapshots?limit=1000&duosDatasetIds=${sublist.join('&duosDatasetIds=')}`
-      return fetchGet<EnumerateSnapshotModel>(url, Config.authOpts())
+      // BFF NOTE: TDR is a separate upstream the BFF proxy does not cover, and
+      // the browser no longer holds a bearer token — this call goes out
+      // unauthenticated until a server-side TDR proxy route exists (a known
+      // gap in the Phase 4 plan, flagged for follow-up).
+      return fetchGet<EnumerateSnapshotModel>(url)
     })
     await Promise.all(snapshotPromises).then(function (responses) {
       responses.forEach((res) => {

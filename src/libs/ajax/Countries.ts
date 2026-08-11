@@ -4,7 +4,7 @@ import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 export const Countries = {
   getCountries: async (): Promise<string[]> => {
     const url = `${await Config.getApiUrl()}/api-docs/ISO-3166-countries.json`
-    const res = await fetchGet<string[]>(url, Config.authOpts())
+    const res = await fetchGet<string[]>(url)
     return res.data
   },
   DEFAULT_COUNTRY: 'United States of America (the)',

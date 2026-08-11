@@ -29,8 +29,8 @@ export default function TermsOfServiceAcceptance() {
   }, [navigate])
 
   const signOut = async () => {
+    // Auth.signOut redirects back home with a full page load.
     await Auth.signOut()
-    navigate('/')
   }
 
   return (

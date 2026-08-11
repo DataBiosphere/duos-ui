@@ -1,5 +1,5 @@
 import React from 'react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router'
@@ -8,6 +8,13 @@ import { Storage } from 'src/libs/storage'
 
 vi.mock('src/libs/libraryVersions', () => ({
   getLibraryVersions: () => ({}),
+}))
+
+// Every case here exercises the unauthenticated path; the session probe
+// (GET /auth/me) is mocked resolved so <Authenticated /> redirects synchronously.
+vi.mock('src/hooks/useSession', () => ({
+  useUserIsLogged: vi.fn(() => false),
+  useSessionInfo: vi.fn(() => ({ authenticated: false })),
 }))
 
 vi.mock('src/components/modals/SupportRequestModal', () => ({
@@ -63,9 +70,6 @@ const roleBACRoutes: string[] = [
 ]
 
 describe('AppRoutes — RoleBAC routes redirect unauthenticated users', () => {
-  beforeEach(() => {
-    vi.spyOn(Storage, 'userIsLogged').mockReturnValue(false)
-  })
   afterEach(() => vi.restoreAllMocks())
 
   it.each(roleBACRoutes)('redirects unauthenticated user visiting "%s" to /?redirectTo=<route>', (route) => {

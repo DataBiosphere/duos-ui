@@ -9,7 +9,7 @@ export const Institution = {
    */
   list: async (): Promise<InstitutionInterface[]> => {
     const url = `${await Config.getApiUrl()}/api/institutions`
-    const res = await fetchGet<InstitutionInterface[]>(url, Config.authOpts())
+    const res = await fetchGet<InstitutionInterface[]>(url)
     return res.data
   },
 
@@ -20,7 +20,7 @@ export const Institution = {
    */
   getById: async (id: number): Promise<InstitutionInterface> => {
     const url = `${await Config.getApiUrl()}/api/institutions/${id}`
-    const res = await fetchGet<InstitutionInterface>(url, Config.authOpts())
+    const res = await fetchGet<InstitutionInterface>(url)
     return res.data
   },
 
@@ -31,7 +31,7 @@ export const Institution = {
    */
   postInstitution: async (institution: Partial<InstitutionInterface>): Promise<InstitutionInterface> => {
     const url = `${await Config.getApiUrl()}/api/institutions`
-    const res = await fetchPost<InstitutionInterface, Partial<InstitutionInterface>>(url, institution, Config.authOpts())
+    const res = await fetchPost<InstitutionInterface, Partial<InstitutionInterface>>(url, institution)
     return res.data
   },
 
@@ -43,7 +43,7 @@ export const Institution = {
    */
   putInstitution: async (id: number, institution: Partial<InstitutionInterface>): Promise<InstitutionInterface> => {
     const url = `${await Config.getApiUrl()}/api/institutions/${id}`
-    const res = await fetchPut<InstitutionInterface, Partial<InstitutionInterface>>(url, institution, Config.authOpts())
+    const res = await fetchPut<InstitutionInterface, Partial<InstitutionInterface>>(url, institution)
     return res.data
   },
 
@@ -55,7 +55,7 @@ export const Institution = {
    */
   patchInstitution: async (id: number, institution: Partial<InstitutionInterface>): Promise<InstitutionInterface> => {
     const url = `${await Config.getApiUrl()}/api/institutions/${id}`
-    const res = await fetchPatch<InstitutionInterface, Partial<InstitutionInterface>>(url, institution, Config.authOpts())
+    const res = await fetchPatch<InstitutionInterface, Partial<InstitutionInterface>>(url, institution)
     return res.data
   },
 
@@ -66,7 +66,7 @@ export const Institution = {
    */
   deleteInstitution: async (id: number): Promise<InstitutionInterface> => {
     const url = `${await Config.getApiUrl()}/api/institutions/${id}`
-    const res = await fetchDelete<InstitutionInterface>(url, Config.authOpts())
+    const res = await fetchDelete<InstitutionInterface>(url)
     return res.data
   },
 }

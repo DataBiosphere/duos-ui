@@ -20,7 +20,6 @@ vi.mock('src/utils/FileDownload', () => ({
 }))
 
 const apiUrl = 'https://api.example.test'
-const authHeaders = { headers: { 'Authorization': 'Bearer test-token', 'Accept': 'application/json', 'X-App-ID': 'DUOS' } } as ReturnType<typeof Config.authOpts>
 
 const mockDaa: DAAObject = {
   daaId: 12,
@@ -45,7 +44,6 @@ describe('DAA ajax', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(Config, 'getApiUrl').mockResolvedValue(apiUrl)
-    vi.spyOn(Config, 'authOpts').mockReturnValue(authHeaders)
   })
 
   afterEach(() => {
@@ -58,7 +56,7 @@ describe('DAA ajax', () => {
     const result = await DAA.getDaas()
 
     expect(result).toEqual([mockDaa])
-    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/daa`, authHeaders)
+    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/daa`)
   })
 
   it('getDaaById sends a GET request and returns one DAA', async () => {
@@ -67,7 +65,7 @@ describe('DAA ajax', () => {
     const result = await DAA.getDaaById(mockDaa.daaId)
 
     expect(result).toEqual(mockDaa)
-    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/daa/${mockDaa.daaId}`, authHeaders)
+    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/daa/${mockDaa.daaId}`)
   })
 
   it('createDaaLcLink sends a PUT request with empty body and returns DAA', async () => {
@@ -76,7 +74,7 @@ describe('DAA ajax', () => {
     const result = await DAA.createDaaLcLink(mockDaa.daaId, 2001)
 
     expect(result).toEqual(mockDaa)
-    expect(fetchPut).toHaveBeenCalledWith(`${apiUrl}/api/daa/${mockDaa.daaId}/2001`, {}, authHeaders)
+    expect(fetchPut).toHaveBeenCalledWith(`${apiUrl}/api/daa/${mockDaa.daaId}/2001`, {})
   })
 
   it('deleteDaaLcLink sends a DELETE request and returns 200', async () => {
@@ -85,7 +83,7 @@ describe('DAA ajax', () => {
     const result = await DAA.deleteDaaLcLink(mockDaa.daaId, 2001)
 
     expect(result).toBe(200)
-    expect(fetchDelete).toHaveBeenCalledWith(`${apiUrl}/api/daa/${mockDaa.daaId}/2001`, authHeaders)
+    expect(fetchDelete).toHaveBeenCalledWith(`${apiUrl}/api/daa/${mockDaa.daaId}/2001`)
   })
 
   it('bulkAddUsersToDaa sends a POST request with user ids and returns the result body', async () => {
@@ -96,7 +94,7 @@ describe('DAA ajax', () => {
     const result = await DAA.bulkAddUsersToDaa(mockDaa.daaId, users)
 
     expect(result).toEqual(summary)
-    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/daa/bulk/${mockDaa.daaId}`, { users }, authHeaders)
+    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/daa/bulk/${mockDaa.daaId}`, { users })
   })
 
   it('bulkRemoveUsersFromDaa sends a DELETE request with user ids in body and returns the result body', async () => {
@@ -121,7 +119,7 @@ describe('DAA ajax', () => {
     const result = await DAA.bulkAddDaasToUser(2001, daas)
 
     expect(result).toEqual(summary)
-    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/daa/bulk/user/2001`, { daaList: daas }, authHeaders)
+    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/daa/bulk/user/2001`, { daaList: daas })
   })
 
   it('bulkRemoveDaasFromUser sends a DELETE request with daa ids in body and returns the result body', async () => {
@@ -146,7 +144,6 @@ describe('DAA ajax', () => {
 
     expect(fetchBlob).toHaveBeenCalledWith(
       `${apiUrl}/api/daa/${mockDaa.daaId}/file`,
-      authHeaders,
     )
     expect(FileDownload.fileDownload).toHaveBeenCalledWith(fakeBlob, 'Sample_DAA.pdf')
   })
@@ -159,7 +156,6 @@ describe('DAA ajax', () => {
 
     expect(fetchBlob).toHaveBeenCalledWith(
       `${apiUrl}/api/daa/${mockDaa.daaId}/file`,
-      authHeaders,
     )
     expect(result).toBe(fakeBlob)
   })
@@ -181,7 +177,6 @@ describe('DAA ajax', () => {
     expect(fetchMultipart).toHaveBeenCalledWith(
       `${apiUrl}/api/daa/dac/42`,
       expect.any(FormData),
-      authHeaders,
     )
     const formData = vi.mocked(fetchMultipart).mock.calls[0][1] as FormData
     expect(formData.get('file')).toBe(file)
@@ -193,7 +188,7 @@ describe('DAA ajax', () => {
     const result = await DAA.addDaaToDac(mockDaa.daaId, 42)
 
     expect(result).toBe(200)
-    expect(fetchPut).toHaveBeenCalledWith(`${apiUrl}/api/daa/${mockDaa.daaId}/dac/42`, {}, authHeaders)
+    expect(fetchPut).toHaveBeenCalledWith(`${apiUrl}/api/daa/${mockDaa.daaId}/dac/42`, {})
   })
 
   it('sendDaaUpdateEmails sends a POST request and returns 200', async () => {
@@ -202,6 +197,6 @@ describe('DAA ajax', () => {
     const result = await DAA.sendDaaUpdateEmails(42, 11, 'New-DAA.pdf')
 
     expect(result).toBe(200)
-    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/daa/42/updated/11/New-DAA.pdf`, {}, authHeaders)
+    expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/daa/42/updated/11/New-DAA.pdf`, {})
   })
 })

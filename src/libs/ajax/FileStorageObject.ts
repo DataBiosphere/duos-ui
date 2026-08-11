@@ -37,7 +37,7 @@ export async function uploadDocument(
   const formData = new FormData()
   formData.append('file', file)
   formData.append('category', category)
-  const res = await fetchMultipart<FileStorageObject>(url, formData, Config.multiPartOpts())
+  const res = await fetchMultipart<FileStorageObject>(url, formData)
   return res.data
 }
 
@@ -48,7 +48,7 @@ export async function updateDocumentCategory(
   category: FileCategory,
 ): Promise<FileStorageObject> {
   const url = await documentPath(entity, entityId, id)
-  const res = await fetchPut<FileStorageObject>(url, { category }, Config.authOpts())
+  const res = await fetchPut<FileStorageObject>(url, { category })
   return res.data
 }
 
@@ -58,7 +58,7 @@ export async function getDocument(
   id: number,
 ): Promise<FileStorageObject> {
   const url = await documentPath(entity, entityId, id)
-  const res = await fetchGet<FileStorageObject>(url, Config.authOpts())
+  const res = await fetchGet<FileStorageObject>(url)
   return res.data
 }
 
@@ -68,7 +68,7 @@ export async function getDocumentFile(
   id: number,
 ): Promise<Blob> {
   const url = `${await documentPath(entity, entityId, id)}/file`
-  return fetchBlob(url, Config.authOpts())
+  return fetchBlob(url)
 }
 
 export async function listDocuments(
@@ -76,7 +76,7 @@ export async function listDocuments(
   entityId: string,
 ): Promise<FileStorageObject[]> {
   const url = await basePath(entity, entityId)
-  const res = await fetchGet<FileStorageObject[]>(url, Config.authOpts())
+  const res = await fetchGet<FileStorageObject[]>(url)
   return res.data
 }
 
@@ -86,6 +86,6 @@ export async function deleteDocument(
   id: number,
 ): Promise<FileStorageObject> {
   const url = await documentPath(entity, entityId, id)
-  const res = await fetchDelete<FileStorageObject>(url, Config.authOpts())
+  const res = await fetchDelete<FileStorageObject>(url)
   return res.data
 }

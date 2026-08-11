@@ -12,7 +12,7 @@ export const DataSet = {
    */
   getDatasetNames: async (): Promise<string[]> => {
     const url = `${await Config.getApiUrl()}/api/dataset/datasetNames`
-    const res = await fetchGet<string[]>(url, Config.authOpts())
+    const res = await fetchGet<string[]>(url)
     return res.data
   },
 
@@ -23,7 +23,7 @@ export const DataSet = {
    */
   registerDataset: async (registration: FormData): Promise<Dataset> => {
     const url = `${await Config.getApiUrl()}/api/dataset/v3`
-    const res = await fetchMultipart<Dataset>(url, registration, Config.multiPartOpts())
+    const res = await fetchMultipart<Dataset>(url, registration)
     return res.data
   },
 
@@ -34,7 +34,7 @@ export const DataSet = {
    */
   getDatasetsByIds: async (ids: number[]): Promise<Dataset[]> => {
     const url = `${await Config.getApiUrl()}/api/dataset/batch?ids=${ids.join('&ids=')}`
-    const res = await fetchGet<Dataset[]>(url, Config.authOpts())
+    const res = await fetchGet<Dataset[]>(url)
     return res.data
   },
 
@@ -46,8 +46,7 @@ export const DataSet = {
    */
   searchDatasetIndex: async (query: ElasticsearchQuery, options: { signal?: AbortSignal } = {}): Promise<DatasetTerm[]> => {
     const url = `${await Config.getApiUrl()}/api/dataset/search/index`
-    const config = { ...Config.authOpts(), ...options }
-    const res = await fetchPost<DatasetTerm[]>(url, query, config)
+    const res = await fetchPost<DatasetTerm[]>(url, query, options)
     return res.data
   },
 
@@ -58,7 +57,7 @@ export const DataSet = {
    */
   searchDatasetIndexV2: async (query: ElasticsearchQuery): Promise<ElasticsearchResponse> => {
     const url = `${await Config.getApiUrl()}/api/dataset/search/index/v2`
-    const res = await fetchPost<ElasticsearchResponse>(url, query, Config.authOpts())
+    const res = await fetchPost<ElasticsearchResponse>(url, query)
     return res.data
   },
 
@@ -69,7 +68,7 @@ export const DataSet = {
    */
   getDataSetsByDatasetId: async (datasetId: number): Promise<Dataset> => {
     const url = `${await Config.getApiUrl()}/api/dataset/v2/${datasetId}`
-    const res = await fetchGet<Dataset>(url, Config.authOpts())
+    const res = await fetchGet<Dataset>(url)
     return res.data
   },
 
@@ -80,7 +79,7 @@ export const DataSet = {
    */
   deleteDataset: async (datasetObjectId: number | string): Promise<{ status: 200 }> => {
     const url = `${await Config.getApiUrl()}/api/dataset/${datasetObjectId}`
-    await fetchDelete<void>(url, Config.authOpts())
+    await fetchDelete<void>(url)
     return { status: 200 }
   },
 
@@ -92,7 +91,7 @@ export const DataSet = {
    */
   updateDatasetV3: async (datasetId: number | string, datasetAndFiles: FormData): Promise<Dataset> => {
     const url = `${await Config.getApiUrl()}/api/dataset/v3/${datasetId}`
-    const res = await fetchMultipart<Dataset>(url, datasetAndFiles, Config.multiPartOpts(), 'PUT')
+    const res = await fetchMultipart<Dataset>(url, datasetAndFiles, {}, 'PUT')
     return res.data
   },
 
@@ -103,7 +102,7 @@ export const DataSet = {
    */
   getStudyById: async (studyId: number | string): Promise<Study> => {
     const url = `${await Config.getApiUrl()}/api/dataset/study/${studyId}`
-    const res = await fetchGet<Study>(url, Config.authOpts())
+    const res = await fetchGet<Study>(url)
     return res.data
   },
 
@@ -115,7 +114,7 @@ export const DataSet = {
    */
   updateStudy: async (studyId: number | string, studyObject: FormData): Promise<Study> => {
     const url = `${await Config.getApiUrl()}/api/dataset/study/${studyId}`
-    const res = await fetchMultipart<Study>(url, studyObject, Config.multiPartOpts(), 'PUT')
+    const res = await fetchMultipart<Study>(url, studyObject, {}, 'PUT')
     return res.data
   },
 
@@ -128,17 +127,15 @@ export const DataSet = {
     if (datasetId === undefined) return
     const datasetInfo = await DataSet.getDataSetsByDatasetId(datasetId)
     const fileName = datasetInfo.nihInstitutionalCertificationFile?.fileName ?? ''
-    const authOpts = {
-      ...Config.authOpts(),
+    const config = {
       responseType: 'blob' as const,
       headers: {
-        ...Config.authOpts().headers,
         'Content-Type': 'application/octet-stream',
         'Accept': 'application/octet-stream',
       },
     }
     const url = `${await Config.getApiUrl()}/api/dataset/${datasetId}/nihInstitutionalCertification`
-    const res = await fetchGet<Blob>(url, authOpts)
+    const res = await fetchGet<Blob>(url, config)
     fileDownload(res.data, fileName)
   },
 }

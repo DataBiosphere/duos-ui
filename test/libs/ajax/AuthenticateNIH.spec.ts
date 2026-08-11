@@ -12,29 +12,24 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
 
 const apiUrl = 'https://api'
 const ecmUrl = 'https://ecm'
-const authHeaders = { headers: { Authorization: 'Bearer test' } } as ReturnType<typeof Config.authOpts>
 
 describe('AuthenticateNIH', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(Config, 'getApiUrl').mockResolvedValue(apiUrl)
     vi.spyOn(Config, 'getECMUrl').mockResolvedValue(ecmUrl)
-    vi.spyOn(Config, 'authOpts').mockReturnValue(authHeaders)
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
-  it('deleteAccountLinkage sends DELETE request with auth header', async () => {
+  it('deleteAccountLinkage sends DELETE request without client-side auth options', async () => {
     vi.mocked(fetchDelete).mockResolvedValue({} as FetchData<void>)
 
     await AuthenticateNIH.deleteAccountLinkage()
 
-    expect(fetchDelete).toHaveBeenCalledWith(
-      `${apiUrl}/api/nih`,
-      expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer test' }) }),
-    )
+    expect(fetchDelete).toHaveBeenCalledWith(`${apiUrl}/api/nih`)
   })
 
   it('getECMProviderAuthUrl sends correct request and returns value', async () => {
@@ -49,7 +44,7 @@ describe('AuthenticateNIH', () => {
     expect(fetchPost).toHaveBeenCalledWith(
       expect.stringContaining(`redirectUri=${redirectUri}`),
       { redirectTo },
-      expect.objectContaining({ headers: expect.objectContaining({ Accept: '*/*' }) }),
+      { headers: { Accept: '*/*' } },
     )
   })
 
@@ -71,12 +66,10 @@ describe('AuthenticateNIH', () => {
     expect(fetchPost).toHaveBeenCalledWith(
       expect.stringContaining(`state=${state}`),
       null,
-      authHeaders,
     )
     expect(fetchPost).toHaveBeenCalledWith(
       expect.stringContaining(`oauthcode=${code}`),
       null,
-      authHeaders,
     )
   })
 
@@ -87,6 +80,6 @@ describe('AuthenticateNIH', () => {
     const result = await AuthenticateNIH.getSyncedUser()
 
     expect(result).toEqual(mockUser)
-    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/nih/sync`, authHeaders)
+    expect(fetchGet).toHaveBeenCalledWith(`${apiUrl}/api/nih/sync`)
   })
 })

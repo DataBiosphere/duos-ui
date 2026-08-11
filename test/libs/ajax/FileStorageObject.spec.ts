@@ -22,9 +22,6 @@ vi.mock('src/libs/ajax/fetchAdapter', () => ({
   fetchMultipart: vi.fn(),
 }))
 
-const authHeaders = { headers: { Authorization: 'Bearer test' } } as ReturnType<typeof Config.authOpts>
-const multiPartHeaders = { headers: { Authorization: 'Bearer test' } } as ReturnType<typeof Config.multiPartOpts>
-
 const mockFso: FileStorageObject = {
   fileStorageObjectId: 1,
   entityId: '42',
@@ -49,8 +46,6 @@ describe('FileStorageObject ajax', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(Config, 'getApiUrl').mockResolvedValue('')
-    vi.spyOn(Config, 'authOpts').mockReturnValue(authHeaders)
-    vi.spyOn(Config, 'multiPartOpts').mockReturnValue(multiPartHeaders)
   })
 
   afterEach(() => {
@@ -68,7 +63,6 @@ describe('FileStorageObject ajax', () => {
       expect(fetchMultipart).toHaveBeenCalledWith(
         '/api/document/dataset/42',
         expect.any(FormData),
-        multiPartHeaders,
       )
     })
   })
@@ -83,7 +77,6 @@ describe('FileStorageObject ajax', () => {
       expect(fetchPut).toHaveBeenCalledWith(
         '/api/document/dataset/42/1',
         { category: FileCategory.DATA_ACCESS_AGREEMENT },
-        authHeaders,
       )
     })
   })
@@ -95,7 +88,7 @@ describe('FileStorageObject ajax', () => {
       const result = await getDocument(EntityType.DAC, '10', 1)
 
       expect(result).toEqual(mockFso)
-      expect(fetchGet).toHaveBeenCalledWith('/api/document/dac/10/1', authHeaders)
+      expect(fetchGet).toHaveBeenCalledWith('/api/document/dac/10/1')
     })
   })
 
@@ -109,7 +102,6 @@ describe('FileStorageObject ajax', () => {
       expect(result).toBeInstanceOf(Blob)
       expect(fetchBlob).toHaveBeenCalledWith(
         '/api/document/study/7/2/file',
-        authHeaders,
       )
     })
   })
@@ -121,7 +113,7 @@ describe('FileStorageObject ajax', () => {
       const result = await listDocuments(EntityType.DAR, '99')
 
       expect(result).toEqual([mockFso])
-      expect(fetchGet).toHaveBeenCalledWith('/api/document/dar/99', authHeaders)
+      expect(fetchGet).toHaveBeenCalledWith('/api/document/dar/99')
     })
   })
 
@@ -132,7 +124,7 @@ describe('FileStorageObject ajax', () => {
       const result = await deleteDocument(EntityType.DATASET, '42', 1)
 
       expect(result).toEqual(mockDeletedFso)
-      expect(fetchDelete).toHaveBeenCalledWith('/api/document/dataset/42/1', authHeaders)
+      expect(fetchDelete).toHaveBeenCalledWith('/api/document/dataset/42/1')
     })
   })
 })
