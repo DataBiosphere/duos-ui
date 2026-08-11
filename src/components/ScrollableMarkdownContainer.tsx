@@ -1,6 +1,5 @@
 import ReactMarkdown from 'react-markdown'
 import React, { useEffect, useState } from 'react'
-import { isEmpty } from 'src/utils/NodashUtil'
 import { Theme } from 'src/libs/theme'
 
 export type MarkdownLoadState = 'loading' | 'loaded' | 'error'
@@ -95,19 +94,11 @@ export default function ScrollableMarkdownContainer({ markdown, onLoadStateChang
     onLoadStateChange?.(loadState)
   }, [loadState, onLoadStateChange])
 
-  const generateContent = (markdownText: string): React.ReactElement => (
-    <ReactMarkdown components={markdownComponents}>
-      {markdownText}
-    </ReactMarkdown>
-  )
-
-  const content = generateContent(text)
-
   return (
     <div style={containerStyle}>
       {loadState === 'error'
         ? <div style={errorStyle} role="alert">This document could not be loaded. Please close this dialog and try again.</div>
-        : !isEmpty(content) && content}
+        : <ReactMarkdown components={markdownComponents}>{text}</ReactMarkdown>}
     </div>
   )
 }
