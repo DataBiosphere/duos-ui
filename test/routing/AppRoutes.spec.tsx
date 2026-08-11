@@ -27,6 +27,7 @@ const LocationSpy = ({ onLocationChange }: { onLocationChange: (loc: string) => 
 }
 
 const roleBACRoutes: string[] = [
+  '/researcher_console_dashboard',
   '/researcher_console',
   '/datasets',
   '/dar_collection/1',

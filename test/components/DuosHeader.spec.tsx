@@ -4,7 +4,8 @@ import '@testing-library/jest-dom/vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import DuosHeader from 'src/components/DuosHeader'
+import DuosHeader, { headerTabsConfig } from 'src/components/DuosHeader'
+import { visibleSubTabs } from 'src/components/navigation/subTabVisibility'
 import { Storage } from 'src/libs/storage'
 import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 import { DuosUser } from 'src/types/model'
@@ -123,6 +124,16 @@ describe('DuosHeader', () => {
       expect(screen.getByRole('tab', { name: 'Dashboard' })).toBeInTheDocument()
       expect(screen.getByRole('tab', { name: 'Data Library' })).toBeInTheDocument()
     })
+
+    // The section pages are registered as sub-tabs only so their URLs resolve to this tab; the
+    // Dashboard's tiles are the only advertised route to them, so the bar must not list them.
+    it('keeps the Researcher Console section pages out of the sub-tab bar', () => {
+      const researcherConsole = headerTabsConfig.find(tab => tab.label === 'Researcher Console')
+
+      expect(visibleSubTabs(researcherConsole?.children, { ...mockUser, isDataSubmitter: true })
+        .map(subTab => subTab.label))
+        .toEqual(['Dashboard', 'Data Library'])
+    })
   })
 
   describe('Authenticated Admin', () => {
@@ -179,6 +190,18 @@ describe('DuosHeader', () => {
 
     it('highlights Researcher Console on /datalibrary for admin+researcher (direct link wins over child match)', async () => {
       await mountHeader('/datalibrary', { ...mockUser, isAdmin: true, isResearcher: true })
+      expect(screen.getByRole('tab', { name: 'Researcher Console' })).toHaveClass('Mui-selected')
+    })
+
+    // Every Researcher Console section must stay in headerTabsConfig. A section that matches no
+    // tab entry leaves urlDerivedTab at -1, and the header then highlights whichever console the
+    // user happens to have first - Admin, for this fixture.
+    it.each([
+      '/researcher_console',
+      '/datasets',
+      '/dataset_submissions',
+    ])('highlights Researcher Console on %s for admin+researcher', async (path) => {
+      await mountHeader(path, { ...mockUser, isAdmin: true, isDataSubmitter: true })
       expect(screen.getByRole('tab', { name: 'Researcher Console' })).toHaveClass('Mui-selected')
     })
 

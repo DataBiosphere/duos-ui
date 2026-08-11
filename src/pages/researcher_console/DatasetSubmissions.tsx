@@ -17,7 +17,6 @@ import { makeSubmissionColumns } from 'src/components/data_library/columns/submi
 import { ConfirmationDialog } from 'src/components/modals/ConfirmationDialog'
 import { useQueryClient } from '@tanstack/react-query'
 import { AssetType, ALL_LIBRARY_TABS, LibraryVersionNew, TabConfig } from 'src/types/library'
-import { DuosUser } from 'src/types/model'
 
 const SUBMISSION_TAB_TYPES = new Set<AssetType>([
   AssetType.STUDIES,
@@ -34,19 +33,22 @@ const SUBMISSION_TABS: TabConfig[] = ALL_LIBRARY_TABS.filter(t => SUBMISSION_TAB
 
 // Scopes a library query to datasets/studies the user submitted or is the data custodian for.
 // The dashboard's Data Submissions stat counts the same records, applying this rule server-side.
-const buildSubmissionOwnershipQuery = (user: Pick<DuosUser, 'userId' | 'email'> | undefined): unknown => {
-  if (!user?.userId && !user?.email) return undefined
+// Takes the two identifiers rather than the user so its memo can depend on those primitives:
+// Storage.getCurrentUser() JSON.parses a new object every render, and a memo keyed on that object
+// never hits.
+const buildSubmissionOwnershipQuery = (userId: number | undefined, email: string | undefined): unknown => {
+  if (!userId && !email) return undefined
   return {
     bool: {
       should: [
-        ...(user.userId
+        ...(userId
           ? [
-              { term: { createUserId: user.userId } },
-              { term: { 'study.dataSubmitterId': user.userId } },
+              { term: { createUserId: userId } },
+              { term: { 'study.dataSubmitterId': userId } },
             ]
           : []),
-        ...(user.email
-          ? [{ term: { 'study.dataCustodianEmail': user.email } }]
+        ...(email
+          ? [{ term: { 'study.dataCustodianEmail': email } }]
           : []),
       ],
       minimum_should_match: 1,
@@ -69,8 +71,8 @@ export default function DatasetSubmissions() {
   const user = Storage.getCurrentUser()
 
   const userOwnershipQuery = useMemo(
-    () => buildSubmissionOwnershipQuery(user),
-    [user],
+    () => buildSubmissionOwnershipQuery(user?.userId, user?.email),
+    [user?.userId, user?.email],
   )
 
   const libraryConfig: LibraryVersionNew = useMemo(() => ({

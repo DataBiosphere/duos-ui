@@ -6,6 +6,6 @@ interface ConsoleDashboardTitleProps {
   children: React.ReactNode
 }
 
-export default function ConsoleDashboardTitle({ children }: ConsoleDashboardTitleProps): React.JSX.Element {
+export default function ConsoleDashboardTitle({ children }: Readonly<ConsoleDashboardTitleProps>): React.JSX.Element {
   return <Typography component="h1" sx={titleStyle}>{children}</Typography>
 }

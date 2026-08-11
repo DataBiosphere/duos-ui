@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React from 'react'
 import { Box } from '@mui/material'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
@@ -16,24 +15,21 @@ import ConsoleDashboardGrid from 'src/components/dashboard/ConsoleDashboardGrid'
 import ConsoleDashboardPromo from 'src/components/dashboard/ConsoleDashboardPromo'
 import ConsoleDashboardResources, { ConsoleDashboardResource } from 'src/components/dashboard/ConsoleDashboardResources'
 import ConsoleDashboardTitle from 'src/components/dashboard/ConsoleDashboardTitle'
-import { Notifications } from 'src/libs/utils'
+import {
+  ConsoleDashboardTileMeta,
+  useConsoleDashboardSummary,
+} from 'src/components/dashboard/useConsoleDashboardSummary'
 import { SigningOfficial, SigningOfficialDashboardSummary } from 'src/libs/ajax/SigningOfficial'
-import { extractError } from 'src/utils/ErrorUtils'
 import { SO_CONSOLE_SECTIONS } from './signingOfficialConsoleRoutes'
 
-interface Stat {
-  label: string
-  value: (summary: SigningOfficialDashboardSummary) => number
-}
-
-const tileMeta: Array<{ label: string, link: string, icon: React.ComponentType, description: string, stats: Stat[] }> = [
+const tileMeta: ConsoleDashboardTileMeta<SigningOfficialDashboardSummary>[] = [
   {
     ...SO_CONSOLE_SECTIONS[0],
     icon: PeopleAltOutlinedIcon,
     description: 'Manage researchers who request data on behalf of your institution.',
     stats: [
-      { label: 'Active', value: s => s.researcherStatus.active },
-      { label: 'Inactive', value: s => s.researcherStatus.inactive },
+      { label: 'Active', value: s => s?.researcherStatus?.active },
+      { label: 'Inactive', value: s => s?.researcherStatus?.inactive },
     ],
   },
   {
@@ -41,10 +37,10 @@ const tileMeta: Array<{ label: string, link: string, icon: React.ComponentType, 
     icon: DescriptionOutlinedIcon,
     description: 'Review data access requests submitted by researchers at your institution.',
     stats: [
-      { label: 'Total', value: s => s.darRequests.total },
-      { label: 'Approved', value: s => s.darRequests.approved },
-      { label: 'Canceled', value: s => s.darRequests.canceled },
-      { label: 'In Process', value: s => s.darRequests.inProcess },
+      { label: 'Total', value: s => s?.darRequests?.total },
+      { label: 'Approved', value: s => s?.darRequests?.approved },
+      { label: 'Canceled', value: s => s?.darRequests?.canceled },
+      { label: 'In Process', value: s => s?.darRequests?.inProcess },
     ],
   },
   {
@@ -52,23 +48,23 @@ const tileMeta: Array<{ label: string, link: string, icon: React.ComponentType, 
     icon: FactCheckOutlinedIcon,
     description: 'Approve or reject data access request applications awaiting your signature.',
     stats: [
-      { label: 'Total', value: s => s.darApprovals.total },
-      { label: 'Awaiting SO Action', value: s => s.darApprovals.awaitingSoAction },
+      { label: 'Total', value: s => s?.darApprovals?.total },
+      { label: 'Awaiting SO Action', value: s => s?.darApprovals?.awaitingSoAction },
     ],
   },
   {
     ...SO_CONSOLE_SECTIONS[3],
     icon: GroupOutlinedIcon,
     description: 'Manage the researchers who submit data on behalf of your institution.',
-    stats: [{ label: 'Approved', value: s => s.dataSubmitters.approved }],
+    stats: [{ label: 'Approved', value: s => s?.dataSubmitters?.approved }],
   },
   {
     ...SO_CONSOLE_SECTIONS[4],
     icon: StorageOutlinedIcon,
     description: 'Browse the datasets and studies registered by your institution.',
     stats: [
-      { label: 'Datasets', value: s => s.institutionLibrary.datasets },
-      { label: 'Studies', value: s => s.institutionLibrary.studies },
+      { label: 'Datasets', value: s => s?.institutionLibrary?.datasets },
+      { label: 'Studies', value: s => s?.institutionLibrary?.studies },
     ],
   },
   {
@@ -76,8 +72,8 @@ const tileMeta: Array<{ label: string, link: string, icon: React.ComponentType, 
     icon: HandshakeOutlinedIcon,
     description: 'Manage Data Access Agreement associations for your researchers.',
     stats: [
-      { label: 'Agreements', value: s => s.daaAssociations.agreements },
-      { label: 'Researchers Approved', value: s => s.daaAssociations.researchersApproved },
+      { label: 'Agreements', value: s => s?.daaAssociations?.agreements },
+      { label: 'Researchers Approved', value: s => s?.daaAssociations?.researchersApproved },
     ],
   },
 ]
@@ -105,37 +101,17 @@ const helpfulResources: ConsoleDashboardResource[] = [
 
 export default function SigningOfficialDashboard(): React.JSX.Element {
   usePageTitle('Dashboard')
-  const { data, isFetching, error } = useQuery({
-    queryKey: ['signing-official-dashboard-summary'],
-    queryFn: SigningOfficial.getDashboardSummary,
-    staleTime: 0,
-    retry: false,
-    refetchOnMount: 'always',
-  })
-
-  useEffect(() => {
-    if (error) {
-      Notifications.showError({
-        text: `Error: Unable to load dashboard statistics: ${extractError(error)}`,
-      })
-    }
-  }, [error])
-
-  // Hide cached counts while a refetch is in flight so stale and fresh numbers never mix.
-  const summary = isFetching || error ? undefined : data
-  const tiles = tileMeta.map(tile => ({
-    ...tile,
-    stats: tile.stats.map(stat => ({
-      label: stat.label,
-      value: summary ? stat.value(summary) : null,
-    })),
-  }))
+  const { tiles, isLoading } = useConsoleDashboardSummary(
+    ['signing-official-dashboard-summary'],
+    SigningOfficial.getDashboardSummary,
+    tileMeta,
+  )
 
   return (
     <Box sx={{ ...Styles.PAGE }}>
       <ConsoleDashboardTitle>Signing Official Console</ConsoleDashboardTitle>
 
-      <ConsoleDashboardGrid tiles={tiles} isLoading={isFetching} />
+      <ConsoleDashboardGrid tiles={tiles} isLoading={isLoading} />
 
       <ConsoleDashboardResources
         heading="Helpful Resources for Signing Officials"

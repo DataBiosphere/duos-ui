@@ -13,7 +13,7 @@ export default function ConsoleDashboardPromo({
   heading,
   paragraphs,
   buttonLabel = 'Contact Us',
-}: ConsoleDashboardPromoProps): React.JSX.Element {
+}: Readonly<ConsoleDashboardPromoProps>): React.JSX.Element {
   const [showContactModal, setShowContactModal] = useState(false)
 
   return (

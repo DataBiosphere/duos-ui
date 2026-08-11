@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React from 'react'
 import { Box } from '@mui/material'
 import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
@@ -21,68 +20,59 @@ import ConsoleDashboardGrid from 'src/components/dashboard/ConsoleDashboardGrid'
 import ConsoleDashboardPromo from 'src/components/dashboard/ConsoleDashboardPromo'
 import ConsoleDashboardResources, { ConsoleDashboardResource } from 'src/components/dashboard/ConsoleDashboardResources'
 import ConsoleDashboardTitle from 'src/components/dashboard/ConsoleDashboardTitle'
-import { Notifications } from 'src/libs/utils'
+import {
+  ConsoleDashboardTileMeta,
+  isRenderedForUser,
+  useConsoleDashboardSummary,
+} from 'src/components/dashboard/useConsoleDashboardSummary'
 import { Researcher, ResearcherDashboardSummary } from 'src/libs/ajax/Researcher'
-import { DuosUser } from 'src/types/model'
-import { extractError } from 'src/utils/ErrorUtils'
+import { RESEARCHER_CONSOLE_SECTIONS } from './researcherConsoleRoutes'
 
-interface Stat {
-  label: string
-  value: (summary: ResearcherDashboardSummary) => number
-}
-
-// These pages no longer have top-nav sub-tabs; the Dashboard is the only route to them, so the
-// tile list lives here rather than being derived from headerTabsConfig.
-const tileMeta: Array<{
-  label: string
-  link: string
-  icon: React.ComponentType
-  description: string
-  stats: Stat[]
-  isRenderedForUser?: (user: DuosUser) => boolean
-}> = [
+// Tiles reuse the header's section entries so a tile and its sub-tab can never disagree about a
+// route or about who is allowed to see it.
+const tileMeta: ConsoleDashboardTileMeta<ResearcherDashboardSummary>[] = [
   {
     label: 'Data Library',
     link: '/datalibrary',
     icon: LibraryBooksOutlinedIcon,
     description: 'Browse and search datasets, studies, and other assets available in DUOS.',
+    // The endpoint applies the same publicVisibility restriction /datalibrary does, so these
+    // counts match the tab badges a researcher sees there.
     stats: [
-      { label: 'Studies', value: s => s.dataLibrary.studies },
-      { label: 'Datasets', value: s => s.dataLibrary.datasets },
-      { label: 'AI Models', value: s => s.dataLibrary.models },
-      { label: 'Workspaces', value: s => s.dataLibrary.workspaces },
+      { label: 'Studies', value: s => s?.dataLibrary?.studies },
+      { label: 'Datasets', value: s => s?.dataLibrary?.datasets },
+      { label: 'AI Models', value: s => s?.dataLibrary?.models },
+      { label: 'Workspaces', value: s => s?.dataLibrary?.workspaces },
     ],
   },
   {
-    label: 'Data Access Requests',
-    link: '/researcher_console',
+    ...RESEARCHER_CONSOLE_SECTIONS[0],
     icon: DescriptionOutlinedIcon,
     description: 'Track the data access requests you have submitted.',
     stats: [
-      { label: 'Total', value: s => s.darRequests.total },
-      { label: 'Approved', value: s => s.darRequests.approved },
-      { label: 'Canceled', value: s => s.darRequests.canceled },
-      { label: 'In Process', value: s => s.darRequests.inProcess },
+      { label: 'Total', value: s => s?.darRequests?.total },
+      { label: 'Approved', value: s => s?.darRequests?.approved },
+      { label: 'Canceled', value: s => s?.darRequests?.canceled },
+      { label: 'In Process', value: s => s?.darRequests?.inProcess },
     ],
   },
   {
-    label: 'My Dataset Approvals',
-    link: '/datasets',
+    ...RESEARCHER_CONSOLE_SECTIONS[1],
     icon: AssignmentTurnedInOutlinedIcon,
     description: 'View your current dataset approvals and when access expires.',
     stats: [
-      { label: 'Active', value: s => s.datasetApprovals.active },
-      { label: 'Expiring in 30 Days', value: s => s.datasetApprovals.expiringSoon },
-      { label: 'Expired', value: s => s.datasetApprovals.expired },
+      { label: 'Active', value: s => s?.datasetApprovals?.active },
+      { label: 'Expiring in 30 Days', value: s => s?.datasetApprovals?.expiringSoon },
+      { label: 'Expired', value: s => s?.datasetApprovals?.expired },
     ],
   },
   {
-    label: 'Data Submissions',
-    link: '/dataset_submissions',
+    ...RESEARCHER_CONSOLE_SECTIONS[2],
     icon: CloudUploadOutlinedIcon,
     description: 'Track the status of datasets you have registered in DUOS.',
-    stats: [{ label: 'Total', value: s => s.dataSubmissions.total }],
-    isRenderedForUser: user => user?.isDataSubmitter,
+    // Labelled "All Submissions" because it sums all nine tabs of My Data Submissions, while the
+    // page it links to opens on Datasets - no single badge there is meant to match this number.
+    stats: [{ label: 'All Submissions', value: s => s?.dataSubmissions?.total }],
   },
 ]
 
@@ -116,6 +106,9 @@ const helpfulResources: ConsoleDashboardResource[] = [
     label: 'Promote Your Publications in DUOS',
     description: 'Add your publications to DUOS so the research community can discover the science that used your data.',
     to: '/dataset_submissions?tab=publications',
+    // /dataset_submissions is RoleBAC-gated, so offering this to a plain researcher would land
+    // them on Not Found. Gated exactly like the Data Submissions tile.
+    isRenderedForUser: user => user?.isDataSubmitter === true,
   },
   {
     icon: FactCheckOutlinedIcon,
@@ -145,40 +138,19 @@ const helpfulResources: ConsoleDashboardResource[] = [
 
 export default function ResearcherDashboard(): React.JSX.Element {
   usePageTitle('Dashboard')
-  const { data, isFetching, error } = useQuery({
-    queryKey: ['researcher-dashboard-summary'],
-    queryFn: Researcher.getDashboardSummary,
-    staleTime: 0,
-    retry: false,
-    refetchOnMount: 'always',
-  })
-
-  useEffect(() => {
-    if (error) {
-      Notifications.showError({
-        text: `Error: Unable to load dashboard statistics: ${extractError(error)}`,
-      })
-    }
-  }, [error])
-
-  // Hide cached counts while a refetch is in flight so stale and fresh numbers never mix.
-  const summary = isFetching || error ? undefined : data
   const currentUser = Storage.getCurrentUser()
-  const tiles = tileMeta
-    .filter(tile => tile.isRenderedForUser?.(currentUser) ?? true)
-    .map(tile => ({
-      ...tile,
-      stats: tile.stats.map(stat => ({
-        label: stat.label,
-        value: summary ? stat.value(summary) : null,
-      })),
-    }))
+  const visibleTiles = tileMeta.filter(tile => isRenderedForUser(tile.isRenderedForUser, currentUser))
+  const { tiles, isLoading } = useConsoleDashboardSummary(
+    ['researcher-dashboard-summary'],
+    Researcher.getDashboardSummary,
+    visibleTiles,
+  )
 
   return (
     <Box sx={{ ...Styles.PAGE }}>
       <ConsoleDashboardTitle>Researcher Console</ConsoleDashboardTitle>
 
-      <ConsoleDashboardGrid tiles={tiles} isLoading={isFetching} />
+      <ConsoleDashboardGrid tiles={tiles} isLoading={isLoading} />
 
       <ConsoleDashboardResources
         heading="Helpful Resources for Researchers"

@@ -34,7 +34,7 @@ interface ConsoleDashboardGridProps {
   isLoading: boolean
 }
 
-export default function ConsoleDashboardGrid({ tiles, isLoading }: ConsoleDashboardGridProps): React.JSX.Element {
+export default function ConsoleDashboardGrid({ tiles, isLoading }: Readonly<ConsoleDashboardGridProps>): React.JSX.Element {
   // Tiles leave the console's own tab, so they carry the tab context that keeps it highlighted.
   const { activeTab } = useNavigationState()
 
@@ -59,9 +59,11 @@ export default function ConsoleDashboardGrid({ tiles, isLoading }: ConsoleDashbo
                 {tile.stats.map((stat) => {
                   // The en-dash alone tells a screen reader nothing, so the accessible name
                   // spells out the label and either the count or why it is missing.
+                  // Nullish, not `!== null`: the visible text falls back with `??`, so testing
+                  // only for `null` would announce "undefined" over a tile reading "–".
                   const value = isLoading ? null : stat.value
                   let valueDescription: string
-                  if (value !== null) {
+                  if (value != null) {
                     valueDescription = `${value}`
                   }
                   else if (isLoading) {

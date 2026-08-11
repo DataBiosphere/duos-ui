@@ -188,4 +188,72 @@ describe('ResearcherDashboard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close support' }))
     expect(screen.queryByTestId('support-modal')).not.toBeInTheDocument()
   })
+
+  it('routes in-app resource cards through the router with the console tab context attached', async () => {
+    renderDashboard()
+
+    // Not an external link: no new tab, no "opens in new tab" icon, and the query string survives.
+    const progressReports = await screen.findByRole('link', { name: /Progress Reports/ })
+    expect(progressReports).toHaveAttribute('href', '/researcher_console')
+    expect(progressReports).not.toHaveAttribute('target')
+
+    fireEvent.click(progressReports)
+    expect(screen.getByTestId('location-state')).toHaveTextContent(
+      JSON.stringify({ selectedMenuTab: 4 }),
+    )
+  })
+
+  it('offers the publications resource only to data submitters, who alone may open it', async () => {
+    renderDashboard()
+    await waitFor(() => expect(screen.queryByText('–')).not.toBeInTheDocument())
+    // /dataset_submissions is RoleBAC-gated; advertising it to a plain researcher lands them on
+    // Not Found.
+    expect(screen.queryByRole('link', { name: /Promote Your Publications/ })).not.toBeInTheDocument()
+
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(dataSubmitter)
+    renderDashboard()
+
+    expect(await screen.findByRole('link', { name: /Promote Your Publications/ })).toHaveAttribute(
+      'href', '/dataset_submissions?tab=publications',
+    )
+  })
+
+  it('does not replay a cached failure as a toast when the dashboard is revisited', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const notification = vi.spyOn(Notifications, 'showError').mockImplementation(() => undefined)
+    // A query that has loaded at least once keeps its data, so a later failure leaves both data
+    // and error in the cache - the state react-query hands straight back to the next mount.
+    client.setQueryData(['researcher-dashboard-summary'], summary)
+    vi.mocked(Researcher.getDashboardSummary).mockRejectedValueOnce(new Error('backend unavailable'))
+
+    const { unmount } = renderDashboard(client)
+    await waitFor(() => expect(notification).toHaveBeenCalledTimes(1))
+    unmount()
+
+    // Coming back to the dashboard: the query is still cached in its failed state while the
+    // mount refetch is in flight, and the old failure must not be announced again.
+    let resolveSummary: (value: ResearcherDashboardSummary) => void = () => undefined
+    vi.mocked(Researcher.getDashboardSummary).mockReturnValue(
+      new Promise(resolve => resolveSummary = resolve),
+    )
+    renderDashboard(client)
+
+    expect(notification).toHaveBeenCalledTimes(1)
+    expect(screen.getAllByText('–')).toHaveLength(11)
+
+    resolveSummary(summary)
+    expect(await screen.findByLabelText('Studies: 7')).toBeInTheDocument()
+    expect(notification).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders placeholders rather than crashing when the payload omits a group', async () => {
+    const partial = { darRequests: summary.darRequests } as unknown as ResearcherDashboardSummary
+    vi.mocked(Researcher.getDashboardSummary).mockResolvedValue(partial)
+    renderDashboard()
+
+    expect(await screen.findByLabelText('Total: 8')).toBeInTheDocument()
+    // A missing count reads as "unavailable", never as the literal string "undefined".
+    expect(screen.getByLabelText('Studies: unavailable')).toBeInTheDocument()
+    expect(screen.queryByLabelText(/undefined/)).not.toBeInTheDocument()
+  })
 })
