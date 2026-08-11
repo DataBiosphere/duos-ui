@@ -18,6 +18,7 @@ import DatasetStatistics from 'src/pages/DatasetStatistics'
 import RoleBAC from 'src/routing/RoleBAC'
 import { USER_ROLES } from 'src/libs/utils'
 import ResearcherConsole from 'src/pages/researcher_console/ResearcherConsole'
+import ResearcherDashboard from 'src/pages/researcher_console/ResearcherDashboard'
 import ControlledAccessGrants from 'src/pages/user_profile/ControlledAccessGrants'
 import DarCollectionReview from 'src/pages/dar_collection_review/DarCollectionReview'
 import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication'
@@ -44,7 +45,6 @@ import SigningOfficialDashboard from 'src/pages/signing_official_console/Signing
 import SigningOfficialLibraryCards from 'src/pages/signing_official_console/SigningOfficialLibraryCards'
 import SigningOfficialDarRequests from 'src/pages/signing_official_console/SigningOfficialDarRequests'
 import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs'
-import SigningOfficialDataSubmitters from 'src/pages/signing_official_console/SigningOfficialDataSubmitters'
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
 import { DataLibrary } from 'src/pages/DataLibrary'
@@ -79,6 +79,7 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route path="/studies/:studyId" element={<StudyDetails />} />
         <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
+          <Route path="/researcher_console_dashboard" element={<ResearcherDashboard />} />
           <Route path="/researcher_console" element={<ResearcherConsole />} />
           <Route path="/datasets" element={<ControlledAccessGrants />} />
           <Route path="/dar_collection/:collectionId" element={<DarCollectionReview adminPage={false} readOnly={false} />} />
@@ -108,7 +109,6 @@ const AppRoutes = (props: AppRoutesProps) => {
             <Route path="/signing_official_console/library_cards" element={<SigningOfficialLibraryCards />} />
             <Route path="/signing_official_console/dar_requests" element={<SigningOfficialDarRequests />} />
             <Route path="/signing_official_console/dar_approvals" element={<SigningOfficialDarApprovals />} />
-            <Route path="/signing_official_console/data_submitters" element={<SigningOfficialDataSubmitters />} />
             <Route path="/signing_official_console/researchers_daa_associations" element={<ManageResearcherDAAs />} />
           </Route>
         </Route>
