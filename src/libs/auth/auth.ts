@@ -2,14 +2,11 @@
     This file should abstract out the oidcBroker actions
     and implement DUOS specific auth login (signIn, signOut, etc.)
 
-    Two flows coexist behind Config.isBffEnabled() (BFF migration, Epic 4):
-    - BFF (bffEnabled true in config.json): the server owns the tokens; the
-      browser holds only the httpOnly session cookie. Sign-in is a full-page
-      redirect to the B2C login page via POST /auth/login, sign-out and auth
-      checks are /auth/* calls. Provider selection happens on the B2C page,
-      so signIn takes no idp parameter.
+    Two flows coexist behind Config.isBffEnabled() (BFF migration, Phase 4):
+    - BFF (bffEnabled true in config.json): the server owns the authentication
+      and proxy flow.
     - Legacy (default): the oidc-client-ts popup flow with tokens in
-      localStorage, unchanged until the environment cuts over (Epic 6).
+      localStorage, unchanged until the environment cuts over (Phase 6).
 */
 import { OidcBroker, OidcUser } from './oidcBroker'
 import { Storage } from './../storage'
@@ -41,9 +38,6 @@ export const Auth = {
   },
   initialize: async (): Promise<void> => {
     if (await Config.isBffEnabled()) {
-      // Tokens written by the legacy flow before the environment cut over
-      // would otherwise linger in localStorage until natural expiry. The
-      // legacy storage is deliberately never touched pre-cutover (4-B).
       purgeLegacyOidcKeys()
       return
     }
@@ -129,9 +123,6 @@ export const Auth = {
 
 export const redirectOnLogout = () => {
   const redirectTo = `/home?redirectTo=${globalThis.location.pathname}`
-  // Legacy signOut does not navigate — the assignment below does. BFF signOut
-  // navigates itself once the server session is destroyed; both writes target
-  // the same URL, so the two modes agree on the destination.
   void Auth.signOut(redirectTo)
   Redirect.to(redirectTo)
 }
