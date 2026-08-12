@@ -86,6 +86,23 @@ describe('LibraryFilters', () => {
     expect(screen.getByText('Participants')).toBeInTheDocument()
   })
 
+  // Driven off the registry rather than a hardcoded list. A key registered in assetFilterRegistry
+  // but claimed by neither CHECKBOX_FILTER_KEYS nor BOOLEAN_FILTER_KEYS falls through
+  // renderCheckboxSection's type guard and renders nothing at all — silently, with every other
+  // test still green. Asserting against the registry covers each new filter the day it lands.
+  it('renders a section for every filter registered for the asset', () => {
+    render(<LibraryFiltersWrapper />)
+
+    const sections = getFilterSectionsForAsset(AssetType.DATASETS, availableFilters)
+    expect(sections.length).toBeGreaterThan(0)
+    sections.forEach((section) => {
+      expect(
+        screen.getAllByText(section.label).length,
+        `no section rendered for "${section.key}"`,
+      ).toBeGreaterThan(0)
+    })
+  })
+
   it('renders filter options with counts', () => {
     render(<LibraryFiltersWrapper />)
     expect(screen.getByText('via DUOS (10)')).toBeInTheDocument()

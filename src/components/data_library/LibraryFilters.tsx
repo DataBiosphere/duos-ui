@@ -39,12 +39,28 @@ const CHECKBOX_FILTER_KEYS = [
   'biospecimenType',
   'biospecimenDataUse',
   'biospecimenPostMortemIntervalUnit',
+  'soApprovalModel',
 ] as const
 
 type CheckboxFilterKey = (typeof CHECKBOX_FILTER_KEYS)[number]
 
 const isCheckboxFilterKey = (key: FilterKey): key is CheckboxFilterKey =>
   (CHECKBOX_FILTER_KEYS as readonly string[]).includes(key)
+
+// Every key rendered as a Yes/No/Any radio group. A key missing from both this
+// list and CHECKBOX_FILTER_KEYS falls through to renderCheckboxSection's type
+// guard and renders nothing at all, so registering a filter is not enough —
+// it has to be claimed by one of these two.
+const BOOLEAN_FILTER_KEYS = [
+  'datasetsCited',
+  'publicationsDatasetsCited',
+  'instantApproval',
+] as const
+
+type BooleanFilterKey = (typeof BOOLEAN_FILTER_KEYS)[number]
+
+const isBooleanFilterKey = (key: FilterKey): key is BooleanFilterKey =>
+  (BOOLEAN_FILTER_KEYS as readonly string[]).includes(key)
 
 export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   filters,
@@ -309,7 +325,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
     )
   }
 
-  const renderBooleanSection = (key: 'datasetsCited' | 'publicationsDatasetsCited', label: string) => (
+  const renderBooleanSection = (key: BooleanFilterKey, label: string) => (
     <Accordion key={key}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{label}</Typography>
@@ -452,7 +468,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
                   return renderPostMortemIntervalSection(section)
                 }
 
-                if (section.key === 'datasetsCited' || section.key === 'publicationsDatasetsCited') {
+                if (isBooleanFilterKey(section.key)) {
                   return renderBooleanSection(section.key, section.label)
                 }
 
