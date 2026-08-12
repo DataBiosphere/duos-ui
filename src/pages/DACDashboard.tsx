@@ -27,7 +27,7 @@ const tileMeta: ConsoleDashboardTileMeta<DacDashboardSummary>[] = [
   },
   {
     label: 'Manage DACs',
-    link: '/manage_dac',
+    link: '/dac_console/manage_dac',
     icon: AccountBalanceOutlinedIcon,
     description: 'Manage the Data Access Committees you chair.',
     stats: [{ label: 'DACs', value: summary => summary.dacs?.total }],

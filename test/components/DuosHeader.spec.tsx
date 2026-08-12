@@ -166,6 +166,27 @@ describe('DuosHeader', () => {
       expect(screen.getByRole('tab', { name: 'Dashboard' })).toBeInTheDocument()
       expect(screen.getByRole('tab', { name: 'Data Library' })).toBeInTheDocument()
     })
+
+    it('keeps dashboard-only destinations out of the sub-tab bar', () => {
+      const dacConsole = headerTabsConfig.find(tab => tab.label === 'DAC Console')
+
+      expect(visibleSubTabs(dacConsole?.children, { ...mockUser, isChairPerson: true })
+        .map(subTab => subTab.label))
+        .toEqual(['Dashboard', 'Data Library'])
+    })
+
+    it('selects the DAC Console tab on its Manage DACs route without navigation state', async () => {
+      const adminChair = {
+        ...mockUser,
+        isAdmin: true,
+        isChairPerson: true,
+        isResearcher: false,
+      }
+      await mountHeader('/dac_console/manage_dac', adminChair)
+
+      expect(screen.getByRole('tab', { name: 'DAC Console' })).toHaveClass('Mui-selected')
+      expect(screen.getByRole('tab', { name: 'Admin Console' })).not.toHaveClass('Mui-selected')
+    })
   })
 
   describe('Contact Us Button', () => {

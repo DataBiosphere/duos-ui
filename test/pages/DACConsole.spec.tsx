@@ -102,7 +102,14 @@ vi.mock('src/components/dar_collection_table/DarCollectionTable', () => ({
       data-has-open={String(!!openCollection)}
     >
       {(collections ?? []).map(c => (
-        <span key={c.darCollectionId}>{c.darCode}</span>
+        <span
+          key={c.darCollectionId}
+          data-testid={`collection-${c.darCollectionId}`}
+          data-actions={c.actions.join(',')}
+          data-dataset-ids={c.datasetIds.join(',')}
+        >
+          {c.darCode}
+        </span>
       ))}
     </div>
   ),
@@ -143,6 +150,7 @@ const collection2 = makeCollection({
 
 const chairUser = { isChairPerson: true, isMember: false } as DuosUser
 const memberUser = { isChairPerson: false, isMember: true } as DuosUser
+const dualRoleUser = { isChairPerson: true, isMember: true } as DuosUser
 
 describe('DACConsole', () => {
   beforeEach(() => {
@@ -199,6 +207,43 @@ describe('DACConsole', () => {
       expect(table).toHaveAttribute('data-console-type', consoleTypes.MEMBER)
       expect(table).toHaveAttribute('data-has-cancel', 'false')
       expect(table).toHaveAttribute('data-has-open', 'false')
+    })
+  })
+
+  describe('as a Chairperson and Member', () => {
+    beforeEach(() => {
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(dualRoleUser)
+      vi.mocked(Collections.getCollectionSummariesByRoleName).mockImplementation((role) => {
+        if (role === USER_ROLES.chairperson) {
+          return Promise.resolve([{
+            ...collection1,
+            actions: ['Cancel'],
+            datasetIds: [1],
+          }])
+        }
+        return Promise.resolve([
+          {
+            ...collection1,
+            actions: ['Vote'],
+            dacNames: ['DAC2'],
+            datasetIds: [2],
+          },
+          { ...collection2, actions: ['Vote'] },
+        ])
+      })
+    })
+
+    it('fetches both role scopes and deduplicates overlapping collections', async () => {
+      await act(async () => renderWithRouter(<DACConsole />))
+
+      expect(Collections.getCollectionSummariesByRoleName).toHaveBeenCalledTimes(2)
+      expect(Collections.getCollectionSummariesByRoleName).toHaveBeenCalledWith(USER_ROLES.chairperson)
+      expect(Collections.getCollectionSummariesByRoleName).toHaveBeenCalledWith(USER_ROLES.member)
+      expect(screen.getAllByText('DAR-1')).toHaveLength(1)
+      expect(screen.getByText('DAR-2')).toBeInTheDocument()
+      expect(screen.getByTestId('collection-1')).toHaveAttribute('data-actions', 'Cancel,Vote')
+      expect(screen.getByTestId('collection-1')).toHaveAttribute('data-dataset-ids', '1,2')
+      expect(screen.getByTestId('collection-2')).toHaveAttribute('data-actions', 'Vote')
     })
   })
 

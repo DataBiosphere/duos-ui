@@ -92,6 +92,10 @@ export const headerTabsConfig: Tab[] = [
     children: [
       { label: 'Dashboard', link: '/dac_console' },
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
+      // Dashboard-only destinations still need to be registered so links carrying the active DAC
+      // tab do not fall through to another console that shares the same route.
+      { label: 'Data Access Requests', link: '/dac_console_dar_requests', isRendered: () => false },
+      { label: 'DAC Datasets', link: '/dac_datasets', isRendered: () => false },
     ],
     isRendered: user => user.isChairPerson || user.isMember,
   },

@@ -103,6 +103,13 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/dac_console" element={<DACDashboard />} />
           <Route path="/dac_console_dar_requests" element={<DACConsole />} />
         </Route>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
+          <Route path="/chair_console" element={<Navigate to="/dac_console_dar_requests" replace />} />
+          <Route path="/dac_console/manage_dac" element={<ManageDac />} />
+        </Route>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member]} />}>
+          <Route path="/member_console" element={<Navigate to="/dac_console_dar_requests" replace />} />
+        </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.signingOfficial]} />}>
           <Route element={<SOAcknowledged />}>
             <Route path="/signing_official_console" element={<Navigate to="/signing_official_console/dashboard" replace />} />

@@ -13,6 +13,33 @@ import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { DarCollectionSummary, Dataset } from 'src/types/model'
 
+const mergeCollectionSummaries = (
+  summariesByRole: DarCollectionSummary[][],
+): DarCollectionSummary[] => {
+  const summaries = new Map<number, DarCollectionSummary>()
+  summariesByRole.flat().forEach((summary) => {
+    const existing = summaries.get(summary.darCollectionId)
+    if (existing === undefined) {
+      summaries.set(summary.darCollectionId, summary)
+      return
+    }
+
+    const datasetIds = [...new Set([...existing.datasetIds, ...summary.datasetIds])]
+    summaries.set(summary.darCollectionId, {
+      ...existing,
+      // Actions are authorized by each role-scoped response. A member-only collection has no
+      // chair summary to merge, so it cannot inherit chair actions just because the user is also
+      // a chair elsewhere.
+      actions: [...new Set([...existing.actions, ...summary.actions])],
+      dacNames: [...new Set([...existing.dacNames, ...summary.dacNames])],
+      datasetIds,
+      datasetCount: datasetIds.length,
+      referenceIds: [...new Set([...existing.referenceIds, ...summary.referenceIds])],
+    })
+  })
+  return [...summaries.values()]
+}
+
 export default function DACConsole() {
   usePageTitle('Data Access Requests')
   const navigate = useNavigate()
@@ -20,6 +47,13 @@ export default function DACConsole() {
   // A user who is both a Chair and a Member gets the superset of capabilities (cancel/revise).
   const isChair = user.isChairPerson
   const role = isChair ? USER_ROLES.chairperson : USER_ROLES.member
+  const roles = useMemo(
+    () => [
+      ...(user.isChairPerson ? [USER_ROLES.chairperson] : []),
+      ...(user.isMember ? [USER_ROLES.member] : []),
+    ],
+    [user.isChairPerson, user.isMember],
+  )
   const consoleType = isChair ? consoleTypes.CHAIR : consoleTypes.MEMBER
 
   const [collections, setCollections] = useState<DarCollectionSummary[]>([])
@@ -39,10 +73,13 @@ export default function DACConsole() {
   useEffect(() => {
     const init = async () => {
       try {
-        const [cols, datasets] = await Promise.all([
-          Collections.getCollectionSummariesByRoleName(role),
+        const [summariesByRole, datasets] = await Promise.all([
+          Promise.all(roles.map(collectionRole =>
+            Collections.getCollectionSummariesByRoleName(collectionRole),
+          )),
           User.getUserRelevantDatasets(),
         ])
+        const cols = mergeCollectionSummaries(summariesByRole)
         setCollections(cols)
         setRelevantDatasets(datasets)
         setFilteredList(cols)
@@ -53,7 +90,7 @@ export default function DACConsole() {
       }
     }
     init()
-  }, [role])
+  }, [roles])
 
   const updateCollections = useCallback(
     (updatedCollection: DarCollectionSummary) => updateCollectionFn({ collections, filterFn, searchText, setCollections, setFilteredList })(updatedCollection),

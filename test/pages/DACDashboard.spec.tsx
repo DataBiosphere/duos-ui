@@ -64,7 +64,9 @@ describe('DACDashboard', () => {
     expect(screen.getByRole('link', { name: /Data Access Requests/ })).toHaveAttribute(
       'href', '/dac_console_dar_requests',
     )
-    expect(screen.getByRole('link', { name: /Manage DACs/ })).toHaveAttribute('href', '/manage_dac')
+    expect(screen.getByRole('link', { name: /Manage DACs/ })).toHaveAttribute(
+      'href', '/dac_console/manage_dac',
+    )
     expect(screen.getByRole('link', { name: /My DAC's Datasets/ })).toHaveAttribute('href', '/dac_datasets')
 
     resolveSummary(summary)
