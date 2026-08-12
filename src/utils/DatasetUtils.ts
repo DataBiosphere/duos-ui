@@ -49,8 +49,6 @@ const RULE_TYPE_TO_CODE: Record<string, 'GRU' | 'HMB'> = {
   HMB_DSV1: 'HMB',
 }
 
-const SO_DAR_APPROVAL_RULE_TYPE = 'REQUIRE_SO_DAR_APPROVAL'
-
 /**
  * How DACbot rules are loaded for a DAC. Callers pass the cached fetcher from `useDacRules`
  * so repeated lookups — and the separate radar and Signing Official passes — share one request
@@ -98,41 +96,26 @@ export const getRadarEnabledDatasetsWithRules = async (
     .map((dataset: { datasetId: number }) => dataset.datasetId))
 }
 
+const BACKEND_SO_APPROVAL_MODELS: Record<string, SoApprovalModel> = {
+  PER_DAR: 'per-dar',
+  PRE_AUTHORIZED: 'pre-authorized',
+}
+
 /**
- * Maps every supplied dataset to its DAC's Signing Official authorization model. Rules are
- * fetched per DAC and resolved independently, so one failing DAC leaves only its own datasets
- * 'unknown' rather than mislabeling the whole grid.
+ * Maps every supplied dataset to its DAC's Signing Official authorization model, which the search
+ * index resolves server-side (DT-3888). A dataset whose document predates that change — or that
+ * carries an unrecognised value — maps to 'unknown' so the grid shows nothing rather than naming
+ * the wrong approval process.
  */
-export const getSoApprovalModelByDatasetId = async (
-  datasets: DatasetTerm[],
-  fetchDacRules: DacRulesFetcher = Dac.fetchDACbotRules,
-): Promise<Map<number, SoApprovalModel>> => {
+export const getSoApprovalModelByDatasetId = (datasets: DatasetTerm[]): Map<number, SoApprovalModel> => {
   const modelByDatasetId = new Map<number, SoApprovalModel>()
   if (isEmpty(datasets)) return modelByDatasetId
 
-  const uniqueDacIds = Array.from(
-    new Set(datasets.filter(dataset => dataset.dacId !== undefined).map(dataset => dataset.dacId)),
-  )
-
-  const modelByDacId = new Map<number, SoApprovalModel>()
-  const outcomes = await Promise.allSettled(uniqueDacIds.map(dacId => fetchDacRules(dacId)))
-  outcomes.forEach((outcome, index) => {
-    const dacId = uniqueDacIds[index]
-    if (outcome.status === 'rejected') {
-      modelByDacId.set(dacId, 'unknown')
-      return
-    }
-    const rules: DACbotRule[] = outcome.value
-    const requiresSoApproval = rules.some(rule => rule.ruleType === SO_DAR_APPROVAL_RULE_TYPE && rule.enabledByUserId)
-    modelByDacId.set(dacId, requiresSoApproval ? 'per-dar' : 'pre-authorized')
-  })
-
   datasets.forEach((dataset) => {
-    // A dataset with no DAC has no per-DAR approval step to satisfy
-    const model = dataset.dacId === undefined
-      ? 'pre-authorized'
-      : modelByDacId.get(dataset.dacId) ?? 'unknown'
-    modelByDatasetId.set(dataset.datasetId, model)
+    modelByDatasetId.set(
+      dataset.datasetId,
+      BACKEND_SO_APPROVAL_MODELS[dataset.soApprovalModel ?? ''] ?? 'unknown',
+    )
   })
 
   return modelByDatasetId

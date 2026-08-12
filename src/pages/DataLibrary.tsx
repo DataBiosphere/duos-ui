@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { AssetType, LibraryVersionNew, ALL_LIBRARY_TABS, SoApprovalModel } from 'src/types/library'
+import { AssetType, LibraryVersionNew, ALL_LIBRARY_TABS } from 'src/types/library'
 import { DatasetTerm } from 'src/types/model'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { getBrandedLibrary } from 'src/libs/libraryVersions'
@@ -74,15 +74,22 @@ export const DataLibrary: React.FC = () => {
 
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
   const [radarEnabledDatasetIds, setRadarEnabledDatasetIds] = useState<Set<number>>(new Set())
-  const [soApprovalModelByDatasetId, setSoApprovalModelByDatasetId] = useState<Map<number, SoApprovalModel>>(new Map())
 
-  // One cached rules fetch per DAC, shared by the radar and Signing Official lookups below
+  // Cached rules fetch per DAC for the radar lookup below
   const fetchDacRules = useDacRules()
 
   const datasets = urlState.tab === AssetType.DATASETS && data?.items ? data.items as DatasetTerm[] : []
   const { data: exportableDatasets = {} } = useLibraryExportableDatasets(
     datasets,
     urlState.tab === AssetType.DATASETS,
+  )
+
+  // Carried on each indexed dataset, so the column renders with the grid rather than after it
+  const soApprovalModelByDatasetId = useMemo(
+    () => getSoApprovalModelByDatasetId(
+      urlState.tab === AssetType.DATASETS && data?.items ? data.items as DatasetTerm[] : [],
+    ),
+    [data, urlState.tab],
   )
 
   const selectedStudyIds = useMemo(() => {
@@ -118,21 +125,7 @@ export const DataLibrary: React.FC = () => {
       }
     }
 
-    const fetchSoApprovalModels = async () => {
-      if (urlState.tab !== AssetType.DATASETS || !data?.items?.length) {
-        setSoApprovalModelByDatasetId(new Map())
-        return
-      }
-      try {
-        setSoApprovalModelByDatasetId(await getSoApprovalModelByDatasetId(data.items as DatasetTerm[], fetchDacRules))
-      }
-      catch {
-        setSoApprovalModelByDatasetId(new Map())
-      }
-    }
-
     fetchRadarEnabled()
-    fetchSoApprovalModels()
   }, [data?.items, urlState.tab, fetchDacRules])
 
   const header = (

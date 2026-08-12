@@ -22,6 +22,7 @@ vi.mock('src/libs/ajax/DataSet', () => ({
 }))
 vi.mock('src/utils/DatasetUtils', () => ({
   getRadarEnabledDatasetsWithRules: vi.fn(),
+  getSoApprovalModelByDatasetId: vi.fn(() => new Map()),
 }))
 
 const ACCESS_REQUEST_PROCESS_LABEL = 'Access Request Process'

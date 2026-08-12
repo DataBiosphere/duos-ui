@@ -282,6 +282,8 @@ export interface DatasetTerm {
   requestLocation?: string
   dacId: number
   dacApproval: boolean
+  /** Signing Official authorization model resolved by the search index (DT-3888) */
+  soApprovalModel?: 'PER_DAR' | 'PRE_AUTHORIZED'
   hasInstitutionCertification?: boolean
   accessManagement: string
   approvedUserIds: number[]
