@@ -299,7 +299,7 @@ describe('getSoApprovalModelByDatasetId', () => {
     study: minimalStudy,
     submitter: { userId: 0, displayName: '', institution: { id: 0, name: '' } },
     updateUser: { userId: 0, displayName: '', institution: { id: 0, name: '' } },
-    dac: { dacId: 0, dacName: '', dacEmail: '' },
+    dac: { dacId: 2, dacName: '', dacEmail: '' },
     piName: '',
     dataUse: { primary: [], secondary: [] },
   }

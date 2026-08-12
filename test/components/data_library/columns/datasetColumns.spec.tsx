@@ -128,13 +128,19 @@ describe('datasetColumns — SO Approval column', () => {
     expect(container.querySelector('.MuiChip-root')).not.toBeInTheDocument()
   })
 
-  // Requirement 6: hovering the indicator explains the model
+  // Requirement 6: the indicator carries an explanation, without that explanation displacing the
+  // label — MUI would otherwise set aria-label to the tooltip text and screen readers would
+  // announce the explanation instead of which model applies
   it.each([
-    ['per-dar', /requires the Signing Official named in each Data Access Request/],
-    ['pre-authorized', /allows Signing Officials to pre-authorize researchers in advance/],
-  ] as const)('exposes an explanatory tooltip for the %s model', (model, expectedText) => {
+    ['per-dar', 'Per-Request Approval', /requires the Signing Official named in each Data Access Request/],
+    ['pre-authorized', 'Pre-Authorized Researchers', /allows Signing Officials to pre-authorize researchers in advance/],
+  ] as const)('describes the %s model without displacing the chip label', (model, label, expectedText) => {
     const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor(model))
-    expect(container.querySelector('.MuiChip-root')).toHaveAccessibleName(expectedText)
+    const chip = container.querySelector('.MuiChip-root')
+    expect(chip).toHaveTextContent(label)
+    expect(chip?.getAttribute('title')).toMatch(expectedText)
+    // Without describeChild, MUI would set this to the tooltip text and hide the label from AT
+    expect(chip).not.toHaveAttribute('aria-label')
   })
 })
 

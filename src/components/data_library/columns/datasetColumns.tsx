@@ -29,7 +29,10 @@ const makeSoApprovalColumn = (soApprovalModelByDatasetId: Map<number, SoApproval
       : { bgcolor: '#d4edda', color: '#155724' }
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-        <Tooltip title={tooltipTitle}>
+        {/* describeChild keeps the chip's label as its accessible name — without it MUI sets
+            aria-label to the tooltip text, so screen readers announce the explanation instead
+            of which model applies */}
+        <Tooltip title={tooltipTitle} describeChild>
           <Chip label={label} size="small" sx={{ ...colorSx, fontWeight: 600 }} />
         </Tooltip>
       </Box>
