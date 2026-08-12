@@ -5,6 +5,8 @@ import { render } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router'
 import AppRoutes from 'src/routing/AppRoutes'
 import { Storage } from 'src/libs/storage'
+import { USER_ROLES } from 'src/libs/utils'
+import { DuosUser } from 'src/types/model'
 
 vi.mock('src/libs/libraryVersions', () => ({
   getLibraryVersions: () => ({}),
@@ -16,6 +18,14 @@ vi.mock('src/components/modals/SupportRequestModal', () => ({
 
 vi.mock('src/components/BaseModal', () => ({
   BaseModal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
+
+vi.mock('src/pages/DACConsole', () => ({
+  default: () => <div>DAC Console</div>,
+}))
+
+vi.mock('src/pages/manage_dac/ManageDac', () => ({
+  default: () => <div>Manage DACs</div>,
 }))
 
 const LocationSpy = ({ onLocationChange }: { onLocationChange: (loc: string) => void }) => {
@@ -39,6 +49,10 @@ const roleBACRoutes: string[] = [
   '/study_update/1',
   '/dataset_update/1',
   '/dar_vote_review/1',
+  '/dac_console',
+  '/dac_console_dar_requests',
+  '/dac_console/manage_dac',
+  '/chair_console',
   '/member_console',
   '/signing_official_console',
   '/signing_official_console/dashboard',
@@ -46,7 +60,6 @@ const roleBACRoutes: string[] = [
   '/signing_official_console/dar_requests',
   '/signing_official_console/dar_approvals',
   '/signing_official_console/researchers_daa_associations',
-  '/chair_console',
   '/dac_datasets',
   '/manage_dac',
   '/manage_dac/1',
@@ -78,6 +91,60 @@ describe('AppRoutes — RoleBAC routes redirect unauthenticated users', () => {
     )
     expect(onLocationChange).toHaveBeenCalledWith(`/?redirectTo=${route}`)
     expect(container.querySelector('[data-cy="not-found"]')).not.toBeInTheDocument()
+  })
+})
+
+describe('AppRoutes — legacy DAC console redirects', () => {
+  const userWithRole = (roleName: string): DuosUser => ({
+    roles: [{ name: roleName }],
+  } as DuosUser)
+
+  beforeEach(() => {
+    vi.spyOn(Storage, 'userIsLogged').mockReturnValue(true)
+  })
+
+  afterEach(() => vi.restoreAllMocks())
+
+  it.each([
+    ['/chair_console', USER_ROLES.chairperson],
+    ['/member_console', USER_ROLES.member],
+  ])('redirects %s for its legacy role', (legacyRoute, roleName) => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(roleName))
+    const onLocationChange = vi.fn()
+
+    const { getByText } = render(
+      <MemoryRouter initialEntries={[legacyRoute]}>
+        <LocationSpy onLocationChange={onLocationChange} />
+        <AppRoutes isLogged={true} env="dev" />
+      </MemoryRouter>,
+    )
+
+    expect(onLocationChange).toHaveBeenCalledWith('/dac_console_dar_requests')
+    expect(getByText('DAC Console')).toBeInTheDocument()
+  })
+
+  it('renders Manage DACs at the DAC-specific route for a chair', () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(USER_ROLES.chairperson))
+
+    const { getByText } = render(
+      <MemoryRouter initialEntries={['/dac_console/manage_dac']}>
+        <AppRoutes isLogged={true} env="dev" />
+      </MemoryRouter>,
+    )
+
+    expect(getByText('Manage DACs')).toBeInTheDocument()
+  })
+
+  it('does not allow a member through the chair-only legacy route', () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(USER_ROLES.member))
+
+    const { container } = render(
+      <MemoryRouter initialEntries={['/chair_console']}>
+        <AppRoutes isLogged={true} env="dev" />
+      </MemoryRouter>,
+    )
+
+    expect(container.querySelector('[data-cy="not-found"]')).toBeInTheDocument()
   })
 })
 
