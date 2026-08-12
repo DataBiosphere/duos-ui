@@ -447,12 +447,26 @@ function upstreamBase(envVar: string): string {
     throw new Error(`${envVar} is '${base}', which is not a valid URL — ${mustBeOrigin}. Include the scheme, e.g. https://duos.example.org`)
   }
 
+  // Checked before the branches below because every one of them echoes the
+  // raw value into the error, which lands in the startup log — and a URL with
+  // userinfo is the one shape whose raw value may carry a real password.
+  if (parsed.username !== '' || parsed.password !== '') {
+    throw new Error(`${envVar} contains userinfo credentials (value withheld from this message) — ${mustBeOrigin}`)
+  }
+
   if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
     throw new Error(`${envVar} is '${base}', whose scheme is '${parsed.protocol}' — ${mustBeOrigin}. Expected http or https, e.g. https://duos.example.org`)
   }
 
   if (parsed.pathname !== '/') {
     throw new Error(`${envVar} is '${base}', which has a path — ${mustBeOrigin}`)
+  }
+
+  // A query or fragment would not fail loudly like a path does — new URL(source,
+  // base) just discards them — so the misconfiguration they signal would
+  // otherwise be silently half-honored.
+  if (parsed.search !== '' || parsed.hash !== '') {
+    throw new Error(`${envVar} is '${base}', which has a query string or fragment — ${mustBeOrigin}`)
   }
 
   return base

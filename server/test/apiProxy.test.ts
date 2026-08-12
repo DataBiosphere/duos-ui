@@ -167,6 +167,11 @@ describe('apiProxy', () => {
       ['a bare hostname', 'duos-api.dsde-dev.broadinstitute.org', /not a valid URL/],
       ['a host:port with no scheme', 'localhost:8000', /scheme is 'localhost:'/],
       ['a non-HTTP scheme', 'ftp://duos-api.example.org', /scheme is 'ftp:'/],
+      // new URL(source, base) silently discards a base's query and fragment,
+      // so without these two rejections the misconfiguration they signal would
+      // be half-honored instead of failing at startup like a path does.
+      ['an origin with a query string', 'https://duos-api.example.org?env=dev', /query string or fragment/],
+      ['an origin with a fragment', 'https://duos-api.example.org#dev', /query string or fragment/],
     ])('fails to register when DUOS_API_URL is %s, naming the variable', async (_case, value, expected) => {
       process.env.DUOS_API_URL = value
       const unregistered = await buildAppShell()
@@ -175,6 +180,22 @@ describe('apiProxy', () => {
       const ready = expect(unregistered.ready()).rejects
       await ready.toThrow(/^DUOS_API_URL is/)
       await ready.toThrow(expected)
+      await unregistered.close()
+    })
+
+    // The one rejection that must NOT echo the value: userinfo may carry a
+    // real password, and this error lands in the startup log.
+    it('fails to register when DUOS_API_URL carries userinfo, without echoing the credential', async () => {
+      process.env.DUOS_API_URL = 'https://svc:hunter2@duos-api.example.org'
+      const unregistered = await buildAppShell()
+      unregistered.register(apiProxy)
+
+      const err = await unregistered.ready().then(() => null, (e: unknown) => e as Error)
+      expect(err).toBeInstanceOf(Error)
+      expect(err?.message).toMatch(/DUOS_API_URL contains userinfo/)
+      expect(err?.message).toMatch(/must be a bare origin/)
+      expect(err?.message).not.toContain('hunter2')
+      expect(err?.message).not.toContain('svc')
       await unregistered.close()
     })
   })
