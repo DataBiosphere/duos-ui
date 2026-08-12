@@ -179,7 +179,8 @@ export const makeDatasetColumns = (
     width: 150,
     valueGetter: (_value, row) => row.dac?.dacName || '',
   },
-  // Omitted entirely when the page has no DAC rule data, rather than rendering an empty column
+  // Omitted entirely when the page supplies no authorization-model data, rather than rendering
+  // a column that could never populate
   ...(soApprovalModelByDatasetId ? [makeSoApprovalColumn(soApprovalModelByDatasetId)] : []),
   {
     field: 'actions',
