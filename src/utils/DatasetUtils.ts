@@ -62,9 +62,11 @@ export const getRadarEnabledDatasetsWithRules = async (
 ) => {
   if (isEmpty(datasets)) return
 
-  // Get unique DAC IDs from datasets that have a DAC ID
+  // Get unique DAC IDs from datasets that have a DAC ID. Filtered on truthiness to match the
+  // lookup below, so a 0 sentinel doesn't cost a doomed /api/dac/0/rules request whose rejection
+  // would take down the whole batch
   const uniqueDacIds = Array.from(
-    new Set(datasets.filter(dataset => dataset.dacId !== undefined).map(dataset => dataset.dacId)),
+    new Set(datasets.filter(dataset => Boolean(dataset.dacId)).map(dataset => dataset.dacId)),
   )
 
   // Fetch DACbot rules for each unique DAC ID, tracking which specific data use code
