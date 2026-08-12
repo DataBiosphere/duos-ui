@@ -104,7 +104,10 @@ export const makeDatasetColumns = (
         : ''
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-          <Tooltip title={tooltipTitle}>
+          {/* describeChild keeps the access label as the chip's accessible name — without it MUI
+              sets aria-label to the tooltip text, so screen readers announce the instant-approval
+              explanation instead of the access type */}
+          <Tooltip title={tooltipTitle} describeChild>
             <Chip
               label={(
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

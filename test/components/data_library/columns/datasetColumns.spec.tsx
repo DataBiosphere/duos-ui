@@ -94,6 +94,20 @@ describe('datasetColumns — Access Management chip', () => {
     )
     expect(container.querySelector('svg[data-testid="BoltIcon"]')).toBeInTheDocument()
   })
+
+  it('keeps the access label readable when the instant-approval tooltip is present', () => {
+    const col = makeDatasetColumns({}, new Set([1])).find(c => c.field === 'accessManagement')!
+    const { container } = render(
+      <MemoryRouter>
+        {col.renderCell!(mockParams('controlled', { datasetId: 1 })) as React.ReactElement}
+      </MemoryRouter>,
+    )
+    const chip = container.querySelector('.MuiChip-root')
+    expect(chip).toHaveTextContent('via DUOS')
+    expect(chip?.getAttribute('title')).toMatch(/Automatic request approvals available/)
+    // Without describeChild, MUI would set this to the tooltip text and hide the label from AT
+    expect(chip).not.toHaveAttribute('aria-label')
+  })
 })
 
 describe('datasetColumns — SO Approval column', () => {
