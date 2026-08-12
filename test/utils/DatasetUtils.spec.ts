@@ -1,11 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { firstNonEmptyPropertyValue, getRadarEnabledDatasetIds, getSoApprovalModelByDatasetId } from 'src/utils/DatasetUtils'
 import type {
   Dataset,
-  DataUseSummary,
   DatasetProperty,
   StudyProperty,
-  DataUseTerm,
   Study,
   DatasetTerm,
 } from 'src/types/model'

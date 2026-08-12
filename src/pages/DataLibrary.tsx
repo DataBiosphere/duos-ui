@@ -73,10 +73,13 @@ export const DataLibrary: React.FC = () => {
 
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
 
-  // Memoized so the derived maps below are recomputed on new results rather than every render
+  // Memoized so the derived maps below are recomputed on new results rather than every render.
+  // Keyed on `data` rather than `data?.items` to match what React Compiler infers — an optional
+  // property access is a narrower dependency than it can preserve, and the mismatch made it skip
+  // optimizing this component entirely.
   const datasets = useMemo(
     () => (urlState.tab === AssetType.DATASETS && data?.items ? data.items as DatasetTerm[] : []),
-    [data?.items, urlState.tab],
+    [data, urlState.tab],
   )
   const { data: exportableDatasets = {} } = useLibraryExportableDatasets(
     datasets,
