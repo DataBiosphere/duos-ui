@@ -12,7 +12,8 @@ import { validateHttpUrl } from 'src/utils/UrlUtils'
 const makeSoApprovalColumn = (soApprovalModelByDatasetId: Map<number, SoApprovalModel>): GridColDef<DatasetTerm> => ({
   field: 'soApprovalModel',
   headerName: 'SO Approval',
-  width: 190,
+  // Wide enough for the full 'Pre-Authorized Researchers' chip, which truncates below ~240
+  width: 250,
   sortable: false,
   renderCell: (params) => {
     const model = soApprovalModelByDatasetId.get(params.row.datasetId)
