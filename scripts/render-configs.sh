@@ -59,7 +59,7 @@ OAUTH_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/auth/c
 API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
 
 parse_cli_args() {
-    while [ $# -gt 0 ]; do
+    while [[ $# -gt 0 ]]; do
         case "$1" in
             --project)
                 PROJECT=$2
@@ -97,7 +97,7 @@ write_certs() {
 
 # Echo the current value of a variable from an existing .env.local, if any.
 existing_env() {
-  if [ -f "$ENV_FILE" ]; then
+  if [[ -f "$ENV_FILE" ]]; then
     grep -E "^$1=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true
   fi
 }
@@ -110,7 +110,7 @@ fetch_azure_client_secret() {
   # a 40-char string like Xxx8Q~…
   AZURE_CLIENT_SECRET=$(kubectl get secret duos-azure-client-secret -n terra-dev \
     -o jsonpath='{.data.azure-client-secret}' | base64 --decode)
-  if [ -z "$AZURE_CLIENT_SECRET" ]; then
+  if [[ -z "$AZURE_CLIENT_SECRET" ]]; then
     error "Could not read azure-client-secret from the terra-dev namespace. Are you on the non-split VPN?"
   fi
 }
@@ -123,7 +123,7 @@ fetch_db_credentials() {
     -o jsonpath='{.data.databaseUser}' | base64 --decode)
   DB_PASSWORD_FETCHED=$(kubectl get secret consent-secrets -n terra-dev \
     -o jsonpath='{.data.databasePassword}' | base64 --decode)
-  if [ -z "$DB_USER_FETCHED" ] || [ -z "$DB_PASSWORD_FETCHED" ]; then
+  if [[ -z "$DB_USER_FETCHED" || -z "$DB_PASSWORD_FETCHED" ]]; then
     error "Could not read databaseUser/databasePassword from consent-secrets in the terra-dev namespace. Are you on the non-split VPN?"
   fi
 }
@@ -134,7 +134,7 @@ write_env() {
   # Per-setup values carry forward from an existing .env.local so a re-run
   # (e.g. on cert rotation) never loses hand-filled configuration.
   SESSION_SECRET=$(existing_env DUOS_SESSION_SECRET)
-  if [ -z "$SESSION_SECRET" ] || [ "$SESSION_SECRET" == "change-me-to-a-random-32-plus-char-string" ]; then
+  if [[ -z "$SESSION_SECRET" || "$SESSION_SECRET" == "change-me-to-a-random-32-plus-char-string" ]]; then
     SESSION_SECRET=$(openssl rand -base64 32)
   fi
   DB_HOST=$(existing_env DUOS_DB_HOST)
@@ -142,7 +142,7 @@ write_env() {
   DB_PORT=$(existing_env DUOS_DB_PORT)
   DB_USER=$(existing_env DUOS_DB_USER)
   DB_PASSWORD=$(existing_env DUOS_DB_PASSWORD)
-  if [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ]; then
+  if [[ -z "$DB_USER" || -z "$DB_PASSWORD" ]]; then
     fetch_db_credentials
     DB_USER=${DB_USER:-$DB_USER_FETCHED}
     DB_PASSWORD=${DB_PASSWORD:-$DB_PASSWORD_FETCHED}
@@ -152,7 +152,7 @@ write_env() {
   REDIRECT_URI=$(existing_env DUOS_OAUTH_REDIRECT_URI)
   API_URL=$(existing_env DUOS_API_URL)
 
-  if [ -f "$ENV_FILE" ]; then
+  if [[ -f "$ENV_FILE" ]]; then
     echo "Backing up existing .env.local to .env.local.bak"
     cp "$ENV_FILE" "${ENV_FILE}.bak"
   fi
@@ -173,7 +173,7 @@ DUOS_SESSION_SECRET=$SESSION_SECRET
 # DB values must match whichever Postgres is being used — see DEVNOTES.md.
 # User/password default to the dev cluster's consent-secrets values.
 EOF
-    if [ -n "$DB_HOST" ]; then
+    if [[ -n "$DB_HOST" ]]; then
       echo "DUOS_DB_HOST=$DB_HOST"
     fi
     cat <<EOF
@@ -205,11 +205,11 @@ write_config() {
 parse_cli_args "$@"
 auth_gcloud
 write_certs
-if [ "$WRITE_ENV" == "true" ]
+if [[ "$WRITE_ENV" == "true" ]]
 then
   write_env
 fi
-if [ "$WRITE_CONFIG" == "true" ]
+if [[ "$WRITE_CONFIG" == "true" ]]
 then
   write_config
 fi
