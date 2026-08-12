@@ -5,7 +5,15 @@ export const assetFilterRegistry: Record<AssetType, AssetFilterConfig> = {
     visibleFilters: ['accessManagement', 'dataUse', 'dataType', 'dac', 'participantCount'],
   },
   [AssetType.DATASETS]: {
-    visibleFilters: ['accessManagement', 'dataUse', 'dataType', 'dac', 'participantCount'],
+    visibleFilters: [
+      'accessManagement',
+      'dataUse',
+      'dataType',
+      'dac',
+      'participantCount',
+      'soApprovalModel',
+      'instantApproval',
+    ],
   },
   [AssetType.MODELS]: {
     visibleFilters: [],

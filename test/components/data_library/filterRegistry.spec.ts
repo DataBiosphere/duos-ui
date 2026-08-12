@@ -22,8 +22,10 @@ const availableFilters: AvailableFilters = {
   biospecimenType: [],
   biospecimenDataUse: [],
   biospecimenPostMortemIntervalUnit: [],
+  soApprovalModel: [],
   datasetsCited: [],
   publicationsDatasetsCited: [],
+  instantApproval: [],
   biospecimenPostMortemIntervalRange: { min: 0, max: 10 },
   participantCountRange: { min: 0, max: 10 },
 }
@@ -139,6 +141,67 @@ describe('filterRegistry', () => {
       const chips = getExternalActiveFilters(AssetType.MODELS, EMPTY_FILTERS, availableFilters)
       const dateKeys = ['fundingDate', 'biospecimenCollectionDate', 'ipFiledDate', 'clinicalTrialDates']
       expect(chips.map(chip => chip.key).filter(key => dateKeys.includes(key))).toEqual([])
+    })
+  })
+
+  describe('soApprovalModel', () => {
+    it('builds no clause when nothing is selected', () => {
+      const clauses = buildActiveFilterClauses(EMPTY_FILTERS)
+      expect(JSON.stringify(clauses)).not.toContain('soApprovalModel')
+    })
+
+    it('matches the selected models on the keyword field', () => {
+      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, soApprovalModel: ['PER_REQUEST'] })
+      expect(clauses).toContainEqual({
+        bool: { should: [{ term: { 'soApprovalModel.keyword': 'PER_REQUEST' } }] },
+      })
+    })
+
+    it('ORs multiple selected models together', () => {
+      const clauses = buildActiveFilterClauses({
+        ...EMPTY_FILTERS,
+        soApprovalModel: ['PER_REQUEST', 'PRE_AUTHORIZED'],
+      })
+      expect(clauses).toContainEqual({
+        bool: {
+          should: [
+            { term: { 'soApprovalModel.keyword': 'PER_REQUEST' } },
+            { term: { 'soApprovalModel.keyword': 'PRE_AUTHORIZED' } },
+          ],
+        },
+      })
+    })
+  })
+
+  describe('instantApproval', () => {
+    it('builds no clause when left on "Any"', () => {
+      const clauses = buildActiveFilterClauses(EMPTY_FILTERS)
+      expect(JSON.stringify(clauses)).not.toContain('instantApprovalEligible')
+    })
+
+    // Unlike the citation filters, an absent flag here means "unknown", not "false": the document
+    // predates DT-3888 or was reindexed while the DAC rule lookup was failing. The grid shows no
+    // badge for those, so neither side of the filter may claim them.
+    it('requires the field to exist on both sides so un-backfilled documents are not claimed', () => {
+      const yes = buildActiveFilterClauses({ ...EMPTY_FILTERS, instantApproval: true })
+      expect(yes).toContainEqual({
+        bool: {
+          must: [
+            { term: { instantApprovalEligible: true } },
+            { exists: { field: 'instantApprovalEligible' } },
+          ],
+        },
+      })
+
+      const no = buildActiveFilterClauses({ ...EMPTY_FILTERS, instantApproval: false })
+      expect(no).toContainEqual({
+        bool: {
+          must: [
+            { term: { instantApprovalEligible: false } },
+            { exists: { field: 'instantApprovalEligible' } },
+          ],
+        },
+      })
     })
   })
 

@@ -41,6 +41,14 @@ const availableFilters: AvailableFilters = {
     { value: 'true', label: 'Yes' },
     { value: 'false', label: 'No' },
   ],
+  soApprovalModel: [
+    { value: 'PER_REQUEST', label: 'Per-Request Approval' },
+    { value: 'PRE_AUTHORIZED', label: 'Pre-Authorized Researchers' },
+  ],
+  instantApproval: [
+    { value: 'true', label: 'Yes' },
+    { value: 'false', label: 'No' },
+  ],
   biospecimenPostMortemIntervalRange: { min: 0, max: 1000 },
   participantCountRange: { min: 0, max: 1000 },
 }

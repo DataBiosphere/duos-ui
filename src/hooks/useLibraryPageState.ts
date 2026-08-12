@@ -137,11 +137,19 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
       biospecimenType: Object.values(BioSpecimenType).map(value => ({ value, label: value })),
       biospecimenDataUse: uniqueValues(biospecimenItems.map(item => item.optionalDataUse)),
       biospecimenPostMortemIntervalUnit: Object.values(PostMortemIntervalUnit).map(value => ({ value, label: value })),
+      soApprovalModel: [
+        { value: 'PER_REQUEST', label: 'Per-Request Approval' },
+        { value: 'PRE_AUTHORIZED', label: 'Pre-Authorized Researchers' },
+      ],
       datasetsCited: [
         { value: 'true', label: 'Yes' },
         { value: 'false', label: 'No' },
       ],
       publicationsDatasetsCited: [
+        { value: 'true', label: 'Yes' },
+        { value: 'false', label: 'No' },
+      ],
+      instantApproval: [
         { value: 'true', label: 'Yes' },
         { value: 'false', label: 'No' },
       ],
