@@ -92,13 +92,21 @@ write_certs() {
   echo "Writing cert files"
   kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.crt" | base64decode }}' > ../server.crt
   kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.key" | base64decode }}' > ../server.key
+  chmod 600 ../server.key
   kubectl -n local-dev get configmaps kube-root-ca.crt -o 'go-template={{ index .data "ca.crt" }}' > ../ca-bundle.crt
 }
 
 # Echo the current value of a variable from an existing .env.local, if any.
+# One layer of surrounding quotes is stripped, since this script writes
+# secret values single-quoted.
 existing_env() {
   if [[ -f "$ENV_FILE" ]]; then
-    grep -E "^$1=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true
+    local val
+    val=$(grep -E "^$1=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true)
+    if [[ $val == \'*\' || $val == \"*\" ]]; then
+      val=${val:1:${#val}-2}
+    fi
+    echo "$val"
   fi
 }
 
@@ -155,6 +163,7 @@ write_env() {
   if [[ -f "$ENV_FILE" ]]; then
     echo "Backing up existing .env.local to .env.local.bak"
     cp "$ENV_FILE" "${ENV_FILE}.bak"
+    chmod 600 "${ENV_FILE}.bak"
   fi
 
   echo "Generating .env.local file"
@@ -168,7 +177,7 @@ HTTPS=true
 SSL_CRT_FILE=server.crt
 SSL_KEY_FILE=server.key
 
-DUOS_SESSION_SECRET=$SESSION_SECRET
+DUOS_SESSION_SECRET='$SESSION_SECRET'
 
 # DB values must match whichever Postgres is being used — see DEVNOTES.md.
 # User/password default to the dev cluster's consent-secrets values.
@@ -179,18 +188,19 @@ EOF
     cat <<EOF
 DUOS_DB_NAME=${DB_NAME:-$DB_NAME_DEFAULT}
 DUOS_DB_PORT=${DB_PORT:-5432}
-DUOS_DB_USER=$DB_USER
-DUOS_DB_PASSWORD=$DB_PASSWORD
+DUOS_DB_USER='$DB_USER'
+DUOS_DB_PASSWORD='$DB_PASSWORD'
 
 # The client secret below was fetched fresh (and base64-decoded) from the
 # duos-azure-client-secret secret in the terra-dev namespace by this run.
 DUOS_AZURE_CLIENT_ID=${AZURE_CLIENT_ID:-$AZURE_CLIENT_ID_DEFAULT}
-DUOS_AZURE_CLIENT_SECRET=$AZURE_CLIENT_SECRET
+DUOS_AZURE_CLIENT_SECRET='$AZURE_CLIENT_SECRET'
 DUOS_AZURE_ISSUER_URL=${ISSUER_URL:-$AZURE_ISSUER_URL_DEFAULT}
 DUOS_OAUTH_REDIRECT_URI=${REDIRECT_URI:-$OAUTH_REDIRECT_URI_DEFAULT}
 DUOS_API_URL=${API_URL:-$API_URL_DEFAULT}
 EOF
   } > "$ENV_FILE"
+  chmod 600 "$ENV_FILE"
 }
 
 write_config() {
