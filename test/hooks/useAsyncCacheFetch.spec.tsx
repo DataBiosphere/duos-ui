@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { describe, it, expect, vi } from 'vitest'
-import { act, render, screen, fireEvent } from '@testing-library/react'
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 
 type TestAsyncCacheFetchProps<T> = {
@@ -60,15 +60,12 @@ describe('useAsyncCacheFetch', () => {
     render(<TestAsyncCacheFetch fetchFn={fetchFn} />)
 
     // First attempt fails; the in-flight entry must not survive it
-    await act(async () => {
-      fireEvent.click(screen.getByText('Fetch'))
-    })
+    fireEvent.click(screen.getByText('Fetch'))
+    await waitFor(() => expect(fetchFn).toHaveBeenCalledTimes(1))
     expect(screen.getByTestId('result').textContent).toBe('')
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('Fetch'))
-    })
-    expect(screen.getByTestId('result').textContent).toBe('fetched-data')
+    fireEvent.click(screen.getByText('Fetch'))
+    await waitFor(() => expect(screen.getByTestId('result').textContent).toBe('fetched-data'))
     expect(fetchFn).toHaveBeenCalledTimes(2)
   })
 

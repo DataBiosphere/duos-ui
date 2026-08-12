@@ -1,24 +1,31 @@
 import React from 'react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { act, render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import useDacRules from 'src/hooks/useDacRules'
 import { DAC } from 'src/libs/ajax/DAC'
 
 const TestDacRules: React.FC<{ dacIds: number[] }> = ({ dacIds }) => {
   const fetchDacRules = useDacRules()
-  const [count, setCount] = React.useState(0)
+  const [rounds, setRounds] = React.useState(0)
 
   const handleFetch = async () => {
     await Promise.allSettled(dacIds.map(dacId => fetchDacRules(dacId)))
-    setCount(current => current + 1)
+    setRounds(current => current + 1)
   }
 
   return (
     <div>
       <button onClick={handleFetch}>Fetch</button>
-      <div data-testid="rounds">{count}</div>
+      <div data-testid="rounds">{rounds}</div>
     </div>
   )
+}
+
+// The counter only increments once every fetch in a round has settled, so waiting on it is
+// what makes the request-count assertions meaningful
+const clickFetchAndAwaitRound = async (round: number) => {
+  fireEvent.click(screen.getByText('Fetch'))
+  await waitFor(() => expect(screen.getByTestId('rounds').textContent).toBe(String(round)))
 }
 
 describe('useDacRules', () => {
@@ -30,16 +37,11 @@ describe('useDacRules', () => {
     const fetchRules = vi.spyOn(DAC, 'fetchDACbotRules').mockResolvedValue([] as never)
     render(<TestDacRules dacIds={[1, 2]} />)
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('Fetch'))
-    })
+    await clickFetchAndAwaitRound(1)
     expect(fetchRules).toHaveBeenCalledTimes(2)
 
     // A second pass — paging, sorting, or the other lookup — hits the cache
-    await act(async () => {
-      fireEvent.click(screen.getByText('Fetch'))
-    })
-    expect(screen.getByTestId('rounds').textContent).toBe('2')
+    await clickFetchAndAwaitRound(2)
     expect(fetchRules).toHaveBeenCalledTimes(2)
   })
 
@@ -47,9 +49,7 @@ describe('useDacRules', () => {
     const fetchRules = vi.spyOn(DAC, 'fetchDACbotRules').mockResolvedValue([] as never)
     render(<TestDacRules dacIds={[7, 7, 7]} />)
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('Fetch'))
-    })
+    await clickFetchAndAwaitRound(1)
     expect(fetchRules).toHaveBeenCalledTimes(1)
   })
 
@@ -59,12 +59,8 @@ describe('useDacRules', () => {
       .mockResolvedValue([] as never)
     render(<TestDacRules dacIds={[3]} />)
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('Fetch'))
-    })
-    await act(async () => {
-      fireEvent.click(screen.getByText('Fetch'))
-    })
+    await clickFetchAndAwaitRound(1)
+    await clickFetchAndAwaitRound(2)
     expect(fetchRules).toHaveBeenCalledTimes(2)
   })
 })
