@@ -188,10 +188,15 @@ export interface LibraryTabsProps {
 export type ExportableDatasets = { [duosId: string]: SnapshotSummaryModel[] }
 
 /**
- * Which Signing Official authorization model a dataset's DAC uses. 'per-dar' means the SO
- * named in each Data Access Request must approve that request before the DAC reviews it;
- * 'pre-authorized' means the SO authorizes researchers in advance instead. 'unknown' means
- * the DAC's rules could not be loaded, so neither model may be asserted.
+ * Which Signing Official authorization model a dataset's DAC uses, as resolved by the search
+ * index (DT-3888). 'per-dar' means the SO named in each Data Access Request must approve that
+ * request before the DAC reviews it; 'pre-authorized' means the SO authorizes researchers in
+ * advance instead.
+ *
+ * 'unknown' means the index supplied no usable model — the document was written before
+ * DT-3888 and predates the backfill reindex, the backend could not resolve the DAC's rules, or
+ * the value is one this client does not recognise. Callers must render nothing in that case
+ * rather than defaulting to a model.
  */
 export type SoApprovalModel = 'per-dar' | 'pre-authorized' | 'unknown'
 
