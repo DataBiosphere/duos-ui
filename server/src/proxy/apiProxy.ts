@@ -62,11 +62,14 @@ export const REFRESH_WINDOW_SECONDS = 60
  * Bounded rather than undici's unbounded default (`connections: null` lets a
  * Pool open Clients without limit): a request burst should queue on a fixed
  * socket pool instead of consuming file descriptors until the pod runs out.
- * Story 3-H load-tests the proxy and is the place to revise this. Timeouts stay
- * at undici's 5-minute defaults, which large dataset uploads and document
- * downloads need.
+ * This caps throughput at roughly `connections ÷ upstream latency`; measured
+ * capacity remains well above expected load. See server/test/load/README.md.
  */
-const UPSTREAM_POOL_CONNECTIONS = 128
+export const UPSTREAM_POOL_CONNECTIONS = 128
+
+export interface ApiProxyOptions {
+  undiciConnections?: number
+}
 
 /**
  * Paths the client calls today with no `Authorization` header, verified against
@@ -75,7 +78,7 @@ const UPSTREAM_POOL_CONNECTIONS = 128
  * `/support/request` and `/support/upload` (Support.ts).
  *
  * They proxy through without a session, and without a token even when there IS
- * a session — matching current client behaviour exactly is the point, so
+ * a session — matching current client behavior exactly is the point, so
  * cutover cannot change what the upstream sees. Without this allowlist the
  * signed-out status page and the Contact Us form would start returning 401.
  *
@@ -197,7 +200,7 @@ function upstreamHeaders(res: UpstreamResponse): IncomingHttpHeaders {
  * the point: `removeAllContentTypeParsers()` below must apply to this scope
  * only, or `/auth/*` would lose its JSON parsing too.
  */
-export async function apiProxy(app: FastifyInstance): Promise<void> {
+export async function apiProxy(app: FastifyInstance, options: ApiProxyOptions = {}): Promise<void> {
   // Fail at startup rather than serve the proxy unguarded. The decorator comes
   // from @fastify/csrf-protection, registered in index.ts; if the proxy were
   // ever moved ahead of it, the alternative to this check is a route that
@@ -271,7 +274,7 @@ export async function apiProxy(app: FastifyInstance): Promise<void> {
 
   await app.register(fastifyReplyFrom, {
     base: upstreamBase(),
-    undici: { connections: UPSTREAM_POOL_CONNECTIONS },
+    undici: { connections: options.undiciConnections ?? UPSTREAM_POOL_CONNECTIONS },
   })
 
   app.all(`${PROXY_PREFIX}/*`, {
