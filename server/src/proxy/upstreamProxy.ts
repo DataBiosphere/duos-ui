@@ -14,7 +14,7 @@ import { requireEnv } from '../auth/oidcClient.js'
 import { RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
 
 /**
- * The BFF upstream proxy machinery (Phase 3).
+ * The BFF upstream proxy machinery.
  *
  * A proxied call is forwarded from here with the session's B2C access token
  * attached, so the browser never holds a bearer token. The shape of this module
@@ -34,12 +34,11 @@ import { RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
  *     no session and no injected `Authorization` — which paths is per-upstream
  *     (`UpstreamProxyConfig.unauthenticatedPaths`).
  *
- * Written for the DUOS API (story 3-A, `apiProxy.ts`) and generalized by story
- * 3-I when ECM needed a second proxied upstream with the identical rules.
- * Everything upstream-specific arrives through `UpstreamProxyConfig`; the
- * security behavior — what is stripped, what is injected, how responses are
- * hardened — is deliberately not configurable, so a new upstream cannot opt
- * out of it.
+ * Written for the DUOS API and generalized by story when ECM needed a second
+ * proxied upstream with the identical rules. Everything upstream-specific arrives
+ * through `UpstreamProxyConfig`; the security behavior — what is stripped, what
+ * is injected, how responses are hardened — is deliberately not configurable, so
+ * a new upstream cannot opt out of it.
  *
  * Registered inside index.ts's `if (process.env.DUOS_DB_HOST)` block, under the
  * same `bffEnabled === true` gate as the `/auth/*` routes — not just for

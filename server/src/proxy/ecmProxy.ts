@@ -6,16 +6,13 @@ import {
 } from './upstreamProxy.js'
 
 /**
- * The ECM proxy (story 3-I).
+ * The ECM proxy.
  *
  * RAS / eRA Commons account linking calls ECM (Terra's External Credentials
  * Manager, "externalcreds") from the client: `AuthenticateNIH.ts` fetches the
- * provider authorization URL and exchanges the OAuth callback code. The legacy
- * client authenticated those calls itself; with browser-held tokens gone
- * (Phase 4), they must come through the BFF like every other authenticated
- * call, or linking breaks. Same machinery, same rules as the DUOS API proxy —
- * see upstreamProxy.ts — with three upstream-specific differences:
- *
+ * provider authorization URL and exchanges the OAuth callback code. Same rules
+ * as the DUOS API proxy — see upstreamProxy.ts — with three upstream-specific
+ * differences:
  *   - **No unauthenticated paths.** Both ECM calls are made signed-in; nothing
  *     under this prefix proxies without a session.
  *   - **No CSRF exemptions.** Both calls are POSTs from an authenticated
@@ -27,26 +24,6 @@ import {
  *     signing the user out of DUOS over that would turn a broken linking flow
  *     into a broken everything. The 401 passes through (response-hardened,
  *     `www-authenticate` stripped) for the linking UI to surface.
- *
- * Token audience: the legacy client sent `profile.idp_access_token` — the
- * Google access token B2C copies into its claims — to ECM, falling back to the
- * B2C `id_token`. The BFF session holds neither; it injects the B2C *access*
- * token, the same credential the DUOS API accepts. That is expected to work:
- * ECM validates no JWTs itself — its httpd-terra-proxy sidecar does, and that
- * proxy's audience allowlist explicitly names DUOS's B2C app registrations
- * (terra-helmfile `global.proxyOauthAllowList.b2c_additional_audiences`) —
- * then resolves the user by handing the same bearer to Sam, whose identical
- * proxy DUOS tokens already pass on every Consent request. The full chain and
- * the live dev probe are recorded in the story
- * (BFF_Epics/epic-3-v2-api-proxy.md § 3-I); if that probe ever fails, the fix
- * belongs in the auth callback (persist `idp_access_token`), not here.
- */
-
-/**
- * The BFF-side prefix. `/ecm-api/api/oauth/v1/ras/authorization-url` →
- * `${DUOS_ECM_URL}/api/oauth/v1/ras/authorization-url`. The client leg lands
- * with the Phase 4 refactor: `getECMUrl()` returns this in BFF environments,
- * so the two call sites keep their literal paths.
  */
 export const ECM_PROXY_PREFIX = '/ecm-api'
 

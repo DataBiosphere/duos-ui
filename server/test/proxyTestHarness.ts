@@ -9,10 +9,10 @@ import { csrfPluginOptions } from '../src/auth/csrf.js'
 
 /**
  * The shared harness for the per-upstream proxy suites (apiProxy.test.ts,
- * ecmProxy.test.ts). Extracted with story 3-I so the second suite exercises
- * the second proxy against exactly the same stand-ins as the first — a
- * harness that drifted between the two would let the shared machinery pass
- * one suite and fail the other for harness reasons rather than proxy reasons.
+ * ecmProxy.test.ts). Extracted so the second suite exercises the second proxy
+ * against exactly the same stand-ins as the first — a harness that drifted
+ * between the two would let the shared machinery pass one suite and fail the
+ * other for harness reasons rather than proxy reasons.
  */
 
 export const nowSeconds = (): number => Math.floor(Date.now() / 1000)

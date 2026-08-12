@@ -17,7 +17,7 @@ import {
 } from './proxyTestHarness.js'
 
 /**
- * The ECM proxy suite (story 3-I).
+ * The ECM proxy suite.
  *
  * The shared machinery — streaming, header hygiene on both legs, response
  * hardening, refresh, transport errors — is exercised across 101 cases in
