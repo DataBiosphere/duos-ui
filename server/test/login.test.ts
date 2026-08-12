@@ -102,7 +102,7 @@ describe('handleLogin', () => {
       code_challenge_method: 'S256',
       state: 'test-state',
       // prompt=login forces the B2C login screen even when B2C's own SSO
-      // cookie survives a DUOS sign-out (front-channel logout is epic-5, 5-I).
+      // cookie survives a DUOS sign-out.
       prompt: 'login',
     })
 
