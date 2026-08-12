@@ -274,6 +274,7 @@ describe('BFF auth route registration', () => {
   afterEach(async () => {
     delete process.env.CONFIG_PATH
     delete process.env.DUOS_ECM_URL
+    delete process.env.DUOS_TDR_URL
     const { resetConfigCache } = await import('../src/config.js')
     resetConfigCache()
     // Guarded: rmSync(undefined) throws and would mask the real failure of a
@@ -409,6 +410,42 @@ describe('BFF auth route registration', () => {
     const localApp = await buildAppWithConfig({ bffEnabled: false })
 
     const res = await localApp.inject({ method: 'GET', url: '/ecm-api/api/oauth/v1/ras/authorization-url' })
+
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  // Same three-way gating as /ecm-api, against the TDR env var and prefix.
+  it('registers the /tdr-api proxy route when bffEnabled is true and DUOS_TDR_URL is set', async () => {
+    process.env.DUOS_TDR_URL = 'https://jade.datarepo-dev.broadinstitute.org'
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({ method: 'GET', url: '/tdr-api/api/repository/v1/snapshots' })
+
+    expect(res.statusCode).toBe(401)
+    expect(res.json()).toEqual({ error: 'unauthenticated' })
+
+    await localApp.close()
+  })
+
+  it('boots without the /tdr-api route when bffEnabled is true but DUOS_TDR_URL is not set', async () => {
+    delete process.env.DUOS_TDR_URL
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({ method: 'GET', url: '/tdr-api/api/repository/v1/snapshots' })
+
+    // Falls through to the SPA fallback instead of the proxy's 401.
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  it('does not register the /tdr-api proxy route when bffEnabled is false, even with DUOS_TDR_URL set', async () => {
+    process.env.DUOS_TDR_URL = 'https://jade.datarepo-dev.broadinstitute.org'
+    const localApp = await buildAppWithConfig({ bffEnabled: false })
+
+    const res = await localApp.inject({ method: 'GET', url: '/tdr-api/api/repository/v1/snapshots' })
 
     expect(res.statusCode).toBe(200)
 

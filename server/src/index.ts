@@ -17,7 +17,8 @@ import { handleCallback } from './auth/callback.js'
 import { handleLogout } from './auth/logout.js'
 import { getMe } from './auth/me.js'
 import { apiProxy } from './proxy/apiProxy.js'
-import { ecmProxy } from './proxy/ecmProxy.js'
+import { ECM_PROXY_PREFIX, ecmProxy } from './proxy/ecmProxy.js'
+import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { configPath, readConfig } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -234,18 +235,24 @@ export async function buildApp(): Promise<AppInstance> {
     // exposes no proxy route at all.
     await fastify.register(apiProxy)
 
-    // The ECM proxy (story 3-I) — RAS/eRA Commons account linking. Same gates
-    // as the DUOS API proxy, plus one more: DUOS_ECM_URL itself. Conditional
-    // rather than required, unlike DUOS_API_URL above, because ECM serves
-    // exactly one feature — a BFF deployment whose env predates the variable
-    // (the terra-helmfile change ships separately) should boot with linking
-    // broken and a warning naming the fix, not crash-loop the whole app.
-    if (process.env.DUOS_ECM_URL) {
-      fastify.log.info('[server] DUOS_ECM_URL is set — registering the ECM proxy')
-      await fastify.register(ecmProxy)
-    }
-    else {
-      fastify.log.warn('[server] DUOS_ECM_URL is not set — the /ecm-api proxy is disabled, so RAS/eRA Commons account linking will fail in this BFF environment')
+    // The single-feature upstream proxies. Same gates as the DUOS API proxy,
+    // plus one more each: their own env var. Conditional rather than required,
+    // unlike DUOS_API_URL above, because each serves exactly one feature — a
+    // BFF deployment whose env predates the variable (the terra-helmfile
+    // change ships separately) should boot with that feature broken and a
+    // warning naming the fix, not crash-loop the whole app.
+    const optionalProxies = [
+      { envVar: 'DUOS_ECM_URL', prefix: ECM_PROXY_PREFIX, register: ecmProxy, feature: 'RAS/eRA Commons account linking' },
+      { envVar: 'DUOS_TDR_URL', prefix: TDR_PROXY_PREFIX, register: tdrProxy, feature: 'TDR snapshot enumeration on dataset pages' },
+    ] as const
+    for (const { envVar, prefix, register, feature } of optionalProxies) {
+      if (process.env[envVar]) {
+        fastify.log.info(`[server] ${envVar} is set — registering the ${prefix} proxy`)
+        await fastify.register(register)
+      }
+      else {
+        fastify.log.warn(`[server] ${envVar} is not set — the ${prefix} proxy is disabled, so ${feature} will fail in this BFF environment`)
+      }
     }
   }
   else {
