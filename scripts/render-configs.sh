@@ -100,9 +100,10 @@ write_certs() {
 # One layer of surrounding quotes is stripped, since this script writes
 # secret values single-quoted.
 existing_env() {
+  local var_name="$1"
   if [[ -f "$ENV_FILE" ]]; then
     local val
-    val=$(grep -E "^$1=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true)
+    val=$(grep -E "^${var_name}=" "$ENV_FILE" | tail -1 | cut -d= -f2- || true)
     if [[ $val == \'*\' || $val == \"*\" ]]; then
       val=${val:1:${#val}-2}
     fi
