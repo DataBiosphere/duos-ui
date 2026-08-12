@@ -21,7 +21,9 @@ const sampleFunding: FundingResource = {
 
 describe('FundingResourceAddEdit component', () => {
   it('opens add form and enforces validation disabling save then adds', async () => {
-    const user = userEvent.setup()
+    // delay: null skips the timer between keystrokes; ~48 chars here otherwise
+    // risks timing out on CI, and a timeout mid-type leaks keystrokes into the next test.
+    const user = userEvent.setup({ delay: null })
     const collected: FundingResource[] = []
     const { container } = render(
       <FundingResourceAddEdit
@@ -43,7 +45,7 @@ describe('FundingResourceAddEdit component', () => {
   })
 
   it('edits existing funding resource and saves changes', async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     const resources: FundingResource[] = [sampleFunding]
     const onFundingResourcesChange = vi.fn((updated: FundingResource[]) => {
       expect(updated[0].funderName).toBe('Funder A Edited')
