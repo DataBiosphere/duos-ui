@@ -189,7 +189,7 @@ export type ExportableDatasets = { [duosId: string]: SnapshotSummaryModel[] }
 
 /**
  * Which Signing Official authorization model a dataset's DAC uses, as resolved by the search
- * index (DT-3888). 'per-dar' means the SO named in each Data Access Request must approve that
+ * index (DT-3888). 'per-request' means the SO named in each access request must approve that
  * request before the DAC reviews it; 'pre-authorized' means the SO authorizes researchers in
  * advance instead.
  *
@@ -198,7 +198,7 @@ export type ExportableDatasets = { [duosId: string]: SnapshotSummaryModel[] }
  * the value is one this client does not recognise. Callers must render nothing in that case
  * rather than defaulting to a model.
  */
-export type SoApprovalModel = 'per-dar' | 'pre-authorized' | 'unknown'
+export type SoApprovalModel = 'per-request' | 'pre-authorized' | 'unknown'
 
 export interface LibraryDataGridProps {
   assetType: AssetType

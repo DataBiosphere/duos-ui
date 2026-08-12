@@ -8,10 +8,9 @@ import { Storage } from 'src/libs/storage'
 import { isRestrictedToPublicVisibility, Notifications } from 'src/libs/utils'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
-import { getRadarEnabledDatasetsWithRules, getSoApprovalModelByDatasetId } from 'src/utils/DatasetUtils'
+import { getRadarEnabledDatasetIds, getSoApprovalModelByDatasetId } from 'src/utils/DatasetUtils'
 import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import { useLibraryExportableDatasets } from 'src/hooks/useLibraryExportableDatasets'
-import { useDacRules } from 'src/hooks/useDacRules'
 import LibraryPageShell from 'src/components/data_library/LibraryPageShell'
 import LibraryFooter from 'src/components/data_library/LibraryFooter'
 import TableHeaderSection from 'src/components/TableHeaderSection'
@@ -73,23 +72,27 @@ export const DataLibrary: React.FC = () => {
   const { urlState, data, currentAsset, handleSearchChange } = pageState
 
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
-  const [radarEnabledDatasetIds, setRadarEnabledDatasetIds] = useState<Set<number>>(new Set())
 
-  // Cached rules fetch per DAC for the radar lookup below
-  const fetchDacRules = useDacRules()
-
-  const datasets = urlState.tab === AssetType.DATASETS && data?.items ? data.items as DatasetTerm[] : []
+  // Memoized so the derived maps below are recomputed on new results rather than every render
+  const datasets = useMemo(
+    () => (urlState.tab === AssetType.DATASETS && data?.items ? data.items as DatasetTerm[] : []),
+    [data?.items, urlState.tab],
+  )
   const { data: exportableDatasets = {} } = useLibraryExportableDatasets(
     datasets,
     urlState.tab === AssetType.DATASETS,
   )
 
-  // Carried on each indexed dataset, so the column renders with the grid rather than after it
+  // Both are carried on each indexed dataset, so the column and badge render with the grid
+  // rather than after a second round of requests
   const soApprovalModelByDatasetId = useMemo(
-    () => getSoApprovalModelByDatasetId(
-      urlState.tab === AssetType.DATASETS && data?.items ? data.items as DatasetTerm[] : [],
-    ),
-    [data, urlState.tab],
+    () => getSoApprovalModelByDatasetId(datasets),
+    [datasets],
+  )
+
+  const radarEnabledDatasetIds = useMemo(
+    () => getRadarEnabledDatasetIds(datasets),
+    [datasets],
   )
 
   const selectedStudyIds = useMemo(() => {
@@ -104,29 +107,6 @@ export const DataLibrary: React.FC = () => {
   const handleApplyForAccess = () => {
     applyForAccess(selectedDatasetIds, navigate)
   }
-
-  useEffect(() => {
-    const fetchRadarEnabled = async () => {
-      if (urlState.tab !== AssetType.DATASETS || !data?.items?.length) {
-        setRadarEnabledDatasetIds(new Set())
-        return
-      }
-      const datasetIds = (data.items as DatasetTerm[]).map(d => d.datasetId)
-      if (datasetIds.length === 0) {
-        setRadarEnabledDatasetIds(new Set())
-        return
-      }
-      try {
-        const radarEnabledIds = await getRadarEnabledDatasetsWithRules(data.items as DatasetTerm[], fetchDacRules)
-        setRadarEnabledDatasetIds(new Set(radarEnabledIds))
-      }
-      catch {
-        setRadarEnabledDatasetIds(new Set())
-      }
-    }
-
-    fetchRadarEnabled()
-  }, [data?.items, urlState.tab, fetchDacRules])
 
   const header = (
     <>

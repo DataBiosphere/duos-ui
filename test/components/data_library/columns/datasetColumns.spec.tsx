@@ -125,7 +125,7 @@ describe('datasetColumns — SO Approval column', () => {
   })
 
   it('shows the per-request-approval chip for a per-DAR dataset', () => {
-    renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor('per-dar'))
+    renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor('per-request'))
     expect(screen.getByText('Per-Request Approval')).toBeInTheDocument()
   })
 
@@ -138,7 +138,7 @@ describe('datasetColumns — SO Approval column', () => {
   })
 
   it('renders nothing for a dataset missing from the map', () => {
-    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 999 }, columnsFor('per-dar'))
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 999 }, columnsFor('per-request'))
     expect(container.querySelector('.MuiChip-root')).not.toBeInTheDocument()
   })
 
@@ -146,7 +146,7 @@ describe('datasetColumns — SO Approval column', () => {
   // label — MUI would otherwise set aria-label to the tooltip text and screen readers would
   // announce the explanation instead of which model applies
   it.each([
-    ['per-dar', 'Per-Request Approval', /requires the Signing Official named in each Data Access Request/],
+    ['per-request', 'Per-Request Approval', /requires the Signing Official named in each Data Access Request/],
     ['pre-authorized', 'Pre-Authorized Researchers', /allows Signing Officials to pre-authorize researchers in advance/],
   ] as const)('describes the %s model without displacing the chip label', (model, label, expectedText) => {
     const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor(model))

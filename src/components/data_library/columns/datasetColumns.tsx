@@ -19,12 +19,12 @@ const makeSoApprovalColumn = (soApprovalModelByDatasetId: Map<number, SoApproval
     const model = soApprovalModelByDatasetId.get(params.row.datasetId)
     // Blank beats a guess when the DAC's rules couldn't be loaded
     if (model === undefined || model === 'unknown') return null
-    const isPerDarApproval = model === 'per-dar'
-    const label = isPerDarApproval ? 'Per-Request Approval' : 'Pre-Authorized Researchers'
-    const tooltipTitle = isPerDarApproval
+    const isPerRequestApproval = model === 'per-request'
+    const label = isPerRequestApproval ? 'Per-Request Approval' : 'Pre-Authorized Researchers'
+    const tooltipTitle = isPerRequestApproval
       ? 'This dataset\'s DAC requires the Signing Official named in each Data Access Request to approve that specific request before the DAC reviews it.'
       : 'This dataset\'s DAC allows Signing Officials to pre-authorize researchers in advance, so approved researchers don\'t need separate per-request SO approval.'
-    const colorSx = isPerDarApproval
+    const colorSx = isPerRequestApproval
       ? { bgcolor: '#cfe2ff', color: '#084298' }
       : { bgcolor: '#d4edda', color: '#155724' }
     return (

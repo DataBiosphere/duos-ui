@@ -20,7 +20,6 @@ import { useParams, useNavigate } from 'react-router'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 import { intersection } from 'src/utils/NodashUtil'
-import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils'
 import InstantApprovalBadge from 'src/components/data_library/InstantApprovalBadge'
 
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />
@@ -53,7 +52,9 @@ export default function DatasetStatistics() {
   const [dars, setDars] = useState<Array<DatasetStatisticsDar>>()
   const [isLoading, setIsLoading] = useState(true)
   const [exportableSnapshots, setExportableSnapshots] = useState<SnapshotSummaryModel[]>([])
-  const [instantApprovalEligible, setInstantApprovalEligible] = useState(false)
+
+  // Resolved server-side and carried on the indexed document, so no follow-up rules request
+  const instantApprovalEligible = datasetTerm?.instantApprovalEligible === true
 
   const showError = (message: string) => {
     Notifications.showError({
@@ -160,23 +161,6 @@ export default function DatasetStatistics() {
     }
     fetchExportableSnapshots()
   }, [datasetIdentifier])
-
-  useEffect(() => {
-    const fetchInstantApprovalEligibility = async () => {
-      if (!datasetTerm) {
-        setInstantApprovalEligible(false)
-        return
-      }
-      try {
-        const radarEnabledIds = await getRadarEnabledDatasetsWithRules([datasetTerm])
-        setInstantApprovalEligible(Boolean(radarEnabledIds?.has(datasetTerm.datasetId)))
-      }
-      catch {
-        setInstantApprovalEligible(false)
-      }
-    }
-    fetchInstantApprovalEligibility()
-  }, [datasetTerm])
 
   const accessInstructions = () => {
     const accessManagement = datasetTerm?.accessManagement as AccessManagement

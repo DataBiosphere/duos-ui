@@ -1,7 +1,5 @@
-import { Dataset, DatasetProperty, DatasetTerm, DataUseSummary, StudyProperty } from 'src/types/model'
+import { Dataset, DatasetProperty, DatasetTerm, StudyProperty } from 'src/types/model'
 import { isEmpty } from 'src/utils/NodashUtil'
-import { DAC as Dac } from 'src/libs/ajax/DAC'
-import { DACbotRule } from 'src/components/dac_bot/DACBotComponent'
 import { SoApprovalModel } from 'src/types/library'
 
 export const firstNonEmptyPropertyValue = (dataset: Partial<Dataset>, propertyNames: string[]): string => {
@@ -30,76 +28,28 @@ export const firstNonEmptyPropertyValue = (dataset: Partial<Dataset>, propertyNa
   return ''
 }
 
-export const isOnlyGRUorHMB = (dataUse: DataUseSummary) => {
-  const modifiers = new Set(['IRB', 'COL', 'GSO', 'NPU'])
-  const primaryCodes = dataUse.primary.map(p => p.code)
-  const secondaryCodes = dataUse.secondary?.map(s => s.code)
-
-  return (
-    primaryCodes.length === 1
-    && (primaryCodes[0] === 'GRU' || primaryCodes[0] === 'HMB')
-    && (secondaryCodes?.length === 0 || !secondaryCodes?.some(mod => modifiers.has(mod)))
-  )
-}
-
-const RULE_TYPE_TO_CODE: Record<string, 'GRU' | 'HMB'> = {
-  GRU_V1: 'GRU',
-  GRU_DSV1: 'GRU',
-  HMB_V1: 'HMB',
-  HMB_DSV1: 'HMB',
-}
-
 /**
- * How DACbot rules are loaded for a DAC. Callers pass the cached fetcher from `useDacRules`
- * so repeated lookups — and the separate radar and Signing Official passes — share one request
- * per DAC; the default keeps these helpers usable outside a React component.
+ * Datasets whose DAC has an automation rule enabled that would auto-approve a matching request,
+ * as resolved server-side by the search index (DT-3888).
+ *
+ * Previously derived here by fetching `/api/dac/{id}/rules` per unique DAC and re-implementing
+ * the rule check in JS. That re-derivation could not see most of the modifiers the approval
+ * engine rejects on, so it marked datasets eligible that would never actually be auto-approved.
+ * A dataset whose document predates the backfill carries no flag and is treated as ineligible,
+ * which matches the pre-existing behaviour of showing no badge.
  */
-export type DacRulesFetcher = (dacId: number) => Promise<DACbotRule[]>
+export const getRadarEnabledDatasetIds = (datasets: DatasetTerm[]): Set<number> => {
+  if (isEmpty(datasets)) return new Set()
 
-export const getRadarEnabledDatasetsWithRules = async (
-  datasets: DatasetTerm[],
-  fetchDacRules: DacRulesFetcher = Dac.fetchDACbotRules,
-) => {
-  if (isEmpty(datasets)) return
-
-  // Get unique DAC IDs from datasets that have a DAC ID. Filtered on truthiness to match the
-  // lookup below, so a 0 sentinel doesn't cost a doomed /api/dac/0/rules request whose rejection
-  // would take down the whole batch
-  const uniqueDacIds = Array.from(
-    new Set(datasets.filter(dataset => Boolean(dataset.dacId)).map(dataset => dataset.dacId)),
+  return new Set(
+    datasets
+      .filter(dataset => dataset.instantApprovalEligible === true)
+      .map(dataset => dataset.datasetId),
   )
-
-  // Fetch DACbot rules for each unique DAC ID, tracking which specific data use code
-  // (GRU or HMB) each DAC has actually enabled auto-approval for
-  const dacIdToEnabledCodes: Record<number, Set<'GRU' | 'HMB'>> = {}
-  await Promise.all(
-    uniqueDacIds.map(async (dacId) => {
-      const rules: DACbotRule[] = await fetchDacRules(dacId)
-      const enabledCodes = new Set(
-        rules
-          .filter((rule: { activationDate: number, ruleType: string }) => rule.activationDate && RULE_TYPE_TO_CODE[rule.ruleType])
-          .map((rule: { ruleType: string }) => RULE_TYPE_TO_CODE[rule.ruleType]),
-      )
-      if (enabledCodes.size > 0) {
-        dacIdToEnabledCodes[dacId] = enabledCodes
-      }
-    }),
-  )
-
-  // A dataset is only radar-enabled if its DAC has enabled auto-approval for that
-  // dataset's own clean GRU/HMB code, not merely enabled it for the other code
-  return new Set(datasets
-    .filter((dataset: DatasetTerm) => {
-      const enabledCodes = dataset.dacId ? dacIdToEnabledCodes[dataset.dacId] : undefined
-      return enabledCodes !== undefined
-        && isOnlyGRUorHMB(dataset.dataUse)
-        && enabledCodes.has(dataset.dataUse.primary[0].code as 'GRU' | 'HMB')
-    })
-    .map((dataset: { datasetId: number }) => dataset.datasetId))
 }
 
 const BACKEND_SO_APPROVAL_MODELS: Record<string, SoApprovalModel> = {
-  PER_DAR: 'per-dar',
+  PER_REQUEST: 'per-request',
   PRE_AUTHORIZED: 'pre-authorized',
 }
 

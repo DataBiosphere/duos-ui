@@ -13,7 +13,7 @@ import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 import { BoolQuery, ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
-import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils'
+import { getRadarEnabledDatasetIds } from 'src/utils/DatasetUtils'
 import { DuosUser } from 'src/types/model'
 import { EnumerateSnapshotModel } from 'src/types/tdrModel'
 
@@ -21,7 +21,7 @@ vi.mock('src/libs/ajax/DataSet', () => ({
   DataSet: { searchDatasetIndexV2: vi.fn() },
 }))
 vi.mock('src/utils/DatasetUtils', () => ({
-  getRadarEnabledDatasetsWithRules: vi.fn(),
+  getRadarEnabledDatasetIds: vi.fn(() => new Set()),
   getSoApprovalModelByDatasetId: vi.fn(() => new Map()),
 }))
 
@@ -241,7 +241,7 @@ beforeEach(() => {
     if (q.size === 0) return asSearchResponse(mockMetadataResponse)
     return asSearchResponse(mockDatasetsResponse)
   })
-  vi.mocked(getRadarEnabledDatasetsWithRules).mockResolvedValue(new Set())
+  vi.mocked(getRadarEnabledDatasetIds).mockReturnValue(new Set())
 
   vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(defaultUser)
   vi.spyOn(TerraDataRepo, 'listSnapshotsByDatasetIds').mockResolvedValue(emptyTdrResponse)

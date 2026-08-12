@@ -9,7 +9,7 @@ import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { DAC } from 'src/libs/ajax/DAC'
-import { DatasetStatisticsDar, DataUseSummary } from 'src/types/model'
+import { DatasetStatisticsDar, DatasetTerm, DataUseSummary } from 'src/types/model'
 import { SnapshotSummaryModel } from 'src/types/tdrModel'
 
 // Mock the AJAX modules
@@ -45,7 +45,7 @@ globalThis.fetch = vi.fn((url: any) => {
   return originalFetch(url)
 }) as typeof fetch
 
-const mockDatasetTerm = {
+const mockDatasetTerm: DatasetTerm = {
   datasetId: 1,
   createUserId: 1,
   createUserDisplayName: 'Test User',
@@ -142,7 +142,7 @@ describe('DatasetStatistics', () => {
     tdrError,
     dacRules = [],
   }: {
-    dataset?: typeof mockDatasetTerm
+    dataset?: DatasetTerm
     dars?: DatasetStatisticsDar[]
     tdrResponse?: ReturnType<typeof buildTdrResponse>
     tdrError?: Error
@@ -189,25 +189,25 @@ describe('DatasetStatistics', () => {
     expect(await screen.findByText('Dr. Test PI')).toBeTruthy()
   })
 
-  it('shows the instant approval badge when the dataset is radar-eligible', async () => {
+  it('shows the instant approval badge when the search index marked the dataset eligible', async () => {
     renderDatasetStatistics({
-      dataset: { ...mockDatasetTerm, dataUse: { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [] } },
-      dacRules: [{
-        id: 1,
-        ruleType: 'GRU_V1',
-        description: 'Auto-approve GRU',
-        ruleState: 'AVAILABLE',
-        activationDate: Date.parse('2026-01-01'),
-        enabledByUserId: null,
-        displayName: null,
-        userEmail: null,
-      }],
+      dataset: { ...mockDatasetTerm, instantApprovalEligible: true },
     })
 
     expect(await screen.findByText('Instant approval eligible')).toBeInTheDocument()
+    // The flag rides on the indexed document, so no per-DAC rules request is made
+    expect(DAC.fetchDACbotRules).not.toHaveBeenCalled()
   })
 
-  it('does not show the instant approval badge when the dataset is not radar-eligible', async () => {
+  it('does not show the instant approval badge when the index marked the dataset ineligible', async () => {
+    renderDatasetStatistics({ dataset: { ...mockDatasetTerm, instantApprovalEligible: false } })
+
+    expect(await screen.findByText(/DUOS-000001 - Test Dataset/)).toBeTruthy()
+    expect(screen.queryByText('Instant approval eligible')).not.toBeInTheDocument()
+  })
+
+  // A document indexed before DT-3888, or reindexed while the DAC rule lookup was failing
+  it('does not show the instant approval badge when the index supplied no flag', async () => {
     renderDatasetStatistics()
 
     expect(await screen.findByText(/DUOS-000001 - Test Dataset/)).toBeTruthy()
