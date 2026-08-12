@@ -9,6 +9,7 @@ interface ConfigType {
   tag: string
   tdrApiUrl: string
   terraUrl: string
+  bffEnabled?: boolean
 }
 
 let configPromise: Promise<ConfigType> | null = null
@@ -47,6 +48,10 @@ class ConfigClass {
 
   async getHash(): Promise<string> {
     return getHash()
+  }
+
+  async isBffEnabled(): Promise<boolean> {
+    return isBffEnabled()
   }
 
   async getProject(): Promise<string> {
@@ -111,6 +116,17 @@ export const getECMUrl = async (): Promise<string> => {
 export const getHash = async (): Promise<string> => {
   const config = await loadConfig()
   return config.hash
+}
+
+/**
+ * The BFF cutover switch. The server registers the /auth/* routes and the API
+ * proxy from the same config.json key, so client and server agree on the
+ * sign-in flow by construction. A missing key means false — the fail-safe is
+ * the legacy client-side auth flow.
+ */
+export const isBffEnabled = async (): Promise<boolean> => {
+  const config = await loadConfig()
+  return config.bffEnabled === true
 }
 
 export const getProject = async (): Promise<string> => {
