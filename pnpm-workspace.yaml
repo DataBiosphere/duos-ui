@@ -11,6 +11,16 @@ overrides:
   # DoS via unbounded brace expansion (GHSA-mh99-v99m-4gvg), then again via
   # unbounded intermediate arrays bypassing that fix (GHSA-rgw5-rvv9-x895).
   brace-expansion: ">=5.0.9"
+  # Infinite loop in custom generators when size is zero (GHSA-2v37-7h3g-55p8).
+  # Reaches us only through vite's postcss, which declares ^3.3.11.
+  nanoid@3: 3.3.18
+  # Missing buffer bounds check in v3/v5/v6 (GHSA-w5hq-g745-h8pq). Pulled in by
+  # autocannon > hyperid, which only ever calls uuid.v4 -- and only as a fallback
+  # when crypto.randomUUID is missing, so this is dead code on our Node. The
+  # advisory range is unbounded below, so no 8.x clears audit. Held at 11.x
+  # rather than the root's 14.x because hyperid's uuid-node.js is CommonJS and
+  # 11.1.1 is the newest line that still ships a require export.
+  uuid@8: 11.1.1
 
 allowBuilds:
   esbuild: false
