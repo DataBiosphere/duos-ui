@@ -6,6 +6,7 @@
   "terraUrl": "https://terraURL.org/",
   "tdrApiUrl": "https://tdrApiUrl.org/",
   "ecmApiUrl": "https://ecmApiUrl.org",
+  "bffEnabled": false,
   "features": {
     "featureX" : true,
     "featureY" : false

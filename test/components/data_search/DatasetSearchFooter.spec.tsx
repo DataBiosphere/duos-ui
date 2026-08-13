@@ -50,7 +50,7 @@ describe('Dataset Search Footer renders tooltip and disables apply button', () =
     vi.restoreAllMocks()
   })
 
-  it('Disables Apply for Access button when user has no library card', () => {
+  it('Disables Apply for Access button when user does not have Active Researcher Status', () => {
     vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ libraryCard: null } as never)
     render(<DatasetSearchFooter {...oneDatasetProps} />)
     expect(screen.getByRole('button', { name: 'Apply for Access' })).toBeDisabled()
@@ -62,10 +62,10 @@ describe('Dataset Search Footer renders tooltip and disables apply button', () =
     const button = screen.getByRole('button', { name: 'Apply for Access' })
     await userEvent.hover(button.parentElement!)
     const tooltip = await screen.findByRole('tooltip')
-    expect(tooltip).toHaveTextContent('A Library Card is required to apply for data access')
+    expect(tooltip).toHaveTextContent('Active Researcher Status is required to apply for data access')
   })
 
-  it('Enables button when user has a library card', () => {
+  it('Enables button when user has Active Researcher Status', () => {
     vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ libraryCard: { cardNumber: '12345' } } as never)
     render(<DatasetSearchFooter {...oneDatasetProps} />)
     expect(screen.getByRole('button', { name: 'Apply for Access' })).not.toBeDisabled()

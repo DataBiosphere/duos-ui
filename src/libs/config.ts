@@ -61,6 +61,10 @@ class ConfigClass {
     return getHash()
   }
 
+  async isBffEnabled(): Promise<boolean> {
+    return isBffEnabled()
+  }
+
   async getProject(): Promise<string> {
     return getProject()
   }
@@ -144,6 +148,11 @@ export const getECMUrl = async (): Promise<string> => {
 export const getHash = async (): Promise<string> => {
   const config = await loadConfig()
   return config.hash
+}
+
+export const isBffEnabled = async (): Promise<boolean> => {
+  const config = await loadConfig()
+  return config.bffEnabled === true
 }
 
 export const getProject = async (): Promise<string> => {

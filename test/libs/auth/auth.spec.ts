@@ -1,40 +1,113 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { Auth, redirectOnLogout } from 'src/libs/auth/auth'
+import { OidcBroker } from 'src/libs/auth/oidcBroker'
+import { Auth, Redirect, redirectOnLogout } from 'src/libs/auth/auth'
 import { Storage } from 'src/libs/storage'
 import { Config } from 'src/libs/config'
-import { browserNavigation } from 'src/libs/browserNavigation'
-import { getCsrfToken, resetCsrfToken } from 'src/libs/auth/csrf'
-import { getSessionInfo, resetSessionCache } from 'src/libs/auth/session'
+import { v4 as uuid } from 'uuid'
+import type { UserManager } from 'oidc-client-ts'
 
-vi.mock('src/libs/auth/csrf', () => ({
-  CSRF_HEADER: 'X-CSRF-Token',
-  getCsrfToken: vi.fn(),
-  resetCsrfToken: vi.fn(),
-}))
-
-vi.mock('src/libs/auth/session', () => ({
-  getSessionInfo: vi.fn(),
-  resetSessionCache: vi.fn(),
-}))
-
-vi.mock('src/libs/browserNavigation', () => ({
-  browserNavigation: {
-    assign: vi.fn(),
-    currentPathname: vi.fn(),
+const mockOidcUser = {
+  access_token: 'valid-access-token',
+  session_state: null as null,
+  state: undefined as undefined,
+  token_type: '',
+  get expired() { return undefined },
+  get scopes() { return [] as string[] },
+  toStorageString() { return '' },
+  profile: {
+    sub: '', iss: '', aud: '', iat: 0,
+    exp: Math.floor(Date.now() / 1000) + 3600, // valid for 1 hour
   },
-}))
+}
 
-describe('Auth (BFF)', () => {
-  let fetchMock: ReturnType<typeof vi.fn>
-
+describe('Auth Failure', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(false)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
     localStorage.clear()
-    fetchMock = vi.fn()
-    vi.stubGlobal('fetch', fetchMock)
-    vi.mocked(browserNavigation.currentPathname).mockReturnValue('/datalibrary')
-    vi.mocked(getCsrfToken).mockResolvedValue('csrf-token-123')
-    vi.mocked(getSessionInfo).mockResolvedValue({ authenticated: false })
+  })
+
+  it('Sign In error throws expected message', async () => {
+    vi.spyOn(OidcBroker, 'signIn').mockResolvedValue(null as never)
+    await expect(Auth.signIn()).rejects.toThrow(Auth.signInError())
+    expect(Storage.userIsLogged()).toBe(false)
+  })
+})
+
+describe('Auth Success', () => {
+  beforeEach(async () => {
+    vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(false)
+    vi.spyOn(OidcBroker, 'initialize').mockResolvedValue(undefined)
+    vi.spyOn(OidcBroker, 'getUserManager').mockReturnValue({
+      events: {
+        addUserLoaded: vi.fn(),
+        addAccessTokenExpiring: vi.fn(),
+        addAccessTokenExpired: vi.fn(),
+      },
+    } as unknown as UserManager)
+    vi.spyOn(OidcBroker, 'signOut').mockResolvedValue(undefined)
+    await Auth.initialize()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    localStorage.clear()
+  })
+
+  it('Sign In stores the current user', async () => {
+    vi.spyOn(OidcBroker, 'signIn').mockResolvedValue(mockOidcUser as never)
+    await Auth.signIn()
+    expect(Storage.getOidcUser().access_token).toBe(mockOidcUser.access_token)
+    expect(Storage.userIsLogged()).toBe(true)
+    // Legacy isAuthenticated falls back to localStorage token expiry
+    expect(await Auth.isAuthenticated()).toBe(true)
+  })
+
+  it('Sign Out Clears the session when called', async () => {
+    Storage.setAnonymousId(uuid())
+    Storage.setData('key', 'val')
+    Storage.setEnv('test')
+    expect(Storage.getAnonymousId()).not.toBeNull()
+    expect(Storage.getData('key')).not.toBeNull()
+    expect(Storage.getEnv()).not.toBeNull()
+    await Auth.signOut()
+    expect(Storage.userIsLogged()).toBe(false)
+    expect(Storage.getAnonymousId()).toBeNull()
+    expect(Storage.getData('key')).toBeNull()
+    expect(Storage.getEnv()).toBeNull()
+  })
+
+  it('redirectOnLogout clears storage and calls signOut', async () => {
+    Storage.setAnonymousId(uuid())
+    Storage.setData('key', 'val')
+    Storage.setEnv('test')
+    expect(Storage.getAnonymousId()).not.toBeNull()
+    expect(Storage.getData('key')).not.toBeNull()
+    expect(Storage.getEnv()).not.toBeNull()
+
+    const signOutSpy = vi.spyOn(Auth, 'signOut')
+    try {
+      redirectOnLogout()
+    }
+    catch (_e) {
+      // ignore location redirect errors in jsdom
+    }
+    // await the async signOut that redirectOnLogout fires-and-forgets
+    await signOutSpy.mock.results[0].value
+    expect(signOutSpy).toHaveBeenCalled()
+    expect(Storage.userIsLogged()).toBe(false)
+    expect(Storage.getAnonymousId()).toBeNull()
+    expect(Storage.getData('key')).toBeNull()
+    expect(Storage.getEnv()).toBeNull()
+  })
+})
+
+describe('Auth (BFF mode)', () => {
+  beforeEach(() => {
+    vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(true)
   })
 
   afterEach(() => {
@@ -43,123 +116,132 @@ describe('Auth (BFF)', () => {
     localStorage.clear()
   })
 
-  describe('initialize', () => {
-    it('purges legacy oidc-client-ts keys when the environment has cut over', async () => {
-      vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(true)
-      localStorage.setItem('OidcUser', '{"access_token":"secret"}')
-      localStorage.setItem('oidc.abc123', 'state')
-      localStorage.setItem('CurrentUser', '{"userId":1}')
+  it('initialize purges legacy oidc keys and does not start the OidcBroker', async () => {
+    localStorage.setItem('OidcUser', JSON.stringify({ access_token: 'stale' }))
+    localStorage.setItem('oidc.user:authority:client', 'stale')
+    localStorage.setItem('oidc.abc123', 'stale-state')
+    localStorage.setItem('CurrentUser', JSON.stringify({ userId: 1 }))
+    const brokerInit = vi.spyOn(OidcBroker, 'initialize')
 
-      await Auth.initialize()
+    await Auth.initialize()
 
-      expect(localStorage.getItem('OidcUser')).toBeNull()
-      expect(localStorage.getItem('oidc.abc123')).toBeNull()
-      expect(localStorage.getItem('CurrentUser')).toBe('{"userId":1}')
-    })
-
-    it('leaves legacy storage untouched in a non-cutover environment', async () => {
-      vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(false)
-      localStorage.setItem('OidcUser', '{"access_token":"legacy"}')
-      localStorage.setItem('oidc.abc123', 'state')
-
-      await Auth.initialize()
-
-      expect(localStorage.getItem('OidcUser')).toBe('{"access_token":"legacy"}')
-      expect(localStorage.getItem('oidc.abc123')).toBe('state')
-    })
+    expect(localStorage.getItem('OidcUser')).toBeNull()
+    expect(localStorage.getItem('oidc.user:authority:client')).toBeNull()
+    expect(localStorage.getItem('oidc.abc123')).toBeNull()
+    expect(localStorage.getItem('CurrentUser')).not.toBeNull()
+    expect(brokerInit).not.toHaveBeenCalled()
   })
 
-  describe('signIn', () => {
-    it('POSTs /auth/login and redirects the page to the returned URL', async () => {
-      fetchMock.mockResolvedValue(
-        new Response(JSON.stringify({ redirectUrl: 'https://b2c.example.org/authorize?x=1' }), { status: 200 }),
-      )
-
-      await Auth.signIn()
-
-      expect(fetchMock).toHaveBeenCalledWith('/auth/login', { method: 'POST', credentials: 'include' })
-      expect(browserNavigation.assign).toHaveBeenCalledWith('https://b2c.example.org/authorize?x=1')
-      expect(resetCsrfToken).toHaveBeenCalled()
-      expect(resetSessionCache).toHaveBeenCalled()
+  it('signIn POSTs /auth/login and redirects to the returned URL', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ redirectUrl: 'https://b2c.example.com/authorize?state=xyz' }),
     })
+    vi.stubGlobal('fetch', fetchMock)
+    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
 
-    it('passes returnTo as a query parameter', async () => {
-      fetchMock.mockResolvedValue(
-        new Response(JSON.stringify({ redirectUrl: 'https://b2c.example.org/authorize' }), { status: 200 }),
-      )
+    // The BFF signIn promise never settles (full-page redirect), so don't await it
+    void Auth.signIn()
 
-      await Auth.signIn('/datalibrary')
-
-      expect(fetchMock).toHaveBeenCalledWith(
-        `/auth/login?returnTo=${encodeURIComponent('/datalibrary')}`,
-        { method: 'POST', credentials: 'include' },
-      )
-    })
-
-    it('takes no idp parameter — provider selection happens on the B2C page', () => {
-      // One-argument signature: (returnTo?: string)
-      expect(Auth.signIn.length).toBeLessThanOrEqual(1)
-    })
-
-    it('throws the standard sign-in error when the BFF rejects the login request', async () => {
-      fetchMock.mockResolvedValue(new Response('{}', { status: 500 }))
-
-      await expect(Auth.signIn()).rejects.toThrow(Auth.signInError())
-      expect(browserNavigation.assign).not.toHaveBeenCalled()
-    })
+    await vi.waitFor(() => expect(redirectSpy).toHaveBeenCalledWith('https://b2c.example.com/authorize?state=xyz'))
+    expect(fetchMock).toHaveBeenCalledWith('/auth/login', { method: 'POST', credentials: 'include' })
   })
 
-  describe('signOut', () => {
-    it('POSTs /auth/logout with a CSRF token, clears storage, and redirects home', async () => {
-      Storage.setAnonymousId('anon-1')
-      Storage.setData('key', 'val')
-      fetchMock.mockResolvedValue(new Response(null, { status: 204 }))
-
-      await Auth.signOut()
-
-      expect(fetchMock).toHaveBeenCalledWith('/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'X-CSRF-Token': 'csrf-token-123' },
-      })
-      expect(Storage.getAnonymousId()).toBeNull()
-      expect(Storage.getData('key')).toBeNull()
-      expect(resetCsrfToken).toHaveBeenCalled()
-      expect(resetSessionCache).toHaveBeenCalled()
-      expect(browserNavigation.assign).toHaveBeenCalledWith('/')
+  it('signIn forwards returnTo to the login endpoint', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ redirectUrl: 'https://b2c.example.com/authorize' }),
     })
+    vi.stubGlobal('fetch', fetchMock)
+    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
 
-    it('still clears storage and redirects when the logout request fails', async () => {
-      Storage.setData('key', 'val')
-      fetchMock.mockRejectedValue(new TypeError('network down'))
+    void Auth.signIn('/datalibrary?tab=all')
 
-      await Auth.signOut()
-
-      expect(Storage.getData('key')).toBeNull()
-      expect(browserNavigation.assign).toHaveBeenCalledWith('/')
-    })
+    await vi.waitFor(() => expect(redirectSpy).toHaveBeenCalledWith('https://b2c.example.com/authorize'))
+    expect(fetchMock).toHaveBeenCalledWith(
+      `/auth/login?returnTo=${encodeURIComponent('/datalibrary?tab=all')}`,
+      { method: 'POST', credentials: 'include' },
+    )
   })
 
-  describe('isAuthenticated', () => {
-    it('reflects the session probe', async () => {
-      vi.mocked(getSessionInfo).mockResolvedValue({ authenticated: true, idp: 'google' })
-      await expect(Auth.isAuthenticated()).resolves.toBe(true)
+  it('signIn rejects when /auth/login fails', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500 }))
+    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
 
-      vi.mocked(getSessionInfo).mockResolvedValue({ authenticated: false })
-      await expect(Auth.isAuthenticated()).resolves.toBe(false)
-    })
+    await expect(Auth.signIn()).rejects.toThrow(Auth.signInError())
+    expect(redirectSpy).not.toHaveBeenCalled()
   })
 
-  describe('redirectOnLogout', () => {
-    it('ends the session and redirects to /home with the current path', async () => {
-      Storage.setData('key', 'val')
-      fetchMock.mockResolvedValue(new Response(null, { status: 204 }))
+  it('signOut fetches a CSRF token, POSTs logout with it, clears storage, and redirects', async () => {
+    Storage.setAnonymousId(uuid())
+    Storage.setData('key', 'val')
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-123' }) })
+      .mockResolvedValueOnce({ ok: true, status: 204 })
+    vi.stubGlobal('fetch', fetchMock)
+    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
 
-      redirectOnLogout()
-      await vi.waitFor(() => expect(browserNavigation.assign).toHaveBeenCalledWith('/home?redirectTo=/datalibrary'))
+    await Auth.signOut()
 
-      expect(fetchMock).toHaveBeenCalledWith('/auth/logout', expect.objectContaining({ method: 'POST' }))
-      expect(Storage.getData('key')).toBeNull()
+    expect(fetchMock).toHaveBeenNthCalledWith(1, '/auth/csrf-token', { credentials: 'include' })
+    expect(fetchMock).toHaveBeenNthCalledWith(2, '/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'X-CSRF-Token': 'csrf-123' },
     })
+    expect(Storage.getAnonymousId()).toBeNull()
+    expect(Storage.getData('key')).toBeNull()
+    // No OidcUser placeholder survives sign-out in BFF mode
+    expect(localStorage.getItem('OidcUser')).toBeNull()
+    expect(redirectSpy).toHaveBeenCalledWith('/')
+  })
+
+  it('signOut still clears local state and redirects when the logout request fails', async () => {
+    Storage.setData('key', 'val')
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')))
+    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+
+    await Auth.signOut()
+
+    expect(Storage.getData('key')).toBeNull()
+    expect(localStorage.getItem('OidcUser')).toBeNull()
+    expect(redirectSpy).toHaveBeenCalledWith('/')
+  })
+
+  it('signOut redirects to the requested target', async () => {
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-123' }) })
+      .mockResolvedValueOnce({ ok: true, status: 204 }))
+    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+
+    await Auth.signOut('/home?redirectTo=/datalibrary')
+
+    expect(redirectSpy).toHaveBeenCalledWith('/home?redirectTo=/datalibrary')
+  })
+
+  it.each([
+    [true, 200],
+    [false, 401],
+  ])('isAuthenticated returns %s when /auth/me responds %i', async (expected, status) => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: expected, status })
+    vi.stubGlobal('fetch', fetchMock)
+
+    expect(await Auth.isAuthenticated()).toBe(expected)
+    expect(fetchMock).toHaveBeenCalledWith('/auth/me', { credentials: 'include' })
+  })
+
+  it('redirectOnLogout signs out with the /home redirect target', async () => {
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-123' }) })
+      .mockResolvedValueOnce({ ok: true, status: 204 }))
+    globalThis.history.replaceState({}, '', '/datalibrary')
+    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+    const signOutSpy = vi.spyOn(Auth, 'signOut')
+
+    redirectOnLogout()
+
+    expect(signOutSpy).toHaveBeenCalledWith('/home?redirectTo=/datalibrary')
+    await signOutSpy.mock.results[0].value
+    expect(redirectSpy).toHaveBeenCalledWith('/home?redirectTo=/datalibrary')
   })
 })

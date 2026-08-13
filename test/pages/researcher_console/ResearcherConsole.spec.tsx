@@ -86,9 +86,6 @@ vi.mock('src/components/TableHeaderSection', () => ({
       React.createElement('p', null, description)),
 }))
 
-vi.mock('src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf', () => ({ default: 'broad-lca.pdf' }))
-vi.mock('src/assets/NIHLibraryCardAgreement06252025.pdf', () => ({ default: 'nih-lca.pdf' }))
-
 const { useResponsiveDarCollectionColumns } = await import('src/hooks/useResponsiveDarCollectionColumns')
 const { searchOnFilteredList } = await import('src/libs/utils')
 
@@ -134,11 +131,10 @@ describe('ResearcherConsole', () => {
     expect(screen.getByText('Select and manage Data Access Requests and Drafts below')).toBeInTheDocument()
   })
 
-  it('renders links to Broad and NIH Library Card Agreements', async () => {
+  it('does not render the outdated Library Card Agreement notice', async () => {
     vi.mocked(Collections.getCollectionSummariesByRoleName).mockResolvedValue([])
     await act(async () => render(<ResearcherConsole />))
-    expect(screen.getByText('Broad')).toBeInTheDocument()
-    expect(screen.getByText('NIH')).toBeInTheDocument()
+    expect(screen.queryByText(/By submitting a DAR in DUOS/)).not.toBeInTheDocument()
   })
 
   it('renders the SearchBar', async () => {
