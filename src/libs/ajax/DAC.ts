@@ -2,6 +2,7 @@ import { fetchGet, fetchPost, fetchPut, fetchDelete } from 'src/libs/ajax/fetchA
 import { DacObject, Dataset, DuosUser } from 'src/types/model'
 import { Config } from 'src/libs/config'
 import { DACbotRule } from 'src/components/dac_bot/DACBotComponent'
+import { DashboardDataLibrary, fetchDashboardSummary } from 'src/libs/ajax/Dashboard'
 
 type SuccessResponseCode = 200
 
@@ -23,12 +24,26 @@ export type DacDeleteResponse = {
   status: number
 }
 
+export interface DacDashboardSummary {
+  /** No denied count: DUOS has no denied DAR collection status. */
+  darRequests: { total: number, approved: number, pending: number, awaitingMyVote: number }
+  /** Chair-only count; the backend returns zero for members. */
+  dacs: { total: number }
+  /** Chair-only count; the backend returns zero for members. */
+  dacDatasets: { total: number }
+  /** Counts matching the four Data Library tab badges visible to the caller. */
+  dataLibrary: DashboardDataLibrary
+}
+
 export const DAC = {
   list: async (withUsers?: boolean): Promise<DacObject[]> => {
     const url = `${await Config.getApiUrl()}/api/dac` + (withUsers === undefined ? '' : `?withUsers=${withUsers}`)
     const res = await fetchGet<DacObject[]>(url, Config.authOpts())
     return res.data
   },
+
+  getDashboardSummary: (): Promise<DacDashboardSummary> =>
+    fetchDashboardSummary('/api/dac/dashboard-summary'),
 
   create: async (name: string, description: string, email: string): Promise<DacObject> => {
     const url = `${await Config.getApiUrl()}/api/dac`

@@ -23,6 +23,9 @@ describe('FundingResourceAddEdit component', () => {
   it('opens add form and enforces validation disabling save then adds', async () => {
     // delay: null skips the timer between keystrokes; ~48 chars here otherwise
     // risks timing out on CI, and a timeout mid-type leaks keystrokes into the next test.
+    // Each keystroke still re-renders the whole form (incl. react-select), so a
+    // saturated CI runner can exceed 5s regardless — hence the 15s timeout below,
+    // matching PresentationAddEdit.spec.tsx.
     const user = userEvent.setup({ delay: null })
     const collected: FundingResource[] = []
     const { container } = render(
@@ -42,7 +45,7 @@ describe('FundingResourceAddEdit component', () => {
     expect(collected).toHaveLength(1)
     expect(collected[0].funderName).toBe('New Funder')
     expect(collected[0].projectTitle).toBe('New Project')
-  })
+  }, 15000)
 
   it('edits existing funding resource and saves changes', async () => {
     const user = userEvent.setup({ delay: null })
@@ -62,5 +65,5 @@ describe('FundingResourceAddEdit component', () => {
     await user.clear(container.querySelector('#funderName')!)
     await user.type(container.querySelector('#funderName')!, 'Funder A Edited')
     await user.click(container.querySelector('.collaborator-form-add-save-button')!)
-  })
+  }, 15000)
 })
