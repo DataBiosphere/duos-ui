@@ -43,16 +43,18 @@ export type ConsoleDashboardResource = ConsoleDashboardResourceBase & (
 interface ConsoleDashboardResourcesProps {
   heading: string
   resources: ConsoleDashboardResource[]
+  currentUser?: DuosUser
 }
 
 export default function ConsoleDashboardResources({
   heading,
   resources,
+  currentUser: providedCurrentUser,
 }: Readonly<ConsoleDashboardResourcesProps>): React.JSX.Element {
   const { activeTab } = useNavigationState()
   const [showContactModal, setShowContactModal] = useState(false)
 
-  const currentUser = Storage.getCurrentUser()
+  const currentUser = providedCurrentUser ?? Storage.getCurrentUser()
   const visibleResources = resources.filter(resource => isRenderedForUser(resource.isRenderedForUser, currentUser))
   // Mounting the modal where nothing can open it costs a Storage read per render for nothing.
   const hasContactUsResource = visibleResources.some(resource => resource.action === 'contactUs')

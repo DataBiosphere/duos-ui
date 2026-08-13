@@ -1,5 +1,7 @@
-import { Config } from 'src/libs/config'
-import { fetchGet } from 'src/libs/ajax/fetchAdapter'
+import {
+  DashboardDarRequests,
+  fetchDashboardSummary,
+} from 'src/libs/ajax/Dashboard'
 
 export interface SigningOfficialDashboardSummary {
   researcherStatus: { active: number, inactive: number }
@@ -7,7 +9,7 @@ export interface SigningOfficialDashboardSummary {
    * Mirrors the statuses on the SO DAR Requests page: `canceled` is a collection the researcher
    * withdrew, `inProcess` is anything not yet fully approved or canceled.
    */
-  darRequests: { total: number, approved: number, canceled: number, inProcess: number }
+  darRequests: DashboardDarRequests
   darApprovals: { total: number, awaitingSoAction: number }
   dataSubmitters: { approved: number }
   institutionLibrary: { datasets: number, studies: number }
@@ -15,9 +17,6 @@ export interface SigningOfficialDashboardSummary {
 }
 
 export const SigningOfficial = {
-  getDashboardSummary: async (): Promise<SigningOfficialDashboardSummary> => {
-    const url = `${await Config.getApiUrl()}/api/signing-official/dashboard-summary`
-    const response = await fetchGet<SigningOfficialDashboardSummary>(url, Config.authOpts())
-    return response.data
-  },
+  getDashboardSummary: (): Promise<SigningOfficialDashboardSummary> =>
+    fetchDashboardSummary('/api/signing-official/dashboard-summary'),
 }
