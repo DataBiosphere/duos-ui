@@ -48,6 +48,7 @@ import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResea
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
 import { DataLibrary } from 'src/pages/DataLibrary'
+import { StudyNameSearch } from 'src/routing/StudyNameSearch'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -76,6 +77,7 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route path="/datalibrary" element={<DataLibrary />}>
           <Route path=":query" element={<DataLibrary />} />
         </Route>
+        <Route path="/studies/name/*" element={<StudyNameSearch />} />
         <Route path="/studies/:studyId" element={<StudyDetails />} />
         <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
