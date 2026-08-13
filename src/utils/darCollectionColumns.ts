@@ -20,17 +20,24 @@ const baseColumnsOverrides: Record<string, string[]> = {
   // Add more overrides if needed for other console types
 }
 
+// Columns each console type drops from the default set
+const excludedColumns: Record<string, string[]> = {
+  [consoleTypes.ADMIN]: [DarCollectionTableColumnOptions.ACTIONS],
+}
+
 function getBaseColumns(consoleType: string): string[] {
   const overrides = baseColumnsOverrides[consoleType] || []
   // Insert DAC after DAR_CODE if present in overrides
-  if (overrides.includes(DarCollectionTableColumnOptions.DAC)) {
-    return [
-      DarCollectionTableColumnOptions.DAR_CODE,
-      DarCollectionTableColumnOptions.DAC,
-      ...defaultBaseColumns.slice(1),
-    ]
-  }
-  return [...defaultBaseColumns]
+  const columns = overrides.includes(DarCollectionTableColumnOptions.DAC)
+    ? [
+        DarCollectionTableColumnOptions.DAR_CODE,
+        DarCollectionTableColumnOptions.DAC,
+        ...defaultBaseColumns.slice(1),
+      ]
+    : [...defaultBaseColumns]
+
+  const excluded = excludedColumns[consoleType] || []
+  return columns.filter(col => !excluded.includes(col))
 }
 
 // Responsive breakpoints for each console type
