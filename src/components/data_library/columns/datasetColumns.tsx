@@ -29,9 +29,7 @@ const makeSoApprovalColumn = (soApprovalModelByDatasetId: Map<number, SoApproval
       : { bgcolor: '#d4edda', color: '#155724' }
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-        {/* describeChild keeps the chip's label as its accessible name — without it MUI sets
-            aria-label to the tooltip text, so screen readers announce the explanation instead
-            of which model applies */}
+        {/* describeChild forces the aria-label to use the chip label text */}
         <Tooltip title={tooltipTitle} describeChild>
           <Chip label={label} size="small" sx={{ ...colorSx, fontWeight: 600 }} />
         </Tooltip>
@@ -104,9 +102,7 @@ export const makeDatasetColumns = (
         : ''
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-          {/* describeChild keeps the access label as the chip's accessible name — without it MUI
-              sets aria-label to the tooltip text, so screen readers announce the instant-approval
-              explanation instead of the access type */}
+          {/* describeChild forces the aria-label to use the access label text */}
           <Tooltip title={tooltipTitle} describeChild>
             <Chip
               label={(
@@ -182,8 +178,6 @@ export const makeDatasetColumns = (
     width: 150,
     valueGetter: (_value, row) => row.dac?.dacName || '',
   },
-  // Omitted entirely when the page supplies no authorization-model data, rather than rendering
-  // a column that could never populate
   ...(soApprovalModelByDatasetId ? [makeSoApprovalColumn(soApprovalModelByDatasetId)] : []),
   {
     field: 'actions',

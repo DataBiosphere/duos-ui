@@ -282,12 +282,11 @@ export interface DatasetTerm {
   requestLocation?: string
   dacId: number
   dacApproval: boolean
-  /** Signing Official authorization model resolved by the search index (DT-3888) */
+  /** Signing Official authorization model resolved by the search index */
   soApprovalModel?: 'PER_REQUEST' | 'PRE_AUTHORIZED'
   /**
    * Whether the dataset's DAC has an automation rule enabled that would auto-approve a matching
-   * request for it, resolved by the search index (DT-3888). Absent when the DAC's rules could not
-   * be resolved, or on documents indexed before the field existed.
+   * request for it. Absent when the index could not resolve the DAC's rules.
    */
   instantApprovalEligible?: boolean
   hasInstitutionCertification?: boolean

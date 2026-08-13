@@ -47,10 +47,8 @@ type CheckboxFilterKey = (typeof CHECKBOX_FILTER_KEYS)[number]
 const isCheckboxFilterKey = (key: FilterKey): key is CheckboxFilterKey =>
   (CHECKBOX_FILTER_KEYS as readonly string[]).includes(key)
 
-// Every key rendered as a Yes/No/Any radio group. A key missing from both this
-// list and CHECKBOX_FILTER_KEYS falls through to renderCheckboxSection's type
-// guard and renders nothing at all, so registering a filter is not enough —
-// it has to be claimed by one of these two.
+// Yes/No/Any radio groups. A registered key claimed by neither this list nor
+// CHECKBOX_FILTER_KEYS renders nothing at all.
 const BOOLEAN_FILTER_KEYS = [
   'datasetsCited',
   'publicationsDatasetsCited',

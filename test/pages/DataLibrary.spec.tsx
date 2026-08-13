@@ -261,7 +261,6 @@ describe('DataLibrary', () => {
     expect(document.querySelector(SEARCH_INPUT_SELECTOR)).toBeInTheDocument()
   })
 
-  // Requirement 2: the SO reminder is page-level, not tied to the Datasets tab
   it.each([
     ['the default tab', '/'],
     ['the Datasets tab', DATASETS_TAB_PATH],

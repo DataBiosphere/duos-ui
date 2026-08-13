@@ -266,21 +266,6 @@ const citationClause = (field: string, cited: boolean): QueryClause => {
   }
 }
 
-/**
- * Clause for a field that only exists on documents indexed since DT-3888.
- *
- * A plain `term` would silently drop every document written before the backfill, so selecting
- * "No" would hide datasets whose state is simply unknown rather than false. Both sides therefore
- * match only what the index actually asserts: "Yes" an explicit true, "No" an explicit false.
- * Datasets carrying neither are excluded from both, matching the grid, which renders no badge
- * and no chip for them rather than guessing.
- */
-const indexedFlagClause = (field: string, value: boolean): QueryClause => ({
-  bool: {
-    must: [{ term: { [field]: value } }, { exists: { field } }],
-  },
-} as unknown as QueryClause)
-
 const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   soApprovalModel: {
     label: 'SO Approval',
@@ -305,7 +290,10 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         return undefined
       }
 
-      return indexedFlagClause('instantApprovalEligible', filters.instantApproval)
+      // Unlike citationClause, an absent flag means "unknown" rather than "No" — the index leaves
+      // it unset when the DAC's rules cannot be resolved, and the grid shows no badge for those.
+      // A bare term matches only documents carrying the field, so both sides exclude them.
+      return { term: { instantApprovalEligible: filters.instantApproval } }
     },
   },
   accessManagement: {

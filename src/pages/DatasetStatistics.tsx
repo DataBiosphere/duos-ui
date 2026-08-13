@@ -53,7 +53,6 @@ export default function DatasetStatistics() {
   const [isLoading, setIsLoading] = useState(true)
   const [exportableSnapshots, setExportableSnapshots] = useState<SnapshotSummaryModel[]>([])
 
-  // Resolved server-side and carried on the indexed document, so no follow-up rules request
   const instantApprovalEligible = datasetTerm?.instantApprovalEligible === true
 
   const showError = (message: string) => {

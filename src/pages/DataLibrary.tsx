@@ -73,10 +73,8 @@ export const DataLibrary: React.FC = () => {
 
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
 
-  // Memoized so the derived maps below are recomputed on new results rather than every render.
-  // Keyed on `data` rather than `data?.items` to match what React Compiler infers — an optional
-  // property access is a narrower dependency than it can preserve, and the mismatch made it skip
-  // optimizing this component entirely.
+  // Keyed on `data` rather than `data?.items`: React Compiler cannot preserve the narrower
+  // optional-access dependency, and the mismatch makes it skip optimizing this component.
   const datasets = useMemo(
     () => (urlState.tab === AssetType.DATASETS && data?.items ? data.items as DatasetTerm[] : []),
     [data, urlState.tab],
@@ -86,8 +84,6 @@ export const DataLibrary: React.FC = () => {
     urlState.tab === AssetType.DATASETS,
   )
 
-  // Both are carried on each indexed dataset, so the column and badge render with the grid
-  // rather than after a second round of requests
   const soApprovalModelByDatasetId = useMemo(
     () => getSoApprovalModelByDatasetId(datasets),
     [datasets],

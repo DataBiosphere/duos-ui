@@ -181,7 +181,6 @@ describe('getRadarEnabledDatasetIds', () => {
     expect(Array.from(result)).toEqual([1, 3])
   })
 
-  // A document indexed before DT-3888, or reindexed while the DAC rule lookup was failing
   it('treats a dataset with no flag as ineligible rather than guessing', () => {
     expect(getRadarEnabledDatasetIds([buildDataset(1)]).size).toEqual(0)
   })
@@ -231,7 +230,6 @@ describe('getSoApprovalModelByDatasetId', () => {
     expect(result.get(2)).toEqual('pre-authorized')
   })
 
-  // A document indexed before DT-3888, or reindexed while the DAC rule lookup was failing
   it('maps a dataset with no model to unknown rather than guessing', () => {
     const result = getSoApprovalModelByDatasetId([buildDataset(1)])
     expect(result.get(1)).toEqual('unknown')

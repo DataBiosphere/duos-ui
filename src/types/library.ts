@@ -193,14 +193,12 @@ export type ExportableDatasets = { [duosId: string]: SnapshotSummaryModel[] }
 
 /**
  * Which Signing Official authorization model a dataset's DAC uses, as resolved by the search
- * index (DT-3888). 'per-request' means the SO named in each access request must approve that
- * request before the DAC reviews it; 'pre-authorized' means the SO authorizes researchers in
- * advance instead.
+ * index. 'per-request' means the SO named in each access request must approve that request before
+ * the DAC reviews it; 'pre-authorized' means the SO authorizes researchers in advance instead.
  *
- * 'unknown' means the index supplied no usable model — the document was written before
- * DT-3888 and predates the backfill reindex, the backend could not resolve the DAC's rules, or
- * the value is one this client does not recognise. Callers must render nothing in that case
- * rather than defaulting to a model.
+ * 'unknown' means the index supplied no usable model: the backend could not resolve the DAC's
+ * rules, or the value is one this client does not recognise. Callers must render nothing in that
+ * case rather than defaulting to a model.
  */
 export type SoApprovalModel = 'per-request' | 'pre-authorized' | 'unknown'
 

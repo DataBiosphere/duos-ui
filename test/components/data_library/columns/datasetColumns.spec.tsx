@@ -105,7 +105,7 @@ describe('datasetColumns — Access Management chip', () => {
     const chip = container.querySelector('.MuiChip-root')
     expect(chip).toHaveTextContent('via DUOS')
     expect(chip?.getAttribute('title')).toMatch(/Automatic request approvals available/)
-    // Without describeChild, MUI would set this to the tooltip text and hide the label from AT
+    // describeChild keeps the label, not the tooltip text, as the accessible name
     expect(chip).not.toHaveAttribute('aria-label')
   })
 })
@@ -129,7 +129,6 @@ describe('datasetColumns — SO Approval column', () => {
     expect(screen.getByText('Per-Request Approval')).toBeInTheDocument()
   })
 
-  // Requirement 8: a DAC whose rules failed to load must not be labeled with either model
   it('renders nothing when the dataset\'s authorization model is unknown', () => {
     const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor('unknown'))
     expect(container.querySelector('.MuiChip-root')).not.toBeInTheDocument()
@@ -142,9 +141,6 @@ describe('datasetColumns — SO Approval column', () => {
     expect(container.querySelector('.MuiChip-root')).not.toBeInTheDocument()
   })
 
-  // Requirement 6: the indicator carries an explanation, without that explanation displacing the
-  // label — MUI would otherwise set aria-label to the tooltip text and screen readers would
-  // announce the explanation instead of which model applies
   it.each([
     ['per-request', 'Per-Request Approval', /requires the Signing Official named in each Data Access Request/],
     ['pre-authorized', 'Pre-Authorized Researchers', /allows Signing Officials to pre-authorize researchers in advance/],
@@ -153,7 +149,7 @@ describe('datasetColumns — SO Approval column', () => {
     const chip = container.querySelector('.MuiChip-root')
     expect(chip).toHaveTextContent(label)
     expect(chip?.getAttribute('title')).toMatch(expectedText)
-    // Without describeChild, MUI would set this to the tooltip text and hide the label from AT
+    // describeChild keeps the label, not the tooltip text, as the accessible name
     expect(chip).not.toHaveAttribute('aria-label')
   })
 })

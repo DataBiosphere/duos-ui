@@ -5,7 +5,6 @@ import { render, screen } from '@testing-library/react'
 import SoApprovalReminderBanner from 'src/components/data_library/SoApprovalReminderBanner'
 
 describe('SoApprovalReminderBanner', () => {
-  // Requirement 1: the reminder states that an SO must approve before DAC review
   it('states that Signing Officials approve the researcher or the request before DAC review', () => {
     render(<SoApprovalReminderBanner />)
     expect(
@@ -13,7 +12,6 @@ describe('SoApprovalReminderBanner', () => {
     ).toBeInTheDocument()
   })
 
-  // Requirement 2: the banner shows on every tab, but only the Datasets tab has the column to point at
   it('omits the per-dataset pointer when no SO Approval column is shown', () => {
     render(<SoApprovalReminderBanner />)
     expect(screen.queryByText(/Each dataset below/)).not.toBeInTheDocument()

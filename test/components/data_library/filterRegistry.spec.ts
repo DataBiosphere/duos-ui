@@ -179,29 +179,14 @@ describe('filterRegistry', () => {
       expect(JSON.stringify(clauses)).not.toContain('instantApprovalEligible')
     })
 
-    // Unlike the citation filters, an absent flag here means "unknown", not "false": the document
-    // predates DT-3888 or was reindexed while the DAC rule lookup was failing. The grid shows no
-    // badge for those, so neither side of the filter may claim them.
-    it('requires the field to exist on both sides so un-backfilled documents are not claimed', () => {
+    // Unlike the citation filters, an absent flag means "unknown" rather than "No", and a bare
+    // term matches only documents carrying the field, so neither side claims them.
+    it('matches only what the index asserts on both sides', () => {
       const yes = buildActiveFilterClauses({ ...EMPTY_FILTERS, instantApproval: true })
-      expect(yes).toContainEqual({
-        bool: {
-          must: [
-            { term: { instantApprovalEligible: true } },
-            { exists: { field: 'instantApprovalEligible' } },
-          ],
-        },
-      })
+      expect(yes).toContainEqual({ term: { instantApprovalEligible: true } })
 
       const no = buildActiveFilterClauses({ ...EMPTY_FILTERS, instantApproval: false })
-      expect(no).toContainEqual({
-        bool: {
-          must: [
-            { term: { instantApprovalEligible: false } },
-            { exists: { field: 'instantApprovalEligible' } },
-          ],
-        },
-      })
+      expect(no).toContainEqual({ term: { instantApprovalEligible: false } })
     })
   })
 

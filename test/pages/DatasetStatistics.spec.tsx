@@ -195,7 +195,6 @@ describe('DatasetStatistics', () => {
     })
 
     expect(await screen.findByText('Instant approval eligible')).toBeInTheDocument()
-    // The flag rides on the indexed document, so no per-DAC rules request is made
     expect(DAC.fetchDACbotRules).not.toHaveBeenCalled()
   })
 
@@ -206,7 +205,6 @@ describe('DatasetStatistics', () => {
     expect(screen.queryByText('Instant approval eligible')).not.toBeInTheDocument()
   })
 
-  // A document indexed before DT-3888, or reindexed while the DAC rule lookup was failing
   it('does not show the instant approval badge when the index supplied no flag', async () => {
     renderDatasetStatistics()
 
