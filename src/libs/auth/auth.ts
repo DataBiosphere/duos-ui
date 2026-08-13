@@ -86,8 +86,7 @@ export const Auth = {
       catch {
         // Session destruction is server-side state; local cleanup still applies.
       }
-      // The session (and with it the server-side CSRF secret) is gone — any
-      // cached token is stale.
+      // The session (and with it the server-side CSRF secret) is gone — any cached token is stale.
       resetCsrfToken()
       Storage.clearStorage()
       purgeLegacyOidcKeys()

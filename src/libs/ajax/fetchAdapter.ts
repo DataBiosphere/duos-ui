@@ -67,14 +67,13 @@ export const reportError = async (url: string, status: number): Promise<void> =>
 
 const UNSAFE_METHODS: ReadonlySet<Method> = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
 
-// BFF-bound URLs are same-origin relative ('/duos-api/...'), while the
-// non-proxied upstreams (Bard, ECM, TDR) stay absolute — the CSRF token is
-// meaningless to them and must not be sent cross-origin.
+// BFF-bound URLs are same-origin relative ('/duos-api/...'), while other non-proxied
+// upstreams — the CSRF token is meaningless to them and must not be sent cross-origin.
 const isSameOriginPath = (url: string): boolean => url.startsWith('/') && !url.startsWith('//')
 
-// BFF mode (story 4-C, gated): the proxy attaches Authorization server-side
-// from the session, so any bearer header the legacy authOpts()/multiPartOpts()
-// helpers constructed is dropped before the request leaves the browser.
+// BFF mode - the proxy attaches Authorization server-side from the session, so any
+// bearer header the legacy authOpts()/multiPartOpts() helpers constructed is dropped
+// before the request leaves the browser.
 const stripAuthorization = (headers: HeadersMap): void => {
   for (const key of Object.keys(headers)) {
     if (key.toLowerCase() === 'authorization') {
@@ -83,11 +82,7 @@ const stripAuthorization = (headers: HeadersMap): void => {
   }
 }
 
-// A CSRF rejection is identified by the body, NOT by the 403 status alone: an
-// authorization denial from the upstream DUOS API is an ordinary proxied
-// response and arrives as a 403 too, so retrying on the status would replay
-// every write the API refused (ADR-010). The BFF also sends a `reason` field —
-// that is for a human reading a network tab; do not branch on it.
+// A CSRF rejection is identified by the body.
 const isCsrfRejection = async (res: Response): Promise<boolean> => {
   if (res.status !== 403) return false
   try {
