@@ -29,7 +29,7 @@ const makeSoApprovalColumn = (soApprovalModelByDatasetId: Map<number, SoApproval
       : { bgcolor: '#d4edda', color: '#155724' }
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-        {/* describeChild forces the aria-label to use the chip label text */}
+        {/* describeChild keeps the chip label as the accessible name, not the tooltip text */}
         <Tooltip title={tooltipTitle} describeChild>
           <Chip label={label} size="small" sx={{ ...colorSx, fontWeight: 600 }} />
         </Tooltip>
@@ -102,7 +102,7 @@ export const makeDatasetColumns = (
         : ''
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-          {/* describeChild forces the aria-label to use the access label text */}
+          {/* describeChild keeps the access label as the accessible name, not the tooltip text */}
           <Tooltip title={tooltipTitle} describeChild>
             <Chip
               label={(

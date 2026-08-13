@@ -59,9 +59,13 @@ describe('useAsyncCacheFetch', () => {
       .mockResolvedValue('fetched-data')
     render(<TestAsyncCacheFetch fetchFn={fetchFn} />)
 
-    // First attempt fails; the in-flight entry must not survive it
-    fireEvent.click(screen.getByText('Fetch'))
-    await waitFor(() => expect(fetchFn).toHaveBeenCalledTimes(1))
+    // Awaited so the rejection has settled and the in-flight entry is cleared before the retry.
+    // Asserting on the call count alone would pass while the first attempt was still pending, and
+    // the retry would then be handed that promise instead of refetching.
+    await act(async () => {
+      fireEvent.click(screen.getByText('Fetch'))
+    })
+    expect(fetchFn).toHaveBeenCalledTimes(1)
     expect(screen.getByTestId('result').textContent).toBe('')
 
     fireEvent.click(screen.getByText('Fetch'))
