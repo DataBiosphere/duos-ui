@@ -5,6 +5,7 @@ import { Storage } from 'src/libs/storage'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
 import { Config } from 'src/libs/config'
+import { getCsrfToken, resetCsrfToken } from 'src/libs/ajax/csrf'
 
 export type ResponseType = 'blob' | 'json' | 'text'
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -62,6 +63,40 @@ export const reportError = async (url: string, status: number): Promise<void> =>
     .concat(String(status))
   // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
   ErrorReporter.report(msg)
+}
+
+const UNSAFE_METHODS: ReadonlySet<Method> = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
+
+// BFF-bound URLs are same-origin relative ('/duos-api/...'), while the
+// non-proxied upstreams (Bard, ECM, TDR) stay absolute — the CSRF token is
+// meaningless to them and must not be sent cross-origin.
+const isSameOriginPath = (url: string): boolean => url.startsWith('/') && !url.startsWith('//')
+
+// BFF mode (story 4-C, gated): the proxy attaches Authorization server-side
+// from the session, so any bearer header the legacy authOpts()/multiPartOpts()
+// helpers constructed is dropped before the request leaves the browser.
+const stripAuthorization = (headers: HeadersMap): void => {
+  for (const key of Object.keys(headers)) {
+    if (key.toLowerCase() === 'authorization') {
+      delete headers[key]
+    }
+  }
+}
+
+// A CSRF rejection is identified by the body, NOT by the 403 status alone: an
+// authorization denial from the upstream DUOS API is an ordinary proxied
+// response and arrives as a 403 too, so retrying on the status would replay
+// every write the API refused (ADR-010). The BFF also sends a `reason` field —
+// that is for a human reading a network tab; do not branch on it.
+const isCsrfRejection = async (res: Response): Promise<boolean> => {
+  if (res.status !== 403) return false
+  try {
+    const body = await res.clone().json() as { error?: string }
+    return body.error === 'csrf_validation_failed'
+  }
+  catch {
+    return false
+  }
 }
 
 function buildUrlWithParams(url: string, params?: Params): string {
@@ -159,6 +194,7 @@ function getRequestBody<TBody extends object>(
 
 async function fetchRequest<T>(
   options: FetchRequestOptions,
+  csrfRetried: boolean = false,
 ): Promise<FetchData<T>> {
   const {
     url,
@@ -174,8 +210,16 @@ async function fetchRequest<T>(
 
   const fullUrl = params ? buildUrlWithParams(url, params) : url
   const finalHeaders: HeadersMap = isMultipart
-    ? headers
+    ? { ...headers }
     : { 'Content-Type': 'application/json', ...headers }
+
+  const bffEnabled = await Config.isBffEnabled()
+  if (bffEnabled) {
+    stripAuthorization(finalHeaders)
+    if (UNSAFE_METHODS.has(method) && isSameOriginPath(fullUrl)) {
+      finalHeaders['X-CSRF-Token'] = await getCsrfToken()
+    }
+  }
 
   const fetchOptions: MinimalRequestInit = {
     method,
@@ -188,6 +232,12 @@ async function fetchRequest<T>(
   try {
     const fetchFn = fetch as unknown as (input: string, init?: unknown) => Promise<Response>
     const res = await fetchFn(fullUrl, fetchOptions)
+    if (bffEnabled && !csrfRetried && 'X-CSRF-Token' in finalHeaders && await isCsrfRejection(res)) {
+      // Session rotation at login and destruction at logout both discard the
+      // server-side CSRF secret — refetch the token once and retry.
+      resetCsrfToken()
+      return fetchRequest<T>(options, true)
+    }
     return handleResponse<T>(res, fullUrl, responseType, method)
   }
   catch (error) {
@@ -205,6 +255,7 @@ async function fetchRequest<T>(
 
 async function fetchMultipartRequest<T>(
   options: FetchMultipartOptions,
+  csrfRetried: boolean = false,
 ): Promise<FetchData<T>> {
   const {
     url,
@@ -222,6 +273,15 @@ async function fetchMultipartRequest<T>(
   const cleanHeaders = { ...headers }
   if (cleanHeaders['Content-Type']) {
     delete cleanHeaders['Content-Type']
+  }
+
+  const bffEnabled = await Config.isBffEnabled()
+  if (bffEnabled) {
+    stripAuthorization(cleanHeaders)
+    // Multipart methods are always unsafe (POST/PUT/PATCH)
+    if (isSameOriginPath(fullUrl)) {
+      cleanHeaders['X-CSRF-Token'] = await getCsrfToken()
+    }
   }
 
   const fetchOptions: MinimalRequestInit = {
@@ -247,6 +307,11 @@ async function fetchMultipartRequest<T>(
     }
     reportError(fullUrl, 0)
     throw new Error(`${error instanceof Error ? error.message : String(error)} ${HELP_DESK_MESSAGE}`, { cause: error })
+  }
+  if (bffEnabled && !csrfRetried && 'X-CSRF-Token' in cleanHeaders && await isCsrfRejection(res)) {
+    // Same single retry as fetchRequest — see the note there.
+    resetCsrfToken()
+    return fetchMultipartRequest<T>(options, true)
   }
   if (!res.ok) {
     interface ErrorData {

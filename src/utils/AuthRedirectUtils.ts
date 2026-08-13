@@ -14,12 +14,15 @@ export const shouldSkip401Redirect = (
   url: string, method: string, apiUrl: string): boolean => {
   if (method !== 'GET') return false
 
-  // Only handle 401s from the DUOS API
-  const requestHostname = new URL(url, globalThis.location.origin).hostname
-  const duosApiHostname = new URL(apiUrl).hostname
-  if (requestHostname !== duosApiHostname) return true
+  // Both URLs are resolved against the app origin: post-cutover apiUrl is the
+  // relative BFF proxy prefix ('/duos-api'), which a bare `new URL()` rejects.
+  const requestUrl = new URL(url, globalThis.location.origin)
+  const apiBase = new URL(apiUrl, globalThis.location.origin)
 
-  // Only skip redirect for the auth probe endpoint
-  const pathname = new URL(url, globalThis.location.origin).pathname
-  return pathname === '/api/user/me'
+  // Only handle 401s from the DUOS API
+  if (requestUrl.hostname !== apiBase.hostname) return true
+
+  // Only skip redirect for the auth probe endpoint, `${apiUrl}/api/user/me`
+  const basePath = apiBase.pathname === '/' ? '' : apiBase.pathname
+  return requestUrl.pathname === `${basePath}/api/user/me`
 }

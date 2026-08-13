@@ -34,6 +34,10 @@ class ConfigClass {
     return getApiUrl()
   }
 
+  async getUpstreamApiUrl(): Promise<string> {
+    return getUpstreamApiUrl()
+  }
+
   async getBardApiUrl(): Promise<string> {
     return getBardApiUrl()
   }
@@ -94,7 +98,30 @@ export const getEnv = async (): Promise<string> => {
   return config.env
 }
 
+/**
+ * The same-origin base path of the BFF API proxy. Must match the prefix the
+ * server registers in server/src/proxy/apiProxy.ts.
+ */
+const BFF_API_PREFIX = '/duos-api'
+
+/**
+ * Base URL for DUOS API calls. Post-cutover (bffEnabled true) this is the
+ * relative BFF proxy prefix, so every ajax module's
+ * `${await Config.getApiUrl()}/api/...` becomes a same-origin request that the
+ * proxy forwards with the session's Authorization attached server-side.
+ */
 export const getApiUrl = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.bffEnabled === true ? BFF_API_PREFIX : config.apiUrl
+}
+
+/**
+ * The un-proxied Consent API base URL, regardless of the BFF cutover. Only for
+ * endpoints that must stay absolute post-cutover: /feature is unauthenticated
+ * and consulted pre-login, and the session-guarded BFF proxy returns 401 for
+ * sessionless requests (it is not in the proxy's UNAUTHENTICATED_PATHS).
+ */
+export const getUpstreamApiUrl = async (): Promise<string> => {
   const config = await loadConfig()
   return config.apiUrl
 }

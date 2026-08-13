@@ -9,6 +9,7 @@
 import { OidcBroker, OidcUser } from './oidcBroker'
 import { Storage } from './../storage'
 import { Config } from './../config'
+import { getCsrfToken, resetCsrfToken } from './../ajax/csrf'
 import { UserManager } from 'oidc-client-ts'
 
 const purgeLegacyOidcKeys = (): void => {
@@ -75,8 +76,7 @@ export const Auth = {
     if (await Config.isBffEnabled()) {
       // POST /auth/logout is CSRF-guarded, so fetch a token first.
       try {
-        const csrfRes = await fetch('/auth/csrf-token', { credentials: 'include' })
-        const { token } = await csrfRes.json() as { token: string }
+        const token = await getCsrfToken()
         await fetch('/auth/logout', {
           method: 'POST',
           credentials: 'include',
@@ -86,6 +86,9 @@ export const Auth = {
       catch {
         // Session destruction is server-side state; local cleanup still applies.
       }
+      // The session (and with it the server-side CSRF secret) is gone — any
+      // cached token is stale.
+      resetCsrfToken()
       Storage.clearStorage()
       purgeLegacyOidcKeys()
       Redirect.to(redirectTo)

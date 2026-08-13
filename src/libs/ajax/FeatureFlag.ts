@@ -8,14 +8,18 @@ export interface FeatureFlag {
   updateDate: number
 }
 
+// BFF NOTE: /feature must stay at the absolute Consent URL post-cutover — it
+// is unauthenticated and consulted pre-login (e.g. NHGRI_RESTRICTED_DAC), and
+// the session-guarded BFF proxy returns 401 for sessionless requests. Hence
+// getUpstreamApiUrl, never the proxied getApiUrl.
 export async function getAllFeatureFlags(): Promise<Record<string, FeatureFlag> | FeatureFlag[]> {
-  const url = `${await Config.getApiUrl()}/feature`
+  const url = `${await Config.getUpstreamApiUrl()}/feature`
   const res = await fetchGet<Record<string, FeatureFlag> | FeatureFlag[]>(url, Config.authOpts())
   return res.data
 }
 
 export async function getFeatureFlag(key: string): Promise<FeatureFlag | undefined> {
-  const url = `${await Config.getApiUrl()}/feature/${encodeURIComponent(key)}`
+  const url = `${await Config.getUpstreamApiUrl()}/feature/${encodeURIComponent(key)}`
   try {
     const res = await fetchGet<FeatureFlag>(url, Config.authOpts())
     return res.data
