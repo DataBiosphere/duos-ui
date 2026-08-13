@@ -132,6 +132,9 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
 
       setOtherPrimaryText(undefined)
       setSelectedDiseases([])
+      setGSText(undefined)
+      setMORText(undefined)
+      setOtherSecondaryText(undefined)
       setShowOtherSecondaryText(false)
       setShowGSText(false)
       setShowOtherPrimaryText(false)

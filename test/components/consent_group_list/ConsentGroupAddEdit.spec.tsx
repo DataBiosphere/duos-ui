@@ -157,8 +157,8 @@ describe('ConsentGroupAddEdit access management changes', () => {
       await user.click(container.querySelector('#primaryConsent_generalResearchUse')!)
       await user.click(container.querySelector(`#accessManagement_${strategy}`)!)
 
-      const errored = Array.from(container.querySelectorAll('.errored')).map(el => el.textContent)
-      expect(errored).not.toContain('Primary Data Use Terms*')
+      const errored = Array.from(container.querySelectorAll('.errored')).map(el => el.textContent).join(' ')
+      expect(errored).not.toContain('Primary Data Use Terms')
     },
   )
 
@@ -181,5 +181,22 @@ describe('ConsentGroupAddEdit access management changes', () => {
 
     await user.click(container.querySelector('#accessManagement_external')!)
     expect(container.querySelector('#dataAccessCommitteeId')).not.toBeInTheDocument()
+  })
+
+  // Re-checking the toggle writes the retained text back into the consent group, so text cleared
+  // by a switch to open access must not come back with it
+  it('does not restore secondary data use text cleared by open access', async () => {
+    const user = userEvent.setup()
+    const { container } = renderForm()
+
+    await user.click(container.querySelector('#accessManagement_controlled')!)
+    await user.click(container.querySelector('#gs')!)
+    await user.type(container.querySelector('#gsText')!, 'USA only')
+
+    await user.click(container.querySelector('#accessManagement_open')!)
+    await user.click(container.querySelector('#accessManagement_controlled')!)
+    await user.click(container.querySelector('#gs')!)
+
+    expect(container.querySelector<HTMLInputElement>('#gsText')?.value ?? '').toBe('')
   })
 })
