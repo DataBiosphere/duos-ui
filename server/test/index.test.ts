@@ -275,6 +275,7 @@ describe('BFF auth route registration', () => {
     delete process.env.CONFIG_PATH
     delete process.env.DUOS_ECM_URL
     delete process.env.DUOS_TDR_URL
+    delete process.env.DUOS_BARD_URL
     const { resetConfigCache } = await import('../src/config.js')
     resetConfigCache()
     // Guarded: rmSync(undefined) throws and would mask the real failure of a
@@ -446,6 +447,42 @@ describe('BFF auth route registration', () => {
     const localApp = await buildAppWithConfig({ bffEnabled: false })
 
     const res = await localApp.inject({ method: 'GET', url: '/tdr-api/api/repository/v1/snapshots' })
+
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  // Same three-way gating again, against the Bard env var and prefix.
+  it('registers the /bard-api proxy route when bffEnabled is true and DUOS_BARD_URL is set', async () => {
+    process.env.DUOS_BARD_URL = 'https://terra-bard-dev.appspot.com'
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({ method: 'GET', url: '/bard-api/api/event' })
+
+    expect(res.statusCode).toBe(401)
+    expect(res.json()).toEqual({ error: 'unauthenticated' })
+
+    await localApp.close()
+  })
+
+  it('boots without the /bard-api route when bffEnabled is true but DUOS_BARD_URL is not set', async () => {
+    delete process.env.DUOS_BARD_URL
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({ method: 'GET', url: '/bard-api/api/event' })
+
+    // Falls through to the SPA fallback instead of the proxy's 401.
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  it('does not register the /bard-api proxy route when bffEnabled is false, even with DUOS_BARD_URL set', async () => {
+    process.env.DUOS_BARD_URL = 'https://terra-bard-dev.appspot.com'
+    const localApp = await buildAppWithConfig({ bffEnabled: false })
+
+    const res = await localApp.inject({ method: 'GET', url: '/bard-api/api/event' })
 
     expect(res.statusCode).toBe(200)
 

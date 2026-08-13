@@ -19,6 +19,7 @@ import { getMe } from './auth/me.js'
 import { apiProxy } from './proxy/apiProxy.js'
 import { ECM_PROXY_PREFIX, ecmProxy } from './proxy/ecmProxy.js'
 import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
+import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
 import { configPath, readConfig } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -241,6 +242,7 @@ export async function buildApp(): Promise<AppInstance> {
     const optionalProxies = [
       { envVar: 'DUOS_ECM_URL', prefix: ECM_PROXY_PREFIX, register: ecmProxy, feature: 'RAS/eRA Commons account linking' },
       { envVar: 'DUOS_TDR_URL', prefix: TDR_PROXY_PREFIX, register: tdrProxy, feature: 'TDR snapshot enumeration on dataset pages' },
+      { envVar: 'DUOS_BARD_URL', prefix: BARD_PROXY_PREFIX, register: bardProxy, feature: 'identified usage metrics (signed-in Bard events fall back to anonymous)' },
     ] as const
     for (const { envVar, prefix, register, feature } of optionalProxies) {
       if (process.env[envVar]) {
