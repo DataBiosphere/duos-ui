@@ -4,7 +4,7 @@ import { Collections } from 'src/libs/ajax/Collections'
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import { DarCollectionTable } from 'src/components/dar_collection_table/DarCollectionTable'
-import { cancelCollectionFn, consoleTypes, openCollectionFn, updateCollectionFn } from 'src/utils/DarCollectionUtils'
+import { consoleTypes } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
@@ -15,12 +15,10 @@ export default function AdminManageDarCollections() {
   const [collections, setCollections] = useState<DarCollectionSummary[]>([])
   const [filteredList, setFilteredList] = useState<DarCollectionSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [searchText, setSearchText] = useState('')
   const filterFn = getSearchFilterFunctions().darCollections
   const responsiveColumns = useResponsiveDarCollectionColumns(consoleTypes.ADMIN)
 
   const handleSearchChange = useCallback((searchTerms: string) => {
-    setSearchText(searchTerms)
     searchOnFilteredList(searchTerms, collections, filterFn, setFilteredList)
   }, [collections, filterFn])
 
@@ -39,19 +37,6 @@ export default function AdminManageDarCollections() {
     init()
   }, [])
 
-  const updateCollections = useCallback(
-    (updatedCollection: DarCollectionSummary) => updateCollectionFn({ collections, filterFn, searchText, setCollections, setFilteredList })(updatedCollection),
-    [collections, filterFn, searchText, setCollections, setFilteredList],
-  )
-  const cancelCollection = useCallback(
-    (params: { darCode: string, darCollectionId: number }) => cancelCollectionFn({ updateCollections, role: USER_ROLES.admin })(params),
-    [updateCollections],
-  )
-  const openCollection = useCallback(
-    (params: { darCode: string, darCollectionId: number }) => openCollectionFn({ updateCollections, role: USER_ROLES.admin })(params),
-    [updateCollections],
-  )
-
   return (
     <div style={Styles.PAGE}>
       <div>
@@ -69,9 +54,6 @@ export default function AdminManageDarCollections() {
           collections={filteredList}
           columns={responsiveColumns}
           isLoading={isLoading}
-          cancelCollection={cancelCollection}
-          reviseCollection={null}
-          openCollection={openCollection}
           consoleType={consoleTypes.ADMIN}
         />
       )}
