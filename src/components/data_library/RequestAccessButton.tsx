@@ -13,14 +13,14 @@ interface RequestAccessButtonProps {
 
 export const RequestAccessButton: React.FC<RequestAccessButtonProps> = ({ datasetId, disabledForSelection = false }) => {
   const navigate = useNavigate()
-  const hasLibraryCard = Storage.getCurrentUser()?.libraryCard != null
+  const hasActiveResearcherStatus = Storage.getCurrentUser()?.libraryCard != null
 
   let tooltip = ''
   if (disabledForSelection) {
     tooltip = 'Use \'Apply for Access\' below to request the selected datasets'
   }
-  else if (!hasLibraryCard) {
-    tooltip = 'A Library Card is required to apply for data access'
+  else if (!hasActiveResearcherStatus) {
+    tooltip = 'Active Researcher Status is required to apply for data access'
   }
 
   return (
@@ -31,7 +31,7 @@ export const RequestAccessButton: React.FC<RequestAccessButtonProps> = ({ datase
           size="small"
           onClick={() => applyForAccess([datasetId], navigate)}
           sx={{ fontWeight: 600, fontSize: '12px' }}
-          disabled={disabledForSelection || !hasLibraryCard}
+          disabled={disabledForSelection || !hasActiveResearcherStatus}
         >
           Request Now
         </Button>
