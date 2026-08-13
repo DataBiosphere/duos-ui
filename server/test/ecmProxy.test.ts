@@ -18,17 +18,10 @@ import {
 
 /**
  * The ECM proxy suite.
- *
- * The shared machinery — streaming, header hygiene on both legs, response
- * hardening, refresh, transport errors — is exercised across 101 cases in
- * apiProxy.test.ts and not repeated per path here. What this suite pins down is
- * the ECM *configuration*: the prefix and upstream env var, that nothing under
- * this prefix is reachable without a session, that no unsafe request is exempt
- * from CSRF, and — the one behavioral divergence — that an upstream 401 passes
- * through without ending the BFF session. Plus one representative case per
- * shared rule, against the two paths AuthenticateNIH.ts actually calls, so the
- * ECM registration as a whole is proven wired to the machinery rather than
- * assumed.
+ * What this suite pins down is the ECM *configuration*: the prefix and upstream env var, that nothing under this
+ * prefix is reachable without a session, that no unsafe request is exempt from CSRF, and that an upstream 401 passes
+ * through without ending the BFF session. Plus one representative case per shared rule, against the two paths
+ * AuthenticateNIH.ts actually calls, so the ECM registration as a whole is proven wired to the machinery.
  */
 
 vi.mock('../src/auth/refresh.js', async (importOriginal) => {
@@ -217,9 +210,6 @@ describe('ecmProxy', () => {
   })
 
   describe('an upstream 401 does not end the session', () => {
-    // The divergence from the DUOS API proxy, and the reason it exists: ECM
-    // authenticates on its own terms, so its 401 must surface to the linking
-    // flow rather than sign the user out of DUOS.
     it('passes the 401 through with the session and cookie intact', async () => {
       app = await buildEcmApp(freshSession())
       const tracked = trackSession(app)
@@ -272,9 +262,6 @@ describe('ecmProxy', () => {
   })
 
   describe('DUOS_ECM_URL validation', () => {
-    // Same guard as DUOS_API_URL, and the error must name THIS variable — a
-    // misconfigured ECM origin diagnosed as an API-proxy problem would send
-    // whoever reads the crash log to the wrong Helm value.
     it.each([
       ['unset', undefined],
       ['a bare hostname', 'externalcreds.dsde-dev.broadinstitute.org'],

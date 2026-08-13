@@ -513,10 +513,9 @@ function forwardedFor(request: ProxyRequest, inbound: string | string[] | undefi
  *                     carry it too.
  *
  * Deliberately still forwarded, because they are not origin state and the client
- * needs them: `content-encoding` and `content-type` (a gzip body has to arrive
- * declared as one), `cache-control`, `etag`, `content-disposition` for the
- * document downloads. `strict-transport-security` is the near miss — origin
- * *policy* rather than state, already settled by the ingress, so left alone.
+ * needs them: `content-encoding` and `content-type`, `cache-control`, `etag`,
+ * `content-disposition` for the document downloads. `strict-transport-security` is
+ * the near miss — origin *policy* rather than state.
  *
  * The second class dropped is the wrong hop rather than origin state; see
  * `CONNECTION_SPECIFIC_RESPONSE_HEADERS`.

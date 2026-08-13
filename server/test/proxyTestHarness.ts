@@ -35,11 +35,6 @@ export interface Upstream {
 
 /**
  * A real HTTP server standing in for the proxied upstream.
- *
- * Real rather than a mocked `fetch`: the point of most of these tests is what
- * actually goes out on the wire — that a 2 MB body was streamed rather than
- * rejected, that a gzip response arrived undisturbed, that the session cookie
- * never left the BFF. A stub of undici would be asserting on the mock.
  */
 export async function startUpstream(): Promise<Upstream> {
   const received: ReceivedRequest[] = []
@@ -96,16 +91,6 @@ export interface SessionSeed {
 /** The @fastify/session default, and what index.ts and me.ts clear by name. */
 export const SESSION_COOKIE = 'sessionId'
 
-/**
- * An app assembled the way index.ts's BFF block does it — cookie, then session,
- * then CSRF, then the proxy. That order is what the proxy's own registration
- * check depends on, and registering the real `@fastify/csrf-protection` (rather
- * than stubbing `csrfProtection`) is the only way the CSRF tests mean
- * anything. `@fastify/session`'s default MemoryStore stands in for the Postgres
- * store; the CSRF options are imported from the same module index.ts registers
- * with, rather than restated here — restating them is what let the header-only
- * narrowing go untested through story 3-D.
- */
 export async function buildAppShell(): Promise<FastifyInstance> {
   const app = Fastify({ logger: false, trustProxy: 1 })
   await app.register(fastifyCookie)
@@ -122,10 +107,6 @@ export async function buildAppShell(): Promise<FastifyInstance> {
   return app
 }
 
-/**
- * Writes `seed` onto `request.session` on every request, which stands in for
- * having completed the OAuth flow. Skip it for a caller with no access token.
- */
 export function seedSession(app: FastifyInstance, seed: SessionSeed): void {
   app.addHook('onRequest', async (request) => {
     Object.assign(request.session, seed)
@@ -157,11 +138,6 @@ export function trackSession(app: FastifyInstance): { stored: () => Promise<Sess
   }
 }
 
-/**
- * A token and the session cookie it is bound to, obtained the way a client
- * would. The token alone is not enough — the secret it verifies against lives in
- * the session, so the cookie has to come back with it.
- */
 export async function csrfCredentials(app: FastifyInstance): Promise<{ token: string, cookie: string }> {
   const res = await app.inject({ method: 'GET', url: '/auth/csrf-token' })
   const sessionCookie = res.cookies.find(cookie => cookie.name === SESSION_COOKIE)
@@ -174,11 +150,6 @@ export async function csrfCredentials(app: FastifyInstance): Promise<{ token: st
   }
 }
 
-/**
- * An unsafe-method request carrying what a real client would: the CSRF token and
- * the session cookie it is bound to. Used by every test whose subject is
- * something other than CSRF itself, so those stay readable.
- */
 export async function injectWithCsrf(
   app: FastifyInstance,
   opts: { method: 'POST' | 'PUT' | 'PATCH' | 'DELETE', url: string, headers?: Record<string, string>, payload?: string | Buffer },

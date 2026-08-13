@@ -26,8 +26,7 @@ vi.mock('../src/auth/refresh.js', async (importOriginal) => {
   return { ...actual, refreshAccessToken: vi.fn() }
 })
 
-// The stand-ins for the upstream, the session, and the CSRF plumbing live in
-// proxyTestHarness.ts, shared with ecmProxy.test.ts since story 3-I.
+// The stand-ins for the upstream, the session, and the CSRF plumbing live in proxyTestHarness.ts
 async function buildProxyApp(seed?: SessionSeed): Promise<FastifyInstance> {
   const app = await buildAppShell()
   if (seed) {
@@ -167,9 +166,6 @@ describe('apiProxy', () => {
       ['a bare hostname', 'duos-api.dsde-dev.broadinstitute.org', /not a valid URL/],
       ['a host:port with no scheme', 'localhost:8000', /scheme is 'localhost:'/],
       ['a non-HTTP scheme', 'ftp://duos-api.example.org', /scheme is 'ftp:'/],
-      // new URL(source, base) silently discards a base's query and fragment,
-      // so without these two rejections the misconfiguration they signal would
-      // be half-honored instead of failing at startup like a path does.
       ['an origin with a query string', 'https://duos-api.example.org?env=dev', /query string or fragment/],
       ['an origin with a fragment', 'https://duos-api.example.org#dev', /query string or fragment/],
     ])('fails to register when DUOS_API_URL is %s, naming the variable', async (_case, value, expected) => {

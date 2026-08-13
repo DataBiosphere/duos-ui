@@ -34,11 +34,6 @@ export function ecmUpstreamPath(url: string): string {
   return stripPrefix(url, ECM_PROXY_PREFIX)
 }
 
-/**
- * Registers the ECM proxy. Handed to `fastify.register()` (never wrapped in
- * `fastify-plugin`) so the shared machinery's parser and error-handler
- * overrides stay encapsulated in this scope — see upstreamProxy.ts.
- */
 export async function ecmProxy(app: FastifyInstance, options: UpstreamProxyOptions = {}): Promise<void> {
   await registerUpstreamProxy(app, {
     prefix: ECM_PROXY_PREFIX,
