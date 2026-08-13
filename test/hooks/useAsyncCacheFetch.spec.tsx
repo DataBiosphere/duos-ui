@@ -10,6 +10,7 @@ type TestAsyncCacheFetchProps<T> = {
 function TestAsyncCacheFetch<T>({ fetchFn }: Readonly<TestAsyncCacheFetchProps<T>>) {
   const { fetchWithCache, clearCache } = useAsyncCacheFetch<string, T>()
   const [result, setResult] = useState<T | null>(null)
+  const [settled, setSettled] = useState(0)
 
   const handleFetch = async () => {
     try {
@@ -17,6 +18,9 @@ function TestAsyncCacheFetch<T>({ fetchFn }: Readonly<TestAsyncCacheFetchProps<T
     }
     catch {
       setResult(null)
+    }
+    finally {
+      setSettled(count => count + 1)
     }
   }
 
@@ -30,6 +34,7 @@ function TestAsyncCacheFetch<T>({ fetchFn }: Readonly<TestAsyncCacheFetchProps<T
       <button onClick={handleFetch}>Fetch</button>
       <button onClick={handleClear}>Clear</button>
       <div data-testid="result">{result !== null ? String(result) : ''}</div>
+      <div data-testid="settled">{settled}</div>
     </div>
   )
 }
@@ -59,12 +64,10 @@ describe('useAsyncCacheFetch', () => {
       .mockResolvedValue('fetched-data')
     render(<TestAsyncCacheFetch fetchFn={fetchFn} />)
 
-    // Awaited so the rejection has settled and the in-flight entry is cleared before the retry.
-    // Asserting on the call count alone would pass while the first attempt was still pending, and
-    // the retry would then be handed that promise instead of refetching.
-    await act(async () => {
-      fireEvent.click(screen.getByText('Fetch'))
-    })
+    // Waits for the attempt to settle, not just to start. The call count alone would pass while
+    // the first fetch was still pending, and the retry would be handed that promise.
+    fireEvent.click(screen.getByText('Fetch'))
+    await waitFor(() => expect(screen.getByTestId('settled').textContent).toBe('1'))
     expect(fetchFn).toHaveBeenCalledTimes(1)
     expect(screen.getByTestId('result').textContent).toBe('')
 
