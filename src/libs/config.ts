@@ -118,11 +118,6 @@ export const getHash = async (): Promise<string> => {
   return config.hash
 }
 
-/**
- * The BFF cutover switch. The server registers the /auth/* routes and the API
- * proxy from the same config.json key, so client and server agree on the sign-in
- * flow. A missing key means false defaulting to the legacy flow.
- */
 export const isBffEnabled = async (): Promise<boolean> => {
   const config = await loadConfig()
   return config.bffEnabled === true

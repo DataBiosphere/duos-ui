@@ -75,8 +75,6 @@ describe('Config', () => {
 
   describe('isBffEnabled', () => {
     it('returns true only when config.json sets bffEnabled to true', async () => {
-      // The module-level configPromise caches the first fetch, so a fresh
-      // module instance is needed to observe a different config.json
       vi.resetModules()
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: () => Promise.resolve({ ...mockConfig, bffEnabled: true }) }))
       const freshConfig = await import('src/libs/config')
