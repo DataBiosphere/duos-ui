@@ -46,7 +46,8 @@ EOF
 }
 
 error() {
-    echo "ERROR: $1" >&2
+    local message=$1
+    echo "ERROR: $message" >&2
     exit 1
 }
 
@@ -59,8 +60,10 @@ DRY_RUN="false"
 SO_EMAIL=""
 
 parse_cli_args() {
+    local arg
     while [[ $# -gt 0 ]]; do
-        case "$1" in
+        arg=$1
+        case "$arg" in
             --config)
                 CONFIG_FILE=$2
                 shift 2
@@ -85,13 +88,13 @@ parse_cli_args() {
                 usage
                 ;;
             -*)
-                error "Unknown option: $1. Try --help to see a list of all options."
+                error "Unknown option: $arg. Try --help to see a list of all options."
                 ;;
             *)
                 if [[ -n "$SO_EMAIL" ]]; then
-                    error "Unexpected argument: $1. Only one Signing Official email may be given."
+                    error "Unexpected argument: $arg. Only one Signing Official email may be given."
                 fi
-                SO_EMAIL=$1
+                SO_EMAIL=$arg
                 shift
                 ;;
         esac
@@ -104,7 +107,8 @@ parse_cli_args() {
 
 # Echoes the value of a key from the config's database block.
 db_config_value() {
-    echo "$DB_BLOCK" | sed -n "s/^[[:space:]]*$1:[[:space:]]*//p" | head -1
+    local key=$1
+    echo "$DB_BLOCK" | sed -n "s/^[[:space:]]*$key:[[:space:]]*//p" | head -1
 }
 
 # Pulls user, password and the JDBC url out of the top-level `database:` block
