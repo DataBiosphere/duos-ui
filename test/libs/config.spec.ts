@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
-import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
+import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, isBffEnabled, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 
 const mockConfig = {
@@ -47,6 +47,8 @@ describe('Config', () => {
       ['getTag', 'v1.0.0-test'],
       ['getTdrApiUrl', 'https://test.tdr.com'],
       ['getTerraUrl', 'https://test.terra.bio'],
+      // bffEnabled is absent from mockConfig — the fail-safe default is false
+      ['isBffEnabled', false],
     ] as const)('should get %s', async (method, expected) => {
       // oxlint-disable-next-line @typescript-eslint/no-explicit-any
       expect(await (Config[method] as any)()).toBe(expected)
@@ -65,8 +67,18 @@ describe('Config', () => {
       ['getTag', getTag, 'v1.0.0-test'],
       ['getTdrApiUrl', getTdrApiUrl, 'https://test.tdr.com'],
       ['getTerraUrl', getTerraUrl, 'https://test.terra.bio'],
+      ['isBffEnabled', isBffEnabled, false],
     ] as const)('%s should return correct value', async (_name, fn, expected) => {
       expect(await fn()).toBe(expected)
+    })
+  })
+
+  describe('isBffEnabled', () => {
+    it('returns true only when config.json sets bffEnabled to true', async () => {
+      vi.resetModules()
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: () => Promise.resolve({ ...mockConfig, bffEnabled: true }) }))
+      const freshConfig = await import('src/libs/config')
+      expect(await freshConfig.isBffEnabled()).toBe(true)
     })
   })
 
