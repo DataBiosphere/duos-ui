@@ -1,15 +1,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import http from 'node:http'
-import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http'
-import type { AddressInfo } from 'node:net'
 import { gzipSync } from 'node:zlib'
-import Fastify, { type FastifyInstance, type FastifyRequest, type Session } from 'fastify'
+import Fastify, { type FastifyInstance } from 'fastify'
 import fastifyCookie from '@fastify/cookie'
-import fastifySession from '@fastify/session'
-import fastifyCsrf from '@fastify/csrf-protection'
-import { csrfPluginOptions } from '../src/auth/csrf.js'
 import { RefreshFailedError } from '../src/auth/refresh.js'
 import { CSRF_ERROR_CODE, CSRF_EXEMPT_UNSAFE_REQUESTS, PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
+import {
+  SESSION_COOKIE,
+  type SessionSeed,
+  type Upstream,
+  buildAppShell,
+  csrfCredentials,
+  injectWithCsrf,
+  nowSeconds,
+  seedSession,
+  startUpstream,
+  trackSession,
+} from './proxyTestHarness.js'
 
 // refreshAccessToken is replaced so the tests never reach B2C; RefreshFailedError
 // stays the real class so the proxy's instanceof branch is exercised rather than
@@ -20,185 +26,14 @@ vi.mock('../src/auth/refresh.js', async (importOriginal) => {
   return { ...actual, refreshAccessToken: vi.fn() }
 })
 
-const nowSeconds = (): number => Math.floor(Date.now() / 1000)
-
-interface ReceivedRequest {
-  method: string
-  url: string
-  headers: IncomingHttpHeaders
-  body: Buffer
-}
-
-interface Upstream {
-  origin: string
-  received: ReceivedRequest[]
-  /** The last request the upstream saw — the assertion target for header/path tests. */
-  last: () => ReceivedRequest
-  respondWith: (handler: (req: IncomingMessage, res: ServerResponse) => void) => void
-  close: () => Promise<void>
-}
-
-/**
- * A real HTTP server standing in for the DUOS API.
- *
- * Real rather than a mocked `fetch`: the point of most of these tests is what
- * actually goes out on the wire — that a 2 MB body was streamed rather than
- * rejected, that a gzip response arrived undisturbed, that the session cookie
- * never left the BFF. A stub of undici would be asserting on the mock.
- */
-async function startUpstream(): Promise<Upstream> {
-  const received: ReceivedRequest[] = []
-  let handler = (_req: IncomingMessage, res: ServerResponse): void => {
-    res.writeHead(200, { 'content-type': 'application/json' })
-    res.end('{"ok":true}')
-  }
-
-  const server = http.createServer((req, res) => {
-    const chunks: Buffer[] = []
-    req.on('data', (chunk: Buffer) => chunks.push(chunk))
-    req.on('end', () => {
-      received.push({
-        method: req.method ?? '',
-        url: req.url ?? '',
-        headers: req.headers,
-        body: Buffer.concat(chunks),
-      })
-      handler(req, res)
-    })
-  })
-
-  await new Promise<void>((resolve) => {
-    server.listen(0, '127.0.0.1', resolve)
-  })
-  const { port } = server.address() as AddressInfo
-
-  return {
-    origin: `http://127.0.0.1:${port}`,
-    received,
-    last: () => {
-      const last = received.at(-1)
-      if (!last) throw new Error('the upstream received no requests')
-      return last
-    },
-    respondWith: (next) => { handler = next },
-    // Idempotent: one test closes the upstream mid-case to simulate an outage,
-    // and afterEach closes it again.
-    close: () => new Promise<void>((resolve, reject) => {
-      if (!server.listening) {
-        resolve()
-        return
-      }
-      server.close(err => err ? reject(err) : resolve())
-    }),
-  }
-}
-
-interface SessionSeed {
-  accessToken?: string
-  tokenExpiry?: number
-}
-
-/** The @fastify/session default, and what index.ts and me.ts clear by name. */
-const SESSION_COOKIE = 'sessionId'
-
-/**
- * An app assembled the way index.ts's BFF block does it — cookie, then session,
- * then CSRF, then the proxy. That order is what the proxy's own registration
- * check depends on, and registering the real `@fastify/csrf-protection` (rather
- * than stubbing `csrfProtection`) is the only way the CSRF tests below mean
- * anything. `@fastify/session`'s default MemoryStore stands in for the Postgres
- * store; the CSRF options are imported from the same module index.ts registers
- * with, rather than restated here — restating them is what let the header-only
- * narrowing go untested through story 3-D.
- *
- * `seed` is written onto `request.session` on every request, which stands in for
- * having completed the OAuth flow. Omit it for a caller with no access token.
- */
-async function buildAppShell(): Promise<FastifyInstance> {
-  const app = Fastify({ logger: false, trustProxy: 1 })
-  await app.register(fastifyCookie)
-  await app.register(fastifySession, {
-    secret: 'a-test-session-secret-at-least-32-characters-long',
-    cookie: { secure: false, path: '/' },
-    saveUninitialized: false,
-    rolling: false,
-  })
-  await app.register(fastifyCsrf, csrfPluginOptions)
-  // Mirrors index.ts's /auth/csrf-token — the only way a client gets a token,
-  // and therefore the only way these tests can produce a valid one.
-  app.get('/auth/csrf-token', async (_request, reply) => reply.send({ token: reply.generateCsrf() }))
-  return app
-}
-
+// The stand-ins for the upstream, the session, and the CSRF plumbing live in proxyTestHarness.ts
 async function buildProxyApp(seed?: SessionSeed): Promise<FastifyInstance> {
   const app = await buildAppShell()
   if (seed) {
-    app.addHook('onRequest', async (request) => {
-      Object.assign(request.session, seed)
-    })
+    seedSession(app, seed)
   }
   await app.register(apiProxy)
   return app
-}
-
-// Capture the request's original session ID before the proxy can destroy it.
-function trackSession(app: FastifyInstance): { stored: () => Promise<Session | null> } {
-  let sid: string | undefined
-  let store: FastifyRequest['sessionStore'] | undefined
-  app.addHook('onRequest', async (request) => {
-    sid = request.session.sessionId
-    store = request.sessionStore
-  })
-  return {
-    stored: () => new Promise((resolve, reject) => {
-      if (!sid || !store) {
-        reject(new Error('no request reached the session-tracking hook'))
-        return
-      }
-      store.get(sid, (err: unknown, session?: Session | null) => {
-        if (err) {
-          reject(err instanceof Error ? err : new Error('session store read failed'))
-          return
-        }
-        resolve(session ?? null)
-      })
-    }),
-  }
-}
-
-/**
- * A token and the session cookie it is bound to, obtained the way a client
- * would. The token alone is not enough — the secret it verifies against lives in
- * the session, so the cookie has to come back with it.
- */
-async function csrfCredentials(app: FastifyInstance): Promise<{ token: string, cookie: string }> {
-  const res = await app.inject({ method: 'GET', url: '/auth/csrf-token' })
-  const sessionCookie = res.cookies.find(cookie => cookie.name === SESSION_COOKIE)
-  if (!sessionCookie) {
-    throw new Error('the CSRF token endpoint set no session cookie')
-  }
-  return {
-    token: res.json<{ token: string }>().token,
-    cookie: `${SESSION_COOKIE}=${sessionCookie.value}`,
-  }
-}
-
-/**
- * An unsafe-method request carrying what a real client would: the CSRF token and
- * the session cookie it is bound to. Used by every test whose subject is
- * something other than CSRF itself, so those stay readable.
- */
-async function injectWithCsrf(
-  app: FastifyInstance,
-  opts: { method: 'POST' | 'PUT' | 'PATCH' | 'DELETE', url: string, headers?: Record<string, string>, payload?: string | Buffer },
-) {
-  const { token, cookie } = await csrfCredentials(app)
-  return app.inject({
-    method: opts.method,
-    url: opts.url,
-    payload: opts.payload,
-    headers: { ...opts.headers, cookie, 'x-csrf-token': token },
-  })
 }
 
 describe('apiProxy', () => {
@@ -331,6 +166,8 @@ describe('apiProxy', () => {
       ['a bare hostname', 'duos-api.dsde-dev.broadinstitute.org', /not a valid URL/],
       ['a host:port with no scheme', 'localhost:8000', /scheme is 'localhost:'/],
       ['a non-HTTP scheme', 'ftp://duos-api.example.org', /scheme is 'ftp:'/],
+      ['an origin with a query string', 'https://duos-api.example.org?env=dev', /query string or fragment/],
+      ['an origin with a fragment', 'https://duos-api.example.org#dev', /query string or fragment/],
     ])('fails to register when DUOS_API_URL is %s, naming the variable', async (_case, value, expected) => {
       process.env.DUOS_API_URL = value
       const unregistered = await buildAppShell()
@@ -339,6 +176,22 @@ describe('apiProxy', () => {
       const ready = expect(unregistered.ready()).rejects
       await ready.toThrow(/^DUOS_API_URL is/)
       await ready.toThrow(expected)
+      await unregistered.close()
+    })
+
+    // The one rejection that must NOT echo the value: userinfo may carry a
+    // real password, and this error lands in the startup log.
+    it('fails to register when DUOS_API_URL carries userinfo, without echoing the credential', async () => {
+      process.env.DUOS_API_URL = 'https://svc:hunter2@duos-api.example.org'
+      const unregistered = await buildAppShell()
+      unregistered.register(apiProxy)
+
+      const err = await unregistered.ready().then(() => null, (e: unknown) => e as Error)
+      expect(err).toBeInstanceOf(Error)
+      expect(err?.message).toMatch(/DUOS_API_URL contains userinfo/)
+      expect(err?.message).toMatch(/must be a bare origin/)
+      expect(err?.message).not.toContain('hunter2')
+      expect(err?.message).not.toContain('svc')
       await unregistered.close()
     })
   })
