@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { DAC } from 'src/libs/ajax/DAC'
+import { DAC, DacDashboardSummary } from 'src/libs/ajax/DAC'
 import { Config } from 'src/libs/config'
 import type { DacObject, Dataset, DuosUser } from 'src/types/model'
 import type { DACbotRule } from 'src/components/dac_bot/DACBotComponent'
@@ -259,5 +259,21 @@ describe('DAC ajax', () => {
     vi.mocked(fetchPost).mockRejectedValue(new Error('Create DAC failed'))
 
     await expect(DAC.create('Broken DAC', 'desc', 'broken@example.test')).rejects.toThrow('Create DAC failed')
+  })
+
+  it('gets and returns the DAC dashboard summary', async () => {
+    const summary: DacDashboardSummary = {
+      darRequests: { total: 8, approved: 3, pending: 5, awaitingMyVote: 2 },
+      dacs: { total: 4 },
+      dacDatasets: { total: 6 },
+      dataLibrary: { studies: 7, datasets: 12, models: 3, workspaces: 1 },
+    }
+    vi.mocked(fetchGet).mockResolvedValue({ data: summary } as FetchData<DacDashboardSummary>)
+
+    await expect(DAC.getDashboardSummary()).resolves.toEqual(summary)
+    expect(fetchGet).toHaveBeenCalledWith(
+      `${apiUrl}/api/dac/dashboard-summary`,
+      authHeaders,
+    )
   })
 })

@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { get, isNil } from 'src/utils/NodashUtil'
 import { Alert } from 'src/components/Alert'
-import ManualReviewWarningBanner from 'src/components/ManualReviewWarningBanner'
 import MultiDatasetVoteSlab from 'src/components/collection_voting_slab/MultiDatasetVoteSlab'
 import { User } from 'src/libs/ajax/User'
 import { Bucket } from 'src/utils/BucketUtils'
-import { DarCollection, DataAccessRequestData } from 'src/types/model'
+import { DarCollection } from 'src/types/model'
 
 interface MultiDatasetVotingTabProps {
-  readonly darInfo: Partial<DataAccessRequestData>
   readonly buckets: Bucket[]
   readonly collection: DarCollection | Record<string, never>
   readonly isChair?: boolean
@@ -80,7 +78,6 @@ const styles = {
 }
 
 export default function MultiDatasetVotingTab({
-  darInfo,
   buckets,
   collection,
   isChair = false,
@@ -114,7 +111,6 @@ export default function MultiDatasetVotingTab({
 
   return (
     <div style={styles.baseStyle}>
-      <ManualReviewWarningBanner darInfo={darInfo} />
       {dataAccessApprovalDisabled() && !readOnly && (
         <Alert
           type="danger"

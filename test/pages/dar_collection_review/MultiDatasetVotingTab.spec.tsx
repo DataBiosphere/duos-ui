@@ -54,11 +54,6 @@ vi.mock('src/libs/utils', async (importActual) => {
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
-const darInfo = {
-  rus: 'test',
-  diseases: true,
-}
-
 const bucket1 = {
   key: 'bucket1',
   label: 'GROUP 1',
@@ -166,7 +161,6 @@ const mockUser = (userId: number) =>
 const renderTab = (props: Record<string, unknown> = {}) =>
   render(
     <MultiDatasetVotingTab
-      darInfo={darInfo}
       buckets={[bucket1]}
       collection={collection}
       {...props}

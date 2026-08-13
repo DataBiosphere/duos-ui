@@ -115,7 +115,9 @@ describe('ScrollableMarkdownContainer', () => {
     // render and rerender flush their own updates, so findBy/waitFor carry the async waiting.
     const { rerender } = render(<ScrollableMarkdownContainer markdown="/one.md" onLoadStateChange={onLoadStateChange} />)
     await waitFor(() => expect(screen.getByTestId('markdown-link').textContent).toContain('First body'))
-    expect(onLoadStateChange).toHaveBeenLastCalledWith('loaded')
+    // The callback fires from a passive effect after the commit that waitFor observed, so it needs
+    // its own waitFor rather than a synchronous assertion.
+    await waitFor(() => expect(onLoadStateChange).toHaveBeenLastCalledWith('loaded'))
 
     rerender(<ScrollableMarkdownContainer markdown="/two.md" onLoadStateChange={onLoadStateChange} />)
 
@@ -125,7 +127,7 @@ describe('ScrollableMarkdownContainer', () => {
 
     resolveSecond({ ok: true, text: () => Promise.resolve('Second body') } as unknown as Response)
     await waitFor(() => expect(screen.getByTestId('markdown-link').textContent).toContain('Second body'))
-    expect(onLoadStateChange).toHaveBeenLastCalledWith('loaded')
+    await waitFor(() => expect(onLoadStateChange).toHaveBeenLastCalledWith('loaded'))
   })
 
   it('reports an error state and explains the gap when the document cannot be loaded', async () => {

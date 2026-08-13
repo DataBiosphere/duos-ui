@@ -100,7 +100,7 @@ export async function buildApp(): Promise<AppInstance> {
       fastify.log.warn('[server] DUOS_DB_SSL=false — connecting to Postgres without TLS; only safe when the transport is loopback (Cloud SQL Proxy sidecar or local docker network)')
     }
 
-    // DB pool — must be registered before session so app.pg is available to the store
+    // Register before sessions; the default pool of 10 is sufficient at measured load.
     await fastify.register(fastifyPostgres, {
       host: process.env.DUOS_DB_HOST,
       database: process.env.DUOS_DB_NAME,

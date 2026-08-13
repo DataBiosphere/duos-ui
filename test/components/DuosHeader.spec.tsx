@@ -156,17 +156,42 @@ describe('DuosHeader', () => {
     })
   })
 
-  describe('Authenticated DAC Chair', () => {
-    it('displays DAC Chair Console tab', async () => {
-      await mountHeader('/chair_console', { ...mockUser, isChairPerson: true, isResearcher: false })
-      expect(screen.getByRole('tab', { name: 'DAC Chair Console' })).toBeInTheDocument()
+  describe('Authenticated DAC Console', () => {
+    it('displays DAC Console tab for a chairperson', async () => {
+      await mountHeader('/dac_console', { ...mockUser, isChairPerson: true, isResearcher: false })
+      expect(screen.getByRole('tab', { name: 'DAC Console' })).toBeInTheDocument()
     })
-  })
 
-  describe('Authenticated DAC Member', () => {
-    it('displays DAC Member Console tab', async () => {
-      await mountHeader('/member_console', { ...mockUser, isMember: true, isResearcher: false })
-      expect(screen.getByRole('tab', { name: 'DAC Member Console' })).toBeInTheDocument()
+    it('displays DAC Console tab for a member', async () => {
+      await mountHeader('/dac_console', { ...mockUser, isMember: true, isResearcher: false })
+      expect(screen.getByRole('tab', { name: 'DAC Console' })).toBeInTheDocument()
+    })
+
+    it('displays collapsed subtabs (Dashboard, Data Library)', async () => {
+      await mountHeader('/dac_console', { ...mockUser, isChairPerson: true, isResearcher: false })
+      expect(screen.getByRole('tab', { name: 'Dashboard' })).toBeInTheDocument()
+      expect(screen.getByRole('tab', { name: 'Data Library' })).toBeInTheDocument()
+    })
+
+    it('keeps dashboard-only destinations out of the sub-tab bar', () => {
+      const dacConsole = headerTabsConfig.find(tab => tab.label === 'DAC Console')
+
+      expect(visibleSubTabs(dacConsole?.children, { ...mockUser, isChairPerson: true })
+        .map(subTab => subTab.label))
+        .toEqual(['Dashboard', 'Data Library'])
+    })
+
+    it('selects the DAC Console tab on its Manage DACs route without navigation state', async () => {
+      const adminChair = {
+        ...mockUser,
+        isAdmin: true,
+        isChairPerson: true,
+        isResearcher: false,
+      }
+      await mountHeader('/dac_console/manage_dac', adminChair)
+
+      expect(screen.getByRole('tab', { name: 'DAC Console' })).toHaveClass('Mui-selected')
+      expect(screen.getByRole('tab', { name: 'Admin Console' })).not.toHaveClass('Mui-selected')
     })
   })
 

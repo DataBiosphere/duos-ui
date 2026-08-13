@@ -27,7 +27,7 @@ export default function DACDatasetApprovalStatus({ dataset: initialDataset }: DA
     try {
       await DataSet.deleteDataset(datasetId)
       Notifications.showSuccess({ text: `Deleted dataset '${datasetName}' successfully.` })
-      navigate('/chair_console')
+      navigate('/dac_console_dar_requests')
     }
     catch {
       Notifications.showError({ text: `Error deleting dataset '${datasetName}'` })

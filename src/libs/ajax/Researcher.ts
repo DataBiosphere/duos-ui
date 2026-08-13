@@ -1,15 +1,18 @@
-import { Config } from 'src/libs/config'
-import { fetchGet } from 'src/libs/ajax/fetchAdapter'
+import {
+  DashboardDarRequests,
+  DashboardDataLibrary,
+  fetchDashboardSummary,
+} from 'src/libs/ajax/Dashboard'
 
 export interface ResearcherDashboardSummary {
   /** What this researcher can see in the Data Library, by asset tab. */
-  dataLibrary: { studies: number, datasets: number, models: number, workspaces: number }
+  dataLibrary: DashboardDataLibrary
   /**
    * Mirrors the DAR Requests page: `canceled` is a collection the researcher withdrew, `inProcess`
    * is anything not yet fully approved or canceled. No denied count - the system records none.
    * Drafts are excluded.
    */
-  darRequests: { total: number, approved: number, canceled: number, inProcess: number }
+  darRequests: DashboardDarRequests
   /** `expiringSoon` is the subset of `active` expiring within 30 days. */
   datasetApprovals: { active: number, expiringSoon: number, expired: number }
   /** Sum of the nine My Data Submissions tab counts. */
@@ -17,9 +20,6 @@ export interface ResearcherDashboardSummary {
 }
 
 export const Researcher = {
-  getDashboardSummary: async (): Promise<ResearcherDashboardSummary> => {
-    const url = `${await Config.getApiUrl()}/api/researcher/dashboard-summary`
-    const response = await fetchGet<ResearcherDashboardSummary>(url)
-    return response.data
-  },
+  getDashboardSummary: (): Promise<ResearcherDashboardSummary> =>
+    fetchDashboardSummary('/api/researcher/dashboard-summary'),
 }
