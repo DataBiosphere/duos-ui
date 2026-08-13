@@ -1,11 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { firstNonEmptyPropertyValue, getRadarEnabledDatasetsWithRules, isOnlyGRUorHMB } from 'src/utils/DatasetUtils'
+import { describe, it, expect, vi } from 'vitest'
+import { firstNonEmptyPropertyValue, getRadarEnabledDatasetIds, getSoApprovalModelByDatasetId } from 'src/utils/DatasetUtils'
 import type {
   Dataset,
-  DataUseSummary,
   DatasetProperty,
   StudyProperty,
-  DataUseTerm,
   Study,
   DatasetTerm,
 } from 'src/types/model'
@@ -150,37 +148,8 @@ describe('firstNonEmptyPropertyValue', () => {
   })
 })
 
-describe('isOnlyGRUorHMB', () => {
-  const makeTerm = (code: string): DataUseTerm => ({ code, description: '' })
-
-  it('returns true for only GRU', () => {
-    const dataUse: DataUseSummary = { primary: [makeTerm('GRU')], secondary: [] }
-    expect(isOnlyGRUorHMB(dataUse)).toBe(true)
-  })
-
-  it('returns true for only HMB', () => {
-    const dataUse: DataUseSummary = { primary: [makeTerm('HMB')], secondary: [] }
-    expect(isOnlyGRUorHMB(dataUse)).toBe(true)
-  })
-
-  it('returns false for GRU with modifier', () => {
-    const dataUse: DataUseSummary = { primary: [makeTerm('GRU')], secondary: [makeTerm('IRB')] }
-    expect(isOnlyGRUorHMB(dataUse)).toBe(false)
-  })
-
-  it('returns false for multiple primary codes', () => {
-    const dataUse: DataUseSummary = { primary: [makeTerm('GRU'), makeTerm('HMB')], secondary: [] }
-    expect(isOnlyGRUorHMB(dataUse)).toBe(false)
-  })
-
-  it('returns false for other code', () => {
-    const dataUse: DataUseSummary = { primary: [makeTerm('DS')], secondary: [] }
-    expect(isOnlyGRUorHMB(dataUse)).toBe(false)
-  })
-})
-
-describe('getRadarEnabledDatasetsWithRules', () => {
-  const minimalDataset: Omit<DatasetTerm, 'datasetId' | 'dacId' | 'dataUse'> = {
+describe('getRadarEnabledDatasetIds', () => {
+  const minimalDataset: Omit<DatasetTerm, 'datasetId' | 'dacId'> = {
     createUserId: 0,
     createUserDisplayName: '',
     datasetIdentifier: '',
@@ -195,90 +164,90 @@ describe('getRadarEnabledDatasetsWithRules', () => {
     study: minimalStudy,
     submitter: { userId: 0, displayName: '', institution: { id: 0, name: '' } },
     updateUser: { userId: 0, displayName: '', institution: { id: 0, name: '' } },
-    dac: { dacId: 0, dacName: '', dacEmail: '' },
+    dac: { dacId: 2, dacName: '', dacEmail: '' },
     piName: '',
+    dataUse: { primary: [], secondary: [] },
   }
 
-  beforeEach(() => {
-    vi.spyOn(DAC, 'fetchDACbotRules').mockImplementation((dacId: number) => {
-      if (dacId === 2) {
-        return Promise.resolve([{ activationDate: 123, ruleType: 'GRU_V1' }] as never)
-      }
-      return Promise.resolve([] as never)
-    })
+  const buildDataset = (datasetId: number, instantApprovalEligible?: boolean): DatasetTerm =>
+    ({ datasetId, dacId: 2, ...minimalDataset, instantApprovalEligible } as DatasetTerm)
+
+  it('collects the datasets the search index marked eligible', () => {
+    const result = getRadarEnabledDatasetIds([
+      buildDataset(1, true),
+      buildDataset(2, false),
+      buildDataset(3, true),
+    ])
+    expect(Array.from(result)).toEqual([1, 3])
   })
 
-  afterEach(() => {
+  it('treats a dataset with no flag as ineligible rather than guessing', () => {
+    expect(getRadarEnabledDatasetIds([buildDataset(1)]).size).toEqual(0)
+  })
+
+  it('returns an empty set for an empty dataset list', () => {
+    expect(getRadarEnabledDatasetIds([]).size).toEqual(0)
+  })
+
+  it('does not fetch DAC rules', () => {
+    const fetchRules = vi.spyOn(DAC, 'fetchDACbotRules')
+    getRadarEnabledDatasetIds([buildDataset(1, true)])
+    expect(fetchRules).not.toHaveBeenCalled()
     vi.restoreAllMocks()
   })
+})
 
-  it('returns set of eligible dataset IDs', async () => {
-    const datasets: DatasetTerm[] = [
-      {
-        datasetId: 1,
-        dacId: 2,
-        dataUse: { primary: [{ code: 'GRU', description: '' }], secondary: [] },
-        ...minimalDataset,
-      },
-      {
-        datasetId: 2,
-        dacId: 3,
-        dataUse: { primary: [{ code: 'DS', description: '' }], secondary: [] },
-        ...minimalDataset,
-      },
-    ]
-    const result = await getRadarEnabledDatasetsWithRules(datasets)
-    expect(result).toBeInstanceOf(Set)
-    expect(Array.from(result as Set<number>)).toEqual([1])
+describe('getSoApprovalModelByDatasetId', () => {
+  const minimalDataset: Omit<DatasetTerm, 'datasetId' | 'dacId'> = {
+    createUserId: 0,
+    createUserDisplayName: '',
+    datasetIdentifier: '',
+    deletable: false,
+    datasetName: '',
+    participantCount: 0,
+    dataLocation: '',
+    url: '',
+    dacApproval: false,
+    accessManagement: 'open',
+    approvedUserIds: [],
+    study: minimalStudy,
+    submitter: { userId: 0, displayName: '', institution: { id: 0, name: '' } },
+    updateUser: { userId: 0, displayName: '', institution: { id: 0, name: '' } },
+    dac: { dacId: 2, dacName: '', dacEmail: '' },
+    piName: '',
+    dataUse: { primary: [], secondary: [] },
+  }
+
+  const buildDataset = (datasetId: number, soApprovalModel?: string): DatasetTerm =>
+    ({ datasetId, dacId: 2, ...minimalDataset, soApprovalModel } as DatasetTerm)
+
+  it('maps the models the search index supplies', () => {
+    const result = getSoApprovalModelByDatasetId([
+      buildDataset(1, 'PER_REQUEST'),
+      buildDataset(2, 'PRE_AUTHORIZED'),
+    ])
+    expect(result.get(1)).toEqual('per-request')
+    expect(result.get(2)).toEqual('pre-authorized')
   })
 
-  it('returns undefined for empty datasets', async () => {
-    const result = await getRadarEnabledDatasetsWithRules([])
-    expect(result).toBeUndefined()
+  it('maps a dataset with no model to unknown rather than guessing', () => {
+    const result = getSoApprovalModelByDatasetId([buildDataset(1)])
+    expect(result.get(1)).toEqual('unknown')
   })
 
-  it('does not flag a dataset as eligible when the DAC only enabled the other code (GRU rule enabled, dataset is HMB)', async () => {
-    const datasets: DatasetTerm[] = [
-      {
-        datasetId: 4,
-        dacId: 2,
-        dataUse: { primary: [{ code: 'HMB', description: '' }], secondary: [] },
-        ...minimalDataset,
-      },
-    ]
-    const result = await getRadarEnabledDatasetsWithRules(datasets)
-    expect(Array.from(result as Set<number>)).toEqual([])
+  it('maps an unrecognised model to unknown', () => {
+    const result = getSoApprovalModelByDatasetId([buildDataset(1, 'SOMETHING_NEW')])
+    expect(result.get(1)).toEqual('unknown')
   })
 
-  it('flags a dataset as eligible when the DAC has enabled that dataset\'s own code', async () => {
-    vi.spyOn(DAC, 'fetchDACbotRules').mockImplementation((dacId: number) => {
-      if (dacId === 2) {
-        return Promise.resolve([{ activationDate: 123, ruleType: 'HMB_V1' }] as never)
-      }
-      return Promise.resolve([] as never)
-    })
-    const datasets: DatasetTerm[] = [
-      {
-        datasetId: 5,
-        dacId: 2,
-        dataUse: { primary: [{ code: 'HMB', description: '' }], secondary: [] },
-        ...minimalDataset,
-      },
-    ]
-    const result = await getRadarEnabledDatasetsWithRules(datasets)
-    expect(Array.from(result as Set<number>)).toEqual([5])
+  it('returns an empty map for an empty dataset list', () => {
+    expect(getSoApprovalModelByDatasetId([]).size).toEqual(0)
   })
 
-  it('returns empty set if no eligible datasets', async () => {
-    const datasets: DatasetTerm[] = [
-      {
-        datasetId: 3,
-        dacId: 3,
-        dataUse: {} as never,
-        ...minimalDataset,
-      },
-    ]
-    const result = await getRadarEnabledDatasetsWithRules(datasets)
-    expect(Array.from(result as Set<number>)).toEqual([])
+  it('does not fetch DAC rules', () => {
+    const fetchRules = vi.spyOn(DAC, 'fetchDACbotRules')
+    getSoApprovalModelByDatasetId([buildDataset(1, 'PER_REQUEST')])
+    expect(fetchRules).not.toHaveBeenCalled()
+    vi.restoreAllMocks()
   })
 })

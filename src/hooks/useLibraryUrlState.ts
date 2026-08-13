@@ -18,6 +18,7 @@ type ArrayFilterParamConfig = {
     | 'biospecimenType'
     | 'biospecimenDataUse'
     | 'biospecimenPostMortemIntervalUnit'
+    | 'soApprovalModel'
   >
   param: string
 }
@@ -52,6 +53,7 @@ const ARRAY_FILTER_PARAM_CONFIG: ArrayFilterParamConfig[] = [
   { key: 'biospecimenType', param: 'biospecimenType' },
   { key: 'biospecimenDataUse', param: 'biospecimenDataUse' },
   { key: 'biospecimenPostMortemIntervalUnit', param: 'biospecimenPostMortemIntervalUnit' },
+  { key: 'soApprovalModel', param: 'soApprovalModel' },
 ]
 
 const RANGE_FILTER_PARAM_CONFIG: RangeFilterParamConfig[] = [
@@ -244,6 +246,7 @@ const parseFiltersFromUrl = (searchParams: URLSearchParams): FilterState => {
     ...parseDateFilters(searchParams),
     datasetsCited: parseBooleanParam(searchParams, ['datasetsCited', 'presentationsDatasetsCited']),
     publicationsDatasetsCited: parseBooleanParam(searchParams, ['publicationsDatasetsCited']),
+    instantApproval: parseBooleanParam(searchParams, ['instantApproval']),
   } as FilterState
 }
 
@@ -257,6 +260,7 @@ const serializeFiltersToUrl = (
   serializeArrayFiltersToUrl(filters, searchParams)
   serializeBooleanFilterToUrl(filters.datasetsCited, 'datasetsCited', searchParams, ['presentationsDatasetsCited'])
   serializeBooleanFilterToUrl(filters.publicationsDatasetsCited, 'publicationsDatasetsCited', searchParams)
+  serializeBooleanFilterToUrl(filters.instantApproval, 'instantApproval', searchParams)
   serializeRangeFiltersToUrl(filters, searchParams)
   serializeDateFiltersToUrl(filters, searchParams)
 }

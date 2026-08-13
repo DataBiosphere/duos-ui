@@ -42,6 +42,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
   onSelectionChange,
   exportableDatasets = {},
   radarEnabledDatasetIds = EMPTY_RADAR_IDS,
+  soApprovalModelByDatasetId,
   extraColumns,
   checkboxSelection = true,
 }) => {
@@ -50,14 +51,14 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
   const hasSelection = selectedDatasetIds.length > 0
 
   const columns = useMemo(() => {
-    const base = asset.makeColumns({ exportableDatasets, radarEnabledDatasetIds, hasSelection })
+    const base = asset.makeColumns({ exportableDatasets, radarEnabledDatasetIds, soApprovalModelByDatasetId, hasSelection })
     if (!extraColumns || extraColumns.length === 0) return base
     const extraFields = new Set(extraColumns.map(c => c.field))
     return [
       ...base.filter(col => !extraFields.has(col.field)),
       ...extraColumns,
     ]
-  }, [asset, exportableDatasets, radarEnabledDatasetIds, hasSelection, extraColumns])
+  }, [asset, exportableDatasets, radarEnabledDatasetIds, soApprovalModelByDatasetId, hasSelection, extraColumns])
 
   const getRowId = (row: LibraryRow) => asset.getRowId(row)
 

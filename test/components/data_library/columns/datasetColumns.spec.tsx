@@ -7,6 +7,7 @@ import { makeMockParams } from './columnTestUtils'
 import { makeDatasetColumns } from 'src/components/data_library/columns/datasetColumns'
 import { Storage } from 'src/libs/storage'
 import { DatasetTerm, DuosUser, LibraryCard } from 'src/types/model'
+import { SoApprovalModel } from 'src/types/library'
 
 const makeRow = (overrides: Partial<DatasetTerm> = {}): DatasetTerm => ({
   datasetId: 1,
@@ -63,6 +64,11 @@ describe('datasetColumns — column order', () => {
       'actions',
     ])
   })
+
+  it('includes the SO Approval column when authorization-model data is supplied', () => {
+    const fields = makeDatasetColumns({}, new Set(), new Map()).map(c => c.field)
+    expect(fields).toContain('soApprovalModel')
+  })
 })
 
 describe('datasetColumns — Access Management chip', () => {
@@ -87,6 +93,64 @@ describe('datasetColumns — Access Management chip', () => {
       </MemoryRouter>,
     )
     expect(container.querySelector('svg[data-testid="BoltIcon"]')).toBeInTheDocument()
+  })
+
+  it('keeps the access label readable when the instant-approval tooltip is present', () => {
+    const col = makeDatasetColumns({}, new Set([1])).find(c => c.field === 'accessManagement')!
+    const { container } = render(
+      <MemoryRouter>
+        {col.renderCell!(mockParams('controlled', { datasetId: 1 })) as React.ReactElement}
+      </MemoryRouter>,
+    )
+    const chip = container.querySelector('.MuiChip-root')
+    expect(chip).toHaveTextContent('via DUOS')
+    expect(chip?.getAttribute('title')).toMatch(/Automatic request approvals available/)
+    // describeChild keeps the label, not the tooltip text, as the accessible name
+    expect(chip).not.toHaveAttribute('aria-label')
+  })
+})
+
+describe('datasetColumns — SO Approval column', () => {
+  const columnsFor = (model: SoApprovalModel) =>
+    makeDatasetColumns({}, new Set(), new Map([[1, model]]))
+
+  it('omits the column entirely when no authorization-model data is supplied', () => {
+    expect(makeDatasetColumns().find(c => c.field === 'soApprovalModel')).toBeUndefined()
+  })
+
+  it('shows the pre-authorization chip for a pre-authorized dataset', () => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor('pre-authorized'))
+    expect(screen.getByText('Pre-Authorized Researchers')).toBeInTheDocument()
+    expect(container.querySelector('.MuiChip-root')).toBeInTheDocument()
+  })
+
+  it('shows the per-request-approval chip for a per-DAR dataset', () => {
+    renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor('per-request'))
+    expect(screen.getByText('Per-Request Approval')).toBeInTheDocument()
+  })
+
+  it('renders nothing when the dataset\'s authorization model is unknown', () => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor('unknown'))
+    expect(container.querySelector('.MuiChip-root')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pre-Authorized Researchers')).not.toBeInTheDocument()
+    expect(screen.queryByText('Per-Request Approval')).not.toBeInTheDocument()
+  })
+
+  it('renders nothing for a dataset missing from the map', () => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 999 }, columnsFor('per-request'))
+    expect(container.querySelector('.MuiChip-root')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['per-request', 'Per-Request Approval', /requires the Signing Official named in each Data Access Request/],
+    ['pre-authorized', 'Pre-Authorized Researchers', /allows Signing Officials to pre-authorize researchers in advance/],
+  ] as const)('describes the %s model without displacing the chip label', (model, label, expectedText) => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor(model))
+    const chip = container.querySelector('.MuiChip-root')
+    expect(chip).toHaveTextContent(label)
+    expect(chip?.getAttribute('title')).toMatch(expectedText)
+    // describeChild keeps the label, not the tooltip text, as the accessible name
+    expect(chip).not.toHaveAttribute('aria-label')
   })
 })
 
@@ -121,7 +185,7 @@ describe('datasetColumns — Request Path column', () => {
   })
 
   it('disables the "Request Now" button when datasets are selected elsewhere on the page', () => {
-    const columnsWithSelection = makeDatasetColumns({}, new Set(), true)
+    const columnsWithSelection = makeDatasetColumns({}, new Set(), undefined, true)
     renderCell('requestLocation', null, { accessManagement: 'controlled' }, columnsWithSelection)
     expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
   })

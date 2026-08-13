@@ -10,17 +10,26 @@ function useAsyncCacheFetch<K extends string | number, V>(
 
   const fetchWithCache = useCallback(
     async (id: K, fetchFn: FetchFn<K, V>): Promise<V> => {
-      if (cacheRef.current[id]) {
-        return cacheRef.current[id]
+      // Compared against undefined rather than truthiness so falsy cached values (0, '', false)
+      // are served from the cache instead of refetching every call
+      const cached = cacheRef.current[id]
+      if (cached !== undefined) {
+        return cached
       }
-      if (fetchingRef.current[id]) {
+      if (fetchingRef.current[id] !== undefined) {
         return fetchingRef.current[id] as Promise<V>
       }
-      fetchingRef.current[id] = fetchFn(id)
-      const result = await fetchingRef.current[id]!
-      cacheRef.current[id] = result
-      fetchingRef.current[id] = undefined
-      return result
+      const pending = fetchFn(id)
+      fetchingRef.current[id] = pending
+      try {
+        const result = await pending
+        cacheRef.current[id] = result
+        return result
+      }
+      finally {
+        // Cleared on failure too, so a transient error doesn't poison the key for good
+        fetchingRef.current[id] = undefined
+      }
     },
     [],
   )

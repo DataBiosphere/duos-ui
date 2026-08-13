@@ -41,6 +41,14 @@ const availableFilters: AvailableFilters = {
     { value: 'true', label: 'Yes' },
     { value: 'false', label: 'No' },
   ],
+  soApprovalModel: [
+    { value: 'PER_REQUEST', label: 'Per-Request Approval' },
+    { value: 'PRE_AUTHORIZED', label: 'Pre-Authorized Researchers' },
+  ],
+  instantApproval: [
+    { value: 'true', label: 'Yes' },
+    { value: 'false', label: 'No' },
+  ],
   biospecimenPostMortemIntervalRange: { min: 0, max: 1000 },
   participantCountRange: { min: 0, max: 1000 },
 }
@@ -76,6 +84,21 @@ describe('LibraryFilters', () => {
     expect(screen.getByText('Data Use')).toBeInTheDocument()
     expect(screen.getByText('Data Type')).toBeInTheDocument()
     expect(screen.getByText('Participants')).toBeInTheDocument()
+  })
+
+  // Asserted against the registry so a newly registered filter claimed by neither key list,
+  // which renders nothing at all, fails here rather than silently
+  it('renders a section for every filter registered for the asset', () => {
+    render(<LibraryFiltersWrapper />)
+
+    const sections = getFilterSectionsForAsset(AssetType.DATASETS, availableFilters)
+    expect(sections.length).toBeGreaterThan(0)
+    sections.forEach((section) => {
+      expect(
+        screen.getAllByText(section.label).length,
+        `no section rendered for "${section.key}"`,
+      ).toBeGreaterThan(0)
+    })
   })
 
   it('renders filter options with counts', () => {

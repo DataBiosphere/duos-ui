@@ -3,11 +3,40 @@ import { GridColDef } from '@mui/x-data-grid'
 import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router'
 import { DatasetTerm } from 'src/types/model'
-import { AccessManagement, ExportableDatasets } from 'src/types/library'
+import { AccessManagement, ExportableDatasets, SoApprovalModel } from 'src/types/library'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
 import RequestAccessButton from 'src/components/data_library/RequestAccessButton'
 import BoltIcon from '@mui/icons-material/Bolt'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
+
+const makeSoApprovalColumn = (soApprovalModelByDatasetId: Map<number, SoApprovalModel>): GridColDef<DatasetTerm> => ({
+  field: 'soApprovalModel',
+  headerName: 'SO Approval',
+  // Wide enough for the full 'Pre-Authorized Researchers' chip, which truncates below ~240
+  width: 250,
+  sortable: false,
+  renderCell: (params) => {
+    const model = soApprovalModelByDatasetId.get(params.row.datasetId)
+    // Blank beats a guess when the DAC's rules couldn't be loaded
+    if (model === undefined || model === 'unknown') return null
+    const isPerRequestApproval = model === 'per-request'
+    const label = isPerRequestApproval ? 'Per-Request Approval' : 'Pre-Authorized Researchers'
+    const tooltipTitle = isPerRequestApproval
+      ? 'This dataset\'s DAC requires the Signing Official named in each Data Access Request to approve that specific request before the DAC reviews it.'
+      : 'This dataset\'s DAC allows Signing Officials to pre-authorize researchers in advance, so approved researchers don\'t need separate per-request SO approval.'
+    const colorSx = isPerRequestApproval
+      ? { bgcolor: '#cfe2ff', color: '#084298' }
+      : { bgcolor: '#d4edda', color: '#155724' }
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+        {/* describeChild keeps the chip label as the accessible name, not the tooltip text */}
+        <Tooltip title={tooltipTitle} describeChild>
+          <Chip label={label} size="small" sx={{ ...colorSx, fontWeight: 600 }} />
+        </Tooltip>
+      </Box>
+    )
+  },
+})
 
 /**
  * Column definitions for dataset view
@@ -15,6 +44,7 @@ import { validateHttpUrl } from 'src/utils/UrlUtils'
 export const makeDatasetColumns = (
   exportableDatasets: ExportableDatasets = {},
   radarEnabledDatasetIds: Set<number> = new Set(),
+  soApprovalModelByDatasetId?: Map<number, SoApprovalModel>,
   hasSelection: boolean = false,
 ): GridColDef<DatasetTerm>[] => [
   {
@@ -72,7 +102,8 @@ export const makeDatasetColumns = (
         : ''
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-          <Tooltip title={tooltipTitle}>
+          {/* describeChild keeps the access label as the accessible name, not the tooltip text */}
+          <Tooltip title={tooltipTitle} describeChild>
             <Chip
               label={(
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -147,6 +178,7 @@ export const makeDatasetColumns = (
     width: 150,
     valueGetter: (_value, row) => row.dac?.dacName || '',
   },
+  ...(soApprovalModelByDatasetId ? [makeSoApprovalColumn(soApprovalModelByDatasetId)] : []),
   {
     field: 'actions',
     headerName: 'Actions',

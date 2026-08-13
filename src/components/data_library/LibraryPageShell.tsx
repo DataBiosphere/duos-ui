@@ -5,7 +5,8 @@ import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
 import InstantApprovalBadge from 'src/components/data_library/InstantApprovalBadge'
-import { ExportableDatasets, TabConfig } from 'src/types/library'
+import SoApprovalReminderBanner from 'src/components/data_library/SoApprovalReminderBanner'
+import { ExportableDatasets, SoApprovalModel, TabConfig } from 'src/types/library'
 import { LibraryPageState } from 'src/hooks/useLibraryPageState'
 
 interface GridExtras {
@@ -15,6 +16,7 @@ interface GridExtras {
   checkboxSelection?: boolean
   exportableDatasets?: ExportableDatasets
   radarEnabledDatasetIds?: Set<number>
+  soApprovalModelByDatasetId?: Map<number, SoApprovalModel>
 }
 
 interface LibraryPageShellProps {
@@ -23,6 +25,8 @@ interface LibraryPageShellProps {
   header: React.ReactNode
   gridExtras?: GridExtras
   footer?: React.ReactNode
+  /** Only the Data Library surfaces the Signing Official authorization model */
+  showSoApprovalReminder?: boolean
 }
 
 export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
@@ -31,6 +35,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
   header,
   gridExtras = {},
   footer,
+  showSoApprovalReminder = false,
 }) => {
   const {
     urlState,
@@ -59,6 +64,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
     checkboxSelection = true,
     exportableDatasets,
     radarEnabledDatasetIds,
+    soApprovalModelByDatasetId,
   } = gridExtras
 
   if (error) {
@@ -109,6 +115,9 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
         </Box>
 
         <Box sx={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {showSoApprovalReminder && (
+            <SoApprovalReminderBanner showsPerDatasetIndicator={soApprovalModelByDatasetId !== undefined} />
+          )}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
             {isFetching
               ? <Skeleton variant="text" width={120} sx={{ fontSize: '15px' }} />
@@ -144,6 +153,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
               onSelectionChange={onSelectionChange}
               exportableDatasets={exportableDatasets}
               radarEnabledDatasetIds={radarEnabledDatasetIds}
+              soApprovalModelByDatasetId={soApprovalModelByDatasetId}
               extraColumns={extraColumns}
               checkboxSelection={checkboxSelection}
             />

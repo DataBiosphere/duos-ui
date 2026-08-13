@@ -24,6 +24,7 @@ type ArrayFilterKey
     | 'biospecimenType'
     | 'biospecimenDataUse'
     | 'biospecimenPostMortemIntervalUnit'
+    | 'soApprovalModel'
 
 const ARRAY_FILTER_KEYS: ArrayFilterKey[] = [
   'accessManagement',
@@ -39,6 +40,7 @@ const ARRAY_FILTER_KEYS: ArrayFilterKey[] = [
   'biospecimenType',
   'biospecimenDataUse',
   'biospecimenPostMortemIntervalUnit',
+  'soApprovalModel',
 ]
 
 const OBJECT_FILTER_KEYS: Array<
@@ -57,9 +59,10 @@ const OBJECT_FILTER_KEYS: Array<
   'fundingDate',
 ]
 
-const BOOL_FILTER_KEYS: Array<'datasetsCited' | 'publicationsDatasetsCited'> = [
+const BOOL_FILTER_KEYS: Array<'datasetsCited' | 'publicationsDatasetsCited' | 'instantApproval'> = [
   'datasetsCited',
   'publicationsDatasetsCited',
+  'instantApproval',
 ]
 
 const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
@@ -76,8 +79,10 @@ const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
   biospecimenType: 'checkbox',
   biospecimenDataUse: 'checkbox',
   biospecimenPostMortemIntervalUnit: 'checkbox',
+  soApprovalModel: 'checkbox',
   datasetsCited: 'boolean',
   publicationsDatasetsCited: 'boolean',
+  instantApproval: 'boolean',
   participantCount: 'range',
   biospecimenPostMortemInterval: 'range',
   clinicalTrialDates: 'dateRange',
@@ -103,8 +108,10 @@ export const EMPTY_FILTERS: FilterState = {
   biospecimenPostMortemIntervalUnit: [],
   biospecimenPostMortemInterval: {},
   biospecimenCollectionDate: {},
+  soApprovalModel: [],
   datasetsCited: undefined,
   publicationsDatasetsCited: undefined,
+  instantApproval: undefined,
   participantCount: {},
   ipFiledDate: {},
   fundingDate: {},
@@ -138,11 +145,13 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
     case 'biospecimenType':
     case 'biospecimenDataUse':
     case 'biospecimenPostMortemIntervalUnit':
+    case 'soApprovalModel':
       return filters[key].length > 0
 
     // Boolean filters are active once explicitly set to Yes/No (not "Any").
     case 'datasetsCited':
     case 'publicationsDatasetsCited':
+    case 'instantApproval':
       return filters[key] !== undefined
 
     // Range filters are active once either bound is set.
@@ -189,8 +198,10 @@ const getFilterOptions = (key: FilterKey, availableFilters: AvailableFilters) =>
     case 'biospecimenType':
     case 'biospecimenDataUse':
     case 'biospecimenPostMortemIntervalUnit':
+    case 'soApprovalModel':
     case 'datasetsCited':
     case 'publicationsDatasetsCited':
+    case 'instantApproval':
       return availableFilters[key]
     default:
       return undefined
@@ -256,6 +267,35 @@ const citationClause = (field: string, cited: boolean): QueryClause => {
 }
 
 const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
+  soApprovalModel: {
+    label: 'SO Approval',
+    buildClause: (filters) => {
+      if (filters.soApprovalModel.length === 0) {
+        return undefined
+      }
+
+      return {
+        bool: {
+          should: filters.soApprovalModel.map(term => ({
+            term: { 'soApprovalModel.keyword': term },
+          })),
+        },
+      }
+    },
+  },
+  instantApproval: {
+    label: 'Instant Approval Available?',
+    buildClause: (filters) => {
+      if (filters.instantApproval === undefined) {
+        return undefined
+      }
+
+      // Unlike citationClause, an absent flag means "unknown" rather than "No" — the index leaves
+      // it unset when the DAC's rules cannot be resolved, and the grid shows no badge for those.
+      // A bare term matches only documents carrying the field, so both sides exclude them.
+      return { term: { instantApprovalEligible: filters.instantApproval } }
+    },
+  },
   accessManagement: {
     label: 'Access Request Process',
     buildClause: (filters) => {
