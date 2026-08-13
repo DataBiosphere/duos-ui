@@ -129,9 +129,6 @@ describe('tdrProxy', () => {
   })
 
   describe('no unauthenticated paths', () => {
-    // The DUOS API proxy allowlists five paths; TDR allowlists none. Pinned
-    // against a path the sibling proxy would wave through, so the two configs
-    // cannot be conflated.
     it.each(['/status', SNAPSHOTS_PATH, '/'])('%s is unreachable without a session', async (path) => {
       app = await buildTdrApp()
 
@@ -144,8 +141,6 @@ describe('tdrProxy', () => {
   })
 
   describe('CSRF enforcement', () => {
-    // The client only GETs TDR today, but the wildcard route proxies every
-    // method — an unsafe one must present a token like anywhere else.
     it('rejects a POST without a token before it reaches TDR', async () => {
       app = await buildTdrApp(freshSession())
       const { cookie } = await csrfCredentials(app)
@@ -161,9 +156,6 @@ describe('tdrProxy', () => {
       expect(upstream.received).toHaveLength(0)
     })
 
-    // The DUOS API proxy exempts the signed-out Contact Us POSTs; the TDR
-    // config's exemption set is empty, and this is what proves it stays that
-    // way — the same path that is exempt through /duos-api is enforced here.
     it('has no unsafe-request exemptions: POST /support/request is enforced through this prefix', async () => {
       app = await buildTdrApp(freshSession())
 
@@ -208,9 +200,7 @@ describe('tdrProxy', () => {
         res.end('{"total":0,"items":[]}')
       })
 
-      // The request carries an existing session cookie — a cookieless GET
-      // would mint a session, and @fastify/session's own legitimate
-      // Set-Cookie would be indistinguishable from a leaked upstream one.
+      // The request carries an existing session cookie
       const { cookie } = await csrfCredentials(app)
       const res = await app.inject({ method: 'GET', url: `${TDR_PROXY_PREFIX}${SNAPSHOTS_PATH}`, headers: { cookie } })
 
@@ -221,9 +211,6 @@ describe('tdrProxy', () => {
   })
 
   describe('an upstream 401 does not end the session', () => {
-    // The divergence from the DUOS API proxy, and the reason it exists: TDR
-    // authenticates on its own terms (via Sam), so its 401 must surface to the
-    // dataset UI as a failed enumeration rather than sign the user out of DUOS.
     it('passes the 401 through with the session and cookie intact', async () => {
       app = await buildTdrApp(freshSession())
       const tracked = trackSession(app)
@@ -276,9 +263,6 @@ describe('tdrProxy', () => {
   })
 
   describe('DUOS_TDR_URL validation', () => {
-    // Same guard as DUOS_API_URL, and the error must name THIS variable — a
-    // misconfigured TDR origin diagnosed as an API-proxy problem would send
-    // whoever reads the crash log to the wrong Helm value.
     it.each([
       ['unset', undefined],
       ['a bare hostname', 'jade.datarepo-dev.broadinstitute.org'],

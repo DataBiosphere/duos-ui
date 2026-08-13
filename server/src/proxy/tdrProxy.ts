@@ -35,11 +35,6 @@ export function tdrUpstreamPath(url: string): string {
   return stripPrefix(url, TDR_PROXY_PREFIX)
 }
 
-/**
- * Registers the TDR proxy. Handed to `fastify.register()` (never wrapped in
- * `fastify-plugin`) so the shared machinery's parser and error-handler
- * overrides stay encapsulated in this scope — see upstreamProxy.ts.
- */
 export async function tdrProxy(app: FastifyInstance, options: UpstreamProxyOptions = {}): Promise<void> {
   await registerUpstreamProxy(app, {
     prefix: TDR_PROXY_PREFIX,

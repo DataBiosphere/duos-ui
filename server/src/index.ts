@@ -237,9 +237,7 @@ export async function buildApp(): Promise<AppInstance> {
 
     // The single-feature upstream proxies. Same gates as the DUOS API proxy,
     // plus one more each: their own env var. Conditional rather than required,
-    // unlike DUOS_API_URL above, because each serves exactly one feature — a
-    // BFF deployment should boot with that feature broken and a warning naming
-    // the fix, not crash-loop the whole app.
+    // unlike DUOS_API_URL above, because each serves exactly one feature.
     const optionalProxies = [
       { envVar: 'DUOS_ECM_URL', prefix: ECM_PROXY_PREFIX, register: ecmProxy, feature: 'RAS/eRA Commons account linking' },
       { envVar: 'DUOS_TDR_URL', prefix: TDR_PROXY_PREFIX, register: tdrProxy, feature: 'TDR snapshot enumeration on dataset pages' },
