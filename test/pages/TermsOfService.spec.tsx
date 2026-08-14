@@ -6,6 +6,13 @@ import { MemoryRouter } from 'react-router'
 import TermsOfService from 'src/pages/TermsOfService'
 import { useUserIsLogged } from 'src/hooks/useSession'
 
+const mockNavigate = vi.fn()
+
+vi.mock('react-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router')>()
+  return { ...actual, useNavigate: () => mockNavigate }
+})
+
 vi.mock('src/libs/TosService', () => ({
   TosService: {
     getFormattedText: vi.fn().mockResolvedValue(
@@ -18,8 +25,6 @@ vi.mock('src/libs/TosService', () => ({
   },
 }))
 
-// Auth.signOut handles the post-sign-out navigation itself (full-page reload
-// to '/'), so the page no longer calls navigate.
 vi.mock('src/libs/auth/auth', () => ({
   Auth: {
     signOut: vi.fn().mockResolvedValue(undefined),
@@ -74,7 +79,7 @@ describe('Terms of Service Page', () => {
     expect(screen.getByText('Reject Terms of Service')).toBeInTheDocument()
   })
 
-  it('clicking reject calls rejectTos and signs the user out', async () => {
+  it('clicking reject calls rejectTos, signOut, and navigates to /', async () => {
     const { TosService } = await import('src/libs/TosService')
     const { Auth } = await import('src/libs/auth/auth')
     vi.mocked(useUserIsLogged).mockReturnValue(true)
@@ -83,7 +88,9 @@ describe('Terms of Service Page', () => {
       fireEvent.click(screen.getByText('Reject Terms of Service'))
     })
     await waitFor(() => expect(TosService.rejectTos).toHaveBeenCalledOnce())
-    // Auth.signOut redirects back home itself — no navigate call to assert.
     expect(Auth.signOut).toHaveBeenCalledOnce()
+    // The navigation covers the legacy flow, where Auth.signOut does not
+    // redirect; in BFF mode the full-page reload supersedes it.
+    expect(mockNavigate).toHaveBeenCalledWith('/')
   })
 })

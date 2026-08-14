@@ -63,8 +63,9 @@ describe('Terms of Service Acceptance Page', () => {
       fireEvent.click(screen.getByText('Reject Terms of Service'))
     })
     await waitFor(() => expect(Auth.signOut).toHaveBeenCalledOnce())
-    // Auth.signOut performs the full-page redirect home itself — no router navigation.
-    expect(mockNavigate).not.toHaveBeenCalled()
+    // The router navigation covers the legacy flow, where Auth.signOut does
+    // not redirect; in BFF mode the full-page reload supersedes it.
+    expect(mockNavigate).toHaveBeenCalledWith('/')
   })
 
   it('clicking the accept button calls acceptTos and navigates', async () => {

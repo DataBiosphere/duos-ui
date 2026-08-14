@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { Auth } from 'src/libs/auth/auth'
 import { TosService } from 'src/libs/TosService'
 import SimpleButton from 'src/components/SimpleButton'
+import { useNavigate } from 'react-router'
 import { useUserIsLogged } from 'src/hooks/useSession'
 
 export default function TermsOfService() {
+  const navigate = useNavigate()
   const [tosText, setTosText] = useState<React.ReactElement | null>(null)
   const isLogged = useUserIsLogged() ?? false
 
@@ -20,8 +22,11 @@ export default function TermsOfService() {
     // update Sam that ToS was rejected
     await TosService.rejectTos()
 
-    // log user out — Auth.signOut redirects back home.
+    // Log the user out and send them back home. The navigation covers the
+    // legacy flow, where Auth.signOut only clears local state; in BFF mode
+    // Auth.signOut follows up with a full-page reload to '/'.
     await Auth.signOut()
+    navigate('/')
   }
 
   return (
