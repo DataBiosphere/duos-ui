@@ -4,6 +4,7 @@ import 'src/index.css'
 import 'src/styles/bootstrap_replacement.css'
 import App from 'src/App'
 import { Auth } from 'src/libs/auth/auth'
+import { Config } from 'src/libs/config'
 import { OidcBroker } from 'src/libs/auth/oidcBroker'
 import { BrowserRouter } from 'react-router'
 
@@ -18,7 +19,9 @@ const load = async () => {
   //   5a. Logging in from the home page
   //   5b. Logging in from a link, i.e. `<origin>/dataLibrary`
   //   5c. Logging in from a link with a `redirectTo` query param, i.e. `<origin>?redirectTo=/dataLibrary`
-  if (globalThis.location.pathname.startsWith('/redirect-from-oauth')) {
+  // Legacy-only: under the BFF, initialize() never starts the OidcBroker, so
+  // a stale bookmark to this path must not crash the app on getUserManager().
+  if (globalThis.location.pathname.startsWith('/redirect-from-oauth') && !(await Config.isBffEnabled())) {
     await OidcBroker.getUserManager().signinPopupCallback(globalThis.location.href)
   }
   const container = document.getElementById('root')

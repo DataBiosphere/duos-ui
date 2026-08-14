@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
-import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, isBffEnabled, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
+import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, getUpstreamApiUrl, isBffEnabled, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 
 const mockConfig = {
@@ -13,13 +13,19 @@ const mockConfig = {
   terraUrl: 'https://test.terra.bio',
 }
 
+const stubConfigFetch = (config: Record<string, unknown>) =>
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: () => Promise.resolve(config) }))
+
 // configPromise is module-level and caches after the first fetch — mock fetch once for all tests
 beforeAll(() => {
-  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: () => Promise.resolve(mockConfig) }))
+  stubConfigFetch(mockConfig)
 })
 
 afterEach(() => {
   vi.restoreAllMocks()
+  // Individual tests override the fetch stub (e.g. with bffEnabled: true);
+  // restore the baseline so test execution order never matters
+  stubConfigFetch(mockConfig)
 })
 
 afterAll(() => {
@@ -47,6 +53,7 @@ describe('Config', () => {
       ['getTag', 'v1.0.0-test'],
       ['getTdrApiUrl', 'https://test.tdr.com'],
       ['getTerraUrl', 'https://test.terra.bio'],
+      ['getUpstreamApiUrl', 'https://test.api.com'],
       // bffEnabled is absent from mockConfig — the fail-safe default is false
       ['isBffEnabled', false],
     ] as const)('should get %s', async (method, expected) => {
@@ -67,6 +74,7 @@ describe('Config', () => {
       ['getTag', getTag, 'v1.0.0-test'],
       ['getTdrApiUrl', getTdrApiUrl, 'https://test.tdr.com'],
       ['getTerraUrl', getTerraUrl, 'https://test.terra.bio'],
+      ['getUpstreamApiUrl', getUpstreamApiUrl, 'https://test.api.com'],
       ['isBffEnabled', isBffEnabled, false],
     ] as const)('%s should return correct value', async (_name, fn, expected) => {
       expect(await fn()).toBe(expected)
@@ -76,9 +84,25 @@ describe('Config', () => {
   describe('isBffEnabled', () => {
     it('returns true only when config.json sets bffEnabled to true', async () => {
       vi.resetModules()
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: () => Promise.resolve({ ...mockConfig, bffEnabled: true }) }))
+      stubConfigFetch({ ...mockConfig, bffEnabled: true })
       const freshConfig = await import('src/libs/config')
       expect(await freshConfig.isBffEnabled()).toBe(true)
+    })
+  })
+
+  describe('API URLs under the BFF cutover', () => {
+    it('returns the relative proxy prefixes when bffEnabled', async () => {
+      vi.resetModules()
+      stubConfigFetch({ ...mockConfig, bffEnabled: true })
+      const freshConfig = await import('src/libs/config')
+      expect(await freshConfig.getApiUrl()).toBe('/duos-api')
+      expect(await freshConfig.getEcmApiUrl()).toBe('/ecm-api')
+      expect(await freshConfig.getECMUrl()).toBe('/ecm-api')
+      expect(await freshConfig.getTdrApiUrl()).toBe('/tdr-api')
+      // The un-proxied getters stay absolute: /feature is called pre-login,
+      // and anonymous Bard events carry no credentials to protect
+      expect(await freshConfig.getUpstreamApiUrl()).toBe('https://test.api.com')
+      expect(await freshConfig.getBardApiUrl()).toBe('https://test.bard.com')
     })
   })
 

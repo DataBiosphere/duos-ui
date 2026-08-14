@@ -20,6 +20,7 @@ describe('Metrics Tests', () => {
     vi.clearAllMocks()
     vi.mocked(retryFetchPost).mockResolvedValue({ data: undefined } as never)
     vi.spyOn(Config, 'getBardApiUrl').mockResolvedValue(bardUrl)
+    vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(false)
     vi.spyOn(Token, 'getToken').mockReturnValue('test-token')
     vi.spyOn(Storage, 'userIsLogged').mockReturnValue(false)
     vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ userId: 0 } as ReturnType<typeof Storage.getCurrentUser>)
@@ -59,5 +60,55 @@ describe('Metrics Tests', () => {
       { anonId: 'anonymousId' },
       expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer test-token' }) }),
     )
+  })
+
+  describe('BFF mode', () => {
+    beforeEach(() => {
+      vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(true)
+    })
+
+    it('routes syncProfile through the Bard proxy', async () => {
+      await Metrics.syncProfile()
+
+      expect(retryFetchPost).toHaveBeenCalledWith(
+        '/bard-api/api/syncProfile',
+        undefined,
+        expect.any(Object),
+      )
+    })
+
+    it('routes identify through the Bard proxy', async () => {
+      await Metrics.identify('anonymousId')
+
+      expect(retryFetchPost).toHaveBeenCalledWith(
+        '/bard-api/api/identify',
+        { anonId: 'anonymousId' },
+        expect.any(Object),
+      )
+    })
+
+    it('routes identified events through the Bard proxy', async () => {
+      vi.spyOn(Storage, 'userIsLogged').mockReturnValue(true)
+
+      await Metrics.captureEvent(Object.keys(eventList)[0] as MetricsEventName)
+
+      expect(retryFetchPost).toHaveBeenCalledWith(
+        '/bard-api/api/event',
+        expect.any(Object),
+        expect.any(Object),
+      )
+    })
+
+    it('keeps anonymous events on the direct Bard URL', async () => {
+      vi.spyOn(Storage, 'userIsLogged').mockReturnValue(false)
+
+      await Metrics.captureEvent(Object.keys(eventList)[0] as MetricsEventName)
+
+      expect(retryFetchPost).toHaveBeenCalledWith(
+        `${bardUrl}/api/event`,
+        expect.any(Object),
+        expect.any(Object),
+      )
+    })
   })
 })
