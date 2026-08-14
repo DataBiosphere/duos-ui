@@ -359,6 +359,24 @@ describe('SigningOfficialTable', () => {
     ])
   })
 
+  // jsdom cannot resolve :focus-visible, so the emitted rules are read instead.
+  it('keeps a visible focus ring for keyboard users', async () => {
+    renderTable()
+    await rowFor(mockResearcher1.displayName)
+
+    const rules = Array.from(document.querySelectorAll('style'))
+      .map(style => style.textContent ?? '')
+      .join('')
+      .split('}')
+
+    for (const selector of ['.MuiDataGrid-cell:focus-visible', '.MuiDataGrid-columnHeader:focus-visible']) {
+      // Last rule wins, so the keyboard ring must outrank the suppressed :focus outline.
+      const matching = rules.filter(rule => rule.includes(selector))
+      expect(matching.length).toBeGreaterThan(0)
+      expect(matching.at(-1)).toContain('outline:2px solid #216fb4')
+    }
+  })
+
   it('allows sorting on every column', async () => {
     renderTable()
 

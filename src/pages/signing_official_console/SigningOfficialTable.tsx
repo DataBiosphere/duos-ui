@@ -47,11 +47,16 @@ const statusCellStyle: React.CSSProperties = { display: 'flex', alignItems: 'cen
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
 
+// MUI rings on plain :focus, which fires on click; keyboard focus keeps a ring via :focus-visible.
 const DATAGRID_SX = {
   '& .MuiDataGrid-cell:focus': { outline: 'none' },
   '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
   '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
   '& .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
+  '& .MuiDataGrid-cell:focus-visible, & .MuiDataGrid-columnHeader:focus-visible': {
+    outline: `2px solid ${Theme.palette.link}`,
+    outlineOffset: '-2px',
+  },
 }
 
 // Matches the header block above: pulled 7.5% left of the page container, inset 2rem.
