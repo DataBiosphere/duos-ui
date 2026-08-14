@@ -57,6 +57,13 @@ AZURE_ISSUER_URL_DEFAULT="https://terradevb2c.b2clogin.com/terradevb2c.onmicroso
 # pnpm-start dev server; drop the port when running under docker compose.
 OAUTH_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/auth/callback"
 API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
+# The single-feature proxy upstreams (ECM, TDR, Bard). Optional server-side —
+# the BFF boots without them and leaves each route dark — but written here so
+# a locally-run BFF exercises RAS linking, snapshot enumeration, and
+# identified metrics out of the box.
+ECM_URL_DEFAULT="https://externalcreds.dsde-dev.broadinstitute.org"
+TDR_URL_DEFAULT="https://jade.datarepo-dev.broadinstitute.org"
+BARD_URL_DEFAULT="https://terra-bard-dev.appspot.com"
 
 parse_cli_args() {
     while [[ $# -gt 0 ]]; do
@@ -160,6 +167,9 @@ write_env() {
   ISSUER_URL=$(existing_env DUOS_AZURE_ISSUER_URL)
   REDIRECT_URI=$(existing_env DUOS_OAUTH_REDIRECT_URI)
   API_URL=$(existing_env DUOS_API_URL)
+  ECM_URL=$(existing_env DUOS_ECM_URL)
+  TDR_URL=$(existing_env DUOS_TDR_URL)
+  BARD_URL=$(existing_env DUOS_BARD_URL)
 
   if [[ -f "$ENV_FILE" ]]; then
     echo "Backing up existing .env.local to .env.local.bak"
@@ -199,6 +209,9 @@ DUOS_AZURE_CLIENT_SECRET='$AZURE_CLIENT_SECRET'
 DUOS_AZURE_ISSUER_URL=${ISSUER_URL:-$AZURE_ISSUER_URL_DEFAULT}
 DUOS_OAUTH_REDIRECT_URI=${REDIRECT_URI:-$OAUTH_REDIRECT_URI_DEFAULT}
 DUOS_API_URL=${API_URL:-$API_URL_DEFAULT}
+DUOS_ECM_URL=${ECM_URL:-$ECM_URL_DEFAULT}
+DUOS_TDR_URL=${TDR_URL:-$TDR_URL_DEFAULT}
+DUOS_BARD_URL=${BARD_URL:-$BARD_URL_DEFAULT}
 EOF
   } > "$ENV_FILE"
   chmod 600 "$ENV_FILE"
