@@ -32,6 +32,59 @@ vi.mock('src/libs/ajax/DataSet', () => ({
   },
 }))
 
+vi.mock('src/libs/ajax/StudyComments', () => ({
+  StudyComments: {
+    listComments: vi.fn().mockResolvedValue({ comments: [], averageRating: undefined }),
+    postComment: vi.fn(),
+    deleteComment: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/ajax/StudyLogo', () => ({
+  StudyLogo: {
+    getLogoBlob: vi.fn().mockRejectedValue(new Error('no logo')),
+    uploadLogo: vi.fn(),
+    deleteLogo: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/ajax/DatasetMetrics', () => ({
+  DatasetMetrics: {
+    getDatasetStats: vi.fn().mockResolvedValue([]),
+    getStudyStats: vi.fn().mockResolvedValue([]),
+    getDarTrend: vi.fn().mockResolvedValue([]),
+  },
+}))
+
+vi.mock('src/libs/ajax/StudyRecommendations', () => ({
+  StudyRecommendations: {
+    getSimilar: vi.fn().mockResolvedValue([]),
+    getFrequentlyRequestedWith: vi.fn().mockResolvedValue([]),
+  },
+}))
+
+vi.mock('src/libs/ajax/Study', () => ({
+  Study: {
+    getStudyNames: vi.fn().mockResolvedValue([]),
+    getAssetCounts: vi.fn().mockResolvedValue({
+      datasetCount: 0,
+      modelCount: 0,
+      workspaceCount: 0,
+      presentationCount: 0,
+      clinicalTrialCount: 0,
+      intellectualPropertyCount: 0,
+      fundingResourceCount: 0,
+      dataTypes: [],
+    }),
+    getModels: vi.fn().mockResolvedValue([]),
+    getWorkspaces: vi.fn().mockResolvedValue([]),
+    getPresentations: vi.fn().mockResolvedValue([]),
+    getClinicalTrials: vi.fn().mockResolvedValue([]),
+    getIntellectualProperty: vi.fn().mockResolvedValue([]),
+    getFundingResources: vi.fn().mockResolvedValue([]),
+  },
+}))
+
 vi.mock('src/utils/accessUtils', () => ({
   applyForAccess: vi.fn(),
 }))
@@ -189,6 +242,12 @@ beforeAll(() => {
     unobserve() {}
     disconnect() {}
   } as unknown as typeof ResizeObserver
+
+  global.IntersectionObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof IntersectionObserver
 })
 
 beforeEach(() => {

@@ -383,6 +383,23 @@ export interface Author extends Person {
 
 export type Maintainer = Contact
 
+export interface StudyComment {
+  studyCommentId: number
+  studyId: number
+  userId: number
+  rating: number
+  commentText?: string
+  createDate: string
+  updateDate: string
+  displayName: string
+  institutionName?: string
+}
+
+export interface StudyCommentsSummary {
+  comments: StudyComment[]
+  averageRating?: number
+}
+
 export interface Study {
   studyId: number
   name: string

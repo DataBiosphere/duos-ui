@@ -61,13 +61,26 @@ describe('datasetColumns — column order', () => {
       'participantCount',
       'dataUse',
       'dac',
-      'actions',
+      'dataLocation',
+      'export',
     ])
   })
 
   it('includes the SO Approval column when authorization-model data is supplied', () => {
     const fields = makeDatasetColumns({}, new Set(), new Map()).map(c => c.field)
     expect(fields).toContain('soApprovalModel')
+  })
+})
+
+describe('datasetColumns — Data Location column', () => {
+  it('renders the data location text', () => {
+    renderCell('dataLocation', 'AWS S3')
+    expect(screen.getByText('AWS S3')).toBeInTheDocument()
+  })
+
+  it('renders nothing when data location is empty', () => {
+    const { container } = renderCell('dataLocation', '')
+    expect(container.textContent).toBe('')
   })
 })
 

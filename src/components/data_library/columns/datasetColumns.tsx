@@ -178,10 +178,26 @@ export const makeDatasetColumns = (
     width: 150,
     valueGetter: (_value, row) => row.dac?.dacName || '',
   },
+  {
+    field: 'dataLocation',
+    headerName: 'Data Location',
+    width: 150,
+    renderCell: (params) => {
+      const text = params.value || ''
+      if (!text) return null
+      return (
+        <Tooltip title={text} placement="top">
+          <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {text}
+          </Box>
+        </Tooltip>
+      )
+    },
+  },
   ...(soApprovalModelByDatasetId ? [makeSoApprovalColumn(soApprovalModelByDatasetId)] : []),
   {
-    field: 'actions',
-    headerName: 'Actions',
+    field: 'export',
+    headerName: 'Export',
     width: 120,
     sortable: false,
     renderCell: (params) => {
