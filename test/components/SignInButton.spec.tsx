@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SignInButton from 'src/components/SignInButton'
-import { Auth } from 'src/libs/auth/auth'
+import { Auth, Redirect } from 'src/libs/auth/auth'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import type { OidcUser } from 'src/libs/auth/oidcBroker'
 
@@ -22,6 +22,9 @@ vi.mock('src/libs/auth/auth', () => ({
   Auth: {
     signIn: vi.fn(),
     signInError: vi.fn(() => signInError),
+  },
+  Redirect: {
+    to: vi.fn(),
   },
 }))
 vi.mock('src/libs/ajax/ServiceStatus')
@@ -62,6 +65,30 @@ describe('SignInButton', () => {
     await userEvent.click(screen.getByRole('button'))
 
     await waitFor(() => expect(vi.mocked(Auth.signIn)).toHaveBeenCalledWith(undefined))
+  })
+
+  it('reloads in place when Auth.signIn resolves (legacy popup flow)', async () => {
+    globalThis.history.replaceState({}, '', '/?redirectTo=/datalibrary')
+    mountComponent()
+    await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
+
+    await userEvent.click(screen.getByRole('button'))
+
+    // Only the legacy flow resolves (BFF mode navigates away instead). The
+    // reload keeps the query string so App's bootstrap can finish the trip.
+    await waitFor(() => expect(vi.mocked(Redirect.to)).toHaveBeenCalledWith(globalThis.location.href))
+    expect(globalThis.location.search).toContain('redirectTo')
+  })
+
+  it('does not reload when the login request fails', async () => {
+    vi.mocked(Auth.signIn).mockRejectedValue(new Error('login failed'))
+    mountComponent()
+    await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
+
+    await userEvent.click(screen.getByRole('button'))
+
+    await waitFor(() => expect(screen.getByText(signInError)).toBeInTheDocument())
+    expect(vi.mocked(Redirect.to)).not.toHaveBeenCalled()
   })
 
   it('does not send /home as a returnTo either', async () => {

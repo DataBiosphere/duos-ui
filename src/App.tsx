@@ -36,11 +36,17 @@ function App() {
   // Auth state comes from the BFF session probe (GET /auth/me), not localStorage.
   const isLoggedIn = useUserIsLogged() ?? false
   const [signInBootstrapDone, setSignInBootstrapDone] = useState(false)
-  const signInBootstrapStarted = useRef(false)
+  // State (render-visible) tracks that the bootstrap is underway; the ref is
+  // only the effect's run-once guard, never read during render.
+  const [signInBootstrapStarted, setSignInBootstrapStarted] = useState(false)
+  const signInBootstrapKickedOff = useRef(false)
   // A session with no local user state means we just returned from the OAuth
   // redirect — the routes stay hidden behind the spinner until the user
-  // bootstrap below resolves.
-  const isBootstrappingSignIn = isLoggedIn && !signInBootstrapDone && Storage.getCurrentUser().userId === 0
+  // bootstrap below resolves. Once the bootstrap has started it stays "on"
+  // until it settles: completeSignIn populates CurrentUser mid-flight, and the
+  // userId check alone would reveal the routes before the ToS gate has routed.
+  const isBootstrappingSignIn = isLoggedIn && !signInBootstrapDone
+    && (signInBootstrapStarted || Storage.getCurrentUser().userId === 0)
 
   useEffect(() => {
     const setEnvironment = async () => {
@@ -60,11 +66,16 @@ function App() {
    * run the user fetch / registration / ToS flow.
    */
   useEffect(() => {
-    if (!isBootstrappingSignIn || signInBootstrapStarted.current) return
-    signInBootstrapStarted.current = true
-    completeSignIn({ navigate, queryClient, redirectPath: location.pathname })
+    if (!isBootstrappingSignIn || signInBootstrapKickedOff.current) return
+    signInBootstrapKickedOff.current = true
+    setSignInBootstrapStarted(true)
+    // The BFF callback lands the browser on the destination itself, so the
+    // pathname is the redirect target; the legacy popup flow reloads on the
+    // landing page with the destination still in ?redirectTo=.
+    const redirectTo = new URLSearchParams(location.search).get('redirectTo')
+    completeSignIn({ navigate, queryClient, redirectPath: redirectTo ?? location.pathname })
       .finally(() => setSignInBootstrapDone(true))
-  }, [isBootstrappingSignIn, navigate, location.pathname])
+  }, [isBootstrappingSignIn, navigate, location.pathname, location.search])
 
   /**
      * Check for RAS Authentication URL params. If we have a code and state, we will call ECM APIs to get redirect

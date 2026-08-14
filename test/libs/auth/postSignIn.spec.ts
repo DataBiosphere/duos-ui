@@ -74,6 +74,10 @@ describe('completeSignIn', () => {
   })
 
   describe('existing user', () => {
+    beforeEach(() => {
+      globalThis.history.replaceState({}, '', '/')
+    })
+
     it('persists the user, clears the query cache, and routes ToS-accepted users to their console', async () => {
       const tosAcceptedUser = { ...duosUser, userStatusInfo: tosAcceptedStatus }
       vi.mocked(User.getMe).mockResolvedValue(tosAcceptedUser as never)
@@ -91,15 +95,28 @@ describe('completeSignIn', () => {
       expect(navigate).not.toHaveBeenCalled()
     })
 
-    it('leaves a ToS-accepted user in place when the callback landed on a destination page', async () => {
+    it('leaves a ToS-accepted user in place when the callback landed on the destination page', async () => {
       const tosAcceptedUser = { ...duosUser, userStatusInfo: tosAcceptedStatus }
       vi.mocked(User.getMe).mockResolvedValue(tosAcceptedUser as never)
+      // The BFF /auth/callback redirect already put the browser on /datalibrary.
+      globalThis.history.replaceState({}, '', '/datalibrary')
 
       await run('/datalibrary')
 
-      // The /auth/callback redirect already put the browser on /datalibrary.
       expect(vi.mocked(Navigation.console)).not.toHaveBeenCalled()
       expect(navigate).not.toHaveBeenCalled()
+    })
+
+    it('navigates a ToS-accepted user to the destination when not already there (legacy reload)', async () => {
+      const tosAcceptedUser = { ...duosUser, userStatusInfo: tosAcceptedStatus }
+      vi.mocked(User.getMe).mockResolvedValue(tosAcceptedUser as never)
+
+      // The legacy popup flow reloads on the landing page ('/'), with the
+      // destination carried in ?redirectTo= — the bootstrap must finish the trip.
+      await run('/datalibrary')
+
+      expect(navigate).toHaveBeenCalledWith('/datalibrary')
+      expect(vi.mocked(Navigation.console)).not.toHaveBeenCalled()
     })
 
     it('routes a user who has not accepted the ToS to /tos_acceptance', async () => {
@@ -161,25 +178,44 @@ describe('completeSignIn', () => {
       expect(navigate).toHaveBeenCalledWith('/tos_acceptance?redirectTo=/datalibrary')
     })
 
-    it('treats a 409 from registration as an already-registered sign-in', async () => {
-      vi.mocked(User.getMe).mockRejectedValue(new Error('not found'))
+    it('treats a 409 from registration as an already-registered sign-in, re-fetching the user', async () => {
+      const tosAcceptedUser = { ...duosUser, userStatusInfo: tosAcceptedStatus }
+      // getMe fails first (that's how we reached registration), the register
+      // 409 proves the user exists, and the re-fetch succeeds.
+      vi.mocked(User.getMe)
+        .mockRejectedValueOnce(new Error('not found'))
+        .mockResolvedValueOnce(tosAcceptedUser as never)
       vi.mocked(User.registerUser).mockRejectedValue({ status: 409 })
-      // The 409 path routes off the locally stored user's ToS status.
-      Storage.setCurrentUser({ ...duosUser, userStatusInfo: tosAcceptedStatus })
 
       await run('/')
 
-      expect(vi.mocked(Navigation.console)).toHaveBeenCalledWith(expect.objectContaining({ userId: 1 }), navigate)
+      // The full sign-in completion runs off the fresh fetch, not stale storage.
+      expect(Storage.getCurrentUser()).toEqual(tosAcceptedUser)
+      expect(queryClient.clear).toHaveBeenCalled()
+      expect(vi.mocked(Metrics.captureEvent)).toHaveBeenCalledWith('user:signin')
+      expect(vi.mocked(Navigation.console)).toHaveBeenCalledWith(tosAcceptedUser, navigate)
       expect(vi.mocked(Notifications.showError)).not.toHaveBeenCalled()
     })
 
     it('sends a 409 user who has not accepted the ToS to /tos_acceptance', async () => {
-      vi.mocked(User.getMe).mockRejectedValue(new Error('not found'))
+      vi.mocked(User.getMe)
+        .mockRejectedValueOnce(new Error('not found'))
+        .mockResolvedValueOnce(duosUser as never)
       vi.mocked(User.registerUser).mockRejectedValue({ response: { status: 409 } })
 
       await run('/')
 
       expect(navigate).toHaveBeenCalledWith('/tos_acceptance')
+    })
+
+    it('signs out when the post-409 user fetch fails too', async () => {
+      vi.mocked(User.getMe).mockRejectedValue(new Error('still failing'))
+      vi.mocked(User.registerUser).mockRejectedValue({ status: 409 })
+
+      await run('/')
+
+      expect(vi.mocked(Auth.signOut)).toHaveBeenCalled()
+      expect(vi.mocked(Navigation.console)).not.toHaveBeenCalled()
     })
 
     it('shows a registration error for any other failure', async () => {

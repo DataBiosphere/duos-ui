@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { isEmpty } from 'src/utils/NodashUtil'
 import { Alert } from 'src/components/Alert'
-import { Auth } from 'src/libs/auth/auth'
+import { Auth, Redirect } from 'src/libs/auth/auth'
 import loadingIndicator from 'src/images/loading-indicator.svg'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
@@ -43,7 +43,12 @@ export const SignInButton = () => {
     try {
       const redirectTo = getRedirectTo()
       await Auth.signIn(shouldRedirectTo(redirectTo) ? redirectTo : undefined)
-      // Auth.signIn navigates the page to B2C — keep the spinner up until then.
+      // In BFF mode Auth.signIn navigates the page to B2C and never resolves —
+      // the spinner stays up until the browser leaves. Only the legacy popup
+      // flow reaches this line: reload in place (query string included) so the
+      // fresh page load re-probes auth state and App.tsx runs the post-sign-in
+      // bootstrap, the same path the BFF callback takes.
+      Redirect.to(globalThis.location.href)
     }
     catch {
       setErrorDisplay({ show: true, title: 'Error', description: Auth.signInError() })

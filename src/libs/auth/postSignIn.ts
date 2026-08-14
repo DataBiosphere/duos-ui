@@ -53,14 +53,18 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath }: Co
   const shouldRedirect = redirectPath !== '/' && redirectPath !== '/home'
   const redirectTo = shouldRedirect ? redirectPath : null
 
-  // Check for ToS acceptance — redirect the user if not accepted yet. Unlike
-  // the old popup flow, the /auth/callback redirect already landed the browser
-  // on redirectPath, so an accepted user with a destination stays put.
+  // Check for ToS acceptance — redirect the user if not accepted yet. The
+  // BFF /auth/callback redirect lands the browser on redirectPath itself, so
+  // an accepted user with a destination usually stays put; the legacy popup
+  // flow reloads on the sign-in page instead, so navigate when not there yet.
   const checkToSAndRedirect = async (redirectPath: string | null) => {
     const tosAccepted = Storage.getCurrentUser().userStatusInfo?.tosAccepted || false
     if (tosAccepted) {
       if (redirectPath === null) {
         await Navigation.console(Storage.getCurrentUser(), navigate)
+      }
+      else if (globalThis.location.pathname !== redirectPath) {
+        navigate(redirectPath)
       }
     }
     else if (redirectPath === null) {
@@ -88,9 +92,13 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath }: Co
     catch (error) {
       switch (errorStatus(error)) {
         case 409:
-          // Already registered — treat like a normal sign-in.
+          // Already registered (raced by another tab, or the earlier getMe
+          // failed transiently) — complete as a normal sign-in from a fresh
+          // user fetch. Routing off whatever CurrentUser happens to be in
+          // storage (usually the empty default) would send an accepted user
+          // back to the ToS gate without the cache reset or sign-in metric.
           try {
-            await checkToSAndRedirect(redirectTo)
+            await completeExistingUserSignIn(await User.getMe())
           }
           catch {
             await Auth.signOut()
@@ -106,21 +114,25 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath }: Co
     }
   }
 
+  const completeExistingUserSignIn = async (duosUser: DuosUser): Promise<void> => {
+    Storage.setCurrentUser(duosUser)
+    setUserRoleStatuses(duosUser, Storage)
+    // Drop any query results cached before sign-in: cached library queries
+    // (data, tab counts, filter metadata) were built with the anonymous /
+    // previous user's role-based visibility clauses and would otherwise be
+    // served from cache under the new user's identity.
+    queryClient.clear()
+    if (!duosUser.roles) {
+      await ErrorReporter.report('roles not found for user: ' + duosUser.email)
+    }
+    syncSignInOrRegistrationEvent(eventList.userSignIn)
+    await checkToSAndRedirect(redirectTo)
+  }
+
   try {
     const duosUser: DuosUser = await User.getMe()
     if (duosUser) {
-      Storage.setCurrentUser(duosUser)
-      setUserRoleStatuses(duosUser, Storage)
-      // Drop any query results cached before sign-in: cached library queries
-      // (data, tab counts, filter metadata) were built with the anonymous /
-      // previous user's role-based visibility clauses and would otherwise be
-      // served from cache under the new user's identity.
-      queryClient.clear()
-      if (!duosUser.roles) {
-        await ErrorReporter.report('roles not found for user: ' + duosUser.email)
-      }
-      syncSignInOrRegistrationEvent(eventList.userSignIn)
-      await checkToSAndRedirect(redirectTo)
+      await completeExistingUserSignIn(duosUser)
     }
     else {
       await handleRegistration()
