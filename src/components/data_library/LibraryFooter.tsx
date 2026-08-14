@@ -1,17 +1,15 @@
 import React from 'react'
 import { Paper, Slide, Button, Typography, Tooltip } from '@mui/material'
 import { LibraryFooterProps } from 'src/types/library'
-import { Storage } from 'src/libs/storage'
+import { useApplyForAccessEligibility } from 'src/hooks/useApplyForAccessEligibility'
 
 export const LibraryFooter: React.FC<LibraryFooterProps> = ({
   selectedDatasetIds,
   selectedStudyIds,
   onApplyForAccess,
 }) => {
-  const hasSelection = selectedDatasetIds.length > 0
-  const datasetText = selectedDatasetIds.length === 1 ? 'dataset' : 'datasets'
-  const studyText = selectedStudyIds.length === 1 ? 'study' : 'studies'
-  const hasActiveResearcherStatus = Storage.getCurrentUser()?.libraryCard != null
+  const { hasSelection, hasActiveResearcherStatus, datasetText, studyText } =
+    useApplyForAccessEligibility(selectedDatasetIds, selectedStudyIds)
 
   return (
     <Slide direction="up" in={hasSelection} mountOnEnter unmountOnExit>

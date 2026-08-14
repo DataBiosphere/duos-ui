@@ -1,12 +1,94 @@
 import { useQuery } from '@tanstack/react-query'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { Study } from 'src/libs/ajax/Study'
+import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'src/utils/NodashUtil'
 import { AggregationResult, ElasticsearchQuery } from 'src/types/elastic'
 import { ExportableDatasets, PaginationState, SortState } from 'src/types/library'
 import { DatasetTerm, StudyTerm } from 'src/types/model'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
+
+const STUDY_ASSETS_QUERY_KEY = 'study-assets'
+
+export const useStudyAssetCounts = (studyId: string) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, 'counts', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => Study.getAssetCounts(studyId),
+  staleTime: 5 * 60 * 1000,
+})
+
+export const useStudyModels = (studyId: string) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, 'models', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => Study.getModels(studyId),
+  staleTime: 5 * 60 * 1000,
+})
+
+export const useStudyWorkspaces = (studyId: string) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, 'workspaces', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => Study.getWorkspaces(studyId),
+  staleTime: 5 * 60 * 1000,
+})
+
+export const useStudyPresentations = (studyId: string) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, 'presentations', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => Study.getPresentations(studyId),
+  staleTime: 5 * 60 * 1000,
+})
+
+export const useStudyClinicalTrials = (studyId: string) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, 'clinicalTrials', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => Study.getClinicalTrials(studyId),
+  staleTime: 5 * 60 * 1000,
+})
+
+export const useStudyIntellectualProperty = (studyId: string) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, 'intellectualProperty', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => Study.getIntellectualProperty(studyId),
+  staleTime: 5 * 60 * 1000,
+})
+
+export const useStudyFundingResources = (studyId: string) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, 'fundingResources', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => Study.getFundingResources(studyId),
+  staleTime: 5 * 60 * 1000,
+})
+
+export const useStudyPastDarRequests = (studyId: string) => useQuery({
+  queryKey: ['study-past-dar-requests', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => DatasetMetrics.getStudyStats(studyId),
+  staleTime: 5 * 60 * 1000,
+})
+
+export const useStudyDarTrend = (studyId: string) => useQuery({
+  queryKey: ['study-dar-trend', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => DatasetMetrics.getDarTrend(studyId),
+  staleTime: 5 * 60 * 1000,
+})
+
+export const useSimilarStudies = (studyId: string) => useQuery({
+  queryKey: ['study-recommendations-similar', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => StudyRecommendations.getSimilar(studyId),
+  staleTime: 5 * 60 * 1000,
+})
+
+export const useFrequentlyRequestedWithStudies = (studyId: string) => useQuery({
+  queryKey: ['study-recommendations-frequently-requested-with', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => StudyRecommendations.getFrequentlyRequestedWith(studyId),
+  staleTime: 5 * 60 * 1000,
+})
 
 export const STUDY_DATASETS_QUERY_KEY = 'study-details-datasets'
 export const STUDY_EXPORTS_QUERY_KEY = 'study-details-exports'

@@ -152,11 +152,11 @@ describe('LibraryDataGrid', () => {
       'DUOS-000201': [{ id: 'snap-001', name: 'Snapshot 001', duosId: 'DUOS-000201', cloudPlatform: 'gcp', resourceLocks: {} }],
     }
 
-    it('renders an Actions column header when exportableDatasets has entries', () => {
+    it('renders an Export column header when exportableDatasets has entries', () => {
       mountGrid(
         <LibraryDataGrid assetType={AssetType.DATASETS} data={[exportableDataset]} total={1} {...baseProps} exportableDatasets={exportableDatasets} />,
       )
-      expect(screen.getByText('Actions')).toBeInTheDocument()
+      expect(screen.getByText('Export')).toBeInTheDocument()
     })
 
     it('renders an Export link for a dataset with matching snapshots', () => {
