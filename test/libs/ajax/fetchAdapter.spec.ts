@@ -965,6 +965,21 @@ describe('fetchAdapter - BFF mode', () => {
     expect((init as StubOptions).headers).toHaveProperty('X-CSRF-Token', 'csrf-token-1')
   })
 
+  it.each(['/ecm-api/api/oidc/v1/ras/link', '/bard-api/api/identify'])(
+    'does not log the user out on a POST 401 from the sibling upstream proxy %s',
+    async (url) => {
+      fetchMock.mockResolvedValue(jsonResponse({ message: 'Unauthorized' }, 401))
+
+      await fetchPost(url, { payload: true }).catch(() => {})
+
+      // The upstream proxies deliberately treat their 401s as non-authoritative
+      // about the DUOS session: the error surfaces to the caller, but the valid
+      // DUOS session must survive.
+      expect(redirectOnLogout).not.toHaveBeenCalled()
+      expect(Metrics.captureEvent).not.toHaveBeenCalled()
+    },
+  )
+
   it('does not attach X-CSRF-Token to GET requests', async () => {
     fetchMock.mockResolvedValue(jsonResponse({}))
 

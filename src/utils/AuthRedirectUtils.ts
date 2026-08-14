@@ -1,9 +1,18 @@
 /**
  * Determines whether to skip the 401 redirect for a given request.
- * This function checks if the request is a GET request to the DUOS API's auth probe endpoint (`/api/user/me`).
- * If the request does not meet these criteria, it returns false, indicating that the 401 redirect should not be skipped.
- * If the request is a GET request to the DUOS API's auth probe endpoint, it returns true, indicating that the 401 redirect should be skipped.
- * This is used to prevent infinite redirect loops when the auth probe endpoint returns a 401 response, which can happen if the user's session has expired or if they are not authenticated.
+ *
+ * Classification happens on the URL first, before any method check: a 401
+ * from anything other than the DUOS API is not authoritative about the DUOS
+ * session, regardless of HTTP method, so the redirect (which signs the user
+ * out) is always skipped. "Other than the DUOS API" covers both different
+ * hostnames and — post-cutover, when the upstream proxies share the app's
+ * hostname — paths outside the DUOS proxy prefix (/ecm-api, /tdr-api,
+ * /bard-api). ECM and identified Bard calls are POSTs, so classifying by
+ * method first would let their upstream 401s destroy a valid DUOS session.
+ *
+ * For DUOS API requests, only the GET auth probe (`${apiUrl}/api/user/me`)
+ * skips the redirect: it 401s benignly whenever the user is simply not
+ * signed in, which must not loop back into another redirect.
  *
  * @param url The URL of the request that resulted in a 401 response.
  * @param method The HTTP method of the request that resulted in a 401 response.
@@ -12,8 +21,6 @@
  */
 export const shouldSkip401Redirect = (
   url: string, method: string, apiUrl: string): boolean => {
-  if (method !== 'GET') return false
-
   // Both URLs are resolved against the app origin: post-cutover apiUrl is the
   // relative BFF proxy prefix ('/duos-api'), which a bare `new URL()` rejects.
   const requestUrl = new URL(url, globalThis.location.origin)
@@ -33,6 +40,9 @@ export const shouldSkip401Redirect = (
     basePath = basePath.slice(0, -1)
   }
   if (basePath && !requestUrl.pathname.startsWith(`${basePath}/`)) return true
+
+  // A DUOS API 401: any non-GET means the session is really gone — redirect.
+  if (method !== 'GET') return false
 
   // Only skip redirect for the auth probe endpoint, `${apiUrl}/api/user/me`
   return requestUrl.pathname === `${basePath}/api/user/me`

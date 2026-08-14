@@ -25,9 +25,9 @@ describe('shouldSkip401Redirect', () => {
     expect(shouldSkip401Redirect(url, 'POST', duosApiUrl)).to.equal(false)
   })
 
-  it('returns false for POST /api/user/me from non-DUOS API', () => {
+  it('returns true for POST /api/user/me from non-DUOS API — a non-DUOS 401 is never authoritative, whatever the method', () => {
     const url = `${otherApiUrl}/api/user/me`
-    expect(shouldSkip401Redirect(url, 'POST', duosApiUrl)).to.equal(false)
+    expect(shouldSkip401Redirect(url, 'POST', duosApiUrl)).to.equal(true)
   })
 
   it('tolerates a trailing slash on apiUrl', () => {
@@ -57,6 +57,13 @@ describe('shouldSkip401Redirect', () => {
       'returns true for GET on the sibling upstream proxy %s — its 401 is not authoritative about the DUOS session',
       (url) => {
         expect(shouldSkip401Redirect(url, 'GET', proxyPrefix)).to.equal(true)
+      },
+    )
+
+    it.each(['/ecm-api/api/oidc/v1/ras/link', '/bard-api/api/identify', '/tdr-api/api/repository/v1/snapshots'])(
+      'returns true for POST on the sibling upstream proxy %s — ECM and identified Bard calls are POSTs, and their 401s must not sign the user out',
+      (url) => {
+        expect(shouldSkip401Redirect(url, 'POST', proxyPrefix)).to.equal(true)
       },
     )
   })
