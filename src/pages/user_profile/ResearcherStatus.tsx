@@ -5,6 +5,8 @@ import { User } from 'src/libs/ajax/User'
 import { DAA } from 'src/libs/ajax/DAA'
 import { isNil } from 'src/utils/NodashUtil'
 import DAAs from './DAAs'
+import './UserProfile.css'
+import './ResearcherStatus.css'
 import { nihAccountInstructions, nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
 import { DAAObject, DuosUser, SigningOfficialUserWithData } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
@@ -60,46 +62,21 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
     init()
   }, [user])
 
-  const subheadStyle = {
-    color: '#000',
-    fontFamily: 'Montserrat',
-    fontSize: '16px',
-    fontStyle: 'normal',
-    fontWeight: '600',
-    lineHeight: 'normal',
-  }
-
   return (
     <div>
-      <h1
-        style={{
-          color: '#01549F',
-          fontSize: '20px',
-          fontWeight: '600',
-          borderBottom: '1px solid #ddd',
-          paddingBottom: '8px',
-        }}
-      >
+      <h1 className="user-profile-section-heading">
         Researcher Status
       </h1>
-      <div style={{ marginTop: '20px' }} />
-      <p style={subheadStyle}>Status</p>
-      <p style={{
-        fontFamily: 'Montserrat',
-        fontSize: '16px',
-        fontWeight: 600,
-        color: hasCard ? '#00928A' : 'rgb(128, 128, 128)',
-      }}
-      >
+      <p className="researcher-status-subhead">Requestor Status</p>
+      <p className={hasCard ? 'researcher-status-active' : 'researcher-status-inactive'}>
         {hasCard ? 'Active' : 'Inactive'}
       </p>
       {!hasCard && (
-        <p style={{ marginTop: '10px' }}>
+        <p className="researcher-status-note">
           You must be an Active researcher to submit a data access request in DUOS. Please contact your Institutional Signing Official to change your status in DUOS.
         </p>
       )}
-      <div style={{ marginTop: '20px' }} />
-      <p style={subheadStyle}>
+      <p className="researcher-status-subhead">
         {accountLabel}
         {' '}
         Account
@@ -117,20 +94,20 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
         onNihStatusUpdate={nihStatusUpdate}
         header={false}
       />
-      <div style={{ marginTop: '20px' }} />
-      <p style={subheadStyle}>Your Pre-Authorized Data Access Agreements</p>
+      <p className="researcher-status-subhead">Your Pre-Authorized Data Access Agreements</p>
       <p>
         Pre-authorization data access agreements (DAAs) allows your Signing Official to approve you once to submit
         data access requests (DARs) to a data access committee (DAC) at will.
       </p>
-      <div style={{ marginTop: '15px' }} />
       {hasCard
         ? (
-            <DAAs
-              issuedOn={issuedOn}
-              issuedBy={issuedBy}
-              daas={daaObjects}
-            />
+            <div className="researcher-status-daas">
+              <DAAs
+                issuedOn={issuedOn}
+                issuedBy={issuedBy}
+                daas={daaObjects}
+              />
+            </div>
           )
         : null}
     </div>

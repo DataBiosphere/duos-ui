@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import './ExternalProfile.css'
+import './UserProfile.css'
 import RemoveCircleOutlinedIcon from '@mui/icons-material/RemoveCircleOutlined'
 import IconButton from '@mui/material/IconButton'
 import { User } from 'src/libs/ajax/User'
@@ -251,7 +252,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
     : (
         <div className="external-profile">
           <div className="header-container">
-            <h1>
+            <h1 className="user-profile-section-heading">
               External Profiles
             </h1>
           </div>

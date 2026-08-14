@@ -218,7 +218,7 @@ describe('UserProfile', () => {
     renderUserProfile()
     await waitFor(() => screen.getByDisplayValue('Test User'))
 
-    await userEvent.click(screen.getByRole('radio', { name: 'Yes' }))
+    await userEvent.click(screen.getByRole('switch', { name: 'Send me email notifications' }))
 
     await waitFor(() => {
       expect(User.updateSelf).toHaveBeenCalledWith({ emailPreference: true })

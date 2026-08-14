@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from 'react'
+import { Switch } from '@mui/material'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { Notification } from 'src/components/Notification'
 import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
 import { Banner, NotificationService } from 'src/libs/notificationService'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
+import { Theme } from 'src/libs/theme'
 import AffiliationAndRoles from './AffiliationAndRoles'
 import ResearcherStatus from './ResearcherStatus'
 import AcceptedAcknowledgements from './AcceptedAcknowledgements'
 import ExternalProfile from './ExternalProfile'
-import ga4ghLogo from 'src/images/ga4gh-logo.png'
-import userProfileIcon from 'src/images/user-profile.png'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { DuosUser } from 'src/types/model'
 import PageHeading from 'src/components/PageHeading'
 import './UserProfile.css'
+
+const emailToggleSx = {
+  '& .MuiSwitch-switchBase.Mui-checked': { color: Theme.palette.success },
+  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: Theme.palette.success },
+}
 
 export default function UserProfile() {
   usePageTitle('User Profile')
@@ -85,31 +90,22 @@ export default function UserProfile() {
     <main className="user-profile-page">
       <div className="header">
         <Notification notificationData={notificationData} />
-        <div>
-          <div>
-            <PageHeading
-              id="researcherProfile"
-              color="common"
-              title="Your Profile"
-              imgSrc={userProfileIcon}
-              iconSize="large"
-            />
-          </div>
-          <div className="user-profile-intro">
-            <img
-              src={ga4ghLogo}
-              alt="GA4GH Logo"
-            />
-            <p>
+        <PageHeading
+          id="researcherProfile"
+          color="common"
+          title="Your Profile"
+          iconSize="none"
+          description={(
+            <>
               DUOS user profile components are based off of the GA4GH Passports specification Visa types. More information on the GA4GH Passports standard can be found{' '}
               <a href="https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md">
                 here.
               </a>
-            </p>
-          </div>
-        </div>
+            </>
+          )}
+        />
       </div>
-      <section className="user-profile-section">
+      <section className="user-profile-section user-profile-card">
         <h1 className="user-profile-section-heading">Full Name</h1>
         <div className="user-profile-name-row">
           <FormField
@@ -119,7 +115,7 @@ export default function UserProfile() {
             hideTitle={true}
             defaultValue={name}
             onChange={updateRef}
-            style={{ width: '100%' }}
+            style={{ width: '400px' }}
           />
           <button
             type="button"
@@ -137,20 +133,17 @@ export default function UserProfile() {
             hideTitle={true}
             defaultValue={user.email}
             disabled={true}
-            style={{ width: '100%' }}
+            style={{ width: '400px' }}
           />
         </div>
-        <div className="user-profile-field">
-          <p>
-            Send me email notifications
-          </p>
-          <FormField
-            type={FormFieldTypes.YESNORADIOGROUP}
-            id="profileEmailEnabled"
-            title="Send me email notifications"
-            hideTitle={true}
-            defaultValue={user.emailPreference}
-            onChange={(field: { key: string, value: boolean, isValid: boolean }) => updateEmailPreference(field.value)}
+        <div className="user-profile-field user-profile-email-toggle">
+          <span>Send me email notifications</span>
+          <Switch
+            checked={!!user.emailPreference}
+            onChange={(_event, checked) => updateEmailPreference(checked)}
+            slotProps={{ input: { 'aria-label': 'Send me email notifications' } }}
+            size="small"
+            sx={emailToggleSx}
           />
         </div>
       </section>
@@ -164,12 +157,12 @@ export default function UserProfile() {
           user={user as DuosUser}
         />
       </section>
-      <section className="user-profile-section">
+      <section className="user-profile-section user-profile-card">
         <ResearcherStatus
           user={user as DuosUser}
         />
       </section>
-      <section className="user-profile-section">
+      <section className="user-profile-section user-profile-card">
         <AcceptedAcknowledgements />
       </section>
     </main>
