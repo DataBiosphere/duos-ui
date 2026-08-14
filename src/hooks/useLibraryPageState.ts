@@ -18,6 +18,31 @@ import {
   clinicalTrialPhaseSelectOptions,
   clinicalTrialStatusSelectOptions,
 } from 'src/utils/ClinicalTrialEnumUtils'
+import { SecondaryDataUseTerms } from 'src/components/forms/SecondaryDataUseTerms'
+import { getFormattedName } from 'src/components/forms/SelectOptionInterface'
+
+/**
+ * Panel wording for the secondary data use codes, keyed by the code the index stores.
+ *
+ * `SecondaryDataUseTerms` is the same list the dataset-submission and consent-group
+ * forms render, so a restriction reads identically wherever it appears, and
+ * `getFormattedName` supplies the app's existing `Name (ABBR)` format — the
+ * abbreviation is what ties a checkbox to the grid's data use chip, which shows codes
+ * only (`HMB-GSO-PUB`).
+ *
+ * `OTHER` is spelled out rather than taken from `SecondaryDataUseTerms.OTH`: the form's
+ * key does not match what the index stores, and `OTH2` is a label this app synthesizes
+ * at render time to tell a secondary other apart from a primary one (see
+ * `processDataUseCodes`).
+ */
+const DATA_USE_MODIFIER_LABELS: Record<string, string> = {
+  ...Object.fromEntries(
+    SecondaryDataUseTerms.VALUES
+      .filter(term => term.key !== SecondaryDataUseTerms.OTH.key)
+      .map(term => [term.key, getFormattedName(term)]),
+  ),
+  OTHER: 'Other Secondary Restriction (OTH2)',
+}
 
 export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
   const [urlState, updateUrlState] = useLibraryUrlState()
@@ -94,6 +119,16 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
     const dacAgg = (metadata?.dac as AggregationResult)?.buckets || []
     const dataTypeAgg = (metadata?.data_type as AggregationResult)?.buckets || []
 
+    // Options come from the codes the corpus actually contains, the way DAC and Data
+    // Type do, so no checkbox can match nothing and no indexed code is unfilterable —
+    // the app's three hand-maintained lists of secondary codes disagree with each
+    // other, and only the index settles which spelling is real. Counts are deliberately
+    // omitted; a code with no label falls back to its bare abbreviation.
+    const dataUseModifierAgg = (metadata?.data_use_modifiers as AggregationResult)?.buckets || []
+    const dataUseModifierOptions = dataUseModifierAgg
+      .map(bucket => bucket.key as string)
+      .map(code => ({ value: code, label: DATA_USE_MODIFIER_LABELS[code] ?? code }))
+      .sort((a, b) => a.label.localeCompare(b.label))
     const uniqueValues = (values: Array<string | undefined | null>) =>
       [...new Set(values.map(v => v?.trim()).filter(Boolean) as string[])]
         .sort((a, b) => a.localeCompare(b))
@@ -122,6 +157,7 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
         { value: 'OTHER', label: 'Other Restriction' },
         { value: 'NRES', label: 'No Restrictions' },
       ],
+      dataUseModifiers: dataUseModifierOptions,
       dataType: dataTypeAgg
         .map(bucket => ({ value: bucket.key as string, label: bucket.key as string, count: bucket.doc_count }))
         .sort((a, b) => a.label.localeCompare(b.label)),

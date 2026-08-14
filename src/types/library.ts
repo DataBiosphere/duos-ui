@@ -42,6 +42,9 @@ export enum AccessManagement {
 export interface FilterState {
   accessManagement: string[]
   dataUse: string[]
+  // Secondary data use conditions (DUO modifiers, e.g. NPU/IRB/PUB). Kept
+  // separate from `dataUse` so a primary code and a modifier combine with AND.
+  dataUseModifiers: string[]
   dataType: string[]
   dac: string[]
   workspaceTools: string[]
@@ -112,6 +115,7 @@ export interface LibraryFilterSection {
 export interface AvailableFilters {
   accessManagement: FilterOption[]
   dataUse: FilterOption[]
+  dataUseModifiers: FilterOption[]
   dataType: FilterOption[]
   dac: FilterOption[]
   workspaceTools: FilterOption[]

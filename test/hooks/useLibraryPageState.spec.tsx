@@ -181,3 +181,56 @@ describe('useLibraryPageState — filter handlers', () => {
     })
   })
 })
+
+describe('useLibraryPageState — data use modifier options', () => {
+  const withModifierFacet = (codes: string[]) => {
+    vi.mocked(useLibraryMetadata).mockReturnValue({
+      data: { data_use_modifiers: { buckets: codes.map(key => ({ key, doc_count: 3 })) } },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useLibraryMetadata>)
+    setup(AssetType.DATASETS)
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+    return result.current.availableFilters.dataUseModifiers
+  }
+
+  it('offers exactly the codes the index reports, so no checkbox matches nothing', () => {
+    const options = withModifierFacet(['NPU', 'IRB', 'MOR'])
+    expect(options.map(option => option.value).sort()).toEqual(['IRB', 'MOR', 'NPU'])
+  })
+
+  it('words each restriction the way the submission forms do, with its abbreviation', () => {
+    const options = withModifierFacet(['IRB', 'MOR', 'GS-', 'NPU'])
+    expect(options).toContainEqual({ value: 'IRB', label: 'Ethics Approval Required (IRB)' })
+    expect(options).toContainEqual({ value: 'MOR', label: 'Publication Moratorium (MOR)' })
+    expect(options).toContainEqual({ value: 'GS-', label: 'Geographic Restriction (GS-)' })
+    expect(options).toContainEqual({ value: 'NPU', label: 'Non-profit Use Only (NPU)' })
+  })
+
+  it('labels a secondary other-restriction OTH2 while still querying the indexed OTHER', () => {
+    const options = withModifierFacet(['OTHER'])
+    expect(options).toEqual([{ value: 'OTHER', label: 'Other Secondary Restriction (OTH2)' }])
+  })
+
+  it('keeps a code with no label, showing its bare abbreviation', () => {
+    // POP-M and NCTRL appear in the app's other secondary-code lists but not in
+    // SecondaryDataUseTerms; they must stay filterable rather than vanish.
+    const options = withModifierFacet(['POP-M', 'NCTRL', 'NPU'])
+    expect(options).toContainEqual({ value: 'POP-M', label: 'POP-M' })
+    expect(options).toContainEqual({ value: 'NCTRL', label: 'NCTRL' })
+  })
+
+  it('lists options alphabetically by label', () => {
+    const labels = withModifierFacet(['PUB', 'COL', 'IRB', 'OTHER', 'ZZZ']).map(option => option.label)
+    expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b)))
+  })
+
+  it('carries no facet counts', () => {
+    expect(withModifierFacet(['NPU', 'IRB']).every(option => option.count === undefined)).toBe(true)
+  })
+
+  it('offers nothing when the aggregation is absent, rather than throwing', () => {
+    setup(AssetType.DATASETS)
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+    expect(result.current.availableFilters.dataUseModifiers).toEqual([])
+  })
+})

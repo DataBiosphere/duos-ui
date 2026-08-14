@@ -7,6 +7,7 @@ type ArrayFilterParamConfig = {
     FilterState,
     | 'accessManagement'
     | 'dataUse'
+    | 'dataUseModifiers'
     | 'dataType'
     | 'dac'
     | 'workspaceTools'
@@ -42,6 +43,7 @@ type DateFilterParamConfig = {
 const ARRAY_FILTER_PARAM_CONFIG: ArrayFilterParamConfig[] = [
   { key: 'accessManagement', param: 'access' },
   { key: 'dataUse', param: 'dataUse' },
+  { key: 'dataUseModifiers', param: 'dataUseModifiers' },
   { key: 'dataType', param: 'dataType' },
   { key: 'dac', param: 'dac' },
   { key: 'workspaceTools', param: 'workspaceTools' },

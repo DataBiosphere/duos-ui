@@ -16,6 +16,10 @@ const availableFilters: AvailableFilters = {
     { value: 'HMB', label: 'Health/Medical/Biomedical', count: 8 },
     { value: 'GRU', label: 'General Research Use', count: 3 },
   ],
+  dataUseModifiers: [
+    { value: 'NPU', label: 'Non-profit Use Only (NPU)' },
+    { value: 'IRB', label: 'Ethics Approval Required (IRB)' },
+  ],
   dataType: [
     { value: 'Phenotype', label: 'Phenotype', count: 7 },
     { value: 'Genomic', label: 'Genomic', count: 4 },
@@ -122,6 +126,22 @@ describe('LibraryFilters', () => {
     expect(onChange).toHaveBeenCalledWith({
       ...EMPTY_FILTERS,
       accessManagement: ['controlled'],
+    })
+  })
+
+  it('toggles a secondary data use condition independently of the primary codes', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<LibraryFiltersWrapper filters={{ ...EMPTY_FILTERS, dataUse: ['HMB'] }} onChange={onChange} />)
+
+    await user.click(screen.getByText('Data Use Modifiers'))
+    await user.click(screen.getByRole('checkbox', { name: 'Non-profit Use Only (NPU)' }))
+
+    // The primary selection survives, so the two combine rather than replace.
+    expect(onChange).toHaveBeenCalledWith({
+      ...EMPTY_FILTERS,
+      dataUse: ['HMB'],
+      dataUseModifiers: ['NPU'],
     })
   })
 

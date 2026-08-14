@@ -141,6 +141,17 @@ describe('buildElasticsearchQuery', () => {
     expect(query.aggs).toHaveProperty('access_management')
   })
 
+  it('aggregates the secondary data use codes that drive the modifier filter options', () => {
+    for (const tab of [AssetType.DATASETS, AssetType.STUDIES]) {
+      const query = buildElasticsearchQuery(libraryConfig, tab, filters, '', pagination)
+      const agg = query.aggs!.data_use_modifiers as { terms: { field: string, size: number } }
+      expect(agg.terms.field).toEqual('dataUse.secondary.code.keyword')
+      // A dropped bucket is a code nobody can filter on, so the ES default of 10 is
+      // raised past the size of any plausible secondary vocabulary.
+      expect(agg.terms.size).toBeGreaterThan(20)
+    }
+  })
+
   it('adds search term to query', () => {
     const query = buildElasticsearchQuery(libraryConfig, AssetType.DATASETS, filters, 'breast cancer', pagination)
     expect(query.query?.bool.must).toHaveLength(2)

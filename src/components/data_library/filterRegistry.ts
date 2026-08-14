@@ -13,6 +13,7 @@ import { assetFilterRegistry } from 'src/libs/dataLibraryFilterConfig'
 type ArrayFilterKey
   = | 'accessManagement'
     | 'dataUse'
+    | 'dataUseModifiers'
     | 'dataType'
     | 'dac'
     | 'workspaceTools'
@@ -29,6 +30,7 @@ type ArrayFilterKey
 const ARRAY_FILTER_KEYS: ArrayFilterKey[] = [
   'accessManagement',
   'dataUse',
+  'dataUseModifiers',
   'dataType',
   'dac',
   'workspaceTools',
@@ -68,6 +70,7 @@ const BOOL_FILTER_KEYS: Array<'datasetsCited' | 'publicationsDatasetsCited' | 'i
 const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
   accessManagement: 'checkbox',
   dataUse: 'checkbox',
+  dataUseModifiers: 'checkbox',
   dataType: 'checkbox',
   dac: 'checkbox',
   workspaceTools: 'checkbox',
@@ -94,6 +97,7 @@ const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
 export const EMPTY_FILTERS: FilterState = {
   accessManagement: [],
   dataUse: [],
+  dataUseModifiers: [],
   dataType: [],
   dac: [],
   workspaceTools: [],
@@ -134,6 +138,7 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
     // Multi-select (array) filters are active once any value is selected.
     case 'accessManagement':
     case 'dataUse':
+    case 'dataUseModifiers':
     case 'dataType':
     case 'dac':
     case 'workspaceTools':
@@ -187,6 +192,7 @@ const getFilterOptions = (key: FilterKey, availableFilters: AvailableFilters) =>
   switch (key) {
     case 'accessManagement':
     case 'dataUse':
+    case 'dataUseModifiers':
     case 'dataType':
     case 'dac':
     case 'workspaceTools':
@@ -327,6 +333,25 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         },
       }
     },
+  },
+  /**
+   * Secondary data use conditions (DUO modifiers). This is a separate filter from
+   * `dataUse` rather than extra options within it: `buildActiveFilterClauses`
+   * combines clauses from different filters with AND, so selecting HMB here and
+   * NPU there means "HMB datasets that are also non-profit-only" — which a single
+   * OR'd checkbox list could not express.
+   */
+  dataUseModifiers: {
+    label: 'Data Use Modifiers',
+    // `matchAny` (match_phrase), not `match`: several modifier codes are hyphenated,
+    // and the analyzed field tokenizes them, so a plain `match` on `RS-G` — which ORs
+    // its tokens — would also return every `RS-PD` dataset. The primary `dataUse`
+    // filter above gets away with `match` only because every primary code is a
+    // single token.
+    buildClause: filters =>
+      filters.dataUseModifiers.length > 0
+        ? matchAny('dataUse.secondary.code', filters.dataUseModifiers)
+        : undefined,
   },
   dataType: {
     label: 'Data Type',
