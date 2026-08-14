@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { ThemeProvider } from '@mui/material/styles'
 import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -12,6 +12,7 @@ import { useNavigate, useLocation } from 'react-router'
 import { Storage } from 'src/libs/storage'
 import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
+import { completeSignIn } from 'src/libs/auth/postSignIn'
 import { useUserIsLogged } from 'src/hooks/useSession'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
@@ -34,6 +35,12 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   // Auth state comes from the BFF session probe (GET /auth/me), not localStorage.
   const isLoggedIn = useUserIsLogged() ?? false
+  const [signInBootstrapDone, setSignInBootstrapDone] = useState(false)
+  const signInBootstrapStarted = useRef(false)
+  // A session with no local user state means we just returned from the OAuth
+  // redirect — the routes stay hidden behind the spinner until the user
+  // bootstrap below resolves.
+  const isBootstrappingSignIn = isLoggedIn && !signInBootstrapDone && Storage.getCurrentUser().userId === 0
 
   useEffect(() => {
     const setEnvironment = async () => {
@@ -45,6 +52,19 @@ function App() {
     // The environment never changes within a page load — look it up once on
     // mount instead of on every render.
   }, [])
+
+  /**
+   * Post-sign-in bootstrap: the OAuth flow is a full-page redirect through the
+   * BFF (/auth/login → B2C → /auth/callback → back here), so the first render
+   * after signing in has a session but no local user state. Detect that and
+   * run the user fetch / registration / ToS flow.
+   */
+  useEffect(() => {
+    if (!isBootstrappingSignIn || signInBootstrapStarted.current) return
+    signInBootstrapStarted.current = true
+    completeSignIn({ navigate, queryClient, redirectPath: location.pathname })
+      .finally(() => setSignInBootstrapDone(true))
+  }, [isBootstrappingSignIn, navigate, location.pathname])
 
   /**
      * Check for RAS Authentication URL params. If we have a code and state, we will call ECM APIs to get redirect
@@ -98,8 +118,8 @@ function App() {
             <div className="wrap">
               <div className="main">
                 <DuosHeader />
-                {isLoading && <div style={loadingSyle}><Spinner /></div>}
-                {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+                {(isLoading || isBootstrappingSignIn) && <div style={loadingSyle}><Spinner /></div>}
+                {!(isLoading || isBootstrappingSignIn) && <AppRoutes isLogged={isLoggedIn} env={env} />}
               </div>
             </div>
             <DuosFooter />
