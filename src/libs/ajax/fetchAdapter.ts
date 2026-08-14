@@ -4,7 +4,7 @@ import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
-import { Config } from 'src/libs/config'
+import { BFF_BARD_PREFIX, Config } from 'src/libs/config'
 import { getCsrfToken, resetCsrfToken } from 'src/libs/ajax/csrf'
 
 export type ResponseType = 'blob' | 'json' | 'text'
@@ -53,8 +53,9 @@ const HELP_DESK_MESSAGE = 'Please contact the help desk at duos@duos.org.'
 export const reportError = async (url: string, status: number): Promise<void> => {
   // Requests to the Bard API are metrics calls (its only consumer). ErrorReporter
   // reports via metrics, so reporting a Bard failure would recurse infinitely.
+  // In BFF mode identified metrics ride the /bard-api proxy — same recursion.
   const bardApiUrl = await Config.getBardApiUrl()
-  if (url.startsWith(bardApiUrl)) {
+  if (url.startsWith(bardApiUrl) || url.startsWith(`${BFF_BARD_PREFIX}/`)) {
     return
   }
   const msg = 'Error fetching response: '

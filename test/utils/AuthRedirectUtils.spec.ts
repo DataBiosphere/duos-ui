@@ -48,5 +48,12 @@ describe('shouldSkip401Redirect', () => {
     it('returns true for GET on an absolute non-DUOS URL', () => {
       expect(shouldSkip401Redirect('https://bard.example.org/api/event', 'GET', proxyPrefix)).to.equal(true)
     })
+
+    it.each(['/ecm-api/api/oauth/v1/ras/authorization-url', '/tdr-api/api/repository/v1/snapshots', '/bard-api/api/event'])(
+      'returns true for GET on the sibling upstream proxy %s — its 401 is not authoritative about the DUOS session',
+      (url) => {
+        expect(shouldSkip401Redirect(url, 'GET', proxyPrefix)).to.equal(true)
+      },
+    )
   })
 })

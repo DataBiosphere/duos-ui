@@ -84,13 +84,19 @@ describe('Config', () => {
     })
   })
 
-  describe('getApiUrl under the BFF cutover', () => {
-    it('returns the relative proxy prefix when bffEnabled, while getUpstreamApiUrl stays absolute', async () => {
+  describe('API URLs under the BFF cutover', () => {
+    it('returns the relative proxy prefixes when bffEnabled', async () => {
       vi.resetModules()
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: () => Promise.resolve({ ...mockConfig, bffEnabled: true }) }))
       const freshConfig = await import('src/libs/config')
       expect(await freshConfig.getApiUrl()).toBe('/duos-api')
+      expect(await freshConfig.getEcmApiUrl()).toBe('/ecm-api')
+      expect(await freshConfig.getECMUrl()).toBe('/ecm-api')
+      expect(await freshConfig.getTdrApiUrl()).toBe('/tdr-api')
+      // The un-proxied getters stay absolute: /feature is called pre-login,
+      // and anonymous Bard events carry no credentials to protect
       expect(await freshConfig.getUpstreamApiUrl()).toBe('https://test.api.com')
+      expect(await freshConfig.getBardApiUrl()).toBe('https://test.bard.com')
     })
   })
 

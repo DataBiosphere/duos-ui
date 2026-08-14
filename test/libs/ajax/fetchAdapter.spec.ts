@@ -20,6 +20,7 @@ import { ErrorReporter } from 'src/libs/ErrorReporter'
 import eventList from 'src/libs/events'
 
 vi.mock('src/libs/config', () => ({
+  BFF_BARD_PREFIX: '/bard-api',
   Config: {
     getApiUrl: vi.fn(),
     getBardApiUrl: vi.fn(),
@@ -595,6 +596,20 @@ describe('fetchAdapter - Fetch methods', () => {
 
       await fetchPost('https://bard.example.org/api/event', { event: 'test' }).catch(() => {})
       // Give the fire-and-forget reportError chain time to complete
+      await new Promise(resolve => setTimeout(resolve, 0))
+
+      expect(ErrorReporter.report).not.toHaveBeenCalled()
+    })
+
+    it('does not report failures of the proxied Bard API (BFF mode)', async () => {
+      fetchMock.mockResolvedValue(
+        new Response('Not Found', {
+          status: 404,
+          headers: { 'content-type': 'text/html' },
+        }),
+      )
+
+      await fetchPost('/bard-api/api/event', { event: 'test' }).catch(() => {})
       await new Promise(resolve => setTimeout(resolve, 0))
 
       expect(ErrorReporter.report).not.toHaveBeenCalled()

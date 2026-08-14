@@ -99,10 +99,16 @@ export const getEnv = async (): Promise<string> => {
 }
 
 /**
- * The same-origin base path of the BFF API proxy. Must match the prefix the
- * server registers in server/src/proxy/apiProxy.ts.
+ * The same-origin base paths of the BFF proxies. Each must match the prefix
+ * the server registers in server/src/proxy/. BFF_BARD_PREFIX is exported for
+ * Metrics.ts, which routes only its *identified* calls through the proxy —
+ * anonymous events stay on the direct Bard URL, so getBardApiUrl() is not
+ * gated the way the other upstream getters are.
  */
 const BFF_API_PREFIX = '/duos-api'
+const BFF_ECM_PREFIX = '/ecm-api'
+const BFF_TDR_PREFIX = '/tdr-api'
+export const BFF_BARD_PREFIX = '/bard-api'
 
 /**
  * Base URL for DUOS API calls.
@@ -125,9 +131,11 @@ export const getBardApiUrl = async (): Promise<string> => { // Mixpanel
   return config.bardApiUrl
 }
 
+// Post-cutover, ECM calls ride the session-authenticated BFF proxy: the
+// browser no longer holds the bearer token ECM requires (Epic 3, story 3-I).
 export const getEcmApiUrl = async (): Promise<string> => {
   const config = await loadConfig()
-  return config.ecmApiUrl
+  return config.bffEnabled === true ? BFF_ECM_PREFIX : config.ecmApiUrl
 }
 
 export const getECMUrl = async (): Promise<string> => {
@@ -154,9 +162,11 @@ export const getTag = async (): Promise<string> => {
   return config.tag
 }
 
+// Same as getEcmApiUrl: TDR snapshot enumeration authenticates with the
+// user's token, attached server-side by the proxy post-cutover (story 3-J).
 export const getTdrApiUrl = async (): Promise<string> => {
   const config = await loadConfig()
-  return config.tdrApiUrl
+  return config.bffEnabled === true ? BFF_TDR_PREFIX : config.tdrApiUrl
 }
 
 export const getTerraUrl = async (): Promise<string> => {

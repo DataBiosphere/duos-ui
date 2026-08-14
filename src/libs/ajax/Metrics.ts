@@ -1,12 +1,23 @@
 import { getDefaultProperties } from '@databiosphere/bard-client'
 
 import { Storage } from 'src/libs/storage'
-import { Config, Token } from 'src/libs/config'
+import { BFF_BARD_PREFIX, Config, Token } from 'src/libs/config'
 import { MetricsEventName } from 'src/libs/events'
 import { retryFetchPost } from 'src/libs/ajax/fetchAdapter'
 
 // Set default timeout for all metrics calls to 30 seconds
 const defaultSignal: AbortSignal = AbortSignal.timeout(30000)
+
+// BFF NOTE: identified Bard calls authenticate with the user's token, which
+// the browser no longer holds post-cutover — they go through the /bard-api
+// proxy, where the session's token is attached server-side (Epic 3, story
+// 3-K). Anonymous events carry no credentials and stay on the direct Bard URL.
+const bardUrl = async (identified: boolean, path: string): Promise<string> => {
+  if (identified && await Config.isBffEnabled()) {
+    return `${BFF_BARD_PREFIX}${path}`
+  }
+  return `${await Config.getBardApiUrl()}${path}`
+}
 
 export const Metrics = {
   captureEvent: (
@@ -49,7 +60,7 @@ const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, deta
     },
   }
 
-  const url = `${await Config.getBardApiUrl()}/api/event`
+  const url = await bardUrl(Boolean(isRegistered), '/api/event')
   const headers = isRegistered ? { Authorization: `Bearer ${Token.getToken()}` } : undefined
 
   return retryFetchPost(url, body, { headers, signal })
@@ -63,7 +74,7 @@ const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, deta
  */
 // oxlint-disable-next-line @typescript-eslint/no-explicit-any
 const syncProfile = async (signal: AbortSignal): Promise<any> => {
-  const url = `${await Config.getBardApiUrl()}/api/syncProfile`
+  const url = await bardUrl(true, '/api/syncProfile')
   const headers = { Authorization: `Bearer ${Token.getToken()}` }
   return retryFetchPost(url, undefined, { headers, signal }).catch(() => {})
 }
@@ -79,7 +90,7 @@ const syncProfile = async (signal: AbortSignal): Promise<any> => {
 const identify = async (anonId: string, signal: AbortSignal): Promise<any> => {
   const body = { anonId }
 
-  const url = `${await Config.getBardApiUrl()}/api/identify`
+  const url = await bardUrl(true, '/api/identify')
   const headers = { Authorization: `Bearer ${Token.getToken()}` }
 
   return retryFetchPost(url, body, { headers, signal }).catch(() => {})
