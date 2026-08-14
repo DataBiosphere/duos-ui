@@ -15,23 +15,9 @@ import { validateHttpUrl } from 'src/utils/UrlUtils'
 import type { DacObject, Dataset, DatasetProperty } from 'src/types/model'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import editDACIcon from 'src/images/dac_icon.svg'
+import './DacProfile.css'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
-
-const SECTION_DIVIDER: React.CSSProperties = {
-  border: 'none',
-  borderTop: '1px solid #e0e0e0',
-  margin: '3rem 0 0 0',
-}
-
-const SECTION_TITLE_SX = {
-  fontFamily: 'Montserrat',
-  fontWeight: 600,
-  fontSize: '2rem',
-  color: '#1f3b50',
-  mt: 3,
-  mb: 2,
-}
 
 const DATAGRID_SX = {
   '& .MuiDataGrid-cell:focus': { outline: 'none' },
@@ -252,14 +238,16 @@ export const DacProfile: React.FC = () => {
       )}
 
       {/* ── Rule Automation for DARs (RADAR) ── */}
-      <hr style={SECTION_DIVIDER} />
-      <Typography sx={SECTION_TITLE_SX}>Rule Automation for DARs (RADAR)</Typography>
-      {dacId !== undefined && <DACBotComponent dacId={dacId} />}
+      <section className="dac-profile-section dac-profile-card">
+        <h1 className="dac-profile-section-heading">Rule Automation for DARs (RADAR)</h1>
+        {dacId !== undefined && <DACBotComponent dacId={dacId} />}
+      </section>
 
       {/* ── Datasets Managed by this DAC ── */}
-      <hr style={SECTION_DIVIDER} />
-      <Typography sx={SECTION_TITLE_SX}>Datasets Managed by this DAC</Typography>
-      {datasetsContent}
+      <section className="dac-profile-section dac-profile-card">
+        <h1 className="dac-profile-section-heading">Datasets Managed by this DAC</h1>
+        {datasetsContent}
+      </section>
     </div>
   )
 }

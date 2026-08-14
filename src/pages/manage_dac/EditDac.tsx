@@ -13,7 +13,6 @@ import backArrowIcon from 'src/images/back_arrow.svg'
 import { Spinner } from 'src/components/Spinner'
 import { Styles } from 'src/libs/theme'
 import PublishIcon from '@mui/icons-material/Publish'
-import { Typography } from '@mui/material'
 import { UploadDaaModal } from 'src/components/modals/UploadDaaModal'
 import { CreateDacUserModal } from 'src/components/modals/CreateDacUserModal'
 import { Storage } from 'src/libs/storage'
@@ -28,23 +27,10 @@ import {
   sortDaasByCreationDate,
 } from 'src/libs/daaHelpers'
 
+import './DacProfile.css'
+
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
-
-const PROFILE_SECTION_DIVIDER: React.CSSProperties = {
-  border: 'none',
-  borderTop: '1px solid #e0e0e0',
-  margin: '3rem 0 0 0',
-}
-
-const PROFILE_SECTION_TITLE_SX = {
-  fontFamily: 'Montserrat',
-  fontWeight: 600,
-  fontSize: '2rem',
-  color: '#1f3b50',
-  mt: 3,
-  mb: 2,
-}
 
 interface EditDacProps {
   dacId?: number
@@ -1041,30 +1027,33 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
   const formContent = profileMode
     ? (
         <>
-          <hr style={PROFILE_SECTION_DIVIDER} />
-          <Typography sx={PROFILE_SECTION_TITLE_SX}>DAC Membership</Typography>
-          <div className="form-horizontal css-form" style={{ maxWidth: '1200px', marginTop: '1rem' }}>
-            {dacMembersJSX}
-            {chairSelectJSX}
-            {memberSelectJSX}
-          </div>
-          {profileSaveButtons}
-          <hr style={PROFILE_SECTION_DIVIDER} />
-          <Typography sx={PROFILE_SECTION_TITLE_SX}>DAC Info</Typography>
-          <form
-            className="form-horizontal css-form"
-            name="dacForm"
-            noValidate
-            encType="multipart/form-data"
-            style={{ maxWidth: '1200px', marginTop: '1rem' }}
-          >
-            {basicFieldsJSX}
-          </form>
-          {errorAlertJSX}
-          {profileSaveButtons}
-          <hr style={PROFILE_SECTION_DIVIDER} />
-          <Typography sx={PROFILE_SECTION_TITLE_SX}>Select a Data Access Agreement</Typography>
-          {daaContentJSX}
+          <section className="dac-profile-section dac-profile-card">
+            <h1 className="dac-profile-section-heading">DAC Membership</h1>
+            <div className="form-horizontal css-form" style={{ maxWidth: '1200px', marginTop: '1rem' }}>
+              {dacMembersJSX}
+              {chairSelectJSX}
+              {memberSelectJSX}
+            </div>
+            {profileSaveButtons}
+          </section>
+          <section className="dac-profile-section dac-profile-card">
+            <h1 className="dac-profile-section-heading">DAC Info</h1>
+            <form
+              className="form-horizontal css-form"
+              name="dacForm"
+              noValidate
+              encType="multipart/form-data"
+              style={{ maxWidth: '1200px', marginTop: '1rem' }}
+            >
+              {basicFieldsJSX}
+            </form>
+            {errorAlertJSX}
+            {profileSaveButtons}
+          </section>
+          <section className="dac-profile-section dac-profile-card">
+            <h1 className="dac-profile-section-heading">Select a Data Access Agreement</h1>
+            {daaContentJSX}
+          </section>
         </>
       )
     : (
