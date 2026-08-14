@@ -46,7 +46,11 @@ async function loadAndMerge(configPath: string): Promise<Record<string, unknown>
   // route. Trailing slashes are stripped because the client concatenates
   // `${terraUrl}/#import-data?…` — a slash here would produce `//#`.
   if (process.env.DUOS_TERRA_URL) {
-    config.terraUrl = process.env.DUOS_TERRA_URL.replace(/\/+$/, '')
+    let terraUrl = process.env.DUOS_TERRA_URL
+    while (terraUrl.endsWith('/')) {
+      terraUrl = terraUrl.slice(0, -1)
+    }
+    config.terraUrl = terraUrl
   }
   return config
 }
