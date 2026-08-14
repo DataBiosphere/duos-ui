@@ -1022,6 +1022,29 @@ describe('fetchAdapter - BFF mode', () => {
     },
   )
 
+  it('reports and wraps a CSRF token acquisition failure like any other request failure', async () => {
+    vi.mocked(getCsrfToken).mockRejectedValue(new Error('csrf endpoint down'))
+
+    await expect(fetchPost('/duos-api/api/dataset', { name: 'test' }))
+      .rejects.toThrow('csrf endpoint down Please contact the help desk')
+
+    expect(fetchMock).not.toHaveBeenCalled()
+    // Give the fire-and-forget reportError chain time to complete
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(ErrorReporter.report).toHaveBeenCalled()
+  })
+
+  it('fetchMultipart - reports and wraps a CSRF token acquisition failure the same way', async () => {
+    vi.mocked(getCsrfToken).mockRejectedValue(new Error('csrf endpoint down'))
+    const formData = new FormData()
+    formData.append('file', 'content')
+
+    await expect(fetchMultipart('/duos-api/api/upload', formData))
+      .rejects.toThrow('csrf endpoint down Please contact the help desk')
+
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
   it('fetchMultipart - does not attach X-CSRF-Token on cross-origin URLs', async () => {
     fetchMock.mockResolvedValue(jsonResponse({}))
     const formData = new FormData()

@@ -222,9 +222,6 @@ async function fetchRequest<T>(
   const bffEnabled = await Config.isBffEnabled()
   if (bffEnabled) {
     stripAuthorization(finalHeaders)
-    if (needsCsrfToken(method, fullUrl)) {
-      finalHeaders['X-CSRF-Token'] = await getCsrfToken()
-    }
   }
 
   const fetchOptions: MinimalRequestInit = {
@@ -236,6 +233,11 @@ async function fetchRequest<T>(
   }
 
   try {
+    // Inside the try so an /auth/csrf-token failure gets the same reporting
+    // and help-desk messaging as any other request failure.
+    if (bffEnabled && needsCsrfToken(method, fullUrl)) {
+      finalHeaders['X-CSRF-Token'] = await getCsrfToken()
+    }
     const fetchFn = fetch as unknown as (input: string, init?: unknown) => Promise<Response>
     const res = await fetchFn(fullUrl, fetchOptions)
     if (bffEnabled && !csrfRetried && 'X-CSRF-Token' in finalHeaders && await isCsrfRejection(res)) {
@@ -284,10 +286,6 @@ async function fetchMultipartRequest<T>(
   const bffEnabled = await Config.isBffEnabled()
   if (bffEnabled) {
     stripAuthorization(cleanHeaders)
-    // Multipart methods are always unsafe (POST/PUT/PATCH)
-    if (needsCsrfToken(method, fullUrl)) {
-      cleanHeaders['X-CSRF-Token'] = await getCsrfToken()
-    }
   }
 
   const fetchOptions: MinimalRequestInit = {
@@ -301,6 +299,12 @@ async function fetchMultipartRequest<T>(
   const fetchFn = fetch as unknown as (input: string, init?: unknown) => Promise<Response>
   let res: Response
   try {
+    // Inside the try so an /auth/csrf-token failure gets the same reporting
+    // and help-desk messaging as any other request failure. Multipart methods
+    // are always unsafe (POST/PUT/PATCH).
+    if (bffEnabled && needsCsrfToken(method, fullUrl)) {
+      cleanHeaders['X-CSRF-Token'] = await getCsrfToken()
+    }
     res = await fetchFn(fullUrl, fetchOptions)
   }
   catch (error) {

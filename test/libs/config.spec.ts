@@ -13,13 +13,19 @@ const mockConfig = {
   terraUrl: 'https://test.terra.bio',
 }
 
+const stubConfigFetch = (config: Record<string, unknown>) =>
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: () => Promise.resolve(config) }))
+
 // configPromise is module-level and caches after the first fetch — mock fetch once for all tests
 beforeAll(() => {
-  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: () => Promise.resolve(mockConfig) }))
+  stubConfigFetch(mockConfig)
 })
 
 afterEach(() => {
   vi.restoreAllMocks()
+  // Individual tests override the fetch stub (e.g. with bffEnabled: true);
+  // restore the baseline so test execution order never matters
+  stubConfigFetch(mockConfig)
 })
 
 afterAll(() => {
@@ -78,7 +84,7 @@ describe('Config', () => {
   describe('isBffEnabled', () => {
     it('returns true only when config.json sets bffEnabled to true', async () => {
       vi.resetModules()
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: () => Promise.resolve({ ...mockConfig, bffEnabled: true }) }))
+      stubConfigFetch({ ...mockConfig, bffEnabled: true })
       const freshConfig = await import('src/libs/config')
       expect(await freshConfig.isBffEnabled()).toBe(true)
     })
@@ -87,7 +93,7 @@ describe('Config', () => {
   describe('API URLs under the BFF cutover', () => {
     it('returns the relative proxy prefixes when bffEnabled', async () => {
       vi.resetModules()
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: () => Promise.resolve({ ...mockConfig, bffEnabled: true }) }))
+      stubConfigFetch({ ...mockConfig, bffEnabled: true })
       const freshConfig = await import('src/libs/config')
       expect(await freshConfig.getApiUrl()).toBe('/duos-api')
       expect(await freshConfig.getEcmApiUrl()).toBe('/ecm-api')
