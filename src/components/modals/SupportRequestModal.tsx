@@ -27,6 +27,7 @@ import { Support } from 'src/libs/ajax/Support'
 import { Storage } from 'src/libs/storage'
 import { Notifications, isEmailAddress } from 'src/libs/utils'
 import { handleSignIn } from 'src/libs/signInUtils'
+import { useUserIsLogged } from 'src/hooks/useSession'
 import { AsyncSpinnerMuiButton } from 'src/components/AsyncSpinnerMuiButton'
 
 interface SupportRequestModalProps {
@@ -69,16 +70,17 @@ interface FormData {
   email: string
 }
 
+// CurrentUser is only populated while signed in (sign-out resets it to the
+// empty default), so prefilled name/email fall back to '' when signed out.
 const resetFormData = (): FormData => {
-  const isLogged = Storage.userIsLogged()
   const currentUser = Storage.getCurrentUser()
   return {
-    name: isLogged ? currentUser.displayName : '',
+    name: currentUser.displayName,
     type: 'question',
     subject: '',
     description: '',
     attachment: [],
-    email: isLogged ? currentUser.email : '',
+    email: currentUser.email,
   }
 }
 
@@ -86,8 +88,17 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
   const { showModal, onCloseRequest, url } = props
   const [formData, setFormData] = useState<FormData>(resetFormData)
 
-  const isLogged = Storage.userIsLogged()
+  const isLogged = useUserIsLogged() ?? false
   const isEmailValid = isEmailAddress(formData.email)
+
+  // The session probe resolves after mount; re-derive the prefill when it
+  // flips so a signed-in user's name/email land in the form (the documented
+  // adjust-state-during-render pattern, not an effect).
+  const [prevIsLogged, setPrevIsLogged] = useState(isLogged)
+  if (prevIsLogged !== isLogged) {
+    setPrevIsLogged(isLogged)
+    setFormData(resetFormData())
+  }
 
   const closeHandler = () => {
     setFormData(resetFormData())

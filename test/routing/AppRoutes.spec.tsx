@@ -1,5 +1,5 @@
 import React from 'react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router'
@@ -7,9 +7,17 @@ import AppRoutes from 'src/routing/AppRoutes'
 import { Storage } from 'src/libs/storage'
 import { USER_ROLES } from 'src/libs/utils'
 import { DuosUser } from 'src/types/model'
+import { useUserIsLogged } from 'src/hooks/useSession'
 
 vi.mock('src/libs/libraryVersions', () => ({
   getLibraryVersions: () => ({}),
+}))
+
+// The session probe (GET /auth/me) is mocked resolved so <Authenticated />
+// decides synchronously: signed out by default, overridden per-describe.
+vi.mock('src/hooks/useSession', () => ({
+  useUserIsLogged: vi.fn(() => false),
+  useSessionInfo: vi.fn(() => ({ authenticated: false })),
 }))
 
 vi.mock('src/components/modals/SupportRequestModal', () => ({
@@ -77,9 +85,6 @@ const roleBACRoutes: string[] = [
 ]
 
 describe('AppRoutes — RoleBAC routes redirect unauthenticated users', () => {
-  beforeEach(() => {
-    vi.spyOn(Storage, 'userIsLogged').mockReturnValue(false)
-  })
   afterEach(() => vi.restoreAllMocks())
 
   it.each(roleBACRoutes)('redirects unauthenticated user visiting "%s" to /?redirectTo=<route>', (route) => {
@@ -101,7 +106,7 @@ describe('AppRoutes — legacy DAC console redirects', () => {
   } as DuosUser)
 
   beforeEach(() => {
-    vi.spyOn(Storage, 'userIsLogged').mockReturnValue(true)
+    vi.mocked(useUserIsLogged).mockReturnValue(true)
   })
 
   afterEach(() => vi.restoreAllMocks())

@@ -6,10 +6,14 @@ import userEvent from '@testing-library/user-event'
 import { BrowserRouter } from 'react-router'
 import { Storage } from 'src/libs/storage'
 import { Support } from 'src/libs/ajax/Support'
+import { useUserIsLogged } from 'src/hooks/useSession'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 
 vi.mock('src/libs/storage')
 vi.mock('src/libs/ajax/Support')
+vi.mock('src/hooks/useSession', () => ({
+  useUserIsLogged: vi.fn(),
+}))
 vi.mock('src/libs/utils', async (importOriginal) => {
   const actual = await importOriginal<typeof import('src/libs/utils')>()
   return { ...actual, Notifications: { showError: vi.fn(), showSuccess: vi.fn() } }
@@ -17,6 +21,9 @@ vi.mock('src/libs/utils', async (importOriginal) => {
 vi.mock('src/libs/signInUtils', () => ({ handleSignIn: vi.fn() }))
 
 const mockUser = { displayName: 'Display Name', email: 'email@test.com' }
+// getCurrentUser never returns undefined — signed-out storage holds the
+// default (empty) user, and the form prefill falls back to empty strings.
+const signedOutUser = { displayName: '', email: '' }
 const handler = vi.fn()
 
 const mountModal = () =>
@@ -27,13 +34,13 @@ const mountModal = () =>
   )
 
 const setupLoggedIn = () => {
-  vi.mocked(Storage.userIsLogged).mockReturnValue(true)
+  vi.mocked(useUserIsLogged).mockReturnValue(true)
   vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser as never)
 }
 
 const setupLoggedOut = () => {
-  vi.mocked(Storage.userIsLogged).mockReturnValue(false)
-  vi.mocked(Storage.getCurrentUser).mockReturnValue(undefined as never)
+  vi.mocked(useUserIsLogged).mockReturnValue(false)
+  vi.mocked(Storage.getCurrentUser).mockReturnValue(signedOutUser as never)
 }
 
 const selectType = async (user: ReturnType<typeof userEvent.setup>, name: string) => {
@@ -66,10 +73,10 @@ describe('Support Request Modal Tests', () => {
 
   it.each([
     { label: 'logged in', isLogged: true, currentUser: mockUser as never, showEmailName: false },
-    { label: 'not logged in', isLogged: false, currentUser: undefined as never, showEmailName: true },
+    { label: 'not logged in', isLogged: false, currentUser: signedOutUser as never, showEmailName: true },
     { label: 'logged in with undefined user values', isLogged: true, currentUser: { displayName: undefined, email: undefined } as never, showEmailName: false },
   ])('Renders form correctly when $label', ({ isLogged, currentUser, showEmailName }) => {
-    vi.mocked(Storage.userIsLogged).mockReturnValue(isLogged)
+    vi.mocked(useUserIsLogged).mockReturnValue(isLogged)
     vi.mocked(Storage.getCurrentUser).mockReturnValue(currentUser)
     mountModal()
     expect(document.querySelector('[data-cy="closeButton"]')).toBeInTheDocument()
@@ -163,7 +170,7 @@ describe('Support Request Modal Tests', () => {
 
   describe('When a user is logged in but current user values are undefined:', () => {
     beforeEach(() => {
-      vi.mocked(Storage.userIsLogged).mockReturnValue(true)
+      vi.mocked(useUserIsLogged).mockReturnValue(true)
       vi.mocked(Storage.getCurrentUser).mockReturnValue({
         displayName: undefined,
         email: undefined,
