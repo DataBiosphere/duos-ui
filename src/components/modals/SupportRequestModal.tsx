@@ -70,25 +70,27 @@ interface FormData {
   email: string
 }
 
-// CurrentUser is only populated while signed in (sign-out resets it to the
-// empty default), so prefilled name/email fall back to '' when signed out.
-const resetFormData = (): FormData => {
+// The prefill is gated on the live session state, not just on CurrentUser:
+// an expired session never runs clearStorage(), so localStorage can retain
+// the previous user's name/email — they must not leak into the signed-out
+// support form.
+const resetFormData = (isLogged: boolean): FormData => {
   const currentUser = Storage.getCurrentUser()
   return {
-    name: currentUser.displayName,
+    name: isLogged ? currentUser.displayName : '',
     type: 'question',
     subject: '',
     description: '',
     attachment: [],
-    email: currentUser.email,
+    email: isLogged ? currentUser.email : '',
   }
 }
 
 export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) => {
   const { showModal, onCloseRequest, url } = props
-  const [formData, setFormData] = useState<FormData>(resetFormData)
 
   const isLogged = useUserIsLogged() ?? false
+  const [formData, setFormData] = useState<FormData>(() => resetFormData(isLogged))
   const isEmailValid = isEmailAddress(formData.email)
 
   // The session probe resolves after mount; re-derive the prefill when it
@@ -97,11 +99,11 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
   const [prevIsLogged, setPrevIsLogged] = useState(isLogged)
   if (prevIsLogged !== isLogged) {
     setPrevIsLogged(isLogged)
-    setFormData(resetFormData())
+    setFormData(resetFormData(isLogged))
   }
 
   const closeHandler = () => {
-    setFormData(resetFormData())
+    setFormData(resetFormData(isLogged))
     onCloseRequest('support')
   }
 

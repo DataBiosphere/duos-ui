@@ -21,8 +21,9 @@ vi.mock('src/libs/utils', async (importOriginal) => {
 vi.mock('src/libs/signInUtils', () => ({ handleSignIn: vi.fn() }))
 
 const mockUser = { displayName: 'Display Name', email: 'email@test.com' }
-// getCurrentUser never returns undefined — signed-out storage holds the
-// default (empty) user, and the form prefill falls back to empty strings.
+// getCurrentUser never returns undefined — signed-out storage usually holds
+// the default (empty) user, but an expired session can leave a previous
+// user's data behind, so the prefill is gated on the session state.
 const signedOutUser = { displayName: '', email: '' }
 const handler = vi.fn()
 
@@ -95,6 +96,18 @@ describe('Support Request Modal Tests', () => {
     expect(document.querySelector('[data-cy="supportFormAttachment"]')).toBeInTheDocument()
     expect(document.querySelector('[data-cy="supportFormSubmit"]')).toBeDisabled()
     expect(document.querySelector('[data-cy="supportFormCancel"]')).not.toBeDisabled()
+  })
+
+  it('does not leak a previous user\'s name/email into the signed-out form', () => {
+    // An expired session never runs clearStorage(), so CurrentUser can still
+    // hold the previous user's data while the session probe reports signed out.
+    vi.mocked(useUserIsLogged).mockReturnValue(false)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser as never)
+    mountModal()
+    const nameInput = document.querySelector('[data-cy="supportFormName"] input') as HTMLInputElement
+    const emailInput = document.querySelector('[data-cy="supportFormEmail"] input') as HTMLInputElement
+    expect(nameInput.value).toBe('')
+    expect(emailInput.value).toBe('')
   })
 
   describe('When a user is logged in:', () => {

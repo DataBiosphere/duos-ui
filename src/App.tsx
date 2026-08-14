@@ -42,7 +42,9 @@ function App() {
       Storage.setEnv(environment)
     }
     setEnvironment()
-  })
+    // The environment never changes within a page load — look it up once on
+    // mount instead of on every render.
+  }, [])
 
   /**
      * Check for RAS Authentication URL params. If we have a code and state, we will call ECM APIs to get redirect
