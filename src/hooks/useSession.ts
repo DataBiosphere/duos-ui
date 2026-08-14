@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router'
-import { SessionInfo, getSessionInfo } from 'src/libs/auth/session'
+import { SessionInfo, getSessionInfo, revalidateSessionInfo } from 'src/libs/auth/session'
 
 /**
  * React view of the BFF session probe (`GET /auth/me`, cached per page load in
@@ -28,6 +28,27 @@ export const useSessionInfo = (): SessionInfo | undefined => {
       cancelled = true
     }
   }, [location])
+
+  // Revalidate when the tab regains focus: another tab can sign in or out on
+  // the shared session cookie, and the fixed-lifetime session can expire while
+  // the tab sits in the background. session.ts throttles the fan-out, so many
+  // mounted hooks reacting to one focus event share a single probe.
+  useEffect(() => {
+    let cancelled = false
+    const revalidate = () => {
+      if (document.visibilityState !== 'visible') return
+      revalidateSessionInfo().then((info) => {
+        if (!cancelled) setSessionInfo(info)
+      })
+    }
+    globalThis.addEventListener('focus', revalidate)
+    document.addEventListener('visibilitychange', revalidate)
+    return () => {
+      cancelled = true
+      globalThis.removeEventListener('focus', revalidate)
+      document.removeEventListener('visibilitychange', revalidate)
+    }
+  }, [])
 
   return sessionInfo
 }
