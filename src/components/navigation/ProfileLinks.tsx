@@ -4,11 +4,14 @@ import { Box, Menu, MenuItem, PopoverOrigin, Typography } from '@mui/material'
 import { DuosUser } from 'src/types/model'
 import { Link } from 'react-router'
 import { useSessionInfo } from 'src/hooks/useSession'
+import type { SessionInfo } from 'src/libs/auth/session'
 
-const IDP_LABELS: Record<string, string> = {
+// Keyed off the SessionInfo union so adding a provider without a label (or
+// typo-ing one) is a compile error.
+const IDP_LABELS = {
   google: 'Google',
   microsoft: 'Microsoft',
-}
+} satisfies Record<NonNullable<SessionInfo['idp']>, string>
 
 interface ProfileLinksProps {
   currentUser: DuosUser

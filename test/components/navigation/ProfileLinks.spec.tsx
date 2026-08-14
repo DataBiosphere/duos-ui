@@ -32,7 +32,9 @@ const mockUser: DuosUser = {
 
 describe('ProfileLinks', () => {
   afterEach(() => {
-    vi.mocked(useSessionInfo).mockReturnValue(undefined)
+    // Clears call history and per-test mockReturnValue overrides, restoring
+    // the factory's default (undefined = probe in flight).
+    vi.mocked(useSessionInfo).mockReset()
   })
 
   const renderComponent = (propsOverride: Record<string, unknown> = {}) => {
