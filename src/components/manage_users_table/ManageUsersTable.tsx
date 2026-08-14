@@ -1,176 +1,101 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import PaginationBar from '../PaginationBar'
-import {
-  recalculateVisibleTable,
-  goToPage as updatePage,
-  getSearchFilterFunctions,
-  searchOnFilteredList,
-} from 'src/libs/utils'
-import SimpleTable from '../SimpleTable'
-import cellData from './ManageUsersTableCellData'
-import { styles } from './manageUsersTableUtils'
+import React, { useMemo, useState } from 'react'
+import { Box } from '@mui/material'
+import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid'
+import { Link } from 'react-router'
+import { getSearchFilterFunctions } from 'src/libs/utils'
+import { Theme } from 'src/libs/theme'
+import { formatUserRoles, institutionName } from 'src/components/manage_users_table/manageUsersTableUtils'
 import { DuosUser } from 'src/types/model'
 
-interface SortConfig {
-  colIndex: number
-  dir: number
+const PAGE_SIZE_OPTIONS = [10, 25, 50]
+
+// MUI rings on plain :focus, which fires on click; keyboard focus keeps a ring via :focus-visible.
+const DATAGRID_SX = {
+  '& .MuiDataGrid-cell:focus': { outline: 'none' },
+  '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
+  '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
+  '& .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
+  '& .MuiDataGrid-cell:focus-visible, & .MuiDataGrid-columnHeader:focus-visible': {
+    outline: `2px solid ${Theme.palette.link}`,
+    outlineOffset: '-2px',
+  },
 }
 
-interface TableCellData {
-  data: React.ReactNode
-  value?: string | number
-  id?: number
-  style?: React.CSSProperties
-  label?: string
-  isComponent?: boolean
-}
-
-interface CellDataArgs {
-  user: DuosUser
-  roles: DuosUser['roles']
-  userId: number
-  displayName: string
-  email: string
-  institution: DuosUser['institution']
-  libraryCard: DuosUser['libraryCard']
-}
-
-interface ColumnConfig {
-  label: string
-  cellStyle: React.CSSProperties
-  cellDataFn: (args: CellDataArgs) => TableCellData
-  sortable: boolean
-}
+// Left inset matches SearchBar's own margin, negative right mirrors the search and add button row.
+const gridContainerSx = { marginTop: '2rem', marginLeft: 3, marginRight: '-2rem' }
 
 export interface ManageUsersTableProps {
   isLoading: boolean
   userList: DuosUser[]
   searchText: string
-  columns?: string[]
 }
 
-const columnHeaderConfig: Record<string, ColumnConfig> = {
-  username: {
-    label: 'User Name',
-    cellStyle: {
-      width: styles.cellWidth.username,
-      margin: `0% ${styles.cellWidth.usernameMargin} 0% 0%`,
-    },
-    cellDataFn: cellData.usernameCellData,
-    sortable: true,
-  },
-  email: {
-    label: 'Email',
-    cellStyle: {
-      width: styles.cellWidth.email,
-      margin: `0% ${styles.cellWidth.emailMargin} 0% 0%`,
-    },
-    cellDataFn: cellData.emailCellData,
-    sortable: false,
-  },
-  institution: {
-    label: 'Institution',
-    cellStyle: {
-      width: styles.cellWidth.institution,
-      margin: `0% ${styles.cellWidth.institutionMargin} 0% 0%`,
-    },
-    cellDataFn: cellData.institutionCellData,
-    sortable: false,
-  },
-  roles: {
-    label: 'Roles',
-    cellStyle: {
-      width: styles.cellWidth.roles,
-    },
-    cellDataFn: cellData.rolesCellData,
-    sortable: false,
-  },
+interface UserRow {
+  id: number
+  displayName: string
+  email: string
+  institution: string
+  roles: string
 }
 
-const columns = Object.keys(columnHeaderConfig)
+// Roles and institution are flattened to their displayed text, so every column sorts on what is read.
+const toUserRow = (user: DuosUser): UserRow => ({
+  id: user.userId,
+  displayName: user.displayName,
+  email: user.email,
+  institution: institutionName(user.institution),
+  roles: formatUserRoles(user.roles, user.libraryCard),
+})
 
-const columnHeaderData = (cols: string[]): ColumnConfig[] => cols.map(col => columnHeaderConfig[col])
-
-const processUserRowData = (users: DuosUser[], cols: string[]): TableCellData[][] =>
-  users.map((user) => {
-    const { roles, userId, displayName, libraryCard, institution, email } = user
-    return cols.map(col =>
-      columnHeaderConfig[col].cellDataFn({ user, roles, userId, displayName, email, institution, libraryCard }),
-    )
-  })
-
-const getInitialSort = (cols: string[] = []): SortConfig => {
-  const defaultField = 'username'
-  const sortIndex = cols.indexOf(defaultField)
-  return sortIndex === -1 ? { colIndex: 0, dir: 1 } : { colIndex: sortIndex, dir: -1 }
-}
+const COLUMNS: GridColDef<UserRow>[] = [
+  {
+    field: 'displayName',
+    headerName: 'User Name',
+    flex: 1,
+    minWidth: 180,
+    renderCell: ({ row }: GridRenderCellParams<UserRow>) => (
+      <Link to={`/admin_edit_user/${row.id}`} title={`Edit ${row.displayName}`}>
+        {row.displayName}
+      </Link>
+    ),
+  },
+  { field: 'email', headerName: 'Email', flex: 1.25, minWidth: 200 },
+  { field: 'institution', headerName: 'Institution', flex: 1, minWidth: 180 },
+  { field: 'roles', headerName: 'Roles', flex: 1, minWidth: 180 },
+]
 
 const filterFn = getSearchFilterFunctions().users
 
-export const ManageUsersTable = function ManageUsersTable({
-  isLoading,
-  userList,
-  searchText,
-  columns: columnsProp,
-}: ManageUsersTableProps) {
-  const [filteredUsers, setFilteredUsers] = useState<DuosUser[]>(userList)
-  const [visibleUsers, setVisibleUsers] = useState<TableCellData[][]>([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageCount, setPageCount] = useState(1)
-  const [sort, setSort] = useState<SortConfig>(getInitialSort(columnsProp))
-  const [tableSize, setTableSize] = useState(10)
+export const ManageUsersTable = function ManageUsersTable({ isLoading, userList, searchText }: ManageUsersTableProps) {
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: PAGE_SIZE_OPTIONS[0] })
 
-  const changeTableSize = useCallback((value: number) => {
-    if (value > 0 && !Number.isNaN(value)) {
-      setTableSize(value)
-    }
-  }, [])
+  // Filtering is derived, so a keystroke costs one render rather than a cascade of effects.
+  const rows = useMemo(() => {
+    const terms = searchText.split(' ').filter(term => term.length > 0)
+    return terms.reduce((list, term) => filterFn(term, list), userList ?? []).map(toUserRow)
+  }, [userList, searchText])
 
-  const handleSearchChange = useCallback(
-    (searchTerms: string) => searchOnFilteredList(searchTerms, userList, filterFn, setFilteredUsers),
-    [userList],
-  )
-
-  useEffect(() => {
-    handleSearchChange(searchText)
-  }, [userList, searchText, handleSearchChange])
-
-  useEffect(() => {
-    recalculateVisibleTable({
-      tableSize,
-      pageCount,
-      filteredList: processUserRowData(filteredUsers, columns),
-      currentPage,
-      setPageCount,
-      setCurrentPage,
-      setVisibleList: setVisibleUsers,
-      sort,
-    })
-  }, [tableSize, currentPage, pageCount, filteredUsers, sort])
-
-  const goToPage = useCallback(
-    (value: number) => updatePage(value, pageCount, setCurrentPage),
-    [pageCount],
-  )
+  // Clamped during render so a narrower search cannot leave the grid on an empty page.
+  const lastPage = Math.max(0, Math.ceil(rows.length / paginationModel.pageSize) - 1)
+  const page = Math.min(paginationModel.page, lastPage)
 
   return (
-    <SimpleTable
-      isLoading={isLoading}
-      rowData={visibleUsers}
-      columnHeaders={columnHeaderData(columns)}
-      styles={styles}
-      tableSize={tableSize}
-      paginationBar={(
-        <PaginationBar
-          pageCount={pageCount}
-          currentPage={currentPage}
-          tableSize={tableSize}
-          goToPage={goToPage}
-          changeTableSize={changeTableSize}
-        />
-      )}
-      sort={sort}
-      onSort={(newSort: SortConfig) => setSort(newSort)}
-    />
+    <Box sx={gridContainerSx}>
+      <DataGrid
+        rows={rows}
+        columns={COLUMNS}
+        loading={isLoading}
+        // A progress bar rather than the default skeleton, so loading is announced to screen readers.
+        slotProps={{ loadingOverlay: { variant: 'linear-progress', noRowsVariant: 'linear-progress' } }}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        paginationModel={{ page, pageSize: paginationModel.pageSize }}
+        onPaginationModelChange={setPaginationModel}
+        // Alphabetical by user name until an admin sorts another column.
+        initialState={{ sorting: { sortModel: [{ field: 'displayName', sort: 'asc' }] } }}
+        disableRowSelectionOnClick
+        autoHeight
+        sx={DATAGRID_SX}
+      />
+    </Box>
   )
 }
