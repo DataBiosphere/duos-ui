@@ -30,6 +30,10 @@ describe('shouldSkip401Redirect', () => {
     expect(shouldSkip401Redirect(url, 'POST', duosApiUrl)).to.equal(false)
   })
 
+  it('tolerates a trailing slash on apiUrl', () => {
+    expect(shouldSkip401Redirect(`${duosApiUrl}/api/user/me`, 'GET', `${duosApiUrl}/`)).to.equal(true)
+  })
+
   describe('BFF mode (apiUrl is the relative proxy prefix)', () => {
     const proxyPrefix = '/duos-api'
 

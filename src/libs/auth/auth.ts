@@ -9,7 +9,7 @@
 import { OidcBroker, OidcUser } from './oidcBroker'
 import { Storage } from './../storage'
 import { Config } from './../config'
-import { getCsrfToken, resetCsrfToken } from './../ajax/csrf'
+import { getCsrfToken, isCsrfRejection, resetCsrfToken } from './../ajax/csrf'
 import { UserManager } from 'oidc-client-ts'
 
 const purgeLegacyOidcKeys = (): void => {
@@ -76,12 +76,22 @@ export const Auth = {
     if (await Config.isBffEnabled()) {
       // POST /auth/logout is CSRF-guarded, so fetch a token first.
       try {
-        const token = await getCsrfToken()
-        await fetch('/auth/logout', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'X-CSRF-Token': token },
-        })
+        const postLogout = async (): Promise<Response> =>
+          fetch('/auth/logout', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'X-CSRF-Token': await getCsrfToken() },
+          })
+        const res = await postLogout()
+        // A cached token can be stale (session rotation at login discards the
+        // old secret) — refetch once and retry, or the logout silently fails
+        // and the server session survives the local cleanup below.
+        if (await isCsrfRejection(res)) {
+          resetCsrfToken()
+          await postLogout()
+        }
+        // Any other failure is a server-side problem the client can't act on;
+        // fall through to the local cleanup either way.
       }
       catch {
         // Session destruction is server-side state; local cleanup still applies.

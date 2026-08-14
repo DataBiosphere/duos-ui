@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { getCsrfToken, resetCsrfToken } from 'src/libs/ajax/csrf'
+import { CSRF_ERROR_CODE, getCsrfToken, isCsrfRejection, resetCsrfToken } from 'src/libs/ajax/csrf'
 
 describe('csrf', () => {
   let fetchMock: ReturnType<typeof vi.fn>
@@ -73,5 +73,32 @@ describe('csrf', () => {
 
     await expect(getCsrfToken()).rejects.toThrow('401')
     expect(await getCsrfToken()).toBe('csrf-after-login')
+  })
+
+  describe('isCsrfRejection', () => {
+    const response = (body: string, status: number) =>
+      new Response(body, { status, headers: { 'content-type': 'application/json' } })
+
+    it('recognizes the BFF rejection body on a 403', async () => {
+      expect(await isCsrfRejection(response(JSON.stringify({ error: CSRF_ERROR_CODE, reason: 'missing_secret' }), 403))).toBe(true)
+    })
+
+    it('does not match an ordinary 403 (upstream authorization denial)', async () => {
+      expect(await isCsrfRejection(response(JSON.stringify({ message: 'Forbidden' }), 403))).toBe(false)
+    })
+
+    it('does not match other statuses even with the code in the body', async () => {
+      expect(await isCsrfRejection(response(JSON.stringify({ error: CSRF_ERROR_CODE }), 401))).toBe(false)
+    })
+
+    it('does not match a non-JSON 403 body', async () => {
+      expect(await isCsrfRejection(response('Forbidden', 403))).toBe(false)
+    })
+
+    it('leaves the response body readable for the caller', async () => {
+      const res = response(JSON.stringify({ message: 'Forbidden' }), 403)
+      await isCsrfRejection(res)
+      expect(await res.json()).toEqual({ message: 'Forbidden' })
+    })
   })
 })

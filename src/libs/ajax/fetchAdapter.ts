@@ -5,7 +5,7 @@ import { Storage } from 'src/libs/storage'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
 import { BFF_BARD_PREFIX, Config } from 'src/libs/config'
-import { getCsrfToken, resetCsrfToken } from 'src/libs/ajax/csrf'
+import { getCsrfToken, isCsrfRejection, resetCsrfToken } from 'src/libs/ajax/csrf'
 
 export type ResponseType = 'blob' | 'json' | 'text'
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -68,30 +68,40 @@ export const reportError = async (url: string, status: number): Promise<void> =>
 
 const UNSAFE_METHODS: ReadonlySet<Method> = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
 
-// BFF-bound URLs are same-origin relative ('/duos-api/...'), while other non-proxied
-// upstreams — the CSRF token is meaningless to them and must not be sent cross-origin.
-const isSameOriginPath = (url: string): boolean => url.startsWith('/') && !url.startsWith('//')
+// The CSRF token only means something to the BFF's own proxies — it must not
+// be sent to another origin.
+const isSameOrigin = (url: string): boolean =>
+  new URL(url, globalThis.location.origin).origin === globalThis.location.origin
 
-// BFF mode - the proxy attaches Authorization server-side from the session, so any
-// bearer header the legacy authOpts()/multiPartOpts() helpers constructed is dropped
-// before the request leaves the browser.
+/**
+ * Unsafe requests that must NOT carry (or fetch) a CSRF token: the signed-out
+ * Contact Us form. Mirrors the server's CSRF_EXEMPT_UNSAFE_REQUESTS
+ * (server/src/proxy/apiProxy.ts) — the server ignores the header here, and
+ * fetching a token for a signed-out user would create an anonymous session
+ * row per submission and hard-fail the form whenever /auth/csrf-token errors.
+ */
+const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
+  'POST /duos-api/support/request',
+  'POST /duos-api/support/upload',
+])
+
+const isCsrfExempt = (method: Method, url: string): boolean =>
+  CSRF_EXEMPT_UNSAFE_REQUESTS.has(`${method} ${new URL(url, globalThis.location.origin).pathname}`)
+
+const needsCsrfToken = (method: Method, url: string): boolean =>
+  UNSAFE_METHODS.has(method) && isSameOrigin(url) && !isCsrfExempt(method, url)
+
+// BFF mode: the proxies attach Authorization server-side from the session, so
+// any bearer header the legacy authOpts()/multiPartOpts() helpers constructed
+// is dropped before the request leaves the browser. Deliberately unconditional
+// — cross-origin too: post-cutover the browser holds no valid token, so a
+// surviving header could only be the helpers' 'Bearer undefined', which no
+// upstream should receive.
 const stripAuthorization = (headers: HeadersMap): void => {
   for (const key of Object.keys(headers)) {
     if (key.toLowerCase() === 'authorization') {
       delete headers[key]
     }
-  }
-}
-
-// A CSRF rejection is identified by the body.
-const isCsrfRejection = async (res: Response): Promise<boolean> => {
-  if (res.status !== 403) return false
-  try {
-    const body = await res.clone().json() as { error?: string }
-    return body.error === 'csrf_validation_failed'
-  }
-  catch {
-    return false
   }
 }
 
@@ -212,7 +222,7 @@ async function fetchRequest<T>(
   const bffEnabled = await Config.isBffEnabled()
   if (bffEnabled) {
     stripAuthorization(finalHeaders)
-    if (UNSAFE_METHODS.has(method) && isSameOriginPath(fullUrl)) {
+    if (needsCsrfToken(method, fullUrl)) {
       finalHeaders['X-CSRF-Token'] = await getCsrfToken()
     }
   }
@@ -275,7 +285,7 @@ async function fetchMultipartRequest<T>(
   if (bffEnabled) {
     stripAuthorization(cleanHeaders)
     // Multipart methods are always unsafe (POST/PUT/PATCH)
-    if (isSameOriginPath(fullUrl)) {
+    if (needsCsrfToken(method, fullUrl)) {
       cleanHeaders['X-CSRF-Token'] = await getCsrfToken()
     }
   }

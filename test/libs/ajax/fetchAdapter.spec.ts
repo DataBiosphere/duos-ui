@@ -19,8 +19,10 @@ import type { OidcUser } from 'src/libs/auth/oidcBroker'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import eventList from 'src/libs/events'
 
-vi.mock('src/libs/config', () => ({
-  BFF_BARD_PREFIX: '/bard-api',
+// The real module is spread in so constants like BFF_BARD_PREFIX stay pinned
+// to their production values, and new Config usage fails loudly here.
+vi.mock('src/libs/config', async importOriginal => ({
+  ...(await importOriginal<typeof import('src/libs/config')>()),
   Config: {
     getApiUrl: vi.fn(),
     getBardApiUrl: vi.fn(),
@@ -28,7 +30,10 @@ vi.mock('src/libs/config', () => ({
   },
 }))
 
-vi.mock('src/libs/ajax/csrf', () => ({
+// Token acquisition/caching is mocked; the pure isCsrfRejection stays real so
+// the retry path is exercised against the actual rejection-body contract.
+vi.mock('src/libs/ajax/csrf', async importOriginal => ({
+  ...(await importOriginal<typeof import('src/libs/ajax/csrf')>()),
   getCsrfToken: vi.fn(),
   resetCsrfToken: vi.fn(),
 }))
@@ -974,6 +979,55 @@ describe('fetchAdapter - BFF mode', () => {
     fetchMock.mockResolvedValue(jsonResponse({}))
 
     await fetchPost('https://bard.example.org/api/event', { event: 'x' })
+
+    expect(getCsrfToken).not.toHaveBeenCalled()
+    const [, init] = fetchMock.mock.calls[0]
+    expect((init as StubOptions).headers).not.toHaveProperty('X-CSRF-Token')
+  })
+
+  it('strips Authorization on cross-origin requests too, keeping other headers', async () => {
+    // Post-cutover the browser holds no valid token: a surviving header could
+    // only be the legacy helpers' 'Bearer undefined', which no upstream
+    // should receive.
+    fetchMock.mockResolvedValue(jsonResponse({}))
+
+    await fetchPost('https://ecm.example.org/api/link', { code: 'x' }, {
+      headers: { 'Authorization': 'Bearer undefined', 'X-App-ID': 'DUOS' },
+    })
+
+    const [, init] = fetchMock.mock.calls[0]
+    expect((init as StubOptions).headers).not.toHaveProperty('Authorization')
+    expect((init as StubOptions).headers).toHaveProperty('X-App-ID', 'DUOS')
+  })
+
+  it('attaches X-CSRF-Token to unsafe absolute same-origin URLs', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({}))
+
+    await fetchPost(`${globalThis.location.origin}/duos-api/api/dataset`, { name: 'test' })
+
+    const [, init] = fetchMock.mock.calls[0]
+    expect((init as StubOptions).headers).toHaveProperty('X-CSRF-Token', 'csrf-token-1')
+  })
+
+  it.each(['/duos-api/support/request', '/duos-api/support/upload'])(
+    'never fetches a CSRF token for the signed-out support form: POST %s',
+    async (path) => {
+      fetchMock.mockResolvedValue(jsonResponse({}))
+
+      await fetchPost(path, { description: 'help' })
+
+      expect(getCsrfToken).not.toHaveBeenCalled()
+      const [, init] = fetchMock.mock.calls[0]
+      expect((init as StubOptions).headers).not.toHaveProperty('X-CSRF-Token')
+    },
+  )
+
+  it('fetchMultipart - does not attach X-CSRF-Token on cross-origin URLs', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({}))
+    const formData = new FormData()
+    formData.append('file', 'content')
+
+    await fetchMultipart('https://other.example.org/api/upload', formData)
 
     expect(getCsrfToken).not.toHaveBeenCalled()
     const [, init] = fetchMock.mock.calls[0]

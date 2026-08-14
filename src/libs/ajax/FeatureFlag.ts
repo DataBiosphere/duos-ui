@@ -14,6 +14,9 @@ export interface FeatureFlag {
 // getUpstreamApiUrl, never the proxied getApiUrl.
 export async function getAllFeatureFlags(): Promise<Record<string, FeatureFlag> | FeatureFlag[]> {
   const url = `${await Config.getUpstreamApiUrl()}/feature`
+  // authOpts() stays for legacy parity (signed-in legacy users send their
+  // token even though /feature doesn't need it); in BFF mode the fetch
+  // adapter strips the Authorization header before sending.
   const res = await fetchGet<Record<string, FeatureFlag> | FeatureFlag[]>(url, Config.authOpts())
   return res.data
 }

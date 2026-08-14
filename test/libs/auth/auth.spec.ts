@@ -219,6 +219,32 @@ describe('Auth (BFF mode)', () => {
     expect(redirectSpy).toHaveBeenCalledWith('/home?redirectTo=/datalibrary')
   })
 
+  it('signOut refetches the CSRF token and retries once when logout is rejected', async () => {
+    // A cached token can be stale after session rotation — the logout must not
+    // silently 403 and leave the server session alive
+    const csrfRejection = new Response(
+      JSON.stringify({ error: 'csrf_validation_failed', reason: 'missing_secret' }),
+      { status: 403, headers: { 'content-type': 'application/json' } },
+    )
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-stale' }) })
+      .mockResolvedValueOnce(csrfRejection)
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-fresh' }) })
+      .mockResolvedValueOnce({ ok: true, status: 204 })
+    vi.stubGlobal('fetch', fetchMock)
+    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+
+    await Auth.signOut()
+
+    expect(fetchMock).toHaveBeenCalledTimes(4)
+    expect(fetchMock).toHaveBeenNthCalledWith(4, '/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'X-CSRF-Token': 'csrf-fresh' },
+    })
+    expect(redirectSpy).toHaveBeenCalledWith('/')
+  })
+
   it.each([
     [true, 200],
     [false, 401],
