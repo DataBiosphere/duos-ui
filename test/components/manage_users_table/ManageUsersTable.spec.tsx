@@ -117,6 +117,15 @@ describe('ManageUsersTable', () => {
       .toHaveAttribute('href', `/admin_edit_user/${bob.userId}`)
   })
 
+  it('keeps the user links out of the page tab order', () => {
+    renderTable()
+
+    // The grid is one tab stop, so links take the cell's tabIndex instead of adding one per row.
+    const links = screen.getAllByRole('link')
+    expect(links).toHaveLength(testUsers.length)
+    links.forEach(link => expect(link).toHaveAttribute('tabindex', '-1'))
+  })
+
   it('reads N/A and Library Card for a user with no institution and a card', async () => {
     renderTable()
 

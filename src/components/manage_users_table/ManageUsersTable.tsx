@@ -53,8 +53,9 @@ const COLUMNS: GridColDef<UserRow>[] = [
     headerName: 'User Name',
     flex: 1,
     minWidth: 180,
-    renderCell: ({ row }: GridRenderCellParams<UserRow>) => (
-      <Link to={`/admin_edit_user/${row.id}`} title={`Edit ${row.displayName}`}>
+    // The cell's tabIndex keeps the link inside the grid's roving focus rather than in the page order.
+    renderCell: ({ row, tabIndex }: GridRenderCellParams<UserRow>) => (
+      <Link to={`/admin_edit_user/${row.id}`} title={`Edit ${row.displayName}`} tabIndex={tabIndex}>
         {row.displayName}
       </Link>
     ),
