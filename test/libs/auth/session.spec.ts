@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { getSessionInfo, resetSessionCache, userIsLogged } from 'src/libs/auth/session'
+import { getSessionInfo, resetSessionCache, revalidateSessionInfo, userIsLogged } from 'src/libs/auth/session'
 import { Config } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 
@@ -108,6 +108,71 @@ describe('session probe', () => {
     await getSessionInfo()
 
     expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('expires the cached answer after the TTL — an 8h session can die under a long-lived tab', async () => {
+    vi.useFakeTimers()
+    try {
+      fetchMock.mockResolvedValue(
+        new Response(JSON.stringify({ authenticated: true }), { status: 200 }),
+      )
+
+      await getSessionInfo()
+      vi.advanceTimersByTime(4 * 60 * 1000)
+      await getSessionInfo()
+      expect(fetchMock).toHaveBeenCalledTimes(1) // within TTL — cached
+
+      vi.advanceTimersByTime(2 * 60 * 1000)
+      await getSessionInfo()
+      expect(fetchMock).toHaveBeenCalledTimes(2) // past TTL — re-probed
+    }
+    finally {
+      vi.useRealTimers()
+    }
+  })
+
+  describe('revalidateSessionInfo', () => {
+    it('drops the cache and probes fresh — another tab may have signed in or out', async () => {
+      vi.useFakeTimers()
+      try {
+        fetchMock.mockResolvedValueOnce(
+          new Response(JSON.stringify({ authenticated: false }), { status: 401 }),
+        )
+        fetchMock.mockResolvedValueOnce(
+          new Response(JSON.stringify({ authenticated: true, idp: 'microsoft' }), { status: 200 }),
+        )
+
+        await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+
+        vi.advanceTimersByTime(10 * 1000)
+        const revalidated = await revalidateSessionInfo()
+
+        expect(revalidated.authenticated).toBe(true)
+        expect(fetchMock).toHaveBeenCalledTimes(2)
+      }
+      finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('throttles bursts — simultaneous revalidations share one probe', async () => {
+      vi.useFakeTimers()
+      try {
+        fetchMock.mockResolvedValue(
+          new Response(JSON.stringify({ authenticated: true }), { status: 200 }),
+        )
+
+        await getSessionInfo()
+        vi.advanceTimersByTime(10 * 1000)
+        // A focus event fans out to every mounted hook; only the first re-probes.
+        await Promise.all([revalidateSessionInfo(), revalidateSessionInfo(), revalidateSessionInfo()])
+
+        expect(fetchMock).toHaveBeenCalledTimes(2)
+      }
+      finally {
+        vi.useRealTimers()
+      }
+    })
   })
 
   it('userIsLogged reflects the probe result', async () => {

@@ -7,12 +7,14 @@ import { DuosUser } from 'src/types/model'
  *
  * With the BFF enabled, authentication state lives server-side in the BFF
  * session; the browser holds only the session cookie. Every "is the user
- * logged in?" question is therefore a network call, cached here per page load
- * so the many components that ask it during a render share one request. Auth
- * state only changes across full-page navigations (sign-in redirects to B2C
- * and back, sign-out reloads to '/'), so a page-load-scoped cache cannot go
- * stale — but resetSessionCache() is exported for the places that must not
- * rely on that.
+ * logged in?" question is therefore a network call, cached here so the many
+ * components that ask it during a render share one request. Sign-in and
+ * sign-out in THIS tab are full-page navigations, but the answer can still go
+ * stale underneath a long-lived tab — the fixed-lifetime session expires, or
+ * another tab signs in or out on the shared cookie — so the cache is bounded
+ * by SESSION_TTL_MS and revalidateSessionInfo() exists for focus/visibility
+ * changes. (A stale "signed in" is UI-only exposure: the first real API call
+ * after expiry still 401s and signs the user out.)
  *
  * In a legacy (non-BFF) environment the /auth/* routes do not exist, so the
  * probe falls back to the synchronous oidc-client-ts token check in
@@ -27,7 +29,22 @@ export interface SessionInfo {
   idp?: 'google' | 'microsoft'
 }
 
+/**
+ * How long a cached probe answer is trusted. The cache mainly exists so the
+ * many components that ask during one render share a single request; the TTL
+ * bounds how long a stale answer can outlive reality (the fixed-lifetime BFF
+ * session can expire mid-use, and another tab can sign in or out on the
+ * shared cookie). Focus/visibility revalidation reacts faster; this is the
+ * backstop for long-lived tabs that keep navigating.
+ */
+const SESSION_TTL_MS = 5 * 60 * 1000
+
+/** Floor between forced revalidations, so a burst of focus events (or many
+ * mounted hooks reacting to one) collapses into a single probe. */
+const REVALIDATE_MIN_INTERVAL_MS = 3 * 1000
+
 let sessionPromise: Promise<SessionInfo> | null = null
+let sessionFetchedAt = 0
 
 const probeBffSession = async (): Promise<SessionInfo> => {
   try {
@@ -66,12 +83,30 @@ export const getSessionInfo = async (): Promise<SessionInfo> => {
     // Config failure — treat as signed out rather than crashing render paths.
     return { authenticated: false }
   }
-  sessionPromise ??= probeBffSession()
+  if (sessionPromise && Date.now() - sessionFetchedAt > SESSION_TTL_MS) {
+    sessionPromise = null
+  }
+  if (!sessionPromise) {
+    sessionFetchedAt = Date.now()
+    sessionPromise = probeBffSession()
+  }
   return sessionPromise
 }
 
 export const resetSessionCache = (): void => {
   sessionPromise = null
+}
+
+/**
+ * Drop the cached answer and probe again — for "the world may have changed"
+ * moments like the tab regaining focus (another tab can sign in or out on the
+ * shared session cookie). Throttled so simultaneous callers share one probe.
+ */
+export const revalidateSessionInfo = (): Promise<SessionInfo> => {
+  if (Date.now() - sessionFetchedAt > REVALIDATE_MIN_INTERVAL_MS) {
+    resetSessionCache()
+  }
+  return getSessionInfo()
 }
 
 /**
