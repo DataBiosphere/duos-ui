@@ -119,5 +119,18 @@ describe('session probe', () => {
       await expect(userIsLogged()).resolves.toBe(false)
       expect(fetchMock).not.toHaveBeenCalled()
     })
+
+    it('re-reads legacy state on every call — no stale cache after a popup or background sign-in', async () => {
+      const legacyCheck = vi.spyOn(Storage, 'userIsLogged').mockReturnValue(false)
+
+      await expect(userIsLogged()).resolves.toBe(false)
+
+      // The popup flow and /backgroundsignin mutate localStorage without a
+      // page load; the next ask must see it.
+      legacyCheck.mockReturnValue(true)
+
+      await expect(userIsLogged()).resolves.toBe(true)
+      expect(fetchMock).not.toHaveBeenCalled()
+    })
   })
 })

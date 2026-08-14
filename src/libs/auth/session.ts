@@ -29,11 +29,8 @@ export interface SessionInfo {
 
 let sessionPromise: Promise<SessionInfo> | null = null
 
-const fetchSessionInfo = async (): Promise<SessionInfo> => {
+const probeBffSession = async (): Promise<SessionInfo> => {
   try {
-    if (!(await Config.isBffEnabled())) {
-      return { authenticated: Storage.userIsLogged() }
-    }
     const res = await fetch('/auth/me', { credentials: 'include' })
     if (!res.ok) {
       // 401 = no session; 502 = upstream unavailable. Neither is "logged in",
@@ -43,14 +40,26 @@ const fetchSessionInfo = async (): Promise<SessionInfo> => {
     return await res.json() as SessionInfo
   }
   catch {
-    // Config or network failure — treat as signed out rather than crashing
-    // render paths.
+    // Network failure — treat as signed out rather than crashing render paths.
     return { authenticated: false }
   }
 }
 
-export const getSessionInfo = (): Promise<SessionInfo> => {
-  sessionPromise ??= fetchSessionInfo()
+export const getSessionInfo = async (): Promise<SessionInfo> => {
+  try {
+    if (!(await Config.isBffEnabled())) {
+      // Legacy: a free synchronous read, deliberately never cached — the popup
+      // sign-in flow and the dev-only /backgroundsignin page both mutate
+      // localStorage without a page load, so a cached answer would go stale.
+      // (config.json itself is promise-cached, so this costs nothing.)
+      return { authenticated: Storage.userIsLogged() }
+    }
+  }
+  catch {
+    // Config failure — treat as signed out rather than crashing render paths.
+    return { authenticated: false }
+  }
+  sessionPromise ??= probeBffSession()
   return sessionPromise
 }
 
