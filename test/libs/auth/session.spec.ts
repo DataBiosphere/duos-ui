@@ -63,6 +63,13 @@ describe('session probe', () => {
     await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
   })
 
+  it('returns unauthenticated when the config lookup itself fails', async () => {
+    vi.mocked(Config.isBffEnabled).mockRejectedValue(new Error('config unavailable'))
+
+    await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
   it('caches the probe per page load', async () => {
     fetchMock.mockResolvedValue(
       new Response(JSON.stringify({ authenticated: true }), { status: 200 }),

@@ -30,10 +30,10 @@ export interface SessionInfo {
 let sessionPromise: Promise<SessionInfo> | null = null
 
 const fetchSessionInfo = async (): Promise<SessionInfo> => {
-  if (!(await Config.isBffEnabled())) {
-    return { authenticated: Storage.userIsLogged() }
-  }
   try {
+    if (!(await Config.isBffEnabled())) {
+      return { authenticated: Storage.userIsLogged() }
+    }
     const res = await fetch('/auth/me', { credentials: 'include' })
     if (!res.ok) {
       // 401 = no session; 502 = upstream unavailable. Neither is "logged in",
@@ -43,7 +43,8 @@ const fetchSessionInfo = async (): Promise<SessionInfo> => {
     return await res.json() as SessionInfo
   }
   catch {
-    // Network failure — treat as signed out rather than crashing render paths.
+    // Config or network failure — treat as signed out rather than crashing
+    // render paths.
     return { authenticated: false }
   }
 }
