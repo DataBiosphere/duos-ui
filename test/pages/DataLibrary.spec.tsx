@@ -566,7 +566,10 @@ describe('DataLibrary', () => {
 
       renderLibraryInStrictMode(DATASETS_TAB_PATH)
 
-      expect(await screen.findByText(EXPORT_LABEL)).toBeInTheDocument()
+      // Generous timeout: the export button only renders once the async
+      // config fetch resolves, and StrictMode's double render makes this the
+      // slowest path through the grid on a loaded CI machine.
+      expect(await screen.findByText(EXPORT_LABEL, undefined, { timeout: 5000 })).toBeInTheDocument()
       expect(TerraDataRepo.listSnapshotsByDatasetIds).toHaveBeenCalledTimes(1)
       expect(TerraDataRepo.listSnapshotsByDatasetIds).toHaveBeenCalledWith(['DUOS-000001'])
     })

@@ -49,6 +49,24 @@ describe('DatasetExportButton', () => {
     expect(container.firstChild).toBeNull()
   })
 
+  it('strips a trailing slash from terraUrl so hrefs do not contain //#', async () => {
+    // The BFF normalizes DUOS_TERRA_URL, but a static config.json value never
+    // passes through that path — the component must not trust the shape.
+    vi.mocked(Config.getTerraUrl).mockResolvedValue('https://terra.example.com/')
+    await renderButton([snapshotA])
+
+    fireEvent.click(screen.getByRole('button', { name: /export to/i }))
+
+    const link = (await screen.findByText('Terra')).closest('a')
+    expect(link?.getAttribute('href')).toMatch(/^https:\/\/terra\.example\.com\/#import-data/)
+  })
+
+  it('renders nothing when terraUrl is only slashes, treating it as unconfigured', async () => {
+    vi.mocked(Config.getTerraUrl).mockResolvedValue('/')
+    const { container } = await renderButton([snapshotA])
+    expect(container.firstChild).toBeNull()
+  })
+
   it('renders an "Export to..." dropdown button', async () => {
     await renderButton([snapshotA])
 

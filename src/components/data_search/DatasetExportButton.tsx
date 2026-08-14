@@ -16,7 +16,17 @@ export const DatasetExportButton = ({ snapshots }: DatasetExportButtonProps) => 
 
   useEffect(() => {
     (async () => {
-      setTerraUrl(await Config.getTerraUrl())
+      // Strip trailing slashes before the value reaches makeTerraLink's
+      // `${terraUrl}/#import-data?…` concatenation. The BFF normalizes its
+      // DUOS_TERRA_URL override the same way, but a static config.json value
+      // (legacy environments, hand-edited local configs) doesn't pass through
+      // that path — and a bare-slashes value must collapse to '' and hide the
+      // links below rather than produce hrefs with an empty base.
+      let url = (await Config.getTerraUrl()) ?? ''
+      while (url.endsWith('/')) {
+        url = url.slice(0, -1)
+      }
+      setTerraUrl(url)
     })()
   }, [])
 
