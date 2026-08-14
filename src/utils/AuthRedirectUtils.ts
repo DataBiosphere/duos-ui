@@ -26,7 +26,12 @@ export const shouldSkip401Redirect = (
   // share the app's hostname, but their 401s are not authoritative about the
   // DUOS session (an ECM or TDR auth problem must not sign the user out) —
   // treat anything outside the DUOS proxy prefix as non-DUOS.
-  const basePath = apiBase.pathname.replace(/\/+$/, '')
+  // Strip trailing slashes without a regex: `/\/+$/` backtracks
+  // super-linearly (Sonar S8786)
+  let basePath = apiBase.pathname
+  while (basePath.endsWith('/')) {
+    basePath = basePath.slice(0, -1)
+  }
   if (basePath && !requestUrl.pathname.startsWith(`${basePath}/`)) return true
 
   // Only skip redirect for the auth probe endpoint, `${apiUrl}/api/user/me`
