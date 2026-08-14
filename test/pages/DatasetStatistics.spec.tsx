@@ -25,7 +25,9 @@ const mockConfig = {
   tag: '',
   bardApiUrl: '',
   apiUrl: '',
-  terraUrl: '',
+  // Non-empty: the export button hides itself when no Terra is configured,
+  // and these specs exercise the export dropdown.
+  terraUrl: 'https://terra.example.com',
   tdrApiUrl: '',
   ecmApiUrl: '',
   features: {},

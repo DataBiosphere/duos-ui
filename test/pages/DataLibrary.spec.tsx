@@ -104,7 +104,9 @@ const mockTdrSnapshotResponse = (id: string, role: string) => ({
 // Mock fetch for /config.json (replaces cy.initApplicationConfig())
 const mockConfig = {
   env: 'ci', hash: '', tag: '', bardApiUrl: '', apiUrl: '',
-  terraUrl: '', tdrApiUrl: '', ecmApiUrl: '', features: {},
+  // Non-empty: the export button hides itself when no Terra is configured,
+  // and the datasets-tab specs exercise the export dropdown.
+  terraUrl: 'https://terra.example.com', tdrApiUrl: '', ecmApiUrl: '', features: {},
 }
 const originalFetch = globalThis.fetch
 globalThis.fetch = vi.fn((...args: Parameters<typeof fetch>) => {
