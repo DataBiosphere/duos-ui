@@ -4,7 +4,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import ChairConsole from 'src/pages/ChairConsole'
 import { Collections } from 'src/libs/ajax/Collections'
-import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { DarCollectionSummary } from 'src/types/model'
@@ -18,12 +17,6 @@ vi.mock('react-router', () => ({
 vi.mock('src/libs/ajax/Collections', () => ({
   Collections: {
     getCollectionSummariesByRoleName: vi.fn(),
-  },
-}))
-
-vi.mock('src/libs/ajax/User', () => ({
-  User: {
-    getUserRelevantDatasets: vi.fn(),
   },
 }))
 
@@ -117,7 +110,6 @@ describe('ChairConsole', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(useResponsiveDarCollectionColumns).mockReturnValue(['col1', 'col2'])
-    vi.mocked(User.getUserRelevantDatasets).mockResolvedValue([])
   })
 
   it('renders the page title', async () => {
@@ -132,11 +124,10 @@ describe('ChairConsole', () => {
     expect(screen.getByText('Select and manage Data Access Requests for DAC Review')).toBeInTheDocument()
   })
 
-  it('fetches collections and relevant datasets on mount', async () => {
+  it('fetches collections on mount', async () => {
     vi.mocked(Collections.getCollectionSummariesByRoleName).mockResolvedValue([])
     await act(async () => render(<ChairConsole />))
     expect(Collections.getCollectionSummariesByRoleName).toHaveBeenCalledTimes(1)
-    expect(User.getUserRelevantDatasets).toHaveBeenCalledTimes(1)
   })
 
   it('passes loaded collections to the table', async () => {

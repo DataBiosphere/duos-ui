@@ -1,49 +1,13 @@
-import React, { useState, useEffect, Fragment, useCallback } from 'react'
-import { cloneDeep, isNil } from 'src/utils/NodashUtil'
-import { DarCollectionTableColumnOptions, styles, consoleTypes } from 'src/utils/DarCollectionUtils'
+import React, { Fragment, useCallback, useMemo, useState } from 'react'
+import { DataGrid, GridPaginationModel, GridSortDirection, GridSortModel } from '@mui/x-data-grid'
+import { Box, CircularProgress } from '@mui/material'
 import { Storage } from 'src/libs/storage'
-import PaginationBar from 'src/components/PaginationBar'
-import { recalculateVisibleTable, goToPage as updatePage, Notifications } from 'src/libs/utils'
-import SimpleTable, { type RowWrapperArgs } from 'src/components/SimpleTable'
-import cellData, { type CellData } from 'src/components/dar_collection_table/DarCollectionTableCellData'
+import { isNil, toLower, uniq } from 'src/utils/NodashUtil'
+import { DarCollectionTableColumnOptions, consoleTypes } from 'src/utils/DarCollectionUtils'
+import { buildDarCollectionGridRows, makeDarCollectionColumns } from 'src/components/dar_collection_table/DarCollectionGridColumns'
+import { useDarCollectionDataUseBuckets } from 'src/components/dar_collection_table/useDarCollectionDataUseBuckets'
 import CollectionConfirmationModal from 'src/components/dar_collection_table/CollectionConfirmationModal'
-import 'src/components/dar_collection_table/dar_collection_table.css'
-import { DarDatasetTable } from 'src/components/dar_dataset_table/DarDatasetTable'
-import { Collections } from 'src/libs/ajax/Collections'
-import { DarCollection, DarCollectionSummary } from 'src/types/model'
-
-interface SortConfig {
-  colIndex: number
-  dir: number
-}
-
-interface CollectionCellFnArgs {
-  collection: DarCollectionSummary
-  darCollectionId: number
-  datasetIds: number[]
-  darCode: string
-  status: string
-  name: string
-  submissionDate: number
-  researcherName: string
-  institutionName: string
-  showConfirmationModal: (collection: DarCollectionSummary, action: string) => void
-  consoleType: string
-  goToVote?: (collectionId: number) => void
-  relevantDatasets?: unknown
-  actions?: string[]
-  dacNames: string[]
-  collectionIsExpanded: boolean
-  updateCollectionIsExpanded: (val: boolean) => void
-  label?: string
-}
-
-interface ColumnConfig {
-  label: string
-  cellStyle: React.CSSProperties
-  cellDataFn: (args: CollectionCellFnArgs) => CellData
-  sortable?: boolean
-}
+import { DarCollectionSummary } from 'src/types/model'
 
 export interface DarCollectionTableProps {
   collections?: DarCollectionSummary[]
@@ -54,204 +18,104 @@ export interface DarCollectionTableProps {
   openCollection?: ((collection: DarCollectionSummary) => Promise<void>) | null
   goToVote?: (collectionId: number) => void
   consoleType?: string
-  relevantDatasets?: unknown
   deleteDraft?: ((collection: DarCollectionSummary) => Promise<void>) | null
   approveCollection?: ((collection: DarCollectionSummary) => Promise<void>) | null
 }
 
-interface ProcessCollectionRowDataArgs {
-  collections?: DarCollectionSummary[]
-  collectionIsExpanded: (id: number) => boolean
-  updateCollectionIsExpandedById: (id: number, val: boolean) => void
-  showConfirmationModal: (collection: DarCollectionSummary, action: string) => void
-  columns?: string[]
-  consoleType?: string
-  goToVote?: (collectionId: number) => void
-  relevantDatasets?: unknown
-}
-
 const storageDarCollectionSort = 'storageDarCollectionSort'
 
-const columnHeaderConfig: Record<string, ColumnConfig> = {
-  darCode: {
-    label: 'DAR Code',
-    cellStyle: { width: styles.cellWidth.darCode },
-    cellDataFn: cellData.darCodeCellData as (args: CollectionCellFnArgs) => CellData,
-    sortable: true,
-  },
-  dacNames: {
-    label: 'DAC',
-    cellStyle: { width: styles.cellWidth.dacNames },
-    cellDataFn: cellData.DacCellData as (args: CollectionCellFnArgs) => CellData,
-    sortable: true,
-  },
-  name: {
-    label: 'Title',
-    cellStyle: { width: styles.cellWidth.projectTitle },
-    cellDataFn: cellData.projectTitleCellData as (args: CollectionCellFnArgs) => CellData,
-    sortable: true,
-  },
-  submissionDate: {
-    label: 'Submission Date',
-    cellStyle: { width: styles.cellWidth.submissionDate },
-    cellDataFn: cellData.submissionDateCellData as (args: CollectionCellFnArgs) => CellData,
-    sortable: true,
-  },
-  researcher: {
-    label: 'Researcher',
-    cellStyle: { width: styles.cellWidth.researcher },
-    cellDataFn: cellData.researcherCellData as (args: CollectionCellFnArgs) => CellData,
-    sortable: true,
-  },
-  institution: {
-    label: 'Institution',
-    cellStyle: { width: styles.cellWidth.institution },
-    cellDataFn: cellData.institutionCellData as (args: CollectionCellFnArgs) => CellData,
-    sortable: true,
-  },
-  datasetCount: {
-    label: 'Datasets',
-    cellStyle: { width: styles.cellWidth.datasetCount },
-    cellDataFn: cellData.datasetCountCellData as (args: CollectionCellFnArgs) => CellData,
-    sortable: true,
-  },
-  expiresAt: {
-    label: 'Expiration Date',
-    cellStyle: { width: styles.cellWidth.expirationDate },
-    cellDataFn: cellData.expiresAtCellData as (args: CollectionCellFnArgs) => CellData,
-    sortable: true,
-  },
-  status: {
-    label: 'Status',
-    cellStyle: { width: styles.cellWidth.status },
-    cellDataFn: cellData.statusCellData as (args: CollectionCellFnArgs) => CellData,
-    sortable: true,
-  },
-  actions: {
-    label: 'Action',
-    cellStyle: { width: styles.cellWidth.actions },
-    cellDataFn: cellData.consoleActionsCellData as (args: CollectionCellFnArgs) => CellData,
-  },
+interface StoredSort {
+  field: string
+  dir: number
 }
 
-const defaultColumns = Object.keys(columnHeaderConfig)
+const defaultColumns = [
+  DarCollectionTableColumnOptions.DAR_CODE,
+  DarCollectionTableColumnOptions.DAC,
+  DarCollectionTableColumnOptions.NAME,
+  DarCollectionTableColumnOptions.SUBMISSION_DATE,
+  DarCollectionTableColumnOptions.RESEARCHER,
+  DarCollectionTableColumnOptions.INSTITUTION,
+  DarCollectionTableColumnOptions.DATASET_COUNT,
+  DarCollectionTableColumnOptions.DATA_USE,
+  DarCollectionTableColumnOptions.EXPIRES_AT,
+  DarCollectionTableColumnOptions.STATUS,
+  DarCollectionTableColumnOptions.ACTIONS,
+]
 
-const columnHeaderData = (columns = defaultColumns): ColumnConfig[] => {
-  return columns.map(col => columnHeaderConfig[col])
+const getInitialSortModel = (columns: string[]): GridSortModel => {
+  const stored = Storage.getCurrentUserSettings<StoredSort>(storageDarCollectionSort)
+    ?? { field: DarCollectionTableColumnOptions.SUBMISSION_DATE, dir: -1 }
+  const field = columns.includes(stored.field) ? stored.field : columns[0]
+  return field ? [{ field, sort: stored.dir === -1 ? 'desc' : 'asc' }] : []
 }
 
-const collectionsSummaryMap: Record<number, DarCollectionSummary> = {}
-
-const processCollectionRowData = ({
-  collections,
-  collectionIsExpanded,
-  updateCollectionIsExpandedById,
-  showConfirmationModal,
-  columns = defaultColumns,
-  consoleType = '',
-  goToVote,
-  relevantDatasets,
-}: ProcessCollectionRowDataArgs): CellData[][] | undefined => {
-  if (!isNil(collections)) {
-    return collections.map((collection) => {
-      const {
-        darCollectionId, darCode, datasetIds,
-        submissionDate, status, actions, dacNames,
-        researcherName, name, institutionName,
-      } = collection
-      collectionsSummaryMap[collection.darCollectionId] = collection
-      return columns.map((col) => {
-        return columnHeaderConfig[col].cellDataFn({
-          collection, darCollectionId, datasetIds, darCode, status, name,
-          submissionDate, researcherName, institutionName,
-          showConfirmationModal, consoleType,
-          goToVote, relevantDatasets, actions, dacNames,
-          collectionIsExpanded: collectionIsExpanded(darCollectionId),
-          updateCollectionIsExpanded: val => updateCollectionIsExpandedById(darCollectionId, val),
-        })
-      })
-    })
+// Sorting/pagination run in DataGrid's "server" mode (self-managed): DataGrid never
+// reorders or slices `rows` on its own, since row spanning requires each collection's
+// data-use rows to stay contiguous and never be split across a page boundary.
+const getSortValue = (field: string, row: DarCollectionSummary): string | number => {
+  switch (field) {
+    case DarCollectionTableColumnOptions.DAR_CODE:
+      return row.darCode ?? ''
+    case DarCollectionTableColumnOptions.DAC:
+      return uniq(row.dacNames).join(', ')
+    case DarCollectionTableColumnOptions.NAME:
+      return row.name ?? ''
+    case DarCollectionTableColumnOptions.SUBMISSION_DATE:
+      return (isNil(row.submissionDate) || toLower(String(row.submissionDate)) === 'unsubmitted')
+        ? -Infinity
+        : Number(row.submissionDate)
+    case DarCollectionTableColumnOptions.RESEARCHER:
+      return row.researcherName ?? ''
+    case DarCollectionTableColumnOptions.INSTITUTION:
+      return row.institutionName ?? ''
+    case DarCollectionTableColumnOptions.DATASET_COUNT:
+      return row.datasetCount ?? 0
+    case DarCollectionTableColumnOptions.EXPIRES_AT:
+      return isNil(row.expiresAt) ? -Infinity : row.expiresAt
+    case DarCollectionTableColumnOptions.STATUS:
+      return row.status ?? ''
+    default:
+      return 0
   }
 }
 
-const getInitialSort = (columns: string[] = []): SortConfig => {
-  const sort = Storage.getCurrentUserSettings(storageDarCollectionSort) ?? {
-    field: DarCollectionTableColumnOptions.SUBMISSION_DATE,
-    dir: -1,
-  }
-  const sortIndex = columns.indexOf(sort.field)
-
-  if (sortIndex === -1) {
-    return { colIndex: 0, dir: 1 }
-  }
-  else {
-    return { colIndex: sortIndex, dir: sort.dir }
-  }
+const sortDarCollections = (
+  collections: DarCollectionSummary[],
+  field: string,
+  direction: GridSortDirection,
+): DarCollectionSummary[] => {
+  const multiplier = direction === 'desc' ? -1 : 1
+  return [...collections].sort((a, b) => {
+    const aValue = getSortValue(field, a)
+    const bValue = getSortValue(field, b)
+    if (aValue < bValue) return -1 * multiplier
+    if (aValue > bValue) return 1 * multiplier
+    return 0
+  })
 }
+
+const LoadingOverlay = () => (
+  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+    <CircularProgress />
+  </Box>
+)
 
 export const DarCollectionTable = function DarCollectionTable(props: DarCollectionTableProps) {
-  const [visibleCollection, setVisibleCollection] = useState<CellData[][]>([])
-  const [collectionsExpandedState, setCollectionsExpandedState] = useState<Record<number, boolean>>({})
-  const [darCollectionCache, setDarCollectionCache] = useState<Record<number, DarCollection | null>>({})
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageCount, setPageCount] = useState(1)
-  const [sort, setSort] = useState<SortConfig>(getInitialSort(props.columns))
-  const [tableSize, setTableSize] = useState(10)
+  const {
+    collections, columns = defaultColumns, isLoading, cancelCollection, reviseCollection,
+    openCollection, goToVote, consoleType = '', deleteDraft, approveCollection,
+  } = props
+
+  const [sortModel, setSortModel] = useState<GridSortModel>(() => getInitialSortModel(columns))
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [selectedCollection, setSelectedCollection] = useState<DarCollectionSummary>({} as DarCollectionSummary)
   const [consoleAction, setConsoleAction] = useState<string | undefined>()
-  const {
-    collections, columns, isLoading, cancelCollection, reviseCollection,
-    openCollection, goToVote, consoleType, relevantDatasets, deleteDraft,
-    approveCollection,
-  } = props
+
   const isUnfilteredView = consoleType === consoleTypes.ADMIN
     || consoleType === consoleTypes.RESEARCHER
     || consoleType === consoleTypes.SIGNING_OFFICIAL
-
-  /*
-    NOTE: This component will most likely be used in multiple consoles
-    Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
-    This will be updated to account for token based requests on a later ticket
-  */
-
-  const updateCollectionIsExpandedById = useCallback((id: number, val: boolean) => {
-    if (collectionsExpandedState[id] !== val) {
-      const newCollectionsExpandedState = cloneDeep(collectionsExpandedState)
-      newCollectionsExpandedState[id] = val
-      setCollectionsExpandedState(newCollectionsExpandedState)
-    }
-  }, [collectionsExpandedState])
-
-  const collectionIsExpanded = useCallback((id: number) => {
-    return collectionsExpandedState[id]
-  }, [collectionsExpandedState])
-
-  const fetchDarCollection = useCallback((darCollectionId: number) => {
-    if (isNil(darCollectionCache[darCollectionId])) {
-      return Collections.getCollectionById(darCollectionId).then((coll) => {
-        const cache = cloneDeep(darCollectionCache)
-        cache[darCollectionId] = coll
-        setDarCollectionCache(cache)
-        return coll
-      }).catch(() => {
-        const cache = cloneDeep(darCollectionCache)
-        cache[darCollectionId] = null
-        setDarCollectionCache(cache)
-        Notifications.showError({ text: 'Could not load DAR Collection.' })
-        return null
-      })
-    }
-    else {
-      return darCollectionCache[darCollectionId]
-    }
-  }, [darCollectionCache, setDarCollectionCache])
-
-  const changeTableSize = useCallback((value: number) => {
-    if (value > 0 && !Number.isNaN(Number.parseInt(String(value)))) {
-      setTableSize(value)
-    }
-  }, [])
 
   const showConfirmationModal = useCallback((collectionSummary: DarCollectionSummary, action = '') => {
     setConsoleAction(action)
@@ -259,104 +123,78 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
     setShowConfirmation(true)
   }, [])
 
-  useEffect(() => {
-    recalculateVisibleTable({
-      tableSize,
-      pageCount,
-      filteredList: processCollectionRowData({
-        collections,
-        collectionIsExpanded,
-        updateCollectionIsExpandedById,
-        columns,
-        showConfirmationModal,
-        consoleType,
-        goToVote,
-        relevantDatasets,
-      }) ?? [],
-      currentPage,
-      setPageCount,
-      setCurrentPage,
-      setVisibleList: setVisibleCollection,
-      sort,
-    })
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, consoleType, goToVote, relevantDatasets, collectionIsExpanded, updateCollectionIsExpandedById, showConfirmationModal])
+  const handleSortModelChange = useCallback((model: GridSortModel) => {
+    setSortModel(model)
+    if (model[0]) {
+      Storage.setCurrentUserSettings(storageDarCollectionSort, {
+        field: model[0].field,
+        dir: model[0].sort === 'desc' ? -1 : 1,
+      })
+    }
+  }, [])
 
-  const goToPage = useCallback(
-    (value: number) => {
-      updatePage(value, pageCount, setCurrentPage)
-    },
-    [pageCount],
+  const sortedCollections = useMemo(() => {
+    if (isNil(collections)) return []
+    return sortModel[0] ? sortDarCollections(collections, sortModel[0].field, sortModel[0].sort) : collections
+  }, [collections, sortModel])
+
+  // Pagination is done by collection, not by grid row, so that one collection's data-use
+  // rows are never split across a page boundary (which would break row spanning).
+  const pagedCollections = useMemo(() => {
+    const start = paginationModel.page * paginationModel.pageSize
+    return sortedCollections.slice(start, start + paginationModel.pageSize)
+  }, [sortedCollections, paginationModel])
+
+  const visibleCollectionIds = useMemo(
+    () => pagedCollections.map(c => c.darCollectionId),
+    [pagedCollections],
   )
 
-  const showDatasetDropdownWrapper = useCallback((wrapperArgs: RowWrapperArgs) => {
-    const { renderedRow, rowData } = wrapperArgs
-    const darCollectionId = rowData[0].id as number
+  const bucketsByCollectionId = useDarCollectionDataUseBuckets(visibleCollectionIds, isUnfilteredView)
 
-    if (collectionIsExpanded(darCollectionId)) {
-      fetchDarCollection(darCollectionId)
-      return (
-        <div key={`expanded-${darCollectionId}`}>
-          {renderedRow}
-          <div
-            style={{
-              width: '80%',
-              margin: 'auto',
-            }}
-          >
-            <DarDatasetTable
-              collection={darCollectionCache[darCollectionId]!}
-              isLoading={isNil(darCollectionCache[darCollectionId])}
-              isUnfilteredView={isUnfilteredView}
-            />
-          </div>
-        </div>
-      )
-    }
-    return renderedRow
-  }, [darCollectionCache, fetchDarCollection, collectionIsExpanded, isUnfilteredView])
+  const rows = useMemo(
+    () => buildDarCollectionGridRows(pagedCollections, bucketsByCollectionId),
+    [pagedCollections, bucketsByCollectionId],
+  )
+
+  const currentUser = useMemo(() => Storage.getCurrentUser(), [])
+
+  const gridColumns = useMemo(() => makeDarCollectionColumns(columns, {
+    consoleType,
+    goToVote,
+    showConfirmationModal,
+    currentUser,
+  }), [columns, consoleType, goToVote, showConfirmationModal, currentUser])
 
   return (
     <Fragment>
-      <SimpleTable
-        isLoading={isLoading}
-        rowData={visibleCollection}
-        columnHeaders={columnHeaderData(columns)}
-        styles={styles}
-        tableSize={tableSize}
-        paginationBar={(
-          <PaginationBar
-            pageCount={pageCount}
-            currentPage={currentPage}
-            tableSize={tableSize}
-            goToPage={goToPage}
-            changeTableSize={changeTableSize}
-          />
-        )}
-        rowWrapper={showDatasetDropdownWrapper}
-        sort={sort}
-        onSort={(s: SortConfig) => {
-          Storage.setCurrentUserSettings(storageDarCollectionSort, {
-            field: columns?.[s.colIndex],
-            dir: s.dir,
-          })
-          setSort(s)
-        }}
-      />
-      {
-        /*
-      Modal needs to be more flexible
-      Should take in an operation type, use that to determine message on modal
-      Operations: Open, Cancel, Revise
-
-      How to make more flexible?
-        - Need to change message based on operation
-        - Need to change prop function based on operation
-        - showConfirmationModal
-         - Can take in an extra op argument, assign that as a state variable
-         - Modal function can be defined via useCallback, recomputed if op state variable changes
-         - Above can also be applied for modal message (expect use useMemo instead of useCallback)
-    */
-      }
+      <Box sx={{ width: '100%' }}>
+        <DataGrid
+          rows={rows}
+          getRowId={row => row.id}
+          columns={gridColumns}
+          loading={isLoading}
+          rowHeight={56}
+          rowSpanning
+          sortingMode="server"
+          sortingOrder={['asc', 'desc']}
+          paginationMode="server"
+          rowCount={sortedCollections.length}
+          sortModel={sortModel}
+          onSortModelChange={handleSortModelChange}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[10, 25, 50]}
+          disableRowSelectionOnClick
+          slots={{ loadingOverlay: LoadingOverlay }}
+          sx={{
+            '& .MuiDataGrid-cell:focus': { outline: 'none' },
+            '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
+            '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
+            '& .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
+          }}
+        />
+      </Box>
       <CollectionConfirmationModal
         collection={selectedCollection}
         showConfirmation={showConfirmation}

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import SearchBar from 'src/components/SearchBar'
-import { User } from 'src/libs/ajax/User'
 import { Collections } from 'src/libs/ajax/Collections'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
@@ -10,14 +9,13 @@ import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCol
 import { useNavigate } from 'react-router'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import { DarCollectionSummary, Dataset } from 'src/types/model'
+import { DarCollectionSummary } from 'src/types/model'
 
 export default function MemberConsole() {
   usePageTitle('Data Access Requests')
   const navigate = useNavigate()
   const [collections, setCollections] = useState<DarCollectionSummary[]>([])
   const [filteredList, setFilteredList] = useState<DarCollectionSummary[]>([])
-  const [relevantDatasets, setRelevantDatasets] = useState<Dataset[]>()
   const [isLoading, setIsLoading] = useState(true)
   const filterFn = getSearchFilterFunctions().darCollections
 
@@ -32,12 +30,8 @@ export default function MemberConsole() {
   useEffect(() => {
     const init = async () => {
       try {
-        const [collections, datasets] = await Promise.all([
-          Collections.getCollectionSummariesByRoleName(USER_ROLES.member),
-          User.getUserRelevantDatasets(),
-        ])
+        const collections = await Collections.getCollectionSummariesByRoleName(USER_ROLES.member)
         setCollections(collections)
-        setRelevantDatasets(datasets)
         setFilteredList(collections)
         setIsLoading(false)
       }
@@ -69,7 +63,6 @@ export default function MemberConsole() {
           collections={filteredList}
           columns={responsiveColumns}
           isLoading={isLoading}
-          relevantDatasets={relevantDatasets}
           reviseCollection={null}
           goToVote={goToVote}
           consoleType={consoleTypes.MEMBER}

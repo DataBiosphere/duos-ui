@@ -4,7 +4,6 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import MemberConsole from 'src/pages/MemberConsole'
 import { Collections } from 'src/libs/ajax/Collections'
-import { User } from 'src/libs/ajax/User'
 import { USER_ROLES } from 'src/libs/utils'
 import { consoleTypes } from 'src/utils/DarCollectionUtils'
 import { DarCollectionSummary } from 'src/types/model'
@@ -58,12 +57,6 @@ vi.mock('src/libs/ajax/Collections', () => ({
   },
 }))
 
-vi.mock('src/libs/ajax/User', () => ({
-  User: {
-    getUserRelevantDatasets: vi.fn(),
-  },
-}))
-
 vi.mock('src/components/TableHeaderSection', () => ({
   default: ({ title, description }: { title: string, description: string }) => (
     <div>
@@ -110,7 +103,6 @@ describe('MemberConsole', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(Collections.getCollectionSummariesByRoleName).mockResolvedValue([collection1, collection2])
-    vi.mocked(User.getUserRelevantDatasets).mockResolvedValue([])
   })
 
   it('renders the page title and description', async () => {
@@ -133,14 +125,6 @@ describe('MemberConsole', () => {
     expect(table).toHaveAttribute('data-loading', 'false')
     expect(screen.getByText('DAR-1')).toBeInTheDocument()
     expect(screen.getByText('DAR-2')).toBeInTheDocument()
-  })
-
-  it('fetches relevant datasets alongside collections', async () => {
-    renderWithRouter(<MemberConsole />)
-
-    await waitFor(() => {
-      expect(User.getUserRelevantDatasets).toHaveBeenCalled()
-    })
   })
 
   it('renders a search bar', async () => {

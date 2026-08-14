@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import SearchBar from 'src/components/SearchBar'
-import { User } from 'src/libs/ajax/User'
 import { Collections } from 'src/libs/ajax/Collections'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
@@ -10,14 +9,13 @@ import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCol
 import { useNavigate } from 'react-router'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import { DarCollectionSummary, Dataset } from 'src/types/model'
+import { DarCollectionSummary } from 'src/types/model'
 
 export default function ChairConsole() {
   usePageTitle('Data Access Requests')
   const navigate = useNavigate()
   const [collections, setCollections] = useState<DarCollectionSummary[]>([])
   const [filteredList, setFilteredList] = useState<DarCollectionSummary[]>([])
-  const [relevantDatasets, setRelevantDatasets] = useState<Dataset[] | undefined>()
   const [isLoading, setIsLoading] = useState(true)
   const [searchText, setSearchText] = useState('')
   const filterFn = getSearchFilterFunctions().darCollections
@@ -32,12 +30,8 @@ export default function ChairConsole() {
   useEffect(() => {
     const init = async () => {
       try {
-        const [cols, datasets] = await Promise.all([
-          Collections.getCollectionSummariesByRoleName(USER_ROLES.chairperson),
-          User.getUserRelevantDatasets(),
-        ])
+        const cols = await Collections.getCollectionSummariesByRoleName(USER_ROLES.chairperson)
         setCollections(cols)
-        setRelevantDatasets(datasets)
         setFilteredList(cols)
         setIsLoading(false)
       }
@@ -79,7 +73,6 @@ export default function ChairConsole() {
           collections={filteredList}
           columns={responsiveColumns}
           isLoading={isLoading}
-          relevantDatasets={relevantDatasets}
           cancelCollection={cancelCollection}
           reviseCollection={null}
           openCollection={openCollection}
