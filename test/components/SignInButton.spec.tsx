@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event'
 import SignInButton from 'src/components/SignInButton'
 import { Auth } from 'src/libs/auth/auth'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
+import type { OidcUser } from 'src/libs/auth/oidcBroker'
 
 /**
  * With the BFF, SignInButton is just the front door: clicking it calls
@@ -35,8 +36,9 @@ describe('SignInButton', () => {
     vi.mocked(ServiceStatus.isConsentHealthy).mockResolvedValue(true)
     vi.mocked(ServiceStatus.isSamHealthy).mockResolvedValue(true)
     // Auth.signIn normally never resolves in the browser (the page navigates
-    // away); resolving keeps the default happy-path tests simple.
-    vi.mocked(Auth.signIn).mockResolvedValue(undefined)
+    // away); resolving keeps the default happy-path tests simple. The button
+    // never reads the legacy OidcUser result, so the value itself is unused.
+    vi.mocked(Auth.signIn).mockResolvedValue(undefined as unknown as OidcUser)
   })
 
   afterEach(() => {
