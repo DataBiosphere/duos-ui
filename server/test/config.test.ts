@@ -29,6 +29,7 @@ describe('readConfig', () => {
 
   afterEach(() => {
     delete process.env.DUOS_API_URL
+    delete process.env.DUOS_TERRA_URL
     resetConfigCache()
     log.error.mockClear()
     // Guarded: rmSync(undefined) throws and would mask the real failure of a
@@ -52,6 +53,23 @@ describe('readConfig', () => {
     const file = writeFixture({ apiUrl: 'https://consent.dsde-dev.broadinstitute.org', env: 'dev' })
     process.env.DUOS_API_URL = 'https://local.dsde-dev.broadinstitute.org:27443'
     expect(await readConfig(file, log)).toEqual({ apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443', env: 'dev' })
+  })
+
+  it('overrides terraUrl with DUOS_TERRA_URL, leaving other fields untouched', async () => {
+    const file = writeFixture({ terraUrl: 'https://bvdp-saturn-dev.appspot.com', env: 'dev' })
+    process.env.DUOS_TERRA_URL = 'https://bvdp-saturn-perf.appspot.com'
+    expect(await readConfig(file, log)).toEqual({ terraUrl: 'https://bvdp-saturn-perf.appspot.com', env: 'dev' })
+  })
+
+  it('strips trailing slashes from DUOS_TERRA_URL so link concatenation stays clean', async () => {
+    const file = writeFixture({ terraUrl: '', env: 'dev' })
+    process.env.DUOS_TERRA_URL = 'https://bvdp-saturn-dev.appspot.com/'
+    expect(await readConfig(file, log)).toEqual({ terraUrl: 'https://bvdp-saturn-dev.appspot.com', env: 'dev' })
+  })
+
+  it('keeps the static terraUrl when DUOS_TERRA_URL is not set', async () => {
+    const file = writeFixture({ terraUrl: 'https://bvdp-saturn-dev.appspot.com', env: 'dev' })
+    expect(await readConfig(file, log)).toEqual({ terraUrl: 'https://bvdp-saturn-dev.appspot.com', env: 'dev' })
   })
 
   it('logs and rethrows on a missing file, without caching the failure', async () => {

@@ -179,6 +179,7 @@ describe('GET /config.json', () => {
   afterEach(async () => {
     delete process.env.CONFIG_PATH
     delete process.env.DUOS_API_URL
+    delete process.env.DUOS_TERRA_URL
     const { resetConfigCache } = await import('../src/config.js')
     resetConfigCache()
     // Guarded: rmSync(undefined) throws and would mask the real failure of a
@@ -186,12 +187,13 @@ describe('GET /config.json', () => {
     if (dir) rmSync(dir, { recursive: true, force: true })
   })
 
-  it('overrides apiUrl with DUOS_API_URL instead of serving the static file verbatim', async () => {
+  it('overrides apiUrl and terraUrl from the env instead of serving the static file verbatim', async () => {
     dir = mkdtempSync(path.join(tmpdir(), 'duos-config-'))
     const file = path.join(dir, 'config.json')
-    writeFileSync(file, JSON.stringify({ apiUrl: 'https://consent.dsde-dev.broadinstitute.org', env: 'dev' }))
+    writeFileSync(file, JSON.stringify({ apiUrl: 'https://consent.dsde-dev.broadinstitute.org', terraUrl: '', env: 'dev' }))
     process.env.CONFIG_PATH = file
     process.env.DUOS_API_URL = 'https://local.dsde-dev.broadinstitute.org:27443'
+    process.env.DUOS_TERRA_URL = 'https://bvdp-saturn-dev.appspot.com'
 
     // buildApp() now reads config.json eagerly at startup (to gate the BFF
     // auth routes on bffEnabled) — the outer beforeEach's own buildApp() call
@@ -205,7 +207,7 @@ describe('GET /config.json', () => {
 
     const res = await localApp.inject({ method: 'GET', url: '/config.json' })
     expect(res.statusCode).toBe(200)
-    expect(res.json()).toEqual({ apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443', env: 'dev' })
+    expect(res.json()).toEqual({ apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443', terraUrl: 'https://bvdp-saturn-dev.appspot.com', env: 'dev' })
 
     // HEAD must serve the same (overridden) resource, not fall through to the
     // static file — mismatched GET/HEAD Content-Length corrupts caches.

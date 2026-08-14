@@ -40,6 +40,14 @@ async function loadAndMerge(configPath: string): Promise<Record<string, unknown>
   if (process.env.DUOS_API_URL) {
     config.apiUrl = process.env.DUOS_API_URL
   }
+  // Unlike the DUOS_ECM/TDR/BARD_URL upstreams, Terra is not proxied: `terraUrl`
+  // is the base for links that send the user to Terra itself (the dataset
+  // export button), so the env var feeds the client config rather than a proxy
+  // route. Trailing slashes are stripped because the client concatenates
+  // `${terraUrl}/#import-data?…` — a slash here would produce `//#`.
+  if (process.env.DUOS_TERRA_URL) {
+    config.terraUrl = process.env.DUOS_TERRA_URL.replace(/\/+$/, '')
+  }
   return config
 }
 

@@ -3,10 +3,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { act, render, screen, fireEvent } from '@testing-library/react'
 import { DatasetExportButton } from 'src/components/data_search/DatasetExportButton'
 import { SnapshotSummaryModel } from 'src/types/tdrModel'
+import { Config } from 'src/libs/config'
 
 vi.mock('src/libs/config', () => ({
   Config: {
-    getTerraUrl: vi.fn().mockResolvedValue('https://terra.example.com'),
+    getTerraUrl: vi.fn(),
   },
 }))
 
@@ -32,10 +33,19 @@ const renderButton = async (snapshots: SnapshotSummaryModel[]) => {
 describe('DatasetExportButton', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(Config.getTerraUrl).mockResolvedValue('https://terra.example.com')
   })
 
   it('renders nothing when snapshots is empty', async () => {
     const { container } = await renderButton([])
+    expect(container.firstChild).toBeNull()
+  })
+
+  it('renders nothing when terraUrl is not configured, instead of links with an empty base', async () => {
+    // BEEs define neither config.json's terraUrl nor DUOS_TERRA_URL — the
+    // export button must disappear, not link to `/#import-data?…`.
+    vi.mocked(Config.getTerraUrl).mockResolvedValue('')
+    const { container } = await renderButton([snapshotA])
     expect(container.firstChild).toBeNull()
   })
 

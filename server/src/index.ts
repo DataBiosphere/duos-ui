@@ -253,6 +253,15 @@ export async function buildApp(): Promise<AppInstance> {
         fastify.log.warn(`[server] ${envVar} is not set — the ${prefix} proxy is disabled, so ${feature} will fail in this BFF environment`)
       }
     }
+
+    // DUOS_TERRA_URL is the odd one out among the upstream env vars: Terra is
+    // not proxied — the var overrides config.json's `terraUrl`, the base for
+    // links that send the user to Terra itself (see config.ts). Same optional
+    // posture as the proxies: boot + warn when unset, and the client hides its
+    // Terra export links when the resulting terraUrl is empty (BEEs).
+    if (!process.env.DUOS_TERRA_URL) {
+      fastify.log.warn('[server] DUOS_TERRA_URL is not set — config.json keeps its static terraUrl; where that is empty too, Terra export links are hidden')
+    }
   }
   else {
     fastify.log.info('[server] bffEnabled is not true — BFF auth routes disabled (legacy client-side auth)')

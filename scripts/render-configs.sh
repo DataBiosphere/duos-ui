@@ -64,6 +64,9 @@ API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
 ECM_URL_DEFAULT="https://externalcreds.dsde-dev.broadinstitute.org"
 TDR_URL_DEFAULT="https://jade.datarepo-dev.broadinstitute.org"
 BARD_URL_DEFAULT="https://terra-bard-dev.appspot.com"
+# Not a proxy upstream: the server overrides config.json's terraUrl with this,
+# the base for links that send the user to Terra itself (dataset export).
+TERRA_URL_DEFAULT="https://bvdp-saturn-dev.appspot.com"
 
 parse_cli_args() {
     while [[ $# -gt 0 ]]; do
@@ -170,6 +173,7 @@ write_env() {
   ECM_URL=$(existing_env DUOS_ECM_URL)
   TDR_URL=$(existing_env DUOS_TDR_URL)
   BARD_URL=$(existing_env DUOS_BARD_URL)
+  TERRA_URL=$(existing_env DUOS_TERRA_URL)
 
   if [[ -f "$ENV_FILE" ]]; then
     echo "Backing up existing .env.local to .env.local.bak"
@@ -212,6 +216,7 @@ DUOS_API_URL=${API_URL:-$API_URL_DEFAULT}
 DUOS_ECM_URL=${ECM_URL:-$ECM_URL_DEFAULT}
 DUOS_TDR_URL=${TDR_URL:-$TDR_URL_DEFAULT}
 DUOS_BARD_URL=${BARD_URL:-$BARD_URL_DEFAULT}
+DUOS_TERRA_URL=${TERRA_URL:-$TERRA_URL_DEFAULT}
 EOF
   } > "$ENV_FILE"
   chmod 600 "$ENV_FILE"

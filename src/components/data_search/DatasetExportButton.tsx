@@ -20,7 +20,10 @@ export const DatasetExportButton = ({ snapshots }: DatasetExportButtonProps) => 
     })()
   }, [])
 
-  if (snapshots.length === 0) return null
+  // No terraUrl means this environment has no Terra to export to (BEEs define
+  // neither the static config value nor DUOS_TERRA_URL) — hide the links
+  // rather than render them with an empty base.
+  if (snapshots.length === 0 || terraUrl === '') return null
 
   const makeTerraLink = (snapshot: SnapshotSummaryModel) =>
     `${terraUrl}/#import-data?snapshotId=${snapshot.id}&format=tdrexport&tdrSyncPermissions=false`
