@@ -64,11 +64,17 @@ const isOnlySigningOfficial = (user: DuosUser): boolean => {
  */
 export const headerTabsConfig: Tab[] = [
   {
+    // Global tab: available to every logged-in user regardless of console/role, so it no longer
+    // lives as a sub-tab duplicated across Admin/DAC/Researcher/SO consoles below.
+    label: 'Data Library',
+    link: '/datalibrary',
+    isRendered: () => true,
+  },
+  {
     label: 'Admin Console',
     link: '/admin_manage_dar_collections',
     children: [
       { label: 'Data Access Requests', link: '/admin_manage_dar_collections' },
-      { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
       { label: 'DACs', link: '/manage_dac' },
       { label: 'Users', link: '/admin_manage_users' },
       { label: 'Institutions', link: '/admin_manage_institutions' },
@@ -81,7 +87,12 @@ export const headerTabsConfig: Tab[] = [
     link: SO_DASHBOARD_ROUTE,
     children: [
       { label: 'Dashboard', link: SO_DASHBOARD_ROUTE, hideSubTabBar: true },
-      ...SO_CONSOLE_SECTIONS,
+      // The institution-branded Data Library variant is only linked from the Dashboard card now
+      // that the generic Data Library lives in the global nav; it stays registered here (rather
+      // than removed) purely so isChildTabMatch still resolves its URL to the SO Console tab.
+      ...SO_CONSOLE_SECTIONS.map(section =>
+        section.link === '/datalibrary/myinstitution' ? { ...section, isRendered: () => false } : section,
+      ),
     ],
     isRendered: user => user.isSigningOfficial,
   },
@@ -90,8 +101,7 @@ export const headerTabsConfig: Tab[] = [
     link: '/dac_console',
     search: 'dac_console',
     children: [
-      { label: 'Dashboard', link: '/dac_console' },
-      { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
+      { label: 'Dashboard', link: '/dac_console', hideSubTabBar: true },
       // Dashboard-only destinations still need to be registered so links carrying the active DAC
       // tab do not fall through to another console that shares the same route.
       { label: 'Data Access Requests', link: '/dac_console_dar_requests', isRendered: () => false },
@@ -101,14 +111,11 @@ export const headerTabsConfig: Tab[] = [
   },
   {
     label: 'Researcher Console',
-    // Lands on the Dashboard like the SO Console; `search` keeps the console highlighted
-    // anywhere in the Data Library. `Navigation.console` sends a researcher to this same `link`
-    // at sign-in, so the Dashboard is also the post-login landing page.
+    // `Navigation.console` sends a researcher to this same `link` at sign-in, so the Dashboard is
+    // also the post-login landing page.
     link: RESEARCHER_DASHBOARD_ROUTE,
-    search: 'datalibrary',
     children: [
-      { label: 'Dashboard', link: RESEARCHER_DASHBOARD_ROUTE },
-      { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
+      { label: 'Dashboard', link: RESEARCHER_DASHBOARD_ROUTE, hideSubTabBar: true },
       // The Dashboard is by design the only advertised route to these pages, so they stay out of
       // the sub-tab bar. They are still registered here because isChildTabMatch reads the raw
       // children: without an entry their URLs match no tab at all, and the header falls back to
