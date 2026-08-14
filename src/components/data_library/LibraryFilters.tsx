@@ -47,6 +47,28 @@ type CheckboxFilterKey = (typeof CHECKBOX_FILTER_KEYS)[number]
 const isCheckboxFilterKey = (key: FilterKey): key is CheckboxFilterKey =>
   (CHECKBOX_FILTER_KEYS as readonly string[]).includes(key)
 
+const COMPACT_ACCORDION_SX = {
+  '&:before': { display: 'none' },
+}
+
+const COMPACT_SUMMARY_SX = {
+  'minHeight': 40,
+  'px': 1,
+  '&.Mui-expanded': { minHeight: 40 },
+  '& .MuiAccordionSummary-content': { my: 1 },
+}
+
+const COMPACT_DETAILS_SX = {
+  px: 1,
+  py: 1,
+}
+
+const SECTION_LABEL_SX = { fontWeight: 400, fontSize: '1.4rem' }
+
+const COMPACT_OPTION_ROW_SX = { my: 0 }
+const COMPACT_OPTION_CHECKBOX_SX = { p: 0.5 }
+const COMPACT_OPTION_LABEL_SX = { fontSize: '1.2rem' }
+
 // Yes/No/Any radio groups. A registered key claimed by neither this list nor
 // CHECKBOX_FILTER_KEYS renders nothing at all.
 const BOOLEAN_FILTER_KEYS = [
@@ -133,17 +155,28 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   const activeFilterCount = activeSectionCount + externalFilterCount
   const hasActiveFilters = activeFilterCount > 0
 
+  const renderSectionLabel = (key: FilterKey, label: string) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, overflow: 'hidden' }}>
+      <Typography variant="subtitle2" sx={SECTION_LABEL_SX} noWrap>{label}</Typography>
+      {isFilterActive(key, filters) && (
+        <Box component="span" sx={{ ...COUNT_BADGE_SX, fontWeight: 'bold', lineHeight: 1 }}>
+          •
+        </Box>
+      )}
+    </Box>
+  )
+
   const renderCheckboxSection = (section: LibraryFilterSection) => {
     const { key, label, options = [] } = section
     if (!isCheckboxFilterKey(key)) {
       return null
     }
     return (
-      <Accordion key={key} defaultExpanded={key === 'accessManagement'}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{label}</Typography>
+      <Accordion key={key} disableGutters defaultExpanded={key === 'accessManagement'} sx={COMPACT_ACCORDION_SX}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={COMPACT_SUMMARY_SX}>
+          {renderSectionLabel(key, label)}
         </AccordionSummary>
-        <AccordionDetails>
+        <AccordionDetails sx={COMPACT_DETAILS_SX}>
           {options.length === 0
             ? (
                 <Typography variant="body2" color="text.secondary">
@@ -155,15 +188,17 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
                   {options.map(option => (
                     <FormControlLabel
                       key={option.value}
+                      sx={COMPACT_OPTION_ROW_SX}
                       control={(
                         <Checkbox
                           checked={(filters[key]).includes(option.value)}
                           onChange={() => handleFilterToggle(key, option.value)}
                           size="small"
+                          sx={COMPACT_OPTION_CHECKBOX_SX}
                         />
                       )}
                       label={(
-                        <Typography variant="body2">
+                        <Typography variant="body2" sx={COMPACT_OPTION_LABEL_SX}>
                           {option.label}
                           {option.count !== undefined && ` (${option.count})`}
                         </Typography>
@@ -178,16 +213,17 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   }
 
   const renderParticipantSection = (label: string) => (
-    <Accordion key="participantCount">
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{label}</Typography>
+    <Accordion key="participantCount" disableGutters sx={COMPACT_ACCORDION_SX}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={COMPACT_SUMMARY_SX}>
+        {renderSectionLabel('participantCount', label)}
       </AccordionSummary>
-      <AccordionDetails>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <AccordionDetails sx={COMPACT_DETAILS_SX}>
+        <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
           <TextField
             type="number"
             label="Minimum"
             size="small"
+            sx={{ flex: 1, minWidth: 0 }}
             value={filters.participantCount.min ?? ''}
             onChange={e => handleParticipantChange('min', e.target.value)}
             slotProps={{
@@ -201,6 +237,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
             type="number"
             label="Maximum"
             size="small"
+            sx={{ flex: 1, minWidth: 0 }}
             value={filters.participantCount.max ?? ''}
             onChange={e => handleParticipantChange('max', e.target.value)}
             slotProps={{
@@ -216,38 +253,42 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   )
 
   const renderPostMortemIntervalSection = (section: LibraryFilterSection) => (
-    <Accordion key="biospecimenPostMortemInterval">
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{section.label}</Typography>
+    <Accordion key="biospecimenPostMortemInterval" disableGutters sx={COMPACT_ACCORDION_SX}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={COMPACT_SUMMARY_SX}>
+        {renderSectionLabel('biospecimenPostMortemInterval', section.label)}
       </AccordionSummary>
-      <AccordionDetails>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            type="number"
-            label="Minimum"
-            size="small"
-            value={filters.biospecimenPostMortemInterval.min ?? ''}
-            onChange={e => handlePostMortemIntervalChange('min', e.target.value)}
-            slotProps={{
-              htmlInput: {
-                min: section.range?.min,
-                max: section.range?.max,
-              },
-            }}
-          />
-          <TextField
-            type="number"
-            label="Maximum"
-            size="small"
-            value={filters.biospecimenPostMortemInterval.max ?? ''}
-            onChange={e => handlePostMortemIntervalChange('max', e.target.value)}
-            slotProps={{
-              htmlInput: {
-                min: section.range?.min,
-                max: section.range?.max,
-              },
-            }}
-          />
+      <AccordionDetails sx={COMPACT_DETAILS_SX}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+            <TextField
+              type="number"
+              label="Minimum"
+              size="small"
+              sx={{ flex: 1, minWidth: 0 }}
+              value={filters.biospecimenPostMortemInterval.min ?? ''}
+              onChange={e => handlePostMortemIntervalChange('min', e.target.value)}
+              slotProps={{
+                htmlInput: {
+                  min: section.range?.min,
+                  max: section.range?.max,
+                },
+              }}
+            />
+            <TextField
+              type="number"
+              label="Maximum"
+              size="small"
+              sx={{ flex: 1, minWidth: 0 }}
+              value={filters.biospecimenPostMortemInterval.max ?? ''}
+              onChange={e => handlePostMortemIntervalChange('max', e.target.value)}
+              slotProps={{
+                htmlInput: {
+                  min: section.range?.min,
+                  max: section.range?.max,
+                },
+              }}
+            />
+          </Box>
           {hasPostMortemIntervalWithoutUnit && (
             <Typography color="warning.main" variant="body2">
               Select a post-mortem interval unit to avoid ambiguous results.
@@ -284,18 +325,19 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
     const dateFields = dateFieldsBySection[key]
 
     return (
-      <Accordion key={key}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{label}</Typography>
+      <Accordion key={key} disableGutters sx={COMPACT_ACCORDION_SX}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={COMPACT_SUMMARY_SX}>
+          {renderSectionLabel(key, label)}
         </AccordionSummary>
-        <AccordionDetails>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <AccordionDetails sx={COMPACT_DETAILS_SX}>
+          <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
             {dateFields.map(dateField => (
               <TextField
                 key={dateField.stateKey}
                 type="date"
                 label={dateField.label}
                 size="small"
+                sx={{ flex: 1, minWidth: 0 }}
                 slotProps={{
                   inputLabel: { shrink: true },
                 }}
@@ -324,11 +366,11 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   }
 
   const renderBooleanSection = (key: BooleanFilterKey, label: string) => (
-    <Accordion key={key}>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{label}</Typography>
+    <Accordion key={key} disableGutters sx={COMPACT_ACCORDION_SX}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={COMPACT_SUMMARY_SX}>
+        {renderSectionLabel(key, label)}
       </AccordionSummary>
-      <AccordionDetails>
+      <AccordionDetails sx={COMPACT_DETAILS_SX}>
         <FormControl>
           <RadioGroup
             aria-label={label}
@@ -367,7 +409,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mb: 2,
+          mb: 1,
         }}
       >
         <Box
@@ -385,7 +427,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
               </IconButton>
             </Tooltip>
           )}
-          {isOpen && <Typography variant="h6">Filters</Typography>}
+          {isOpen && <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Filters</Typography>}
           {!isOpen && onToggle && (
             <>
               {activeFilterCount > 0 && (
