@@ -11,11 +11,8 @@ import {
  * Bard (Terra's Mixpanel gateway) is how DUOS reports usage metrics:
  * `Metrics.ts` POSTs `/api/event`, `/api/identify`, and `/api/syncProfile`.
  * The signed-in legs require a bearer token Bard-side, which the browser no
- * longer holds under the BFF — without this route, the Phase 4 client had to
- * downgrade `captureEvent` to anonymous-only and leave `identify`/
- * `syncProfile` as inert no-ops. Proxying restores identified metrics: the
- * signed-in client calls these paths through /bard-api and the session token
- * is injected here.
+ * longer holds under the BFF. The signed-in client calls these paths through
+ * /bard-api and the session token is injected here.
  *
  * Anonymous events are NOT this proxy's concern: a signed-out `captureEvent`
  * never carried a token, so the client keeps sending it directly to Bard
