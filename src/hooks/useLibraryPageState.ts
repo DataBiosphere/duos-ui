@@ -24,11 +24,16 @@ import { getFormattedName } from 'src/components/forms/SelectOptionInterface'
 /**
  * Panel wording for the secondary data use codes, keyed by the code the index stores.
  *
- * `SecondaryDataUseTerms` is the same list the dataset-submission and consent-group
- * forms render, so a restriction reads identically wherever it appears, and
- * `getFormattedName` supplies the app's existing `Name (ABBR)` format — the
- * abbreviation is what ties a checkbox to the grid's data use chip, which shows codes
- * only (`HMB-GSO-PUB`).
+ * `SecondaryDataUseTerms` carries the vocabulary the dataset-submission and
+ * consent-group forms are worded from, and `getFormattedName` supplies the app's
+ * existing `Name (ABBR)` format — the abbreviation is what ties a checkbox to the
+ * grid's data use chip, which shows codes only (`HMB-GSO-PUB`).
+ *
+ * That class covers only the eight restrictions those forms collect, so the codes
+ * below fill in the rest of the secondary vocabulary the corpus can hold: the
+ * modifiers `consentTranslations` translates for the dataset views, plus the
+ * `AbstainDataUseCodes` the voting flow recognizes. Without them a real, selectable
+ * checkbox would read as a bare abbreviation.
  *
  * `OTHER` is spelled out rather than taken from `SecondaryDataUseTerms.OTH`: the form's
  * key does not match what the index stores, and `OTH2` is a label this app synthesizes
@@ -41,8 +46,26 @@ const DATA_USE_MODIFIER_LABELS: Record<string, string> = {
       .filter(term => term.key !== SecondaryDataUseTerms.OTH.key)
       .map(term => [term.key, getFormattedName(term)]),
   ),
-  OTHER: 'Other Secondary Restriction (OTH2)',
+  'OTHER': 'Other Secondary Restriction (OTH2)',
+  'NCTRL': 'No Control Set Use (NCTRL)',
+  'NAGR': 'No Aggregate-Level Data Use (NAGR)',
+  'NCU': 'Non-Commercial Use Only (NCU)',
+  'RS-G': 'Gender-Specific Research (RS-G)',
+  'RS-PD': 'Pediatric Research Only (RS-PD)',
+  'POP-M': 'Male-Specific Research (POP-M)',
+  'POP-F': 'Female-Specific Research (POP-F)',
+  'POP-PD': 'Pediatric Research Only (POP-PD)',
 }
+
+/**
+ * A geographic restriction is the one modifier whose code is not fixed: dbGaP appends
+ * the permitted region to it (`GS-US`), so the exact code cannot be enumerated above.
+ * Match the family by prefix and keep the region visible — the alternative is the bare
+ * code, and the region is the whole substance of the restriction.
+ */
+const dataUseModifierLabel = (code: string): string =>
+  DATA_USE_MODIFIER_LABELS[code]
+  ?? (code.startsWith('GS-') ? `Geographic Restriction (${code})` : code)
 
 export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
   const [urlState, updateUrlState] = useLibraryUrlState()
@@ -123,11 +146,12 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
     // Type do, so no checkbox can match nothing and no indexed code is unfilterable —
     // the app's three hand-maintained lists of secondary codes disagree with each
     // other, and only the index settles which spelling is real. Counts are deliberately
-    // omitted; a code with no label falls back to its bare abbreviation.
+    // omitted; a code the label map has never heard of still lists, as its bare
+    // abbreviation, rather than being dropped from a filter the corpus supports.
     const dataUseModifierAgg = (metadata?.data_use_modifiers as AggregationResult)?.buckets || []
     const dataUseModifierOptions = dataUseModifierAgg
       .map(bucket => bucket.key as string)
-      .map(code => ({ value: code, label: DATA_USE_MODIFIER_LABELS[code] ?? code }))
+      .map(code => ({ value: code, label: dataUseModifierLabel(code) }))
       .sort((a, b) => a.label.localeCompare(b.label))
     const uniqueValues = (values: Array<string | undefined | null>) =>
       [...new Set(values.map(v => v?.trim()).filter(Boolean) as string[])]
