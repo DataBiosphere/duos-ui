@@ -87,7 +87,7 @@ describe('SignInButton', () => {
 
     await userEvent.click(screen.getByRole('button'))
 
-    await waitFor(() => expect(screen.getByText(signInError)).toBeInTheDocument())
+    expect(await screen.findByText(signInError)).toBeInTheDocument()
     expect(vi.mocked(Redirect.to)).not.toHaveBeenCalled()
   })
 
@@ -128,7 +128,7 @@ describe('SignInButton', () => {
 
     await userEvent.click(screen.getByRole('button'))
 
-    await waitFor(() => expect(screen.getByText(signInError)).toBeInTheDocument())
+    expect(await screen.findByText(signInError)).toBeInTheDocument()
     expect(screen.getByText('Error')).toBeInTheDocument()
     expect(screen.queryByText(signInText)).not.toBeInTheDocument()
   })

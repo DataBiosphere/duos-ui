@@ -90,26 +90,24 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath }: Co
       await registerAndRedirectNewUser()
     }
     catch (error) {
-      switch (errorStatus(error)) {
-        case 409:
-          // Already registered (raced by another tab, or the earlier getMe
-          // failed transiently) — complete as a normal sign-in from a fresh
-          // user fetch. Routing off whatever CurrentUser happens to be in
-          // storage (usually the empty default) would send an accepted user
-          // back to the ToS gate without the cache reset or sign-in metric.
-          try {
-            await completeExistingUserSignIn(await User.getMe())
-          }
-          catch {
-            await Auth.signOut()
-          }
-          break
-        default:
-          Notifications.showError({
-            text: 'Error during sign in: ' + extractError(error),
-            description: 'There was an error completing your registration. Please try again.',
-          })
-          break
+      if (errorStatus(error) === 409) {
+        // Already registered (raced by another tab, or the earlier getMe
+        // failed transiently) — complete as a normal sign-in from a fresh
+        // user fetch. Routing off whatever CurrentUser happens to be in
+        // storage (usually the empty default) would send an accepted user
+        // back to the ToS gate without the cache reset or sign-in metric.
+        try {
+          await completeExistingUserSignIn(await User.getMe())
+        }
+        catch {
+          await Auth.signOut()
+        }
+      }
+      else {
+        Notifications.showError({
+          text: 'Error during sign in: ' + extractError(error),
+          description: 'There was an error completing your registration. Please try again.',
+        })
       }
     }
   }
