@@ -179,13 +179,15 @@ interface StatusSwitchProps {
   researcher: DuosUser
   isActive: boolean
   onToggle: () => void
+  /** The cell's tabIndex, so the switch joins the grid's roving focus instead of the page tab order. */
+  tabIndex: number
 }
 
-const StatusSwitch = ({ status, researcher, isActive, onToggle }: StatusSwitchProps): React.JSX.Element => (
+const StatusSwitch = ({ status, researcher, isActive, onToggle, tabIndex }: StatusSwitchProps): React.JSX.Element => (
   <div style={statusCellStyle}>
     <Switch
       // Named per row so screen reader users can tell the rows apart.
-      slotProps={{ input: { 'aria-label': `${status} for ${researcherName(researcher)}` } }}
+      slotProps={{ input: { 'aria-label': `${status} for ${researcherName(researcher)}`, tabIndex } }}
       checked={isActive}
       onChange={onToggle}
       size="small"
@@ -222,13 +224,14 @@ const buildColumns = (
     headerAlign: 'left',
     flex: 1,
     minWidth: 160,
-    renderCell: ({ row }: GridRenderCellParams<ResearcherRow>) => {
+    renderCell: ({ row, tabIndex }: GridRenderCellParams<ResearcherRow>) => {
       const card = row.researcher.libraryCard
       return (
         <StatusSwitch
           status="Access Status"
           researcher={row.researcher}
           isActive={row.accessStatus}
+          tabIndex={tabIndex}
           onToggle={() => showConfirmationModal(
             isNil(card)
               ? {
@@ -253,11 +256,12 @@ const buildColumns = (
     headerAlign: 'left',
     flex: 1,
     minWidth: 160,
-    renderCell: ({ row }: GridRenderCellParams<ResearcherRow>) => (
+    renderCell: ({ row, tabIndex }: GridRenderCellParams<ResearcherRow>) => (
       <StatusSwitch
         status="Submitter Status"
         researcher={row.researcher}
         isActive={row.submitterStatus}
+        tabIndex={tabIndex}
         onToggle={() => showConfirmationModal({
           card: {
             userId: row.researcher.userId,

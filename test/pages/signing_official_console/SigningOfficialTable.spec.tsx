@@ -164,6 +164,16 @@ describe('SigningOfficialTable', () => {
     expect(within(row).getByRole('switch', { name: /^Access Status/ })).toBeChecked()
   })
 
+  it('keeps the row switches out of the page tab order', async () => {
+    renderTable()
+    await rowFor(mockResearcher1.displayName)
+
+    // The grid is one tab stop, so switches take the cell's tabIndex instead of adding two per row.
+    const switches = screen.getAllByRole('switch')
+    expect(switches).toHaveLength(6)
+    switches.forEach(toggle => expect(toggle).toHaveAttribute('tabindex', '-1'))
+  })
+
   it('shows separate Access Status and Submitter Status notices', async () => {
     renderTable()
 
