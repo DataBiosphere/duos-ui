@@ -32,15 +32,22 @@ let sessionPromise: Promise<SessionInfo> | null = null
 const probeBffSession = async (): Promise<SessionInfo> => {
   try {
     const res = await fetch('/auth/me', { credentials: 'include' })
+    if (res.status === 401) {
+      // A real answer — no session — worth caching for the page load.
+      return { authenticated: false }
+    }
     if (!res.ok) {
-      // 401 = no session; 502 = upstream unavailable. Neither is "logged in",
-      // and neither body carries a user profile worth keeping.
+      // Transient upstream failure (e.g. 502): report signed out for this ask,
+      // but drop the cache so the next ask retries instead of pinning the app
+      // signed-out for the rest of the page load.
+      resetSessionCache()
       return { authenticated: false }
     }
     return await res.json() as SessionInfo
   }
   catch {
-    // Network failure — treat as signed out rather than crashing render paths.
+    // Network failure — same as above: signed out now, retry on the next ask.
+    resetSessionCache()
     return { authenticated: false }
   }
 }

@@ -41,26 +41,43 @@ describe('session probe', () => {
     expect(info.idp).toBe('google')
   })
 
-  it('returns unauthenticated on 401 without throwing', async () => {
+  it('returns unauthenticated on 401 and caches it — "no session" is a real answer', async () => {
     fetchMock.mockResolvedValue(
       new Response(JSON.stringify({ authenticated: false }), { status: 401 }),
     )
 
     await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+    await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
-  it('returns unauthenticated on upstream outage (502) without throwing', async () => {
-    fetchMock.mockResolvedValue(
+  it('returns unauthenticated on upstream outage (502) but retries on the next ask', async () => {
+    fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ authenticated: false, error: 'upstream_unavailable' }), { status: 502 }),
+    )
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: true, idp: 'google' }), { status: 200 }),
     )
 
     await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+
+    // The outage was transient — the next ask must not be pinned signed-out.
+    const recovered = await getSessionInfo()
+    expect(recovered.authenticated).toBe(true)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
-  it('returns unauthenticated on network failure without throwing', async () => {
-    fetchMock.mockRejectedValue(new TypeError('offline'))
+  it('returns unauthenticated on network failure but retries on the next ask', async () => {
+    fetchMock.mockRejectedValueOnce(new TypeError('offline'))
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: true }), { status: 200 }),
+    )
 
     await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+
+    const recovered = await getSessionInfo()
+    expect(recovered.authenticated).toBe(true)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
   it('returns unauthenticated when the config lookup itself fails', async () => {
