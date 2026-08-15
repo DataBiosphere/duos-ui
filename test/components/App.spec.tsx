@@ -33,6 +33,17 @@ vi.mock('src/libs/notificationService', () => ({
   },
 }))
 
+// Both vi.fn()s default to undefined: the probe reads as in-flight, so every
+// pre-existing test runs signed out exactly as before these mocks existed.
+vi.mock('src/hooks/useSession', () => ({
+  useSessionInfo: vi.fn(),
+  useUserIsLogged: vi.fn(),
+}))
+
+vi.mock('src/libs/auth/postSignIn', () => ({
+  completeSignIn: vi.fn(),
+}))
+
 // BaseModal calls Modal.setAppElement('#root') at module load time; prevent
 // the error by no-op-ing it before the import chain resolves.
 vi.mock('react-modal', async (importOriginal) => {
@@ -44,6 +55,8 @@ vi.mock('react-modal', async (importOriginal) => {
 import App from 'src/App'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { Storage } from 'src/libs/storage'
+import { useSessionInfo } from 'src/hooks/useSession'
+import { completeSignIn } from 'src/libs/auth/postSignIn'
 
 const duosUser = {
   userId: 2,
@@ -134,5 +147,65 @@ describe('Main App Functions', () => {
     await waitFor(() => expect(vi.mocked(AuthenticateNIH.getECMProviderLinkInfo)).toHaveBeenCalledWith(code, state))
     await waitFor(() => expect(vi.mocked(AuthenticateNIH.getSyncedUser)).toHaveBeenCalledOnce())
     expect(pageVisitStub).toHaveBeenCalledWith('/')
+  })
+})
+
+describe('post-sign-in bootstrap', () => {
+  const renderApp = () =>
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(completeSignIn).mockResolvedValue(undefined)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    localStorage.clear()
+  })
+
+  it('starts the bootstrap for an authenticated session with no DUOS profile yet (new-user registration path)', async () => {
+    // /auth/me reports a valid session but no user — the shape an
+    // unregistered user produces right after the B2C callback. CurrentUser
+    // holds the empty default (userId 0).
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+
+    renderApp()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+  })
+
+  it('re-bootstraps when the session identity differs from the stored profile', async () => {
+    // Another tab switched accounts (or the user re-signed-in after expiry):
+    // the session says userId 2, storage still holds userId 7.
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ ...duosUser, userId: 7 } as never)
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: duosUser as never })
+
+    renderApp()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+  })
+
+  it('does not bootstrap when the stored profile already matches the session identity', async () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(duosUser as never)
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: duosUser as never })
+
+    renderApp()
+
+    await waitFor(() => expect(document.querySelector('.main')).toBeInTheDocument())
+    expect(vi.mocked(completeSignIn)).not.toHaveBeenCalled()
+  })
+
+  it('does not bootstrap while signed out', async () => {
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: false })
+
+    renderApp()
+
+    await waitFor(() => expect(document.querySelector('.main')).toBeInTheDocument())
+    expect(vi.mocked(completeSignIn)).not.toHaveBeenCalled()
   })
 })

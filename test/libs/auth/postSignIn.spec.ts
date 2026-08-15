@@ -58,6 +58,15 @@ const queryClient = { clear: vi.fn() } as unknown as QueryClient
 
 const run = (redirectPath = '/') => completeSignIn({ navigate, queryClient, redirectPath })
 
+// The exact shape fetchAdapter throws for an HTTP error: the axios-like
+// { response: { status } } error is re-wrapped by the adapter's outer catch,
+// so the status lives on Error.cause, not on the thrown error itself.
+const adapterHttpError = (status: number, message = `Request failed with status ${status}`): Error => {
+  const inner = new Error(message) as Error & { response: { status: number, data: object } }
+  inner.response = { status, data: { message } }
+  return new Error(`${message} Please contact the help desk.`, { cause: inner })
+}
+
 describe('completeSignIn', () => {
   beforeEach(() => {
     Storage.clearStorage()
@@ -185,7 +194,7 @@ describe('completeSignIn', () => {
       vi.mocked(User.getMe)
         .mockRejectedValueOnce(new Error('not found'))
         .mockResolvedValueOnce(tosAcceptedUser as never)
-      vi.mocked(User.registerUser).mockRejectedValue({ status: 409 })
+      vi.mocked(User.registerUser).mockRejectedValue(adapterHttpError(409))
 
       await run('/')
 
@@ -201,7 +210,7 @@ describe('completeSignIn', () => {
       vi.mocked(User.getMe)
         .mockRejectedValueOnce(new Error('not found'))
         .mockResolvedValueOnce(duosUser as never)
-      vi.mocked(User.registerUser).mockRejectedValue({ response: { status: 409 } })
+      vi.mocked(User.registerUser).mockRejectedValue(adapterHttpError(409))
 
       await run('/')
 
@@ -210,7 +219,7 @@ describe('completeSignIn', () => {
 
     it('signs out when the post-409 user fetch fails too', async () => {
       vi.mocked(User.getMe).mockRejectedValue(new Error('still failing'))
-      vi.mocked(User.registerUser).mockRejectedValue({ status: 409 })
+      vi.mocked(User.registerUser).mockRejectedValue(adapterHttpError(409))
 
       await run('/')
 
@@ -218,15 +227,18 @@ describe('completeSignIn', () => {
       expect(vi.mocked(Navigation.console)).not.toHaveBeenCalled()
     })
 
-    it('shows a registration error for any other failure', async () => {
+    it('shows a registration error and signs out for any other failure', async () => {
       vi.mocked(User.getMe).mockRejectedValue(new Error('not found'))
-      vi.mocked(User.registerUser).mockRejectedValue({ status: 500, message: 'boom' })
+      vi.mocked(User.registerUser).mockRejectedValue(adapterHttpError(500, 'boom'))
 
       await run('/')
 
       expect(vi.mocked(Notifications.showError)).toHaveBeenCalledWith(expect.objectContaining({
         description: 'There was an error completing your registration. Please try again.',
       }))
+      // Resolving with an empty CurrentUser would unlock the authenticated
+      // routes — destroy the session instead so the user lands signed out.
+      expect(vi.mocked(Auth.signOut)).toHaveBeenCalled()
       expect(navigate).not.toHaveBeenCalled()
     })
   })

@@ -30,11 +30,22 @@ export interface CompleteSignInOptions {
 interface HttpishError {
   status?: number
   response?: { status?: number, data?: { message?: string } }
+  cause?: unknown
 }
 
+/**
+ * fetchAdapter throws the axios-like { response: { status } } error wrapped
+ * inside Error.cause (its outer catch re-wraps everything it didn't itself
+ * construct), so the HTTP status must be dug out of the cause chain.
+ */
 const errorStatus = (error: unknown): number | undefined => {
-  const e = error as HttpishError
-  return e.response?.status ?? e.status
+  let e = error as HttpishError | undefined
+  while (e) {
+    const status = e.response?.status ?? e.status
+    if (status !== undefined) return status
+    e = e.cause as HttpishError | undefined
+  }
+  return undefined
 }
 
 const syncSignInOrRegistrationEvent = (event: MetricsEventName) => {
@@ -108,6 +119,11 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath }: Co
           text: 'Error during sign in: ' + extractError(error),
           description: 'There was an error completing your registration. Please try again.',
         })
+        // Authenticated but unregistered and unregisterable: resolving here
+        // would let App mark the bootstrap done and unlock the routes with an
+        // empty CurrentUser. Destroy the session instead — the reload lands
+        // the user cleanly signed out, and signing in again retries.
+        await Auth.signOut()
       }
     }
   }
