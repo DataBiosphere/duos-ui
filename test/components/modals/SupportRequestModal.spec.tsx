@@ -110,6 +110,44 @@ describe('Support Request Modal Tests', () => {
     expect(emailInput.value).toBe('')
   })
 
+  it('picks up the profile the post-sign-in bootstrap persists AFTER authentication flips', async () => {
+    // BFF callback ordering: the probe reports authenticated before
+    // completeSignIn has persisted CurrentUser. The prefill must not freeze
+    // on the empty profile it sees at that moment.
+    vi.mocked(useUserIsLogged).mockReturnValue(false)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(signedOutUser as never)
+    const view = mountModal()
+
+    // Auth flips true while storage still holds the empty default.
+    vi.mocked(useUserIsLogged).mockReturnValue(true)
+    view.rerender(
+      <BrowserRouter>
+        <SupportRequestModal onCloseRequest={handler} url="url" showModal={true} />
+      </BrowserRouter>,
+    )
+
+    // The bootstrap persists the real profile afterward.
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser as never)
+    view.rerender(
+      <BrowserRouter>
+        <SupportRequestModal onCloseRequest={handler} url="url" showModal={true} />
+      </BrowserRouter>,
+    )
+
+    // Submit uses formData.name/email even though the fields are hidden when
+    // signed in — a frozen empty prefill would make the form unsubmittable.
+    const user = userEvent.setup()
+    await user.type(document.querySelector('[data-cy="supportFormSubject"] input')!, 'Subject')
+    await user.type(document.querySelector('[data-cy="supportFormDescription"] textarea')!, 'Description')
+    await selectType(user, 'Bug')
+    expect(document.querySelector('[data-cy="supportFormSubmit"]')).not.toBeDisabled()
+
+    await user.click(document.querySelector('[data-cy="supportFormSubmit"]')!)
+    await waitFor(() => expect(vi.mocked(Support.createTicket)).toHaveBeenCalledWith(
+      mockUser.displayName, expect.anything(), mockUser.email, 'Subject', 'Description', expect.anything(), expect.anything(),
+    ))
+  })
+
   it('preserves typed content when the session probe resolves mid-typing', async () => {
     const user = userEvent.setup()
     vi.mocked(useUserIsLogged).mockReturnValue(false)

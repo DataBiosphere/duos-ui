@@ -93,17 +93,20 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
   const [formData, setFormData] = useState<FormData>(() => resetFormData(isLogged))
   const isEmailValid = isEmailAddress(formData.email)
 
-  // The session probe resolves after mount; re-derive the prefill when it
-  // flips so a signed-in user's name/email land in the form (the documented
-  // adjust-state-during-render pattern, not an effect). Only the prefilled
-  // fields change — the probe can resolve (or focus revalidation can flip the
-  // state) while the user is mid-typing, and their subject, description, and
-  // attachments must survive.
-  const [prevIsLogged, setPrevIsLogged] = useState(isLogged)
-  if (prevIsLogged !== isLogged) {
-    setPrevIsLogged(isLogged)
-    const { name, email } = resetFormData(isLogged)
-    setFormData(prev => ({ ...prev, name, email }))
+  // The prefill tracks the identity, not the auth boolean: on a BFF callback
+  // authentication flips true before the post-sign-in bootstrap persists
+  // CurrentUser, so keying on isLogged alone would freeze an empty (or a
+  // previous user's) prefill. Deriving the key from the prefill values means
+  // any change — sign-in, sign-out, the bootstrap persisting the profile,
+  // identity reconciliation swapping accounts — re-derives exactly once
+  // (adjust-state-during-render pattern). Only the prefilled fields change:
+  // typed subject/description/attachments must survive.
+  const { name: prefillName, email: prefillEmail } = resetFormData(isLogged)
+  const prefillKey = `${isLogged}:${prefillName}:${prefillEmail}`
+  const [prevPrefillKey, setPrevPrefillKey] = useState(prefillKey)
+  if (prevPrefillKey !== prefillKey) {
+    setPrevPrefillKey(prefillKey)
+    setFormData(prev => ({ ...prev, name: prefillName, email: prefillEmail }))
   }
 
   const closeHandler = () => {
