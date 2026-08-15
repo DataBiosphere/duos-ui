@@ -282,4 +282,24 @@ describe('Auth (BFF mode)', () => {
     await signOutSpy.mock.results[0].value
     expect(redirectSpy).toHaveBeenCalledWith('/home?redirectTo=/datalibrary')
   })
+
+  it.each(['/home', '/'])(
+    'redirectOnLogout from %s does not append a self-referential redirectTo',
+    async (path) => {
+      // The sign-out race: DuosHeader has already navigated home when an
+      // in-flight 401 lands, and the user must not end on /home?redirectTo=/home.
+      vi.stubGlobal('fetch', vi.fn()
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-123' }) })
+        .mockResolvedValueOnce({ ok: true, status: 204 }))
+      globalThis.history.replaceState({}, '', path)
+      const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+      const signOutSpy = vi.spyOn(Auth, 'signOut')
+
+      redirectOnLogout()
+
+      expect(signOutSpy).toHaveBeenCalledWith('/home')
+      await signOutSpy.mock.results[0].value
+      expect(redirectSpy).toHaveBeenCalledWith('/home')
+    },
+  )
 })

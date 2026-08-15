@@ -124,7 +124,12 @@ export const Auth = {
 }
 
 export const redirectOnLogout = () => {
-  const redirectTo = `/home?redirectTo=${globalThis.location.pathname}`
+  // '/' and '/home' are landing pages, not destinations worth returning to
+  // (the same rule SignInButton applies). A 401 can fire after the app has
+  // already navigated home — an in-flight request racing a sign-out — and
+  // must not produce a self-referential /home?redirectTo=/home.
+  const path = globalThis.location.pathname
+  const redirectTo = path === '/' || path === '/home' ? '/home' : `/home?redirectTo=${path}`
   void Auth.signOut(redirectTo)
   Redirect.to(redirectTo)
 }
