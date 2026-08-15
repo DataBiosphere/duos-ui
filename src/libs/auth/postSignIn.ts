@@ -26,6 +26,12 @@ export interface CompleteSignInOptions {
   queryClient: QueryClient
   /** The path the /auth/callback redirect landed on (location.pathname). */
   redirectPath: string
+  /**
+   * Polled before every side-effecting step. When a newer reconciliation has
+   * superseded this run, it must not persist a user, clear caches, emit
+   * metrics, navigate, or sign out — the newer run owns the session now.
+   */
+  isCancelled?: () => boolean
 }
 
 interface HttpishError {
@@ -59,7 +65,8 @@ const syncSignInOrRegistrationEvent = (event: MetricsEventName) => {
   Metrics.captureEvent(event)
 }
 
-export const completeSignIn = async ({ navigate, queryClient, redirectPath }: CompleteSignInOptions): Promise<void> => {
+export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCancelled }: CompleteSignInOptions): Promise<void> => {
+  const cancelled = () => isCancelled?.() === true
   // '/' and '/home' are landing pages, not destinations worth returning to —
   // signed-in users on those go to their console instead.
   const shouldRedirect = redirectPath !== '/' && redirectPath !== '/home'
@@ -70,6 +77,7 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath }: Co
   // an accepted user with a destination usually stays put; the legacy popup
   // flow reloads on the sign-in page instead, so navigate when not there yet.
   const checkToSAndRedirect = async (redirectPath: string | null) => {
+    if (cancelled()) return
     const tosAccepted = Storage.getCurrentUser().userStatusInfo?.tosAccepted || false
     if (tosAccepted) {
       if (redirectPath === null) {
@@ -89,6 +97,7 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath }: Co
 
   const registerAndRedirectNewUser = async () => {
     const registeredUser: DuosUser = await User.registerUser()
+    if (cancelled()) return
     const redirectParam = redirectTo ? `?redirectTo=${redirectTo}` : ''
     setUserRoleStatuses(registeredUser, Storage)
     // New identity — same cache reset as the normal sign-in path below. The
@@ -116,10 +125,11 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath }: Co
           await completeExistingUserSignIn(await User.getMe())
         }
         catch {
-          await Auth.signOut()
+          if (!cancelled()) await Auth.signOut()
         }
       }
       else {
+        if (cancelled()) return
         Notifications.showError({
           text: 'Error during sign in: ' + extractError(error),
           description: 'There was an error completing your registration. Please try again.',
@@ -134,6 +144,7 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath }: Co
   }
 
   const completeExistingUserSignIn = async (duosUser: DuosUser): Promise<void> => {
+    if (cancelled()) return
     Storage.setCurrentUser(duosUser)
     setUserRoleStatuses(duosUser, Storage)
     // Drop any query results cached before sign-in: cached library queries
@@ -161,6 +172,7 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath }: Co
     }
   }
   catch (error) {
+    if (cancelled()) return
     // Explicitly handle AzureB2C errors from Sam
     const errorMessage = extractError(error)
     if (errorMessage.toLowerCase().includes('azureb2c authentication error')) {

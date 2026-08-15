@@ -237,6 +237,21 @@ describe('post-sign-in bootstrap', () => {
     expect(vi.mocked(completeSignIn)).not.toHaveBeenCalled()
   })
 
+  it('hides the header while reconciling so stale role tabs are never committed', async () => {
+    // Cross-tab switch shape with the bootstrap still in flight: the header
+    // derives role tabs from Storage.getCurrentUser() and must not render
+    // the previous identity's chrome while the identity is in question.
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ ...duosUser, userId: 7 } as never)
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+    vi.mocked(completeSignIn).mockReturnValue(new Promise(() => {}))
+
+    renderApp()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalled())
+    expect(screen.queryByText('Contact Us')).not.toBeInTheDocument()
+    expect(screen.queryByText('Data Use Oversight System')).not.toBeInTheDocument()
+  })
+
   it('bootstraps when a fresh probe reports an unregistered session over a stored identity (cross-tab switch)', async () => {
     // Another tab switched the shared cookie to a brand-new account: this
     // tab still stores user 7, but a FRESH probe reports authenticated with

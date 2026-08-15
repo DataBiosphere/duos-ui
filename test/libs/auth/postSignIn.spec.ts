@@ -249,6 +249,41 @@ describe('completeSignIn', () => {
     })
   })
 
+  describe('cancellation (superseded runs)', () => {
+    it('performs no side effects once cancelled mid-flight', async () => {
+      let resolveGetMe!: (user: unknown) => void
+      vi.mocked(User.getMe).mockReturnValue(new Promise((resolve) => {
+        resolveGetMe = resolve
+      }) as never)
+      let cancelledFlag = false
+
+      const run = completeSignIn({ navigate, queryClient, redirectPath: '/', isCancelled: () => cancelledFlag })
+      // A newer reconciliation supersedes this run while its getMe is in flight.
+      cancelledFlag = true
+      resolveGetMe({ ...duosUser, userStatusInfo: tosAcceptedStatus })
+      await run
+
+      // The obsolete run must not persist, clear caches, emit metrics, or route.
+      expect(Storage.getCurrentUser().userId).toBe(0)
+      expect(queryClient.clear).not.toHaveBeenCalled()
+      expect(vi.mocked(Metrics.captureEvent)).not.toHaveBeenCalled()
+      expect(vi.mocked(Navigation.console)).not.toHaveBeenCalled()
+      expect(navigate).not.toHaveBeenCalled()
+    })
+
+    it('does not sign out or toast when a cancelled run fails', async () => {
+      vi.mocked(User.getMe).mockRejectedValue(new Error('not found'))
+
+      await completeSignIn({ navigate, queryClient, redirectPath: '/', isCancelled: () => true })
+
+      // The newer run owns the session — a superseded failure must not
+      // destroy it or surface stale errors.
+      expect(vi.mocked(Auth.signOut)).not.toHaveBeenCalled()
+      expect(vi.mocked(Notifications.showError)).not.toHaveBeenCalled()
+      expect(vi.mocked(User.registerUser)).not.toHaveBeenCalled()
+    })
+  })
+
   describe('AzureB2C errors from Sam', () => {
     it('shows the error and signs the user out', async () => {
       vi.mocked(User.getMe).mockRejectedValue(new Error('AzureB2C authentication error: bad tenant'))

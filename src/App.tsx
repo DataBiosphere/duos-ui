@@ -100,7 +100,10 @@ function App() {
           <div className="body">
             <div className="wrap">
               <div className="main">
-                <DuosHeader />
+                {/* The header derives role tabs and the profile menu from
+                    Storage.getCurrentUser() — it is identity-bearing UI and
+                    must hide during reconciliation like the routes do. */}
+                {!reconciling && <DuosHeader />}
                 {(isLoading || reconciling) && <div style={loadingSyle}><Spinner /></div>}
                 {!(isLoading || reconciling) && <AppRoutes isLogged={isLoggedIn} env={env} />}
               </div>
