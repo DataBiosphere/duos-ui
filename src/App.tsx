@@ -44,12 +44,16 @@ function App() {
   // The session identity and the locally stored profile can disagree: after a
   // session expires and someone signs in as a different account (or another
   // tab switches accounts on the shared cookie), CurrentUser still holds the
-  // previous user. An unregistered session reports no user at all, which is
-  // also a mismatch against any nonzero stored profile. In legacy mode the
-  // probe reports the stored user itself, so this can never fire there.
+  // previous user. Only a session that NAMES a different user counts — a
+  // session with no user is what the cached probe looks like right after
+  // registration persists the new profile, and treating that as a mismatch
+  // re-armed the bootstrap into a run the once-per-identity guard blocks,
+  // pinning the app on the spinner. In legacy mode the probe reports the
+  // stored user itself, so this can never fire there.
   const storedUserId = Storage.getCurrentUser().userId
+  const sessionUserId = sessionInfo?.user?.userId
   const identityMismatch = isLoggedIn && storedUserId !== 0
-    && sessionInfo?.user?.userId !== storedUserId
+    && sessionUserId !== undefined && sessionUserId !== storedUserId
   // A session with no local user state means we just returned from the OAuth
   // redirect — the routes stay hidden behind the spinner until the user
   // bootstrap below resolves. Once the bootstrap has started it stays "on"

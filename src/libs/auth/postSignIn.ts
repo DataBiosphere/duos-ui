@@ -14,6 +14,7 @@ import { User } from 'src/libs/ajax/User'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
 import { Auth } from 'src/libs/auth/auth'
+import { resetSessionCache } from 'src/libs/auth/session'
 import { Navigation, Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import eventList, { MetricsEventName } from 'src/libs/events'
@@ -90,8 +91,12 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath }: Co
     const registeredUser: DuosUser = await User.registerUser()
     const redirectParam = redirectTo ? `?redirectTo=${redirectTo}` : ''
     setUserRoleStatuses(registeredUser, Storage)
-    // New identity — same cache reset as the normal sign-in path below.
+    // New identity — same cache reset as the normal sign-in path below. The
+    // cached /auth/me answer predates the registration (authenticated, no
+    // user), so drop it too: the navigation below re-probes and picks up the
+    // newly registered identity.
     queryClient.clear()
+    resetSessionCache()
     syncSignInOrRegistrationEvent(eventList.userRegister)
     navigate(`/tos_acceptance${redirectParam}`)
   }
@@ -134,8 +139,11 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath }: Co
     // Drop any query results cached before sign-in: cached library queries
     // (data, tab counts, filter metadata) were built with the anonymous /
     // previous user's role-based visibility clauses and would otherwise be
-    // served from cache under the new user's identity.
+    // served from cache under the new user's identity. The session cache can
+    // likewise predate this identity (the 409 path arrives here with an
+    // authenticated-no-user probe answer cached).
     queryClient.clear()
+    resetSessionCache()
     if (!duosUser.roles) {
       await ErrorReporter.report('roles not found for user: ' + duosUser.email)
     }

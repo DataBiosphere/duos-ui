@@ -5,6 +5,7 @@ import { User } from 'src/libs/ajax/User'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
 import { Auth } from 'src/libs/auth/auth'
+import { resetSessionCache } from 'src/libs/auth/session'
 import { Navigation, Notifications } from 'src/libs/utils'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { DuosUser, UserStatusInfo } from 'src/types/model'
@@ -12,6 +13,7 @@ import { DuosUser, UserStatusInfo } from 'src/types/model'
 vi.mock('src/libs/ajax/User')
 vi.mock('src/libs/ajax/Metrics')
 vi.mock('src/libs/ErrorReporter')
+vi.mock('src/libs/auth/session', () => ({ resetSessionCache: vi.fn() }))
 vi.mock('src/libs/auth/auth', () => ({
   Auth: {
     signOut: vi.fn().mockResolvedValue(undefined),
@@ -174,6 +176,9 @@ describe('completeSignIn', () => {
 
       expect(vi.mocked(User.registerUser)).toHaveBeenCalled()
       expect(queryClient.clear).toHaveBeenCalled()
+      // The cached /auth/me answer predates the registration — it must be
+      // dropped or the app deadlocks on a stale authenticated-no-user session.
+      expect(vi.mocked(resetSessionCache)).toHaveBeenCalled()
       expect(vi.mocked(Metrics.captureEvent)).toHaveBeenCalledWith('user:register')
       expect(navigate).toHaveBeenCalledWith('/tos_acceptance')
     })
@@ -201,6 +206,7 @@ describe('completeSignIn', () => {
       // The full sign-in completion runs off the fresh fetch, not stale storage.
       expect(Storage.getCurrentUser()).toEqual(tosAcceptedUser)
       expect(queryClient.clear).toHaveBeenCalled()
+      expect(vi.mocked(resetSessionCache)).toHaveBeenCalled()
       expect(vi.mocked(Metrics.captureEvent)).toHaveBeenCalledWith('user:signin')
       expect(vi.mocked(Navigation.console)).toHaveBeenCalledWith(tosAcceptedUser, navigate)
       expect(vi.mocked(Notifications.showError)).not.toHaveBeenCalled()

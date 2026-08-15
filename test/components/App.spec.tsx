@@ -208,4 +208,25 @@ describe('post-sign-in bootstrap', () => {
     await waitFor(() => expect(document.querySelector('.main')).toBeInTheDocument())
     expect(vi.mocked(completeSignIn)).not.toHaveBeenCalled()
   })
+
+  it('unlocks the routes after registration even while the cached session still has no user', async () => {
+    // The probe's cached answer predates the registration for the rest of the
+    // page load: authenticated, no user. That must not read as an identity
+    // mismatch once completeSignIn persists the new nonzero profile — doing so
+    // re-armed the bootstrap into a run the once-per-identity guard blocks,
+    // pinning the app on the spinner forever.
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+    vi.mocked(completeSignIn).mockImplementation(async () => {
+      // What registerAndRedirectNewUser -> setUserRoleStatuses does.
+      Storage.setCurrentUser(duosUser as never)
+    })
+
+    renderApp()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+    // The routes must come out from behind the bootstrap spinner…
+    await waitFor(() => expect(screen.getByText('Data Use Oversight System')).toBeInTheDocument())
+    // …and the bootstrap must not have re-armed into a second run.
+    expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce()
+  })
 })
