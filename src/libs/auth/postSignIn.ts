@@ -157,6 +157,8 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
     resetSessionCache()
     if (!duosUser.roles) {
       await ErrorReporter.report('roles not found for user: ' + duosUser.email)
+      // The report awaits env lookup + delivery — long enough to be superseded.
+      if (cancelled()) return
     }
     syncSignInOrRegistrationEvent(eventList.userSignIn)
     await checkToSAndRedirect(redirectTo)

@@ -5,11 +5,20 @@ import type { SessionInfo } from 'src/libs/auth/session'
 import type { DuosUser } from 'src/types/model'
 import { useSessionInfo } from 'src/hooks/useSession'
 import { completeSignIn } from 'src/libs/auth/postSignIn'
+import { Redirect } from 'src/libs/auth/auth'
 import { Storage } from 'src/libs/storage'
 import { setUserRoleStatuses } from 'src/libs/utils'
 
 /**
  * Reconciles the BFF session identity with the locally stored profile.
+ *
+ * SCOPE POLICY: concurrent different-user tabs are unsupported. The session
+ * cookie is shared, so "two users in two tabs" was never real — only serial
+ * account switching with a stale tab. A stale tab that detects an identity
+ * conflict UNDER AN IN-FLIGHT BOOTSTRAP hard-reloads (the fresh page load
+ * reconciles from scratch and kills all in-flight work); this deliberately
+ * replaces in-place supersede/join-provenance machinery. Within a single
+ * tab, localStorage therefore has a single writer.
  *
  * Each FRESH probe result (a new object from useSessionInfo — the cached
  * probe returns the same object, so re-renders and StrictMode double
@@ -20,26 +29,20 @@ import { setUserRoleStatuses } from 'src/libs/utils'
  *   to the ToS gate on an explicit rejection. Classification is recorded in
  *   React state so the refreshed profile re-renders mounted consumers.
  * - Anything else (no local identity, a session naming a different user, or
- *   a fresh probe with no profile — the cross-tab switch to an unregistered
- *   account) → the full post-sign-in BOOTSTRAP via completeSignIn.
+ *   a fresh probe with no profile) → the full post-sign-in BOOTSTRAP via
+ *   completeSignIn.
  *
- * Bootstrap lifecycle guarantees:
- * - JOIN with provenance: a probe joins the in-flight run only for the same
- *   target identity, or when it names a user that storage acquired DURING
- *   the run (the run's own output, e.g. the post-registration re-probe). A
- *   probe naming the user storage held BEFORE the run started is an identity
- *   reversal and supersedes instead.
- * - SUPERSEDE with cancellation: superseding marks the old run's token
- *   cancelled — completeSignIn checks the token before each side-effecting
- *   step, so an obsolete run cannot persist a user, clear caches, emit
- *   metrics, navigate, or sign out after it has been replaced — and only the
- *   token still active at completion may unlock the routes.
+ * Bootstrap lifecycle:
+ * - A probe covered by the in-flight run joins it: same target identity, or
+ *   naming the user the run itself persisted (single-writer, per the policy
+ *   above — storage changes during a run are the run's own output).
+ * - A conflicting identity during a run → cancel + hard reload (policy).
+ * - The probe turning unauthenticated, or unmount, cancels the run: a
+ *   cancelled completeSignIn performs no further side effects.
  */
 
 interface ActiveBootstrap {
   targetUserId: number
-  /** What CurrentUser held when this run started — provenance for joins. */
-  storedUserIdAtStart: number
   cancelled: boolean
 }
 
@@ -59,15 +62,19 @@ export interface SessionReconciliation {
   reconciling: boolean
 }
 
-/** The auth-relevant surface of a profile: identity, role set, ToS state.
+/** The auth-relevant surface of a profile: identity, role assignments
+ * (including which DAC each role is scoped to), and account/ToS status.
  * Cosmetic fields (display name, email) may lag one render — they cannot
  * grant access. */
 const authProfileEquivalent = (a: DuosUser, b: DuosUser): boolean => {
-  const roleNames = (u: DuosUser): string =>
-    (u.roles ?? []).map(r => r.name).sort().join(',')
+  const roleKeys = (u: DuosUser): string =>
+    (u.roles ?? []).map(r => `${r.name}:${r.dacId ?? ''}`).sort().join(',')
+  const status = (u: DuosUser) => u.userStatusInfo
   return a.userId === b.userId
-    && a.userStatusInfo?.tosAccepted === b.userStatusInfo?.tosAccepted
-    && roleNames(a) === roleNames(b)
+    && status(a)?.tosAccepted === status(b)?.tosAccepted
+    && status(a)?.enabled === status(b)?.enabled
+    && status(a)?.adminEnabled === status(b)?.adminEnabled
+    && roleKeys(a) === roleKeys(b)
 }
 
 export const useSessionReconciler = (queryClient: QueryClient): SessionReconciliation => {
@@ -79,36 +86,67 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
     bootstrapRunning: false,
   })
   // Effect-only guards (never read during render): idempotence for StrictMode
-  // double-invocations, and the active bootstrap's token.
+  // double-invocations, and the active bootstrap's cancellation token.
   const consumedProbeRef = useRef<SessionInfo | null>(null)
   const activeBootstrapRef = useRef<ActiveBootstrap | null>(null)
 
+  // Unmount cancels whatever is in flight.
+  useEffect(() => () => {
+    if (activeBootstrapRef.current) {
+      activeBootstrapRef.current.cancelled = true
+    }
+  }, [])
+
   useEffect(() => {
-    if (!sessionInfo?.authenticated || consumedProbeRef.current === sessionInfo) return
+    if (!sessionInfo?.authenticated) {
+      // The session disappeared (signed out in this or another tab, expiry).
+      // An in-flight bootstrap must not keep persisting a user, emitting
+      // metrics, or navigating for a session that no longer exists.
+      if (activeBootstrapRef.current) {
+        activeBootstrapRef.current.cancelled = true
+      }
+      return
+    }
+    if (consumedProbeRef.current === sessionInfo) return
     consumedProbeRef.current = sessionInfo
 
     const storedUserId = Storage.getCurrentUser().userId
     const sessionUser = sessionInfo.user
     const targetUserId = sessionUser?.userId ?? 0
 
-    // Join the in-flight bootstrap when this probe is covered by it: same
-    // target identity, or it names a user that storage acquired DURING the
-    // run (that run's own output — the post-registration re-probe). A probe
-    // naming the user storage held before the run started is an identity
-    // reversal and falls through to supersede.
     const active = activeBootstrapRef.current
-    const namesRunOutput = sessionUser !== undefined && sessionUser.userId !== 0
-      && sessionUser.userId === storedUserId && storedUserId !== active?.storedUserIdAtStart
-    if (active && (targetUserId === active.targetUserId || namesRunOutput)) {
-      setSnapshot(prev => ({ ...prev, classifiedProbe: sessionInfo }))
+    if (active) {
+      // Covered by the in-flight run: same target identity, or — for a
+      // registration run (target 0) only — naming the user the run itself
+      // persisted (single-writer, per the scope policy: storage changes
+      // during a run are the run's own output). Runs targeting a named user
+      // are already covered by the target match, so a probe naming a
+      // DIFFERENT stored user during one is a genuine conflict.
+      const coveredByRun = targetUserId === active.targetUserId
+        || (active.targetUserId === 0 && sessionUser !== undefined
+          && sessionUser.userId !== 0 && sessionUser.userId === storedUserId)
+      if (coveredByRun) {
+        // Recording classification IS this effect's externally-visible work
+        // for a joined probe (see ReconcilerSnapshot.classifiedProbe).
+        // oxlint-disable-next-line react/react-compiler
+        setSnapshot(prev => ({ ...prev, classifiedProbe: sessionInfo }))
+        return
+      }
+      // A different identity appeared under an in-flight bootstrap — only an
+      // unsupported cross-tab account switch produces this. Cancel and hard
+      // reload: the fresh page load reconciles from scratch.
+      active.cancelled = true
+      Redirect.to(globalThis.location.href)
       return
     }
 
-    if (!active && sessionUser !== undefined && sessionUser.userId !== 0
+    if (sessionUser !== undefined && sessionUser.userId !== 0
       && sessionUser.userId === storedUserId) {
       Storage.setCurrentUser(sessionUser)
       setUserRoleStatuses(sessionUser, Storage)
-      // Recorded in state → clean re-render off the refreshed profile.
+      // Recorded in state → clean re-render off the refreshed profile (the
+      // localStorage write above is invisible to React without it).
+      // oxlint-disable-next-line react/react-compiler
       setSnapshot(prev => ({ ...prev, classifiedProbe: sessionInfo }))
       // Only an explicit "not accepted" routes to the gate — a profile without
       // status info (older legacy sessions, service accounts) is left alone.
@@ -119,17 +157,8 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
       return
     }
 
-    // Full bootstrap, superseding any in-flight run: the old token is
-    // cancelled so its remaining side effects are suppressed inside
-    // completeSignIn and its completion cannot unlock the routes.
-    if (active) {
-      active.cancelled = true
-    }
-    const token: ActiveBootstrap = {
-      targetUserId,
-      storedUserIdAtStart: storedUserId,
-      cancelled: false,
-    }
+    // Full bootstrap: no local identity, a different user, or no profile.
+    const token: ActiveBootstrap = { targetUserId, cancelled: false }
     activeBootstrapRef.current = token
     setSnapshot({ classifiedProbe: sessionInfo, bootstrapRunning: true })
     // The BFF callback lands the browser on the destination itself, so the
@@ -151,8 +180,8 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
   const isLoggedIn = sessionInfo?.authenticated ?? false
   // An unclassified probe hides identity-bearing UI unless it matches the
   // stored profile on every auth-relevant field — same user with changed
-  // roles or ToS state must not be committed off stale storage, while a
-  // routine no-change revalidation must not blank the screen.
+  // roles, DAC assignments, or status must not be committed off stale
+  // storage, while a routine no-change revalidation must not blank the screen.
   const sessionUser = sessionInfo?.user
   const authEquivalent = sessionUser !== undefined && sessionUser.userId !== 0
     && authProfileEquivalent(sessionUser, Storage.getCurrentUser())

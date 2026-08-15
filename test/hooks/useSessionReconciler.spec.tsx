@@ -6,12 +6,16 @@ import type { QueryClient } from '@tanstack/react-query'
 import { useSessionReconciler } from 'src/hooks/useSessionReconciler'
 import { useSessionInfo } from 'src/hooks/useSession'
 import { completeSignIn } from 'src/libs/auth/postSignIn'
+import { Redirect } from 'src/libs/auth/auth'
 import { Storage } from 'src/libs/storage'
 import type { SessionInfo } from 'src/libs/auth/session'
 import type { DuosUser } from 'src/types/model'
 
 vi.mock('src/hooks/useSession', () => ({ useSessionInfo: vi.fn() }))
 vi.mock('src/libs/auth/postSignIn', () => ({ completeSignIn: vi.fn() }))
+// The hard-reload seam: identity conflicts under an in-flight bootstrap
+// reload the page instead of reconciling in place (see the scope policy).
+vi.mock('src/libs/auth/auth', () => ({ Redirect: { to: vi.fn() } }))
 
 const queryClient = { clear: vi.fn() } as unknown as QueryClient
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -101,10 +105,11 @@ describe('useSessionReconciler', () => {
     await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
   })
 
-  it('supersedes on identity reversal — a probe naming the pre-run stored user does not join', async () => {
+  it('reloads on identity reversal — a probe naming the pre-run stored user does not join', async () => {
     // Storage holds user 7. A bootstrap for user 9 is in flight. The session
     // switches BACK to user 7: the probe matches storage, but 9's run did not
     // produce that state — joining would let 9's fetch overwrite storage.
+    // Only an unsupported cross-tab switch produces this: cancel and reload.
     vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(storedUser as never)
     vi.mocked(completeSignIn).mockReturnValue(new Promise(() => {}))
     const otherUser = { userId: 9, displayName: 'Other', roles: [] } as unknown as DuosUser
@@ -118,11 +123,28 @@ describe('useSessionReconciler', () => {
     vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: storedUser as never })
     rerender()
 
-    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledTimes(2))
-    // The superseded run's token is cancelled, so its remaining side effects
-    // (persisting user 9, metrics, navigation) are suppressed inside
-    // completeSignIn.
+    await waitFor(() => expect(vi.mocked(Redirect.to)).toHaveBeenCalledWith(globalThis.location.href))
     expect(firstRunOptions.isCancelled?.()).toBe(true)
+    expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce()
+  })
+
+  it('hides identity-bearing UI when the same user returns with a changed DAC assignment', () => {
+    // Same role names, different DAC scope — DACDatasets/ManageDac authorize
+    // by dacId, so this must not commit off stale storage.
+    const chairOfDac1 = { ...storedUser, roles: [{ name: 'Chairperson', dacId: 1 }] }
+    const chairOfDac2 = { ...storedUser, roles: [{ name: 'Chairperson', dacId: 2 }] }
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(chairOfDac1 as never)
+    vi.spyOn(Storage, 'setCurrentUser').mockImplementation(() => {})
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: chairOfDac2 as never })
+
+    const reconcilingPerRender: boolean[] = []
+    renderHook(() => {
+      const reconciliation = useSessionReconciler(queryClient)
+      reconcilingPerRender.push(reconciliation.reconciling)
+      return reconciliation
+    }, { wrapper })
+
+    expect(reconcilingPerRender[0]).toBe(true)
   })
 
   it('joins an in-flight bootstrap instead of starting a concurrent one for the same identity', async () => {
@@ -153,35 +175,57 @@ describe('useSessionReconciler', () => {
     expect(result.current.reconciling).toBe(false)
   })
 
-  it('supersedes an in-flight bootstrap for a different identity — the older completion cannot unlock the routes', async () => {
-    const resolvers: Array<() => void> = []
-    vi.mocked(completeSignIn).mockImplementation(() => new Promise<void>((resolve) => {
-      resolvers.push(() => resolve())
-    }))
+  it('cancels and hard-reloads when a different identity appears under an in-flight bootstrap', async () => {
+    // Cross-tab account switching is unsupported (scope policy): the stale
+    // tab reloads instead of reconciling in place, and the obsolete run is
+    // cancelled so it cannot act before the page unloads.
+    vi.mocked(completeSignIn).mockReturnValue(new Promise(() => {}))
     // First probe: unregistered session (target 0).
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+
+    const { rerender } = renderReconciler()
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+    const firstRunOptions = vi.mocked(completeSignIn).mock.calls[0][0]
+    expect(firstRunOptions.isCancelled?.()).toBe(false)
+
+    const otherUser = { userId: 9, displayName: 'Other', roles: [] } as unknown as DuosUser
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: otherUser as never })
+    rerender()
+
+    await waitFor(() => expect(vi.mocked(Redirect.to)).toHaveBeenCalledWith(globalThis.location.href))
+    expect(firstRunOptions.isCancelled?.()).toBe(true)
+    // No second in-place bootstrap — the reload owns reconciliation now.
+    expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce()
+  })
+
+  it('cancels the in-flight bootstrap when the session disappears', async () => {
+    vi.mocked(completeSignIn).mockReturnValue(new Promise(() => {}))
     vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
 
     const { result, rerender } = renderReconciler()
     await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+    const runOptions = vi.mocked(completeSignIn).mock.calls[0][0]
 
-    // A fresh probe now names a different registered user (cross-tab switch
-    // landed mid-bootstrap) → a new bootstrap supersedes the first.
-    const otherUser = { userId: 9, displayName: 'Other', roles: [] } as unknown as DuosUser
-    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: otherUser as never })
+    // Sign-out in another tab (or expiry): the probe flips unauthenticated.
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: false })
     rerender()
-    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledTimes(2))
 
-    // The SUPERSEDED run finishing must not reveal the routes…
-    await act(async () => {
-      resolvers[0]()
-    })
-    expect(result.current.reconciling).toBe(true)
-
-    // …only the active generation's completion may.
-    await act(async () => {
-      resolvers[1]()
-    })
+    expect(runOptions.isCancelled?.()).toBe(true)
+    // Signed out → nothing to reconcile; the UI renders the signed-out state.
     expect(result.current.reconciling).toBe(false)
+  })
+
+  it('cancels the in-flight bootstrap on unmount', async () => {
+    vi.mocked(completeSignIn).mockReturnValue(new Promise(() => {}))
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+
+    const { unmount } = renderReconciler()
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+    const runOptions = vi.mocked(completeSignIn).mock.calls[0][0]
+
+    unmount()
+
+    expect(runOptions.isCancelled?.()).toBe(true)
   })
 
   it('does nothing while signed out', async () => {
