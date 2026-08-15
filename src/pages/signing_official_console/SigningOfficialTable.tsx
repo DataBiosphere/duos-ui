@@ -141,7 +141,8 @@ const ConfirmationMessage = ({ action, onAgreementLoadStateChange }: Readonly<Co
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers
 
-const researcherName = (researcher: DuosUser): string => researcher.displayName ?? researcher.email
+// `||` so a blank displayName also falls back to the email
+const researcherName = (researcher: DuosUser): string => researcher.displayName || researcher.email
 
 /**
  * The Submitter toggle reads `roles`, so the change is applied locally rather than relying on the
