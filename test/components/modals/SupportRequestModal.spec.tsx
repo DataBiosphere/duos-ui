@@ -110,6 +110,31 @@ describe('Support Request Modal Tests', () => {
     expect(emailInput.value).toBe('')
   })
 
+  it('preserves typed content when the session probe resolves mid-typing', async () => {
+    const user = userEvent.setup()
+    vi.mocked(useUserIsLogged).mockReturnValue(false)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(signedOutUser as never)
+    const view = mountModal()
+
+    await user.type(document.querySelector('[data-cy="supportFormSubject"] input')!, 'Half-typed subject')
+    await user.type(document.querySelector('[data-cy="supportFormDescription"] textarea')!, 'Details so far')
+
+    // The probe (or a focus revalidation) flips the auth state mid-typing.
+    vi.mocked(useUserIsLogged).mockReturnValue(true)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser as never)
+    view.rerender(
+      <BrowserRouter>
+        <SupportRequestModal onCloseRequest={handler} url="url" showModal={true} />
+      </BrowserRouter>,
+    )
+
+    // Only the prefill re-derives; the user's work survives.
+    const subjectInput = document.querySelector('[data-cy="supportFormSubject"] input') as HTMLInputElement
+    const descriptionInput = document.querySelector('[data-cy="supportFormDescription"] textarea') as HTMLTextAreaElement
+    expect(subjectInput.value).toBe('Half-typed subject')
+    expect(descriptionInput.value).toBe('Details so far')
+  })
+
   describe('When a user is logged in:', () => {
     beforeEach(setupLoggedIn)
 

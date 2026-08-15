@@ -95,11 +95,15 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
 
   // The session probe resolves after mount; re-derive the prefill when it
   // flips so a signed-in user's name/email land in the form (the documented
-  // adjust-state-during-render pattern, not an effect).
+  // adjust-state-during-render pattern, not an effect). Only the prefilled
+  // fields change — the probe can resolve (or focus revalidation can flip the
+  // state) while the user is mid-typing, and their subject, description, and
+  // attachments must survive.
   const [prevIsLogged, setPrevIsLogged] = useState(isLogged)
   if (prevIsLogged !== isLogged) {
     setPrevIsLogged(isLogged)
-    setFormData(resetFormData(isLogged))
+    const { name, email } = resetFormData(isLogged)
+    setFormData(prev => ({ ...prev, name, email }))
   }
 
   const closeHandler = () => {

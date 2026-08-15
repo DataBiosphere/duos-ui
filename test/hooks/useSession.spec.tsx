@@ -4,6 +4,7 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { useSessionInfo, useUserIsLogged } from 'src/hooks/useSession'
 import { getSessionInfo, revalidateSessionInfo } from 'src/libs/auth/session'
+import type { SessionInfo } from 'src/libs/auth/session'
 
 vi.mock('src/libs/auth/session', () => ({
   getSessionInfo: vi.fn(),
@@ -61,6 +62,29 @@ describe('useSession hooks', () => {
     finally {
       visibilitySpy.mockRestore()
     }
+  })
+
+  it('ignores a stale probe that resolves after a newer revalidation (latest request wins)', async () => {
+    let resolveInitialProbe!: (info: SessionInfo) => void
+    vi.mocked(getSessionInfo).mockReturnValue(new Promise((resolve) => {
+      resolveInitialProbe = resolve
+    }))
+    vi.mocked(revalidateSessionInfo).mockResolvedValue({ authenticated: true, idp: 'google' })
+
+    const { result } = renderHook(() => useSessionInfo(), { wrapper })
+
+    // The focus revalidation starts later but finishes first.
+    act(() => {
+      globalThis.dispatchEvent(new Event('focus'))
+    })
+    await waitFor(() => expect(result.current).toEqual({ authenticated: true, idp: 'google' }))
+
+    // The slow initial probe finally resolves signed-out — it must not
+    // overwrite the newer answer.
+    await act(async () => {
+      resolveInitialProbe({ authenticated: false })
+    })
+    expect(result.current).toEqual({ authenticated: true, idp: 'google' })
   })
 
   it('stops listening after unmount', async () => {

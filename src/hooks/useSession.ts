@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router'
 import { SessionInfo, getSessionInfo, revalidateSessionInfo } from 'src/libs/auth/session'
 
@@ -18,35 +18,45 @@ import { SessionInfo, getSessionInfo, revalidateSessionInfo } from 'src/libs/aut
 export const useSessionInfo = (): SessionInfo | undefined => {
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | undefined>(undefined)
   const location = useLocation()
+  // Monotonic id of the most recently STARTED probe. The navigation and focus
+  // effects race each other, and per-effect cancellation cannot order them —
+  // a slow initial probe must not overwrite a newer revalidation's answer, or
+  // downstream consumers (identity reconciliation in App) see time go backwards.
+  const latestRequestId = useRef(0)
+
+  const publishLatest = useCallback((probe: Promise<SessionInfo>) => {
+    const requestId = ++latestRequestId.current
+    probe.then((info) => {
+      if (latestRequestId.current === requestId) setSessionInfo(info)
+    })
+  }, [])
 
   useEffect(() => {
-    let cancelled = false
-    getSessionInfo().then((info) => {
-      if (!cancelled) setSessionInfo(info)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [location])
+    publishLatest(getSessionInfo())
+  }, [location, publishLatest])
 
   // Revalidate when the tab regains focus: another tab can sign in or out on
   // the shared session cookie, and the fixed-lifetime session can expire while
   // the tab sits in the background. session.ts throttles the fan-out, so many
   // mounted hooks reacting to one focus event share a single probe.
   useEffect(() => {
-    let cancelled = false
     const revalidate = () => {
       if (document.visibilityState !== 'visible') return
-      revalidateSessionInfo().then((info) => {
-        if (!cancelled) setSessionInfo(info)
-      })
+      publishLatest(revalidateSessionInfo())
     }
     globalThis.addEventListener('focus', revalidate)
     document.addEventListener('visibilitychange', revalidate)
     return () => {
-      cancelled = true
       globalThis.removeEventListener('focus', revalidate)
       document.removeEventListener('visibilitychange', revalidate)
+    }
+  }, [publishLatest])
+
+  // Retire every in-flight probe on unmount so none of them publish late.
+  useEffect(() => {
+    const requests = latestRequestId
+    return () => {
+      requests.current++
     }
   }, [])
 
