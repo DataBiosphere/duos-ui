@@ -1,5 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { requireEnv } from './oidcClient.js'
+import { RefreshFailedError, refreshAccessToken } from './refresh.js'
+import { REFRESH_WINDOW_SECONDS } from '../proxy/upstreamProxy.js'
 
 const UPSTREAM_TIMEOUT_MS = 5000
 
@@ -12,6 +14,31 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
   if (!request.session.accessToken) {
     reply.status(401).send({ authenticated: false })
     return
+  }
+
+  // Refresh-before-forward, mirroring the API proxy: an idle tab can outlive
+  // the access token while the refresh token and session are still perfectly
+  // valid. Forwarding the expired token would 401 upstream and destroy a
+  // session that only needed a refresh — and the client's focus revalidation
+  // makes this exact path hot.
+  const secondsRemaining = (request.session.tokenExpiry ?? 0) - Math.floor(Date.now() / 1000)
+  if (secondsRemaining < REFRESH_WINDOW_SECONDS) {
+    try {
+      await refreshAccessToken(request)
+    }
+    catch (err: unknown) {
+      if (err instanceof RefreshFailedError) {
+        // Terminal: B2C rejected the refresh token and refreshAccessToken has
+        // already destroyed the session — clear the dead cookie.
+        reply.clearCookie('sessionId').status(401).send({ authenticated: false })
+        return
+      }
+      // Transient (network blip, B2C 5xx, store error) — the session is
+      // intact, so this must not read as signed out permanently: 502 tells
+      // the client probe to retry on the next ask.
+      reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
+      return
+    }
   }
 
   const url = `${requireEnv('DUOS_API_URL')}/api/user/me`
