@@ -100,17 +100,20 @@ describe('getMe', () => {
     })
   })
 
-  it('destroys the session and returns 401 when the upstream API rejects the token', async () => {
+  it('reports authenticated with no user on an upstream 401 — DUOS conflates "no profile" with "bad token"', async () => {
+    // DuosUserAuthenticator turns an unregistered email's NotFoundException
+    // into an empty principal → Dropwizard 401. The token itself was just
+    // refreshed, so this must NOT destroy the session: it is a brand-new
+    // user who needs the registration bootstrap, not a dead session.
     vi.mocked(fetch).mockResolvedValue(makeFetchResponse(401, {}) as never)
-    const { request, destroy } = makeRequest({ accessToken: 'stale-access-token' })
+    const { request, destroy } = makeRequest({ accessToken: 'fresh-access-token', idp: 'google' })
     const reply = makeReply()
 
     await getMe(request, reply)
 
-    expect(destroy).toHaveBeenCalled()
-    expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
-    expect(reply.status).toHaveBeenCalledWith(401)
-    expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+    expect(destroy).not.toHaveBeenCalled()
+    expect(reply.clearCookie).not.toHaveBeenCalled()
+    expect(reply.send).toHaveBeenCalledWith({ authenticated: true, idp: 'google' })
   })
 
   it('does not refresh when the access token is comfortably fresh', async () => {

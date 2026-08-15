@@ -61,20 +61,20 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     return
   }
 
-  if (res.status === 401) {
-    // The upstream API is the source of truth for token validity — a session
-    // whose access token it now rejects (expired, revoked) is dead weight.
-    await request.session.destroy()
-    reply.clearCookie('sessionId').status(401).send({ authenticated: false })
-    return
-  }
-
-  if (res.status === 404) {
-    // Authenticated but not yet registered: the session is valid, the DUOS
-    // profile just doesn't exist yet. Report authenticated with no user so
-    // the client can run its post-sign-in registration bootstrap — collapsing
-    // this into a failure would make every new user look signed out and leave
+  if (res.status === 401 || res.status === 404) {
+    // Authenticated but (almost certainly) not yet registered. The DUOS API
+    // conflates "bad token" with "no DUOS profile for this email": its auth
+    // filter (DuosUserAuthenticator) turns the user lookup's NotFoundException
+    // into an empty principal, which Dropwizard reports as 401 — the same
+    // status a rejected token gets. Treating that 401 as a dead session
+    // destroyed every brand-new user's session on their first probe and made
     // registration unreachable.
+    //
+    // Reporting the session honestly here is safe: the access token was
+    // refreshed just above when anywhere near expiry, so a 401 from a fresh
+    // token means "no profile", and in the rare revoked-token case the
+    // client's registration attempt fails too, which signs the session out.
+    // (404 kept for symmetry should the upstream ever disambiguate.)
     reply.send({ authenticated: true, idp: request.session.idp })
     return
   }
