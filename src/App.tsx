@@ -14,6 +14,7 @@ import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { completeSignIn } from 'src/libs/auth/postSignIn'
 import { useSessionInfo } from 'src/hooks/useSession'
+import type { SessionInfo } from 'src/libs/auth/session'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
 
@@ -38,18 +39,18 @@ function App() {
   const isLoggedIn = sessionInfo?.authenticated ?? false
   const [signInBootstrapDone, setSignInBootstrapDone] = useState(false)
   // State (render-visible) tracks that the bootstrap is underway; the ref is
-  // only the effect's run-once-per-identity guard, never read during render.
+  // only the effect's consumed-probe marker, never read during render.
   const [signInBootstrapStarted, setSignInBootstrapStarted] = useState(false)
-  const signInBootstrapKickedOffFor = useRef<number | null>(null)
+  const consumedProbeRef = useRef<SessionInfo | null>(null)
   // The session identity and the locally stored profile can disagree: after a
   // session expires and someone signs in as a different account (or another
   // tab switches accounts on the shared cookie), CurrentUser still holds the
-  // previous user. Only a session that NAMES a different user counts — a
-  // session with no user is what the cached probe looks like right after
-  // registration persists the new profile, and treating that as a mismatch
-  // re-armed the bootstrap into a run the once-per-identity guard blocks,
-  // pinning the app on the spinner. In legacy mode the probe reports the
-  // stored user itself, so this can never fire there.
+  // previous user. Render-visibly, only a session that NAMES a different user
+  // counts — a session with no user is also what the cached probe looks like
+  // right after registration persists the new profile. The effect below tells
+  // those two apart by probe freshness (each probe result is classified once),
+  // so a genuinely unregistered session still re-bootstraps. In legacy mode
+  // the probe reports the stored user itself, so this can never fire there.
   const storedUserId = Storage.getCurrentUser().userId
   const sessionUserId = sessionInfo?.user?.userId
   const identityMismatch = isLoggedIn && storedUserId !== 0
@@ -83,27 +84,52 @@ function App() {
   }, [])
 
   /**
-   * Post-sign-in bootstrap: the OAuth flow is a full-page redirect through the
-   * BFF (/auth/login → B2C → /auth/callback → back here), so the first render
-   * after signing in has a session but no local user state. Detect that and
-   * run the user fetch / registration / ToS flow.
+   * Session reconciliation. Each FRESH probe result is classified exactly once
+   * (the ref remembers the last consumed result object; the cached probe
+   * returns the same object, so re-renders and StrictMode double-invocations
+   * are no-ops):
+   *
+   * - Session names the stored user → hydrate: refresh the local profile from
+   *   the probe's server-fetched user (roles/ToS can change between page
+   *   loads — the popup flow used to reconcile on every sign-in) and route to
+   *   the ToS gate if acceptance is missing. No metrics, no navigation churn.
+   * - Anything else (no local user after the OAuth callback, a session naming
+   *   a different user, or a fresh probe with no profile = unregistered — the
+   *   cross-tab-switch case) → the full post-sign-in bootstrap.
    */
   useEffect(() => {
-    if (!isBootstrappingSignIn) return
-    // Keyed by the session identity (0 = unregistered), so a StrictMode
-    // double-invocation is blocked while a re-arm for a different account
-    // passes through.
-    const targetUserId = sessionInfo?.user?.userId ?? 0
-    if (signInBootstrapKickedOffFor.current === targetUserId) return
-    signInBootstrapKickedOffFor.current = targetUserId
+    if (!sessionInfo?.authenticated || consumedProbeRef.current === sessionInfo) return
+    consumedProbeRef.current = sessionInfo
+
+    const storedId = Storage.getCurrentUser().userId
+    const sessionUser = sessionInfo.user
+    if (sessionUser?.userId !== undefined && sessionUser.userId === storedId) {
+      Storage.setCurrentUser(sessionUser)
+      setUserRoleStatuses(sessionUser, Storage)
+      // Only an explicit "not accepted" routes to the gate — a profile without
+      // status info (older legacy sessions, service accounts) is left alone.
+      const tosRejected = sessionUser.userStatusInfo?.tosAccepted === false
+      const onTosPage = location.pathname.startsWith('/tos')
+      if (tosRejected && !onTosPage) {
+        navigate('/tos_acceptance')
+      }
+      return
+    }
+
+    // Arm the spinner in the same tick the bootstrap kicks off — deliberate:
+    // the effect's real work is the external completeSignIn call below, and
+    // these flags are how the render layer tracks it.
+    // oxlint-disable-next-line react/react-compiler
     setSignInBootstrapStarted(true)
+    // oxlint-disable-next-line react/react-compiler
+    setSignInBootstrapDone(false)
     // The BFF callback lands the browser on the destination itself, so the
     // pathname is the redirect target; the legacy popup flow reloads on the
     // landing page with the destination still in ?redirectTo=.
     const redirectTo = new URLSearchParams(location.search).get('redirectTo')
     completeSignIn({ navigate, queryClient, redirectPath: redirectTo ?? location.pathname })
       .finally(() => setSignInBootstrapDone(true))
-  }, [isBootstrappingSignIn, sessionInfo, navigate, location.pathname, location.search])
+  }, [sessionInfo, navigate, location.pathname, location.search])
 
   /**
      * Check for RAS Authentication URL params. If we have a code and state, we will call ECM APIs to get redirect

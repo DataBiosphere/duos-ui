@@ -44,6 +44,12 @@ vi.mock('src/libs/auth/postSignIn', () => ({
   completeSignIn: vi.fn(),
 }))
 
+// The hydrate-path ToS test navigates here; the real page fetches ToS text
+// through unmocked config plumbing. Only the route transition matters.
+vi.mock('src/pages/TermsOfServiceAcceptance', () => ({
+  default: () => null,
+}))
+
 // BaseModal calls Modal.setAppElement('#root') at module load time; prevent
 // the error by no-op-ing it before the import chain resolves.
 vi.mock('react-modal', async (importOriginal) => {
@@ -150,6 +156,14 @@ describe('Main App Functions', () => {
   })
 })
 
+const LocationSpyGlobal = ({ onLocationChange }: { onLocationChange: (pathname: string) => void }) => {
+  const location = useLocation()
+  React.useEffect(() => {
+    onLocationChange(location.pathname)
+  }, [location, onLocationChange])
+  return null
+}
+
 describe('post-sign-in bootstrap', () => {
   const renderApp = () =>
     render(
@@ -190,14 +204,50 @@ describe('post-sign-in bootstrap', () => {
     await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
   })
 
-  it('does not bootstrap when the stored profile already matches the session identity', async () => {
+  it('hydrates (not bootstraps) when the stored profile already matches the session identity', async () => {
     vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(duosUser as never)
-    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: duosUser as never })
+    const setCurrentUser = vi.spyOn(Storage, 'setCurrentUser').mockImplementation(() => {})
+    const freshUser = { ...duosUser, roles: [{ userId: 2, roleId: 5, name: 'Researcher' }] }
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: freshUser as never })
 
     renderApp()
 
-    await waitFor(() => expect(document.querySelector('.main')).toBeInTheDocument())
+    // Same identity → the local profile refreshes from the probe's
+    // server-fetched user (roles/ToS can change between page loads)…
+    await waitFor(() => expect(setCurrentUser).toHaveBeenCalledWith(freshUser))
+    // …without the full bootstrap (no metrics, no cache reset, no navigation).
     expect(vi.mocked(completeSignIn)).not.toHaveBeenCalled()
+  })
+
+  it('routes a hydrated user with explicitly rejected ToS to the acceptance gate', async () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(duosUser as never)
+    vi.spyOn(Storage, 'setCurrentUser').mockImplementation(() => {})
+    const noTosUser = { ...duosUser, userStatusInfo: { tosAccepted: false } }
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: noTosUser as never })
+    const pageVisitStub = vi.fn()
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <LocationSpyGlobal onLocationChange={pageVisitStub} />
+        <App />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => expect(pageVisitStub).toHaveBeenCalledWith('/tos_acceptance'))
+    expect(vi.mocked(completeSignIn)).not.toHaveBeenCalled()
+  })
+
+  it('bootstraps when a fresh probe reports an unregistered session over a stored identity (cross-tab switch)', async () => {
+    // Another tab switched the shared cookie to a brand-new account: this
+    // tab still stores user 7, but a FRESH probe reports authenticated with
+    // no user. That must re-bootstrap (reaching registration), not silently
+    // keep wearing user 7's identity under the new session.
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ ...duosUser, userId: 7 } as never)
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+
+    renderApp()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
   })
 
   it('does not bootstrap while signed out', async () => {
