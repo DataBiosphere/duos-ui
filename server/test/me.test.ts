@@ -95,6 +95,20 @@ describe('getMe', () => {
     expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
   })
 
+  it('reports authenticated with no user when the upstream has no profile yet (404 = unregistered)', async () => {
+    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(404, { message: 'Unable to find user' }) as never)
+    const { request, destroy } = makeRequest({ accessToken: 'test-access-token', idp: 'microsoft' })
+    const reply = makeReply()
+
+    await getMe(request, reply)
+
+    // The session is valid; the client's post-sign-in bootstrap needs
+    // authenticated:true (with user absent) to reach its registration flow.
+    expect(destroy).not.toHaveBeenCalled()
+    expect(reply.status).not.toHaveBeenCalledWith(502)
+    expect(reply.send).toHaveBeenCalledWith({ authenticated: true, idp: 'microsoft' })
+  })
+
   it('returns 502 without destroying the session when the upstream API errors with a non-401 status', async () => {
     vi.mocked(fetch).mockResolvedValue(makeFetchResponse(503, {}) as never)
     const { request, destroy } = makeRequest({ accessToken: 'test-access-token' })

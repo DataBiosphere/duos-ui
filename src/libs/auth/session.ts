@@ -76,7 +76,13 @@ export const getSessionInfo = async (): Promise<SessionInfo> => {
       // sign-in flow and the dev-only /backgroundsignin page both mutate
       // localStorage without a page load, so a cached answer would go stale.
       // (config.json itself is promise-cached, so this costs nothing.)
-      return { authenticated: Storage.userIsLogged() }
+      // The stored user IS the legacy identity, so reporting it here means
+      // identity-reconciliation checks (session user vs stored user) are
+      // trivially satisfied in legacy mode.
+      const authenticated = Storage.userIsLogged()
+      return authenticated
+        ? { authenticated, user: Storage.getCurrentUser() }
+        : { authenticated }
     }
   }
   catch {

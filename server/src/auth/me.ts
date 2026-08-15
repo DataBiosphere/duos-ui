@@ -42,6 +42,16 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     return
   }
 
+  if (res.status === 404) {
+    // Authenticated but not yet registered: the session is valid, the DUOS
+    // profile just doesn't exist yet. Report authenticated with no user so
+    // the client can run its post-sign-in registration bootstrap — collapsing
+    // this into a failure would make every new user look signed out and leave
+    // registration unreachable.
+    reply.send({ authenticated: true, idp: request.session.idp })
+    return
+  }
+
   if (!res.ok) {
     // A non-401 failure (5xx, upstream outage) says nothing about whether the
     // token itself is still valid — don't destroy the session or parse an

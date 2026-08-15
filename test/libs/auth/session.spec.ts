@@ -190,8 +190,12 @@ describe('session probe', () => {
 
     it('derives auth state from the legacy localStorage token, never calling /auth/me', async () => {
       vi.spyOn(Storage, 'userIsLogged').mockReturnValue(true)
+      const storedUser = { userId: 7, displayName: 'Legacy User' }
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(storedUser as never)
 
-      await expect(getSessionInfo()).resolves.toEqual({ authenticated: true })
+      // The stored user is the legacy identity — reported so identity
+      // reconciliation (session user vs stored user) holds in legacy mode.
+      await expect(getSessionInfo()).resolves.toEqual({ authenticated: true, user: storedUser })
       expect(fetchMock).not.toHaveBeenCalled()
     })
 
