@@ -44,6 +44,11 @@ import { setUserRoleStatuses } from 'src/libs/utils'
 interface ActiveBootstrap {
   targetUserId: number
   cancelled: boolean
+  /** The freshest same-user profile carried by a probe that JOINED this run.
+   * The run's own (older) getMe response may land after that probe, so the
+   * joined profile is applied when the run completes — otherwise a
+   * same-user authorization change arriving mid-bootstrap would be lost. */
+  pendingHydration?: DuosUser
 }
 
 interface ReconcilerSnapshot {
@@ -99,11 +104,18 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
 
   useEffect(() => {
     if (!sessionInfo?.authenticated) {
-      // The session disappeared (signed out in this or another tab, expiry).
-      // An in-flight bootstrap must not keep persisting a user, emitting
-      // metrics, or navigating for a session that no longer exists.
+      // The session disappeared — genuine sign-out/expiry, or a transient
+      // failure the probe reports as unauthenticated. An in-flight bootstrap
+      // must not keep acting, and the token must be RETIRED, not just
+      // cancelled: if it stayed registered, the next authenticated probe
+      // (e.g. after a network blip) would join a dead run and either hang
+      // behind the spinner or unlock routes with nothing persisted.
       if (activeBootstrapRef.current) {
         activeBootstrapRef.current.cancelled = true
+        activeBootstrapRef.current = null
+        // The retired run's finally no longer owns this flag.
+        // oxlint-disable-next-line react/react-compiler
+        setSnapshot(prev => ({ ...prev, bootstrapRunning: false }))
       }
       return
     }
@@ -126,6 +138,12 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
         || (active.targetUserId === 0 && sessionUser !== undefined
           && sessionUser.userId !== 0 && sessionUser.userId === storedUserId)
       if (coveredByRun) {
+        // A joined probe carrying a profile is fresher than the run's own
+        // in-flight getMe response — remember it so the run's completion
+        // applies it (latest join wins).
+        if (sessionUser !== undefined && sessionUser.userId !== 0) {
+          active.pendingHydration = sessionUser
+        }
         // Recording classification IS this effect's externally-visible work
         // for a joined probe (see ReconcilerSnapshot.classifiedProbe).
         // oxlint-disable-next-line react/react-compiler
@@ -173,6 +191,20 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
     }).finally(() => {
       if (activeBootstrapRef.current !== token) return
       activeBootstrapRef.current = null
+      // Apply the freshest profile a joined probe carried: the run's own
+      // getMe response may have been older and overwritten storage after it.
+      if (!token.cancelled && token.pendingHydration) {
+        const fresh = token.pendingHydration
+        Storage.setCurrentUser(fresh)
+        setUserRoleStatuses(fresh, Storage)
+        // Same explicit-rejection rule as the hydrate path. The router
+        // location closure may be stale by completion time — read the live
+        // one (they coincide outside MemoryRouter tests).
+        if (fresh.userStatusInfo?.tosAccepted === false
+          && !globalThis.location.pathname.startsWith('/tos')) {
+          navigate('/tos_acceptance')
+        }
+      }
       setSnapshot(prev => ({ ...prev, bootstrapRunning: false }))
     })
   }, [sessionInfo, navigate, location.pathname, location.search, queryClient])

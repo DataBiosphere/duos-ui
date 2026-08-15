@@ -215,6 +215,60 @@ describe('useSessionReconciler', () => {
     expect(result.current.reconciling).toBe(false)
   })
 
+  it('retires a cancelled run — the next authenticated probe starts fresh instead of joining it', async () => {
+    // /auth/me reports { authenticated: false } for transient failures too,
+    // so a network blip mid-bootstrap must not leave a dead token that the
+    // recovered probe would join (hanging the spinner or unlocking empty).
+    vi.mocked(completeSignIn).mockReturnValue(new Promise(() => {}))
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+
+    const { result, rerender } = renderReconciler()
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+
+    // Transient blip: probe flips unauthenticated…
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: false })
+    rerender()
+    expect(result.current.reconciling).toBe(false)
+
+    // …then recovers with a fresh unauthenticated-session probe (same shape,
+    // NEW object). It must start a second bootstrap, not join the dead one.
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+    rerender()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledTimes(2))
+    expect(result.current.reconciling).toBe(true)
+  })
+
+  it('applies the freshest joined profile when the run completes', async () => {
+    // A named-user bootstrap has an older getMe in flight when focus
+    // revalidation returns the SAME user with newer roles. The join must not
+    // swallow that profile — it is applied at run completion, after the
+    // run's own (older) write.
+    let resolveBootstrap!: () => void
+    vi.mocked(completeSignIn).mockReturnValue(new Promise<void>((resolve) => {
+      resolveBootstrap = () => resolve()
+    }))
+    const setCurrentUser = vi.spyOn(Storage, 'setCurrentUser').mockImplementation(() => {})
+    const user9 = { userId: 9, displayName: 'Nine', roles: [] } as unknown as DuosUser
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: user9 as never })
+
+    const { result, rerender } = renderReconciler()
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+
+    // Same user, newer authorization state, mid-run.
+    const user9Promoted = { ...user9, roles: [{ name: 'Admin' }] }
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: user9Promoted as never })
+    rerender()
+    expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce() // joined, not restarted
+
+    await act(async () => {
+      resolveBootstrap()
+    })
+
+    expect(setCurrentUser).toHaveBeenCalledWith(user9Promoted)
+    expect(result.current.reconciling).toBe(false)
+  })
+
   it('cancels the in-flight bootstrap on unmount', async () => {
     vi.mocked(completeSignIn).mockReturnValue(new Promise(() => {}))
     vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })

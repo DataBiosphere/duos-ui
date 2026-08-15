@@ -271,6 +271,24 @@ describe('completeSignIn', () => {
       expect(navigate).not.toHaveBeenCalled()
     })
 
+    it('stops before metrics and routing when superseded during the missing-roles report', async () => {
+      // ErrorReporter.report awaits env lookup + delivery — long enough to be
+      // superseded mid-call. The run must not resume with metrics/navigation.
+      let cancelledFlag = false
+      const rolelessUser = { email: 'test@user.com', userStatusInfo: tosAcceptedStatus }
+      vi.mocked(User.getMe).mockResolvedValue(rolelessUser as never)
+      vi.mocked(ErrorReporter.report).mockImplementation(async () => {
+        cancelledFlag = true
+      })
+
+      await completeSignIn({ navigate, queryClient, redirectPath: '/', isCancelled: () => cancelledFlag })
+
+      expect(vi.mocked(ErrorReporter.report)).toHaveBeenCalled()
+      expect(vi.mocked(Metrics.captureEvent)).not.toHaveBeenCalled()
+      expect(vi.mocked(Navigation.console)).not.toHaveBeenCalled()
+      expect(navigate).not.toHaveBeenCalled()
+    })
+
     it('does not sign out or toast when a cancelled run fails', async () => {
       vi.mocked(User.getMe).mockRejectedValue(new Error('not found'))
 
