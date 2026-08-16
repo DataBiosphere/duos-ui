@@ -28,7 +28,7 @@ const renderReconciler = () => renderHook(() => useSessionReconciler(queryClient
 
 describe('useSessionReconciler', () => {
   beforeEach(() => {
-    vi.mocked(completeSignIn).mockResolvedValue(undefined)
+    vi.mocked(completeSignIn).mockResolvedValue('completed')
   })
 
   afterEach(() => {
@@ -150,8 +150,8 @@ describe('useSessionReconciler', () => {
   it('joins an in-flight bootstrap instead of starting a concurrent one for the same identity', async () => {
     // completeSignIn hangs, as a slow registration would.
     let resolveBootstrap!: () => void
-    vi.mocked(completeSignIn).mockReturnValue(new Promise<void>((resolve) => {
-      resolveBootstrap = () => resolve()
+    vi.mocked(completeSignIn).mockReturnValue(new Promise((resolve) => {
+      resolveBootstrap = () => resolve('completed')
     }))
     const probe1: SessionInfo = { authenticated: true }
     vi.mocked(useSessionInfo).mockReturnValue(probe1)
@@ -245,8 +245,8 @@ describe('useSessionReconciler', () => {
     // swallow that profile — it is applied at run completion, after the
     // run's own (older) write.
     let resolveBootstrap!: () => void
-    vi.mocked(completeSignIn).mockReturnValue(new Promise<void>((resolve) => {
-      resolveBootstrap = () => resolve()
+    vi.mocked(completeSignIn).mockReturnValue(new Promise((resolve) => {
+      resolveBootstrap = () => resolve('completed')
     }))
     const setCurrentUser = vi.spyOn(Storage, 'setCurrentUser').mockImplementation(() => {})
     const user9 = { userId: 9, displayName: 'Nine', roles: [] } as unknown as DuosUser
@@ -267,6 +267,32 @@ describe('useSessionReconciler', () => {
 
     expect(setCurrentUser).toHaveBeenCalledWith(user9Promoted)
     expect(result.current.reconciling).toBe(false)
+  })
+
+  it('discards pending hydration when the run ends signed-out', async () => {
+    // The run failed and completeSignIn signed the session out, clearing
+    // storage. Applying the joined profile afterwards would resurrect a
+    // stale identity that survives the sign-out reload.
+    let resolveBootstrap!: (outcome: 'signed-out') => void
+    vi.mocked(completeSignIn).mockReturnValue(new Promise((resolve) => {
+      resolveBootstrap = resolve
+    }))
+    const setCurrentUser = vi.spyOn(Storage, 'setCurrentUser').mockImplementation(() => {})
+    const user9 = { userId: 9, displayName: 'Nine', roles: [] } as unknown as DuosUser
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: user9 as never })
+
+    const { rerender } = renderReconciler()
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+
+    // A same-user probe joins mid-run, supplying pending hydration.
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: { ...user9 } as never })
+    rerender()
+
+    await act(async () => {
+      resolveBootstrap('signed-out')
+    })
+
+    expect(setCurrentUser).not.toHaveBeenCalled()
   })
 
   it('cancels the in-flight bootstrap on unmount', async () => {

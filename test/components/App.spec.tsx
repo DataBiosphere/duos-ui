@@ -174,7 +174,7 @@ describe('post-sign-in bootstrap', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(completeSignIn).mockResolvedValue(undefined)
+    vi.mocked(completeSignIn).mockResolvedValue('completed')
   })
 
   afterEach(() => {
@@ -284,6 +284,7 @@ describe('post-sign-in bootstrap', () => {
     vi.mocked(completeSignIn).mockImplementation(async () => {
       // What registerAndRedirectNewUser -> setUserRoleStatuses does.
       Storage.setCurrentUser(duosUser as never)
+      return 'completed'
     })
 
     renderApp()

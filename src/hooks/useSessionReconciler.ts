@@ -188,12 +188,21 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
       queryClient,
       redirectPath: redirectTo ?? location.pathname,
       isCancelled: () => token.cancelled,
-    }).finally(() => {
+      latestJoinedProfile: () => token.pendingHydration,
+    }).then(
+      outcome => outcome,
+      // An unexpected rejection is not a completion — treat like a failure so
+      // pending hydration is discarded along with it.
+      () => 'failed' as const,
+    ).then((outcome) => {
       if (activeBootstrapRef.current !== token) return
       activeBootstrapRef.current = null
-      // Apply the freshest profile a joined probe carried: the run's own
-      // getMe response may have been older and overwritten storage after it.
-      if (!token.cancelled && token.pendingHydration) {
+      // Apply the freshest profile a joined probe carried — but ONLY when the
+      // run completed. A 'signed-out' run just cleared storage; re-populating
+      // it here would resurrect a stale identity that survives the sign-out
+      // reload. (Joins that landed before the run's persist/routing step were
+      // already applied inside completeSignIn via latestJoinedProfile.)
+      if (outcome === 'completed' && !token.cancelled && token.pendingHydration) {
         const fresh = token.pendingHydration
         Storage.setCurrentUser(fresh)
         setUserRoleStatuses(fresh, Storage)

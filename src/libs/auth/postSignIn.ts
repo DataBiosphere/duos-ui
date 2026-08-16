@@ -32,7 +32,22 @@ export interface CompleteSignInOptions {
    * metrics, navigate, or sign out — the newer run owns the session now.
    */
   isCancelled?: () => boolean
+  /**
+   * The freshest same-user profile a probe delivered while this run was in
+   * flight (the reconciler's joined-probe hydration). Consulted at persist
+   * and routing time so an older getMe response does not route off outdated
+   * roles/ToS state.
+   */
+  latestJoinedProfile?: () => DuosUser | undefined
 }
+
+/**
+ * How the run ended. The caller applies follow-up work (e.g. joined-probe
+ * hydration) only on 'completed' — a 'signed-out' run has just cleared
+ * storage, and re-populating it would resurrect a stale identity that
+ * survives the sign-out reload.
+ */
+export type CompleteSignInOutcome = 'completed' | 'signed-out' | 'cancelled'
 
 interface HttpishError {
   status?: number
@@ -65,7 +80,7 @@ const syncSignInOrRegistrationEvent = (event: MetricsEventName) => {
   Metrics.captureEvent(event)
 }
 
-export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCancelled }: CompleteSignInOptions): Promise<void> => {
+export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCancelled, latestJoinedProfile }: CompleteSignInOptions): Promise<CompleteSignInOutcome> => {
   const cancelled = () => isCancelled?.() === true
   // '/' and '/home' are landing pages, not destinations worth returning to —
   // signed-in users on those go to their console instead.
@@ -95,9 +110,9 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
     }
   }
 
-  const registerAndRedirectNewUser = async () => {
+  const registerAndRedirectNewUser = async (): Promise<CompleteSignInOutcome> => {
     const registeredUser: DuosUser = await User.registerUser()
-    if (cancelled()) return
+    if (cancelled()) return 'cancelled'
     const redirectParam = redirectTo ? `?redirectTo=${redirectTo}` : ''
     setUserRoleStatuses(registeredUser, Storage)
     // New identity — same cache reset as the normal sign-in path below. The
@@ -108,11 +123,12 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
     resetSessionCache()
     syncSignInOrRegistrationEvent(eventList.userRegister)
     navigate(`/tos_acceptance${redirectParam}`)
+    return 'completed'
   }
 
-  const handleRegistration = async () => {
+  const handleRegistration = async (): Promise<CompleteSignInOutcome> => {
     try {
-      await registerAndRedirectNewUser()
+      return await registerAndRedirectNewUser()
     }
     catch (error) {
       if (errorStatus(error) === 409) {
@@ -122,31 +138,37 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
         // storage (usually the empty default) would send an accepted user
         // back to the ToS gate without the cache reset or sign-in metric.
         try {
-          await completeExistingUserSignIn(await User.getMe())
+          return await completeExistingUserSignIn(await User.getMe())
         }
         catch {
-          if (!cancelled()) await Auth.signOut()
+          if (cancelled()) return 'cancelled'
+          await Auth.signOut()
+          return 'signed-out'
         }
       }
-      else {
-        if (cancelled()) return
-        Notifications.showError({
-          text: 'Error during sign in: ' + extractError(error),
-          description: 'There was an error completing your registration. Please try again.',
-        })
-        // Authenticated but unregistered and unregisterable: resolving here
-        // would let App mark the bootstrap done and unlock the routes with an
-        // empty CurrentUser. Destroy the session instead — the reload lands
-        // the user cleanly signed out, and signing in again retries.
-        await Auth.signOut()
-      }
+      if (cancelled()) return 'cancelled'
+      Notifications.showError({
+        text: 'Error during sign in: ' + extractError(error),
+        description: 'There was an error completing your registration. Please try again.',
+      })
+      // Authenticated but unregistered and unregisterable: resolving here
+      // would let App mark the bootstrap done and unlock the routes with an
+      // empty CurrentUser. Destroy the session instead — the reload lands
+      // the user cleanly signed out, and signing in again retries.
+      await Auth.signOut()
+      return 'signed-out'
     }
   }
 
-  const completeExistingUserSignIn = async (duosUser: DuosUser): Promise<void> => {
-    if (cancelled()) return
-    Storage.setCurrentUser(duosUser)
-    setUserRoleStatuses(duosUser, Storage)
+  const completeExistingUserSignIn = async (duosUser: DuosUser): Promise<CompleteSignInOutcome> => {
+    if (cancelled()) return 'cancelled'
+    // Prefer the freshest same-user profile a joined probe delivered while
+    // this run's getMe was in flight — persisting and routing off the older
+    // response could apply outdated roles or ToS state.
+    const joined = latestJoinedProfile?.()
+    const effectiveUser = joined !== undefined && joined.userId === duosUser.userId ? joined : duosUser
+    Storage.setCurrentUser(effectiveUser)
+    setUserRoleStatuses(effectiveUser, Storage)
     // Drop any query results cached before sign-in: cached library queries
     // (data, tab counts, filter metadata) were built with the anonymous /
     // previous user's role-based visibility clauses and would otherwise be
@@ -155,34 +177,32 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
     // authenticated-no-user probe answer cached).
     queryClient.clear()
     resetSessionCache()
-    if (!duosUser.roles) {
-      await ErrorReporter.report('roles not found for user: ' + duosUser.email)
+    if (!effectiveUser.roles) {
+      await ErrorReporter.report('roles not found for user: ' + effectiveUser.email)
       // The report awaits env lookup + delivery — long enough to be superseded.
-      if (cancelled()) return
+      if (cancelled()) return 'cancelled'
     }
     syncSignInOrRegistrationEvent(eventList.userSignIn)
     await checkToSAndRedirect(redirectTo)
+    return cancelled() ? 'cancelled' : 'completed'
   }
 
   try {
     const duosUser: DuosUser = await User.getMe()
     if (duosUser) {
-      await completeExistingUserSignIn(duosUser)
+      return await completeExistingUserSignIn(duosUser)
     }
-    else {
-      await handleRegistration()
-    }
+    return await handleRegistration()
   }
   catch (error) {
-    if (cancelled()) return
+    if (cancelled()) return 'cancelled'
     // Explicitly handle AzureB2C errors from Sam
     const errorMessage = extractError(error)
     if (errorMessage.toLowerCase().includes('azureb2c authentication error')) {
       Notifications.showError({ text: errorMessage })
       await Auth.signOut()
+      return 'signed-out'
     }
-    else {
-      await handleRegistration()
-    }
+    return await handleRegistration()
   }
 }

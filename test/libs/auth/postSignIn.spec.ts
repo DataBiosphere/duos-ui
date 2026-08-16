@@ -93,7 +93,7 @@ describe('completeSignIn', () => {
       const tosAcceptedUser = { ...duosUser, userStatusInfo: tosAcceptedStatus }
       vi.mocked(User.getMe).mockResolvedValue(tosAcceptedUser as never)
 
-      await run('/')
+      await expect(run('/')).resolves.toBe('completed')
 
       expect(Storage.getCurrentUser()).toEqual(tosAcceptedUser)
       expect(Storage.getAnonymousId()).not.toBeNull()
@@ -172,7 +172,7 @@ describe('completeSignIn', () => {
       vi.mocked(User.getMe).mockRejectedValue(new Error('not found'))
       vi.mocked(User.registerUser).mockResolvedValue(duosUser)
 
-      await run('/')
+      await expect(run('/')).resolves.toBe('completed')
 
       expect(vi.mocked(User.registerUser)).toHaveBeenCalled()
       expect(queryClient.clear).toHaveBeenCalled()
@@ -227,7 +227,7 @@ describe('completeSignIn', () => {
       vi.mocked(User.getMe).mockRejectedValue(new Error('still failing'))
       vi.mocked(User.registerUser).mockRejectedValue(adapterHttpError(409))
 
-      await run('/')
+      await expect(run('/')).resolves.toBe('signed-out')
 
       expect(vi.mocked(Auth.signOut)).toHaveBeenCalled()
       expect(vi.mocked(Navigation.console)).not.toHaveBeenCalled()
@@ -237,7 +237,7 @@ describe('completeSignIn', () => {
       vi.mocked(User.getMe).mockRejectedValue(new Error('not found'))
       vi.mocked(User.registerUser).mockRejectedValue(adapterHttpError(500, 'boom'))
 
-      await run('/')
+      await expect(run('/')).resolves.toBe('signed-out')
 
       expect(vi.mocked(Notifications.showError)).toHaveBeenCalledWith(expect.objectContaining({
         description: 'There was an error completing your registration. Please try again.',
@@ -261,7 +261,7 @@ describe('completeSignIn', () => {
       // A newer reconciliation supersedes this run while its getMe is in flight.
       cancelledFlag = true
       resolveGetMe({ ...duosUser, userStatusInfo: tosAcceptedStatus })
-      await run
+      await expect(run).resolves.toBe('cancelled')
 
       // The obsolete run must not persist, clear caches, emit metrics, or route.
       expect(Storage.getCurrentUser().userId).toBe(0)
@@ -292,7 +292,9 @@ describe('completeSignIn', () => {
     it('does not sign out or toast when a cancelled run fails', async () => {
       vi.mocked(User.getMe).mockRejectedValue(new Error('not found'))
 
-      await completeSignIn({ navigate, queryClient, redirectPath: '/', isCancelled: () => true })
+      await expect(
+        completeSignIn({ navigate, queryClient, redirectPath: '/', isCancelled: () => true }),
+      ).resolves.toBe('cancelled')
 
       // The newer run owns the session — a superseded failure must not
       // destroy it or surface stale errors.
@@ -306,7 +308,7 @@ describe('completeSignIn', () => {
     it('shows the error and signs the user out', async () => {
       vi.mocked(User.getMe).mockRejectedValue(new Error('AzureB2C authentication error: bad tenant'))
 
-      await run('/')
+      await expect(run('/')).resolves.toBe('signed-out')
 
       expect(vi.mocked(Notifications.showError)).toHaveBeenCalledWith({ text: 'AzureB2C authentication error: bad tenant' })
       expect(vi.mocked(Auth.signOut)).toHaveBeenCalled()
