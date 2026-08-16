@@ -165,8 +165,11 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
     // Prefer the freshest same-user profile a joined probe delivered while
     // this run's getMe was in flight — persisting and routing off the older
     // response could apply outdated roles or ToS state.
-    const joined = latestJoinedProfile?.()
-    const effectiveUser = joined !== undefined && joined.userId === duosUser.userId ? joined : duosUser
+    const resolveEffectiveUser = (base: DuosUser): DuosUser => {
+      const joined = latestJoinedProfile?.()
+      return joined !== undefined && joined.userId === base.userId ? joined : base
+    }
+    let effectiveUser = resolveEffectiveUser(duosUser)
     Storage.setCurrentUser(effectiveUser)
     setUserRoleStatuses(effectiveUser, Storage)
     // Drop any query results cached before sign-in: cached library queries
@@ -179,8 +182,18 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
     resetSessionCache()
     if (!effectiveUser.roles) {
       await ErrorReporter.report('roles not found for user: ' + effectiveUser.email)
-      // The report awaits env lookup + delivery — long enough to be superseded.
+      // The report awaits env lookup + delivery — long enough to be superseded…
       if (cancelled()) return 'cancelled'
+      // …or for a fresher profile to join. Resample before metrics and
+      // routing: checkToSAndRedirect reads storage, and routing off the
+      // pre-report profile could send an accepted user to the ToS gate — a
+      // navigation the reconciler's post-completion apply cannot repair.
+      const resampled = resolveEffectiveUser(effectiveUser)
+      if (resampled !== effectiveUser) {
+        effectiveUser = resampled
+        Storage.setCurrentUser(effectiveUser)
+        setUserRoleStatuses(effectiveUser, Storage)
+      }
     }
     syncSignInOrRegistrationEvent(eventList.userSignIn)
     await checkToSAndRedirect(redirectTo)

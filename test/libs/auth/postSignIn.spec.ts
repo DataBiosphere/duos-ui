@@ -271,6 +271,32 @@ describe('completeSignIn', () => {
       expect(navigate).not.toHaveBeenCalled()
     })
 
+    it('resamples the joined profile after the missing-roles report and routes off the fresher state', async () => {
+      // The roles-missing report is the one await between the profile sample
+      // and routing: a fresher same-user profile joining during it must reach
+      // metrics/ToS routing, or an accepted user gets routed to the ToS gate
+      // — a navigation the reconciler's post-completion apply cannot repair.
+      const rolelessUser = { userId: 1, email: 'test@user.com' }
+      const acceptedUser = { ...duosUser, userStatusInfo: tosAcceptedStatus }
+      vi.mocked(User.getMe).mockResolvedValue(rolelessUser as never)
+      let joined: DuosUser | undefined
+      vi.mocked(ErrorReporter.report).mockImplementation(async () => {
+        joined = acceptedUser
+      })
+
+      await expect(completeSignIn({
+        navigate,
+        queryClient,
+        redirectPath: '/',
+        latestJoinedProfile: () => joined,
+      })).resolves.toBe('completed')
+
+      // Routed as the accepted user, not the pre-report roleless one.
+      expect(Storage.getCurrentUser()).toEqual(acceptedUser)
+      expect(vi.mocked(Navigation.console)).toHaveBeenCalledWith(acceptedUser, navigate)
+      expect(navigate).not.toHaveBeenCalledWith('/tos_acceptance')
+    })
+
     it('stops before metrics and routing when superseded during the missing-roles report', async () => {
       // ErrorReporter.report awaits env lookup + delivery — long enough to be
       // superseded mid-call. The run must not resume with metrics/navigation.
