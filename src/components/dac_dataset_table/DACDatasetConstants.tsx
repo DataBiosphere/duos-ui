@@ -1,30 +1,4 @@
-import { Styles } from 'src/libs/theme'
-
 export const styles = {
-  baseStyle: {
-    fontFamily: 'Montserrat',
-    fontSize: '1.6rem',
-    fontWeight: 400,
-    display: 'flex',
-    padding: '1rem 2%',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    whiteSpace: 'pre-wrap',
-    backgroundColor: 'white',
-    border: '1px solid #DEDEDE',
-    borderRadius: '4px',
-    margin: '0.5% 0',
-  },
-  columnStyle: {
-    ...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between',
-    color: '#7B7B7B',
-    fontFamily: 'Montserrat',
-    fontSize: '1.2rem',
-    fontWeight: 'bold',
-    letterSpacing: '0.2px',
-    textTransform: 'uppercase',
-    border: 'none',
-  },
   cellWidths: {
     duosId: '10%',
     certificationLink: '10%',

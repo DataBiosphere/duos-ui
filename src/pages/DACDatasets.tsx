@@ -6,7 +6,6 @@ import SearchBar from 'src/components/SearchBar'
 import { DACDatasetsTable } from 'src/components/dac_dataset_table/DACDatasetsTable'
 import { DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants.js'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from 'src/libs/utils'
-import { consoleTypes } from 'src/components/dac_dataset_table/DACDatasetTableCellData'
 import { useNavigate } from 'react-router'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
@@ -103,7 +102,6 @@ export default function DACDatasets() {
           DACDatasetTableColumnOptions.STATUS,
         ]}
         isLoading={isLoading}
-        consoleType={consoleTypes.CHAIR}
       />
     </div>
   )
