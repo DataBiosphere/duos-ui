@@ -141,6 +141,23 @@ describe('DuosHeader', () => {
       await mountHeader('/admin_manage_dar_collections', { ...mockUser, isAdmin: true, isResearcher: false })
       expect(screen.getByRole('tab', { name: 'Admin Console' })).toBeInTheDocument()
     })
+
+    it('displays the DAA Associations subtab for an admin', async () => {
+      await mountHeader('/admin_manage_dar_collections', { ...mockUser, isAdmin: true, isResearcher: false })
+      expect(screen.getByRole('tab', { name: 'DAA Associations' })).toBeInTheDocument()
+    })
+
+    it('points the Admin Console DAA Associations subtab at the admin route', () => {
+      const adminConsole = headerTabsConfig.find(tab => tab.label === 'Admin Console')
+      const daaAssociations = adminConsole?.children?.find(subTab => subTab.label === 'DAA Associations')
+
+      expect(daaAssociations?.link).toEqual('/admin_daa_associations')
+    })
+
+    it('highlights Admin Console on /admin_daa_associations', async () => {
+      await mountHeader('/admin_daa_associations', { ...mockUser, isAdmin: true, isResearcher: false })
+      expect(screen.getByRole('tab', { name: 'Admin Console' })).toHaveClass('Mui-selected')
+    })
   })
 
   describe('Authenticated Signing Official', () => {

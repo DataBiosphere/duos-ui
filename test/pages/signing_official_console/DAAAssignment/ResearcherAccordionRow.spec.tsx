@@ -13,6 +13,7 @@ const mockResearcher: DuosUser = makeResearcher({
   displayName: 'Test User Gamma',
   email: 'test.user.gamma@test.org',
   daaDetails: [{ daaId: 1 }],
+  institutionName: 'Institution Gamma',
 })
 
 const mockDaaRows: DAARowData[] = [
@@ -65,6 +66,29 @@ describe('ResearcherAccordionRow', () => {
     expect(container.querySelector('[data-cy="researcher-row-42"]')).toHaveTextContent('test.user.gamma@test.org')
   })
 
+  // ── Institution ───────────────────────────────────────────────────────────
+
+  it('does not show the institution by default', () => {
+    const { container } = mount()
+    expect(container.querySelector('[data-cy="researcher-institution-42"]')).not.toBeInTheDocument()
+    expect(container.querySelector('[data-cy="researcher-row-42"]')).not.toHaveTextContent('Institution Gamma')
+  })
+
+  it('shows the institution when asked', () => {
+    const { container } = mount({ showInstitution: true })
+    expect(container.querySelector('[data-cy="researcher-institution-42"]')).toHaveTextContent('Institution Gamma')
+  })
+
+  it('shows a dash when the researcher has no institution', () => {
+    const withoutInstitution = makeResearcher({
+      userId: 42,
+      displayName: 'Test User Gamma',
+      email: 'test.user.gamma@test.org',
+    })
+    const { container } = mount({ researcher: withoutInstitution, showInstitution: true })
+    expect(container.querySelector('[data-cy="researcher-institution-42"]')).toHaveTextContent('—')
+  })
+
   it('shows authorized badge when authorizedCount > 0', () => {
     const { container } = mount()
     expect(container.querySelector('[data-cy="researcher-authorized-badge-42"]')).toHaveTextContent('1 pre-authorized')
@@ -80,6 +104,33 @@ describe('ResearcherAccordionRow', () => {
     const { container } = mount()
     await user.click(container.querySelector('[data-cy="researcher-row-toggle-42"]') as HTMLElement)
     expect(toggleSpy).toHaveBeenCalledOnce()
+  })
+
+  // The header is a role="button" Box, so keyboard support is not free — and on
+  // the read-only admin page it is the only control on the card.
+  it('is reachable by keyboard and toggles on Enter and Space', async () => {
+    const user = userEvent.setup()
+    const { container } = mount()
+    const header = container.querySelector('[data-cy="researcher-row-toggle-42"]') as HTMLElement
+
+    expect(header).toHaveAttribute('tabindex', '0')
+    header.focus()
+    expect(header).toHaveFocus()
+
+    await user.keyboard('{Enter}')
+    expect(toggleSpy).toHaveBeenCalledTimes(1)
+    await user.keyboard(' ')
+    expect(toggleSpy).toHaveBeenCalledTimes(2)
+  })
+
+  it('ignores other keys on the header', async () => {
+    const user = userEvent.setup()
+    const { container } = mount()
+    const header = container.querySelector('[data-cy="researcher-row-toggle-42"]') as HTMLElement
+    header.focus()
+
+    await user.keyboard('{Escape}a{ArrowDown}')
+    expect(toggleSpy).not.toHaveBeenCalled()
   })
 
   it('does not render the DAA subtable when collapsed', () => {
@@ -133,5 +184,36 @@ describe('ResearcherAccordionRow', () => {
     const { container } = mount({ daaRows: allAuthorized })
     await user.click(container.querySelector('[data-cy="bulk-approve-all-researcher-42"]') as HTMLElement)
     expect(approveAllSpy).not.toHaveBeenCalled()
+  })
+
+  // ── Read-only mode ────────────────────────────────────────────────────────
+
+  describe('read-only mode', () => {
+    it('renders no bulk action buttons in the header', () => {
+      const { container } = mount({ readOnly: true })
+      expect(container.querySelector('[data-cy="bulk-approve-all-researcher-42"]')).not.toBeInTheDocument()
+      expect(container.querySelector('[data-cy="bulk-remove-all-researcher-42"]')).not.toBeInTheDocument()
+    })
+
+    it('still renders the header content and authorized count badge', () => {
+      const { container } = mount({ readOnly: true })
+      expect(container.querySelector('[data-cy="researcher-row-42"]')).toHaveTextContent('Test User Gamma')
+      expect(container.querySelector('[data-cy="researcher-authorized-badge-42"]')).toHaveTextContent('1 pre-authorized')
+    })
+
+    it('renders the sub-table without action buttons when expanded', () => {
+      const { container } = mount({ readOnly: true, isExpanded: true })
+      expect(container.querySelector('[data-cy="daa-subtable"]')).toBeInTheDocument()
+      expect(container.querySelector('[data-cy="daa-row-1"]')).toBeInTheDocument()
+      expect(container.querySelector('[data-cy="auth-action-revoke"]')).not.toBeInTheDocument()
+      expect(container.querySelector('[data-cy="auth-action-authorize"]')).not.toBeInTheDocument()
+    })
+
+    it('still toggles when the header is clicked', async () => {
+      const user = userEvent.setup()
+      const { container } = mount({ readOnly: true })
+      await user.click(container.querySelector('[data-cy="researcher-row-toggle-42"]') as HTMLElement)
+      expect(toggleSpy).toHaveBeenCalledOnce()
+    })
   })
 })

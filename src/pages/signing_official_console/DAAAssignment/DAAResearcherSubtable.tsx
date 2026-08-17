@@ -10,6 +10,8 @@ import {
 import AuthStatusChip from './AuthStatusChip'
 import AuthActionButton from './AuthActionButton'
 import { AuthStatus, DAAResearcherRowData } from './types'
+import { ACTION_COLUMN, normalizedWidths, visibleColumns } from './subtableColumns'
+import { institutionLabel } from './researcherViewHelpers'
 
 const FONT = 'Montserrat'
 
@@ -41,17 +43,24 @@ function rowBorderColor(status: AuthStatus): string {
   return '1px solid #e5e7eb'
 }
 
+const INSTITUTION_COLUMN = 'Institution'
+
 const COLUMN_HEADERS = [
   'Researcher',
   'Email',
+  INSTITUTION_COLUMN,
   'Pre-Auth Status',
   'Pre-authorized By',
-  'Action',
+  ACTION_COLUMN,
 ] as const
 
-const COLUMN_WIDTHS: Record<(typeof COLUMN_HEADERS)[number], string> = {
+type ColumnHeader = (typeof COLUMN_HEADERS)[number]
+
+/** Relative weights, renormalized to 100% across whichever columns are shown. */
+const COLUMN_WIDTHS: Record<ColumnHeader, string> = {
   'Researcher': '23%',
   'Email': '25%',
+  'Institution': '20%',
   'Pre-Auth Status': '17%',
   'Pre-authorized By': '20%',
   'Action': '15%',
@@ -61,6 +70,13 @@ interface DAAResearcherSubtableProps {
   researcherRows: DAAResearcherRowData[]
   onAuthorize: (researcherId: number) => void
   onRevoke: (researcherId: number) => void
+  /** Read-only mode (Admin Console): drops the Action column entirely. */
+  readOnly?: boolean
+  /**
+   * Adds the Institution column. Only meaningful when the list spans more than
+   * one institution, which is the Admin Console's cross-institution scope.
+   */
+  showInstitution?: boolean
 }
 
 /**
@@ -71,19 +87,29 @@ interface DAAResearcherSubtableProps {
  *
  * This is the mirror of ResearcherDAASubtable — researcher-first instead of
  * DAA-first.
+ *
+ * In read-only mode the Action column — header and cells — is not rendered, so
+ * the same table serves the Admin Console's observe-only view; that view also
+ * adds an Institution column, since its rows span institutions.
  */
 export default function DAAResearcherSubtable({
   researcherRows,
   onAuthorize,
   onRevoke,
+  readOnly = false,
+  showInstitution = false,
 }: Readonly<DAAResearcherSubtableProps>) {
+  const columnHeaders = visibleColumns(COLUMN_HEADERS, readOnly)
+    .filter(column => showInstitution || column !== INSTITUTION_COLUMN)
+  const columnWidths = normalizedWidths(columnHeaders, COLUMN_WIDTHS)
+
   return (
     <Box sx={{ bgcolor: '#fafafa' }} data-cy="daa-researcher-subtable">
       <Table size="small">
         <TableHead>
           <TableRow sx={{ bgcolor: '#f0f0f0' }}>
-            {COLUMN_HEADERS.map(col => (
-              <TableCell key={col} sx={{ ...tableCellHeadSx, width: COLUMN_WIDTHS[col] }}>
+            {columnHeaders.map(col => (
+              <TableCell key={col} sx={{ ...tableCellHeadSx, width: columnWidths[col] }}>
                 {col}
               </TableCell>
             ))}
@@ -106,34 +132,44 @@ export default function DAAResearcherSubtable({
               <TableCell sx={tableCellBodySx}>
                 {researcher.email}
               </TableCell>
-              <TableCell sx={{ width: COLUMN_WIDTHS['Pre-Auth Status'] }}>
+              {showInstitution && (
+                <TableCell
+                  sx={{ ...tableCellBodySx, width: columnWidths[INSTITUTION_COLUMN] }}
+                  data-cy={`daa-researcher-institution-${researcher.userId}`}
+                >
+                  {institutionLabel(researcher)}
+                </TableCell>
+              )}
+              <TableCell sx={{ width: columnWidths['Pre-Auth Status'] }}>
                 <AuthStatusChip status={status} />
               </TableCell>
               <TableCell
-                sx={{ ...tableCellBodySx, width: COLUMN_WIDTHS['Pre-authorized By'] }}
+                sx={{ ...tableCellBodySx, width: columnWidths['Pre-authorized By'] }}
                 data-cy={`daa-authorized-by-${researcher.userId}`}
               >
                 {authorizedBy ?? '—'}
               </TableCell>
-              <TableCell
-                sx={{
-                  width: COLUMN_WIDTHS.Action,
-                  minWidth: 120,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                <AuthActionButton
-                  status={status}
-                  onAuthorize={() => onAuthorize(researcher.userId)}
-                  onRevoke={() => onRevoke(researcher.userId)}
-                />
-              </TableCell>
+              {!readOnly && (
+                <TableCell
+                  sx={{
+                    width: COLUMN_WIDTHS.Action,
+                    minWidth: 120,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <AuthActionButton
+                    status={status}
+                    onAuthorize={() => onAuthorize(researcher.userId)}
+                    onRevoke={() => onRevoke(researcher.userId)}
+                  />
+                </TableCell>
+              )}
             </TableRow>
           ))}
           {researcherRows.length === 0 && (
             <TableRow>
               <TableCell
-                colSpan={COLUMN_HEADERS.length}
+                colSpan={columnHeaders.length}
                 sx={{ ...tableCellBodySx, textAlign: 'center', color: '#999', py: 4 }}
                 data-cy="daa-researcher-subtable-empty"
               >

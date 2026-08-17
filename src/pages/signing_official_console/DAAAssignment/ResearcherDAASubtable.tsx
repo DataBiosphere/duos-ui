@@ -11,6 +11,7 @@ import AuthStatusChip from './AuthStatusChip'
 import AuthActionButton from './AuthActionButton'
 import { AuthStatus, DAARowData } from './types'
 import { daaLabel, formatDateYYYYMMDD } from './researcherViewHelpers'
+import { ACTION_COLUMN, visibleColumns } from './subtableColumns'
 
 const FONT = 'Montserrat'
 
@@ -42,30 +43,38 @@ function rowBorderColor(status: AuthStatus): string {
   return '1px solid #e5e7eb'
 }
 
-const COLUMN_HEADERS = ['DAA', 'DAC', 'Effective Date', 'Status', 'Action'] as const
+const COLUMN_HEADERS = ['DAA', 'DAC', 'Effective Date', 'Status', ACTION_COLUMN] as const
 
 interface ResearcherDAASubtableProps {
   daaRows: DAARowData[]
   onAuthorize: (daaId: number) => void
   onRevoke: (daaId: number) => void
+  /** Read-only mode (Admin Console): drops the Action column entirely. */
+  readOnly?: boolean
 }
 
 /**
  * Sub-table rendered inside a researcher's expanded accordion row.
  * Lists every DAA the SO manages, showing the researcher's auth status
  * and an action button for each.
+ *
+ * In read-only mode the Action column — header and cells — is not rendered, so
+ * the same table serves the Admin Console's observe-only view.
  */
 export default function ResearcherDAASubtable({
   daaRows,
   onAuthorize,
   onRevoke,
+  readOnly = false,
 }: Readonly<ResearcherDAASubtableProps>) {
+  const columnHeaders = visibleColumns(COLUMN_HEADERS, readOnly)
+
   return (
     <Box sx={{ bgcolor: '#fafafa' }} data-cy="daa-subtable">
       <Table size="small">
         <TableHead>
           <TableRow sx={{ bgcolor: '#f0f0f0' }}>
-            {COLUMN_HEADERS.map(col => (
+            {columnHeaders.map(col => (
               <TableCell key={col} sx={tableCellHeadSx}>
                 {col}
               </TableCell>
@@ -94,13 +103,15 @@ export default function ResearcherDAASubtable({
               <TableCell>
                 <AuthStatusChip status={status} />
               </TableCell>
-              <TableCell>
-                <AuthActionButton
-                  status={status}
-                  onAuthorize={() => onAuthorize(daa.daaId)}
-                  onRevoke={() => onRevoke(daa.daaId)}
-                />
-              </TableCell>
+              {!readOnly && (
+                <TableCell>
+                  <AuthActionButton
+                    status={status}
+                    onAuthorize={() => onAuthorize(daa.daaId)}
+                    onRevoke={() => onRevoke(daa.daaId)}
+                  />
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

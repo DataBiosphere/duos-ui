@@ -134,6 +134,23 @@ describe('DAAAccordionRow', () => {
     expect(toggleSpy).toHaveBeenCalledOnce()
   })
 
+  // The header is a role="button" Box, so keyboard support is not free — and on
+  // the read-only admin page it is the only control on the card.
+  it('is reachable by keyboard and toggles on Enter and Space', async () => {
+    const user = userEvent.setup()
+    const { container } = mount()
+    const header = container.querySelector('[data-cy="daa-accordion-toggle-5"]') as HTMLElement
+
+    expect(header).toHaveAttribute('tabindex', '0')
+    header.focus()
+    expect(header).toHaveFocus()
+
+    await user.keyboard('{Enter}')
+    expect(toggleSpy).toHaveBeenCalledTimes(1)
+    await user.keyboard(' ')
+    expect(toggleSpy).toHaveBeenCalledTimes(2)
+  })
+
   it('does not render the researcher subtable when collapsed', () => {
     const { container } = mount({ isExpanded: false })
     expect(container.querySelector('[data-cy="daa-researcher-subtable"]')).not.toBeInTheDocument()
@@ -186,6 +203,70 @@ describe('DAAAccordionRow', () => {
     const { container } = mount({ researcherRows: noneAuthorized })
     expect(container.querySelector('[data-cy="bulk-remove-all-daa-5"]')).toBeDisabled()
     expect(container.querySelector('[data-cy="bulk-approve-all-daa-5"]')).not.toBeDisabled()
+  })
+
+  // ── Read-only mode ────────────────────────────────────────────────────────
+
+  describe('read-only mode', () => {
+    it('renders no bulk action buttons in the header', () => {
+      const { container } = mount({ readOnly: true })
+      expect(container.querySelector('[data-cy="bulk-approve-all-daa-5"]')).not.toBeInTheDocument()
+      expect(container.querySelector('[data-cy="bulk-remove-all-daa-5"]')).not.toBeInTheDocument()
+    })
+
+    it('still renders the header content and authorized count badge', () => {
+      const { container } = mount({ readOnly: true })
+      const row = container.querySelector('[data-cy="daa-accordion-row-5"]')
+      expect(row).toHaveTextContent('Default DUOS DAA')
+      expect(container.querySelector('[data-cy="daa-authorized-badge-5"]')).toHaveTextContent('1 pre-authorized')
+    })
+
+    it('renders the sub-table without action buttons when expanded', () => {
+      const { container } = mount({ readOnly: true, isExpanded: true })
+      expect(container.querySelector('[data-cy="daa-researcher-subtable"]')).toBeInTheDocument()
+      expect(container.querySelector('[data-cy="daa-researcher-row-1"]')).toBeInTheDocument()
+      expect(container.querySelector('[data-cy="auth-action-revoke"]')).not.toBeInTheDocument()
+      expect(container.querySelector('[data-cy="auth-action-authorize"]')).not.toBeInTheDocument()
+    })
+
+    it('still toggles when the header is clicked', async () => {
+      const user = userEvent.setup()
+      const { container } = mount({ readOnly: true })
+      await user.click(container.querySelector('[data-cy="daa-accordion-toggle-5"]') as HTMLElement)
+      expect(toggleSpy).toHaveBeenCalledOnce()
+    })
+
+    // An admin has neither an institution nor the authorize control the SO copy
+    // tells them to use.
+    it('drops the authorize-oriented wording from the recently-updated banner', () => {
+      const { container } = mount({
+        daa: recentDaa,
+        isRecentlyUpdated: true,
+        isExpanded: true,
+        authorizedCount: 0,
+        readOnly: true,
+      })
+      const banner = container.querySelector('[data-cy="daa-recently-updated-banner-6"]') as HTMLElement
+      expect(banner).toHaveTextContent('This DAA has been updated within the last year.')
+      expect(banner).not.toHaveTextContent('before authorizing new researchers')
+      expect(banner).not.toHaveTextContent('your institution')
+    })
+
+    it('keeps the authorize-oriented banner wording when not read-only', () => {
+      const { container } = mount({
+        daa: recentDaa,
+        isRecentlyUpdated: true,
+        isExpanded: true,
+        authorizedCount: 0,
+      })
+      const banner = container.querySelector('[data-cy="daa-recently-updated-banner-6"]') as HTMLElement
+      expect(banner).toHaveTextContent('before authorizing new researchers')
+    })
+  })
+
+  it('exposes aria-expanded on the header from first render', () => {
+    const { container } = mount()
+    expect(container.querySelector('[data-cy="daa-accordion-toggle-5"]')).toHaveAttribute('aria-expanded', 'false')
   })
 
   it('a disabled bulk button does nothing when clicked', async () => {
