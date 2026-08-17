@@ -17,6 +17,10 @@ const SORT_FIELD_MAP: Record<string, string> = {
 const FILTER_AGGS = {
   access_management: { terms: { field: 'accessManagement.keyword' } },
   data_use: { terms: { field: 'dataUse.primary.code.keyword' } },
+  // Drives the Data Use Modifiers filter's option list (not counts — it shows none).
+  // `size` is explicit because the secondary vocabulary is larger than Elasticsearch's
+  // default bucket limit of 10, and a dropped bucket is a code nobody can filter on.
+  data_use_modifiers: { terms: { field: 'dataUse.secondary.code.keyword', size: 50 } },
   data_type: { terms: { field: 'study.dataTypes.keyword' } },
   dac: { terms: { field: 'dac.dacName.keyword' } },
 }

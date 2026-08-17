@@ -4,6 +4,7 @@ import {
   EMPTY_FILTERS,
   getExternalActiveFilters,
   getFilterSectionsForAsset,
+  isFilterActive,
   removeFilterValue,
 } from 'src/components/data_library/filterRegistry'
 import { AssetType, AvailableFilters, FilterState } from 'src/types/library'
@@ -11,6 +12,7 @@ import { AssetType, AvailableFilters, FilterState } from 'src/types/library'
 const availableFilters: AvailableFilters = {
   accessManagement: [],
   dataUse: [],
+  dataUseModifiers: [],
   dataType: [],
   dac: [],
   workspaceTools: [],
@@ -64,6 +66,75 @@ describe('filterRegistry', () => {
     expect(serialized).toContain('study.dataTypes')
     expect(serialized).toContain('participantCount')
     expect(serialized).toContain('study.assets.presentations.citation')
+  })
+
+  describe('data use modifiers', () => {
+    it('is offered on the tabs that carry data use, right after the primary codes', () => {
+      for (const tab of [AssetType.DATASETS, AssetType.STUDIES]) {
+        const keys = getFilterSectionsForAsset(tab, availableFilters).map(section => section.key)
+        expect(keys).toContain('dataUseModifiers')
+        expect(keys.indexOf('dataUseModifiers')).toBe(keys.indexOf('dataUse') + 1)
+      }
+    })
+
+    it('matches the selected codes against the secondary data use field', () => {
+      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, dataUseModifiers: ['NPU', 'IRB'] })
+      expect(clauses).toEqual([{
+        bool: {
+          should: [
+            { match_phrase: { 'dataUse.secondary.code': 'NPU' } },
+            { match_phrase: { 'dataUse.secondary.code': 'IRB' } },
+          ],
+        },
+      }])
+    })
+
+    it('phrase-matches, so a hyphenated code cannot spill into its siblings', () => {
+      // `match` would OR the tokens of RS-G ([rs, g]) and so also hit RS-PD ([rs, pd]).
+      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, dataUseModifiers: ['RS-G'] })
+      expect(JSON.stringify(clauses)).not.toContain('"match"')
+      expect(clauses).toEqual([{
+        bool: { should: [{ match_phrase: { 'dataUse.secondary.code': 'RS-G' } }] },
+      }])
+    })
+
+    it('builds no clause when nothing is selected', () => {
+      const clauses = buildActiveFilterClauses(EMPTY_FILTERS)
+      expect(JSON.stringify(clauses)).not.toContain('dataUse.secondary.code')
+    })
+
+    it('combines with a primary code as AND — separate clauses, not one OR', () => {
+      const clauses = buildActiveFilterClauses({
+        ...EMPTY_FILTERS,
+        dataUse: ['HMB'],
+        dataUseModifiers: ['NPU'],
+      })
+      // Two clauses land in the query's `filter` array, so both must hold.
+      expect(clauses).toHaveLength(2)
+      expect(JSON.stringify(clauses)).toContain('dataUse.primary.code')
+      expect(JSON.stringify(clauses)).toContain('dataUse.secondary.code')
+    })
+
+    it('counts as active once a code is selected, and drops a single code on removal', () => {
+      const state: FilterState = { ...EMPTY_FILTERS, dataUseModifiers: ['NPU', 'IRB'] }
+      expect(isFilterActive('dataUseModifiers', state)).toBe(true)
+      expect(isFilterActive('dataUseModifiers', EMPTY_FILTERS)).toBe(false)
+      expect(removeFilterValue(state, 'dataUseModifiers', 'NPU').dataUseModifiers).toEqual(['IRB'])
+    })
+
+    it('surfaces as a removable chip when set from a tab that does not show it', () => {
+      const chips = getExternalActiveFilters(
+        AssetType.MODELS,
+        { ...EMPTY_FILTERS, dataUseModifiers: ['NPU'] },
+        { ...availableFilters, dataUseModifiers: [{ value: 'NPU', label: 'Non-Profit Use Only' }] },
+      )
+      expect(chips).toContainEqual({
+        key: 'dataUseModifiers',
+        sectionLabel: 'Data Use Modifiers',
+        valueLabel: 'Non-Profit Use Only',
+        value: 'NPU',
+      })
+    })
   })
 
   describe('getExternalActiveFilters', () => {

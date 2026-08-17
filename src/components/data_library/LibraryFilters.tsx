@@ -28,6 +28,7 @@ import { isFilterActive } from 'src/components/data_library/filterRegistry'
 const CHECKBOX_FILTER_KEYS = [
   'accessManagement',
   'dataUse',
+  'dataUseModifiers',
   'dataType',
   'dac',
   'workspaceTools',
