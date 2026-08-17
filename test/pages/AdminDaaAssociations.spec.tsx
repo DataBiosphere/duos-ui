@@ -228,18 +228,6 @@ describe('AdminDaaAssociations', () => {
     expect(container.querySelector('[data-cy="daa-researcher-institution-1"]')).toHaveTextContent('Institution Alpha')
   })
 
-  it('filters researchers by institution', async () => {
-    const user = userEvent.setup()
-    const { container } = await mountLoadedPage()
-
-    await user.type(
-      container.querySelector('[data-cy="researcher-search"] input') as HTMLElement,
-      'Institution Beta',
-    )
-    expect(container.querySelector('[data-cy="researcher-row-2"]')).toBeInTheDocument()
-    expect(container.querySelector('[data-cy="researcher-row-1"]')).not.toBeInTheDocument()
-  })
-
   it('does not match the dash shown for researchers with no institution', async () => {
     const user = userEvent.setup()
     const { container } = await mountLoadedPage()
@@ -371,51 +359,35 @@ describe('AdminDaaAssociations', () => {
 
   // ── Search ──────────────────────────────────────────────────────────────────
 
-  it('filters researchers by name', async () => {
+  // Institution is admin-only: this page's list spans institutions, so the
+  // search covers it alongside the fields the SO console already searched.
+  it.each([
+    { field: 'name', query: 'Alpha', kept: 1, dropped: 2 },
+    { field: 'email', query: 'institution-b', kept: 2, dropped: 1 },
+    { field: 'institution', query: 'Institution Beta', kept: 2, dropped: 1 },
+  ])('filters researchers by $field', async ({ query, kept, dropped }) => {
     const user = userEvent.setup()
     const { container } = await mountLoadedPage()
 
     await user.type(
       container.querySelector('[data-cy="researcher-search"] input') as HTMLElement,
-      'Alpha',
+      query,
     )
-    expect(container.querySelector('[data-cy="researcher-row-1"]')).toBeInTheDocument()
-    expect(container.querySelector('[data-cy="researcher-row-2"]')).not.toBeInTheDocument()
+    expect(container.querySelector(`[data-cy="researcher-row-${kept}"]`)).toBeInTheDocument()
+    expect(container.querySelector(`[data-cy="researcher-row-${dropped}"]`)).not.toBeInTheDocument()
   })
 
-  it('filters researchers by email', async () => {
-    const user = userEvent.setup()
-    const { container } = await mountLoadedPage()
-
-    await user.type(
-      container.querySelector('[data-cy="researcher-search"] input') as HTMLElement,
-      'institution-b',
-    )
-    expect(container.querySelector('[data-cy="researcher-row-2"]')).toBeInTheDocument()
-    expect(container.querySelector('[data-cy="researcher-row-1"]')).not.toBeInTheDocument()
-  })
-
-  it('filters DAAs by name in the DAA View', async () => {
+  it.each([
+    { field: 'name', query: 'GTEx' },
+    { field: 'DAC', query: 'DAC-20' },
+  ])('filters DAAs by $field in the DAA View', async ({ query }) => {
     const user = userEvent.setup()
     const { container } = await mountLoadedPage()
 
     await openDaaViewTab(user, container)
     await user.type(
       await waitFor(() => container.querySelector('[data-cy="daa-search"] input') as HTMLElement),
-      'GTEx',
-    )
-    expect(container.querySelector('[data-cy="daa-accordion-row-2"]')).toBeInTheDocument()
-    expect(container.querySelector('[data-cy="daa-accordion-row-1"]')).not.toBeInTheDocument()
-  })
-
-  it('filters DAAs by DAC in the DAA View', async () => {
-    const user = userEvent.setup()
-    const { container } = await mountLoadedPage()
-
-    await openDaaViewTab(user, container)
-    await user.type(
-      await waitFor(() => container.querySelector('[data-cy="daa-search"] input') as HTMLElement),
-      'DAC-20',
+      query,
     )
     expect(container.querySelector('[data-cy="daa-accordion-row-2"]')).toBeInTheDocument()
     expect(container.querySelector('[data-cy="daa-accordion-row-1"]')).not.toBeInTheDocument()

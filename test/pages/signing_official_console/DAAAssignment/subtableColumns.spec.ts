@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   ACTION_COLUMN,
   normalizedWidths,
-  visibleColumns,
+  withoutActionColumn,
 } from 'src/pages/signing_official_console/DAAAssignment/subtableColumns'
 
 const HEADERS = [
@@ -33,18 +33,14 @@ const READ_ONLY_COLUMNS = HEADERS.filter(header => header !== ACTION_COLUMN)
 const sumOf = (widths: Record<string, string>): number =>
   Object.values(widths).reduce((sum, width) => sum + Number.parseFloat(width), 0)
 
-describe('visibleColumns', () => {
-  it('keeps every column when not read-only', () => {
-    expect(visibleColumns(HEADERS, false)).toEqual(HEADERS)
-  })
-
-  it('drops the Action column when read-only', () => {
-    expect(visibleColumns(HEADERS, true)).toEqual(READ_ONLY_COLUMNS)
+describe('withoutActionColumn', () => {
+  it('drops the Action column, keeping the others in order', () => {
+    expect(withoutActionColumn(HEADERS)).toEqual(READ_ONLY_COLUMNS)
   })
 
   it('is a no-op for a header list with no Action column', () => {
     const headers = ['DAA', 'DAC'] as const
-    expect(visibleColumns(headers, true)).toEqual(headers)
+    expect(withoutActionColumn(headers)).toEqual(headers)
   })
 })
 

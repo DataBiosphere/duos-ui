@@ -10,13 +10,11 @@
 export const ACTION_COLUMN = 'Action'
 
 /**
- * The columns to render: every column normally, all but Action when read-only.
+ * `headers` without the Action column — what a read-only view renders.
+ * Views that can act on rows render their header list unchanged.
  */
-export function visibleColumns<T extends string>(
-  headers: readonly T[],
-  readOnly: boolean,
-): readonly T[] {
-  return readOnly ? headers.filter(header => header !== ACTION_COLUMN) : headers
+export function withoutActionColumn<T extends string>(headers: readonly T[]): readonly T[] {
+  return headers.filter(header => header !== ACTION_COLUMN)
 }
 
 /**

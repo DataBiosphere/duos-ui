@@ -10,7 +10,7 @@ import {
 import AuthStatusChip from './AuthStatusChip'
 import AuthActionButton from './AuthActionButton'
 import { AuthStatus, DAAResearcherRowData } from './types'
-import { ACTION_COLUMN, normalizedWidths, visibleColumns } from './subtableColumns'
+import { ACTION_COLUMN, normalizedWidths, withoutActionColumn } from './subtableColumns'
 import { institutionLabel } from './researcherViewHelpers'
 
 const FONT = 'Montserrat'
@@ -99,7 +99,7 @@ export default function DAAResearcherSubtable({
   readOnly = false,
   showInstitution = false,
 }: Readonly<DAAResearcherSubtableProps>) {
-  const columnHeaders = visibleColumns(COLUMN_HEADERS, readOnly)
+  const columnHeaders = (readOnly ? withoutActionColumn(COLUMN_HEADERS) : COLUMN_HEADERS)
     .filter(column => showInstitution || column !== INSTITUTION_COLUMN)
   const columnWidths = normalizedWidths(columnHeaders, COLUMN_WIDTHS)
 

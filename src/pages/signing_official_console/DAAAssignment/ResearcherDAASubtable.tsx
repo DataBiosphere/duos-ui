@@ -11,7 +11,7 @@ import AuthStatusChip from './AuthStatusChip'
 import AuthActionButton from './AuthActionButton'
 import { AuthStatus, DAARowData } from './types'
 import { daaLabel, formatDateYYYYMMDD } from './researcherViewHelpers'
-import { ACTION_COLUMN, visibleColumns } from './subtableColumns'
+import { ACTION_COLUMN, withoutActionColumn } from './subtableColumns'
 
 const FONT = 'Montserrat'
 
@@ -67,7 +67,7 @@ export default function ResearcherDAASubtable({
   onRevoke,
   readOnly = false,
 }: Readonly<ResearcherDAASubtableProps>) {
-  const columnHeaders = visibleColumns(COLUMN_HEADERS, readOnly)
+  const columnHeaders = readOnly ? withoutActionColumn(COLUMN_HEADERS) : COLUMN_HEADERS
 
   return (
     <Box sx={{ bgcolor: '#fafafa' }} data-cy="daa-subtable">
