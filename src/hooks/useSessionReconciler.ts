@@ -113,6 +113,21 @@ const applyPendingHydration = (fresh: DuosUser, navigate: NavigateFunction): voi
   }
 }
 
+/** Drops the per-tab query cache when the tab starts serving a different
+ * identity than the one the cache was populated under. A cross-tab account
+ * switch arrives at the hydrate path looking routine (shared storage already
+ * names the new user), but this tab's cache still holds the previous
+ * identity's role-scoped results. */
+const ensureCacheIdentity = (
+  cacheIdentity: { current: number },
+  queryClient: QueryClient,
+  userId: number,
+): void => {
+  if (cacheIdentity.current === userId) return
+  queryClient.clear()
+  cacheIdentity.current = userId
+}
+
 /** A probe that names the stored user (a real identity, not the empty
  * default) hydrates the local profile instead of bootstrapping. */
 const probeNamesStoredUser = (sessionUser: DuosUser | undefined, storedUserId: number): sessionUser is DuosUser =>
@@ -197,13 +212,7 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
     }
 
     if (probeNamesStoredUser(sessionUser, storedUserId)) {
-      // A cross-tab account switch arrives here looking like a routine
-      // hydrate (shared storage already names the new user). The per-tab
-      // query cache still holds the previous identity's data — drop it.
-      if (cacheIdentityRef.current !== sessionUser.userId) {
-        queryClient.clear()
-        cacheIdentityRef.current = sessionUser.userId
-      }
+      ensureCacheIdentity(cacheIdentityRef, queryClient, sessionUser.userId)
       Storage.setCurrentUser(sessionUser)
       setUserRoleStatuses(sessionUser, Storage)
       // Recorded in state → clean re-render off the refreshed profile (the
