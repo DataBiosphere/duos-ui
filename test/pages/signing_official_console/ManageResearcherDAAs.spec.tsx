@@ -6,8 +6,7 @@ import userEvent from '@testing-library/user-event'
 import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs'
 import { User } from 'src/libs/ajax/User'
 import { DAA } from 'src/libs/ajax/DAA'
-import { Notifications } from 'src/libs/utils'
-import { USER_ROLES } from 'src/libs/utils'
+import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { makeDaa, makeResearcher } from './DAAAssignment/fixtures'
 
 afterEach(() => vi.restoreAllMocks())

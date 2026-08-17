@@ -163,6 +163,25 @@ describe('ResearcherAccordionRow', () => {
     expect(toggleSpy).not.toHaveBeenCalled()
   })
 
+  // Enter/Space on a bulk button bubbles to the header's keydown handler, which
+  // must leave it alone: the button activates itself and the card stays put.
+  it('activates a focused bulk button by keyboard, without toggling', async () => {
+    const user = userEvent.setup()
+    const { container } = mount()
+    const approveAll = container.querySelector('[data-cy="bulk-approve-all-researcher-42"]') as HTMLElement
+
+    approveAll.focus()
+    await user.keyboard('{Enter}')
+    expect(approveAllSpy).toHaveBeenCalledWith([2])
+    expect(toggleSpy).not.toHaveBeenCalled()
+
+    const removeAll = container.querySelector('[data-cy="bulk-remove-all-researcher-42"]') as HTMLElement
+    removeAll.focus()
+    await user.keyboard(' ')
+    expect(removeAllSpy).toHaveBeenCalledWith([1])
+    expect(toggleSpy).not.toHaveBeenCalled()
+  })
+
   it('disables Approve All when every DAA is already authorized', () => {
     const allAuthorized = mockDaaRows.map(r => ({ ...r, status: 'authorized' as const }))
     const { container } = mount({ daaRows: allAuthorized })

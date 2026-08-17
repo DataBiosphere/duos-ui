@@ -17,6 +17,10 @@ export function accordionHeaderKeyboardProps(onToggle: () => void): {
   return {
     tabIndex: 0,
     onKeyDown: (event: React.KeyboardEvent) => {
+      // Only the header itself activates. Enter/Space on a nested control — the
+      // bulk Approve All / Remove All buttons — bubbles up here, and swallowing
+      // it would toggle the row and suppress the button's own activation.
+      if (event.target !== event.currentTarget) return
       if (event.key !== 'Enter' && event.key !== ' ') return
       // Space would otherwise scroll the page.
       event.preventDefault()

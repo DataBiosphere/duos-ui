@@ -152,7 +152,7 @@ export default function DAAResearcherSubtable({
               {!readOnly && (
                 <TableCell
                   sx={{
-                    width: COLUMN_WIDTHS.Action,
+                    width: columnWidths[ACTION_COLUMN],
                     minWidth: 120,
                     whiteSpace: 'nowrap',
                   }}
