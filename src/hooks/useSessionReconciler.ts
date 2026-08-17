@@ -100,14 +100,24 @@ const probeCoveredByRun = (active: ActiveBootstrap, sessionUser: DuosUser | unde
  * completes. Same explicit-rejection rule as the hydrate path. The router
  * location closure may be stale by completion time — read the live one
  * (they coincide outside MemoryRouter tests). */
+/** Only an explicit "not accepted" routes to the gate — a profile without
+ * status info (older legacy sessions, service accounts) is left alone. */
+const tosExplicitlyRejected = (user: DuosUser, pathname: string): boolean =>
+  user.userStatusInfo?.tosAccepted === false && !pathname.startsWith('/tos')
+
 const applyPendingHydration = (fresh: DuosUser, navigate: NavigateFunction): void => {
   Storage.setCurrentUser(fresh)
   setUserRoleStatuses(fresh, Storage)
-  if (fresh.userStatusInfo?.tosAccepted === false
-    && !globalThis.location.pathname.startsWith('/tos')) {
+  if (tosExplicitlyRejected(fresh, globalThis.location.pathname)) {
     navigate('/tos_acceptance')
   }
 }
+
+/** A probe that names the stored user (a real identity, not the empty
+ * default) hydrates the local profile instead of bootstrapping. */
+const probeNamesStoredUser = (sessionUser: DuosUser | undefined, storedUserId: number): sessionUser is DuosUser =>
+  sessionUser !== undefined && sessionUser.userId !== 0
+  && sessionUser.userId === storedUserId
 
 export const useSessionReconciler = (queryClient: QueryClient): SessionReconciliation => {
   const navigate = useNavigate()
@@ -176,18 +186,16 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
       return
     }
 
-    if (sessionUser !== undefined && sessionUser.userId !== 0
-      && sessionUser.userId === storedUserId) {
+    if (probeNamesStoredUser(sessionUser, storedUserId)) {
       Storage.setCurrentUser(sessionUser)
       setUserRoleStatuses(sessionUser, Storage)
       // Recorded in state → clean re-render off the refreshed profile (the
       // localStorage write above is invisible to React without it).
       // oxlint-disable-next-line react/react-compiler
       setSnapshot(prev => ({ ...prev, classifiedProbe: sessionInfo }))
-      // Only an explicit "not accepted" routes to the gate — a profile without
-      // status info (older legacy sessions, service accounts) is left alone.
-      const tosRejected = sessionUser.userStatusInfo?.tosAccepted === false
-      if (tosRejected && !location.pathname.startsWith('/tos')) {
+      // The hydrate path reads the router location — it is live here, unlike
+      // at run completion (see applyPendingHydration).
+      if (tosExplicitlyRejected(sessionUser, location.pathname)) {
         navigate('/tos_acceptance')
       }
       return
