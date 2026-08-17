@@ -28,6 +28,10 @@ vi.mock('src/pages/manage_dac/ManageDac', () => ({
   default: () => <div>Manage DACs</div>,
 }))
 
+vi.mock('src/pages/data_submission/StudyTemplateUpload', () => ({
+  StudyTemplateUpload: () => <div>Upload Study Template</div>,
+}))
+
 const LocationSpy = ({ onLocationChange }: { onLocationChange: (loc: string) => void }) => {
   const location = useLocation()
   React.useEffect(() => {
@@ -45,6 +49,7 @@ const roleBACRoutes: string[] = [
   '/progress_report_application/1',
   '/dar_application/1',
   '/dataset_submissions',
+  '/data_submission_template',
   '/data_submission_form',
   '/study_update/1',
   '/dataset_update/1',
@@ -145,6 +150,47 @@ describe('AppRoutes — legacy DAC console redirects', () => {
     )
 
     expect(container.querySelector('[data-cy="not-found"]')).toBeInTheDocument()
+  })
+})
+
+describe('AppRoutes — study template upload route', () => {
+  const userWithRole = (roleName: string): DuosUser => ({
+    roles: [{ name: roleName }],
+  } as DuosUser)
+
+  beforeEach(() => {
+    vi.spyOn(Storage, 'userIsLogged').mockReturnValue(true)
+  })
+
+  afterEach(() => vi.restoreAllMocks())
+
+  it.each([
+    USER_ROLES.dataSubmitter,
+    USER_ROLES.chairperson,
+    USER_ROLES.admin,
+  ])('renders the upload page for a %s', (roleName) => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(roleName))
+
+    const { getByText } = render(
+      <MemoryRouter initialEntries={['/data_submission_template']}>
+        <AppRoutes isLogged={true} env="dev" />
+      </MemoryRouter>,
+    )
+
+    expect(getByText('Upload Study Template')).toBeInTheDocument()
+  })
+
+  it('does not let a researcher through', () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(USER_ROLES.researcher))
+
+    const { container, queryByText } = render(
+      <MemoryRouter initialEntries={['/data_submission_template']}>
+        <AppRoutes isLogged={true} env="dev" />
+      </MemoryRouter>,
+    )
+
+    expect(container.querySelector('[data-cy="not-found"]')).toBeInTheDocument()
+    expect(queryByText('Upload Study Template')).not.toBeInTheDocument()
   })
 })
 

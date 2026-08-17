@@ -127,6 +127,8 @@ administrator authorization checks remain unchanged.
 
 Validation errors are a completed, expected result and should return HTTP 200. Authentication, authorization, malformed multipart requests, size-limit violations, and unexpected server failures should use appropriate non-2xx responses.
 
+Note: the Ticket 2 service currently reports the size-limit and encoding failures as `valid: false` results instead. Ticket 3 reconciles the two — see "Findings from implementation" below.
+
 Invalid template response:
 
 ```json
@@ -813,3 +815,34 @@ adding template-only cleanup behavior here.
 - A new platform-wide retention implementation.
 - Supporting template v2.
 - Performance testing beyond the documented 5 MiB request limit.
+
+---
+
+## Findings from implementation
+
+Two kinds of thing came out of building Ticket 4 (DT-1854) against the Consent DTOs and the Ticket 2
+parser. The actionable ones are now carried by the tickets that own them, following the same pattern
+as "Contract outcomes" above, so they are summarised here rather than specified here. The design
+observation is recorded in full because no ticket owns it.
+
+| Finding | Recorded in | Outcome |
+| --- | --- | --- |
+| The `draft` table is the only JSON write in this area without the NUL guard the DAR tables already have. A U+0000 escape survives the parser and `jsonb` rejects it, so a valid template can 500 on insert. | Tickets 2 and 3 | Ticket 2 rejects U+0000 during parsing so the producer is told; Ticket 3 applies the existing `regexp_replace` idiom to `DraftDAO.insert` and `updateDraftByDraftUUID`. |
+| `StudyTemplateValidationResult.truncated` has no counterpart in the response type documented in this plan or in the v1 contract. | Ticket 3 | Ticket 3 decides whether it reaches the wire and makes OpenAPI and both documents agree. duos-ui types it as optional, so either choice works. |
+| The service reports the 5 MiB and UTF-8 failures as `valid: false` rather than as request failures, contradicting this plan and the contract. | Ticket 3 | Ticket 3 either rejects oversize at the resource layer or amends both documents. See the note under "Validate a template" above. |
+
+Chairperson access to the draft endpoints was already specified in Ticket 3 and needed no change.
+
+### The supported field set is derivable, not prose
+
+Worth recording because it is a property of the contract rather than a task. The v1 field catalogue is
+exactly a slice of declared wire order: items 1–27 of `StudyRegistrationRequest`'s
+`@JsonPropertyOrder` (of 41), items 2–23 of `ConsentGroupRequest`'s (of 25), and both
+`FileTypeObject` properties. That is 51 fields, and it is why the blank template is 51 rows. The
+duos-ui manifest (`src/libs/studyTemplate/studyTemplateV1Manifest.ts`) is ordered to match, so it can
+be diffed against those annotations rather than against this document, and
+`test/libs/studyTemplate/studyTemplateV1Manifest.spec.ts` enforces that no field Consent lists in
+`StudyTemplateV1Fields.UNSUPPORTED_*` is ever offered — Consent rejects those by name, so offering one
+would produce a template that cannot validate.
+
+Ticket 5 should expect the same slice when mapping a draft document back into the UI `Study` model.
