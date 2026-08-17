@@ -19,6 +19,12 @@ const DATAGRID_SX = {
     outline: `2px solid ${Theme.palette.link}`,
     outlineOffset: '-2px',
   },
+  // The link takes focus in its cell's place, and index.css drops link outlines with !important,
+  // so the ring has to be reinstated at the same weight to be seen at all.
+  '& .MuiDataGrid-cell a:focus-visible': {
+    outline: `2px solid ${Theme.palette.link} !important`,
+    outlineOffset: '2px',
+  },
 }
 
 // Left inset matches SearchBar's own margin, negative right mirrors the search and add button row.
@@ -69,6 +75,7 @@ const filterFn = getSearchFilterFunctions().users
 
 export const ManageUsersTable = function ManageUsersTable({ isLoading, userList, searchText }: ManageUsersTableProps) {
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: PAGE_SIZE_OPTIONS[0] })
+  const [lastSearchText, setLastSearchText] = useState(searchText)
 
   // Filtering is derived, so a keystroke costs one render rather than a cascade of effects.
   const rows = useMemo(() => {
@@ -76,8 +83,18 @@ export const ManageUsersTable = function ManageUsersTable({ isLoading, userList,
     return terms.reduce((list, term) => filterFn(term, list), userList ?? []).map(toUserRow)
   }, [userList, searchText])
 
-  // Clamped during render so a narrower search cannot leave the grid on an empty page.
   const lastPage = Math.max(0, Math.ceil(rows.length / paginationModel.pageSize) - 1)
+
+  // Adjusted during render rather than clamped for the render alone, so widening the results again
+  // cannot restore the page the admin was already moved off.
+  if (searchText !== lastSearchText) {
+    setLastSearchText(searchText)
+    setPaginationModel(model => ({ ...model, page: 0 }))
+  }
+  else if (paginationModel.page > lastPage) {
+    setPaginationModel(model => ({ ...model, page: lastPage }))
+  }
+
   const page = Math.min(paginationModel.page, lastPage)
 
   return (

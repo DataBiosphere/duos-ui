@@ -60,11 +60,18 @@ const renderTable = (props: Partial<ManageUsersTableProps> = {}) => renderWithRo
   <ManageUsersTable isLoading={false} userList={testUsers} searchText="" {...props} />,
 )
 
-const SearchHarness = ({ users }: { users: DuosUser[] }) => {
+const numberedUsers = (count: number): DuosUser[] => Array.from({ length: count }, (_, index) => makeUser({
+  userId: index + 10,
+  displayName: `User ${String(index).padStart(2, '0')}`,
+  email: `user${index}@test.com`,
+}))
+
+const SearchHarness = ({ users, term }: { users: DuosUser[], term: string }) => {
   const [searchText, setSearchText] = useState('')
   return (
     <>
-      <button type="button" onClick={() => setSearchText('user0@')}>Apply search</button>
+      <button type="button" onClick={() => setSearchText(term)}>Apply search</button>
+      <button type="button" onClick={() => setSearchText('')}>Clear search</button>
       <ManageUsersTable isLoading={false} userList={users} searchText={searchText} />
     </>
   )
@@ -83,6 +90,13 @@ const columnHeader = (label: string): HTMLElement =>
 const sortBy = (label: string): void => {
   fireEvent.click(columnHeader(label))
 }
+
+// jsdom cannot resolve :focus-visible, so the emitted rules are read instead.
+const emittedRules = (): string[] =>
+  Array.from(document.querySelectorAll('style'))
+    .map(style => style.textContent ?? '')
+    .join('')
+    .split('}')
 
 const rowFor = async (name: string): Promise<HTMLElement> => {
   const cell = await screen.findByText(name)
@@ -180,12 +194,7 @@ describe('ManageUsersTable', () => {
   })
 
   it('narrows to a page that still holds rows when the search shrinks the list', async () => {
-    const manyUsers = Array.from({ length: 12 }, (_, index) => makeUser({
-      userId: index + 10,
-      displayName: `User ${String(index).padStart(2, '0')}`,
-      email: `user${index}@test.com`,
-    }))
-    renderWithRouter(<SearchHarness users={manyUsers} />)
+    renderWithRouter(<SearchHarness users={numberedUsers(12)} term="user0@" />)
 
     fireEvent.click(await screen.findByRole('button', { name: /go to next page/i }))
     expect(userOrder()).toEqual(['User 10', 'User 11'])
@@ -195,6 +204,30 @@ describe('ManageUsersTable', () => {
 
     expect(userOrder()).toEqual(['User 00'])
     expect(screen.getByText('1–1 of 1')).toBeInTheDocument()
+  })
+
+  it('stays on the first page when a search that shrank the list is cleared', async () => {
+    renderWithRouter(<SearchHarness users={numberedUsers(12)} term="user0@" />)
+
+    fireEvent.click(await screen.findByRole('button', { name: /go to next page/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'Apply search' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }))
+
+    // The abandoned second page is not restored, because the narrowing was written back to state.
+    expect(screen.getByText('1–10 of 12')).toBeInTheDocument()
+    expect(userOrder()).toEqual(numberedUsers(12).slice(0, 10).map(user => user.displayName))
+  })
+
+  it('restarts at the first page when a new search is applied', async () => {
+    renderWithRouter(<SearchHarness users={numberedUsers(24)} term="test.com" />)
+
+    fireEvent.click(await screen.findByRole('button', { name: /go to next page/i }))
+    expect(screen.getByText('11–20 of 24')).toBeInTheDocument()
+
+    // Every user matches, so the page count is unchanged and only the reset can move the grid.
+    fireEvent.click(screen.getByRole('button', { name: 'Apply search' }))
+
+    expect(screen.getByText('1–10 of 24')).toBeInTheDocument()
   })
 
   it('shows a loading indicator while users are being fetched', () => {
@@ -211,20 +244,24 @@ describe('ManageUsersTable', () => {
     expect(columnHeader('User Name')).toBeInTheDocument()
   })
 
-  // jsdom cannot resolve :focus-visible, so the emitted rules are read instead.
   it('keeps a visible focus ring for keyboard users', () => {
     renderTable()
 
-    const rules = Array.from(document.querySelectorAll('style'))
-      .map(style => style.textContent ?? '')
-      .join('')
-      .split('}')
-
     for (const selector of ['.MuiDataGrid-cell:focus-visible', '.MuiDataGrid-columnHeader:focus-visible']) {
       // Last rule wins, so the keyboard ring must outrank the suppressed :focus outline.
-      const matching = rules.filter(rule => rule.includes(selector))
+      const matching = emittedRules().filter(rule => rule.includes(selector))
       expect(matching.length).toBeGreaterThan(0)
       expect(matching.at(-1)).toContain('outline:2px solid #216fb4')
     }
+  })
+
+  it('rings a focused user link at a weight that survives the global link reset', () => {
+    renderTable()
+
+    const matching = emittedRules().filter(rule => rule.includes('.MuiDataGrid-cell a:focus-visible'))
+    expect(matching.length).toBeGreaterThan(0)
+    // index.css drops link outlines with !important, so nothing lighter would be painted.
+    expect(matching.at(-1)).toContain('outline:2px solid #216fb4')
+    expect(matching.at(-1)).toContain('!important')
   })
 })
