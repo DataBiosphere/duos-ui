@@ -46,26 +46,40 @@ const REVALIDATE_MIN_INTERVAL_MS = 3 * 1000
 let sessionPromise: Promise<SessionInfo> | null = null
 let sessionFetchedAt = 0
 
+/**
+ * The last answer /auth/me actually gave (200 or 401). A transient failure
+ * (502, network) says nothing about the session, so it reports this instead
+ * of flipping to signed-out — one upstream blip must not unmount every
+ * authenticated route (Authenticated navigates away and loses form state)
+ * or retire an in-flight bootstrap. The risk of a stale "signed in" here is
+ * the same UI-only exposure the TTL comment above accepts: the first real
+ * API call after expiry still 401s and signs the user out.
+ */
+let lastAuthoritativeAnswer: SessionInfo | null = null
+
 const probeBffSession = async (): Promise<SessionInfo> => {
   try {
     const res = await fetch('/auth/me', { credentials: 'include' })
     if (res.status === 401) {
       // A real answer — no session — worth caching for the page load.
-      return { authenticated: false }
+      lastAuthoritativeAnswer = { authenticated: false }
+      return lastAuthoritativeAnswer
     }
     if (!res.ok) {
-      // Transient upstream failure (e.g. 502): report signed out for this ask,
-      // but drop the cache so the next ask retries instead of pinning the app
-      // signed-out for the rest of the page load.
+      // Transient upstream failure (e.g. 502): hold the last real answer for
+      // this ask, but drop the cache so the next ask retries instead of
+      // pinning the stale answer for the rest of the page load.
       resetSessionCache()
-      return { authenticated: false }
+      return lastAuthoritativeAnswer ?? { authenticated: false }
     }
-    return await res.json() as SessionInfo
+    const info = await res.json() as SessionInfo
+    lastAuthoritativeAnswer = info
+    return info
   }
   catch {
-    // Network failure — same as above: signed out now, retry on the next ask.
+    // Network failure — same as above: last real answer now, retry next ask.
     resetSessionCache()
-    return { authenticated: false }
+    return lastAuthoritativeAnswer ?? { authenticated: false }
   }
 }
 
@@ -101,6 +115,16 @@ export const getSessionInfo = async (): Promise<SessionInfo> => {
 
 export const resetSessionCache = (): void => {
   sessionPromise = null
+}
+
+/**
+ * Test seam: drops the remembered authoritative answer along with the cache.
+ * Production code wants resetSessionCache — the held answer must survive a
+ * cache reset, or it could not bridge the transient failures it exists for.
+ */
+export const resetSessionProbeState = (): void => {
+  sessionPromise = null
+  lastAuthoritativeAnswer = null
 }
 
 /**

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { getSessionInfo, resetSessionCache, revalidateSessionInfo, userIsLogged } from 'src/libs/auth/session'
+import { getSessionInfo, resetSessionCache, resetSessionProbeState, revalidateSessionInfo, userIsLogged } from 'src/libs/auth/session'
 import { Config } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 
@@ -17,11 +17,11 @@ describe('session probe', () => {
     fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
     vi.mocked(Config.isBffEnabled).mockResolvedValue(true)
-    resetSessionCache()
+    resetSessionProbeState()
   })
 
   afterEach(() => {
-    resetSessionCache()
+    resetSessionProbeState()
     vi.unstubAllGlobals()
     vi.restoreAllMocks()
   })
@@ -78,6 +78,50 @@ describe('session probe', () => {
     const recovered = await getSessionInfo()
     expect(recovered.authenticated).toBe(true)
     expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('holds the last authenticated answer across a transient outage', async () => {
+    // One 502 must not flip every mounted hook to signed-out — Authenticated
+    // would navigate away and lose the user's form state.
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: true, idp: 'google' }), { status: 200 }),
+    )
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: false, error: 'upstream_unavailable' }), { status: 502 }),
+    )
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: true, idp: 'google' }), { status: 200 }),
+    )
+
+    await expect(getSessionInfo()).resolves.toMatchObject({ authenticated: true })
+    resetSessionCache()
+
+    // The outage ask reports the held answer…
+    await expect(getSessionInfo()).resolves.toMatchObject({ authenticated: true })
+    // …and stays un-cached, so the next ask probes again.
+    await expect(getSessionInfo()).resolves.toMatchObject({ authenticated: true })
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+  })
+
+  it('lets an authoritative 401 overwrite the held answer', async () => {
+    // A real sign-out must win over the remembered signed-in answer: a later
+    // transient failure reports signed-out, not the pre-sign-out identity.
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: true }), { status: 200 }),
+    )
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: false }), { status: 401 }),
+    )
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: false, error: 'upstream_unavailable' }), { status: 502 }),
+    )
+
+    await expect(getSessionInfo()).resolves.toMatchObject({ authenticated: true })
+    resetSessionCache()
+    await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+    resetSessionCache()
+
+    await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
   })
 
   it('returns unauthenticated when the config lookup itself fails', async () => {

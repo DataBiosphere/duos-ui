@@ -11,6 +11,12 @@ const UPSTREAM_TIMEOUT_MS = 5000
  * tokens themselves, which stay server-side in the session.
  */
 export async function getMe(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  // The answer is per-session and now gates the whole SPA: no intermediary
+  // (or the browser's heuristic cache) may replay one user's profile to
+  // another, or a stale answer to the same user.
+  reply.header('cache-control', 'no-store')
+  reply.header('vary', 'Cookie')
+
   if (!request.session.accessToken) {
     reply.status(401).send({ authenticated: false })
     return

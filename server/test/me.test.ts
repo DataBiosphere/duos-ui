@@ -30,13 +30,15 @@ function makeRequest(overrides: { accessToken?: string, idp?: 'google' | 'micros
 }
 
 function makeReply() {
-  const reply = { clearCookie: vi.fn(), status: vi.fn(), send: vi.fn() }
+  const reply = { clearCookie: vi.fn(), status: vi.fn(), send: vi.fn(), header: vi.fn() }
   reply.clearCookie.mockReturnValue(reply)
   reply.status.mockReturnValue(reply)
+  reply.header.mockReturnValue(reply)
   return reply as unknown as FastifyReply & {
     clearCookie: ReturnType<typeof vi.fn>
     status: ReturnType<typeof vi.fn>
     send: ReturnType<typeof vi.fn>
+    header: ReturnType<typeof vi.fn>
   }
 }
 
@@ -98,6 +100,26 @@ describe('getMe', () => {
       user: { email: 'user@example.com' },
       idp: 'google',
     })
+  })
+
+  it('marks every answer uncacheable — the profile must never be replayed across sessions', async () => {
+    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(200, { email: 'user@example.com' }) as never)
+    const { request } = makeRequest({ accessToken: 'test-access-token', idp: 'google' })
+    const reply = makeReply()
+
+    await getMe(request, reply)
+
+    expect(reply.header).toHaveBeenCalledWith('cache-control', 'no-store')
+    expect(reply.header).toHaveBeenCalledWith('vary', 'Cookie')
+  })
+
+  it('marks the unauthenticated answer uncacheable too', async () => {
+    const { request } = makeRequest({})
+    const reply = makeReply()
+
+    await getMe(request, reply)
+
+    expect(reply.header).toHaveBeenCalledWith('cache-control', 'no-store')
   })
 
   it('reports authenticated with no user on an upstream 401 — DUOS conflates "no profile" with "bad token"', async () => {
