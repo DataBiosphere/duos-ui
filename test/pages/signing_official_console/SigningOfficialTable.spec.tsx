@@ -103,13 +103,27 @@ const mockResearcher3 = user({
   }),
 })
 
-const renderTable = () => render(
+const renderTable = (researchers: DuosUser[] = [mockResearcher1, mockResearcher2, mockResearcher3]) => render(
   <SigningOfficialTable
-    researchers={[mockResearcher1, mockResearcher2, mockResearcher3]}
+    researchers={researchers}
     signingOfficial={mockSigningOfficial}
     isLoading={false}
   />,
 )
+
+// Sorting changes row order, so assertions read the names in rendered order.
+const researcherOrder = (): string[] =>
+  screen.getAllByRole('row')
+    .map(row => within(row).queryAllByRole('gridcell')[0]?.textContent ?? '')
+    .filter(name => name !== '')
+
+// A sorted header's accessible name gains the sort button, so match the label prefix.
+const columnHeader = (label: string): HTMLElement =>
+  screen.getByRole('columnheader', { name: new RegExp(`^${label}`) })
+
+const sortBy = (label: string): void => {
+  fireEvent.click(columnHeader(label))
+}
 
 const rowFor = async (name: string): Promise<HTMLElement> => {
   const cell = await screen.findByText(name)
@@ -148,6 +162,16 @@ describe('SigningOfficialTable', () => {
     const row = await rowFor(mockResearcher3.displayName)
     expect(within(row).getByText('Active')).toBeInTheDocument()
     expect(within(row).getByRole('switch', { name: /^Access Status/ })).toBeChecked()
+  })
+
+  it('keeps the row switches out of the page tab order', async () => {
+    renderTable()
+    await rowFor(mockResearcher1.displayName)
+
+    // The grid is one tab stop, so switches take the cell's tabIndex instead of adding two per row.
+    const switches = screen.getAllByRole('switch')
+    expect(switches).toHaveLength(6)
+    switches.forEach(toggle => expect(toggle).toHaveAttribute('tabindex', '-1'))
   })
 
   it('shows separate Access Status and Submitter Status notices', async () => {
@@ -294,6 +318,84 @@ describe('SigningOfficialTable', () => {
     // The container reports its load state to the table after committing, so Confirm is enabled on
     // the following render rather than the one that shows the text.
     await waitFor(() => expect(screen.getByRole('button', { name: 'Confirm' })).not.toBeDisabled())
+  })
+
+  it('lists researchers alphabetically before any column is sorted', async () => {
+    renderTable()
+
+    await rowFor(mockResearcher1.displayName)
+    expect(researcherOrder()).toEqual([
+      mockResearcher1.displayName,
+      mockResearcher2.displayName,
+      mockResearcher3.displayName,
+    ])
+  })
+
+  it('falls back to the email address for a researcher with no display name', async () => {
+    const unnamed = user({ userId: 4, email: 'unnamed@test.com', displayName: undefined as unknown as string })
+    renderTable([unnamed])
+
+    // The address fills both the Researcher and Email cells.
+    expect(await screen.findAllByText(unnamed.email)).toHaveLength(2)
+    expect(researcherOrder()).toEqual([unnamed.email])
+  })
+
+  it('reverses the order when the Researcher column is sorted descending', async () => {
+    renderTable()
+
+    await rowFor(mockResearcher1.displayName)
+    // The grid starts ascending on this column, so one click flips it.
+    sortBy('Researcher')
+
+    expect(researcherOrder()).toEqual([
+      mockResearcher3.displayName,
+      mockResearcher2.displayName,
+      mockResearcher1.displayName,
+    ])
+  })
+
+  it('sorts by access status so active researchers can be grouped', async () => {
+    renderTable()
+
+    await rowFor(mockResearcher1.displayName)
+    // Ascending puts Inactive first, so a second click lifts the active researcher.
+    sortBy('Access Status')
+    sortBy('Access Status')
+
+    expect(researcherOrder()).toEqual([
+      mockResearcher3.displayName,
+      mockResearcher1.displayName,
+      mockResearcher2.displayName,
+    ])
+  })
+
+  // jsdom cannot resolve :focus-visible, so the emitted rules are read instead.
+  it('keeps a visible focus ring for keyboard users', async () => {
+    renderTable()
+    await rowFor(mockResearcher1.displayName)
+
+    const rules = Array.from(document.querySelectorAll('style'))
+      .map(style => style.textContent ?? '')
+      .join('')
+      .split('}')
+
+    for (const selector of ['.MuiDataGrid-cell:focus-visible', '.MuiDataGrid-columnHeader:focus-visible']) {
+      // Last rule wins, so the keyboard ring must outrank the suppressed :focus outline.
+      const matching = rules.filter(rule => rule.includes(selector))
+      expect(matching.length).toBeGreaterThan(0)
+      expect(matching.at(-1)).toContain('outline:2px solid #216fb4')
+    }
+  })
+
+  it('allows sorting on every column', async () => {
+    renderTable()
+
+    await rowFor(mockResearcher1.displayName)
+    // Researcher goes last: it starts ascending, so a click would flip it.
+    for (const label of ['Email', 'Access Status', 'Submitter Status', 'Researcher']) {
+      sortBy(label)
+      expect(columnHeader(label)).toHaveAttribute('aria-sort', 'ascending')
+    }
   })
 
   it('issues and removes Data Submitter status from the table', async () => {
