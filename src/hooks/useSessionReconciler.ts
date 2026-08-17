@@ -189,6 +189,12 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
       redirectPath: redirectTo ?? location.pathname,
       isCancelled: () => token.cancelled,
       latestJoinedProfile: () => token.pendingHydration,
+      // Only the BFF probe can be authenticated without a user — the legacy
+      // probe always mirrors storage (session.ts). That answer means
+      // "unregistered": completeSignIn must go straight to registration, as
+      // its usual getMe would hit the same upstream 401 the probe just saw
+      // and the /duos-api proxy answers that by destroying the session.
+      sessionReportsNoProfile: sessionUser === undefined,
     }).then(
       outcome => outcome,
       // An unexpected rejection is not a completion — treat like a failure so

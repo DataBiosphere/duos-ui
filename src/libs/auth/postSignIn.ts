@@ -39,6 +39,17 @@ export interface CompleteSignInOptions {
    * roles/ToS state.
    */
   latestJoinedProfile?: () => DuosUser | undefined
+  /**
+   * True when the session probe that triggered this run reported an
+   * authenticated session with no DUOS profile — /auth/me's "valid session,
+   * unregistered user" answer. The initial getMe is skipped: the probe fetched
+   * /api/user/me moments ago, and repeating the call through /duos-api hits
+   * the same upstream 401 that the proxy treats as an authoritative token
+   * rejection (destroySessionOnUpstream401) — destroying the session that
+   * registerUser() is about to need. A stale no-profile answer (the user
+   * registered in another tab meanwhile) is recovered by the 409 branch.
+   */
+  sessionReportsNoProfile?: boolean
 }
 
 /**
@@ -80,7 +91,7 @@ const syncSignInOrRegistrationEvent = (event: MetricsEventName) => {
   Metrics.captureEvent(event)
 }
 
-export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCancelled, latestJoinedProfile }: CompleteSignInOptions): Promise<CompleteSignInOutcome> => {
+export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCancelled, latestJoinedProfile, sessionReportsNoProfile }: CompleteSignInOptions): Promise<CompleteSignInOutcome> => {
   const cancelled = () => isCancelled?.() === true
   // '/' and '/home' are landing pages, not destinations worth returning to —
   // signed-in users on those go to their console instead.
@@ -198,6 +209,13 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
     syncSignInOrRegistrationEvent(eventList.userSignIn)
     await checkToSAndRedirect(redirectTo)
     return cancelled() ? 'cancelled' : 'completed'
+  }
+
+  // The probe already answered "authenticated, no profile" — registration is
+  // the only next step, and the getMe below must not run first (it would
+  // destroy the session; see sessionReportsNoProfile).
+  if (sessionReportsNoProfile) {
+    return await handleRegistration()
   }
 
   try {

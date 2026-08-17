@@ -58,7 +58,8 @@ const duosUser = {
 const navigate = vi.fn()
 const queryClient = { clear: vi.fn() } as unknown as QueryClient
 
-const run = (redirectPath = '/') => completeSignIn({ navigate, queryClient, redirectPath })
+const run = (redirectPath = '/', options: { sessionReportsNoProfile?: boolean } = {}) =>
+  completeSignIn({ navigate, queryClient, redirectPath, ...options })
 
 // The exact shape fetchAdapter throws for an HTTP error: the axios-like
 // { response: { status } } error is re-wrapped by the adapter's outer catch,
@@ -246,6 +247,46 @@ describe('completeSignIn', () => {
       // routes — destroy the session instead so the user lands signed out.
       expect(vi.mocked(Auth.signOut)).toHaveBeenCalled()
       expect(navigate).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('unregistered session probe (BFF)', () => {
+    // The regression Kevin traced: /auth/me reports the upstream 401 on
+    // /api/user/me as "authenticated, no profile", but repeating getMe through
+    // /duos-api hits the same 401 — which the proxy treats as an authoritative
+    // token rejection and destroys the session, so the registerUser that
+    // follows arrives unauthenticated. The probe's answer must route straight
+    // to registration with the session intact.
+    it('registers without calling getMe when the probe already reported no profile', async () => {
+      // What the doomed getMe would produce: the proxy destroys the session
+      // and answers 401 session_expired. If completeSignIn regresses into
+      // calling it, registration fails and this test routes to sign-out.
+      vi.mocked(User.getMe).mockRejectedValue(adapterHttpError(401, 'session_expired'))
+      vi.mocked(User.registerUser).mockResolvedValue(duosUser)
+
+      await expect(run('/', { sessionReportsNoProfile: true })).resolves.toBe('completed')
+
+      expect(vi.mocked(User.getMe)).not.toHaveBeenCalled()
+      expect(vi.mocked(User.registerUser)).toHaveBeenCalled()
+      expect(vi.mocked(Auth.signOut)).not.toHaveBeenCalled()
+      expect(vi.mocked(Metrics.captureEvent)).toHaveBeenCalledWith('user:register')
+      expect(navigate).toHaveBeenCalledWith('/tos_acceptance')
+    })
+
+    it('recovers through the 409 branch when the no-profile answer was stale', async () => {
+      // The user registered in another tab after the probe answered: the
+      // register 409 proves it, and the re-fetch (now safe — a registered
+      // user's getMe succeeds) completes the sign-in.
+      const tosAcceptedUser = { ...duosUser, userStatusInfo: tosAcceptedStatus }
+      vi.mocked(User.getMe).mockResolvedValue(tosAcceptedUser as never)
+      vi.mocked(User.registerUser).mockRejectedValue(adapterHttpError(409))
+
+      await expect(run('/', { sessionReportsNoProfile: true })).resolves.toBe('completed')
+
+      expect(vi.mocked(User.getMe)).toHaveBeenCalledOnce()
+      expect(Storage.getCurrentUser()).toEqual(tosAcceptedUser)
+      expect(vi.mocked(Metrics.captureEvent)).toHaveBeenCalledWith('user:signin')
+      expect(vi.mocked(Notifications.showError)).not.toHaveBeenCalled()
     })
   })
 

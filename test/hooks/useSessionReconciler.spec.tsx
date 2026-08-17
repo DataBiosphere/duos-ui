@@ -103,6 +103,23 @@ describe('useSessionReconciler', () => {
     renderReconciler()
 
     await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+    // The legacy probe carries a user (the storage mirror), so it never
+    // reports "no profile" — the bootstrap's getMe must run as usual.
+    expect(vi.mocked(completeSignIn).mock.calls[0][0].sessionReportsNoProfile).toBe(false)
+  })
+
+  it('tells the bootstrap the probe reported no profile, so it skips the session-destroying getMe', async () => {
+    // Only the BFF probe answers authenticated-without-user (an unregistered
+    // session). completeSignIn must go straight to registration: its usual
+    // getMe would repeat the upstream 401 the probe just saw, and the
+    // /duos-api proxy answers that by destroying the session registerUser
+    // is about to need.
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+
+    renderReconciler()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+    expect(vi.mocked(completeSignIn).mock.calls[0][0].sessionReportsNoProfile).toBe(true)
   })
 
   it('reloads on identity reversal — a probe naming the pre-run stored user does not join', async () => {
