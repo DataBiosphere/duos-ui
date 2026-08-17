@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event'
 import SignInButton from 'src/components/SignInButton'
 import { Auth, Redirect } from 'src/libs/auth/auth'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
+import { Storage } from 'src/libs/storage'
 import type { OidcUser } from 'src/libs/auth/oidcBroker'
 
 /**
@@ -25,6 +26,7 @@ vi.mock('src/libs/auth/auth', () => ({
   },
   Redirect: {
     to: vi.fn(),
+    reload: vi.fn(),
   },
 }))
 vi.mock('src/libs/ajax/ServiceStatus')
@@ -74,9 +76,10 @@ describe('SignInButton', () => {
 
     await userEvent.click(screen.getByRole('button'))
 
-    // Only the legacy flow resolves (BFF mode navigates away instead). The
-    // reload keeps the query string so App's bootstrap can finish the trip.
-    await waitFor(() => expect(vi.mocked(Redirect.to)).toHaveBeenCalledWith(globalThis.location.href))
+    // Only the legacy flow resolves (BFF mode navigates away instead). A real
+    // reload (not an href assignment, which is a no-op on #fragment URLs)
+    // keeps the query string so App's bootstrap can finish the trip.
+    await waitFor(() => expect(vi.mocked(Redirect.reload)).toHaveBeenCalled())
     expect(globalThis.location.search).toContain('redirectTo')
   })
 
@@ -88,7 +91,34 @@ describe('SignInButton', () => {
     await userEvent.click(screen.getByRole('button'))
 
     expect(await screen.findByText(signInError)).toBeInTheDocument()
-    expect(vi.mocked(Redirect.to)).not.toHaveBeenCalled()
+    expect(vi.mocked(Redirect.reload)).not.toHaveBeenCalled()
+  })
+
+  it('shows the cancel message when the user closes the legacy popup', async () => {
+    // oidc-client-ts PopupWindow rejects with exactly this error. Closing the
+    // window is a decision, not a failure — no scary generic error.
+    vi.mocked(Auth.signIn).mockRejectedValue(new Error('Popup closed by user'))
+    mountComponent()
+    await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
+
+    await userEvent.click(screen.getByRole('button'))
+
+    expect(await screen.findByText('Sign in cancelled')).toBeInTheDocument()
+    expect(screen.getByText('Sign in cancelled by closing the sign in window')).toBeInTheDocument()
+    expect(screen.queryByText(signInError)).not.toBeInTheDocument()
+  })
+
+  it('clears partial auth state from storage when sign-in fails', async () => {
+    // The abandoned popup can leave partial oidc state behind; the old
+    // onFailure always cleared storage and the rewrite must too.
+    const clearStorage = vi.spyOn(Storage, 'clearStorage')
+    vi.mocked(Auth.signIn).mockRejectedValue(new Error('login failed'))
+    mountComponent()
+    await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
+
+    await userEvent.click(screen.getByRole('button'))
+
+    await waitFor(() => expect(clearStorage).toHaveBeenCalled())
   })
 
   it('does not send /home as a returnTo either', async () => {

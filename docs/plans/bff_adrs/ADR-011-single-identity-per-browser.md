@@ -40,7 +40,9 @@ multi-account applications do — by discarding the stale tab's state:
   the reconciliation spinner. This needs no conflict machinery: nothing else
   is in flight.
 - An identity conflict that appears **under an in-flight bootstrap** cancels
-  that run and **hard-reloads the tab** (`Redirect.to(location.href)`). The
+  that run and **hard-reloads the tab** (`Redirect.reload()` — a true
+  `location.reload()`, because assigning `location.href` to a URL with a
+  `#fragment` is a same-document navigation that reloads nothing). The
   fresh page load reconciles from scratch; the reload kills all in-flight
   JavaScript, so no obsolete run can persist a user, emit metrics, navigate,
   or destroy the session after being overtaken.
@@ -72,6 +74,37 @@ withheld for the one render until the fresh profile commits.
   repeatedly), reload more than once. Each reload converges on the current
   session, so there is no livelock — the fresh load either matches storage
   (hydrate) or bootstraps in place.
+
+## Accepted risks
+
+Two residual windows, surfaced by the cross-tab review on #3863
+(2026-08-17), are accepted rather than engineered around:
+
+1. **A registration run can adopt a different unregistered identity.**
+   `/auth/me` cannot distinguish unregistered accounts — every one of them
+   reports `authenticated: true` with no user, so a registration run's
+   target identity is "none". If, during the seconds a registration run is
+   in flight, another tab signs the shared cookie into a *different*
+   unregistered account, a focus revalidation in the first tab joins the
+   run (same "none" target) and the in-flight `registerUser()` registers
+   whoever now owns the cookie. The tab converges on that account rather
+   than reloading. Detecting this needs a stable per-session identifier for
+   unregistered sessions from `/auth/me`; the join rule cannot be tightened
+   without also reloading on the legitimate joins (StrictMode double
+   invocation, focus revalidation) that the run-once machinery exists for.
+   The window is seconds wide and requires two different unregistered
+   accounts switching mid-registration.
+
+2. **A transient upstream 401 for a registered user drives one
+   registration POST.** `/auth/me` reports an upstream 401 as "valid
+   session, no profile" (the upstream conflates the two — see #3861). For
+   a *registered* user this shape only appears when the upstream 401s a
+   freshly refreshed token: a revoked token, or upstream auth outage. The
+   bootstrap then attempts `registerUser()`; the expected `409 Conflict`
+   recovers into a normal sign-in, and any other failure signs the session
+   out — which is the correct end state for a genuinely revoked token. The
+   cost of the window is one spurious POST and, during an upstream auth
+   outage, a sign-out instead of an error banner.
 
 ## Alternative considered
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { isEmpty } from 'src/utils/NodashUtil'
 import { Alert } from 'src/components/Alert'
 import { Auth, Redirect } from 'src/libs/auth/auth'
+import { Storage } from 'src/libs/storage'
 import loadingIndicator from 'src/images/loading-indicator.svg'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
@@ -47,11 +48,27 @@ export const SignInButton = () => {
       // the spinner stays up until the browser leaves. Only the legacy popup
       // flow reaches this line: reload in place (query string included) so the
       // fresh page load re-probes auth state and App.tsx runs the post-sign-in
-      // bootstrap, the same path the BFF callback takes.
-      Redirect.to(globalThis.location.href)
+      // bootstrap, the same path the BFF callback takes. Redirect.reload, not
+      // Redirect.to(href) — on a #fragment URL the latter reloads nothing and
+      // a successful sign-in appears to do nothing.
+      Redirect.reload()
     }
-    catch {
-      setErrorDisplay({ show: true, title: 'Error', description: Auth.signInError() })
+    catch (error) {
+      // The legacy popup flow rejects here (BFF mode navigates away instead).
+      // Mirror the old onFailure: drop whatever partial auth state the popup
+      // left behind, and tell a deliberate cancel apart from a real failure —
+      // oidc-client-ts PopupWindow rejects with "Popup closed by user".
+      Storage.clearStorage()
+      if (String(error).includes('Popup closed by user')) {
+        setErrorDisplay({
+          show: true,
+          title: 'Sign in cancelled',
+          description: 'Sign in cancelled by closing the sign in window',
+        })
+      }
+      else {
+        setErrorDisplay({ show: true, title: 'Error', description: Auth.signInError() })
+      }
       setIsLoading(false)
     }
   }

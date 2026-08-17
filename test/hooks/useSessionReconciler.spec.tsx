@@ -15,7 +15,7 @@ vi.mock('src/hooks/useSession', () => ({ useSessionInfo: vi.fn() }))
 vi.mock('src/libs/auth/postSignIn', () => ({ completeSignIn: vi.fn() }))
 // The hard-reload seam: identity conflicts under an in-flight bootstrap
 // reload the page instead of reconciling in place (see the scope policy).
-vi.mock('src/libs/auth/auth', () => ({ Redirect: { to: vi.fn() } }))
+vi.mock('src/libs/auth/auth', () => ({ Redirect: { to: vi.fn(), reload: vi.fn() } }))
 
 const queryClient = { clear: vi.fn() } as unknown as QueryClient
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -29,6 +29,7 @@ const renderReconciler = () => renderHook(() => useSessionReconciler(queryClient
 describe('useSessionReconciler', () => {
   beforeEach(() => {
     vi.mocked(completeSignIn).mockResolvedValue('completed')
+    vi.mocked(queryClient.clear).mockClear()
   })
 
   afterEach(() => {
@@ -122,6 +123,41 @@ describe('useSessionReconciler', () => {
     expect(vi.mocked(completeSignIn).mock.calls[0][0].sessionReportsNoProfile).toBe(true)
   })
 
+  it('clears the per-tab query cache when storage changed under us (cross-tab account switch)', async () => {
+    // This tab mounted (and filled its QueryClient) as user 7. Another tab
+    // then switched the shared cookie AND shared storage to user 9. This
+    // tab's next probe names 9 and MATCHES storage — an ordinary-looking
+    // hydrate — but the per-tab cache still holds 7's role-scoped results.
+    const user9 = { userId: 9, displayName: 'Nine', roles: [] } as unknown as DuosUser
+    const getCurrentUser = vi.spyOn(Storage, 'getCurrentUser')
+    vi.spyOn(Storage, 'setCurrentUser').mockImplementation(() => {})
+    // Mount-time cache identity: user 7.
+    getCurrentUser.mockReturnValue(storedUser as never)
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: { ...storedUser } as never })
+
+    const { rerender } = renderReconciler()
+    expect(queryClient.clear).not.toHaveBeenCalled()
+
+    // The other tab's switch: storage now names 9, and so does the probe.
+    getCurrentUser.mockReturnValue(user9 as never)
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: user9 as never })
+    rerender()
+
+    await waitFor(() => expect(queryClient.clear).toHaveBeenCalled())
+    expect(vi.mocked(completeSignIn)).not.toHaveBeenCalled()
+  })
+
+  it('does not clear the query cache on a routine same-user hydrate', async () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(storedUser as never)
+    vi.spyOn(Storage, 'setCurrentUser').mockImplementation(() => {})
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: { ...storedUser } as never })
+
+    renderReconciler()
+
+    await waitFor(() => expect(vi.mocked(useSessionInfo)).toHaveBeenCalled())
+    expect(queryClient.clear).not.toHaveBeenCalled()
+  })
+
   it('reloads on identity reversal — a probe naming the pre-run stored user does not join', async () => {
     // Storage holds user 7. A bootstrap for user 9 is in flight. The session
     // switches BACK to user 7: the probe matches storage, but 9's run did not
@@ -140,7 +176,7 @@ describe('useSessionReconciler', () => {
     vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: storedUser as never })
     rerender()
 
-    await waitFor(() => expect(vi.mocked(Redirect.to)).toHaveBeenCalledWith(globalThis.location.href))
+    await waitFor(() => expect(vi.mocked(Redirect.reload)).toHaveBeenCalled())
     expect(firstRunOptions.isCancelled?.()).toBe(true)
     expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce()
   })
@@ -209,7 +245,7 @@ describe('useSessionReconciler', () => {
     vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: otherUser as never })
     rerender()
 
-    await waitFor(() => expect(vi.mocked(Redirect.to)).toHaveBeenCalledWith(globalThis.location.href))
+    await waitFor(() => expect(vi.mocked(Redirect.reload)).toHaveBeenCalled())
     expect(firstRunOptions.isCancelled?.()).toBe(true)
     // No second in-place bootstrap — the reload owns reconciliation now.
     expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce()

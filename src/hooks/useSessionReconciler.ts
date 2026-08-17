@@ -131,6 +131,13 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
   // double-invocations, and the active bootstrap's cancellation token.
   const consumedProbeRef = useRef<SessionInfo | null>(null)
   const activeBootstrapRef = useRef<ActiveBootstrap | null>(null)
+  // The identity this tab's QueryClient was populated under. localStorage is
+  // shared across tabs but the query cache is per-tab: when another tab
+  // switches accounts, this tab's next probe MATCHES the (already-switched)
+  // stored user and hydrates — with the previous user's role-scoped query
+  // results still resident. Storage cannot answer "whose data does THIS
+  // tab's cache hold", so the tab tracks it itself and clears on change.
+  const cacheIdentityRef = useRef<number>(Storage.getCurrentUser().userId)
 
   // Unmount cancels whatever is in flight.
   useEffect(() => () => {
@@ -182,11 +189,21 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
       // unsupported cross-tab account switch produces this. Cancel and hard
       // reload: the fresh page load reconciles from scratch.
       active.cancelled = true
-      Redirect.to(globalThis.location.href)
+      // Redirect.reload, not Redirect.to(href): on a #fragment URL the href
+      // assignment is a same-document navigation — nothing reloads, the
+      // conflict is never classified, and the spinner never clears.
+      Redirect.reload()
       return
     }
 
     if (probeNamesStoredUser(sessionUser, storedUserId)) {
+      // A cross-tab account switch arrives here looking like a routine
+      // hydrate (shared storage already names the new user). The per-tab
+      // query cache still holds the previous identity's data — drop it.
+      if (cacheIdentityRef.current !== sessionUser.userId) {
+        queryClient.clear()
+        cacheIdentityRef.current = sessionUser.userId
+      }
       Storage.setCurrentUser(sessionUser)
       setUserRoleStatuses(sessionUser, Storage)
       // Recorded in state → clean re-render off the refreshed profile (the
@@ -237,6 +254,10 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
       if (outcome === 'completed' && !token.cancelled && token.pendingHydration) {
         applyPendingHydration(token.pendingHydration, navigate)
       }
+      // completeSignIn cleared and repopulated the cache under whatever
+      // identity it persisted (the empty default after a signed-out run) —
+      // that is who this tab's cache belongs to now.
+      cacheIdentityRef.current = Storage.getCurrentUser().userId
       setSnapshot(prev => ({ ...prev, bootstrapRunning: false }))
     })
   }, [sessionInfo, navigate, location.pathname, location.search, queryClient])

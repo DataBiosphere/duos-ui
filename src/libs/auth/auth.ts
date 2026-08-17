@@ -23,6 +23,15 @@ export const Redirect = {
   to: (url: string): void => {
     globalThis.location.href = url
   },
+  /**
+   * A guaranteed reload of the current page. Assigning location.href to the
+   * current URL does NOT reload when the URL carries a #fragment — the
+   * browser treats it as a same-document navigation — so "reload in place"
+   * must never go through Redirect.to.
+   */
+  reload: (): void => {
+    globalThis.location.reload()
+  },
 }
 
 export const Auth = {
