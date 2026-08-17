@@ -291,7 +291,7 @@ describe('post-sign-in bootstrap', () => {
 
     await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
     // The routes must come out from behind the bootstrap spinner…
-    await waitFor(() => expect(screen.getByText('Data Use Oversight System')).toBeInTheDocument())
+    expect(await screen.findByText('Data Use Oversight System')).toBeInTheDocument()
     // …and the bootstrap must not have re-armed into a second run.
     expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce()
   })

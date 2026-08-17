@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
+import type { NavigateFunction } from 'react-router'
 import type { QueryClient } from '@tanstack/react-query'
 import type { SessionInfo } from 'src/libs/auth/session'
 import type { DuosUser } from 'src/types/model'
@@ -73,13 +74,39 @@ export interface SessionReconciliation {
  * grant access. */
 const authProfileEquivalent = (a: DuosUser, b: DuosUser): boolean => {
   const roleKeys = (u: DuosUser): string =>
-    (u.roles ?? []).map(r => `${r.name}:${r.dacId ?? ''}`).sort().join(',')
+    (u.roles ?? []).map(r => `${r.name}:${r.dacId ?? ''}`).sort((x, y) => x.localeCompare(y)).join(',')
   const status = (u: DuosUser) => u.userStatusInfo
   return a.userId === b.userId
     && status(a)?.tosAccepted === status(b)?.tosAccepted
     && status(a)?.enabled === status(b)?.enabled
     && status(a)?.adminEnabled === status(b)?.adminEnabled
     && roleKeys(a) === roleKeys(b)
+}
+
+/** Whether a fresh probe is covered by the in-flight run: same target
+ * identity, or — for a registration run (target 0) only — naming the user the
+ * run itself persisted (single-writer, per the scope policy: storage changes
+ * during a run are the run's own output). Runs targeting a named user are
+ * already covered by the target match, so a probe naming a DIFFERENT stored
+ * user during one is a genuine conflict. */
+const probeCoveredByRun = (active: ActiveBootstrap, sessionUser: DuosUser | undefined, storedUserId: number): boolean => {
+  const targetUserId = sessionUser?.userId ?? 0
+  return targetUserId === active.targetUserId
+    || (active.targetUserId === 0 && sessionUser !== undefined
+      && sessionUser.userId !== 0 && sessionUser.userId === storedUserId)
+}
+
+/** Persist the freshest profile a joined probe carried, once its run
+ * completes. Same explicit-rejection rule as the hydrate path. The router
+ * location closure may be stale by completion time — read the live one
+ * (they coincide outside MemoryRouter tests). */
+const applyPendingHydration = (fresh: DuosUser, navigate: NavigateFunction): void => {
+  Storage.setCurrentUser(fresh)
+  setUserRoleStatuses(fresh, Storage)
+  if (fresh.userStatusInfo?.tosAccepted === false
+    && !globalThis.location.pathname.startsWith('/tos')) {
+    navigate('/tos_acceptance')
+  }
 }
 
 export const useSessionReconciler = (queryClient: QueryClient): SessionReconciliation => {
@@ -128,16 +155,7 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
 
     const active = activeBootstrapRef.current
     if (active) {
-      // Covered by the in-flight run: same target identity, or — for a
-      // registration run (target 0) only — naming the user the run itself
-      // persisted (single-writer, per the scope policy: storage changes
-      // during a run are the run's own output). Runs targeting a named user
-      // are already covered by the target match, so a probe naming a
-      // DIFFERENT stored user during one is a genuine conflict.
-      const coveredByRun = targetUserId === active.targetUserId
-        || (active.targetUserId === 0 && sessionUser !== undefined
-          && sessionUser.userId !== 0 && sessionUser.userId === storedUserId)
-      if (coveredByRun) {
+      if (probeCoveredByRun(active, sessionUser, storedUserId)) {
         // A joined probe carrying a profile is fresher than the run's own
         // in-flight getMe response — remember it so the run's completion
         // applies it (latest join wins).
@@ -209,16 +227,7 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
       // reload. (Joins that landed before the run's persist/routing step were
       // already applied inside completeSignIn via latestJoinedProfile.)
       if (outcome === 'completed' && !token.cancelled && token.pendingHydration) {
-        const fresh = token.pendingHydration
-        Storage.setCurrentUser(fresh)
-        setUserRoleStatuses(fresh, Storage)
-        // Same explicit-rejection rule as the hydrate path. The router
-        // location closure may be stale by completion time — read the live
-        // one (they coincide outside MemoryRouter tests).
-        if (fresh.userStatusInfo?.tosAccepted === false
-          && !globalThis.location.pathname.startsWith('/tos')) {
-          navigate('/tos_acceptance')
-        }
+        applyPendingHydration(token.pendingHydration, navigate)
       }
       setSnapshot(prev => ({ ...prev, bootstrapRunning: false }))
     })

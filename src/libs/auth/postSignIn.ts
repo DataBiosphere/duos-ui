@@ -178,7 +178,8 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
     // response could apply outdated roles or ToS state.
     const resolveEffectiveUser = (base: DuosUser): DuosUser => {
       const joined = latestJoinedProfile?.()
-      return joined !== undefined && joined.userId === base.userId ? joined : base
+      if (joined === undefined) return base
+      return joined.userId === base.userId ? joined : base
     }
     let effectiveUser = resolveEffectiveUser(duosUser)
     Storage.setCurrentUser(effectiveUser)
