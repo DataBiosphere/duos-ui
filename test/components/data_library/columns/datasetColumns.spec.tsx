@@ -2,11 +2,13 @@ import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { makeMockParams } from './columnTestUtils'
 import { makeDatasetColumns } from 'src/components/data_library/columns/datasetColumns'
 import { Storage } from 'src/libs/storage'
 import { DatasetTerm, DuosUser, LibraryCard } from 'src/types/model'
+import { SoApprovalModel } from 'src/types/library'
 
 const makeRow = (overrides: Partial<DatasetTerm> = {}): DatasetTerm => ({
   datasetId: 1,
@@ -63,6 +65,11 @@ describe('datasetColumns — column order', () => {
       'actions',
     ])
   })
+
+  it('includes the SO Approval column when authorization-model data is supplied', () => {
+    const fields = makeDatasetColumns({}, new Set(), new Map()).map(c => c.field)
+    expect(fields).toContain('soApprovalModel')
+  })
 })
 
 describe('datasetColumns — Access Management chip', () => {
@@ -87,6 +94,225 @@ describe('datasetColumns — Access Management chip', () => {
       </MemoryRouter>,
     )
     expect(container.querySelector('svg[data-testid="BoltIcon"]')).toBeInTheDocument()
+  })
+
+  it('keeps the access label readable when the instant-approval tooltip is present', () => {
+    const col = makeDatasetColumns({}, new Set([1])).find(c => c.field === 'accessManagement')!
+    const { container } = render(
+      <MemoryRouter>
+        {col.renderCell!(mockParams('controlled', { datasetId: 1 })) as React.ReactElement}
+      </MemoryRouter>,
+    )
+    const chip = container.querySelector('.MuiChip-root')
+    expect(chip).toHaveTextContent('via DUOS')
+    expect(chip?.getAttribute('title')).toMatch(/Automatic request approvals available/)
+    // describeChild keeps the label, not the tooltip text, as the accessible name
+    expect(chip).not.toHaveAttribute('aria-label')
+  })
+})
+
+describe('datasetColumns — SO Approval column', () => {
+  const columnsFor = (model: SoApprovalModel) =>
+    makeDatasetColumns({}, new Set(), new Map([[1, model]]))
+
+  it('omits the column entirely when no authorization-model data is supplied', () => {
+    expect(makeDatasetColumns().find(c => c.field === 'soApprovalModel')).toBeUndefined()
+  })
+
+  it('shows the pre-authorization chip for a pre-authorized dataset', () => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor('pre-authorized'))
+    expect(screen.getByText('Pre-Authorized Researchers')).toBeInTheDocument()
+    expect(container.querySelector('.MuiChip-root')).toBeInTheDocument()
+  })
+
+  it('shows the per-request-approval chip for a per-DAR dataset', () => {
+    renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor('per-request'))
+    expect(screen.getByText('Per-Request Approval')).toBeInTheDocument()
+  })
+
+  it('renders nothing when the dataset\'s authorization model is unknown', () => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor('unknown'))
+    expect(container.querySelector('.MuiChip-root')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pre-Authorized Researchers')).not.toBeInTheDocument()
+    expect(screen.queryByText('Per-Request Approval')).not.toBeInTheDocument()
+  })
+
+  it('renders nothing for a dataset missing from the map', () => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 999 }, columnsFor('per-request'))
+    expect(container.querySelector('.MuiChip-root')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['per-request', 'Per-Request Approval', /requires the Signing Official named in each Data Access Request/],
+    ['pre-authorized', 'Pre-Authorized Researchers', /allows Signing Officials to pre-authorize researchers in advance/],
+  ] as const)('describes the %s model without displacing the chip label', (model, label, expectedText) => {
+    const { container } = renderCell('soApprovalModel', undefined, { datasetId: 1 }, columnsFor(model))
+    const chip = container.querySelector('.MuiChip-root')
+    expect(chip).toHaveTextContent(label)
+    expect(chip?.getAttribute('title')).toMatch(expectedText)
+    // describeChild keeps the label, not the tooltip text, as the accessible name
+    expect(chip).not.toHaveAttribute('aria-label')
+  })
+})
+
+describe('datasetColumns — Data Use column', () => {
+  const chipLabels = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll('.MuiChip-label')).map(el => el.textContent)
+
+  // The tooltip content is a rendered list, not a string, so MUI does not mirror it
+  // into the native `title` attribute — it has to be hovered open.
+  const hoverTooltipText = async (container: HTMLElement) => {
+    await userEvent.hover(container.querySelector('.MuiChip-root')!)
+    return (await screen.findByRole('tooltip')).textContent
+  }
+
+  const dataUseValue = (row: Partial<DatasetTerm>) => {
+    const col = makeDatasetColumns().find(c => c.field === 'dataUse')!
+    return (col.valueGetter as (v: unknown, r: DatasetTerm) => string)(undefined, makeRow(row))
+  }
+
+  it('joins primary and secondary codes into one hyphenated chip', () => {
+    const { container } = renderCell('dataUse', undefined, {
+      dataUse: {
+        primary: [{ code: 'HMB', description: 'Health/Medical/Biomedical' }],
+        secondary: [
+          { code: 'PUB', description: 'Publication Required' },
+          { code: 'GSO', description: 'Genetic Studies Only' },
+        ],
+      },
+    })
+    expect(chipLabels(container)).toEqual(['HMB-GSO-PUB'])
+  })
+
+  it('leads with the primary codes even when a secondary sorts ahead of them', () => {
+    const { container } = renderCell('dataUse', undefined, {
+      dataUse: {
+        primary: [{ code: 'HMB', description: 'Health/Medical/Biomedical' }],
+        secondary: [{ code: 'COL', description: 'Collaboration Required' }],
+      },
+    })
+    expect(chipLabels(container)).toEqual(['HMB-COL'])
+  })
+
+  it('keeps multiple primary codes in declaration order, ahead of the secondaries', () => {
+    const { container } = renderCell('dataUse', undefined, {
+      dataUse: {
+        primary: [
+          { code: 'HMB', description: 'Health/Medical/Biomedical' },
+          { code: 'POA', description: 'Population Origins or Ancestry' },
+        ],
+        secondary: [{ code: 'IRB', description: 'IRB Approval Required' }],
+      },
+    })
+    expect(chipLabels(container)).toEqual(['HMB-POA-IRB'])
+  })
+
+  it('sorts the secondary conditions alphabetically, whatever order they arrive in', () => {
+    const { container } = renderCell('dataUse', undefined, {
+      dataUse: {
+        primary: [{ code: 'GRU', description: 'General Research Use' }],
+        secondary: [
+          { code: 'PUB', description: 'Publication Required' },
+          { code: 'IRB', description: 'IRB Approval Required' },
+          { code: 'COL', description: 'Collaboration Required' },
+          { code: 'NPU', description: 'Not for Profit Use Only' },
+        ],
+      },
+    })
+    expect(chipLabels(container)).toEqual(['GRU-COL-IRB-NPU-PUB'])
+  })
+
+  it('shortens a disease-specific primary to DS, keeping the diseases in the tooltip', async () => {
+    const { container } = renderCell('dataUse', undefined, {
+      dataUse: {
+        primary: [{ code: 'DS', description: 'Disease specific: Breast Cancer' }],
+        secondary: [{ code: 'NPU', description: 'Not for Profit Use Only' }],
+      },
+    })
+    expect(chipLabels(container)).toEqual(['DS-NPU'])
+    expect(await hoverTooltipText(container)).toContain('DS (Breast Cancer)')
+  })
+
+  it('numbers the two "other" restrictions so they stay distinguishable', () => {
+    const { container } = renderCell('dataUse', undefined, {
+      dataUse: {
+        primary: [{ code: 'OTHER', description: 'Primary Other: ask first' }],
+        secondary: [{ code: 'OTHER', description: 'Secondary Other: and again' }],
+      },
+    })
+    expect(chipLabels(container)).toEqual(['OTH1-OTH2'])
+  })
+
+  it('names each code and its tier in the tooltip', async () => {
+    const { container } = renderCell('dataUse', undefined, {
+      dataUse: {
+        primary: [{ code: 'HMB', description: 'Health/Medical/Biomedical' }],
+        secondary: [{ code: 'NPU', description: 'Not for Profit Use Only' }],
+      },
+    })
+    const title = await hoverTooltipText(container)
+    expect(title).toContain('Primary — HMB: Health/Medical/Biomedical')
+    expect(title).toContain('Secondary — NPU: Not for Profit Use Only')
+    // describeChild keeps the code sequence as the accessible name, not the descriptions
+    expect(container.querySelector('.MuiChip-root')).not.toHaveAttribute('aria-label')
+  })
+
+  it('lists the primary alongside every secondary in the tooltip, primary first', async () => {
+    const { container } = renderCell('dataUse', undefined, {
+      dataUse: {
+        primary: [{ code: 'HMB', description: 'Health/Medical/Biomedical' }],
+        secondary: [
+          { code: 'PUB', description: 'Publication Required' },
+          { code: 'GSO', description: 'Genetic Studies Only' },
+        ],
+      },
+    })
+    await userEvent.hover(container.querySelector('.MuiChip-root')!)
+    const lines = Array.from((await screen.findByRole('tooltip')).querySelectorAll('li'))
+      .map(li => li.textContent)
+
+    // One line per code in the chip, in the same order the chip shows them.
+    expect(lines).toEqual([
+      'Primary — HMB: Health/Medical/Biomedical',
+      'Secondary — GSO: Genetic Studies Only',
+      'Secondary — PUB: Publication Required',
+    ])
+  })
+
+  it('lists the primary in the tooltip even with no secondary conditions at all', async () => {
+    const { container } = renderCell('dataUse', undefined, {
+      dataUse: { primary: [{ code: 'GRU', description: 'General Research Use' }], secondary: [] },
+    })
+    expect(await hoverTooltipText(container)).toContain('Primary — GRU: General Research Use')
+  })
+
+  it('puts the chip in the tab order, since the tooltip is the only place the tiers appear', () => {
+    const { container } = renderCell('dataUse', undefined, {
+      dataUse: {
+        primary: [{ code: 'HMB', description: 'Health/Medical/Biomedical' }],
+        secondary: [{ code: 'NPU', description: 'Not for Profit Use Only' }],
+      },
+    })
+    expect(container.querySelector('.MuiChip-root')).toHaveAttribute('tabindex', '0')
+  })
+
+  it('renders nothing when the dataset has no data use codes', () => {
+    const { container } = renderCell('dataUse', undefined, { dataUse: { primary: [], secondary: [] } })
+    expect(container.textContent).toBe('')
+  })
+
+  it('gives the cell the same value the chip displays', () => {
+    expect(dataUseValue({
+      dataUse: {
+        primary: [{ code: 'HMB', description: 'Health/Medical/Biomedical' }],
+        secondary: [
+          { code: 'PUB', description: 'Publication Required' },
+          { code: 'GSO', description: 'Genetic Studies Only' },
+        ],
+      },
+    })).toBe('HMB-GSO-PUB')
+
+    expect(dataUseValue({ dataUse: { primary: [], secondary: [] } })).toBe('')
   })
 })
 
@@ -121,7 +347,7 @@ describe('datasetColumns — Request Path column', () => {
   })
 
   it('disables the "Request Now" button when datasets are selected elsewhere on the page', () => {
-    const columnsWithSelection = makeDatasetColumns({}, new Set(), true)
+    const columnsWithSelection = makeDatasetColumns({}, new Set(), undefined, true)
     renderCell('requestLocation', null, { accessManagement: 'controlled' }, columnsWithSelection)
     expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
   })

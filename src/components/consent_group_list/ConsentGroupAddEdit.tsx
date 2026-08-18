@@ -104,27 +104,46 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
   const [editDataLocationUrl, setEditDataLocationUrl] = useState(consentGroup?.dataLocation !== 'Not Determined')
 
   const onAccessTypeChange = ({ _key, value }: { _key: string, value: string }) => {
-    const clearedFields = {} as ConsentGroup2
-    clearedFields.consentGroupName = current.consentGroupName
-    clearedFields.accessManagement = value as AccessManagementType
-    clearedFields.numberOfParticipants = current.numberOfParticipants
-    clearedFields.dataLocation = current.dataLocation
-    clearedFields.url = current.url
-    setCurrent(
-      clearedFields)
-    setShowOtherSecondaryText(false)
-    setShowGSText(false)
-    setShowOtherPrimaryText(false)
-    setShowMORText(false)
+    const accessManagement = value as AccessManagementType
+    const next = structuredClone(current)
+    next.accessManagement = accessManagement
 
-    if (value === 'open') {
-      setOtherPrimaryText(undefined)
-      setShowOtherPrimaryText(false)
-      setSelectedDiseases([])
-      setShowDiseaseSpecificUseSearchbar(false)
-      setShowMORText(false)
+    // Only the fields the new strategy stops showing are cleared. Wiping the data use here marked
+    // it invalid for anyone who filled it in before choosing a strategy (DT-3579).
+    if (accessManagement !== 'controlled') {
+      next.dataAccessCommitteeId = undefined
     }
-    setValidation(calcErrors(clearedFields))
+    if (accessManagement === 'open') {
+      next.generalResearchUse = false
+      next.hmb = false
+      next.diseaseSpecificUse = undefined
+      next.poa = false
+      next.otherPrimary = undefined
+      next.nmds = false
+      next.gso = false
+      next.pub = false
+      next.col = false
+      next.irb = false
+      next.gs = undefined
+      next.mor = false
+      next.morDate = undefined
+      next.npu = false
+      next.otherSecondary = undefined
+
+      setOtherPrimaryText(undefined)
+      setSelectedDiseases([])
+      setGSText(undefined)
+      setMORText(undefined)
+      setOtherSecondaryText(undefined)
+      setShowOtherSecondaryText(false)
+      setShowGSText(false)
+      setShowOtherPrimaryText(false)
+      setShowMORText(false)
+      setShowDiseaseSpecificUseSearchbar(false)
+    }
+
+    setCurrent(next)
+    setValidation(calcErrors(next))
   }
 
   const onPrimaryChange = ({ key, value }: { key: string, value: boolean | string | string[] | { displayText: string, id: string }[] }) => {

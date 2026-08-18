@@ -13,9 +13,9 @@ vi.mock('src/libs/utils', async () => {
 
 vi.mock('src/components/modals/ConfirmationModal', () => ({
   default: ({ title, message, header, showConfirmation, onConfirm, closeConfirmation }: {
-    title: string
-    message: string
-    header: string
+    title: React.ReactNode
+    message: React.ReactNode
+    header: React.ReactNode
     showConfirmation: boolean
     onConfirm: () => Promise<void>
     closeConfirmation: () => void
@@ -24,7 +24,7 @@ vi.mock('src/components/modals/ConfirmationModal', () => ({
       ? (
           <div data-testid="confirmation-modal">
             <span data-testid="modal-title">{title}</span>
-            <span data-testid="modal-message">{message}</span>
+            <div data-testid="modal-message">{message}</div>
             <span data-testid="modal-header">{header}</span>
             <button type="button" onClick={onConfirm}>Confirm</button>
             <button type="button" onClick={closeConfirmation}>Close</button>
@@ -140,10 +140,45 @@ describe('CollectionConfirmationModal - consoleAction: open', () => {
   })
 })
 
+const affiliationAttestation = 'Are affiliated with their listed institution or corporation.'
+const qualificationAttestation = 'Is a permanent employee of their institution at a level equivalent to, but not limited to, that of an academic professor (e.g., assistant, associate, or non-tenure or tenure-track professor) or senior researcher. This does not include lab technicians or trainees, e.g., post-docs or graduate students.'
+
 describe('CollectionConfirmationModal - consoleAction: approve', () => {
   it('renders the approve modal title', () => {
     renderModal({ consoleAction: 'approve' })
     expect(screen.getByTestId('modal-title')).toHaveTextContent('Approve Data Access Request')
+  })
+
+  it('renders the approve confirmation message', () => {
+    renderModal({ consoleAction: 'approve' })
+    expect(screen.getByTestId('modal-message')).toHaveTextContent('Are you sure you want to approve DAR-100?')
+  })
+
+  it('renders the attestation preamble', () => {
+    renderModal({ consoleAction: 'approve' })
+    expect(screen.getByText('By approving this Data Access Request, you attest that the requester(s):')).toBeVisible()
+  })
+
+  it('renders the institutional affiliation attestation as a bullet', () => {
+    renderModal({ consoleAction: 'approve' })
+    const bullet = screen.getByText(affiliationAttestation)
+    expect(bullet).toBeVisible()
+    expect(bullet.tagName).toBe('LI')
+  })
+
+  it('renders the Data Access Requester qualification attestation as a bullet', () => {
+    renderModal({ consoleAction: 'approve' })
+    const bullet = screen.getByText(qualificationAttestation)
+    expect(bullet).toBeVisible()
+    expect(bullet.tagName).toBe('LI')
+  })
+
+  it('renders both attestations in order within a single list', () => {
+    renderModal({ consoleAction: 'approve' })
+    const bullets = screen.getAllByRole('listitem')
+    expect(bullets).toHaveLength(2)
+    expect(bullets[0]).toHaveTextContent(affiliationAttestation)
+    expect(bullets[1]).toHaveTextContent(qualificationAttestation)
   })
 
   it('calls approveCollection and closes on confirm', async () => {
@@ -153,6 +188,14 @@ describe('CollectionConfirmationModal - consoleAction: approve', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Confirm' }))
     expect(approveCollection).toHaveBeenCalledWith(collection)
     expect(setShowConfirmation).toHaveBeenCalledWith(false)
+  })
+})
+
+describe('CollectionConfirmationModal - attestations are approval-only', () => {
+  it.each(['cancel', 'revise', 'open', 'delete'])('does not show the attestations for the %s modal', (consoleAction) => {
+    renderModal({ consoleAction })
+    expect(screen.queryByText(affiliationAttestation)).toBeNull()
+    expect(screen.queryByText(qualificationAttestation)).toBeNull()
   })
 })
 

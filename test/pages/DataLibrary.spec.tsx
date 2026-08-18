@@ -13,7 +13,7 @@ import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
 import { BoolQuery, ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
-import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils'
+import { getRadarEnabledDatasetIds } from 'src/utils/DatasetUtils'
 import { DuosUser } from 'src/types/model'
 import { EnumerateSnapshotModel } from 'src/types/tdrModel'
 
@@ -21,7 +21,8 @@ vi.mock('src/libs/ajax/DataSet', () => ({
   DataSet: { searchDatasetIndexV2: vi.fn() },
 }))
 vi.mock('src/utils/DatasetUtils', () => ({
-  getRadarEnabledDatasetsWithRules: vi.fn(),
+  getRadarEnabledDatasetIds: vi.fn(() => new Set()),
+  getSoApprovalModelByDatasetId: vi.fn(() => new Map()),
 }))
 
 const ACCESS_REQUEST_PROCESS_LABEL = 'Access Request Process'
@@ -240,7 +241,7 @@ beforeEach(() => {
     if (q.size === 0) return asSearchResponse(mockMetadataResponse)
     return asSearchResponse(mockDatasetsResponse)
   })
-  vi.mocked(getRadarEnabledDatasetsWithRules).mockResolvedValue(new Set())
+  vi.mocked(getRadarEnabledDatasetIds).mockReturnValue(new Set())
 
   vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(defaultUser)
   vi.spyOn(TerraDataRepo, 'listSnapshotsByDatasetIds').mockResolvedValue(emptyTdrResponse)
@@ -258,6 +259,14 @@ describe('DataLibrary', () => {
     expect(await screen.findByText(DUOS_DATA_LIBRARY_TITLE)).toBeInTheDocument()
     expect(await screen.findByText(/Search, filter, and select datasets/)).toBeInTheDocument()
     expect(document.querySelector(SEARCH_INPUT_SELECTOR)).toBeInTheDocument()
+  })
+
+  it.each([
+    ['the default tab', '/'],
+    ['the Datasets tab', DATASETS_TAB_PATH],
+  ])('shows the Signing Official approval reminder on %s', async (_label, path) => {
+    renderLibrary(path)
+    expect(await screen.findByText(/require Signing Officials to approve/)).toBeInTheDocument()
   })
 
   it('shows an error message when the dataset query fails', async () => {

@@ -31,6 +31,15 @@ pnpm install
 ### Notes on `render-configs`:
 
 * Ensure that `HOST` is not set in your shell environment, as it will override the value in `.env.local`.  You can check like so: `env | grep HOST=`.
+* **BFF env vars**: `--write_env true` also fetches the Azure B2C client secret from the dev cluster
+(`duos-azure-client-secret` in the `terra-dev` namespace, base64-decoded — the decode matters: the wrapped
+`.data` value fails at the token exchange with `AADB2C90081: client_secret does not match`) and generates a
+`DUOS_SESSION_SECRET`. An existing `.env.local` is backed up to `.env.local.bak` and its values (DB
+credentials, redirect URI, etc.) are carried forward, so it's safe to re-run on cert rotation. The
+consent DB user/password are fetched from the dev cluster's `consent-secrets` secret (keys
+`databaseUser`/`databasePassword`) when not already set, and `DUOS_DB_NAME` defaults to `consent`
+(its name in every environment) — a fresh run produces a fully populated `.env.local` with nothing
+left to fill in by hand. See [.env.example](.env.example) for what each variable means.
 * **Development against other envs**: If you want to point to other envs, you can populate public/config.json with the values from any
 environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where
 {%ENV%} is any of `dev`, `staging`, `alpha`, or `prod`. Remember to set the `env` value appropriately, for example,
@@ -129,7 +138,7 @@ Visit https://local.dsde-dev.broadinstitute.org/ to see the instance running und
 
 ### Environment variables
 
-The server reads sensitive configuration from `.env.local` in the project root (gitignored). Create this file before running `docker compose up`. The required variables are:
+The server reads sensitive configuration from `.env.local` in the project root (gitignored). Create this file before running `docker compose up` — `./scripts/render-configs.sh --write_env true` generates it fully populated, including the Azure B2C client secret and consent DB credentials fetched from the dev cluster (see the render-configs notes above). Under docker compose, also change `DUOS_OAUTH_REDIRECT_URI` to the portless variant (`https://local.dsde-dev.broadinstitute.org/auth/callback`) — both variants are registered in B2C, but the script's default (with `:3000`) targets the pnpm dev server. The required variables are:
 
 ```properties
 # Fastify session

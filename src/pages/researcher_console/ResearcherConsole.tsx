@@ -8,8 +8,6 @@ import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROL
 import { consoleTypes } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import SearchBar from 'src/components/SearchBar'
-import BroadLibraryCardAgreementLink from 'src/assets/Library_Card_Agreement_2023_ApplicationVersion.pdf'
-import NihLibraryCardAgreementLink from 'src/assets/NIHLibraryCardAgreement06252025.pdf'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { DarCollectionSummary } from 'src/types/model'
@@ -121,22 +119,6 @@ export default function ResearcherConsole() {
           title="My Data Access Requests"
           description="Select and manage Data Access Requests and Drafts below"
         />
-        <div style={{ ...Styles.MEDIUM_DESCRIPTION, fontSize: '16px', marginTop: '1rem', marginLeft: '1.75em', textAlign: 'justify' }}>
-          <p>By submitting a DAR in DUOS you agree to the
-            {' '}
-            <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>
-              Broad
-            </a>
-            {' '}
-            and
-            {' '}
-            <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>
-              NIH
-            </a>
-            {' '}
-            Library Card Agreements.
-          </p>
-        </div>
       </div>
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar handleSearchChange={handleSearchChange} />

@@ -2,10 +2,19 @@ import { AssetFilterConfig, AssetType } from 'src/types/library'
 
 export const assetFilterRegistry: Record<AssetType, AssetFilterConfig> = {
   [AssetType.STUDIES]: {
-    visibleFilters: ['accessManagement', 'dataUse', 'dataType', 'dac', 'participantCount'],
+    visibleFilters: ['accessManagement', 'dataUse', 'dataUseModifiers', 'dataType', 'dac', 'participantCount'],
   },
   [AssetType.DATASETS]: {
-    visibleFilters: ['accessManagement', 'dataUse', 'dataType', 'dac', 'participantCount'],
+    visibleFilters: [
+      'accessManagement',
+      'dataUse',
+      'dataUseModifiers',
+      'dataType',
+      'dac',
+      'participantCount',
+      'soApprovalModel',
+      'instantApproval',
+    ],
   },
   [AssetType.MODELS]: {
     visibleFilters: [],

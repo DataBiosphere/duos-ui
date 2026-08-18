@@ -94,7 +94,13 @@ describe('darCollectionColumns', () => {
         expect(columns).toContain(DarCollectionTableColumnOptions.DAR_CODE)
         expect(columns).toContain(DarCollectionTableColumnOptions.NAME)
         expect(columns).toContain(DarCollectionTableColumnOptions.STATUS)
-        expect(columns).toContain(DarCollectionTableColumnOptions.ACTIONS)
+      })
+
+      it('omits the Action column, which only the other consoles offer', () => {
+        expect(getDarCollectionColumns(consoleTypes.ADMIN, 1600))
+          .not.toContain(DarCollectionTableColumnOptions.ACTIONS)
+        expect(getDarCollectionColumns(consoleTypes.CHAIR, 1600))
+          .toContain(DarCollectionTableColumnOptions.ACTIONS)
       })
     })
 

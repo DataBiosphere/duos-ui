@@ -43,7 +43,7 @@ const readStat = <S>(stat: ConsoleDashboardStatMeta<S>, summary: S): number | nu
 /**
  * The shared data plumbing behind every console dashboard: one summary request, one error
  * notification per failure, and tiles whose counts blank out rather than mixing stale and fresh
- * numbers. Both consoles use it so a change to the loading or error policy can only be made once.
+ * numbers. All role consoles use it so a change to the loading or error policy can only be made once.
  */
 export function useConsoleDashboardSummary<S>(
   queryKey: QueryKey,

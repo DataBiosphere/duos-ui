@@ -16,6 +16,10 @@ const availableFilters: AvailableFilters = {
     { value: 'HMB', label: 'Health/Medical/Biomedical', count: 8 },
     { value: 'GRU', label: 'General Research Use', count: 3 },
   ],
+  dataUseModifiers: [
+    { value: 'NPU', label: 'Non-profit Use Only (NPU)' },
+    { value: 'IRB', label: 'Ethics Approval Required (IRB)' },
+  ],
   dataType: [
     { value: 'Phenotype', label: 'Phenotype', count: 7 },
     { value: 'Genomic', label: 'Genomic', count: 4 },
@@ -38,6 +42,14 @@ const availableFilters: AvailableFilters = {
     { value: 'false', label: 'No' },
   ],
   publicationsDatasetsCited: [
+    { value: 'true', label: 'Yes' },
+    { value: 'false', label: 'No' },
+  ],
+  soApprovalModel: [
+    { value: 'PER_REQUEST', label: 'Per-Request Approval' },
+    { value: 'PRE_AUTHORIZED', label: 'Pre-Authorized Researchers' },
+  ],
+  instantApproval: [
     { value: 'true', label: 'Yes' },
     { value: 'false', label: 'No' },
   ],
@@ -78,6 +90,21 @@ describe('LibraryFilters', () => {
     expect(screen.getByText('Participants')).toBeInTheDocument()
   })
 
+  // Asserted against the registry so a newly registered filter claimed by neither key list,
+  // which renders nothing at all, fails here rather than silently
+  it('renders a section for every filter registered for the asset', () => {
+    render(<LibraryFiltersWrapper />)
+
+    const sections = getFilterSectionsForAsset(AssetType.DATASETS, availableFilters)
+    expect(sections.length).toBeGreaterThan(0)
+    sections.forEach((section) => {
+      expect(
+        screen.getAllByText(section.label).length,
+        `no section rendered for "${section.key}"`,
+      ).toBeGreaterThan(0)
+    })
+  })
+
   it('renders filter options with counts', () => {
     render(<LibraryFiltersWrapper />)
     expect(screen.getByText('via DUOS (10)')).toBeInTheDocument()
@@ -99,6 +126,22 @@ describe('LibraryFilters', () => {
     expect(onChange).toHaveBeenCalledWith({
       ...EMPTY_FILTERS,
       accessManagement: ['controlled'],
+    })
+  })
+
+  it('toggles a secondary data use condition independently of the primary codes', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<LibraryFiltersWrapper filters={{ ...EMPTY_FILTERS, dataUse: ['HMB'] }} onChange={onChange} />)
+
+    await user.click(screen.getByText('Data Use Modifiers'))
+    await user.click(screen.getByRole('checkbox', { name: 'Non-profit Use Only (NPU)' }))
+
+    // The primary selection survives, so the two combine rather than replace.
+    expect(onChange).toHaveBeenCalledWith({
+      ...EMPTY_FILTERS,
+      dataUse: ['HMB'],
+      dataUseModifiers: ['NPU'],
     })
   })
 

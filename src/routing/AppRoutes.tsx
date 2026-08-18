@@ -37,9 +37,9 @@ import EditDac from 'src/pages/manage_dac/EditDac'
 import DacProfile from 'src/pages/manage_dac/DacProfile'
 import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions'
 import DatasetUpdateForm from 'src/pages/DatasetUpdateForm'
-import ChairConsole from 'src/pages/ChairConsole'
+import DACConsole from 'src/pages/DACConsole'
+import DACDashboard from 'src/pages/DACDashboard'
 import DACDatasets from 'src/pages/DACDatasets'
-import MemberConsole from 'src/pages/MemberConsole'
 import SOAcknowledged from 'src/routing/SOAcknowledged'
 import SigningOfficialDashboard from 'src/pages/signing_official_console/SigningOfficialDashboard'
 import SigningOfficialLibraryCards from 'src/pages/signing_official_console/SigningOfficialLibraryCards'
@@ -48,6 +48,7 @@ import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResea
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
 import { DataLibrary } from 'src/pages/DataLibrary'
+import { StudyNameSearch } from 'src/routing/StudyNameSearch'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -76,6 +77,7 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route path="/datalibrary" element={<DataLibrary />}>
           <Route path=":query" element={<DataLibrary />} />
         </Route>
+        <Route path="/studies/name/*" element={<StudyNameSearch />} />
         <Route path="/studies/:studyId" element={<StudyDetails />} />
         <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.researcher]} />}>
@@ -99,8 +101,16 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/dar_vote_review/:collectionId" element={<DarCollectionReview readOnly={true} />} />
           <Route path="/dar_collection/:collectionId" element={<DarCollectionReview />} />
         </Route>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]} />}>
+          <Route path="/dac_console" element={<DACDashboard />} />
+          <Route path="/dac_console_dar_requests" element={<DACConsole />} />
+        </Route>
+        <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
+          <Route path="/chair_console" element={<Navigate to="/dac_console_dar_requests" replace />} />
+          <Route path="/dac_console/manage_dac" element={<ManageDac />} />
+        </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.member]} />}>
-          <Route path="/member_console" element={<MemberConsole />} />
+          <Route path="/member_console" element={<Navigate to="/dac_console_dar_requests" replace />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.signingOfficial]} />}>
           <Route element={<SOAcknowledged />}>
@@ -113,7 +123,6 @@ const AppRoutes = (props: AppRoutesProps) => {
           </Route>
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
-          <Route path="/chair_console" element={<ChairConsole />} />
           <Route path="/dac_datasets" element={<DACDatasets />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />}>

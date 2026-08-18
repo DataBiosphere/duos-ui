@@ -86,9 +86,20 @@ export default function CollectionConfirmationModal({ collection, showConfirmati
   const approveModal = (
     <ConfirmationModal
       showConfirmation={showConfirmation}
+      // The attestation text requires a larger view than a plain confirmation prompt
+      styleOverride={{ height: 'auto', maxHeight: '80vh', overflowY: 'auto' }}
       closeConfirmation={() => setShowConfirmation(false)}
       title="Approve Data Access Request"
-      message={`Are you sure you want to approve ${collection.darCode}?`}
+      message={(
+        <div>
+          <div>{`Are you sure you want to approve ${collection.darCode}?`}</div>
+          <div style={{ marginTop: '1rem' }}>By approving this Data Access Request, you attest that the requester(s):</div>
+          <ul style={{ marginTop: '0.5rem', paddingLeft: '2rem' }}>
+            <li>Are affiliated with their listed institution or corporation.</li>
+            <li style={{ marginTop: '0.5rem' }}>Is a permanent employee of their institution at a level equivalent to, but not limited to, that of an academic professor (e.g., assistant, associate, or non-tenure or tenure-track professor) or senior researcher. This does not include lab technicians or trainees, e.g., post-docs or graduate students.</li>
+          </ul>
+        </div>
+      )}
       header={getModalHeader(collection)}
       onConfirm={approveOnClick}
     />

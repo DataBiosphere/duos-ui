@@ -49,6 +49,8 @@ export async function handleLogin(request: FastifyRequest, reply: FastifyReply):
     code_challenge: await pkce.challenge(verifier),
     code_challenge_method: 'S256',
     state,
+    // Force the B2C login screen even when B2C still holds an SSO cookie.
+    prompt: 'login',
   })
 
   // Persist the session BEFORE responding, so @fastify/session's async onSend

@@ -10,7 +10,7 @@ vi.mock('src/libs/ajax/OAuth2', () => ({
 
 vi.mock('src/libs/config', () => ({
   Config: {
-    getApiUrl: vi.fn().mockResolvedValue('http://localhost'),
+    getUpstreamApiUrl: vi.fn().mockResolvedValue('http://localhost'),
   },
 }))
 

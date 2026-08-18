@@ -19,7 +19,7 @@ const authHeaders = { headers: { Authorization: 'Bearer test' } } as ReturnType<
 describe('FeatureFlag ajax', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.spyOn(Config, 'getApiUrl').mockResolvedValue('')
+    vi.spyOn(Config, 'getUpstreamApiUrl').mockResolvedValue('')
     vi.spyOn(Config, 'authOpts').mockReturnValue(authHeaders)
   })
 

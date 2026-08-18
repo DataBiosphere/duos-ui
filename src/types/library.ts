@@ -42,6 +42,9 @@ export enum AccessManagement {
 export interface FilterState {
   accessManagement: string[]
   dataUse: string[]
+  // Secondary data use conditions (DUO modifiers, e.g. NPU/IRB/PUB). Kept
+  // separate from `dataUse` so a primary code and a modifier combine with AND.
+  dataUseModifiers: string[]
   dataType: string[]
   dac: string[]
   workspaceTools: string[]
@@ -53,8 +56,10 @@ export interface FilterState {
   biospecimenType: string[]
   biospecimenDataUse: string[]
   biospecimenPostMortemIntervalUnit: string[]
+  soApprovalModel: string[]
   datasetsCited?: boolean
   publicationsDatasetsCited?: boolean
+  instantApproval?: boolean
   participantCount: {
     min?: number
     max?: number
@@ -110,6 +115,7 @@ export interface LibraryFilterSection {
 export interface AvailableFilters {
   accessManagement: FilterOption[]
   dataUse: FilterOption[]
+  dataUseModifiers: FilterOption[]
   dataType: FilterOption[]
   dac: FilterOption[]
   workspaceTools: FilterOption[]
@@ -121,8 +127,10 @@ export interface AvailableFilters {
   biospecimenType: FilterOption[]
   biospecimenDataUse: FilterOption[]
   biospecimenPostMortemIntervalUnit: FilterOption[]
+  soApprovalModel: FilterOption[]
   datasetsCited: FilterOption[]
   publicationsDatasetsCited: FilterOption[]
+  instantApproval: FilterOption[]
   biospecimenPostMortemIntervalRange: {
     min: number
     max: number
@@ -187,6 +195,17 @@ export interface LibraryTabsProps {
 
 export type ExportableDatasets = { [duosId: string]: SnapshotSummaryModel[] }
 
+/**
+ * Which Signing Official authorization model a dataset's DAC uses, as resolved by the search
+ * index. 'per-request' means the SO named in each access request must approve that request before
+ * the DAC reviews it; 'pre-authorized' means the SO authorizes researchers in advance instead.
+ *
+ * 'unknown' means the index supplied no usable model: the backend could not resolve the DAC's
+ * rules, or the value is one this client does not recognise. Callers must render nothing in that
+ * case rather than defaulting to a model.
+ */
+export type SoApprovalModel = 'per-request' | 'pre-authorized' | 'unknown'
+
 export interface LibraryDataGridProps {
   assetType: AssetType
   data: unknown[]
@@ -203,6 +222,7 @@ export interface LibraryDataGridProps {
   onSelectionChange: (selectedIds: number[]) => void
   exportableDatasets?: ExportableDatasets
   radarEnabledDatasetIds?: Set<number>
+  soApprovalModelByDatasetId?: Map<number, SoApprovalModel>
 }
 
 export interface StudyAggregation {

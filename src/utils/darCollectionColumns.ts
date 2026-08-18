@@ -21,6 +21,11 @@ const consolesWithDac = new Set<string>([consoleTypes.ADMIN, consoleTypes.CHAIR]
 // other consoles never cast DAC-member votes, so the column would always be empty for them
 const consolesWithVotes = new Set<string>([consoleTypes.CHAIR, consoleTypes.MEMBER])
 
+// Columns each console type drops from the default set
+const excludedColumns: Record<string, string[]> = {
+  [consoleTypes.ADMIN]: [DarCollectionTableColumnOptions.ACTIONS],
+}
+
 function getBaseColumns(consoleType: string): string[] {
   const columns = [...defaultBaseColumns]
 
@@ -30,7 +35,9 @@ function getBaseColumns(consoleType: string): string[] {
   if (consolesWithVotes.has(consoleType)) {
     columns.splice(columns.indexOf(DarCollectionTableColumnOptions.DATA_USE) + 1, 0, DarCollectionTableColumnOptions.VOTES)
   }
-  return columns
+
+  const excluded = excludedColumns[consoleType] || []
+  return columns.filter(col => !excluded.includes(col))
 }
 
 // Responsive breakpoints for each console type

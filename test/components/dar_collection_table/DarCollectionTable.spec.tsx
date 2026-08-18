@@ -249,12 +249,12 @@ describe('useResponsiveDarCollectionColumns', () => {
   })
 
   describe('Console Type Column Configuration', () => {
-    it('returns columns including dacNames, darCode, and actions for ADMIN', () => {
+    it('returns columns including dacNames and darCode but not actions for ADMIN', () => {
       setViewportWidth(1600)
       const { result } = renderHook(() => useResponsiveDarCollectionColumns(consoleTypes.ADMIN))
       expect(result.current).toContain('dacNames')
       expect(result.current).toContain('darCode')
-      expect(result.current).toContain('actions')
+      expect(result.current).not.toContain('actions')
     })
 
     it('returns columns including darCode and actions but not dacNames for RESEARCHER', () => {

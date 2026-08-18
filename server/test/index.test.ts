@@ -273,6 +273,9 @@ describe('BFF auth route registration', () => {
 
   afterEach(async () => {
     delete process.env.CONFIG_PATH
+    delete process.env.DUOS_ECM_URL
+    delete process.env.DUOS_TDR_URL
+    delete process.env.DUOS_BARD_URL
     const { resetConfigCache } = await import('../src/config.js')
     resetConfigCache()
     // Guarded: rmSync(undefined) throws and would mask the real failure of a
@@ -369,6 +372,118 @@ describe('BFF auth route registration', () => {
     const res = await localApp.inject({ method: 'GET', url: '/duos-api/api/dataset/1' })
 
     // Falls through to the SPA fallback instead of the proxy's 401.
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  it('registers the /ecm-api proxy route when bffEnabled is true and DUOS_ECM_URL is set', async () => {
+    process.env.DUOS_ECM_URL = 'https://externalcreds.dsde-dev.broadinstitute.org'
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    // Same proof as /duos-api above: the 401 comes from the proxy's own
+    // session gate, which means the route exists and its preHandler ran.
+    const res = await localApp.inject({ method: 'GET', url: '/ecm-api/api/oauth/v1/ras/authorization-url' })
+
+    expect(res.statusCode).toBe(401)
+    expect(res.json()).toEqual({ error: 'unauthenticated' })
+
+    await localApp.close()
+  })
+
+  // DUOS_ECM_URL is deliberately softer than DUOS_API_URL: a BFF deployment
+  // whose env predates the variable boots with RAS linking broken and a
+  // startup warning, instead of crash-looping the whole app (see index.ts).
+  it('boots without the /ecm-api route when bffEnabled is true but DUOS_ECM_URL is not set', async () => {
+    delete process.env.DUOS_ECM_URL
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({ method: 'GET', url: '/ecm-api/api/oauth/v1/ras/authorization-url' })
+
+    // Falls through to the SPA fallback instead of the proxy's 401.
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  it('does not register the /ecm-api proxy route when bffEnabled is false, even with DUOS_ECM_URL set', async () => {
+    process.env.DUOS_ECM_URL = 'https://externalcreds.dsde-dev.broadinstitute.org'
+    const localApp = await buildAppWithConfig({ bffEnabled: false })
+
+    const res = await localApp.inject({ method: 'GET', url: '/ecm-api/api/oauth/v1/ras/authorization-url' })
+
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  // Same three-way gating as /ecm-api, against the TDR env var and prefix.
+  it('registers the /tdr-api proxy route when bffEnabled is true and DUOS_TDR_URL is set', async () => {
+    process.env.DUOS_TDR_URL = 'https://jade.datarepo-dev.broadinstitute.org'
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({ method: 'GET', url: '/tdr-api/api/repository/v1/snapshots' })
+
+    expect(res.statusCode).toBe(401)
+    expect(res.json()).toEqual({ error: 'unauthenticated' })
+
+    await localApp.close()
+  })
+
+  it('boots without the /tdr-api route when bffEnabled is true but DUOS_TDR_URL is not set', async () => {
+    delete process.env.DUOS_TDR_URL
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({ method: 'GET', url: '/tdr-api/api/repository/v1/snapshots' })
+
+    // Falls through to the SPA fallback instead of the proxy's 401.
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  it('does not register the /tdr-api proxy route when bffEnabled is false, even with DUOS_TDR_URL set', async () => {
+    process.env.DUOS_TDR_URL = 'https://jade.datarepo-dev.broadinstitute.org'
+    const localApp = await buildAppWithConfig({ bffEnabled: false })
+
+    const res = await localApp.inject({ method: 'GET', url: '/tdr-api/api/repository/v1/snapshots' })
+
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  // Same three-way gating again, against the Bard env var and prefix.
+  it('registers the /bard-api proxy route when bffEnabled is true and DUOS_BARD_URL is set', async () => {
+    process.env.DUOS_BARD_URL = 'https://terra-bard-dev.appspot.com'
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({ method: 'GET', url: '/bard-api/api/event' })
+
+    expect(res.statusCode).toBe(401)
+    expect(res.json()).toEqual({ error: 'unauthenticated' })
+
+    await localApp.close()
+  })
+
+  it('boots without the /bard-api route when bffEnabled is true but DUOS_BARD_URL is not set', async () => {
+    delete process.env.DUOS_BARD_URL
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({ method: 'GET', url: '/bard-api/api/event' })
+
+    // Falls through to the SPA fallback instead of the proxy's 401.
+    expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  it('does not register the /bard-api proxy route when bffEnabled is false, even with DUOS_BARD_URL set', async () => {
+    process.env.DUOS_BARD_URL = 'https://terra-bard-dev.appspot.com'
+    const localApp = await buildAppWithConfig({ bffEnabled: false })
+
+    const res = await localApp.inject({ method: 'GET', url: '/bard-api/api/event' })
+
     expect(res.statusCode).toBe(200)
 
     await localApp.close()

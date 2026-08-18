@@ -31,8 +31,11 @@ const generateOidcUserManagerSettings = async (
   config: OAuthConfig,
 ): Promise<UserManagerSettings> => {
   const metadata: Partial<OidcMetadata> = {
-    authorization_endpoint: `${await Config.getApiUrl()}/oauth2/authorize`,
-    token_endpoint: `${await Config.getApiUrl()}/oauth2/token`,
+    // getUpstreamApiUrl, not getApiUrl: this legacy-only broker must keep the
+    // absolute Consent URL even in an environment where getApiUrl() has
+    // flipped to the BFF proxy prefix.
+    authorization_endpoint: `${await Config.getUpstreamApiUrl()}/oauth2/authorize`,
+    token_endpoint: `${await Config.getUpstreamApiUrl()}/oauth2/token`,
   }
   return {
     authority: config.authorityEndpoint,

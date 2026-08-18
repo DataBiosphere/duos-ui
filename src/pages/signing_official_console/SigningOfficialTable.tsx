@@ -1,12 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { Switch } from '@mui/material'
+import { Box, Switch } from '@mui/material'
+import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { Styles, Theme } from 'src/libs/theme'
 import { cloneDeep, findIndex, isNil } from 'src/utils/NodashUtil'
-import SimpleTable from 'src/components/SimpleTable'
-import PaginationBar from 'src/components/PaginationBar'
 import SearchBar from 'src/components/SearchBar'
-import { calcTablePageCount, calcVisibleWindow, getSearchFilterFunctions, hasDataSubmitterRole, Notifications, ROLES } from 'src/libs/utils'
+import { getSearchFilterFunctions, hasDataSubmitterRole, Notifications, ROLES } from 'src/libs/utils'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import { LibraryCard } from 'src/libs/ajax/LibraryCard'
 import { User } from 'src/libs/ajax/User'
@@ -45,11 +44,30 @@ const statusSwitchSx = {
   '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: Theme.palette.success },
 }
 const statusCellStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '0.5rem' }
+
+const PAGE_SIZE_OPTIONS = [10, 25, 50]
+
+// MUI rings on plain :focus, which fires on click; keyboard focus keeps a ring via :focus-visible.
+const DATAGRID_SX = {
+  '& .MuiDataGrid-cell:focus': { outline: 'none' },
+  '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
+  '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
+  '& .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
+  '& .MuiDataGrid-cell:focus-visible, & .MuiDataGrid-columnHeader:focus-visible': {
+    outline: `2px solid ${Theme.palette.link}`,
+    outlineOffset: '-2px',
+  },
+}
+
+// Matches the header block above: pulled 7.5% left of the page container, inset 2rem.
+const gridContainerSx = {
+  marginTop: '2rem',
+  marginLeft: 'calc(-7.5% + 2rem)',
+  width: 'calc(107.5% - 2rem)',
+}
 const statusLabelBase: React.CSSProperties = { fontWeight: 600, fontSize: '1.45rem', fontFamily: 'Montserrat' }
 const activeStatusLabelStyle: React.CSSProperties = { ...statusLabelBase, color: Theme.palette.success }
 const inactiveStatusLabelStyle: React.CSSProperties = { ...statusLabelBase, color: Theme.legacy.color }
-
-type TableRowId = number | string
 
 interface LibraryCardRequest {
   userEmail: string
@@ -121,54 +139,10 @@ const ConfirmationMessage = ({ action, onAgreementLoadStateChange }: Readonly<Co
   }
 }
 
-interface LibraryCardCellProps {
-  researcher: DuosUser
-  showConfirmationModal: (params: ShowConfirmationModalParams) => void
-}
-
-type DataSubmitterCellProps = LibraryCardCellProps
-
-interface TableCell {
-  data: React.ReactNode
-  id: TableRowId
-  style: React.CSSProperties
-  label: string
-  isComponent: boolean
-}
-
-// Styles specific to this table
-const styles = {
-  baseStyle: {
-    fontFamily: 'Montserrat',
-    fontSize: '1.45rem',
-    fontWeight: 400,
-    color: 'rgb(53, 64, 82)',
-    display: 'flex',
-    padding: '1rem 2%',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  columnStyle: { ...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between' },
-  cellWidths: {
-    email: '25%',
-    name: '20%',
-    libraryCard: '20%',
-    dataSubmitter: '20%',
-  },
-}
-
-// column header format for table
-const columnHeaderFormat = {
-  email: { label: 'Email', cellStyle: { width: styles.cellWidths.email } },
-  name: { label: 'Researcher', cellStyle: { width: styles.cellWidths.name } },
-  libraryCard: { label: 'Access Status', cellStyle: { width: styles.cellWidths.libraryCard } },
-  dataSubmitter: { label: 'Submitter Status', cellStyle: { width: styles.cellWidths.dataSubmitter } },
-  // activeDARs: {label: 'Active DARs', cellStyle: {width: styles.cellWidths.activeDARs}}
-}
-
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers
 
-const researcherName = (researcher: DuosUser): string => researcher.displayName ?? researcher.email
+// `||` so a blank displayName also falls back to the email
+const researcherName = (researcher: DuosUser): string => researcher.displayName || researcher.email
 
 /**
  * The Submitter toggle reads `roles`, so the change is applied locally rather than relying on the
@@ -191,128 +165,116 @@ const applyDataSubmitterRole = (
     return { ...researcher, ...updatedUser, roles }
   })
 
-const LibraryCardCell = ({
+interface ResearcherRow {
+  id: number
+  name: string
+  email: string
+  accessStatus: boolean
+  submitterStatus: boolean
+  researcher: DuosUser
+}
+
+interface StatusSwitchProps {
+  /** Column name, used in the switch's accessible name. */
+  status: string
+  researcher: DuosUser
+  isActive: boolean
+  onToggle: () => void
+  /** The cell's tabIndex, so the switch joins the grid's roving focus instead of the page tab order. */
+  tabIndex: number
+}
+
+const StatusSwitch = ({ status, researcher, isActive, onToggle, tabIndex }: StatusSwitchProps): React.JSX.Element => (
+  <div style={statusCellStyle}>
+    <Switch
+      // Named per row so screen reader users can tell the rows apart.
+      slotProps={{ input: { 'aria-label': `${status} for ${researcherName(researcher)}`, tabIndex } }}
+      checked={isActive}
+      onChange={onToggle}
+      size="small"
+      sx={statusSwitchSx}
+    />
+    <span style={isActive ? activeStatusLabelStyle : inactiveStatusLabelStyle}>
+      {isActive ? 'Active' : 'Inactive'}
+    </span>
+  </div>
+)
+
+const toResearcherRow = (researcher: DuosUser): ResearcherRow => ({
+  id: researcher.userId,
+  // Falls back to email when a researcher has no display name.
+  name: researcherName(researcher),
+  email: researcher.email,
+  accessStatus: !isNil(researcher.libraryCard),
+  submitterStatus: hasDataSubmitterRole(researcher),
   researcher,
-  showConfirmationModal,
-}: LibraryCardCellProps): TableCell => {
-  const id = researcher.userId
-  const card = researcher.libraryCard
-  const isActive = !isNil(card)
+})
 
-  const handleToggle = (): void => {
-    if (isActive) {
-      showConfirmationModal({ card, action: 'deactivate-library-card' })
-    }
-    else {
-      showConfirmationModal({
-        card: {
-          userId: researcher.userId,
-          userEmail: researcher.email,
-          userName: researcher.displayName,
-        },
-        action: 'issue-library-card',
-      })
-    }
-  }
-
-  return {
-    isComponent: true,
-    id,
-    style: {},
-    label: 'lc-status',
-    data: (
-      <div style={statusCellStyle} key={`lc-status-cell-${id}`}>
-        <Switch
-          // Named per row so screen reader users can tell the rows apart.
-          slotProps={{ input: { 'aria-label': `Access Status for ${researcherName(researcher)}` } }}
-          checked={isActive}
-          onChange={handleToggle}
-          size="small"
-          sx={statusSwitchSx}
-        />
-        <span style={isActive ? activeStatusLabelStyle : inactiveStatusLabelStyle}>
-          {isActive ? 'Active' : 'Inactive'}
-        </span>
-      </div>
-    ),
-  }
-}
-
-const DataSubmitterCell = ({ researcher, showConfirmationModal }: DataSubmitterCellProps): TableCell => {
-  const id = researcher.userId
-  const isActive = hasDataSubmitterRole(researcher)
-
-  return {
-    isComponent: true,
-    id,
-    style: {},
-    label: 'data-submitter-status',
-    data: (
-      <div style={statusCellStyle} key={`data-submitter-status-cell-${id}`}>
-        <Switch
-          // Named per row so screen reader users can tell the rows apart.
-          slotProps={{ input: { 'aria-label': `Submitter Status for ${researcherName(researcher)}` } }}
-          checked={isActive}
-          onChange={() => showConfirmationModal({
-            card: { userId: researcher.userId, userEmail: researcher.email, userName: researcher.displayName },
-            action: isActive ? 'remove-data-submitter' : 'issue-data-submitter',
-          })}
-          size="small"
-          sx={statusSwitchSx}
-        />
-        <span style={isActive ? activeStatusLabelStyle : inactiveStatusLabelStyle}>
-          {isActive ? 'Active' : 'Inactive'}
-        </span>
-      </div>
-    ),
-  }
-}
-
-const emailCell = (email: string, id: TableRowId): TableCell => {
-  return {
-    data: email,
-    id,
-    style: {},
-    label: 'user-email',
-    isComponent: false,
-  }
-}
-
-const displayNameCell = (displayName: string, id: TableRowId): TableCell => {
-  return {
-    data: displayName,
-    id,
-    style: {},
-    label: 'display-name',
-    isComponent: false,
-  }
-}
-
-const columnHeaderData = [
-  columnHeaderFormat.name,
-  columnHeaderFormat.email,
-  columnHeaderFormat.libraryCard,
-  columnHeaderFormat.dataSubmitter,
-  // columnHeaderFormat.activeDARs -> add this back in when back-end supports this
-]
-
-const processResearcherRowData = (
-  researchers: DuosUser[],
+// Status columns sort on booleans, not on the rendered switch.
+const buildColumns = (
   showConfirmationModal: (params: ShowConfirmationModalParams) => void,
-): TableCell[][] => {
-  return researchers.map((researcher) => {
-    const { displayName } = researcher
-    const email = researcher.email
-    const id = researcher.userId
-    return [
-      displayNameCell(displayName, id),
-      emailCell(email, id),
-      LibraryCardCell({ researcher, showConfirmationModal }),
-      DataSubmitterCell({ researcher, showConfirmationModal }),
-      // activeDarCountCell(count, id)
-    ]
-  })
-}
+): GridColDef<ResearcherRow>[] => [
+  { field: 'name', headerName: 'Researcher', flex: 1, minWidth: 160 },
+  { field: 'email', headerName: 'Email', flex: 1.25, minWidth: 200 },
+  {
+    field: 'accessStatus',
+    headerName: 'Access Status',
+    type: 'boolean',
+    // Boolean columns centre by default; match the text columns.
+    align: 'left',
+    headerAlign: 'left',
+    flex: 1,
+    minWidth: 160,
+    renderCell: ({ row, tabIndex }: GridRenderCellParams<ResearcherRow>) => {
+      const card = row.researcher.libraryCard
+      return (
+        <StatusSwitch
+          status="Access Status"
+          researcher={row.researcher}
+          isActive={row.accessStatus}
+          tabIndex={tabIndex}
+          onToggle={() => showConfirmationModal(
+            isNil(card)
+              ? {
+                  card: {
+                    userId: row.researcher.userId,
+                    userEmail: row.researcher.email,
+                    userName: row.researcher.displayName,
+                  },
+                  action: 'issue-library-card',
+                }
+              : { card, action: 'deactivate-library-card' },
+          )}
+        />
+      )
+    },
+  },
+  {
+    field: 'submitterStatus',
+    headerName: 'Submitter Status',
+    type: 'boolean',
+    align: 'left',
+    headerAlign: 'left',
+    flex: 1,
+    minWidth: 160,
+    renderCell: ({ row, tabIndex }: GridRenderCellParams<ResearcherRow>) => (
+      <StatusSwitch
+        status="Submitter Status"
+        researcher={row.researcher}
+        isActive={row.submitterStatus}
+        tabIndex={tabIndex}
+        onToggle={() => showConfirmationModal({
+          card: {
+            userId: row.researcher.userId,
+            userEmail: row.researcher.email,
+            userName: row.researcher.displayName,
+          },
+          action: row.submitterStatus ? 'remove-data-submitter' : 'issue-data-submitter',
+        })}
+      />
+    ),
+  },
+]
 
 export default function SigningOfficialTable(props: SigningOfficialTableProps): React.JSX.Element {
   // Local edits carry the provided list they were made against, so an edit is ignored once the prop
@@ -328,8 +290,7 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
       researchers: update(previous?.source === props.researchers ? previous.researchers : props.researchers),
     }))
 
-  const [tableSize, setTableSize] = useState<number>(10)
-  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const [selectedCard, setSelectedCard] = useState<SelectedLibraryCard | null>(null)
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false)
   const [searchText, setSearchText] = useState<string>('')
@@ -342,10 +303,11 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
   // Search function for SearchBar component, function defined in utils
   const handleSearchChange = useCallback((searchTerms: string) => {
     setSearchText(searchTerms)
-    setCurrentPage(1)
+    // Narrower results can leave the current page empty.
+    setPaginationModel(previous => ({ ...previous, page: 0 }))
   }, [])
 
-  // Stable so the memoised row data below is not rebuilt on every render.
+  // Stable so the memoised columns below are not rebuilt on every render.
   const showConfirmationModal = useCallback(({ card, action }: ShowConfirmationModalParams): void => {
     setSelectedCard(card)
     setShowConfirmation(true)
@@ -354,47 +316,15 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
     setAgreementLoadState('loading')
   }, [])
 
-  // Filtering and paging are derived, so a keystroke costs one render rather than a cascade of effects.
+  // Filtering is derived, so a keystroke costs one render rather than a cascade of effects.
   const filteredResearchers = useMemo(() => {
     const terms = searchText.split(' ').filter(term => term.length > 0)
     return terms.reduce((list, term) => researcherFilterFunction(term, list), researchers)
   }, [researchers, searchText])
 
-  const pageCount = useMemo(() => calcTablePageCount(tableSize, filteredResearchers), [tableSize, filteredResearchers])
-  // Clamped during render rather than corrected by an effect that also depends on what it sets.
-  const visiblePage = Math.min(currentPage, pageCount)
-  const visibleResearchers = useMemo(
-    () => calcVisibleWindow(visiblePage, tableSize, filteredResearchers),
-    [visiblePage, tableSize, filteredResearchers],
-  )
+  const rows = useMemo(() => filteredResearchers.map(toResearcherRow), [filteredResearchers])
 
-  const goToPage = useCallback((value: number) => {
-    if (value >= 1 && value <= pageCount) {
-      setCurrentPage(value)
-    }
-  }, [pageCount])
-
-  const changeTableSize = useCallback((value: number) => {
-    if (value > 0 && !Number.isNaN(value)) {
-      setTableSize(value)
-    }
-  }, [])
-
-  const paginationBar = (
-    <PaginationBar
-      pageCount={pageCount}
-      currentPage={visiblePage}
-      tableSize={tableSize}
-      goToPage={goToPage}
-      changeTableSize={changeTableSize}
-    />
-  )
-
-  // Memoised so a re-render that changes neither the visible rows nor the handler reuses the cells.
-  const rowData = useMemo(
-    () => processResearcherRowData(visibleResearchers, showConfirmationModal),
-    [visibleResearchers, showConfirmationModal],
-  )
+  const columns = useMemo(() => buildColumns(showConfirmationModal), [showConfirmationModal])
 
   const issueLibraryCards = async (
     cards: LibraryCardRequest[],
@@ -545,14 +475,21 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
         </div>
       </div>
 
-      <SimpleTable
-        isLoading={isLoading}
-        rowData={rowData}
-        columnHeaders={columnHeaderData}
-        styles={styles}
-        tableSize={tableSize}
-        paginationBar={paginationBar}
-      />
+      <Box sx={gridContainerSx}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          loading={isLoading}
+          pageSizeOptions={PAGE_SIZE_OPTIONS}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          // Alphabetical until the SO sorts another column.
+          initialState={{ sorting: { sortModel: [{ field: 'name', sort: 'asc' }] } }}
+          disableRowSelectionOnClick
+          autoHeight
+          sx={DATAGRID_SX}
+        />
+      </Box>
       {selectedCard !== null && (
         <ConfirmationModal
           showConfirmation={showConfirmation}

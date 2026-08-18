@@ -8,7 +8,7 @@ import { Storage } from 'src/libs/storage'
 import { isRestrictedToPublicVisibility, Notifications } from 'src/libs/utils'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import eventList from 'src/libs/events'
-import { getRadarEnabledDatasetsWithRules } from 'src/utils/DatasetUtils'
+import { getRadarEnabledDatasetIds, getSoApprovalModelByDatasetId } from 'src/utils/DatasetUtils'
 import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import { useLibraryExportableDatasets } from 'src/hooks/useLibraryExportableDatasets'
 import LibraryPageShell from 'src/components/data_library/LibraryPageShell'
@@ -72,12 +72,26 @@ export const DataLibrary: React.FC = () => {
   const { urlState, data, currentAsset, handleSearchChange } = pageState
 
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
-  const [radarEnabledDatasetIds, setRadarEnabledDatasetIds] = useState<Set<number>>(new Set())
 
-  const datasets = urlState.tab === AssetType.DATASETS && data?.items ? data.items as DatasetTerm[] : []
+  // Keyed on `data` rather than `data?.items`: React Compiler cannot preserve the narrower
+  // optional-access dependency, and the mismatch makes it skip optimizing this component.
+  const datasets = useMemo(
+    () => (urlState.tab === AssetType.DATASETS && data?.items ? data.items as DatasetTerm[] : []),
+    [data, urlState.tab],
+  )
   const { data: exportableDatasets = {} } = useLibraryExportableDatasets(
     datasets,
     urlState.tab === AssetType.DATASETS,
+  )
+
+  const soApprovalModelByDatasetId = useMemo(
+    () => getSoApprovalModelByDatasetId(datasets),
+    [datasets],
+  )
+
+  const radarEnabledDatasetIds = useMemo(
+    () => getRadarEnabledDatasetIds(datasets),
+    [datasets],
   )
 
   const selectedStudyIds = useMemo(() => {
@@ -92,29 +106,6 @@ export const DataLibrary: React.FC = () => {
   const handleApplyForAccess = () => {
     applyForAccess(selectedDatasetIds, navigate)
   }
-
-  useEffect(() => {
-    const fetchRadarEnabled = async () => {
-      if (urlState.tab !== AssetType.DATASETS || !data?.items?.length) {
-        setRadarEnabledDatasetIds(new Set())
-        return
-      }
-      const datasetIds = (data.items as DatasetTerm[]).map(d => d.datasetId)
-      if (datasetIds.length === 0) {
-        setRadarEnabledDatasetIds(new Set())
-        return
-      }
-      try {
-        const radarEnabledIds = await getRadarEnabledDatasetsWithRules(data.items as DatasetTerm[])
-        setRadarEnabledDatasetIds(new Set(radarEnabledIds))
-      }
-      catch {
-        setRadarEnabledDatasetIds(new Set())
-      }
-    }
-
-    fetchRadarEnabled()
-  }, [data?.items, urlState.tab])
 
   const header = (
     <>
@@ -136,11 +127,13 @@ export const DataLibrary: React.FC = () => {
       pageState={pageState}
       tabs={ALL_LIBRARY_TABS}
       header={header}
+      showSoApprovalReminder
       gridExtras={{
         selectedDatasetIds,
         onSelectionChange: handleSelectionChange,
         exportableDatasets,
         radarEnabledDatasetIds: urlState.tab === AssetType.DATASETS ? radarEnabledDatasetIds : undefined,
+        soApprovalModelByDatasetId: urlState.tab === AssetType.DATASETS ? soApprovalModelByDatasetId : undefined,
       }}
       footer={(
         <LibraryFooter

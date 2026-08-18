@@ -7,6 +7,7 @@ type ArrayFilterParamConfig = {
     FilterState,
     | 'accessManagement'
     | 'dataUse'
+    | 'dataUseModifiers'
     | 'dataType'
     | 'dac'
     | 'workspaceTools'
@@ -18,6 +19,7 @@ type ArrayFilterParamConfig = {
     | 'biospecimenType'
     | 'biospecimenDataUse'
     | 'biospecimenPostMortemIntervalUnit'
+    | 'soApprovalModel'
   >
   param: string
 }
@@ -41,6 +43,7 @@ type DateFilterParamConfig = {
 const ARRAY_FILTER_PARAM_CONFIG: ArrayFilterParamConfig[] = [
   { key: 'accessManagement', param: 'access' },
   { key: 'dataUse', param: 'dataUse' },
+  { key: 'dataUseModifiers', param: 'dataUseModifiers' },
   { key: 'dataType', param: 'dataType' },
   { key: 'dac', param: 'dac' },
   { key: 'workspaceTools', param: 'workspaceTools' },
@@ -52,6 +55,7 @@ const ARRAY_FILTER_PARAM_CONFIG: ArrayFilterParamConfig[] = [
   { key: 'biospecimenType', param: 'biospecimenType' },
   { key: 'biospecimenDataUse', param: 'biospecimenDataUse' },
   { key: 'biospecimenPostMortemIntervalUnit', param: 'biospecimenPostMortemIntervalUnit' },
+  { key: 'soApprovalModel', param: 'soApprovalModel' },
 ]
 
 const RANGE_FILTER_PARAM_CONFIG: RangeFilterParamConfig[] = [
@@ -244,6 +248,7 @@ const parseFiltersFromUrl = (searchParams: URLSearchParams): FilterState => {
     ...parseDateFilters(searchParams),
     datasetsCited: parseBooleanParam(searchParams, ['datasetsCited', 'presentationsDatasetsCited']),
     publicationsDatasetsCited: parseBooleanParam(searchParams, ['publicationsDatasetsCited']),
+    instantApproval: parseBooleanParam(searchParams, ['instantApproval']),
   } as FilterState
 }
 
@@ -257,6 +262,7 @@ const serializeFiltersToUrl = (
   serializeArrayFiltersToUrl(filters, searchParams)
   serializeBooleanFilterToUrl(filters.datasetsCited, 'datasetsCited', searchParams, ['presentationsDatasetsCited'])
   serializeBooleanFilterToUrl(filters.publicationsDatasetsCited, 'publicationsDatasetsCited', searchParams)
+  serializeBooleanFilterToUrl(filters.instantApproval, 'instantApproval', searchParams)
   serializeRangeFiltersToUrl(filters, searchParams)
   serializeDateFiltersToUrl(filters, searchParams)
 }

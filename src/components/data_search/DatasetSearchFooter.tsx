@@ -17,7 +17,7 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
       .map(dataset => dataset.study.studyId))
   const datasetText = selectedDatasets.length > 1 ? 'datasets' : 'dataset'
   const studyText = selectedStudies.length > 1 ? 'studies' : 'study'
-  const hasLibraryCard = !isNil(Storage.getCurrentUser().libraryCard)
+  const hasActiveResearcherStatus = !isNil(Storage.getCurrentUser().libraryCard)
 
   return (
     <div style={{
@@ -45,7 +45,7 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
         {studyText}
       </div>
       <Tooltip
-        title={hasLibraryCard ? '' : 'A Library Card is required to apply for data access'}
+        title={hasActiveResearcherStatus ? '' : 'Active Researcher Status is required to apply for data access'}
         slotProps={{
           tooltip: {
             sx: {
@@ -60,7 +60,7 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
             variant="contained"
             onClick={onClick}
             sx={{ fontWeight: 600, marginRight: 5 }}
-            disabled={!hasLibraryCard}
+            disabled={!hasActiveResearcherStatus}
           >
             Apply for Access
           </Button>

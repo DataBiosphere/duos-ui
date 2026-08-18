@@ -17,6 +17,9 @@ import { handleCallback } from './auth/callback.js'
 import { handleLogout } from './auth/logout.js'
 import { getMe } from './auth/me.js'
 import { apiProxy } from './proxy/apiProxy.js'
+import { ECM_PROXY_PREFIX, ecmProxy } from './proxy/ecmProxy.js'
+import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
+import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
 import { configPath, readConfig } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -100,7 +103,7 @@ export async function buildApp(): Promise<AppInstance> {
       fastify.log.warn('[server] DUOS_DB_SSL=false — connecting to Postgres without TLS; only safe when the transport is loopback (Cloud SQL Proxy sidecar or local docker network)')
     }
 
-    // DB pool — must be registered before session so app.pg is available to the store
+    // Register before sessions; the default pool of 10 is sufficient at measured load.
     await fastify.register(fastifyPostgres, {
       host: process.env.DUOS_DB_HOST,
       database: process.env.DUOS_DB_NAME,
@@ -232,6 +235,24 @@ export async function buildApp(): Promise<AppInstance> {
     // getApiUrl() at it — so a deployment running the legacy client-side flow
     // exposes no proxy route at all.
     await fastify.register(apiProxy)
+
+    // The single-feature upstream proxies. Same gates as the DUOS API proxy,
+    // plus one more each: their own env var. Conditional rather than required,
+    // unlike DUOS_API_URL above, because each serves exactly one feature.
+    const optionalProxies = [
+      { envVar: 'DUOS_ECM_URL', prefix: ECM_PROXY_PREFIX, register: ecmProxy, feature: 'RAS/eRA Commons account linking' },
+      { envVar: 'DUOS_TDR_URL', prefix: TDR_PROXY_PREFIX, register: tdrProxy, feature: 'TDR snapshot enumeration on dataset pages' },
+      { envVar: 'DUOS_BARD_URL', prefix: BARD_PROXY_PREFIX, register: bardProxy, feature: 'identified usage metrics (signed-in Bard events fall back to anonymous)' },
+    ] as const
+    for (const { envVar, prefix, register, feature } of optionalProxies) {
+      if (process.env[envVar]) {
+        fastify.log.info(`[server] ${envVar} is set — registering the ${prefix} proxy`)
+        await fastify.register(register)
+      }
+      else {
+        fastify.log.warn(`[server] ${envVar} is not set — the ${prefix} proxy is disabled, so ${feature} will fail in this BFF environment`)
+      }
+    }
   }
   else {
     fastify.log.info('[server] bffEnabled is not true — BFF auth routes disabled (legacy client-side auth)')

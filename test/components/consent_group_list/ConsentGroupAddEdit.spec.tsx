@@ -135,3 +135,68 @@ describe('ConsentGroupAddEdit requestLocation', () => {
     expect(collected[0].requestLocation).toBeUndefined()
   })
 })
+
+describe('ConsentGroupAddEdit access management changes', () => {
+  const renderForm = () => render(
+    <MemoryRouter>
+      <ConsentGroupAddEdit
+        id={0}
+        consentGroups={[]}
+        closeAction={vi.fn()}
+        onConsentGroupChange={vi.fn()}
+      />
+    </MemoryRouter>,
+  )
+
+  it.each(['controlled', 'external'])(
+    'keeps a data use selected before %s access was chosen',
+    async (strategy) => {
+      const user = userEvent.setup()
+      const { container } = renderForm()
+
+      await user.click(container.querySelector('#primaryConsent_generalResearchUse')!)
+      await user.click(container.querySelector(`#accessManagement_${strategy}`)!)
+
+      const errored = Array.from(container.querySelectorAll('.errored')).map(el => el.textContent).join(' ')
+      expect(errored).not.toContain('Primary Data Use Terms')
+    },
+  )
+
+  it('clears the data use when switching to open access, which does not use it', async () => {
+    const user = userEvent.setup()
+    const { container } = renderForm()
+
+    await user.click(container.querySelector('#primaryConsent_generalResearchUse')!)
+    await user.click(container.querySelector('#accessManagement_open')!)
+
+    expect(container.querySelector('#primaryConsent_generalResearchUse')).not.toBeInTheDocument()
+  })
+
+  it('drops the DAC when access management leaves controlled', async () => {
+    const user = userEvent.setup()
+    const { container } = renderForm()
+
+    await user.click(container.querySelector('#accessManagement_controlled')!)
+    expect(container.querySelector('#dataAccessCommitteeId')).toBeInTheDocument()
+
+    await user.click(container.querySelector('#accessManagement_external')!)
+    expect(container.querySelector('#dataAccessCommitteeId')).not.toBeInTheDocument()
+  })
+
+  // Re-checking the toggle writes the retained text back into the consent group, so text cleared
+  // by a switch to open access must not come back with it
+  it('does not restore secondary data use text cleared by open access', async () => {
+    const user = userEvent.setup()
+    const { container } = renderForm()
+
+    await user.click(container.querySelector('#accessManagement_controlled')!)
+    await user.click(container.querySelector('#gs')!)
+    await user.type(container.querySelector('#gsText')!, 'USA only')
+
+    await user.click(container.querySelector('#accessManagement_open')!)
+    await user.click(container.querySelector('#accessManagement_controlled')!)
+    await user.click(container.querySelector('#gs')!)
+
+    expect(container.querySelector<HTMLInputElement>('#gsText')?.value ?? '').toBe('')
+  })
+})

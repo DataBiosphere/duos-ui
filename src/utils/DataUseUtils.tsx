@@ -2,9 +2,18 @@ import React, { CSSProperties, ReactNode } from 'react'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import { DatasetTerm } from 'src/types/model'
 
-interface DataUseCode {
+export type DataUseCodeType = 'primary' | 'secondary'
+
+export interface DataUseCode {
   code: string
+  /**
+   * The bare DUO code, for displays too tight to carry `code` in full — `code`
+   * appends the disease list for DS (`DS (Breast Cancer)`), which does not fit
+   * where several codes are shown together.
+   */
+  shortCode: string
   description: string
+  type: DataUseCodeType
 }
 
 interface ProcessedDataUseCodes {
@@ -18,17 +27,22 @@ interface ProcessedDataUseCodes {
  * @returns {ProcessedDataUseCodes} - Object with processed data use information
  */
 export function processDataUseCodes(dataset: DatasetTerm): ProcessedDataUseCodes {
-  const codesAndDescriptions = dataset.dataUse?.primary
+  const codesAndDescriptions: DataUseCode[] = dataset.dataUse?.primary
     ? dataset.dataUse.primary.map((dataUse) => {
         if (dataUse.code === 'OTHER') {
-          return { code: `OTH1`, description: dataUse.description }
+          return { code: `OTH1`, shortCode: 'OTH1', description: dataUse.description, type: 'primary' }
         }
         else if (dataUse.code === 'DS') {
-          const disease = dataUse.description.substring(dataUse.description.indexOf(':') + 2)
-          return { code: `${dataUse.code} (${disease})`, description: dataUse.description }
+          // The diseases follow a "Disease specific: <list>" prefix. Guard the split:
+          // a description with no colon (or none at all) must still yield a usable
+          // code, since the library grid derives a whole row's cell value from this.
+          const separator = dataUse.description?.indexOf(':') ?? -1
+          const disease = separator >= 0 ? dataUse.description.substring(separator + 2) : dataUse.description
+          const code = disease ? `${dataUse.code} (${disease})` : dataUse.code
+          return { code, shortCode: dataUse.code, description: dataUse.description, type: 'primary' }
         }
         else {
-          return { code: dataUse.code, description: dataUse.description }
+          return { code: dataUse.code, shortCode: dataUse.code, description: dataUse.description, type: 'primary' }
         }
       })
     : []
@@ -36,10 +50,10 @@ export function processDataUseCodes(dataset: DatasetTerm): ProcessedDataUseCodes
   if (dataset.dataUse?.secondary) {
     dataset.dataUse.secondary.forEach((dataUse) => {
       if (dataUse.code === 'OTHER') {
-        codesAndDescriptions.push({ code: `OTH2`, description: dataUse.description })
+        codesAndDescriptions.push({ code: `OTH2`, shortCode: 'OTH2', description: dataUse.description, type: 'secondary' })
       }
       else {
-        codesAndDescriptions.push({ code: dataUse.code, description: dataUse.description })
+        codesAndDescriptions.push({ code: dataUse.code, shortCode: dataUse.code, description: dataUse.description, type: 'secondary' })
       }
     })
   }

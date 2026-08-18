@@ -1,59 +1,35 @@
 import React from 'react'
-import { Box } from '@mui/material'
-import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined'
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
-import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined'
-import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined'
 import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined'
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined'
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined'
 import DatasetOutlinedIcon from '@mui/icons-material/DatasetOutlined'
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined'
-import { Styles } from 'src/libs/theme'
-import { Storage } from 'src/libs/storage'
-import { usePageTitle } from 'src/hooks/usePageTitle'
-import ConsoleDashboardGrid from 'src/components/dashboard/ConsoleDashboardGrid'
-import ConsoleDashboardPromo from 'src/components/dashboard/ConsoleDashboardPromo'
-import ConsoleDashboardResources, { ConsoleDashboardResource } from 'src/components/dashboard/ConsoleDashboardResources'
-import ConsoleDashboardTitle from 'src/components/dashboard/ConsoleDashboardTitle'
-import {
-  ConsoleDashboardTileMeta,
-  isRenderedForUser,
-  useConsoleDashboardSummary,
-} from 'src/components/dashboard/useConsoleDashboardSummary'
+import ConsoleDashboard from 'src/components/dashboard/ConsoleDashboard'
+import { ConsoleDashboardResource } from 'src/components/dashboard/ConsoleDashboardResources'
+import { COMMON_CONSOLE_RESOURCES } from 'src/components/dashboard/dashboardResources'
+import { createDataLibraryTile } from 'src/components/dashboard/dashboardTiles'
+import { ConsoleDashboardTileMeta } from 'src/components/dashboard/useConsoleDashboardSummary'
 import { Researcher, ResearcherDashboardSummary } from 'src/libs/ajax/Researcher'
 import { RESEARCHER_CONSOLE_SECTIONS } from './researcherConsoleRoutes'
 
 // Tiles reuse the header's section entries so a tile and its sub-tab can never disagree about a
 // route or about who is allowed to see it.
 const tileMeta: ConsoleDashboardTileMeta<ResearcherDashboardSummary>[] = [
-  {
-    label: 'Data Library',
-    link: '/datalibrary',
-    icon: LibraryBooksOutlinedIcon,
-    description: 'Browse and search datasets, studies, and other assets available in DUOS.',
-    // The endpoint applies the same publicVisibility restriction /datalibrary does, so these
-    // counts match the tab badges a researcher sees there.
-    stats: [
-      { label: 'Studies', value: s => s?.dataLibrary?.studies },
-      { label: 'Datasets', value: s => s?.dataLibrary?.datasets },
-      { label: 'AI Models', value: s => s?.dataLibrary?.models },
-      { label: 'Workspaces', value: s => s?.dataLibrary?.workspaces },
-    ],
-  },
+  createDataLibraryTile<ResearcherDashboardSummary>(),
   {
     ...RESEARCHER_CONSOLE_SECTIONS[0],
     icon: DescriptionOutlinedIcon,
     description: 'Track the data access requests you have submitted.',
     stats: [
-      { label: 'Total', value: s => s?.darRequests?.total },
-      { label: 'Approved', value: s => s?.darRequests?.approved },
-      { label: 'Canceled', value: s => s?.darRequests?.canceled },
-      { label: 'In Process', value: s => s?.darRequests?.inProcess },
+      { label: 'Total', value: summary => summary.darRequests?.total },
+      { label: 'Approved', value: summary => summary.darRequests?.approved },
+      { label: 'Canceled', value: summary => summary.darRequests?.canceled },
+      { label: 'In Process', value: summary => summary.darRequests?.inProcess },
     ],
   },
   {
@@ -61,18 +37,17 @@ const tileMeta: ConsoleDashboardTileMeta<ResearcherDashboardSummary>[] = [
     icon: AssignmentTurnedInOutlinedIcon,
     description: 'View your current dataset approvals and when access expires.',
     stats: [
-      { label: 'Active', value: s => s?.datasetApprovals?.active },
-      { label: 'Expiring in 30 Days', value: s => s?.datasetApprovals?.expiringSoon },
-      { label: 'Expired', value: s => s?.datasetApprovals?.expired },
+      { label: 'Active', value: summary => summary.datasetApprovals?.active },
+      { label: 'Expiring in 30 Days', value: summary => summary.datasetApprovals?.expiringSoon },
+      { label: 'Expired', value: summary => summary.datasetApprovals?.expired },
     ],
   },
   {
     ...RESEARCHER_CONSOLE_SECTIONS[2],
     icon: CloudUploadOutlinedIcon,
     description: 'Track the status of datasets you have registered in DUOS.',
-    // Labelled "All Submissions" because it sums all nine tabs of My Data Submissions, while the
-    // page it links to opens on Datasets - no single badge there is meant to match this number.
-    stats: [{ label: 'All Submissions', value: s => s?.dataSubmissions?.total }],
+    // This sums all nine tabs of My Data Submissions, while the linked page opens on Datasets.
+    stats: [{ label: 'All Submissions', value: summary => summary.dataSubmissions?.total }],
   },
 ]
 
@@ -83,18 +58,7 @@ const helpfulResources: ConsoleDashboardResource[] = [
     description: 'A walkthrough of the Researcher role, from browsing the data library to submitting a data access request.',
     href: 'https://duos.blog/help/researcherguide/',
   },
-  {
-    icon: QuizOutlinedIcon,
-    label: 'Frequently Asked Questions',
-    description: 'Answers to common questions about using DUOS.',
-    href: 'https://duos.blog/help/faqs/',
-  },
-  {
-    icon: ArticleOutlinedIcon,
-    label: 'Help Center',
-    description: 'Browse the full library of DUOS documentation and how-to articles.',
-    href: 'https://duos.blog/help/',
-  },
+  ...COMMON_CONSOLE_RESOURCES,
   {
     icon: BadgeOutlinedIcon,
     label: 'Linking Your NIH RAS Account',
@@ -136,36 +100,23 @@ const helpfulResources: ConsoleDashboardResource[] = [
   },
 ]
 
+const promoParagraphs = [
+  'Researchers can use DUOS to discover controlled-access datasets and submit data access '
+  + 'requests to Data Access Committees. You can also leverage DUOS alongside Terra to meet '
+  + 'NIH requirements for analyzing and storing controlled-access data.',
+  'Reach out if you\'d like to learn more about either of these.',
+]
+
 export default function ResearcherDashboard(): React.JSX.Element {
-  usePageTitle('Dashboard')
-  const currentUser = Storage.getCurrentUser()
-  const visibleTiles = tileMeta.filter(tile => isRenderedForUser(tile.isRenderedForUser, currentUser))
-  const { tiles, isLoading } = useConsoleDashboardSummary(
-    ['researcher-dashboard-summary'],
-    Researcher.getDashboardSummary,
-    visibleTiles,
-  )
-
   return (
-    <Box sx={{ ...Styles.PAGE }}>
-      <ConsoleDashboardTitle>Researcher Console</ConsoleDashboardTitle>
-
-      <ConsoleDashboardGrid tiles={tiles} isLoading={isLoading} />
-
-      <ConsoleDashboardResources
-        heading="Helpful Resources for Researchers"
-        resources={helpfulResources}
-      />
-
-      <ConsoleDashboardPromo
-        heading="Get more out of DUOS"
-        paragraphs={[
-          'Researchers can use DUOS to discover controlled-access datasets and submit data access '
-          + 'requests to Data Access Committees. You can also leverage DUOS alongside Terra to meet '
-          + 'NIH requirements for analyzing and storing controlled-access data.',
-          'Reach out if you\'d like to learn more about either of these.',
-        ]}
-      />
-    </Box>
+    <ConsoleDashboard
+      consoleTitle="Researcher Console"
+      queryKey={['researcher-dashboard-summary']}
+      queryFn={Researcher.getDashboardSummary}
+      tileMeta={tileMeta}
+      resourcesHeading="Helpful Resources for Researchers"
+      resources={helpfulResources}
+      promoParagraphs={promoParagraphs}
+    />
   )
 }
