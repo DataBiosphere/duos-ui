@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatUserRoles, institutionName } from 'src/components/manage_users_table/manageUsersTableUtils'
+import { formatUserRoles, institutionName, yesNo } from 'src/components/manage_users_table/manageUsersTableUtils'
 import { InstitutionInterface, LibraryCard, UserRole } from 'src/types/model'
 
 const role = (name: UserRole['name'], userId = 1): UserRole => ({
@@ -31,6 +31,10 @@ describe('formatUserRoles', () => {
     expect(formatUserRoles([role('Researcher')], undefined)).toBe('None')
   })
 
+  it('leaves out the DataSubmitter role, which has its own status column', () => {
+    expect(formatUserRoles([role('DataSubmitter'), role('Admin')], undefined)).toBe('Admin')
+  })
+
   it('splits camel cased role names', () => {
     expect(formatUserRoles([role('SigningOfficial')], undefined)).toBe('Signing Official')
   })
@@ -60,5 +64,15 @@ describe('institutionName', () => {
 
   it('reads N/A when the user has no institution', () => {
     expect(institutionName(undefined)).toBe('N/A')
+  })
+})
+
+describe('yesNo', () => {
+  it('reads Yes for true', () => {
+    expect(yesNo(true)).toBe('Yes')
+  })
+
+  it('reads No for false', () => {
+    expect(yesNo(false)).toBe('No')
   })
 })

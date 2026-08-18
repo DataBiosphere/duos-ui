@@ -4,7 +4,7 @@ import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from 
 import { Link } from 'react-router'
 import { getSearchFilterFunctions } from 'src/libs/utils'
 import { Theme } from 'src/libs/theme'
-import { formatUserRoles, institutionName } from 'src/components/manage_users_table/manageUsersTableUtils'
+import { formatUserRoles, institutionName, yesNo } from 'src/components/manage_users_table/manageUsersTableUtils'
 import { DuosUser } from 'src/types/model'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
@@ -41,6 +41,8 @@ interface UserRow {
   email: string
   institution: string
   roles: string
+  researcherStatus: string
+  dataSubmitterStatus: string
 }
 
 // Roles and institution are flattened to their displayed text, so every column sorts on what is read.
@@ -50,6 +52,8 @@ const toUserRow = (user: DuosUser): UserRow => ({
   email: user.email,
   institution: institutionName(user.institution),
   roles: formatUserRoles(user.roles, user.libraryCard),
+  researcherStatus: yesNo(user.isResearcher),
+  dataSubmitterStatus: yesNo(user.isDataSubmitter),
 })
 
 const COLUMNS: GridColDef<UserRow>[] = [
@@ -68,6 +72,8 @@ const COLUMNS: GridColDef<UserRow>[] = [
   { field: 'email', headerName: 'Email', flex: 1.25, minWidth: 200 },
   { field: 'institution', headerName: 'Institution', flex: 1, minWidth: 180 },
   { field: 'roles', headerName: 'Roles', flex: 1, minWidth: 180 },
+  { field: 'researcherStatus', headerName: 'Researcher Status', flex: 0.75, minWidth: 150 },
+  { field: 'dataSubmitterStatus', headerName: 'Data Submitter Status', flex: 0.75, minWidth: 170 },
 ]
 
 const filterFn = getSearchFilterFunctions().users

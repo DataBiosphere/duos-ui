@@ -109,7 +109,7 @@ describe('ManageUsersTable', () => {
   it('renders a column for every user attribute', () => {
     renderTable()
 
-    for (const label of ['User Name', 'Email', 'Institution', 'Roles']) {
+    for (const label of ['User Name', 'Email', 'Institution', 'Roles', 'Researcher Status', 'Data Submitter Status']) {
       expect(columnHeader(label)).toBeInTheDocument()
     }
   })
@@ -121,6 +121,25 @@ describe('ManageUsersTable', () => {
     expect(within(row).getByText(alice.email)).toBeInTheDocument()
     expect(within(row).getByText('Broad Institute')).toBeInTheDocument()
     expect(within(row).getByText('Admin')).toBeInTheDocument()
+  })
+
+  it('shows Yes or No for researcher and data submitter status', async () => {
+    const dave = makeUser({
+      userId: 4,
+      displayName: 'Dave Lee',
+      email: 'dave@test.com',
+      isResearcher: false,
+      isDataSubmitter: true,
+    })
+    renderWithRouter(<ManageUsersTable isLoading={false} userList={[alice, dave]} searchText="" />)
+
+    const aliceRow = await rowFor(alice.displayName)
+    expect(within(aliceRow).getByText('Yes')).toBeInTheDocument()
+    expect(within(aliceRow).getByText('No')).toBeInTheDocument()
+
+    const daveRow = await rowFor(dave.displayName)
+    expect(within(daveRow).getByText('No')).toBeInTheDocument()
+    expect(within(daveRow).getByText('Yes')).toBeInTheDocument()
   })
 
   it('links each user name to their edit page', async () => {
