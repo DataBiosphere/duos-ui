@@ -48,7 +48,7 @@ describe('useLibraryUrlState', () => {
       </MemoryRouter>,
     )
     expect(screen.getByText('duos')).toBeInTheDocument()
-    expect(screen.getByText(AssetType.DATASETS)).toBeInTheDocument()
+    expect(screen.getByText(AssetType.STUDIES)).toBeInTheDocument()
     const filtersEl = document.getElementById('filters')!
     const filters = JSON.parse(filtersEl.textContent!)
     expect(filters.accessManagement).toHaveLength(0)

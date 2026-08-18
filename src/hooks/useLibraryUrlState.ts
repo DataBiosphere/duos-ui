@@ -356,7 +356,7 @@ export const useLibraryUrlState = () => {
   // was parsed each time.
   const state: LibraryUrlState = useMemo(() => ({
     library: searchParams.get('library') || 'duos',
-    tab: (searchParams.get('tab') as AssetType) || AssetType.DATASETS,
+    tab: (searchParams.get('tab') as AssetType) || AssetType.STUDIES,
     filters: parseFiltersFromUrl(searchParams),
     page: parsePageParam(searchParams),
     pageSize: parsePageSizeParam(searchParams),

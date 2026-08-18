@@ -13,6 +13,8 @@ import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import { useLibraryExportableDatasets } from 'src/hooks/useLibraryExportableDatasets'
 import LibraryPageShell from 'src/components/data_library/LibraryPageShell'
 import LibraryFooter from 'src/components/data_library/LibraryFooter'
+import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
+import StudyCardGrid from 'src/components/data_library/StudyCardGrid'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import SearchBar from 'src/components/SearchBar'
 
@@ -107,6 +109,11 @@ export const DataLibrary: React.FC = () => {
     applyForAccess(selectedDatasetIds, navigate)
   }
 
+  const renderGrid = useCallback((gridProps: React.ComponentProps<typeof LibraryDataGrid>) =>
+    gridProps.assetType === AssetType.STUDIES
+      ? <StudyCardGrid {...gridProps} />
+      : <LibraryDataGrid {...gridProps} />, [])
+
   const header = (
     <>
       <TableHeaderSection
@@ -128,6 +135,7 @@ export const DataLibrary: React.FC = () => {
       tabs={ALL_LIBRARY_TABS}
       header={header}
       showSoApprovalReminder
+      renderGrid={renderGrid}
       gridExtras={{
         selectedDatasetIds,
         onSelectionChange: handleSelectionChange,

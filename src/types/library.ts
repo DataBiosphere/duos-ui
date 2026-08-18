@@ -233,10 +233,16 @@ export interface StudyAggregation {
   species: string
   phenotype: string
   dataCustodianEmail: string[]
+  dataTypes: string[]
+  /** Distinct DUO data use codes (e.g. `HMB`, `GRU`) across the study's datasets */
+  dataUseCodes: string[]
+  /** Distinct `accessManagement` values (e.g. `open`, `controlled`, `external`) across the study's datasets */
+  accessTypes: string[]
   datasetCount: number
   totalParticipants: number
   datasetIds: number[]
-  accessTypes?: string[]
+  modelCount: number
+  workspaceCount: number
 }
 
 export interface PaginationState {

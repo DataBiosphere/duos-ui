@@ -71,8 +71,8 @@ const makeDatasetTerm = (overrides: Partial<DatasetTerm> = {}): DatasetTerm => (
 } as DatasetTerm)
 
 const studies: StudyAggregation[] = [
-  { studyId: 1, studyName: 'Study 1', piName: 'PI 1', species: 'Human', phenotype: 'Condition A', dataCustodianEmail: ['custodian1@example.com'], datasetCount: 2, totalParticipants: 100, datasetIds: [101, 102] },
-  { studyId: 2, studyName: 'Study 2', piName: 'PI 2', species: 'Mouse', phenotype: 'Condition B', dataCustodianEmail: ['custodian2@example.com'], datasetCount: 1, totalParticipants: 50, datasetIds: [201] },
+  { studyId: 1, studyName: 'Study 1', piName: 'PI 1', species: 'Human', phenotype: 'Condition A', dataCustodianEmail: ['custodian1@example.com'], dataTypes: [], dataUseCodes: [], accessTypes: [], datasetCount: 2, totalParticipants: 100, datasetIds: [101, 102], modelCount: 0, workspaceCount: 0 },
+  { studyId: 2, studyName: 'Study 2', piName: 'PI 2', species: 'Mouse', phenotype: 'Condition B', dataCustodianEmail: ['custodian2@example.com'], dataTypes: [], dataUseCodes: [], accessTypes: [], datasetCount: 1, totalParticipants: 50, datasetIds: [201], modelCount: 0, workspaceCount: 0 },
 ]
 
 const datasets = [

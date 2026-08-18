@@ -188,6 +188,11 @@ export interface StudyAggregationBucket {
             species?: string
             phenotype?: string
             dataCustodianEmail?: string[]
+            dataTypes?: string[]
+            assets?: {
+              models?: PartialModelAsset[]
+              workspaces?: PartialWorkspaceAsset[]
+            }
           }
         }
       }>
@@ -201,6 +206,14 @@ export interface StudyAggregationBucket {
   }
   dataset_ids?: {
     buckets: Array<{ key: number }>
+  }
+  /** Distinct DUO data use codes (`dataUse.primary.code`) across the study's datasets */
+  data_use_codes?: {
+    buckets: Array<{ key: string }>
+  }
+  /** Distinct `accessManagement` values across the study's datasets */
+  access_management_types?: {
+    buckets: Array<{ key: string }>
   }
 }
 

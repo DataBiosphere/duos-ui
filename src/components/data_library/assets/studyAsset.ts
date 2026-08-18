@@ -67,6 +67,12 @@ export const studyAsset: AssetDefinition = {
             dataset_ids: {
               terms: { field: 'datasetId', size: 10000 },
             },
+            data_use_codes: {
+              terms: { field: 'dataUse.primary.code.keyword', size: 10 },
+            },
+            access_management_types: {
+              terms: { field: 'accessManagement.keyword', size: 10 },
+            },
           },
         },
         access_management: { terms: { field: 'accessManagement.keyword' } },
@@ -93,9 +99,14 @@ export const studyAsset: AssetDefinition = {
         species: studyData.species || '',
         phenotype: studyData.phenotype || '',
         dataCustodianEmail: studyData.dataCustodianEmail || [],
+        dataTypes: studyData.dataTypes || [],
+        dataUseCodes: bucket.data_use_codes?.buckets?.map(b => b.key) || [],
+        accessTypes: bucket.access_management_types?.buckets?.map(b => b.key) || [],
         datasetCount: bucket.dataset_count?.value || 0,
         totalParticipants: bucket.total_participants?.value || 0,
         datasetIds: bucket.dataset_ids?.buckets?.map(b => b.key) || [],
+        modelCount: studyData.assets?.models?.length || 0,
+        workspaceCount: studyData.assets?.workspaces?.length || 0,
       }
     })
 
