@@ -410,6 +410,10 @@ export interface Study {
   description: string
   dataTypes: string[]
   piName: string
+  piInstitution?: { id: number; name: string }
+  piOrcid?: string
+  piLinkedinUrl?: string
+  piWebsiteUrl?: string
   publicVisibility: boolean
   datasetIds: number[]
   datasets: Dataset[]
@@ -651,6 +655,9 @@ export interface DatasetStatisticsDar {
   nonTechRus: string
   referenceId: string
   expired: boolean
+  piName?: string
+  institutionName?: string
+  submissionDate?: number
 }
 
 /**

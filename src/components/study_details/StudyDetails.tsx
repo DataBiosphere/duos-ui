@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Link, useParams, useNavigate } from 'react-router'
 import { Typography, useMediaQuery, useTheme } from '@mui/material'
@@ -8,12 +8,22 @@ import { usePageTitle } from 'src/hooks/usePageTitle'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
 import LibraryFooter from 'src/components/data_library/LibraryFooter'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
-import { AssetType, SortOrder, SortState } from 'src/types/library'
+import {
+  AssetType,
+  ClinicalTrialAsset,
+  FundingResourceAsset,
+  IntellectualPropertyAsset,
+  ModelAsset,
+  PresentationAsset,
+  SortOrder,
+  SortState,
+  WorkspaceAsset,
+} from 'src/types/library'
 import {
   useFrequentlyRequestedWithStudies,
+  usePiDetails,
   useSimilarStudies,
   useStudyClinicalTrials,
-  useStudyDarTrend,
   useStudyDatasets,
   useStudyExportableDatasets,
   useStudyFundingResources,
@@ -26,13 +36,14 @@ import { TocProvider, TableOfContents } from 'src/components/study_details/Table
 import StudyPageSection from 'src/components/study_details/StudyPageSection'
 import StudySidebar from 'src/components/study_details/StudySidebar'
 import StudyCommentsSection from 'src/components/study_details/StudyCommentsSection'
-import StudyLogoUpload from 'src/components/study_details/StudyLogoUpload'
 import StudyAssetCountBadges from 'src/components/study_details/StudyAssetCountBadges'
 import StudyTitleBadges from 'src/components/study_details/StudyTitleBadges'
 import StudyInfoTable from 'src/components/study_details/StudyInfoTable'
+import PiExternalProfileIcons from 'src/components/study_details/PiExternalProfileIcons'
 import StudyRecommendationCarousel from 'src/components/study_details/StudyRecommendationCarousel'
-import StudyPastDarRequests from 'src/components/study_details/StudyPastDarRequests'
-import DarTrendChart from 'src/components/study_details/DarTrendChart'
+import StudyDarHistory from 'src/components/study_details/StudyDarHistory'
+import StudySecondaryResearchOutputs from 'src/components/study_details/StudySecondaryResearchOutputs'
+import StudyPublicationCards from 'src/components/study_details/StudyPublicationCards'
 import StudyAssetTable from 'src/components/study_details/StudyAssetTable'
 import { makeModelColumns } from 'src/components/data_library/columns/modelColumns'
 import { makeWorkspaceColumns } from 'src/components/data_library/columns/workspaceColumns'
@@ -40,14 +51,6 @@ import { makePresentationColumns } from 'src/components/data_library/columns/pre
 import { makeClinicalTrialColumns } from 'src/components/data_library/columns/clinicalTrialColumns'
 import { makeIntellectualPropertyColumns } from 'src/components/data_library/columns/intellectualPropertyColumns'
 import { makeFundingResourceColumns } from 'src/components/data_library/columns/fundingResourceColumns'
-import {
-  ClinicalTrialAsset,
-  FundingResourceAsset,
-  IntellectualPropertyAsset,
-  ModelAsset,
-  PresentationAsset,
-  WorkspaceAsset,
-} from 'src/types/library'
 
 const INITIAL_PAGINATION = { page: 0, pageSize: 25 }
 const EMPTY_PAGE = {
@@ -82,13 +85,13 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const study = data.study
   const participantCount = data.participantCount
   const { data: exportableDatasets } = useStudyExportableDatasets(studyId, datasets)
+  const { data: piDetails } = usePiDetails(studyId)
   const models = useStudyModels(studyId)
   const workspaces = useStudyWorkspaces(studyId)
   const presentations = useStudyPresentations(studyId)
   const clinicalTrials = useStudyClinicalTrials(studyId)
   const intellectualProperty = useStudyIntellectualProperty(studyId)
   const fundingResources = useStudyFundingResources(studyId)
-  const { data: darTrend = [] } = useStudyDarTrend(studyId)
   const similarStudies = useSimilarStudies(studyId)
   const frequentlyRequestedWith = useFrequentlyRequestedWithStudies(studyId)
   const selectedStudyIds = selectedDatasets.length > 0 && study
@@ -98,6 +101,18 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const hasSelectableDatasets = datasets.some(dataset => datasetAsset.isRowSelectable(dataset))
   const theme = useTheme()
   const isNarrowViewport = useMediaQuery(theme.breakpoints.down('md'))
+  // Header row + one row per dataset (up to a full page) + pagination footer, so a study with
+  // few datasets doesn't reserve a full page's worth of empty grid space.
+  const datasetGridHeight = 56 + Math.max(datasets.length, 1) * 52 + 56
+
+  const hasInitializedSelection = useRef(false)
+  useEffect(() => {
+    if (hasInitializedSelection.current || loading || datasets.length === 0) return
+    hasInitializedSelection.current = true
+    setSelectedDatasets(
+      datasets.filter(dataset => datasetAsset.isRowSelectable(dataset)).map(dataset => dataset.datasetId),
+    )
+  }, [loading, datasets])
 
   return (
     <TocProvider>
@@ -117,21 +132,16 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             Back to library
           </Typography>
           <StudyPageSection id="overview" heading="Overview" style={{ paddingTop: 20 }}>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-              <StudyLogoUpload studyId={studyId} />
-              <div>
-                <Typography variant="body2" color="text.secondary">
-                  <Link to={`/DUOS-S${study?.studyId ?? studyId}`}>
-                    DUOS-S{study?.studyId ?? studyId}
-                  </Link>
-                </Typography>
-                <Typography variant="h5" sx={{ fontWeight: Theme.font.weight.semibold, pt: 1 }}>
-                  {study?.studyName}
-                </Typography>
-                <StudyTitleBadges datasets={datasets} />
-                <StudyAssetCountBadges studyId={studyId} />
-              </div>
-            </div>
+            <Typography variant="body2" color="text.secondary">
+              <Link to={`/DUOS-S${study?.studyId ?? studyId}`}>
+                DUOS-S{study?.studyId ?? studyId}
+              </Link>
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: Theme.font.weight.semibold, pt: 1 }}>
+              {study?.studyName}
+            </Typography>
+            <StudyTitleBadges datasets={datasets} />
+            <StudyAssetCountBadges studyId={studyId} />
             <Typography variant="body1" sx={{ pt: 2.5 }}>
               {study?.description}
             </Typography>
@@ -140,15 +150,27 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
                 { label: 'Participants', value: participantCount },
                 { label: 'Phenotype', value: study?.phenotype },
                 { label: 'Species', value: study?.species },
-                { label: 'PI Name', value: study?.piName },
+                {
+                  label: 'PI Name',
+                  value: study?.piName && (
+                    <>
+                      {study.piName}
+                      <PiExternalProfileIcons
+                        orcid={piDetails?.piOrcid}
+                        linkedinUrl={piDetails?.piLinkedinUrl}
+                        websiteUrl={piDetails?.piWebsiteUrl}
+                      />
+                    </>
+                  ),
+                },
+                { label: 'PI Institution', value: piDetails?.piInstitution?.name },
                 { label: 'Data Custodian', value: study?.dataCustodianEmail?.join(', ') },
               ]}
             />
           </StudyPageSection>
-          <TableOfContents />
           <StudyPageSection id="datasets" heading="Datasets">
             {errorMessage && <div role="alert">Unable to load datasets: {errorMessage}</div>}
-            <div style={{ height: 600, marginTop: errorMessage ? 20 : 0 }}>
+            <div style={{ height: datasetGridHeight, marginTop: errorMessage ? 20 : 0 }}>
               <LibraryDataGrid
                 assetType={AssetType.DATASETS}
                 data={datasets}
@@ -164,6 +186,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
               />
             </div>
           </StudyPageSection>
+          <StudyDarHistory studyId={studyId} />
           <StudyAssetTable<ModelAsset>
             id="models"
             heading="AI Models"
@@ -188,6 +211,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             columns={makePresentationColumns()}
             getRowId={row => row.presentationId}
           />
+          <StudyPublicationCards studyId={studyId} />
           <StudyAssetTable<ClinicalTrialAsset>
             id="clinical-trials"
             heading="Clinical Trials"
@@ -212,17 +236,15 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             columns={makeFundingResourceColumns()}
             getRowId={row => row.fundingId}
           />
-          <StudyPageSection id="dar-trend" heading="Data Access Request Trend">
-            <DarTrendChart trend={darTrend} />
-          </StudyPageSection>
+          <StudySecondaryResearchOutputs studyId={studyId} />
           <StudyRecommendationCarousel
             id="frequently-requested-with"
-            heading="Frequently Requested With"
+            heading="Studies often Requested with this Study"
             recommendations={frequentlyRequestedWith.data}
           />
           <StudyRecommendationCarousel
             id="similar-studies"
-            heading="You may also be interested in"
+            heading="Recommended Studies based on Data Type"
             recommendations={similarStudies.data}
           />
           <StudyPageSection id="comments" heading="Comments & Ratings">
@@ -236,7 +258,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             onApplyForAccess={() => applyForAccess(selectedDatasets, navigate)}
             hasSelectableDatasets={hasSelectableDatasets}
           >
-            <StudyPastDarRequests studyId={studyId} />
+            <TableOfContents />
           </StudySidebar>
         )}
       </div>

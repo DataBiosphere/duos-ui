@@ -40,19 +40,11 @@ vi.mock('src/libs/ajax/StudyComments', () => ({
   },
 }))
 
-vi.mock('src/libs/ajax/StudyLogo', () => ({
-  StudyLogo: {
-    getLogoBlob: vi.fn().mockRejectedValue(new Error('no logo')),
-    uploadLogo: vi.fn(),
-    deleteLogo: vi.fn(),
-  },
-}))
-
 vi.mock('src/libs/ajax/DatasetMetrics', () => ({
   DatasetMetrics: {
     getDatasetStats: vi.fn().mockResolvedValue([]),
     getStudyStats: vi.fn().mockResolvedValue([]),
-    getDarTrend: vi.fn().mockResolvedValue([]),
+    getResearchOutputs: vi.fn().mockResolvedValue({ presentations: [], publications: [], intellectualProperties: [] }),
   },
 }))
 
@@ -71,6 +63,7 @@ vi.mock('src/libs/ajax/Study', () => ({
       modelCount: 0,
       workspaceCount: 0,
       presentationCount: 0,
+      publicationCount: 0,
       clinicalTrialCount: 0,
       intellectualPropertyCount: 0,
       fundingResourceCount: 0,
@@ -79,9 +72,11 @@ vi.mock('src/libs/ajax/Study', () => ({
     getModels: vi.fn().mockResolvedValue([]),
     getWorkspaces: vi.fn().mockResolvedValue([]),
     getPresentations: vi.fn().mockResolvedValue([]),
+    getPublications: vi.fn().mockResolvedValue([]),
     getClinicalTrials: vi.fn().mockResolvedValue([]),
     getIntellectualProperty: vi.fn().mockResolvedValue([]),
     getFundingResources: vi.fn().mockResolvedValue([]),
+    getById: vi.fn().mockResolvedValue({}),
   },
 }))
 
@@ -285,6 +280,8 @@ describe('Study details test', () => {
       datasetId: 223456,
       datasetIdentifier: 'DUOS-223456',
       datasetName: 'Study 2 Dataset',
+      // Not auto-selectable, so selection state after navigating is unambiguous
+      accessManagement: 'open',
       study: {
         ...datasets[0].study,
         studyId: 2,
@@ -299,10 +296,8 @@ describe('Study details test', () => {
       .mockResolvedValueOnce(makeSearchResponse() as never)
       .mockReturnValueOnce(nextStudyRequest as never)
 
-    const { container } = mountComponent(true)
+    mountComponent(true)
     await screen.findByText(datasets[0].datasetName)
-    const checkbox = container.querySelector('.MuiDataGrid-row[data-id="123456"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
-    await user.click(checkbox)
     expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'View study 2' }))
@@ -421,10 +416,8 @@ describe('Study details test', () => {
         ? makeSearchResponse(nextPageDatasets, 26, 6)
         : makeSearchResponse(datasets, 26, 6)) as never)
 
-    const { container } = mountComponent()
+    mountComponent()
     await screen.findByText(datasets[0].datasetName)
-    const checkbox = container.querySelector('.MuiDataGrid-row[data-id="123456"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
-    await user.click(checkbox)
     expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Go to next page' }))
@@ -432,16 +425,25 @@ describe('Study details test', () => {
     expect(screen.getByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
   })
 
-  it('selects controlled datasets, displays LibraryFooter, and applies for access', async () => {
+  it('selects controlled datasets by default, displays LibraryFooter, and applies for access', async () => {
     const user = userEvent.setup()
-    const { container } = mountComponent()
+    mountComponent()
     await screen.findByText(datasets[0].datasetName)
-    const checkbox = container.querySelector('.MuiDataGrid-row[data-id="123456"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
-    await user.click(checkbox)
     expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Apply for Access' }))
     expect(applyForAccess).toHaveBeenCalledWith([123456], expect.any(Function))
+  })
+
+  it('does not select open or externally managed datasets by default', async () => {
+    const { container } = mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    await screen.findByText(/1 dataset selected from 1 study/i)
+
+    const externalCheckbox = container.querySelector('.MuiDataGrid-row[data-id="123457"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    const openCheckbox = container.querySelector('.MuiDataGrid-row[data-id="123458"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    expect(externalCheckbox).not.toBeChecked()
+    expect(openCheckbox).not.toBeChecked()
   })
 
   it('does not allow open or externally managed datasets to be selected', async () => {

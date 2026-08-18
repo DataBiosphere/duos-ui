@@ -6,14 +6,17 @@ import {
   IntellectualPropertyAsset,
   ModelAsset,
   PresentationAsset,
+  PublicationAsset,
   WorkspaceAsset,
 } from 'src/types/library'
+import { Study as StudyModel } from 'src/types/model'
 
 export interface StudyAssetCounts {
   datasetCount: number
   modelCount: number
   workspaceCount: number
   presentationCount: number
+  publicationCount: number
   clinicalTrialCount: number
   intellectualPropertyCount: number
   fundingResourceCount: number
@@ -39,6 +42,17 @@ export const Study = {
     return res.data
   },
 
+  /**
+   * Fetches the study directly from the relational store (not the Elasticsearch-backed search
+   * index used elsewhere on the study page), for fields the index doesn't carry, e.g. PI
+   * institution/external profile links.
+   */
+  getById: async (studyId: number | string): Promise<StudyModel> => {
+    const url = `${await Config.getApiUrl()}/api/dataset/study/${studyId}`
+    const res = await fetchGet<StudyModel>(url, Config.authOpts())
+    return res.data
+  },
+
   getModels: async (studyId: number | string): Promise<ModelAsset[]> => {
     const res = await fetchGet<ModelAsset[]>(await assetsUrl(studyId, 'models'), Config.authOpts())
     return res.data
@@ -51,6 +65,11 @@ export const Study = {
 
   getPresentations: async (studyId: number | string): Promise<PresentationAsset[]> => {
     const res = await fetchGet<PresentationAsset[]>(await assetsUrl(studyId, 'presentations'), Config.authOpts())
+    return res.data
+  },
+
+  getPublications: async (studyId: number | string): Promise<PublicationAsset[]> => {
+    const res = await fetchGet<PublicationAsset[]>(await assetsUrl(studyId, 'publications'), Config.authOpts())
     return res.data
   },
 

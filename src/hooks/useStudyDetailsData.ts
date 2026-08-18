@@ -20,6 +20,15 @@ export const useStudyAssetCounts = (studyId: string) => useQuery({
   staleTime: 5 * 60 * 1000,
 })
 
+// The page's primary `study` object comes from the Elasticsearch-backed search index, which
+// doesn't carry PI institution/external profile fields. Fetch those from the relational store.
+export const usePiDetails = (studyId: string) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, 'pi-details', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => Study.getById(studyId),
+  staleTime: 5 * 60 * 1000,
+})
+
 export const useStudyModels = (studyId: string) => useQuery({
   queryKey: [STUDY_ASSETS_QUERY_KEY, 'models', studyId],
   enabled: studyId.length > 0,
@@ -38,6 +47,13 @@ export const useStudyPresentations = (studyId: string) => useQuery({
   queryKey: [STUDY_ASSETS_QUERY_KEY, 'presentations', studyId],
   enabled: studyId.length > 0,
   queryFn: () => Study.getPresentations(studyId),
+  staleTime: 5 * 60 * 1000,
+})
+
+export const useStudyPublications = (studyId: string) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, 'publications', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => Study.getPublications(studyId),
   staleTime: 5 * 60 * 1000,
 })
 
@@ -62,17 +78,17 @@ export const useStudyFundingResources = (studyId: string) => useQuery({
   staleTime: 5 * 60 * 1000,
 })
 
-export const useStudyPastDarRequests = (studyId: string) => useQuery({
-  queryKey: ['study-past-dar-requests', studyId],
+export const useStudyDarHistory = (studyId: string) => useQuery({
+  queryKey: ['study-dar-history', studyId],
   enabled: studyId.length > 0,
   queryFn: () => DatasetMetrics.getStudyStats(studyId),
   staleTime: 5 * 60 * 1000,
 })
 
-export const useStudyDarTrend = (studyId: string) => useQuery({
-  queryKey: ['study-dar-trend', studyId],
+export const useStudyResearchOutputs = (studyId: string) => useQuery({
+  queryKey: ['study-research-outputs', studyId],
   enabled: studyId.length > 0,
-  queryFn: () => DatasetMetrics.getDarTrend(studyId),
+  queryFn: () => DatasetMetrics.getResearchOutputs(studyId),
   staleTime: 5 * 60 * 1000,
 })
 
