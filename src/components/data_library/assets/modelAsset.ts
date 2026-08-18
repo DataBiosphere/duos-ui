@@ -1,8 +1,32 @@
 import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, ModelStudyAggregationResponse, QueryClause } from 'src/types/elastic'
-import { ModelAsset, PaginationState, SortState } from 'src/types/library'
+import { FilterState, ModelAsset, PaginationState, SortState } from 'src/types/library'
 import { makeModelColumns } from 'src/components/data_library/columns/modelColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+
+// The Elasticsearch clauses for these filters only decide which *studies* enter
+// the shared aggregation; every model of a qualifying study comes back, so each
+// row must be re-checked here or the grid (and the tab-count badge derived from
+// this same function) includes models that don't match the filter.
+const matchesModelFilters = (model: ModelAsset, filters?: FilterState) => {
+  if (!filters) {
+    return true
+  }
+
+  if (filters.modelFormat.length > 0 && !filters.modelFormat.includes(model.format)) {
+    return false
+  }
+
+  if (filters.modelLicense.length > 0 && !filters.modelLicense.includes(model.license)) {
+    return false
+  }
+
+  if (filters.modelCloud.length > 0 && !(model.cloud || []).some(cloud => filters.modelCloud.includes(cloud))) {
+    return false
+  }
+
+  return filters.modelTags.length === 0 || (model.tags || []).some(tag => filters.modelTags.includes(tag))
+}
 
 export const modelAsset: AssetDefinition = {
   label: { singular: 'AI Model', plural: 'AI Models' },
@@ -44,7 +68,7 @@ export const modelAsset: AssetDefinition = {
     }
   },
 
-  transformResponse(response: ElasticsearchResponse, pagination: PaginationState): LibraryPage {
+  transformResponse(response: ElasticsearchResponse, pagination: PaginationState, filters?: FilterState): LibraryPage {
     const studiesAgg = response.aggregations?.studies as ModelStudyAggregationResponse | undefined
     const buckets = studiesAgg?.buckets || []
     const models: ModelAsset[] = []
@@ -55,7 +79,7 @@ export const modelAsset: AssetDefinition = {
       for (const [modelIndex, model] of studyModels.entries()) {
         // modelId may be absent from the indexed document; fall back to a
         // composite key so every row in the DataGrid has a unique id.
-        models.push({
+        const row: ModelAsset = {
           modelId: model.modelId || `${bucket.key}-${modelIndex}`,
           studyId: bucket.key,
           studyName: studyData.studyName || '',
@@ -64,13 +88,18 @@ export const modelAsset: AssetDefinition = {
           url: model.url || '',
           format: model.format || '',
           license: model.license || '',
+          cloud: model.cloud || [],
           trainedOnDatasets: model.trainedOnDatasets || [],
           maintainer: {
             name: model.maintainer?.name || '',
             email: model.maintainer?.email || '',
           },
           tags: model.tags || [],
-        })
+        }
+
+        if (matchesModelFilters(row, filters)) {
+          models.push(row)
+        }
       }
     }
 

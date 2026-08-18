@@ -4,16 +4,33 @@ import { FilterState, PaginationState, PublicationAsset, SortState } from 'src/t
 import { makePublicationColumns } from 'src/components/data_library/columns/publicationColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 
+// The Elasticsearch clauses for these filters only decide which *studies* enter
+// the shared aggregation; every publication of a qualifying study comes back,
+// so each row must be re-checked here or the grid (and the tab-count badge
+// derived from this same function) includes publications that don't match.
 const matchesPublicationFilters = (publication: PublicationAsset, filters?: FilterState) => {
   if (!filters) {
     return true
   }
 
-  if (filters.publicationsDatasetsCited === undefined) {
-    return true
+  if (filters.publicationsDatasetsCited !== undefined && publication.citation !== filters.publicationsDatasetsCited) {
+    return false
   }
 
-  return publication.citation === filters.publicationsDatasetsCited
+  if (filters.publicationJournal.length > 0 && !filters.publicationJournal.includes(publication.journal || '')) {
+    return false
+  }
+
+  if (filters.publicationAccess.length > 0 && !filters.publicationAccess.includes(publication.access || '')) {
+    return false
+  }
+
+  const publishedDate = publication.publishedDate || ''
+  const { after, before } = filters.publicationPublishedDate
+  if (after && publishedDate < after) {
+    return false
+  }
+  return !(before && publishedDate > before)
 }
 
 export const publicationAsset: AssetDefinition = {

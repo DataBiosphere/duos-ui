@@ -31,8 +31,14 @@ const CHECKBOX_FILTER_KEYS = [
   'dataUseModifiers',
   'dataType',
   'dac',
+  'modelFormat',
+  'modelLicense',
+  'modelCloud',
+  'modelTags',
   'workspaceTools',
   'workspacePlatform',
+  'workspaceCloud',
+  'workspaceAccess',
   'clinicalTrialStatus',
   'clinicalTrialPhase',
   'clinicalTrialInterventionType',
@@ -41,6 +47,14 @@ const CHECKBOX_FILTER_KEYS = [
   'biospecimenDataUse',
   'biospecimenPostMortemIntervalUnit',
   'soApprovalModel',
+  'ipType',
+  'ipStatus',
+  'presentationEvent',
+  'presentationFormat',
+  'presentationAccess',
+  'publicationJournal',
+  'publicationAccess',
+  'fundingFunderName',
 ] as const
 
 type CheckboxFilterKey = (typeof CHECKBOX_FILTER_KEYS)[number]
@@ -260,7 +274,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   )
 
   const renderDateSection = (
-    key: 'clinicalTrialDates' | 'biospecimenCollectionDate' | 'ipFiledDate' | 'fundingDate',
+    key: 'clinicalTrialDates' | 'biospecimenCollectionDate' | 'ipFiledDate' | 'fundingDate' | 'presentationDate' | 'publicationPublishedDate',
     label: string,
   ) => {
     const dateFieldsBySection = {
@@ -279,6 +293,14 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
       fundingDate: [
         { stateKey: 'startDate', label: 'Start Date' },
         { stateKey: 'endDate', label: 'End Date' },
+      ],
+      presentationDate: [
+        { stateKey: 'before', label: 'Presented Before' },
+        { stateKey: 'after', label: 'Presented After' },
+      ],
+      publicationPublishedDate: [
+        { stateKey: 'before', label: 'Published Before' },
+        { stateKey: 'after', label: 'Published After' },
       ],
     } as const
 
@@ -476,6 +498,8 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
                   || section.key === 'biospecimenCollectionDate'
                   || section.key === 'ipFiledDate'
                   || section.key === 'fundingDate'
+                  || section.key === 'presentationDate'
+                  || section.key === 'publicationPublishedDate'
                 ) {
                   return renderDateSection(section.key, section.label)
                 }

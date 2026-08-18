@@ -19,7 +19,11 @@ const matchesFundingResourceFilters = (funding: FundingResourceAsset, filters?: 
   if (startDate && (!funding.startDate || funding.startDate < startDate)) {
     return false
   }
-  return !(endDate && (!funding.endDate || funding.endDate > endDate))
+  if (endDate && (!funding.endDate || funding.endDate > endDate)) {
+    return false
+  }
+
+  return filters.fundingFunderName.length === 0 || filters.fundingFunderName.includes(funding.funderName)
 }
 
 export const fundingResourceAsset: AssetDefinition = {

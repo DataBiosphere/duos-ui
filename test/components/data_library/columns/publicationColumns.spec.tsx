@@ -137,6 +137,18 @@ describe('makePublicationColumns — DOI column', () => {
   })
 })
 
+describe('makePublicationColumns — Access column', () => {
+  it('renders the access text', () => {
+    renderCell('access', 'open')
+    expect(screen.getByText('open')).toBeInTheDocument()
+  })
+
+  it('renders gracefully when access is empty', () => {
+    const { container } = renderCell('access', '')
+    expect(container.textContent?.trim()).toBe('')
+  })
+})
+
 describe('makePublicationColumns — Authors column', () => {
   it('renders comma-separated author names', () => {
     renderCell('authorNames', ['Alice Smith', 'Bob Jones', 'Carol White'])

@@ -17,7 +17,15 @@ const matchesIntellectualPropertyFilters = (ip: IntellectualPropertyAsset, filte
   if (filters.ipFiledDate.after && filingDate < filters.ipFiledDate.after) {
     return false
   }
-  return !(filters.ipFiledDate.before && filingDate > filters.ipFiledDate.before)
+  if (filters.ipFiledDate.before && filingDate > filters.ipFiledDate.before) {
+    return false
+  }
+
+  if (filters.ipType.length > 0 && !filters.ipType.includes(ip.type)) {
+    return false
+  }
+
+  return filters.ipStatus.length === 0 || filters.ipStatus.includes(ip.status)
 }
 
 export const intellectualPropertyAsset: AssetDefinition = {

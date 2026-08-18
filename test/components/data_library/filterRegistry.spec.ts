@@ -15,8 +15,14 @@ const availableFilters: AvailableFilters = {
   dataUseModifiers: [],
   dataType: [],
   dac: [],
+  modelFormat: [],
+  modelLicense: [],
+  modelCloud: [],
+  modelTags: [],
   workspaceTools: [],
   workspacePlatform: [],
+  workspaceCloud: [],
+  workspaceAccess: [],
   clinicalTrialStatus: [],
   clinicalTrialPhase: [],
   clinicalTrialInterventionType: [],
@@ -25,6 +31,14 @@ const availableFilters: AvailableFilters = {
   biospecimenDataUse: [],
   biospecimenPostMortemIntervalUnit: [],
   soApprovalModel: [],
+  ipType: [],
+  ipStatus: [],
+  presentationEvent: [],
+  presentationFormat: [],
+  presentationAccess: [],
+  publicationJournal: [],
+  publicationAccess: [],
+  fundingFunderName: [],
   datasetsCited: [],
   publicationsDatasetsCited: [],
   instantApproval: [],
@@ -43,17 +57,28 @@ describe('filterRegistry', () => {
 
   it('returns asset-specific visible filters', () => {
     const publicationFilters = getFilterSectionsForAsset(AssetType.PUBLICATIONS, availableFilters)
-    expect(publicationFilters.map(section => section.key)).toEqual(['publicationsDatasetsCited'])
+    expect(publicationFilters.map(section => section.key)).toEqual([
+      'publicationsDatasetsCited',
+      'publicationJournal',
+      'publicationAccess',
+      'publicationPublishedDate',
+    ])
   })
 
-  it('returns no visible filters for models', () => {
+  it('returns the model-specific filters', () => {
     const modelFilters = getFilterSectionsForAsset(AssetType.MODELS, availableFilters)
-    expect(modelFilters.map(section => section.key)).toEqual([])
+    expect(modelFilters.map(section => section.key)).toEqual(['modelFormat', 'modelLicense', 'modelCloud', 'modelTags'])
   })
 
-  it('returns presentation-specific datasets cited filter', () => {
+  it('returns presentation-specific filters', () => {
     const presentationFilters = getFilterSectionsForAsset(AssetType.PRESENTATIONS, availableFilters)
-    expect(presentationFilters.map(section => section.key)).toEqual(['datasetsCited'])
+    expect(presentationFilters.map(section => section.key)).toEqual([
+      'datasetsCited',
+      'presentationEvent',
+      'presentationFormat',
+      'presentationAccess',
+      'presentationDate',
+    ])
   })
 
   it('builds clauses for every active filter regardless of tab so rules combine', () => {
@@ -144,7 +169,8 @@ describe('filterRegistry', () => {
     }
 
     it('lists active filters not shown on the current tab as removable chips', () => {
-      // Models has no visible filters, so every active filter is "external".
+      // None of accessManagement/dataType/participantCount/datasetsCited are among
+      // Models' own visible filters, so all of them are "external" here.
       const chips = getExternalActiveFilters(AssetType.MODELS, filters, labelledFilters)
       const keys = chips.map(chip => chip.key)
 

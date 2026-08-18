@@ -10,8 +10,14 @@ type ArrayFilterParamConfig = {
     | 'dataUseModifiers'
     | 'dataType'
     | 'dac'
+    | 'modelFormat'
+    | 'modelLicense'
+    | 'modelCloud'
+    | 'modelTags'
     | 'workspaceTools'
     | 'workspacePlatform'
+    | 'workspaceCloud'
+    | 'workspaceAccess'
     | 'clinicalTrialStatus'
     | 'clinicalTrialPhase'
     | 'clinicalTrialInterventionType'
@@ -20,6 +26,14 @@ type ArrayFilterParamConfig = {
     | 'biospecimenDataUse'
     | 'biospecimenPostMortemIntervalUnit'
     | 'soApprovalModel'
+    | 'ipType'
+    | 'ipStatus'
+    | 'presentationEvent'
+    | 'presentationFormat'
+    | 'presentationAccess'
+    | 'publicationJournal'
+    | 'publicationAccess'
+    | 'fundingFunderName'
   >
   param: string
 }
@@ -33,7 +47,7 @@ type RangeFilterParamConfig = {
 }
 
 type DateFilterParamConfig = {
-  key: keyof Pick<FilterState, 'clinicalTrialDates' | 'biospecimenCollectionDate' | 'ipFiledDate' | 'fundingDate'>
+  key: keyof Pick<FilterState, 'clinicalTrialDates' | 'biospecimenCollectionDate' | 'ipFiledDate' | 'fundingDate' | 'presentationDate' | 'publicationPublishedDate'>
   startParam: string
   endParam: string
   startKey?: string
@@ -46,8 +60,14 @@ const ARRAY_FILTER_PARAM_CONFIG: ArrayFilterParamConfig[] = [
   { key: 'dataUseModifiers', param: 'dataUseModifiers' },
   { key: 'dataType', param: 'dataType' },
   { key: 'dac', param: 'dac' },
+  { key: 'modelFormat', param: 'modelFormat' },
+  { key: 'modelLicense', param: 'modelLicense' },
+  { key: 'modelCloud', param: 'modelCloud' },
+  { key: 'modelTags', param: 'modelTags' },
   { key: 'workspaceTools', param: 'workspaceTools' },
   { key: 'workspacePlatform', param: 'workspacePlatform' },
+  { key: 'workspaceCloud', param: 'workspaceCloud' },
+  { key: 'workspaceAccess', param: 'workspaceAccess' },
   { key: 'clinicalTrialStatus', param: 'clinicalTrialStatus' },
   { key: 'clinicalTrialPhase', param: 'clinicalTrialPhase' },
   { key: 'clinicalTrialInterventionType', param: 'clinicalTrialInterventionType' },
@@ -56,6 +76,14 @@ const ARRAY_FILTER_PARAM_CONFIG: ArrayFilterParamConfig[] = [
   { key: 'biospecimenDataUse', param: 'biospecimenDataUse' },
   { key: 'biospecimenPostMortemIntervalUnit', param: 'biospecimenPostMortemIntervalUnit' },
   { key: 'soApprovalModel', param: 'soApprovalModel' },
+  { key: 'ipType', param: 'ipType' },
+  { key: 'ipStatus', param: 'ipStatus' },
+  { key: 'presentationEvent', param: 'presentationEvent' },
+  { key: 'presentationFormat', param: 'presentationFormat' },
+  { key: 'presentationAccess', param: 'presentationAccess' },
+  { key: 'publicationJournal', param: 'publicationJournal' },
+  { key: 'publicationAccess', param: 'publicationAccess' },
+  { key: 'fundingFunderName', param: 'fundingFunderName' },
 ]
 
 const RANGE_FILTER_PARAM_CONFIG: RangeFilterParamConfig[] = [
@@ -74,6 +102,8 @@ const DATE_FILTER_PARAM_CONFIG: DateFilterParamConfig[] = [
   { key: 'biospecimenCollectionDate', startParam: 'biospecimenCollectedAfter', endParam: 'biospecimenCollectedBefore', startKey: 'after', endKey: 'before' },
   { key: 'ipFiledDate', startParam: 'ipFiledAfter', endParam: 'ipFiledBefore', startKey: 'after', endKey: 'before' },
   { key: 'fundingDate', startParam: 'fundingStartDate', endParam: 'fundingEndDate' },
+  { key: 'presentationDate', startParam: 'presentedAfter', endParam: 'presentedBefore', startKey: 'after', endKey: 'before' },
+  { key: 'publicationPublishedDate', startParam: 'publishedAfter', endParam: 'publishedBefore', startKey: 'after', endKey: 'before' },
 ]
 
 // Parse an integer URL param defensively: a malformed value (e.g. ?page=abc)

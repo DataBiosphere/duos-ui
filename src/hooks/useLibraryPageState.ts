@@ -3,7 +3,7 @@ import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
 import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { computeTabCounts, STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
-import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, SortOrder } from 'src/types/library'
+import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, PaginationState, SortOrder } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
 import {
   EMPTY_FILTERS,
@@ -158,15 +158,30 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
         .sort((a, b) => a.localeCompare(b))
         .map(value => ({ value, label: value }))
 
-    const workspaceItems = urlState.tab === AssetType.WORKSPACES
-      ? data?.items as Array<{ tools?: string[], platform?: string }>
-      : []
-    const clinicalTrialItems = urlState.tab === AssetType.CLINICAL_TRIALS
-      ? data?.items as Array<{ registry?: string }>
-      : []
-    const biospecimenItems = urlState.tab === AssetType.BIOSPECIMENS
-      ? data?.items as Array<{ optionalDataUse?: string }>
-      : []
+    // Every study-asset tab's option lists are derived from the *entire* matching
+    // corpus, not just the currently active tab's current page: `tabCountsResponse`
+    // already carries every matching study (via STUDIES_AGG's `terms.size: 10000`),
+    // so re-running an asset's own `transformResponse` with an unbounded page size
+    // yields its full flattened item list regardless of which tab the user is
+    // viewing. This mirrors the precedent in `libraryCounts.ts`, which already
+    // calls `transformResponse` a second time, with different pagination, purely to
+    // read `.total` rather than to render rows. Without this, an option list would
+    // only reflect whichever page happened to be on screen, and would go empty the
+    // moment the user switched to a different tab.
+    const FULL_CORPUS_PAGINATION: PaginationState = { page: 0, pageSize: Number.MAX_SAFE_INTEGER }
+    const fullCorpusItems = <T>(assetType: AssetType): T[] =>
+      (tabCountsResponse
+        ? assetRegistry[assetType].transformResponse(tabCountsResponse, FULL_CORPUS_PAGINATION, urlState.filters).items
+        : []) as T[]
+
+    const modelItems = fullCorpusItems<{ format?: string, license?: string, cloud?: string[], tags?: string[] }>(AssetType.MODELS)
+    const workspaceItems = fullCorpusItems<{ tools?: string[], platform?: string, cloud?: string[], access?: string }>(AssetType.WORKSPACES)
+    const clinicalTrialItems = fullCorpusItems<{ registry?: string }>(AssetType.CLINICAL_TRIALS)
+    const biospecimenItems = fullCorpusItems<{ optionalDataUse?: string }>(AssetType.BIOSPECIMENS)
+    const intellectualPropertyItems = fullCorpusItems<{ type?: string, status?: string }>(AssetType.INTELLECTUAL_PROPERTY)
+    const presentationItems = fullCorpusItems<{ event?: string, format?: string, access?: string }>(AssetType.PRESENTATIONS)
+    const publicationItems = fullCorpusItems<{ journal?: string, access?: string }>(AssetType.PUBLICATIONS)
+    const fundingResourceItems = fullCorpusItems<{ funderName?: string }>(AssetType.FUNDING_RESOURCES)
 
     return {
       accessManagement: [
@@ -188,8 +203,14 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
       dac: dacAgg
         .map(bucket => ({ value: bucket.key as string, label: bucket.key as string, count: bucket.doc_count }))
         .sort((a, b) => a.label.localeCompare(b.label)),
+      modelFormat: uniqueValues(modelItems.map(item => item.format)),
+      modelLicense: uniqueValues(modelItems.map(item => item.license)),
+      modelCloud: uniqueValues(modelItems.flatMap(item => item.cloud || [])),
+      modelTags: uniqueValues(modelItems.flatMap(item => item.tags || [])),
       workspaceTools: uniqueValues(workspaceItems.flatMap(item => item.tools || [])),
       workspacePlatform: uniqueValues(workspaceItems.map(item => item.platform)),
+      workspaceCloud: uniqueValues(workspaceItems.flatMap(item => item.cloud || [])),
+      workspaceAccess: uniqueValues(workspaceItems.map(item => item.access)),
       clinicalTrialStatus: clinicalTrialStatusSelectOptions.map(o => ({ value: o.key, label: o.displayText })),
       clinicalTrialPhase: clinicalTrialPhaseSelectOptions.map(o => ({ value: o.key, label: o.displayText })),
       clinicalTrialInterventionType: clinicalTrialInterventionSelectOptions.map(o => ({ value: o.key, label: o.displayText })),
@@ -201,6 +222,14 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
         { value: 'PER_REQUEST', label: 'Per-Request Approval' },
         { value: 'PRE_AUTHORIZED', label: 'Pre-Authorized Researchers' },
       ],
+      ipType: uniqueValues(intellectualPropertyItems.map(item => item.type)),
+      ipStatus: uniqueValues(intellectualPropertyItems.map(item => item.status)),
+      presentationEvent: uniqueValues(presentationItems.map(item => item.event)),
+      presentationFormat: uniqueValues(presentationItems.map(item => item.format)),
+      presentationAccess: uniqueValues(presentationItems.map(item => item.access)),
+      publicationJournal: uniqueValues(publicationItems.map(item => item.journal)),
+      publicationAccess: uniqueValues(publicationItems.map(item => item.access)),
+      fundingFunderName: uniqueValues(fundingResourceItems.map(item => item.funderName)),
       datasetsCited: [
         { value: 'true', label: 'Yes' },
         { value: 'false', label: 'No' },
@@ -216,7 +245,7 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
       biospecimenPostMortemIntervalRange: { min: 0, max: 1000000 },
       participantCountRange: { min: 0, max: 100000 },
     }
-  }, [metadata, data?.items, urlState.tab])
+  }, [metadata, tabCountsResponse, urlState.filters])
 
   const filterSections = useMemo(
     () => getFilterSectionsForAsset(urlState.tab, availableFilters),

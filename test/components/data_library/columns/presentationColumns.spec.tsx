@@ -131,6 +131,18 @@ describe('makePresentationColumns — Format column', () => {
   })
 })
 
+describe('makePresentationColumns — Access column', () => {
+  it('renders the access text', () => {
+    renderCell('access', 'open')
+    expect(screen.getByText('open')).toBeInTheDocument()
+  })
+
+  it('renders gracefully when access is empty', () => {
+    const { container } = renderCell('access', '')
+    expect(container.textContent?.trim()).toBe('')
+  })
+})
+
 describe('makePresentationColumns — Tags column', () => {
   it('renders nothing when tags array is empty', () => {
     const col = makePresentationColumns().find(c => c.field === 'tags')!

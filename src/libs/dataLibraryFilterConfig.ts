@@ -17,10 +17,10 @@ export const assetFilterRegistry: Record<AssetType, AssetFilterConfig> = {
     ],
   },
   [AssetType.MODELS]: {
-    visibleFilters: [],
+    visibleFilters: ['modelFormat', 'modelLicense', 'modelCloud', 'modelTags'],
   },
   [AssetType.WORKSPACES]: {
-    visibleFilters: ['workspaceTools', 'workspacePlatform'],
+    visibleFilters: ['workspaceTools', 'workspacePlatform', 'workspaceCloud', 'workspaceAccess'],
   },
   [AssetType.CLINICAL_TRIALS]: {
     visibleFilters: [
@@ -42,15 +42,15 @@ export const assetFilterRegistry: Record<AssetType, AssetFilterConfig> = {
     ],
   },
   [AssetType.PUBLICATIONS]: {
-    visibleFilters: ['publicationsDatasetsCited'],
+    visibleFilters: ['publicationsDatasetsCited', 'publicationJournal', 'publicationAccess', 'publicationPublishedDate'],
   },
   [AssetType.PRESENTATIONS]: {
-    visibleFilters: ['datasetsCited'],
+    visibleFilters: ['datasetsCited', 'presentationEvent', 'presentationFormat', 'presentationAccess', 'presentationDate'],
   },
   [AssetType.INTELLECTUAL_PROPERTY]: {
-    visibleFilters: ['ipFiledDate'],
+    visibleFilters: ['ipType', 'ipStatus', 'ipFiledDate'],
   },
   [AssetType.FUNDING_RESOURCES]: {
-    visibleFilters: ['fundingDate'],
+    visibleFilters: ['fundingFunderName', 'fundingDate'],
   },
 }

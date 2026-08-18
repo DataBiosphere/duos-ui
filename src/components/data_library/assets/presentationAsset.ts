@@ -4,16 +4,37 @@ import { FilterState, PaginationState, PresentationAsset, SortState } from 'src/
 import { makePresentationColumns } from 'src/components/data_library/columns/presentationColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 
+// The Elasticsearch clauses for these filters only decide which *studies* enter
+// the shared aggregation; every presentation of a qualifying study comes back,
+// so each row must be re-checked here or the grid (and the tab-count badge
+// derived from this same function) includes presentations that don't match.
 const matchesPresentationFilters = (presentation: PresentationAsset, filters?: FilterState) => {
   if (!filters) {
     return true
   }
 
-  if (filters.datasetsCited === undefined) {
-    return true
+  if (filters.datasetsCited !== undefined && presentation.citation !== filters.datasetsCited) {
+    return false
   }
 
-  return presentation.citation === filters.datasetsCited
+  if (filters.presentationEvent.length > 0 && !filters.presentationEvent.includes(presentation.event || '')) {
+    return false
+  }
+
+  if (filters.presentationFormat.length > 0 && !filters.presentationFormat.includes(presentation.format || '')) {
+    return false
+  }
+
+  if (filters.presentationAccess.length > 0 && !filters.presentationAccess.includes(presentation.access || '')) {
+    return false
+  }
+
+  const date = presentation.date || ''
+  const { after, before } = filters.presentationDate
+  if (after && date < after) {
+    return false
+  }
+  return !(before && date > before)
 }
 
 export const presentationAsset: AssetDefinition = {

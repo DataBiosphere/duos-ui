@@ -29,7 +29,15 @@ const matchesWorkspaceFilters = (workspace: WorkspaceAsset, filters?: FilterStat
     return false
   }
 
-  return includesIgnoreCase(workspace.platform, filters.workspacePlatform)
+  if (!includesIgnoreCase(workspace.platform, filters.workspacePlatform)) {
+    return false
+  }
+
+  if (filters.workspaceCloud.length > 0 && !(workspace.cloud || []).some(cloud => filters.workspaceCloud.includes(cloud))) {
+    return false
+  }
+
+  return filters.workspaceAccess.length === 0 || filters.workspaceAccess.includes(workspace.access || '')
 }
 
 export const workspaceAsset: AssetDefinition = {
@@ -90,6 +98,7 @@ export const workspaceAsset: AssetDefinition = {
           url: workspace.url || '',
           description: workspace.description || '',
           tools: workspace.tools || [],
+          cloud: workspace.cloud || [],
           access: workspace.access || '',
           tags: workspace.tags || [],
         }

@@ -255,3 +255,80 @@ describe('useLibraryPageState — data use modifier options', () => {
     expect(result.current.availableFilters.dataUseModifiers).toEqual([])
   })
 })
+
+describe('useLibraryPageState — dynamic filter option derivation', () => {
+  // A single study bucket carrying two models and two workspaces, so option
+  // lists for both asset types can be derived from one shared response.
+  const bucket = {
+    key: 1,
+    study_details: {
+      hits: {
+        hits: [{
+          _source: {
+            study: {
+              studyId: 1,
+              studyName: 'Study 1',
+              assets: {
+                models: [
+                  { modelId: 'm1', format: 'ONNX', license: 'MIT', cloud: ['AWS'], tags: ['vision'] },
+                  { modelId: 'm2', format: 'PyTorch', license: 'Apache-2.0', cloud: ['GCP'], tags: ['nlp'] },
+                ],
+                workspaces: [
+                  { workspaceId: 'w1', tools: ['Jupyter'], platform: 'Terra', cloud: ['AWS'], access: 'open' },
+                ],
+              },
+            },
+          },
+        }],
+      },
+    },
+  }
+
+  const responseWithBucket = {
+    aggregations: {
+      total_studies: { value: 1 },
+      datasets_count: { doc_count: 0 },
+      studies: { buckets: [bucket] },
+    },
+  }
+
+  beforeEach(() => {
+    vi.mocked(useLibraryTabCounts).mockReturnValue({
+      data: responseWithBucket,
+      isFetching: false,
+      error: null,
+    } as unknown as ReturnType<typeof useLibraryTabCounts>)
+  })
+
+  it('populates an asset-specific option list even while a different tab is active', () => {
+    // The active tab is Studies, not Models, yet the shared response already
+    // carries every model — so its option list must not go empty just because
+    // Models is not the tab currently on screen.
+    setup(AssetType.STUDIES)
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['Terra'])
+  })
+
+  it('derives options from the full corpus, not just the current page', () => {
+    vi.mocked(useLibraryUrlState).mockReturnValue([
+      { library: 'duos', tab: AssetType.MODELS, filters: EMPTY_FILTERS, query: '', page: 0, pageSize: 1, hideFilters: false },
+      updateUrlState,
+    ] as unknown as ReturnType<typeof useLibraryUrlState>)
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    // pageSize: 1 means the grid itself only renders one model, but both
+    // formats must still appear as filter options.
+    expect(result.current.data?.items).toHaveLength(1)
+    expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+  })
+
+  it('derives model and workspace cloud options independently by asset', () => {
+    setup(AssetType.MODELS)
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.modelCloud.map(o => o.value)).toEqual(['AWS', 'GCP'])
+    expect(result.current.availableFilters.workspaceCloud.map(o => o.value)).toEqual(['AWS'])
+  })
+})

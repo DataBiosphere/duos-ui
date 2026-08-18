@@ -300,3 +300,71 @@ describe('useLibraryUrlState — datasets-cited boolean params', () => {
     expect(search).not.toContain('publicationsDatasetsCited')
   })
 })
+
+describe('useLibraryUrlState — new asset filter params', () => {
+  it('parses every new array filter key from its own param, defaulting the rest to empty arrays', () => {
+    render(
+      <MemoryRouter initialEntries={['/?modelFormat=ONNX,PyTorch&workspaceCloud=AWS&ipType=Patent&presentationEvent=ASHG&publicationJournal=Nature&fundingFunderName=NIH']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.modelFormat).toEqual(['ONNX', 'PyTorch'])
+    expect(filters.modelLicense).toEqual([])
+    expect(filters.workspaceCloud).toEqual(['AWS'])
+    expect(filters.ipType).toEqual(['Patent'])
+    expect(filters.presentationEvent).toEqual(['ASHG'])
+    expect(filters.publicationJournal).toEqual(['Nature'])
+    expect(filters.fundingFunderName).toEqual(['NIH'])
+  })
+
+  it('parses the presentationDate and publicationPublishedDate ranges from their own params', () => {
+    render(
+      <MemoryRouter initialEntries={['/?presentedAfter=2020-01-01&presentedBefore=2023-12-31&publishedAfter=2019-01-01&publishedBefore=2022-06-30']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.presentationDate).toEqual({ after: '2020-01-01', before: '2023-12-31' })
+    expect(filters.publicationPublishedDate).toEqual({ after: '2019-01-01', before: '2022-06-30' })
+  })
+
+  it('round-trips a new array filter and a new date filter through updateState', () => {
+    const NewFilterHarness = () => {
+      const [state, updateState] = useLibraryUrlState()
+      const location = useLocation()
+      return (
+        <div>
+          <div id="filters">{JSON.stringify(state.filters)}</div>
+          <div id="search">{location.search}</div>
+          <button
+            onClick={() => updateState({
+              filters: {
+                ...EMPTY_FILTERS,
+                modelFormat: ['ONNX'],
+                presentationDate: { after: '2020-01-01' },
+              },
+            })}
+          >Update New Filters
+          </button>
+        </div>
+      )
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <NewFilterHarness />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByText('Update New Filters'))
+
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.modelFormat).toEqual(['ONNX'])
+    expect(filters.presentationDate).toEqual({ after: '2020-01-01' })
+
+    const search = document.getElementById('search')!.textContent!
+    expect(search).toContain('modelFormat=ONNX')
+    expect(search).toContain('presentedAfter=2020-01-01')
+  })
+})

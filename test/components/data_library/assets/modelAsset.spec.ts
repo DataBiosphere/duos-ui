@@ -9,6 +9,7 @@ import {
   ModelStudyAggregationBucket,
   QueryClause,
 } from 'src/types/elastic'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 const pagination: PaginationState = { page: 0, pageSize: 25 }
 
@@ -19,6 +20,7 @@ const makeBucket = (
     name?: string
     format?: string
     license?: string
+    cloud?: string[]
     tags?: string[]
     url?: string
     maintainer?: { name: string, email: string }
@@ -41,6 +43,7 @@ const makeBucket = (
                   name: m.name,
                   format: m.format,
                   license: m.license,
+                  cloud: m.cloud,
                   tags: m.tags,
                   url: m.url,
                   maintainer: m.maintainer,
@@ -234,6 +237,89 @@ describe('modelAsset — transformResponse', () => {
     expect(result.items).toHaveLength(0)
     expect(result.total).toBe(0)
   })
+
+  it('maps the cloud field onto the row', () => {
+    const response = makeResponse([makeBucket(1, [{ modelId: 'm1', cloud: ['AWS', 'GCP'] }])])
+    const row = modelAsset.transformResponse(response, pagination).items[0] as ModelAsset
+    expect(row.cloud).toEqual(['AWS', 'GCP'])
+  })
+
+  // The ES clauses for these filters only decide which studies are aggregated;
+  // every model of a qualifying study comes back, so transformResponse must
+  // re-check each row or the grid and count badge include non-matching rows.
+  it('returns only models matching the format filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { modelId: 'm1', format: 'ONNX' },
+        { modelId: 'm2', format: 'PyTorch' },
+      ]),
+    ])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as ModelAsset).modelId).toBe('m1')
+  })
+
+  it('returns only models matching the license filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { modelId: 'm1', license: 'Apache-2.0' },
+        { modelId: 'm2', license: 'MIT' },
+      ]),
+    ])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelLicense: ['MIT'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+  })
+
+  it('returns only models matching the cloud filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { modelId: 'm1', cloud: ['AWS'] },
+        { modelId: 'm2', cloud: ['GCP'] },
+      ]),
+    ])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelCloud: ['GCP'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+  })
+
+  it('returns only models matching the tags filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { modelId: 'm1', tags: ['vision'] },
+        { modelId: 'm2', tags: ['nlp'] },
+      ]),
+    ])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelTags: ['nlp'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+  })
+
+  it('combines multiple active model filters with AND', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { modelId: 'm1', format: 'ONNX', license: 'MIT' },
+        { modelId: 'm2', format: 'ONNX', license: 'Apache-2.0' },
+      ]),
+    ])
+
+    const result = modelAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      modelFormat: ['ONNX'],
+      modelLicense: ['Apache-2.0'],
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+  })
 })
 
 describe('modelAsset — getRowId', () => {
@@ -331,6 +417,7 @@ describe('modelAsset — makeColumns', () => {
     expect(fields).toContain('studyName')
     expect(fields).toContain('format')
     expect(fields).toContain('license')
+    expect(fields).toContain('cloud')
     expect(fields).toContain('maintainer')
     expect(fields).toContain('url')
     expect(fields).toContain('tags')

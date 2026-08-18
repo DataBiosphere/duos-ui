@@ -156,6 +156,27 @@ export const makePresentationColumns = (): GridColDef<PresentationAsset>[] => [
     },
   },
   {
+    field: 'access',
+    headerName: 'Access',
+    width: 120,
+    renderCell: (params) => {
+      const text = params.value || ''
+      return (
+        <Tooltip title={text} placement="top">
+          <Box
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {text}
+          </Box>
+        </Tooltip>
+      )
+    },
+  },
+  {
     field: 'tags',
     headerName: 'Tags',
     flex: 1,

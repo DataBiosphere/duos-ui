@@ -22,6 +22,7 @@ const makeBucket = (
     url?: string
     description?: string
     tools?: string[]
+    cloud?: string[]
     access?: string
     tags?: string[]
   }> = [],
@@ -45,6 +46,7 @@ const makeBucket = (
                   url: w.url,
                   description: w.description,
                   tools: w.tools,
+                  cloud: w.cloud,
                   access: w.access,
                   tags: w.tags,
                 })),
@@ -272,6 +274,46 @@ describe('workspaceAsset — transformResponse', () => {
     const result = workspaceAsset.transformResponse(response, pagination, {
       ...EMPTY_FILTERS,
       workspacePlatform: ['Terra'],
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w1')
+  })
+
+  it('maps the cloud field onto the row', () => {
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: ['AWS', 'Azure'] }])])
+    const row = workspaceAsset.transformResponse(response, pagination).items[0] as WorkspaceAsset
+    expect(row.cloud).toEqual(['AWS', 'Azure'])
+  })
+
+  it('returns only workspaces matching the cloud filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { workspaceId: 'w1', cloud: ['AWS'] },
+        { workspaceId: 'w2', cloud: ['GCP'] },
+      ]),
+    ])
+
+    const result = workspaceAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      workspaceCloud: ['GCP'],
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w2')
+  })
+
+  it('returns only workspaces matching the access filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { workspaceId: 'w1', access: 'open' },
+        { workspaceId: 'w2', access: 'restricted' },
+      ]),
+    ])
+
+    const result = workspaceAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      workspaceAccess: ['open'],
     })
 
     expect(result.total).toBe(1)

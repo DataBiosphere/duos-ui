@@ -133,6 +133,27 @@ export const makePublicationColumns = (): GridColDef<PublicationAsset>[] => [
     },
   },
   {
+    field: 'access',
+    headerName: 'Access',
+    width: 120,
+    renderCell: (params) => {
+      const text = params.value || ''
+      return (
+        <Tooltip title={text} placement="top">
+          <Box
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {text}
+          </Box>
+        </Tooltip>
+      )
+    },
+  },
+  {
     field: 'authorNames',
     headerName: 'Authors',
     flex: 1.2,

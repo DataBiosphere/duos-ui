@@ -268,6 +268,23 @@ describe('fundingResourceAsset — transformResponse', () => {
     expect(result.total).toBe(1)
     expect((result.items[0] as FundingResourceRow).fundingId).toBe('f-in-range')
   })
+
+  it('returns only funding resources matching the funderName filter', () => {
+    const response = makeResponse([
+      makeBucket('1', [
+        { fundingId: 'f1', funderName: 'NIH' },
+        { fundingId: 'f2', funderName: 'NSF' },
+      ]),
+    ])
+
+    const result = fundingResourceAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      fundingFunderName: ['NIH'],
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as FundingResourceRow).fundingId).toBe('f1')
+  })
 })
 
 describe('fundingResourceAsset — getRowId', () => {

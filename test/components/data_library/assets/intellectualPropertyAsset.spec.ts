@@ -251,6 +251,34 @@ describe('intellectualPropertyAsset — transformResponse', () => {
     expect((result.items[0] as IntellectualPropertyAsset).ipId).toBe('ip-in-range')
   })
 
+  it('returns only assets matching the type filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { ipId: 'ip-patent', type: 'Patent' },
+        { ipId: 'ip-copyright', type: 'Copyright' },
+      ]),
+    ])
+
+    const result = intellectualPropertyAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, ipType: ['Patent'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as IntellectualPropertyAsset).ipId).toBe('ip-patent')
+  })
+
+  it('returns only assets matching the status filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { ipId: 'ip-granted', status: 'Granted' },
+        { ipId: 'ip-pending', status: 'Pending' },
+      ]),
+    ])
+
+    const result = intellectualPropertyAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, ipStatus: ['Pending'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as IntellectualPropertyAsset).ipId).toBe('ip-pending')
+  })
+
   it('handles studies with no intellectualProperties assets', () => {
     const response = makeResponse([makeBucket(7, [])])
     const result = intellectualPropertyAsset.transformResponse(response, pagination)

@@ -85,6 +85,30 @@ export const makeModelColumns = (): GridColDef<ModelAsset>[] => [
     },
   },
   {
+    field: 'cloud',
+    headerName: 'Cloud',
+    flex: 1,
+    minWidth: 130,
+    sortable: false,
+    valueGetter: (_value, row) => (row.cloud || []).join(', '),
+    renderCell: (params) => {
+      const cloud = params.row.cloud || []
+      if (cloud.length === 0) return null
+      return (
+        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+          {cloud.slice(0, 3).map(c => (
+            <Chip key={c} label={c} size="small" variant="outlined" />
+          ))}
+          {cloud.length > 3 && (
+            <Tooltip title={cloud.slice(3).join(', ')}>
+              <Chip label={`+${cloud.length - 3}`} size="small" variant="outlined" />
+            </Tooltip>
+          )}
+        </Box>
+      )
+    },
+  },
+  {
     field: 'maintainer',
     headerName: 'Maintainer',
     flex: 1,
