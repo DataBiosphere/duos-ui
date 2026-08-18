@@ -8,6 +8,7 @@ import { consoleTypes, approveCollectionFn } from 'src/utils/DarCollectionUtils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import PrincipalInvestigatorHelpText from 'src/pages/signing_official_console/PrincipalInvestigatorHelpText'
 import { DarCollectionSummary } from 'src/types/model'
 
 export default function SigningOfficialDarApprovals(): React.JSX.Element {
@@ -68,6 +69,9 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
           title="My Institution's Data Access Approvals"
           description="Your Institution's Data Access Approvals: Records from all current data access approvals"
         />
+      </div>
+      <div style={{ padding: '0 2em 1em' }}>
+        <PrincipalInvestigatorHelpText />
       </div>
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
         <SearchBar handleSearchChange={handleSearchChange} />

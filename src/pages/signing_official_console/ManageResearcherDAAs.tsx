@@ -8,6 +8,7 @@ import { DAA } from 'src/libs/ajax/DAA'
 import { DAAObject, DuosUser } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+import PrincipalInvestigatorHelpText from 'src/pages/signing_official_console/PrincipalInvestigatorHelpText'
 
 export default function ManageResearcherDAAs(): React.JSX.Element {
   const [researchers, setResearchers] = useState<DuosUser[]>([])
@@ -47,6 +48,9 @@ export default function ManageResearcherDAAs(): React.JSX.Element {
           title="Pre-Authorize Researchers (DAAs)"
           description="Grant and revoke pre-authorization for researchers at your institution to submit DARs directly to the DAC (without SO review of the individual DAR first) when permitted by the DAC."
         />
+      </Box>
+      <Box sx={{ paddingLeft: '5rem', paddingRight: '5rem', marginBottom: '1.5rem' }}>
+        <PrincipalInvestigatorHelpText />
       </Box>
       <Box
         sx={{
