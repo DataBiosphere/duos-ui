@@ -46,7 +46,7 @@ const defaultColumns = [
 
 // The per-data-use-group columns carry no collection-level value to order by, so they
 // are not sortable and a persisted sort naming one is ignored.
-const sortableFields: string[] = [
+const sortableFields = new Set<string>([
   DarCollectionTableColumnOptions.DAR_CODE,
   DarCollectionTableColumnOptions.DAC,
   DarCollectionTableColumnOptions.NAME,
@@ -55,12 +55,12 @@ const sortableFields: string[] = [
   DarCollectionTableColumnOptions.INSTITUTION,
   DarCollectionTableColumnOptions.EXPIRES_AT,
   DarCollectionTableColumnOptions.STATUS,
-]
+])
 
 const getInitialSortModel = (columns: string[]): GridSortModel => {
   const stored = Storage.getCurrentUserSettings<StoredSort>(storageDarCollectionSort)
     ?? { field: DarCollectionTableColumnOptions.SUBMISSION_DATE, dir: -1 }
-  const isUsable = (field: string) => columns.includes(field) && sortableFields.includes(field)
+  const isUsable = (field: string) => columns.includes(field) && sortableFields.has(field)
   const field = isUsable(stored.field) ? stored.field : columns.find(isUsable)
   return field ? [{ field, sort: stored.dir === -1 ? 'desc' : 'asc' }] : []
 }
