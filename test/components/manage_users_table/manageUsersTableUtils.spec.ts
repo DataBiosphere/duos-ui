@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { formatUserRoles, institutionName } from 'src/components/manage_users_table/manageUsersTableUtils'
-import { InstitutionInterface, LibraryCard, UserRole } from 'src/types/model'
+import { dacNameMap, formatUserDacs, formatUserRoles, institutionName, userDacs } from 'src/components/manage_users_table/manageUsersTableUtils'
+import { DacObject, InstitutionInterface, LibraryCard, UserRole } from 'src/types/model'
 
 const role = (name: UserRole['name'], userId = 1): UserRole => ({
   roleId: 1,
@@ -60,5 +60,60 @@ describe('institutionName', () => {
 
   it('reads N/A when the user has no institution', () => {
     expect(institutionName(undefined)).toBe('N/A')
+  })
+})
+
+describe('dacNameMap', () => {
+  it('maps dacId to name', () => {
+    const dacs: DacObject[] = [{ dacId: 1, name: 'DAC One' }, { dacId: 2, name: 'DAC Two' }]
+    expect(dacNameMap(dacs)).toEqual(new Map([[1, 'DAC One'], [2, 'DAC Two']]))
+  })
+
+  it('falls back to dacName when name is absent', () => {
+    expect(dacNameMap([{ dacId: 1, dacName: 'Legacy Name' }])).toEqual(new Map([[1, 'Legacy Name']]))
+  })
+
+  it('skips DACs with no id', () => {
+    expect(dacNameMap([{ name: 'No Id' }])).toEqual(new Map())
+  })
+})
+
+describe('userDacs', () => {
+  const dacNameById = dacNameMap([{ dacId: 1, name: 'DAC One' }, { dacId: 2, name: 'DAC Two' }])
+
+  it('reads no DACs when there are no chair or member roles', () => {
+    expect(userDacs([role('Admin')], dacNameById)).toEqual([])
+  })
+
+  it('reads DACs from chairperson and member roles, sorted by name', () => {
+    expect(userDacs(
+      [{ ...role('Member'), dacId: 2 }, { ...role('Chairperson'), dacId: 1 }],
+      dacNameById,
+    )).toEqual([{ dacId: 1, name: 'DAC One' }, { dacId: 2, name: 'DAC Two' }])
+  })
+
+  it('dedupes a DAC the user holds more than one role in', () => {
+    expect(userDacs(
+      [{ ...role('Chairperson'), dacId: 1 }, { ...role('Member'), dacId: 1 }],
+      dacNameById,
+    )).toEqual([{ dacId: 1, name: 'DAC One' }])
+  })
+
+  it('reads Unknown for a dacId missing from the DAC list', () => {
+    expect(userDacs([{ ...role('Member'), dacId: 99 }], dacNameById)).toEqual([{ dacId: 99, name: 'Unknown' }])
+  })
+
+  it('treats missing roles as no DACs', () => {
+    expect(userDacs(undefined, dacNameById)).toEqual([])
+  })
+})
+
+describe('formatUserDacs', () => {
+  it('reads None when the list is empty', () => {
+    expect(formatUserDacs([])).toBe('None')
+  })
+
+  it('joins DAC names with commas', () => {
+    expect(formatUserDacs([{ dacId: 1, name: 'DAC One' }, { dacId: 2, name: 'DAC Two' }])).toBe('DAC One, DAC Two')
   })
 })

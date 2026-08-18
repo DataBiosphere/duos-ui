@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { AddUserModal } from 'src/components/modals/AddUserModal'
 import { User } from 'src/libs/ajax/User'
+import { DAC } from 'src/libs/ajax/DAC'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { ManageUsersTable } from 'src/components/manage_users_table/ManageUsersTable'
 import { Styles } from 'src/libs/theme'
@@ -9,21 +10,24 @@ import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
-import { DuosUser } from 'src/types/model'
+import { DacObject, DuosUser } from 'src/types/model'
 
 const getUserList = (): Promise<DuosUser[]> => User.list(USER_ROLES.admin)
+const getDacList = (): Promise<DacObject[]> => DAC.list(false)
 
 export const AdminManageUsers = function AdminManageUsers() {
   usePageTitle('Manage Users')
   const [searchText, setSearchText] = useState('')
   const [userList, setUserList] = useState<DuosUser[]>([])
+  const [dacList, setDacList] = useState<DacObject[]>([])
   const [showAddUserModal, setShowAddUserModal] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    getUserList()
-      .then((users) => {
+    Promise.all([getUserList(), getDacList()])
+      .then(([users, dacs]) => {
         setUserList(users)
+        setDacList(dacs)
         setIsLoading(false)
       })
       .catch(() => {
@@ -76,7 +80,7 @@ export const AdminManageUsers = function AdminManageUsers() {
           className="button button-blue"
         />
       </div>
-      <ManageUsersTable userList={userList} isLoading={isLoading} searchText={searchText} />
+      <ManageUsersTable userList={userList} dacList={dacList} isLoading={isLoading} searchText={searchText} />
       <AddUserModal
         showModal={showAddUserModal}
         onOKRequest={okModal}

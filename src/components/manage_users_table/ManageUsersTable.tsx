@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react'
-import { Box } from '@mui/material'
+import { Box, Tooltip } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid'
 import { Link } from 'react-router'
 import { getSearchFilterFunctions } from 'src/libs/utils'
 import { Theme } from 'src/libs/theme'
-import { formatUserRoles, institutionName } from 'src/components/manage_users_table/manageUsersTableUtils'
-import { DuosUser } from 'src/types/model'
+import { dacNameMap, formatUserDacs, formatUserRoles, institutionName, UserDac, userDacs } from 'src/components/manage_users_table/manageUsersTableUtils'
+import { DacObject, DuosUser } from 'src/types/model'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
 
@@ -32,6 +32,7 @@ const gridContainerSx = { marginTop: '2rem', marginLeft: 3, marginRight: '-2rem'
 export interface ManageUsersTableProps {
   isLoading: boolean
   userList: DuosUser[]
+  dacList?: DacObject[]
   searchText: string
 }
 
@@ -41,16 +42,23 @@ interface UserRow {
   email: string
   institution: string
   roles: string
+  dacs: string
+  dacDetails: UserDac[]
 }
 
 // Roles and institution are flattened to their displayed text, so every column sorts on what is read.
-const toUserRow = (user: DuosUser): UserRow => ({
-  id: user.userId,
-  displayName: user.displayName,
-  email: user.email,
-  institution: institutionName(user.institution),
-  roles: formatUserRoles(user.roles, user.libraryCard),
-})
+const toUserRow = (user: DuosUser, dacNameById: Map<number, string>): UserRow => {
+  const dacDetails = userDacs(user.roles, dacNameById)
+  return {
+    id: user.userId,
+    displayName: user.displayName,
+    email: user.email,
+    institution: institutionName(user.institution),
+    roles: formatUserRoles(user.roles, user.libraryCard),
+    dacs: formatUserDacs(dacDetails),
+    dacDetails,
+  }
+}
 
 const COLUMNS: GridColDef<UserRow>[] = [
   {
@@ -68,19 +76,44 @@ const COLUMNS: GridColDef<UserRow>[] = [
   { field: 'email', headerName: 'Email', flex: 1.25, minWidth: 200 },
   { field: 'institution', headerName: 'Institution', flex: 1, minWidth: 180 },
   { field: 'roles', headerName: 'Roles', flex: 1, minWidth: 180 },
+  {
+    field: 'dacs',
+    headerName: 'DACs',
+    flex: 1,
+    minWidth: 180,
+    // The tooltip only shows the full list on hover once the row's names overflow the cell width.
+    renderCell: ({ row, tabIndex }: GridRenderCellParams<UserRow>) => (
+      <Tooltip title={row.dacDetails.length === 0 ? '' : row.dacs} placement="top">
+        <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {row.dacDetails.length === 0
+            ? 'None'
+            : row.dacDetails.map((dac, index) => (
+                <React.Fragment key={dac.dacId}>
+                  {index > 0 && ', '}
+                  <Link to={`/manage_dac/${dac.dacId}`} tabIndex={tabIndex}>
+                    {dac.name}
+                  </Link>
+                </React.Fragment>
+              ))}
+        </Box>
+      </Tooltip>
+    ),
+  },
 ]
 
 const filterFn = getSearchFilterFunctions().users
 
-export const ManageUsersTable = function ManageUsersTable({ isLoading, userList, searchText }: ManageUsersTableProps) {
+export const ManageUsersTable = function ManageUsersTable({ isLoading, userList, dacList = [], searchText }: ManageUsersTableProps) {
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: PAGE_SIZE_OPTIONS[0] })
   const [lastSearchText, setLastSearchText] = useState(searchText)
+
+  const dacNameById = useMemo(() => dacNameMap(dacList), [dacList])
 
   // Filtering is derived, so a keystroke costs one render rather than a cascade of effects.
   const rows = useMemo(() => {
     const terms = searchText.split(' ').filter(term => term.length > 0)
-    return terms.reduce((list, term) => filterFn(term, list), userList ?? []).map(toUserRow)
-  }, [userList, searchText])
+    return terms.reduce((list, term) => filterFn(term, list), userList ?? []).map(user => toUserRow(user, dacNameById))
+  }, [userList, searchText, dacNameById])
 
   const lastPage = Math.max(0, Math.ceil(rows.length / paginationModel.pageSize) - 1)
 
