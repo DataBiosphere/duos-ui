@@ -1,3 +1,4 @@
+import InfoIcon from '@mui/icons-material/Info'
 import React, { useState } from 'react'
 import { Support } from 'src/libs/ajax/Support'
 import { User } from 'src/libs/ajax/User'
@@ -62,6 +63,15 @@ export default function SigningOfficialRequest({ user }: SigningOfficialRequestP
   return (
     <section className="signing-official-request" aria-labelledby="signing-official-request-title">
       <h2 id="signing-official-request-title">Request Signing Official Status</h2>
+      <div className="signing-official-request-notice">
+        <InfoIcon fontSize="large" color="info" />
+        <div>
+          You cannot be both the requestor and the Signing Official on the same Data Access Request.
+          The Signing Official is typically a member of your institution&apos;s Contracts Office, Office
+          of Sponsored Programs, or Legal/General Counsel &mdash; not the researcher submitting the request.
+          Only request this status if that describes your role.
+        </div>
+      </div>
       <p>
         I legally attest that I am a Signing Official for the above listed institution, and have the authority to engage my institution in contracts related to data access and submission.
       </p>
