@@ -107,6 +107,9 @@ const sortDarCollections = (
   })
 }
 
+// Left inset matches SearchBar's own margin.
+const gridContainerSx = { marginTop: '2rem', marginLeft: 3 }
+
 // Focus rings for keyboard users only. The link rule is needed because index.css
 // resets `a { outline: 0 }` globally, and the DAR Code cell renders a link.
 const DATAGRID_SX = {
@@ -180,7 +183,7 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
 
   return (
     <Fragment>
-      <Box sx={{ width: '100%' }}>
+      <Box sx={gridContainerSx}>
         <DataGrid
           rows={rows}
           getRowId={row => row.id}

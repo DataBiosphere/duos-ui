@@ -43,54 +43,6 @@ interface VoteGroup {
   radarVotes?: Vote[]
 }
 
-// Terms don't come with type-specification so we need to modify that manually.
-const annotateDataUseTypes = (terms: DatasetTerm[] | undefined): void => {
-  for (const term of terms ?? []) {
-    for (const dut of term.dataUse?.primary ?? []) {
-      dut.type = ControlledAccessType.permissions
-    }
-    for (const dut of term.dataUse?.secondary ?? []) {
-      dut.type = ControlledAccessType.modifiers
-    }
-  }
-}
-
-/**
- * Map each distinct DataUse to the datasets that carry it. The key is the stringified DataUse,
- * since an object cannot serve as a Map key by value.
- */
-const groupDatasetsByDataUse = (terms: DatasetTerm[] | undefined, datasets: Dataset[]): Map<string, Dataset[]> => {
-  const datasetTermMap = new Map<string, Dataset[]>()
-  for (const term of terms ?? []) {
-    const stringValue = JSON.stringify(term.dataUse)
-    const matchingDataset = datasets.find((dataset: Dataset) => dataset.datasetId === term.datasetId)
-    if (!matchingDataset) {
-      continue
-    }
-    const existing = datasetTermMap.get(stringValue)
-    if (existing) {
-      existing.push(matchingDataset)
-    }
-    else {
-      datasetTermMap.set(stringValue, [matchingDataset])
-    }
-  }
-  return datasetTermMap
-}
-
-// A match is recorded once per bucket dataset it applies to, which the algorithm coalescing relies on.
-const matchResultsForBucket = (bucket: Bucket, matchData: MatchResult[]): MatchResult[] => {
-  const results: MatchResult[] = []
-  for (const m of matchData) {
-    for (const dataset of bucket.datasets) {
-      if (dataset.datasetIdentifier.toLowerCase() === m.consent.toLowerCase()) {
-        results.push(m)
-      }
-    }
-  }
-  return results
-}
-
 /**
  * Entry method into bundling up datasets into groups based on common data use restrictions.
  *
@@ -102,15 +54,8 @@ const matchResultsForBucket = (bucket: Bucket, matchData: MatchResult[]): MatchR
  * Step 4: Pull all votes up to a top level bucket field for easier iteration
  * Step 5: Set the bucket key/label from the dataUse + dataset ids
  * Step 6: Coalesce the algorithm decision per bucket
- *
- * Callers that never read `matchResults`/`algorithmResult` can pass
- * `includeMatchResults: false` to skip the match fetch entirely.
  */
-export const binCollectionToBuckets = async (
-  collection: Pick<DarCollection, 'datasets'> & Partial<Pick<DarCollection, 'dars'>>,
-  dacIds: number[] = [],
-  { includeMatchResults = true }: { includeMatchResults?: boolean } = {},
-): Promise<Bucket[]> => {
+export const binCollectionToBuckets = async (collection: Pick<DarCollection, 'datasets'> & Partial<Pick<DarCollection, 'dars'>>, dacIds: number[] = []): Promise<Bucket[]> => {
   const buckets: Bucket[] = []
   // Find the most recent DAR
   const recentDar: DataAccessRequest = collection.dars === undefined
@@ -118,15 +63,43 @@ export const binCollectionToBuckets = async (
     : Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0) || {} as DataAccessRequest
   // Find all match results for this collection. This will be placed into each
   // bucket based on the dataset that the match applies to in step 1.a
-  const matchData: MatchResult[] = (includeMatchResults && recentDar.referenceId)
-    ? await Match.findMatchBatch([recentDar.referenceId])
-    : []
+  const matchData: MatchResult[] = recentDar.referenceId ? await Match.findMatchBatch([recentDar.referenceId]) : []
   // If we need to restrict the datasets to a particular DAC, do that here.
   const datasets: Dataset[] = filterDatasetsByDACs(dacIds, collection.datasets)
   // Find the DatasetTerms which have preprocessed DataUse objects.
   const terms = await getDatasetTerms(datasets)
-  annotateDataUseTypes(terms)
-  const datasetTermMap = groupDatasetsByDataUse(terms, datasets)
+  // Terms don't come with type-specification so we need to modify that manually
+  if (terms) {
+    for (const term of terms) {
+      if (term.dataUse?.primary) {
+        for (const dut of term.dataUse.primary) {
+          dut.type = ControlledAccessType.permissions
+        }
+      }
+      if (term.dataUse?.secondary) {
+        for (const dut of term.dataUse.secondary) {
+          dut.type = ControlledAccessType.modifiers
+        }
+      }
+    }
+  }
+  // Create a map of DataUse to a list of datasets. This will serve as the basis for bucketing datasets by DataUse.
+  // Note that we need to use a string value of the DataUse object to ensure that we can use it as a key in a Map.
+  const datasetTermMap: Map<string, Dataset[]> = new Map<string, Dataset[]>()
+  if (terms) {
+    for (const term of terms) {
+      const stringValue = JSON.stringify(term.dataUse)
+      const matchingDataset = datasets.find((dataset: Dataset) => dataset.datasetId === term.datasetId)
+      if (matchingDataset) {
+        if (datasetTermMap.has(stringValue)) {
+          datasetTermMap.get(stringValue)!.push(matchingDataset)
+        }
+        else {
+          datasetTermMap.set(stringValue, [matchingDataset])
+        }
+      }
+    }
+  }
   // Iterate through the datasetTermMap to create buckets
   const iterator = datasetTermMap.keys()
   for (const key of iterator) {
@@ -159,7 +132,13 @@ export const binCollectionToBuckets = async (
   // Steps 2-6
   for (const b of buckets) {
     // Step 2: Find match results for each dataset in bucket
-    b.matchResults = matchResultsForBucket(b, matchData)
+    for (const m of matchData) {
+      for (const dataset of b.datasets) {
+        if (dataset.datasetIdentifier.toLowerCase() === m.consent.toLowerCase()) {
+          b.matchResults.push(m)
+        }
+      }
+    }
 
     // Step 3: Populate elections for datasets in this bucket
     b.elections = findElectionsForDatasets(recentDar, b.datasetIds)
