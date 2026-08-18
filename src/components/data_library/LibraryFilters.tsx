@@ -65,8 +65,6 @@ const isCheckboxFilterKey = (key: FilterKey): key is CheckboxFilterKey =>
 // Yes/No/Any radio groups. A registered key claimed by neither this list nor
 // CHECKBOX_FILTER_KEYS renders nothing at all.
 const BOOLEAN_FILTER_KEYS = [
-  'datasetsCited',
-  'publicationsDatasetsCited',
   'instantApproval',
 ] as const
 

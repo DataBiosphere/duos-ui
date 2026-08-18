@@ -71,8 +71,6 @@ export interface FilterState {
   publicationJournal: string[]
   publicationAccess: string[]
   fundingFunderName: string[]
-  datasetsCited?: boolean
-  publicationsDatasetsCited?: boolean
   instantApproval?: boolean
   participantCount: {
     min?: number
@@ -164,8 +162,6 @@ export interface AvailableFilters {
   publicationJournal: FilterOption[]
   publicationAccess: FilterOption[]
   fundingFunderName: FilterOption[]
-  datasetsCited: FilterOption[]
-  publicationsDatasetsCited: FilterOption[]
   instantApproval: FilterOption[]
   biospecimenPostMortemIntervalRange: {
     min: number

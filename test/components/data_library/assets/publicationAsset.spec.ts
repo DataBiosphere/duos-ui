@@ -264,31 +264,6 @@ describe('publicationAsset — transformResponse', () => {
     expect(result.total).toBe(0)
   })
 
-  it('returns only matching publications when a citation filter is present', () => {
-    const response = makeResponse([
-      makeBucket(1, [
-        {
-          publicationId: 'PUB-CITED',
-          title: 'Cited Publication',
-          citation: true,
-        },
-        {
-          publicationId: 'PUB-NOT-CITED',
-          title: 'Not Cited Publication',
-          citation: false,
-        },
-      ]),
-    ])
-
-    const result = publicationAsset.transformResponse(response, pagination, {
-      ...EMPTY_FILTERS,
-      publicationsDatasetsCited: true,
-    })
-
-    expect(result.items).toHaveLength(1)
-    expect((result.items[0] as PublicationAsset).publicationId).toBe('PUB-CITED')
-  })
-
   it('returns only publications matching the journal filter', () => {
     const response = makeResponse([
       makeBucket(1, [

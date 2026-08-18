@@ -93,9 +93,7 @@ const OBJECT_FILTER_KEYS: Array<
   'publicationPublishedDate',
 ]
 
-const BOOL_FILTER_KEYS: Array<'datasetsCited' | 'publicationsDatasetsCited' | 'instantApproval'> = [
-  'datasetsCited',
-  'publicationsDatasetsCited',
+const BOOL_FILTER_KEYS: Array<'instantApproval'> = [
   'instantApproval',
 ]
 
@@ -129,8 +127,6 @@ const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
   publicationJournal: 'checkbox',
   publicationAccess: 'checkbox',
   fundingFunderName: 'checkbox',
-  datasetsCited: 'boolean',
-  publicationsDatasetsCited: 'boolean',
   instantApproval: 'boolean',
   participantCount: 'range',
   biospecimenPostMortemInterval: 'range',
@@ -177,8 +173,6 @@ export const EMPTY_FILTERS: FilterState = {
   publicationAccess: [],
   publicationPublishedDate: {},
   fundingFunderName: [],
-  datasetsCited: undefined,
-  publicationsDatasetsCited: undefined,
   instantApproval: undefined,
   participantCount: {},
   ipFiledDate: {},
@@ -232,8 +226,6 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
       return filters[key].length > 0
 
     // Boolean filters are active once explicitly set to Yes/No (not "Any").
-    case 'datasetsCited':
-    case 'publicationsDatasetsCited':
     case 'instantApproval':
       return filters[key] !== undefined
 
@@ -299,8 +291,6 @@ const getFilterOptions = (key: FilterKey, availableFilters: AvailableFilters) =>
     case 'publicationJournal':
     case 'publicationAccess':
     case 'fundingFunderName':
-    case 'datasetsCited':
-    case 'publicationsDatasetsCited':
     case 'instantApproval':
       return availableFilters[key]
     default:
@@ -341,31 +331,6 @@ const dateRangeClause = (field: string, range: { gte?: string, lte?: string }): 
   },
 } as unknown as QueryClause)
 
-/**
- * Clause for a nested-asset "cited datasets?" boolean.
- *
- * The grid treats a missing `citation` field as `false` (`citation ?? false`),
- * so the query must do the same or the two diverge. A bare `term: { citation:
- * false }` would exclude any asset indexed without the field — every pre-Oct-2025
- * record and any non-form ingestion path — even though the grid shows them as
- * "No". Selecting "No" therefore matches an explicit `false` OR the absence of the
- * field; "Yes" matches only an explicit `true`.
- */
-const citationClause = (field: string, cited: boolean): QueryClause => {
-  if (cited) {
-    return { term: { [field]: true } }
-  }
-  return {
-    bool: {
-      should: [
-        { term: { [field]: false } },
-        { bool: { must_not: [{ exists: { field } }] } },
-      ],
-      minimum_should_match: 1,
-    },
-  }
-}
-
 const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   soApprovalModel: {
     label: 'SO Approval',
@@ -390,9 +355,9 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         return undefined
       }
 
-      // Unlike citationClause, an absent flag means "unknown" rather than "No" — the index leaves
-      // it unset when the DAC's rules cannot be resolved, and the grid shows no badge for those.
-      // A bare term matches only documents carrying the field, so both sides exclude them.
+      // An absent flag means "unknown" rather than "No" — the index leaves it unset when the
+      // DAC's rules cannot be resolved, and the grid shows no badge for those. A bare term
+      // matches only documents carrying the field, so both sides exclude them.
       return { term: { instantApprovalEligible: filters.instantApproval } }
     },
   },
@@ -675,26 +640,6 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
       filters.biospecimenDataUse.length > 0
         ? matchAny('study.assets.biospecimens.optionalDataUse', filters.biospecimenDataUse)
         : undefined,
-  },
-  datasetsCited: {
-    label: 'Datasets Cited (Presentations)?',
-    buildClause: (filters) => {
-      if (filters.datasetsCited === undefined) {
-        return undefined
-      }
-
-      return citationClause('study.assets.presentations.citation', filters.datasetsCited)
-    },
-  },
-  publicationsDatasetsCited: {
-    label: 'Datasets Cited (Publications)?',
-    buildClause: (filters) => {
-      if (filters.publicationsDatasetsCited === undefined) {
-        return undefined
-      }
-
-      return citationClause('study.assets.publications.citation', filters.publicationsDatasetsCited)
-    },
   },
   ipFiledDate: {
     label: 'Filed Date',

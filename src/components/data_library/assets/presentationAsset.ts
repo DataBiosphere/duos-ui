@@ -13,10 +13,6 @@ const matchesPresentationFilters = (presentation: PresentationAsset, filters?: F
     return true
   }
 
-  if (filters.datasetsCited !== undefined && presentation.citation !== filters.datasetsCited) {
-    return false
-  }
-
   if (filters.presentationEvent.length > 0 && !filters.presentationEvent.includes(presentation.event || '')) {
     return false
   }

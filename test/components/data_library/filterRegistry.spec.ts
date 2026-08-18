@@ -39,8 +39,6 @@ const availableFilters: AvailableFilters = {
   publicationJournal: [],
   publicationAccess: [],
   fundingFunderName: [],
-  datasetsCited: [],
-  publicationsDatasetsCited: [],
   instantApproval: [],
   biospecimenPostMortemIntervalRange: { min: 0, max: 10 },
   participantCountRange: { min: 0, max: 10 },
@@ -52,13 +50,12 @@ describe('filterRegistry', () => {
     accessManagement: ['controlled'],
     dataType: ['Genomic'],
     participantCount: { min: 10, max: 100 },
-    datasetsCited: true,
+    presentationEvent: ['ASHG'],
   }
 
   it('returns asset-specific visible filters', () => {
     const publicationFilters = getFilterSectionsForAsset(AssetType.PUBLICATIONS, availableFilters)
     expect(publicationFilters.map(section => section.key)).toEqual([
-      'publicationsDatasetsCited',
       'publicationJournal',
       'publicationAccess',
       'publicationPublishedDate',
@@ -73,7 +70,6 @@ describe('filterRegistry', () => {
   it('returns presentation-specific filters', () => {
     const presentationFilters = getFilterSectionsForAsset(AssetType.PRESENTATIONS, availableFilters)
     expect(presentationFilters.map(section => section.key)).toEqual([
-      'datasetsCited',
       'presentationEvent',
       'presentationFormat',
       'presentationAccess',
@@ -83,14 +79,14 @@ describe('filterRegistry', () => {
 
   it('builds clauses for every active filter regardless of tab so rules combine', () => {
     const clauses = buildActiveFilterClauses(filters)
-    // accessManagement, dataType, participantCount and datasetsCited are all set.
+    // accessManagement, dataType, participantCount and presentationEvent are all set.
     expect(clauses).toHaveLength(4)
     const serialized = JSON.stringify(clauses)
 
     expect(serialized).toContain('accessManagement.keyword')
     expect(serialized).toContain('study.dataTypes')
     expect(serialized).toContain('participantCount')
-    expect(serialized).toContain('study.assets.presentations.citation')
+    expect(serialized).toContain('study.assets.presentations.event')
   })
 
   describe('data use modifiers', () => {
@@ -169,7 +165,7 @@ describe('filterRegistry', () => {
     }
 
     it('lists active filters not shown on the current tab as removable chips', () => {
-      // None of accessManagement/dataType/participantCount/datasetsCited are among
+      // None of accessManagement/dataType/participantCount/presentationEvent are among
       // Models' own visible filters, so all of them are "external" here.
       const chips = getExternalActiveFilters(AssetType.MODELS, filters, labelledFilters)
       const keys = chips.map(chip => chip.key)
@@ -177,7 +173,7 @@ describe('filterRegistry', () => {
       expect(keys).toContain('accessManagement')
       expect(keys).toContain('dataType')
       expect(keys).toContain('participantCount')
-      expect(keys).toContain('datasetsCited')
+      expect(keys).toContain('presentationEvent')
     })
 
     it('resolves value labels from available filters and formats ranges/booleans', () => {
@@ -185,14 +181,16 @@ describe('filterRegistry', () => {
 
       expect(chips).toContainEqual({ key: 'accessManagement', sectionLabel: 'Access Request Process', valueLabel: 'via DUOS', value: 'controlled' })
       expect(chips).toContainEqual({ key: 'participantCount', sectionLabel: 'Participants', valueLabel: '10 – 100' })
-      expect(chips).toContainEqual({ key: 'datasetsCited', sectionLabel: 'Datasets Cited (Presentations)?', valueLabel: 'Yes' })
+
+      const boolChips = getExternalActiveFilters(AssetType.MODELS, { ...EMPTY_FILTERS, instantApproval: true }, availableFilters)
+      expect(boolChips).toContainEqual({ key: 'instantApproval', sectionLabel: 'Instant Approval Available?', valueLabel: 'Yes' })
     })
 
     it('excludes filters that the current tab renders itself', () => {
       // Datasets renders accessManagement, dataType and participantCount, so only
-      // datasetsCited (not a datasets filter) remains external.
+      // presentationEvent (not a datasets filter) remains external.
       const chips = getExternalActiveFilters(AssetType.DATASETS, filters, labelledFilters)
-      expect(chips.map(chip => chip.key)).toEqual(['datasetsCited'])
+      expect(chips.map(chip => chip.key)).toEqual(['presentationEvent'])
     })
 
     it('falls back to the raw value when no label is available', () => {
@@ -276,89 +274,14 @@ describe('filterRegistry', () => {
       expect(JSON.stringify(clauses)).not.toContain('instantApprovalEligible')
     })
 
-    // Unlike the citation filters, an absent flag means "unknown" rather than "No", and a bare
-    // term matches only documents carrying the field, so neither side claims them.
+    // An absent flag means "unknown" rather than "No", and a bare term matches only
+    // documents carrying the field, so neither side claims them.
     it('matches only what the index asserts on both sides', () => {
       const yes = buildActiveFilterClauses({ ...EMPTY_FILTERS, instantApproval: true })
       expect(yes).toContainEqual({ term: { instantApprovalEligible: true } })
 
       const no = buildActiveFilterClauses({ ...EMPTY_FILTERS, instantApproval: false })
       expect(no).toContainEqual({ term: { instantApprovalEligible: false } })
-    })
-  })
-
-  describe('publicationsDatasetsCited (its own filter)', () => {
-    it('builds a server clause on the publications citation field', () => {
-      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, publicationsDatasetsCited: true })
-      expect(JSON.stringify(clauses)).toContain('study.assets.publications.citation')
-      expect(JSON.stringify(clauses)).not.toContain('study.assets.presentations.citation')
-    })
-
-    it('matches an explicit true with a bare term when "Yes" is selected', () => {
-      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, publicationsDatasetsCited: true })
-      expect(clauses).toContainEqual({ term: { 'study.assets.publications.citation': true } })
-    })
-
-    it('treats a missing citation field as "No" so legacy documents are not excluded', () => {
-      // The grid renders a missing citation as false (`citation ?? false`), so
-      // "No" must match an explicit false OR the absence of the field rather than
-      // a bare `term: { citation: false }` that would drop legacy documents.
-      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, publicationsDatasetsCited: false })
-      expect(clauses).toContainEqual({
-        bool: {
-          should: [
-            { term: { 'study.assets.publications.citation': false } },
-            { bool: { must_not: [{ exists: { field: 'study.assets.publications.citation' } }] } },
-          ],
-          minimum_should_match: 1,
-        },
-      })
-    })
-
-    it('applies the same missing-field handling to the presentations citation filter', () => {
-      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, datasetsCited: false })
-      expect(clauses).toContainEqual({
-        bool: {
-          should: [
-            { term: { 'study.assets.presentations.citation': false } },
-            { bool: { must_not: [{ exists: { field: 'study.assets.presentations.citation' } }] } },
-          ],
-          minimum_should_match: 1,
-        },
-      })
-    })
-
-    it('is a visible filter on the Publications tab (not an external chip there)', () => {
-      const sections = getFilterSectionsForAsset(AssetType.PUBLICATIONS, availableFilters)
-      expect(sections.map(s => s.key)).toContain('publicationsDatasetsCited')
-
-      const chips = getExternalActiveFilters(
-        AssetType.PUBLICATIONS,
-        { ...EMPTY_FILTERS, publicationsDatasetsCited: true },
-        availableFilters,
-      )
-      expect(chips.map(chip => chip.key)).not.toContain('publicationsDatasetsCited')
-    })
-
-    it('appears as a removable external chip on tabs that do not own it', () => {
-      const chips = getExternalActiveFilters(
-        AssetType.STUDIES,
-        { ...EMPTY_FILTERS, publicationsDatasetsCited: true },
-        availableFilters,
-      )
-      expect(chips).toContainEqual({ key: 'publicationsDatasetsCited', sectionLabel: 'Datasets Cited (Publications)?', valueLabel: 'Yes' })
-    })
-
-    it('gives the two citation filters distinct chip labels so they are not confused', () => {
-      const chips = getExternalActiveFilters(
-        AssetType.STUDIES,
-        { ...EMPTY_FILTERS, datasetsCited: true, publicationsDatasetsCited: false },
-        availableFilters,
-      )
-      const labels = chips
-        .filter(chip => chip.key === 'datasetsCited' || chip.key === 'publicationsDatasetsCited')
-        .map(chip => chip.sectionLabel)
-      expect(new Set(labels).size).toEqual(2)
     })
   })
 
@@ -374,8 +297,8 @@ describe('filterRegistry', () => {
     })
 
     it('resets a boolean filter to undefined', () => {
-      const next = removeFilterValue(filters, 'datasetsCited')
-      expect(next.datasetsCited).toBeUndefined()
+      const next = removeFilterValue({ ...filters, instantApproval: true }, 'instantApproval')
+      expect(next.instantApproval).toBeUndefined()
     })
   })
 })

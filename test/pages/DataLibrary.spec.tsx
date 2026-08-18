@@ -74,6 +74,17 @@ const getLabelControl = <T extends HTMLElement>(labelText: string, role: string)
   return within(label as HTMLElement).getByRole(role) as T
 }
 
+// The filter panel and the DataGrid can share the same visible text (e.g. a
+// "Format" filter section and a "Format" column header), so disambiguate by
+// finding the match that's actually inside a filter accordion header.
+const getAccordionHeader = (labelText: string): HTMLElement => {
+  const header = screen.getAllByText(labelText)
+    .map(el => el.closest('.MuiAccordionSummary-root'))
+    .find((el): el is HTMLElement => el !== null)
+  expect(header).toBeInTheDocument()
+  return header as HTMLElement
+}
+
 const getFilterToggleButton = (selector: string): HTMLElement => {
   const button = document.querySelector<HTMLElement>(selector)
   expect(button).toBeInTheDocument()
@@ -400,7 +411,7 @@ describe('DataLibrary', () => {
     expect(locationSearch).toContain('minParticipants=')
   })
 
-  it('applies row-level filtering for nested presentation rows when Datasets Cited is selected', async () => {
+  it('applies row-level filtering for nested presentation rows when a presentation filter is selected', async () => {
     const nestedPresentationResponse = {
       aggregations: {
         studies: {
@@ -421,12 +432,12 @@ describe('DataLibrary', () => {
                               {
                                 presentationId: 'pres-match',
                                 title: 'Nested Match Presentation',
-                                citation: true,
+                                format: 'Oral',
                               },
                               {
                                 presentationId: 'pres-non-match',
                                 title: 'Nested Non-Match Presentation',
-                                citation: false,
+                                format: 'Poster',
                               },
                             ],
                           },
@@ -453,10 +464,8 @@ describe('DataLibrary', () => {
     expect(await screen.findByText('Nested Match Presentation')).toBeInTheDocument()
     expect(screen.getByText('Nested Non-Match Presentation')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByText('Datasets Cited (Presentations)?'))
-    await screen.findByText('Yes')
-
-    fireEvent.click(getLabelControl<HTMLInputElement>('Yes', 'radio'))
+    fireEvent.click(getAccordionHeader('Format'))
+    fireEvent.click(getLabelControl<HTMLInputElement>('Oral', 'checkbox'))
 
     await waitFor(() => {
       expect(screen.queryByText('Nested Non-Match Presentation')).not.toBeInTheDocument()

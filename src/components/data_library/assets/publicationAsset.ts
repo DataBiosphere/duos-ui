@@ -13,10 +13,6 @@ const matchesPublicationFilters = (publication: PublicationAsset, filters?: Filt
     return true
   }
 
-  if (filters.publicationsDatasetsCited !== undefined && publication.citation !== filters.publicationsDatasetsCited) {
-    return false
-  }
-
   if (filters.publicationJournal.length > 0 && !filters.publicationJournal.includes(publication.journal || '')) {
     return false
   }

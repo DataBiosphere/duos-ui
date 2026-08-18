@@ -276,8 +276,6 @@ const parseFiltersFromUrl = (searchParams: URLSearchParams): FilterState => {
     ...parseArrayFilters(searchParams),
     ...parseRangeFilters(searchParams),
     ...parseDateFilters(searchParams),
-    datasetsCited: parseBooleanParam(searchParams, ['datasetsCited', 'presentationsDatasetsCited']),
-    publicationsDatasetsCited: parseBooleanParam(searchParams, ['publicationsDatasetsCited']),
     instantApproval: parseBooleanParam(searchParams, ['instantApproval']),
   } as FilterState
 }
@@ -290,8 +288,6 @@ const serializeFiltersToUrl = (
   searchParams: URLSearchParams,
 ): void => {
   serializeArrayFiltersToUrl(filters, searchParams)
-  serializeBooleanFilterToUrl(filters.datasetsCited, 'datasetsCited', searchParams, ['presentationsDatasetsCited'])
-  serializeBooleanFilterToUrl(filters.publicationsDatasetsCited, 'publicationsDatasetsCited', searchParams)
   serializeBooleanFilterToUrl(filters.instantApproval, 'instantApproval', searchParams)
   serializeRangeFiltersToUrl(filters, searchParams)
   serializeDateFiltersToUrl(filters, searchParams)

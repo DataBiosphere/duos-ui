@@ -51,14 +51,6 @@ const availableFilters: AvailableFilters = {
   publicationJournal: [],
   publicationAccess: [],
   fundingFunderName: [],
-  datasetsCited: [
-    { value: 'true', label: 'Yes' },
-    { value: 'false', label: 'No' },
-  ],
-  publicationsDatasetsCited: [
-    { value: 'true', label: 'Yes' },
-    { value: 'false', label: 'No' },
-  ],
   soApprovalModel: [
     { value: 'PER_REQUEST', label: 'Per-Request Approval' },
     { value: 'PRE_AUTHORIZED', label: 'Pre-Authorized Researchers' },
@@ -204,7 +196,7 @@ describe('LibraryFilters', () => {
         sections={getFilterSectionsForAsset(AssetType.PRESENTATIONS, availableFilters)}
       />,
     )
-    expect(screen.getByText('Datasets Cited (Presentations)?')).toBeInTheDocument()
+    expect(screen.getByText('Event')).toBeInTheDocument()
     expect(screen.queryByText('Participants')).not.toBeInTheDocument()
     expect(screen.queryByText('Access Request Process')).not.toBeInTheDocument()
   })

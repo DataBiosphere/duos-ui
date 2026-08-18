@@ -230,14 +230,6 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
       publicationJournal: uniqueValues(publicationItems.map(item => item.journal)),
       publicationAccess: uniqueValues(publicationItems.map(item => item.access)),
       fundingFunderName: uniqueValues(fundingResourceItems.map(item => item.funderName)),
-      datasetsCited: [
-        { value: 'true', label: 'Yes' },
-        { value: 'false', label: 'No' },
-      ],
-      publicationsDatasetsCited: [
-        { value: 'true', label: 'Yes' },
-        { value: 'false', label: 'No' },
-      ],
       instantApproval: [
         { value: 'true', label: 'Yes' },
         { value: 'false', label: 'No' },
