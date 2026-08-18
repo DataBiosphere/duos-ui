@@ -718,6 +718,26 @@ export interface DarCollection {
   datasets: Dataset[]
 }
 
+export interface DataUseGroupDataset {
+  datasetId: number
+  name: string
+  datasetIdentifier: string
+}
+
+export interface DataUseGroupVote {
+  userId: number
+  vote?: boolean
+  displayName: string
+}
+
+/** A collection's datasets grouped by shared data use, as served on the collection summary. */
+export interface DataUseGroup {
+  key: string
+  label: string
+  datasets: DataUseGroupDataset[]
+  votes: DataUseGroupVote[]
+}
+
 export interface DarCollectionSummary {
   actions: string[]
   dacNames: string[]
@@ -739,6 +759,7 @@ export interface DarCollectionSummary {
   soApproverTimestamp?: number
   status: string
   submissionDate: number
+  dataUseGroups?: DataUseGroup[]
 }
 
 export interface DataAccessRequest {

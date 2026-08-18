@@ -1,16 +1,14 @@
 import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
-import { Box, Chip, Skeleton, Tooltip } from '@mui/material'
+import { Box, Chip, Tooltip } from '@mui/material'
 import { Link } from 'react-router'
 import { formatDate } from 'src/libs/utils'
 import { includes, isEmpty, isNil, toLower, uniq } from 'src/utils/NodashUtil'
-import { collapseVotesByUser, consoleTypes, extractDacDataAccessVotesFromBucket } from 'src/utils/DarCollectionUtils'
-import { DarCollectionSummary } from 'src/types/model'
-import { Bucket } from 'src/utils/BucketUtils'
+import { consoleTypes } from 'src/utils/DarCollectionUtils'
+import { DarCollectionSummary, DataUseGroup } from 'src/types/model'
 import Actions from 'src/components/dar_collection_table/Actions'
 import DarCollectionAdminReviewLink from 'src/components/dar_collection_table/DarCollectionAdminReviewLink'
 import DataUseVoteStatusBadges from 'src/components/dar_collection_table/DataUseVoteStatusBadges'
-import { DataUseBucketsState } from 'src/components/dar_collection_table/useDarCollectionDataUseBuckets'
 
 // One grid row per (collection, data-use group) pair, so every group gets its own pill,
 // vote badges, and dataset count. Collection-level columns are visually merged back together
@@ -18,31 +16,21 @@ import { DataUseBucketsState } from 'src/components/dar_collection_table/useDarC
 export interface DarCollectionGridRow {
   id: string
   collection: DarCollectionSummary
-  bucket: Bucket | null
-  bucketState: 'loading' | 'loaded' | 'error'
+  group: DataUseGroup | null
 }
 
 export function buildDarCollectionGridRows(
   collections: DarCollectionSummary[],
-  bucketsByCollectionId: Record<number, DataUseBucketsState>,
 ): DarCollectionGridRow[] {
   return collections.flatMap((collection): DarCollectionGridRow[] => {
-    const state = bucketsByCollectionId[collection.darCollectionId]
-
-    if (!state || state.status === 'loading') {
-      return [{ id: `${collection.darCollectionId}-loading`, collection, bucket: null, bucketState: 'loading' }]
+    const groups = collection.dataUseGroups ?? []
+    if (groups.length === 0) {
+      return [{ id: `${collection.darCollectionId}-empty`, collection, group: null }]
     }
-    if (state.status === 'error') {
-      return [{ id: `${collection.darCollectionId}-error`, collection, bucket: null, bucketState: 'error' }]
-    }
-    if (state.buckets.length === 0) {
-      return [{ id: `${collection.darCollectionId}-empty`, collection, bucket: null, bucketState: 'loaded' }]
-    }
-    return state.buckets.map(bucket => ({
-      id: `${collection.darCollectionId}-${bucket.key}`,
+    return groups.map(group => ({
+      id: `${collection.darCollectionId}-${group.key}`,
       collection,
-      bucket,
-      bucketState: 'loaded' as const,
+      group,
     }))
   })
 }
@@ -51,7 +39,6 @@ export interface MakeDarCollectionColumnsArgs {
   consoleType: string
   goToVote?: (collectionId: number) => void
   showConfirmationModal: (collection: DarCollectionSummary, action: string) => void
-  currentUser: { userId: number }
 }
 
 // Spans a collection-level column down across every row belonging to the same collection.
@@ -154,22 +141,15 @@ const datasetCountColumn = (): GridColDef<DarCollectionGridRow> => ({
   sortable: false,
   rowSpanValueGetter: (_value, row) => row.id,
   renderCell: (params) => {
-    const { bucket, bucketState } = params.row
-
-    if (bucketState === 'loading') {
-      return <Skeleton variant="rounded" width={24} height={24} />
-    }
-    if (bucketState === 'error') {
-      return <span>—</span>
-    }
-    if (!bucket) {
+    const { group } = params.row
+    if (!group) {
       return <span>0</span>
     }
 
-    const datasetTooltip = bucket.datasets.map(dataset => `${dataset.name} (${dataset.datasetIdentifier})`).join(', ')
+    const datasetTooltip = group.datasets.map(dataset => `${dataset.name} (${dataset.datasetIdentifier})`).join(', ')
     return (
       <Tooltip title={datasetTooltip}>
-        <span style={{ cursor: 'default' }}>{bucket.datasets.length}</span>
+        <span style={{ cursor: 'default' }}>{group.datasets.length}</span>
       </Tooltip>
     )
   },
@@ -205,22 +185,15 @@ const dataUseColumn = (): GridColDef<DarCollectionGridRow> => ({
   sortable: false,
   rowSpanValueGetter: (_value, row) => row.id,
   renderCell: (params) => {
-    const { bucket, bucketState } = params.row
-
-    if (bucketState === 'loading') {
-      return <Skeleton variant="rounded" width={160} height={24} />
-    }
-    if (bucketState === 'error') {
-      return <span>—</span>
-    }
-    if (!bucket) {
+    const { group } = params.row
+    if (!group) {
       return <span>No datasets</span>
     }
 
     return (
-      <Tooltip title={bucket.label}>
+      <Tooltip title={group.label}>
         <Chip
-          label={bucket.label}
+          label={group.label}
           size="small"
           variant="outlined"
           sx={{ 'maxWidth': '100%', '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis' } }}
@@ -232,7 +205,7 @@ const dataUseColumn = (): GridColDef<DarCollectionGridRow> => ({
 
 // Never spans: votes are cast per data-use group's election, not per collection. Only
 // rendered for Chair/Member consoles — the only column list that includes 'votes' at all.
-const votesColumn = ({ consoleType, currentUser }: MakeDarCollectionColumnsArgs): GridColDef<DarCollectionGridRow> => ({
+const votesColumn = ({ consoleType }: MakeDarCollectionColumnsArgs): GridColDef<DarCollectionGridRow> => ({
   field: 'votes',
   headerName: 'Votes',
   flex: 1,
@@ -240,27 +213,14 @@ const votesColumn = ({ consoleType, currentUser }: MakeDarCollectionColumnsArgs)
   sortable: false,
   rowSpanValueGetter: (_value, row) => row.id,
   renderCell: (params) => {
-    const { bucket, bucketState } = params.row
-
-    if (bucketState === 'loading') {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-          <Skeleton variant="rounded" width={80} height={24} />
-        </Box>
-      )
-    }
-    if (bucketState === 'error' || !bucket) {
-      return null
-    }
-    if (consoleType !== consoleTypes.CHAIR && consoleType !== consoleTypes.MEMBER) {
+    const { group } = params.row
+    if (!group || (consoleType !== consoleTypes.CHAIR && consoleType !== consoleTypes.MEMBER)) {
       return null
     }
 
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-        <DataUseVoteStatusBadges
-          memberVotes={collapseVotesByUser(extractDacDataAccessVotesFromBucket({ votes: bucket.votes }, currentUser, false))}
-        />
+        <DataUseVoteStatusBadges memberVotes={group.votes} />
       </Box>
     )
   },

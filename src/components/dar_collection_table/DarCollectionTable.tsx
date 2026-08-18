@@ -4,9 +4,8 @@ import { Box, CircularProgress } from '@mui/material'
 import { Storage } from 'src/libs/storage'
 import { Theme } from 'src/libs/theme'
 import { isNil, toLower, uniq } from 'src/utils/NodashUtil'
-import { DarCollectionTableColumnOptions, consoleTypes } from 'src/utils/DarCollectionUtils'
+import { DarCollectionTableColumnOptions } from 'src/utils/DarCollectionUtils'
 import { buildDarCollectionGridRows, makeDarCollectionColumns } from 'src/components/dar_collection_table/DarCollectionGridColumns'
-import { useDarCollectionDataUseBuckets } from 'src/components/dar_collection_table/useDarCollectionDataUseBuckets'
 import CollectionConfirmationModal from 'src/components/dar_collection_table/CollectionConfirmationModal'
 import { DarCollectionSummary } from 'src/types/model'
 
@@ -143,10 +142,6 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
   const [selectedCollection, setSelectedCollection] = useState<DarCollectionSummary>({} as DarCollectionSummary)
   const [consoleAction, setConsoleAction] = useState<string | undefined>()
 
-  const isUnfilteredView = consoleType === consoleTypes.ADMIN
-    || consoleType === consoleTypes.RESEARCHER
-    || consoleType === consoleTypes.SIGNING_OFFICIAL
-
   const showConfirmationModal = useCallback((collectionSummary: DarCollectionSummary, action = '') => {
     setConsoleAction(action)
     setSelectedCollection(collectionSummary)
@@ -175,21 +170,13 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
     return sortedCollections.slice(start, start + paginationModel.pageSize)
   }, [sortedCollections, paginationModel])
 
-  const bucketsByCollectionId = useDarCollectionDataUseBuckets(pagedCollections, isUnfilteredView)
-
-  const rows = useMemo(
-    () => buildDarCollectionGridRows(pagedCollections, bucketsByCollectionId),
-    [pagedCollections, bucketsByCollectionId],
-  )
-
-  const currentUser = useMemo(() => Storage.getCurrentUser(), [])
+  const rows = useMemo(() => buildDarCollectionGridRows(pagedCollections), [pagedCollections])
 
   const gridColumns = useMemo(() => makeDarCollectionColumns(columns, {
     consoleType,
     goToVote,
     showConfirmationModal,
-    currentUser,
-  }), [columns, consoleType, goToVote, showConfirmationModal, currentUser])
+  }), [columns, consoleType, goToVote, showConfirmationModal])
 
   return (
     <Fragment>

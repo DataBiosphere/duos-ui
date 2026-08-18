@@ -10,12 +10,6 @@ import { DarCollectionSummary } from 'src/types/model'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { renderWithRouter } from '../../test-utils'
 
-const useDarCollectionDataUseBucketsMock = vi.fn().mockReturnValue({})
-
-vi.mock('src/components/dar_collection_table/useDarCollectionDataUseBuckets', () => ({
-  useDarCollectionDataUseBuckets: (...args: unknown[]) => useDarCollectionDataUseBucketsMock(...args),
-}))
-
 vi.mock('src/libs/storage', () => ({
   Storage: {
     getCurrentUserSettings: vi.fn().mockReturnValue(null),
@@ -84,7 +78,6 @@ beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(Storage.getCurrentUserSettings).mockReturnValue(null)
   vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 1, roles: [] } as never)
-  useDarCollectionDataUseBucketsMock.mockReturnValue({})
   setViewportWidth(1600)
 })
 
@@ -185,16 +178,14 @@ describe('DarCollectionTable', () => {
   })
 
   it('renders one row per data-use group for a collection with multiple groups', () => {
-    useDarCollectionDataUseBucketsMock.mockReturnValue({
-      211: {
-        status: 'loaded',
-        buckets: [
-          { key: 'bucket-1', label: 'GRU', datasets: [], datasetIds: [], elections: [], votes: [] },
-          { key: 'bucket-2', label: 'NPU', datasets: [], datasetIds: [], elections: [], votes: [] },
-        ],
-      },
-    })
     const { container } = renderTable({
+      collections: [{
+        ...baseCollection,
+        dataUseGroups: [
+          { key: 'bucket-1', label: 'GRU', datasets: [], votes: [] },
+          { key: 'bucket-2', label: 'NPU', datasets: [], votes: [] },
+        ],
+      }],
       columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],
     })
     expect(container.querySelectorAll('.MuiDataGrid-row')).toHaveLength(2)
@@ -204,33 +195,25 @@ describe('DarCollectionTable', () => {
     expect(screen.getAllByText('DAR-259')).toHaveLength(1)
   })
 
-  it('requests data-use buckets for the collections on the current page', () => {
-    const secondCollection = { ...baseCollection, darCollectionId: 212 }
-    renderTable({
-      collections: [baseCollection, secondCollection],
+  it('renders a collection with no data-use groups as a single row', () => {
+    const { container } = renderTable({
       columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],
-      consoleType: consoleTypes.CHAIR,
     })
-    expect(useDarCollectionDataUseBucketsMock).toHaveBeenCalledWith([baseCollection, secondCollection], false)
-  })
-
-  it('passes isUnfilteredView=true for admin/researcher/signing official consoles', () => {
-    renderTable({
-      columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],
-      consoleType: consoleTypes.ADMIN,
-    })
-    expect(useDarCollectionDataUseBucketsMock).toHaveBeenCalledWith([baseCollection], true)
+    expect(container.querySelectorAll('.MuiDataGrid-row')).toHaveLength(1)
+    expect(screen.getByText('No datasets')).toBeInTheDocument()
   })
 
   describe('pagination and sorting by collection', () => {
     // Two data-use groups per collection, so a page break in the wrong place would be visible.
-    const twoGroupBuckets = (collections: DarCollectionSummary[]) =>
-      Object.fromEntries(collections.map(c => [
-        c.darCollectionId,
-        { status: 'loaded', buckets: [{ key: 'a', label: `GRU-${c.darCollectionId}`, datasets: [] }, { key: 'b', label: `NPU-${c.darCollectionId}`, datasets: [] }] },
-      ]))
+    const withTwoGroups = (collection: DarCollectionSummary): DarCollectionSummary => ({
+      ...collection,
+      dataUseGroups: [
+        { key: 'a', label: `GRU-${collection.darCollectionId}`, datasets: [], votes: [] },
+        { key: 'b', label: `NPU-${collection.darCollectionId}`, datasets: [], votes: [] },
+      ],
+    })
 
-    const manyCollections = Array.from({ length: 12 }, (_, i) => ({
+    const manyCollections = Array.from({ length: 12 }, (_, i) => withTwoGroups({
       ...baseCollection,
       darCollectionId: 300 + i,
       darCode: `DAR-${300 + i}`,
@@ -242,7 +225,6 @@ describe('DarCollectionTable', () => {
 
     it('fills a page with whole collections, never splitting one across a boundary', async () => {
       const user = userEvent.setup()
-      useDarCollectionDataUseBucketsMock.mockReturnValue(twoGroupBuckets(manyCollections))
       const { container } = renderTable({
         collections: manyCollections,
         columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],
@@ -263,7 +245,6 @@ describe('DarCollectionTable', () => {
     })
 
     it('counts pages by collection, not by grid row', () => {
-      useDarCollectionDataUseBucketsMock.mockReturnValue(twoGroupBuckets(manyCollections))
       renderTable({
         collections: manyCollections,
         columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],
@@ -275,7 +256,6 @@ describe('DarCollectionTable', () => {
     it('keeps a collection data-use rows adjacent after sorting', async () => {
       const user = userEvent.setup()
       const collections = manyCollections.slice(0, 3)
-      useDarCollectionDataUseBucketsMock.mockReturnValue(twoGroupBuckets(collections))
       renderTable({
         collections,
         columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],

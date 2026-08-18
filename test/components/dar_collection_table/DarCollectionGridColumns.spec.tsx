@@ -11,9 +11,7 @@ import {
   makeDarCollectionColumns,
 } from 'src/components/dar_collection_table/DarCollectionGridColumns'
 import { consoleTypes } from 'src/utils/DarCollectionUtils'
-import { DarCollectionSummary } from 'src/types/model'
-import { Bucket } from 'src/utils/BucketUtils'
-import { DataUseBucketsState } from 'src/components/dar_collection_table/useDarCollectionDataUseBuckets'
+import { DarCollectionSummary, DataUseGroup } from 'src/types/model'
 import { renderWithRouter } from '../../test-utils'
 
 vi.mock('src/components/dar_collection_table/Actions', () => ({
@@ -51,28 +49,24 @@ const baseCollection: DarCollectionSummary = {
   submissionDate: 1234567890,
 }
 
-const makeBucket = (overrides: Partial<Bucket> = {}): Bucket => ({
+const makeGroup = (overrides: Partial<DataUseGroup> = {}): DataUseGroup => ({
   key: 'bucket-1',
   label: 'GRU',
   datasets: [],
-  datasetIds: [],
-  elections: [],
   votes: [],
   ...overrides,
-} as Bucket)
+})
 
 const baseArgs: MakeDarCollectionColumnsArgs = {
   consoleType: consoleTypes.RESEARCHER,
   showConfirmationModal: vi.fn(),
-  currentUser: { userId: 1 },
 }
 
 function makeRow(overrides: Partial<DarCollectionGridRow> = {}): DarCollectionGridRow {
   return {
     id: `${darCollectionId}-row`,
     collection: baseCollection,
-    bucket: null,
-    bucketState: 'loaded',
+    group: null,
     ...overrides,
   }
 }
@@ -111,42 +105,29 @@ beforeEach(() => {
 })
 
 describe('buildDarCollectionGridRows', () => {
-  it('produces one row per bucket when buckets have loaded', () => {
-    const bucketsByCollectionId: Record<number, DataUseBucketsState> = {
-      [darCollectionId]: { status: 'loaded', buckets: [makeBucket({ label: 'GRU' }), makeBucket({ key: 'bucket-2', label: 'NPU' })] },
+  it('produces one row per data-use group on the collection', () => {
+    const collection = {
+      ...baseCollection,
+      dataUseGroups: [makeGroup({ label: 'GRU' }), makeGroup({ key: 'bucket-2', label: 'NPU' })],
     }
-    const rows = buildDarCollectionGridRows([baseCollection], bucketsByCollectionId)
+    const rows = buildDarCollectionGridRows([collection])
     expect(rows).toHaveLength(2)
-    expect(rows[0].bucket?.label).toBe('GRU')
-    expect(rows[1].bucket?.label).toBe('NPU')
+    expect(rows[0].group?.label).toBe('GRU')
+    expect(rows[1].group?.label).toBe('NPU')
     expect(rows.every(r => r.collection.darCollectionId === darCollectionId)).toBe(true)
     expect(new Set(rows.map(r => r.id)).size).toBe(2)
   })
 
-  it('produces a single placeholder row while buckets are loading', () => {
-    const rows = buildDarCollectionGridRows([baseCollection], {})
+  it('produces a single empty-state row when the collection has no groups', () => {
+    const rows = buildDarCollectionGridRows([{ ...baseCollection, dataUseGroups: [] }])
     expect(rows).toHaveLength(1)
-    expect(rows[0].bucketState).toBe('loading')
-    expect(rows[0].bucket).toBeNull()
+    expect(rows[0].group).toBeNull()
   })
 
-  it('produces a single empty-state row when there are no buckets', () => {
-    const bucketsByCollectionId: Record<number, DataUseBucketsState> = {
-      [darCollectionId]: { status: 'loaded', buckets: [] },
-    }
-    const rows = buildDarCollectionGridRows([baseCollection], bucketsByCollectionId)
+  it('produces a single empty-state row when groups are absent entirely', () => {
+    const rows = buildDarCollectionGridRows([baseCollection])
     expect(rows).toHaveLength(1)
-    expect(rows[0].bucketState).toBe('loaded')
-    expect(rows[0].bucket).toBeNull()
-  })
-
-  it('produces a single error row when the fetch failed', () => {
-    const bucketsByCollectionId: Record<number, DataUseBucketsState> = {
-      [darCollectionId]: { status: 'error' },
-    }
-    const rows = buildDarCollectionGridRows([baseCollection], bucketsByCollectionId)
-    expect(rows).toHaveLength(1)
-    expect(rows[0].bucketState).toBe('error')
+    expect(rows[0].group).toBeNull()
   })
 })
 
@@ -245,42 +226,30 @@ describe('researcher and institution columns', () => {
 })
 
 describe('datasetCount column', () => {
-  it('renders a loading skeleton while the bucket has not resolved', () => {
+  it('renders 0 when the row has no group', () => {
     const columns = makeDarCollectionColumns(['datasetCount'], baseArgs)
-    const { container } = renderCell(getColumn(columns, 'datasetCount'), makeRow({ bucketState: 'loading', bucket: null }))
-    expect(container.querySelector('.MuiSkeleton-root')).toBeInTheDocument()
-  })
-
-  it('renders 0 when there is no bucket', () => {
-    const columns = makeDarCollectionColumns(['datasetCount'], baseArgs)
-    renderCell(getColumn(columns, 'datasetCount'), makeRow({ bucketState: 'loaded', bucket: null }))
+    renderCell(getColumn(columns, 'datasetCount'), makeRow({ group: null }))
     expect(screen.getByText('0')).toBeInTheDocument()
   })
 
-  it('renders an error placeholder when the bucket fetch failed', () => {
+  it('renders the per-group dataset count as a plain integer', () => {
+    const group = makeGroup({ datasets: [{ datasetId: 1, name: 'Set A', datasetIdentifier: 'DUOS-1' }] })
     const columns = makeDarCollectionColumns(['datasetCount'], baseArgs)
-    renderCell(getColumn(columns, 'datasetCount'), makeRow({ bucketState: 'error', bucket: null }))
-    expect(screen.getByText('—')).toBeInTheDocument()
-  })
-
-  it('renders the per-bucket dataset count as a plain integer', () => {
-    const bucket = makeBucket({ datasets: [{ name: 'Set A', datasetIdentifier: 'DUOS-1' } as never] })
-    const columns = makeDarCollectionColumns(['datasetCount'], baseArgs)
-    const { container } = renderCell(getColumn(columns, 'datasetCount'), makeRow({ bucket, bucketState: 'loaded' }))
+    const { container } = renderCell(getColumn(columns, 'datasetCount'), makeRow({ group }))
     expect(screen.getByText('1')).toBeInTheDocument()
     expect(container.querySelector('.MuiChip-root')).toBeNull()
   })
 
   it('shows the dataset names and identifiers on hover', async () => {
     const user = userEvent.setup()
-    const bucket = makeBucket({
+    const group = makeGroup({
       datasets: [
-        { name: 'Dataset One', datasetIdentifier: 'DUOS-000001' },
-        { name: 'Dataset Two', datasetIdentifier: 'DUOS-000002' },
-      ] as Bucket['datasets'],
+        { datasetId: 1, name: 'Dataset One', datasetIdentifier: 'DUOS-000001' },
+        { datasetId: 2, name: 'Dataset Two', datasetIdentifier: 'DUOS-000002' },
+      ],
     })
     const column = getColumn(makeDarCollectionColumns(['datasetCount'], baseArgs), 'datasetCount')
-    renderCell(column, makeRow({ bucket }))
+    renderCell(column, makeRow({ group }))
 
     await user.hover(screen.getByText('2'))
 
@@ -299,40 +268,30 @@ describe('datasetCount column', () => {
 })
 
 describe('votes column', () => {
-  const bucketWithVotes = makeBucket({
-    votes: [{
-      dataAccess: {
-        memberVotes: [
-          { userId: 1, displayName: 'Alice', vote: true } as never,
-          { userId: 2, displayName: 'Bob', vote: false } as never,
-        ],
-        chairpersonVotes: [],
-        finalVotes: [],
-      },
-    } as never],
+  const groupWithVotes = makeGroup({
+    votes: [
+      { userId: 1, displayName: 'Alice', vote: true },
+      { userId: 2, displayName: 'Bob', vote: false },
+    ],
   })
 
   it('renders nothing for non chair/member consoles', () => {
     const columns = makeDarCollectionColumns(['votes'], { ...baseArgs, consoleType: consoleTypes.RESEARCHER })
-    const { container } = renderCell(getColumn(columns, 'votes'), makeRow({ bucket: bucketWithVotes, bucketState: 'loaded' }))
+    const { container } = renderCell(getColumn(columns, 'votes'), makeRow({ group: groupWithVotes }))
     expect(container.querySelector('.MuiChip-root')).toBeNull()
   })
 
   it('renders number-only approve/deny pills for CHAIR console', () => {
-    const columns = makeDarCollectionColumns(['votes'], {
-      ...baseArgs,
-      consoleType: consoleTypes.CHAIR,
-      currentUser: { userId: 1 },
-    })
-    const { container } = renderCell(getColumn(columns, 'votes'), makeRow({ bucket: bucketWithVotes, bucketState: 'loaded' }))
+    const columns = makeDarCollectionColumns(['votes'], { ...baseArgs, consoleType: consoleTypes.CHAIR })
+    const { container } = renderCell(getColumn(columns, 'votes'), makeRow({ group: groupWithVotes }))
     expect(container.querySelector('.MuiChip-colorSuccess')).toHaveTextContent('1')
     expect(container.querySelector('.MuiChip-colorError')).toHaveTextContent('1')
   })
 
-  it('renders a loading skeleton while the bucket has not resolved', () => {
+  it('renders nothing when the row has no group', () => {
     const columns = makeDarCollectionColumns(['votes'], { ...baseArgs, consoleType: consoleTypes.MEMBER })
-    const { container } = renderCell(getColumn(columns, 'votes'), makeRow({ bucketState: 'loading', bucket: null }))
-    expect(container.querySelector('.MuiSkeleton-root')).toBeInTheDocument()
+    const { container } = renderCell(getColumn(columns, 'votes'), makeRow({ group: null }))
+    expect(container.querySelector('.MuiChip-root')).toBeNull()
   })
 
   it('never spans, since votes vary per data-use group', () => {
@@ -361,28 +320,16 @@ describe('actions column', () => {
 })
 
 describe('dataUse column', () => {
-  it('renders a loading skeleton while the bucket has not resolved', () => {
+  it('renders an empty-state placeholder when the row has no group', () => {
     const columns = makeDarCollectionColumns(['dataUse'], baseArgs)
-    const { container } = renderCell(getColumn(columns, 'dataUse'), makeRow({ bucketState: 'loading', bucket: null }))
-    expect(container.querySelector('.MuiSkeleton-root')).toBeInTheDocument()
-  })
-
-  it('renders an empty-state placeholder when there is no bucket', () => {
-    const columns = makeDarCollectionColumns(['dataUse'], baseArgs)
-    renderCell(getColumn(columns, 'dataUse'), makeRow({ bucketState: 'loaded', bucket: null }))
+    renderCell(getColumn(columns, 'dataUse'), makeRow({ group: null }))
     expect(screen.getByText('No datasets')).toBeInTheDocument()
   })
 
-  it('renders an error placeholder when the bucket fetch failed', () => {
-    const columns = makeDarCollectionColumns(['dataUse'], baseArgs)
-    renderCell(getColumn(columns, 'dataUse'), makeRow({ bucketState: 'error', bucket: null }))
-    expect(screen.getByText('—')).toBeInTheDocument()
-  })
-
   it('renders only the data-use pill, with no dataset count or vote content', () => {
-    const bucket = makeBucket({ label: 'GRU', datasets: [{ name: 'Set A', datasetIdentifier: 'DUOS-1' } as never] })
+    const group = makeGroup({ label: 'GRU', datasets: [{ datasetId: 1, name: 'Set A', datasetIdentifier: 'DUOS-1' }] })
     const columns = makeDarCollectionColumns(['dataUse'], { ...baseArgs, consoleType: consoleTypes.CHAIR })
-    renderCell(getColumn(columns, 'dataUse'), makeRow({ bucket, bucketState: 'loaded' }))
+    renderCell(getColumn(columns, 'dataUse'), makeRow({ group }))
     expect(screen.getByText('GRU')).toBeInTheDocument()
     expect(screen.queryByText(/datasets/)).not.toBeInTheDocument()
   })
@@ -391,7 +338,7 @@ describe('dataUse column', () => {
     const user = userEvent.setup()
     const label = 'General Research Use, No Methods Development, Publication Required'
     const column = getColumn(makeDarCollectionColumns(['dataUse'], baseArgs), 'dataUse')
-    renderCell(column, makeRow({ bucket: makeBucket({ label }) }))
+    renderCell(column, makeRow({ group: makeGroup({ label }) }))
 
     await user.hover(screen.getByText(label))
 
@@ -401,8 +348,8 @@ describe('dataUse column', () => {
   it('never spans across rows, even within the same collection', () => {
     const columns = makeDarCollectionColumns(['dataUse'], baseArgs)
     const column = getColumn(columns, 'dataUse')
-    const rowA = makeRow({ id: 'a', bucket: makeBucket({ key: 'a' }) })
-    const rowB = makeRow({ id: 'b', bucket: makeBucket({ key: 'b' }) })
+    const rowA = makeRow({ id: 'a', group: makeGroup({ key: 'a' }) })
+    const rowB = makeRow({ id: 'b', group: makeGroup({ key: 'b' }) })
     expect(getSpanValue(column, rowA)).not.toBe(getSpanValue(column, rowB))
   })
 })
