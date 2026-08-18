@@ -1,11 +1,11 @@
 import { Config } from 'src/libs/config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
-import { DatasetStatisticsDar } from 'src/types/model'
+import { DatasetStatisticsDar, IntellectualProperty, Presentation, Publication } from 'src/types/model'
 
-export interface DarTrendMonth {
-  period: string
-  approvedCount: number
-  deniedCount: number
+export interface StudyResearchOutputs {
+  presentations: Presentation[]
+  publications: Publication[]
+  intellectualProperties: IntellectualProperty[]
 }
 
 export const DatasetMetrics = {
@@ -32,13 +32,13 @@ export const DatasetMetrics = {
   },
 
   /**
-   * Retrieve monthly approved-vs-denied DAR election outcome counts across a study's datasets.
-   * @param studyId The ID of the study to fetch the DAR trend for
-   * @returns Promise resolving to the chronological list of monthly counts
+   * Retrieve presentations/publications/intellectual property researchers reported through
+   * progress reports on this study's datasets.
+   * @param studyId The ID of the study to fetch research outputs for
    */
-  getDarTrend: async (studyId: number | string): Promise<DarTrendMonth[]> => {
-    const url = `${await Config.getApiUrl()}/api/metrics/dar-trend/study/${studyId}`
-    const res = await fetchGet<DarTrendMonth[]>(url, Config.authOpts())
+  getResearchOutputs: async (studyId: number | string): Promise<StudyResearchOutputs> => {
+    const url = `${await Config.getApiUrl()}/api/metrics/research-outputs/study/${studyId}`
+    const res = await fetchGet<StudyResearchOutputs>(url, Config.authOpts())
     return res.data
   },
 }
