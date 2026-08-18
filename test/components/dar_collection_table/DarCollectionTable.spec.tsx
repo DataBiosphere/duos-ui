@@ -1,14 +1,14 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach, beforeAll, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, renderHook, act } from '@testing-library/react'
+import { screen, renderHook, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
 import { DarCollectionTable, DarCollectionTableProps } from 'src/components/dar_collection_table/DarCollectionTable'
 import { DarCollectionTableColumnOptions, consoleTypes } from 'src/utils/DarCollectionUtils'
 import { Storage } from 'src/libs/storage'
 import { DarCollectionSummary } from 'src/types/model'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
+import { renderWithRouter } from '../../test-utils'
 
 const useDarCollectionDataUseBucketsMock = vi.fn().mockReturnValue({})
 
@@ -61,11 +61,9 @@ const baseProps: DarCollectionTableProps = {
 }
 
 function renderTable(overrides: Partial<DarCollectionTableProps> = {}) {
-  return render(
+  return renderWithRouter(
     <div style={{ width: 1200, height: 600 }}>
-      <MemoryRouter>
-        <DarCollectionTable {...baseProps} {...overrides} />
-      </MemoryRouter>
+      <DarCollectionTable {...baseProps} {...overrides} />
     </div>,
   )
 }
@@ -206,14 +204,14 @@ describe('DarCollectionTable', () => {
     expect(screen.getAllByText('DAR-259')).toHaveLength(1)
   })
 
-  it('requests data-use buckets for the collection ids on the current page', () => {
+  it('requests data-use buckets for the collections on the current page', () => {
     const secondCollection = { ...baseCollection, darCollectionId: 212 }
     renderTable({
       collections: [baseCollection, secondCollection],
       columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],
       consoleType: consoleTypes.CHAIR,
     })
-    expect(useDarCollectionDataUseBucketsMock).toHaveBeenCalledWith([211, 212], false)
+    expect(useDarCollectionDataUseBucketsMock).toHaveBeenCalledWith([baseCollection, secondCollection], false)
   })
 
   it('passes isUnfilteredView=true for admin/researcher/signing official consoles', () => {
@@ -221,13 +219,93 @@ describe('DarCollectionTable', () => {
       columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],
       consoleType: consoleTypes.ADMIN,
     })
-    expect(useDarCollectionDataUseBucketsMock).toHaveBeenCalledWith([211], true)
+    expect(useDarCollectionDataUseBucketsMock).toHaveBeenCalledWith([baseCollection], true)
+  })
+
+  describe('pagination and sorting by collection', () => {
+    // Two data-use groups per collection, so a page break in the wrong place would be visible.
+    const twoGroupBuckets = (collections: DarCollectionSummary[]) =>
+      Object.fromEntries(collections.map(c => [
+        c.darCollectionId,
+        { status: 'loaded', buckets: [{ key: 'a', label: `GRU-${c.darCollectionId}`, datasets: [] }, { key: 'b', label: `NPU-${c.darCollectionId}`, datasets: [] }] },
+      ]))
+
+    const manyCollections = Array.from({ length: 12 }, (_, i) => ({
+      ...baseCollection,
+      darCollectionId: 300 + i,
+      darCode: `DAR-${300 + i}`,
+      submissionDate: 12 - i,
+    }))
+
+    const darCodesOnPage = () =>
+      screen.getAllByText(/^DAR-3\d\d$/).map(el => el.textContent)
+
+    it('fills a page with whole collections, never splitting one across a boundary', async () => {
+      const user = userEvent.setup()
+      useDarCollectionDataUseBucketsMock.mockReturnValue(twoGroupBuckets(manyCollections))
+      const { container } = renderTable({
+        collections: manyCollections,
+        columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],
+      })
+
+      // 10 collections x 2 groups: every collection on the page shows both of its groups.
+      expect(container.querySelectorAll('.MuiDataGrid-row')).toHaveLength(20)
+      const firstPage = darCodesOnPage()
+      expect(firstPage).toHaveLength(10)
+
+      await user.click(screen.getByRole('button', { name: /next page/i }))
+
+      const secondPage = darCodesOnPage()
+      expect(secondPage).toHaveLength(2)
+      expect(container.querySelectorAll('.MuiDataGrid-row')).toHaveLength(4)
+      // No collection straddles the boundary.
+      expect(firstPage.filter(code => secondPage.includes(code))).toEqual([])
+    })
+
+    it('counts pages by collection, not by grid row', () => {
+      useDarCollectionDataUseBucketsMock.mockReturnValue(twoGroupBuckets(manyCollections))
+      renderTable({
+        collections: manyCollections,
+        columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],
+      })
+
+      expect(screen.getByText('1–10 of 12')).toBeInTheDocument()
+    })
+
+    it('keeps a collection data-use rows adjacent after sorting', async () => {
+      const user = userEvent.setup()
+      const collections = manyCollections.slice(0, 3)
+      useDarCollectionDataUseBucketsMock.mockReturnValue(twoGroupBuckets(collections))
+      renderTable({
+        collections,
+        columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],
+      })
+
+      // Twice, for descending - so the collections actually reorder off their input order.
+      await user.click(screen.getByText('DAR Code'))
+      await user.click(screen.getByText('DAR Code'))
+
+      const labels = screen.getAllByText(/^(GRU|NPU)-\d+$/).map(el => el.textContent)
+      expect(labels).toEqual(['GRU-302', 'NPU-302', 'GRU-301', 'NPU-301', 'GRU-300', 'NPU-300'])
+    })
   })
 
   it('reads the persisted sort field/direction on mount', () => {
     vi.mocked(Storage.getCurrentUserSettings).mockReturnValue({ field: 'darCode', dir: 1 })
     renderTable({ columns: [DarCollectionTableColumnOptions.DAR_CODE] })
     expect(Storage.getCurrentUserSettings).toHaveBeenCalledWith('storageDarCollectionSort')
+  })
+
+  it('ignores a persisted sort naming a per-data-use-group column', () => {
+    // datasetCount has no collection-level value to order by, so it is not sortable.
+    vi.mocked(Storage.getCurrentUserSettings).mockReturnValue({ field: 'datasetCount', dir: 1 })
+    const { container } = renderTable({
+      columns: [DarCollectionTableColumnOptions.DATASET_COUNT, DarCollectionTableColumnOptions.DAR_CODE],
+    })
+
+    // Falls back to the first sortable column rather than sorting by a column that cannot.
+    const sorted = container.querySelector('[aria-sort="ascending"], [aria-sort="descending"]')
+    expect(sorted?.getAttribute('data-field')).toBe('darCode')
   })
 
   it('persists sort field/direction when a column header is clicked', async () => {

@@ -54,8 +54,15 @@ interface VoteGroup {
  * Step 4: Pull all votes up to a top level bucket field for easier iteration
  * Step 5: Set the bucket key/label from the dataUse + dataset ids
  * Step 6: Coalesce the algorithm decision per bucket
+ *
+ * Callers that never read `matchResults`/`algorithmResult` can pass
+ * `includeMatchResults: false` to skip the match fetch entirely.
  */
-export const binCollectionToBuckets = async (collection: Pick<DarCollection, 'datasets'> & Partial<Pick<DarCollection, 'dars'>>, dacIds: number[] = []): Promise<Bucket[]> => {
+export const binCollectionToBuckets = async (
+  collection: Pick<DarCollection, 'datasets'> & Partial<Pick<DarCollection, 'dars'>>,
+  dacIds: number[] = [],
+  { includeMatchResults = true }: { includeMatchResults?: boolean } = {},
+): Promise<Bucket[]> => {
   const buckets: Bucket[] = []
   // Find the most recent DAR
   const recentDar: DataAccessRequest = collection.dars === undefined
@@ -63,7 +70,9 @@ export const binCollectionToBuckets = async (collection: Pick<DarCollection, 'da
     : Object.values(collection.dars).sort((a, b) => b.id - a.id).at(0) || {} as DataAccessRequest
   // Find all match results for this collection. This will be placed into each
   // bucket based on the dataset that the match applies to in step 1.a
-  const matchData: MatchResult[] = recentDar.referenceId ? await Match.findMatchBatch([recentDar.referenceId]) : []
+  const matchData: MatchResult[] = (includeMatchResults && recentDar.referenceId)
+    ? await Match.findMatchBatch([recentDar.referenceId])
+    : []
   // If we need to restrict the datasets to a particular DAC, do that here.
   const datasets: Dataset[] = filterDatasetsByDACs(dacIds, collection.datasets)
   // Find the DatasetTerms which have preprocessed DataUse objects.

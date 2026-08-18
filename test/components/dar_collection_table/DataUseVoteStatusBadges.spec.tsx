@@ -1,7 +1,8 @@
 import React from 'react'
 import { describe, it, expect } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { DataUseVoteStatusBadges } from 'src/components/dar_collection_table/DataUseVoteStatusBadges'
 import { Vote } from 'src/types/model'
 
@@ -47,6 +48,25 @@ describe('DataUseVoteStatusBadges', () => {
     const { container } = render(<DataUseVoteStatusBadges memberVotes={memberVotes} />)
     expect(container.querySelectorAll('.MuiChip-root')).toHaveLength(1)
     expect(container.querySelector('.MuiChip-colorSuccess')).toHaveTextContent('1')
+  })
+
+  it.each([
+    ['MuiChip-colorSuccess', 'Approve: Alice, Bob'],
+    ['MuiChip-colorError', 'Deny: Carol'],
+    ['MuiChip-colorDefault', 'Pending: Dan'],
+  ])('shows the %s members names on hover', async (chipClass, expected) => {
+    const user = userEvent.setup()
+    const memberVotes = [
+      makeVote({ userId: 1, displayName: 'Alice', vote: true }),
+      makeVote({ userId: 2, displayName: 'Bob', vote: true }),
+      makeVote({ userId: 3, displayName: 'Carol', vote: false }),
+      makeVote({ userId: 4, displayName: 'Dan', vote: undefined }),
+    ]
+    const { container } = render(<DataUseVoteStatusBadges memberVotes={memberVotes} />)
+
+    await user.hover(container.querySelector(`.${chipClass}`)!)
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(expected)
   })
 
   it('renders nothing when there are no member votes', () => {

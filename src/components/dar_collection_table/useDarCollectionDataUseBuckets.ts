@@ -4,7 +4,7 @@ import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
 import { compact, map, uniq } from 'src/utils/NodashUtil'
 import { Bucket, binCollectionToBuckets } from 'src/utils/BucketUtils'
-import { DarCollection } from 'src/types/model'
+import { DarCollection, DarCollectionSummary } from 'src/types/model'
 
 export type DataUseBucketsState
   = | { status: 'loading' }
@@ -13,24 +13,35 @@ export type DataUseBucketsState
 
 const MAX_CONCURRENT_FETCHES = 5
 
+// Buckets carry election and vote state, so they go stale when an action changes the
+// collection. Keying the cache on the fields an action alters refetches only what changed.
+const collectionSignature = (collection: DarCollectionSummary): string =>
+  `${collection.status ?? ''}|${(collection.actions ?? []).join(',')}`
+
 /**
  * Lazily fetches and bins each visible collection's datasets into data-use buckets so the
  * table's Data Use column can render pills/vote-badges without requiring the row to be
- * expanded first. Results are cached permanently per hook instance (per table mount).
+ * expanded first. Results are cached per hook instance (per table mount) until the
+ * collection's election state changes.
  */
 export function useDarCollectionDataUseBuckets(
-  visibleCollectionIds: number[],
+  visibleCollections: DarCollectionSummary[],
   isUnfilteredView: boolean,
 ): Record<number, DataUseBucketsState> {
   const [bucketsByCollectionId, setBucketsByCollectionId] = useState<Record<number, DataUseBucketsState>>({})
-  const requestedIds = useRef<Set<number>>(new Set())
+  const requestedSignatures = useRef<Map<number, string>>(new Map())
 
   useEffect(() => {
-    const idsToFetch = visibleCollectionIds.filter(id => !requestedIds.current.has(id))
-    if (idsToFetch.length === 0) {
+    const collectionsToFetch = visibleCollections.filter(
+      collection => requestedSignatures.current.get(collection.darCollectionId) !== collectionSignature(collection),
+    )
+    if (collectionsToFetch.length === 0) {
       return
     }
-    idsToFetch.forEach(id => requestedIds.current.add(id))
+    const idsToFetch = collectionsToFetch.map(collection => collection.darCollectionId)
+    collectionsToFetch.forEach((collection) => {
+      requestedSignatures.current.set(collection.darCollectionId, collectionSignature(collection))
+    })
     setBucketsByCollectionId((prev) => {
       const next = { ...prev }
       idsToFetch.forEach((id) => {
@@ -53,10 +64,14 @@ export function useDarCollectionDataUseBuckets(
       const id = idsToFetch[index]
       try {
         const collection: DarCollection = await Collections.getCollectionById(id)
-        const buckets = await binCollectionToBuckets(collection, dacIds)
+        // The table renders only labels, datasets and votes, so skip the per-collection
+        // match fetch that the DAR review page needs.
+        const buckets = await binCollectionToBuckets(collection, dacIds, { includeMatchResults: false })
         setBucketsByCollectionId(prev => ({ ...prev, [id]: { status: 'loaded', buckets } }))
       }
       catch {
+        // Dropped so the next pass retries, rather than pinning the error until remount.
+        requestedSignatures.current.delete(id)
         setBucketsByCollectionId(prev => ({ ...prev, [id]: { status: 'error' } }))
         Notifications.showError({ text: 'Could not load DAR Collection.' })
       }
@@ -65,7 +80,7 @@ export function useDarCollectionDataUseBuckets(
 
     const workerCount = Math.min(MAX_CONCURRENT_FETCHES, idsToFetch.length)
     void Promise.all(Array.from({ length: workerCount }, () => runNext()))
-  }, [visibleCollectionIds, isUnfilteredView])
+  }, [visibleCollections, isUnfilteredView])
 
   return bucketsByCollectionId
 }

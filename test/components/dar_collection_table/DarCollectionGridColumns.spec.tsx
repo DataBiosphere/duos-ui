@@ -1,8 +1,8 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import { screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
 import {
   DarCollectionGridRow,
@@ -14,6 +14,7 @@ import { consoleTypes } from 'src/utils/DarCollectionUtils'
 import { DarCollectionSummary } from 'src/types/model'
 import { Bucket } from 'src/utils/BucketUtils'
 import { DataUseBucketsState } from 'src/components/dar_collection_table/useDarCollectionDataUseBuckets'
+import { renderWithRouter } from '../../test-utils'
 
 vi.mock('src/components/dar_collection_table/Actions', () => ({
   default: ({ consoleType }: { consoleType: string }) => <div data-testid="actions">{consoleType}</div>,
@@ -88,7 +89,7 @@ function makeParams(row: DarCollectionGridRow, value?: unknown): GridRenderCellP
 
 function renderCell(column: GridColDef<DarCollectionGridRow>, row: DarCollectionGridRow, value?: unknown) {
   const node = column.renderCell!(makeParams(row, value))
-  return render(<MemoryRouter>{node as React.ReactElement}</MemoryRouter>)
+  return renderWithRouter(node as React.ReactElement)
 }
 
 type LooseGetter = (value: unknown, row: DarCollectionGridRow, column: GridColDef<DarCollectionGridRow>, apiRef: unknown) => unknown
@@ -270,6 +271,24 @@ describe('datasetCount column', () => {
     expect(container.querySelector('.MuiChip-root')).toBeNull()
   })
 
+  it('shows the dataset names and identifiers on hover', async () => {
+    const user = userEvent.setup()
+    const bucket = makeBucket({
+      datasets: [
+        { name: 'Dataset One', datasetIdentifier: 'DUOS-000001' },
+        { name: 'Dataset Two', datasetIdentifier: 'DUOS-000002' },
+      ] as Bucket['datasets'],
+    })
+    const column = getColumn(makeDarCollectionColumns(['datasetCount'], baseArgs), 'datasetCount')
+    renderCell(column, makeRow({ bucket }))
+
+    await user.hover(screen.getByText('2'))
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Dataset One (DUOS-000001), Dataset Two (DUOS-000002)',
+    )
+  })
+
   it('never spans, since the count varies per data-use group', () => {
     const columns = makeDarCollectionColumns(['datasetCount'], baseArgs)
     const column = getColumn(columns, 'datasetCount')
@@ -366,6 +385,17 @@ describe('dataUse column', () => {
     renderCell(getColumn(columns, 'dataUse'), makeRow({ bucket, bucketState: 'loaded' }))
     expect(screen.getByText('GRU')).toBeInTheDocument()
     expect(screen.queryByText(/datasets/)).not.toBeInTheDocument()
+  })
+
+  it('shows the full, untruncated data-use label on hover', async () => {
+    const user = userEvent.setup()
+    const label = 'General Research Use, No Methods Development, Publication Required'
+    const column = getColumn(makeDarCollectionColumns(['dataUse'], baseArgs), 'dataUse')
+    renderCell(column, makeRow({ bucket: makeBucket({ label }) }))
+
+    await user.hover(screen.getByText(label))
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(label)
   })
 
   it('never spans across rows, even within the same collection', () => {

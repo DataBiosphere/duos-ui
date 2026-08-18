@@ -286,6 +286,32 @@ describe('BucketUtils', () => {
     }
   })
 
+  it('skips the match fetch when includeMatchResults is false', async () => {
+    const findMatchBatch = vi.spyOn(Match, 'findMatchBatch').mockResolvedValue(match_results)
+    vi.spyOn(DataSet, 'searchDatasetIndex').mockResolvedValue(dataset_terms)
+
+    const buckets = await binCollectionToBuckets(dar_collection, [], { includeMatchResults: false })
+
+    expect(findMatchBatch).not.toHaveBeenCalled()
+    // Buckets still carry everything a caller that opted out reads.
+    expect(buckets).not.toHaveLength(0)
+    for (const b of buckets) {
+      expect(b.matchResults).toHaveLength(0)
+      expect(b.label).not.toBe('')
+      expect(b.datasets).not.toHaveLength(0)
+      expect(b.votes).not.toHaveLength(0)
+    }
+  })
+
+  it('fetches matches by default', async () => {
+    const findMatchBatch = vi.spyOn(Match, 'findMatchBatch').mockResolvedValue(match_results)
+    vi.spyOn(DataSet, 'searchDatasetIndex').mockResolvedValue(dataset_terms)
+
+    await binCollectionToBuckets(dar_collection)
+
+    expect(findMatchBatch).toHaveBeenCalled()
+  })
+
   it('there should be a bucket with two GRU datasets', async () => {
     vi.spyOn(Match, 'findMatchBatch').mockResolvedValue(match_results)
     vi.spyOn(DataSet, 'searchDatasetIndex').mockResolvedValue(dataset_terms)

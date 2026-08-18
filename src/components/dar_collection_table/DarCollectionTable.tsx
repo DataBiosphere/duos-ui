@@ -2,6 +2,7 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react'
 import { DataGrid, GridPaginationModel, GridSortDirection, GridSortModel } from '@mui/x-data-grid'
 import { Box, CircularProgress } from '@mui/material'
 import { Storage } from 'src/libs/storage'
+import { Theme } from 'src/libs/theme'
 import { isNil, toLower, uniq } from 'src/utils/NodashUtil'
 import { DarCollectionTableColumnOptions, consoleTypes } from 'src/utils/DarCollectionUtils'
 import { buildDarCollectionGridRows, makeDarCollectionColumns } from 'src/components/dar_collection_table/DarCollectionGridColumns'
@@ -43,10 +44,24 @@ const defaultColumns = [
   DarCollectionTableColumnOptions.ACTIONS,
 ]
 
+// The per-data-use-group columns carry no collection-level value to order by, so they
+// are not sortable and a persisted sort naming one is ignored.
+const sortableFields: string[] = [
+  DarCollectionTableColumnOptions.DAR_CODE,
+  DarCollectionTableColumnOptions.DAC,
+  DarCollectionTableColumnOptions.NAME,
+  DarCollectionTableColumnOptions.SUBMISSION_DATE,
+  DarCollectionTableColumnOptions.RESEARCHER,
+  DarCollectionTableColumnOptions.INSTITUTION,
+  DarCollectionTableColumnOptions.EXPIRES_AT,
+  DarCollectionTableColumnOptions.STATUS,
+]
+
 const getInitialSortModel = (columns: string[]): GridSortModel => {
   const stored = Storage.getCurrentUserSettings<StoredSort>(storageDarCollectionSort)
     ?? { field: DarCollectionTableColumnOptions.SUBMISSION_DATE, dir: -1 }
-  const field = columns.includes(stored.field) ? stored.field : columns[0]
+  const isUsable = (field: string) => columns.includes(field) && sortableFields.includes(field)
+  const field = isUsable(stored.field) ? stored.field : columns.find(isUsable)
   return field ? [{ field, sort: stored.dir === -1 ? 'desc' : 'asc' }] : []
 }
 
@@ -69,8 +84,6 @@ const getSortValue = (field: string, row: DarCollectionSummary): string | number
       return row.researcherName ?? ''
     case DarCollectionTableColumnOptions.INSTITUTION:
       return row.institutionName ?? ''
-    case DarCollectionTableColumnOptions.DATASET_COUNT:
-      return row.datasetCount ?? 0
     case DarCollectionTableColumnOptions.EXPIRES_AT:
       return isNil(row.expiresAt) ? -Infinity : row.expiresAt
     case DarCollectionTableColumnOptions.STATUS:
@@ -93,6 +106,23 @@ const sortDarCollections = (
     if (aValue > bValue) return 1 * multiplier
     return 0
   })
+}
+
+// Focus rings for keyboard users only. The link rule is needed because index.css
+// resets `a { outline: 0 }` globally, and the DAR Code cell renders a link.
+const DATAGRID_SX = {
+  '& .MuiDataGrid-cell:focus': { outline: 'none' },
+  '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
+  '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
+  '& .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
+  '& .MuiDataGrid-cell:focus-visible, & .MuiDataGrid-columnHeader:focus-visible': {
+    outline: `2px solid ${Theme.palette.link}`,
+    outlineOffset: '-2px',
+  },
+  '& .MuiDataGrid-cell a:focus-visible': {
+    outline: `2px solid ${Theme.palette.link}`,
+    outlineOffset: '2px',
+  },
 }
 
 const LoadingOverlay = () => (
@@ -145,12 +175,7 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
     return sortedCollections.slice(start, start + paginationModel.pageSize)
   }, [sortedCollections, paginationModel])
 
-  const visibleCollectionIds = useMemo(
-    () => pagedCollections.map(c => c.darCollectionId),
-    [pagedCollections],
-  )
-
-  const bucketsByCollectionId = useDarCollectionDataUseBuckets(visibleCollectionIds, isUnfilteredView)
+  const bucketsByCollectionId = useDarCollectionDataUseBuckets(pagedCollections, isUnfilteredView)
 
   const rows = useMemo(
     () => buildDarCollectionGridRows(pagedCollections, bucketsByCollectionId),
@@ -186,13 +211,9 @@ export const DarCollectionTable = function DarCollectionTable(props: DarCollecti
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50]}
           disableRowSelectionOnClick
+          autoHeight
           slots={{ loadingOverlay: LoadingOverlay }}
-          sx={{
-            '& .MuiDataGrid-cell:focus': { outline: 'none' },
-            '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
-            '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
-            '& .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
-          }}
+          sx={DATAGRID_SX}
         />
       </Box>
       <CollectionConfirmationModal

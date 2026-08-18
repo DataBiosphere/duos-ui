@@ -4,7 +4,7 @@ import { Box, Chip, Skeleton, Tooltip } from '@mui/material'
 import { Link } from 'react-router'
 import { formatDate } from 'src/libs/utils'
 import { includes, isEmpty, isNil, toLower, uniq } from 'src/utils/NodashUtil'
-import { VoteBucket, collapseVotesByUser, consoleTypes, extractDacDataAccessVotesFromBucket } from 'src/utils/DarCollectionUtils'
+import { collapseVotesByUser, consoleTypes, extractDacDataAccessVotesFromBucket } from 'src/utils/DarCollectionUtils'
 import { DarCollectionSummary } from 'src/types/model'
 import { Bucket } from 'src/utils/BucketUtils'
 import Actions from 'src/components/dar_collection_table/Actions'
@@ -259,7 +259,7 @@ const votesColumn = ({ consoleType, currentUser }: MakeDarCollectionColumnsArgs)
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
         <DataUseVoteStatusBadges
-          memberVotes={collapseVotesByUser(extractDacDataAccessVotesFromBucket(bucket as unknown as VoteBucket, currentUser, false))}
+          memberVotes={collapseVotesByUser(extractDacDataAccessVotesFromBucket({ votes: bucket.votes }, currentUser, false))}
         />
       </Box>
     )
