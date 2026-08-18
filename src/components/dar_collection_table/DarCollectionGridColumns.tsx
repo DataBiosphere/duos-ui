@@ -6,6 +6,7 @@ import { formatDate } from 'src/libs/utils'
 import { includes, isEmpty, isNil, toLower, uniq } from 'src/utils/NodashUtil'
 import { consoleTypes } from 'src/utils/DarCollectionUtils'
 import { DarCollectionSummary, DataUseGroup } from 'src/types/model'
+import { dataUseTooltip, orderDataUseCodes } from 'src/utils/DataUseUtils'
 import Actions from 'src/components/dar_collection_table/Actions'
 import DarCollectionAdminReviewLink from 'src/components/dar_collection_table/DarCollectionAdminReviewLink'
 import DataUseVoteStatusBadges from 'src/components/dar_collection_table/DataUseVoteStatusBadges'
@@ -190,13 +191,27 @@ const dataUseColumn = (): GridColDef<DarCollectionGridRow> => ({
       return <span>No datasets</span>
     }
 
+    const terms = orderDataUseCodes(group)
+    if (terms.length === 0) {
+      return null
+    }
+
     return (
-      <Tooltip title={group.label}>
+      <Tooltip
+        title={(
+          <Box component="ul" sx={{ m: 0, pl: 2 }}>
+            {terms.map((term, index) => <li key={`${term.shortCode}-${index}`}>{dataUseTooltip(term)}</li>)}
+          </Box>
+        )}
+        describeChild
+      >
         <Chip
-          label={group.label}
+          label={terms.map(term => term.shortCode).join('-')}
           size="small"
           variant="outlined"
-          sx={{ 'maxWidth': '100%', '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis' } }}
+          color="primary"
+          tabIndex={0}
+          sx={{ maxWidth: '100%' }}
         />
       </Tooltip>
     )

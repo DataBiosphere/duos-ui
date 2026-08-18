@@ -49,9 +49,11 @@ const baseCollection: DarCollectionSummary = {
   submissionDate: 1234567890,
 }
 
+const gru = { primary: [{ code: 'GRU', description: 'General research use' }] }
+
 const makeGroup = (overrides: Partial<DataUseGroup> = {}): DataUseGroup => ({
   key: 'bucket-1',
-  label: 'GRU',
+  dataUse: gru,
   datasets: [],
   votes: [],
   ...overrides,
@@ -108,12 +110,15 @@ describe('buildDarCollectionGridRows', () => {
   it('produces one row per data-use group on the collection', () => {
     const collection = {
       ...baseCollection,
-      dataUseGroups: [makeGroup({ label: 'GRU' }), makeGroup({ key: 'bucket-2', label: 'NPU' })],
+      dataUseGroups: [
+        makeGroup(),
+        makeGroup({ key: 'bucket-2', dataUse: { primary: [{ code: 'NPU', description: 'Non-profit use only' }] } }),
+      ],
     }
     const rows = buildDarCollectionGridRows([collection])
     expect(rows).toHaveLength(2)
-    expect(rows[0].group?.label).toBe('GRU')
-    expect(rows[1].group?.label).toBe('NPU')
+    expect(rows[0].group?.dataUse?.primary[0].code).toBe('GRU')
+    expect(rows[1].group?.dataUse?.primary[0].code).toBe('NPU')
     expect(rows.every(r => r.collection.darCollectionId === darCollectionId)).toBe(true)
     expect(new Set(rows.map(r => r.id)).size).toBe(2)
   })
@@ -327,22 +332,29 @@ describe('dataUse column', () => {
   })
 
   it('renders only the data-use pill, with no dataset count or vote content', () => {
-    const group = makeGroup({ label: 'GRU', datasets: [{ datasetId: 1, name: 'Set A', datasetIdentifier: 'DUOS-1' }] })
+    const group = makeGroup({ datasets: [{ datasetId: 1, name: 'Set A', datasetIdentifier: 'DUOS-1' }] })
     const columns = makeDarCollectionColumns(['dataUse'], { ...baseArgs, consoleType: consoleTypes.CHAIR })
     renderCell(getColumn(columns, 'dataUse'), makeRow({ group }))
     expect(screen.getByText('GRU')).toBeInTheDocument()
     expect(screen.queryByText(/datasets/)).not.toBeInTheDocument()
   })
 
-  it('shows the full, untruncated data-use label on hover', async () => {
+  it('shows each code with its tier and description on hover', async () => {
     const user = userEvent.setup()
-    const label = 'General Research Use, No Methods Development, Publication Required'
+    const dataUse = {
+      primary: [{ code: 'DS', description: 'Data use is limited for studying: diabetes' }],
+      secondary: [{ code: 'NPU', description: 'Non-profit use only' }],
+    }
     const column = getColumn(makeDarCollectionColumns(['dataUse'], baseArgs), 'dataUse')
-    renderCell(column, makeRow({ group: makeGroup({ label }) }))
+    renderCell(column, makeRow({ group: makeGroup({ dataUse }) }))
 
-    await user.hover(screen.getByText(label))
+    await user.hover(screen.getByText('DS-NPU'))
 
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(label)
+    const tooltip = await screen.findByRole('tooltip')
+    // Same tier-and-description format the Data Library grid uses.
+    expect(tooltip).toHaveTextContent('Primary')
+    expect(tooltip).toHaveTextContent('diabetes')
+    expect(tooltip).toHaveTextContent('Secondary')
   })
 
   it('never spans across rows, even within the same collection', () => {

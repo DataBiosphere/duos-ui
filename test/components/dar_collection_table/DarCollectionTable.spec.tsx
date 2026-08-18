@@ -182,8 +182,8 @@ describe('DarCollectionTable', () => {
       collections: [{
         ...baseCollection,
         dataUseGroups: [
-          { key: 'bucket-1', label: 'GRU', datasets: [], votes: [] },
-          { key: 'bucket-2', label: 'NPU', datasets: [], votes: [] },
+          { key: 'bucket-1', dataUse: { primary: [{ code: 'GRU', description: 'General research use' }] }, datasets: [], votes: [] },
+          { key: 'bucket-2', dataUse: { primary: [{ code: 'NPU', description: 'Non-profit use only' }] }, datasets: [], votes: [] },
         ],
       }],
       columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],
@@ -208,8 +208,8 @@ describe('DarCollectionTable', () => {
     const withTwoGroups = (collection: DarCollectionSummary): DarCollectionSummary => ({
       ...collection,
       dataUseGroups: [
-        { key: 'a', label: `GRU-${collection.darCollectionId}`, datasets: [], votes: [] },
-        { key: 'b', label: `NPU-${collection.darCollectionId}`, datasets: [], votes: [] },
+        { key: 'a', dataUse: { primary: [{ code: `GRU${collection.darCollectionId}`, description: '' }] }, datasets: [], votes: [] },
+        { key: 'b', dataUse: { primary: [{ code: `NPU${collection.darCollectionId}`, description: '' }] }, datasets: [], votes: [] },
       ],
     })
 
@@ -265,8 +265,8 @@ describe('DarCollectionTable', () => {
       await user.click(screen.getByText('DAR Code'))
       await user.click(screen.getByText('DAR Code'))
 
-      const labels = screen.getAllByText(/^(GRU|NPU)-\d+$/).map(el => el.textContent)
-      expect(labels).toEqual(['GRU-302', 'NPU-302', 'GRU-301', 'NPU-301', 'GRU-300', 'NPU-300'])
+      const labels = screen.getAllByText(/^(GRU|NPU)\d+$/).map(el => el.textContent)
+      expect(labels).toEqual(['GRU302', 'NPU302', 'GRU301', 'NPU301', 'GRU300', 'NPU300'])
     })
   })
 
