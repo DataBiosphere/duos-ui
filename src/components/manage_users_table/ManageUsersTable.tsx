@@ -19,10 +19,9 @@ const DATAGRID_SX = {
     outline: `2px solid ${Theme.palette.link}`,
     outlineOffset: '-2px',
   },
-  // The link takes focus in its cell's place, and index.css drops link outlines with !important,
-  // so the ring has to be reinstated at the same weight to be seen at all.
+  // The link takes focus in its cell's place, and index.css resets link outlines.
   '& .MuiDataGrid-cell a:focus-visible': {
-    outline: `2px solid ${Theme.palette.link} !important`,
+    outline: `2px solid ${Theme.palette.link}`,
     outlineOffset: '2px',
   },
 }

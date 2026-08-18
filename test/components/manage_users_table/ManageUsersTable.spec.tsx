@@ -255,13 +255,13 @@ describe('ManageUsersTable', () => {
     }
   })
 
-  it('rings a focused user link at a weight that survives the global link reset', () => {
+  it('rings a focused user link', () => {
     renderTable()
 
     const matching = emittedRules().filter(rule => rule.includes('.MuiDataGrid-cell a:focus-visible'))
     expect(matching.length).toBeGreaterThan(0)
-    // index.css drops link outlines with !important, so nothing lighter would be painted.
+    // The rule outranks index.css's link outline reset on specificity alone.
     expect(matching.at(-1)).toContain('outline:2px solid #216fb4')
-    expect(matching.at(-1)).toContain('!important')
+    expect(matching.at(-1)).not.toContain('!important')
   })
 })
