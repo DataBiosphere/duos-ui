@@ -30,6 +30,7 @@ import { InstitutionDetails } from 'src/components/institution_table/Institution
 import { FORM_MODES } from 'src/components/institution_table/InstitutionFormMode'
 import AdminManageInstitutions from 'src/pages/AdminManageInstitutions'
 import AdminManageLC from 'src/pages/AdminManageLC'
+import AdminDaaAssociations from 'src/pages/AdminDaaAssociations'
 import AdminManageDarCollections from 'src/pages/AdminManageDarCollections'
 import ManageDac from 'src/pages/manage_dac/ManageDac'
 import ManageRadar from 'src/pages/manage_dac/ManageRadar'
@@ -138,6 +139,7 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
           <Route path="/admin_manage_institutions" element={<AdminManageInstitutions />} />
           <Route path="/admin_manage_lc/" element={<AdminManageLC />} />
+          <Route path="/admin_daa_associations" element={<AdminDaaAssociations />} />
           <Route path="/admin_manage_dar_collections/" element={<AdminManageDarCollections />} />
           <Route path="/manage_add_dac_daa" element={<EditDac />} />
         </Route>

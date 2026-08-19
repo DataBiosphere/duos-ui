@@ -73,6 +73,7 @@ export const headerTabsConfig: Tab[] = [
       { label: 'Users', link: '/admin_manage_users' },
       { label: 'Institutions', link: '/admin_manage_institutions' },
       { label: 'Library Cards', link: '/admin_manage_lc' },
+      { label: 'DAA Associations', link: '/admin_daa_associations' },
     ],
     isRendered: user => user.isAdmin,
   },

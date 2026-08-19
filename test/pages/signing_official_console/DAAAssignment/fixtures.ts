@@ -1,4 +1,5 @@
-import { DAAObject, DuosUser } from 'src/types/model'
+import { DAAObject, DuosUser, InstitutionInterface, UserRole } from 'src/types/model'
+import { ROLES, USER_ROLES } from 'src/libs/utils'
 
 interface DaaOptions {
   daaId: number
@@ -17,6 +18,15 @@ interface ResearcherOptions {
   displayName: string
   email: string
   daaDetails?: DaaDetailOption[]
+  /** Defaults to the Researcher role, as a list response would carry it. */
+  roles?: UserRole[]
+  /** Omitted by default, so tests must opt in to having an institution. */
+  institutionName?: string
+}
+
+/** The `roles` entry a list response carries for a researcher. */
+export function researcherRole(userId: number): UserRole {
+  return { roleId: ROLES.researcher.roleId, name: USER_ROLES.researcher, userId }
 }
 
 export function makeDaa({
@@ -50,6 +60,8 @@ export function makeResearcher({
   displayName,
   email,
   daaDetails,
+  roles,
+  institutionName,
 }: ResearcherOptions): DuosUser {
   return {
     userId,
@@ -64,7 +76,17 @@ export function makeResearcher({
     isMember: false,
     isResearcher: true,
     isSigningOfficial: false,
-    roles: [],
+    roles: roles ?? [researcherRole(userId)],
+    ...(institutionName && {
+      institutionId: userId * 100,
+      // Only the identifying fields, as a user payload's nested institution
+      // carries; InstitutionInterface also declares creation metadata that the
+      // views never read.
+      institution: {
+        id: userId * 100,
+        name: institutionName,
+      } as unknown as InstitutionInterface,
+    }),
     libraryCard: {
       id: userId * 10,
       userId,
