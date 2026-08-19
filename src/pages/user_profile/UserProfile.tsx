@@ -4,7 +4,7 @@ import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { Notification } from 'src/components/Notification'
 import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
-import { Banner, NotificationService } from 'src/libs/notificationService'
+import { Banner, dismissBanner, isBannerDismissed, NotificationService } from 'src/libs/notificationService'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import AffiliationAndRoles from './AffiliationAndRoles'
 import ResearcherStatus from './ResearcherStatus'
@@ -95,7 +95,8 @@ export default function UserProfile() {
         setUser(user)
         setName(user.displayName)
         setEmailPreference(Boolean(user.emailPreference))
-        setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'))
+        const banner = await NotificationService.getBannerObjectById('eRACommonsOutage')
+        setNotificationData(banner && !isBannerDismissed(banner.id) ? banner : null)
       }
       catch {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' })
@@ -107,7 +108,15 @@ export default function UserProfile() {
 
   return (
     <main className="user-profile-page">
-      <Notification notificationData={notificationData} />
+      <Notification
+        notificationData={notificationData}
+        onDismiss={notificationData
+          ? () => {
+              dismissBanner(notificationData.id)
+              setNotificationData(null)
+            }
+          : undefined}
+      />
       <PageHeading
         id="researcherProfile"
         color="common"

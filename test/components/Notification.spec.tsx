@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { Notification } from 'src/components/Notification'
 import type { Banner } from 'src/libs/notificationService'
@@ -55,5 +55,18 @@ describe('Notification', () => {
     )
     const alertDiv = container.querySelector('.alert') as HTMLElement
     expect(alertDiv.style.backgroundColor).toBe('rgb(255, 0, 0)')
+  })
+
+  it('does not render a close button when onDismiss is omitted', () => {
+    render(<Notification notificationData={makeBanner()} />)
+    expect(screen.queryByRole('button', { name: 'Dismiss notification' })).not.toBeInTheDocument()
+  })
+
+  it('renders a close button and calls onDismiss when clicked', () => {
+    const onDismiss = vi.fn()
+    render(<Notification notificationData={makeBanner()} onDismiss={onDismiss} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
+    expect(onDismiss).toHaveBeenCalledOnce()
   })
 })

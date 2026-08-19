@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { NotificationService } from 'src/libs/notificationService'
+import { dismissBanner, isBannerDismissed, NotificationService } from 'src/libs/notificationService'
 import { Config } from 'src/libs/config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
+import { Storage } from 'src/libs/storage'
 
 vi.mock('src/libs/config', () => ({
   Config: {
@@ -139,6 +140,34 @@ describe('NotificationService', () => {
       const result = await NotificationService.getBannerObjectById('banner-1')
 
       expect(result).toBeUndefined()
+    })
+  })
+
+  // ── isBannerDismissed / dismissBanner ──────────────────────────────────────
+
+  describe('isBannerDismissed', () => {
+    it('returns false when the banner has not been dismissed', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(undefined)
+
+      expect(isBannerDismissed('banner-1')).toBe(false)
+    })
+
+    it('returns true when the banner has been dismissed', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockImplementation(
+        (key: string) => key === 'dismissedBanner_banner-1',
+      )
+
+      expect(isBannerDismissed('banner-1')).toBe(true)
+    })
+  })
+
+  describe('dismissBanner', () => {
+    it('persists the dismissal under a banner-specific key', () => {
+      const setCurrentUserSettings = vi.spyOn(Storage, 'setCurrentUserSettings').mockReturnValue(undefined)
+
+      dismissBanner('banner-1')
+
+      expect(setCurrentUserSettings).toHaveBeenCalledWith('dismissedBanner_banner-1', true)
     })
   })
 })

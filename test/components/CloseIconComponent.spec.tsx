@@ -24,6 +24,16 @@ describe('CloseIconComponent', () => {
     expect(closeFn).toHaveBeenCalledTimes(1)
   })
 
+  it('names the button Close for screen readers by default', () => {
+    render(<CloseIconComponent closeFn={vi.fn()} />)
+    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
+  })
+
+  it('names the button with the supplied label', () => {
+    render(<CloseIconComponent closeFn={vi.fn()} label="Dismiss notification" />)
+    expect(screen.getByRole('button', { name: 'Dismiss notification' })).toBeInTheDocument()
+  })
+
   it('renders the glyphicon span inside the button', () => {
     const { container } = render(<CloseIconComponent closeFn={vi.fn()} />)
     const span = container.querySelector('span.glyphicon.glyphicon-remove.default-color')
