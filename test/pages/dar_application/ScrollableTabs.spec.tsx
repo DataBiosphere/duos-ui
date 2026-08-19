@@ -100,6 +100,26 @@ describe('ScrollableTabs', () => {
     expect(container.querySelectorAll('.title')).toHaveLength(3)
   })
 
+  it('stacks the tabs horizontally when orientation is horizontal', () => {
+    const { container } = render(
+      <BrowserRouter>
+        <ScrollableTabs applicationTabs={mockApplicationTabs} orientation="horizontal" />
+      </BrowserRouter>,
+    )
+    expect(screen.getByRole('tablist')).not.toHaveAttribute('aria-orientation')
+    expect(container.querySelector('.step-tabs-container--horizontal')).toBeInTheDocument()
+    expect(container.querySelector('.multi-step-buttons-container')).not.toBeInTheDocument()
+  })
+
+  it('renders the side panel by default', () => {
+    render(
+      <BrowserRouter>
+        <ScrollableTabs applicationTabs={mockApplicationTabs} />
+      </BrowserRouter>,
+    )
+    expect(screen.getByRole('tablist')).toHaveAttribute('aria-orientation', 'vertical')
+  })
+
   it('selects last tab based on formSelectedTabId', () => {
     render(
       <BrowserRouter>

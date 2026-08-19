@@ -262,7 +262,33 @@ beforeEach(() => {
   vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue(terms)
 })
 
+const findReadOnlyWarning = async () => {
+  const alerts = await screen.findAllByRole('alert')
+  return alerts.find(alert => alert.getAttribute('data-cy') === 'vote-read-only-warning')
+}
+
 describe('DAR Review', () => {
+  // The chair and members hold votes on this collection's open election, so only the
+  // researcher lands on the read-only page.
+  it('warns above the review header when the user has no vote on this collection', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(researcher)
+    const { container } = renderReview({ adminPage: false })
+
+    const warning = await findReadOnlyWarning()
+    expect(warning).toHaveTextContent('This vote page is read-only.')
+
+    const darCode = container.querySelector('.dar-code')!
+    expect(warning!.compareDocumentPosition(darCode) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('omits the read-only warning when the user has an open vote', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(chair)
+    renderReview({ adminPage: false })
+
+    await screen.findByText('Vote')
+    expect(await findReadOnlyWarning()).toBeUndefined()
+  })
+
   it('renders one manual-review warning while the Vote tab is open', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(chair)
     renderReview({ adminPage: false })

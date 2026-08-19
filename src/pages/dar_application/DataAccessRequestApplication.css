@@ -114,6 +114,14 @@ fieldset[disabled] .regular-checkbox:before {
   align-items: flex-start;
 }
 
+/* Embedded in the Full DAR tab: no page heading above to divide off from, and the step
+   tabs stack above the content rather than sitting beside it. */
+.forms-v2--flush {
+  border-top: none;
+  margin-top: 0;
+  flex-direction: column;
+}
+
 .step-container {
   clear: both;
   width: 100%;
@@ -197,6 +205,13 @@ fieldset[disabled] .regular-checkbox:before {
 
 .multi-step-buttons-container .MuiTouchRipple-root span {
   background-color: rgba(43, 189, 155, .3);
+}
+
+/* Layout only; the tab bar itself is styled by stepTabsSx so it matches the review
+   page's other tab bars. */
+.step-tabs-container--horizontal {
+  width: 100%;
+  margin-bottom: 1rem;
 }
 
 @media (max-width: 1024px) {
