@@ -25,6 +25,8 @@ vi.mock('src/libs/notificationService', () => ({
   NotificationService: {
     getBannerObjectById: vi.fn(),
   },
+  dismissBanner: vi.fn(),
+  isBannerDismissed: vi.fn().mockReturnValue(false),
 }))
 
 vi.mock('src/libs/utils', () => ({
@@ -61,7 +63,19 @@ vi.mock('src/pages/user_profile/ExternalProfile', () => ({
 }))
 
 vi.mock('src/components/Notification', () => ({
-  Notification: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Notification: ({ notificationData, onDismiss }: {
+    notificationData?: { message: string } | null
+    onDismiss?: () => void
+  }) => (
+    notificationData
+      ? (
+          <div>
+            {notificationData.message}
+            {onDismiss && <button onClick={onDismiss}>Close banner</button>}
+          </div>
+        )
+      : null
+  ),
 }))
 
 vi.mock('src/components/forms/forms', () => {
@@ -108,7 +122,7 @@ vi.mock('src/components/forms/forms', () => {
 
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
-import { NotificationService } from 'src/libs/notificationService'
+import { dismissBanner, isBannerDismissed, NotificationService } from 'src/libs/notificationService'
 import { Notifications } from 'src/libs/utils'
 
 const mockUser: DuosUser = {
@@ -238,5 +252,39 @@ describe('UserProfile', () => {
         text: 'Error: Unable to retrieve user data from server',
       })
     })
+  })
+
+  it('shows the eRACommonsOutage banner and hides it after dismissal', async () => {
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue({
+      id: 'eRACommonsOutage',
+      active: true,
+      message: 'eRA Commons is down',
+      level: 'warning',
+    })
+
+    renderUserProfile()
+    await waitFor(() => {
+      expect(screen.getByText('eRA Commons is down')).toBeInTheDocument()
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Close banner' }))
+
+    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage')
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
+  })
+
+  it('does not show an already-dismissed eRACommonsOutage banner', async () => {
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue({
+      id: 'eRACommonsOutage',
+      active: true,
+      message: 'eRA Commons is down',
+      level: 'warning',
+    })
+    vi.mocked(isBannerDismissed).mockReturnValueOnce(true)
+
+    renderUserProfile()
+    await waitFor(() => screen.getByDisplayValue('Test User'))
+
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
   })
 })

@@ -1,6 +1,15 @@
 import type { DAAObject } from 'src/types/model'
 
 /**
+ * Human-readable label for a DAA. Uses the uploaded file's name, falling back to
+ * a stable `DAA-<id>` token when no file name is available. Single source of truth
+ * for the DAA label shown across the DAA-assignment views, dialogs, toasts, and tables.
+ */
+export function daaLabel(daa: DAAObject): string {
+  return daa.file?.fileName ?? `DAA-${daa.daaId}`
+}
+
+/**
  * Get DAAs that were created (uploaded) by a specific DAC
  * @param daas - All available DAAs
  * @param dacId - The DAC ID to filter by

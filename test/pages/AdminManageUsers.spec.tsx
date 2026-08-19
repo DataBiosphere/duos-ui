@@ -4,11 +4,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { AdminManageUsers } from 'src/pages/AdminManageUsers'
 import { User } from 'src/libs/ajax/User'
+import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
-import { DuosUser } from 'src/types/model'
+import { DAAObject, DuosUser } from 'src/types/model'
 
 vi.mock('src/libs/ajax/User', () => ({
   User: { list: vi.fn() },
+}))
+
+vi.mock('src/libs/ajax/DAA', () => ({
+  DAA: { getDaas: vi.fn() },
 }))
 
 vi.mock('src/libs/utils', async (importActual) => {
@@ -20,8 +25,12 @@ vi.mock('src/libs/utils', async (importActual) => {
 })
 
 vi.mock('src/components/manage_users_table/ManageUsersTable', () => ({
-  ManageUsersTable: ({ userList, isLoading }: { userList: DuosUser[], isLoading: boolean }) => (
-    <div data-testid="manage-users-table" data-loading={isLoading}>
+  ManageUsersTable: ({ userList, isLoading, daaLabelsById }: {
+    userList: DuosUser[]
+    isLoading: boolean
+    daaLabelsById: Map<number, string>
+  }) => (
+    <div data-testid="manage-users-table" data-loading={isLoading} data-daa-label-count={daaLabelsById.size}>
       {userList.map(u => <span key={u.userId}>{u.displayName}</span>)}
     </div>
   ),
@@ -74,6 +83,7 @@ const testUsers: DuosUser[] = [
 describe('AdminManageUsers', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(DAA.getDaas).mockResolvedValue([])
   })
 
   it('renders the page title and description', async () => {
@@ -94,6 +104,25 @@ describe('AdminManageUsers', () => {
     await act(async () => render(<AdminManageUsers />))
     expect(screen.getByText('Alice Admin')).toBeInTheDocument()
     expect(screen.getByText('Bob Admin')).toBeInTheDocument()
+  })
+
+  it('builds a daa label lookup map and passes it to ManageUsersTable', async () => {
+    vi.mocked(User.list).mockResolvedValue([])
+    vi.mocked(DAA.getDaas).mockResolvedValue([
+      { daaId: 1, file: { fileName: 'Broad DAA v2.pdf' } } as DAAObject,
+      { daaId: 2, file: { fileName: 'MGH DAA.pdf' } } as DAAObject,
+    ])
+    await act(async () => render(<AdminManageUsers />))
+    expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-daa-label-count', '2')
+  })
+
+  it('degrades gracefully when the daa fetch fails, without blocking the user list', async () => {
+    vi.mocked(User.list).mockResolvedValue(testUsers)
+    vi.mocked(DAA.getDaas).mockRejectedValue(new Error('daa service unavailable'))
+    await act(async () => render(<AdminManageUsers />))
+    expect(screen.getByText('Alice Admin')).toBeInTheDocument()
+    expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-daa-label-count', '0')
+    expect(Notifications.showError).not.toHaveBeenCalled()
   })
 
   it('shows loading state while fetching', () => {

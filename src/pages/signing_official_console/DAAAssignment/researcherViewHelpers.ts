@@ -1,5 +1,8 @@
 import { DAAObject, DuosUser } from 'src/types/model'
+import { daaLabel } from 'src/libs/daaHelpers'
 import { AuthStatus, DAAAccordionData, DAAResearcherRowData, DAARowData, ResearcherRowData } from './types'
+
+export { daaLabel }
 
 const DASH = '—'
 
@@ -66,15 +69,6 @@ export function getAuthorizedBy(researcher: DuosUser, daaId: number): string | u
   if (!Array.isArray(daaDetails)) return undefined
 
   return daaDetails.find(detail => detail.daaId === daaId)?.authorizedBy
-}
-
-/**
- * Human-readable label for a DAA. Uses the uploaded file's name, falling back to
- * a stable `DAA-<id>` token when no file name is available. Single source of truth
- * for the DAA label shown across the DAA-assignment views, dialogs, and toasts.
- */
-export function daaLabel(daa: DAAObject): string {
-  return daa.file?.fileName ?? `DAA-${daa.daaId}`
 }
 
 /**

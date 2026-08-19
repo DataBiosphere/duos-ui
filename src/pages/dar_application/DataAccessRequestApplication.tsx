@@ -12,7 +12,7 @@ import { User } from 'src/libs/ajax/User'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DAR } from 'src/libs/ajax/DAR'
 import { Collections } from 'src/libs/ajax/Collections'
-import { NotificationService, Banner } from 'src/libs/notificationService'
+import { NotificationService, Banner, dismissBanner, isBannerDismissed } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import 'src/pages/dar_application/DataAccessRequestApplication.css'
 import DucAddendum from 'src/pages/dar_application/DucAddendum'
@@ -429,7 +429,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     init()
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
       if (!isMountedRef.current) return
-      setNotificationData(notificationData)
+      setNotificationData(notificationData && !isBannerDismissed(notificationData.id) ? notificationData : null)
     })
     Countries.getCountries().then((isoCountriesData: string[]) => {
       if (!isMountedRef.current) return
@@ -796,7 +796,15 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
       <div className={existingDarsReadOnlyMode ? 'application-information-page' : 'container'} style={{ padding: existingDarsReadOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: existingDarsReadOnlyMode ? 'white' : '' }}>
         <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div className="row no-margin">
-            <Notification notificationData={notificationData} />
+            <Notification
+              notificationData={notificationData}
+              onDismiss={notificationData
+                ? () => {
+                    dismissBanner(notificationData.id)
+                    setNotificationData(null)
+                  }
+                : undefined}
+            />
             <div
               className={(formData.darCode === null
                 ? 'col-lg-12 col-md-12 col-sm-12 '

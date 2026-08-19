@@ -4,7 +4,12 @@ import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from 
 import { Link } from 'react-router'
 import { getSearchFilterFunctions } from 'src/libs/utils'
 import { Theme } from 'src/libs/theme'
-import { formatUserRoles, institutionName } from 'src/components/manage_users_table/manageUsersTableUtils'
+import {
+  formatPreAuth,
+  formatRegistrationDate,
+  formatUserRoles,
+  institutionName,
+} from 'src/components/manage_users_table/manageUsersTableUtils'
 import { DuosUser } from 'src/types/model'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
@@ -33,6 +38,7 @@ export interface ManageUsersTableProps {
   isLoading: boolean
   userList: DuosUser[]
   searchText: string
+  daaLabelsById?: Map<number, string>
 }
 
 interface UserRow {
@@ -40,16 +46,20 @@ interface UserRow {
   displayName: string
   email: string
   institution: string
+  registrationDate: string
   roles: string
+  preauth: string
 }
 
-// Roles and institution are flattened to their displayed text, so every column sorts on what is read.
-const toUserRow = (user: DuosUser): UserRow => ({
+// Roles, institution, preauth, and registrationDate are flattened to their displayed text, so every column sorts on what is read.
+const toUserRow = (user: DuosUser, daaLabelsById: Map<number, string>): UserRow => ({
   id: user.userId,
   displayName: user.displayName,
   email: user.email,
   institution: institutionName(user.institution),
+  registrationDate: formatRegistrationDate(user.createDate),
   roles: formatUserRoles(user.roles, user.libraryCard),
+  preauth: formatPreAuth(user.libraryCard, daaLabelsById),
 })
 
 const COLUMNS: GridColDef<UserRow>[] = [
@@ -67,20 +77,25 @@ const COLUMNS: GridColDef<UserRow>[] = [
   },
   { field: 'email', headerName: 'Email', flex: 1.25, minWidth: 200 },
   { field: 'institution', headerName: 'Institution', flex: 1, minWidth: 180 },
+  { field: 'registrationDate', headerName: 'Registration Date', flex: 1, minWidth: 160 },
   { field: 'roles', headerName: 'Roles', flex: 1, minWidth: 180 },
+  { field: 'preauth', headerName: 'Pre-Auth', flex: 1, minWidth: 180 },
 ]
 
 const filterFn = getSearchFilterFunctions().users
 
-export const ManageUsersTable = function ManageUsersTable({ isLoading, userList, searchText }: ManageUsersTableProps) {
+export const ManageUsersTable = function ManageUsersTable({
+  isLoading, userList, searchText, daaLabelsById = new Map(),
+}: ManageUsersTableProps) {
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: PAGE_SIZE_OPTIONS[0] })
   const [lastSearchText, setLastSearchText] = useState(searchText)
 
   // Filtering is derived, so a keystroke costs one render rather than a cascade of effects.
   const rows = useMemo(() => {
     const terms = searchText.split(' ').filter(term => term.length > 0)
-    return terms.reduce((list, term) => filterFn(term, list), userList ?? []).map(toUserRow)
-  }, [userList, searchText])
+    return terms.reduce((list, term) => filterFn(term, list), userList ?? [])
+      .map(user => toUserRow(user, daaLabelsById))
+  }, [userList, searchText, daaLabelsById])
 
   const lastPage = Math.max(0, Math.ceil(rows.length / paginationModel.pageSize) - 1)
 

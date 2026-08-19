@@ -51,13 +51,15 @@ const carol = makeUser({
   userId: 3,
   displayName: 'Carol White',
   email: 'carol@test.com',
-  libraryCard: libraryCard(3),
+  libraryCard: { ...libraryCard(3), daaDetails: [{ daaId: 9 }] },
 })
 
 const testUsers = [carol, alice, bob]
 
+const daaLabelsById = new Map([[9, 'Broad DAA v2.pdf']])
+
 const renderTable = (props: Partial<ManageUsersTableProps> = {}) => renderWithRouter(
-  <ManageUsersTable isLoading={false} userList={testUsers} searchText="" {...props} />,
+  <ManageUsersTable isLoading={false} userList={testUsers} searchText="" daaLabelsById={daaLabelsById} {...props} />,
 )
 
 const numberedUsers = (count: number): DuosUser[] => Array.from({ length: count }, (_, index) => makeUser({
@@ -109,17 +111,18 @@ describe('ManageUsersTable', () => {
   it('renders a column for every user attribute', () => {
     renderTable()
 
-    for (const label of ['User Name', 'Email', 'Institution', 'Roles']) {
+    for (const label of ['User Name', 'Email', 'Institution', 'Registration Date', 'Roles', 'Pre-Auth']) {
       expect(columnHeader(label)).toBeInTheDocument()
     }
   })
 
-  it('renders each user with their email, institution and roles', async () => {
+  it('renders each user with their email, institution, registration date and roles', async () => {
     renderTable()
 
     const row = await rowFor(alice.displayName)
     expect(within(row).getByText(alice.email)).toBeInTheDocument()
     expect(within(row).getByText('Broad Institute')).toBeInTheDocument()
+    expect(within(row).getByText('2022-01-01')).toBeInTheDocument()
     expect(within(row).getByText('Admin')).toBeInTheDocument()
   })
 
@@ -146,6 +149,20 @@ describe('ManageUsersTable', () => {
     const row = await rowFor(carol.displayName)
     expect(within(row).getByText('N/A')).toBeInTheDocument()
     expect(within(row).getByText('Library Card')).toBeInTheDocument()
+  })
+
+  it('labels a pre-authorized DAA using the lookup map', async () => {
+    renderTable()
+
+    const row = await rowFor(carol.displayName)
+    expect(within(row).getByText('Broad DAA v2.pdf')).toBeInTheDocument()
+  })
+
+  it('reads None in the Pre-Auth column for a user with no library card', async () => {
+    renderTable()
+
+    const row = await rowFor(alice.displayName)
+    expect(within(row).getByText('None')).toBeInTheDocument()
   })
 
   it('lists users alphabetically before any column is sorted', async () => {
@@ -180,7 +197,7 @@ describe('ManageUsersTable', () => {
 
     await rowFor(alice.displayName)
     // User Name goes last: it starts ascending, so a click would flip it.
-    for (const label of ['Email', 'Institution', 'Roles', 'User Name']) {
+    for (const label of ['Email', 'Institution', 'Registration Date', 'Roles', 'Pre-Auth', 'User Name']) {
       sortBy(label)
       expect(columnHeader(label)).toHaveAttribute('aria-sort', 'ascending')
     }

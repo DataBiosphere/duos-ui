@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { AddUserModal } from 'src/components/modals/AddUserModal'
 import { User } from 'src/libs/ajax/User'
+import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { ManageUsersTable } from 'src/components/manage_users_table/ManageUsersTable'
 import { Styles } from 'src/libs/theme'
@@ -10,20 +11,28 @@ import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 import { DuosUser } from 'src/types/model'
+import { daaLabel } from 'src/libs/daaHelpers'
 
 const getUserList = (): Promise<DuosUser[]> => User.list(USER_ROLES.admin)
+
+// A DAA outage shouldn't block user management, so a failed fetch just leaves labels falling back to `DAA-<id>`.
+const getDaaLabelsById = (): Promise<Map<number, string>> => DAA.getDaas()
+  .then(daas => new Map(daas.map(daa => [daa.daaId, daaLabel(daa)])))
+  .catch(() => new Map<number, string>())
 
 export const AdminManageUsers = function AdminManageUsers() {
   usePageTitle('Manage Users')
   const [searchText, setSearchText] = useState('')
   const [userList, setUserList] = useState<DuosUser[]>([])
+  const [daaLabelsById, setDaaLabelsById] = useState<Map<number, string>>(new Map())
   const [showAddUserModal, setShowAddUserModal] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    getUserList()
-      .then((users) => {
+    Promise.all([getUserList(), getDaaLabelsById()])
+      .then(([users, labelsById]) => {
         setUserList(users)
+        setDaaLabelsById(labelsById)
         setIsLoading(false)
       })
       .catch(() => {
@@ -76,7 +85,12 @@ export const AdminManageUsers = function AdminManageUsers() {
           className="button button-blue"
         />
       </div>
-      <ManageUsersTable userList={userList} isLoading={isLoading} searchText={searchText} />
+      <ManageUsersTable
+        userList={userList}
+        isLoading={isLoading}
+        searchText={searchText}
+        daaLabelsById={daaLabelsById}
+      />
       <AddUserModal
         showModal={showAddUserModal}
         onOKRequest={okModal}
