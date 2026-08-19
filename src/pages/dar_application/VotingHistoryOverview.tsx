@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import SimpleTable from 'src/components/SimpleTable'
+import { VOTE_TABLE_BORDER_COLOR, voteHistoryContainerOverride } from 'src/components/vote_history_table/voteHistoryTableStyles'
 import './VotingHistoryOverview.css'
 
 type Dar = {
@@ -31,12 +32,13 @@ type VotingHistoryOverviewProps = {
 const headerStyle: React.CSSProperties = {
   fontWeight: 600,
   fontSize: '1.1rem',
-  background: '#f5f7fa',
+  background: '#FFFFFF',
   color: '#2a3b4d',
   padding: '8px 0',
   whiteSpace: 'normal',
   wordBreak: 'break-word',
   overflowWrap: 'anywhere',
+  borderBottom: `1px solid ${VOTE_TABLE_BORDER_COLOR}`,
 }
 
 const cellWrapStyle: React.CSSProperties = {
@@ -47,8 +49,8 @@ const cellWrapStyle: React.CSSProperties = {
 
 const styles = {
   baseStyle: { display: 'flex', alignItems: 'center', minHeight: 40, ...cellWrapStyle },
-  columnStyle: { display: 'flex', background: '#f5f7fa', ...cellWrapStyle },
-  containerOverride: { width: '100%', overflowX: 'visible' as const },
+  columnStyle: { display: 'flex', background: '#FFFFFF', ...cellWrapStyle },
+  containerOverride: { ...voteHistoryContainerOverride, width: '100%', overflowX: 'auto' as const },
 }
 
 const VotingHistoryOverview: React.FC<VotingHistoryOverviewProps> = ({ dar, votes }) => {

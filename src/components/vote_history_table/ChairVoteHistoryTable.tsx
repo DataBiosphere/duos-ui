@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react'
 import SimpleTable from '../SimpleTable'
 import { VoteHistoryRow } from 'src/types/model'
-import { Styles } from 'src/libs/theme'
 import { formatDate, sortVisibleTable } from 'src/libs/utils'
+import { voteHistoryTableStyles } from './voteHistoryTableStyles'
 
 interface ChairVoteHistoryTableProps {
   voteHistory: VoteHistoryRow[]
@@ -15,36 +15,7 @@ interface RowData {
   id: number | string
 }
 
-const styles = {
-  baseStyle: {
-    fontFamily: 'Montserrat',
-    fontSize: '1.4rem',
-    fontWeight: 400,
-    color: '#333F52',
-    backgroundColor: '#FFFFFF',
-    display: 'flex',
-    padding: '1rem 2%',
-    lineHeight: '2rem',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    whiteSpace: 'pre-line',
-  },
-  columnStyle: {
-    ...Styles.TABLE.HEADER_ROW,
-    ...{
-      fontFamily: 'Montserrat',
-      fontSize: '1.4rem',
-      color: '#333F52',
-      justifyContent: 'space-between',
-    },
-  },
-  containerOverride: {
-    marginTop: '0',
-    borderTop: '0',
-    backgroundColor: 'rgba(184, 205, 211, 0)',
-    padding: '0',
-  },
-}
+const styles = voteHistoryTableStyles
 
 const getVoteText = (vote: boolean | null | undefined) => {
   if (vote === true) return 'Yes'
