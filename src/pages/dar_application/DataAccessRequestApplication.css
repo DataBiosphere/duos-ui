@@ -114,6 +114,16 @@ fieldset[disabled] .regular-checkbox:before {
   align-items: flex-start;
 }
 
+/* The Full DAR (read-only) tab has no page heading above it, so the divider
+   this border-top/margin-top pair was separating from no longer applies.
+   It also stacks its DAR/progress-report tabs above the content instead of
+   beside it in a side panel (see .step-tabs-container--horizontal below). */
+.forms-v2--flush {
+  border-top: none;
+  margin-top: 0;
+  flex-direction: column;
+}
+
 .step-container {
   clear: both;
   width: 100%;
@@ -196,6 +206,41 @@ fieldset[disabled] .regular-checkbox:before {
 }
 
 .multi-step-buttons-container .MuiTouchRipple-root span {
+  background-color: rgba(43, 189, 155, .3);
+}
+
+/* Full DAR (read-only) tab: DAR/progress-report entries as a horizontal bar
+   above the content, matching the look of the page's other tab bars
+   (see reviewTabsSx in dar_collection_review/reviewTabStyles.ts) instead of
+   the vertical side-panel styling above. */
+.step-tabs-container--horizontal {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.step-tabs-container--horizontal .MuiTabs-root {
+  border-bottom: 1px solid rgba(31, 59, 80, 0.15);
+  min-height: auto;
+}
+
+.step-tabs-container--horizontal .MuiButtonBase-root {
+  min-height: auto;
+  padding: 0.9rem 1.1rem;
+}
+
+.step-tabs-container--horizontal .title {
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Montserrat';
+  text-transform: none;
+  color: #7c8a94;
+}
+
+.step-tabs-container--horizontal .Mui-selected .title {
+  color: #333F52;
+}
+
+.step-tabs-container--horizontal .MuiTouchRipple-root span {
   background-color: rgba(43, 189, 155, .3);
 }
 

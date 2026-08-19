@@ -56,11 +56,6 @@ const styles = {
     marginBottom: '3rem',
     columnGap: '2rem',
   },
-  title: {
-    fontWeight: 800,
-    fontSize: 'clamp(1.9rem, 3.5vw, 2.7rem)',
-    margin: '1.5rem 0',
-  },
   tableWrapper: {
     overflowX: 'auto' as const,
     maxWidth: '100%',
@@ -140,10 +135,6 @@ export default function VotingHistory({ darCollection, dacIds }: VotingHistoryPr
 
   return (
     <div style={styles.baseStyle}>
-      <div>
-        <div style={styles.title}>Votes</div>
-      </div>
-
       <div style={styles.tableSection}>
         <div style={styles.tableTitle}>Chair Votes</div>
         <div style={styles.tableWrapper}>

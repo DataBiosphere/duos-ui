@@ -15,7 +15,7 @@ import VotingHistory from './VotingHistory'
 import ManualReviewWarningBanner from 'src/components/ManualReviewWarningBanner'
 import { APPROVED_VOTETYPES, ElectionStatus, ElectionType, userHasOpenDataAccessElection } from 'src/utils/DarUtils'
 import { extractError } from 'src/utils/ErrorUtils.js'
-import { Notification } from 'src/components/Notification.jsx'
+import Alert from '@mui/material/Alert'
 import { useNavigate, useParams } from 'react-router'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { DarCollection, DuosUser, DataAccessRequestData } from 'src/types/model'
@@ -235,6 +235,11 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
   return (
     <div className="collection-review-page">
       <div className="review-page-header" style={{ padding: '0 clamp(0.8rem, 2.5vw, 2.2rem)' }}>
+        {canVote === false && (
+          <Alert severity="warning" data-cy="vote-read-only-warning" sx={{ my: 1 }}>
+            This vote page is read-only. Click vote on the DAR table entry or look at the voting history tab for details.
+          </Alert>
+        )}
         <ReviewHeader
           darCode={get(collection, 'darCode') || '- -'}
           projectTitle={get(darInfo, 'projectTitle') || '- -'}
@@ -263,14 +268,6 @@ export default function DarCollectionReview({ adminPage = false, readOnly = fals
           darInfo={darInfo}
         />
         <ManualReviewWarningBanner darInfo={darInfo} />
-        {canVote === false && (
-          <Notification
-            customStyle={{ paddingLeft: 0 }}
-            notificationData={{
-              message: 'This vote page is read-only. Click vote on the DAR table entry or look at the voting history tab for details.',
-            }}
-          />
-        )}
       </div>
       <div className="review-page-body" style={{ marginTop: '1rem', padding: '1rem clamp(0.8rem, 2.5vw, 2.2rem) 0', backgroundColor: tabContainerColor }}>
         <TabControl

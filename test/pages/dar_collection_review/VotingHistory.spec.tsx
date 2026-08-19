@@ -206,7 +206,6 @@ const dacIds: number[] = [1]
 describe('VotingHistory', () => {
   it('renders with correct headers', () => {
     render(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
-    expect(screen.getByText('Votes')).toBeInTheDocument()
     expect(screen.getByText('Chair Votes')).toBeInTheDocument()
     expect(screen.getByText('Member Votes')).toBeInTheDocument()
   })

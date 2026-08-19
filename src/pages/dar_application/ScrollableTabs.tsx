@@ -13,9 +13,10 @@ type ScrollableTabsProps = {
   applicationTabs: ApplicationTab[]
   formSelectedTabId?: string
   onTabChange?: (tabId: string) => void
+  orientation?: 'vertical' | 'horizontal'
 }
 
-export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange }: ScrollableTabsProps) => {
+export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange, orientation = 'vertical' }: ScrollableTabsProps) => {
   // Use positive check for clarity (suggested improvement)
   const selectedStepNumber
     = typeof formSelectedTabId === 'string'
@@ -107,13 +108,17 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange
     }
   }, [applicationTabs, formSelectedTabId, onTabChange])
 
+  const containerClassName = orientation === 'horizontal'
+    ? 'step-tabs-container--horizontal'
+    : 'multi-step-buttons-container'
+
   return (
-    <div className="multi-step-buttons-container">
+    <div className={containerClassName}>
       <Tabs
         value={selectedStepNumber}
         variant="scrollable"
         scrollButtons="auto"
-        orientation="vertical"
+        orientation={orientation}
         slotProps={{
           indicator: { style: { background: '#2BBD9B' } },
         }}
