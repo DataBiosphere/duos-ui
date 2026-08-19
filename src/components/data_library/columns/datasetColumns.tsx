@@ -8,30 +8,7 @@ import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
 import RequestAccessButton from 'src/components/data_library/RequestAccessButton'
 import BoltIcon from '@mui/icons-material/Bolt'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
-import { DataUseCode, processDataUseCodes } from 'src/utils/DataUseUtils'
-
-/**
- * A dataset's data use codes as one hyphenated string (`HMB-GSO-PUB`): the
- * primary codes lead in the order the dataset declares them, then the secondary
- * conditions alphabetically. Uses `shortCode` so a DS primary reads as `DS`
- * rather than dragging its disease list into the middle of the sequence — the
- * full text stays in the tooltip.
- */
-const orderDataUseCodes = (dataset: DatasetTerm): DataUseCode[] => {
-  const terms = processDataUseCodes(dataset).codesAndDescriptions.filter(term => Boolean(term.shortCode))
-  return [
-    ...terms.filter(term => term.type === 'primary'),
-    ...terms
-      .filter(term => term.type === 'secondary')
-      .sort((a, b) => a.shortCode.localeCompare(b.shortCode)),
-  ]
-}
-
-// Codes alone are opaque; name the tier so a secondary condition isn't read as a primary use
-const dataUseTooltip = ({ code, description, type }: DataUseCode): string => {
-  const tier = type === 'primary' ? 'Primary' : 'Secondary'
-  return description ? `${tier} — ${code}: ${description}` : `${tier} — ${code}`
-}
+import { dataUseTooltip, orderDataUseCodes } from 'src/utils/DataUseUtils'
 
 const makeSoApprovalColumn = (soApprovalModelByDatasetId: Map<number, SoApprovalModel>): GridColDef<DatasetTerm> => ({
   field: 'soApprovalModel',
