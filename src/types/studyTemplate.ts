@@ -6,10 +6,10 @@
 export const STUDY_DATASET_DRAFT_TYPE = 'StudyDatasetSubmissionV1'
 
 /**
- * One independently actionable validation error. `row` is one-based and counts the CSV header as
- * row 1. Parser and conversion errors carry a row, and a column when a single cell is at fault;
- * registration-validator violations may carry neither, and their location must never be inferred
- * from the message text.
+ * One independently actionable validation error. `row` is the one-based physical line the record
+ * starts on — an ignored blank line still occupies one, and a multi-line value reports its first.
+ * A registration-validator violation may carry neither row nor column, and its location must never
+ * be inferred from the message text.
  */
 export interface TemplateValidationError {
   row?: number

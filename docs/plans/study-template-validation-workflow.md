@@ -127,13 +127,14 @@ administrator authorization checks remain unchanged.
 
 Validation errors are a completed, expected result and should return HTTP 200. Authentication, authorization, malformed multipart requests, size-limit violations, and unexpected server failures should use appropriate non-2xx responses.
 
-Note: the Ticket 2 service currently reports the size-limit and encoding failures as `valid: false` results instead. Ticket 3 reconciles the two — see "Findings from implementation" below.
+Ticket 3 settled where the boundary falls: the 5 MiB limit is enforced at the resource and answered with `413`, while an empty, non-UTF-8, or malformed file stays a `valid: false` result, since only the latter is something the producer edits.
 
 Invalid template response:
 
 ```json
 {
   "valid": false,
+  "truncated": false,
   "errors": [
     {
       "row": 3,
@@ -149,6 +150,7 @@ Valid template response:
 ```json
 {
   "valid": true,
+  "truncated": false,
   "draft": {
     "id": "c2e4583a-20b9-4705-8280-e6a5753f10c9",
     "draftType": "StudyDatasetSubmissionV1"
@@ -172,9 +174,12 @@ interface StudyDatasetDraftReference {
 }
 
 type TemplateValidationResponse =
-  | { valid: false, errors: TemplateValidationError[] }
-  | { valid: true, errors: TemplateValidationError[], draft: StudyDatasetDraftReference }
+  | { valid: false, errors: TemplateValidationError[], truncated: boolean }
+  | { valid: true, errors: TemplateValidationError[], truncated: false, draft: StudyDatasetDraftReference }
 ```
+
+`truncated` reports that the 100-error cap was reached. The last error says so as well, so a client
+that ignores the flag still tells the producer that errors were omitted.
 
 Both branches use `TemplateValidationError[]` so callers can pass `errors` through uniformly. The
 success branch is identified by `valid` and includes a typed draft reference.
@@ -821,15 +826,15 @@ adding template-only cleanup behavior here.
 ## Findings from implementation
 
 Two kinds of thing came out of building Ticket 4 (DT-1854) against the Consent DTOs and the Ticket 2
-parser. The actionable ones are now carried by the tickets that own them, following the same pattern
-as "Contract outcomes" above, so they are summarised here rather than specified here. The design
+parser. The actionable ones were carried by the tickets that own them, following the same pattern as
+"Contract outcomes" above, and are summarised here with what each was settled as. The design
 observation is recorded in full because no ticket owns it.
 
 | Finding | Recorded in | Outcome |
 | --- | --- | --- |
 | The `draft` table is the only JSON write in this area without the NUL guard the DAR tables already have. A U+0000 escape survives the parser and `jsonb` rejects it, so a valid template can 500 on insert. | Tickets 2 and 3 | Ticket 2 rejects U+0000 during parsing so the producer is told; Ticket 3 applies the existing `regexp_replace` idiom to `DraftDAO.insert` and `updateDraftByDraftUUID`. |
-| `StudyTemplateValidationResult.truncated` has no counterpart in the response type documented in this plan or in the v1 contract. | Ticket 3 | Ticket 3 decides whether it reaches the wire and makes OpenAPI and both documents agree. duos-ui types it as optional, so either choice works. |
-| The service reports the 5 MiB and UTF-8 failures as `valid: false` rather than as request failures, contradicting this plan and the contract. | Ticket 3 | Ticket 3 either rejects oversize at the resource layer or amends both documents. See the note under "Validate a template" above. |
+| `StudyTemplateValidationResult.truncated` has no counterpart in the response type documented in this plan or in the v1 contract. | Ticket 3 | Settled: it reaches the wire. duos-ui already renders a notice when it is true, and OpenAPI, the v1 contract, and this plan now document it. |
+| The service reports the 5 MiB and UTF-8 failures as `valid: false` rather than as request failures, contradicting this plan and the contract. | Ticket 3 | Settled: the resource rejects an oversized upload with `413` before the service reads it, and encoding stays a `valid: false` result. See the note under "Validate a template" above. |
 
 Chairperson access to the draft endpoints was already specified in Ticket 3 and needed no change.
 
