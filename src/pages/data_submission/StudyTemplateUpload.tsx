@@ -30,6 +30,14 @@ export const StudyTemplateUpload = (): React.JSX.Element => {
   const [file, setFile] = useState<File | null>(null)
   const [validationErrors, setValidationErrors] = useState<TemplateValidationError[]>([])
   const [truncated, setTruncated] = useState(false)
+  // The picker and Remove stay live while a validation is in flight, so the handler needs the
+  // current selection at the moment its response arrives, not the one captured when it started.
+  const selectedFileRef = useRef<File | null>(null)
+
+  const selectFile = useCallback((selected: File | null) => {
+    selectedFileRef.current = selected
+    setFile(selected)
+  }, [])
 
   // Failures are toasts, matching the rest of the app. Validation errors are not failures: they are a
   // completed result the user works through while editing their file, so they stay on the page.
@@ -46,38 +54,40 @@ export const StudyTemplateUpload = (): React.JSX.Element => {
     const selected = event.currentTarget.files?.[0] ?? null
     clearResults()
     if (!selected) {
-      setFile(null)
+      selectFile(null)
       return
     }
     // Pre-checks the two limits Consent enforces, so a doomed 5 MiB upload never leaves the browser.
     // Wording matches the server's so the two layers cannot appear to disagree.
     if (!selected.name.toLowerCase().endsWith('.csv')) {
-      setFile(null)
+      selectFile(null)
       Notifications.showError({ text: 'Template file must be a .csv file' })
       return
     }
     if (selected.size > MAX_TEMPLATE_BYTES) {
-      setFile(null)
+      selectFile(null)
       Notifications.showError({ text: MAX_TEMPLATE_SIZE_MESSAGE })
       return
     }
-    setFile(selected)
-  }, [clearResults])
+    selectFile(selected)
+  }, [clearResults, selectFile])
 
   const handleRemove = useCallback(() => {
-    setFile(null)
+    selectFile(null)
     clearResults()
     // Resetting the element lets the user re-select the same filename and still get a change event.
     if (inputRef.current) {
       inputRef.current.value = ''
     }
-  }, [clearResults])
+  }, [clearResults, selectFile])
 
   const handleValidate = useCallback(async () => {
     if (!file) return
+    const validated = file
     clearResults()
     try {
-      const result = await Draft.validateStudyDatasetTemplate(file)
+      const result = await Draft.validateStudyDatasetTemplate(validated)
+      if (selectedFileRef.current !== validated) return
       if (!result.valid) {
         setValidationErrors(result.errors)
         setTruncated(result.truncated === true)
@@ -90,6 +100,7 @@ export const StudyTemplateUpload = (): React.JSX.Element => {
       navigate(`/data_submission_form/draft/study-dataset/${result.draft.id}`)
     }
     catch (error) {
+      if (selectedFileRef.current !== validated) return
       Notifications.showError({
         text: error instanceof Error ? error.message : 'The template could not be validated. Please try again.',
       })

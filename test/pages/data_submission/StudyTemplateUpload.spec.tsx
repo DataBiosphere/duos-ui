@@ -178,6 +178,65 @@ describe('StudyTemplateUpload', () => {
     })
   })
 
+  describe('stale results', () => {
+    const pendingValidation = () => {
+      let settle: (value: TemplateValidationResponse) => void = () => {}
+      vi.mocked(Draft.validateStudyDatasetTemplate).mockReturnValue(
+        new Promise<TemplateValidationResponse>((resolve) => { settle = resolve }),
+      )
+      return async (response: TemplateValidationResponse) => {
+        await act(async () => {
+          settle(response)
+        })
+      }
+    }
+
+    it('discards errors belonging to a file the user has replaced', async () => {
+      const settle = pendingValidation()
+
+      renderWithRouter(<StudyTemplateUpload />)
+      await selectFile(buildCsv('first.csv'))
+      await clickValidate()
+      await selectFile(buildCsv('second.csv'))
+
+      await settle({ valid: false, errors: [{ message: 'Study name is required.' }] })
+
+      expect(screen.queryByText('Study name is required.')).toBeNull()
+      expect(screen.getByText('second.csv')).toBeTruthy()
+    })
+
+    it('does not navigate to a draft built from a file the user has removed', async () => {
+      const settle = pendingValidation()
+
+      renderWithRouter(<StudyTemplateUpload />)
+      await selectFile(buildCsv())
+      await clickValidate()
+      await clickButton('Remove my-study.csv')
+
+      await settle(validResponse)
+
+      expect(mockNavigate).not.toHaveBeenCalled()
+    })
+
+    it('does not report a failure for a file the user has removed', async () => {
+      let reject: (error: unknown) => void = () => {}
+      vi.mocked(Draft.validateStudyDatasetTemplate).mockReturnValue(
+        new Promise<TemplateValidationResponse>((_resolve, rejectPromise) => { reject = rejectPromise }),
+      )
+
+      renderWithRouter(<StudyTemplateUpload />)
+      await selectFile(buildCsv())
+      await clickValidate()
+      await clickButton('Remove my-study.csv')
+
+      await act(async () => {
+        reject(new Error('Service unavailable'))
+      })
+
+      expect(showError).not.toHaveBeenCalled()
+    })
+  })
+
   describe('validation errors', () => {
     const invalidResponse: TemplateValidationResponse = {
       valid: false,
