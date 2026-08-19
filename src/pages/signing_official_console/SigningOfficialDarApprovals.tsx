@@ -66,7 +66,7 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
       <div>
         <TableHeaderSection
           title="My Institution's Data Access Approvals"
-          description="Your Institution's Data Access Approvals: Records from all current data access approvals"
+          description="Review all approved Data Access Requests (DARs) submitted by researchers at your institution. When required, your approval must happen before a DAR can proceed to Data Access Committee (DAC) review — you can approve those requests directly from this page."
         />
       </div>
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
