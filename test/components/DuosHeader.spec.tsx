@@ -9,11 +9,14 @@ import { visibleSubTabs } from 'src/components/navigation/subTabVisibility'
 import { Storage } from 'src/libs/storage'
 import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 import { DuosUser } from 'src/types/model'
+import { NotificationService, dismissBanner, isBannerDismissed } from 'src/libs/notificationService'
 
 vi.mock('src/libs/notificationService', () => ({
   NotificationService: {
     getActiveBanners: vi.fn().mockResolvedValue([]),
   },
+  dismissBanner: vi.fn(),
+  isBannerDismissed: vi.fn().mockReturnValue(false),
 }))
 
 vi.mock('src/components/modals/SupportRequestModal', () => ({
@@ -238,6 +241,45 @@ describe('DuosHeader', () => {
     it('preserves a tab selection on a detail page with no URL match (context fallback)', async () => {
       await mountHeader('/dar_application_review/999', mockUser)
       expect(document.querySelector('.Mui-selected')).toBeInTheDocument()
+    })
+  })
+
+  describe('Banner notifications', () => {
+    it('does not render a banner the user has already dismissed', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
+        { id: 'banner-1', active: true, message: 'Already dismissed', level: 'info' },
+      ])
+      vi.mocked(isBannerDismissed).mockReturnValue(true)
+
+      await mountHeader('/home')
+
+      expect(screen.queryByText('Already dismissed')).not.toBeInTheDocument()
+    })
+
+    it('renders an active banner that has not been dismissed', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
+        { id: 'banner-2', active: true, message: 'Still active', level: 'info' },
+      ])
+      vi.mocked(isBannerDismissed).mockReturnValue(false)
+
+      await mountHeader('/home')
+
+      expect(screen.getByText('Still active')).toBeInTheDocument()
+    })
+
+    it('dismisses a banner and removes it from view when its close button is clicked', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
+        { id: 'banner-3', active: true, message: 'Dismiss me', level: 'info' },
+      ])
+      vi.mocked(isBannerDismissed).mockReturnValue(false)
+
+      await mountHeader('/home')
+      expect(screen.getByText('Dismiss me')).toBeInTheDocument()
+
+      fireEvent.click(document.querySelector('.modal-close-btn')!)
+
+      expect(dismissBanner).toHaveBeenCalledWith('banner-3')
+      expect(screen.queryByText('Dismiss me')).not.toBeInTheDocument()
     })
   })
 })

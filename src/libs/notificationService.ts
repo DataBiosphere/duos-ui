@@ -1,6 +1,7 @@
 import { filter, find, isEmpty } from 'src/utils/NodashUtil'
 import { Config } from './config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
+import { Storage } from 'src/libs/storage'
 
 // https://storage.googleapis.com/broad-duos-banners/{{env}}_notifications.json
 const gcs = 'https://storage.googleapis.com/broad-duos-banners'
@@ -11,6 +12,26 @@ export interface Banner {
   active: boolean
   message: string
   level: 'info' | 'warning' | 'danger' | 'success'
+}
+
+const dismissedBannerKey = (id: string): string => `dismissedBanner_${id}`
+
+/**
+ * Has the current user (or anonymous browser) dismissed this banner?
+ * @param {string} id - the banner id to check
+ * @returns {boolean}
+ */
+export const isBannerDismissed = (id: string): boolean => {
+  return Storage.getCurrentUserSettings<boolean>(dismissedBannerKey(id)) ?? false
+}
+
+/**
+ * Record that the current user (or anonymous browser) has dismissed this banner
+ * @param {string} id - the banner id to dismiss
+ * @returns {void}
+ */
+export const dismissBanner = (id: string): void => {
+  Storage.setCurrentUserSettings<boolean>(dismissedBannerKey(id), true)
 }
 
 export const NotificationService = {

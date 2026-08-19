@@ -9,7 +9,7 @@ import DuosLogo from 'src/images/duos-network-logo.svg'
 import contactUsStandard from 'src/images/navbar_icon_contact_us.svg'
 import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg'
 import { Auth } from 'src/libs/auth/auth'
-import { Banner, NotificationService } from 'src/libs/notificationService'
+import { Banner, dismissBanner, isBannerDismissed, NotificationService } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import { withStyles } from 'tss-react/mui'
 import { SupportRequestModal } from './modals/SupportRequestModal'
@@ -158,9 +158,12 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   useEffect(() => {
     const fetchNotificationData = async (): Promise<void> => {
       const notificationData = await NotificationService.getActiveBanners()
+      const visibleNotificationData = Array.isArray(notificationData)
+        ? notificationData.filter(banner => !isBannerDismissed(banner.id))
+        : []
       setState(prev => ({
         ...prev,
-        notificationData: Array.isArray(notificationData) ? notificationData : [],
+        notificationData: visibleNotificationData,
       }))
     }
     void fetchNotificationData()
@@ -195,8 +198,23 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     })
   }
 
+  const dismissNotification = (bannerId: string): void => {
+    dismissBanner(bannerId)
+    setState(prev => ({
+      ...prev,
+      notificationData: prev.notificationData.filter(banner => banner.id !== bannerId),
+    }))
+  }
+
   const makeNotifications = (): React.ReactNode[] => {
-    return state.notificationData.map((d, index) => <Notification notificationData={d} key={d.message} index={index} />)
+    return state.notificationData.map((d, index) => (
+      <Notification
+        notificationData={d}
+        key={d.message}
+        index={index}
+        onDismiss={() => dismissNotification(d.id)}
+      />
+    ))
   }
 
   const toggleDrawer = (boolVal: boolean): void => {

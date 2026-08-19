@@ -6,6 +6,7 @@ import InfoIcon from '@mui/icons-material/Info'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ReportIcon from '@mui/icons-material/Report'
 import style from 'src/components/Notification.module.css'
+import CloseIconComponent from 'src/components/CloseIconComponent'
 
 export interface NotificationData {
   message: string
@@ -16,6 +17,7 @@ interface NotificationProps {
   notificationData?: NotificationData | null
   index?: number
   customStyle?: React.CSSProperties
+  onDismiss?: () => void
 }
 
 const iconStyle: React.CSSProperties = {
@@ -40,7 +42,7 @@ const getIcon = (level: NotificationData['level']): React.ReactElement => {
 }
 
 export const Notification = (props: Readonly<NotificationProps>) => {
-  const { notificationData, index = 1, customStyle } = props
+  const { notificationData, index = 1, customStyle, onDismiss } = props
 
   if (isEmpty(notificationData) || !notificationData) {
     return <div key={index} style={{ display: 'none' }} />
@@ -52,12 +54,13 @@ export const Notification = (props: Readonly<NotificationProps>) => {
     <div
       key={index}
       className={`row alert alert-${level}`}
-      style={{ margin: 0, padding: '1.5rem', alignItems: 'center', ...customStyle }}
+      style={{ margin: 0, padding: '1.5rem', alignItems: 'center', position: 'relative', ...customStyle }}
     >
       <div style={{ float: 'left' }}>{getIcon(level)}</div>
       <div className={style['underlined']} style={{ margin: '0.5rem auto' }}>
         <ReactMarkdown>{notificationData.message}</ReactMarkdown>
       </div>
+      {onDismiss && <CloseIconComponent closeFn={onDismiss} />}
     </div>
   )
 }

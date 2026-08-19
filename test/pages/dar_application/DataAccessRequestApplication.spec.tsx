@@ -90,7 +90,7 @@ import { User } from 'src/libs/ajax/User'
 import { Collections } from 'src/libs/ajax/Collections'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Countries } from 'src/libs/ajax/Countries'
-import { NotificationService } from 'src/libs/notificationService'
+import { dismissBanner, isBannerDismissed, NotificationService } from 'src/libs/notificationService'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Notifications } from 'src/libs/utils'
 
@@ -362,6 +362,94 @@ describe('DataAccessRequestApplication', () => {
 
     const call = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: string }
     expect(call.text).toBe('Error saving Data Access Request. Please try again in a few moments.')
+  })
+
+  it('shows the eRACommonsOutage banner and hides it after dismissal', async () => {
+    vi.mocked(Countries.getCountries).mockResolvedValue(['United States of America (the)', 'Canada'])
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(user as ReturnType<typeof Storage.getCurrentUser>)
+    vi.mocked(User.getMe).mockResolvedValue(user as Awaited<ReturnType<typeof User.getMe>>)
+    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue(userSigningOfficials as Awaited<ReturnType<typeof User.getSOsForCurrentUser>>)
+    vi.mocked(Collections.getCollectionById).mockResolvedValue(darCollection)
+    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue(datasets as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>)
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue({
+      id: 'eRACommonsOutage',
+      active: true,
+      message: 'eRA Commons is down',
+      level: 'warning',
+    })
+    vi.mocked(DAR.getPartialDarRequest).mockResolvedValue(darCollection.dars[darId])
+    vi.mocked(DAA.getDaas).mockResolvedValue([] as Awaited<ReturnType<typeof DAA.getDaas>>)
+    vi.mocked(Metrics.captureEvent).mockResolvedValue(undefined)
+
+    await act(async () => {
+      render(
+        <MemoryRouter initialEntries={[`/dar_application/${darId}`]}>
+          <Routes>
+            <Route
+              path="/dar_application/:dataRequestId"
+              element={(
+                <DataAccessRequestApplication
+                  draftDar={true}
+                  isProgressReportApplication={false}
+                  existingDarsReadOnlyMode={false}
+                />
+              )}
+            />
+          </Routes>
+        </MemoryRouter>,
+      )
+    })
+
+    expect(screen.getByText('Data Access Request Application')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('eRA Commons is down')).toBeInTheDocument()
+    })
+
+    fireEvent.click(document.querySelector('.modal-close-btn')!)
+
+    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage')
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
+  })
+
+  it('does not show an already-dismissed eRACommonsOutage banner', async () => {
+    vi.mocked(Countries.getCountries).mockResolvedValue(['United States of America (the)', 'Canada'])
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(user as ReturnType<typeof Storage.getCurrentUser>)
+    vi.mocked(User.getMe).mockResolvedValue(user as Awaited<ReturnType<typeof User.getMe>>)
+    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue(userSigningOfficials as Awaited<ReturnType<typeof User.getSOsForCurrentUser>>)
+    vi.mocked(Collections.getCollectionById).mockResolvedValue(darCollection)
+    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue(datasets as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>)
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue({
+      id: 'eRACommonsOutage',
+      active: true,
+      message: 'eRA Commons is down',
+      level: 'warning',
+    })
+    vi.mocked(isBannerDismissed).mockReturnValue(true)
+    vi.mocked(DAR.getPartialDarRequest).mockResolvedValue(darCollection.dars[darId])
+    vi.mocked(DAA.getDaas).mockResolvedValue([] as Awaited<ReturnType<typeof DAA.getDaas>>)
+    vi.mocked(Metrics.captureEvent).mockResolvedValue(undefined)
+
+    await act(async () => {
+      render(
+        <MemoryRouter initialEntries={[`/dar_application/${darId}`]}>
+          <Routes>
+            <Route
+              path="/dar_application/:dataRequestId"
+              element={(
+                <DataAccessRequestApplication
+                  draftDar={true}
+                  isProgressReportApplication={false}
+                  existingDarsReadOnlyMode={false}
+                />
+              )}
+            />
+          </Routes>
+        </MemoryRouter>,
+      )
+    })
+
+    expect(screen.getByText('Data Access Request Application')).toBeInTheDocument()
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
   })
 
   it('loads dataset/DAA snapshots in submitted read-only DAR review container', async () => {
