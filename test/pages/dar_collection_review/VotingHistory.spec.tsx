@@ -215,9 +215,8 @@ describe('VotingHistory', () => {
     const user = userEvent.setup()
     const { container } = render(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
 
-    const tables = container.querySelectorAll('.table-data')
-    const chairTable = tables[0] as HTMLElement
-    const memberTable = tables[1] as HTMLElement
+    // Chair Votes tab is selected by default
+    const chairTable = container.querySelector('.table-data') as HTMLElement
 
     // chair table shows election for datasetId 13 (dacId 1), not datasetId 14 (dacId 2)
     // date appears in multiple rows (per-vote rows), so use getAllByText
@@ -239,6 +238,10 @@ describe('VotingHistory', () => {
     expect(within(chairTable).queryByText('DAC')).not.toBeInTheDocument()
     expect(within(chairTable).queryByText('AGREEMENT')).not.toBeInTheDocument()
     expect(within(chairTable).queryByText('Chairperson')).not.toBeInTheDocument()
+
+    // switch to the Member Votes tab
+    await user.click(screen.getByText('Member Votes'))
+    const memberTable = await waitFor(() => container.querySelector('.table-data') as HTMLElement)
 
     // member table shows election for datasetId 13 (DataAccess)
     expect(within(memberTable).getAllByText('2022-11-21').length).toBeGreaterThan(0)

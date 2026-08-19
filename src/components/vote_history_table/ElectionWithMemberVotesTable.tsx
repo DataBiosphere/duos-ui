@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import SimpleTable, { type CellData } from '../SimpleTable'
-import { Styles } from 'src/libs/theme'
+import SimpleTable, { type CellData, type TableStyles } from '../SimpleTable'
 import { formatDate, sortVisibleTable } from 'src/libs/utils'
 import { ElectionWithMemberVotes, Vote } from 'src/types/model'
 import { ExpandMore, ExpandLess } from '@mui/icons-material'
 import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable'
+import { voteHistoryTableStyles, voteHistoryBaseStyle, voteHistoryColumnStyle, voteHistoryContainerOverride } from './voteHistoryTableStyles'
 
 interface ElectionWithMemberVotesTableProps {
   electionsWithMemberVotes: ElectionWithMemberVotes[]
@@ -20,35 +20,14 @@ interface RowData {
   onClick?: () => void
 }
 
-const styles = {
-  baseStyle: {
-    fontFamily: 'Montserrat',
-    fontSize: '1.4rem',
-    fontWeight: 400,
-    color: '#333F52',
-    backgroundColor: '#FFFFFF',
-    display: 'flex',
-    padding: '1rem 2%',
-    lineHeight: '2rem',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    whiteSpace: 'pre-line',
-  },
-  columnStyle: {
-    ...Styles.TABLE.HEADER_ROW,
-    ...{
-      fontFamily: 'Montserrat',
-      fontSize: '1.4rem',
-      color: '#333F52',
-      justifyContent: 'space-between',
-    },
-  },
-  containerOverride: {
-    marginTop: '0',
-    borderTop: '0',
-    backgroundColor: 'rgba(184, 205, 211, 0)',
-    padding: '0',
-  },
+const styles = voteHistoryTableStyles
+
+// Styling for the nested member-vote summary table shown when a row is expanded, matching
+// the same Data-Library-like look as the parent table but at the summary table's smaller scale.
+const memberVoteSummaryStyles: TableStyles = {
+  baseStyle: { ...voteHistoryBaseStyle, fontSize: '1.25rem', padding: '0.5rem 1%', lineHeight: '1.6rem' },
+  columnStyle: { ...voteHistoryColumnStyle, fontSize: '1.2rem' },
+  containerOverride: voteHistoryContainerOverride,
 }
 
 const processVotesCast = (memberVotes: Vote[]) => {
@@ -157,6 +136,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
               isChair={false}
               isLoading={false}
               dacVotes={firstData.memberVotes || []}
+              styles={memberVoteSummaryStyles}
             />
           </div>
         </div>

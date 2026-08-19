@@ -1,9 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import ChairVoteHistoryTable from 'src/components/vote_history_table/ChairVoteHistoryTable'
 import ElectionWithMemberVotesTable from 'src/components/vote_history_table/ElectionWithMemberVotesTable'
+import VoteHistoryTabs from 'src/components/vote_history_table/VoteHistoryTabs'
 import { Styles } from 'src/libs/theme'
 import { DarCollection, DataAccessRequest, Election, ElectionWithMemberVotes, Vote, VoteHistoryRow } from 'src/types/model'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
+
+const VOTE_HISTORY_TABS = {
+  CHAIR: 'chair',
+  MEMBER: 'member',
+} as const
 
 interface VotingHistoryProps {
   readonly darCollection: DarCollection
@@ -20,17 +26,8 @@ const styles = {
     ...Styles.PAGE,
     color: '#333F52',
   },
-  tableSection: {
-    marginBottom: '3rem',
-  },
-  tableTitle: {
-    fontFamily: 'Montserrat',
-    fontSize: 'clamp(1.4rem, 2.4vw, 1.8rem)',
-    fontWeight: 600,
-    color: '#333F52',
-    marginBottom: '1rem',
-    paddingBottom: '0.5rem',
-    borderBottom: '2px solid #E0E6ED',
+  tabsSection: {
+    marginBottom: '2rem',
   },
   flexRowElement: {
     fontFamily: 'Montserrat',
@@ -129,6 +126,8 @@ const isChairVote = (vote: Vote) => {
 }
 
 export default function VotingHistory({ darCollection, dacIds }: VotingHistoryProps) {
+  const [activeTab, setActiveTab] = useState<string>(VOTE_HISTORY_TABS.CHAIR)
+
   const filteredDatasetIds: number[] = darCollection.datasets.filter((dataset) => {
     if (dacIds.length === 0) {
       return true // admin pages show all datasets
@@ -144,22 +143,21 @@ export default function VotingHistory({ darCollection, dacIds }: VotingHistoryPr
         <div style={styles.title}>Votes</div>
       </div>
 
-      <div style={styles.tableSection}>
-        <div style={styles.tableTitle}>Chair Votes</div>
-        <div style={styles.tableWrapper}>
-          <ChairVoteHistoryTable
-            voteHistory={chairVotes}
-          />
-        </div>
+      <div style={styles.tabsSection}>
+        <VoteHistoryTabs
+          value={activeTab}
+          onChange={setActiveTab}
+          tabs={[
+            { key: VOTE_HISTORY_TABS.CHAIR, label: 'Chair Votes', count: chairVotes.length },
+            { key: VOTE_HISTORY_TABS.MEMBER, label: 'Member Votes', count: memberVotes.length },
+          ]}
+        />
       </div>
 
-      <div style={styles.tableSection}>
-        <div style={styles.tableTitle}>Member Votes</div>
-        <div style={styles.tableWrapper}>
-          <ElectionWithMemberVotesTable
-            electionsWithMemberVotes={memberVotes}
-          />
-        </div>
+      <div style={styles.tableWrapper}>
+        {activeTab === VOTE_HISTORY_TABS.CHAIR
+          ? <ChairVoteHistoryTable voteHistory={chairVotes} />
+          : <ElectionWithMemberVotesTable electionsWithMemberVotes={memberVotes} />}
       </div>
     </div>
   )
