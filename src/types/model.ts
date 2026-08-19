@@ -732,7 +732,7 @@ export interface DataUseGroupVote {
 
 /** A collection's datasets grouped by shared data use, as served on the collection summary. */
 export interface DataUseGroup {
-  key: string
+  key: number[]
   dataUse?: DataUseSummary
   datasets: DataUseGroupDataset[]
   votes: DataUseGroupVote[]

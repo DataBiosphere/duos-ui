@@ -182,8 +182,8 @@ describe('DarCollectionTable', () => {
       collections: [{
         ...baseCollection,
         dataUseGroups: [
-          { key: 'bucket-1', dataUse: { primary: [{ code: 'GRU', description: 'General research use' }] }, datasets: [], votes: [] },
-          { key: 'bucket-2', dataUse: { primary: [{ code: 'NPU', description: 'Non-profit use only' }] }, datasets: [], votes: [] },
+          { key: [1], dataUse: { primary: [{ code: 'GRU', description: 'General research use' }] }, datasets: [], votes: [] },
+          { key: [2], dataUse: { primary: [{ code: 'NPU', description: 'Non-profit use only' }] }, datasets: [], votes: [] },
         ],
       }],
       columns: [DarCollectionTableColumnOptions.DAR_CODE, DarCollectionTableColumnOptions.DATA_USE],
@@ -208,8 +208,8 @@ describe('DarCollectionTable', () => {
     const withTwoGroups = (collection: DarCollectionSummary): DarCollectionSummary => ({
       ...collection,
       dataUseGroups: [
-        { key: 'a', dataUse: { primary: [{ code: `GRU${collection.darCollectionId}`, description: '' }] }, datasets: [], votes: [] },
-        { key: 'b', dataUse: { primary: [{ code: `NPU${collection.darCollectionId}`, description: '' }] }, datasets: [], votes: [] },
+        { key: [1], dataUse: { primary: [{ code: `GRU${collection.darCollectionId}`, description: '' }] }, datasets: [], votes: [] },
+        { key: [2], dataUse: { primary: [{ code: `NPU${collection.darCollectionId}`, description: '' }] }, datasets: [], votes: [] },
       ],
     })
 

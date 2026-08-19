@@ -52,7 +52,7 @@ const baseCollection: DarCollectionSummary = {
 const gru = { primary: [{ code: 'GRU', description: 'General research use' }] }
 
 const makeGroup = (overrides: Partial<DataUseGroup> = {}): DataUseGroup => ({
-  key: 'bucket-1',
+  key: [1],
   dataUse: gru,
   datasets: [],
   votes: [],
@@ -112,7 +112,7 @@ describe('buildDarCollectionGridRows', () => {
       ...baseCollection,
       dataUseGroups: [
         makeGroup(),
-        makeGroup({ key: 'bucket-2', dataUse: { primary: [{ code: 'NPU', description: 'Non-profit use only' }] } }),
+        makeGroup({ key: [2], dataUse: { primary: [{ code: 'NPU', description: 'Non-profit use only' }] } }),
       ],
     }
     const rows = buildDarCollectionGridRows([collection])
@@ -360,8 +360,8 @@ describe('dataUse column', () => {
   it('never spans across rows, even within the same collection', () => {
     const columns = makeDarCollectionColumns(['dataUse'], baseArgs)
     const column = getColumn(columns, 'dataUse')
-    const rowA = makeRow({ id: 'a', group: makeGroup({ key: 'a' }) })
-    const rowB = makeRow({ id: 'b', group: makeGroup({ key: 'b' }) })
+    const rowA = makeRow({ id: 'a', group: makeGroup({ key: [1] }) })
+    const rowB = makeRow({ id: 'b', group: makeGroup({ key: [2] }) })
     expect(getSpanValue(column, rowA)).not.toBe(getSpanValue(column, rowB))
   })
 })

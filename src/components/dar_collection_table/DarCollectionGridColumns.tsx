@@ -29,7 +29,7 @@ export function buildDarCollectionGridRows(
       return [{ id: `${collection.darCollectionId}-empty`, collection, group: null }]
     }
     return groups.map(group => ({
-      id: `${collection.darCollectionId}-${group.key}`,
+      id: `${collection.darCollectionId}-${group.key.join('-')}`,
       collection,
       group,
     }))
