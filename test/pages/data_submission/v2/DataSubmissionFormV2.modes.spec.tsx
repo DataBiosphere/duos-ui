@@ -70,7 +70,7 @@ describe('DataSubmissionFormV2 in draft mode', () => {
 
     renderDraftRoute()
 
-    await waitFor(() => expect(screen.getByTestId('study-name')).toHaveTextContent('Synthetic Minimal Study'))
+    expect(await screen.findByTestId('study-name')).toHaveTextContent('Synthetic Minimal Study')
   })
 
   it('says the registration is a draft', async () => {
@@ -78,7 +78,7 @@ describe('DataSubmissionFormV2 in draft mode', () => {
 
     renderDraftRoute()
 
-    await waitFor(() => expect(screen.getByText('Study Registration Draft')).toBeInTheDocument())
+    await screen.findByText('Study Registration Draft')
   })
 
   it('offers creation rather than update, since a draft was never submitted', async () => {
@@ -86,7 +86,7 @@ describe('DataSubmissionFormV2 in draft mode', () => {
 
     renderDraftRoute()
 
-    await waitFor(() => expect(screen.getByText('Create Study')).toBeInTheDocument())
+    await screen.findByText('Create Study')
     expect(screen.queryByText('Update Study')).not.toBeInTheDocument()
   })
 
@@ -97,7 +97,7 @@ describe('DataSubmissionFormV2 in draft mode', () => {
 
     renderDraftRoute()
 
-    await waitFor(() => expect(screen.getByText('Draft could not be loaded')).toBeInTheDocument())
+    await screen.findByText('Draft could not be loaded')
     expect(screen.queryByText('Create Study')).not.toBeInTheDocument()
     expect(screen.queryByTestId('study-name')).not.toBeInTheDocument()
   })
@@ -107,7 +107,7 @@ describe('DataSubmissionFormV2 in draft mode', () => {
 
     renderDraftRoute()
 
-    await waitFor(() => expect(screen.getByText('Draft could not be loaded')).toBeInTheDocument())
+    await screen.findByText('Draft could not be loaded')
     expect(screen.getByText('Back to My Data Submissions')).toBeInTheDocument()
   })
 })
@@ -123,7 +123,7 @@ describe('DataSubmissionFormV2 outside draft mode', () => {
       { route: '/data_submission_form' },
     )
 
-    await waitFor(() => expect(screen.getByText('Study Registration Form')).toBeInTheDocument())
+    await screen.findByText('Study Registration Form')
     expect(Draft.getDraft).not.toHaveBeenCalled()
     expect(DataSet.getStudyById).not.toHaveBeenCalled()
     expect(screen.getByText('Create Study')).toBeInTheDocument()
@@ -138,7 +138,7 @@ describe('DataSubmissionFormV2 outside draft mode', () => {
       </Routes>,
       { route: '/data_submission_form' },
     )
-    await waitFor(() => expect(screen.getByText('Create Study')).toBeInTheDocument())
+    await screen.findByText('Create Study')
     await act(async () => {
       fireEvent.click(screen.getByText('Create Study'))
     })
@@ -172,7 +172,7 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
 
     renderStudyRoute()
 
-    await waitFor(() => expect(screen.getByTestId('study-name')).toHaveTextContent('Persisted Study'))
+    expect(await screen.findByTestId('study-name')).toHaveTextContent('Persisted Study')
     expect(DataSet.getStudyById).toHaveBeenCalledWith(STUDY_ID)
     expect(Draft.getDraft).not.toHaveBeenCalled()
     expect(screen.getByText('Study Registration Form')).toBeInTheDocument()
@@ -183,7 +183,7 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
 
     renderStudyRoute()
 
-    await waitFor(() => expect(screen.getByText('Update Study')).toBeInTheDocument())
+    await screen.findByText('Update Study')
     expect(screen.queryByText('Create Study')).not.toBeInTheDocument()
   })
 
@@ -192,7 +192,7 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     vi.mocked(DataSet.updateStudy).mockResolvedValue({} as never)
 
     renderStudyRoute()
-    await waitFor(() => expect(screen.getByText('Update Study')).toBeInTheDocument())
+    await screen.findByText('Update Study')
     await act(async () => {
       fireEvent.click(screen.getByText('Update Study'))
     })
@@ -207,7 +207,7 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
 
     renderStudyRoute()
 
-    await waitFor(() => expect(screen.getByText('Error Loading Page')).toBeInTheDocument())
+    await screen.findByText('Error Loading Page')
     expect(screen.queryByText('Draft could not be loaded')).not.toBeInTheDocument()
     expect(screen.getByText('Create Study')).toBeInTheDocument()
   })
@@ -215,7 +215,7 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
 
 describe('creating a study from a draft', () => {
   const createStudy = async () => {
-    await waitFor(() => expect(screen.getByText('Create Study')).toBeInTheDocument())
+    await screen.findByText('Create Study')
     await act(async () => {
       fireEvent.click(screen.getByText('Create Study'))
     })

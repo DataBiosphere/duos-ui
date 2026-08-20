@@ -233,12 +233,10 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
   return datasetSchema
 }
 /**
- * The inverse of {@link studyToDatasetSchemaSubmission}: turns a registration-shaped document — a
- * template draft, or anything else built to that contract — back into the form's Study model.
- *
- * A property is only written when the document carries a value. Consent serializes the document
- * with NON_NULL, so a field the producer left empty is absent rather than null, and writing an
- * empty property for it would submit a value the producer never gave.
+ * The inverse of {@link studyToDatasetSchemaSubmission}: a registration-shaped document becomes the
+ * Study the form edits. A property is written only where the document carries a value — Consent
+ * serializes with NON_NULL, so an empty field is absent, and writing one would submit a value the
+ * producer never gave.
  */
 export const datasetSchemaSubmissionToStudy = (schema: DatasetRegistrationSchemaV1): Study => {
   const properties: StudyProperty[] = []
@@ -286,7 +284,6 @@ export const datasetSchemaSubmissionToStudy = (schema: DatasetRegistrationSchema
     dataTypes: schema.dataTypes,
     publicVisibility: schema.publicVisibility,
     properties,
-    // fileTypes and the rest of a consent group arrive as the wire shape the form already edits.
     assets: { ...otherAssets, consentGroups: structuredClone(schema.consentGroups ?? []) },
     data: schema.data ?? {},
   } as Study

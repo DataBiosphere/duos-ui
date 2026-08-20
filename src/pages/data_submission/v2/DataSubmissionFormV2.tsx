@@ -28,10 +28,7 @@ export type DataSubmissionFormV2Props = {
 
 export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFile'
 
-/**
- * Which of the three things this form is doing. A draft id is not a study id: the draft holds a
- * document that has never been submitted, so it creates a study rather than updating one.
- */
+/** A draft id is not a study id: a draft has never been submitted, so it creates rather than updates. */
 export type FormMode = 'create' | 'edit' | 'draft'
 
 export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
@@ -63,8 +60,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
     }
   }
 
-  // A draft is loaded, mapped, and then edited like any other unsubmitted study: it stays a draft
-  // until the study is created from it, so isEditing remains false.
+  // A draft stays a draft until the study is created from it, so isEditing remains false.
   const onLoadDraft = (draftId: string) => {
     loadStudyDatasetDraft(draftId).then((study) => {
       setStudy(study)
@@ -113,10 +109,8 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   /**
-   * Removes the draft the study was created from, once it exists. Best effort by design: a study
-   * that was created is not a failure because the draft it came from outlived it, so a failure here
-   * is reported on its own and nothing is retried. A failed creation leaves the draft alone, which
-   * is what makes retrying from it possible.
+   * Best effort, and only once the study exists: a study that was created is not a failure because
+   * the draft it came from outlived it, so a failure here is reported on its own and not retried.
    */
   const removeSourceDraft = async () => {
     if (formMode !== 'draft' || !draftId) {
@@ -155,8 +149,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
     })
   }
 
-  // A draft that could not be loaded has nothing to edit, so the form is not offered at all: there
-  // is no document to submit and none to delete.
+  // Nothing to edit, so nothing to submit or delete: the form is not offered at all.
   if (formMode === 'draft' && loadingError) {
     return (
       <div style={Styles.PAGE}>

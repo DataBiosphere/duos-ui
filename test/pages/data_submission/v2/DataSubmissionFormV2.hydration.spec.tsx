@@ -112,13 +112,13 @@ describe('DataSubmissionFormV2 hydrating a draft', () => {
   it('lists the consent groups in the order the document gave them', async () => {
     renderDraft(richDocument())
 
-    await waitFor(() => expect(screen.getByText('Synthetic Open Dataset')).toBeInTheDocument())
+    await screen.findByText('Synthetic Open Dataset')
     expect(screen.getByText('Synthetic Controlled Dataset')).toBeInTheDocument()
   })
 
   it('keeps consent groups, their file types, and the client metadata through submission', async () => {
     renderDraft(richDocument())
-    await waitFor(() => expect(screen.getByText('Create Study')).toBeInTheDocument())
+    await screen.findByText('Create Study')
 
     await createStudy()
 
