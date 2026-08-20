@@ -2,6 +2,7 @@ import React from 'react'
 import {
   Study,
   StudyProperty,
+  StudyPropertyType,
   StringStudyProperty,
   DateStudyProperty, BooleanStudyProperty,
   DatasetRegistrationSchemaV1,
@@ -231,6 +232,74 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
   datasetSchema.assets = assets
   return datasetSchema
 }
+/**
+ * The inverse of {@link studyToDatasetSchemaSubmission}: turns a registration-shaped document — a
+ * template draft, or anything else built to that contract — back into the form's Study model.
+ *
+ * A property is only written when the document carries a value. Consent serializes the document
+ * with NON_NULL, so a field the producer left empty is absent rather than null, and writing an
+ * empty property for it would submit a value the producer never gave.
+ */
+export const datasetSchemaSubmissionToStudy = (schema: DatasetRegistrationSchemaV1): Study => {
+  const properties: StudyProperty[] = []
+  const addProperty = (key: string, type: StudyPropertyType, value: unknown) => {
+    if (value !== undefined && value !== null) {
+      properties.push(new StudyProperty(key, type, value))
+    }
+  }
+
+  addProperty(StudyTypeProperty.key, 'String', schema.studyType)
+  addProperty(PhenotypeIndication.key, 'String', schema.phenotypeIndication)
+  addProperty(Species.key, 'String', schema.species)
+  addProperty(DataCustodianEmail.key, 'Json', schema.dataCustodianEmail)
+  addProperty(ThroughBioId.key, 'String', schema.throughBioId)
+  addProperty(NihAnvilUse.key, 'String', schema.nihAnvilUse)
+  addProperty(SubmittingToAnvil.key, 'Boolean', schema.submittingToAnvil)
+  addProperty(DbGaPPhsID.key, 'String', schema.dbGaPPhsID)
+  addProperty(DbGaPStudyRegistrationName.key, 'String', schema.dbGaPStudyRegistrationName)
+  addProperty(EmbargoReleaseDate.key, 'Date', schema.embargoReleaseDate)
+  addProperty(SequencingCenter.key, 'String', schema.sequencingCenter)
+  addProperty(PiInstitution.key, 'Number', schema.piInstitution)
+  addProperty(NihGrantContractNumber.key, 'String', schema.nihGrantContractNumber)
+  addProperty(NihICsSupportingStudy.key, 'Json', schema.nihICsSupportingStudy)
+  addProperty(NihProgramOfficerName.key, 'String', schema.nihProgramOfficerName)
+  addProperty(NihInstitutionCenterSubmission.key, 'String', schema.nihInstitutionCenterSubmission)
+  addProperty(NihGenomicProgramAdministratorName.key, 'String', schema.nihGenomicProgramAdministratorName)
+  addProperty(MultiCenterStudy.key, 'Boolean', schema.multiCenterStudy)
+  addProperty(CollaboratingSites.key, 'Json', schema.collaboratingSites)
+  addProperty(ControlledAccessRequiredForGenomicSummaryResultsGSR.key, 'Boolean', schema.controlledAccessRequiredForGenomicSummaryResultsGSR)
+  addProperty(ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key, 'String', schema.controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation)
+  addProperty(AlternativeDataSharingPlan.key, 'Boolean', schema.alternativeDataSharingPlan)
+  addProperty(AlternativeDataSharingPlanReasons.key, 'Json', schema.alternativeDataSharingPlanReasons)
+  addProperty(AlternativeDataSharingPlanExplanation.key, 'String', schema.alternativeDataSharingPlanExplanation)
+  addProperty(AlternativeDataSharingPlanDataSubmitted.key, 'String', schema.alternativeDataSharingPlanDataSubmitted)
+  addProperty(AlternativeDataSharingPlanDataReleased.key, 'Boolean', schema.alternativeDataSharingPlanDataReleased)
+  addProperty(AlternativeDataSharingPlanTargetDeliveryDate.key, 'Date', schema.alternativeDataSharingPlanTargetDeliveryDate)
+  addProperty(AlternativeDataSharingPlanTargetPublicReleaseDate.key, 'Date', schema.alternativeDataSharingPlanTargetPublicReleaseDate)
+
+  const { consentGroups, ...otherAssets } = structuredClone(schema.assets ?? {}) as Record<string, unknown>
+  void consentGroups
+
+  const study = {
+    name: schema.studyName,
+    description: schema.studyDescription,
+    dataTypes: schema.dataTypes,
+    publicVisibility: schema.publicVisibility,
+    properties,
+    // fileTypes and the rest of a consent group arrive as the wire shape the form already edits.
+    assets: { ...otherAssets, consentGroups: structuredClone(schema.consentGroups ?? []) },
+    data: schema.data ?? {},
+  } as Study
+
+  if (schema.piName !== undefined) {
+    study.piName = schema.piName
+  }
+  if (schema.piEmail !== undefined) {
+    study.piEmail = schema.piEmail
+  }
+  return study
+}
+
 const getDatasetPropertyValueByKey = <T = unknown>(key: string, dataset: Dataset): T | undefined => {
   if (dataset.properties && Array.isArray(dataset.properties)) {
     const result = dataset.properties.find(entry => entry.propertyName === key)
