@@ -31,10 +31,17 @@ export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFil
 /** A draft id is not a study id: a draft has never been submitted, so it creates rather than updates. */
 export type FormMode = 'create' | 'edit' | 'draft'
 
+const resolveFormMode = (draftId?: string, studyId?: string): FormMode => {
+  if (draftId) {
+    return 'draft'
+  }
+  return studyId ? 'edit' : 'create'
+}
+
 export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const { onSaveRoute } = props
   const { studyId, draftId } = useParams()
-  const formMode: FormMode = draftId ? 'draft' : studyId ? 'edit' : 'create'
+  const formMode: FormMode = resolveFormMode(draftId, studyId)
   const [isEditing, setIsEditing] = useState(false)
   const [study, setStudy] = useState({ data: {} } as Study)
   const [loadingError, setLoadingError] = useState(false)
@@ -160,6 +167,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
           />
         </div>
         <button
+          type="button"
           className="button button-white"
           data-cy="draft-load-error-back"
           onClick={() => navigate('/dataset_submissions')}

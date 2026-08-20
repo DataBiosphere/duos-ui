@@ -275,8 +275,8 @@ export const datasetSchemaSubmissionToStudy = (schema: DatasetRegistrationSchema
   addProperty(AlternativeDataSharingPlanTargetDeliveryDate.key, 'Date', schema.alternativeDataSharingPlanTargetDeliveryDate)
   addProperty(AlternativeDataSharingPlanTargetPublicReleaseDate.key, 'Date', schema.alternativeDataSharingPlanTargetPublicReleaseDate)
 
-  const { consentGroups, ...otherAssets } = structuredClone(schema.assets ?? {}) as Record<string, unknown>
-  void consentGroups
+  const otherAssets = structuredClone(schema.assets ?? {}) as Record<string, unknown>
+  delete otherAssets.consentGroups
 
   const study = {
     name: schema.studyName,

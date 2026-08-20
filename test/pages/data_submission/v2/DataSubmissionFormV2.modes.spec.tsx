@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { Route, Routes } from 'react-router'
-import { act, fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import { Draft } from 'src/libs/ajax/Draft'
@@ -78,7 +78,7 @@ describe('DataSubmissionFormV2 in draft mode', () => {
 
     renderDraftRoute()
 
-    await screen.findByText('Study Registration Draft')
+    expect(await screen.findByText('Study Registration Draft')).toBeInTheDocument()
   })
 
   it('offers creation rather than update, since a draft was never submitted', async () => {
@@ -86,7 +86,7 @@ describe('DataSubmissionFormV2 in draft mode', () => {
 
     renderDraftRoute()
 
-    await screen.findByText('Create Study')
+    expect(await screen.findByText('Create Study')).toBeInTheDocument()
     expect(screen.queryByText('Update Study')).not.toBeInTheDocument()
   })
 
@@ -97,7 +97,7 @@ describe('DataSubmissionFormV2 in draft mode', () => {
 
     renderDraftRoute()
 
-    await screen.findByText('Draft could not be loaded')
+    expect(await screen.findByText('Draft could not be loaded')).toBeInTheDocument()
     expect(screen.queryByText('Create Study')).not.toBeInTheDocument()
     expect(screen.queryByTestId('study-name')).not.toBeInTheDocument()
   })
@@ -107,7 +107,7 @@ describe('DataSubmissionFormV2 in draft mode', () => {
 
     renderDraftRoute()
 
-    await screen.findByText('Draft could not be loaded')
+    expect(await screen.findByText('Draft could not be loaded')).toBeInTheDocument()
     expect(screen.getByText('Back to My Data Submissions')).toBeInTheDocument()
   })
 })
@@ -123,7 +123,7 @@ describe('DataSubmissionFormV2 outside draft mode', () => {
       { route: '/data_submission_form' },
     )
 
-    await screen.findByText('Study Registration Form')
+    expect(await screen.findByText('Study Registration Form')).toBeInTheDocument()
     expect(Draft.getDraft).not.toHaveBeenCalled()
     expect(DataSet.getStudyById).not.toHaveBeenCalled()
     expect(screen.getByText('Create Study')).toBeInTheDocument()
@@ -138,11 +138,10 @@ describe('DataSubmissionFormV2 outside draft mode', () => {
       </Routes>,
       { route: '/data_submission_form' },
     )
-    await screen.findByText('Create Study')
-    await act(async () => {
-      fireEvent.click(screen.getByText('Create Study'))
-    })
+    expect(await screen.findByText('Create Study')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Create Study'))
 
+    await waitFor(() => expect(Notifications.showNotification).toHaveBeenCalled())
     expect(DataSet.registerDataset).toHaveBeenCalled()
     expect(Draft.deleteDraft).not.toHaveBeenCalled()
   })
@@ -183,7 +182,7 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
 
     renderStudyRoute()
 
-    await screen.findByText('Update Study')
+    expect(await screen.findByText('Update Study')).toBeInTheDocument()
     expect(screen.queryByText('Create Study')).not.toBeInTheDocument()
   })
 
@@ -192,10 +191,8 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     vi.mocked(DataSet.updateStudy).mockResolvedValue({} as never)
 
     renderStudyRoute()
-    await screen.findByText('Update Study')
-    await act(async () => {
-      fireEvent.click(screen.getByText('Update Study'))
-    })
+    expect(await screen.findByText('Update Study')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Update Study'))
 
     expect(DataSet.updateStudy).toHaveBeenCalledWith(STUDY_ID, expect.any(FormData))
     expect(Draft.deleteDraft).not.toHaveBeenCalled()
@@ -207,18 +204,19 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
 
     renderStudyRoute()
 
-    await screen.findByText('Error Loading Page')
+    expect(await screen.findByText('Error Loading Page')).toBeInTheDocument()
     expect(screen.queryByText('Draft could not be loaded')).not.toBeInTheDocument()
     expect(screen.getByText('Create Study')).toBeInTheDocument()
   })
 })
 
 describe('creating a study from a draft', () => {
+  // fireEvent wraps its own act(); the click handler is async, so its continuation is awaited
+  // through what it does rather than by wrapping the click again.
   const createStudy = async () => {
-    await screen.findByText('Create Study')
-    await act(async () => {
-      fireEvent.click(screen.getByText('Create Study'))
-    })
+    expect(await screen.findByText('Create Study')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Create Study'))
+    await waitFor(() => expect(DataSet.registerDataset).toHaveBeenCalled())
   }
 
   beforeEach(() => {
@@ -233,7 +231,7 @@ describe('creating a study from a draft', () => {
     renderDraftRoute()
     await createStudy()
 
-    expect(Draft.deleteDraft).toHaveBeenCalledWith(DRAFT_ID)
+    await waitFor(() => expect(Draft.deleteDraft).toHaveBeenCalledWith(DRAFT_ID))
     expect(vi.mocked(DataSet.registerDataset).mock.invocationCallOrder[0])
       .toBeLessThan(vi.mocked(Draft.deleteDraft).mock.invocationCallOrder[0])
   })
@@ -258,6 +256,7 @@ describe('creating a study from a draft', () => {
     renderDraftRoute()
     await createStudy()
 
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalled())
     expect(Draft.deleteDraft).not.toHaveBeenCalled()
   })
 
@@ -268,6 +267,7 @@ describe('creating a study from a draft', () => {
     renderDraftRoute()
     await createStudy()
 
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalled())
     expect(Notifications.showNotification).toHaveBeenCalledWith(
       expect.objectContaining({ text: 'Study created successfully', type: 'success' }),
     )
@@ -283,6 +283,7 @@ describe('creating a study from a draft', () => {
     renderDraftRoute()
     await createStudy()
 
+    await waitFor(() => expect(Draft.deleteDraft).toHaveBeenCalled())
     expect(Draft.deleteDraft).toHaveBeenCalledTimes(1)
   })
 })

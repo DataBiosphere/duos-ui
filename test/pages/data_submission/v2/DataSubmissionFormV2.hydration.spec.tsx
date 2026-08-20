@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { Route, Routes } from 'react-router'
-import { act, fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import { Draft } from 'src/libs/ajax/Draft'
@@ -81,9 +81,8 @@ const submittedPayload = (): DatasetRegistrationSchemaV1 => {
 }
 
 const createStudy = async () => {
-  await act(async () => {
-    fireEvent.click(screen.getByText('Create Study'))
-  })
+  fireEvent.click(screen.getByText('Create Study'))
+  await waitFor(() => expect(DataSet.registerDataset).toHaveBeenCalled())
 }
 
 describe('DataSubmissionFormV2 hydrating a draft', () => {
@@ -112,13 +111,13 @@ describe('DataSubmissionFormV2 hydrating a draft', () => {
   it('lists the consent groups in the order the document gave them', async () => {
     renderDraft(richDocument())
 
-    await screen.findByText('Synthetic Open Dataset')
+    expect(await screen.findByText('Synthetic Open Dataset')).toBeInTheDocument()
     expect(screen.getByText('Synthetic Controlled Dataset')).toBeInTheDocument()
   })
 
   it('keeps consent groups, their file types, and the client metadata through submission', async () => {
     renderDraft(richDocument())
-    await screen.findByText('Create Study')
+    expect(await screen.findByText('Create Study')).toBeInTheDocument()
 
     await createStudy()
 
@@ -143,9 +142,7 @@ describe('DataSubmissionFormV2 hydrating a draft', () => {
     expect(fileInput.files?.length ?? 0).toBe(0)
 
     const plan = new File(['plan'], 'sharing-plan.txt', { type: 'text/plain' })
-    await act(async () => {
-      fireEvent.change(fileInput, { target: { files: [plan] } })
-    })
+    fireEvent.change(fileInput, { target: { files: [plan] } })
     await createStudy()
 
     // The form clones the study before submitting, so the file arrives as a copy rather than the
