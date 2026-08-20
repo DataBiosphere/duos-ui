@@ -12,6 +12,7 @@ import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetMan
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Notifications } from 'src/libs/utils'
 import { studyToDatasetSchemaSubmission, buildConsentGroupsFromStudy, getStudyPropertyValueByKey } from 'src/pages/data_submission/v2/v2-common-functions'
+import { loadStudyDatasetDraft } from 'src/pages/data_submission/v2/studyDatasetDraft'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 
@@ -26,15 +27,28 @@ export type DataSubmissionFormV2Props = {
 
 export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFile'
 
+/**
+ * Which of the three things this form is doing. A draft id is not a study id: the draft holds a
+ * document that has never been submitted, so it creates a study rather than updating one.
+ */
+export type FormMode = 'create' | 'edit' | 'draft'
+
 export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const { onSaveRoute } = props
-  const { studyId } = useParams()
+  const { studyId, draftId } = useParams()
+  const formMode: FormMode = draftId ? 'draft' : studyId ? 'edit' : 'create'
   const [isEditing, setIsEditing] = useState(false)
   const [study, setStudy] = useState({ data: {} } as Study)
   const [loadingError, setLoadingError] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
 
   const navigate = useNavigate()
+
+  const onLoadFailure = () => {
+    setStudy({ data: {} } as Study)
+    setIsEditing(false)
+    setLoadingError(true)
+  }
 
   const onLoadFormData = (studyId: string | undefined) => {
     if (studyId) {
@@ -44,17 +58,26 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
         study.assets = { ...studyAssets, consentGroups: consentGroupAssets }
         setStudy(study)
         setIsEditing(true)
-      }).catch(() => {
-        setStudy({ data: {} } as Study)
-        setIsEditing(false)
-        setLoadingError(true)
-      })
+      }).catch(onLoadFailure)
     }
   }
 
+  // A draft is loaded, mapped, and then edited like any other unsubmitted study: it stays a draft
+  // until the study is created from it, so isEditing remains false.
+  const onLoadDraft = (draftId: string) => {
+    loadStudyDatasetDraft(draftId).then((study) => {
+      setStudy(study)
+      setLoadingError(false)
+    }).catch(onLoadFailure)
+  }
+
   useEffect(() => {
+    if (formMode === 'draft' && draftId) {
+      onLoadDraft(draftId)
+      return
+    }
     onLoadFormData(studyId)
-  }, [studyId, setStudy, setIsEditing])
+  }, [studyId, draftId, formMode, setStudy, setIsEditing])
 
   const buildMultiPartFormData = (study: Study) => {
     const multiPartFormData = new FormData()
@@ -110,14 +133,38 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
     })
   }
 
+  // A draft that could not be loaded has nothing to edit, so the form is not offered at all: there
+  // is no document to submit and none to delete.
+  if (formMode === 'draft' && loadingError) {
+    return (
+      <div style={Styles.PAGE}>
+        <div style={{ marginLeft: '-1.5%' }}>
+          <TableHeaderSection
+            title="Draft could not be loaded"
+            description="This draft may have been removed, or it may belong to a different kind of submission. Nothing has been changed."
+          />
+        </div>
+        <button
+          className="button button-white"
+          data-cy="draft-load-error-back"
+          onClick={() => navigate('/dataset_submissions')}
+        >
+          Back to My Data Submissions
+        </button>
+      </div>
+    )
+  }
+
   return (
     <>
       {loadingError && <div>Error Loading Page</div>}
       <div style={Styles.PAGE}>
         <div style={{ marginLeft: '-1.5%' }}>
           <TableHeaderSection
-            title="Study Registration Form"
-            description="Submit new datasets to DUOS"
+            title={formMode === 'draft' ? 'Study Registration Draft' : 'Study Registration Form'}
+            description={formMode === 'draft'
+              ? 'Review the values from your template, edit anything that needs it, then create the study.'
+              : 'Submit new datasets to DUOS'}
           />
         </div>
 

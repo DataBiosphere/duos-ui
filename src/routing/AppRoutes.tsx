@@ -96,6 +96,7 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/data_submission_form" element={<DataSubmissionFormV2 />}>
             <Route path=":studyId" element={<DataSubmissionFormV2 />} />
           </Route>
+          <Route path="/data_submission_form/draft/study-dataset/:draftId" element={<DataSubmissionFormV2 />} />
           <Route path="/study_update/:studyId" element={<DataSubmissionFormV2 onSaveRoute="/dataset_submissions" />} />
           <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
         </Route>
