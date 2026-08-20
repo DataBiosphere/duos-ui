@@ -181,10 +181,10 @@ const filterDatasetsByDACs = (dacIds: number[], datasets: Dataset[]): Dataset[] 
  * Versions whose ABSTAIN is decided by Consent's `DataUseMatcherV5`, which supplies the rationale
  * the DAC reads. Suppressing these client-side would replace a real decision with "N/A".
  */
-const BACKEND_ABSTAINING_VERSIONS: readonly string[] = ['v3', 'v4', 'v5']
+const BACKEND_ABSTAINING_VERSIONS: ReadonlySet<string> = new Set(['v3', 'v4', 'v5'])
 
 /** Versions that predate server-side abstention and so still need client-side suppression. */
-const CLIENT_SUPPRESSING_VERSIONS: readonly string[] = ['v1', 'v2']
+const CLIENT_SUPPRESSING_VERSIONS: ReadonlySet<string> = new Set(['v1', 'v2'])
 
 const UNRECOGNIZED_ALGORITHM_RESULT = 'Unable to interpret the system match'
 
@@ -199,10 +199,10 @@ const classifyAlgorithmVersion = (versions: (string | undefined)[]): AlgorithmVe
     return 'unrecognized'
   }
   const [version] = versions
-  if (!isNil(version) && BACKEND_ABSTAINING_VERSIONS.includes(version)) {
+  if (!isNil(version) && BACKEND_ABSTAINING_VERSIONS.has(version)) {
     return 'backend-abstains'
   }
-  if (!isNil(version) && CLIENT_SUPPRESSING_VERSIONS.includes(version)) {
+  if (!isNil(version) && CLIENT_SUPPRESSING_VERSIONS.has(version)) {
     return 'client-suppresses'
   }
   return 'unrecognized'
