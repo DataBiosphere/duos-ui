@@ -148,6 +148,71 @@ describe('DataSubmissionFormV2 outside draft mode', () => {
   })
 })
 
+describe('DataSubmissionFormV2 editing a persisted study', () => {
+  const STUDY_ID = '1'
+  const persistedStudy = () => ({
+    studyId: 1,
+    name: 'Persisted Study',
+    datasets: [],
+    properties: [],
+    data: {},
+  } as unknown as Study)
+
+  const renderStudyRoute = () => renderWithRouter(
+    <Routes>
+      <Route path="/data_submission_form/:studyId" element={<DataSubmissionFormV2 />} />
+    </Routes>,
+    { route: `/data_submission_form/${STUDY_ID}` },
+  )
+
+  beforeEach(() => vi.clearAllMocks())
+
+  it('still loads by study id, with no draft involved', async () => {
+    vi.mocked(DataSet.getStudyById).mockResolvedValue(persistedStudy())
+
+    renderStudyRoute()
+
+    await waitFor(() => expect(screen.getByTestId('study-name')).toHaveTextContent('Persisted Study'))
+    expect(DataSet.getStudyById).toHaveBeenCalledWith(STUDY_ID)
+    expect(Draft.getDraft).not.toHaveBeenCalled()
+    expect(screen.getByText('Study Registration Form')).toBeInTheDocument()
+  })
+
+  it('still offers update rather than creation', async () => {
+    vi.mocked(DataSet.getStudyById).mockResolvedValue(persistedStudy())
+
+    renderStudyRoute()
+
+    await waitFor(() => expect(screen.getByText('Update Study')).toBeInTheDocument())
+    expect(screen.queryByText('Create Study')).not.toBeInTheDocument()
+  })
+
+  it('still updates the study it loaded, deleting no draft', async () => {
+    vi.mocked(DataSet.getStudyById).mockResolvedValue(persistedStudy())
+    vi.mocked(DataSet.updateStudy).mockResolvedValue({} as never)
+
+    renderStudyRoute()
+    await waitFor(() => expect(screen.getByText('Update Study')).toBeInTheDocument())
+    await act(async () => {
+      fireEvent.click(screen.getByText('Update Study'))
+    })
+
+    expect(DataSet.updateStudy).toHaveBeenCalledWith(STUDY_ID, expect.any(FormData))
+    expect(Draft.deleteDraft).not.toHaveBeenCalled()
+  })
+
+  it('still reports a failed load inline, keeping the form on the page', async () => {
+    // Only the draft path replaces the form with an error page; this one is unchanged.
+    vi.mocked(DataSet.getStudyById).mockRejectedValue(new Error('Request failed with status 404'))
+
+    renderStudyRoute()
+
+    await waitFor(() => expect(screen.getByText('Error Loading Page')).toBeInTheDocument())
+    expect(screen.queryByText('Draft could not be loaded')).not.toBeInTheDocument()
+    expect(screen.getByText('Create Study')).toBeInTheDocument()
+  })
+})
+
 describe('creating a study from a draft', () => {
   const createStudy = async () => {
     await waitFor(() => expect(screen.getByText('Create Study')).toBeInTheDocument())
