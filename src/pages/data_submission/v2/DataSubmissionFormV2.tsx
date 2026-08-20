@@ -14,6 +14,7 @@ import { Notifications } from 'src/libs/utils'
 import { studyToDatasetSchemaSubmission, buildConsentGroupsFromStudy, getStudyPropertyValueByKey } from 'src/pages/data_submission/v2/v2-common-functions'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
+import { ResponseError } from 'src/types/model'
 
 export type FileProperty = {
   key: string
@@ -25,6 +26,23 @@ export type DataSubmissionFormV2Props = {
 }
 
 export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFile'
+
+const isValidationRejection = (error: unknown): boolean =>
+  (error as ResponseError)?.response?.status === 400
+
+/** Consent joins Data Use consistency violations with newlines, so each needs its own line here. */
+const renderViolations = (prefix: string, error: unknown): React.ReactElement => {
+  const message = error instanceof Error ? error.message : String(error)
+  return (
+    <>
+      {prefix}
+      <br />
+      {message.split('\n').map((line, index) => (
+        <Fragment key={`${index}-${line}`}>{line}<br /></Fragment>
+      ))}
+    </>
+  )
+}
 
 export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const { onSaveRoute } = props
@@ -84,6 +102,11 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   const onUpdateStudyError = (error: unknown) => {
+    // Nothing persisted, so reloading would discard the user's edits along with the violations.
+    if (isValidationRejection(error)) {
+      Notifications.showError({ text: renderViolations('Study update failed:', error) })
+      return
+    }
     Notifications.showError({ text: `Study update failed: ${error}.  Reloading original study.` })
     onLoadFormData(studyId)
   }
@@ -99,15 +122,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   const onError = (error: unknown) => {
-    Notifications.showError({
-      text: (
-        <>
-          Study creation failed:<br />{String(error).split('\n').map(line => (
-            <Fragment key={line}>{line}<br /></Fragment>
-          ))}
-        </>
-      ),
-    })
+    Notifications.showError({ text: renderViolations('Study creation failed:', error) })
   }
 
   return (

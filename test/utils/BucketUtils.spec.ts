@@ -244,6 +244,48 @@ const unmatchableCases: DataUseSummary[] = [
   { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'POP-PD', description: 'POP-PD' }] },
 ]
 
+// ─── Algorithm version fixtures ───────────────────────────────────────────────
+
+// Verbatim from Consent's DataUseMatcherV5, so a reworded rationale surfaces here.
+const MISSING_PRIMARY_RATIONALE = 'The dataset is missing a supported primary Data Use and requires manual review.'
+const MULTIPLE_PRIMARY_RATIONALE = 'The dataset has multiple primary Data Use categories and requires manual review.'
+const OTHER_PRIMARY_RATIONALE = 'The dataset has an Other primary Data Use and requires manual review.'
+
+const GRU: DataUseTerm = { code: 'GRU', description: 'General Research Use' }
+const HMB: DataUseTerm = { code: 'HMB', description: 'Health, Medical and Biomedical Research' }
+const OTHER: DataUseTerm = { code: 'OTHER', description: 'Other Restrictions' }
+
+const makeMatch = (algorithmVersion: string | undefined, overrides: Partial<MatchResult> = {}): MatchResult => ({
+  id: '1',
+  consent: 'DUOS-000001',
+  purpose: REF,
+  match: false,
+  abstain: false,
+  failed: false,
+  createDate: 'Jan 23, 2023',
+  algorithmVersion,
+  rationales: [],
+  ...overrides,
+} as unknown as MatchResult)
+
+/** A backend ABSTAIN: V5 records match=false, abstain=true and the rationale for the DAC. */
+const abstainMatch = (version: string, rationale: string): MatchResult =>
+  makeMatch(version, { match: false, abstain: true, rationales: [rationale] })
+
+/**
+ * Bin a single dataset into one bucket so its coalesced algorithm result can be asserted.
+ * Filtering to DAC 1 keeps only dataset 1, whose identifier the match rows reference.
+ */
+const bucketFor = async (dataUse: DataUseSummary | undefined, matches: MatchResult[]): Promise<Bucket> => {
+  vi.spyOn(Match, 'findMatchBatch').mockResolvedValue(matches)
+  vi.spyOn(DataSet, 'searchDatasetIndex').mockResolvedValue([
+    { datasetId: 1, datasetName: 'ds 1', datasetIdentifier: 'DUOS-000001', dataUse, dacId: 1 },
+  ] as unknown as DatasetTerm[])
+
+  const buckets = await binCollectionToBuckets(dar_collection, [1])
+  return buckets[0]
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const verifyBucketElectionsAndDatasets = (buckets: Bucket[]) => {
@@ -404,5 +446,96 @@ describe('BucketUtils', () => {
     // HMB only
     expect(buckets[2].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'HMB')).toBeDefined()
     expect(buckets[2].dataUse?.primary?.find((t: DataUseTerm) => t.code === 'OTHER')).toBeUndefined()
+  })
+
+  describe('algorithm version handling', () => {
+    // Every shape V5 abstains on; each was previously hidden as "N/A" by the v3-only gate.
+    const v5AbstainShapes: [string, DataUseSummary | undefined, string][] = [
+      ['Other-only primary', { primary: [OTHER] }, OTHER_PRIMARY_RATIONALE],
+      ['MULTIPLE(HMB+OTHER)', { primary: [HMB, OTHER] }, MULTIPLE_PRIMARY_RATIONALE],
+      ['MULTIPLE(GRU+HMB)', { primary: [GRU, HMB] }, MULTIPLE_PRIMARY_RATIONALE],
+      ['NONE', { primary: [] }, MISSING_PRIMARY_RATIONALE],
+      ['null data use', undefined, MISSING_PRIMARY_RATIONALE],
+    ]
+
+    it.each(v5AbstainShapes)('surfaces a v5 ABSTAIN for %s', async (_shape, dataUse, rationale) => {
+      const bucket = await bucketFor(dataUse, [abstainMatch('v5', rationale)])
+
+      expect(bucket.algorithmResult?.result).toBe('Abstain')
+      expect(bucket.algorithmResult?.rationales).toContain(rationale)
+    })
+
+    it('surfaces a v5 ABSTAIN for a secondary-Other data use, which V5 treats as no primary', async () => {
+      const dataUse: DataUseSummary = { primary: [], secondary: [OTHER] }
+
+      const bucket = await bucketFor(dataUse, [abstainMatch('v5', MISSING_PRIMARY_RATIONALE)])
+
+      expect(bucket.algorithmResult?.result).toBe('Abstain')
+    })
+
+    // The legacy heuristic abstains on these; V5 matches them normally.
+    it.each(['PUB', 'IRB', 'COL', 'GSO', 'MOR', 'POP-M', 'POP-F', 'POP-PD'])(
+      'keeps a v5 match on a GRU data use with a secondary %s',
+      async (code) => {
+        const dataUse: DataUseSummary = { primary: [GRU], secondary: [{ code, description: code }] }
+
+        const bucket = await bucketFor(dataUse, [makeMatch('v5', { match: true })])
+
+        expect(bucket.algorithmResult?.result).toBe('Yes')
+      },
+    )
+
+    it.each(['v3', 'v4', 'v5'])('trusts a %s result rather than re-deriving abstention', async (version) => {
+      const bucket = await bucketFor({ primary: [OTHER] }, [makeMatch(version, { match: true })])
+
+      expect(bucket.algorithmResult?.result).toBe('Yes')
+    })
+
+    it.each(['v1', 'v2'])('still suppresses a %s result for an unmatchable data use', async (version) => {
+      const bucket = await bucketFor({ primary: [OTHER] }, [makeMatch(version, { match: true })])
+
+      expect(bucket.algorithmResult?.result).toBe('N/A')
+    })
+
+    it.each(['v1', 'v2'])('keeps a %s result for a matchable data use', async (version) => {
+      const bucket = await bucketFor({ primary: [GRU] }, [makeMatch(version, { match: true })])
+
+      expect(bucket.algorithmResult?.result).toBe('Yes')
+    })
+
+    it.each([
+      ['an unknown version', 'v99'],
+      ['a missing version', undefined],
+    ])('reports %s instead of trusting or hiding it', async (_label, version) => {
+      const bucket = await bucketFor({ primary: [GRU] }, [makeMatch(version, { match: true })])
+
+      expect(bucket.algorithmResult?.result).toBe('Unable to interpret the system match')
+      expect(bucket.algorithmResult?.rationales?.[0]).toContain(version ?? 'unknown')
+    })
+
+    it('reports mixed versions within a bucket rather than interpreting the newest', async () => {
+      vi.spyOn(Match, 'findMatchBatch').mockResolvedValue([
+        makeMatch('v5', { id: '1', consent: 'DUOS-000001', match: true }),
+        makeMatch('v2', { id: '2', consent: 'DUOS-000002', match: true }),
+      ])
+      // One data use, so both datasets land in the same bucket and their match rows coalesce.
+      vi.spyOn(DataSet, 'searchDatasetIndex').mockResolvedValue([
+        { datasetId: 1, datasetName: 'ds 1', datasetIdentifier: 'DUOS-000001', dataUse: { primary: [GRU] }, dacId: 1 },
+        { datasetId: 2, datasetName: 'ds 2', datasetIdentifier: 'DUOS-000002', dataUse: { primary: [GRU] }, dacId: 2 },
+      ] as unknown as DatasetTerm[])
+
+      const buckets = await binCollectionToBuckets(dar_collection, [1, 2])
+
+      expect(buckets).toHaveLength(1)
+      expect(buckets[0].matchResults).toHaveLength(2)
+      expect(buckets[0].algorithmResult?.result).toBe('Unable to interpret the system match')
+    })
+
+    it('reports N/A when no match has been recorded', async () => {
+      const bucket = await bucketFor({ primary: [GRU] }, [])
+
+      expect(bucket.algorithmResult?.result).toBe('N/A')
+      expect(bucket.algorithmResult?.rationales).toBeUndefined()
+    })
   })
 })

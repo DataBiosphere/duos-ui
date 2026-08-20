@@ -178,31 +178,80 @@ const filterDatasetsByDACs = (dacIds: number[], datasets: Dataset[]): Dataset[] 
 }
 
 /**
+ * Versions whose ABSTAIN is decided by Consent's `DataUseMatcherV5`, which supplies the rationale
+ * the DAC reads. Suppressing these client-side would replace a real decision with "N/A".
+ */
+const BACKEND_ABSTAINING_VERSIONS: readonly string[] = ['v3', 'v4', 'v5']
+
+/** Versions that predate server-side abstention and so still need client-side suppression. */
+const CLIENT_SUPPRESSING_VERSIONS: readonly string[] = ['v1', 'v2']
+
+const UNRECOGNIZED_ALGORITHM_RESULT = 'Unable to interpret the system match'
+
+type AlgorithmVersionHandling = 'backend-abstains' | 'client-suppresses' | 'unrecognized'
+
+/**
+ * A bucket's datasets are matched in one pass, so mixed versions mean at least one row is stale;
+ * applying the newest version's semantics to all of them would be a silent guess.
+ */
+const classifyAlgorithmVersion = (versions: (string | undefined)[]): AlgorithmVersionHandling => {
+  if (versions.length !== 1) {
+    return 'unrecognized'
+  }
+  const [version] = versions
+  if (!isNil(version) && BACKEND_ABSTAINING_VERSIONS.includes(version)) {
+    return 'backend-abstains'
+  }
+  if (!isNil(version) && CLIENT_SUPPRESSING_VERSIONS.includes(version)) {
+    return 'client-suppresses'
+  }
+  return 'unrecognized'
+}
+
+/**
  * Generate the summary of algorithm results suitable for display in the UI
  *
- * Four potential cases:
+ * Five potential cases:
  *  1. No matches
- *  2. Exactly one match or N matches that are all the same - easy case
- *  3. Abstain is true and match is false - decision is abstained
- *  4. N matches - not all the same - very confusing case
+ *  2. A stale or unknown algorithm version - no result can be interpreted
+ *  3. Exactly one match or N matches that are all the same - easy case
+ *  4. Abstain is true and match is false - decision is abstained
+ *  5. N matches - not all the same - very confusing case
  */
 const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
-  // V1 and V2: We actually DO NOT want to show system match results when the data use indicates
-  // that a match should not be made. This happens for all "Other" cases.
-  const algorithmVersionV3 = bucket.matchResults.length > 0 && bucket.matchResults[0].algorithmVersion === 'v3'
+  if (isEmpty(bucket.matchResults)) {
+    return { result: 'N/A', createDate: undefined, rationales: undefined, id: bucket.key }
+  }
+
+  const versions: (string | undefined)[] = chain(bucket.matchResults)
+    .map((m: MatchResult) => m.algorithmVersion)
+    .uniq()
+    .value()
+  const handling = classifyAlgorithmVersion(versions)
+  if (handling === 'unrecognized') {
+    return {
+      result: UNRECOGNIZED_ALGORITHM_RESULT,
+      createDate: bucket.matchResults[0].createDate,
+      rationales: [
+        `This match was recorded by algorithm version ${versions.map(v => v ?? 'unknown').join(', ')}, `
+        + 'which DUOS can no longer interpret. Please vote without a system suggestion.',
+      ],
+      id: bucket.key,
+    }
+  }
+
   const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse)
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
-  // Check algorithm version: V3 does not need to be checked for 'unmatchable'
-  const matchVals: boolean[] = (algorithmVersionV3 || !unmatchable)
+  const matchVals: boolean[] = (handling === 'backend-abstains' || !unmatchable)
     ? chain(bucket.matchResults)
         .map((m: MatchResult) => m.match)
         .uniq()
         .value()
     : []
 
-  const abstain = processV3Abstain(bucket.matchResults)
+  const abstain = hasBackendAbstention(bucket.matchResults)
 
   // check results based on matchVals
   if (isEmpty(matchVals)) {
@@ -243,11 +292,8 @@ const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
   }
 }
 
-/**
- * Process the match results for V3 Abstain. If we have a V3 result and we have
- * an ABSTAIN case, we can return true if the number of abstentions > 0
- */
-const processV3Abstain = (matchResults: MatchResult[]): boolean => {
+/** One abstention is enough: the algorithm declined on a dataset, so the bucket has no answer. */
+const hasBackendAbstention = (matchResults: MatchResult[]): boolean => {
   const abstainList = map(matchResults, (m: MatchResult) => m.abstain)
   const abstainValList = filter(abstainList, (a: boolean | undefined) => a === true)
   return abstainValList.length > 0
@@ -256,6 +302,8 @@ const processV3Abstain = (matchResults: MatchResult[]): boolean => {
 /**
  * Calculate "Other" status for a data use. Data Uses can have 'otherRestrictions': TRUE|FALSE,
  * or they can have fields populated for 'other': 'other restriction' and 'secondaryOther': 'yet other restriction'
+ *
+ * Counts a secondary Other, unlike the classifier — this feeds only the legacy suppression path.
  */
 const isOther = (dataUse?: DataUseSummary): boolean => {
   const primaryOther = dataUse?.primary?.some((dut: DataUseTerm) => dut.code === 'OTHER') || false
@@ -266,12 +314,14 @@ const isOther = (dataUse?: DataUseSummary): boolean => {
 /**
  * Calculate abstention for a data use. There are a number of cases where there should
  * not be an algorithm decision if a field is true, including any "Other" state.
+ *
+ * Legacy (v1/v2) heuristic only, and deliberately broader than Consent's classifier: it abstains
+ * on secondary modifiers like PUB or IRB, which V5 matches normally because they are not primary.
  */
 export const shouldAbstain = (dataUse?: DataUseSummary): boolean => {
-  const codeList: string[] = Object.keys(AbstainDataUseCodes)
   return isOther(dataUse)
     || (dataUse?.secondary
-      ? dataUse.secondary.map((dut: DataUseTerm) => dut.code).some(code => codeList.includes(code))
+      ? dataUse.secondary.map((dut: DataUseTerm) => dut.code).some(code => AbstainDataUseCodes.includes(code))
       : false)
 }
 

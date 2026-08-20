@@ -200,3 +200,81 @@ describe('ConsentGroupAddEdit access management changes', () => {
     expect(container.querySelector<HTMLInputElement>('#gsText')?.value ?? '').toBe('')
   })
 })
+
+// Consent rejects a write with more than one primary category, so the form must send exactly one
+describe('ConsentGroupAddEdit primary data use exclusivity', () => {
+  const renderList = (collected: ConsentGroup2[]) => render(
+    <MemoryRouter>
+      <ConsentGroupList
+        consentGroups={[]}
+        columnsToShow={['consentGroupName']}
+        onConsentGroupChange={(items) => { collected.splice(0, collected.length, ...items) }}
+        disabled={false}
+      />
+    </MemoryRouter>,
+  )
+
+  // External access keeps the primary fields visible without also requiring a DAC
+  const fillRequiredFields = async (
+    user: ReturnType<typeof userEvent.setup>,
+    container: HTMLElement,
+  ) => {
+    await user.click(container.querySelector('#add-consent-group-btn')!)
+    await user.type(container.querySelector('#consentGroupName')!, 'Exclusivity Group')
+    await user.click(container.querySelector('#accessManagement_external')!)
+    await user.clear(container.querySelector('#numberOfParticipants')!)
+    await user.type(container.querySelector('#numberOfParticipants')!, '25')
+  }
+
+  it('clears the previous primary when a new one is selected', async () => {
+    const user = userEvent.setup()
+    const collected: ConsentGroup2[] = []
+    const { container } = renderList(collected)
+    await fillRequiredFields(user, container)
+
+    await user.click(container.querySelector('#primaryConsent_hmb')!)
+    await user.click(container.querySelector('#primaryConsent_generalResearchUse')!)
+    await clickSaveButton(user, container)
+
+    expect(collected).toHaveLength(1)
+    expect(collected[0].generalResearchUse).toBe(true)
+    expect(collected[0].hmb).toBe(false)
+    expect(collected[0].poa).toBe(false)
+    expect(collected[0].diseaseSpecificUse).toBeUndefined()
+    expect(collected[0].otherPrimary).toBeUndefined()
+  })
+
+  it('clears a primary Other and its text when another primary is selected', async () => {
+    const user = userEvent.setup()
+    const collected: ConsentGroup2[] = []
+    const { container } = renderList(collected)
+    await fillRequiredFields(user, container)
+
+    await user.click(container.querySelector('#primaryConsent_otherPrimary')!)
+    await user.type(container.querySelector('#otherPrimaryText')!, 'Bespoke restriction')
+    await user.click(container.querySelector('#primaryConsent_hmb')!)
+    await clickSaveButton(user, container)
+
+    expect(collected).toHaveLength(1)
+    expect(collected[0].hmb).toBe(true)
+    expect(collected[0].otherPrimary).toBeUndefined()
+    expect(container.querySelector('#otherPrimaryText')).not.toBeInTheDocument()
+  })
+
+  it('clears a boolean primary when Other is selected', async () => {
+    const user = userEvent.setup()
+    const collected: ConsentGroup2[] = []
+    const { container } = renderList(collected)
+    await fillRequiredFields(user, container)
+
+    await user.click(container.querySelector('#primaryConsent_generalResearchUse')!)
+    await user.click(container.querySelector('#primaryConsent_otherPrimary')!)
+    await user.type(container.querySelector('#otherPrimaryText')!, 'Bespoke restriction')
+    await clickSaveButton(user, container)
+
+    expect(collected).toHaveLength(1)
+    expect(collected[0].otherPrimary).toBe('Bespoke restriction')
+    expect(collected[0].generalResearchUse).toBe(false)
+    expect(collected[0].hmb).toBe(false)
+  })
+})

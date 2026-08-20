@@ -368,6 +368,10 @@ export const processRestrictionStatements = async (
   return processDiseaseRestrictionsWithUrls(diseaseValue as string[])
 }
 
+/**
+ * Shows only the narrowest permission of a legacy multi-primary record (DS over HMB, those over
+ * GRU). Unlike the classifier's full enumeration: a broad statement beside a narrow one misleads.
+ */
 export const processDefinedLimitations = (
   key: string,
   dataUse: DataUse,
@@ -412,7 +416,8 @@ const processOtherInDataUse = (
       Promise.resolve({
         code: 'OTH1',
         description: `Primary Other: ${isEmpty(dataUse.other) ? 'Not provided' : dataUse.other}`,
-        type: ControlledAccessType.modifiers,
+        // A permission, like OTHER in the classifier and srpTranslations.other; only OTH2 is not.
+        type: ControlledAccessType.permissions,
       }),
     )
   }

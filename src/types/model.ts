@@ -25,7 +25,11 @@ export type UserRoleName
     | 'ServiceAccount'
     | 'All'
 
-export enum AbstainDataUseCodes {
+/**
+ * Secondary data use codes that suppress a legacy (v1/v2) system match. Scoped to legacy results
+ * on purpose: from v3 Consent decides abstention itself — see `calculateAlgorithmResultForBucket`.
+ */
+export const AbstainDataUseCodes: readonly string[] = [
   'OTHER',
   'POP-M',
   'POP-F',
@@ -35,7 +39,7 @@ export enum AbstainDataUseCodes {
   'PUB',
   'MOR',
   'POP-PD',
-}
+]
 
 export interface UserRole {
   roleId: number
