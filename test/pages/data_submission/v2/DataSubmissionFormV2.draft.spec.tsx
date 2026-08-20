@@ -3,17 +3,23 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { Route, Routes } from 'react-router'
-import { screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import { Draft } from 'src/libs/ajax/Draft'
+import { Notifications } from 'src/libs/utils'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Study } from 'src/pages/data_submission/v2/v2-models'
 import { DraftDetail } from 'src/types/draft'
 import { renderWithRouter } from '../../../test-utils'
 
-vi.mock('src/libs/ajax/Draft', () => ({ Draft: { getDraft: vi.fn() } }))
+vi.mock('src/libs/ajax/Draft', () => ({ Draft: { getDraft: vi.fn(), deleteDraft: vi.fn() } }))
 vi.mock('src/libs/ajax/DataSet', () => ({ DataSet: { getStudyById: vi.fn(), registerDataset: vi.fn(), updateStudy: vi.fn() } }))
+vi.mock('src/libs/utils', async () => {
+  const actual = await vi.importActual<typeof import('src/libs/utils')>('src/libs/utils')
+  return { ...actual, Notifications: { showNotification: vi.fn(), showError: vi.fn() } }
+})
+
 vi.mock('src/libs/storage', () => ({
   Storage: {
     getCurrentUser: () => ({}),
@@ -121,5 +127,97 @@ describe('DataSubmissionFormV2 outside draft mode', () => {
     expect(Draft.getDraft).not.toHaveBeenCalled()
     expect(DataSet.getStudyById).not.toHaveBeenCalled()
     expect(screen.getByText('Create Study')).toBeInTheDocument()
+  })
+
+  it('deletes no draft when a study is created without one', async () => {
+    vi.mocked(DataSet.registerDataset).mockResolvedValue({} as never)
+
+    renderWithRouter(
+      <Routes>
+        <Route path="/data_submission_form" element={<DataSubmissionFormV2 />} />
+      </Routes>,
+      { route: '/data_submission_form' },
+    )
+    await waitFor(() => expect(screen.getByText('Create Study')).toBeInTheDocument())
+    await act(async () => {
+      fireEvent.click(screen.getByText('Create Study'))
+    })
+
+    expect(DataSet.registerDataset).toHaveBeenCalled()
+    expect(Draft.deleteDraft).not.toHaveBeenCalled()
+  })
+})
+
+describe('creating a study from a draft', () => {
+  const createStudy = async () => {
+    await waitFor(() => expect(screen.getByText('Create Study')).toBeInTheDocument())
+    await act(async () => {
+      fireEvent.click(screen.getByText('Create Study'))
+    })
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(Draft.getDraft).mockResolvedValue(draftDetail())
+  })
+
+  it('removes the source draft once the study exists', async () => {
+    vi.mocked(DataSet.registerDataset).mockResolvedValue({} as never)
+    vi.mocked(Draft.deleteDraft).mockResolvedValue(undefined)
+
+    renderDraftRoute()
+    await createStudy()
+
+    expect(Draft.deleteDraft).toHaveBeenCalledWith(DRAFT_ID)
+    expect(vi.mocked(DataSet.registerDataset).mock.invocationCallOrder[0])
+      .toBeLessThan(vi.mocked(Draft.deleteDraft).mock.invocationCallOrder[0])
+  })
+
+  it('submits what the form holds rather than the document it was loaded from', async () => {
+    vi.mocked(DataSet.registerDataset).mockResolvedValue({} as never)
+    vi.mocked(Draft.deleteDraft).mockResolvedValue(undefined)
+
+    renderDraftRoute()
+    await createStudy()
+
+    // Built from the Study the form edits, so an edit made before submitting is what gets sent.
+    const formData = vi.mocked(DataSet.registerDataset).mock.calls[0][0] as FormData
+    const submitted = JSON.parse(formData.get('dataset') as string)
+    expect(submitted.studyName).toBe('Synthetic Minimal Study')
+    expect(submitted.consentGroups).toHaveLength(1)
+  })
+
+  it('keeps the draft when creation fails, so it can be tried again', async () => {
+    vi.mocked(DataSet.registerDataset).mockRejectedValue(new Error('Study creation failed'))
+
+    renderDraftRoute()
+    await createStudy()
+
+    expect(Draft.deleteDraft).not.toHaveBeenCalled()
+  })
+
+  it('reports a failed cleanup without presenting the study as failed', async () => {
+    vi.mocked(DataSet.registerDataset).mockResolvedValue({} as never)
+    vi.mocked(Draft.deleteDraft).mockRejectedValue(new Error('Request failed with status 500'))
+
+    renderDraftRoute()
+    await createStudy()
+
+    expect(Notifications.showNotification).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'Study created successfully', type: 'success' }),
+    )
+    expect(Notifications.showError).toHaveBeenCalledWith(
+      expect.objectContaining({ text: expect.stringContaining('could not be removed') }),
+    )
+  })
+
+  it('does not retry a failed cleanup', async () => {
+    vi.mocked(DataSet.registerDataset).mockResolvedValue({} as never)
+    vi.mocked(Draft.deleteDraft).mockRejectedValue(new Error('Request failed with status 500'))
+
+    renderDraftRoute()
+    await createStudy()
+
+    expect(Draft.deleteDraft).toHaveBeenCalledTimes(1)
   })
 })

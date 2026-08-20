@@ -13,6 +13,7 @@ import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Notifications } from 'src/libs/utils'
 import { studyToDatasetSchemaSubmission, buildConsentGroupsFromStudy, getStudyPropertyValueByKey } from 'src/pages/data_submission/v2/v2-common-functions'
 import { loadStudyDatasetDraft } from 'src/pages/data_submission/v2/studyDatasetDraft'
+import { Draft } from 'src/libs/ajax/Draft'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 
@@ -111,9 +112,30 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
     onLoadFormData(studyId)
   }
 
+  /**
+   * Removes the draft the study was created from, once it exists. Best effort by design: a study
+   * that was created is not a failure because the draft it came from outlived it, so a failure here
+   * is reported on its own and nothing is retried. A failed creation leaves the draft alone, which
+   * is what makes retrying from it possible.
+   */
+  const removeSourceDraft = async () => {
+    if (formMode !== 'draft' || !draftId) {
+      return
+    }
+    try {
+      await Draft.deleteDraft(draftId)
+    }
+    catch (_error) {
+      Notifications.showError({
+        text: 'Your study was created, but the draft it came from could not be removed. It may still appear in your drafts.',
+      })
+    }
+  }
+
   const onSubmitStudy = async () => {
     await DataSet.registerDataset(buildMultiPartFormData(study))
     Notifications.showNotification({ text: 'Study created successfully', type: 'success' })
+    await removeSourceDraft()
     if (onSaveRoute) {
       navigate(onSaveRoute)
       return
