@@ -36,19 +36,6 @@
   font-style: italic;
 }
 
-.signing-official-request-notice {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin: 0 0 14px;
-  padding: 12px 16px;
-  background-color: #eef6fc;
-  border: 1px solid #b9dcf0;
-  border-radius: 4px;
-  font-style: italic;
-  line-height: 1.45;
-}
-
 .signing-official-request-button {
   min-width: 126px;
   height: 34px;
