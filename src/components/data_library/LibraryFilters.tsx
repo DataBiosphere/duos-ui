@@ -160,10 +160,13 @@ const DateFilterField: React.FC<DateFilterFieldProps> = ({ label, value, error, 
 
   // Adopt values that changed upstream (Clear, a removed chip, a tab switch)
   // without clobbering a date the user is part-way through typing: while the
-  // date is incomplete `value` does not change, so this does not fire.
-  React.useEffect(() => {
+  // date is incomplete `value` does not change, so this does not fire. Adjusted
+  // during render rather than in an effect so the stale draft is never painted.
+  const [prevValue, setPrevValue] = React.useState(value)
+  if (value !== prevValue) {
+    setPrevValue(value)
     setDraft(value)
-  }, [value])
+  }
 
   return (
     <TextField
