@@ -251,7 +251,8 @@ export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
     consentGroup.col = dataset.dataUse.collaboratorRequired
     consentGroup.generalResearchUse = dataset.dataUse.generalUse
     consentGroup.hmb = dataset.dataUse.hmbResearch
-    consentGroup.diseaseSpecificUse = dataset.dataUse.diseaseRestrictions
+    // An empty array would light the Disease-Specific radio; only a populated one is a primary.
+    consentGroup.diseaseSpecificUse = isEmpty(dataset.dataUse.diseaseRestrictions) ? undefined : dataset.dataUse.diseaseRestrictions
     consentGroup.poa = dataset.dataUse.populationOriginsAncestry
     if (isEmpty(dataset.dataUse.other)) {
       consentGroup.otherPrimary = undefined
