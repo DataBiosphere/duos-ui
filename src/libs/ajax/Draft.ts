@@ -6,10 +6,12 @@ import { TemplateValidationResponse } from 'src/types/studyTemplate'
 export const Draft = {
   /**
    * Validate a filled-in study/dataset template. A valid template creates a
-   * `StudyDatasetSubmissionV1` draft and the response carries its typed reference.
+   * `StudyDatasetSubmissionV1` draft, answered 201 at its location, and the response body carries
+   * its typed reference.
    *
    * Validation failures are a completed result, not a request failure: the endpoint answers 200 with
    * `valid: false`, so callers get them as data and must render them separately from a thrown error.
+   * Both are 2xx, so branch on `valid` rather than on the status.
    * @param file The CSV template to validate
    * @returns Promise resolving to the discriminated validation response
    */

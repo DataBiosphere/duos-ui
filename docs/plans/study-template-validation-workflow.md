@@ -98,7 +98,7 @@ sequenceDiagram
     else Template is valid
         API->>DB: Create typed Draft (StudyDatasetSubmissionV1)
         DB-->>API: draft UUID and draftType
-        API-->>UI: 200 { valid: true, draft: { id, draftType } }
+        API-->>UI: 201 Location /api/draft/v1/:id { valid: true, draft: { id, draftType } }
         UI->>UI: Navigate to /data_submission_form/draft/study-dataset/:draftUuid
         UI->>API: GET /api/draft/v1/:draftUuid
         API-->>UI: Draft document and typed metadata
@@ -125,9 +125,9 @@ registration. Add `Chairperson` to the existing draft endpoints as well so all t
 create, resume, update, attach files to, and delete their authorized drafts. Existing ownership and
 administrator authorization checks remain unchanged.
 
-Validation errors are a completed, expected result and should return HTTP 200. Authentication, authorization, malformed multipart requests, size-limit violations, and unexpected server failures should use appropriate non-2xx responses.
+Validation errors are a completed, expected result and should return HTTP 200; a valid template creates a draft and returns HTTP 201 at its location. Authentication, authorization, malformed multipart requests, size-limit violations, and unexpected server failures should use appropriate non-2xx responses.
 
-Ticket 3 settled where the boundary falls: the 5 MiB limit is enforced at the resource and answered with `413`, while an empty, non-UTF-8, or malformed file stays a `valid: false` result, since only the latter is something the producer edits.
+Ticket 3 settled where the boundary falls: the 5 MiB limit is enforced by the validator and answered with `413`, while an empty, non-UTF-8, or malformed file stays a `valid: false` result, since only the latter is something the producer edits.
 
 Invalid template response:
 
@@ -583,8 +583,9 @@ and authentication requirements.
 - Unauthorized and unauthenticated callers receive the existing standard responses.
 - Missing, multiple, empty, and oversized file parts are rejected without draft creation.
 - Template validation errors return HTTP 200 with `valid: false` and structured errors.
-- Successful validation returns HTTP 200 with `valid: true`, an empty error list, and a reference
-  containing both the draft UUID and `StudyDatasetSubmissionV1` type.
+- Successful validation returns HTTP 201, a `Location` header for the created draft, and a body
+  with `valid: true`, an empty error list, and a reference containing both the draft UUID and
+  `StudyDatasetSubmissionV1` type.
 - Exactly one draft with type `StudyDatasetSubmissionV1`, owned by the caller, is created for a valid
   request.
 - The existing authorized draft endpoint returns the persisted registration-shaped document.
@@ -834,7 +835,7 @@ observation is recorded in full because no ticket owns it.
 | --- | --- | --- |
 | The `draft` table is the only JSON write in this area without the NUL guard the DAR tables already have. A U+0000 escape survives the parser and `jsonb` rejects it, so a valid template can 500 on insert. | Tickets 2 and 3 | Ticket 2 rejects U+0000 during parsing so the producer is told; Ticket 3 applies the existing `regexp_replace` idiom to `DraftDAO.insert` and `updateDraftByDraftUUID`. |
 | `StudyTemplateValidationResult.truncated` has no counterpart in the response type documented in this plan or in the v1 contract. | Ticket 3 | Settled: it reaches the wire. duos-ui already renders a notice when it is true, and OpenAPI, the v1 contract, and this plan now document it. |
-| The service reports the 5 MiB and UTF-8 failures as `valid: false` rather than as request failures, contradicting this plan and the contract. | Ticket 3 | Settled: the resource rejects an oversized upload with `413` before the service reads it, and encoding stays a `valid: false` result. See the note under "Validate a template" above. |
+| The service reports the 5 MiB and UTF-8 failures as `valid: false` rather than as request failures, contradicting this plan and the contract. | Ticket 3 | Settled: an oversized upload is refused by the validator that reads it and answered `413`, and encoding stays a `valid: false` result. See the note under "Validate a template" above. |
 
 Chairperson access to the draft endpoints was already specified in Ticket 3 and needed no change.
 
