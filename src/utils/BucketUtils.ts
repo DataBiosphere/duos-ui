@@ -199,13 +199,11 @@ const classifyAlgorithmVersion = (versions: (string | undefined)[]): AlgorithmVe
     return 'unrecognized'
   }
   const [version] = versions
-  if (!isNil(version) && BACKEND_ABSTAINING_VERSIONS.has(version)) {
-    return 'backend-abstains'
-  }
-  if (!isNil(version) && CLIENT_SUPPRESSING_VERSIONS.has(version)) {
+  // Rows predating the version column were backfilled to v1, so an absent version is legacy too.
+  if (isNil(version) || CLIENT_SUPPRESSING_VERSIONS.has(version)) {
     return 'client-suppresses'
   }
-  return 'unrecognized'
+  return BACKEND_ABSTAINING_VERSIONS.has(version) ? 'backend-abstains' : 'unrecognized'
 }
 
 /**

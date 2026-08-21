@@ -503,14 +503,19 @@ describe('BucketUtils', () => {
       expect(bucket.algorithmResult?.result).toBe('Yes')
     })
 
-    it.each([
-      ['an unknown version', 'v99'],
-      ['a missing version', undefined],
-    ])('reports %s instead of trusting or hiding it', async (_label, version) => {
-      const bucket = await bucketFor({ primary: [GRU] }, [makeMatch(version, { match: true })])
+    it('reports an unknown version instead of trusting or hiding it', async () => {
+      const bucket = await bucketFor({ primary: [GRU] }, [makeMatch('v99', { match: true })])
 
       expect(bucket.algorithmResult?.result).toBe('Unable to interpret the system match')
-      expect(bucket.algorithmResult?.rationales?.[0]).toContain(version ?? 'unknown')
+      expect(bucket.algorithmResult?.rationales?.[0]).toContain('v99')
+    })
+
+    it('reads a missing version as legacy rather than uninterpretable', async () => {
+      const matchable = await bucketFor({ primary: [GRU] }, [makeMatch(undefined, { match: true })])
+      const unmatchable = await bucketFor({ primary: [OTHER] }, [makeMatch(undefined, { match: true })])
+
+      expect(matchable.algorithmResult?.result).toBe('Yes')
+      expect(unmatchable.algorithmResult?.result).toBe('N/A')
     })
 
     it('reports mixed versions within a bucket rather than interpreting the newest', async () => {

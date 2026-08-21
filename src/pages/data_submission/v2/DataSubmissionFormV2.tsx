@@ -74,21 +74,31 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
     onLoadFormData(studyId)
   }, [studyId, setStudy, setIsEditing])
 
+  /** A copy: a failed save leaves the form standing, so the live study must keep its attachments. */
+  const withoutAttachments = (study: Study): Study => ({
+    ...study,
+    alternativeDataSharingPlanFile: undefined,
+    assets: study.assets && {
+      ...study.assets,
+      consentGroups: study.assets.consentGroups?.map(
+        ({ addedNIHInstitutionalCertificationFile: _file, ...consentGroup }) => consentGroup,
+      ),
+    },
+  })
+
   const buildMultiPartFormData = (study: Study) => {
     const multiPartFormData = new FormData()
     if (study.alternativeDataSharingPlanFile) {
       multiPartFormData.append('alternativeDataSharingPlan', study.alternativeDataSharingPlanFile, study.alternativeDataSharingPlanFile.name)
-      delete study.alternativeDataSharingPlanFile
     }
 
     study.assets?.consentGroups?.forEach((consentGroup, idx) => {
       if (consentGroup?.addedNIHInstitutionalCertificationFile) {
         const fieldKey = `consentGroups[${idx}].nihInstitutionalCertificationFile`
         multiPartFormData.append(fieldKey, consentGroup.addedNIHInstitutionalCertificationFile, consentGroup.addedNIHInstitutionalCertificationFile.name)
-        delete consentGroup.addedNIHInstitutionalCertificationFile
       }
     })
-    multiPartFormData.append('dataset', JSON.stringify(studyToDatasetSchemaSubmission(structuredClone(study))))
+    multiPartFormData.append('dataset', JSON.stringify(studyToDatasetSchemaSubmission(withoutAttachments(study))))
     return multiPartFormData
   }
   const onUpdateStudy = async () => {

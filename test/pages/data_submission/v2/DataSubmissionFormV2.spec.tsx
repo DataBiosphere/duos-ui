@@ -120,6 +120,25 @@ describe('DataSubmissionFormV2 Data Use validation errors', () => {
     expect(DataSet.getStudyById).toHaveBeenCalledTimes(1)
   })
 
+  // The form is the only copy of the edits after a 400, so it must still hold the attachments
+  it('resubmits the attachment after a 400 rather than dropping it', async () => {
+    const user = userEvent.setup()
+    const plan = new File(['plan'], 'plan.pdf')
+    mockUseParams.mockReturnValue({ studyId: '42' })
+    vi.mocked(DataSet.getStudyById).mockResolvedValue({ data: {}, alternativeDataSharingPlanFile: plan } as Study)
+    vi.mocked(DataSet.updateStudy).mockRejectedValueOnce(validationRejection()).mockResolvedValueOnce({} as Study)
+
+    renderForm()
+    await user.click(await screen.findByRole('button', { name: /update study/i }))
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalled())
+    await user.click(await screen.findByRole('button', { name: /update study/i }))
+
+    await waitFor(() => expect(DataSet.updateStudy).toHaveBeenCalledTimes(2))
+    const [, resubmitted] = vi.mocked(DataSet.updateStudy).mock.calls[1] as unknown as [string, FormData]
+    expect((resubmitted.get('alternativeDataSharingPlan') as File)?.name).toBe('plan.pdf')
+    expect(resubmitted.get('dataset')).not.toContain('alternativeDataSharingPlanFile')
+  })
+
   // A failed update that did change server state still warrants reloading
   it('reloads the study after a non-validation failure on update', async () => {
     const user = userEvent.setup()

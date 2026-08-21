@@ -369,8 +369,8 @@ export const processRestrictionStatements = async (
 }
 
 /**
- * Shows only the narrowest permission of a legacy multi-primary record (DS over HMB, those over
- * GRU). Unlike the classifier's full enumeration: a broad statement beside a narrow one misleads.
+ * Shows only the narrowest permission when a record carries several primaries (DS over HMB, those
+ * over GRU). Unlike the classifier's full enumeration: a broad statement beside a narrow one misleads.
  */
 export const processDefinedLimitations = (
   key: string,

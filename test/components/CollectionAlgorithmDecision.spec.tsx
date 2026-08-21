@@ -46,6 +46,13 @@ describe('CollectionAlgorithmDecision component', () => {
     expect(decisionValue.textContent).toContain('N/A')
   })
 
+  it('renders an unrecognized result as given rather than as N/A', () => {
+    const result = 'Unable to interpret the system match'
+    const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result, id }} />)
+    const decisionValue = container.querySelector(`#collection-${id}-decision-value`) as HTMLElement
+    expect(decisionValue.textContent).toContain(result)
+  })
+
   it('renders "YES" if provided by algorithmResult', () => {
     const { container } = render(<CollectionAlgorithmDecision algorithmResult={{ result: 'Yes', id }} />)
     const decisionValue = container.querySelector(`#collection-${id}-decision-value`) as HTMLElement
