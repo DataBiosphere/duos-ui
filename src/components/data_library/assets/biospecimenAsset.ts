@@ -15,6 +15,38 @@ const includesIgnoreCase = (source: string | undefined, values: string[]) => {
   return values.some(value => normalizedSource.includes(value.toLowerCase()))
 }
 
+const matchesCollectionDate = (biospecimen: BiospecimenAsset, filters: FilterState) => {
+  // Inverted bounds build no ES clause, so they must not narrow rows here
+  // either — otherwise the grid empties while the panel flags the range.
+  if (!isFilterActive('biospecimenCollectionDate', filters)) {
+    return true
+  }
+
+  const { after, before } = filters.biospecimenCollectionDate
+  const collectionDate = biospecimen.dateOfCollection || ''
+  if (after && collectionDate < after) {
+    return false
+  }
+  return !(before && collectionDate > before)
+}
+
+const matchesPostMortemInterval = (biospecimen: BiospecimenAsset, filters: FilterState) => {
+  const interval = biospecimen.postMortemInterval
+  if (
+    filters.biospecimenPostMortemIntervalUnit.length > 0
+    && !filters.biospecimenPostMortemIntervalUnit.includes(interval?.unit || '')
+  ) {
+    return false
+  }
+
+  const { min, max } = filters.biospecimenPostMortemInterval
+  const value = interval?.value
+  if (min !== undefined && (value === undefined || value < min)) {
+    return false
+  }
+  return !(max !== undefined && (value === undefined || value > max))
+}
+
 const matchesBiospecimenFilters = (biospecimen: BiospecimenAsset, filters?: FilterState) => {
   if (!filters) {
     return true
@@ -28,39 +60,7 @@ const matchesBiospecimenFilters = (biospecimen: BiospecimenAsset, filters?: Filt
     return false
   }
 
-  // Inverted bounds build no ES clause, so they must not narrow rows here
-  // either — otherwise the grid empties while the panel flags the range.
-  if (isFilterActive('biospecimenCollectionDate', filters)) {
-    const collectionDate = biospecimen.dateOfCollection || ''
-    if (filters.biospecimenCollectionDate.after && collectionDate < filters.biospecimenCollectionDate.after) {
-      return false
-    }
-    if (filters.biospecimenCollectionDate.before && collectionDate > filters.biospecimenCollectionDate.before) {
-      return false
-    }
-  }
-
-  if (
-    filters.biospecimenPostMortemIntervalUnit.length > 0
-    && !filters.biospecimenPostMortemIntervalUnit.includes(biospecimen.postMortemInterval?.unit || '')
-  ) {
-    return false
-  }
-
-  const postMortemValue = biospecimen.postMortemInterval?.value
-  const belowMinPostMortemInterval = (
-    filters.biospecimenPostMortemInterval.min !== undefined
-    && (postMortemValue === undefined || postMortemValue < filters.biospecimenPostMortemInterval.min)
-  )
-  if (belowMinPostMortemInterval) {
-    return false
-  }
-
-  const aboveMaxPostMortemInterval = (
-    filters.biospecimenPostMortemInterval.max !== undefined
-    && (postMortemValue === undefined || postMortemValue > filters.biospecimenPostMortemInterval.max)
-  )
-  return !aboveMaxPostMortemInterval
+  return matchesCollectionDate(biospecimen, filters) && matchesPostMortemInterval(biospecimen, filters)
 }
 
 export const biospecimenAsset: AssetDefinition = {
