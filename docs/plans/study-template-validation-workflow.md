@@ -99,8 +99,8 @@ sequenceDiagram
         API->>DB: Create typed Draft (StudyDatasetSubmissionV1)
         DB-->>API: draft UUID and draftType
         API-->>UI: 200 { valid: true, draft: { id, draftType } }
-        UI->>UI: Navigate to /data_submission_form/draft/study-dataset/:draftId
-        UI->>API: GET /api/draft/v1/:draftId
+        UI->>UI: Navigate to /data_submission_form/draft/study-dataset/:draftUuid
+        UI->>API: GET /api/draft/v1/:draftUuid
         API-->>UI: Draft document and typed metadata
         UI->>UI: Verify meta.draftType is StudyDatasetSubmissionV1
         UI-->>U: Render populated Draft Study Registration Form
@@ -277,14 +277,14 @@ Add a typed multipart method to `src/libs/ajax/DataSet.ts` or a dedicated draft 
 Add an explicit route so a draft UUID cannot be confused with an existing numeric study ID:
 
 ```text
-/data_submission_form/draft/study-dataset/:draftId
+/data_submission_form/draft/study-dataset/:draftUuid
 ```
 
 Update `DataSubmissionFormV2` to support three explicit modes:
 
 1. Blank study creation.
 2. Existing study editing by `studyId`.
-3. Draft study creation by `draftId`.
+3. Draft study creation by `draftUuid`.
 
 Draft mode should:
 
@@ -648,7 +648,7 @@ class is reserved for non-download secondary actions.
 
 The selected file remains visible after validation errors. Users can remove it, select a replacement,
 and retry without leaving the page. A valid response navigates to
-`/data_submission_form/draft/study-dataset/:draftId` using the returned typed reference.
+`/data_submission_form/draft/study-dataset/:draftUuid` using the returned typed reference.
 
 **Acceptance criteria**
 
@@ -710,7 +710,7 @@ Add draft mode to the study registration form and populate it from a validated t
 
 **Description**
 
-Add the explicit `/data_submission_form/draft/study-dataset/:draftId` route and a typed client for
+Add the explicit `/data_submission_form/draft/study-dataset/:draftUuid` route and a typed client for
 the existing generic draft read and delete endpoints. Extend `DataSubmissionFormV2` with an
 explicit draft mode instead of treating a UUID as a persisted study ID. After loading, require
 `meta.draftType === 'StudyDatasetSubmissionV1'` before mapping the registration-shaped document

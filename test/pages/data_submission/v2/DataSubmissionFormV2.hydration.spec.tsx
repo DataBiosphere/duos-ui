@@ -66,7 +66,7 @@ const renderDraft = (document: DatasetRegistrationSchemaV1) => {
   vi.mocked(Draft.getDraft).mockResolvedValue(detail)
   return renderWithRouter(
     <Routes>
-      <Route path="/data_submission_form/draft/study-dataset/:draftId" element={<DataSubmissionFormV2 />} />
+      <Route path="/data_submission_form/draft/study-dataset/:draftUuid" element={<DataSubmissionFormV2 />} />
     </Routes>,
     { route: DRAFT_ROUTE },
   )

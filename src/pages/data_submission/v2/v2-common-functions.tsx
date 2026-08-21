@@ -186,6 +186,12 @@ const convertDateEpochToString = (dateEpoch: unknown): string | undefined => {
   return undefined
 }
 
+/** `false` is a value the producer gave, so it must not fall through to undefined. */
+const getBooleanStudyPropertyValueByKey = (study: Study, key: string): boolean | undefined => {
+  const value = getStudyPropertyValueByKey(study, key)
+  return typeof value === 'boolean' ? value : undefined
+}
+
 export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistrationSchemaV1 => {
   const datasetSchema: DatasetRegistrationSchemaV1 = {
     studyName: study.name || '',
@@ -200,7 +206,7 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     publicVisibility: study.publicVisibility || false,
     throughBioId: getStudyPropertyValueByKey(study, ThroughBioId.key) as string || undefined,
     nihAnvilUse: getStudyPropertyValueByKey(study, NihAnvilUse.key) as NiHAnvilUseValues || undefined,
-    submittingToAnvil: getStudyPropertyValueByKey(study, SubmittingToAnvil.key) as boolean || undefined,
+    submittingToAnvil: getBooleanStudyPropertyValueByKey(study, SubmittingToAnvil.key),
     dbGaPPhsID: getStudyPropertyValueByKey(study, DbGaPPhsID.key) as string || undefined,
     dbGaPStudyRegistrationName: getStudyPropertyValueByKey(study, DbGaPStudyRegistrationName.key) as string || undefined,
     embargoReleaseDate: convertDateEpochToString(getStudyPropertyValueByKey(study, EmbargoReleaseDate.key) as string || undefined),
@@ -211,15 +217,15 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     nihProgramOfficerName: getStudyPropertyValueByKey(study, NihProgramOfficerName.key) as string || undefined,
     nihInstitutionCenterSubmission: getStudyPropertyValueByKey(study, NihInstitutionCenterSubmission.key) as NIHInstituteAndCenterAbbreviations || undefined,
     nihGenomicProgramAdministratorName: getStudyPropertyValueByKey(study, NihGenomicProgramAdministratorName.key) as string || undefined,
-    multiCenterStudy: getStudyPropertyValueByKey(study, MultiCenterStudy.key) as boolean || undefined,
+    multiCenterStudy: getBooleanStudyPropertyValueByKey(study, MultiCenterStudy.key),
     collaboratingSites: getStudyPropertyValueByKey(study, CollaboratingSites.key) as string[] || undefined,
-    controlledAccessRequiredForGenomicSummaryResultsGSR: getStudyPropertyValueByKey(study, ControlledAccessRequiredForGenomicSummaryResultsGSR.key) as boolean || undefined,
+    controlledAccessRequiredForGenomicSummaryResultsGSR: getBooleanStudyPropertyValueByKey(study, ControlledAccessRequiredForGenomicSummaryResultsGSR.key),
     controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation: getStudyPropertyValueByKey(study, ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key) as string || undefined,
-    alternativeDataSharingPlan: getStudyPropertyValueByKey(study, AlternativeDataSharingPlan.key) as boolean || undefined,
+    alternativeDataSharingPlan: getBooleanStudyPropertyValueByKey(study, AlternativeDataSharingPlan.key),
     alternativeDataSharingPlanReasons: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as Array<DataSharingPlanReasons> || undefined,
     alternativeDataSharingPlanExplanation: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanExplanation.key) as string || undefined,
     alternativeDataSharingPlanDataSubmitted: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanDataSubmitted.key) as AlternativeDataSharingPlanDataSubmittedValues || undefined,
-    alternativeDataSharingPlanDataReleased: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanDataReleased.key) as boolean || undefined,
+    alternativeDataSharingPlanDataReleased: getBooleanStudyPropertyValueByKey(study, AlternativeDataSharingPlanDataReleased.key),
     alternativeDataSharingPlanTargetDeliveryDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetDeliveryDate.key) as string || undefined),
     alternativeDataSharingPlanTargetPublicReleaseDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetPublicReleaseDate.key) as string || undefined),
     consentGroups: structuredClone(study.assets?.consentGroups) || [],

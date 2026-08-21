@@ -167,4 +167,23 @@ describe('draft document round trip', () => {
       expect(submitted[field as keyof DatasetRegistrationSchemaV1]).toEqual(value)
     })
   })
+
+  it('round trips a boolean the document set to false', () => {
+    const document: DatasetRegistrationSchemaV1 = {
+      ...draftDocument(),
+      submittingToAnvil: false,
+      multiCenterStudy: false,
+      controlledAccessRequiredForGenomicSummaryResultsGSR: false,
+      alternativeDataSharingPlan: false,
+      alternativeDataSharingPlanDataReleased: false,
+    }
+
+    const submitted = studyToDatasetSchemaSubmission(datasetSchemaSubmissionToStudy(document))
+
+    expect(submitted.submittingToAnvil).toBe(false)
+    expect(submitted.multiCenterStudy).toBe(false)
+    expect(submitted.controlledAccessRequiredForGenomicSummaryResultsGSR).toBe(false)
+    expect(submitted.alternativeDataSharingPlan).toBe(false)
+    expect(submitted.alternativeDataSharingPlanDataReleased).toBe(false)
+  })
 })

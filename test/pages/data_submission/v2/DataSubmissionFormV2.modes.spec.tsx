@@ -47,7 +47,7 @@ const draftDetail = (): DraftDetail => JSON.parse(readFileSync(
 
 const renderDraftRoute = () => renderWithRouter(
   <Routes>
-    <Route path="/data_submission_form/draft/study-dataset/:draftId" element={<DataSubmissionFormV2 />} />
+    <Route path="/data_submission_form/draft/study-dataset/:draftUuid" element={<DataSubmissionFormV2 />} />
     <Route path="/data_submission_form" element={<DataSubmissionFormV2 />} />
   </Routes>,
   { route: DRAFT_ROUTE },
@@ -88,6 +88,22 @@ describe('DataSubmissionFormV2 in draft mode', () => {
 
     expect(await screen.findByText('Create Study')).toBeInTheDocument()
     expect(screen.queryByText('Update Study')).not.toBeInTheDocument()
+  })
+
+  it('offers nothing to submit until the draft has loaded', async () => {
+    let resolveDraft: (detail: DraftDetail) => void = () => {}
+    vi.mocked(Draft.getDraft).mockReturnValue(new Promise((resolve) => {
+      resolveDraft = resolve
+    }))
+
+    renderDraftRoute()
+
+    expect(screen.queryByText('Create Study')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('study-name')).not.toBeInTheDocument()
+
+    resolveDraft(draftDetail())
+
+    expect(await screen.findByText('Create Study')).toBeInTheDocument()
   })
 
   it('refuses a draft of another type without offering the form', async () => {

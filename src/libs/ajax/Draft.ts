@@ -24,11 +24,10 @@ export const Draft = {
   /**
    * Load a draft's document and metadata. The endpoint is generic across draft types, so a caller
    * must check `meta.draftType` before mapping the document.
-   * @param draftId The draft UUID
    * @returns Promise resolving to the draft document and its metadata
    */
-  getDraft: async (draftId: string): Promise<DraftDetail> => {
-    const url = `${await Config.getApiUrl()}/api/draft/v1/${draftId}`
+  getDraft: async (draftUuid: string): Promise<DraftDetail> => {
+    const url = `${await Config.getApiUrl()}/api/draft/v1/${draftUuid}`
     const res = await fetchGet<DraftDetail>(url, Config.authOpts())
     return res.data
   },
@@ -36,10 +35,9 @@ export const Draft = {
   /**
    * Delete a draft and its attachments. Used after the study it seeded has been created, so a
    * failure here leaves a study that exists and a draft that outlived its purpose.
-   * @param draftId The draft UUID
    */
-  deleteDraft: async (draftId: string): Promise<void> => {
-    const url = `${await Config.getApiUrl()}/api/draft/v1/${draftId}`
+  deleteDraft: async (draftUuid: string): Promise<void> => {
+    const url = `${await Config.getApiUrl()}/api/draft/v1/${draftUuid}`
     await fetchDelete<void>(url, Config.authOpts())
   },
 }

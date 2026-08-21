@@ -15,6 +15,7 @@ import { studyToDatasetSchemaSubmission, buildConsentGroupsFromStudy, getStudyPr
 import { loadStudyDatasetDraft } from 'src/pages/data_submission/v2/studyDatasetDraft'
 import { Draft } from 'src/libs/ajax/Draft'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
+import { Spinner } from 'src/components/Spinner'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 
 export type FileProperty = {
@@ -31,8 +32,8 @@ export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFil
 /** A draft id is not a study id: a draft has never been submitted, so it creates rather than updates. */
 export type FormMode = 'create' | 'edit' | 'draft'
 
-const resolveFormMode = (draftId?: string, studyId?: string): FormMode => {
-  if (draftId) {
+const resolveFormMode = (draftUuid?: string, studyId?: string): FormMode => {
+  if (draftUuid) {
     return 'draft'
   }
   return studyId ? 'edit' : 'create'
@@ -40,11 +41,12 @@ const resolveFormMode = (draftId?: string, studyId?: string): FormMode => {
 
 export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const { onSaveRoute } = props
-  const { studyId, draftId } = useParams()
-  const formMode: FormMode = resolveFormMode(draftId, studyId)
+  const { studyId, draftUuid } = useParams()
+  const formMode: FormMode = resolveFormMode(draftUuid, studyId)
   const [isEditing, setIsEditing] = useState(false)
   const [study, setStudy] = useState({ data: {} } as Study)
   const [loadingError, setLoadingError] = useState(false)
+  const [loadedDraftUuid, setLoadedDraftUuid] = useState<string>()
   const [showContactModal, setShowContactModal] = useState(false)
 
   const navigate = useNavigate()
@@ -68,20 +70,20 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   // A draft stays a draft until the study is created from it, so isEditing remains false.
-  const onLoadDraft = (draftId: string) => {
-    loadStudyDatasetDraft(draftId).then((study) => {
+  const onLoadDraft = (draftUuid: string) => {
+    loadStudyDatasetDraft(draftUuid).then((study) => {
       setStudy(study)
       setLoadingError(false)
-    }).catch(onLoadFailure)
+    }).catch(onLoadFailure).finally(() => setLoadedDraftUuid(draftUuid))
   }
 
   useEffect(() => {
-    if (formMode === 'draft' && draftId) {
-      onLoadDraft(draftId)
+    if (formMode === 'draft' && draftUuid) {
+      onLoadDraft(draftUuid)
       return
     }
     onLoadFormData(studyId)
-  }, [studyId, draftId, formMode, setStudy, setIsEditing])
+  }, [studyId, draftUuid, formMode, setStudy, setIsEditing])
 
   const buildMultiPartFormData = (study: Study) => {
     const multiPartFormData = new FormData()
@@ -120,11 +122,11 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
    * the draft it came from outlived it, so a failure here is reported on its own and not retried.
    */
   const removeSourceDraft = async () => {
-    if (formMode !== 'draft' || !draftId) {
+    if (formMode !== 'draft' || !draftUuid) {
       return
     }
     try {
-      await Draft.deleteDraft(draftId)
+      await Draft.deleteDraft(draftUuid)
     }
     catch (_error) {
       Notifications.showError({
@@ -154,6 +156,15 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
         </>
       ),
     })
+  }
+
+  // Submitting before the draft arrives would register an empty study and then delete the draft.
+  if (formMode === 'draft' && loadedDraftUuid !== draftUuid) {
+    return (
+      <div style={Styles.PAGE}>
+        <Spinner />
+      </div>
+    )
   }
 
   // Nothing to edit, so nothing to submit or delete: the form is not offered at all.

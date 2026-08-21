@@ -14,11 +14,11 @@ export class WrongDraftTypeError extends Error {
 /**
  * Loads a draft and maps it into the form's model, refusing anything that is not a study/dataset
  * draft: the read endpoint is generic, so the id says nothing about what the draft holds.
- * @param draftId The draft UUID
+ * @param draftUuid The draft UUID
  * @returns Promise resolving to the study the form should edit
  */
-export const loadStudyDatasetDraft = async (draftId: string): Promise<Study> => {
-  const draft = await Draft.getDraft(draftId)
+export const loadStudyDatasetDraft = async (draftUuid: string): Promise<Study> => {
+  const draft = await Draft.getDraft(draftUuid)
   if (!isStudyDatasetDraft(draft)) {
     throw new WrongDraftTypeError(draft?.meta?.draftType)
   }

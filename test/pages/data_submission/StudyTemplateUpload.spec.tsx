@@ -146,6 +146,13 @@ describe('StudyTemplateUpload', () => {
       expect(Draft.validateStudyDatasetTemplate).not.toHaveBeenCalled()
     })
 
+    it('resets the input after a rejection so the same file can be re-picked', async () => {
+      renderWithRouter(<StudyTemplateUpload />)
+      await selectFile(buildCsv('notes.txt'))
+
+      expect(fileInput().value).toBe('')
+    })
+
     it('accepts a file exactly at the limit', async () => {
       renderWithRouter(<StudyTemplateUpload />)
       await selectFile(buildCsv('exact.csv', 5 * 1024 * 1024))
