@@ -179,6 +179,37 @@ describe('DataSubmissionFormV2 Data Use validation errors', () => {
     expect(text).toBe('Study creation failed: Internal Server Error')
   })
 
+  // fetchMultipartRequest falls back to this when a 400 has no readable body — not a violation list
+  it('reloads the study after a 400 that carries no server message on update', async () => {
+    const user = userEvent.setup()
+    mockUseParams.mockReturnValue({ studyId: '42' })
+    vi.mocked(DataSet.getStudyById).mockResolvedValue({ data: {} } as Study)
+    const opaqueRejection = new Error('Request failed with status 400. Please contact the help desk at duos@duos.org.') as Error & { response: { status: number, data: object } }
+    opaqueRejection.response = { status: 400, data: {} }
+    vi.mocked(DataSet.updateStudy).mockRejectedValue(opaqueRejection)
+
+    renderForm()
+    await waitFor(() => expect(DataSet.getStudyById).toHaveBeenCalledTimes(1))
+    await user.click(await screen.findByRole('button', { name: /update study/i }))
+
+    await waitFor(() => expect(DataSet.getStudyById).toHaveBeenCalledTimes(2))
+    const { text } = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: React.ReactNode }
+    expect(text).toBe('Study update failed: Request failed with status 400. Please contact the help desk at duos@duos.org..  Reloading original study.')
+  })
+
+  it('does not render a blank server message on a 400 as a violation list', async () => {
+    const user = userEvent.setup()
+    mockUseParams.mockReturnValue({})
+    vi.mocked(DataSet.registerDataset).mockRejectedValue({ response: { status: 400, data: { message: '   ' } } })
+
+    renderForm()
+    await user.click(await screen.findByRole('button', { name: /create study/i }))
+
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalled())
+    const { text } = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: React.ReactNode }
+    expect(text).toBe('Study creation failed:    ')
+  })
+
   // A failed update that did change server state still warrants reloading
   it('reloads the study after a non-validation failure on update', async () => {
     const user = userEvent.setup()

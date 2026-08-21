@@ -15,6 +15,7 @@ import { studyToDatasetSchemaSubmission, buildConsentGroupsFromStudy, getStudyPr
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { ResponseError } from 'src/types/model'
+import { isEmpty } from 'src/utils/NodashUtil'
 
 export type FileProperty = {
   key: string
@@ -27,8 +28,15 @@ export type DataSubmissionFormV2Props = {
 
 export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFile'
 
-const isValidationRejection = (error: unknown): boolean =>
-  (error as ResponseError)?.response?.status === 400
+/**
+ * Only a 400 carrying Consent's own explanation is a rejection the submitter can act on in the form.
+ * One with no readable body — a malformed multipart, a proxy — carries the generic help-desk line
+ * instead, which is not a violation list and still needs the reload.
+ */
+const isValidationRejection = (error: unknown): boolean => {
+  const response = (error as ResponseError)?.response
+  return response?.status === 400 && !isEmpty(response.data?.message?.trim())
+}
 
 /** A rejection reaches us either as a thrown Error or as the raw response it was built from. */
 const errorMessage = (error: unknown): string => {
