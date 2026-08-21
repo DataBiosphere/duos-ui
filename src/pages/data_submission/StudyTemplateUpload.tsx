@@ -39,6 +39,14 @@ export const StudyTemplateUpload = (): React.JSX.Element => {
     setFile(selected)
   }, [])
 
+  // Resetting the element lets the user re-select the same filename and still get a change event.
+  const clearSelection = useCallback(() => {
+    selectFile(null)
+    if (inputRef.current) {
+      inputRef.current.value = ''
+    }
+  }, [selectFile])
+
   // Failures are toasts, matching the rest of the app. Validation errors are not failures: they are a
   // completed result the user works through while editing their file, so they stay on the page.
   const clearResults = useCallback(() => {
@@ -54,32 +62,28 @@ export const StudyTemplateUpload = (): React.JSX.Element => {
     const selected = event.currentTarget.files?.[0] ?? null
     clearResults()
     if (!selected) {
-      selectFile(null)
+      clearSelection()
       return
     }
     // Pre-checks the two limits Consent enforces, so a doomed 5 MiB upload never leaves the browser.
     // Wording matches the server's so the two layers cannot appear to disagree.
     if (!selected.name.toLowerCase().endsWith('.csv')) {
-      selectFile(null)
+      clearSelection()
       Notifications.showError({ text: 'Template file must be a .csv file' })
       return
     }
     if (selected.size > MAX_TEMPLATE_BYTES) {
-      selectFile(null)
+      clearSelection()
       Notifications.showError({ text: MAX_TEMPLATE_SIZE_MESSAGE })
       return
     }
     selectFile(selected)
-  }, [clearResults, selectFile])
+  }, [clearResults, clearSelection, selectFile])
 
   const handleRemove = useCallback(() => {
-    selectFile(null)
+    clearSelection()
     clearResults()
-    // Resetting the element lets the user re-select the same filename and still get a change event.
-    if (inputRef.current) {
-      inputRef.current.value = ''
-    }
-  }, [clearResults, selectFile])
+  }, [clearResults, clearSelection])
 
   const handleValidate = useCallback(async () => {
     if (!file) return

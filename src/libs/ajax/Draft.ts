@@ -1,5 +1,6 @@
 import { Config } from 'src/libs/config'
-import { fetchMultipart } from 'src/libs/ajax/fetchAdapter'
+import { fetchDelete, fetchGet, fetchMultipart } from 'src/libs/ajax/fetchAdapter'
+import { DraftDetail } from 'src/types/draft'
 import { TemplateValidationResponse } from 'src/types/studyTemplate'
 
 export const Draft = {
@@ -18,5 +19,25 @@ export const Draft = {
     formData.append('file', file)
     const res = await fetchMultipart<TemplateValidationResponse>(url, formData, Config.multiPartOpts())
     return res.data
+  },
+
+  /**
+   * Load a draft's document and metadata. The endpoint is generic across draft types, so a caller
+   * must check `meta.draftType` before mapping the document.
+   * @returns Promise resolving to the draft document and its metadata
+   */
+  getDraft: async (draftUuid: string): Promise<DraftDetail> => {
+    const url = `${await Config.getApiUrl()}/api/draft/v1/${draftUuid}`
+    const res = await fetchGet<DraftDetail>(url, Config.authOpts())
+    return res.data
+  },
+
+  /**
+   * Delete a draft and its attachments. Used after the study it seeded has been created, so a
+   * failure here leaves a study that exists and a draft that outlived its purpose.
+   */
+  deleteDraft: async (draftUuid: string): Promise<void> => {
+    const url = `${await Config.getApiUrl()}/api/draft/v1/${draftUuid}`
+    await fetchDelete<void>(url, Config.authOpts())
   },
 }

@@ -19,3 +19,14 @@ this repository.
 Keep these byte-identical to their source. If the contract changes, re-copy rather than edit — and
 note that provenance cannot be recorded inside the CSVs themselves, since v1 requires the canonical
 header as the first row and rejects any row it does not recognise.
+
+## `draft/minimal-valid-draft-detail.json`
+
+Not a copy: what `GET /api/draft/v1/{draftUUID}` returns after `valid/minimal-valid.csv` is validated,
+captured from Consent's own `DraftService.draftAsJson` running against a database, so the envelope and
+the document are the server's rather than a guess. What a hand-written version gets wrong is the
+omissions — Consent serializes the document with `NON_NULL`, so a field the producer left empty is
+absent rather than `null`, and hydration has to read absence as unset.
+
+Volatile values are normalized: the UUID, the timestamps, and the synthetic user the capture ran as.
+Everything else is verbatim.
