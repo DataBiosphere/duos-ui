@@ -4,6 +4,7 @@ import { BiospecimenAsset, FilterState, PaginationState, SortState } from 'src/t
 import { makeBiospecimenColumns } from 'src/components/data_library/columns/biospecimenColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 import { BioSpecimenPreservationMethod, BioSpecimenType, PostMortemIntervalUnit, Sex } from 'src/types/model'
+import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
 const includesIgnoreCase = (source: string | undefined, values: string[]) => {
   if (values.length === 0) {
@@ -27,12 +28,16 @@ const matchesBiospecimenFilters = (biospecimen: BiospecimenAsset, filters?: Filt
     return false
   }
 
-  const collectionDate = biospecimen.dateOfCollection || ''
-  if (filters.biospecimenCollectionDate.after && collectionDate < filters.biospecimenCollectionDate.after) {
-    return false
-  }
-  if (filters.biospecimenCollectionDate.before && collectionDate > filters.biospecimenCollectionDate.before) {
-    return false
+  // Inverted bounds build no ES clause, so they must not narrow rows here
+  // either — otherwise the grid empties while the panel flags the range.
+  if (isFilterActive('biospecimenCollectionDate', filters)) {
+    const collectionDate = biospecimen.dateOfCollection || ''
+    if (filters.biospecimenCollectionDate.after && collectionDate < filters.biospecimenCollectionDate.after) {
+      return false
+    }
+    if (filters.biospecimenCollectionDate.before && collectionDate > filters.biospecimenCollectionDate.before) {
+      return false
+    }
   }
 
   if (
