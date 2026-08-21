@@ -30,9 +30,15 @@ export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFil
 const isValidationRejection = (error: unknown): boolean =>
   (error as ResponseError)?.response?.status === 400
 
+/** A rejection reaches us either as a thrown Error or as the raw response it was built from. */
+const errorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message
+  return (error as ResponseError)?.response?.data?.message ?? String(error)
+}
+
 /** Consent joins Data Use consistency violations with newlines, so each needs its own line here. */
 const renderViolations = (prefix: string, error: unknown): React.ReactElement => {
-  const message = error instanceof Error ? error.message : String(error)
+  const message = errorMessage(error)
   return (
     <>
       {prefix}
@@ -43,6 +49,20 @@ const renderViolations = (prefix: string, error: unknown): React.ReactElement =>
     </>
   )
 }
+
+/**
+ * A copy: a failed save leaves the form standing, so the live study must keep its attachments. Only
+ * the consent group files need stripping; the rest of the payload is built from named fields.
+ */
+const withoutAttachments = (study: Study): Study => ({
+  ...study,
+  assets: study.assets && {
+    ...study.assets,
+    consentGroups: study.assets.consentGroups?.map(
+      ({ addedNIHInstitutionalCertificationFile: _file, ...consentGroup }) => consentGroup,
+    ),
+  },
+})
 
 export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const { onSaveRoute } = props
@@ -73,18 +93,6 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   useEffect(() => {
     onLoadFormData(studyId)
   }, [studyId, setStudy, setIsEditing])
-
-  /** A copy: a failed save leaves the form standing, so the live study must keep its attachments. */
-  const withoutAttachments = (study: Study): Study => ({
-    ...study,
-    alternativeDataSharingPlanFile: undefined,
-    assets: study.assets && {
-      ...study.assets,
-      consentGroups: study.assets.consentGroups?.map(
-        ({ addedNIHInstitutionalCertificationFile: _file, ...consentGroup }) => consentGroup,
-      ),
-    },
-  })
 
   const buildMultiPartFormData = (study: Study) => {
     const multiPartFormData = new FormData()
@@ -117,7 +125,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
       Notifications.showError({ text: renderViolations('Study update failed:', error) })
       return
     }
-    Notifications.showError({ text: `Study update failed: ${error}.  Reloading original study.` })
+    Notifications.showError({ text: `Study update failed: ${errorMessage(error)}.  Reloading original study.` })
     onLoadFormData(studyId)
   }
 
@@ -132,7 +140,11 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   const onError = (error: unknown) => {
-    Notifications.showError({ text: renderViolations('Study creation failed:', error) })
+    if (isValidationRejection(error)) {
+      Notifications.showError({ text: renderViolations('Study creation failed:', error) })
+      return
+    }
+    Notifications.showError({ text: `Study creation failed: ${errorMessage(error)}` })
   }
 
   return (

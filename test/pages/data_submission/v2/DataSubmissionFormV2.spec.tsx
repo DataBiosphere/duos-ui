@@ -39,7 +39,7 @@ vi.mock('src/libs/ajax/DataSet', () => ({
 
 vi.mock('src/pages/data_submission/v2/v2-common-functions', () => ({
   studyToDatasetSchemaSubmission: (study: Study) => study,
-  buildConsentGroupsFromStudy: () => [],
+  buildConsentGroupsFromStudy: (study: Study) => study.assets?.consentGroups ?? [],
   getStudyPropertyValueByKey: () => ({}),
 }))
 
@@ -121,11 +121,16 @@ describe('DataSubmissionFormV2 Data Use validation errors', () => {
   })
 
   // The form is the only copy of the edits after a 400, so it must still hold the attachments
-  it('resubmits the attachment after a 400 rather than dropping it', async () => {
+  it('resubmits both attachments after a 400 rather than dropping them', async () => {
     const user = userEvent.setup()
     const plan = new File(['plan'], 'plan.pdf')
+    const certification = new File(['cert'], 'cert.pdf')
     mockUseParams.mockReturnValue({ studyId: '42' })
-    vi.mocked(DataSet.getStudyById).mockResolvedValue({ data: {}, alternativeDataSharingPlanFile: plan } as Study)
+    vi.mocked(DataSet.getStudyById).mockResolvedValue({
+      data: {},
+      alternativeDataSharingPlanFile: plan,
+      assets: { consentGroups: [{ addedNIHInstitutionalCertificationFile: certification }] },
+    } as unknown as Study)
     vi.mocked(DataSet.updateStudy).mockRejectedValueOnce(validationRejection()).mockResolvedValueOnce({} as Study)
 
     renderForm()
@@ -136,7 +141,42 @@ describe('DataSubmissionFormV2 Data Use validation errors', () => {
     await waitFor(() => expect(DataSet.updateStudy).toHaveBeenCalledTimes(2))
     const [, resubmitted] = vi.mocked(DataSet.updateStudy).mock.calls[1] as unknown as [string, FormData]
     expect((resubmitted.get('alternativeDataSharingPlan') as File)?.name).toBe('plan.pdf')
-    expect(resubmitted.get('dataset')).not.toContain('alternativeDataSharingPlanFile')
+    expect((resubmitted.get('consentGroups[0].nihInstitutionalCertificationFile') as File)?.name).toBe('cert.pdf')
+    // The file travels as its own part; leaving it in the JSON too would serialize it as `{}`.
+    expect(resubmitted.get('dataset')).not.toContain('addedNIHInstitutionalCertificationFile')
+  })
+
+  // A rejection can arrive as the raw response rather than as a thrown Error
+  it('renders every violation from a 400 that is not an Error instance', async () => {
+    const user = userEvent.setup()
+    mockUseParams.mockReturnValue({})
+    vi.mocked(DataSet.registerDataset).mockRejectedValue({ response: { status: 400, data: { message: VIOLATIONS.join('\n') } } })
+
+    renderForm()
+    await user.click(await screen.findByRole('button', { name: /create study/i }))
+
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalled())
+    const container = renderedNotification()
+    for (const violation of VIOLATIONS) {
+      expect(container).toHaveTextContent(violation)
+    }
+    expect(container).not.toHaveTextContent('[object Object]')
+  })
+
+  // A server fault is not a form problem the submitter can fix, so it must not read like one
+  it('does not render a server fault on creation as a violation list', async () => {
+    const user = userEvent.setup()
+    mockUseParams.mockReturnValue({})
+    const serverError = new Error('Internal Server Error') as Error & { response: { status: number } }
+    serverError.response = { status: 500 }
+    vi.mocked(DataSet.registerDataset).mockRejectedValue(serverError)
+
+    renderForm()
+    await user.click(await screen.findByRole('button', { name: /create study/i }))
+
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalled())
+    const { text } = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: React.ReactNode }
+    expect(text).toBe('Study creation failed: Internal Server Error')
   })
 
   // A failed update that did change server state still warrants reloading

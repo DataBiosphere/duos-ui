@@ -503,11 +503,17 @@ describe('BucketUtils', () => {
       expect(bucket.algorithmResult?.result).toBe('Yes')
     })
 
-    it('reports an unknown version instead of trusting or hiding it', async () => {
-      const bucket = await bucketFor({ primary: [GRU] }, [makeMatch('v99', { match: true })])
+    it('reports an unparseable version instead of trusting or hiding it', async () => {
+      const bucket = await bucketFor({ primary: [GRU] }, [makeMatch('experimental', { match: true })])
 
-      expect(bucket.algorithmResult?.result).toBe('Unable to interpret the system match')
-      expect(bucket.algorithmResult?.rationales?.[0]).toContain('v99')
+      expect(bucket.algorithmResult?.result).toBe('System match unavailable for this algorithm version')
+      expect(bucket.algorithmResult?.rationales?.[0]).toContain('experimental')
+    })
+
+    it('trusts a version newer than any this build enumerates', async () => {
+      const bucket = await bucketFor({ primary: [OTHER] }, [makeMatch('v99', { match: true })])
+
+      expect(bucket.algorithmResult?.result).toBe('Yes')
     })
 
     it('reads a missing version as legacy rather than uninterpretable', async () => {
@@ -518,22 +524,34 @@ describe('BucketUtils', () => {
       expect(unmatchable.algorithmResult?.result).toBe('N/A')
     })
 
-    it('reports mixed versions within a bucket rather than interpreting the newest', async () => {
+    // One data use, so both datasets land in the same bucket and their match rows coalesce.
+    const bucketForVersions = async (first: string, second: string) => {
       vi.spyOn(Match, 'findMatchBatch').mockResolvedValue([
-        makeMatch('v5', { id: '1', consent: 'DUOS-000001', match: true }),
-        makeMatch('v2', { id: '2', consent: 'DUOS-000002', match: true }),
+        makeMatch(first, { id: '1', consent: 'DUOS-000001', match: true }),
+        makeMatch(second, { id: '2', consent: 'DUOS-000002', match: true }),
       ])
-      // One data use, so both datasets land in the same bucket and their match rows coalesce.
       vi.spyOn(DataSet, 'searchDatasetIndex').mockResolvedValue([
         { datasetId: 1, datasetName: 'ds 1', datasetIdentifier: 'DUOS-000001', dataUse: { primary: [GRU] }, dacId: 1 },
         { datasetId: 2, datasetName: 'ds 2', datasetIdentifier: 'DUOS-000002', dataUse: { primary: [GRU] }, dacId: 2 },
       ] as unknown as DatasetTerm[])
 
       const buckets = await binCollectionToBuckets(dar_collection, [1, 2])
-
       expect(buckets).toHaveLength(1)
       expect(buckets[0].matchResults).toHaveLength(2)
-      expect(buckets[0].algorithmResult?.result).toBe('Unable to interpret the system match')
+      return buckets[0]
+    }
+
+    it('reports versions DUOS reads differently rather than interpreting the newest', async () => {
+      const bucket = await bucketForVersions('v5', 'v2')
+
+      expect(bucket.algorithmResult?.result).toBe('System match unavailable for this algorithm version')
+      expect(bucket.algorithmResult?.createDate).toBeUndefined()
+    })
+
+    it('keeps the suggestion when mixed versions agree on how the result reads', async () => {
+      const bucket = await bucketForVersions('v3', 'v5')
+
+      expect(bucket.algorithmResult?.result).toBe('Yes')
     })
 
     it('reports N/A when no match has been recorded', async () => {

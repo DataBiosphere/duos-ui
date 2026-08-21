@@ -369,8 +369,8 @@ export const processRestrictionStatements = async (
 }
 
 /**
- * Shows only the narrowest permission when a record carries several primaries (DS over HMB, those
- * over GRU). Unlike the classifier's full enumeration: a broad statement beside a narrow one misleads.
+ * Shows only the narrowest permission along the DS > HMB > GRU chain, since a broad statement beside
+ * a narrow one misleads. POA sits outside that chain and still renders alongside DS.
  */
 export const processDefinedLimitations = (
   key: string,

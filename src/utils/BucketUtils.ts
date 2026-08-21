@@ -1,4 +1,4 @@
-import { chain, filter, includes, isEmpty, isNil, map } from 'src/utils/NodashUtil'
+import { chain, filter, includes, isEmpty, isNil } from 'src/utils/NodashUtil'
 import { Match } from 'src/libs/ajax/Match'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { ElasticsearchQuery } from 'src/types/elastic'
@@ -177,33 +177,34 @@ const filterDatasetsByDACs = (dacIds: number[], datasets: Dataset[]): Dataset[] 
     : filter(datasets, (dataset: Dataset) => includes(dacIds, dataset.dacId))
 }
 
-/**
- * Versions whose ABSTAIN is decided by Consent's `DataUseMatcherV5`, which supplies the rationale
- * the DAC reads. Suppressing these client-side would replace a real decision with "N/A".
- */
-const BACKEND_ABSTAINING_VERSIONS: ReadonlySet<string> = new Set(['v3', 'v4', 'v5'])
-
 /** Versions that predate server-side abstention and so still need client-side suppression. */
 const CLIENT_SUPPRESSING_VERSIONS: ReadonlySet<string> = new Set(['v1', 'v2'])
 
-const UNRECOGNIZED_ALGORITHM_RESULT = 'Unable to interpret the system match'
+/**
+ * From v3 on Consent decides ABSTAIN and supplies the rationale the DAC reads. A floor rather than
+ * an allowlist, so a newer matcher does not blank every suggestion until this UI is redeployed.
+ */
+const FIRST_BACKEND_ABSTAINING_VERSION = 3
+
+const UNRECOGNIZED_ALGORITHM_RESULT = 'System match unavailable for this algorithm version'
 
 type AlgorithmVersionHandling = 'backend-abstains' | 'client-suppresses' | 'unrecognized'
 
-/**
- * A bucket's datasets are matched in one pass, so mixed versions mean at least one row is stale;
- * applying the newest version's semantics to all of them would be a silent guess.
- */
-const classifyAlgorithmVersion = (versions: (string | undefined)[]): AlgorithmVersionHandling => {
-  if (versions.length !== 1) {
-    return 'unrecognized'
-  }
-  const [version] = versions
+const classifyOneVersion = (version: string | undefined): AlgorithmVersionHandling => {
   // Rows predating the version column were backfilled to v1, so an absent version is legacy too.
   if (isNil(version) || CLIENT_SUPPRESSING_VERSIONS.has(version)) {
     return 'client-suppresses'
   }
-  return BACKEND_ABSTAINING_VERSIONS.has(version) ? 'backend-abstains' : 'unrecognized'
+  const majorVersion = /^v(\d+)$/.exec(version)
+  return majorVersion && Number(majorVersion[1]) >= FIRST_BACKEND_ABSTAINING_VERSION
+    ? 'backend-abstains'
+    : 'unrecognized'
+}
+
+/** Versions mixed across match runs matter only when they disagree on how the results are read. */
+const classifyAlgorithmVersion = (versions: (string | undefined)[]): AlgorithmVersionHandling => {
+  const handlings = new Set(versions.map(classifyOneVersion))
+  return handlings.size === 1 ? [...handlings][0] : 'unrecognized'
 }
 
 /**
@@ -227,18 +228,19 @@ const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
     .value()
   const handling = classifyAlgorithmVersion(versions)
   if (handling === 'unrecognized') {
+    // No single createDate applies when the rows come from runs DUOS reads differently.
     return {
       result: UNRECOGNIZED_ALGORITHM_RESULT,
-      createDate: bucket.matchResults[0].createDate,
+      createDate: undefined,
       rationales: [
         `This match was recorded by algorithm version ${versions.map(v => v ?? 'unknown').join(', ')}, `
-        + 'which DUOS can no longer interpret. Please vote without a system suggestion.',
+        + 'which DUOS cannot interpret. Please vote without a system suggestion.',
       ],
       id: bucket.key,
     }
   }
 
-  const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse)
+  const unmatchable = shouldAbstain(bucket.dataUse)
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
@@ -249,7 +251,7 @@ const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
         .value()
     : []
 
-  const abstain = hasBackendAbstention(bucket.matchResults)
+  const abstain = hasRecordedAbstention(bucket.matchResults)
 
   // check results based on matchVals
   if (isEmpty(matchVals)) {
@@ -291,11 +293,8 @@ const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
 }
 
 /** One abstention is enough: the algorithm declined on a dataset, so the bucket has no answer. */
-const hasBackendAbstention = (matchResults: MatchResult[]): boolean => {
-  const abstainList = map(matchResults, (m: MatchResult) => m.abstain)
-  const abstainValList = filter(abstainList, (a: boolean | undefined) => a === true)
-  return abstainValList.length > 0
-}
+const hasRecordedAbstention = (matchResults: MatchResult[]): boolean =>
+  matchResults.some((m: MatchResult) => m.abstain === true)
 
 /**
  * Calculate "Other" status for a data use. Data Uses can have 'otherRestrictions': TRUE|FALSE,
@@ -319,7 +318,7 @@ const isOther = (dataUse?: DataUseSummary): boolean => {
 export const shouldAbstain = (dataUse?: DataUseSummary): boolean => {
   return isOther(dataUse)
     || (dataUse?.secondary
-      ? dataUse.secondary.map((dut: DataUseTerm) => dut.code).some(code => AbstainDataUseCodes.includes(code))
+      ? dataUse.secondary.some((dut: DataUseTerm) => AbstainDataUseCodes.has(dut.code))
       : false)
 }
 
