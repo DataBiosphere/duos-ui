@@ -54,6 +54,14 @@ describe('SigningOfficialRequest', () => {
     expect(screen.getByRole('button', { name: 'Attest & Request' })).toBeEnabled()
   })
 
+  it('warns in an info alert that the requestor cannot also be the Signing Official', () => {
+    render(<SigningOfficialRequest user={user} />)
+
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveTextContent(/cannot be both the requestor and the Signing Official/)
+    expect(alert).toHaveTextContent(/Contracts Office/)
+  })
+
   it('does not show the request for an existing Signing Official', () => {
     render(<SigningOfficialRequest user={{ ...user, isSigningOfficial: true }} />)
 
