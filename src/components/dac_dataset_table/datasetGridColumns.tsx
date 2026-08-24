@@ -3,7 +3,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { Box, Chip, Tooltip } from '@mui/material'
 import { DatasetTerm } from 'src/types/model'
 import { DataSet } from 'src/libs/ajax/DataSet'
-import { processDataUseCodes } from 'src/utils/DataUseUtils'
+import { DataUseCode, processDataUseCodes } from 'src/utils/DataUseUtils'
 import { Notifications } from 'src/libs/utils'
 import DACDatasetApprovalStatus from 'src/components/dac_dataset_table/DACDatasetApprovalStatus'
 import { DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants'
@@ -14,7 +14,15 @@ const downloadInstitutionalCertification = (dataset: DatasetTerm) => {
   })
 }
 
-const dacDatasetGridColumns: Record<string, GridColDef<DatasetTerm>> = {
+// processDataUseCodes expands DS into `DS (disease)`, so cap the chip and let it ellipsize
+// rather than overflow the cell's hidden overflow
+const dataUseChip = (du: DataUseCode) => (
+  <Tooltip title={du.description}>
+    <Chip label={du.code} size="small" variant="outlined" sx={{ maxWidth: 96 }} />
+  </Tooltip>
+)
+
+const dacDatasetGridColumns: Partial<Record<string, GridColDef<DatasetTerm>>> = {
   [DACDatasetTableColumnOptions.DUOS_ID]: {
     field: 'datasetIdentifier',
     headerName: 'DUOS ID',
@@ -67,18 +75,14 @@ const dacDatasetGridColumns: Record<string, GridColDef<DatasetTerm>> = {
     renderCell: (params) => {
       const { codesAndDescriptions } = processDataUseCodes(params.row)
       if (codesAndDescriptions.length === 0) return null
-      const visible = codesAndDescriptions.slice(0, 2)
+      // Rendered positionally rather than mapped: codes are not unique — primary and secondary can
+      // carry the same one — so a code-derived key would collide and an index key is its own smell.
+      const [first, second] = codesAndDescriptions
       const overflow = codesAndDescriptions.slice(2)
       return (
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center', height: '100%' }}>
-          {/* Codes are not unique — primary and secondary can carry the same one — so index the key */}
-          {visible.map((du, index) => (
-            <Tooltip key={`${du.code}-${index}`} title={du.description}>
-              {/* processDataUseCodes expands DS into `DS (disease)`, so cap the chip and let it
-                  ellipsize rather than overflow the cell's hidden overflow */}
-              <Chip label={du.code} size="small" variant="outlined" sx={{ maxWidth: 96 }} />
-            </Tooltip>
-          ))}
+          {dataUseChip(first)}
+          {second && dataUseChip(second)}
           {overflow.length > 0 && (
             <Tooltip title={overflow.map(du => `${du.code}: ${du.description}`).join(', ')}>
               <Chip label={`+${overflow.length}`} size="small" variant="outlined" />
