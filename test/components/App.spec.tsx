@@ -33,6 +33,23 @@ vi.mock('src/libs/notificationService', () => ({
   },
 }))
 
+// Both vi.fn()s default to undefined: the probe reads as in-flight, so every
+// pre-existing test runs signed out exactly as before these mocks existed.
+vi.mock('src/hooks/useSession', () => ({
+  useSessionInfo: vi.fn(),
+  useUserIsLogged: vi.fn(),
+}))
+
+vi.mock('src/libs/auth/postSignIn', () => ({
+  completeSignIn: vi.fn(),
+}))
+
+// The hydrate-path ToS test navigates here; the real page fetches ToS text
+// through unmocked config plumbing. Only the route transition matters.
+vi.mock('src/pages/TermsOfServiceAcceptance', () => ({
+  default: () => null,
+}))
+
 // BaseModal calls Modal.setAppElement('#root') at module load time; prevent
 // the error by no-op-ing it before the import chain resolves.
 vi.mock('react-modal', async (importOriginal) => {
@@ -44,6 +61,8 @@ vi.mock('react-modal', async (importOriginal) => {
 import App from 'src/App'
 import { AuthenticateNIH } from 'src/libs/ajax/AuthenticateNIH'
 import { Storage } from 'src/libs/storage'
+import { useSessionInfo } from 'src/hooks/useSession'
+import { completeSignIn } from 'src/libs/auth/postSignIn'
 
 const duosUser = {
   userId: 2,
@@ -78,6 +97,9 @@ describe('Main App Functions', () => {
   })
 
   it('should render main layout components on the home page', async () => {
+    // A resolved signed-out probe: while the probe is in flight the app
+    // deliberately shows only the reconciliation spinner (no layout chrome).
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: false })
     render(
       <MemoryRouter initialEntries={['/']}>
         <App />
@@ -134,5 +156,146 @@ describe('Main App Functions', () => {
     await waitFor(() => expect(vi.mocked(AuthenticateNIH.getECMProviderLinkInfo)).toHaveBeenCalledWith(code, state))
     await waitFor(() => expect(vi.mocked(AuthenticateNIH.getSyncedUser)).toHaveBeenCalledOnce())
     expect(pageVisitStub).toHaveBeenCalledWith('/')
+  })
+})
+
+const LocationSpyGlobal = ({ onLocationChange }: { onLocationChange: (pathname: string) => void }) => {
+  const location = useLocation()
+  React.useEffect(() => {
+    onLocationChange(location.pathname)
+  }, [location, onLocationChange])
+  return null
+}
+
+describe('post-sign-in bootstrap', () => {
+  const renderApp = () =>
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(completeSignIn).mockResolvedValue('completed')
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    localStorage.clear()
+  })
+
+  it('starts the bootstrap for an authenticated session with no DUOS profile yet (new-user registration path)', async () => {
+    // /auth/me reports a valid session but no user — the shape an
+    // unregistered user produces right after the B2C callback. CurrentUser
+    // holds the empty default (userId 0).
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+
+    renderApp()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+  })
+
+  it('re-bootstraps when the session identity differs from the stored profile', async () => {
+    // Another tab switched accounts (or the user re-signed-in after expiry):
+    // the session says userId 2, storage still holds userId 7.
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ ...duosUser, userId: 7 } as never)
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: duosUser as never })
+
+    renderApp()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+  })
+
+  it('hydrates (not bootstraps) when the stored profile already matches the session identity', async () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(duosUser as never)
+    const setCurrentUser = vi.spyOn(Storage, 'setCurrentUser').mockImplementation(() => {})
+    const freshUser = { ...duosUser, roles: [{ userId: 2, roleId: 5, name: 'Researcher' }] }
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: freshUser as never })
+
+    renderApp()
+
+    // Same identity → the local profile refreshes from the probe's
+    // server-fetched user (roles/ToS can change between page loads)…
+    await waitFor(() => expect(setCurrentUser).toHaveBeenCalledWith(freshUser))
+    // …without the full bootstrap (no metrics, no cache reset, no navigation).
+    expect(vi.mocked(completeSignIn)).not.toHaveBeenCalled()
+  })
+
+  it('routes a hydrated user with explicitly rejected ToS to the acceptance gate', async () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(duosUser as never)
+    vi.spyOn(Storage, 'setCurrentUser').mockImplementation(() => {})
+    const noTosUser = { ...duosUser, userStatusInfo: { tosAccepted: false } }
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, user: noTosUser as never })
+    const pageVisitStub = vi.fn()
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <LocationSpyGlobal onLocationChange={pageVisitStub} />
+        <App />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => expect(pageVisitStub).toHaveBeenCalledWith('/tos_acceptance'))
+    expect(vi.mocked(completeSignIn)).not.toHaveBeenCalled()
+  })
+
+  it('hides the header while reconciling so stale role tabs are never committed', async () => {
+    // Cross-tab switch shape with the bootstrap still in flight: the header
+    // derives role tabs from Storage.getCurrentUser() and must not render
+    // the previous identity's chrome while the identity is in question.
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ ...duosUser, userId: 7 } as never)
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+    vi.mocked(completeSignIn).mockReturnValue(new Promise(() => {}))
+
+    renderApp()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalled())
+    expect(screen.queryByText('Contact Us')).not.toBeInTheDocument()
+    expect(screen.queryByText('Data Use Oversight System')).not.toBeInTheDocument()
+  })
+
+  it('bootstraps when a fresh probe reports an unregistered session over a stored identity (cross-tab switch)', async () => {
+    // Another tab switched the shared cookie to a brand-new account: this
+    // tab still stores user 7, but a FRESH probe reports authenticated with
+    // no user. That must re-bootstrap (reaching registration), not silently
+    // keep wearing user 7's identity under the new session.
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ ...duosUser, userId: 7 } as never)
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+
+    renderApp()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+  })
+
+  it('does not bootstrap while signed out', async () => {
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: false })
+
+    renderApp()
+
+    await waitFor(() => expect(document.querySelector('.main')).toBeInTheDocument())
+    expect(vi.mocked(completeSignIn)).not.toHaveBeenCalled()
+  })
+
+  it('unlocks the routes after registration even while the cached session still has no user', async () => {
+    // The probe's cached answer predates the registration for the rest of the
+    // page load: authenticated, no user. That must not read as an identity
+    // mismatch once completeSignIn persists the new nonzero profile — doing so
+    // re-armed the bootstrap into a run the once-per-identity guard blocks,
+    // pinning the app on the spinner forever.
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+    vi.mocked(completeSignIn).mockImplementation(async () => {
+      // What registerAndRedirectNewUser -> setUserRoleStatuses does.
+      Storage.setCurrentUser(duosUser as never)
+      return 'completed'
+    })
+
+    renderApp()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+    // The routes must come out from behind the bootstrap spinner…
+    expect(await screen.findByText('Data Use Oversight System')).toBeInTheDocument()
+    // …and the bootstrap must not have re-armed into a second run.
+    expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce()
   })
 })

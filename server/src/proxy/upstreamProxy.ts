@@ -11,7 +11,7 @@ import type {
 } from 'fastify'
 import fastifyReplyFrom from '@fastify/reply-from'
 import { requireEnv } from '../auth/oidcClient.js'
-import { RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
+import { REFRESH_WINDOW_SECONDS, RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
 
 /**
  * The BFF upstream proxy machinery.
@@ -84,12 +84,9 @@ export interface UpstreamProxyConfig {
   destroySessionOnUpstream401: boolean
 }
 
-/**
- * How early to renew the access token. Wide enough that a request which passes
- * this check still has a usable token by the time it reaches the upstream, so
- * ordinary expiry never reaches the browser as a 401.
- */
-export const REFRESH_WINDOW_SECONDS = 60
+// Re-exported for existing consumers; the constant is refresh policy and
+// lives with refreshAccessToken (auth/refresh.ts), not in the proxy layer.
+export { REFRESH_WINDOW_SECONDS } from '../auth/refresh.js'
 
 /**
  * Bounded rather than undici's unbounded default (`connections: null` lets a
