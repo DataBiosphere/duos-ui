@@ -95,16 +95,18 @@ Two residual windows, surfaced by the cross-tab review on #3863
    The window is seconds wide and requires two different unregistered
    accounts switching mid-registration.
 
-2. **A transient upstream 401 for a registered user drives one
+2. **An upstream 401 on a session's first-ever probe drives one
    registration POST.** `/auth/me` reports an upstream 401 as "valid
-   session, no profile" (the upstream conflates the two — see #3861). For
-   a *registered* user this shape only appears when the upstream 401s a
-   freshly refreshed token: a revoked token, or upstream auth outage. The
-   bootstrap then attempts `registerUser()`; the expected `409 Conflict`
-   recovers into a normal sign-in, and any other failure signs the session
-   out — which is the correct end state for a genuinely revoked token. The
-   cost of the window is one spurious POST and, during an upstream auth
-   outage, a sign-out instead of an error banner.
+   session, no profile" (the upstream conflates the two — see #3861). The
+   session's `profileSeen` flag narrows the exposure: once a session has
+   served a profile, a later 401/404 is treated as a terminal token
+   verdict (revoked mid-lifetime, disabled account) and destroys the
+   session instead of reading as "unregistered". What remains is the
+   first-contact case — a token revoked between login and the session's
+   first probe. The bootstrap then attempts `registerUser()`; the expected
+   `409 Conflict` recovers into a normal sign-in, and any other failure
+   signs the session out — the correct end state for a revoked token. The
+   cost of the residual window is one spurious POST.
 
 ## Alternative considered
 

@@ -9,6 +9,7 @@
 import { OidcBroker, OidcUser } from './oidcBroker'
 import { Storage } from './../storage'
 import { Config } from './../config'
+import { resetSessionCache } from './session'
 import { getCsrfToken, isCsrfRejection, resetCsrfToken } from './../ajax/csrf'
 import { UserManager } from 'oidc-client-ts'
 
@@ -108,19 +109,17 @@ export const Auth = {
       // The session (and with it the server-side CSRF secret) is gone — any cached token is stale.
       resetCsrfToken()
       Storage.clearStorage()
+      // The probe cache still holds the pre-logout "authenticated" answer;
+      // callers navigate before the redirect below unloads the page, and a
+      // re-render in that window must not paint a signed-in header around
+      // the just-cleared (empty) stored user.
+      resetSessionCache()
       purgeLegacyOidcKeys()
       Redirect.to(redirectTo)
       return
     }
     Storage.clearStorage()
     await OidcBroker.signOut()
-  },
-  isAuthenticated: async (): Promise<boolean> => {
-    if (await Config.isBffEnabled()) {
-      const res = await fetch('/auth/me', { credentials: 'include' })
-      return res.ok
-    }
-    return Storage.userIsLogged()
   },
 }
 

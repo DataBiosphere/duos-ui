@@ -96,17 +96,17 @@ const probeCoveredByRun = (active: ActiveBootstrap, sessionUser: DuosUser | unde
       && sessionUser.userId !== 0 && sessionUser.userId === storedUserId)
 }
 
-/** Persist the freshest profile a joined probe carried, once its run
- * completes. Same explicit-rejection rule as the hydrate path. The router
- * location closure may be stale by completion time — read the live one
- * (they coincide outside MemoryRouter tests). */
 /** Only an explicit "not accepted" routes to the gate — a profile without
  * status info (older legacy sessions, service accounts) is left alone. */
 const tosExplicitlyRejected = (user: DuosUser, pathname: string): boolean =>
   user.userStatusInfo?.tosAccepted === false && !pathname.startsWith('/tos')
 
+/** Persist the freshest profile a joined probe carried, once its run
+ * completes. Same explicit-rejection rule as the hydrate path. The router
+ * location closure may be stale by completion time — read the live one
+ * (they coincide outside MemoryRouter tests). */
 const applyPendingHydration = (fresh: DuosUser, navigate: NavigateFunction): void => {
-  Storage.setCurrentUser(fresh)
+  // setUserRoleStatuses persists the user itself (utils.ts).
   setUserRoleStatuses(fresh, Storage)
   if (tosExplicitlyRejected(fresh, globalThis.location.pathname)) {
     navigate('/tos_acceptance')
@@ -213,7 +213,7 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
 
     if (probeNamesStoredUser(sessionUser, storedUserId)) {
       ensureCacheIdentity(cacheIdentityRef, queryClient, sessionUser.userId)
-      Storage.setCurrentUser(sessionUser)
+      // setUserRoleStatuses persists the user itself (utils.ts).
       setUserRoleStatuses(sessionUser, Storage)
       // Recorded in state → clean re-render off the refreshed profile (the
       // localStorage write above is invisible to React without it).
@@ -280,7 +280,13 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
   const authEquivalent = sessionUser !== undefined && sessionUser.userId !== 0
     && authProfileEquivalent(sessionUser, Storage.getCurrentUser())
   const unclassifiedIdentityChange = sessionInfo !== snapshot.classifiedProbe && !authEquivalent
-  const reconciling = isLoggedIn && (snapshot.bootstrapRunning || unclassifiedIdentityChange)
+  // An in-flight first probe (sessionInfo undefined) reconciles too: rendering
+  // the signed-out chrome to a signed-in user invites a click that starts a
+  // sign-in flow (Home's library cards) or bounces a deep link. The cost is
+  // one probe round-trip behind the spinner on a BFF hard load; the legacy
+  // probe answers synchronously.
+  const reconciling = sessionInfo === undefined
+    || (isLoggedIn && (snapshot.bootstrapRunning || unclassifiedIdentityChange))
 
   return { sessionInfo, isLoggedIn, reconciling }
 }

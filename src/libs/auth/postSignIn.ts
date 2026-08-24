@@ -117,14 +117,18 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
       navigate('/tos_acceptance')
     }
     else {
-      navigate(`/tos_acceptance?redirectTo=${redirectPath}`)
+      // Encoded, or a destination with its own query string ('?filter=a&b=c')
+      // splits at the first '&' and its tail becomes sibling params of the
+      // ToS page. The readers decode via URLSearchParams.
+      navigate(`/tos_acceptance?redirectTo=${encodeURIComponent(redirectPath)}`)
     }
   }
 
   const registerAndRedirectNewUser = async (): Promise<CompleteSignInOutcome> => {
     const registeredUser: DuosUser = await User.registerUser()
     if (cancelled()) return 'cancelled'
-    const redirectParam = redirectTo ? `?redirectTo=${redirectTo}` : ''
+    // Encoded for the same reason as checkToSAndRedirect above.
+    const redirectParam = redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''
     setUserRoleStatuses(registeredUser, Storage)
     // New identity — same cache reset as the normal sign-in path below. The
     // cached /auth/me answer predates the registration (authenticated, no
@@ -182,7 +186,8 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
       return joined.userId === base.userId ? joined : base
     }
     let effectiveUser = resolveEffectiveUser(duosUser)
-    Storage.setCurrentUser(effectiveUser)
+    // setUserRoleStatuses persists the user itself (utils.ts) — no separate
+    // Storage.setCurrentUser call.
     setUserRoleStatuses(effectiveUser, Storage)
     // Drop any query results cached before sign-in: cached library queries
     // (data, tab counts, filter metadata) were built with the anonymous /
@@ -203,7 +208,6 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
       const resampled = resolveEffectiveUser(effectiveUser)
       if (resampled !== effectiveUser) {
         effectiveUser = resampled
-        Storage.setCurrentUser(effectiveUser)
         setUserRoleStatuses(effectiveUser, Storage)
       }
     }

@@ -97,6 +97,9 @@ describe('Main App Functions', () => {
   })
 
   it('should render main layout components on the home page', async () => {
+    // A resolved signed-out probe: while the probe is in flight the app
+    // deliberately shows only the reconciliation spinner (no layout chrome).
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: false })
     render(
       <MemoryRouter initialEntries={['/']}>
         <App />

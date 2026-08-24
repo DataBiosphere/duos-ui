@@ -1,7 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { requireEnv } from './oidcClient.js'
-import { RefreshFailedError, refreshAccessToken } from './refresh.js'
-import { REFRESH_WINDOW_SECONDS } from '../proxy/upstreamProxy.js'
+import { REFRESH_WINDOW_SECONDS, RefreshFailedError, refreshAccessToken } from './refresh.js'
 
 const UPSTREAM_TIMEOUT_MS = 5000
 
@@ -68,19 +67,33 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
   }
 
   if (res.status === 401 || res.status === 404) {
-    // Authenticated but (almost certainly) not yet registered. The DUOS API
-    // conflates "bad token" with "no DUOS profile for this email": its auth
-    // filter (DuosUserAuthenticator) turns the user lookup's NotFoundException
-    // into an empty principal, which Dropwizard reports as 401 — the same
-    // status a rejected token gets. Treating that 401 as a dead session
-    // destroyed every brand-new user's session on their first probe and made
-    // registration unreachable.
-    //
-    // Reporting the session honestly here is safe: the access token was
-    // refreshed just above when anywhere near expiry, so a 401 from a fresh
-    // token means "no profile", and in the rare revoked-token case the
-    // client's registration attempt fails too, which signs the session out.
-    // (404 kept for symmetry should the upstream ever disambiguate.)
+    // The DUOS API conflates "bad token" with "no DUOS profile for this
+    // email": its auth filter (DuosUserAuthenticator) turns the user lookup's
+    // NotFoundException into an empty principal, which Dropwizard reports as
+    // 401 — the same status a rejected token gets. `profileSeen` is the
+    // disambiguator this endpoint controls:
+    if (request.session.profileSeen) {
+      // This session has served a profile before, so "no profile" cannot be
+      // the explanation. The upstream is rejecting the token itself — revoked
+      // mid-lifetime (before refresh-before-forward would touch it) or the
+      // account was disabled. The terminal 401 is the honest answer; leaving
+      // the session alive would send the client into re-registering an
+      // existing user.
+      try {
+        await request.session.destroy()
+      }
+      catch (err: unknown) {
+        request.log.error({ err }, '[auth] upstream rejected a profile-seen session but it could not be destroyed — returning 401 anyway')
+      }
+      reply.clearCookie('sessionId').status(401).send({ authenticated: false })
+      return
+    }
+    // Never seen a profile: authenticated but not yet registered. Treating
+    // this 401 as a dead session destroyed every brand-new user's session on
+    // their first probe and made registration unreachable. In the rare case
+    // of a token revoked before first contact, the client's registration
+    // attempt fails too, which signs the session out. (404 kept deliberately:
+    // DT-3997 restores the upstream's 404 for unregistered users.)
     reply.send({ authenticated: true, idp: request.session.idp })
     return
   }
@@ -100,6 +113,15 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
   catch {
     reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
     return
+  }
+
+  if (!request.session.profileSeen) {
+    request.session.profileSeen = true
+    // Saved explicitly before the reply, once per session (the flag never
+    // flips back): with rolling off, the onSend hook only skips its async
+    // save when the session is unmodified — see index.ts on the
+    // ERR_HTTP_HEADERS_SENT hazard a post-reply async save creates.
+    await request.session.save()
   }
 
   reply.send({

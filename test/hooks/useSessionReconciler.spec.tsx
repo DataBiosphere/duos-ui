@@ -361,6 +361,18 @@ describe('useSessionReconciler', () => {
     expect(runOptions.isCancelled?.()).toBe(true)
   })
 
+  it('reconciles while the first probe is in flight — no anonymous chrome for a signed-in user', () => {
+    // On a hard load the probe has not answered yet. Rendering the signed-out
+    // header and routes in that window invites a click that starts a sign-in
+    // flow, and bounces deep links.
+    vi.mocked(useSessionInfo).mockReturnValue(undefined)
+
+    const { result } = renderReconciler()
+
+    expect(result.current.reconciling).toBe(true)
+    expect(vi.mocked(completeSignIn)).not.toHaveBeenCalled()
+  })
+
   it('does nothing while signed out', async () => {
     vi.mocked(useSessionInfo).mockReturnValue({ authenticated: false })
 

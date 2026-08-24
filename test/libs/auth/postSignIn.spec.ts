@@ -145,7 +145,19 @@ describe('completeSignIn', () => {
 
       await run('/datalibrary')
 
-      expect(navigate).toHaveBeenCalledWith('/tos_acceptance?redirectTo=/datalibrary')
+      expect(navigate).toHaveBeenCalledWith('/tos_acceptance?redirectTo=%2Fdatalibrary')
+    })
+
+    it('encodes a destination that carries its own query string', async () => {
+      // Unencoded, '/datalibrary?filter=a&b=c' splits at the '&' and the tail
+      // becomes sibling params of the ToS page — accepting the ToS then drops
+      // the user on the wrong page. URLSearchParams on the reading side decodes.
+      vi.mocked(User.getMe).mockResolvedValue(duosUser as never)
+
+      await run('/datalibrary?filter=a&b=c')
+
+      const url = vi.mocked(navigate).mock.calls[0][0] as string
+      expect(new URLSearchParams(url.split('?')[1]).get('redirectTo')).toBe('/datalibrary?filter=a&b=c')
     })
 
     it('reports missing roles to the error reporter', async () => {
@@ -190,7 +202,7 @@ describe('completeSignIn', () => {
 
       await run('/datalibrary')
 
-      expect(navigate).toHaveBeenCalledWith('/tos_acceptance?redirectTo=/datalibrary')
+      expect(navigate).toHaveBeenCalledWith('/tos_acceptance?redirectTo=%2Fdatalibrary')
     })
 
     it('treats a 409 from registration as an already-registered sign-in, re-fetching the user', async () => {
