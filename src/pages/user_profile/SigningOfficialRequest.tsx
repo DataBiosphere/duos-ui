@@ -5,6 +5,7 @@ import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
 import { DuosUser, ResponseError } from 'src/types/model'
 import { getExternalProfileLinks } from './externalProfileUtils'
+import './SigningOfficialRequest.css'
 
 interface SigningOfficialRequestProps {
   readonly user: DuosUser

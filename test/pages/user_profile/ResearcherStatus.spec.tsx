@@ -97,6 +97,13 @@ describe('ResearcherStatus', () => {
     })
   })
 
+  it('labels the status field "Requestor Status"', async () => {
+    render(<ResearcherStatus user={baseUser} />)
+    await waitFor(() => {
+      expect(screen.getByText('Requestor Status')).toBeInTheDocument()
+    })
+  })
+
   it('shows "Inactive" status when user has no libraryCard', async () => {
     render(<ResearcherStatus user={baseUser} />)
     await waitFor(() => {

@@ -4,7 +4,7 @@ import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
 import { DuosUser, InstitutionInterface, SigningOfficialUserWithData } from 'src/types/model'
 import SigningOfficialRequest from './SigningOfficialRequest'
-import './AffiliationAndRoles.css'
+import './UserProfile.css'
 
 interface AffiliationAndRoleProps {
   readonly user: DuosUser
@@ -37,30 +37,11 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
     init()
   }, [user])
 
-  const soTableHeaderStyle: React.CSSProperties = {
-    fontFamily: 'Montserrat',
-    fontSize: '14px',
-    fontWeight: 600,
-    color: '#000',
-    padding: '8px 24px 8px 0',
-    textAlign: 'left',
-    borderBottom: '2px solid #ddd',
-    whiteSpace: 'nowrap',
-  }
-
-  const soTableCellStyle: React.CSSProperties = {
-    fontFamily: 'Montserrat',
-    fontSize: '14px',
-    padding: '10px 24px 10px 0',
-    borderBottom: '1px solid #eee',
-    verticalAlign: 'top',
-  }
-
   return (
     <div className="affiliation-and-roles">
-      <h1>Affiliation & Role</h1>
+      <h1 className="user-profile-section-heading">Affiliation & Role</h1>
       <div>
-        <p className="affiliation-and-roles-subheading">My Institution</p>
+        <p className="user-profile-subheading">My Institution</p>
         {institution
           ? <div data-cy="institutional-affiliation">{institution.name}</div>
           : (
@@ -71,11 +52,10 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
                 {' '}
               </div>
             )}
-        <p className="affiliation-and-roles-subheading">My Role(s)</p>
+        <p className="user-profile-subheading">My Role(s)</p>
         <p data-cy="user-roles">{roles}</p>
         <SigningOfficialRequest user={user} />
-        <p className="affiliation-and-roles-subheading">My Institution&apos;s Signing Official(s)</p>
-        <div style={{ marginTop: '10px' }} />
+        <p className="user-profile-subheading">My Institution&apos;s Signing Official(s)</p>
         {signingOfficialUsers.length === 0
           ? (
               <p>
@@ -87,22 +67,24 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
               </p>
             )
           : (
-              <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-                <thead>
-                  <tr>
-                    <th style={soTableHeaderStyle}>Name</th>
-                    <th style={soTableHeaderStyle}>Email</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {signingOfficialUsers.map(so => (
-                    <tr key={so.userId}>
-                      <td style={soTableCellStyle}>{so.displayName}</td>
-                      <td style={soTableCellStyle}>{so.email}</td>
+              <div className="user-profile-table-wrapper">
+                <table className="user-profile-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {signingOfficialUsers.map(so => (
+                      <tr key={so.userId}>
+                        <td>{so.displayName}</td>
+                        <td>{so.email}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
       </div>
     </div>

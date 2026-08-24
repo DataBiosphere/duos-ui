@@ -65,6 +65,23 @@ describe('AcceptedAcknowledgements', () => {
     })
   })
 
+  it('renders the Document Name and Attestation Date column headers', async () => {
+    vi.mocked(User.getAcknowledgements).mockResolvedValue(mockAcknowledgements)
+    render(<AcceptedAcknowledgements />)
+    await waitFor(() => {
+      expect(screen.getByRole('columnheader', { name: 'Document Name' })).toBeInTheDocument()
+      expect(screen.getByRole('columnheader', { name: 'Attestation Date' })).toBeInTheDocument()
+    })
+  })
+
+  it('renders an em dash for the Terms of Service entry, which has no attestation date', async () => {
+    vi.mocked(User.getAcknowledgements).mockResolvedValue(mockAcknowledgements)
+    render(<AcceptedAcknowledgements />)
+    await waitFor(() => {
+      expect(screen.getByText('—')).toBeInTheDocument()
+    })
+  })
+
   it('formats and displays the attestedTime for each acknowledgement', async () => {
     vi.mocked(User.getAcknowledgements).mockResolvedValue(mockAcknowledgements)
     render(<AcceptedAcknowledgements />)

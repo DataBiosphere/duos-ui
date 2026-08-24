@@ -4,19 +4,6 @@
   padding: 50px clamp(24px, 10vw, 140px) 70px;
 }
 
-.user-profile-intro {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-  margin-top: 32px;
-}
-
-.user-profile-intro img {
-  width: 166px;
-  height: 48px;
-  flex: 0 0 auto;
-}
-
 .user-profile-section {
   margin-top: 48px;
 }
@@ -29,23 +16,61 @@
 }
 
 .user-profile-section-heading {
-  margin: 0 0 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #ddd;
+  margin: 0 0 24px;
   color: #01549f;
   font-size: 20px;
   font-weight: 600;
 }
 
+.user-profile-subheading {
+  margin: 24px 0 12px;
+  color: #000;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.user-profile-table-wrapper {
+  overflow-x: auto;
+}
+
+.user-profile-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-profile-table th {
+  padding: 8px 24px 8px 0;
+  border-bottom: 2px solid #ddd;
+  color: #000;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.user-profile-table td {
+  padding: 12px 24px 12px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  vertical-align: top;
+}
+
 .user-profile-name-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 400px) auto;
   align-items: center;
+  /* The auto track would otherwise absorb free space and stretch the Save button. */
+  justify-content: start;
   gap: 20px;
 }
 
 .user-profile-field {
   margin-top: 16px;
+}
+
+.user-profile-input {
+  width: 400px;
+  max-width: 100%;
 }
 
 .profile-save-button {
@@ -59,14 +84,12 @@
     padding-inline: 20px;
   }
 
-  .user-profile-intro {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 20px;
+  .user-profile-card {
+    padding: 20px;
   }
 
   .user-profile-name-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 400px);
     gap: 12px;
   }
 }

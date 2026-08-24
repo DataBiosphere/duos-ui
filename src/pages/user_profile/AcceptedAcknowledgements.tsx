@@ -2,35 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
 import { AcknowledgementMap } from 'src/types/model'
+import './UserProfile.css'
 
 interface AcknowledgmentItem {
   name: string
   attestedTime: string
 }
-
-const Acknowledgment = ({ value }: { value: AcknowledgmentItem }) => (
-  <div style={{
-    display: 'flex',
-    flexDirection: 'row',
-    fontFamily: 'Montserrat',
-    fontSize: '16px',
-    fontStyle: 'normal',
-    fontWeight: '400',
-    width: '675px',
-  }}
-  >
-    <p>{value.name}</p>
-    <div style={{ flex: '1' }} />
-    {value.attestedTime === ''
-      ? ''
-      : (
-          <p>
-            attested on:
-            {value.attestedTime}
-          </p>
-        ) }
-  </div>
-)
 
 export default function AcceptedAcknowledgements() {
   const [acceptedAcknowledgements, setAcceptedAcknowledgements] = useState<AcknowledgmentItem[]>([])
@@ -67,30 +44,30 @@ export default function AcceptedAcknowledgements() {
   }, [])
 
   return (
-    <div>
-      <h1
-        style={{
-          color: '#01549F',
-          fontSize: '20px',
-          fontWeight: '600',
-          borderBottom: '1px solid #ddd',
-          paddingBottom: '8px',
-        }}
-      >
-        Accepted Terms & Policies
-      </h1>
-      <div style={{ marginTop: '20px' }} />
-      {
-        (acceptedAcknowledgements.length === 0)
-          ? (
-              <div>
-                <p>No Accepted Terms & Policies Found</p>
-              </div>
-            )
-          : acceptedAcknowledgements.map(value => (
-              <Acknowledgment key={`${value.name}-${value.attestedTime}`} value={value} />
-            ))
-      }
+    <div className="accepted-acknowledgements">
+      <h1 className="user-profile-section-heading">Accepted Terms & Policies</h1>
+      {acceptedAcknowledgements.length === 0
+        ? <p>No Accepted Terms & Policies Found</p>
+        : (
+            <div className="user-profile-table-wrapper">
+              <table className="user-profile-table">
+                <thead>
+                  <tr>
+                    <th>Document Name</th>
+                    <th>Attestation Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {acceptedAcknowledgements.map(acknowledgement => (
+                    <tr key={`${acknowledgement.name}-${acknowledgement.attestedTime}`}>
+                      <td>{acknowledgement.name}</td>
+                      <td>{acknowledgement.attestedTime || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
     </div>
   )
 }
