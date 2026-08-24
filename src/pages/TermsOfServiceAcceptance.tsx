@@ -29,6 +29,9 @@ export default function TermsOfServiceAcceptance() {
   }, [navigate])
 
   const signOut = async () => {
+    // The navigation covers the legacy flow, where Auth.signOut only clears
+    // local state; in BFF mode Auth.signOut follows up with a full-page
+    // reload to '/'.
     await Auth.signOut()
     navigate('/')
   }

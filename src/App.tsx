@@ -12,6 +12,7 @@ import { useNavigate, useLocation } from 'react-router'
 import { Storage } from 'src/libs/storage'
 import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
+import { useUserIsLogged } from 'src/hooks/useSession'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
 
@@ -27,11 +28,12 @@ const queryClient = new QueryClient({
 })
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [env, setEnv] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const [isLoading, setIsLoading] = useState(false)
+  // Auth state comes from the BFF session probe (GET /auth/me), not localStorage.
+  const isLoggedIn = useUserIsLogged() ?? false
 
   useEffect(() => {
     const setEnvironment = async () => {
@@ -40,15 +42,9 @@ function App() {
       Storage.setEnv(environment)
     }
     setEnvironment()
-  })
-
-  useEffect(() => {
-    const setUserIsLogged = () => {
-      const isLogged = Storage.userIsLogged()
-      setIsLoggedIn(isLogged)
-    }
-    setUserIsLogged()
-  })
+    // The environment never changes within a page load — look it up once on
+    // mount instead of on every render.
+  }, [])
 
   /**
      * Check for RAS Authentication URL params. If we have a code and state, we will call ECM APIs to get redirect
