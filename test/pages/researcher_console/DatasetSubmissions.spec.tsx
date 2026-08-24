@@ -162,6 +162,44 @@ describe('DatasetSubmissions', () => {
     expect(navigateMock).toHaveBeenCalledWith('/data_submission_form')
   })
 
+  // ── UPLOAD TEMPLATE button ─────────────────────────────────────────────────
+
+  it('renders the UPLOAD TEMPLATE button', () => {
+    renderComponent()
+    expect(screen.getByRole('button', { name: /UPLOAD TEMPLATE/i })).toBeInTheDocument()
+  })
+
+  // Deliberately wider than ADD DATASET's data-submitter-only rule: it matches the route's own
+  // RoleBAC guard, since chairpersons and admins register studies too.
+  it.each([
+    ['data submitter', { isDataSubmitter: true }],
+    ['chairperson', { isChairPerson: true }],
+    ['admin', { isAdmin: true }],
+  ])('UPLOAD TEMPLATE button is enabled for a %s', (_role, roleFlags) => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ ...baseUser, ...roleFlags })
+    renderComponent()
+    expect(screen.getByRole('button', { name: /UPLOAD TEMPLATE/i })).not.toBeDisabled()
+  })
+
+  it('UPLOAD TEMPLATE button is disabled for a user with none of those roles', () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ ...baseUser, isResearcher: true })
+    renderComponent()
+    expect(screen.getByRole('button', { name: /UPLOAD TEMPLATE/i })).toBeDisabled()
+  })
+
+  it('clicking UPLOAD TEMPLATE navigates to /data_submission_template', () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ ...baseUser, isDataSubmitter: true })
+    renderComponent()
+    fireEvent.click(screen.getByRole('button', { name: /UPLOAD TEMPLATE/i }))
+    expect(navigateMock).toHaveBeenCalledWith('/data_submission_template')
+  })
+
+  it('leaves the manual ADD DATASET path untouched for a chairperson', () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ ...baseUser, isChairPerson: true })
+    renderComponent()
+    expect(screen.getByRole('button', { name: /ADD DATASET/i })).toBeDisabled()
+  })
+
   // ── Delete dialog ──────────────────────────────────────────────────────────
 
   it('delete dialog is not shown on initial render', () => {

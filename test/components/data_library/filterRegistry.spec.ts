@@ -208,6 +208,25 @@ describe('filterRegistry', () => {
       expect(beforeOnly).toContainEqual({ key: 'ipFiledDate', sectionLabel: 'Filed Date', valueLabel: 'Until 2019-12-31' })
     })
 
+    it('does not surface any inverted date range (builds no clause, so no chip)', () => {
+      const inverted: FilterState = {
+        ...EMPTY_FILTERS,
+        fundingDate: { startDate: '2024-01-01', endDate: '2023-01-01' },
+        biospecimenCollectionDate: { after: '2024-01-01', before: '2020-01-01' },
+        ipFiledDate: { after: '2024-01-01', before: '2020-01-01' },
+      }
+      const chips = getExternalActiveFilters(AssetType.MODELS, inverted, availableFilters)
+      const chipKeys = chips.map(chip => chip.key)
+      expect(chipKeys).not.toContain('fundingDate')
+      expect(chipKeys).not.toContain('biospecimenCollectionDate')
+      expect(chipKeys).not.toContain('ipFiledDate')
+
+      const clauses = JSON.stringify(buildActiveFilterClauses(inverted))
+      expect(clauses).not.toContain('funding.startDate')
+      expect(clauses).not.toContain('dateOfCollection')
+      expect(clauses).not.toContain('filingDate')
+    })
+
     it('omits date filters that hold no active value', () => {
       const chips = getExternalActiveFilters(AssetType.MODELS, EMPTY_FILTERS, availableFilters)
       const dateKeys = ['fundingDate', 'biospecimenCollectionDate', 'ipFiledDate', 'clinicalTrialDates']

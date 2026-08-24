@@ -5,11 +5,15 @@ import { render } from '@testing-library/react'
 import { BrowserRouter } from 'react-router'
 import { Storage } from 'src/libs/storage'
 import { Support } from 'src/libs/ajax/Support'
+import { useUserIsLogged } from 'src/hooks/useSession'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 import { DuosUser } from 'src/types/model'
 
 vi.mock('src/libs/storage')
 vi.mock('src/libs/ajax/Support')
+vi.mock('src/hooks/useSession', () => ({
+  useUserIsLogged: vi.fn(),
+}))
 // Avoid importOriginal — only mock what SupportRequestModal uses from utils
 vi.mock('src/libs/utils', () => ({
   Notifications: { showError: vi.fn(), showSuccess: vi.fn() },
@@ -34,10 +38,12 @@ describe('SupportRequestModal - RedirectLink cursor styling (browser)', () => {
   })
 
   it.each([
+    // getCurrentUser never returns undefined — signed-out storage holds the
+    // default (empty) user, and the prefill falls back to empty strings.
     { label: 'logged in', isLogged: true, currentUser: mockUser as DuosUser },
-    { label: 'not logged in', isLogged: false, currentUser: undefined as unknown as DuosUser },
+    { label: 'not logged in', isLogged: false, currentUser: { displayName: '', email: '' } as DuosUser },
   ])('DUOS Data Library link has cursor:pointer when $label', ({ isLogged, currentUser }) => {
-    vi.mocked(Storage.userIsLogged).mockReturnValue(isLogged)
+    vi.mocked(useUserIsLogged).mockReturnValue(isLogged)
     vi.mocked(Storage.getCurrentUser).mockReturnValue(currentUser)
     vi.mocked(Support.createSupportRequest).mockResolvedValue(undefined)
     mountModal()

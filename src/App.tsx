@@ -12,6 +12,7 @@ import { useNavigate, useLocation } from 'react-router'
 import { Storage } from 'src/libs/storage'
 import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
+import { useSessionReconciler } from 'src/hooks/useSessionReconciler'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
 
@@ -27,11 +28,15 @@ const queryClient = new QueryClient({
 })
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [env, setEnv] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const [isLoading, setIsLoading] = useState(false)
+  // Auth state comes from the BFF session probe (GET /auth/me), not
+  // localStorage. The reconciler classifies every fresh probe (hydrate the
+  // stored profile, or run the full post-sign-in bootstrap) and reports when
+  // the routes must stay hidden — see useSessionReconciler for the rules.
+  const { isLoggedIn, reconciling } = useSessionReconciler(queryClient)
 
   useEffect(() => {
     const setEnvironment = async () => {
@@ -40,15 +45,9 @@ function App() {
       Storage.setEnv(environment)
     }
     setEnvironment()
-  })
-
-  useEffect(() => {
-    const setUserIsLogged = () => {
-      const isLogged = Storage.userIsLogged()
-      setIsLoggedIn(isLogged)
-    }
-    setUserIsLogged()
-  })
+    // The environment never changes within a page load — look it up once on
+    // mount instead of on every render.
+  }, [])
 
   /**
      * Check for RAS Authentication URL params. If we have a code and state, we will call ECM APIs to get redirect
@@ -101,9 +100,12 @@ function App() {
           <div className="body">
             <div className="wrap">
               <div className="main">
-                <DuosHeader />
-                {isLoading && <div style={loadingSyle}><Spinner /></div>}
-                {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+                {/* The header derives role tabs and the profile menu from
+                    Storage.getCurrentUser() — it is identity-bearing UI and
+                    must hide during reconciliation like the routes do. */}
+                {!reconciling && <DuosHeader />}
+                {(isLoading || reconciling) && <div style={loadingSyle}><Spinner /></div>}
+                {!(isLoading || reconciling) && <AppRoutes isLogged={isLoggedIn} env={env} />}
               </div>
             </div>
             <DuosFooter />

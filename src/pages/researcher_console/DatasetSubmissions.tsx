@@ -3,6 +3,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { Box } from '@mui/material'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
+import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined'
 import { Notifications } from 'src/libs/utils'
 import SearchBar from 'src/components/SearchBar'
 import { DataSet } from 'src/libs/ajax/DataSet'
@@ -74,6 +75,10 @@ export default function DatasetSubmissions() {
     () => buildSubmissionOwnershipQuery(user?.userId, user?.email),
     [user?.userId, user?.email],
   )
+
+  // Template upload matches the route's role guard rather than ADD DATASET's narrower
+  // data-submitter-only rule: chairpersons and admins register studies too.
+  const canUploadTemplate = Boolean(user?.isDataSubmitter || user?.isChairPerson || user?.isAdmin)
 
   const libraryConfig: LibraryVersionNew = useMemo(() => ({
     key: `submissions-${user?.userId ?? 'anonymous'}`,
@@ -148,14 +153,24 @@ export default function DatasetSubmissions() {
           handleSearchChange={handleSearchChange}
           initialValue={urlState.query ?? ''}
         />
-        <AddObjectButton
-          id="add-dataset-btn"
-          label="ADD DATASET"
-          onClick={() => navigate('/data_submission_form')}
-          icon={<AddCircleOutlineOutlinedIcon />}
-          className="button button-blue"
-          disabled={!user?.isDataSubmitter}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <AddObjectButton
+            id="upload-template-btn"
+            label="UPLOAD TEMPLATE"
+            onClick={() => navigate('/data_submission_template')}
+            icon={<UploadFileOutlinedIcon />}
+            className="button button-white"
+            disabled={!canUploadTemplate}
+          />
+          <AddObjectButton
+            id="add-dataset-btn"
+            label="ADD DATASET"
+            onClick={() => navigate('/data_submission_form')}
+            icon={<AddCircleOutlineOutlinedIcon />}
+            className="button button-blue"
+            disabled={!user?.isDataSubmitter}
+          />
+        </Box>
       </Box>
     </>
   )

@@ -4,6 +4,7 @@ import { BiospecimenAsset, FilterState, PaginationState, SortState } from 'src/t
 import { makeBiospecimenColumns } from 'src/components/data_library/columns/biospecimenColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 import { BioSpecimenPreservationMethod, BioSpecimenType, PostMortemIntervalUnit, Sex } from 'src/types/model'
+import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
 const includesIgnoreCase = (source: string | undefined, values: string[]) => {
   if (values.length === 0) {
@@ -12,6 +13,38 @@ const includesIgnoreCase = (source: string | undefined, values: string[]) => {
 
   const normalizedSource = source?.toLowerCase() || ''
   return values.some(value => normalizedSource.includes(value.toLowerCase()))
+}
+
+const matchesCollectionDate = (biospecimen: BiospecimenAsset, filters: FilterState) => {
+  // Inverted bounds build no ES clause, so they must not narrow rows here
+  // either — otherwise the grid empties while the panel flags the range.
+  if (!isFilterActive('biospecimenCollectionDate', filters)) {
+    return true
+  }
+
+  const { after, before } = filters.biospecimenCollectionDate
+  const collectionDate = biospecimen.dateOfCollection || ''
+  if (after && collectionDate < after) {
+    return false
+  }
+  return !(before && collectionDate > before)
+}
+
+const matchesPostMortemInterval = (biospecimen: BiospecimenAsset, filters: FilterState) => {
+  const interval = biospecimen.postMortemInterval
+  if (
+    filters.biospecimenPostMortemIntervalUnit.length > 0
+    && !filters.biospecimenPostMortemIntervalUnit.includes(interval?.unit || '')
+  ) {
+    return false
+  }
+
+  const { min, max } = filters.biospecimenPostMortemInterval
+  const value = interval?.value
+  if (min !== undefined && (value === undefined || value < min)) {
+    return false
+  }
+  return !(max !== undefined && (value === undefined || value > max))
 }
 
 const matchesBiospecimenFilters = (biospecimen: BiospecimenAsset, filters?: FilterState) => {
@@ -27,35 +60,7 @@ const matchesBiospecimenFilters = (biospecimen: BiospecimenAsset, filters?: Filt
     return false
   }
 
-  const collectionDate = biospecimen.dateOfCollection || ''
-  if (filters.biospecimenCollectionDate.after && collectionDate < filters.biospecimenCollectionDate.after) {
-    return false
-  }
-  if (filters.biospecimenCollectionDate.before && collectionDate > filters.biospecimenCollectionDate.before) {
-    return false
-  }
-
-  if (
-    filters.biospecimenPostMortemIntervalUnit.length > 0
-    && !filters.biospecimenPostMortemIntervalUnit.includes(biospecimen.postMortemInterval?.unit || '')
-  ) {
-    return false
-  }
-
-  const postMortemValue = biospecimen.postMortemInterval?.value
-  const belowMinPostMortemInterval = (
-    filters.biospecimenPostMortemInterval.min !== undefined
-    && (postMortemValue === undefined || postMortemValue < filters.biospecimenPostMortemInterval.min)
-  )
-  if (belowMinPostMortemInterval) {
-    return false
-  }
-
-  const aboveMaxPostMortemInterval = (
-    filters.biospecimenPostMortemInterval.max !== undefined
-    && (postMortemValue === undefined || postMortemValue > filters.biospecimenPostMortemInterval.max)
-  )
-  return !aboveMaxPostMortemInterval
+  return matchesCollectionDate(biospecimen, filters) && matchesPostMortemInterval(biospecimen, filters)
 }
 
 export const biospecimenAsset: AssetDefinition = {
