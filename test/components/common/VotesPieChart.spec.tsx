@@ -1,24 +1,23 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import VotesPieChart from 'src/components/common/VotesPieChart'
+import { Vote } from 'src/types/model'
 
-vi.mock('react-google-charts', () => ({
-  Chart: () => <div data-testid="pie-chart" />,
-}))
+const makeVote = (voteId: number, vote?: boolean): Vote => ({
+  voteId,
+  userId: voteId,
+  createDate: '',
+  electionId: 1,
+  displayName: `User ${voteId}`,
+  type: 'DAC',
+  vote,
+})
 
-const testVotes = [
-  { voteId: 1, userId: 1, createDate: '', electionId: 1, displayName: 'A', type: 'DAC', vote: true },
-  { voteId: 2, userId: 2, createDate: '', electionId: 1, displayName: 'B', type: 'DAC', vote: false },
-  { voteId: 3, userId: 3, createDate: '', electionId: 1, displayName: 'C', type: 'DAC', vote: undefined },
-]
+const testVotes = [makeVote(1, true), makeVote(2, false), makeVote(3, undefined)]
 
 describe('VotesPieChart', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('renders the no-data div when votes is empty', () => {
     render(<VotesPieChart keyString="test" />)
 
@@ -33,11 +32,47 @@ describe('VotesPieChart', () => {
     expect(document.querySelector('.test-pie-chart-no-data')).toBeInTheDocument()
   })
 
-  it('renders the chart when votes are provided', () => {
+  it('renders an inline SVG chart with one slice per category', () => {
+    const { container } = render(<VotesPieChart keyString="test" votes={testVotes} />)
+
+    const svg = screen.getByRole('img', { name: 'Vote summary: 1 Yes, 1 No, 1 Not Yet Voted' })
+    expect(svg).toBeInTheDocument()
+    expect(container.querySelectorAll('path')).toHaveLength(3)
+    expect(document.querySelector('.test-pie-chart-no-data')).not.toBeInTheDocument()
+  })
+
+  it('shows every category with its count in the legend', () => {
     render(<VotesPieChart keyString="test" votes={testVotes} />)
 
-    expect(screen.getByTestId('pie-chart')).toBeInTheDocument()
-    expect(document.querySelector('.test-pie-chart-no-data')).not.toBeInTheDocument()
+    expect(screen.getByText('Yes (1)')).toBeInTheDocument()
+    expect(screen.getByText('No (1)')).toBeInTheDocument()
+    expect(screen.getByText('Not Yet Voted (1)')).toBeInTheDocument()
+  })
+
+  it('omits the slice for a zero-count category but keeps it in the legend', () => {
+    const votes = [makeVote(1, true), makeVote(2, true), makeVote(3, false)]
+    const { container } = render(<VotesPieChart keyString="test" votes={votes} />)
+
+    expect(container.querySelectorAll('path')).toHaveLength(2)
+    expect(screen.getByText('Not Yet Voted (0)')).toBeInTheDocument()
+  })
+
+  it('labels each slice with its count and percentage', () => {
+    const votes = [makeVote(1, true), makeVote(2, true), makeVote(3, false), makeVote(4, undefined)]
+    const { container } = render(<VotesPieChart keyString="test" votes={votes} />)
+
+    const titles = [...container.querySelectorAll('path > title')].map(t => t.textContent)
+    expect(titles).toEqual(['Yes: 2 (50%)', 'No: 1 (25%)', 'Not Yet Voted: 1 (25%)'])
+  })
+
+  it('renders a full ring when only one category has votes', () => {
+    const votes = [makeVote(1, true), makeVote(2, true)]
+    const { container } = render(<VotesPieChart keyString="test" votes={votes} />)
+
+    expect(container.querySelectorAll('path')).toHaveLength(0)
+    const ring = container.querySelector('circle')
+    expect(ring).toBeInTheDocument()
+    expect(ring?.querySelector('title')).toHaveTextContent('Yes: 2 (100%)')
   })
 
   it('applies styleOverride to the chart wrapper', () => {
