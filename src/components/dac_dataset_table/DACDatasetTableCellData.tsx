@@ -3,7 +3,6 @@ import style from 'src/pages/DACDatasets.module.css'
 import { styles } from 'src/components/dac_dataset_table/DACDatasetConstants'
 import { createDataUseDisplay, processDataUseCodes, TooltipPlacement } from 'src/utils/DataUseUtils'
 import { DatasetTerm } from 'src/types/model'
-import { NavigateFunction } from 'react-router'
 
 export interface CellData {
   data: React.ReactNode
@@ -16,8 +15,6 @@ export interface CellData {
 export interface CellDataParams {
   dataset: DatasetTerm
   label?: string
-  consoleType?: string
-  navigate?: NavigateFunction
   divClass?: string
   spanClass?: string
   cellWidth?: string

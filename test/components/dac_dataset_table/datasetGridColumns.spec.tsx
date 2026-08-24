@@ -1,14 +1,14 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import { makeMockParams } from '../data_library/columns/columnTestUtils'
+import { screen } from '@testing-library/react'
+import { makeRenderCellHelper } from '../data_library/columns/columnTestUtils'
 import { makeDACDatasetGridColumns } from 'src/components/dac_dataset_table/datasetGridColumns'
 import { DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants'
 import { DatasetTerm } from 'src/types/model'
 
 vi.mock('src/libs/ajax/DataSet', () => ({
-  DataSet: { getNIHInstitutionalCertification: vi.fn() },
+  DataSet: { getNIHInstitutionalCertification: vi.fn().mockResolvedValue(undefined) },
 }))
 
 vi.mock('src/components/dac_dataset_table/DACDatasetApprovalStatus', () => ({
@@ -45,13 +45,10 @@ const makeRow = (overrides: Partial<DatasetTerm> = {}): DatasetTerm => ({
   ...overrides,
 })
 
-const renderCell = (field: string, value: unknown, row: Partial<DatasetTerm> = {}) => {
-  const col = makeDACDatasetGridColumns().find(c => c.field === field)!
-  return render(col.renderCell!(makeMockParams(value, makeRow(row))) as React.ReactElement)
-}
+const renderCell = makeRenderCellHelper<DatasetTerm>(makeDACDatasetGridColumns, makeRow)
 
 describe('datasetGridColumns — column selection and order', () => {
-  it('returns all columns in DACDatasetTableColumnOptions order by default', () => {
+  it('returns every column, in declaration order, by default', () => {
     const fields = makeDACDatasetGridColumns().map(c => c.field)
     expect(fields).toEqual([
       'datasetIdentifier',
@@ -73,6 +70,11 @@ describe('datasetGridColumns — column selection and order', () => {
     ]).map(c => c.field)
     expect(fields).toEqual(['dacApproval', 'datasetIdentifier'])
   })
+
+  it('drops unrecognized column keys instead of emitting undefined entries', () => {
+    const columns = makeDACDatasetGridColumns([DACDatasetTableColumnOptions.DUOS_ID, 'notAColumn'])
+    expect(columns.map(c => c.field)).toEqual(['datasetIdentifier'])
+  })
 })
 
 describe('datasetGridColumns — valueGetters', () => {
@@ -92,6 +94,11 @@ describe('datasetGridColumns — valueGetters', () => {
   it('dataCustodian joins study.dataCustodianEmail', () => {
     const row = makeRow({ study: { ...makeRow().study, dataCustodianEmail: ['a@test.org', 'b@test.org'] } })
     expect(getValue('dataCustodian', row)).toBe('a@test.org, b@test.org')
+  })
+
+  it('dataUse resolves to the code list so filtering sees text, not the raw object', () => {
+    const row = makeRow({ dataUse: { primary: [{ code: 'HMB', description: 'd1' }, { code: 'GRU', description: 'd2' }] } } as Partial<DatasetTerm>)
+    expect(getValue('dataUse', row)).toBe('HMB, GRU')
   })
 })
 

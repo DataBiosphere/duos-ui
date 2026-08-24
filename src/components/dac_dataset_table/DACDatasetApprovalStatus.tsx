@@ -80,14 +80,13 @@ export default function DACDatasetApprovalStatus({ dataset: initialDataset }: DA
   )
 
   const dacUndecided = (ds: DatasetTerm) => (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <Button
         data-tip={true}
         data-for={`approve-dataset-button-${ds.datasetId}`}
         id={`btn_approveDataset-${ds.datasetId}`}
         onClick={() => { void updateApprovalStatus(true) }}
         className={style['btn-primary-dac-datasets']}
-        style={{ minWidth: '90px' }}
       >
         APPROVE
       </Button>
@@ -103,7 +102,6 @@ export default function DACDatasetApprovalStatus({ dataset: initialDataset }: DA
         id={`btn_rejectDataset-${ds.datasetId}`}
         onClick={() => { void updateApprovalStatus(false) }}
         className={style['btn-primary-dac-datasets']}
-        style={{ minWidth: '70px' }}
       >
         REJECT
       </Button>

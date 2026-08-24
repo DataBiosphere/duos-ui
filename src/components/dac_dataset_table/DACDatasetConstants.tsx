@@ -1,26 +1,8 @@
 export const styles = {
   cellWidths: {
-    duosId: '10%',
-    certificationLink: '10%',
-    phsId: '10%',
-    datasetName: '15%',
-    studyName: '15%',
-    dataSubmitter: '15%',
-    dataCustodian: '15%',
+    // Only the Data Use width survives: it is the default cell width for dataUseCellData, which
+    // the Dataset Search table still renders through SimpleTable.
     dataUse: '10%',
-    status: '10%',
-  },
-  color: {
-    dataUseGroup: '#000000',
-    votes: '#000000',
-    numberOfDatasets: '#000000',
-    datasets: '#000000',
-  },
-  fontSize: {
-    dataUseGroup: '1.4rem',
-    votes: '1.4rem',
-    numberOfDatasets: '1.4rem',
-    datasets: '1.4rem',
   },
 }
 

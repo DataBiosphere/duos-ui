@@ -4,8 +4,15 @@ import { Box, Chip, Tooltip } from '@mui/material'
 import { DatasetTerm } from 'src/types/model'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { processDataUseCodes } from 'src/utils/DataUseUtils'
+import { Notifications } from 'src/libs/utils'
 import DACDatasetApprovalStatus from 'src/components/dac_dataset_table/DACDatasetApprovalStatus'
 import { DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants'
+
+const downloadInstitutionalCertification = (dataset: DatasetTerm) => {
+  DataSet.getNIHInstitutionalCertification(dataset.datasetId).catch(() => {
+    Notifications.showError({ text: `Error downloading the NIH Institutional Certification for ${dataset.datasetIdentifier}` })
+  })
+}
 
 const dacDatasetGridColumns: Record<string, GridColDef<DatasetTerm>> = {
   [DACDatasetTableColumnOptions.DUOS_ID]: {
@@ -52,8 +59,11 @@ const dacDatasetGridColumns: Record<string, GridColDef<DatasetTerm>> = {
     field: 'dataUse',
     headerName: 'Data Use',
     flex: 1,
-    minWidth: 160,
+    // Wide enough for two `DS (disease)` chips, which processDataUseCodes can make long
+    minWidth: 220,
     sortable: false,
+    // Without this the raw dataUse object is the cell value, so filtering matches '[object Object]'
+    valueGetter: (_value, row) => processDataUseCodes(row).codeList.join(', '),
     renderCell: (params) => {
       const { codesAndDescriptions } = processDataUseCodes(params.row)
       if (codesAndDescriptions.length === 0) return null
@@ -61,9 +71,12 @@ const dacDatasetGridColumns: Record<string, GridColDef<DatasetTerm>> = {
       const overflow = codesAndDescriptions.slice(2)
       return (
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center', height: '100%' }}>
-          {visible.map(du => (
-            <Tooltip key={du.code} title={du.description}>
-              <Chip label={du.code} size="small" variant="outlined" />
+          {/* Codes are not unique — primary and secondary can carry the same one — so index the key */}
+          {visible.map((du, index) => (
+            <Tooltip key={`${du.code}-${index}`} title={du.description}>
+              {/* processDataUseCodes expands DS into `DS (disease)`, so cap the chip and let it
+                  ellipsize rather than overflow the cell's hidden overflow */}
+              <Chip label={du.code} size="small" variant="outlined" sx={{ maxWidth: 96 }} />
             </Tooltip>
           ))}
           {overflow.length > 0 && (
@@ -78,16 +91,18 @@ const dacDatasetGridColumns: Record<string, GridColDef<DatasetTerm>> = {
   [DACDatasetTableColumnOptions.CERTIFICATION_LINK]: {
     field: 'hasInstitutionCertification',
     headerName: 'NIH Institutional Certification',
+    // The grid truncates long headers instead of wrapping them, so surface the full text on hover
+    description: 'NIH Institutional Certification',
     flex: 1,
     minWidth: 160,
-    sortable: false,
     renderCell: params => (
       params.row.hasInstitutionCertification
         ? (
             <button
-              onClick={() => { DataSet.getNIHInstitutionalCertification(params.row.datasetId) }}
+              onClick={() => downloadInstitutionalCertification(params.row)}
               className="button button-white"
               style={{ padding: '10px 12px' }}
+              aria-label={`Download the NIH Institutional Certification for ${params.row.datasetIdentifier}`}
             >
               <span className="glyphicon glyphicon-download-alt" />
             </button>
@@ -99,8 +114,12 @@ const dacDatasetGridColumns: Record<string, GridColDef<DatasetTerm>> = {
     field: 'dacApproval',
     headerName: 'Status',
     flex: 1,
+    // The undecided state's compact APPROVE + REJECT measure ~149px (Montserrat 500 at 12px,
+    // 6px padding, 1px borders, 8px gap) and the cell adds 10px of padding a side.
     minWidth: 180,
     sortable: false,
+    // Without this the cell stays in text mode and the button row top-aligns on a 51px line box
+    display: 'flex',
     renderCell: params => <DACDatasetApprovalStatus dataset={params.row} />,
   },
 }
@@ -108,4 +127,5 @@ const dacDatasetGridColumns: Record<string, GridColDef<DatasetTerm>> = {
 export const defaultDACDatasetGridColumnKeys = Object.keys(dacDatasetGridColumns)
 
 export const makeDACDatasetGridColumns = (columnKeys: string[] = defaultDACDatasetGridColumnKeys): GridColDef<DatasetTerm>[] =>
-  columnKeys.map(key => dacDatasetGridColumns[key])
+  // Drop unrecognized keys: an undefined entry crashes the DataGrid
+  columnKeys.map(key => dacDatasetGridColumns[key]).filter(col => col !== undefined)

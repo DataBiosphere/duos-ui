@@ -14,6 +14,20 @@ import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOu
 import { DatasetTerm } from 'src/types/model'
 import { ElasticsearchQuery } from 'src/types/elastic'
 
+// Module-level so the array identity is stable: the table memoizes its grid columns on this prop,
+// and a fresh literal would rebuild them on every keystroke in the search bar.
+const DAC_DATASET_COLUMNS = [
+  DACDatasetTableColumnOptions.DUOS_ID,
+  DACDatasetTableColumnOptions.PHS_ID,
+  DACDatasetTableColumnOptions.DATASET_NAME,
+  DACDatasetTableColumnOptions.STUDY_NAME,
+  DACDatasetTableColumnOptions.DATA_SUBMITTER,
+  DACDatasetTableColumnOptions.DATA_CUSTODIAN,
+  DACDatasetTableColumnOptions.DATA_USE,
+  DACDatasetTableColumnOptions.CERTIFICATION_LINK,
+  DACDatasetTableColumnOptions.STATUS,
+]
+
 export default function DACDatasets() {
   usePageTitle('My DAC\'s Datasets')
   const navigate = useNavigate()
@@ -90,17 +104,7 @@ export default function DACDatasets() {
       </div>
       <DACDatasetsTable
         datasets={filteredList}
-        columns={[
-          DACDatasetTableColumnOptions.DUOS_ID,
-          DACDatasetTableColumnOptions.PHS_ID,
-          DACDatasetTableColumnOptions.DATASET_NAME,
-          DACDatasetTableColumnOptions.STUDY_NAME,
-          DACDatasetTableColumnOptions.DATA_SUBMITTER,
-          DACDatasetTableColumnOptions.DATA_CUSTODIAN,
-          DACDatasetTableColumnOptions.DATA_USE,
-          DACDatasetTableColumnOptions.CERTIFICATION_LINK,
-          DACDatasetTableColumnOptions.STATUS,
-        ]}
+        columns={DAC_DATASET_COLUMNS}
         isLoading={isLoading}
       />
     </div>

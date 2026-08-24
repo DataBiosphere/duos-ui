@@ -24,7 +24,7 @@ vi.mock('src/libs/storage', () => ({
 }))
 
 vi.mock('src/libs/ajax/DataSet', () => ({
-  DataSet: { getNIHInstitutionalCertification: vi.fn() },
+  DataSet: { getNIHInstitutionalCertification: vi.fn().mockResolvedValue(undefined) },
 }))
 
 vi.mock('src/components/dac_dataset_table/DACDatasetApprovalStatus', () => ({

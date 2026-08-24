@@ -1,18 +1,15 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { Box, CircularProgress } from '@mui/material'
+import { Box } from '@mui/material'
 import { DataGrid, GridSortModel } from '@mui/x-data-grid'
 import { Storage } from 'src/libs/storage'
+import { DATA_GRID_NO_FOCUS_OUTLINE_SX, DATA_GRID_SLOTS } from 'src/components/dataGridDefaults'
 import { makeDACDatasetGridColumns } from 'src/components/dac_dataset_table/datasetGridColumns'
 import { DatasetTerm } from 'src/types/model'
 
 const storageDACDatasetSort = 'storageDACDatasetSort'
 const DEFAULT_SORT_MODEL: GridSortModel = [{ field: 'datasetIdentifier', sort: 'asc' }]
 
-const LoadingOverlay = () => (
-  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-    <CircularProgress />
-  </Box>
-)
+const getRowId = (row: DatasetTerm) => row.datasetId
 
 export interface DACDatasetsTableProps {
   datasets: DatasetTerm[]
@@ -38,7 +35,7 @@ export const DACDatasetsTable = function DACDatasetTable({ datasets, columns, is
       <DataGrid
         rows={datasets}
         columns={gridColumns}
-        getRowId={row => row.datasetId}
+        getRowId={getRowId}
         loading={isLoading}
         autoHeight
         pageSizeOptions={[10, 25, 50]}
@@ -47,13 +44,8 @@ export const DACDatasetsTable = function DACDatasetTable({ datasets, columns, is
         sortModel={sortModel}
         onSortModelChange={handleSortModelChange}
         disableRowSelectionOnClick
-        sx={{
-          '& .MuiDataGrid-cell:focus': { outline: 'none' },
-          '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
-          '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
-          '& .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
-        }}
-        slots={{ loadingOverlay: LoadingOverlay }}
+        sx={DATA_GRID_NO_FOCUS_OUTLINE_SX}
+        slots={DATA_GRID_SLOTS}
       />
     </Box>
   )
