@@ -103,6 +103,7 @@ const dacDatasetGridColumns: Partial<Record<string, GridColDef<DatasetTerm>>> = 
       params.row.hasInstitutionCertification
         ? (
             <button
+              type="button"
               onClick={() => downloadInstitutionalCertification(params.row)}
               className="button button-white"
               style={{ padding: '10px 12px' }}
