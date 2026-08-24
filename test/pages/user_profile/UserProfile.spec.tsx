@@ -214,6 +214,25 @@ describe('UserProfile', () => {
     })
   })
 
+  it('disables the email notification toggle while the update is in flight', async () => {
+    let resolveUpdate: (user: DuosUser) => void = () => {}
+    vi.mocked(User.updateSelf).mockReturnValue(new Promise((resolve) => {
+      resolveUpdate = resolve
+    }))
+    renderUserProfile()
+    await screen.findByDisplayValue('Test User')
+
+    const toggle = screen.getByRole('switch', { name: 'Send me email notifications' })
+    await userEvent.click(toggle)
+
+    await waitFor(() => expect(toggle).toBeDisabled())
+
+    resolveUpdate(mockUser)
+
+    await waitFor(() => expect(toggle).toBeEnabled())
+    expect(User.updateSelf).toHaveBeenCalledOnce()
+  })
+
   it('reverts the email notification toggle when the update fails', async () => {
     vi.mocked(User.updateSelf).mockRejectedValue(new Error('API error'))
     renderUserProfile()

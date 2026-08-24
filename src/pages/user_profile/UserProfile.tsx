@@ -34,6 +34,7 @@ export default function UserProfile() {
   const [name, setName] = useState<string>('')
   const [updatedName, setUpdatedName] = useState<string>('')
   const [emailPreference, setEmailPreference] = useState<boolean>(false)
+  const [savingEmailPreference, setSavingEmailPreference] = useState<boolean>(false)
 
   const [notificationData, setNotificationData] = useState<Banner | null | undefined>(null)
 
@@ -62,21 +63,28 @@ export default function UserProfile() {
     }
   }
 
-  const updateEmailPreference = (value: boolean) => {
+  const updateEmailPreference = async (value: boolean) => {
     const payload = {
       emailPreference: value,
     }
+    const lastConfirmed = emailPreference
 
     setEmailPreference(value)
-    User.updateSelf(payload).then((response) => {
+    setSavingEmailPreference(true)
+    try {
+      const response = await User.updateSelf(payload)
       if (response) {
         setUserRoleStatuses(response, Storage)
       }
       Notifications.showSuccess({ text: 'Email preference updated successfully!' })
-    }, () => {
-      setEmailPreference(!value)
+    }
+    catch {
+      setEmailPreference(lastConfirmed)
       Notifications.showError({ text: 'Some errors occurred, the user\'s email preference was not updated.' })
-    })
+    }
+    finally {
+      setSavingEmailPreference(false)
+    }
   }
 
   useEffect(() => {
@@ -146,6 +154,7 @@ export default function UserProfile() {
                 size="small"
                 sx={emailToggleSx}
                 checked={emailPreference}
+                disabled={savingEmailPreference}
                 onChange={event => updateEmailPreference(event.target.checked)}
               />
             )}
