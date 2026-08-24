@@ -17,6 +17,8 @@ import { Draft } from 'src/libs/ajax/Draft'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 import { Spinner } from 'src/components/Spinner'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
+import { ResponseError } from 'src/types/model'
+import { isEmpty } from 'src/utils/NodashUtil'
 
 export type FileProperty = {
   key: string
@@ -38,6 +40,50 @@ const resolveFormMode = (draftUuid?: string, studyId?: string): FormMode => {
   }
   return studyId ? 'edit' : 'create'
 }
+
+/**
+ * Only a 400 carrying Consent's own explanation is a rejection the submitter can act on in the form.
+ * One with no readable body — a malformed multipart, a proxy — carries the generic help-desk line
+ * instead, which is not a violation list and still needs the reload.
+ */
+const isValidationRejection = (error: unknown): boolean => {
+  const response = (error as ResponseError)?.response
+  return response?.status === 400 && !isEmpty(response.data?.message?.trim())
+}
+
+/** A rejection reaches us either as a thrown Error or as the raw response it was built from. */
+const errorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message
+  return (error as ResponseError)?.response?.data?.message ?? String(error)
+}
+
+/** Consent joins Data Use consistency violations with newlines, so each needs its own line here. */
+const renderViolations = (prefix: string, error: unknown): React.ReactElement => {
+  const message = errorMessage(error)
+  return (
+    <>
+      {prefix}
+      <br />
+      {message.split('\n').map((line, index) => (
+        <Fragment key={`${index}-${line}`}>{line}<br /></Fragment>
+      ))}
+    </>
+  )
+}
+
+/**
+ * A copy: a failed save leaves the form standing, so the live study must keep its attachments. Only
+ * the consent group files need stripping; the rest of the payload is built from named fields.
+ */
+const withoutAttachments = (study: Study): Study => ({
+  ...study,
+  assets: study.assets && {
+    ...study.assets,
+    consentGroups: study.assets.consentGroups?.map(
+      ({ addedNIHInstitutionalCertificationFile: _file, ...consentGroup }) => consentGroup,
+    ),
+  },
+})
 
 export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const { onSaveRoute } = props
@@ -89,17 +135,15 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
     const multiPartFormData = new FormData()
     if (study.alternativeDataSharingPlanFile) {
       multiPartFormData.append('alternativeDataSharingPlan', study.alternativeDataSharingPlanFile, study.alternativeDataSharingPlanFile.name)
-      delete study.alternativeDataSharingPlanFile
     }
 
     study.assets?.consentGroups?.forEach((consentGroup, idx) => {
       if (consentGroup?.addedNIHInstitutionalCertificationFile) {
         const fieldKey = `consentGroups[${idx}].nihInstitutionalCertificationFile`
         multiPartFormData.append(fieldKey, consentGroup.addedNIHInstitutionalCertificationFile, consentGroup.addedNIHInstitutionalCertificationFile.name)
-        delete consentGroup.addedNIHInstitutionalCertificationFile
       }
     })
-    multiPartFormData.append('dataset', JSON.stringify(studyToDatasetSchemaSubmission(structuredClone(study))))
+    multiPartFormData.append('dataset', JSON.stringify(studyToDatasetSchemaSubmission(withoutAttachments(study))))
     return multiPartFormData
   }
   const onUpdateStudy = async () => {
@@ -113,7 +157,12 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   const onUpdateStudyError = (error: unknown) => {
-    Notifications.showError({ text: `Study update failed: ${error}.  Reloading original study.` })
+    // Nothing persisted, so reloading would discard the user's edits along with the violations.
+    if (isValidationRejection(error)) {
+      Notifications.showError({ text: renderViolations('Study update failed:', error) })
+      return
+    }
+    Notifications.showError({ text: `Study update failed: ${errorMessage(error)}.  Reloading original study.` })
     onLoadFormData(studyId)
   }
 
@@ -147,15 +196,11 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   const onError = (error: unknown) => {
-    Notifications.showError({
-      text: (
-        <>
-          Study creation failed:<br />{String(error).split('\n').map(line => (
-            <Fragment key={line}>{line}<br /></Fragment>
-          ))}
-        </>
-      ),
-    })
+    if (isValidationRejection(error)) {
+      Notifications.showError({ text: renderViolations('Study creation failed:', error) })
+      return
+    }
+    Notifications.showError({ text: `Study creation failed: ${errorMessage(error)}` })
   }
 
   // Submitting before the draft arrives would register an empty study and then delete the draft.

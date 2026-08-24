@@ -124,6 +124,9 @@ export function createDataUseDisplay({
 /**
  * Primary codes first, then secondary alphabetically. Shared so every grid that shows data use
  * renders the same codes in the same order.
+ *
+ * Renders every primary a record carries: Consent rejects multi-primary writes, but legacy records
+ * still hold them, and collapsing them would hide a shape a curator has to see.
  */
 export const orderDataUseCodes = (dataset: HasDataUse): DataUseCode[] => {
   const terms = processDataUseCodes(dataset).codesAndDescriptions.filter(term => Boolean(term.shortCode))
