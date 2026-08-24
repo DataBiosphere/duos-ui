@@ -47,6 +47,7 @@ import SigningOfficialLibraryCards from 'src/pages/signing_official_console/Sign
 import SigningOfficialDarRequests from 'src/pages/signing_official_console/SigningOfficialDarRequests'
 import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs'
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
+import { StudyTemplateUpload } from 'src/pages/data_submission/StudyTemplateUpload'
 import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
 import { DataLibrary } from 'src/pages/DataLibrary'
 import { StudyNameSearch } from 'src/routing/StudyNameSearch'
@@ -92,9 +93,11 @@ const AppRoutes = (props: AppRoutesProps) => {
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.dataSubmitter, USER_ROLES.chairperson, USER_ROLES.admin]} />}>
           <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
+          <Route path="/data_submission_template" element={<StudyTemplateUpload />} />
           <Route path="/data_submission_form" element={<DataSubmissionFormV2 />}>
             <Route path=":studyId" element={<DataSubmissionFormV2 />} />
           </Route>
+          <Route path="/data_submission_form/draft/study-dataset/:draftUuid" element={<DataSubmissionFormV2 />} />
           <Route path="/study_update/:studyId" element={<DataSubmissionFormV2 onSaveRoute="/dataset_submissions" />} />
           <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
         </Route>

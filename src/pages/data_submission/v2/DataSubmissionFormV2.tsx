@@ -12,7 +12,10 @@ import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetMan
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Notifications } from 'src/libs/utils'
 import { studyToDatasetSchemaSubmission, buildConsentGroupsFromStudy, getStudyPropertyValueByKey } from 'src/pages/data_submission/v2/v2-common-functions'
+import { loadStudyDatasetDraft } from 'src/pages/data_submission/v2/studyDatasetDraft'
+import { Draft } from 'src/libs/ajax/Draft'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
+import { Spinner } from 'src/components/Spinner'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 
 export type FileProperty = {
@@ -26,15 +29,33 @@ export type DataSubmissionFormV2Props = {
 
 export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFile'
 
+/** A draft id is not a study id: a draft has never been submitted, so it creates rather than updates. */
+export type FormMode = 'create' | 'edit' | 'draft'
+
+const resolveFormMode = (draftUuid?: string, studyId?: string): FormMode => {
+  if (draftUuid) {
+    return 'draft'
+  }
+  return studyId ? 'edit' : 'create'
+}
+
 export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const { onSaveRoute } = props
-  const { studyId } = useParams()
+  const { studyId, draftUuid } = useParams()
+  const formMode: FormMode = resolveFormMode(draftUuid, studyId)
   const [isEditing, setIsEditing] = useState(false)
   const [study, setStudy] = useState({ data: {} } as Study)
   const [loadingError, setLoadingError] = useState(false)
+  const [loadedDraftUuid, setLoadedDraftUuid] = useState<string>()
   const [showContactModal, setShowContactModal] = useState(false)
 
   const navigate = useNavigate()
+
+  const onLoadFailure = () => {
+    setStudy({ data: {} } as Study)
+    setIsEditing(false)
+    setLoadingError(true)
+  }
 
   const onLoadFormData = (studyId: string | undefined) => {
     if (studyId) {
@@ -44,17 +65,25 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
         study.assets = { ...studyAssets, consentGroups: consentGroupAssets }
         setStudy(study)
         setIsEditing(true)
-      }).catch(() => {
-        setStudy({ data: {} } as Study)
-        setIsEditing(false)
-        setLoadingError(true)
-      })
+      }).catch(onLoadFailure)
     }
   }
 
+  // A draft stays a draft until the study is created from it, so isEditing remains false.
+  const onLoadDraft = (draftUuid: string) => {
+    loadStudyDatasetDraft(draftUuid).then((study) => {
+      setStudy(study)
+      setLoadingError(false)
+    }).catch(onLoadFailure).finally(() => setLoadedDraftUuid(draftUuid))
+  }
+
   useEffect(() => {
+    if (formMode === 'draft' && draftUuid) {
+      onLoadDraft(draftUuid)
+      return
+    }
     onLoadFormData(studyId)
-  }, [studyId, setStudy, setIsEditing])
+  }, [studyId, draftUuid, formMode, setStudy, setIsEditing])
 
   const buildMultiPartFormData = (study: Study) => {
     const multiPartFormData = new FormData()
@@ -88,9 +117,28 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
     onLoadFormData(studyId)
   }
 
+  /**
+   * Best effort, and only once the study exists: a study that was created is not a failure because
+   * the draft it came from outlived it, so a failure here is reported on its own and not retried.
+   */
+  const removeSourceDraft = async () => {
+    if (formMode !== 'draft' || !draftUuid) {
+      return
+    }
+    try {
+      await Draft.deleteDraft(draftUuid)
+    }
+    catch (_error) {
+      Notifications.showError({
+        text: 'Your study was created, but the draft it came from could not be removed. It may still appear in your drafts.',
+      })
+    }
+  }
+
   const onSubmitStudy = async () => {
     await DataSet.registerDataset(buildMultiPartFormData(study))
     Notifications.showNotification({ text: 'Study created successfully', type: 'success' })
+    await removeSourceDraft()
     if (onSaveRoute) {
       navigate(onSaveRoute)
       return
@@ -110,14 +158,47 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
     })
   }
 
+  // Submitting before the draft arrives would register an empty study and then delete the draft.
+  if (formMode === 'draft' && loadedDraftUuid !== draftUuid) {
+    return (
+      <div style={Styles.PAGE}>
+        <Spinner />
+      </div>
+    )
+  }
+
+  // Nothing to edit, so nothing to submit or delete: the form is not offered at all.
+  if (formMode === 'draft' && loadingError) {
+    return (
+      <div style={Styles.PAGE}>
+        <div style={{ marginLeft: '-1.5%' }}>
+          <TableHeaderSection
+            title="Draft could not be loaded"
+            description="This draft may have been removed, or it may belong to a different kind of submission. Nothing has been changed."
+          />
+        </div>
+        <button
+          type="button"
+          className="button button-white"
+          data-cy="draft-load-error-back"
+          onClick={() => navigate('/dataset_submissions')}
+        >
+          Back to My Data Submissions
+        </button>
+      </div>
+    )
+  }
+
   return (
     <>
       {loadingError && <div>Error Loading Page</div>}
       <div style={Styles.PAGE}>
         <div style={{ marginLeft: '-1.5%' }}>
           <TableHeaderSection
-            title="Study Registration Form"
-            description="Submit new datasets to DUOS"
+            title={formMode === 'draft' ? 'Study Registration Draft' : 'Study Registration Form'}
+            description={formMode === 'draft'
+              ? 'Review the values from your template, edit anything that needs it, then create the study.'
+              : 'Submit new datasets to DUOS'}
           />
         </div>
 

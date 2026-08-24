@@ -98,9 +98,9 @@ sequenceDiagram
     else Template is valid
         API->>DB: Create typed Draft (StudyDatasetSubmissionV1)
         DB-->>API: draft UUID and draftType
-        API-->>UI: 200 { valid: true, draft: { id, draftType } }
-        UI->>UI: Navigate to /data_submission_form/draft/study-dataset/:draftId
-        UI->>API: GET /api/draft/v1/:draftId
+        API-->>UI: 201 Location /api/draft/v1/:id { valid: true, draft: { id, draftType } }
+        UI->>UI: Navigate to /data_submission_form/draft/study-dataset/:draftUuid
+        UI->>API: GET /api/draft/v1/:draftUuid
         API-->>UI: Draft document and typed metadata
         UI->>UI: Verify meta.draftType is StudyDatasetSubmissionV1
         UI-->>U: Render populated Draft Study Registration Form
@@ -125,13 +125,16 @@ registration. Add `Chairperson` to the existing draft endpoints as well so all t
 create, resume, update, attach files to, and delete their authorized drafts. Existing ownership and
 administrator authorization checks remain unchanged.
 
-Validation errors are a completed, expected result and should return HTTP 200. Authentication, authorization, malformed multipart requests, size-limit violations, and unexpected server failures should use appropriate non-2xx responses.
+Validation errors are a completed, expected result and should return HTTP 200; a valid template creates a draft and returns HTTP 201 at its location. Authentication, authorization, malformed multipart requests, size-limit violations, and unexpected server failures should use appropriate non-2xx responses.
+
+Ticket 3 settled where the boundary falls: the 5 MiB limit is enforced by the validator and answered with `413`, while an empty, non-UTF-8, or malformed file stays a `valid: false` result, since only the latter is something the producer edits.
 
 Invalid template response:
 
 ```json
 {
   "valid": false,
+  "truncated": false,
   "errors": [
     {
       "row": 3,
@@ -147,6 +150,7 @@ Valid template response:
 ```json
 {
   "valid": true,
+  "truncated": false,
   "draft": {
     "id": "c2e4583a-20b9-4705-8280-e6a5753f10c9",
     "draftType": "StudyDatasetSubmissionV1"
@@ -170,9 +174,12 @@ interface StudyDatasetDraftReference {
 }
 
 type TemplateValidationResponse =
-  | { valid: false, errors: TemplateValidationError[] }
-  | { valid: true, errors: TemplateValidationError[], draft: StudyDatasetDraftReference }
+  | { valid: false, errors: TemplateValidationError[], truncated: boolean }
+  | { valid: true, errors: TemplateValidationError[], truncated: false, draft: StudyDatasetDraftReference }
 ```
+
+`truncated` reports that the 100-error cap was reached. The last error says so as well, so a client
+that ignores the flag still tells the producer that errors were omitted.
 
 Both branches use `TemplateValidationError[]` so callers can pass `errors` through uniformly. The
 success branch is identified by `valid` and includes a typed draft reference.
@@ -270,14 +277,14 @@ Add a typed multipart method to `src/libs/ajax/DataSet.ts` or a dedicated draft 
 Add an explicit route so a draft UUID cannot be confused with an existing numeric study ID:
 
 ```text
-/data_submission_form/draft/study-dataset/:draftId
+/data_submission_form/draft/study-dataset/:draftUuid
 ```
 
 Update `DataSubmissionFormV2` to support three explicit modes:
 
 1. Blank study creation.
 2. Existing study editing by `studyId`.
-3. Draft study creation by `draftId`.
+3. Draft study creation by `draftUuid`.
 
 Draft mode should:
 
@@ -576,8 +583,9 @@ and authentication requirements.
 - Unauthorized and unauthenticated callers receive the existing standard responses.
 - Missing, multiple, empty, and oversized file parts are rejected without draft creation.
 - Template validation errors return HTTP 200 with `valid: false` and structured errors.
-- Successful validation returns HTTP 200 with `valid: true`, an empty error list, and a reference
-  containing both the draft UUID and `StudyDatasetSubmissionV1` type.
+- Successful validation returns HTTP 201, a `Location` header for the created draft, and a body
+  with `valid: true`, an empty error list, and a reference containing both the draft UUID and
+  `StudyDatasetSubmissionV1` type.
 - Exactly one draft with type `StudyDatasetSubmissionV1`, owned by the caller, is created for a valid
   request.
 - The existing authorized draft endpoint returns the persisted registration-shaped document.
@@ -641,7 +649,7 @@ class is reserved for non-download secondary actions.
 
 The selected file remains visible after validation errors. Users can remove it, select a replacement,
 and retry without leaving the page. A valid response navigates to
-`/data_submission_form/draft/study-dataset/:draftId` using the returned typed reference.
+`/data_submission_form/draft/study-dataset/:draftUuid` using the returned typed reference.
 
 **Acceptance criteria**
 
@@ -703,7 +711,7 @@ Add draft mode to the study registration form and populate it from a validated t
 
 **Description**
 
-Add the explicit `/data_submission_form/draft/study-dataset/:draftId` route and a typed client for
+Add the explicit `/data_submission_form/draft/study-dataset/:draftUuid` route and a typed client for
 the existing generic draft read and delete endpoints. Extend `DataSubmissionFormV2` with an
 explicit draft mode instead of treating a UUID as a persisted study ID. After loading, require
 `meta.draftType === 'StudyDatasetSubmissionV1'` before mapping the registration-shaped document
@@ -813,3 +821,34 @@ adding template-only cleanup behavior here.
 - A new platform-wide retention implementation.
 - Supporting template v2.
 - Performance testing beyond the documented 5 MiB request limit.
+
+---
+
+## Findings from implementation
+
+Two kinds of thing came out of building Ticket 4 (DT-1854) against the Consent DTOs and the Ticket 2
+parser. The actionable ones were carried by the tickets that own them, following the same pattern as
+"Contract outcomes" above, and are summarised here with what each was settled as. The design
+observation is recorded in full because no ticket owns it.
+
+| Finding | Recorded in | Outcome |
+| --- | --- | --- |
+| The `draft` table is the only JSON write in this area without the NUL guard the DAR tables already have. A U+0000 escape survives the parser and `jsonb` rejects it, so a valid template can 500 on insert. | Tickets 2 and 3 | Ticket 2 rejects U+0000 during parsing so the producer is told; Ticket 3 applies the existing `regexp_replace` idiom to `DraftDAO.insert` and `updateDraftByDraftUUID`. |
+| `StudyTemplateValidationResult.truncated` has no counterpart in the response type documented in this plan or in the v1 contract. | Ticket 3 | Settled: it reaches the wire. duos-ui already renders a notice when it is true, and OpenAPI, the v1 contract, and this plan now document it. |
+| The service reports the 5 MiB and UTF-8 failures as `valid: false` rather than as request failures, contradicting this plan and the contract. | Ticket 3 | Settled: an oversized upload is refused by the validator that reads it and answered `413`, and encoding stays a `valid: false` result. See the note under "Validate a template" above. |
+
+Chairperson access to the draft endpoints was already specified in Ticket 3 and needed no change.
+
+### The supported field set is derivable, not prose
+
+Worth recording because it is a property of the contract rather than a task. The v1 field catalogue is
+exactly a slice of declared wire order: items 1–27 of `StudyRegistrationRequest`'s
+`@JsonPropertyOrder` (of 41), items 2–23 of `ConsentGroupRequest`'s (of 25), and both
+`FileTypeObject` properties. That is 51 fields, and it is why the blank template is 51 rows. The
+duos-ui manifest (`src/libs/studyTemplate/studyTemplateV1Manifest.ts`) is ordered to match, so it can
+be diffed against those annotations rather than against this document, and
+`test/libs/studyTemplate/studyTemplateV1Manifest.spec.ts` enforces that no field Consent lists in
+`StudyTemplateV1Fields.UNSUPPORTED_*` is ever offered — Consent rejects those by name, so offering one
+would produce a template that cannot validate.
+
+Ticket 5 should expect the same slice when mapping a draft document back into the UI `Study` model.

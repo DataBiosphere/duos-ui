@@ -36,6 +36,10 @@ vi.mock('src/pages/manage_dac/ManageDac', () => ({
   default: () => <div>Manage DACs</div>,
 }))
 
+vi.mock('src/pages/data_submission/StudyTemplateUpload', () => ({
+  StudyTemplateUpload: () => <div>Upload Study Template</div>,
+}))
+
 const LocationSpy = ({ onLocationChange }: { onLocationChange: (loc: string) => void }) => {
   const location = useLocation()
   React.useEffect(() => {
@@ -53,7 +57,9 @@ const roleBACRoutes: string[] = [
   '/progress_report_application/1',
   '/dar_application/1',
   '/dataset_submissions',
+  '/data_submission_template',
   '/data_submission_form',
+  '/data_submission_form/draft/study-dataset/0393c587-343b-4c85-8969-e69e3f4f5aa8',
   '/study_update/1',
   '/dataset_update/1',
   '/dar_vote_review/1',
@@ -146,6 +152,86 @@ describe('AppRoutes — legacy DAC console redirects', () => {
 
     const { container } = render(
       <MemoryRouter initialEntries={['/chair_console']}>
+        <AppRoutes isLogged={true} env="dev" />
+      </MemoryRouter>,
+    )
+
+    expect(container.querySelector('[data-cy="not-found"]')).toBeInTheDocument()
+  })
+})
+
+describe('AppRoutes — study template upload route', () => {
+  const userWithRole = (roleName: string): DuosUser => ({
+    roles: [{ name: roleName }],
+  } as DuosUser)
+
+  beforeEach(() => {
+    vi.spyOn(Storage, 'userIsLogged').mockReturnValue(true)
+  })
+
+  afterEach(() => vi.restoreAllMocks())
+
+  it.each([
+    USER_ROLES.dataSubmitter,
+    USER_ROLES.chairperson,
+    USER_ROLES.admin,
+  ])('renders the upload page for a %s', (roleName) => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(roleName))
+
+    const { getByText } = render(
+      <MemoryRouter initialEntries={['/data_submission_template']}>
+        <AppRoutes isLogged={true} env="dev" />
+      </MemoryRouter>,
+    )
+
+    expect(getByText('Upload Study Template')).toBeInTheDocument()
+  })
+
+  it('does not let a researcher through', () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(USER_ROLES.researcher))
+
+    const { container, queryByText } = render(
+      <MemoryRouter initialEntries={['/data_submission_template']}>
+        <AppRoutes isLogged={true} env="dev" />
+      </MemoryRouter>,
+    )
+
+    expect(container.querySelector('[data-cy="not-found"]')).toBeInTheDocument()
+    expect(queryByText('Upload Study Template')).not.toBeInTheDocument()
+  })
+})
+
+describe('AppRoutes — study/dataset draft route', () => {
+  const userWithRole = (roleName: string): DuosUser => ({
+    roles: [{ name: roleName }],
+  } as DuosUser)
+
+  const DRAFT_ROUTE = '/data_submission_form/draft/study-dataset/0393c587-343b-4c85-8969-e69e3f4f5aa8'
+
+  beforeEach(() => {
+    vi.spyOn(Storage, 'userIsLogged').mockReturnValue(true)
+  })
+
+  afterEach(() => vi.restoreAllMocks())
+
+  it('resolves the draft path to the registration form rather than the blank one', () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(USER_ROLES.dataSubmitter))
+
+    const { container } = render(
+      <MemoryRouter initialEntries={[DRAFT_ROUTE]}>
+        <AppRoutes isLogged={true} env="dev" />
+      </MemoryRouter>,
+    )
+
+    // Four segments deep, so it must not be mistaken for /data_submission_form/:studyId.
+    expect(container.querySelector('[data-cy="not-found"]')).not.toBeInTheDocument()
+  })
+
+  it('does not let a researcher through', () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(USER_ROLES.researcher))
+
+    const { container } = render(
+      <MemoryRouter initialEntries={[DRAFT_ROUTE]}>
         <AppRoutes isLogged={true} env="dev" />
       </MemoryRouter>,
     )
