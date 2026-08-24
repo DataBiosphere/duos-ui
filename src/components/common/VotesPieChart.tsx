@@ -2,8 +2,6 @@ import React, { useMemo } from 'react'
 import { isNil, isEmpty } from 'src/utils/NodashUtil'
 import { Vote } from 'src/types/model'
 
-// This chart must stay inline SVG with no chart library: the CSP allows
-// scripts from 'self' only, so it cannot load a remote chart loader at runtime.
 const VOTE_CATEGORIES = [
   { label: 'Yes', color: '#1FA371' },
   { label: 'No', color: '#DA000E' },
