@@ -181,3 +181,77 @@ describe('useLibraryPageState — filter handlers', () => {
     })
   })
 })
+
+describe('useLibraryPageState — data use modifier options', () => {
+  const withModifierFacet = (codes: string[]) => {
+    vi.mocked(useLibraryMetadata).mockReturnValue({
+      data: { data_use_modifiers: { buckets: codes.map(key => ({ key, doc_count: 3 })) } },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useLibraryMetadata>)
+    setup(AssetType.DATASETS)
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+    return result.current.availableFilters.dataUseModifiers
+  }
+
+  it('offers exactly the codes the index reports, so no checkbox matches nothing', () => {
+    const options = withModifierFacet(['NPU', 'IRB', 'MOR'])
+    expect(options.map(option => option.value).sort()).toEqual(['IRB', 'MOR', 'NPU'])
+  })
+
+  it('words each restriction the way the submission forms do, with its abbreviation', () => {
+    const options = withModifierFacet(['IRB', 'MOR', 'GS', 'NPU'])
+    expect(options).toContainEqual({ value: 'IRB', label: 'Ethics Approval Required (IRB)' })
+    expect(options).toContainEqual({ value: 'MOR', label: 'Publication Moratorium (MOR)' })
+    expect(options).toContainEqual({ value: 'GS', label: 'Geographic Restriction (GS)' })
+    expect(options).toContainEqual({ value: 'NPU', label: 'Non-profit Use Only (NPU)' })
+  })
+
+  it('labels a secondary other-restriction OTH2 while still querying the indexed OTHER', () => {
+    const options = withModifierFacet(['OTHER'])
+    expect(options).toEqual([{ value: 'OTHER', label: 'Other Secondary Restriction (OTH2)' }])
+  })
+
+  it('words the modifiers the submission forms do not collect', () => {
+    // These live in `consentTranslations` and `AbstainDataUseCodes` rather than in
+    // SecondaryDataUseTerms, and are as real as any code the forms do collect.
+    const options = withModifierFacet(['NCTRL', 'NAGR', 'NCU', 'RS-G', 'RS-PD', 'POP-M', 'POP-F', 'POP-PD'])
+    expect(options).toContainEqual({ value: 'NCTRL', label: 'No Control Set Use (NCTRL)' })
+    expect(options).toContainEqual({ value: 'NAGR', label: 'No Aggregate-Level Data Use (NAGR)' })
+    expect(options).toContainEqual({ value: 'NCU', label: 'Non-Commercial Use Only (NCU)' })
+    expect(options).toContainEqual({ value: 'RS-G', label: 'Gender-Specific Research (RS-G)' })
+    expect(options).toContainEqual({ value: 'RS-PD', label: 'Pediatric Research Only (RS-PD)' })
+    expect(options).toContainEqual({ value: 'POP-M', label: 'Male-Specific Research (POP-M)' })
+    expect(options).toContainEqual({ value: 'POP-F', label: 'Female-Specific Research (POP-F)' })
+    expect(options).toContainEqual({ value: 'POP-PD', label: 'Pediatric Research Only (POP-PD)' })
+  })
+
+  it('reads a region-qualified geographic restriction, and the legacy bare GS-', () => {
+    // dbGaP appends the permitted region to the code, so `GS-US` cannot be enumerated;
+    // `GS-` is what datasets indexed under the app's older spelling still carry.
+    const options = withModifierFacet(['GS-US', 'GS-'])
+    expect(options).toContainEqual({ value: 'GS-US', label: 'Geographic Restriction (GS-US)' })
+    expect(options).toContainEqual({ value: 'GS-', label: 'Geographic Restriction (GS-)' })
+  })
+
+  it('keeps a code with no label, showing its bare abbreviation', () => {
+    // An unrecognized code must stay filterable rather than vanish from a filter the
+    // corpus supports — the index, not this app's code lists, decides what exists.
+    const options = withModifierFacet(['XYZ', 'NPU'])
+    expect(options).toContainEqual({ value: 'XYZ', label: 'XYZ' })
+  })
+
+  it('lists options alphabetically by label', () => {
+    const labels = withModifierFacet(['PUB', 'COL', 'IRB', 'OTHER', 'ZZZ']).map(option => option.label)
+    expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b)))
+  })
+
+  it('carries no facet counts', () => {
+    expect(withModifierFacet(['NPU', 'IRB']).every(option => option.count === undefined)).toBe(true)
+  })
+
+  it('offers nothing when the aggregation is absent, rather than throwing', () => {
+    setup(AssetType.DATASETS)
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+    expect(result.current.availableFilters.dataUseModifiers).toEqual([])
+  })
+})

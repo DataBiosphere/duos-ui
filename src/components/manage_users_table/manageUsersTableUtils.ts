@@ -1,47 +1,13 @@
-import { Styles } from 'src/libs/theme'
+import { isNil, uniq } from 'src/utils/NodashUtil'
+import { InstitutionInterface, LibraryCard, UserRole } from 'src/types/model'
 
-export const styles = {
-  baseStyle: {
-    fontFamily: 'Montserrat',
-    fontSize: '1.6rem',
-    fontWeight: 400,
-    display: 'flex',
-    padding: '1rem 2%',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    whiteSpace: 'pre-wrap',
-    backgroundColor: 'white',
-    border: '1px solid #DEDEDE',
-    borderRadius: '4px',
-    margin: '0.5% 0',
-  },
-  columnStyle: {
-    ...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between',
-    color: '#7B7B7B',
-    fontFamily: 'Montserrat',
-    fontSize: '1.2rem',
-    fontWeight: 'bold',
-    letterSpacing: '0.2px',
-    textTransform: 'uppercase',
-    border: 'none',
-  },
-  cellWidth: {
-    username: '20%',
-    usernameMargin: '5%',
-    email: '20%',
-    emailMargin: '5%',
-    institution: '20%',
-    institutionMargin: '5%',
-    roles: '20%',
-  },
-  color: {
-    username: '#000000',
-    email: '#000000',
-    roles: '#000000',
-  },
-  fontSize: {
-    username: '1.6rem',
-    email: '1.4rem',
-    roles: '1.4rem',
-  },
+/** Researcher is implicit for every user, and a library card reads as a role in this table. */
+export const formatUserRoles = (roles: UserRole[] | undefined, libraryCard: LibraryCard | undefined): string => {
+  const named = (roles ?? []).map(role => role.name).filter(name => name !== 'Researcher')
+  const withCard = isNil(libraryCard) ? named : [...named, 'LibraryCard']
+  // SigningOfficial -> Signing Official
+  const spaced = withCard.map(name => name.replace(/([A-Z])/g, ' $1').trim())
+  return uniq(spaced).join(', ') || 'None'
 }
+
+export const institutionName = (institution: InstitutionInterface | undefined): string => institution?.name ?? 'N/A'

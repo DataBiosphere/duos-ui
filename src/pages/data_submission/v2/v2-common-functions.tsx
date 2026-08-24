@@ -2,6 +2,7 @@ import React from 'react'
 import {
   Study,
   StudyProperty,
+  StudyPropertyType,
   StringStudyProperty,
   DateStudyProperty, BooleanStudyProperty,
   DatasetRegistrationSchemaV1,
@@ -185,6 +186,12 @@ const convertDateEpochToString = (dateEpoch: unknown): string | undefined => {
   return undefined
 }
 
+/** `false` is a value the producer gave, so it must not fall through to undefined. */
+const getBooleanStudyPropertyValueByKey = (study: Study, key: string): boolean | undefined => {
+  const value = getStudyPropertyValueByKey(study, key)
+  return typeof value === 'boolean' ? value : undefined
+}
+
 export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistrationSchemaV1 => {
   const datasetSchema: DatasetRegistrationSchemaV1 = {
     studyName: study.name || '',
@@ -199,7 +206,7 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     publicVisibility: study.publicVisibility || false,
     throughBioId: getStudyPropertyValueByKey(study, ThroughBioId.key) as string || undefined,
     nihAnvilUse: getStudyPropertyValueByKey(study, NihAnvilUse.key) as NiHAnvilUseValues || undefined,
-    submittingToAnvil: getStudyPropertyValueByKey(study, SubmittingToAnvil.key) as boolean || undefined,
+    submittingToAnvil: getBooleanStudyPropertyValueByKey(study, SubmittingToAnvil.key),
     dbGaPPhsID: getStudyPropertyValueByKey(study, DbGaPPhsID.key) as string || undefined,
     dbGaPStudyRegistrationName: getStudyPropertyValueByKey(study, DbGaPStudyRegistrationName.key) as string || undefined,
     embargoReleaseDate: convertDateEpochToString(getStudyPropertyValueByKey(study, EmbargoReleaseDate.key) as string || undefined),
@@ -210,15 +217,15 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     nihProgramOfficerName: getStudyPropertyValueByKey(study, NihProgramOfficerName.key) as string || undefined,
     nihInstitutionCenterSubmission: getStudyPropertyValueByKey(study, NihInstitutionCenterSubmission.key) as NIHInstituteAndCenterAbbreviations || undefined,
     nihGenomicProgramAdministratorName: getStudyPropertyValueByKey(study, NihGenomicProgramAdministratorName.key) as string || undefined,
-    multiCenterStudy: getStudyPropertyValueByKey(study, MultiCenterStudy.key) as boolean || undefined,
+    multiCenterStudy: getBooleanStudyPropertyValueByKey(study, MultiCenterStudy.key),
     collaboratingSites: getStudyPropertyValueByKey(study, CollaboratingSites.key) as string[] || undefined,
-    controlledAccessRequiredForGenomicSummaryResultsGSR: getStudyPropertyValueByKey(study, ControlledAccessRequiredForGenomicSummaryResultsGSR.key) as boolean || undefined,
+    controlledAccessRequiredForGenomicSummaryResultsGSR: getBooleanStudyPropertyValueByKey(study, ControlledAccessRequiredForGenomicSummaryResultsGSR.key),
     controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation: getStudyPropertyValueByKey(study, ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key) as string || undefined,
-    alternativeDataSharingPlan: getStudyPropertyValueByKey(study, AlternativeDataSharingPlan.key) as boolean || undefined,
+    alternativeDataSharingPlan: getBooleanStudyPropertyValueByKey(study, AlternativeDataSharingPlan.key),
     alternativeDataSharingPlanReasons: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as Array<DataSharingPlanReasons> || undefined,
     alternativeDataSharingPlanExplanation: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanExplanation.key) as string || undefined,
     alternativeDataSharingPlanDataSubmitted: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanDataSubmitted.key) as AlternativeDataSharingPlanDataSubmittedValues || undefined,
-    alternativeDataSharingPlanDataReleased: getStudyPropertyValueByKey(study, AlternativeDataSharingPlanDataReleased.key) as boolean || undefined,
+    alternativeDataSharingPlanDataReleased: getBooleanStudyPropertyValueByKey(study, AlternativeDataSharingPlanDataReleased.key),
     alternativeDataSharingPlanTargetDeliveryDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetDeliveryDate.key) as string || undefined),
     alternativeDataSharingPlanTargetPublicReleaseDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetPublicReleaseDate.key) as string || undefined),
     consentGroups: structuredClone(study.assets?.consentGroups) || [],
@@ -231,6 +238,71 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
   datasetSchema.assets = assets
   return datasetSchema
 }
+/**
+ * The inverse of {@link studyToDatasetSchemaSubmission}: a registration-shaped document becomes the
+ * Study the form edits. A property is written only where the document carries a value — Consent
+ * serializes with NON_NULL, so an empty field is absent, and writing one would submit a value the
+ * producer never gave.
+ */
+export const datasetSchemaSubmissionToStudy = (schema: DatasetRegistrationSchemaV1): Study => {
+  const properties: StudyProperty[] = []
+  const addProperty = (key: string, type: StudyPropertyType, value: unknown) => {
+    if (value !== undefined && value !== null) {
+      properties.push(new StudyProperty(key, type, value))
+    }
+  }
+
+  addProperty(StudyTypeProperty.key, 'String', schema.studyType)
+  addProperty(PhenotypeIndication.key, 'String', schema.phenotypeIndication)
+  addProperty(Species.key, 'String', schema.species)
+  addProperty(DataCustodianEmail.key, 'Json', schema.dataCustodianEmail)
+  addProperty(ThroughBioId.key, 'String', schema.throughBioId)
+  addProperty(NihAnvilUse.key, 'String', schema.nihAnvilUse)
+  addProperty(SubmittingToAnvil.key, 'Boolean', schema.submittingToAnvil)
+  addProperty(DbGaPPhsID.key, 'String', schema.dbGaPPhsID)
+  addProperty(DbGaPStudyRegistrationName.key, 'String', schema.dbGaPStudyRegistrationName)
+  addProperty(EmbargoReleaseDate.key, 'Date', schema.embargoReleaseDate)
+  addProperty(SequencingCenter.key, 'String', schema.sequencingCenter)
+  addProperty(PiInstitution.key, 'Number', schema.piInstitution)
+  addProperty(NihGrantContractNumber.key, 'String', schema.nihGrantContractNumber)
+  addProperty(NihICsSupportingStudy.key, 'Json', schema.nihICsSupportingStudy)
+  addProperty(NihProgramOfficerName.key, 'String', schema.nihProgramOfficerName)
+  addProperty(NihInstitutionCenterSubmission.key, 'String', schema.nihInstitutionCenterSubmission)
+  addProperty(NihGenomicProgramAdministratorName.key, 'String', schema.nihGenomicProgramAdministratorName)
+  addProperty(MultiCenterStudy.key, 'Boolean', schema.multiCenterStudy)
+  addProperty(CollaboratingSites.key, 'Json', schema.collaboratingSites)
+  addProperty(ControlledAccessRequiredForGenomicSummaryResultsGSR.key, 'Boolean', schema.controlledAccessRequiredForGenomicSummaryResultsGSR)
+  addProperty(ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key, 'String', schema.controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation)
+  addProperty(AlternativeDataSharingPlan.key, 'Boolean', schema.alternativeDataSharingPlan)
+  addProperty(AlternativeDataSharingPlanReasons.key, 'Json', schema.alternativeDataSharingPlanReasons)
+  addProperty(AlternativeDataSharingPlanExplanation.key, 'String', schema.alternativeDataSharingPlanExplanation)
+  addProperty(AlternativeDataSharingPlanDataSubmitted.key, 'String', schema.alternativeDataSharingPlanDataSubmitted)
+  addProperty(AlternativeDataSharingPlanDataReleased.key, 'Boolean', schema.alternativeDataSharingPlanDataReleased)
+  addProperty(AlternativeDataSharingPlanTargetDeliveryDate.key, 'Date', schema.alternativeDataSharingPlanTargetDeliveryDate)
+  addProperty(AlternativeDataSharingPlanTargetPublicReleaseDate.key, 'Date', schema.alternativeDataSharingPlanTargetPublicReleaseDate)
+
+  const otherAssets = structuredClone(schema.assets ?? {}) as Record<string, unknown>
+  delete otherAssets.consentGroups
+
+  const study = {
+    name: schema.studyName,
+    description: schema.studyDescription,
+    dataTypes: schema.dataTypes,
+    publicVisibility: schema.publicVisibility,
+    properties,
+    assets: { ...otherAssets, consentGroups: structuredClone(schema.consentGroups ?? []) },
+    data: schema.data ?? {},
+  } as Study
+
+  if (schema.piName !== undefined) {
+    study.piName = schema.piName
+  }
+  if (schema.piEmail !== undefined) {
+    study.piEmail = schema.piEmail
+  }
+  return study
+}
+
 const getDatasetPropertyValueByKey = <T = unknown>(key: string, dataset: Dataset): T | undefined => {
   if (dataset.properties && Array.isArray(dataset.properties)) {
     const result = dataset.properties.find(entry => entry.propertyName === key)
@@ -251,7 +323,8 @@ export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
     consentGroup.col = dataset.dataUse.collaboratorRequired
     consentGroup.generalResearchUse = dataset.dataUse.generalUse
     consentGroup.hmb = dataset.dataUse.hmbResearch
-    consentGroup.diseaseSpecificUse = dataset.dataUse.diseaseRestrictions
+    // An empty array would light the Disease-Specific radio; only a populated one is a primary.
+    consentGroup.diseaseSpecificUse = isEmpty(dataset.dataUse.diseaseRestrictions) ? undefined : dataset.dataUse.diseaseRestrictions
     consentGroup.poa = dataset.dataUse.populationOriginsAncestry
     if (isEmpty(dataset.dataUse.other)) {
       consentGroup.otherPrimary = undefined

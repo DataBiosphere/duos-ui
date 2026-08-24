@@ -4,7 +4,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen, fireEvent, act } from '@testing-library/react'
 import DACConsole from 'src/pages/DACConsole'
 import { Collections } from 'src/libs/ajax/Collections'
-import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
@@ -21,12 +20,6 @@ vi.mock('react-router', async (importActual) => {
 vi.mock('src/libs/ajax/Collections', () => ({
   Collections: {
     getCollectionSummariesByRoleName: vi.fn(),
-  },
-}))
-
-vi.mock('src/libs/ajax/User', () => ({
-  User: {
-    getUserRelevantDatasets: vi.fn(),
   },
 }))
 
@@ -156,7 +149,6 @@ describe('DACConsole', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(useResponsiveDarCollectionColumns).mockReturnValue(['col1', 'col2'])
-    vi.mocked(User.getUserRelevantDatasets).mockResolvedValue([])
     vi.mocked(Collections.getCollectionSummariesByRoleName).mockResolvedValue([collection1, collection2])
   })
 
@@ -250,11 +242,6 @@ describe('DACConsole', () => {
   describe('shared behavior', () => {
     beforeEach(() => {
       vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(memberUser)
-    })
-
-    it('fetches relevant datasets alongside collections', async () => {
-      await act(async () => renderWithRouter(<DACConsole />))
-      expect(User.getUserRelevantDatasets).toHaveBeenCalledTimes(1)
     })
 
     it('passes loaded collections to the table', async () => {

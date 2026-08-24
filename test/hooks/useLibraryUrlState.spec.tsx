@@ -68,6 +68,17 @@ describe('useLibraryUrlState', () => {
     expect(filters.participantCount.min).toBe(5)
   })
 
+  it('reads primary and secondary data use codes from their own params', () => {
+    render(
+      <MemoryRouter initialEntries={['/?dataUse=HMB&dataUseModifiers=NPU,IRB']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.dataUse).toEqual(['HMB'])
+    expect(filters.dataUseModifiers).toEqual(['NPU', 'IRB'])
+  })
+
   it('updates state via updateState', () => {
     render(
       <MemoryRouter initialEntries={['/']}>

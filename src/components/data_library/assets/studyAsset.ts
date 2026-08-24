@@ -71,6 +71,8 @@ export const studyAsset: AssetDefinition = {
         },
         access_management: { terms: { field: 'accessManagement.keyword' } },
         data_use: { terms: { field: 'dataUse.primary.code.keyword' } },
+        // Explicit `size`: the secondary vocabulary exceeds the default bucket limit of 10.
+        data_use_modifiers: { terms: { field: 'dataUse.secondary.code.keyword', size: 50 } },
         data_type: { terms: { field: 'study.dataTypes.keyword' } },
         dac: { terms: { field: 'dac.dacName.keyword' } },
       },

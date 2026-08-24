@@ -9,7 +9,12 @@ import { styles } from 'src/components/dac_dataset_table/DACDatasetConstants'
 import { DatasetTerm } from 'src/types/model'
 
 vi.mock('src/utils/DataUseUtils', () => ({
-  processDataUseCodes: vi.fn(() => ({ codeList: ['HMB'], codesAndDescriptions: [{ code: 'HMB', description: 'Health/Medical/Biomedical' }] })),
+  processDataUseCodes: vi.fn(() => ({
+    codeList: ['HMB'],
+    // Mirrors the real DataUseCode shape (shortCode/type included) — vi.mock factories
+    // are not type-checked against the module, so this has to be kept in step by hand.
+    codesAndDescriptions: [{ code: 'HMB', shortCode: 'HMB', description: 'Health/Medical/Biomedical', type: 'primary' }],
+  })),
   createDataUseDisplay: vi.fn(() => <span>HMB</span>),
 }))
 

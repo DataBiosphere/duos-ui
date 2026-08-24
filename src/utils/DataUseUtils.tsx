@@ -1,10 +1,19 @@
 import React, { CSSProperties, ReactNode } from 'react'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
-import { DatasetTerm } from 'src/types/model'
+import { DatasetTerm, DataUseSummary } from 'src/types/model'
 
-interface DataUseCode {
+export type DataUseCodeType = 'primary' | 'secondary'
+
+export interface DataUseCode {
   code: string
+  /**
+   * The bare DUO code, for displays too tight to carry `code` in full — `code`
+   * appends the disease list for DS (`DS (Breast Cancer)`), which does not fit
+   * where several codes are shown together.
+   */
+  shortCode: string
   description: string
+  type: DataUseCodeType
 }
 
 interface ProcessedDataUseCodes {
@@ -12,23 +21,33 @@ interface ProcessedDataUseCodes {
   codeList: string[]
 }
 
+/** Anything carrying data use terms: an indexed dataset, or a DAR collection's data use group. */
+export interface HasDataUse {
+  dataUse?: DataUseSummary
+}
+
 /**
  * Process data use codes from a dataset
- * @param {DatasetTerm} dataset - DatasetTerm object containing data use information
+ * @param {object} dataset - anything carrying data use information
  * @returns {ProcessedDataUseCodes} - Object with processed data use information
  */
-export function processDataUseCodes(dataset: DatasetTerm): ProcessedDataUseCodes {
-  const codesAndDescriptions = dataset.dataUse?.primary
+export function processDataUseCodes(dataset: HasDataUse): ProcessedDataUseCodes {
+  const codesAndDescriptions: DataUseCode[] = dataset.dataUse?.primary
     ? dataset.dataUse.primary.map((dataUse) => {
         if (dataUse.code === 'OTHER') {
-          return { code: `OTH1`, description: dataUse.description }
+          return { code: `OTH1`, shortCode: 'OTH1', description: dataUse.description, type: 'primary' }
         }
         else if (dataUse.code === 'DS') {
-          const disease = dataUse.description.substring(dataUse.description.indexOf(':') + 2)
-          return { code: `${dataUse.code} (${disease})`, description: dataUse.description }
+          // The diseases follow a "Disease specific: <list>" prefix. Guard the split:
+          // a description with no colon (or none at all) must still yield a usable
+          // code, since the library grid derives a whole row's cell value from this.
+          const separator = dataUse.description?.indexOf(':') ?? -1
+          const disease = separator >= 0 ? dataUse.description.substring(separator + 2) : dataUse.description
+          const code = disease ? `${dataUse.code} (${disease})` : dataUse.code
+          return { code, shortCode: dataUse.code, description: dataUse.description, type: 'primary' }
         }
         else {
-          return { code: dataUse.code, description: dataUse.description }
+          return { code: dataUse.code, shortCode: dataUse.code, description: dataUse.description, type: 'primary' }
         }
       })
     : []
@@ -36,10 +55,10 @@ export function processDataUseCodes(dataset: DatasetTerm): ProcessedDataUseCodes
   if (dataset.dataUse?.secondary) {
     dataset.dataUse.secondary.forEach((dataUse) => {
       if (dataUse.code === 'OTHER') {
-        codesAndDescriptions.push({ code: `OTH2`, description: dataUse.description })
+        codesAndDescriptions.push({ code: `OTH2`, shortCode: 'OTH2', description: dataUse.description, type: 'secondary' })
       }
       else {
-        codesAndDescriptions.push({ code: dataUse.code, description: dataUse.description })
+        codesAndDescriptions.push({ code: dataUse.code, shortCode: dataUse.code, description: dataUse.description, type: 'secondary' })
       }
     })
   }
@@ -100,4 +119,27 @@ export function createDataUseDisplay({
       </ReactTooltip>
     </div>
   )
+}
+
+/**
+ * Primary codes first, then secondary alphabetically. Shared so every grid that shows data use
+ * renders the same codes in the same order.
+ *
+ * Renders every primary a record carries: Consent rejects multi-primary writes, but legacy records
+ * still hold them, and collapsing them would hide a shape a curator has to see.
+ */
+export const orderDataUseCodes = (dataset: HasDataUse): DataUseCode[] => {
+  const terms = processDataUseCodes(dataset).codesAndDescriptions.filter(term => Boolean(term.shortCode))
+  return [
+    ...terms.filter(term => term.type === 'primary'),
+    ...terms
+      .filter(term => term.type === 'secondary')
+      .sort((a, b) => a.shortCode.localeCompare(b.shortCode)),
+  ]
+}
+
+// Codes alone are opaque; name the tier so a secondary condition isn't read as a primary use
+export const dataUseTooltip = ({ code, description, type }: DataUseCode): string => {
+  const tier = type === 'primary' ? 'Primary' : 'Secondary'
+  return description ? `${tier} — ${code}: ${description}` : `${tier} — ${code}`
 }

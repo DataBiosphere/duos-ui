@@ -18,7 +18,7 @@ import ResearcherViewConfirmDialog from './ResearcherViewConfirmDialog'
 import BulkActionConfirmDialog from './BulkActionConfirmDialog'
 import { buildDAAViewRows, daaLabel } from './researcherViewHelpers'
 import { useBulkPreAuthorization } from './useBulkPreAuthorization'
-import { BulkConfirmState, ConfirmDialogState, DAAAccordionData } from './types'
+import { BulkConfirmState, ConfirmDialogState, DAAAccordionData, UserListScope } from './types'
 
 const FONT = 'Montserrat'
 const BRAND_BLUE = '#0948b7'
@@ -40,6 +40,24 @@ export interface DAAViewProps {
   readonly daas: readonly DAAObject[]
   readonly isLoading: boolean
   readonly onResearchersRefresh: (updated: DuosUser[]) => void
+  /**
+   * Role scope to reload the user list with after a mutation. Must match the
+   * scope the page loaded with, or a refresh would silently swap the list for a
+   * differently-scoped one.
+   */
+  readonly scope?: UserListScope
+  /**
+   * Read-only mode (Admin Console). Suppresses every mutating control: the
+   * per-row action buttons, the bulk Approve All / Remove All buttons, and the
+   * confirmation dialogs those buttons open.
+   */
+  readonly readOnly?: boolean
+  /**
+   * Adds an Institution column to each DAA's researcher sub-table. Only
+   * meaningful when the list spans more than one institution, which is the Admin
+   * Console's cross-institution scope.
+   */
+  readonly showInstitution?: boolean
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -56,12 +74,19 @@ export interface DAAViewProps {
  *
  * Auth mutations (createDaaLcLink / deleteDaaLcLink) are the same APIs used
  * by the existing ManageResearcherDAAs page.
+ *
+ * With `readOnly` set, the same view becomes the Admin Console's observe-only
+ * list: identical layout, search, expand/collapse and legend, but no controls
+ * that can change a pre-authorization.
  */
 export default function DAAView({
   researchers,
   daas,
   isLoading,
   onResearchersRefresh,
+  scope = USER_ROLES.signingOfficial,
+  readOnly = false,
+  showInstitution = false,
 }: Readonly<DAAViewProps>) {
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState<Record<number, boolean>>({})
@@ -92,13 +117,13 @@ export default function DAAView({
 
   const refreshResearchers = useCallback(async () => {
     try {
-      const updated = await User.list(USER_ROLES.signingOfficial)
+      const updated = await User.list(scope)
       onResearchersRefresh(updated)
     }
     catch {
       Notifications.showError({ text: 'Failed to refresh researcher list' })
     }
-  }, [onResearchersRefresh])
+  }, [onResearchersRefresh, scope])
 
   const toggleRow = useCallback((daaId: number) => {
     setExpanded(prev => ({ ...prev, [daaId]: !prev[daaId] }))
@@ -276,7 +301,7 @@ export default function DAAView({
             researcherRows={row.researcherRows}
             authorizedCount={row.authorizedCount}
             isRecentlyUpdated={row.isRecentlyUpdated}
-            isExpanded={expanded[row.daa.daaId]}
+            isExpanded={expanded[row.daa.daaId] ?? false}
             onToggle={() => toggleRow(row.daa.daaId)}
             onAuthorize={researcherId => openAuthorizeDialog(
               row.daa.daaId,
@@ -304,9 +329,16 @@ export default function DAAView({
               'remove',
               userIds,
             )}
+            readOnly={readOnly}
+            showInstitution={showInstitution}
           />
         ))}
       </Box>
+
+      {/*
+        Both dialogs render nothing until their state is set, and read-only mode
+        renders no control that can set it — so they self-suppress there.
+      */}
 
       {/* Single-relationship confirmation dialog (shared with ResearcherView) */}
       <ResearcherViewConfirmDialog

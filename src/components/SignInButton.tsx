@@ -1,22 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { isEmpty, isNil } from 'src/utils/NodashUtil'
+import { isEmpty } from 'src/utils/NodashUtil'
 import { Alert } from 'src/components/Alert'
-import { Auth } from 'src/libs/auth/auth'
-import { User } from 'src/libs/ajax/User'
-import { Metrics } from 'src/libs/ajax/Metrics'
+import { Auth, Redirect } from 'src/libs/auth/auth'
 import { Storage } from 'src/libs/storage'
-import { Navigation, setUserRoleStatuses } from 'src/libs/utils'
 import loadingIndicator from 'src/images/loading-indicator.svg'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
-import eventList, { MetricsEventName } from 'src/libs/events'
-import { ErrorReporter } from 'src/libs/ErrorReporter'
-import { OidcUser } from 'src/libs/auth/oidcBroker'
-import { DuosUser } from 'src/types/model'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import 'src/styles/tooltip.css'
-import { useNavigate } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
-import { extractError } from 'src/utils/ErrorUtils'
 
 interface ErrorInfo {
   title?: string
@@ -27,78 +17,20 @@ interface ErrorInfo {
 
 type ErrorDisplay = ErrorInfo | React.JSX.Element
 
-interface HttpError extends Error {
-  status?: number
-  body?: ReadableStream<Uint8Array>
-}
-
+/**
+ * A single sign-in button that starts the BFF login flow: POST /auth/login
+ * returns the B2C authorization URL and the whole page redirects there. The
+ * B2C login page presents the provider choice (Google / Microsoft), so no
+ * provider selection happens here. After B2C, the server-side /auth/callback
+ * establishes the session and redirects back; App.tsx's post-sign-in bootstrap
+ * takes it from there (user fetch, registration, ToS gate).
+ */
 export const SignInButton = () => {
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({})
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isConsentDown, setIsConsentDown] = useState<boolean>(false)
   const [isSamDown, setIsSamDown] = useState<boolean>(false)
   const [isButtonActive, setIsButtonActive] = useState<boolean>(false)
-
-  // Utility function called in the normal success case and in the undocumented 409 case
-  // Check for ToS Acceptance - redirect user if not set.
-  const checkToSAndRedirect = async (redirectPath: string | null) => {
-    // Check if the user has accepted ToS yet or not:
-    const tosAccepted = Storage.getCurrentUser().userStatusInfo?.tosAccepted || false
-    if (tosAccepted) {
-      if (isNil(redirectPath)) {
-        await Navigation.console(Storage.getCurrentUser(), navigate)
-      }
-      else {
-        navigate(redirectPath)
-      }
-    }
-    else if (isNil(redirectPath)) {
-      // User has authenticated, but has not accepted ToS
-      navigate(`/tos_acceptance`)
-    }
-    else {
-      navigate(`/tos_acceptance?redirectTo=${redirectPath}`)
-    }
-  }
-
-  const onSuccess = async (_: OidcUser) => {
-    const redirectTo = getRedirectTo()
-    const shouldRedirect = shouldRedirectTo(redirectTo)
-    try {
-      const duosUser: DuosUser = await User.getMe()
-      if (duosUser) {
-        Storage.setCurrentUser(duosUser)
-        setUserRoleStatuses(duosUser, Storage)
-        // Drop any query results cached before sign-in: cached library queries
-        // (data, tab counts, filter metadata) were built with the anonymous /
-        // previous user's role-based visibility clauses and would otherwise be
-        // served from cache under the new user's identity. Sign-out does the
-        // same in DuosHeader.signOut.
-        queryClient.clear()
-        if (!duosUser.roles) {
-          await ErrorReporter.report('roles not found for user: ' + duosUser.email)
-        }
-        syncSignInOrRegistrationEvent(eventList.userSignIn)
-        await checkToSAndRedirect(shouldRedirect ? redirectTo : null)
-      }
-      else {
-        await handleRegistration(redirectTo, shouldRedirect)
-      }
-    }
-    catch (error) {
-      // Explicitly handle AzureB2C errors from Sam
-      const errorMessage = extractError(error)
-      if (errorMessage.toLowerCase().includes('azureb2c authentication error')) {
-        await Auth.signOut()
-        setErrorDisplay({ show: true, title: 'Error', description: errorMessage })
-      }
-      else {
-        await handleRegistration(redirectTo, shouldRedirect)
-      }
-    }
-  }
 
   const getRedirectTo = (): string => {
     const queryParams = new URLSearchParams(globalThis.location.search)
@@ -107,82 +39,37 @@ export const SignInButton = () => {
 
   const shouldRedirectTo = (page: string): boolean => page !== '/' && page !== '/home'
 
-  const handleRegistration = async (redirectTo: string, shouldRedirect: boolean) => {
+  const handleSignIn = async () => {
+    setIsLoading(true)
     try {
-      await registerAndRedirectNewUser(redirectTo, shouldRedirect)
+      const redirectTo = getRedirectTo()
+      await Auth.signIn(shouldRedirectTo(redirectTo) ? redirectTo : undefined)
+      // In BFF mode Auth.signIn navigates the page to B2C and never resolves —
+      // the spinner stays up until the browser leaves. Only the legacy popup
+      // flow reaches this line: reload in place (query string included) so the
+      // fresh page load re-probes auth state and App.tsx runs the post-sign-in
+      // bootstrap, the same path the BFF callback takes. Redirect.reload, not
+      // Redirect.to(href) — on a #fragment URL the latter reloads nothing and
+      // a successful sign-in appears to do nothing.
+      Redirect.reload()
     }
     catch (error) {
-      await handleErrors(error as HttpError, redirectTo, shouldRedirect)
-    }
-  }
-
-  const registerAndRedirectNewUser = async (redirectTo: string, shouldRedirect: boolean) => {
-    const registeredUser: DuosUser = await User.registerUser()
-    const redirectParam = shouldRedirect ? `?redirectTo=${redirectTo}` : ''
-    setUserRoleStatuses(registeredUser, Storage)
-    // New identity — same cache reset as the normal sign-in path above.
-    queryClient.clear()
-    syncSignInOrRegistrationEvent(eventList.userRegister)
-    navigate(`/tos_acceptance${redirectParam}`)
-  }
-
-  const syncSignInOrRegistrationEvent = (event: MetricsEventName) => {
-    Storage.setAnonymousId()
-    // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
-    Metrics.identify(`${Storage.getAnonymousId()}`)
-    // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
-    Metrics.syncProfile()
-    // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
-    Metrics.captureEvent(event)
-  }
-
-  const errorStreamToString = async (error: HttpError) => {
-    const body = await new Response(error.body).json()
-    return body.message || JSON.stringify(body)
-  }
-
-  const handleServerError = async (error: HttpError) => {
-    const errorMessage = await errorStreamToString(error)
-    setErrorDisplay({ show: true, title: 'Error', description: errorMessage })
-  }
-
-  const handleErrors = async (error: HttpError, redirectTo: string, shouldRedirect: boolean) => {
-    const status = error.status
-
-    switch (status) {
-      case 400:
-        setErrorDisplay({ show: true, title: 'Error', description: JSON.stringify(error) })
-        break
-      case 409:
-        await handleConflictError(redirectTo, shouldRedirect)
-        break
-      case 500:
-        await handleServerError(error)
-        break
-      default:
-        setErrorDisplay({ show: true, title: 'Error', description: 'Unexpected error, please try again' })
-        break
-    }
-  }
-
-  const handleConflictError = async (redirectTo: string, shouldRedirect: boolean) => {
-    try {
-      await checkToSAndRedirect(shouldRedirect ? redirectTo : null)
-    }
-    catch {
-      await Auth.signOut()
-    }
-  }
-
-  const onFailure = (response: Error) => {
-    Storage.clearStorage()
-    // Known error case from oidc-client-ts PopupWindow: "new Error("Popup closed by user")"
-    if (response.toString().includes('Popup closed by user')) {
-      setErrorDisplay(
-        { title: 'Sign in cancelled', description: 'Sign in cancelled by closing the sign in window' })
-    }
-    else {
-      setErrorDisplay({ title: 'Error', description: response.toString() })
+      // The legacy popup flow rejects here (BFF mode navigates away instead).
+      // Mirror the old onFailure: drop whatever partial auth state the popup
+      // left behind, and tell a deliberate cancel apart from a real failure —
+      // oidc-client-ts PopupWindow rejects with "Popup closed by user".
+      Storage.clearStorage()
+      if (String(error).includes('Popup closed by user')) {
+        setErrorDisplay({
+          show: true,
+          title: 'Sign in cancelled',
+          description: 'Sign in cancelled by closing the sign in window',
+        })
+      }
+      else {
+        setErrorDisplay({ show: true, title: 'Error', description: Auth.signInError() })
+      }
+      setIsLoading(false)
     }
   }
 
@@ -230,10 +117,8 @@ export const SignInButton = () => {
             onMouseLeave={() => setIsButtonActive(false)}
             onFocus={() => setIsButtonActive(true)}
             onBlur={() => setIsButtonActive(false)}
-            onClick={async () => {
-              setIsLoading(true)
-              Auth.signIn().then(onSuccess, onFailure)
-              setIsLoading(false)
+            onClick={() => {
+              void handleSignIn()
             }}
             disabled={isSignInDisabled}
           >

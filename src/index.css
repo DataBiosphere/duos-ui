@@ -57,7 +57,7 @@ a {
 }
 
 a, input {
-  outline: 0 !important;
+  outline: 0;
   text-decoration: none !important;
 }
 

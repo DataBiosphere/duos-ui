@@ -13,6 +13,7 @@ import { assetFilterRegistry } from 'src/libs/dataLibraryFilterConfig'
 type ArrayFilterKey
   = | 'accessManagement'
     | 'dataUse'
+    | 'dataUseModifiers'
     | 'dataType'
     | 'dac'
     | 'workspaceTools'
@@ -29,6 +30,7 @@ type ArrayFilterKey
 const ARRAY_FILTER_KEYS: ArrayFilterKey[] = [
   'accessManagement',
   'dataUse',
+  'dataUseModifiers',
   'dataType',
   'dac',
   'workspaceTools',
@@ -68,6 +70,7 @@ const BOOL_FILTER_KEYS: Array<'datasetsCited' | 'publicationsDatasetsCited' | 'i
 const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
   accessManagement: 'checkbox',
   dataUse: 'checkbox',
+  dataUseModifiers: 'checkbox',
   dataType: 'checkbox',
   dac: 'checkbox',
   workspaceTools: 'checkbox',
@@ -94,6 +97,7 @@ const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
 export const EMPTY_FILTERS: FilterState = {
   accessManagement: [],
   dataUse: [],
+  dataUseModifiers: [],
   dataType: [],
   dac: [],
   workspaceTools: [],
@@ -129,11 +133,45 @@ export const EMPTY_FILTERS: FilterState = {
  * also count as inactive everywhere; encoding that once here keeps the badge, the
  * chips, and the query in lockstep.
  */
+/**
+ * The two bounds of each date-range filter, lower bound first. A range whose
+ * bounds cross can match nothing (both bounds are ANDed, and for the start/end
+ * pairs an asset would have to end before it starts), so it builds no clause
+ * and must read as inactive everywhere — see isFilterActive.
+ */
+const DATE_RANGE_BOUNDS = {
+  clinicalTrialDates: ['startDate', 'endDate'],
+  fundingDate: ['startDate', 'endDate'],
+  biospecimenCollectionDate: ['after', 'before'],
+  ipFiledDate: ['after', 'before'],
+} as const
+
+/**
+ * True when both bounds of a date-range filter are set and crossed. The single
+ * encoding of the rule: the filter panel's validation message, isFilterActive
+ * (and through it the badge, the chips and the query clause), and the
+ * client-side row filters in the funding/IP/biospecimen transforms all use it.
+ */
+export const isInvertedDateRange = (key: FilterKey, filters: FilterState): boolean => {
+  const bounds = DATE_RANGE_BOUNDS[key as keyof typeof DATE_RANGE_BOUNDS]
+  if (!bounds) {
+    return false
+  }
+
+  const [lowerKey, upperKey] = bounds
+  const value = filters[key] as Record<string, string | undefined>
+  const lower = value[lowerKey]
+  const upper = value[upperKey]
+
+  return !!lower && !!upper && lower > upper
+}
+
 export const isFilterActive = (key: FilterKey, filters: FilterState): boolean => {
   switch (key) {
     // Multi-select (array) filters are active once any value is selected.
     case 'accessManagement':
     case 'dataUse':
+    case 'dataUseModifiers':
     case 'dataType':
     case 'dac':
     case 'workspaceTools':
@@ -159,21 +197,21 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
     case 'biospecimenPostMortemInterval':
       return filters[key].min !== undefined || filters[key].max !== undefined
 
-    case 'clinicalTrialDates': {
-      const { startDate, endDate } = filters.clinicalTrialDates
-      // An inverted range builds no clause (see buildClause), so it is inactive.
-      if (startDate && endDate && startDate > endDate) {
+    // An inverted range builds no clause (see buildClause), so it is inactive.
+    case 'clinicalTrialDates':
+    case 'fundingDate': {
+      if (isInvertedDateRange(key, filters)) {
         return false
       }
-      return !!startDate || !!endDate
-    }
-    case 'fundingDate': {
-      const { startDate, endDate } = filters.fundingDate
+      const { startDate, endDate } = filters[key]
       return !!startDate || !!endDate
     }
 
     case 'biospecimenCollectionDate':
     case 'ipFiledDate': {
+      if (isInvertedDateRange(key, filters)) {
+        return false
+      }
       const { after, before } = filters[key]
       return !!after || !!before
     }
@@ -187,6 +225,7 @@ const getFilterOptions = (key: FilterKey, availableFilters: AvailableFilters) =>
   switch (key) {
     case 'accessManagement':
     case 'dataUse':
+    case 'dataUseModifiers':
     case 'dataType':
     case 'dac':
     case 'workspaceTools':
@@ -327,6 +366,25 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         },
       }
     },
+  },
+  /**
+   * Secondary data use conditions (DUO modifiers). This is a separate filter from
+   * `dataUse` rather than extra options within it: `buildActiveFilterClauses`
+   * combines clauses from different filters with AND, so selecting HMB here and
+   * NPU there means "HMB datasets that are also non-profit-only" — which a single
+   * OR'd checkbox list could not express.
+   */
+  dataUseModifiers: {
+    label: 'Data Use Modifiers',
+    // `matchAny` (match_phrase), not `match`: several modifier codes are hyphenated,
+    // and the analyzed field tokenizes them, so a plain `match` on `RS-G` — which ORs
+    // its tokens — would also return every `RS-PD` dataset. The primary `dataUse`
+    // filter above gets away with `match` only because every primary code is a
+    // single token.
+    buildClause: filters =>
+      filters.dataUseModifiers.length > 0
+        ? matchAny('dataUse.secondary.code', filters.dataUseModifiers)
+        : undefined,
   },
   dataType: {
     label: 'Data Type',
@@ -493,10 +551,10 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   biospecimenCollectionDate: {
     label: 'Collection Date',
     buildClause: (filters) => {
-      const { after, before } = filters.biospecimenCollectionDate
-      if (!after && !before) {
+      if (!isFilterActive('biospecimenCollectionDate', filters)) {
         return undefined
       }
+      const { after, before } = filters.biospecimenCollectionDate
 
       return {
         range: {
@@ -538,10 +596,10 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   ipFiledDate: {
     label: 'Filed Date',
     buildClause: (filters) => {
-      const { after, before } = filters.ipFiledDate
-      if (!after && !before) {
+      if (!isFilterActive('ipFiledDate', filters)) {
         return undefined
       }
+      const { after, before } = filters.ipFiledDate
 
       return {
         range: {
@@ -556,10 +614,10 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   fundingDate: {
     label: 'Funding Dates',
     buildClause: (filters) => {
-      const { startDate, endDate } = filters.fundingDate
-      if (!startDate && !endDate) {
+      if (!isFilterActive('fundingDate', filters)) {
         return undefined
       }
+      const { startDate, endDate } = filters.fundingDate
 
       const clauses: QueryClause[] = []
       if (startDate) {
