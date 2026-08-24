@@ -163,7 +163,7 @@ describe('UserProfile', () => {
 
   it('clicking Save without editing the name shows an informational notification', async () => {
     renderUserProfile()
-    await waitFor(() => screen.getByDisplayValue('Test User'))
+    await screen.findByDisplayValue('Test User')
 
     await userEvent.click(screen.getByRole('button', { name: 'Save' }))
 
@@ -175,7 +175,7 @@ describe('UserProfile', () => {
   it('saving an edited name calls User.updateSelf and shows success', async () => {
     vi.mocked(User.updateSelf).mockResolvedValue(mockUser)
     renderUserProfile()
-    await waitFor(() => screen.getByDisplayValue('Test User'))
+    await screen.findByDisplayValue('Test User')
 
     const nameInput = screen.getByDisplayValue('Test User')
     await userEvent.clear(nameInput)
@@ -202,7 +202,7 @@ describe('UserProfile', () => {
   it('turning on the email notification toggle calls User.updateSelf and shows success', async () => {
     vi.mocked(User.updateSelf).mockResolvedValue(mockUser)
     renderUserProfile()
-    await waitFor(() => screen.getByDisplayValue('Test User'))
+    await screen.findByDisplayValue('Test User')
 
     await userEvent.click(screen.getByRole('switch', { name: 'Send me email notifications' }))
 
@@ -217,7 +217,7 @@ describe('UserProfile', () => {
   it('reverts the email notification toggle when the update fails', async () => {
     vi.mocked(User.updateSelf).mockRejectedValue(new Error('API error'))
     renderUserProfile()
-    await waitFor(() => screen.getByDisplayValue('Test User'))
+    await screen.findByDisplayValue('Test User')
 
     const toggle = screen.getByRole('switch', { name: 'Send me email notifications' })
     await userEvent.click(toggle)
