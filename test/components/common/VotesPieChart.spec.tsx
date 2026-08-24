@@ -41,20 +41,20 @@ describe('VotesPieChart', () => {
     expect(document.querySelector('.test-pie-chart-no-data')).not.toBeInTheDocument()
   })
 
-  it('shows every category with its count in the legend', () => {
+  it('shows a legend entry for every voted category', () => {
     render(<VotesPieChart keyString="test" votes={testVotes} />)
 
-    expect(screen.getByText('Yes (1)')).toBeInTheDocument()
-    expect(screen.getByText('No (1)')).toBeInTheDocument()
-    expect(screen.getByText('Not Yet Voted (1)')).toBeInTheDocument()
+    expect(screen.getByText('Yes')).toBeInTheDocument()
+    expect(screen.getByText('No')).toBeInTheDocument()
+    expect(screen.getByText('Not Yet Voted')).toBeInTheDocument()
   })
 
-  it('omits the slice for a zero-count category but keeps it in the legend', () => {
+  it('omits a zero-count category from the pie and the legend', () => {
     const votes = [makeVote(1, true), makeVote(2, true), makeVote(3, false)]
     const { container } = render(<VotesPieChart keyString="test" votes={votes} />)
 
     expect(container.querySelectorAll('path')).toHaveLength(2)
-    expect(screen.getByText('Not Yet Voted (0)')).toBeInTheDocument()
+    expect(screen.queryByText('Not Yet Voted')).not.toBeInTheDocument()
   })
 
   it('labels each slice with its count and percentage', () => {

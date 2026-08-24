@@ -109,12 +109,12 @@ export default function VotesPieChart({
 
   return (
     <div style={{ ...style, ...styleOverride }} className={`${keyString}-pie-chart`}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width, height }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', padding: '1.5rem 1rem', width, height }}>
         <svg
           viewBox={`0 0 ${VIEW_BOX_SIZE} ${VIEW_BOX_SIZE}`}
           role="img"
           aria-label={`Vote summary: ${summary}`}
-          style={{ width: '45%', maxWidth: '180px', flex: '0 0 auto' }}
+          style={{ width: '40%', maxWidth: '150px', flex: '0 0 auto' }}
         >
           {slices.length === 1
             ? (
@@ -135,8 +135,6 @@ export default function VotesPieChart({
                     key={slice.label}
                     d={donutSlicePath(slice.start, slice.start + slice.fraction, innerRadius)}
                     fill={slice.color}
-                    stroke="#FFFFFF"
-                    strokeWidth="1"
                   >
                     <title>{sliceTitle(slice.label, slice.count, slice.fraction)}</title>
                   </path>
@@ -152,18 +150,25 @@ export default function VotesPieChart({
             flexDirection: 'column',
             gap: '0.25rem',
             fontFamily: 'Montserrat',
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: 400,
-            color: '#333F52',
+            color: '#222222',
           }}
         >
-          {VOTE_CATEGORIES.map(({ label, color }) => (
+          {slices.map(({ label, color }) => (
             <li key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span
                 aria-hidden="true"
-                style={{ width: 12, height: 12, backgroundColor: color, display: 'inline-block', flex: '0 0 auto' }}
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: '50%',
+                  backgroundColor: color,
+                  display: 'inline-block',
+                  flex: '0 0 auto',
+                }}
               />
-              <span>{`${label} (${counts[label]})`}</span>
+              <span>{label}</span>
             </li>
           ))}
         </ul>
