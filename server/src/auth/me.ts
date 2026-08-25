@@ -147,9 +147,10 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
   }
 
   if (!res.ok) {
-    // A non-4xx failure (5xx, upstream outage) says nothing about whether the
-    // token itself is still valid — don't destroy the session or parse an
-    // error body as if it were a user profile.
+    // An unmapped status — 5xx, an upstream outage, or a 4xx the contract
+    // does not define (400/403/429) — says nothing about whether the token
+    // itself is still valid: don't destroy the session or parse an error
+    // body as if it were a user profile. 502 tells the probe to retry.
     reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
     return
   }

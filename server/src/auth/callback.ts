@@ -30,8 +30,11 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
       // code — the user canceled on the B2C page (access_denied), or chose
       // an identity the tenant's policy rejects. Land back in the
       // SPA instead; a cancel is the user's own action and stays silent.
-      request.log.warn({ error: err.error, description: err.error_description }, '[auth] B2C authorization response is an error')
-      reply.redirect(err.error === 'access_denied' ? '/' : '/?signInError=provider')
+      // A cancel is routine — info keeps it out of warn-based alerting;
+      // real provider errors stay at warn.
+      const cancelled = err.error === 'access_denied'
+      request.log[cancelled ? 'info' : 'warn']({ error: err.error, description: err.error_description }, '[auth] B2C authorization response is an error')
+      reply.redirect(cancelled ? '/' : '/?signInError=provider')
       return
     }
     throw err
