@@ -17,11 +17,7 @@ export const PrincipalInvestigatorHelpText: React.FC = () => {
     >
       <div style={{ fontWeight: 600 }}>Who qualifies as a Principal Investigator?</div>
       <div>
-        A Principal Investigator is affiliated with their listed institution or corporation, and is a
-        permanent employee of their institution at a level equivalent to, but not limited to, that of
-        an academic professor (e.g., assistant, associate, or non-tenure or tenure-track professor)
-        or senior researcher. This does not include lab technicians or trainees, e.g., post-docs or
-        graduate students.
+        <strong>Principal Investigator (PI):</strong> is a permanent employee of their institution at a level equivalent to, but not limited to, that of an academic professor (e.g., assistant, associate, or non-tenure or tenure-track professor) or senior researcher. This does not include lab technicians or trainees, e.g., post-docs or graduate students.
       </div>
     </div>
   )
