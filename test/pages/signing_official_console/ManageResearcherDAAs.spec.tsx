@@ -7,6 +7,7 @@ import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResea
 import { User } from 'src/libs/ajax/User'
 import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
+import { PI_QUALIFICATION } from 'src/libs/principalInvestigator'
 import { makeDaa, makeResearcher } from './DAAAssignment/fixtures'
 
 afterEach(() => vi.restoreAllMocks())
@@ -31,7 +32,7 @@ describe('ManageResearcherDAAs', () => {
 
     const { container } = render(<ManageResearcherDAAs />)
 
-    expect(screen.getByText(/permanent employee of their institution/i)).toBeInTheDocument()
+    expect(screen.getByText(PI_QUALIFICATION, { exact: false })).toBeInTheDocument()
 
     await waitFor(() => expect(container.querySelector('[data-cy="researcher-view"]')).toBeInTheDocument())
 

@@ -70,7 +70,7 @@ export default function SigningOfficialDarApprovals(): React.JSX.Element {
           description="Your Institution's Data Access Approvals: Records from all current data access approvals"
         />
       </div>
-      <div style={{ padding: '0 2em 1em' }}>
+      <div style={{ padding: '0 2rem 1rem' }}>
         <PrincipalInvestigatorHelpText />
       </div>
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>

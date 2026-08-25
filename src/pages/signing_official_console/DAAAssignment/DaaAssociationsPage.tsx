@@ -160,7 +160,9 @@ export default function DaaAssociationsPage({
         />
       </Box>
       {helpContent && (
-        <Box sx={{ paddingLeft: '5rem', paddingRight: '5rem', marginBottom: '1.5rem' }}>
+        // Left-aligned with the header above rather than the tab bar below, so
+        // the guidance reads as part of the page's introduction.
+        <Box sx={{ paddingLeft: '4rem', paddingRight: '5rem', marginBottom: '1.5rem' }}>
           {helpContent}
         </Box>
       )}
