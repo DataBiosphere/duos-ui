@@ -106,9 +106,7 @@ describe('ResearcherStatus', () => {
 
   it('shows "Inactive" status when user has no libraryCard', async () => {
     render(<ResearcherStatus user={baseUser} />)
-    await waitFor(() => {
-      expect(screen.getByText('Inactive')).toBeInTheDocument()
-    })
+    expect(await screen.findByRole('alert')).toHaveTextContent('Inactive')
   })
 
   it('shows "Active" status when user has a libraryCard', async () => {
@@ -126,9 +124,7 @@ describe('ResearcherStatus', () => {
     }
     vi.mocked(User.getSOsForInstitution).mockResolvedValue([soWithData])
     render(<ResearcherStatus user={userWithCard} />)
-    await waitFor(() => {
-      expect(screen.getByText('Active')).toBeInTheDocument()
-    })
+    expect(await screen.findByRole('alert')).toHaveTextContent('Active')
   })
 
   it('renders the DAAs component when user has a libraryCard', async () => {

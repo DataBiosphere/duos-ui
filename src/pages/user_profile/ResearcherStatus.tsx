@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
+import Alert from '@mui/material/Alert'
+import AlertTitle from '@mui/material/AlertTitle'
 import ERACommons from 'src/components/era_commons/ERACommons'
 import { Notifications } from 'src/libs/utils'
 import { User } from 'src/libs/ajax/User'
@@ -9,7 +11,6 @@ import { nihAccountInstructions, nihAccountLabel } from 'src/components/era_comm
 import { DAAObject, DuosUser, SigningOfficialUserWithData } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
 import './UserProfile.css'
-import './ResearcherStatus.css'
 
 export interface ResearcherStatusProps {
   user: DuosUser
@@ -63,17 +64,19 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
   }, [user])
 
   return (
-    <div className="researcher-status">
+    <>
       <h1 className="user-profile-section-heading">Researcher Status</h1>
       <p className="user-profile-subheading">Requestor Status</p>
-      <p className={`researcher-status-value researcher-status-value-${hasCard ? 'active' : 'inactive'}`}>
-        {hasCard ? 'Active' : 'Inactive'}
-      </p>
-      {!hasCard && (
-        <p className="researcher-status-inactive-notice">
-          You must be an Active researcher to submit a data access request in DUOS. Please contact your Institutional Signing Official to change your status in DUOS.
-        </p>
-      )}
+      <Alert severity={hasCard ? 'success' : 'info'} sx={{ mb: 2 }}>
+        {hasCard
+          ? 'Active'
+          : (
+              <>
+                <AlertTitle>Inactive</AlertTitle>
+                You must be an Active researcher to submit a data access request in DUOS. Please contact your Institutional Signing Official to change your status in DUOS.
+              </>
+            )}
+      </Alert>
       <p className="user-profile-subheading">
         {accountLabel}
         {' '}
@@ -106,7 +109,7 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
             />
           )
         : null}
-    </div>
+    </>
   )
 }
 
