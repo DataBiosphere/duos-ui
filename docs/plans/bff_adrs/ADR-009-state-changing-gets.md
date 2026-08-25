@@ -67,14 +67,33 @@ change, out of scope for a duos-ui story — **raise it with the Consent API own
 as follow-up.** This ADR should be revisited, and can likely be retired, once
 that lands.
 
-### One BFF-side mitigation, deliberately deferred
+### One BFF-side mitigation, deliberately deferred — since implemented (Epic 5, story 5-B)
 
 Available without touching client or upstream: reject requests arriving with
 `Sec-Fetch-Mode: navigate` on the proxy, since no API call should ever be a
-top-level navigation and the header cannot be forged from JavaScript. It is
+top-level navigation and the header cannot be forged from JavaScript. It was
 **not** implemented here — it is a new request-rejection rule rather than part of
-this story, and it should be decided on its own merits. Worth considering for
-Epic 5 (security hardening).
+this story, and it should be decided on its own merits.
+
+**Update (2026-08-24, Epic 5, story 5-B):** implemented, and deliberately
+broader than the navigate-only rule sketched above — that rule would not have
+closed the gap. The dangerous requests here are same-**site** (a compromised
+`*.broadinstitute.org` sibling), and they come in three shapes — a top-level
+navigation, a `no-cors` subresource (`<img>`), and a credentialed `fetch()`
+whose read CORS blocks but whose GET still executes upstream. The enforced
+rule is a positive allowlist: when `Sec-Fetch-Site` is present, require
+`same-origin` AND `Sec-Fetch-Mode: cors`/`same-origin`; when the headers are
+absent (older browsers, non-browser clients), allow and rely on the
+CSRF/session controls. It is applied by the shared proxy machinery to every
+upstream prefix, and to `/auth/me` (which calls `GET /api/user/me`
+server-side); `/auth/login` and `/auth/callback` are exempt because the OAuth
+callback is a legitimate cross-site navigation. See
+`server/src/security/fetchMetadata.ts` for the rule and its rationale, and
+`server/test/fetchMetadata.test.ts` for the matrix.
+
+The residual risk above is therefore closed for modern browsers; the
+accepted-risk analysis continues to apply only to browsers that send no Fetch
+Metadata headers. The upstream fix (DT-3945) remains the real fix.
 
 ---
 
@@ -126,3 +145,17 @@ A false positive. The regex matched `Approved` inside
 The audit script is not checked in — it is 40 lines of throwaway Python and
 would rot against the Consent API's shape. Re-derive it when the upstream API
 changes materially, or when a new epic widens what the proxy forwards.
+
+### Re-run (2026-08-24, Epic 5, story 5-B)
+
+**Audited:** Consent API `origin/develop` at `001497ae1`, 2026-08-24, with the
+same method (brace-matched `@GET` bodies across the `*Resource.java` files,
+searched for mutation-verb calls): 37 resource files, 91 `@GET` methods.
+
+**Result: unchanged.** The same two endpoints are state-changing — 
+`GET /api/nih/sync` (`nihService.syncAccount`) and `GET /api/user/me`
+(`nihService.syncAccount` unconditionally, plus
+`samService.asyncPostRegistrationInfo` when the user has no Sam status) — and
+no new ones appeared. Every other candidate the verb regex surfaced was the
+`createExceptionResponse` error-path false positive. Both endpoints are now
+behind the Fetch Metadata guard described above; DT-3945 is still open.

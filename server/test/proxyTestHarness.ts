@@ -5,7 +5,7 @@ import Fastify, { type FastifyInstance, type FastifyRequest, type Session } from
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
-import { csrfPluginOptions } from '../src/auth/csrf.js'
+import { csrfPluginOptions, handleCsrfToken } from '../src/auth/csrf.js'
 import { TRUST_PROXY } from '../src/config.js'
 
 /**
@@ -102,9 +102,11 @@ export async function buildAppShell(): Promise<FastifyInstance> {
     rolling: false,
   })
   await app.register(fastifyCsrf, csrfPluginOptions)
-  // Mirrors index.ts's /auth/csrf-token — the only way a client gets a token,
-  // and therefore the only way these tests can produce a valid one.
-  app.get('/auth/csrf-token', async (_request, reply) => reply.send({ token: reply.generateCsrf() }))
+  // The real /auth/csrf-token handler, not a copy — the only way a client gets
+  // a token, and therefore the only way these tests can produce a valid one.
+  // Since story 5-B it is gated on an authenticated session, so a suite that
+  // needs a token must seed one (seedSession applies to this route too).
+  app.get('/auth/csrf-token', handleCsrfToken)
   return app
 }
 

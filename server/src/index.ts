@@ -10,7 +10,8 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { createPgSessionStore } from './session/pgStore.js'
-import { csrfPluginOptions } from './auth/csrf.js'
+import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
+import { fetchMetadataGuard } from './security/fetchMetadata.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
 import { handleCallback } from './auth/callback.js'
@@ -216,17 +217,22 @@ export async function buildApp(): Promise<AppInstance> {
     fastify.post('/auth/login', handleLogin)
     fastify.get('/auth/callback', handleCallback)
     // The client fetches this after sign-in and echoes the token in an
-    // X-CSRF-Token header on unsafe auth requests. The CSRF secret lives in the
-    // session, so calling this creates/updates a session row — the client
-    // should only call it once authenticated (see Epic 4, story 4-D). After
-    // session rotation (Epic 5, 5-D) the pre-auth secret is discarded, so the
-    // client must (re)fetch this once login completes.
-    fastify.get('/auth/csrf-token', async (_request, reply) => reply.send({ token: reply.generateCsrf() }))
-    // /auth/login is deliberately exempt: it is pre-authentication (no token to
-    // have fetched yet), and login CSRF is neutralized by the PKCE state binding
-    // the flow to the session. /auth/me is a safe GET. Only logout is guarded.
+    // X-CSRF-Token header on unsafe auth requests. Gated on an authenticated
+    // session (story 5-B): an anonymous request gets 401 and mints no session
+    // row — see the handler in auth/csrf.ts. After session rotation (Epic 5,
+    // 5-C) the pre-auth secret is discarded, so the client must (re)fetch this
+    // once login completes.
+    fastify.get('/auth/csrf-token', handleCsrfToken)
+    // /auth/login is deliberately exempt from CSRF: it is pre-authentication
+    // (no token to have fetched yet), and login CSRF is neutralized by the
+    // PKCE state binding the flow to the session. Only logout is guarded.
     fastify.post('/auth/logout', { onRequest: fastify.csrfProtection }, handleLogout)
-    fastify.get('/auth/me', getMe)
+    // /auth/me is a safe GET here, but it calls Consent's state-changing
+    // GET /api/user/me server-side, so it carries the Fetch Metadata guard the
+    // proxies get from their shared machinery (story 5-B; see
+    // security/fetchMetadata.ts). /auth/login and /auth/callback must NOT get
+    // it — the callback is a legitimate cross-site navigation from B2C.
+    fastify.get('/auth/me', { onRequest: fetchMetadataGuard }, getMe)
 
     // The API proxy (Phase 3). Registered here, inside both switches, rather
     // than alongside /health: it depends on @fastify/cookie, @fastify/session
