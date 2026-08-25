@@ -133,6 +133,33 @@ describe('Main App Functions', () => {
     await waitFor(() => expect(document.querySelector('[data-cy="notification-alert"]')).toBeVisible())
   })
 
+  it('shows the sign-in error toast and strips the marker when the BFF callback lands with ?signInError', async () => {
+    // The BFF /auth/callback redirects here when B2C answers the
+    // authorization request with an error instead of a code (e.g. a
+    // rejected Microsoft authentication attempt).
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: false })
+    const searchSpy = vi.fn()
+    const SearchSpy = () => {
+      const location = useLocation()
+      React.useEffect(() => {
+        searchSpy(location.search)
+      }, [location])
+      return null
+    }
+
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/', search: '?signInError=provider' }]}>
+        <SearchSpy />
+        <App />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => expect(document.querySelector('[data-cy="notification-alert"]')).toBeVisible())
+    expect(document.querySelector('[data-cy="notification-alert"]')?.textContent).toContain('identity provider')
+    // Stripped so a reload or bookmark does not repeat the toast.
+    await waitFor(() => expect(searchSpy).toHaveBeenCalledWith(''))
+  })
+
   it('should process RAS query params (code, state) and navigate to the profile page when the parameter specifies it', async () => {
     vi.mocked(AuthenticateNIH.getECMProviderLinkInfo).mockResolvedValue(linkInfo as never)
     vi.mocked(AuthenticateNIH.getSyncedUser).mockResolvedValue(duosUser as never)

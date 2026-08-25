@@ -17,10 +17,25 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
   // inspected; DUOS_OAUTH_REDIRECT_URI supplies the base so it parses as an
   // absolute URL.
   const currentUrl = new URL(request.url, requireEnv('DUOS_OAUTH_REDIRECT_URI'))
-  const tokens = await oidc.authorizationCodeGrant(config, currentUrl, {
-    pkceCodeVerifier: request.session.pkceVerifier,
-    expectedState: request.session.pkceState,
-  })
+  let tokens: Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>
+  try {
+    tokens = await oidc.authorizationCodeGrant(config, currentUrl, {
+      pkceCodeVerifier: request.session.pkceVerifier,
+      expectedState: request.session.pkceState,
+    })
+  }
+  catch (err: unknown) {
+    if (err instanceof oidc.AuthorizationResponseError) {
+      // B2C answered the authorization request with an error instead of a
+      // code — the user canceled on the B2C page (access_denied), or chose
+      // an identity the tenant's policy rejects. Land back in the
+      // SPA instead; a cancel is the user's own action and stays silent.
+      request.log.warn({ error: err.error, description: err.error_description }, '[auth] B2C authorization response is an error')
+      reply.redirect(err.error === 'access_denied' ? '/' : '/?signInError=provider')
+      return
+    }
+    throw err
+  }
 
   const claims = tokens.claims() // undefined when no id_token is present
 
