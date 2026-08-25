@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { FormControlLabel, Switch } from '@mui/material'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { Notification } from 'src/components/Notification'
 import { User } from 'src/libs/ajax/User'
@@ -9,18 +10,31 @@ import AffiliationAndRoles from './AffiliationAndRoles'
 import ResearcherStatus from './ResearcherStatus'
 import AcceptedAcknowledgements from './AcceptedAcknowledgements'
 import ExternalProfile from './ExternalProfile'
-import ga4ghLogo from 'src/images/ga4gh-logo.png'
-import userProfileIcon from 'src/images/user-profile.png'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import { Theme } from 'src/libs/theme'
 import { DuosUser } from 'src/types/model'
 import PageHeading from 'src/components/PageHeading'
 import './UserProfile.css'
+
+const emailToggleSx = {
+  '& .MuiSwitch-switchBase.Mui-checked': { color: Theme.palette.success },
+  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: Theme.palette.success },
+}
+
+// The app roots rem at 10px, so MUI's rem-based label default renders far smaller than the page text.
+const emailToggleLabelSx = {
+  'margin': 0,
+  'gap': '8px',
+  '& .MuiFormControlLabel-label': { font: 'inherit' },
+}
 
 export default function UserProfile() {
   usePageTitle('User Profile')
   const [user, setUser] = useState<Partial<DuosUser>>({})
   const [name, setName] = useState<string>('')
   const [updatedName, setUpdatedName] = useState<string>('')
+  const [emailPreference, setEmailPreference] = useState<boolean>(false)
+  const [savingEmailPreference, setSavingEmailPreference] = useState<boolean>(false)
 
   const [notificationData, setNotificationData] = useState<Banner | null | undefined>(null)
 
@@ -49,19 +63,28 @@ export default function UserProfile() {
     }
   }
 
-  const updateEmailPreference = (value: boolean) => {
+  const updateEmailPreference = async (value: boolean) => {
     const payload = {
       emailPreference: value,
     }
+    const lastConfirmed = emailPreference
 
-    User.updateSelf(payload).then((response) => {
+    setEmailPreference(value)
+    setSavingEmailPreference(true)
+    try {
+      const response = await User.updateSelf(payload)
       if (response) {
         setUserRoleStatuses(response, Storage)
       }
       Notifications.showSuccess({ text: 'Email preference updated successfully!' })
-    }, () => {
+    }
+    catch {
+      setEmailPreference(lastConfirmed)
       Notifications.showError({ text: 'Some errors occurred, the user\'s email preference was not updated.' })
-    })
+    }
+    finally {
+      setSavingEmailPreference(false)
+    }
   }
 
   useEffect(() => {
@@ -71,6 +94,7 @@ export default function UserProfile() {
         setUserRoleStatuses(user, Storage)
         setUser(user)
         setName(user.displayName)
+        setEmailPreference(Boolean(user.emailPreference))
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'))
       }
       catch {
@@ -83,33 +107,15 @@ export default function UserProfile() {
 
   return (
     <main className="user-profile-page">
-      <div className="header">
-        <Notification notificationData={notificationData} />
-        <div>
-          <div>
-            <PageHeading
-              id="researcherProfile"
-              color="common"
-              title="Your Profile"
-              imgSrc={userProfileIcon}
-              iconSize="large"
-            />
-          </div>
-          <div className="user-profile-intro">
-            <img
-              src={ga4ghLogo}
-              alt="GA4GH Logo"
-            />
-            <p>
-              DUOS user profile components are based off of the GA4GH Passports specification Visa types. More information on the GA4GH Passports standard can be found{' '}
-              <a href="https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md">
-                here.
-              </a>
-            </p>
-          </div>
-        </div>
-      </div>
-      <section className="user-profile-section">
+      <Notification notificationData={notificationData} />
+      <PageHeading
+        id="researcherProfile"
+        color="common"
+        title="Your Profile"
+        description="Review and update the information DUOS holds about you"
+        iconSize="none"
+      />
+      <section className="user-profile-section user-profile-card">
         <h1 className="user-profile-section-heading">Full Name</h1>
         <div className="user-profile-name-row">
           <FormField
@@ -119,7 +125,6 @@ export default function UserProfile() {
             hideTitle={true}
             defaultValue={name}
             onChange={updateRef}
-            style={{ width: '100%' }}
           />
           <button
             type="button"
@@ -129,7 +134,7 @@ export default function UserProfile() {
             Save
           </button>
         </div>
-        <div className="user-profile-field">
+        <div className="user-profile-field user-profile-input">
           <FormField
             type={FormFieldTypes.TEXT}
             id="profileEmail"
@@ -137,20 +142,22 @@ export default function UserProfile() {
             hideTitle={true}
             defaultValue={user.email}
             disabled={true}
-            style={{ width: '100%' }}
           />
         </div>
         <div className="user-profile-field">
-          <p>
-            Send me email notifications
-          </p>
-          <FormField
-            type={FormFieldTypes.YESNORADIOGROUP}
-            id="profileEmailEnabled"
-            title="Send me email notifications"
-            hideTitle={true}
-            defaultValue={user.emailPreference}
-            onChange={(field: { key: string, value: boolean, isValid: boolean }) => updateEmailPreference(field.value)}
+          <FormControlLabel
+            sx={emailToggleLabelSx}
+            label="Send me email notifications"
+            control={(
+              <Switch
+                id="profileEmailEnabled"
+                size="small"
+                sx={emailToggleSx}
+                checked={emailPreference}
+                disabled={savingEmailPreference}
+                onChange={event => updateEmailPreference(event.target.checked)}
+              />
+            )}
           />
         </div>
       </section>
@@ -164,12 +171,12 @@ export default function UserProfile() {
           user={user as DuosUser}
         />
       </section>
-      <section className="user-profile-section">
+      <section className="user-profile-section user-profile-card">
         <ResearcherStatus
           user={user as DuosUser}
         />
       </section>
-      <section className="user-profile-section">
+      <section className="user-profile-section user-profile-card">
         <AcceptedAcknowledgements />
       </section>
     </main>

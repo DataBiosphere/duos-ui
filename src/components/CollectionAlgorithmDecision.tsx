@@ -24,19 +24,18 @@ const OtherResult = (otherResultProps: Readonly<OtherResultProps>) => {
 }
 
 const getResult = (resultValue: string | undefined): React.ReactElement => {
-  if (resultValue?.toLowerCase().trim() === 'abstain') {
-    return <AbstainResult />
+  const result = resultValue?.trim()
+  switch (result?.toLowerCase()) {
+    case 'abstain':
+      return <AbstainResult />
+    case 'yes':
+      return <YesResult />
+    case 'no':
+      return <NoResult />
+    default:
+      // Anything else is the caller's own wording, such as a match no longer interpretable.
+      return <OtherResult text={result || 'N/A'} />
   }
-  if (resultValue && resultValue.trim().length > 0) {
-    switch (resultValue.toLowerCase().trim()) {
-      case 'yes':
-        return <YesResult />
-      case 'no':
-        return <NoResult />
-      default:
-    }
-  }
-  return <OtherResult text="N/A" />
 }
 
 export default function CollectionAlgorithmDecision(props: Readonly<CollectionAlgorithmDecisionProps>) {

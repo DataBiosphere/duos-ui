@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { OidcBroker } from 'src/libs/auth/oidcBroker'
 import { Auth, Redirect, redirectOnLogout } from 'src/libs/auth/auth'
+import { getSessionInfo, resetSessionProbeState } from 'src/libs/auth/session'
 import { Storage } from 'src/libs/storage'
 import { Config } from 'src/libs/config'
 import { v4 as uuid } from 'uuid'
@@ -62,8 +63,6 @@ describe('Auth Success', () => {
     await Auth.signIn()
     expect(Storage.getOidcUser().access_token).toBe(mockOidcUser.access_token)
     expect(Storage.userIsLogged()).toBe(true)
-    // Legacy isAuthenticated falls back to localStorage token expiry
-    expect(await Auth.isAuthenticated()).toBe(true)
   })
 
   it('Sign Out Clears the session when called', async () => {
@@ -245,15 +244,28 @@ describe('Auth (BFF mode)', () => {
     expect(redirectSpy).toHaveBeenCalledWith('/')
   })
 
-  it.each([
-    [true, 200],
-    [false, 401],
-  ])('isAuthenticated returns %s when /auth/me responds %i', async (expected, status) => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: expected, status })
+  it('signOut drops the cached session answer before redirecting', async () => {
+    // DuosHeader navigates before Auth.signOut's redirect unloads the page;
+    // a re-render in that window must re-probe rather than serve the cached
+    // pre-logout "authenticated" — which painted a signed-in header around
+    // the just-cleared empty user.
+    resetSessionProbeState()
+    const fetchMock = vi.fn()
+      // 1: session probe → cached authenticated answer
+      .mockResolvedValueOnce(new Response(JSON.stringify({ authenticated: true }), { status: 200 }))
+      // 2: CSRF token, 3: logout
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-123' }) } as never)
+      .mockResolvedValueOnce({ ok: true, status: 204 } as never)
+      // 4: the post-signOut ask must reach the network again
+      .mockResolvedValueOnce(new Response(JSON.stringify({ authenticated: false }), { status: 401 }))
     vi.stubGlobal('fetch', fetchMock)
+    vi.spyOn(Redirect, 'to').mockImplementation(() => {})
 
-    expect(await Auth.isAuthenticated()).toBe(expected)
-    expect(fetchMock).toHaveBeenCalledWith('/auth/me', { credentials: 'include' })
+    await expect(getSessionInfo()).resolves.toMatchObject({ authenticated: true })
+    await Auth.signOut()
+    await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+
+    expect(fetchMock).toHaveBeenNthCalledWith(4, '/auth/me', { credentials: 'include' })
   })
 
   it('redirectOnLogout signs out with the /home redirect target', async () => {
@@ -270,4 +282,24 @@ describe('Auth (BFF mode)', () => {
     await signOutSpy.mock.results[0].value
     expect(redirectSpy).toHaveBeenCalledWith('/home?redirectTo=/datalibrary')
   })
+
+  it.each(['/home', '/'])(
+    'redirectOnLogout from %s does not append a self-referential redirectTo',
+    async (path) => {
+      // The sign-out race: DuosHeader has already navigated home when an
+      // in-flight 401 lands, and the user must not end on /home?redirectTo=/home.
+      vi.stubGlobal('fetch', vi.fn()
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-123' }) })
+        .mockResolvedValueOnce({ ok: true, status: 204 }))
+      globalThis.history.replaceState({}, '', path)
+      const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+      const signOutSpy = vi.spyOn(Auth, 'signOut')
+
+      redirectOnLogout()
+
+      expect(signOutSpy).toHaveBeenCalledWith('/home')
+      await signOutSpy.mock.results[0].value
+      expect(redirectSpy).toHaveBeenCalledWith('/home')
+    },
+  )
 })

@@ -1,4 +1,4 @@
-import { chain, filter, includes, isEmpty, isNil, map } from 'src/utils/NodashUtil'
+import { chain, filter, includes, isEmpty, isNil } from 'src/utils/NodashUtil'
 import { Match } from 'src/libs/ajax/Match'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { ElasticsearchQuery } from 'src/types/elastic'
@@ -177,32 +177,81 @@ const filterDatasetsByDACs = (dacIds: number[], datasets: Dataset[]): Dataset[] 
     : filter(datasets, (dataset: Dataset) => includes(dacIds, dataset.dacId))
 }
 
+/** Versions that predate server-side abstention and so still need client-side suppression. */
+const CLIENT_SUPPRESSING_VERSIONS: ReadonlySet<string> = new Set(['v1', 'v2'])
+
+/**
+ * From v3 on Consent decides ABSTAIN and supplies the rationale the DAC reads. A floor rather than
+ * an allowlist, so a newer matcher does not blank every suggestion until this UI is redeployed.
+ */
+const FIRST_BACKEND_ABSTAINING_VERSION = 3
+
+const UNRECOGNIZED_ALGORITHM_RESULT = 'System match unavailable for this algorithm version'
+
+type AlgorithmVersionHandling = 'backend-abstains' | 'client-suppresses' | 'unrecognized'
+
+const classifyOneVersion = (version: string | undefined): AlgorithmVersionHandling => {
+  // Rows predating the version column were backfilled to v1, so an absent version is legacy too.
+  if (isNil(version) || CLIENT_SUPPRESSING_VERSIONS.has(version)) {
+    return 'client-suppresses'
+  }
+  const majorVersion = /^v(\d+)$/.exec(version)
+  return majorVersion && Number(majorVersion[1]) >= FIRST_BACKEND_ABSTAINING_VERSION
+    ? 'backend-abstains'
+    : 'unrecognized'
+}
+
+/** Versions mixed across match runs matter only when they disagree on how the results are read. */
+const classifyAlgorithmVersion = (versions: (string | undefined)[]): AlgorithmVersionHandling => {
+  const handlings = new Set(versions.map(classifyOneVersion))
+  return handlings.size === 1 ? [...handlings][0] : 'unrecognized'
+}
+
 /**
  * Generate the summary of algorithm results suitable for display in the UI
  *
- * Four potential cases:
+ * Five potential cases:
  *  1. No matches
- *  2. Exactly one match or N matches that are all the same - easy case
- *  3. Abstain is true and match is false - decision is abstained
- *  4. N matches - not all the same - very confusing case
+ *  2. A stale or unknown algorithm version - no result can be interpreted
+ *  3. Exactly one match or N matches that are all the same - easy case
+ *  4. Abstain is true and match is false - decision is abstained
+ *  5. N matches - not all the same - very confusing case
  */
 const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
-  // V1 and V2: We actually DO NOT want to show system match results when the data use indicates
-  // that a match should not be made. This happens for all "Other" cases.
-  const algorithmVersionV3 = bucket.matchResults.length > 0 && bucket.matchResults[0].algorithmVersion === 'v3'
-  const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse)
+  if (isEmpty(bucket.matchResults)) {
+    return { result: 'N/A', createDate: undefined, rationales: undefined, id: bucket.key }
+  }
+
+  const versions: (string | undefined)[] = chain(bucket.matchResults)
+    .map((m: MatchResult) => m.algorithmVersion)
+    .uniq()
+    .value()
+  const handling = classifyAlgorithmVersion(versions)
+  if (handling === 'unrecognized') {
+    // No single createDate applies when the rows come from runs DUOS reads differently.
+    return {
+      result: UNRECOGNIZED_ALGORITHM_RESULT,
+      createDate: undefined,
+      rationales: [
+        `This match was recorded by algorithm version ${versions.map(v => v ?? 'unknown').join(', ')}, `
+        + 'which DUOS cannot interpret. Please vote without a system suggestion.',
+      ],
+      id: bucket.key,
+    }
+  }
+
+  const unmatchable = shouldAbstain(bucket.dataUse)
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
-  // Check algorithm version: V3 does not need to be checked for 'unmatchable'
-  const matchVals: boolean[] = (algorithmVersionV3 || !unmatchable)
+  const matchVals: boolean[] = (handling === 'backend-abstains' || !unmatchable)
     ? chain(bucket.matchResults)
         .map((m: MatchResult) => m.match)
         .uniq()
         .value()
     : []
 
-  const abstain = processV3Abstain(bucket.matchResults)
+  const abstain = hasRecordedAbstention(bucket.matchResults)
 
   // check results based on matchVals
   if (isEmpty(matchVals)) {
@@ -243,19 +292,15 @@ const calculateAlgorithmResultForBucket = (bucket: Bucket): AlgorithmResult => {
   }
 }
 
-/**
- * Process the match results for V3 Abstain. If we have a V3 result and we have
- * an ABSTAIN case, we can return true if the number of abstentions > 0
- */
-const processV3Abstain = (matchResults: MatchResult[]): boolean => {
-  const abstainList = map(matchResults, (m: MatchResult) => m.abstain)
-  const abstainValList = filter(abstainList, (a: boolean | undefined) => a === true)
-  return abstainValList.length > 0
-}
+/** One abstention is enough: the algorithm declined on a dataset, so the bucket has no answer. */
+const hasRecordedAbstention = (matchResults: MatchResult[]): boolean =>
+  matchResults.some((m: MatchResult) => m.abstain === true)
 
 /**
  * Calculate "Other" status for a data use. Data Uses can have 'otherRestrictions': TRUE|FALSE,
  * or they can have fields populated for 'other': 'other restriction' and 'secondaryOther': 'yet other restriction'
+ *
+ * Counts a secondary Other, unlike the classifier — this feeds only the legacy suppression path.
  */
 const isOther = (dataUse?: DataUseSummary): boolean => {
   const primaryOther = dataUse?.primary?.some((dut: DataUseTerm) => dut.code === 'OTHER') || false
@@ -266,12 +311,14 @@ const isOther = (dataUse?: DataUseSummary): boolean => {
 /**
  * Calculate abstention for a data use. There are a number of cases where there should
  * not be an algorithm decision if a field is true, including any "Other" state.
+ *
+ * Legacy (v1/v2) heuristic only, and deliberately broader than Consent's classifier: it abstains
+ * on secondary modifiers like PUB or IRB, which V5 matches normally because they are not primary.
  */
 export const shouldAbstain = (dataUse?: DataUseSummary): boolean => {
-  const codeList: string[] = Object.keys(AbstainDataUseCodes)
   return isOther(dataUse)
     || (dataUse?.secondary
-      ? dataUse.secondary.map((dut: DataUseTerm) => dut.code).some(code => codeList.includes(code))
+      ? dataUse.secondary.some((dut: DataUseTerm) => AbstainDataUseCodes.has(dut.code))
       : false)
 }
 

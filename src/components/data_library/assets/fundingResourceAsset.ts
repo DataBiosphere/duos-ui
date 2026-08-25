@@ -3,6 +3,7 @@ import { FundingResourceStudyAggregationResponse, ElasticsearchQuery, Elasticsea
 import { FilterState, FundingResourceAsset, PaginationState, SortState } from 'src/types/library'
 import { makeFundingResourceColumns } from 'src/components/data_library/columns/fundingResourceColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
 // The Elasticsearch clause for fundingDate only decides which *studies* enter
 // the shared aggregation; every funding resource of a qualifying study comes
@@ -12,6 +13,12 @@ import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } f
 // endDate filter → resource ends on/before it.
 const matchesFundingResourceFilters = (funding: FundingResourceAsset, filters?: FilterState) => {
   if (!filters) {
+    return true
+  }
+
+  // Inverted bounds build no ES clause, so they must not narrow rows here
+  // either — otherwise the grid empties while the panel flags the range.
+  if (!isFilterActive('fundingDate', filters)) {
     return true
   }
 

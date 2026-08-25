@@ -96,6 +96,28 @@ DAA-related UI and workflows are permanently enabled in this codebase.
 - Implement new DAA UI directly where appropriate.
 - Routes and views that support DAA functionality should remain active by default.
 
+## Prefer Material UI Components Over Hand-Rolled Ones
+
+When a UI need is already covered by a Material UI component, use it instead of hand-rolling the same
+thing from a `div` plus bespoke CSS. MUI is a first-class dependency here (`@mui/material`,
+`@mui/icons-material`, `@mui/x-data-grid`), and its components give us accessibility roles, theming, and
+consistent spacing for free.
+
+- Banners, notices, warnings, and inline callouts — use `Alert` (with `AlertTitle` when a heading is
+  needed), not a custom bordered `div`. `severity="info" | "warning" | "error" | "success"` supplies the
+  icon and colour, so do **not** also render an explicit `@mui/icons-material` icon inside it.
+  See `src/components/ManualReviewWarningBanner.tsx` for the canonical pattern.
+- Tables — use `DataGrid` (`@mui/x-data-grid`) rather than a hand-built `<table>`.
+- Dialogs/modals — use `Dialog` and friends; chips, tabs, tooltips, accordions, and typography likewise
+  have MUI equivalents that should be preferred.
+- Style MUI components with the `sx` prop rather than adding a new CSS class; reach for a `.css` file only
+  for styling that MUI does not own (legacy `button button-blue` CTAs, page-level layout).
+- `src/components/Alert.tsx` is a legacy hand-rolled component. Do not extend it or copy its approach for
+  new UI — use the MUI `Alert` directly.
+
+Exception: don't churn existing hand-rolled UI purely to migrate it. Prefer MUI for new code and for code
+you are already modifying.
+
 ## Component Test Conventions (Vitest + RTL)
 
 - **Never use `new Date()` directly as a fixture value** in component tests where the formatted date is

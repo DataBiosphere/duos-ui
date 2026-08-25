@@ -58,14 +58,60 @@ function getAuthorizedDaaIdSet(researcher: DuosUser): Set<number> {
 }
 
 /**
+ * Maps each DAA the researcher is authorized for to the SO who granted it.
+ * On duplicate `daaId` entries the first wins.
+ */
+function buildAuthorizedByMap(researcher: DuosUser): Map<number, string | undefined> {
+  const authorizedByDaaId = new Map<number, string | undefined>()
+  const daaDetails = researcher.libraryCard?.daaDetails
+  if (!Array.isArray(daaDetails)) return authorizedByDaaId
+
+  daaDetails.forEach((detail) => {
+    if (!authorizedByDaaId.has(detail.daaId)) {
+      authorizedByDaaId.set(detail.daaId, detail.authorizedBy)
+    }
+  })
+  return authorizedByDaaId
+}
+
+/**
  * Returns the email address of the SO who authorized a researcher for a given
  * DAA, as recorded in the `daaDetails` array of their library card.
  */
 export function getAuthorizedBy(researcher: DuosUser, daaId: number): string | undefined {
-  const daaDetails = researcher.libraryCard?.daaDetails
-  if (!Array.isArray(daaDetails)) return undefined
+  return buildAuthorizedByMap(researcher).get(daaId)
+}
 
-  return daaDetails.find(detail => detail.daaId === daaId)?.authorizedBy
+/** The single definition of the researcher/DAA authorization rule. */
+function statusFromAuthorizedIds(authorizedDaaIds: ReadonlySet<number>, daaId: number): AuthStatus {
+  if (!daaId) return 'not_requested'
+  return authorizedDaaIds.has(daaId) ? 'authorized' : 'not_requested'
+}
+
+/**
+ * One researcher's library card flattened for repeated lookup.
+ *
+ * The DAA View asks the same two questions (is this researcher authorized for
+ * this DAA, and by whom) once per researcher/DAA pair, so building this index
+ * once per researcher keeps the grid linear instead of re-walking the library
+ * card for every cell — the Admin Console's system-wide list makes that
+ * difference material.
+ */
+interface ResearcherAuthIndex {
+  authorizedDaaIds: Set<number>
+  authorizedByDaaId: Map<number, string | undefined>
+}
+
+function buildAuthIndex(researcher: DuosUser): ResearcherAuthIndex {
+  return {
+    authorizedDaaIds: getAuthorizedDaaIdSet(researcher),
+    authorizedByDaaId: buildAuthorizedByMap(researcher),
+  }
+}
+
+/** API payloads can include duplicate DAA entries; daaId is the canonical key. */
+function dedupeDaas(daas: readonly DAAObject[]): DAAObject[] {
+  return Array.from(new Map(daas.map(daa => [daa.daaId, daa])).values())
 }
 
 /**
@@ -75,6 +121,17 @@ export function getAuthorizedBy(researcher: DuosUser, daaId: number): string | u
  */
 export function daaLabel(daa: DAAObject): string {
   return daa.file?.fileName ?? `DAA-${daa.daaId}`
+}
+
+/**
+ * Display name of a researcher's institution.
+ *
+ * Falls back to a dash rather than the users table's "N/A" so it matches the
+ * dash this folder's tables already use for missing values. Searching matches on
+ * the raw name, so the placeholder is never itself a search hit.
+ */
+export function institutionLabel(researcher: DuosUser): string {
+  return researcher.institution?.name || DASH
 }
 
 /**
@@ -94,25 +151,25 @@ export function getDacName(daa: DAAObject): string {
  * researcher's library card.
  */
 export function getAuthStatus(researcher: DuosUser, daaId: number): AuthStatus {
-  const normalizedDaaId = daaId
-  if (!normalizedDaaId) return 'not_requested'
+  return statusFromAuthorizedIds(getAuthorizedDaaIdSet(researcher), daaId)
+}
 
+/** buildDAARows against an already-deduplicated DAA list. */
+function buildDAARowsFor(researcher: DuosUser, uniqueDaas: readonly DAAObject[]): DAARowData[] {
   const authorizedDaaIds = getAuthorizedDaaIdSet(researcher)
-  return authorizedDaaIds.has(normalizedDaaId) ? 'authorized' : 'not_requested'
+
+  return uniqueDaas.map(daa => ({
+    daa,
+    dacName: getDacName(daa),
+    status: statusFromAuthorizedIds(authorizedDaaIds, daa.daaId),
+  }))
 }
 
 /**
  * Builds the full list of DAARowData for a single researcher across all DAAs.
  */
 export function buildDAARows(researcher: DuosUser, daas: readonly DAAObject[]): DAARowData[] {
-  // API payloads can include duplicate DAA entries; use daaId as the canonical key.
-  const uniqueDaas = Array.from(new Map(daas.map(daa => [daa.daaId, daa])).values())
-
-  return uniqueDaas.map(daa => ({
-    daa,
-    dacName: getDacName(daa),
-    status: getAuthStatus(researcher, daa.daaId),
-  }))
+  return buildDAARowsFor(researcher, dedupeDaas(daas))
 }
 
 /**
@@ -122,9 +179,12 @@ export function buildResearcherRows(
   researchers: readonly DuosUser[],
   daas: readonly DAAObject[],
 ): ResearcherRowData[] {
+  // Deduplicated once for the whole grid rather than once per researcher.
+  const uniqueDaas = dedupeDaas(daas)
+
   return researchers
     .map((researcher) => {
-      const daaRows = buildDAARows(researcher, daas)
+      const daaRows = buildDAARowsFor(researcher, uniqueDaas)
       const authorizedCount = daaRows.filter(r => r.status === 'authorized').length
       return { researcher, daaRows, authorizedCount }
     })
@@ -147,16 +207,24 @@ export function isRecentlyUpdated(daa: DAAObject): boolean {
 
 /**
  * Builds the per-researcher auth rows for a single DAA.
+ *
+ * `indexByUserId` lets a caller iterating many DAAs (see buildDAAViewRows) build
+ * each researcher's index once instead of once per DAA; without it, each row
+ * builds its own.
  */
 export function buildDAAResearcherRows(
   daa: DAAObject,
   researchers: readonly DuosUser[],
+  indexByUserId?: ReadonlyMap<number, ResearcherAuthIndex>,
 ): DAAResearcherRowData[] {
-  return researchers.map(researcher => ({
-    researcher,
-    status: getAuthStatus(researcher, daa.daaId),
-    authorizedBy: getAuthorizedBy(researcher, daa.daaId),
-  }))
+  return researchers.map((researcher) => {
+    const authIndex = indexByUserId?.get(researcher.userId) ?? buildAuthIndex(researcher)
+    return {
+      researcher,
+      status: statusFromAuthorizedIds(authIndex.authorizedDaaIds, daa.daaId),
+      authorizedBy: authIndex.authorizedByDaaId.get(daa.daaId),
+    }
+  })
 }
 
 /**
@@ -167,10 +235,14 @@ export function buildDAAViewRows(
   daas: readonly DAAObject[],
   researchers: readonly DuosUser[],
 ): DAAAccordionData[] {
-  const uniqueDaas = Array.from(new Map(daas.map(daa => [daa.daaId, daa])).values())
+  const uniqueDaas = dedupeDaas(daas)
+  // Built once per researcher rather than once per researcher/DAA pair.
+  const indexByUserId = new Map(
+    researchers.map(researcher => [researcher.userId, buildAuthIndex(researcher)]),
+  )
 
   return uniqueDaas.map((daa) => {
-    const researcherRows = buildDAAResearcherRows(daa, researchers)
+    const researcherRows = buildDAAResearcherRows(daa, researchers, indexByUserId)
     const authorizedCount = researcherRows.filter(r => r.status === 'authorized').length
     return {
       daa,
