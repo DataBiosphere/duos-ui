@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react'
-import { Box, Tooltip } from '@mui/material'
+import { useMemo, useState } from 'react'
+import { Box } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid'
 import { Link } from 'react-router'
 import { getSearchFilterFunctions } from 'src/libs/utils'
@@ -61,25 +61,29 @@ const COLUMNS: GridColDef<UserRow>[] = [
     headerName: 'DACs',
     flex: 1,
     minWidth: 180,
-    // The tooltip only shows the full list on hover once the row's names overflow the cell width.
+    // One DAC per line, so every link is visible and followable however many a user belongs to.
     renderCell: ({ row, tabIndex }: GridRenderCellParams<UserRow>) => (
-      <Tooltip title={row.dacDetails.length === 0 ? '' : row.dacs} placement="top">
-        <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {row.dacDetails.length === 0
-            ? 'None'
-            : row.dacDetails.map((dac, index) => (
-                <React.Fragment key={dac.dacId}>
-                  {index > 0 && ', '}
-                  <Link to={`/manage_dac/${dac.dacId}`} tabIndex={tabIndex}>
-                    {dac.name}
-                  </Link>
-                </React.Fragment>
-              ))}
-        </Box>
-      </Tooltip>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        {row.dacDetails.length === 0
+          ? 'None'
+          : row.dacDetails.map(dac => (
+              <Link key={dac.dacId} to={`/manage_dac/${dac.dacId}`} tabIndex={tabIndex}>
+                {dac.name}
+              </Link>
+            ))}
+      </Box>
     ),
   },
 ]
+
+const GROW_ROW_TO_FIT_CONTENT = () => 'auto' as const
+
+// An auto-height cell lays its content out itself, so the padding and centering the fixed row height
+// used to supply have to be spelled out.
+const AUTO_HEIGHT_DATA_GRID_SX = {
+  ...DATA_GRID_SX,
+  '& .MuiDataGrid-cell': { display: 'flex', alignItems: 'center', paddingY: 1 },
+}
 
 const filterFn = getSearchFilterFunctions().users
 
@@ -124,7 +128,9 @@ export const ManageUsersTable = function ManageUsersTable({ isLoading, userList,
         initialState={{ sorting: { sortModel: [{ field: 'displayName', sort: 'asc' }] } }}
         disableRowSelectionOnClick
         autoHeight
-        sx={DATA_GRID_SX}
+        // A row grows to fit its DACs column, rather than clipping every DAC after the first.
+        getRowHeight={GROW_ROW_TO_FIT_CONTENT}
+        sx={AUTO_HEIGHT_DATA_GRID_SX}
       />
     </Box>
   )

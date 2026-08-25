@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, screen, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { ManageUsersTable, ManageUsersTableProps } from 'src/components/manage_users_table/ManageUsersTable'
 import { renderWithRouter } from '../../test-utils'
@@ -176,20 +175,14 @@ describe('ManageUsersTable', () => {
     expect(within(row).getByRole('link', { name: 'Rare Disease DAC' })).toHaveAttribute('href', '/manage_dac/2')
   })
 
-  it('shows a tooltip listing every DAC name, for when the names overflow the cell', async () => {
+  it('lists each DAC on its own line rather than running them together', async () => {
     renderTable({ userList: [dave], dacList: testDacs })
 
     const row = await rowFor(dave.displayName)
-    await userEvent.hover(within(row).getByText('Cancer DAC'))
-    expect(await screen.findByRole('tooltip')).toHaveTextContent('Cancer DAC, Rare Disease DAC')
-  })
-
-  it('shows no tooltip over the DACs cell when the user has none', async () => {
-    renderTable()
-
-    const row = await rowFor(alice.displayName)
-    await userEvent.hover(within(row).getByText('None'))
-    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
+    const cell = within(row).getByRole('link', { name: 'Cancer DAC' }).parentElement as HTMLElement
+    // Stacked children, so no separator text sits between the names.
+    expect(cell.textContent).toBe('Cancer DACRare Disease DAC')
+    expect(Array.from(cell.children).map(child => child.textContent)).toEqual(['Cancer DAC', 'Rare Disease DAC'])
   })
 
   it('reads Unknown for a DAC role whose id is missing from the DAC list', async () => {
