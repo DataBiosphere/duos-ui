@@ -25,6 +25,55 @@ async function destroySession(request: FastifyRequest, reply: FastifyReply): Pro
 }
 
 /**
+ * Refresh-before-forward, mirroring the API proxy: an idle tab can outlive
+ * the access token while the refresh token and session are still perfectly
+ * valid. Forwarding the expired token would 401 upstream and destroy a
+ * session that only needed a refresh — and the client's focus revalidation
+ * makes this exact path hot.
+ *
+ * Returns false when the refresh failed and the reply has already gone out.
+ */
+async function refreshedIfExpiring(request: FastifyRequest, reply: FastifyReply): Promise<boolean> {
+  const secondsRemaining = (request.session.tokenExpiry ?? 0) - Math.floor(Date.now() / 1000)
+  if (secondsRemaining >= REFRESH_WINDOW_SECONDS) return true
+  try {
+    await refreshAccessToken(request)
+    return true
+  }
+  catch (err: unknown) {
+    if (err instanceof RefreshFailedError) {
+      // Terminal: B2C rejected the refresh token and refreshAccessToken has
+      // already destroyed the session — clear the dead cookie.
+      reply.clearCookie('sessionId').status(401).send({ authenticated: false })
+      return false
+    }
+    // Transient (network blip, B2C 5xx, store error) — the session is
+    // intact, so this must not read as signed out permanently: 502 tells
+    // the client probe to retry on the next ask.
+    reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
+    return false
+  }
+}
+
+/**
+ * The actionable message from the upstream 409 body ({ message, code }), or
+ * the fallback when the body is empty, malformed, or not a string.
+ */
+async function providerConflictMessage(res: Response): Promise<string> {
+  try {
+    const body: unknown = await res.json()
+    const upstreamMessage = (body as { message?: unknown } | null)?.message
+    if (typeof upstreamMessage === 'string' && upstreamMessage.length > 0) {
+      return upstreamMessage
+    }
+  }
+  catch {
+    // Unparseable body — the fallback message stands.
+  }
+  return PROVIDER_CONFLICT_FALLBACK_MESSAGE
+}
+
+/**
  * Confirms the user is authenticated against the upstream Consent API.
  * Forwards the upstream user profile and the active sub-provider — never the
  * tokens themselves, which stay server-side in the session.
@@ -47,30 +96,7 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     return
   }
 
-  // Refresh-before-forward, mirroring the API proxy: an idle tab can outlive
-  // the access token while the refresh token and session are still perfectly
-  // valid. Forwarding the expired token would 401 upstream and destroy a
-  // session that only needed a refresh — and the client's focus revalidation
-  // makes this exact path hot.
-  const secondsRemaining = (request.session.tokenExpiry ?? 0) - Math.floor(Date.now() / 1000)
-  if (secondsRemaining < REFRESH_WINDOW_SECONDS) {
-    try {
-      await refreshAccessToken(request)
-    }
-    catch (err: unknown) {
-      if (err instanceof RefreshFailedError) {
-        // Terminal: B2C rejected the refresh token and refreshAccessToken has
-        // already destroyed the session — clear the dead cookie.
-        reply.clearCookie('sessionId').status(401).send({ authenticated: false })
-        return
-      }
-      // Transient (network blip, B2C 5xx, store error) — the session is
-      // intact, so this must not read as signed out permanently: 502 tells
-      // the client probe to retry on the next ask.
-      reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
-      return
-    }
-  }
+  if (!(await refreshedIfExpiring(request, reply))) return
 
   const url = `${requireEnv('DUOS_API_URL')}/api/user/me`
 
@@ -114,17 +140,7 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     // Registration cannot succeed and the session cannot become usable, so end it — but forward the
     // upstream's actionable message (sign in with the other provider, plus the support link) instead
     // of a generic failure.
-    let message = PROVIDER_CONFLICT_FALLBACK_MESSAGE
-    try {
-      const body: unknown = await res.json()
-      const upstreamMessage = (body as { message?: unknown } | null)?.message
-      if (typeof upstreamMessage === 'string' && upstreamMessage.length > 0) {
-        message = upstreamMessage
-      }
-    }
-    catch {
-      // Unparseable body — the fallback message stands.
-    }
+    const message = await providerConflictMessage(res)
     await destroySession(request, reply)
     reply.status(409).send({ authenticated: false, error: 'provider_conflict', message })
     return
