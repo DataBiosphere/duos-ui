@@ -16,7 +16,7 @@ import ResearcherAccordionRow from './ResearcherAccordionRow'
 import ResearcherViewLegend from './ResearcherViewLegend'
 import ResearcherViewConfirmDialog from './ResearcherViewConfirmDialog'
 import BulkActionConfirmDialog from './BulkActionConfirmDialog'
-import { BulkConfirmState, ConfirmDialogState, DAARowData, ResearcherRowData } from './types'
+import { BulkConfirmState, ConfirmDialogState, DAARowData, ResearcherRowData, UserListScope } from './types'
 import { buildResearcherRows, daaLabel } from './researcherViewHelpers'
 import { useBulkPreAuthorization } from './useBulkPreAuthorization'
 
@@ -40,6 +40,24 @@ export interface ResearcherViewProps {
   readonly daas: readonly DAAObject[]
   readonly isLoading: boolean
   readonly onResearchersRefresh: (updated: DuosUser[]) => void
+  /**
+   * Role scope to reload the user list with after a mutation. Must match the
+   * scope the page loaded with, or a refresh would silently swap the list for a
+   * differently-scoped one.
+   */
+  readonly scope?: UserListScope
+  /**
+   * Read-only mode (Admin Console). Suppresses every mutating control: the
+   * per-row action buttons, the bulk Approve All / Remove All buttons, and the
+   * confirmation dialogs those buttons open.
+   */
+  readonly readOnly?: boolean
+  /**
+   * Shows each researcher's institution and makes it searchable. Only meaningful
+   * when the list spans more than one institution, which is the Admin Console's
+   * cross-institution scope.
+   */
+  readonly showInstitution?: boolean
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -53,12 +71,19 @@ export interface ResearcherViewProps {
  *
  * Auth mutations (createDaaLcLink / deleteDaaLcLink) are the same APIs used
  * by the existing ManageResearcherDAAs page.
+ *
+ * With `readOnly` set, the same view becomes the Admin Console's observe-only
+ * list: identical layout, search, expand/collapse and legend, but no controls
+ * that can change a pre-authorization.
  */
 export default function ResearcherView({
   researchers,
   daas,
   isLoading,
   onResearchersRefresh,
+  scope = USER_ROLES.signingOfficial,
+  readOnly = false,
+  showInstitution = false,
 }: Readonly<ResearcherViewProps>) {
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState<Record<number, boolean>>({})
@@ -78,9 +103,12 @@ export default function ResearcherView({
     return researcherRows.filter(
       (row: ResearcherRowData) =>
         row.researcher.displayName?.toLowerCase().includes(term)
-        || row.researcher.email?.toLowerCase().includes(term),
+        || row.researcher.email?.toLowerCase().includes(term)
+        // Matched on the raw name, so the dash shown for a researcher with no
+        // institution is not itself a search hit.
+        || (showInstitution && !!row.researcher.institution?.name?.toLowerCase().includes(term)),
     )
-  }, [researcherRows, search])
+  }, [researcherRows, search, showInstitution])
 
   const allExpanded
     = filteredRows.length > 0
@@ -90,13 +118,13 @@ export default function ResearcherView({
 
   const refreshResearchers = useCallback(async () => {
     try {
-      const updated = await User.list(USER_ROLES.signingOfficial)
+      const updated = await User.list(scope)
       onResearchersRefresh(updated)
     }
     catch {
       Notifications.showError({ text: 'Failed to refresh researcher list' })
     }
-  }, [onResearchersRefresh])
+  }, [onResearchersRefresh, scope])
 
   const toggleRow = useCallback((userId: number) => {
     setExpanded(prev => ({ ...prev, [userId]: !prev[userId] }))
@@ -222,13 +250,14 @@ export default function ResearcherView({
         }}
       >
         <TextField
-          placeholder="Search researchers"
+          placeholder={showInstitution ? 'Search by researcher, email, or institution' : 'Search researchers'}
           value={search}
           onChange={e => setSearch(e.target.value)}
           size="small"
           data-cy="researcher-search"
           sx={{
-            'width': 280,
+            // Wide enough for the longer placeholder the institution search uses.
+            'width': showInstitution ? 360 : 280,
             '& .MuiOutlinedInput-root': { fontFamily: FONT, fontSize: 13 },
           }}
           slotProps={{
@@ -292,9 +321,16 @@ export default function ResearcherView({
             onRevoke={daaId => openRevokeDialog(row.researcher, daaId, row.daaRows)}
             onApproveAll={daaIds => openBulkDialog(row.researcher, 'approve', daaIds)}
             onRemoveAll={daaIds => openBulkDialog(row.researcher, 'remove', daaIds)}
+            readOnly={readOnly}
+            showInstitution={showInstitution}
           />
         ))}
       </Box>
+
+      {/*
+        Both dialogs render nothing until their state is set, and read-only mode
+        renders no control that can set it — so they self-suppress there.
+      */}
 
       {/* Single-relationship confirmation dialog */}
       <ResearcherViewConfirmDialog

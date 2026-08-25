@@ -6,7 +6,6 @@ import SearchBar from 'src/components/SearchBar'
 import { DACDatasetsTable } from 'src/components/dac_dataset_table/DACDatasetsTable'
 import { DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants.js'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from 'src/libs/utils'
-import { consoleTypes } from 'src/components/dac_dataset_table/DACDatasetTableCellData'
 import { useNavigate } from 'react-router'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
@@ -14,6 +13,20 @@ import AddObjectButton from 'src/components/AddObjectButton'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 import { DatasetTerm } from 'src/types/model'
 import { ElasticsearchQuery } from 'src/types/elastic'
+
+// Module-level so the array identity is stable: the table memoizes its grid columns on this prop,
+// and a fresh literal would rebuild them on every keystroke in the search bar.
+const DAC_DATASET_COLUMNS = [
+  DACDatasetTableColumnOptions.DUOS_ID,
+  DACDatasetTableColumnOptions.PHS_ID,
+  DACDatasetTableColumnOptions.DATASET_NAME,
+  DACDatasetTableColumnOptions.STUDY_NAME,
+  DACDatasetTableColumnOptions.DATA_SUBMITTER,
+  DACDatasetTableColumnOptions.DATA_CUSTODIAN,
+  DACDatasetTableColumnOptions.DATA_USE,
+  DACDatasetTableColumnOptions.CERTIFICATION_LINK,
+  DACDatasetTableColumnOptions.STATUS,
+]
 
 export default function DACDatasets() {
   usePageTitle('My DAC\'s Datasets')
@@ -91,19 +104,8 @@ export default function DACDatasets() {
       </div>
       <DACDatasetsTable
         datasets={filteredList}
-        columns={[
-          DACDatasetTableColumnOptions.DUOS_ID,
-          DACDatasetTableColumnOptions.PHS_ID,
-          DACDatasetTableColumnOptions.DATASET_NAME,
-          DACDatasetTableColumnOptions.STUDY_NAME,
-          DACDatasetTableColumnOptions.DATA_SUBMITTER,
-          DACDatasetTableColumnOptions.DATA_CUSTODIAN,
-          DACDatasetTableColumnOptions.DATA_USE,
-          DACDatasetTableColumnOptions.CERTIFICATION_LINK,
-          DACDatasetTableColumnOptions.STATUS,
-        ]}
+        columns={DAC_DATASET_COLUMNS}
         isLoading={isLoading}
-        consoleType={consoleTypes.CHAIR}
       />
     </div>
   )

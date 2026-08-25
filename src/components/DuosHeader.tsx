@@ -19,6 +19,7 @@ import { useLocation, useNavigate } from 'react-router'
 import { DuosUser } from 'src/types/model'
 import { useNavigationState } from 'src/contexts/NavigationStateContext'
 import { useQueryClient } from '@tanstack/react-query'
+import { useUserIsLogged } from 'src/hooks/useSession'
 import { SO_CONSOLE_SECTIONS, SO_DASHBOARD_ROUTE } from 'src/pages/signing_official_console/signingOfficialConsoleRoutes'
 import { RESEARCHER_CONSOLE_SECTIONS, RESEARCHER_DASHBOARD_ROUTE } from 'src/pages/researcher_console/researcherConsoleRoutes'
 
@@ -73,6 +74,7 @@ export const headerTabsConfig: Tab[] = [
       { label: 'Users', link: '/admin_manage_users' },
       { label: 'Institutions', link: '/admin_manage_institutions' },
       { label: 'Library Cards', link: '/admin_manage_lc' },
+      { label: 'DAA Associations', link: '/admin_daa_associations' },
     ],
     isRendered: user => user.isAdmin,
   },
@@ -174,10 +176,13 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   const signOut = (): void => {
+    // The SPA navigation covers the legacy flow, where Auth.signOut only
+    // clears local state; in BFF mode Auth.signOut follows up with a full-page
+    // reload to the same destination, which supersedes both of these.
     queryClient.clear()
     navigate('/home')
     toggleDrawer(false)
-    void Auth.signOut()
+    void Auth.signOut('/home')
   }
 
   const supportRequestModal = (): void => {
@@ -211,7 +216,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     toggleDrawer(false)
   }
 
-  const isLogged = Storage.userIsLogged()
+  const isLogged = useUserIsLogged() ?? false
   let currentUser: DuosUser = {
     createDate: new Date(),
     displayName: '',

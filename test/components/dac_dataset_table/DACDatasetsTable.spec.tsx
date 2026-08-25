@@ -1,14 +1,19 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest'
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { DACDatasetsTable } from 'src/components/dac_dataset_table/DACDatasetsTable'
+import { Storage } from 'src/libs/storage'
 import { DatasetTerm } from 'src/types/model'
 import { DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants'
 
-vi.mock('react-router', () => {
-  const navigate = vi.fn()
-  return { useNavigate: () => navigate }
+beforeAll(() => {
+  global.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver
 })
 
 vi.mock('src/libs/storage', () => ({
@@ -18,29 +23,16 @@ vi.mock('src/libs/storage', () => ({
   },
 }))
 
-vi.mock('src/components/dac_dataset_table/DACDatasetApprovalStatus', () => ({
-  default: ({ dataset }: { dataset: DatasetTerm }) => {
-    if (dataset.dacApproval) return <div>ACCEPTED</div>
-    if (!dataset.dacApproval) return <div>REJECTED</div>
-    return <div>UNDECIDED</div>
-  },
+vi.mock('src/libs/ajax/DataSet', () => ({
+  DataSet: { getNIHInstitutionalCertification: vi.fn().mockResolvedValue(undefined) },
 }))
 
-vi.mock('src/utils/DataUseUtils', () => ({
-  processDataUseCodes: vi.fn((dataset: DatasetTerm) => {
-    const primary = (dataset.dataUse as { primary?: Array<{ code: string, description: string }> })?.primary ?? []
-    const codeList = primary.map(p => p.code)
-    // Mirrors the real DataUseCode shape (shortCode/type included) — vi.mock factories
-    // are not type-checked against the module, so this has to be kept in step by hand.
-    return {
-      codeList,
-      codesAndDescriptions: primary.map(p => ({ ...p, shortCode: p.code, type: 'primary' })),
-    }
-  }),
-  createDataUseDisplay: vi.fn((opts: { dataset: DatasetTerm }) => {
-    const primary = (opts.dataset.dataUse as { primary?: Array<{ code: string }> })?.primary ?? []
-    return <span>{primary.map(p => p.code).join(', ')}</span>
-  }),
+vi.mock('src/components/dac_dataset_table/DACDatasetApprovalStatus', () => ({
+  default: ({ dataset }: { dataset: DatasetTerm }) => {
+    if (dataset.dacApproval === true) return <div>ACCEPTED</div>
+    if (dataset.dacApproval === false) return <div>REJECTED</div>
+    return <div>UNDECIDED</div>
+  },
 }))
 
 const makeDataset = (overrides: Partial<DatasetTerm> = {}): DatasetTerm => ({
@@ -63,7 +55,7 @@ const makeDataset = (overrides: Partial<DatasetTerm> = {}): DatasetTerm => ({
     description: 'Test Dataset Submission',
     studyName: 'Test Study',
     studyId: 39,
-    phsId: 'PHS ID',
+    phsId: 'phs000649',
     phenotype: 'Test',
     species: 'Human',
     piName: 'PI',
@@ -91,105 +83,69 @@ const defaultColumns = [
   DACDatasetTableColumnOptions.STATUS,
 ]
 
+const mountTable = (props: Partial<React.ComponentProps<typeof DACDatasetsTable>> = {}) =>
+  render(
+    <div style={{ width: 1200 }}>
+      <DACDatasetsTable datasets={[]} columns={defaultColumns} isLoading={false} {...props} />
+    </div>,
+  )
+
 describe('DACDatasetsTable', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('renders column headers', async () => {
-    await act(async () => {
-      render(
-        <DACDatasetsTable
-          datasets={[makeDataset()]}
-          columns={defaultColumns}
-          isLoading={false}
-        />,
-      )
-    })
-    const headers = document.querySelectorAll('.column-header')
-    expect(headers).toHaveLength(defaultColumns.length)
+  it('renders a column header for each provided column', () => {
+    mountTable({ datasets: [makeDataset()] })
+    expect(screen.getByText('DUOS ID')).toBeInTheDocument()
+    expect(screen.getByText('PHS ID')).toBeInTheDocument()
+    expect(screen.getByText('Dataset Name')).toBeInTheDocument()
+    expect(screen.getByText('Status')).toBeInTheDocument()
   })
 
-  it('renders dataset rows with DUOS ID', async () => {
-    await act(async () => {
-      render(
-        <DACDatasetsTable
-          datasets={[makeDataset()]}
-          columns={defaultColumns}
-          isLoading={false}
-        />,
-      )
-    })
-    expect(document.querySelector('.row-data-0')?.textContent).toContain('DUOS-000649')
+  it('renders dataset rows with DUOS ID', () => {
+    const { container } = mountTable({ datasets: [makeDataset()] })
+    const row = container.querySelector('.MuiDataGrid-row[data-id="1"]')!
+    expect(within(row as HTMLElement).getByText('DUOS-000649')).toBeInTheDocument()
   })
 
-  it('shows HMB data use code', async () => {
+  it('shows HMB data use code', () => {
     const dataset = makeDataset({
       dataUse: {
         primary: [{ code: 'HMB', description: 'Data is limited for health/medical/biomedical research.' }],
       },
     })
-    await act(async () => {
-      render(
-        <DACDatasetsTable
-          datasets={[dataset]}
-          columns={defaultColumns}
-          isLoading={false}
-        />,
-      )
-    })
+    mountTable({ datasets: [dataset] })
     expect(screen.getByText('HMB')).toBeInTheDocument()
   })
 
-  it('shows REJECTED for rejected dataset', async () => {
-    await act(async () => {
-      render(
-        <DACDatasetsTable
-          datasets={[makeDataset({ dacApproval: false })]}
-          columns={defaultColumns}
-          isLoading={false}
-        />,
-      )
-    })
+  it('shows REJECTED for rejected dataset', () => {
+    mountTable({ datasets: [makeDataset({ dacApproval: false })] })
     expect(screen.getByText('REJECTED')).toBeInTheDocument()
   })
 
-  it('shows ACCEPTED for approved dataset', async () => {
-    await act(async () => {
-      render(
-        <DACDatasetsTable
-          datasets={[makeDataset({ dacApproval: true })]}
-          columns={defaultColumns}
-          isLoading={false}
-        />,
-      )
-    })
+  it('shows ACCEPTED for approved dataset', () => {
+    mountTable({ datasets: [makeDataset({ dacApproval: true })] })
     expect(screen.getByText('ACCEPTED')).toBeInTheDocument()
   })
 
-  it('renders loading state', async () => {
-    await act(async () => {
-      render(
-        <DACDatasetsTable
-          datasets={[]}
-          columns={defaultColumns}
-          isLoading={true}
-        />,
-      )
-    })
-    expect(document.querySelector('.table-loading-placeholder')).toBeInTheDocument()
+  it('renders loading state', () => {
+    mountTable({ datasets: [], isLoading: true })
+    expect(document.querySelector('.MuiCircularProgress-root')).toBeInTheDocument()
   })
 
-  it('renders empty table with no datasets', async () => {
-    await act(async () => {
-      render(
-        <DACDatasetsTable
-          datasets={[]}
-          columns={defaultColumns}
-          isLoading={false}
-        />,
-      )
-    })
-    expect(document.querySelectorAll('.row-data-0')).toHaveLength(0)
+  it('renders empty table with no datasets', () => {
+    const { container } = mountTable({ datasets: [] })
+    expect(container.querySelectorAll('.MuiDataGrid-row')).toHaveLength(0)
+  })
+
+  it('persists sort changes to user settings when a column header is clicked', async () => {
+    const user = userEvent.setup()
+    mountTable({ datasets: [makeDataset()] })
+    await user.click(screen.getByText('DUOS ID'))
+    expect(Storage.setCurrentUserSettings).toHaveBeenCalledWith(
+      'storageDACDatasetSort',
+      expect.arrayContaining([expect.objectContaining({ field: 'datasetIdentifier' })]),
+    )
   })
 })

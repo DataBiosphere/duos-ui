@@ -3,31 +3,11 @@ import { Box, Tooltip } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid'
 import { Link } from 'react-router'
 import { getSearchFilterFunctions } from 'src/libs/utils'
-import { Theme } from 'src/libs/theme'
+import { DATA_GRID_CONTAINER_SX, DATA_GRID_SX } from 'src/components/dataGridDefaults'
 import { dacNameMap, formatUserDacs, formatUserRoles, institutionName, UserDac, userDacs } from 'src/components/manage_users_table/manageUsersTableUtils'
 import { DacObject, DuosUser } from 'src/types/model'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
-
-// MUI rings on plain :focus, which fires on click; keyboard focus keeps a ring via :focus-visible.
-const DATAGRID_SX = {
-  '& .MuiDataGrid-cell:focus': { outline: 'none' },
-  '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
-  '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
-  '& .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
-  '& .MuiDataGrid-cell:focus-visible, & .MuiDataGrid-columnHeader:focus-visible': {
-    outline: `2px solid ${Theme.palette.link}`,
-    outlineOffset: '-2px',
-  },
-  // The link takes focus in its cell's place, and index.css resets link outlines.
-  '& .MuiDataGrid-cell a:focus-visible': {
-    outline: `2px solid ${Theme.palette.link}`,
-    outlineOffset: '2px',
-  },
-}
-
-// Left inset matches SearchBar's own margin, negative right mirrors the search and add button row.
-const gridContainerSx = { marginTop: '2rem', marginLeft: 3, marginRight: '-2rem' }
 
 export interface ManageUsersTableProps {
   isLoading: boolean
@@ -130,7 +110,7 @@ export const ManageUsersTable = function ManageUsersTable({ isLoading, userList,
   const page = Math.min(paginationModel.page, lastPage)
 
   return (
-    <Box sx={gridContainerSx}>
+    <Box sx={DATA_GRID_CONTAINER_SX}>
       <DataGrid
         rows={rows}
         columns={COLUMNS}
@@ -144,7 +124,7 @@ export const ManageUsersTable = function ManageUsersTable({ isLoading, userList,
         initialState={{ sorting: { sortModel: [{ field: 'displayName', sort: 'asc' }] } }}
         disableRowSelectionOnClick
         autoHeight
-        sx={DATAGRID_SX}
+        sx={DATA_GRID_SX}
       />
     </Box>
   )

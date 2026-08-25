@@ -12,8 +12,30 @@ import DAAResearcherSubtable from './DAAResearcherSubtable'
 import BulkActionButtons from './BulkActionButtons'
 import { DAAResearcherRowData } from './types'
 import { daaLabel, formatDateYYYYMMDD } from './researcherViewHelpers'
+import { accordionHeaderKeyboardProps } from './accordionHeaderKeyboard'
 
 const FONT = 'Montserrat'
+
+/**
+ * The recently-updated warning tells an SO to act on their own institution's
+ * researchers. An admin viewing the read-only, system-wide page has neither an
+ * institution nor the controls to act, so the same fact is stated without the
+ * call to action.
+ */
+const RECENTLY_UPDATED_TOOLTIP = {
+  managed: 'This DAA was updated within the last year. Review the agreement to ensure your '
+    + 'institution\'s researchers are operating under the most current terms.',
+  readOnly: 'This DAA was updated within the last year. Researchers pre-authorized before the '
+    + 'update may be operating under superseded terms.',
+} as const
+
+/** Body of the same warning as an in-panel banner, following the heading sentence. */
+const RECENTLY_UPDATED_BANNER = {
+  managed: ' Please review the agreement to ensure it reflects your institution\'s current data '
+    + 'governance expectations before authorizing new researchers.',
+  readOnly: ' Researchers pre-authorized before the update may be operating under superseded '
+    + 'terms.',
+} as const
 
 interface DAAAccordionRowProps {
   daa: DAAObject
@@ -29,6 +51,10 @@ interface DAAAccordionRowProps {
   onApproveAll: (researcherIds: number[]) => void
   /** Bulk "Remove All" — receives the ids of every currently-authorized researcher */
   onRemoveAll: (researcherIds: number[]) => void
+  /** Read-only mode (Admin Console): renders no bulk or per-row action buttons. */
+  readOnly?: boolean
+  /** Adds an Institution column to the researcher sub-table. */
+  showInstitution?: boolean
 }
 
 /**
@@ -41,6 +67,9 @@ interface DAAAccordionRowProps {
  * status and action buttons for this specific DAA.
  *
  * This is the DAA-first mirror of ResearcherAccordionRow.
+ *
+ * In read-only mode the bulk action buttons are omitted from the header and the
+ * sub-table drops its Action column, leaving status information only.
  */
 export default function DAAAccordionRow({
   daa,
@@ -54,6 +83,8 @@ export default function DAAAccordionRow({
   onRevoke,
   onApproveAll,
   onRemoveAll,
+  readOnly = false,
+  showInstitution = false,
 }: Readonly<DAAAccordionRowProps>) {
   const daaId = daa.daaId
   const label = daaLabel(daa)
@@ -86,6 +117,7 @@ export default function DAAAccordionRow({
         aria-controls={`daa-researcher-panel-${daaId}`}
         data-cy={`daa-accordion-toggle-${daaId}`}
         onClick={onToggle}
+        {...accordionHeaderKeyboardProps(onToggle)}
         sx={{
           'display': 'flex',
           'alignItems': 'center',
@@ -118,8 +150,7 @@ export default function DAAAccordionRow({
                 title={
                   (
                     <Typography sx={{ fontFamily: FONT, fontSize: 12, lineHeight: 1.6 }}>
-                      This DAA was updated within the last year. Review the agreement to ensure
-                      your institution&apos;s researchers are operating under the most current terms.
+                      {readOnly ? RECENTLY_UPDATED_TOOLTIP.readOnly : RECENTLY_UPDATED_TOOLTIP.managed}
                     </Typography>
                   )
                 }
@@ -149,13 +180,15 @@ export default function DAAAccordionRow({
 
         {/* Right: bulk actions + authorized count badge + chevron */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0, ml: 2 }}>
-          <BulkActionButtons
-            dataCyPrefix={`daa-${daaId}`}
-            approveAllDisabled={unauthorizedUserIds.length === 0}
-            removeAllDisabled={authorizedUserIds.length === 0}
-            onApproveAll={() => onApproveAll(unauthorizedUserIds)}
-            onRemoveAll={() => onRemoveAll(authorizedUserIds)}
-          />
+          {!readOnly && (
+            <BulkActionButtons
+              dataCyPrefix={`daa-${daaId}`}
+              approveAllDisabled={unauthorizedUserIds.length === 0}
+              removeAllDisabled={authorizedUserIds.length === 0}
+              onApproveAll={() => onApproveAll(unauthorizedUserIds)}
+              onRemoveAll={() => onRemoveAll(authorizedUserIds)}
+            />
+          )}
           {authorizedCount > 0 && (
             <Chip
               label={`${authorizedCount} pre-authorized`}
@@ -206,9 +239,8 @@ export default function DAAAccordionRow({
               <Typography
                 sx={{ fontFamily: FONT, fontSize: 13, color: '#e65100', lineHeight: 1.7 }}
               >
-                <strong>This DAA has been updated within the last year.</strong> Please review
-                the agreement to ensure it reflects your institution&apos;s current data
-                governance expectations before authorizing new researchers.
+                <strong>This DAA has been updated within the last year.</strong>
+                {readOnly ? RECENTLY_UPDATED_BANNER.readOnly : RECENTLY_UPDATED_BANNER.managed}
               </Typography>
             </Box>
           )}
@@ -216,6 +248,8 @@ export default function DAAAccordionRow({
             researcherRows={researcherRows}
             onAuthorize={onAuthorize}
             onRevoke={onRevoke}
+            readOnly={readOnly}
+            showInstitution={showInstitution}
           />
         </Box>
       </Collapse>
