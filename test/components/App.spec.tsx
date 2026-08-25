@@ -135,8 +135,8 @@ describe('Main App Functions', () => {
 
   it('shows the sign-in error toast and strips the marker when the BFF callback lands with ?signInError', async () => {
     // The BFF /auth/callback redirects here when B2C answers the
-    // authorization request with an error instead of a code (e.g. a
-    // rejected Microsoft authentication attempt).
+    // authorization request with an error instead of a code (e.g. B2C could
+    // not complete a federated Microsoft sign-in).
     vi.mocked(useSessionInfo).mockReturnValue({ authenticated: false })
     const searchSpy = vi.fn()
     const SearchSpy = () => {

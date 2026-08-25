@@ -27,11 +27,13 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
   catch (err: unknown) {
     if (err instanceof oidc.AuthorizationResponseError) {
       // B2C answered the authorization request with an error instead of a
-      // code — the user canceled on the B2C page (access_denied), or chose
-      // an identity the tenant's policy rejects. Land back in the
-      // SPA instead; a cancel is the user's own action and stays silent.
-      // A cancel is routine — info keeps it out of warn-based alerting;
-      // real provider errors stay at warn.
+      // code — the user canceled on the B2C page (access_denied), or B2C
+      // itself failed (error=server_error; observed as AADB2C90289 when a
+      // tenant's federation client secret to the upstream Microsoft provider
+      // expired, which fails EVERY Microsoft sign-in in that environment).
+      // Land back in the SPA instead; a cancel is the user's own action
+      // and stays silent. A cancel is also routine — info keeps it out of
+      // warn-based alerting; real provider errors stay at warn.
       const cancelled = err.error === 'access_denied'
       request.log[cancelled ? 'info' : 'warn']({ error: err.error, description: err.error_description }, '[auth] B2C authorization response is an error')
       reply.redirect(cancelled ? '/' : '/?signInError=provider')

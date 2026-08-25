@@ -51,15 +51,16 @@ function App() {
 
   /**
    * The BFF /auth/callback lands here with ?signInError=provider when B2C answered the authorization request with an
-   * error instead of a code. The known case is when Microsoft provides login options that use an unsupported client id
+   * error instead of a code. The known case is B2C failing to connect to the chosen Microsoft provider (an expired
+   * federation client secret in the tenant fails every Microsoft sign-in). The message stays generic because the
+   * cause is on the provider side — the server log carries the B2C error and description.
    */
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search)
     if (queryParams.get('signInError') === null) return
     Notifications.showError({
       text: 'Sign in could not be completed because the identity provider reported an error. '
-        + 'If you chose a personal Microsoft account (such as an Outlook.com or Live account), that account type is not supported — '
-        + 'please sign in with Google or with a Microsoft work or school account.',
+        + 'Please try again. If the problem continues, contact Terra support.',
       // Long timeout: the message carries instructions the user must read.
       timeout: 30000,
     })

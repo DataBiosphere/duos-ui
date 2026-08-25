@@ -311,15 +311,16 @@ describe('B2C OAuth callback (real openid-client validation against a fake B2C)'
   })
 
   it('redirects to /?signInError=provider when B2C answers with an error instead of a code', async () => {
-    // Edge case: the user picked an identity the tenant's policy
-    // rejects (e.g. a personal Microsoft Live account). B2C redirects back
+    // Edge case: B2C cannot complete the federated sign-in (observed when a
+    // tenant's federation client secret to the upstream Microsoft provider
+    // has expired — every Microsoft account then fails). B2C redirects back
     // with error=server_error — the real authorizationCodeGrant throws
     // AuthorizationResponseError, which must land the browser in the SPA
     const { cookie, state } = await login()
 
     const res = await app.inject({
       method: 'GET',
-      url: `/auth/callback?error=server_error&error_description=AADB2C90085&state=${state}`,
+      url: `/auth/callback?error=server_error&error_description=AADB2C90289&state=${state}`,
       headers: { cookie },
     })
 
