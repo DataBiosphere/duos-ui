@@ -1,7 +1,7 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { AdminManageUsers } from 'src/pages/AdminManageUsers'
 import { User } from 'src/libs/ajax/User'
 import { DAC } from 'src/libs/ajax/DAC'
@@ -81,6 +81,12 @@ const testUsers: DuosUser[] = [
 
 const testDacs: DacObject[] = [{ dacId: 1, name: 'Cancer DAC' }]
 
+// The mount fetch has to settle before a test asserts, or its state update lands after the test.
+const renderPage = async (): Promise<void> => {
+  render(<AdminManageUsers />)
+  await waitFor(() => expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-loading', 'false'))
+}
+
 describe('AdminManageUsers', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -90,20 +96,20 @@ describe('AdminManageUsers', () => {
 
   it('renders the page title and description', async () => {
     vi.mocked(User.list).mockResolvedValue([])
-    await act(async () => render(<AdminManageUsers />))
+    await renderPage()
     expect(screen.getByText('Manage Users')).toBeInTheDocument()
     expect(screen.getByText('Select and manage users and their roles')).toBeInTheDocument()
   })
 
   it('fetches users with the admin role on mount', async () => {
     vi.mocked(User.list).mockResolvedValue([])
-    await act(async () => render(<AdminManageUsers />))
+    await renderPage()
     expect(User.list).toHaveBeenCalledWith(USER_ROLES.admin)
   })
 
   it('passes loaded users to ManageUsersTable', async () => {
     vi.mocked(User.list).mockResolvedValue(testUsers)
-    await act(async () => render(<AdminManageUsers />))
+    await renderPage()
     expect(screen.getByText('Alice Admin')).toBeInTheDocument()
     expect(screen.getByText('Bob Admin')).toBeInTheDocument()
   })
@@ -111,18 +117,18 @@ describe('AdminManageUsers', () => {
   it('fetches the DAC list on mount, for the table to name a user\'s DACs', async () => {
     vi.mocked(User.list).mockResolvedValue([])
     vi.mocked(DAC.list).mockResolvedValue(testDacs)
-    await act(async () => render(<AdminManageUsers />))
-    expect(DAC.list).toHaveBeenCalledWith(false)
+    await renderPage()
     expect(screen.getByText('Cancer DAC')).toBeInTheDocument()
+    expect(DAC.list).toHaveBeenCalledWith(false)
   })
 
   it('shows an error notification when the DAC fetch fails', async () => {
     vi.mocked(User.list).mockResolvedValue(testUsers)
     vi.mocked(DAC.list).mockRejectedValue(new Error('network error'))
-    await act(async () => render(<AdminManageUsers />))
-    expect(Notifications.showError).toHaveBeenCalledWith({
+    render(<AdminManageUsers />)
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalledWith({
       text: 'Error: Unable to retrieve user data from server',
-    })
+    }))
   })
 
   it('shows loading state while fetching', () => {
@@ -133,27 +139,27 @@ describe('AdminManageUsers', () => {
 
   it('clears loading state after fetch completes', async () => {
     vi.mocked(User.list).mockResolvedValue(testUsers)
-    await act(async () => render(<AdminManageUsers />))
-    expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-loading', 'false')
+    render(<AdminManageUsers />)
+    await waitFor(() => expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-loading', 'false'))
   })
 
   it('shows an error notification when the fetch fails', async () => {
     vi.mocked(User.list).mockRejectedValue(new Error('network error'))
-    await act(async () => render(<AdminManageUsers />))
-    expect(Notifications.showError).toHaveBeenCalledWith({
+    render(<AdminManageUsers />)
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalledWith({
       text: 'Error: Unable to retrieve user data from server',
-    })
+    }))
   })
 
   it('clears loading state after the fetch fails', async () => {
     vi.mocked(User.list).mockRejectedValue(new Error('network error'))
-    await act(async () => render(<AdminManageUsers />))
-    expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-loading', 'false')
+    render(<AdminManageUsers />)
+    await waitFor(() => expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-loading', 'false'))
   })
 
   it('opens the add user modal when the Add User button is clicked', async () => {
     vi.mocked(User.list).mockResolvedValue([])
-    await act(async () => render(<AdminManageUsers />))
+    await renderPage()
     expect(screen.queryByTestId('add-user-modal')).not.toBeInTheDocument()
     fireEvent.click(screen.getByText('ADD USER'))
     expect(screen.getByTestId('add-user-modal')).toBeInTheDocument()
@@ -161,20 +167,20 @@ describe('AdminManageUsers', () => {
 
   it('closes the add user modal and refreshes users when OK is clicked', async () => {
     vi.mocked(User.list).mockResolvedValue(testUsers)
-    await act(async () => render(<AdminManageUsers />))
+    await renderPage()
     expect(User.list).toHaveBeenCalledTimes(1)
 
     fireEvent.click(screen.getByText('ADD USER'))
     expect(screen.getByTestId('add-user-modal')).toBeInTheDocument()
 
-    await act(async () => fireEvent.click(screen.getByText('OK')))
+    fireEvent.click(screen.getByText('OK'))
+    await waitFor(() => expect(User.list).toHaveBeenCalledTimes(2))
     expect(screen.queryByTestId('add-user-modal')).not.toBeInTheDocument()
-    expect(User.list).toHaveBeenCalledTimes(2)
   })
 
   it('closes the add user modal when Close is clicked', async () => {
     vi.mocked(User.list).mockResolvedValue([])
-    await act(async () => render(<AdminManageUsers />))
+    await renderPage()
     fireEvent.click(screen.getByText('ADD USER'))
     expect(screen.getByTestId('add-user-modal')).toBeInTheDocument()
     fireEvent.click(screen.getByText('Close'))
