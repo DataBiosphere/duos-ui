@@ -5,12 +5,13 @@ import { DatasetTerm } from 'src/types/model'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DataUseCode, processDataUseCodes } from 'src/utils/DataUseUtils'
 import { Notifications } from 'src/libs/utils'
+import { extractError } from 'src/utils/ErrorUtils'
 import DACDatasetApprovalStatus from 'src/components/dac_dataset_table/DACDatasetApprovalStatus'
 import { DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants'
 
 const downloadInstitutionalCertification = (dataset: DatasetTerm) => {
-  DataSet.getNIHInstitutionalCertification(dataset.datasetId).catch(() => {
-    Notifications.showError({ text: `Error downloading the NIH Institutional Certification for ${dataset.datasetIdentifier}` })
+  DataSet.getNIHInstitutionalCertification(dataset.datasetId).catch((error: unknown) => {
+    Notifications.showError({ text: `Error downloading the NIH Institutional Certification for ${dataset.datasetIdentifier}: ${extractError(error)}` })
   })
 }
 

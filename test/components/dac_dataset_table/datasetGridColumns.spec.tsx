@@ -1,14 +1,20 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi } from 'vitest'
-import { screen } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
 import { makeRenderCellHelper } from '../data_library/columns/columnTestUtils'
 import { makeDACDatasetGridColumns } from 'src/components/dac_dataset_table/datasetGridColumns'
 import { DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants'
 import { DatasetTerm } from 'src/types/model'
+import { DataSet } from 'src/libs/ajax/DataSet'
+import { Notifications } from 'src/libs/utils'
 
 vi.mock('src/libs/ajax/DataSet', () => ({
   DataSet: { getNIHInstitutionalCertification: vi.fn().mockResolvedValue(undefined) },
+}))
+
+vi.mock('src/libs/utils', () => ({
+  Notifications: { showError: vi.fn() },
 }))
 
 vi.mock('src/components/dac_dataset_table/DACDatasetApprovalStatus', () => ({
@@ -141,6 +147,15 @@ describe('datasetGridColumns — NIH Institutional Certification', () => {
   it('renders nothing when the dataset has no certification', () => {
     const { container } = renderCell('hasInstitutionCertification', undefined, { hasInstitutionCertification: false })
     expect(container.textContent).toBe('')
+  })
+
+  it('surfaces the error returned by Consent when the download fails', async () => {
+    vi.mocked(DataSet.getNIHInstitutionalCertification).mockRejectedValueOnce(new Error('Dataset not found'))
+    renderCell('hasInstitutionCertification', undefined, { hasInstitutionCertification: true })
+    fireEvent.click(screen.getByRole('button'))
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalledWith({
+      text: 'Error downloading the NIH Institutional Certification for DUOS-000001: Dataset not found',
+    }))
   })
 })
 
