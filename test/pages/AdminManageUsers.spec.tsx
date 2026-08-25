@@ -4,11 +4,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { AdminManageUsers } from 'src/pages/AdminManageUsers'
 import { User } from 'src/libs/ajax/User'
+import { DAC } from 'src/libs/ajax/DAC'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
-import { DuosUser } from 'src/types/model'
+import { DacObject, DuosUser } from 'src/types/model'
 
 vi.mock('src/libs/ajax/User', () => ({
   User: { list: vi.fn() },
+}))
+
+// The page loads users and DACs together, so an unmocked DAC.list would reach the network
+// and fail the pair.
+vi.mock('src/libs/ajax/DAC', () => ({
+  DAC: { list: vi.fn() },
 }))
 
 vi.mock('src/libs/utils', async (importActual) => {
@@ -20,9 +27,10 @@ vi.mock('src/libs/utils', async (importActual) => {
 })
 
 vi.mock('src/components/manage_users_table/ManageUsersTable', () => ({
-  ManageUsersTable: ({ userList, isLoading }: { userList: DuosUser[], isLoading: boolean }) => (
+  ManageUsersTable: ({ userList, dacList, isLoading }: { userList: DuosUser[], dacList: DacObject[], isLoading: boolean }) => (
     <div data-testid="manage-users-table" data-loading={isLoading}>
       {userList.map(u => <span key={u.userId}>{u.displayName}</span>)}
+      {dacList.map(dac => <span key={dac.dacId}>{dac.name}</span>)}
     </div>
   ),
 }))
@@ -71,9 +79,13 @@ const testUsers: DuosUser[] = [
   makeUser({ userId: 2, displayName: 'Bob Admin' }),
 ]
 
+const testDacs: DacObject[] = [{ dacId: 1, name: 'Cancer DAC' }]
+
 describe('AdminManageUsers', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Every test loads the page, and only the DAC tests care what comes back.
+    vi.mocked(DAC.list).mockResolvedValue([])
   })
 
   it('renders the page title and description', async () => {
@@ -94,6 +106,23 @@ describe('AdminManageUsers', () => {
     await act(async () => render(<AdminManageUsers />))
     expect(screen.getByText('Alice Admin')).toBeInTheDocument()
     expect(screen.getByText('Bob Admin')).toBeInTheDocument()
+  })
+
+  it('fetches the DAC list on mount, for the table to name a user\'s DACs', async () => {
+    vi.mocked(User.list).mockResolvedValue([])
+    vi.mocked(DAC.list).mockResolvedValue(testDacs)
+    await act(async () => render(<AdminManageUsers />))
+    expect(DAC.list).toHaveBeenCalledWith(false)
+    expect(screen.getByText('Cancer DAC')).toBeInTheDocument()
+  })
+
+  it('shows an error notification when the DAC fetch fails', async () => {
+    vi.mocked(User.list).mockResolvedValue(testUsers)
+    vi.mocked(DAC.list).mockRejectedValue(new Error('network error'))
+    await act(async () => render(<AdminManageUsers />))
+    expect(Notifications.showError).toHaveBeenCalledWith({
+      text: 'Error: Unable to retrieve user data from server',
+    })
   })
 
   it('shows loading state while fetching', () => {
