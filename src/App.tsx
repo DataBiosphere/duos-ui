@@ -60,7 +60,7 @@ function App() {
     if (queryParams.get('signInError') === null) return
     Notifications.showError({
       text: 'Sign in could not be completed because the identity provider reported an error. '
-        + 'Please try again. If the problem continues, contact Terra support.',
+        + 'Please try again. If the problem continues, contact DUOS support.',
       // Long timeout: the message carries instructions the user must read.
       timeout: 30000,
     })
