@@ -5,41 +5,35 @@ import { REFRESH_WINDOW_SECONDS, RefreshFailedError, refreshAccessToken } from '
 const UPSTREAM_TIMEOUT_MS = 5000
 
 /**
- * Answers an upstream 401/404. The DUOS API conflates "bad token" with "no
- * DUOS profile for this email" (both 401 — DuosUserAuthenticator turns the
- * lookup's NotFoundException into an empty principal), so the session's
- * `profileSeen` flag is the disambiguator this endpoint controls.
+ * Shown when the upstream 409 arrives without a usable message — the client
+ * needs something actionable even if the body was empty or malformed.
  */
-async function answerNoProfile(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-  if (request.session.profileSeen) {
-    // This session has served a profile before, so "no profile" cannot be
-    // the explanation. The upstream is rejecting the token itself — revoked
-    // mid-lifetime (before refresh-before-forward would touch it) or the
-    // account was disabled. The terminal 401 is the honest answer; leaving
-    // the session alive would send the client into re-registering an
-    // existing user.
-    try {
-      await request.session.destroy()
-    }
-    catch (err: unknown) {
-      request.log.error({ err }, '[auth] upstream rejected a profile-seen session but it could not be destroyed — returning 401 anyway')
-    }
-    reply.clearCookie('sessionId').status(401).send({ authenticated: false })
-    return
+const PROVIDER_CONFLICT_FALLBACK_MESSAGE
+  = 'You may have previously signed in with a different authentication provider (Google or Microsoft). Please sign in with that provider.'
+
+/**
+ * Ends a session the upstream has authoritatively rejected.
+ */
+async function destroySession(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  try {
+    await request.session.destroy()
   }
-  // Never seen a profile: authenticated but not yet registered. Treating
-  // this 401 as a dead session destroyed every brand-new user's session on
-  // their first probe and made registration unreachable. In the rare case
-  // of a token revoked before first contact, the client's registration
-  // attempt fails too, which signs the session out. (404 kept deliberately:
-  // DT-3997 restores the upstream's 404 for unregistered users.)
-  reply.send({ authenticated: true, idp: request.session.idp })
+  catch (err: unknown) {
+    request.log.error({ err }, '[auth] upstream rejected the session but it could not be destroyed — answering as signed out anyway')
+  }
+  reply.clearCookie('sessionId')
 }
 
 /**
  * Confirms the user is authenticated against the upstream Consent API.
  * Forwards the upstream user profile and the active sub-provider — never the
  * tokens themselves, which stay server-side in the session.
+ *
+ * The upstream /api/user/me contract:
+ * - 200 registered profile
+ * - 401 rejected token
+ * - 404 authenticated but unregistered
+ * - 409 Sam sub-provider conflict
  */
 export async function getMe(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   // The answer is per-session and now gates the whole SPA: no intermediary
@@ -98,13 +92,46 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     return
   }
 
-  if (res.status === 401 || res.status === 404) {
-    await answerNoProfile(request, reply)
+  if (res.status === 401) {
+    // The upstream rejected the token itself — revoked mid-lifetime (before refresh-before-forward would
+    // touch it) or the account was disabled. The terminal 401 is final so the session must be destroyed.
+    // The client still needs to know it is signed out, so the reply goes out after the session is destroyed.
+    await destroySession(request, reply)
+    reply.status(401).send({ authenticated: false })
+    return
+  }
+
+  if (res.status === 404) {
+    // Authenticated but not yet registered — the session is valid, and the
+    // client's post-sign-in bootstrap needs authenticated:true (with user
+    // absent) to reach its registration flow.
+    reply.send({ authenticated: true, idp: request.session.idp })
+    return
+  }
+
+  if (res.status === 409) {
+    // Sam sub-provider conflict: the account exists under the other B2C sub-provider and Sam rejects it.
+    // Registration cannot succeed and the session cannot become usable, so end it — but forward the
+    // upstream's actionable message (sign in with the other provider, plus the support link) instead
+    // of a generic failure.
+    let message = PROVIDER_CONFLICT_FALLBACK_MESSAGE
+    try {
+      const body: unknown = await res.json()
+      const upstreamMessage = (body as { message?: unknown } | null)?.message
+      if (typeof upstreamMessage === 'string' && upstreamMessage.length > 0) {
+        message = upstreamMessage
+      }
+    }
+    catch {
+      // Unparseable body — the fallback message stands.
+    }
+    await destroySession(request, reply)
+    reply.status(409).send({ authenticated: false, error: 'provider_conflict', message })
     return
   }
 
   if (!res.ok) {
-    // A non-401 failure (5xx, upstream outage) says nothing about whether the
+    // A non-4xx failure (5xx, upstream outage) says nothing about whether the
     // token itself is still valid — don't destroy the session or parse an
     // error body as if it were a user profile.
     reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
@@ -118,15 +145,6 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
   catch {
     reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
     return
-  }
-
-  if (!request.session.profileSeen) {
-    request.session.profileSeen = true
-    // Saved explicitly before the reply, once per session (the flag never
-    // flips back): with rolling off, the onSend hook only skips its async
-    // save when the session is unmodified — see index.ts on the
-    // ERR_HTTP_HEADERS_SENT hazard a post-reply async save creates.
-    await request.session.save()
   }
 
   reply.send({
