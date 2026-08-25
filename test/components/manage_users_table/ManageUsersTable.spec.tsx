@@ -98,9 +98,12 @@ const emittedRules = (): string[] =>
     .join('')
     .split('}')
 
-// Yes and No repeat across the two status columns, so the assertions read a named cell.
-const cellText = (row: HTMLElement, field: string): string =>
-  row.querySelector(`[data-field="${field}"]`)?.textContent ?? ''
+// Yes and No repeat across the two status columns, so the assertions read a cell by column position.
+const RESEARCHER_STATUS = 4
+const DATA_SUBMITTER_STATUS = 5
+
+const cellText = (row: HTMLElement, column: number): string =>
+  within(row).queryAllByRole('gridcell')[column]?.textContent ?? ''
 
 const rowFor = async (name: string): Promise<HTMLElement> => {
   const cell = await screen.findByText(name)
@@ -131,8 +134,8 @@ describe('ManageUsersTable', () => {
   it('reads researcher status off the library card', async () => {
     renderTable()
 
-    expect(cellText(await rowFor(carol.displayName), 'researcherStatus')).toBe('Yes')
-    expect(cellText(await rowFor(alice.displayName), 'researcherStatus')).toBe('No')
+    expect(cellText(await rowFor(carol.displayName), RESEARCHER_STATUS)).toBe('Yes')
+    expect(cellText(await rowFor(alice.displayName), RESEARCHER_STATUS)).toBe('No')
   })
 
   it('reads data submitter status off the DataSubmitter role', async () => {
@@ -144,8 +147,8 @@ describe('ManageUsersTable', () => {
     })
     renderWithRouter(<ManageUsersTable isLoading={false} userList={[alice, dave]} searchText="" />)
 
-    expect(cellText(await rowFor(dave.displayName), 'dataSubmitterStatus')).toBe('Yes')
-    expect(cellText(await rowFor(alice.displayName), 'dataSubmitterStatus')).toBe('No')
+    expect(cellText(await rowFor(dave.displayName), DATA_SUBMITTER_STATUS)).toBe('Yes')
+    expect(cellText(await rowFor(alice.displayName), DATA_SUBMITTER_STATUS)).toBe('No')
   })
 
   it('links each user name to their edit page', async () => {
