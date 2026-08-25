@@ -1,9 +1,8 @@
 import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
-import { Box, Chip, Tooltip } from '@mui/material'
 import { DatasetTerm } from 'src/types/model'
 import { DataSet } from 'src/libs/ajax/DataSet'
-import { DataUseCode, processDataUseCodes } from 'src/utils/DataUseUtils'
+import { DATA_USE_GRID_COLUMN } from 'src/components/dataUseGridColumn'
 import { Notifications } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import DACDatasetApprovalStatus from 'src/components/dac_dataset_table/DACDatasetApprovalStatus'
@@ -14,14 +13,6 @@ const downloadInstitutionalCertification = (dataset: DatasetTerm) => {
     Notifications.showError({ text: `Error downloading the NIH Institutional Certification for ${dataset.datasetIdentifier}: ${extractError(error)}` })
   })
 }
-
-// processDataUseCodes expands DS into `DS (disease)`, so cap the chip and let it ellipsize
-// rather than overflow the cell's hidden overflow
-const dataUseChip = (du: DataUseCode) => (
-  <Tooltip title={du.description}>
-    <Chip label={du.code} size="small" variant="outlined" sx={{ maxWidth: 96 }} />
-  </Tooltip>
-)
 
 const dacDatasetGridColumns: Partial<Record<string, GridColDef<DatasetTerm>>> = {
   [DACDatasetTableColumnOptions.DUOS_ID]: {
@@ -65,33 +56,11 @@ const dacDatasetGridColumns: Partial<Record<string, GridColDef<DatasetTerm>>> = 
     valueGetter: (_value, row) => row.study?.dataCustodianEmail?.join(', ') ?? '',
   },
   [DACDatasetTableColumnOptions.DATA_USE]: {
-    field: 'dataUse',
-    headerName: 'Data Use',
+    ...DATA_USE_GRID_COLUMN,
     flex: 1,
-    // Wide enough for two `DS (disease)` chips, which processDataUseCodes can make long
-    minWidth: 220,
-    sortable: false,
-    // Without this the raw dataUse object is the cell value, so filtering matches '[object Object]'
-    valueGetter: (_value, row) => processDataUseCodes(row).codeList.join(', '),
-    renderCell: (params) => {
-      const { codesAndDescriptions } = processDataUseCodes(params.row)
-      if (codesAndDescriptions.length === 0) return null
-      // Rendered positionally rather than mapped: codes are not unique — primary and secondary can
-      // carry the same one — so a code-derived key would collide and an index key is its own smell.
-      const [first, second] = codesAndDescriptions
-      const overflow = codesAndDescriptions.slice(2)
-      return (
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center', height: '100%' }}>
-          {dataUseChip(first)}
-          {second && dataUseChip(second)}
-          {overflow.length > 0 && (
-            <Tooltip title={overflow.map(du => `${du.code}: ${du.description}`).join(', ')}>
-              <Chip label={`+${overflow.length}`} size="small" variant="outlined" />
-            </Tooltip>
-          )}
-        </Box>
-      )
-    },
+    // Matches the Data Library's fixed 230 for the same chip, which its longest
+    // code sequences need before they ellipsize
+    minWidth: 230,
   },
   [DACDatasetTableColumnOptions.CERTIFICATION_LINK]: {
     field: 'hasInstitutionCertification',

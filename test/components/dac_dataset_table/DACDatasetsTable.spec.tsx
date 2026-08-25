@@ -35,23 +35,6 @@ vi.mock('src/components/dac_dataset_table/DACDatasetApprovalStatus', () => ({
   },
 }))
 
-vi.mock('src/utils/DataUseUtils', () => ({
-  processDataUseCodes: vi.fn((dataset: DatasetTerm) => {
-    const primary = (dataset.dataUse as { primary?: Array<{ code: string, description: string }> })?.primary ?? []
-    const codeList = primary.map(p => p.code)
-    // Mirrors the real DataUseCode shape (shortCode/type included) — vi.mock factories
-    // are not type-checked against the module, so this has to be kept in step by hand.
-    return {
-      codeList,
-      codesAndDescriptions: primary.map(p => ({ ...p, shortCode: p.code, type: 'primary' })),
-    }
-  }),
-  createDataUseDisplay: vi.fn((opts: { dataset: DatasetTerm }) => {
-    const primary = (opts.dataset.dataUse as { primary?: Array<{ code: string }> })?.primary ?? []
-    return <span>{primary.map(p => p.code).join(', ')}</span>
-  }),
-}))
-
 const makeDataset = (overrides: Partial<DatasetTerm> = {}): DatasetTerm => ({
   datasetId: 1,
   createUserId: 1,

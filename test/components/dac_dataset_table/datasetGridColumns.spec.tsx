@@ -21,13 +21,6 @@ vi.mock('src/components/dac_dataset_table/DACDatasetApprovalStatus', () => ({
   default: ({ dataset }: { dataset: DatasetTerm }) => <div>Status for {dataset.datasetId}</div>,
 }))
 
-vi.mock('src/utils/DataUseUtils', () => ({
-  processDataUseCodes: vi.fn((dataset: DatasetTerm) => {
-    const primary = (dataset.dataUse as { primary?: Array<{ code: string, description: string }> })?.primary ?? []
-    return { codeList: primary.map(p => p.code), codesAndDescriptions: primary }
-  }),
-}))
-
 const makeRow = (overrides: Partial<DatasetTerm> = {}): DatasetTerm => ({
   datasetId: 1,
   createUserId: 0,
@@ -102,34 +95,27 @@ describe('datasetGridColumns — valueGetters', () => {
     expect(getValue('dataCustodian', row)).toBe('a@test.org, b@test.org')
   })
 
-  it('dataUse resolves to the code list so filtering sees text, not the raw object', () => {
+  it('dataUse resolves to the hyphenated code list so filtering sees text, not the raw object', () => {
     const row = makeRow({ dataUse: { primary: [{ code: 'HMB', description: 'd1' }, { code: 'GRU', description: 'd2' }] } } as Partial<DatasetTerm>)
-    expect(getValue('dataUse', row)).toBe('HMB, GRU')
+    expect(getValue('dataUse', row)).toBe('HMB-GRU')
   })
 })
 
-describe('datasetGridColumns — Data Use chips', () => {
-  it('renders a chip per code', () => {
-    const dataset = { dataUse: { primary: [{ code: 'HMB', description: 'Health/Medical/Biomedical' }] } }
-    renderCell('dataUse', undefined, dataset)
-    expect(screen.getByText('HMB')).toBeInTheDocument()
-  })
+describe('datasetGridColumns — Data Use chip', () => {
+  const chipLabels = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll('.MuiChip-label')).map(el => el.textContent)
 
-  it('shows an overflow chip beyond the first two codes', () => {
-    const dataset = {
+  it('reuses the Data Library chip: one chip carrying every code, primaries first', () => {
+    const { container } = renderCell('dataUse', undefined, {
       dataUse: {
-        primary: [
-          { code: 'HMB', description: 'd1' },
-          { code: 'GRU', description: 'd2' },
-          { code: 'NPU', description: 'd3' },
+        primary: [{ code: 'HMB', description: 'Health/Medical/Biomedical' }],
+        secondary: [
+          { code: 'PUB', description: 'Publication Required' },
+          { code: 'GSO', description: 'Genetic Studies Only' },
         ],
       },
-    }
-    renderCell('dataUse', undefined, dataset)
-    expect(screen.getByText('HMB')).toBeInTheDocument()
-    expect(screen.getByText('GRU')).toBeInTheDocument()
-    expect(screen.getByText('+1')).toBeInTheDocument()
-    expect(screen.queryByText('NPU')).not.toBeInTheDocument()
+    })
+    expect(chipLabels(container)).toEqual(['HMB-GSO-PUB'])
   })
 
   it('renders nothing when there are no data use codes', () => {

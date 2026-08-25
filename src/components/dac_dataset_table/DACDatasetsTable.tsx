@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { Box } from '@mui/material'
 import { DataGrid, GridSortModel } from '@mui/x-data-grid'
 import { Storage } from 'src/libs/storage'
-import { DATA_GRID_NO_FOCUS_OUTLINE_SX, DATA_GRID_SLOTS } from 'src/components/dataGridDefaults'
+import { DATA_GRID_CONTAINER_SX, DATA_GRID_SLOTS, DATA_GRID_SX } from 'src/components/dataGridDefaults'
 import { makeDACDatasetGridColumns } from 'src/components/dac_dataset_table/datasetGridColumns'
 import { DatasetTerm } from 'src/types/model'
 
@@ -31,7 +31,7 @@ export const DACDatasetsTable = function DACDatasetTable({ datasets, columns, is
   }, [])
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={DATA_GRID_CONTAINER_SX}>
       <DataGrid
         rows={datasets}
         columns={gridColumns}
@@ -44,7 +44,7 @@ export const DACDatasetsTable = function DACDatasetTable({ datasets, columns, is
         sortModel={sortModel}
         onSortModelChange={handleSortModelChange}
         disableRowSelectionOnClick
-        sx={DATA_GRID_NO_FOCUS_OUTLINE_SX}
+        sx={DATA_GRID_SX}
         slots={DATA_GRID_SLOTS}
       />
     </Box>
