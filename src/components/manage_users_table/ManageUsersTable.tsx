@@ -2,9 +2,10 @@ import React, { useMemo, useState } from 'react'
 import { Box } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid'
 import { Link } from 'react-router'
-import { getSearchFilterFunctions } from 'src/libs/utils'
+import { getSearchFilterFunctions, hasDataSubmitterRole } from 'src/libs/utils'
 import { Theme } from 'src/libs/theme'
 import { formatUserRoles, institutionName, yesNo } from 'src/components/manage_users_table/manageUsersTableUtils'
+import { isNil } from 'src/utils/NodashUtil'
 import { DuosUser } from 'src/types/model'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
@@ -46,14 +47,15 @@ interface UserRow {
 }
 
 // Roles and institution are flattened to their displayed text, so every column sorts on what is read.
+// The isResearcher/isDataSubmitter flags are set for the signed-in user only, so a list response has neither.
 const toUserRow = (user: DuosUser): UserRow => ({
   id: user.userId,
   displayName: user.displayName,
   email: user.email,
   institution: institutionName(user.institution),
   roles: formatUserRoles(user.roles, user.libraryCard),
-  researcherStatus: yesNo(user.isResearcher),
-  dataSubmitterStatus: yesNo(user.isDataSubmitter),
+  researcherStatus: yesNo(!isNil(user.libraryCard)),
+  dataSubmitterStatus: yesNo(hasDataSubmitterRole(user)),
 })
 
 const COLUMNS: GridColDef<UserRow>[] = [

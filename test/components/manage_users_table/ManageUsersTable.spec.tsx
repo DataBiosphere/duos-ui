@@ -25,7 +25,7 @@ const makeUser = (overrides: Partial<DuosUser> & { userId: number, displayName: 
   isChairPerson: false,
   isDataSubmitter: false,
   isMember: false,
-  isResearcher: true,
+  isResearcher: false,
   isSigningOfficial: false,
   roles: [{ roleId: 1, name: 'Researcher', userId: overrides.userId, userRoleId: overrides.userId }],
   ...overrides,
@@ -98,6 +98,10 @@ const emittedRules = (): string[] =>
     .join('')
     .split('}')
 
+// Yes and No repeat across the two status columns, so the assertions read a named cell.
+const cellText = (row: HTMLElement, field: string): string =>
+  row.querySelector(`[data-field="${field}"]`)?.textContent ?? ''
+
 const rowFor = async (name: string): Promise<HTMLElement> => {
   const cell = await screen.findByText(name)
   const row = cell.closest('[role="row"]')
@@ -123,23 +127,25 @@ describe('ManageUsersTable', () => {
     expect(within(row).getByText('Admin')).toBeInTheDocument()
   })
 
-  it('shows Yes or No for researcher and data submitter status', async () => {
+  // Every fixture leaves the flags false, as a list response does, so only the card and the role can drive these.
+  it('reads researcher status off the library card', async () => {
+    renderTable()
+
+    expect(cellText(await rowFor(carol.displayName), 'researcherStatus')).toBe('Yes')
+    expect(cellText(await rowFor(alice.displayName), 'researcherStatus')).toBe('No')
+  })
+
+  it('reads data submitter status off the DataSubmitter role', async () => {
     const dave = makeUser({
       userId: 4,
       displayName: 'Dave Lee',
       email: 'dave@test.com',
-      isResearcher: false,
-      isDataSubmitter: true,
+      roles: [{ roleId: 8, name: 'DataSubmitter', userId: 4, userRoleId: 4 }],
     })
     renderWithRouter(<ManageUsersTable isLoading={false} userList={[alice, dave]} searchText="" />)
 
-    const aliceRow = await rowFor(alice.displayName)
-    expect(within(aliceRow).getByText('Yes')).toBeInTheDocument()
-    expect(within(aliceRow).getByText('No')).toBeInTheDocument()
-
-    const daveRow = await rowFor(dave.displayName)
-    expect(within(daveRow).getByText('No')).toBeInTheDocument()
-    expect(within(daveRow).getByText('Yes')).toBeInTheDocument()
+    expect(cellText(await rowFor(dave.displayName), 'dataSubmitterStatus')).toBe('Yes')
+    expect(cellText(await rowFor(alice.displayName), 'dataSubmitterStatus')).toBe('No')
   })
 
   it('links each user name to their edit page', async () => {
