@@ -5,12 +5,22 @@ import { render, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import DAAResearcherSubtable from 'src/pages/signing_official_console/DAAAssignment/DAAResearcherSubtable'
 import { DAAResearcherRowData } from 'src/pages/signing_official_console/DAAAssignment/types'
-import { DuosUser } from 'src/types/model'
+import { DuosUser, InstitutionInterface } from 'src/types/model'
 
-const makeResearcher = (userId: number, displayName: string, email: string): DuosUser => ({
+const makeResearcher = (
+  userId: number,
+  displayName: string,
+  email: string,
+  institution?: { id: number, name: string },
+): DuosUser => ({
   userId,
   displayName,
   email,
+  // Only the identifying fields, as a user payload's nested institution carries.
+  ...(institution && {
+    institutionId: institution.id,
+    institution: institution as unknown as InstitutionInterface,
+  }),
   createDate: new Date('2020-01-01'),
   emailPreference: true,
   isAdmin: false,
@@ -25,7 +35,10 @@ const makeResearcher = (userId: number, displayName: string, email: string): Duo
 
 const mockRows: DAAResearcherRowData[] = [
   {
-    researcher: makeResearcher(1, 'Test User Theta', 'test.user.theta@test.org'),
+    researcher: makeResearcher(1, 'Test User Theta', 'test.user.theta@test.org', {
+      id: 100,
+      name: 'Institution Theta',
+    }),
     status: 'authorized',
     authorizedBy: 'so@test.org',
   },
@@ -48,14 +61,19 @@ describe('DAAResearcherSubtable', () => {
     revokeSpy = vi.fn()
   })
 
-  const mount = (rows = mockRows) =>
+  const mount = (rows = mockRows, readOnly = false, showInstitution = false) =>
     render(
       <DAAResearcherSubtable
         researcherRows={rows}
         onAuthorize={authorizeSpy}
         onRevoke={revokeSpy}
+        readOnly={readOnly}
+        showInstitution={showInstitution}
       />,
     )
+
+  const columnHeaders = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll('th')).map(th => th.textContent)
 
   it('renders all researcher rows', () => {
     const { container } = mount()
@@ -137,6 +155,75 @@ describe('DAAResearcherSubtable', () => {
     const { container } = mount()
     mockRows.forEach(({ researcher }) => {
       expect(container.querySelector(`[data-cy="daa-authorized-by-${researcher.userId}"]`)).toBeInTheDocument()
+    })
+  })
+
+  describe('read-only mode', () => {
+    it('omits the Action column header, keeping the other four', () => {
+      const { container } = mount(mockRows, true)
+      expect(columnHeaders(container)).toEqual([
+        'Researcher',
+        'Email',
+        'Pre-Auth Status',
+        'Pre-authorized By',
+      ])
+    })
+
+    it('renders no action buttons in any row', () => {
+      const { container } = mount(mockRows, true)
+      expect(container.querySelector('[data-cy="auth-action-revoke"]')).not.toBeInTheDocument()
+      expect(container.querySelector('[data-cy="auth-action-authorize"]')).not.toBeInTheDocument()
+      expect(container.querySelector('[data-cy="auth-action-reauthorize"]')).not.toBeInTheDocument()
+    })
+
+    it('still renders every row with its status chip and authorizedBy value', () => {
+      const { container } = mount(mockRows, true)
+      expect(container.querySelectorAll('[data-cy^="daa-researcher-row-"]')).toHaveLength(3)
+      expect(container.querySelector('[data-cy="daa-researcher-row-1"] [data-cy="auth-status-chip-authorized"]')).toBeInTheDocument()
+      expect(container.querySelector('[data-cy="daa-authorized-by-1"]')).toHaveTextContent('so@test.org')
+    })
+
+    it('spans the empty-state cell across the remaining columns', () => {
+      const { container } = mount([], true)
+      const emptyCell = container.querySelector('[data-cy="daa-researcher-subtable-empty"]') as HTMLElement
+      expect(emptyCell).toHaveAttribute('colspan', '4')
+    })
+  })
+
+  describe('institution column', () => {
+    it('is absent by default', () => {
+      const { container } = mount()
+      expect(columnHeaders(container)).not.toContain('Institution')
+      expect(container.querySelector('[data-cy="daa-researcher-institution-1"]')).not.toBeInTheDocument()
+    })
+
+    it('is inserted after Email when asked', () => {
+      const { container } = mount(mockRows, true, true)
+      expect(columnHeaders(container)).toEqual([
+        'Researcher',
+        'Email',
+        'Institution',
+        'Pre-Auth Status',
+        'Pre-authorized By',
+      ])
+    })
+
+    it('shows each researcher institution, dashing the ones without', () => {
+      const { container } = mount(mockRows, true, true)
+      expect(container.querySelector('[data-cy="daa-researcher-institution-1"]')).toHaveTextContent('Institution Theta')
+      expect(container.querySelector('[data-cy="daa-researcher-institution-2"]')).toHaveTextContent('—')
+    })
+
+    it('keeps each row cell count aligned with the header', () => {
+      const { container } = mount(mockRows, true, true)
+      const row1 = container.querySelector('[data-cy="daa-researcher-row-1"]') as HTMLElement
+      expect(row1.querySelectorAll('td')).toHaveLength(columnHeaders(container).length)
+    })
+
+    it('spans the empty-state cell across all five columns', () => {
+      const { container } = mount([], true, true)
+      expect(container.querySelector('[data-cy="daa-researcher-subtable-empty"]'))
+        .toHaveAttribute('colspan', '5')
     })
   })
 })

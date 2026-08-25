@@ -1,11 +1,18 @@
 import React from 'react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BrowserRouter } from 'react-router'
 import { ProfileLinks } from 'src/components/navigation/ProfileLinks'
 import { DuosUser } from 'src/types/model'
+import { useSessionInfo } from 'src/hooks/useSession'
+
+// The session probe is mocked unresolved by default (undefined = in flight);
+// the sub-provider badge cases override it per test.
+vi.mock('src/hooks/useSession', () => ({
+  useSessionInfo: vi.fn(() => undefined),
+}))
 
 const mockUser: DuosUser = {
   createDate: new Date(),
@@ -24,6 +31,12 @@ const mockUser: DuosUser = {
 }
 
 describe('ProfileLinks', () => {
+  afterEach(() => {
+    // Clears call history and per-test mockReturnValue overrides, restoring
+    // the factory's default (undefined = probe in flight).
+    vi.mocked(useSessionInfo).mockReset()
+  })
+
   const renderComponent = (propsOverride: Record<string, unknown> = {}) => {
     const onSubtabChange = vi.fn()
     const signOut = vi.fn()
@@ -78,5 +91,28 @@ describe('ProfileLinks', () => {
     await user.click(screen.getByText(mockUser.displayName))
     expect(screen.getByText('Your Profile')).toBeVisible()
     expect(screen.getByText('Sign out')).toBeVisible()
+  })
+
+  it('shows the sub-provider badge when /auth/me reports an idp', async () => {
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, idp: 'google' })
+    const user = userEvent.setup()
+    renderComponent()
+    await user.click(screen.getByText(mockUser.displayName))
+    expect(screen.getByText('Signed in with Google')).toBeVisible()
+  })
+
+  it('shows no badge while the session probe is in flight', async () => {
+    const user = userEvent.setup()
+    renderComponent()
+    await user.click(screen.getByText(mockUser.displayName))
+    expect(screen.queryByText(/Signed in with/)).not.toBeInTheDocument()
+  })
+
+  it('shows no badge when the session reports no idp (legacy flow)', async () => {
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+    const user = userEvent.setup()
+    renderComponent()
+    await user.click(screen.getByText(mockUser.displayName))
+    expect(screen.queryByText(/Signed in with/)).not.toBeInTheDocument()
   })
 })

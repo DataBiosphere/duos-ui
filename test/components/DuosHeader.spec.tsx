@@ -7,8 +7,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DuosHeader, { headerTabsConfig } from 'src/components/DuosHeader'
 import { visibleSubTabs } from 'src/components/navigation/subTabVisibility'
 import { Storage } from 'src/libs/storage'
+import { useUserIsLogged } from 'src/hooks/useSession'
 import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 import { DuosUser } from 'src/types/model'
+
+vi.mock('src/hooks/useSession', () => ({
+  useUserIsLogged: vi.fn(),
+}))
 
 vi.mock('src/libs/notificationService', () => ({
   NotificationService: {
@@ -83,7 +88,8 @@ const defaultUser: DuosUser = {
 afterEach(() => vi.restoreAllMocks())
 
 const mountHeader = async (path: string, user?: DuosUser) => {
-  vi.spyOn(Storage, 'userIsLogged').mockReturnValue(!!user)
+  // Auth state comes from the BFF session probe now, not localStorage.
+  vi.mocked(useUserIsLogged).mockReturnValue(!!user)
   vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(user ?? defaultUser)
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
@@ -140,6 +146,23 @@ describe('DuosHeader', () => {
     it('displays Admin Console tab', async () => {
       await mountHeader('/admin_manage_dar_collections', { ...mockUser, isAdmin: true, isResearcher: false })
       expect(screen.getByRole('tab', { name: 'Admin Console' })).toBeInTheDocument()
+    })
+
+    it('displays the DAA Associations subtab for an admin', async () => {
+      await mountHeader('/admin_manage_dar_collections', { ...mockUser, isAdmin: true, isResearcher: false })
+      expect(screen.getByRole('tab', { name: 'DAA Associations' })).toBeInTheDocument()
+    })
+
+    it('points the Admin Console DAA Associations subtab at the admin route', () => {
+      const adminConsole = headerTabsConfig.find(tab => tab.label === 'Admin Console')
+      const daaAssociations = adminConsole?.children?.find(subTab => subTab.label === 'DAA Associations')
+
+      expect(daaAssociations?.link).toEqual('/admin_daa_associations')
+    })
+
+    it('highlights Admin Console on /admin_daa_associations', async () => {
+      await mountHeader('/admin_daa_associations', { ...mockUser, isAdmin: true, isResearcher: false })
+      expect(screen.getByRole('tab', { name: 'Admin Console' })).toHaveClass('Mui-selected')
     })
   })
 

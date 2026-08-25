@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
+import Alert from '@mui/material/Alert'
+import AlertTitle from '@mui/material/AlertTitle'
 import ERACommons from 'src/components/era_commons/ERACommons'
 import { Notifications } from 'src/libs/utils'
 import { User } from 'src/libs/ajax/User'
@@ -8,6 +10,7 @@ import DAAs from './DAAs'
 import { nihAccountInstructions, nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
 import { DAAObject, DuosUser, SigningOfficialUserWithData } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
+import './UserProfile.css'
 
 export interface ResearcherStatusProps {
   user: DuosUser
@@ -60,46 +63,21 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
     init()
   }, [user])
 
-  const subheadStyle = {
-    color: '#000',
-    fontFamily: 'Montserrat',
-    fontSize: '16px',
-    fontStyle: 'normal',
-    fontWeight: '600',
-    lineHeight: 'normal',
-  }
-
   return (
-    <div>
-      <h1
-        style={{
-          color: '#01549F',
-          fontSize: '20px',
-          fontWeight: '600',
-          borderBottom: '1px solid #ddd',
-          paddingBottom: '8px',
-        }}
-      >
-        Researcher Status
-      </h1>
-      <div style={{ marginTop: '20px' }} />
-      <p style={subheadStyle}>Status</p>
-      <p style={{
-        fontFamily: 'Montserrat',
-        fontSize: '16px',
-        fontWeight: 600,
-        color: hasCard ? '#00928A' : 'rgb(128, 128, 128)',
-      }}
-      >
-        {hasCard ? 'Active' : 'Inactive'}
-      </p>
-      {!hasCard && (
-        <p style={{ marginTop: '10px' }}>
-          You must be an Active researcher to submit a data access request in DUOS. Please contact your Institutional Signing Official to change your status in DUOS.
-        </p>
-      )}
-      <div style={{ marginTop: '20px' }} />
-      <p style={subheadStyle}>
+    <>
+      <h1 className="user-profile-section-heading">Researcher Status</h1>
+      <p className="user-profile-subheading">Requestor Status</p>
+      <Alert severity={hasCard ? 'success' : 'info'} sx={{ mb: 2 }}>
+        {hasCard
+          ? 'Active'
+          : (
+              <>
+                <AlertTitle>Inactive</AlertTitle>
+                You must be an Active researcher to submit a data access request in DUOS. Please contact your Institutional Signing Official to change your status in DUOS.
+              </>
+            )}
+      </Alert>
+      <p className="user-profile-subheading">
         {accountLabel}
         {' '}
         Account
@@ -117,13 +95,11 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
         onNihStatusUpdate={nihStatusUpdate}
         header={false}
       />
-      <div style={{ marginTop: '20px' }} />
-      <p style={subheadStyle}>Your Pre-Authorized Data Access Agreements</p>
+      <p className="user-profile-subheading">Your Pre-Authorized Data Access Agreements</p>
       <p>
         Pre-authorization data access agreements (DAAs) allows your Signing Official to approve you once to submit
         data access requests (DARs) to a data access committee (DAC) at will.
       </p>
-      <div style={{ marginTop: '15px' }} />
       {hasCard
         ? (
             <DAAs
@@ -133,7 +109,7 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
             />
           )
         : null}
-    </div>
+    </>
   )
 }
 

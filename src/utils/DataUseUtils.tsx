@@ -1,6 +1,6 @@
 import React, { CSSProperties, ReactNode } from 'react'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
-import { DatasetTerm } from 'src/types/model'
+import { DatasetTerm, DataUseSummary } from 'src/types/model'
 
 export type DataUseCodeType = 'primary' | 'secondary'
 
@@ -21,12 +21,17 @@ interface ProcessedDataUseCodes {
   codeList: string[]
 }
 
+/** Anything carrying data use terms: an indexed dataset, or a DAR collection's data use group. */
+export interface HasDataUse {
+  dataUse?: DataUseSummary
+}
+
 /**
  * Process data use codes from a dataset
- * @param {DatasetTerm} dataset - DatasetTerm object containing data use information
+ * @param {object} dataset - anything carrying data use information
  * @returns {ProcessedDataUseCodes} - Object with processed data use information
  */
-export function processDataUseCodes(dataset: DatasetTerm): ProcessedDataUseCodes {
+export function processDataUseCodes(dataset: HasDataUse): ProcessedDataUseCodes {
   const codesAndDescriptions: DataUseCode[] = dataset.dataUse?.primary
     ? dataset.dataUse.primary.map((dataUse) => {
         if (dataUse.code === 'OTHER') {
@@ -114,4 +119,27 @@ export function createDataUseDisplay({
       </ReactTooltip>
     </div>
   )
+}
+
+/**
+ * Primary codes first, then secondary alphabetically. Shared so every grid that shows data use
+ * renders the same codes in the same order.
+ *
+ * Renders every primary a record carries: Consent rejects multi-primary writes, but legacy records
+ * still hold them, and collapsing them would hide a shape a curator has to see.
+ */
+export const orderDataUseCodes = (dataset: HasDataUse): DataUseCode[] => {
+  const terms = processDataUseCodes(dataset).codesAndDescriptions.filter(term => Boolean(term.shortCode))
+  return [
+    ...terms.filter(term => term.type === 'primary'),
+    ...terms
+      .filter(term => term.type === 'secondary')
+      .sort((a, b) => a.shortCode.localeCompare(b.shortCode)),
+  ]
+}
+
+// Codes alone are opaque; name the tier so a secondary condition isn't read as a primary use
+export const dataUseTooltip = ({ code, description, type }: DataUseCode): string => {
+  const tier = type === 'primary' ? 'Primary' : 'Secondary'
+  return description ? `${tier} — ${code}: ${description}` : `${tier} — ${code}`
 }

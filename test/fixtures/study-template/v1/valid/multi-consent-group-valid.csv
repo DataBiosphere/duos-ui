@@ -1,0 +1,33 @@
+templateVersion,recordType,recordId,parentRecordId,field,value
+1,study,study,,studyName,Synthetic Multi-Dataset Study
+1,study,study,,studyType,Observational
+1,study,study,,studyDescription,"A synthetic study with multiple datasets, quoted values, and non-file assets."
+1,study,study,,dataTypes,Genomic
+1,study,study,,dataTypes,Phenotypic
+1,study,study,,phenotypeIndication,Synthetic condition
+1,study,study,,species,Homo sapiens
+1,study,study,,piName,Synthetic Investigator
+1,study,study,,piEmail,investigator@example.org
+1,study,study,,dataCustodianEmail,custodian.one@example.org
+1,study,study,,dataCustodianEmail,custodian.two@example.org
+1,study,study,,publicVisibility,false
+1,study,study,,nihAnvilUse,I am not NHGRI funded and do not plan to store data in AnVIL
+1,study,study,,submittingToAnvil,false
+1,study,study,,multiCenterStudy,true
+1,study,study,,collaboratingSites,Synthetic Site One
+1,study,study,,collaboratingSites,Synthetic Site Two
+1,study,study,,controlledAccessRequiredForGenomicSummaryResultsGSR,false
+1,consentGroup,dataset-open,study,consentGroupName,Synthetic Open Dataset
+1,consentGroup,dataset-open,study,accessManagement,open
+1,consentGroup,dataset-open,study,numberOfParticipants,20
+1,consentGroup,dataset-open,study,dataLocation,Terra Workspace
+1,consentGroup,dataset-open,study,url,https://example.org/data/synthetic-open
+1,consentGroup,dataset-controlled,study,consentGroupName,Synthetic Controlled Dataset
+1,consentGroup,dataset-controlled,study,accessManagement,controlled
+1,consentGroup,dataset-controlled,study,generalResearchUse,true
+1,consentGroup,dataset-controlled,study,npu,true
+1,consentGroup,dataset-controlled,study,dataAccessCommitteeId,1
+1,consentGroup,dataset-controlled,study,numberOfParticipants,30
+1,fileType,ft-genome,dataset-controlled,fileType,Genome
+1,fileType,ft-genome,dataset-controlled,functionalEquivalence,Synthetic reference build
+1,fileType,ft-phenotype,dataset-controlled,fileType,Phenotype

@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import { describe, expect, it } from 'vitest'
-import { processDefinedLimitations, consentTranslations, TranslationEntry } from 'src/libs/dataUseTranslation'
+import { processDefinedLimitations, consentTranslations, ControlledAccessType, DataUseTranslation, TranslationEntry } from 'src/libs/dataUseTranslation'
 import { isEmpty, cloneDeep } from 'src/utils/NodashUtil'
 import { DataUse } from 'src/types/model'
 
@@ -124,6 +124,64 @@ describe('Data Use Translation', () => {
       })
 
       expectTranslatedLimitation(targetKey, modifiedMockData)
+    })
+
+    // Unlike the classifier's full enumeration, display keeps only the narrowest permission.
+    describe('legacy multi-primary display', () => {
+      it('shows only DS, not HMB, when both are set', () => {
+        const dataUse = makeDataUse({ hmbResearch: true, diseaseRestrictions: ['test'] })
+
+        expect(isEmpty(processDefinedLimitations('hmbResearch', dataUse, consentTranslations))).toBe(true)
+      })
+
+      it('shows only the narrowest permission when every primary is set', () => {
+        const dataUse = makeDataUse({
+          generalUse: true,
+          hmbResearch: true,
+          populationOriginsAncestry: true,
+          diseaseRestrictions: ['test'],
+        })
+
+        expect(isEmpty(processDefinedLimitations('generalUse', dataUse, consentTranslations))).toBe(true)
+        expect(isEmpty(processDefinedLimitations('hmbResearch', dataUse, consentTranslations))).toBe(true)
+        expect(processDefinedLimitations('populationOriginsAncestry', dataUse, consentTranslations)).toBeDefined()
+      })
+    })
+  })
+
+  // A primary Other is a permission, like OTHER in the classifier; only a secondary one is not
+  describe('other restriction classification', () => {
+    const findByCode = (entries: TranslationEntry[], code: string) => entries.find(entry => entry.code === code)
+
+    it('classifies a primary Other as a permission', async () => {
+      const entries = await DataUseTranslation.translateDataUseRestrictions({
+        diseaseRestrictions: [],
+        other: 'Bespoke restriction',
+      })
+
+      expect(findByCode(entries, 'OTH1')?.type).toBe(ControlledAccessType.permissions)
+      expect(findByCode(entries, 'OTH1')?.description).toContain('Bespoke restriction')
+    })
+
+    it('classifies a secondary Other as a modifier', async () => {
+      const entries = await DataUseTranslation.translateDataUseRestrictions({
+        diseaseRestrictions: [],
+        secondaryOther: 'Bespoke secondary restriction',
+      })
+
+      expect(findByCode(entries, 'OTH2')?.type).toBe(ControlledAccessType.modifiers)
+      expect(findByCode(entries, 'OTH1')).toBeUndefined()
+    })
+
+    it('classifies each tier independently when both are present', async () => {
+      const entries = await DataUseTranslation.translateDataUseRestrictions({
+        diseaseRestrictions: [],
+        other: 'Primary text',
+        secondaryOther: 'Secondary text',
+      })
+
+      expect(findByCode(entries, 'OTH1')?.type).toBe(ControlledAccessType.permissions)
+      expect(findByCode(entries, 'OTH2')?.type).toBe(ControlledAccessType.modifiers)
     })
   })
 })

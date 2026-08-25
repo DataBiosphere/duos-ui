@@ -1,5 +1,5 @@
 import React from 'react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -8,6 +8,8 @@ import ConsentGroupAddEdit from 'src/components/consent_group_list/ConsentGroupA
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import ConsentGroupList from 'src/components/consent_group_list/ConsentGroupList'
 import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
+import { findOntologyTerms } from 'src/libs/utils'
+import { renderWithRouter } from '../../test-utils'
 
 vi.mock('src/libs/utils', async (importActual) => {
   const actual = await importActual<typeof import('src/libs/utils')>()
@@ -198,5 +200,152 @@ describe('ConsentGroupAddEdit access management changes', () => {
     await user.click(container.querySelector('#gs')!)
 
     expect(container.querySelector<HTMLInputElement>('#gsText')?.value ?? '').toBe('')
+  })
+})
+
+// Consent rejects a write with more than one primary category, so the form must send exactly one
+describe('ConsentGroupAddEdit primary data use exclusivity', () => {
+  const renderList = (collected: ConsentGroup2[]) => render(
+    <MemoryRouter>
+      <ConsentGroupList
+        consentGroups={[]}
+        columnsToShow={['consentGroupName']}
+        onConsentGroupChange={(items) => { collected.splice(0, collected.length, ...items) }}
+        disabled={false}
+      />
+    </MemoryRouter>,
+  )
+
+  // External access keeps the primary fields visible without also requiring a DAC
+  const fillRequiredFields = async (
+    user: ReturnType<typeof userEvent.setup>,
+    container: HTMLElement,
+  ) => {
+    await user.click(container.querySelector('#add-consent-group-btn')!)
+    await user.type(container.querySelector('#consentGroupName')!, 'Exclusivity Group')
+    await user.click(container.querySelector('#accessManagement_external')!)
+    await user.clear(container.querySelector('#numberOfParticipants')!)
+    await user.type(container.querySelector('#numberOfParticipants')!, '25')
+  }
+
+  it('clears the previous primary when a new one is selected', async () => {
+    const user = userEvent.setup()
+    const collected: ConsentGroup2[] = []
+    const { container } = renderList(collected)
+    await fillRequiredFields(user, container)
+
+    await user.click(container.querySelector('#primaryConsent_hmb')!)
+    await user.click(container.querySelector('#primaryConsent_generalResearchUse')!)
+    await clickSaveButton(user, container)
+
+    expect(collected).toHaveLength(1)
+    expect(collected[0].generalResearchUse).toBe(true)
+    expect(collected[0].hmb).toBe(false)
+    expect(collected[0].poa).toBe(false)
+    expect(collected[0].diseaseSpecificUse).toBeUndefined()
+    expect(collected[0].otherPrimary).toBeUndefined()
+  })
+
+  it('clears a primary Other and its text when another primary is selected', async () => {
+    const user = userEvent.setup()
+    const collected: ConsentGroup2[] = []
+    const { container } = renderList(collected)
+    await fillRequiredFields(user, container)
+
+    await user.click(container.querySelector('#primaryConsent_otherPrimary')!)
+    await user.type(container.querySelector('#otherPrimaryText')!, 'Bespoke restriction')
+    await user.click(container.querySelector('#primaryConsent_hmb')!)
+    await clickSaveButton(user, container)
+
+    expect(collected).toHaveLength(1)
+    expect(collected[0].hmb).toBe(true)
+    expect(collected[0].otherPrimary).toBeUndefined()
+    expect(container.querySelector('#otherPrimaryText')).not.toBeInTheDocument()
+  })
+
+  // The radio handed its own field name over as the answer, defeating the required check
+  it('does not accept the Other radio as its own free-text answer', async () => {
+    const user = userEvent.setup()
+    const collected: ConsentGroup2[] = []
+    const { container } = renderList(collected)
+    await fillRequiredFields(user, container)
+
+    await user.click(container.querySelector('#primaryConsent_otherPrimary')!)
+    await clickSaveButton(user, container)
+
+    expect(collected).toHaveLength(0)
+    expect(container.querySelector('#otherPrimaryText')).toBeInTheDocument()
+  })
+
+  it('clears a boolean primary when Other is selected', async () => {
+    const user = userEvent.setup()
+    const collected: ConsentGroup2[] = []
+    const { container } = renderList(collected)
+    await fillRequiredFields(user, container)
+
+    await user.click(container.querySelector('#primaryConsent_generalResearchUse')!)
+    await user.click(container.querySelector('#primaryConsent_otherPrimary')!)
+    await user.type(container.querySelector('#otherPrimaryText')!, 'Bespoke restriction')
+    await clickSaveButton(user, container)
+
+    expect(collected).toHaveLength(1)
+    expect(collected[0].otherPrimary).toBe('Bespoke restriction')
+    expect(collected[0].generalResearchUse).toBe(false)
+    expect(collected[0].hmb).toBe(false)
+  })
+})
+
+// A stored record can carry more than one primary, and only the one the radios light may be saved
+describe('ConsentGroupAddEdit legacy multi-primary records', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  const renderEdit = (consentGroup: ConsentGroup2, collected: ConsentGroup2[]) => renderWithRouter(
+    <ConsentGroupAddEdit
+      id={0}
+      consentGroup={consentGroup}
+      consentGroups={[consentGroup]}
+      closeAction={vi.fn()}
+      onConsentGroupChange={(items) => { collected.splice(0, collected.length, ...items) }}
+    />,
+  )
+
+  const diseaseSpecificGroup: ConsentGroup2 = {
+    consentGroupId: 'cg1',
+    consentGroupName: 'Legacy Group',
+    name: 'Legacy Group',
+    numberOfParticipants: 10,
+    accessManagement: 'external',
+    diseaseSpecificUse: ['DOID_1'],
+    dataLocation: DataLocationType.NotDetermined,
+  }
+
+  it('hides the disease searchbar when another primary takes precedence', () => {
+    const { container } = renderEdit({ ...diseaseSpecificGroup, poa: true }, [])
+
+    expect(container.querySelector<HTMLInputElement>('#primaryConsent_poa')?.checked).toBe(true)
+    expect(container.querySelector('#diseaseSpecificUseText')).not.toBeInTheDocument()
+  })
+
+  it('hides the Other text box when another primary takes precedence', () => {
+    const { container } = renderEdit({ ...diseaseSpecificGroup, hmb: true, otherPrimary: 'Bespoke' }, [])
+
+    expect(container.querySelector<HTMLInputElement>('#primaryConsent_hmb')?.checked).toBe(true)
+    expect(container.querySelector('#otherPrimaryText')).not.toBeInTheDocument()
+  })
+
+  // Consent stores DOIDs, but the radio used to write the searchbar's option objects back
+  it('keeps disease selections as DOIDs when the radio is re-selected', async () => {
+    const user = userEvent.setup()
+    vi.mocked(findOntologyTerms).mockResolvedValue([{ displayText: 'Breast Cancer', id: 'DOID_1' }])
+    const collected: ConsentGroup2[] = []
+    const { container } = renderEdit(diseaseSpecificGroup, collected)
+
+    await user.click(container.querySelector('#primaryConsent_diseaseSpecificUse')!)
+    await clickSaveButton(user, container)
+
+    expect(collected).toHaveLength(1)
+    expect(collected[0].diseaseSpecificUse).toEqual(['DOID_1'])
   })
 })
