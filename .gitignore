@@ -19,6 +19,7 @@ models.json
 
 # testing
 /coverage
+/.vitest-reports
 /test-results
 /playwright-report
 /test/e2e/fixtures/duos-automation*.json
