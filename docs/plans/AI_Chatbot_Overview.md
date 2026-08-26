@@ -51,10 +51,11 @@ them; it does not rebuild them.
 | Session `userId` = the B2C email claim | `server/src/auth/callback.ts` | Rate-limit key that matches Consent's own bucket key (§3.4) |
 | Per-user Consent API rate limit — [consent#2976](https://github.com/DataBiosphere/consent/pull/2976), merged 2026-07-16 | Consent `RateLimitFilter` | The budget every chat tool call spends (§3.4) |
 
-The Consent API needs **no changes**. `DatasetResource` and
+The Consent API needs **no endpoint changes**. `DatasetResource` and
 `DarCollectionResource` already exist, and the BFF proves that the session
-token is accepted for `/api/*` calls. The chat does share one existing
-upstream control, though: the per-user API rate limit — see §3.4.
+token is accepted for `/api/*` calls. Two caveats follow, both in §3.4: the
+chat shares the existing per-user API rate limit, and the daily quota needs a
+table in a schema that Consent owns.
 
 Two rows above are not live today. Stories 5-F, 5-G and 6-D-pre are the only
 hard dependencies for the chat. Story 6-J (legacy removal) only simplifies the
@@ -160,9 +161,15 @@ High-level items only. Each becomes a story with full detail after approval.
   Elasticsearch query body, and the collections route takes a role name.
   Give each tool a narrow parameter set and build the upstream request on the
   server. The model must never supply a raw query body.
-- **The server sets `roleName` from the session, not the model.** The role
-  decides which view of the collections the caller reads, so it is an
-  authorization decision. A model that picks the role picks its own permissions.
+- **The tool is fixed to the `Researcher` role in v1. The model never supplies
+  it.** The role decides which view of the collections the caller reads, so it
+  is an authorization decision, not a parameter. `Admin` reads every collection
+  in DUOS, so a model that picks its own role picks its own permissions.
+- The session stores no role: `server/src/types/session.ts` holds identity and
+  tokens only, and `/auth/me` forwards the Consent profile without saving it.
+  The tool story confirms the user holds `Researcher` through Consent, and
+  answers plainly when they do not. The DAC and signing-official views need a
+  role-selection rule, so they wait for v2.
 - Cap the result count and the response fields each tool returns. The cap bounds
   the token cost and bounds what leaves DUOS (§7). Agree the numbers in the
   tool story.
@@ -178,7 +185,7 @@ High-level items only. Each becomes a story with full detail after approval.
 
 ### 3.4 Rate limits and cost
 
-These are two controls, not one. Do not conflate them.
+These are three controls, not one. Do not conflate them.
 
 **Burst control — copy the Consent pattern.**
 [consent#2976](https://github.com/DataBiosphere/consent/pull/2976) added a
@@ -207,6 +214,12 @@ not spend: it resets on every pod restart and forgets an idle user in minutes.
 Add a per-user daily **turn quota** in the BFF's PostgreSQL database, which the
 session store already uses and which every pod shares.
 
+The quota must outlive a logout and a session rotation, so it cannot sit inside
+`user_sessions.sess`. It needs its own table, and Consent owns that schema
+(`server/test/load/README.md`). Settle the migration route before the quota
+story starts: a Consent Liquibase changeset, or a schema the BFF owns. This is
+the one Consent-side change the chat needs (§1).
+
 Call it a turn quota, because that is what it is. A turn count is not a dollar
 ceiling: turns differ in history size, iteration count and output length. §3.2
 already records token counts per turn, so measure the real cost of a turn first,
@@ -214,8 +227,11 @@ then set the quota from that number and review it (open question 4). Do not
 build reserve-and-settle billing for v1.
 
 **Bound concurrency too.** Neither control stops one person from opening several
-tabs and starting several 90-second turns at once. Cap the concurrent turns per
-user, and pick the number in the same story as the quota.
+tabs and starting several turns at once. Cap the concurrent turns per user, and
+pick the number in the same story as the quota. Decide the scope with it: an
+in-process counter set to 1 allows one turn *per pod*, not one per user. A
+deployment-wide cap needs a shared lease, and a lease needs a release path for a
+disconnect, a crash, and a turn that outruns its deadline.
 
 **The shared Consent budget.** Every tool call is an authenticated `/api/*`
 request billed to the same per-user bucket as the user's ordinary page traffic
@@ -279,8 +295,11 @@ Vertex never calls back into DUOS. All tool execution is in-process.
 - Gate the chat button with a `chatEnabled` boolean in `config.json`, set per
   environment in `terra-helmfile`. This matches the delivery path the BFF
   used for `bffEnabled`.
+- `chatEnabled` is environment-wide, so it cannot serve a per-user canary. The
+  first rollout is staged by environment: dev, then staging, then prod.
 - Migrate to the Consent feature-flag service later for per-user staged
-  rollout, as a follow-on sprint.
+  rollout, as a follow-on sprint. Move that migration ahead of launch if the
+  team wants a true per-user canary.
 
 ---
 
@@ -302,7 +321,7 @@ Chat 6.  Agentic loop with hard bounds (Ollama first, Vertex second)
 Chat 7.  Rate limit, daily turn quota, concurrency cap
 Chat 8.  Chat UI (panel, message, stream hook; chatEnabled gate; accessibility)
 Chat 9.  E2E test on the BFF Playwright harness
-Chat 10. Load and soak test, then a canary rollout
+Chat 10. Load and soak test, then a staged rollout by environment
 ── follow-on sprints ──
 Chat 11. Migrate chatEnabled to the Consent feature-flag service
 Chat 12. Add the get_dataset tool if usage shows the need
@@ -341,7 +360,9 @@ first ship.
   stays on. Record the region and who approved it before any code ships. See
   open question 5.
 - **Least privilege on tools.** Keep the v1 tool set small and read-only.
-  Any state-changing tool needs an explicit security review first.
+  The collections tool is pinned to the `Researcher` role, so the model cannot
+  choose a wider view (§3.3). Any state-changing tool, and any new role, needs
+  an explicit security review first.
 - **Prompt injection.** Dataset names and study descriptions are
   researcher-supplied text that enters the model context. With read-only
   tools, the blast radius is data the user can already see. Review each new
@@ -375,3 +396,7 @@ first ship.
    them yet. Decide whether the project needs caching turned off or an
    abuse-monitoring exception. This gates Chat 0, and it is the item most likely
    to block a launch late.
+
+6. **Where the quota table lives.** The daily quota needs a durable table, and
+   Consent owns the schema the BFF already uses. Decide before Chat 7: a Consent
+   Liquibase changeset, or a schema the BFF owns. See §3.4.
