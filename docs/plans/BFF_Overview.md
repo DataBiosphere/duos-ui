@@ -113,7 +113,7 @@ than 001 through 003: the numbers belong to this list, not to the directory.
 | [006](#adr-006--lazy-oidc-client-initialization-with-startup-warm-up) | Lazy OIDC client init with startup warm-up | 2 |
 | [007](#adr-007--idp-stored-in-session-as-sub-provider) | `idp` stored as sub-provider, from the B2C `id_token` claim | 2 |
 | [008](#adr-008--azure-b2c-as-single-oidc-entry-point) | Azure B2C as the single OIDC entry point | 0, 2 |
-| [009](#adr-009--state-changing-upstream-gets-are-proxied-not-blocked) | State-changing upstream GETs are proxied, not blocked | 3 |
+| [009](#adr-009--state-changing-upstream-gets-are-proxied-not-blocked) | State-changing upstream GETs are proxied, not blocked | 3, 5 |
 | [010](#adr-010--the-proxy-scope-declares-its-own-error-shape) | The proxy scope declares its own error shape | 3, 4 |
 
 ### ADR-001 — PostgreSQL-backed sessions via `@fastify/session`
@@ -207,8 +207,15 @@ changes `DUOS_AZURE_ISSUER_URL` and its siblings, not the BFF's structure.
 `SameSite=Lax` is required by the OAuth callback redirect and a CSRF token cannot
 guard a GET, which leaves two upstream endpoints that mutate state on GET
 forgeable by a plain link. Blocking either breaks the app — one is how the client
-learns who the user is — so the residual risk is accepted, documented, and the
-real fix (making the side effect a POST) belongs upstream in Consent.
+learns who the user is — so the residual risk was accepted and documented, and the
+real fix (making the side effect a POST) belongs upstream in Consent (DT-3945).
+
+Phase 5 (story 5-B) then closed the residual for modern browsers with Fetch
+Metadata enforcement: a positive allowlist requiring `Sec-Fetch-Site:
+same-origin` plus a `cors`/`same-origin` mode, applied to every proxy prefix
+and to `/auth/me` (`server/src/security/fetchMetadata.ts`). Requests without
+the headers — older browsers and non-browser clients — are allowed and remain
+covered only by the original accepted-risk analysis.
 
 ### ADR-010 — The proxy scope declares its own error shape
 
