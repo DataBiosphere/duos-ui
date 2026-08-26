@@ -6,6 +6,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { csrfPluginOptions } from '../src/auth/csrf.js'
+import { TRUST_PROXY } from '../src/config.js'
 
 /**
  * The shared harness for the per-upstream proxy suites (apiProxy.test.ts,
@@ -92,7 +93,7 @@ export interface SessionSeed {
 export const SESSION_COOKIE = 'sessionId'
 
 export async function buildAppShell(): Promise<FastifyInstance> {
-  const app = Fastify({ logger: false, trustProxy: 1 })
+  const app = Fastify({ logger: false, trustProxy: TRUST_PROXY })
   await app.register(fastifyCookie)
   await app.register(fastifySession, {
     secret: 'a-test-session-secret-at-least-32-characters-long',
