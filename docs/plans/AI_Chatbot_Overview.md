@@ -189,9 +189,9 @@ Record them here, and let Chat 1 pick the fix and the numbers:
 
 ### 3.4 Rate limits and cost
 
-These are three controls, not one. Do not conflate them.
+There are different limiting controls.
 
-**Burst control — copy the Consent pattern.**
+**Burst Control — uses the pattern established by Consent.**
 [consent#2976](https://github.com/DataBiosphere/consent/pull/2976) added a
 per-user token bucket and **accepts the multi-pod limitation**: buckets stay
 in-process, and each pod enforces `ceil(requestsPerMinute / podCount)`, so the
@@ -213,7 +213,7 @@ so the divisor always tracks the real pod count. Apply the same shape to
    small numbers, so the rounding error is proportionally far larger than it is
    at Consent's 100 per minute.
 
-**Spend control needs a durable counter.** A per-minute bucket bounds bursts,
+**Spend Control needs a durable tracker.** A per-minute bucket bounds bursts,
 not spend: it resets on every pod restart and forgets an idle user in minutes.
 Add a per-user daily **turn quota** in the BFF's PostgreSQL database, which the
 session store already uses and which every pod shares.
@@ -230,7 +230,7 @@ already records token counts per turn, so measure the real cost of a turn first,
 then set the quota from that number and review it (open question 4). Do not
 build reserve-and-settle billing for v1.
 
-**Bound concurrency too.** Neither control stops one person from opening several
+**Bound Concurrency.** Neither control stops one person from opening several
 tabs and starting several turns at once. Cap the concurrent turns per user, and
 pick the number in the same story as the quota. Decide the scope with it: an
 in-process counter set to 1 allows one turn *per pod*, not one per user. A
