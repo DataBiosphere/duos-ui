@@ -3,7 +3,7 @@
 **Project:** duos-ui
 **Date:** August 2026
 
-Parent Ticket: https://broadworkbench.atlassian.net/browse/DT-3069
+Parent Epic: https://broadworkbench.atlassian.net/browse/DT-3069
 
 Add an AI chat window to DUOS. The chat answers user questions about datasets
 and data-access requests. A server-side agentic loop drives an LLM (Large
