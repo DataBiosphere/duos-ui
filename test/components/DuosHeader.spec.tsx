@@ -6,6 +6,9 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DuosHeader, { headerTabsConfig } from 'src/components/DuosHeader'
 import { visibleSubTabs } from 'src/components/navigation/subTabVisibility'
+import { RESEARCHER_DASHBOARD_ROUTE } from 'src/pages/researcher_console/researcherConsoleRoutes'
+import { MY_INSTITUTION_LIBRARY_ROUTE, SO_DASHBOARD_ROUTE } from 'src/pages/signing_official_console/signingOfficialConsoleRoutes'
+import { Navigation } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
 import { useUserIsLogged } from 'src/hooks/useSession'
 import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
@@ -121,14 +124,8 @@ describe('DuosHeader', () => {
 
   describe('Authenticated Researcher', () => {
     it('displays Researcher Console tab', async () => {
-      await mountHeader('/datalibrary', mockUser)
+      await mountHeader(RESEARCHER_DASHBOARD_ROUTE, mockUser)
       expect(screen.getByRole('tab', { name: 'Researcher Console' })).toBeInTheDocument()
-    })
-
-    it('displays correct subtabs for researcher', async () => {
-      await mountHeader('/datalibrary', mockUser)
-      expect(screen.getByRole('tab', { name: 'Dashboard' })).toBeInTheDocument()
-      expect(screen.getByRole('tab', { name: 'Data Library' })).toBeInTheDocument()
     })
 
     // The section pages are registered as sub-tabs only so their URLs resolve to this tab; the
@@ -136,9 +133,8 @@ describe('DuosHeader', () => {
     it('keeps the Researcher Console section pages out of the sub-tab bar', () => {
       const researcherConsole = headerTabsConfig.find(tab => tab.label === 'Researcher Console')
 
-      expect(visibleSubTabs(researcherConsole?.children, { ...mockUser, isDataSubmitter: true })
-        .map(subTab => subTab.label))
-        .toEqual(['Dashboard', 'Data Library'])
+      expect(visibleSubTabs(researcherConsole?.children, { ...mockUser, isDataSubmitter: true }))
+        .toEqual([])
     })
   })
 
@@ -184,18 +180,11 @@ describe('DuosHeader', () => {
       expect(screen.getByRole('tab', { name: 'DAC Console' })).toBeInTheDocument()
     })
 
-    it('displays collapsed subtabs (Dashboard, Data Library)', async () => {
-      await mountHeader('/dac_console', { ...mockUser, isChairPerson: true, isResearcher: false })
-      expect(screen.getByRole('tab', { name: 'Dashboard' })).toBeInTheDocument()
-      expect(screen.getByRole('tab', { name: 'Data Library' })).toBeInTheDocument()
-    })
-
     it('keeps dashboard-only destinations out of the sub-tab bar', () => {
       const dacConsole = headerTabsConfig.find(tab => tab.label === 'DAC Console')
 
-      expect(visibleSubTabs(dacConsole?.children, { ...mockUser, isChairPerson: true })
-        .map(subTab => subTab.label))
-        .toEqual(['Dashboard', 'Data Library'])
+      expect(visibleSubTabs(dacConsole?.children, { ...mockUser, isChairPerson: true }))
+        .toEqual([])
     })
 
     it('selects the DAC Console tab on its Manage DACs route without navigation state', async () => {
@@ -209,6 +198,76 @@ describe('DuosHeader', () => {
 
       expect(screen.getByRole('tab', { name: 'DAC Console' })).toHaveClass('Mui-selected')
       expect(screen.getByRole('tab', { name: 'Admin Console' })).not.toHaveClass('Mui-selected')
+    })
+  })
+
+  describe('Data Library tab', () => {
+    it.each([
+      ['an admin', { isAdmin: true }],
+      ['a signing official', { isSigningOfficial: true }],
+      ['a DAC chair', { isChairPerson: true }],
+      ['a DAC member', { isMember: true }],
+      ['a researcher', { isResearcher: true }],
+    ])('renders for %s', async (_label, roles) => {
+      await mountHeader('/profile', { ...mockUser, isResearcher: false, ...roles })
+      expect(screen.getByRole('tab', { name: 'Data Library' })).toBeInTheDocument()
+    })
+
+    it('is the first tab in the bar', () => {
+      expect(headerTabsConfig[0].label).toEqual('Data Library')
+      expect(headerTabsConfig[0].link).toEqual('/datalibrary')
+    })
+
+    it('highlights the Data Library and no console on /datalibrary', async () => {
+      const everyRole = { ...mockUser, isAdmin: true, isSigningOfficial: true, isChairPerson: true }
+      await mountHeader('/datalibrary', everyRole)
+
+      expect(screen.getByRole('tab', { name: 'Data Library' })).toHaveClass('Mui-selected')
+      for (const console of ['Admin Console', 'SO Console', 'DAC Console', 'Researcher Console']) {
+        expect(screen.getByRole('tab', { name: console })).not.toHaveClass('Mui-selected')
+      }
+    })
+
+    it('stays highlighted on the other library versions', async () => {
+      await mountHeader('/datalibrary/anvil', mockUser)
+      expect(screen.getByRole('tab', { name: 'Data Library' })).toHaveClass('Mui-selected')
+    })
+
+    // The consoles used to carry their own copy of the Data Library sub-tab; the top-level tab
+    // replaces all of them.
+    it('is the only Data Library entry in the nav config', () => {
+      const nested = headerTabsConfig.flatMap(tab => tab.children ?? [])
+        .filter(subTab => subTab.link.startsWith('/datalibrary'))
+        .map(subTab => subTab.link)
+
+      // The SO's institution-scoped view is the one exception - it is a console section.
+      expect(nested).toEqual([MY_INSTITUTION_LIBRARY_ROUTE])
+    })
+
+    it('is not a console, so it is never the post-login landing page', async () => {
+      const navigate = vi.fn()
+      await Navigation.console({ ...mockUser, isSigningOfficial: true, isResearcher: false }, navigate)
+
+      expect(navigate).toHaveBeenCalledWith(SO_DASHBOARD_ROUTE)
+    })
+  })
+
+  describe('My Institution\'s Data Library', () => {
+    const signingOfficial = { ...mockUser, isSigningOfficial: true, isResearcher: false }
+
+    it('highlights SO Console rather than Data Library', async () => {
+      await mountHeader(MY_INSTITUTION_LIBRARY_ROUTE, signingOfficial)
+
+      expect(screen.getByRole('tab', { name: 'SO Console' })).toHaveClass('Mui-selected')
+      expect(screen.getByRole('tab', { name: 'Data Library' })).not.toHaveClass('Mui-selected')
+    })
+
+    // The SO Console Dashboard tile is the only advertised route to it now.
+    it('is kept out of the SO Console sub-tab bar', () => {
+      const soConsole = headerTabsConfig.find(tab => tab.label === 'SO Console')
+
+      expect(visibleSubTabs(soConsole?.children, signingOfficial).map(subTab => subTab.label))
+        .toEqual(['Dashboard', 'Researcher Status', 'Data Access Requests', 'DAR Approvals', 'DAA Associations'])
     })
   })
 
@@ -231,13 +290,8 @@ describe('DuosHeader', () => {
   })
 
   describe('Tab Highlighting', () => {
-    it('highlights Researcher Console on /datalibrary for researcher-only user', async () => {
-      await mountHeader('/datalibrary', mockUser)
-      expect(screen.getByRole('tab', { name: 'Researcher Console' })).toHaveClass('Mui-selected')
-    })
-
-    it('highlights Researcher Console on /datalibrary for admin+researcher (direct link wins over child match)', async () => {
-      await mountHeader('/datalibrary', { ...mockUser, isAdmin: true, isResearcher: true })
+    it('highlights Researcher Console on its dashboard route', async () => {
+      await mountHeader(RESEARCHER_DASHBOARD_ROUTE, mockUser)
       expect(screen.getByRole('tab', { name: 'Researcher Console' })).toHaveClass('Mui-selected')
     })
 

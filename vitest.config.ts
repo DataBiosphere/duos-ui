@@ -14,7 +14,11 @@ export default defineConfig({
     css: false,
     globals: true,
     environment: 'jsdom',
-    pool: 'vmThreads',
+    // NB: vmThreads leaks memory across test files (its VM contexts are never
+    // released), so a full run grows unbounded and gets OOM-killed. Even with
+    // poolOptions.vmThreads.memoryLimit the run still gets killed, so use the
+    // standard threads pool, which runs the whole suite reliably.
+    pool: 'threads',
     include: ['test/**/*.{spec,test}.{js,jsx,ts,tsx}'],
     exclude: ['test/browser/**', 'test/e2e/**', 'build/**', 'node_modules/**', 'server/**'],
     coverage: {
