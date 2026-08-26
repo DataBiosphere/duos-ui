@@ -35,15 +35,34 @@ function makeRequest(overrides: {
   pkceVerifier?: string
   pkceState?: string
   returnTo?: string
+  destroyError?: Error
 } = {}): FastifyRequest {
+  const session: Record<string, unknown> = {
+    sessionId: 'pre-auth-sid',
+    pkceVerifier: 'pkceVerifier' in overrides ? overrides.pkceVerifier : 'test-verifier',
+    pkceState: 'pkceState' in overrides ? overrides.pkceState : 'test-state',
+    returnTo: overrides.returnTo,
+    save: vi.fn().mockResolvedValue(undefined),
+  }
+  // Emulate @fastify/session's regenerate(): request.session becomes a NEW,
+  // EMPTY session with a new sid. Emptying the data fields here is load-bearing
+  // for the tests: any field the handler reads or writes on the WRONG side of
+  // the rotation (returnTo read after, tokens written before) is lost, exactly
+  // as in production.
+  session.regenerate = vi.fn().mockImplementation(async () => {
+    for (const key of Object.keys(session)) {
+      if (key !== 'sessionId' && key !== 'save' && key !== 'regenerate') delete session[key]
+    }
+    session.sessionId = 'post-auth-sid'
+  })
   return {
     url: overrides.url ?? '/auth/callback?code=test-code&state=test-state',
-    session: {
-      pkceVerifier: 'pkceVerifier' in overrides ? overrides.pkceVerifier : 'test-verifier',
-      pkceState: 'pkceState' in overrides ? overrides.pkceState : 'test-state',
-      returnTo: overrides.returnTo,
-      save: vi.fn().mockResolvedValue(undefined),
+    session,
+    sessionStore: {
+      destroy: vi.fn((_sid: string, callback: (err?: Error | null) => void) =>
+        callback(overrides.destroyError ?? null)),
     },
+    log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   } as unknown as FastifyRequest
 }
 
@@ -184,6 +203,62 @@ describe('handleCallback', () => {
     const save = vi.mocked(request.session.save as () => Promise<void>)
     expect(save).toHaveBeenCalled()
     expect(save.mock.invocationCallOrder[0]).toBeLessThan(reply.redirect.mock.invocationCallOrder[0])
+  })
+
+  describe('session fixation protection (story 5-C)', () => {
+    it('rotates the session before writing tokens, and saves before destroying the old row', async () => {
+      const request = makeRequest()
+      const reply = makeReply()
+
+      await handleCallback(request, reply)
+
+      // Tokens survived makeRequest's field-clearing regenerate() emulation,
+      // so the handler wrote them AFTER the rotation.
+      const regenerate = vi.mocked(request.session.regenerate as () => Promise<void>)
+      expect(regenerate).toHaveBeenCalledOnce()
+      expect(request.session.accessToken).toBe('test-access-token')
+      expect(request.session.userId).toBe('user@example.com')
+
+      // Order: regenerate → save → destroy → redirect. Once save() succeeds
+      // the login has succeeded; destroy is cleanup of the pre-auth row.
+      const save = vi.mocked(request.session.save as () => Promise<void>)
+      const destroy = vi.mocked(request.sessionStore.destroy)
+      expect(regenerate.mock.invocationCallOrder[0]).toBeLessThan(save.mock.invocationCallOrder[0])
+      expect(save.mock.invocationCallOrder[0]).toBeLessThan(destroy.mock.invocationCallOrder[0])
+      expect(destroy.mock.invocationCallOrder[0]).toBeLessThan(reply.redirect.mock.invocationCallOrder[0])
+    })
+
+    it('destroys the PRE-AUTH sid via the session store, not the new session', async () => {
+      const request = makeRequest()
+
+      await handleCallback(request, makeReply())
+
+      expect(request.sessionStore.destroy).toHaveBeenCalledWith('pre-auth-sid', expect.any(Function))
+      expect(request.session.sessionId).toBe('post-auth-sid')
+    })
+
+    it('logs but does not fail the login when destroying the pre-auth row errors', async () => {
+      const request = makeRequest({ destroyError: new Error('pg down'), returnTo: '/datalibrary' })
+      const reply = makeReply()
+
+      await handleCallback(request, reply)
+
+      expect(request.log.error).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        expect.stringContaining('destroy'),
+      )
+      expect(reply.redirect).toHaveBeenCalledWith('/datalibrary')
+    })
+
+    it('redirects to the returnTo captured BEFORE rotation (the field dies with the pre-auth session)', async () => {
+      // makeRequest's regenerate() emulation deletes returnTo, so this passes
+      // only when the handler captures it before rotating.
+      const reply = makeReply()
+
+      await handleCallback(makeRequest({ returnTo: '/datalibrary?filter=x' }), reply)
+
+      expect(reply.redirect).toHaveBeenCalledWith('/datalibrary?filter=x')
+    })
   })
 
   it('rejects with an error naming DUOS_OAUTH_REDIRECT_URI when it is unset', async () => {
