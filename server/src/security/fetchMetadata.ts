@@ -25,13 +25,15 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
  *   `same-origin`.** Anything else — including a missing or malformed
  *   `Sec-Fetch-Mode` alongside a present `Sec-Fetch-Site` — is rejected.
  *
- * When `Sec-Fetch-Site` is absent (older browsers, and non-browser clients
+ * When **both** headers are absent (older browsers, and non-browser clients
  * such as curl or the test injector), the request is **allowed** and the
  * CSRF/session controls carry the load alone — exactly the pre-guard posture.
  * That is a documented, deliberate choice: the headers are forbidden request
  * headers a browser sets itself, so an attacker-controlled *browser* request
  * cannot strip them, and a non-browser client holds no victim's cookie jar to
- * forge with.
+ * forge with. A request carrying only ONE of the pair is not a browser shape
+ * at all — browsers send both together or neither — so it is rejected as
+ * malformed rather than waved through as legacy.
  *
  * This is safe to apply bluntly because no legitimate flow navigates to or
  * subresource-loads a guarded path (verified 2026-08-24: every client download
@@ -60,7 +62,7 @@ const ALLOWED_MODES: ReadonlySet<string> = new Set(['cors', 'same-origin'])
  *
  * The header reads tolerate `string[]` (repeated headers): a repeated
  * `sec-fetch-site` fails the `=== 'same-origin'` comparison and is rejected —
- * malformed input fails closed, only a genuinely absent header is waved
+ * malformed input fails closed, only the genuinely absent PAIR is waved
  * through.
  */
 export async function fetchMetadataGuard(
@@ -68,11 +70,11 @@ export async function fetchMetadataGuard(
   reply: FastifyReply,
 ): Promise<FastifyReply | undefined> {
   const site = request.headers['sec-fetch-site']
-  if (site === undefined) {
+  const mode = request.headers['sec-fetch-mode']
+  if (site === undefined && mode === undefined) {
     return undefined
   }
 
-  const mode = request.headers['sec-fetch-mode']
   if (site === 'same-origin' && typeof mode === 'string' && ALLOWED_MODES.has(mode)) {
     return undefined
   }

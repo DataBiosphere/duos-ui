@@ -72,9 +72,11 @@ describe('fetchMetadataGuard', () => {
       ['a user-initiated navigation (site none)', { 'sec-fetch-site': 'none', 'sec-fetch-mode': 'navigate' }],
       ['a cross-site cors fetch', { 'sec-fetch-site': 'cross-site', 'sec-fetch-mode': 'cors' }],
       ['a cross-site no-cors subresource', { 'sec-fetch-site': 'cross-site', 'sec-fetch-mode': 'no-cors' }],
-      // Malformed shapes fail closed: only a genuinely ABSENT sec-fetch-site
-      // is waved through. A real browser always sends the pair together.
+      // Malformed shapes fail closed: only the genuinely absent PAIR is waved
+      // through. A real browser always sends both headers or neither, so a
+      // lone header in either direction is not a browser shape.
       ['a present site with a missing mode', { 'sec-fetch-site': 'same-origin' }],
+      ['a present mode with a missing site', { 'sec-fetch-mode': 'cors' }],
       ['a repeated sec-fetch-site header', { 'sec-fetch-site': ['same-origin', 'same-origin'], 'sec-fetch-mode': 'cors' }],
       ['a repeated sec-fetch-mode header', { 'sec-fetch-site': 'same-origin', 'sec-fetch-mode': ['cors', 'cors'] }],
       ['an unknown mode value', { 'sec-fetch-site': 'same-origin', 'sec-fetch-mode': 'websocket' }],
