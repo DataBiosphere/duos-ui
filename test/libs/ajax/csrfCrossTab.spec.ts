@@ -16,7 +16,7 @@ import { Config } from 'src/libs/config'
 // full-page navigation, which resets the module cache — the freshly loaded
 // page cannot hold a stale token. A SECOND tab can: it keeps its module cache
 // across the first tab's re-login, and the session rotation at that login
-// (Epic 5, 5-C) discards the server-side secret its cached token was minted
+// (Phase 5, 5-C) discards the server-side secret its cached token was minted
 // against.
 // ---------------------------------------------------------------------------
 

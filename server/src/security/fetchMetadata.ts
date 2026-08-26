@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 /**
- * Fetch Metadata enforcement (Epic 5, story 5-B) — closes the ADR-009 residual.
+ * Fetch Metadata enforcement (Phase 5, story 5-B) — closes the ADR-009 residual.
  *
  * The residual risk recorded in docs/plans/bff_adrs/ADR-009-state-changing-gets.md
  * is state-changing **GETs** (`/api/nih/sync`, and the sync side effect inside

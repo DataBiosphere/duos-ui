@@ -41,7 +41,7 @@ export const csrfPluginOptions = {
 } as const
 
 /**
- * GET /auth/csrf-token — gated on an authenticated session (Epic 5, story 5-B).
+ * GET /auth/csrf-token — gated on an authenticated session (Phase 5, story 5-B).
  *
  * The route always documented itself as a post-sign-in call, but nothing
  * enforced that: any same-origin request minted an anonymous session row (the

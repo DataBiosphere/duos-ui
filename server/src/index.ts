@@ -219,7 +219,7 @@ export async function buildApp(): Promise<AppInstance> {
     // The client fetches this after sign-in and echoes the token in an
     // X-CSRF-Token header on unsafe auth requests. Gated on an authenticated
     // session (story 5-B): an anonymous request gets 401 and mints no session
-    // row — see the handler in auth/csrf.ts. After session rotation (Epic 5,
+    // row — see the handler in auth/csrf.ts. After session rotation (Phase 5,
     // 5-C) the pre-auth secret is discarded, so the client must (re)fetch this
     // once login completes.
     fastify.get('/auth/csrf-token', handleCsrfToken)
@@ -238,7 +238,7 @@ export async function buildApp(): Promise<AppInstance> {
     // than alongside /health: it depends on @fastify/cookie, @fastify/session
     // and @fastify/csrf-protection, all of which are registered above only when
     // DUOS_DB_HOST is set. Gating it on bffEnabled too keeps it dark until
-    // cutover — the client does not call /duos-api until Epic 4 points
+    // cutover — the client does not call /duos-api until Phase 4 points
     // getApiUrl() at it — so a deployment running the legacy client-side flow
     // exposes no proxy route at all.
     await fastify.register(apiProxy)

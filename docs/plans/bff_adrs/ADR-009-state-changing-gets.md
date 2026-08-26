@@ -67,7 +67,7 @@ change, out of scope for a duos-ui story — **raise it with the Consent API own
 as follow-up.** This ADR should be revisited, and can likely be retired, once
 that lands.
 
-### One BFF-side mitigation, deliberately deferred — since implemented (Epic 5, story 5-B)
+### One BFF-side mitigation, deliberately deferred — since implemented (Phase 5, story 5-B)
 
 Available without touching client or upstream: reject requests arriving with
 `Sec-Fetch-Mode: navigate` on the proxy, since no API call should ever be a
@@ -75,7 +75,7 @@ top-level navigation and the header cannot be forged from JavaScript. It was
 **not** implemented here — it is a new request-rejection rule rather than part of
 this story, and it should be decided on its own merits.
 
-**Update (2026-08-24, Epic 5, story 5-B):** implemented, and deliberately
+**Update (2026-08-24, Phase 5, story 5-B):** implemented, and deliberately
 broader than the navigate-only rule sketched above — that rule would not have
 closed the gap. The dangerous requests here are same-**site** (a compromised
 `*.broadinstitute.org` sibling), and they come in three shapes — a top-level
@@ -144,9 +144,9 @@ A false positive. The regex matched `Approved` inside
 
 The audit script is not checked in — it is 40 lines of throwaway Python and
 would rot against the Consent API's shape. Re-derive it when the upstream API
-changes materially, or when a new epic widens what the proxy forwards.
+changes materially, or when a new phase widens what the proxy forwards.
 
-### Re-run (2026-08-24, Epic 5, story 5-B)
+### Re-run (2026-08-24, Phase 5, story 5-B)
 
 **Audited:** Consent API `origin/develop` at `001497ae1`, 2026-08-24, with the
 same method (brace-matched `@GET` bodies across the `*Resource.java` files,
