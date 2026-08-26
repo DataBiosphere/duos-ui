@@ -7,6 +7,7 @@ import { Collections } from 'src/libs/ajax/Collections'
 import { USER_ROLES } from 'src/libs/utils'
 import { consoleTypes } from 'src/utils/DarCollectionUtils'
 import { DarCollectionSummary } from 'src/types/model'
+import { PI_QUALIFICATION } from 'src/definitions/definitions-en-us'
 
 type MockDarCollectionTableProps = {
   collections: DarCollectionSummary[]
@@ -112,6 +113,7 @@ describe('SigningOfficialDarApprovals', () => {
     render(<SigningOfficialDarApprovals />)
 
     expect(screen.getByText('My Institution\'s Data Access Approvals')).toBeInTheDocument()
+    expect(screen.getByText(PI_QUALIFICATION, { exact: false })).toBeInTheDocument()
 
     await waitFor(() => {
       expect(Collections.getCollectionSummariesByRoleName).toHaveBeenCalledWith(USER_ROLES.signingOfficial)
