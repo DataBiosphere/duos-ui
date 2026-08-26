@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { getSessionInfo, resetSessionCache, resetSessionProbeState, revalidateSessionInfo, userIsLogged } from 'src/libs/auth/session'
 import { Config } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
+import { ToastNotifications } from 'src/libs/ToastNotifications'
 
 vi.mock('src/libs/config', async importOriginal => ({
   ...(await importOriginal<typeof import('src/libs/config')>()),
@@ -49,6 +50,57 @@ describe('session probe', () => {
     await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
     await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
     expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('returns unauthenticated on 409 and shows the provider-conflict message — a real answer, not a transient failure', async () => {
+    // The BFF forwards consent's Sam sub-provider conflict (DT-4012) as a 409
+    // with an actionable message, and has already destroyed the session.
+    const message = 'Email: user@example.com. You may have previously signed in with a different authentication provider (Google or Microsoft). Please sign in with that provider.'
+    const showError = vi.spyOn(ToastNotifications, 'showError').mockImplementation(() => undefined)
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ authenticated: false, error: 'provider_conflict', message }), {
+        status: 409,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+    expect(showError).toHaveBeenCalledWith(expect.objectContaining({ text: message }))
+    // Cached like any authoritative answer — one failed sign-in, one toast.
+    await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(showError).toHaveBeenCalledTimes(1)
+  })
+
+  it('falls back to a generic provider-conflict message when the 409 body is unusable', async () => {
+    const showError = vi.spyOn(ToastNotifications, 'showError').mockImplementation(() => undefined)
+    fetchMock.mockResolvedValue(new Response('not json', { status: 409 }))
+
+    await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+    expect(showError).toHaveBeenCalledWith(expect.objectContaining({
+      text: expect.stringContaining('different authentication provider'),
+    }))
+  })
+
+  it('lets an authoritative 409 overwrite the held signed-in answer', async () => {
+    vi.spyOn(ToastNotifications, 'showError').mockImplementation(() => undefined)
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: true, idp: 'google' }), { status: 200 }),
+    )
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: false, error: 'provider_conflict', message: 'conflict' }), { status: 409 }),
+    )
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ authenticated: false, error: 'upstream_unavailable' }), { status: 502 }),
+    )
+
+    await expect(getSessionInfo()).resolves.toMatchObject({ authenticated: true })
+    resetSessionCache()
+    await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+    resetSessionCache()
+
+    // The later transient failure reports the 409 verdict, not the stale sign-in.
+    await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
   })
 
   it('returns unauthenticated on upstream outage (502) but retries on the next ask', async () => {

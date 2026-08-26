@@ -383,13 +383,31 @@ describe('completeSignIn', () => {
     })
   })
 
-  describe('AzureB2C errors from Sam', () => {
-    it('shows the error and signs the user out', async () => {
+  describe('Sam sub-provider conflicts', () => {
+    it('shows the 409 conflict message and signs the user out instead of attempting registration', async () => {
+      // Consent DT-4011 answers the conflict with a 409 and an actionable
+      // message — registration cannot succeed, so it must not be attempted.
+      const message = 'Email: test@user.com. You may have previously signed in with a different authentication provider (Google or Microsoft). Please sign in with that provider.'
+      vi.mocked(User.getMe).mockRejectedValue(adapterHttpError(409, message))
+
+      await expect(run('/')).resolves.toBe('signed-out')
+
+      expect(vi.mocked(Notifications.showError)).toHaveBeenCalledWith(
+        expect.objectContaining({ text: expect.stringContaining('different authentication provider') }),
+      )
+      expect(vi.mocked(Auth.signOut)).toHaveBeenCalled()
+      expect(vi.mocked(User.registerUser)).not.toHaveBeenCalled()
+    })
+
+    it('still recognizes the legacy 500 "AzureB2C authentication error" message', async () => {
+      // Older consent builds answer the conflict with a 500 and this message.
       vi.mocked(User.getMe).mockRejectedValue(new Error('AzureB2C authentication error: bad tenant'))
 
       await expect(run('/')).resolves.toBe('signed-out')
 
-      expect(vi.mocked(Notifications.showError)).toHaveBeenCalledWith({ text: 'AzureB2C authentication error: bad tenant' })
+      expect(vi.mocked(Notifications.showError)).toHaveBeenCalledWith(
+        expect.objectContaining({ text: 'AzureB2C authentication error: bad tenant' }),
+      )
       expect(vi.mocked(Auth.signOut)).toHaveBeenCalled()
       expect(vi.mocked(User.registerUser)).not.toHaveBeenCalled()
     })

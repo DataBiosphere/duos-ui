@@ -310,6 +310,41 @@ describe('B2C OAuth callback (real openid-client validation against a fake B2C)'
     expect(res.statusCode).toBe(500)
   })
 
+  it('redirects to /?signInError=provider when B2C answers with an error instead of a code', async () => {
+    // Edge case: B2C cannot complete the federated sign-in (observed when a
+    // tenant's federation client secret to the upstream Microsoft provider
+    // has expired — every Microsoft account then fails). B2C redirects back
+    // with error=server_error — the real authorizationCodeGrant throws
+    // AuthorizationResponseError, which must land the browser in the SPA
+    const { cookie, state } = await login()
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/auth/callback?error=server_error&error_description=AADB2C90289&state=${state}`,
+      headers: { cookie },
+    })
+
+    expect(res.statusCode).toBe(302)
+    expect(res.headers.location).toBe('/?signInError=provider')
+    const sess = [...rows.values()][0].sess as Record<string, unknown>
+    expect(sess.accessToken).toBeUndefined()
+  })
+
+  it('redirects home silently when the user cancels on the B2C page (access_denied)', async () => {
+    const { cookie, state } = await login()
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/auth/callback?error=access_denied&error_description=AADB2C90091&state=${state}`,
+      headers: { cookie },
+    })
+
+    expect(res.statusCode).toBe(302)
+    expect(res.headers.location).toBe('/')
+    const sess = [...rows.values()][0].sess as Record<string, unknown>
+    expect(sess.accessToken).toBeUndefined()
+  })
+
   it('returns 400 token_missing_email_claim when a valid id_token has no email', async () => {
     // The token is cryptographically valid — the grant succeeds — so this
     // exercises the handler guard on top of real validation, not a crypto error.

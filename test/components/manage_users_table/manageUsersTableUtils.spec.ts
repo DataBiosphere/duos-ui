@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dacNameMap, formatUserDacs, formatUserRoles, institutionName, userDacs } from 'src/components/manage_users_table/manageUsersTableUtils'
+import { dacNameMap, formatUserDacs, formatUserRoles, institutionName, userDacs, yesNo } from 'src/components/manage_users_table/manageUsersTableUtils'
 import { DacObject, InstitutionInterface, LibraryCard, UserRole } from 'src/types/model'
 
 const role = (name: UserRole['name'], userId = 1): UserRole => ({
@@ -29,6 +29,10 @@ describe('formatUserRoles', () => {
 
   it('reads None when Researcher is the only role', () => {
     expect(formatUserRoles([role('Researcher')], undefined)).toBe('None')
+  })
+
+  it('leaves out the DataSubmitter role, which has its own status column', () => {
+    expect(formatUserRoles([role('DataSubmitter'), role('Admin')], undefined)).toBe('Admin')
   })
 
   it('splits camel cased role names', () => {
@@ -115,5 +119,15 @@ describe('formatUserDacs', () => {
 
   it('joins DAC names with commas', () => {
     expect(formatUserDacs([{ dacId: 1, name: 'DAC One' }, { dacId: 2, name: 'DAC Two' }])).toBe('DAC One, DAC Two')
+  })
+})
+
+describe('yesNo', () => {
+  it('reads Yes for true', () => {
+    expect(yesNo(true)).toBe('Yes')
+  })
+
+  it('reads No for false', () => {
+    expect(yesNo(false)).toBe('No')
   })
 })

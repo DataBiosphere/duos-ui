@@ -16,21 +16,18 @@ const ENV = { DUOS_API_URL: 'https://consent.dsde-dev.broadinstitute.org' }
 // tests exercise the forward path untouched.
 const FRESH_EXPIRY = () => Math.floor(Date.now() / 1000) + 3600
 
-function makeRequest(overrides: { accessToken?: string, idp?: 'google' | 'microsoft', tokenExpiry?: number, profileSeen?: boolean } = {}) {
+function makeRequest(overrides: { accessToken?: string, idp?: 'google' | 'microsoft', tokenExpiry?: number } = {}) {
   const destroy = vi.fn().mockResolvedValue(undefined)
-  const save = vi.fn().mockResolvedValue(undefined)
   const request = {
     session: {
       accessToken: overrides.accessToken,
       idp: overrides.idp,
       tokenExpiry: overrides.tokenExpiry ?? FRESH_EXPIRY(),
-      profileSeen: overrides.profileSeen,
       destroy,
-      save,
     },
     log: { error: vi.fn(), info: vi.fn() },
   }
-  return { request: request as unknown as FastifyRequest, destroy, save }
+  return { request: request as unknown as FastifyRequest, destroy }
 }
 
 function makeReply() {
@@ -106,38 +103,30 @@ describe('getMe', () => {
     })
   })
 
-  it('marks the session profile-seen on the first served profile, with an explicit pre-reply save', async () => {
-    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(200, { email: 'user@example.com' }) as never)
-    const { request, save } = makeRequest({ accessToken: 'test-access-token' })
-
-    await getMe(request, makeReply())
-
-    expect(request.session.profileSeen).toBe(true)
-    expect(save).toHaveBeenCalledOnce()
-  })
-
-  it('does not re-save a session already marked profile-seen', async () => {
-    // Focus revalidation makes this path hot — the flag costs one DB write
-    // per session, not one per probe.
-    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(200, { email: 'user@example.com' }) as never)
-    const { request, save } = makeRequest({ accessToken: 'test-access-token', profileSeen: true })
-
-    await getMe(request, makeReply())
-
-    expect(save).not.toHaveBeenCalled()
-  })
-
-  it.each([401, 404])('destroys a profile-seen session on an upstream %i — "no profile" cannot explain it', async (status) => {
+  it('destroys the session on an upstream 401', async () => {
     // A registered user's token revoked mid-lifetime forwards (no refresh due)
     // and 401s. Answering "authenticated, no user" here sent the client into
     // re-registering an existing account; the terminal 401 is the honest end.
-    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(status, {}) as never)
-    const { request, destroy } = makeRequest({ accessToken: 'fresh-access-token', idp: 'google', profileSeen: true })
+    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(401, {}) as never)
+    const { request, destroy } = makeRequest({ accessToken: 'fresh-access-token', idp: 'google' })
     const reply = makeReply()
 
     await getMe(request, reply)
 
     expect(destroy).toHaveBeenCalledOnce()
+    expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
+    expect(reply.status).toHaveBeenCalledWith(401)
+    expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+  })
+
+  it('still answers 401 when the rejected session cannot be destroyed', async () => {
+    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(401, {}) as never)
+    const { request, destroy } = makeRequest({ accessToken: 'fresh-access-token' })
+    destroy.mockRejectedValue(new Error('store unavailable'))
+    const reply = makeReply()
+
+    await getMe(request, reply)
+
     expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
     expect(reply.status).toHaveBeenCalledWith(401)
     expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
@@ -163,20 +152,35 @@ describe('getMe', () => {
     expect(reply.header).toHaveBeenCalledWith('cache-control', 'no-store')
   })
 
-  it('reports authenticated with no user on an upstream 401 — DUOS conflates "no profile" with "bad token"', async () => {
-    // DuosUserAuthenticator turns an unregistered email's NotFoundException
-    // into an empty principal → Dropwizard 401. The token itself was just
-    // refreshed, so this must NOT destroy the session: it is a brand-new
-    // user who needs the registration bootstrap, not a dead session.
-    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(401, {}) as never)
-    const { request, destroy } = makeRequest({ accessToken: 'fresh-access-token', idp: 'google' })
+  it('forwards the upstream 409 message and destroys the session — a Sam sub-provider conflict cannot be registered through', async () => {
+    const message = 'Email: user@example.com. You may have previously signed in with a different authentication provider (Google or Microsoft). Please sign in with that provider.'
+    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(409, { message, code: 409 }) as never)
+    const { request, destroy } = makeRequest({ accessToken: 'fresh-access-token', idp: 'microsoft' })
     const reply = makeReply()
 
     await getMe(request, reply)
 
-    expect(destroy).not.toHaveBeenCalled()
-    expect(reply.clearCookie).not.toHaveBeenCalled()
-    expect(reply.send).toHaveBeenCalledWith({ authenticated: true, idp: 'google' })
+    expect(destroy).toHaveBeenCalledOnce()
+    expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
+    expect(reply.status).toHaveBeenCalledWith(409)
+    expect(reply.send).toHaveBeenCalledWith({ authenticated: false, error: 'provider_conflict', message })
+  })
+
+  it('answers the 409 with a fallback message when the upstream body is unusable', async () => {
+    const badBody = { status: 409, ok: false, json: vi.fn().mockRejectedValue(new Error('invalid JSON')) }
+    vi.mocked(fetch).mockResolvedValue(badBody as never)
+    const { request, destroy } = makeRequest({ accessToken: 'fresh-access-token' })
+    const reply = makeReply()
+
+    await getMe(request, reply)
+
+    expect(destroy).toHaveBeenCalledOnce()
+    expect(reply.status).toHaveBeenCalledWith(409)
+    expect(reply.send).toHaveBeenCalledWith({
+      authenticated: false,
+      error: 'provider_conflict',
+      message: expect.stringContaining('different authentication provider'),
+    })
   })
 
   it('does not refresh when the access token is comfortably fresh', async () => {
@@ -248,7 +252,7 @@ describe('getMe', () => {
     expect(reply.send).toHaveBeenCalledWith({ authenticated: true, idp: 'microsoft' })
   })
 
-  it('returns 502 without destroying the session when the upstream API errors with a non-401 status', async () => {
+  it('returns 502 without destroying the session when the upstream API errors with an unmapped status', async () => {
     vi.mocked(fetch).mockResolvedValue(makeFetchResponse(503, {}) as never)
     const { request, destroy } = makeRequest({ accessToken: 'test-access-token' })
     const reply = makeReply()

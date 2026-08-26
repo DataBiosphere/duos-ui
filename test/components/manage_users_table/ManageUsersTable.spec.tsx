@@ -25,7 +25,7 @@ const makeUser = (overrides: Partial<DuosUser> & { userId: number, displayName: 
   isChairPerson: false,
   isDataSubmitter: false,
   isMember: false,
-  isResearcher: true,
+  isResearcher: false,
   isSigningOfficial: false,
   roles: [{ roleId: 1, name: 'Researcher', userId: overrides.userId, userRoleId: overrides.userId }],
   ...overrides,
@@ -110,6 +110,13 @@ const emittedRules = (): string[] =>
     .join('')
     .split('}')
 
+// Yes and No repeat across the two status columns, so the assertions read a cell by column position.
+const RESEARCHER_STATUS = 5
+const DATA_SUBMITTER_STATUS = 6
+
+const cellText = (row: HTMLElement, column: number): string =>
+  within(row).queryAllByRole('gridcell')[column]?.textContent ?? ''
+
 const rowFor = async (name: string): Promise<HTMLElement> => {
   const cell = await screen.findByText(name)
   const row = cell.closest('[role="row"]')
@@ -121,7 +128,7 @@ describe('ManageUsersTable', () => {
   it('renders a column for every user attribute', () => {
     renderTable()
 
-    for (const label of ['User Name', 'Email', 'Institution', 'Roles', 'DACs']) {
+    for (const label of ['User Name', 'Email', 'Institution', 'Roles', 'DACs', 'Researcher Status', 'Data Submitter Status']) {
       expect(columnHeader(label)).toBeInTheDocument()
     }
   })
@@ -133,6 +140,27 @@ describe('ManageUsersTable', () => {
     expect(within(row).getByText(alice.email)).toBeInTheDocument()
     expect(within(row).getByText('Broad Institute')).toBeInTheDocument()
     expect(within(row).getByText('Admin')).toBeInTheDocument()
+  })
+
+  // Every fixture leaves the flags false, as a list response does, so only the card and the role can drive these.
+  it('reads researcher status off the library card', async () => {
+    renderTable()
+
+    expect(cellText(await rowFor(carol.displayName), RESEARCHER_STATUS)).toBe('Yes')
+    expect(cellText(await rowFor(alice.displayName), RESEARCHER_STATUS)).toBe('No')
+  })
+
+  it('reads data submitter status off the DataSubmitter role', async () => {
+    const dave = makeUser({
+      userId: 4,
+      displayName: 'Dave Lee',
+      email: 'dave@test.com',
+      roles: [{ roleId: 8, name: 'DataSubmitter', userId: 4, userRoleId: 4 }],
+    })
+    renderWithRouter(<ManageUsersTable isLoading={false} userList={[alice, dave]} searchText="" />)
+
+    expect(cellText(await rowFor(dave.displayName), DATA_SUBMITTER_STATUS)).toBe('Yes')
+    expect(cellText(await rowFor(alice.displayName), DATA_SUBMITTER_STATUS)).toBe('No')
   })
 
   it('links each user name to their edit page', async () => {

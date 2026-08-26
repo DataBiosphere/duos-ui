@@ -23,10 +23,5 @@ declare module 'fastify' {
     // regardless — this field exists for the audit trail and observability,
     // not client selection.
     idp?: 'google' | 'microsoft'
-    // Set once /auth/me has served a DUOS profile on this session. The
-    // upstream conflates "no profile" with "bad token" (both 401), and this
-    // is the disambiguator: a 401/404 on a profile-seen session cannot mean
-    // "unregistered", so it is treated as a terminal token verdict.
-    profileSeen?: boolean
   }
 }

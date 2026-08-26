@@ -1,9 +1,10 @@
 import { isNil, uniq } from 'src/utils/NodashUtil'
-import { DacObject, InstitutionInterface, LibraryCard, UserRole } from 'src/types/model'
+import { DacObject, InstitutionInterface, LibraryCard, UserRole, UserRoleName } from 'src/types/model'
 
-/** Researcher is implicit for every user, and a library card reads as a role in this table. */
+const STATUS_COLUMN_ROLES = new Set<UserRoleName>(['Researcher', 'DataSubmitter'])
+
 export const formatUserRoles = (roles: UserRole[] | undefined, libraryCard: LibraryCard | undefined): string => {
-  const named = (roles ?? []).map(role => role.name).filter(name => name !== 'Researcher')
+  const named = (roles ?? []).map(role => role.name).filter(name => !STATUS_COLUMN_ROLES.has(name))
   const withCard = isNil(libraryCard) ? named : [...named, 'LibraryCard']
   // SigningOfficial -> Signing Official
   const spaced = withCard.map(name => name.replace(/([A-Z])/g, ' $1').trim())
@@ -11,6 +12,8 @@ export const formatUserRoles = (roles: UserRole[] | undefined, libraryCard: Libr
 }
 
 export const institutionName = (institution: InstitutionInterface | undefined): string => institution?.name ?? 'N/A'
+
+export const yesNo = (value: boolean): string => (value ? 'Yes' : 'No')
 
 export interface UserDac {
   dacId: number

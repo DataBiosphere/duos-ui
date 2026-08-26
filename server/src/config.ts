@@ -47,3 +47,23 @@ async function loadAndMerge(configPath: string): Promise<Record<string, unknown>
 export const resetConfigCache = (): void => {
   configPromise = null
 }
+
+/**
+ * Which peers may set `X-Forwarded-*` on this app's behalf.
+ *
+ * The app always sits behind exactly one reverse-proxy hop — the
+ * httpd-terra-proxy sidecar in k8s (same pod, so loopback) or the `proxy`
+ * container in docker-compose (a bridge network, so RFC1918) — and both must be
+ * trusted for `request.protocol` to honor X-Forwarded-Proto and for
+ * `request.ips` to carry the client chain.
+ *
+ * Expressed as peer addresses rather than a hop count on purpose. Fastify 5.12.1
+ * made the numeric form (`trustProxy: 1`) fail closed permanently, because a hop
+ * count cannot verify who the immediate peer actually is — any direct client
+ * could spoof X-Forwarded-* by supplying enough hops. A numeric value is now
+ * silently equivalent to `trustProxy: false`, which drops the forwarded protocol
+ * and makes @fastify/session refuse to persist sessions once cookie.secure is
+ * true. `trustProxy: true` would restore the behavior but re-open that spoofing
+ * hole, so the trusted peers are named instead.
+ */
+export const TRUST_PROXY = ['loopback', 'uniquelocal']
