@@ -2,9 +2,10 @@ import React, { useMemo, useState } from 'react'
 import { Box } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid'
 import { Link } from 'react-router'
-import { getSearchFilterFunctions } from 'src/libs/utils'
+import { getSearchFilterFunctions, hasDataSubmitterRole } from 'src/libs/utils'
 import { DATA_GRID_CONTAINER_SX, DATA_GRID_SX } from 'src/components/dataGridDefaults'
-import { formatUserRoles, institutionName } from 'src/components/manage_users_table/manageUsersTableUtils'
+import { formatUserRoles, institutionName, yesNo } from 'src/components/manage_users_table/manageUsersTableUtils'
+import { isNil } from 'src/utils/NodashUtil'
 import { DuosUser } from 'src/types/model'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
@@ -21,15 +22,20 @@ interface UserRow {
   email: string
   institution: string
   roles: string
+  researcherStatus: string
+  dataSubmitterStatus: string
 }
 
 // Roles and institution are flattened to their displayed text, so every column sorts on what is read.
+// The isResearcher/isDataSubmitter flags are set for the signed-in user only, so a list response has neither.
 const toUserRow = (user: DuosUser): UserRow => ({
   id: user.userId,
   displayName: user.displayName,
   email: user.email,
   institution: institutionName(user.institution),
   roles: formatUserRoles(user.roles, user.libraryCard),
+  researcherStatus: yesNo(!isNil(user.libraryCard)),
+  dataSubmitterStatus: yesNo(hasDataSubmitterRole(user)),
 })
 
 const COLUMNS: GridColDef<UserRow>[] = [
@@ -48,6 +54,8 @@ const COLUMNS: GridColDef<UserRow>[] = [
   { field: 'email', headerName: 'Email', flex: 1.25, minWidth: 200 },
   { field: 'institution', headerName: 'Institution', flex: 1, minWidth: 180 },
   { field: 'roles', headerName: 'Roles', flex: 1, minWidth: 180 },
+  { field: 'researcherStatus', headerName: 'Researcher Status', flex: 0.75, minWidth: 150 },
+  { field: 'dataSubmitterStatus', headerName: 'Data Submitter Status', flex: 0.75, minWidth: 170 },
 ]
 
 const filterFn = getSearchFilterFunctions().users
