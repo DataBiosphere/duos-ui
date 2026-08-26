@@ -110,7 +110,7 @@ directory.
 |---|---|---|
 | [001](#adr-001--postgresql-backed-sessions-via-fastifysession) | PostgreSQL-backed sessions via `@fastify/session` | 1 |
 | [002](#adr-002--full-page-redirect-for-oauth-instead-of-popup) | Full-page redirect for OAuth instead of popup | 2, 4 |
-| [003](#adr-003--remove-oidc-client-ts-entirely-in-phase-4) | Remove `oidc-client-ts` entirely | 4 |
+| [003](#adr-003--remove-oidc-client-ts-entirely-in-phase-6) | Remove `oidc-client-ts` entirely | 4, 6 |
 | [004](#adr-004--fastifyreply-from-on-a-duos-api-prefix-for-the-proxy) | `@fastify/reply-from` on a `/duos-api` prefix for the proxy | 3 |
 | [005](#adr-005--single-authcallback-route) | Single `/auth/callback` route | 2 |
 | [006](#adr-006--lazy-oidc-client-initialization-with-startup-warm-up) | Lazy OIDC client init with startup warm-up | 2 |
@@ -141,13 +141,15 @@ navigation, but the session cookie survives the redirect naturally and a
 `returnTo` field in the session restores the user's destination. A full-page
 redirect is unaffected by COOP headers on the IdP's domain.
 
-### ADR-003 — Remove `oidc-client-ts` entirely in Phase 4
+### ADR-003 — Remove `oidc-client-ts` entirely in Phase 6
 
 The library's event system is only used for client-side token expiry, which
 server-side proactive refresh (60 s before expiry, in the proxy) makes
-unnecessary. It is removed rather than left in place: keeping it invites reuse of
-its `WebStorageStateStore`, which would re-introduce the vulnerability this
-migration exists to close.
+unnecessary. It will be removed rather than left in place: keeping it invites
+reuse of its `WebStorageStateStore`, which would re-introduce the vulnerability
+this migration exists to close. Phase 4 stopped the BFF-mode client from using
+it; the legacy flow still uses it behind `bffEnabled`, so the removal itself is
+Phase 6 work, after the BFF flow is stable in production.
 
 ### ADR-004 — `@fastify/reply-from` on a `/duos-api` prefix for the proxy
 
