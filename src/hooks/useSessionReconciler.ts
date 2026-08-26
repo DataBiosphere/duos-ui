@@ -173,7 +173,7 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
         activeBootstrapRef.current.cancelled = true
         activeBootstrapRef.current = null
         // The retired run's finally no longer owns this flag.
-        // oxlint-disable-next-line react/react-compiler
+        // oxlint-disable-next-line react/set-state-in-effect
         setSnapshot(prev => ({ ...prev, bootstrapRunning: false }))
       }
       return
@@ -196,7 +196,7 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
         }
         // Recording classification IS this effect's externally-visible work
         // for a joined probe (see ReconcilerSnapshot.classifiedProbe).
-        // oxlint-disable-next-line react/react-compiler
+        // oxlint-disable-next-line react/set-state-in-effect
         setSnapshot(prev => ({ ...prev, classifiedProbe: sessionInfo }))
         return
       }
@@ -217,7 +217,7 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
       setUserRoleStatuses(sessionUser, Storage)
       // Recorded in state → clean re-render off the refreshed profile (the
       // localStorage write above is invisible to React without it).
-      // oxlint-disable-next-line react/react-compiler
+      // oxlint-disable-next-line react/set-state-in-effect
       setSnapshot(prev => ({ ...prev, classifiedProbe: sessionInfo }))
       // The hydrate path reads the router location — it is live here, unlike
       // at run completion (see applyPendingHydration).

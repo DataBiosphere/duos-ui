@@ -6,6 +6,7 @@ import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { createPgSessionStore } from '../../src/session/pgStore.js'
 import { csrfPluginOptions } from '../../src/auth/csrf.js'
+import { TRUST_PROXY } from '../../src/config.js'
 import { apiProxy } from '../../src/proxy/apiProxy.js'
 import { envBool } from '../../src/index.js'
 
@@ -63,7 +64,7 @@ async function verifyDatabase(app: FastifyInstance, where: string): Promise<void
 export async function startLoadTarget(options: LoadTargetOptions): Promise<LoadTarget> {
   process.env.DUOS_API_URL = options.upstreamOrigin
 
-  const app: FastifyInstance = Fastify({ logger: false, trustProxy: 1 })
+  const app: FastifyInstance = Fastify({ logger: false, trustProxy: TRUST_PROXY })
 
   let poolSnapshot: LoadTarget['poolSnapshot'] = () => undefined
   let store: ReturnType<typeof createPgSessionStore> | undefined
