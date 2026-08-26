@@ -50,6 +50,25 @@ function App() {
   }, [])
 
   /**
+   * The BFF /auth/callback lands here with ?signInError=provider when B2C answered the authorization request with an
+   * error instead of a code. The known case is B2C failing to connect to the chosen Microsoft provider (an expired
+   * federation client secret in the tenant fails every Microsoft sign-in). The message stays generic because the
+   * cause is on the provider side — the server log carries the B2C error and description.
+   */
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search)
+    if (queryParams.get('signInError') === null) return
+    Notifications.showError({
+      text: 'Sign in could not be completed because the identity provider reported an error. '
+        + 'Please try again. If the problem continues, contact DUOS support.',
+      // Long timeout: the message carries instructions the user must read.
+      timeout: 30000,
+    })
+    queryParams.delete('signInError')
+    navigate({ pathname: location.pathname, search: queryParams.toString() }, { replace: true })
+  }, [navigate, location.pathname, location.search])
+
+  /**
      * Check for RAS Authentication URL params. If we have a code and state, we will call ECM APIs to get redirect
      * information and user linkage information. With that, we can sync the users account linkage and then redirect the
      * user to the original page they authenticated from.

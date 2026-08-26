@@ -232,10 +232,12 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
   }
   catch (error) {
     if (cancelled()) return 'cancelled'
-    // Explicitly handle AzureB2C errors from Sam
     const errorMessage = extractError(error)
-    if (errorMessage.toLowerCase().includes('azureb2c authentication error')) {
-      Notifications.showError({ text: errorMessage })
+    // A 409 from getMe is the Sam sub-provider conflict the account lives under the other provider,
+    // so registration cannot succeed — surface the actionable message instead of attempting it.
+    if (errorStatus(error) === 409 || errorMessage.toLowerCase().includes('azureb2c authentication error')) {
+      // Long timeout: the message carries instructions and a support link.
+      Notifications.showError({ text: errorMessage, timeout: 30000 })
       await Auth.signOut()
       return 'signed-out'
     }

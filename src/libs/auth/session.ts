@@ -1,5 +1,6 @@
 import { Config } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
+import { ToastNotifications } from 'src/libs/ToastNotifications'
 import { DuosUser } from 'src/types/model'
 
 /**
@@ -62,6 +63,25 @@ const probeBffSession = async (): Promise<SessionInfo> => {
     const res = await fetch('/auth/me', { credentials: 'include' })
     if (res.status === 401) {
       // A real answer — no session — worth caching for the page load.
+      lastAuthoritativeAnswer = { authenticated: false }
+      return lastAuthoritativeAnswer
+    }
+    if (res.status === 409) {
+      // Sam sub-provider conflict (the account lives under the other provider). The BFF has already destroyed
+      // the session, so this fires once per sign-in attempt. Show the upstream's actionable message (sign in
+      // with the other provider, plus the support link) instead of failing sign-in generically.
+      let message = 'You may have previously signed in with a different authentication provider (Google or Microsoft). Please sign in with that provider.'
+      try {
+        const body = await res.json() as { message?: string }
+        if (typeof body.message === 'string' && body.message.length > 0) {
+          message = body.message
+        }
+      }
+      catch {
+        // Unparseable body — the fallback message stands.
+      }
+      // Long timeout: the message carries instructions and a support link.
+      ToastNotifications.showError({ text: message, timeout: 30000 })
       lastAuthoritativeAnswer = { authenticated: false }
       return lastAuthoritativeAnswer
     }
