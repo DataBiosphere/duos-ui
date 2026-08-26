@@ -116,20 +116,45 @@ function buildUrlWithParams(url: string, params?: Params): string {
   return query ? `${url}?${query}` : url
 }
 
+/**
+ * Guards the auto-logout handler against re-entering itself.
+ *
+ * The metric below is an identified event, so in BFF mode it posts to
+ * /bard-api — an unsafe same-origin request, which fetches a CSRF token from
+ * the gated /auth/csrf-token. The session is already gone, so that fetch
+ * answers 401, and the adapter routes a 401 there straight back into this
+ * handler. Unguarded, the outer `await` never resolves: redirectOnLogout()
+ * never runs and the token endpoint is hit again on every turn. (reportError
+ * above avoids the same loop for Bard URLs, one level further in.)
+ *
+ * The nested call returns without a metric and without a redirect; the
+ * outer call finishes both exactly once.
+ */
+let autoLogoutInFlight = false
+
 // Record relevant 401 logouts to Bard / Mixpanel, then start the sign-out
 // redirect. The metric gives systematic, empirical data to assess premature
 // logout issues. More context: https://github.com/DataBiosphere/duos-ui/pull/3389
 const recordAutoLogout401 = async (url: string): Promise<void> => {
+  if (autoLogoutInFlight) return
+  autoLogoutInFlight = true
   const oidcUser = Storage.getOidcUser()
   const expiresOn = oidcUser?.profile?.exp ?? null
   const currentTime = Math.floor(Date.now() / 1000)
-  await Metrics.captureEvent(eventList.userAutoLogout401, {
-    expires_on: expiresOn,
-    current_time: currentTime,
-    time_until_expires: expiresOn === null ? null : expiresOn - currentTime,
-    endpoint_url: url,
-  }, AbortSignal.timeout(1000)) // Wait <= 1s, abort if log slower
-  redirectOnLogout()
+  try {
+    await Metrics.captureEvent(eventList.userAutoLogout401, {
+      expires_on: expiresOn,
+      current_time: currentTime,
+      time_until_expires: expiresOn === null ? null : expiresOn - currentTime,
+      endpoint_url: url,
+    }, AbortSignal.timeout(1000)) // Wait <= 1s, abort if log slower
+  }
+  finally {
+    // The sign-out must start even if the metric throws, and the flag must
+    // clear so a later 401 in a page that did not navigate still records.
+    autoLogoutInFlight = false
+    redirectOnLogout()
+  }
 }
 
 /**
@@ -144,7 +169,8 @@ const recordAutoLogout401 = async (url: string): Promise<void> => {
  * (an ECM 401 is not). This 401 comes from the BFF itself, so it is always
  * authoritative — even when the blocked request was headed for a sibling
  * proxy prefix. No redirect loop is possible: Auth.signOut calls
- * getCsrfToken directly and consumes its own errors.
+ * getCsrfToken directly and consumes its own errors, and the telemetry
+ * below cannot re-enter this handler — see autoLogoutInFlight.
  */
 const throwSessionExpired = async (url: string): Promise<never> => {
   await recordAutoLogout401(url)
