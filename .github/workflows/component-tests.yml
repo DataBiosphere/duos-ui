@@ -73,15 +73,21 @@ jobs:
           name: server-coverage
           path: server/coverage/coverage-*.json
           retention-days: 1
-  coverage-report:
-    name: Merge coverage and publish
+  vitest-run:
     runs-on: ubuntu-latest
     needs: [vitest-shard, vitest-server-browser]
+    # Branch protection requires the `vitest-run` check, and GitHub counts a
+    # skipped required check as a pass. Run even when a test job fails, so this
+    # job reports a real failure instead of a skip that would open the gate.
+    if: ${{ !cancelled() }}
     permissions:
       contents: read
       pull-requests: write
       checks: write
     steps:
+      - name: Fail if any test job did not pass
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
