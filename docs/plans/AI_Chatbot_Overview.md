@@ -98,26 +98,30 @@ High-level items only. Each becomes a story with full detail after approval.
 
 - Register a Fastify plugin after the session and CSRF middleware.
 - Guard the route with `fastify.csrfProtection` (same pattern as `POST /auth/logout`).
-- Return `401` when `request.session.accessToken` is absent.
-- Refresh the token up front when it is inside `REFRESH_WINDOW_SECONDS`.
-- Stream SSE (Server-Sent Events): `token`, `status`, `done`, `error` event types.
-- Disable the socket timeout for the stream; a turn can take 30–60 seconds.
-- Call `reply.hijack()` before any raw write. `@fastify/session` saves in an
-  `onSend` hook, and an un-hijacked raw stream re-runs the double-send crash
-  fixed in Phase 2 — see the note in `server/src/auth/refresh.ts`.
-- Send a heartbeat comment frame every 15 seconds. It defeats idle timeouts in
-  the reverse proxy and detects a dead client (open question 2).
-- Abort the model call when the client disconnects. A closed tab must not keep
-  spending.
-- Abort open streams on `SIGTERM`. Fastify `close()` waits for in-flight
-  requests, so a held stream delays every rolling deploy.
+- Return `401` when `request.session.accessToken` is absent, and refresh the
+  token up front when it is inside `REFRESH_WINDOW_SECONDS`.
+- Stream the answer with SSE (Server-Sent Events). Four event types:
+  `token`, `status`, `done`, `error`. This is a contract with the client, so it
+  stays here.
 - The client owns conversation history and sends it with each request. The
   server caps the history it forwards to the model (see open question 3).
 - Treat `history[]` as untrusted input. Accept user and assistant text only —
   never tool results — and set an explicit body size limit.
-- Register an explicit 404 for unmatched `/api/*`. The SPA fallback in
-  `server/src/index.ts` otherwise answers a mistyped chat path with the client
-  shell instead of JSON.
+- Stop spending when nobody listens. Abort the model call when the client
+  disconnects, and abort open streams on shutdown.
+
+**Four hazards this route inherits.** The BFF already paid for these lessons.
+Record them here, and let Chat 1 pick the fix and the numbers:
+
+1. `@fastify/session` saves in an `onSend` hook. A raw stream that does not
+   hijack the reply re-runs the double-send crash fixed in Phase 2 — see the
+   note in `server/src/auth/refresh.ts`.
+2. The reverse proxy has an idle timeout. A long turn needs a keep-alive frame
+   and a socket timeout that outlasts the turn (open question 2).
+3. Fastify `close()` waits for in-flight requests, so a held stream delays every
+   rolling deploy.
+4. The SPA fallback in `server/src/index.ts` answers a mistyped `/api/*` path
+   with the client shell instead of JSON.
 
 ### 3.2 Agentic loop
 
@@ -132,10 +136,10 @@ High-level items only. Each becomes a story with full detail after approval.
 - Loop: send message + history + tool declarations. If the model returns tool
   calls, execute them, append results, and re-invoke. Stop when the model
   returns a final text answer.
-- **Bound every turn:** at most 5 iterations, a 90-second deadline, and a byte
-  cap on each tool result. Emit `error` and stop when a bound trips. Without
-  these, a model that keeps calling tools runs until the socket dies, and the
-  bill runs with it.
+- **Bound every turn.** Cap the iteration count, set a wall-clock deadline, and
+  cap the bytes of each tool result. Emit `error` and stop when a bound trips.
+  Without bounds, a model that keeps calling tools runs until the socket dies,
+  and the bill runs with it. The loop story picks the numbers.
 - Emit `status` events around tool calls and `token` events for text.
 - Record per turn: duration, iteration count, tool-call count, token counts,
   and error type. Follow the Phase 6 metrics pattern (story 6-G).
