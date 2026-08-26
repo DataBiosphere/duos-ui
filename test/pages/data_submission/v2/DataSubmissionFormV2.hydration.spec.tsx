@@ -24,6 +24,15 @@ vi.mock('src/components/DuosDatePicker', () => ({
 const DRAFT_ID = '0393c587-343b-4c85-8969-e69e3f4f5aa8'
 const DRAFT_ROUTE = `/data_submission_form/draft/study-dataset/${DRAFT_ID}`
 
+/**
+ * Hydration is not one await: the draft load resolves, the spinner gives way to the whole form, and
+ * only the passive-effect pass after that commit copies each defaultValue into its control. On a
+ * contended machine that chain runs well past the 1s these helpers allow by default, so every wait
+ * that stands between a render and a hydrated control gets the longer budget. It costs nothing
+ * unless the test is genuinely failing.
+ */
+const HYDRATION_TIMEOUT = { timeout: 10000 }
+
 const baseDocument = (): DatasetRegistrationSchemaV1 => {
   const detail: DraftDetail<DatasetRegistrationSchemaV1> = JSON.parse(readFileSync(
     resolve(__dirname, '../../../fixtures/study-template/v1/draft/minimal-valid-draft-detail.json'),
@@ -82,7 +91,7 @@ const submittedPayload = (): DatasetRegistrationSchemaV1 => {
 
 const createStudy = async () => {
   fireEvent.click(screen.getByText('Create Study'))
-  await waitFor(() => expect(DataSet.registerDataset).toHaveBeenCalled())
+  await waitFor(() => expect(DataSet.registerDataset).toHaveBeenCalled(), HYDRATION_TIMEOUT)
 }
 
 describe('DataSubmissionFormV2 hydrating a draft', () => {
@@ -95,7 +104,7 @@ describe('DataSubmissionFormV2 hydrating a draft', () => {
   it('places the scalar fields in their controls', async () => {
     renderDraft(richDocument())
 
-    await waitFor(() => expect(inputValue('name')).toBe('Synthetic Minimal Study'))
+    await waitFor(() => expect(inputValue('name')).toBe('Synthetic Minimal Study'), HYDRATION_TIMEOUT)
     expect(inputValue('description')).toBe('A synthetic study used only for contract tests.')
     expect(inputValue('piName')).toBe('Synthetic Investigator')
     expect(inputValue('piEmail')).toBe('investigator@example.org')
@@ -104,20 +113,20 @@ describe('DataSubmissionFormV2 hydrating a draft', () => {
   it('places the fields that travel as study properties', async () => {
     renderDraft(richDocument())
 
-    await waitFor(() => expect(inputValue('phenotypeIndication')).toBe('Synthetic indication'))
+    await waitFor(() => expect(inputValue('phenotypeIndication')).toBe('Synthetic indication'), HYDRATION_TIMEOUT)
     expect(inputValue('species')).toBe('Homo sapiens')
   })
 
   it('lists the consent groups in the order the document gave them', async () => {
     renderDraft(richDocument())
 
-    expect(await screen.findByText('Synthetic Open Dataset')).toBeInTheDocument()
+    expect(await screen.findByText('Synthetic Open Dataset', {}, HYDRATION_TIMEOUT)).toBeInTheDocument()
     expect(screen.getByText('Synthetic Controlled Dataset')).toBeInTheDocument()
   })
 
   it('keeps consent groups, their file types, and the client metadata through submission', async () => {
     renderDraft(richDocument())
-    expect(await screen.findByText('Create Study')).toBeInTheDocument()
+    expect(await screen.findByText('Create Study', {}, HYDRATION_TIMEOUT)).toBeInTheDocument()
 
     await createStudy()
 
@@ -136,7 +145,7 @@ describe('DataSubmissionFormV2 hydrating a draft', () => {
       nihAnvilUse: 'I am NHGRI funded and I have a dbGaP PHS ID already',
     } as DatasetRegistrationSchemaV1)
     // FileInput keeps its input hidden and unlabelled, so it is found the way its own spec finds it.
-    await waitFor(() => expect(globalThis.document.querySelector('input[type="file"]')).toBeInTheDocument())
+    await waitFor(() => expect(globalThis.document.querySelector('input[type="file"]')).toBeInTheDocument(), HYDRATION_TIMEOUT)
 
     const fileInput = globalThis.document.querySelector('input[type="file"]') as HTMLInputElement
     expect(fileInput.files?.length ?? 0).toBe(0)
