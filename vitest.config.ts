@@ -19,6 +19,9 @@ export default defineConfig({
     // poolOptions.vmThreads.memoryLimit the run still gets killed, so use the
     // standard threads pool, which runs the whole suite reliably.
     pool: 'threads',
+    // Repairs the web storage globals that the threads pool leaves broken; see
+    // the comment in the setup file itself.
+    setupFiles: ['./test/setup.ts'],
     include: ['test/**/*.{spec,test}.{js,jsx,ts,tsx}'],
     exclude: ['test/browser/**', 'test/e2e/**', 'build/**', 'node_modules/**', 'server/**'],
     coverage: {
