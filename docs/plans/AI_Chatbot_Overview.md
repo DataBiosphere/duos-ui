@@ -10,10 +10,11 @@ and data-access requests. A server-side agentic loop drives an LLM (Large
 Language Model). The loop executes tool calls against the Consent API as the
 authenticated user.
 
-This plan assumes the BFF (Backend For Frontend) migration is **complete**:
-Phases 0–6 of [`BFF Migration`](https://broadworkbench.atlassian.net/browse/DT-3604) are live, and the legacy client-side
-auth flow is removed. Details stay high level. We will expand each work item
-after the plan is approved.
+This plan builds on the BFF (Backend For Frontend) migration,
+[DT-3604](https://broadworkbench.atlassian.net/browse/DT-3604). The chat needs
+three of its stories, and no more: 5-F, 5-G and 6-D-pre. §1 lists them.
+Details stay high level on purpose. We will expand each work item into a story
+when we implement that phase.
 
 ---
 
@@ -55,9 +56,10 @@ The Consent API needs **no changes**. `DatasetResource` and
 token is accepted for `/api/*` calls. The chat does share one existing
 upstream control, though: the per-user API rate limit — see §3.4.
 
-Two rows above are not live today. Only stories 5-F, 5-G and 6-D-pre are hard
-dependencies for the chat. Story 6-J (legacy removal) only simplifies the
-feature flag, so chat work does not have to wait for all of Phase 6.
+Two rows above are not live today. Stories 5-F, 5-G and 6-D-pre are the only
+hard dependencies for the chat. Story 6-J (legacy removal) only simplifies the
+feature flag, so chat work does not have to wait for all of Phase 6. Chat 1
+(§6) confirms the three are live before later work depends on them.
 
 ---
 
@@ -119,10 +121,13 @@ High-level items only. Each becomes a story with full detail after approval.
 ### 3.2 Agentic loop
 
 - One module with two backends behind a common interface.
-- **Local:** Ollama, selected when `OLLAMA_URL` is set.
-- **Production:** Vertex AI Gemini via `@google-cloud/vertexai` (confirm the
-  package — see open question 6). Keep the interface provider-neutral; do not
-  shape the tool declarations to one vendor's schema.
+- **Local:** Ollama, selected when `OLLAMA_URL` is set. Pin a model tag with
+  verified tool-call support. `OLLAMA_URL` alone does not guarantee it
+  (open question 1).
+- **Production:** Vertex AI Gemini through the Google Gen AI SDK
+  (`@google/genai`). This is Google's current Node client;
+  `@google-cloud/vertexai` is the older one. Keep the interface
+  provider-neutral; do not shape the tool declarations to one vendor's schema.
 - Loop: send message + history + tool declarations. If the model returns tool
   calls, execute them, append results, and re-invoke. Stop when the model
   returns a final text answer.
@@ -133,9 +138,9 @@ High-level items only. Each becomes a story with full detail after approval.
 - Emit `status` events around tool calls and `token` events for text.
 - Record per turn: duration, iteration count, tool-call count, token counts,
   and error type. Follow the Phase 6 metrics pattern (story 6-G).
-- Keep a small fixture set of questions with recorded tool results, so a prompt
-  edit or a model-version bump has a regression check. One E2E test does not
-  cover tool choice.
+- Keep a fixture set of questions with recorded tool results, so a prompt edit
+  or a model-version bump has a regression check. This lands as its own story
+  **before** the loop story, not after. One E2E test does not cover tool choice.
 
 ### 3.3 Consent tool client
 
@@ -144,13 +149,23 @@ High-level items only. Each becomes a story with full detail after approval.
   but do not force the proxy abstraction onto simple JSON calls.
 - **v1 tool set — two read-only tools:**
 
-| Tool | Consent endpoint | Purpose |
-|---|---|---|
-| `list_datasets` | dataset search | Search the DUOS dataset index |
-| `list_dar_collections` | user's collections | List the user's DAR collections |
+| Tool | Consent endpoint                                     | Purpose |
+|---|------------------------------------------------------|---|
+| `list_datasets` | `POST /api/dataset/search/index/v2` | Search the DUOS dataset index |
+| `list_dar_collections` | `GET /api/collections/role/{roleName}/summary`       | List the user's DAR collections |
 
 - Every call carries the user's own token. Consent enforces the user's actual
   access. The chat cannot show data the user cannot already see.
+- **The server owns both request shapes.** Dataset search takes an
+  Elasticsearch query body, and the collections route takes a role name.
+  Give each tool a narrow parameter set and build the upstream request on the
+  server. The model must never supply a raw query body.
+- **The server sets `roleName` from the session, not the model.** The role
+  decides which view of the collections the caller reads, so it is an
+  authorization decision. A model that picks the role picks its own permissions.
+- Cap the result count and the response fields each tool returns. The cap bounds
+  the token cost and bounds what leaves DUOS (§7). Agree the numbers in the
+  tool story.
 - `get_dataset` (single dataset by ID) is the natural v2 tool. Add it when
   usage shows the model needs per-dataset detail.
 - **Decide the mid-turn 401 behavior before implementation.** `apiProxy` sets
@@ -187,10 +202,20 @@ so the divisor always tracks the real pod count. Apply the same shape to
    small numbers, so the rounding error is proportionally far larger than it is
    at Consent's 100 per minute.
 
-**Cost control needs a durable counter.** A per-minute bucket bounds bursts,
+**Spend control needs a durable counter.** A per-minute bucket bounds bursts,
 not spend: it resets on every pod restart and forgets an idle user in minutes.
-Add a per-user daily turn budget in the BFF's PostgreSQL database, which the
-session store already uses. State the ceiling in dollars per user per day.
+Add a per-user daily **turn quota** in the BFF's PostgreSQL database, which the
+session store already uses and which every pod shares.
+
+Call it a turn quota, because that is what it is. A turn count is not a dollar
+ceiling: turns differ in history size, iteration count and output length. §3.2
+already records token counts per turn, so measure the real cost of a turn first,
+then set the quota from that number and review it (open question 4). Do not
+build reserve-and-settle billing for v1.
+
+**Bound concurrency too.** Neither control stops one person from opening several
+tabs and starting several 90-second turns at once. Cap the concurrent turns per
+user, and pick the number in the same story as the quota.
 
 **The shared Consent budget.** Every tool call is an authenticated `/api/*`
 request billed to the same per-user bucket as the user's ordinary page traffic
@@ -231,6 +256,11 @@ Vertex never calls back into DUOS. All tool execution is in-process.
 | `src/components/chat/ChatMessage.tsx` | Message bubble; markdown via `react-markdown`, no raw HTML |
 | `src/components/chat/useChatStream.ts` | History state; POST + SSE parse |
 
+- **Accessibility ships with the UI; it is not a follow-up.** A panel that
+  streams text needs an announced live region, focus management on open and
+  close, a keyboard route to close, and respect for reduced-motion. Agree the
+  detail with the designer in the UI story.
+
 ### 5.2 Auth and transport
 
 - POST with `credentials: 'include'`; the HttpOnly session cookie rides along.
@@ -261,23 +291,27 @@ Two unknowns carry most of the risk: whether SSE survives the reverse proxy
 before other work depends on the answer.
 
 ```
-Chat 0.  Data-governance sign-off                     (gate — open question 5)
+Chat 0.  Data-governance sign-off + field-level data contract
+                                                      (gate — open question 5)
 Chat 1.  Stub POST /api/chat: CSRF, SSE, heartbeat, canned events, live in dev
 Chat 2.  Vertex service account + Workload Identity + one real call
 Chat 3.  Ollama in docker-compose                     (local dev unblock)
-Chat 4.  Consent tool client + two tool declarations
-Chat 5.  Agentic loop with hard bounds (Ollama first, Vertex second)
-Chat 6.  Rate limit + daily cost budget
-Chat 7.  Chat UI (panel, message, stream hook; chatEnabled gate)
-Chat 8.  E2E test on the BFF Playwright harness
+Chat 4.  Consent tool client + two bounded tool declarations
+Chat 5.  Evaluation fixtures + tool-choice harness
+Chat 6.  Agentic loop with hard bounds (Ollama first, Vertex second)
+Chat 7.  Rate limit, daily turn quota, concurrency cap
+Chat 8.  Chat UI (panel, message, stream hook; chatEnabled gate; accessibility)
+Chat 9.  E2E test on the BFF Playwright harness
+Chat 10. Load and soak test, then a canary rollout
 ── follow-on sprints ──
-Chat 9.  Migrate chatEnabled to the Consent feature-flag service
-Chat 10. Add the get_dataset tool if usage shows the need
+Chat 11. Migrate chatEnabled to the Consent feature-flag service
+Chat 12. Add the get_dataset tool if usage shows the need
 ```
 
 Chat 1 answers open question 2 in about a day and de-risks every story after
-it. Chat 3 runs in parallel with Chat 2. Chats 9–10 do not block the first
-ship.
+it. Chat 3 runs in parallel with Chat 2. Chat 5 comes before Chat 6 so the loop
+has a regression check from its first commit. Chats 11–12 do not block the
+first ship.
 
 ---
 
@@ -294,14 +328,18 @@ ship.
   external script origins.
 - **Markdown rendering.** LLM output and Consent dataset text are untrusted.
   Use `react-markdown` without `rehype-raw`. Allow no raw HTML.
-- **Rate limits.** Two controls: a per-user burst bucket that copies the
-  Consent pod-share pattern, and a durable daily spend budget. See §3.4.
+- **Rate limits.** Three controls: a per-user burst bucket that copies the
+  Consent pod-share pattern, a durable daily turn quota, and a concurrency cap.
+  See §3.4.
 - **Untrusted history.** The client owns the transcript, so every entry is
   caller-controlled. Accept user and assistant text only. Never accept or
   re-execute tool results that arrive from the client.
-- **Data leaving the cluster.** Dataset metadata and DAR text reach a Google
-  service. Record what leaves, the retention and no-training terms, the region,
-  and who approved it, before any code ships.
+- **Data leaving the cluster.** More than dataset and DAR text reaches a Google
+  service: the user's prompts, the generated answers, and whatever the server
+  logs or records as metrics. Decide field by field what may leave, how the logs
+  are redacted, how long each side keeps the data, and whether request caching
+  stays on. Record the region and who approved it before any code ships. See
+  open question 5.
 - **Least privilege on tools.** Keep the v1 tool set small and read-only.
   Any state-changing tool needs an explicit security review first.
 - **Prompt injection.** Dataset names and study descriptions are
@@ -313,8 +351,9 @@ ship.
 
 ## 8. Open questions
 
-1. **Production model and region.** Confirm the Gemini model version and the
-   Vertex region before staging. The local model choice is dev-only.
+1. **Model versions and region.** Pin an exact Gemini model version and Vertex
+   region before staging, and an exact Ollama model tag for local work. Confirm
+   the Ollama tag supports tool calling.
 
 2. **SSE through the reverse proxy.** The app sits behind one reverse-proxy
    hop (`httpd-terra-proxy` sidecar in k8s). Verify that the proxy does not
@@ -324,15 +363,15 @@ ship.
 3. **Conversation history cap.** Agree on the cap (suggested: last 10 turns)
    before implementation, so the client and the server use one limit.
 
-4. **Rate-limit numbers.** Pick `turnsPerMinute` — a multiple of the replica
-   count — and the daily spend ceiling. Measure the tool-call count of a
-   typical turn first, so the chat limit and the shared Consent budget (§3.4)
-   are sized together.
+4. **Limit numbers.** Pick `turnsPerMinute` — a multiple of the replica count
+   — the daily turn quota, and the concurrent-turn cap. Measure the tool-call
+   count and the token count of a typical turn first, so the chat limits, the
+   spend they imply, and the shared Consent budget (§3.4) are sized together.
 
-5. **Data-governance sign-off.** Who approves sending Consent dataset and DAR
-   text to Vertex AI? Confirm retention, no-training terms, and region. This
-   gates Chat 0, and it is the item most likely to block a launch late.
-
-6. **Vertex SDK.** Confirm the current Node client before Chat 2. Google moved
-   from `@google-cloud/vertexai` to `@google/genai`; §3.2 still names the older
-   package.
+5. **Data-governance sign-off.** Who approves sending DUOS data to Vertex AI?
+   The decision covers prompts, answers, tool results, logs and metrics, not
+   only dataset and DAR text. Read Google's current retention, caching and
+   no-training terms first and record them: nobody on the team has confirmed
+   them yet. Decide whether the project needs caching turned off or an
+   abuse-monitoring exception. This gates Chat 0, and it is the item most likely
+   to block a launch late.
