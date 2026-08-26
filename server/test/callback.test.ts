@@ -205,7 +205,7 @@ describe('handleCallback', () => {
     expect(save.mock.invocationCallOrder[0]).toBeLessThan(reply.redirect.mock.invocationCallOrder[0])
   })
 
-  describe('session fixation protection (story 5-C)', () => {
+  describe('session fixation protection', () => {
     it('rotates the session before writing tokens, and saves before destroying the old row', async () => {
       const request = makeRequest()
       const reply = makeReply()

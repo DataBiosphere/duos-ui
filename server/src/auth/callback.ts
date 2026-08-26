@@ -50,10 +50,10 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
   // Verify the exact claim name ('idp' vs 'identityProvider') against the dev B2C tenant.
   const subProvider: 'google' | 'microsoft' = claims.idp === 'google.com' ? 'google' : 'microsoft'
 
-  // Session fixation protection (story 5-C): rotate the session ID now that
-  // authentication succeeded, so a sid planted before login never becomes an
-  // authenticated session. regenerate() creates a NEW, EMPTY session and
-  // repoints request.session at it — so capture what the pre-auth session must
+  // Session fixation protection: rotate the session ID now that authentication
+  // succeeded, so a sid planted before login never becomes an authenticated
+  // session. regenerate() creates a NEW, EMPTY session and repoints
+  // request.session at it — so capture what the pre-auth session must
   // hand over BEFORE rotating, and write tokens only AFTER. It never destroys
   // the old row, so that happens explicitly below via the store.
   const preAuthSid = request.session.sessionId

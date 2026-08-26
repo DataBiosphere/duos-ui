@@ -205,9 +205,9 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     return res.json().token as string
   }
 
-  // Full login→callback. The callback rotates the session (story 5-C), so the
+  // Full login→callback. The callback rotates the session so the
   // authenticated cookie is the one the CALLBACK response sets — the login
-  // cookie is dead afterwards. Returns both so tests can assert on the old one.
+  // cookie is dead afterward. Returns both so tests can assert on the old one.
   async function authenticate(returnTo?: string) {
     const { cookie: preAuthCookie } = await login(returnTo)
     const res = await app.inject({
@@ -291,7 +291,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     it('leaves exactly one persisted session, holding tokens and no PKCE material', async () => {
       await authenticate()
 
-      // Rotation (story 5-C) leaves one row: the fresh post-auth session. The
+      // Rotation leaves one row: the fresh post-auth session. The
       // PKCE fields died with the destroyed pre-auth row.
       expect(rows.size).toBe(1)
       const sess = [...rows.values()][0].sess as Record<string, unknown>
@@ -312,7 +312,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     })
   })
 
-  describe('session fixation protection (story 5-C)', () => {
+  describe('session fixation protection', () => {
     it('rotates the sessionId cookie across the callback', async () => {
       const { cookie, preAuthCookie } = await authenticate()
 
