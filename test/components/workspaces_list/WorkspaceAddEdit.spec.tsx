@@ -76,9 +76,7 @@ describe('WorkspaceAddEdit component', () => {
   it('edits existing workspace and saves changes', async () => {
     const user = userEvent.setup()
     const workspaces: Workspace[] = [sampleWorkspace]
-    const onWorkspaceChange = vi.fn((updated: Workspace[]) => {
-      expect(updated[0].name).toBe('Analysis Workspace Edited')
-    })
+    const onWorkspaceChange = vi.fn()
     const { container } = render(
       <WorkspaceAddEdit
         id={0}
@@ -91,5 +89,9 @@ describe('WorkspaceAddEdit component', () => {
     await user.clear(container.querySelector('#name')!)
     await user.type(container.querySelector('#name')!, 'Analysis Workspace Edited')
     await user.click(container.querySelector('.collaborator-form-add-save-button')!)
+
+    expect(onWorkspaceChange).toHaveBeenCalledTimes(1)
+    const [updated] = onWorkspaceChange.mock.calls[0] as [Workspace[]]
+    expect(updated[0].name).toBe('Analysis Workspace Edited')
   })
 })

@@ -79,9 +79,7 @@ describe('AiModelAddEdit component', () => {
   it('edits existing model and saves changes', async () => {
     const user = userEvent.setup()
     const models: AiModel[] = [sampleModel]
-    const onAiModelsChange = vi.fn((updated: AiModel[]) => {
-      expect(updated[0].name).toBe('Baseline Model Edited')
-    })
+    const onAiModelsChange = vi.fn()
     const { container } = render(
       <AiModelAddEdit
         id={0}
@@ -94,5 +92,9 @@ describe('AiModelAddEdit component', () => {
     await user.clear(container.querySelector('#name')!)
     await user.type(container.querySelector('#name')!, 'Baseline Model Edited')
     await user.click(container.querySelector('.collaborator-form-add-save-button')!)
+
+    expect(onAiModelsChange).toHaveBeenCalledTimes(1)
+    const [updated] = onAiModelsChange.mock.calls[0] as [AiModel[]]
+    expect(updated[0].name).toBe('Baseline Model Edited')
   })
 })
