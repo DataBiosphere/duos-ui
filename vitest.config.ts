@@ -7,13 +7,19 @@ export default defineConfig({
     react({ include: /\.(mdx|js|jsx|ts|tsx)$/ }),
   ],
   assetsInclude: ['**/*.md'],
-  // Vitest externalizes node_modules and never consumes Vite's pre-bundled deps,
-  // so the automatic dependency scan is wasted work. It also races with server
-  // teardown on `--merge-reports` runs (no test files to keep the server alive),
-  // which logged a spurious "Failed to run dependency scan" error in CI.
-  optimizeDeps: {
-    noDiscovery: true,
-    include: [],
+  // Vitest turns off dependency discovery for the `client` and `ssr` environments,
+  // but skips the `__vitest_vm__` environment that `pool: 'vmThreads'` adds, so that
+  // one still scans `index.html` on every run. The scan is wasted work: Vitest
+  // externalizes node_modules and never consumes Vite's pre-bundled deps. It also
+  // races with server teardown on `--merge-reports` runs, where no test files keep
+  // the server alive, and logged a spurious "Failed to run dependency scan" in CI.
+  environments: {
+    __vitest_vm__: {
+      optimizeDeps: {
+        noDiscovery: true,
+        include: [],
+      },
+    },
   },
   resolve: {
     alias: aliases_from_tsconfig(),
