@@ -4,7 +4,7 @@ import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CollectionConfirmationModal, { CollectionConfirmationModalProps } from 'src/components/dar_collection_table/CollectionConfirmationModal'
-import { PI_QUALIFICATION } from 'src/libs/principalInvestigator'
+import { PI_QUALIFICATION } from 'src/definitions/definitions-en-us'
 import { DarCollectionSummary } from 'src/types/model'
 
 vi.mock('src/libs/utils', async () => {

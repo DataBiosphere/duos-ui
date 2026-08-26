@@ -1,4 +1,11 @@
 /**
+ * User-facing definitions of DUOS terms, in en-US.
+ *
+ * A term whose wording is stated in more than one place belongs here, so the
+ * places that state it cannot drift apart.
+ */
+
+/**
  * The DUOS definition of a qualifying Principal Investigator.
  *
  * Held as a predicate phrase — without a leading verb — because each site keeps

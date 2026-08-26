@@ -2,7 +2,7 @@ import React from 'react'
 import { isNil } from 'src/utils/NodashUtil'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import { isCollectionCanceled } from 'src/libs/utils'
-import { PI_QUALIFICATION } from 'src/libs/principalInvestigator'
+import { PI_QUALIFICATION } from 'src/definitions/definitions-en-us'
 import { DarCollection, DarCollectionSummary } from 'src/types/model'
 
 export interface CollectionConfirmationModalProps {

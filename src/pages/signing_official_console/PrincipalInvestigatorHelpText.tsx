@@ -2,7 +2,7 @@ import React from 'react'
 import Alert from '@mui/material/Alert'
 import AlertTitle from '@mui/material/AlertTitle'
 
-import { PI_QUALIFICATION } from 'src/libs/principalInvestigator'
+import { PI_QUALIFICATION } from 'src/definitions/definitions-en-us'
 
 /**
  * The DUOS definition of a qualifying Principal Investigator, shown as help text

@@ -7,7 +7,7 @@ import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResea
 import { User } from 'src/libs/ajax/User'
 import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
-import { PI_QUALIFICATION } from 'src/libs/principalInvestigator'
+import { PI_QUALIFICATION } from 'src/definitions/definitions-en-us'
 import { makeDaa, makeResearcher } from './DAAAssignment/fixtures'
 
 afterEach(() => vi.restoreAllMocks())
