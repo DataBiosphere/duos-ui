@@ -2,6 +2,7 @@ import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import { fetchPost } from 'src/libs/ajax/fetchAdapter'
 import { resetCsrfToken } from 'src/libs/ajax/csrf'
 import { Config } from 'src/libs/config'
+import { redirectOnLogout } from 'src/libs/auth/auth'
 
 // ---------------------------------------------------------------------------
 // Story 5-B: the cross-tab stale-token recovery, end to end.
@@ -56,6 +57,10 @@ function makeBffStub() {
     // What /auth/csrf-token hands out. Normally the same as serverToken;
     // split so a test can model a recovery whose fresh token STILL fails.
     issuedToken: null as string | null,
+    // Session destroyed/expired: /auth/csrf-token is gated on authentication
+    // (story 5-B) and answers 401; a POST finds no session secret and gets
+    // the missing_secret CSRF rejection.
+    sessionDead: false,
     tokenFetches: 0,
     postAttempts: [] as string[],
   }
@@ -63,6 +68,12 @@ function makeBffStub() {
   const fetchMock = vi.fn(async (url: string, init?: { headers?: Record<string, string> }) => {
     if (url === '/auth/csrf-token') {
       state.tokenFetches += 1
+      if (state.sessionDead) {
+        return new Response(JSON.stringify({ error: 'unauthenticated' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        })
+      }
       return new Response(JSON.stringify({ token: state.issuedToken ?? state.serverToken }), {
         status: 200,
         headers: { 'content-type': 'application/json' },
@@ -70,6 +81,12 @@ function makeBffStub() {
     }
     const sent = init?.headers?.['X-CSRF-Token'] ?? ''
     state.postAttempts.push(sent)
+    if (state.sessionDead) {
+      return new Response(
+        JSON.stringify({ error: 'csrf_validation_failed', reason: 'missing_secret' }),
+        { status: 403, headers: { 'content-type': 'application/json' } },
+      )
+    }
     if (sent !== state.serverToken) {
       return new Response(
         JSON.stringify({ error: 'csrf_validation_failed', reason: 'invalid_token' }),
@@ -87,6 +104,7 @@ function makeBffStub() {
 
 describe('cross-tab stale CSRF token recovery (real csrf module)', () => {
   beforeEach(() => {
+    vi.clearAllMocks()
     // The token cache is module-level state shared across tests — start cold.
     resetCsrfToken()
     vi.mocked(Config.isBffEnabled).mockResolvedValue(true)
@@ -153,5 +171,24 @@ describe('cross-tab stale CSRF token recovery (real csrf module)', () => {
 
     // Initial success + stale attempt + single retry: exactly three POSTs.
     expect(state.postAttempts).toHaveLength(3)
+  })
+
+  // The expired-session path end to end, with the REAL csrf module: warm
+  // token → session dies → stale POST gets the CSRF 403 → the retry refetches
+  // → the gated /auth/csrf-token answers 401 → the adapter runs the normal
+  // session-expired handling instead of a generic help-desk error.
+  it('redirects to sign-out when the session dies under a warm cache', async () => {
+    const { state, fetchMock } = makeBffStub()
+    vi.stubGlobal('fetch', fetchMock)
+
+    await fetchPost('/duos-api/api/dataset', { name: 'one' })
+    state.sessionDead = true
+
+    await expect(fetchPost('/duos-api/api/dataset', { name: 'two' }))
+      .rejects.toMatchObject({ response: { status: 401 } })
+
+    expect(redirectOnLogout).toHaveBeenCalledOnce()
+    // The stale POST went out once; the refetch 401 stopped the retry POST.
+    expect(state.postAttempts).toHaveLength(2)
   })
 })

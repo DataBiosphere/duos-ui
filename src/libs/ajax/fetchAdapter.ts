@@ -5,7 +5,7 @@ import { Storage } from 'src/libs/storage'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
 import { BFF_BARD_PREFIX, Config } from 'src/libs/config'
-import { getCsrfToken, isCsrfRejection, resetCsrfToken } from 'src/libs/ajax/csrf'
+import { CsrfTokenSessionExpiredError, getCsrfToken, isCsrfRejection, resetCsrfToken } from 'src/libs/ajax/csrf'
 
 export type ResponseType = 'blob' | 'json' | 'text'
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -116,6 +116,46 @@ function buildUrlWithParams(url: string, params?: Params): string {
   return query ? `${url}?${query}` : url
 }
 
+// Record relevant 401 logouts to Bard / Mixpanel, then start the sign-out
+// redirect. The metric gives systematic, empirical data to assess premature
+// logout issues. More context: https://github.com/DataBiosphere/duos-ui/pull/3389
+const recordAutoLogout401 = async (url: string): Promise<void> => {
+  const oidcUser = Storage.getOidcUser()
+  const expiresOn = oidcUser?.profile?.exp ?? null
+  const currentTime = Math.floor(Date.now() / 1000)
+  await Metrics.captureEvent(eventList.userAutoLogout401, {
+    expires_on: expiresOn,
+    current_time: currentTime,
+    time_until_expires: expiresOn === null ? null : expiresOn - currentTime,
+    endpoint_url: url,
+  }, AbortSignal.timeout(1000)) // Wait <= 1s, abort if log slower
+  redirectOnLogout()
+}
+
+/**
+ * The session-expired path for a 401 from /auth/csrf-token itself (the
+ * endpoint is gated on authentication — Epic 5, story 5-B). Runs the same
+ * telemetry + redirect as a real 401 response and throws the same axios-like
+ * shape, so callers cannot tell whether the session died before or after the
+ * request went out.
+ *
+ * Deliberately NOT routed through shouldSkip401Redirect: that util judges
+ * whether the TARGET upstream's 401 is authoritative about the DUOS session
+ * (an ECM 401 is not). This 401 comes from the BFF itself, so it is always
+ * authoritative — even when the blocked request was headed for a sibling
+ * proxy prefix. No redirect loop is possible: Auth.signOut calls
+ * getCsrfToken directly and consumes its own errors.
+ */
+const throwSessionExpired = async (url: string): Promise<never> => {
+  await recordAutoLogout401(url)
+  reportError(url, 401)
+  const error = new Error('Request failed with status 401') as Error & {
+    response: { status: number, data: { message?: string, code?: number } }
+  }
+  error.response = { status: 401, data: {} }
+  throw error
+}
+
 async function handleResponse<T>(
   res: Response,
   url: string,
@@ -125,19 +165,7 @@ async function handleResponse<T>(
   if (!res.ok) {
     const apiUrl = await Config.getApiUrl()
     if (res.status === 401 && !shouldSkip401Redirect(url, method, apiUrl)) {
-      // Record relevant 401 logouts to Bard / Mixpanel.
-      // This gives systematic, empirical data to assess premature logout issues.
-      // More context: https://github.com/DataBiosphere/duos-ui/pull/3389
-      const oidcUser = Storage.getOidcUser()
-      const expiresOn = oidcUser?.profile?.exp ?? null
-      const currentTime = Math.floor(Date.now() / 1000)
-      await Metrics.captureEvent(eventList.userAutoLogout401, {
-        expires_on: expiresOn,
-        current_time: currentTime,
-        time_until_expires: expiresOn === null ? null : expiresOn - currentTime,
-        endpoint_url: url,
-      }, AbortSignal.timeout(1000)) // Wait <= 1s, abort if log slower
-      redirectOnLogout()
+      await recordAutoLogout401(url)
     }
     reportError(url, res.status)
 
@@ -249,6 +277,11 @@ async function fetchRequest<T>(
     return handleResponse<T>(res, fullUrl, responseType, method)
   }
   catch (error) {
+    // The gated /auth/csrf-token said the session is gone — run the normal
+    // session-expired handling instead of wrapping this as a generic failure.
+    if (error instanceof CsrfTokenSessionExpiredError) {
+      return throwSessionExpired(fullUrl)
+    }
     // TypeError = network-level failure (offline, invalid URL, CORS, etc.) that never reached the server
     // DOMException (e.g. AbortError, NotAllowedError) = aborted request or blocked by permissions policy
     // Report with status 0 (no HTTP response) rather than 502 (bad gateway) to avoid misleading monitoring
@@ -308,6 +341,14 @@ async function fetchMultipartRequest<T>(
     res = await fetchFn(fullUrl, fetchOptions)
   }
   catch (error) {
+    // Same session-expired handling as fetchRequest — see throwSessionExpired.
+    // Note this makes multipart slightly BETTER than its pre-gate behavior
+    // (multipart's own error path never redirected on a real 401): the
+    // csrf-token 401 is an unambiguous dead-session signal, so redirecting is
+    // correct, not accidental.
+    if (error instanceof CsrfTokenSessionExpiredError) {
+      return throwSessionExpired(fullUrl)
+    }
     // TypeError = network-level failure (offline, invalid URL, CORS, etc.) that never reached the server
     // DOMException (e.g. AbortError, NotAllowedError) = aborted request or blocked by permissions policy
     // Report with status 0 (no HTTP response) rather than 502 (bad gateway) to avoid misleading monitoring
