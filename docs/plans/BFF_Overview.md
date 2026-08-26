@@ -54,8 +54,8 @@ The work is split into seven phases, delivered in order.
 | 1 | Server Foundation & Session Infrastructure | Add session middleware to the Fastify server with a PostgreSQL-backed session store, automated expired-session cleanup, and a metadata-only session audit trail. No user-visible changes. | [DT-3606](https://broadworkbench.atlassian.net/browse/DT-3606) | ✅ |
 | 2 | Server-Side OAuth Flow | Implement the BFF auth routes (`/auth/login`, `/auth/callback`, `/auth/logout`, `/auth/me`) using `openid-client` against the single Azure B2C client, with PKCE; the callback extracts the sub-provider from the B2C `id_token`. Runs alongside the legacy client-side flow during rollout. | [DT-3607](https://broadworkbench.atlassian.net/browse/DT-3607) | ✅ |
 | 3 | API Proxy Layer | Add a reverse proxy so the client calls relative `/duos-api/*` URLs; the server injects the Bearer token from the session and proactively refreshes tokens before expiry. | [DT-3608](https://broadworkbench.atlassian.net/browse/DT-3608) | ✅ |
-| 4 | Client Refactor | Remove all token handling from the React client: drop `oidc-client-ts` and localStorage token storage, switch the fetch layer to relative URLs, and replace the popup sign-in with a full-page redirect to the B2C login page (which presents the Google/Microsoft choice, unchanged). | [DT-3609](https://broadworkbench.atlassian.net/browse/DT-3609) |        |
-| 5 | Security Hardening | Layer additional defenses: strict Content Security Policy, end-to-end verification of CSRF coverage (enforcement lands with the endpoints in Phases 2–4), session-fixation protection (session ID regeneration), token revocation on logout, SRI/third-party script audit, and rate limiting on auth endpoints. | [DT-3610](https://broadworkbench.atlassian.net/browse/DT-3610) |        |
+| 4 | Client Refactor | Remove all token handling from the React client: drop `oidc-client-ts` and localStorage token storage, switch the fetch layer to relative URLs, and replace the popup sign-in with a full-page redirect to the B2C login page (which presents the Google/Microsoft choice, unchanged). | [DT-3609](https://broadworkbench.atlassian.net/browse/DT-3609) | ✅ |
+| 5 | Security Hardening | Layer additional defenses: strict Content Security Policy, end-to-end verification of CSRF coverage (enforcement lands with the endpoints in Phases 2–4) plus Fetch Metadata enforcement, session-fixation protection (session ID regeneration), cookie-attribute hardening, B2C front-channel logout, replacement of the runtime-loaded Google Charts script, and rate limiting on auth endpoints. | [DT-3610](https://broadworkbench.atlassian.net/browse/DT-3610) |        |
 | 6 | Testing, Observability & Rollout | E2E test coverage, auth/session metrics and alerting, and a config-driven (`bffEnabled` in `config.json`) per-environment cutover. The legacy flow is removed only after the new flow is stable in production. | [DT-3611](https://broadworkbench.atlassian.net/browse/DT-3611) |        |
 
 ## Rollout strategy
@@ -91,8 +91,10 @@ Both sub-providers (Google-federated and Microsoft) flow through the same B2C
 client behind the same flag, so we can test both sign-in paths in each
 environment before cutting over.
 
-> Status: as of Phase 1 nothing reads `bffEnabled` yet — the flag-gated
-> routing lands with the Phase 2 auth routes.
+> Status: the flag-gated routing is live. The server gates the BFF auth
+> routes and proxies on `bffEnabled` at startup (Phase 2/3), and the Phase 4
+> client directs sign-in through the BFF flow when it is true. Per-environment
+> cutover is Phase 6 work.
 
 ## Architecture decision records
 
@@ -100,8 +102,9 @@ One sequence, numbered continuously. ADR-001 through ADR-008 were settled with
 the migration plan and are summarised below; the ones that needed fuller
 treatment — because they were resolved during implementation, with alternatives
 and residual risk worth recording — have their own files under
-[`bff_adrs/`](bff_adrs/). That is why the directory holds 004, 009 and 010 rather
-than 001 through 003: the numbers belong to this list, not to the directory.
+[`bff_adrs/`](bff_adrs/). That is why the directory holds 004 and 009 through
+011 rather than 001 through 003: the numbers belong to this list, not to the
+directory.
 
 | ADR | Decision | Phase |
 |---|---|---|
@@ -115,6 +118,7 @@ than 001 through 003: the numbers belong to this list, not to the directory.
 | [008](#adr-008--azure-b2c-as-single-oidc-entry-point) | Azure B2C as the single OIDC entry point | 0, 2 |
 | [009](#adr-009--state-changing-upstream-gets-are-proxied-not-blocked) | State-changing upstream GETs are proxied, not blocked | 3 |
 | [010](#adr-010--the-proxy-scope-declares-its-own-error-shape) | The proxy scope declares its own error shape | 3, 4 |
+| [011](#adr-011--one-identity-per-browser-cross-tab-account-switching-reloads-the-stale-tab) | One identity per browser: cross-tab account switching reloads the stale tab | 4 |
 
 ### ADR-001 — PostgreSQL-backed sessions via `@fastify/session`
 
@@ -223,6 +227,20 @@ same generic body as the rest of the app. The client needs that one code because
 403 is otherwise ambiguous through the proxy — an upstream authorization denial
 arrives as a 403 too, as an ordinary proxied response — so Phase 4 keys its single
 refetch-and-retry on the body, not the status.
+
+### ADR-011 — One identity per browser: cross-tab account switching reloads the stale tab
+
+**Full record:** [bff_adrs/ADR-011-single-identity-per-browser.md](bff_adrs/ADR-011-single-identity-per-browser.md)
+— the interleavings behind it, the join rule, and the accepted risks.
+
+With the BFF, every tab shares one session cookie, so "two users in two tabs"
+is not a state the system can be in — only a stale tab displaying a previous
+user. The client's session reconciler (`useSessionReconciler`) resolves a
+detected identity conflict the way mainstream multi-account applications do:
+a conflict with no bootstrap in flight re-bootstraps in place, and a conflict
+under an in-flight bootstrap cancels it and hard-reloads the tab. The reload
+discards transient tab state — an accepted cost that removed the supersede
+and provenance machinery a graceful in-place merge kept demanding.
 
 ### Decisions not tracked as ADRs
 
