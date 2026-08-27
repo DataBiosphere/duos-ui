@@ -33,9 +33,9 @@ export default defineConfig({
     // poolOptions.vmThreads.memoryLimit the run still gets killed, so use the
     // standard threads pool, which runs the whole suite reliably.
     pool: 'threads',
-    // Repairs the web storage globals that the threads pool leaves broken; see
-    // the comment in the setup file itself.
-    setupFiles: ['./test/setup.ts'],
+    // setup.jsdom.ts repairs the web storage globals that the threads pool
+    // leaves broken; see the comment in that file itself.
+    setupFiles: ['./test/setup.ts', './test/setup.jsdom.ts'],
     // Vitest's 5s default is a wall-clock budget. Under heavy CI load, render-heavy
     // tests exhaust it and fail without any defect; worse, an abandoned test's pending
     // userEvent keystrokes then bleed into the next test. Give tests real headroom.
