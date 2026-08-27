@@ -1,4 +1,4 @@
-import type { FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 /**
  * How the BFF registers `@fastify/csrf-protection` — one object, imported by
@@ -39,3 +39,43 @@ export const csrfPluginOptions = {
   getToken: (request: FastifyRequest): string | undefined =>
     request.headers[CSRF_HEADER] as string | undefined,
 } as const
+
+/**
+ * GET /auth/csrf-token — gated on an authenticated session (Phase 5, story 5-B).
+ *
+ * The route always documented itself as a post-sign-in call, but nothing
+ * enforced that: any same-origin request minted an anonymous session row (the
+ * secret `generateCsrf()` writes is what triggers the save) plus a token for
+ * it. The gate closes that: no user in the session means 401, and because the
+ * rejection happens before `generateCsrf()`, nothing is written and no row is
+ * created (`saveUninitialized: false`).
+ *
+ * `accessToken` is the authentication marker for the same reason the proxies
+ * and /auth/me key on it: it exists exactly from the OAuth callback until the
+ * session is destroyed. A pre-auth session (PKCE fields only) is rejected too
+ * — by design, since /auth/login is deliberately CSRF-exempt and nothing
+ * pre-auth needs a token.
+ *
+ * Shared here, like `csrfPluginOptions` above and for the same reason: the
+ * route existed in three copies (index.ts, proxyTestHarness.ts, auth.test.ts),
+ * so a gate added only in index.ts would leave every suite green while testing
+ * an ungated route production no longer has.
+ *
+ * The optional chain on `request.session` is for index.test.ts, which mocks
+ * @fastify/session away; everywhere real, the session plugin guarantees an
+ * object.
+ */
+export async function handleCsrfToken(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  if (!request.session?.accessToken) {
+    reply.status(401).send({ error: 'unauthenticated' })
+    return
+  }
+  const token = reply.generateCsrf()
+  // generateCsrf() writes the secret into the session on first use, so persist
+  // before replying — the same pre-response save as me.ts and callback.ts:
+  // with rolling off, an unsaved modification makes @fastify/session's async
+  // onSend save race Fastify's wrapThenable into a second reply.send()
+  // (ERR_HTTP_HEADERS_SENT — see index.ts on the session config).
+  await request.session.save()
+  reply.send({ token })
+}

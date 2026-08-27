@@ -12,6 +12,7 @@ import type {
 import fastifyReplyFrom from '@fastify/reply-from'
 import { requireEnv } from '../auth/oidcClient.js'
 import { REFRESH_WINDOW_SECONDS, RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
+import { fetchMetadataGuard } from '../security/fetchMetadata.js'
 
 /**
  * The BFF upstream proxy machinery.
@@ -388,8 +389,14 @@ export async function registerUpstreamProxy(
     undici: { connections: options.undiciConnections ?? UPSTREAM_POOL_CONNECTIONS },
   })
 
+  // The Fetch Metadata guard runs first, on every method and every path under
+  // the prefix (allowlisted unauthenticated paths included — they are fetched
+  // same-origin by the client too), so a rejected request costs no CSRF work,
+  // no session read, no token refresh, and never reaches the upstream. Part of
+  // the shared machinery deliberately: like the CSRF hook, a new upstream
+  // cannot opt out of it. See security/fetchMetadata.ts for the rule.
   app.all(`${prefix}/*`, {
-    onRequest: csrfForUnsafeMethods,
+    onRequest: [fetchMetadataGuard, csrfForUnsafeMethods],
     preHandler: ensureUpstreamAuth,
   }, (request, reply) => {
     reply.from(pathFor(request.url), {
