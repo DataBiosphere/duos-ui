@@ -29,6 +29,23 @@ when we implement that phase.
 7. [Security notes](#7-security-notes)
 8. [Open questions](#8-open-questions)
 
+Supplemental: [Architecture decision records](#architecture-decision-records)
+
+---
+
+## Architecture decision records
+
+Full records live in [`ai_chatbot_docs/`](ai_chatbot_docs/). That directory also
+holds the phase documents this plan expands into. Each file carries a kind
+prefix: `ADR-00N-*` for a decision, `PHASE-N-*` for a phase.
+
+The sequence is this feature's own. It does not continue the BFF numbering in
+[`bff_adrs/`](bff_adrs/).
+
+| ADR | Decision | Work item |
+|---|---|---|
+| [001](ai_chatbot_docs/ADR-001-local-inference-engine.md) | Run local inference on llama.cpp `llama-server`, not Ollama | Chat 3 |
+
 ---
 
 ## 1. Baseline: what the completed BFF provides
@@ -75,7 +92,7 @@ Fastify BFF (same process as the existing server)
   │  csrfProtection onRequest hook rejects forged requests
   │  reads request.session.accessToken; refreshes via refreshAccessToken()
   │  drives the agentic loop against the configured LLM
-  │    local:      Ollama  (OLLAMA_URL, OpenAI-compatible tool calling)
+  │    local:      llama.cpp llama-server  (LOCAL_LLM_URL, OpenAI-compatible)
   │    production: Vertex AI Gemini (Workload Identity, no key files)
   │  executes each LLM tool call in-process against the Consent API
   │    with Authorization: Bearer <session accessToken>
@@ -126,9 +143,16 @@ Record them here, and let Chat 1 pick the fix and the numbers:
 ### 3.2 Agentic loop
 
 - One module with two backends behind a common interface.
-- **Local:** Ollama, selected when `OLLAMA_URL` is set. Pin a model tag with
-  verified tool-call support. `OLLAMA_URL` alone does not guarantee it
-  (open question 1).
+- **Local:** llama.cpp `llama-server`, selected when `LOCAL_LLM_URL` is set.
+  Run it with `--jinja`, and add `--chat-template-file` when the model needs it;
+  without the flag the server rejects a request that carries tools. Pin the
+  model with `LOCAL_LLM_MODEL` (open question 1). See
+  [ADR-001](ai_chatbot_docs/ADR-001-local-inference-engine.md) for why this is
+  not Ollama.
+- The local backend talks to one OpenAI-compatible client, so a later engine
+  swap changes two env values and no code. Accept `tool_calls.arguments` as
+  either a JSON string or a JSON object: `llama-server` can return the object
+  form, which the OpenAI contract does not allow (ADR-001, accepted risk 1).
 - **Production:** Vertex AI Gemini through the Google Gen AI SDK
   (`@google/genai`). This is Google's current Node client;
   `@google-cloud/vertexai` is the older one. Keep the interface
@@ -248,10 +272,16 @@ Size the chat limit against what is left of that budget, and handle the 429
 
 ## 4. Infrastructure
 
-### 4.1 Local: Ollama in docker-compose
+### 4.1 Local: llama.cpp in docker-compose
 
-- Add an `ollama` service and set `OLLAMA_URL` on the app service.
-- Document the first-run model pull in the compose README.
+- Add a `llama-server` service, mount a model volume, and set `LOCAL_LLM_URL`
+  and `LOCAL_LLM_MODEL` on the app service.
+- Document the one-time GGUF file download in the compose README, with the
+  exact URL and a digest check. The engine reaches no registry, so no tag pull
+  exists (ADR-001, accepted risk 4).
+- Docker on Apple Silicon gives the container no Metal access, so the service
+  runs on the CPU. A developer who needs speed runs `llama-server` on the host
+  and points `LOCAL_LLM_URL` at it.
 
 ### 4.2 Production: Vertex AI via Workload Identity
 
@@ -318,10 +348,10 @@ Chat 0.  Data-governance sign-off + field-level data contract
                                                       (gate — open question 5)
 Chat 1.  Stub POST /api/chat: CSRF, SSE, heartbeat, canned events, live in dev
 Chat 2.  Vertex service account + Workload Identity + one real call
-Chat 3.  Ollama in docker-compose                     (local dev unblock)
+Chat 3.  llama-server in docker-compose               (local dev unblock)
 Chat 4.  Consent tool client + two bounded tool declarations
 Chat 5.  Evaluation fixtures + tool-choice harness
-Chat 6.  Agentic loop with hard bounds (Ollama first, Vertex second)
+Chat 6.  Agentic loop with hard bounds (local first, Vertex second)
 Chat 7.  Rate limit, daily turn quota, concurrency cap
 Chat 8.  Chat UI (panel, message, stream hook; chatEnabled gate; accessibility)
 Chat 9.  E2E test on the BFF Playwright harness
@@ -363,6 +393,10 @@ first ship.
   are redacted, how long each side keeps the data, and whether request caching
   stays on. Record the region and who approved it before any code ships. See
   open question 5.
+- **No accidental third-party model.** The local engine loads a file from disk
+  and reaches no model registry, so no tag can route a developer's prompts to a
+  vendor cloud. This guard is structural, not a rule in a README. See
+  [ADR-001](ai_chatbot_docs/ADR-001-local-inference-engine.md).
 - **Least privilege on tools.** Keep the v1 tool set small and read-only.
   The collections tool is pinned to the `Researcher` role, so the model cannot
   choose a wider view (§3.3). Any state-changing tool, and any new role, needs
@@ -377,8 +411,12 @@ first ship.
 ## 8. Open questions
 
 1. **Model versions and region.** Pin an exact Gemini model version and Vertex
-   region before staging, and an exact Ollama model tag for local work. Confirm
-   the Ollama tag supports tool calling.
+   region before staging. For local work, pin one GGUF repository, one revision
+   and one SHA256 digest, and record the model license next to the pin. Prefer
+   Apache-2.0 or MIT weights, such as Qwen or Mistral-Nemo; the Llama and Gemma
+   terms are custom licenses, and the OSI has not approved them. Confirm the
+   model supports tool calling. See
+   [ADR-001](ai_chatbot_docs/ADR-001-local-inference-engine.md).
 
 2. **SSE through the reverse proxy.** The app sits behind one reverse-proxy
    hop (`httpd-terra-proxy` sidecar in k8s). Verify that the proxy does not
