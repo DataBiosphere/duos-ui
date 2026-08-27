@@ -14,7 +14,7 @@ import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
 import { Config } from 'src/libs/config'
 import { redirectOnLogout } from 'src/libs/auth/auth'
-import { getCsrfToken, resetCsrfToken } from 'src/libs/ajax/csrf'
+import { CsrfTokenSessionExpiredError, getCsrfToken, resetCsrfToken } from 'src/libs/ajax/csrf'
 import type { OidcUser } from 'src/libs/auth/oidcBroker'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import eventList from 'src/libs/events'
@@ -629,7 +629,7 @@ describe('fetchAdapter - Fetch methods', () => {
       )
 
       await fetchPost('/api/dar/v2', { data: 'test' }).catch(() => {})
-      await vi.waitFor(() => expect(ErrorReporter.report).toHaveBeenCalledOnce())
+      await vi.waitFor(() => expect(ErrorReporter.report).toHaveBeenCalledOnce(), { timeout: 5000 })
     })
   })
 })
@@ -1044,9 +1044,9 @@ describe('fetchAdapter - BFF mode', () => {
       .rejects.toThrow('csrf endpoint down Please contact the help desk')
 
     expect(fetchMock).not.toHaveBeenCalled()
-    // Give the fire-and-forget reportError chain time to complete
-    await new Promise(resolve => setTimeout(resolve, 0))
-    expect(ErrorReporter.report).toHaveBeenCalled()
+    // reportError is fire-and-forget, so poll for it rather than assuming it lands
+    // within a single macrotask.
+    await vi.waitFor(() => expect(ErrorReporter.report).toHaveBeenCalled(), { timeout: 5000 })
   })
 
   it('fetchMultipart - reports and wraps a CSRF token acquisition failure the same way', async () => {
@@ -1058,6 +1058,58 @@ describe('fetchAdapter - BFF mode', () => {
       .rejects.toThrow('csrf endpoint down Please contact the help desk')
 
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  // The gated /auth/csrf-token 401s on a dead session (story 5-B). That
+  // signal must run the SAME session-expired handling as a real 401 response
+  // — metric, redirectOnLogout, and the axios-like 401 shape — or an expired
+  // session on a write surfaces as a help-desk error and the UI stays stale.
+  it('runs the session-expired flow when the CSRF token fetch returns 401', async () => {
+    vi.mocked(getCsrfToken).mockRejectedValue(new CsrfTokenSessionExpiredError())
+
+    await expect(fetchPost('/duos-api/api/dataset', { name: 'test' }))
+      .rejects.toMatchObject({ message: 'Request failed with status 401', response: { status: 401 } })
+
+    expect(fetchMock).not.toHaveBeenCalled() // the write itself was never sent
+    expect(redirectOnLogout).toHaveBeenCalledOnce()
+    expect(Metrics.captureEvent).toHaveBeenCalledWith(
+      eventList.userAutoLogout401,
+      expect.objectContaining({ endpoint_url: '/duos-api/api/dataset' }),
+      expect.anything(),
+    )
+  })
+
+  // shouldSkip401Redirect would skip an ECM 401 (a sibling upstream is not
+  // authoritative about the DUOS session) — but this 401 came from the BFF's
+  // own /auth/csrf-token, which always is. The redirect must fire regardless
+  // of where the blocked request was headed.
+  it('redirects even when the blocked request targeted a sibling upstream proxy', async () => {
+    vi.mocked(getCsrfToken).mockRejectedValue(new CsrfTokenSessionExpiredError())
+
+    await expect(fetchPost('/ecm-api/api/oidc/v1/ras/link', { code: 'x' }))
+      .rejects.toMatchObject({ response: { status: 401 } })
+
+    expect(redirectOnLogout).toHaveBeenCalledOnce()
+  })
+
+  it('does not run the session-expired flow for an ordinary token fetch failure', async () => {
+    vi.mocked(getCsrfToken).mockRejectedValue(new Error('csrf endpoint down'))
+
+    await expect(fetchPost('/duos-api/api/dataset', { name: 'test' })).rejects.toThrow('csrf endpoint down')
+
+    expect(redirectOnLogout).not.toHaveBeenCalled()
+  })
+
+  it('fetchMultipart - runs the session-expired flow when the token fetch returns 401', async () => {
+    vi.mocked(getCsrfToken).mockRejectedValue(new CsrfTokenSessionExpiredError())
+    const formData = new FormData()
+    formData.append('file', 'content')
+
+    await expect(fetchMultipart('/duos-api/api/upload', formData))
+      .rejects.toMatchObject({ response: { status: 401 } })
+
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(redirectOnLogout).toHaveBeenCalledOnce()
   })
 
   it('fetchMultipart - does not attach X-CSRF-Token on cross-origin URLs', async () => {

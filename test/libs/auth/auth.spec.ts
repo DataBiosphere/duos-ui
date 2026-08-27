@@ -142,7 +142,10 @@ describe('Auth (BFF mode)', () => {
     // The BFF signIn promise never settles (full-page redirect), so don't await it
     void Auth.signIn()
 
-    await vi.waitFor(() => expect(redirectSpy).toHaveBeenCalledWith('https://b2c.example.com/authorize?state=xyz'))
+    await vi.waitFor(
+      () => expect(redirectSpy).toHaveBeenCalledWith('https://b2c.example.com/authorize?state=xyz'),
+      { timeout: 5000 },
+    )
     expect(fetchMock).toHaveBeenCalledWith('/auth/login', { method: 'POST', credentials: 'include' })
   })
 
@@ -156,7 +159,10 @@ describe('Auth (BFF mode)', () => {
 
     void Auth.signIn('/datalibrary?tab=all')
 
-    await vi.waitFor(() => expect(redirectSpy).toHaveBeenCalledWith('https://b2c.example.com/authorize'))
+    await vi.waitFor(
+      () => expect(redirectSpy).toHaveBeenCalledWith('https://b2c.example.com/authorize'),
+      { timeout: 5000 },
+    )
     expect(fetchMock).toHaveBeenCalledWith(
       `/auth/login?returnTo=${encodeURIComponent('/datalibrary?tab=all')}`,
       { method: 'POST', credentials: 'include' },

@@ -1,12 +1,13 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs'
 import { User } from 'src/libs/ajax/User'
 import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
+import { PI_QUALIFICATION } from 'src/definitions/definitions-en-us'
 import { makeDaa, makeResearcher } from './DAAAssignment/fixtures'
 
 afterEach(() => vi.restoreAllMocks())
@@ -30,6 +31,8 @@ describe('ManageResearcherDAAs', () => {
     ])
 
     const { container } = render(<ManageResearcherDAAs />)
+
+    expect(screen.getByText(PI_QUALIFICATION, { exact: false })).toBeInTheDocument()
 
     await waitFor(() => expect(container.querySelector('[data-cy="researcher-view"]')).toBeInTheDocument())
 

@@ -6,7 +6,8 @@ import fastifyCsrf from '@fastify/csrf-protection'
 import type { PostgresDb } from '@fastify/postgres'
 import type { Configuration } from 'openid-client'
 import { createPgSessionStore } from '../src/session/pgStore.js'
-import { csrfPluginOptions } from '../src/auth/csrf.js'
+import { csrfPluginOptions, handleCsrfToken } from '../src/auth/csrf.js'
+import { fetchMetadataGuard } from '../src/security/fetchMetadata.js'
 import { handleLogin } from '../src/auth/login.js'
 import { handleCallback } from '../src/auth/callback.js'
 import { handleLogout } from '../src/auth/logout.js'
@@ -130,11 +131,14 @@ async function buildAuthApp(pg: PostgresDb, errorLog?: string[]): Promise<Fastif
   // the body or under three other header spellings that production rejects.
   await app.register(fastifyCsrf, csrfPluginOptions)
 
+  // Routes registered exactly as index.ts registers them — the shared
+  // handleCsrfToken (gated since 5-B) and the Fetch Metadata guard on
+  // /auth/me. Copies here would let the production wiring drift untested.
   app.post('/auth/login', handleLogin)
   app.get('/auth/callback', handleCallback)
-  app.get('/auth/csrf-token', async (_request, reply) => reply.send({ token: reply.generateCsrf() }))
+  app.get('/auth/csrf-token', handleCsrfToken)
   app.post('/auth/logout', { onRequest: app.csrfProtection }, handleLogout)
-  app.get('/auth/me', getMe)
+  app.get('/auth/me', { onRequest: fetchMetadataGuard }, getMe)
   return app
 }
 
@@ -435,6 +439,137 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       })
 
       expect(res.statusCode).toBe(403)
+    })
+
+    // The classic CSRF shape, end to end: an attacker page auto-submits a
+    // <form action="https://duos/auth/logout" method="POST"> in the victim's
+    // browser. The session cookie rides along (same-site siblings defeat Lax
+    // — see index.ts), but no X-CSRF-Token can: a cross-origin form cannot
+    // set a custom header. Asserted with the exact headers a browser form
+    // POST carries, so this stays a faithful forgery even if the guard's
+    // internals change.
+    it('rejects a forged cross-origin form POST to /auth/logout, leaving the session intact', async () => {
+      const cookie = await authenticatedCookie()
+      expect(rows.size).toBe(1)
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/auth/logout',
+        headers: {
+          cookie,
+          'content-type': 'application/x-www-form-urlencoded',
+          'origin': 'https://evil.example.org',
+          'sec-fetch-site': 'cross-site',
+          'sec-fetch-mode': 'navigate',
+        },
+        payload: 'submit=Sign+out',
+      })
+
+      expect(res.statusCode).toBe(403)
+      expect(rows.size).toBe(1) // session survives
+      expect(auditUpdates).toHaveLength(0) // handler never ran
+    })
+  })
+
+  describe('/auth/csrf-token gate (story 5-B)', () => {
+    it('rejects an anonymous request with 401 and mints no session row', async () => {
+      const res = await app.inject({ method: 'GET', url: '/auth/csrf-token' })
+
+      expect(res.statusCode).toBe(401)
+      expect(res.json()).toEqual({ error: 'unauthenticated' })
+      // The pre-gate route wrote generateCsrf()'s secret into a fresh session,
+      // which persisted a row and set a cookie — an anonymous-session mint per
+      // caller. The gate answers before the secret exists.
+      expect(rows.size).toBe(0)
+      expect(res.cookies.find(c => c.name === 'sessionId')).toBeUndefined()
+      expect(res.body).not.toContain('token')
+    })
+
+    it('rejects a pre-auth session (login begun, callback not reached) with 401', async () => {
+      // login() persists PKCE material but no tokens — the session exists and
+      // is real, but holds no user yet. Nothing pre-auth needs a CSRF token:
+      // /auth/login itself is deliberately exempt.
+      const { cookie } = await login()
+      expect(rows.size).toBe(1)
+
+      const res = await app.inject({ method: 'GET', url: '/auth/csrf-token', headers: { cookie } })
+
+      expect(res.statusCode).toBe(401)
+      expect(res.json()).toEqual({ error: 'unauthenticated' })
+    })
+
+    it('issues a token to an authenticated session, persisted before the reply', async () => {
+      const { cookie } = await login()
+      await app.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie } })
+
+      const res = await app.inject({ method: 'GET', url: '/auth/csrf-token', headers: { cookie } })
+
+      expect(res.statusCode).toBe(200)
+      expect(res.json().token).toEqual(expect.any(String))
+      // The secret must be in the STORED session by the time the reply lands,
+      // or a token could be handed out that the next request cannot verify.
+      const sess = [...rows.values()][0].sess as Record<string, unknown>
+      expect(sess._csrf).toEqual(expect.any(String))
+    })
+  })
+
+  describe('Fetch Metadata on /auth/me (story 5-B)', () => {
+    // /auth/me is a safe GET at the BFF, but it triggers Consent's
+    // state-changing GET /api/user/me server-side — the ADR-009 residual. The
+    // guard's full matrix lives in fetchMetadata.test.ts; these pin that
+    // /auth/me is wired with it, that rejected requests never reach the
+    // upstream, and that the legitimate shapes still work.
+    async function authenticatedCookie(): Promise<string> {
+      const { cookie } = await login()
+      await app.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie } })
+      return cookie
+    }
+
+    it.each([
+      ['a same-site credentialed fetch (compromised sibling subdomain)', { 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors' }],
+      ['a same-site no-cors subresource', { 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'no-cors' }],
+      ['a top-level navigation', { 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'navigate' }],
+    ])('rejects %s with 403, without calling the upstream', async (_name, headers) => {
+      const cookie = await authenticatedCookie()
+      const fetchSpy = vi.fn()
+      vi.stubGlobal('fetch', fetchSpy)
+
+      const res = await app.inject({ method: 'GET', url: '/auth/me', headers: { cookie, ...headers } })
+      vi.unstubAllGlobals()
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toEqual({ error: 'cross_site_request_blocked' })
+      expect(fetchSpy).not.toHaveBeenCalled()
+    })
+
+    it('serves a legitimate same-origin fetch', async () => {
+      const cookie = await authenticatedCookie()
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        status: 200, ok: true, json: async () => ({ email: 'user@example.com' }),
+      }))
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/auth/me',
+        headers: { cookie, 'sec-fetch-site': 'same-origin', 'sec-fetch-mode': 'cors' },
+      })
+      vi.unstubAllGlobals()
+
+      expect(res.statusCode).toBe(200)
+      expect(res.json().authenticated).toBe(true)
+    })
+
+    it('serves a request without Fetch Metadata headers (older browsers) — documented allow', async () => {
+      const cookie = await authenticatedCookie()
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        status: 200, ok: true, json: async () => ({ email: 'user@example.com' }),
+      }))
+
+      const res = await app.inject({ method: 'GET', url: '/auth/me', headers: { cookie } })
+      vi.unstubAllGlobals()
+
+      expect(res.statusCode).toBe(200)
+      expect(res.json().authenticated).toBe(true)
     })
   })
 
