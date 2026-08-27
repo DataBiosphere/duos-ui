@@ -32,7 +32,7 @@ import { getFormattedName } from 'src/components/forms/SelectOptionInterface'
  * That class covers only the eight restrictions those forms collect, so the codes
  * below fill in the rest of the secondary vocabulary the corpus can hold: the
  * modifiers `consentTranslations` translates for the dataset views, plus the
- * `AbstainDataUseCodes` the voting flow recognizes. Without them a real, selectable
+ * population restrictions the index stores. Without them a real, selectable
  * checkbox would read as a bare abbreviation.
  *
  * `OTHER` is spelled out rather than taken from `SecondaryDataUseTerms.OTH`: the form's

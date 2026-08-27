@@ -25,22 +25,6 @@ export type UserRoleName
     | 'ServiceAccount'
     | 'All'
 
-/**
- * Secondary data use codes that suppress a legacy (v1/v2) system match. Scoped to legacy results
- * on purpose: from v3 Consent decides abstention itself — see `calculateAlgorithmResultForBucket`.
- */
-export const AbstainDataUseCodes: ReadonlySet<string> = new Set([
-  'OTHER',
-  'POP-M',
-  'POP-F',
-  'COL',
-  'IRB',
-  'GSO',
-  'PUB',
-  'MOR',
-  'POP-PD',
-])
-
 export interface UserRole {
   roleId: number
   name: UserRoleName
