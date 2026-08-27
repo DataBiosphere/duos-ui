@@ -11,8 +11,9 @@ const FIXTURES = 'test/fixtures/study-template/v1'
 const UPLOAD_PATH = '/data_submission_template'
 const DRAFT_URL = /\/data_submission_form\/draft\/study-dataset\/([0-9a-f-]+)$/
 
-// CHAIR satisfies both the route's RoleBAC and the endpoint's @RolesAllowed.
-const ROLE = 'CHAIR' as const
+// ADMIN, not CHAIR: the auth spec proves Admin (its console renders on isAdmin alone) where DAC
+// Console renders for Member too. RoleBAC denies by rendering NotFound at the same URL.
+const ROLE = 'ADMIN' as const
 
 const chooseFile = async (page: Page, fixture: string) => {
   await page.locator('#study-template-file').setInputFiles(`${FIXTURES}/${fixture}`)
