@@ -2,7 +2,7 @@ import React from 'react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router'
+import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DuosHeader, { headerTabsConfig } from 'src/components/DuosHeader'
 import { visibleSubTabs } from 'src/components/navigation/subTabVisibility'
@@ -107,6 +107,49 @@ const mountHeader = async (path: string, user?: DuosUser) => {
     </QueryClientProvider>,
   )
   await act(async () => {})
+}
+
+/**
+ * Mounts the header at `path` and hands back a function that navigates to `destination` within the
+ * same NavigationStateProvider. This is the only way to exercise the navigation-context tier: a
+ * fresh mount always starts with `activeTab` undefined.
+ */
+const mountHeaderThenNavigate = async (path: string, destination: string, user: DuosUser) => {
+  vi.mocked(useUserIsLogged).mockReturnValue(true)
+  vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(user)
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+
+  const GoToDestination: React.FC = () => {
+    const navigate = useNavigate()
+    return <button onClick={() => navigate(destination)}>go to destination</button>
+  }
+
+  render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[path]}>
+        <NavigationStateProvider>
+          <Routes>
+            <Route
+              path="*"
+              element={(
+                <>
+                  <DuosHeader classes={{ drawerPaper: '' }} />
+                  <GoToDestination />
+                </>
+              )}
+            />
+          </Routes>
+        </NavigationStateProvider>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  )
+  await act(async () => {})
+
+  return async () => {
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'go to destination' }))
+    })
+  }
 }
 
 describe('DuosHeader', () => {
@@ -251,6 +294,29 @@ describe('DuosHeader', () => {
       for (const console of ['Admin Console', 'SO Console', 'DAC Console', 'Researcher Console']) {
         expect(screen.getByRole('tab', { name: console })).not.toHaveClass('Mui-selected')
       }
+    })
+
+    // The hidden /studies/ and /dataset/ registrations above are there for a cold load only. A
+    // detail page opened from inside a console has to leave that console highlighted, otherwise the
+    // highlight flips back and forth as the user moves between the results and a study.
+    it.each([
+      ['SO Console', MY_INSTITUTION_LIBRARY_ROUTE, '/studies/123'],
+      ['Admin Console', '/manage_dac', '/dataset/DUOS-000001'],
+    ])('leaves %s highlighted when %s links out to %s', async (consoleLabel, from, to) => {
+      const everyRole = {
+        ...mockUser,
+        isAdmin: true,
+        isSigningOfficial: true,
+        isChairPerson: true,
+        isMember: true,
+      }
+      const goToDetailPage = await mountHeaderThenNavigate(from, to, everyRole)
+      expect(screen.getByRole('tab', { name: consoleLabel })).toHaveClass('Mui-selected')
+
+      await goToDetailPage()
+
+      expect(screen.getByRole('tab', { name: consoleLabel })).toHaveClass('Mui-selected')
+      expect(screen.getByRole('tab', { name: 'Data Library' })).not.toHaveClass('Mui-selected')
     })
 
     // The consoles used to carry their own copy of the Data Library sub-tab; the top-level tab

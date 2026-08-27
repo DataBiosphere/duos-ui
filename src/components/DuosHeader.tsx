@@ -309,16 +309,33 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     tab.link === location.pathname
     || (tab.children?.some(subtab => subtab.link === location.pathname) ?? false)
 
-  // returns true if the tab or one of its children claims the current URL by `search` fragment
-  const isSearchTabMatch = (tab: Tab): boolean =>
-    !!(tab.search && location.pathname.includes(tab.search))
-    || (tab.children?.some(subtab => subtab.search && location.pathname.includes(subtab.search)) ?? false)
+  const matchesSearch = (entry: Tab | SubTab): boolean =>
+    !!entry.search && location.pathname.includes(entry.search)
+
+  // returns true if the tab claims the current URL by a `search` fragment of its own or of a
+  // sub-tab the user can actually see. That is real ownership of the URL, so it outranks the tab
+  // the user happened to be on before.
+  const isVisibleSearchTabMatch = (tab: Tab): boolean =>
+    matchesSearch(tab) || visibleSubTabs(tab.children, currentUser).some(matchesSearch)
+
+  // returns true if the only thing claiming the current URL is a sub-tab that is registered but
+  // never listed in the bar. Those entries exist to answer "which tab owns this URL" for a cold
+  // load, so they rank below the navigation context: a study opened from inside a console has to
+  // leave that console highlighted rather than jump the highlight to the Data Library.
+  const isHiddenSearchTabMatch = (tab: Tab): boolean => {
+    const visible = visibleSubTabs(tab.children, currentUser)
+    return (tab.children ?? []).some(subtab => !visible.includes(subtab) && matchesSearch(subtab))
+  }
+
+  const claimsUrl = (tab: Tab): boolean =>
+    isExactTabMatch(tab) || isVisibleSearchTabMatch(tab) || isHiddenSearchTabMatch(tab)
 
   // Prefer an exact match over a `search` fragment match. This is what keeps
   // /datalibrary/myinstitution on the SO Console, whose section link spells that route out, rather
   // than on the Data Library tab, whose broader `search` covers every library version.
   const exactTabMatch = tabs.findIndex(isExactTabMatch)
-  const urlDerivedTab = exactTabMatch >= 0 ? exactTabMatch : tabs.findIndex(isSearchTabMatch)
+  const urlDerivedTab = exactTabMatch >= 0 ? exactTabMatch : tabs.findIndex(isVisibleSearchTabMatch)
+  const hiddenSearchTab = tabs.findIndex(isHiddenSearchTabMatch)
 
   // NavigationTabsComponent always sets location.state.selectedMenuTab when a tab is clicked.
   // Honour that so clicking e.g. "Researcher Console" always wins, even when the destination
@@ -326,26 +343,29 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   const stateTab: number | undefined = location?.state?.selectedMenuTab
 
   let urlMatchedTab = urlDerivedTab
-  if (stateTab != null && tabs.length > stateTab && (isExactTabMatch(tabs[stateTab]) || isSearchTabMatch(tabs[stateTab]))) {
+  if (stateTab != null && tabs.length > stateTab && claimsUrl(tabs[stateTab])) {
     urlMatchedTab = stateTab
   }
 
+  // resolve the tab in priority order:
+  //   1. URL match (with state from tab click taking priority over findIndex)
+  //   2. Context fallback for detail pages whose URL doesn't appear in any tab config
+  //   3. Hidden sub-tab registration - a cold load of a detail page, with no context to keep
+  const resolvedTab = urlMatchedTab !== -1
+    ? urlMatchedTab
+    : (activeTab != null && tabs.length > activeTab ? activeTab : hiddenSearchTab)
+
   useEffect(() => {
-    if (urlMatchedTab !== -1) {
-      setActiveTab(urlMatchedTab)
+    if (resolvedTab !== -1) {
+      setActiveTab(resolvedTab)
     }
-  }, [urlMatchedTab, setActiveTab])
+  }, [resolvedTab, setActiveTab])
 
   let initialSubTab: number = -1
 
-  // populate initialTab:
-  //   1. URL match (with state from tab click taking priority over findIndex)
-  //   2. Context fallback for detail pages whose URL doesn't appear in any tab config
-  //   3. First console the user can see, as last resort
-  let initialTab = urlMatchedTab
-  if (initialTab === -1 && activeTab != null && tabs.length > activeTab) {
-    initialTab = activeTab
-  }
+  // The last resort below is a guess rather than a match, so it is deliberately not written back
+  // to the navigation context by the effect above.
+  let initialTab = resolvedTab
 
   // populate initialSubTab
   if (initialTab !== -1) {
@@ -358,9 +378,10 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     )
   }
 
-  // A page that matches no tab and has no context to fall back on belongs to a console, not to
-  // the role-agnostic Data Library that sits at index 0 - so land on the first console the user
-  // can see. Only a user with no console roles at all falls through to the first tab.
+  // A page that matches no tab at all, not even a hidden registration, and has no context to fall
+  // back on belongs to a console, not to the role-agnostic Data Library that sits at index 0 - so
+  // land on the first console the user can see. Only a user with no console roles at all falls
+  // through to the first tab.
   if (initialTab === -1 && tabs.length > 0) {
     const firstConsole = tabs.findIndex(tab => tab.isConsole)
     initialTab = firstConsole >= 0 ? firstConsole : 0
