@@ -21,7 +21,7 @@ import { useNavigationState } from 'src/contexts/NavigationStateContext'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUserIsLogged } from 'src/hooks/useSession'
 import { MY_INSTITUTION_LIBRARY_ROUTE, SO_CONSOLE_SECTIONS, SO_DASHBOARD_ROUTE } from 'src/pages/signing_official_console/signingOfficialConsoleRoutes'
-import { RESEARCHER_CONSOLE_SECTIONS, RESEARCHER_DASHBOARD_ROUTE } from 'src/pages/researcher_console/researcherConsoleRoutes'
+import { RESEARCHER_CONSOLE_SECTIONS, RESEARCHER_DASHBOARD_ROUTE, RESEARCHER_DETAIL_ROUTES } from 'src/pages/researcher_console/researcherConsoleRoutes'
 
 export type { SubTab }
 
@@ -79,6 +79,14 @@ export const headerTabsConfig: Tab[] = [
     label: 'Data Library',
     link: DATA_LIBRARY_ROUTE,
     search: 'datalibrary',
+    // Study and dataset detail pages live outside /datalibrary, but are reached from its
+    // results. Keep them registered as hidden children so a direct load or refresh still
+    // highlights Data Library. The trailing slashes avoid claiming Researcher Console routes
+    // such as /datasets and /dataset_submissions.
+    children: [
+      { label: 'Study Details', link: '/studies', search: '/studies/', isRendered: () => false },
+      { label: 'Dataset Details', link: '/dataset', search: '/dataset/', isRendered: () => false },
+    ],
     isRendered: () => true,
   },
   {
@@ -132,9 +140,12 @@ export const headerTabsConfig: Tab[] = [
     link: RESEARCHER_DASHBOARD_ROUTE,
     // As with the DAC Console, the Dashboard's tiles are the only advertised route to these
     // pages, so they stay out of the sub-tab bar. They are still registered because
-    // isExactTabMatch reads the raw children: without an entry their URLs match no tab at all,
-    // and the header falls back to highlighting whichever tab the user happens to have first.
-    children: RESEARCHER_CONSOLE_SECTIONS.map(section => ({ ...section, isRendered: () => false })),
+    // isExactTabMatch and isSearchTabMatch read the raw children: without an entry their URLs
+    // match no tab at all, and the header falls back to the first console the user can see.
+    // The detail routes are here for that same reason - their URLs carry an id, so only a
+    // `search` fragment can claim them.
+    children: [...RESEARCHER_CONSOLE_SECTIONS, ...RESEARCHER_DETAIL_ROUTES]
+      .map(section => ({ ...section, isRendered: () => false })),
     isRendered: user => user.isResearcher && !isOnlySigningOfficial(user),
     isConsole: true,
   },
@@ -330,7 +341,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   // populate initialTab:
   //   1. URL match (with state from tab click taking priority over findIndex)
   //   2. Context fallback for detail pages whose URL doesn't appear in any tab config
-  //   3. First available tab as last resort
+  //   3. First console the user can see, as last resort
   let initialTab = urlMatchedTab
   if (initialTab === -1 && activeTab != null && tabs.length > activeTab) {
     initialTab = activeTab
@@ -347,8 +358,12 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     )
   }
 
+  // A page that matches no tab and has no context to fall back on belongs to a console, not to
+  // the role-agnostic Data Library that sits at index 0 - so land on the first console the user
+  // can see. Only a user with no console roles at all falls through to the first tab.
   if (initialTab === -1 && tabs.length > 0) {
-    initialTab = 0
+    const firstConsole = tabs.findIndex(tab => tab.isConsole)
+    initialTab = firstConsole >= 0 ? firstConsole : 0
   }
 
   return (

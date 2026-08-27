@@ -233,6 +233,26 @@ describe('DuosHeader', () => {
       expect(screen.getByRole('tab', { name: 'Data Library' })).toHaveClass('Mui-selected')
     })
 
+    it.each([
+      '/studies/123',
+      '/studies/name/Framingham%20Heart%20Study',
+      '/dataset/DUOS-000001',
+    ])('stays highlighted on a fresh load of %s', async (path) => {
+      const everyRole = {
+        ...mockUser,
+        isAdmin: true,
+        isSigningOfficial: true,
+        isChairPerson: true,
+        isMember: true,
+      }
+      await mountHeader(path, everyRole)
+
+      expect(screen.getByRole('tab', { name: 'Data Library' })).toHaveClass('Mui-selected')
+      for (const console of ['Admin Console', 'SO Console', 'DAC Console', 'Researcher Console']) {
+        expect(screen.getByRole('tab', { name: console })).not.toHaveClass('Mui-selected')
+      }
+    })
+
     // The consoles used to carry their own copy of the Data Library sub-tab; the top-level tab
     // replaces all of them.
     it('is the only Data Library entry in the nav config', () => {
@@ -312,9 +332,45 @@ describe('DuosHeader', () => {
       expect(screen.getByRole('tab', { name: 'Admin Console' })).toHaveClass('Mui-selected')
     })
 
-    it('preserves a tab selection on a detail page with no URL match (context fallback)', async () => {
-      await mountHeader('/dar_application_review/999', mockUser)
-      expect(document.querySelector('.Mui-selected')).toBeInTheDocument()
+    // A DAR application and its progress report are registered by `search` fragment, so a fresh
+    // load or refresh of one - no click, so no activeTab context to fall back on - resolves to
+    // the console that owns it rather than to the Data Library tab sitting at index 0.
+    it.each([
+      '/dar_application_review/999',
+      '/dar_application/999',
+      '/progress_report_application/999',
+    ])('highlights Researcher Console on a fresh load of %s', async (path) => {
+      await mountHeader(path, mockUser)
+
+      expect(screen.getByRole('tab', { name: 'Researcher Console' })).toHaveClass('Mui-selected')
+      expect(screen.getByRole('tab', { name: 'Data Library' })).not.toHaveClass('Mui-selected')
+    })
+
+    it('highlights Researcher Console on a fresh load of a DAR application for admin+researcher', async () => {
+      await mountHeader('/dar_application_review/999', { ...mockUser, isAdmin: true })
+
+      expect(screen.getByRole('tab', { name: 'Researcher Console' })).toHaveClass('Mui-selected')
+      expect(screen.getByRole('tab', { name: 'Admin Console' })).not.toHaveClass('Mui-selected')
+      expect(screen.getByRole('tab', { name: 'Data Library' })).not.toHaveClass('Mui-selected')
+    })
+
+    // /dar_collection/:collectionId is shared by researchers, DAC members and signing officials,
+    // so it is deliberately registered with no console - the last-resort fallback has to carry it.
+    it.each([
+      '/dar_collection/123',
+      '/profile',
+    ])('falls back to the first console, not the Data Library, on %s', async (path) => {
+      await mountHeader(path, { ...mockUser, isAdmin: true })
+
+      expect(screen.getByRole('tab', { name: 'Admin Console' })).toHaveClass('Mui-selected')
+      expect(screen.getByRole('tab', { name: 'Data Library' })).not.toHaveClass('Mui-selected')
+    })
+
+    // Data Library is the only tab such a user has, so the fallback still has to land on it.
+    it('falls back to the Data Library for a user with no console', async () => {
+      await mountHeader('/profile', { ...mockUser, isResearcher: false })
+
+      expect(screen.getByRole('tab', { name: 'Data Library' })).toHaveClass('Mui-selected')
     })
   })
 })
