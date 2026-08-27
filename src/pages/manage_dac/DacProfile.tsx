@@ -11,11 +11,11 @@ import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Spinner } from 'src/components/Spinner'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import { DACBotComponent } from 'src/components/dac_bot/DACBotComponent'
+import { DacProfileSection } from 'src/pages/manage_dac/DacProfileSection'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 import type { DacObject, Dataset, DatasetProperty } from 'src/types/model'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import editDACIcon from 'src/images/dac_icon.svg'
-import './DacProfile.css'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
 
@@ -237,17 +237,13 @@ export const DacProfile: React.FC = () => {
         />
       )}
 
-      {/* ── Rule Automation for DARs (RADAR) ── */}
-      <section className="dac-profile-section dac-profile-card">
-        <h1 className="dac-profile-section-heading">Rule Automation for DARs (RADAR)</h1>
+      <DacProfileSection title="Rule Automation for DARs (RADAR)">
         {dacId !== undefined && <DACBotComponent dacId={dacId} />}
-      </section>
+      </DacProfileSection>
 
-      {/* ── Datasets Managed by this DAC ── */}
-      <section className="dac-profile-section dac-profile-card">
-        <h1 className="dac-profile-section-heading">Datasets Managed by this DAC</h1>
+      <DacProfileSection title="Datasets Managed by this DAC">
         {datasetsContent}
-      </section>
+      </DacProfileSection>
     </div>
   )
 }

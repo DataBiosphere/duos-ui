@@ -19,6 +19,7 @@ import { Storage } from 'src/libs/storage'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import type { DAAObject, DacObject, DuosUser, SimplifiedDuosUser } from 'src/types/model'
 import { DaaTabs } from 'src/components/DaaTabs'
+import { DacProfileSection } from './DacProfileSection'
 import {
   getOwnedDaas,
   getSharedDaas,
@@ -26,8 +27,6 @@ import {
   getDefaultTabForDac,
   sortDaasByCreationDate,
 } from 'src/libs/daaHelpers'
-
-import './DacProfile.css'
 
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
@@ -1027,33 +1026,30 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
   const formContent = profileMode
     ? (
         <>
-          <section className="dac-profile-section dac-profile-card">
-            <h1 className="dac-profile-section-heading">DAC Membership</h1>
-            <div className="form-horizontal css-form" style={{ maxWidth: '1200px', marginTop: '1rem' }}>
+          <DacProfileSection title="DAC Membership">
+            <div className="form-horizontal css-form" style={{ maxWidth: '1200px' }}>
               {dacMembersJSX}
               {chairSelectJSX}
               {memberSelectJSX}
             </div>
             {profileSaveButtons}
-          </section>
-          <section className="dac-profile-section dac-profile-card">
-            <h1 className="dac-profile-section-heading">DAC Info</h1>
+          </DacProfileSection>
+          <DacProfileSection title="DAC Info">
             <form
               className="form-horizontal css-form"
               name="dacForm"
               noValidate
               encType="multipart/form-data"
-              style={{ maxWidth: '1200px', marginTop: '1rem' }}
+              style={{ maxWidth: '1200px' }}
             >
               {basicFieldsJSX}
             </form>
             {errorAlertJSX}
             {profileSaveButtons}
-          </section>
-          <section className="dac-profile-section dac-profile-card">
-            <h1 className="dac-profile-section-heading">Select a Data Access Agreement</h1>
+          </DacProfileSection>
+          <DacProfileSection title="Select a Data Access Agreement">
             {daaContentJSX}
-          </section>
+          </DacProfileSection>
         </>
       )
     : (
