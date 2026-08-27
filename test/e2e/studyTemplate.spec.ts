@@ -42,7 +42,11 @@ test.describe('study template validation', () => {
   test.beforeEach(async ({ page, signInAs }) => {
     await signInAs(ROLE)
     await page.goto(UPLOAD_PATH)
-    await expect(page.getByRole('heading', { name: 'Upload Study Template' })).toBeVisible()
+    // RoleBAC redirects rather than erroring, so a role that cannot reach the page shows up here
+    // as a changed URL rather than as a missing element further down.
+    await expect(page).toHaveURL(new RegExp(`${UPLOAD_PATH}$`))
+    // TableHeaderSection renders its title in a div, so the page's first real heading is this one.
+    await expect(page.getByRole('heading', { name: '1. Start from the blank template' })).toBeVisible()
   })
 
   test('reports the errors Consent found and creates no draft', async ({ page }) => {
