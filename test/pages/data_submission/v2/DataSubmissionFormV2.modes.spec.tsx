@@ -7,6 +7,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
 import { Draft } from 'src/libs/ajax/Draft'
+import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { Notifications } from 'src/libs/utils'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Study } from 'src/pages/data_submission/v2/v2-models'
@@ -14,6 +15,7 @@ import { DraftDetail } from 'src/types/draft'
 import { renderWithRouter } from '../../../test-utils'
 
 vi.mock('src/libs/ajax/Draft', () => ({ Draft: { getDraft: vi.fn(), deleteDraft: vi.fn() } }))
+vi.mock('src/libs/ErrorReporter', () => ({ ErrorReporter: { report: vi.fn() } }))
 vi.mock('src/libs/ajax/DataSet', () => ({ DataSet: { getStudyById: vi.fn(), registerDataset: vi.fn(), updateStudy: vi.fn() } }))
 vi.mock('src/libs/utils', async () => {
   const actual = await vi.importActual<typeof import('src/libs/utils')>('src/libs/utils')
@@ -290,6 +292,8 @@ describe('creating a study from a draft', () => {
     expect(Notifications.showError).toHaveBeenCalledWith(
       expect.objectContaining({ text: expect.stringContaining('could not be removed') }),
     )
+    // The toast is transient; the rate of these is only measurable if it is also reported.
+    expect(ErrorReporter.report).toHaveBeenCalledWith(expect.stringContaining(DRAFT_ID))
   })
 
   it('does not retry a failed cleanup', async () => {

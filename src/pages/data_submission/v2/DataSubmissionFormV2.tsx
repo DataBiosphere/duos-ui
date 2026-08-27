@@ -11,6 +11,7 @@ import { Styles } from 'src/libs/theme'
 import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetManagement'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Notifications } from 'src/libs/utils'
+import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { studyToDatasetSchemaSubmission, buildConsentGroupsFromStudy, getStudyPropertyValueByKey } from 'src/pages/data_submission/v2/v2-common-functions'
 import { loadStudyDatasetDraft } from 'src/pages/data_submission/v2/studyDatasetDraft'
 import { Draft } from 'src/libs/ajax/Draft'
@@ -177,7 +178,9 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
     try {
       await Draft.deleteDraft(draftUuid)
     }
-    catch (_error) {
+    catch (error) {
+      // The toast is transient; a rising rate here is the only signal drafts are accumulating.
+      ErrorReporter.report(`study dataset draft cleanup failed for ${draftUuid}: ${errorMessage(error)}`)
       Notifications.showError({
         text: 'Your study was created, but the draft it came from could not be removed. It may still appear in your drafts.',
       })
