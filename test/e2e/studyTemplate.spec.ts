@@ -2,17 +2,15 @@ import { test, expect } from './support/auth'
 import type { Page } from '@playwright/test'
 
 /*
- * The only coverage that crosses the HTTP boundary: StudyTemplateUpload.spec.tsx mocks the ajax
- * layer. Stops at draft navigation because creating a study would leave a permanent record in dev
- * on every run, and DataSubmissionFormV2.modes.spec.tsx already covers past that point.
+ * The only coverage crossing the HTTP boundary; StudyTemplateUpload.spec.tsx mocks the ajax layer.
+ * Stops at draft navigation: a created study cannot be removed from dev afterwards.
  */
 
 const FIXTURES = 'test/fixtures/study-template/v1'
 const UPLOAD_PATH = '/data_submission_template'
 const DRAFT_URL = /\/data_submission_form\/draft\/study-dataset\/([0-9a-f-]+)$/
 
-// No automation account holds DataSubmitter, the real persona here. CHAIR holds Chairperson, which
-// both the route's RoleBAC and the endpoint's @RolesAllowed admit.
+// No automation account holds DataSubmitter, the real persona; Chairperson is also admitted.
 const ROLE = 'CHAIR' as const
 
 const chooseFile = async (page: Page, fixture: string) => {
@@ -43,8 +41,7 @@ test.describe('study template validation', () => {
   test.beforeEach(async ({ page, signInAs }) => {
     await signInAs(ROLE)
     await page.goto(UPLOAD_PATH)
-    // RoleBAC redirects rather than erroring, so a role that cannot reach the page shows up here
-    // as a changed URL rather than as a missing element further down.
+    // The app renders other pages at this URL when it gates the route, so check both.
     await expect(page).toHaveURL(new RegExp(`${UPLOAD_PATH}$`))
     // TableHeaderSection renders its title in a div, so the page's first real heading is this one.
     await expect(page.getByRole('heading', { name: '1. Start from the blank template' })).toBeVisible()
@@ -59,7 +56,6 @@ test.describe('study template validation', () => {
     await expect(page.getByText('Unknown study field: studyColour')).toBeVisible()
     await expect(page.getByText('Row 2, column field')).toBeVisible()
 
-    // An invalid template is a completed result, not a failure: the user stays here to fix it.
     await expect(page).toHaveURL(new RegExp(`${UPLOAD_PATH}$`))
     await expect(page.locator('#validate-template-btn')).toBeEnabled()
   })
