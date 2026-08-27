@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { binCollectionToBuckets, Bucket, shouldAbstain } from 'src/utils/BucketUtils'
+import { binCollectionToBuckets, Bucket } from 'src/utils/BucketUtils'
 import { isUndefined } from 'src/utils/NodashUtil'
 import { Match } from 'src/libs/ajax/Match'
 import {
@@ -148,8 +148,8 @@ const dar_collection: DarCollection = {
 }
 
 const match_results = [
-  { id: '1', consent: 'DUOS-000001', purpose: REF, match: true, failed: false, abstain: false, createDate: 'Jan 23, 2023', algorithmVersion: 'v2', rationales: [] },
-  { id: '2', consent: 'DUOS-000002', purpose: REF, match: true, failed: false, abstain: false, createDate: 'Jan 23, 2023', algorithmVersion: 'v2', rationales: [] },
+  { id: '1', consent: 'DUOS-000001', purpose: REF, match: true, failed: false, abstain: false, createDate: 'Jan 23, 2023', algorithmVersion: 'v5', rationales: [] },
+  { id: '2', consent: 'DUOS-000002', purpose: REF, match: true, failed: false, abstain: false, createDate: 'Jan 23, 2023', algorithmVersion: 'v5', rationales: [] },
 ] as unknown as MatchResult[]
 
 const dataset_terms = [
@@ -223,26 +223,6 @@ const similar_data_use_terms = [
   { datasetId: 4, datasetName: 'ds 4', datasetIdentifier: 'DUOS-000004', dataUse: { primary: [{ code: 'GRU', description: 'General Research Use' }] }, dacId: 4 },
   { datasetId: 5, datasetName: 'ds 5', datasetIdentifier: 'DUOS-000005', dataUse: { primary: [{ code: 'HMB', description: 'Health, Medical and Biomedical Research' }] }, dacId: 5 },
 ] as unknown as DatasetTerm[]
-
-// ─── shouldAbstain cases ──────────────────────────────────────────────────────
-
-const matchableCases: DataUseSummary[] = [
-  { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'NCU', description: 'NCU' }] },
-  { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'NMDS', description: 'NMDS' }] },
-  { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'NCTRL', description: 'NCTRL' }] },
-]
-
-const unmatchableCases: DataUseSummary[] = [
-  { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'OTHER', description: 'OTHER' }] },
-  { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'POP-M', description: 'POP-M' }] },
-  { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'POP-F', description: 'POP-F' }] },
-  { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'COL', description: 'COL' }] },
-  { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'IRB', description: 'IRB' }] },
-  { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'GSO', description: 'GSO' }] },
-  { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'PUB', description: 'PUB' }] },
-  { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'MOR', description: 'MOR' }] },
-  { primary: [{ code: 'GRU', description: 'GRU' }], secondary: [{ code: 'POP-PD', description: 'POP-PD' }] },
-]
 
 // ─── Algorithm version fixtures ───────────────────────────────────────────────
 
@@ -401,8 +381,8 @@ describe('BucketUtils', () => {
 
   it('match failures should be condensed for a bucket with two failing matches', async () => {
     const failing_matches = [
-      { id: '1', consent: 'DUOS-000001', purpose: REF, match: false, failed: false, abstain: true, createDate: 'Jan 23, 2023', algorithmVersion: 'v2', rationales: ['1', '2', '3'] },
-      { id: '2', consent: 'DUOS-000002', purpose: REF, match: false, failed: false, abstain: true, createDate: 'Jan 23, 2023', algorithmVersion: 'v2', rationales: ['1', '2', '3', '4', '5'] },
+      { id: '1', consent: 'DUOS-000001', purpose: REF, match: false, failed: false, abstain: true, createDate: 'Jan 23, 2023', algorithmVersion: 'v5', rationales: ['1', '2', '3'] },
+      { id: '2', consent: 'DUOS-000002', purpose: REF, match: false, failed: false, abstain: true, createDate: 'Jan 23, 2023', algorithmVersion: 'v5', rationales: ['1', '2', '3', '4', '5'] },
     ] as unknown as MatchResult[]
     vi.spyOn(Match, 'findMatchBatch').mockResolvedValue(failing_matches)
     vi.spyOn(DataSet, 'searchDatasetIndex').mockResolvedValue(dataset_terms)
@@ -419,14 +399,6 @@ describe('BucketUtils', () => {
       }
     }
     expect(rationaleCheck).toBe(true)
-  })
-
-  it.each(matchableCases)('correctly determines matchable data use: %j', (dataUse) => {
-    expect(shouldAbstain(dataUse)).toBe(false)
-  })
-
-  it.each(unmatchableCases)('correctly determines unmatchable data use: %j', (dataUse) => {
-    expect(shouldAbstain(dataUse)).toBe(true)
   })
 
   it('correctly buckets data uses when there are similar data use entries', async () => {
@@ -473,7 +445,7 @@ describe('BucketUtils', () => {
       expect(bucket.algorithmResult?.result).toBe('Abstain')
     })
 
-    // The legacy heuristic abstains on these; V5 matches them normally.
+    // V5 matches these normally: they are secondary modifiers, not primaries.
     it.each(['PUB', 'IRB', 'COL', 'GSO', 'MOR', 'POP-M', 'POP-F', 'POP-PD'])(
       'keeps a v5 match on a GRU data use with a secondary %s',
       async (code) => {
@@ -491,16 +463,11 @@ describe('BucketUtils', () => {
       expect(bucket.algorithmResult?.result).toBe('Yes')
     })
 
-    it.each(['v1', 'v2'])('still suppresses a %s result for an unmatchable data use', async (version) => {
+    it.each(['v1', 'v2'])('reports a %s result as uninterpretable rather than suppressing it', async (version) => {
       const bucket = await bucketFor({ primary: [OTHER] }, [makeMatch(version, { match: true })])
 
-      expect(bucket.algorithmResult?.result).toBe('N/A')
-    })
-
-    it.each(['v1', 'v2'])('keeps a %s result for a matchable data use', async (version) => {
-      const bucket = await bucketFor({ primary: [GRU] }, [makeMatch(version, { match: true })])
-
-      expect(bucket.algorithmResult?.result).toBe('Yes')
+      expect(bucket.algorithmResult?.result).toBe('System match unavailable for this algorithm version')
+      expect(bucket.algorithmResult?.rationales?.[0]).toContain(version)
     })
 
     it('reports an unparseable version instead of trusting or hiding it', async () => {
@@ -516,12 +483,11 @@ describe('BucketUtils', () => {
       expect(bucket.algorithmResult?.result).toBe('Yes')
     })
 
-    it('reads a missing version as legacy rather than uninterpretable', async () => {
-      const matchable = await bucketFor({ primary: [GRU] }, [makeMatch(undefined, { match: true })])
-      const unmatchable = await bucketFor({ primary: [OTHER] }, [makeMatch(undefined, { match: true })])
+    it('reports a missing version as uninterpretable', async () => {
+      const bucket = await bucketFor({ primary: [GRU] }, [makeMatch(undefined, { match: true })])
 
-      expect(matchable.algorithmResult?.result).toBe('Yes')
-      expect(unmatchable.algorithmResult?.result).toBe('N/A')
+      expect(bucket.algorithmResult?.result).toBe('System match unavailable for this algorithm version')
+      expect(bucket.algorithmResult?.rationales?.[0]).toContain('unknown')
     })
 
     // One data use, so both datasets land in the same bucket and their match rows coalesce.
