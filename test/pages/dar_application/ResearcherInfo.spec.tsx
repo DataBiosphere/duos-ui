@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Modal from 'react-modal'
 import ResearcherInfo, { ResearcherInfoProps } from 'src/pages/dar_application/ResearcherInfo'
@@ -95,16 +95,25 @@ const fillCollaboratorForm = async (user: UserEventInstance, { name, eraCommonsI
   await user.type(emailInput!, email)
 }
 
-const AsyncResearcherWrapper = (componentProps: ResearcherInfoProps) => {
+// Models a researcher that arrives asynchronously. The arrival is driven by a promise
+// the test resolves explicitly rather than by a real timer, so "before the load
+// completes" is a state the test controls instead of a wall-clock race it has to win.
+type AsyncResearcherWrapperProps = ResearcherInfoProps & { researcherLoad: Promise<DuosUser> }
+
+const AsyncResearcherWrapper = ({ researcherLoad, ...componentProps }: AsyncResearcherWrapperProps) => {
   const [asyncResearcher, setAsyncResearcher] = useState<DuosUser>({} as DuosUser)
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setAsyncResearcher({ displayName: 'Sample Researcher', email: 'researcher@example.test' } as DuosUser)
-    }, 50)
+    let cancelled = false
 
-    return () => clearTimeout(timer)
-  }, [])
+    researcherLoad.then((loaded) => {
+      if (!cancelled) setAsyncResearcher(loaded)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [researcherLoad])
 
   return <ResearcherInfo {...componentProps} researcher={asyncResearcher} />
 }
@@ -127,13 +136,24 @@ describe('Researcher Info', () => {
   })
 
   it('does not show the library card warning before async researcher load completes', async () => {
-    renderWithRouter(<AsyncResearcherWrapper {...props} />)
+    let completeResearcherLoad: (researcher: DuosUser) => void = () => {}
+    const researcherLoad = new Promise<DuosUser>((resolve) => {
+      completeResearcherLoad = resolve
+    })
 
+    renderWithRouter(<AsyncResearcherWrapper {...props} researcherLoad={researcherLoad} />)
+
+    // The load is still outstanding, so this is not a race the test can lose.
     expect(document.querySelector('[data-cy="researcher-info-library-card-required"]')).toBeNull()
+
+    await act(async () => {
+      completeResearcherLoad({ displayName: 'Sample Researcher', email: 'researcher@example.test' } as DuosUser)
+      await researcherLoad
+    })
 
     await waitFor(() => {
       expect(document.querySelector('[data-cy="researcher-info-library-card-required"]')).not.toBeNull()
-    }, { timeout: 2000 })
+    })
   })
 
   it('renders the library card required alert when researcher has no library card', () => {

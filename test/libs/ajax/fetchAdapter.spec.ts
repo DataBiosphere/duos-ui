@@ -629,7 +629,7 @@ describe('fetchAdapter - Fetch methods', () => {
       )
 
       await fetchPost('/api/dar/v2', { data: 'test' }).catch(() => {})
-      await vi.waitFor(() => expect(ErrorReporter.report).toHaveBeenCalledOnce())
+      await vi.waitFor(() => expect(ErrorReporter.report).toHaveBeenCalledOnce(), { timeout: 5000 })
     })
   })
 })
@@ -1044,9 +1044,9 @@ describe('fetchAdapter - BFF mode', () => {
       .rejects.toThrow('csrf endpoint down Please contact the help desk')
 
     expect(fetchMock).not.toHaveBeenCalled()
-    // Give the fire-and-forget reportError chain time to complete
-    await new Promise(resolve => setTimeout(resolve, 0))
-    expect(ErrorReporter.report).toHaveBeenCalled()
+    // reportError is fire-and-forget, so poll for it rather than assuming it lands
+    // within a single macrotask.
+    await vi.waitFor(() => expect(ErrorReporter.report).toHaveBeenCalled(), { timeout: 5000 })
   })
 
   it('fetchMultipart - reports and wraps a CSRF token acquisition failure the same way', async () => {
