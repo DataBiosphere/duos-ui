@@ -7,6 +7,7 @@ import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions'
 import { AssetType } from 'src/types/library'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Storage } from 'src/libs/storage'
+import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import { Notifications } from 'src/libs/utils'
 import { DuosUser } from 'src/types/model'
 import { GridColDef } from '@mui/x-data-grid'
@@ -128,6 +129,12 @@ describe('DatasetSubmissions', () => {
   it('renders the ADD DATASET button', () => {
     renderComponent()
     expect(screen.getByRole('button', { name: /ADD DATASET/i })).toBeInTheDocument()
+  })
+
+  // This page's Submitter/Status/Delete columns live on the Datasets tab, so it must land there.
+  it('does not ask for a default tab, leaving the hook on Datasets', () => {
+    renderComponent()
+    expect(vi.mocked(useLibraryPageState)).toHaveBeenCalledWith(expect.anything())
   })
 
   it('does not render the Signing Official approval reminder — that is Data Library only', () => {

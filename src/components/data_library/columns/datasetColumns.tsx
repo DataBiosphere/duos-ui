@@ -6,6 +6,7 @@ import { DatasetTerm } from 'src/types/model'
 import { AccessManagement, ExportableDatasets, SoApprovalModel } from 'src/types/library'
 import DatasetExportButton from 'src/components/data_search/DatasetExportButton'
 import RequestAccessButton from 'src/components/data_library/RequestAccessButton'
+import { getAccessManagementColor, getAccessManagementLabel } from 'src/components/data_library/accessManagementDisplay'
 import BoltIcon from '@mui/icons-material/Bolt'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 import { DATA_USE_GRID_COLUMN } from 'src/components/dataUseGridColumn'
@@ -82,22 +83,8 @@ export const makeDatasetColumns = (
     width: 150,
     renderCell: (params) => {
       const isRadarEnabled = radarEnabledDatasetIds.has(params.row.datasetId)
-      const label = (() => {
-        switch (params.value) {
-          case 'open': return 'Open Access'
-          case 'controlled': return 'via DUOS'
-          case 'external': return 'External to DUOS'
-          default: return params.value
-        }
-      })()
-      const color = (() => {
-        switch (params.value) {
-          case AccessManagement.CONTROLLED: return 'primary'
-          case AccessManagement.OPEN: return 'success'
-          case AccessManagement.EXTERNAL: return 'secondary'
-          default: return 'default'
-        }
-      })()
+      const label = getAccessManagementLabel(params.value)
+      const color = getAccessManagementColor(params.value)
       const tooltipTitle = isRadarEnabled
         ? 'Automatic request approvals available for datasets clearly within the data use terms.'
         : ''

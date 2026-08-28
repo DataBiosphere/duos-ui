@@ -135,8 +135,15 @@ export const useLibraryData = (
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
-    // Preserve previous rows/options while new filters load to avoid UI flicker.
-    placeholderData: previousData => previousData ?? emptyResult,
+    // Preserve previous rows while new filters/pagination load on the *same*
+    // tab to avoid UI flicker. Discard the placeholder on a tab switch instead:
+    // TanStack hands back the immediately-preceding query's data regardless of
+    // queryKey, so without this check a Studies row (`studyId`) would flow into
+    // the Datasets grid using `datasetAsset.getRowId` (`datasetId`) for one
+    // frame, which MUI's DataGrid rejects as a missing row id.
+    placeholderData: (previousData, previousQuery) => (
+      previousQuery?.queryKey[2] === assetType ? (previousData ?? emptyResult) : emptyResult
+    ),
   })
 }
 

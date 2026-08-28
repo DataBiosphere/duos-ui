@@ -89,6 +89,13 @@ export interface TermsAggregation {
   terms: {
     field: string
     size?: number
+    /** Candidates each shard returns before the merge; raise it to make an ordered terms agg exact. */
+    shard_size?: number
+    /** Bucket ordering, e.g. `{ total_participants: 'desc' }` to rank by a metric sub-aggregation. */
+    order?: { [key: string]: SortOrder }
+  }
+  aggs?: {
+    [key: string]: AggregationDefinition
   }
 }
 
@@ -99,6 +106,8 @@ export interface CompositeAggregation {
       [key: string]: {
         terms: {
           field: string
+          /** Composite buckets come back ordered by their sources, so this is the sort. */
+          order?: SortOrder
         }
       }
     }>
@@ -174,7 +183,8 @@ export interface AggregationResult {
 }
 
 export interface StudyAggregationBucket {
-  key: { study_id: number }
+  /** Composite buckets key by source name; a terms aggregation keys by the field value itself. */
+  key: { study_id: number } | number
   doc_count: number
   study_details?: {
     hits?: {
@@ -188,6 +198,11 @@ export interface StudyAggregationBucket {
             species?: string
             phenotype?: string
             dataCustodianEmail?: string[]
+            dataTypes?: string[]
+            assets?: {
+              models?: PartialModelAsset[]
+              workspaces?: PartialWorkspaceAsset[]
+            }
           }
         }
       }>
@@ -202,12 +217,23 @@ export interface StudyAggregationBucket {
   dataset_ids?: {
     buckets: Array<{ key: number }>
   }
+  /** Distinct DUO data use codes (`dataUse.primary.code`) across the study's datasets */
+  data_use_codes?: {
+    buckets: Array<{ key: string }>
+  }
+  /** Distinct `accessManagement` values across the study's datasets */
+  access_management_types?: {
+    buckets: Array<{ key: string }>
+  }
 }
 
 export interface StudyAggregationResponse {
   buckets: StudyAggregationBucket[]
   after_key?: { study_id: number }
 }
+
+export const studyIdFromBucketKey = (key: StudyAggregationBucket['key']): number =>
+  typeof key === 'number' ? key : key.study_id
 
 /** Raw Elasticsearch document shape for a model asset; derived from ModelAsset so both stay in sync. */
 export type PartialModelAsset = Partial<ModelAsset>
