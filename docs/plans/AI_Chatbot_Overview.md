@@ -161,9 +161,13 @@ Record them here, and let Chat 1 pick the fix and the numbers:
   vLLM (ADR-001, decision 5), and provider neutrality is what makes that a
   configuration change instead of a rewrite.
 - Build nothing Vertex-specific until Chat 0 returns.
-- Loop: send message + history + tool declarations. If the model returns tool
-  calls, execute them, append results, and re-invoke. Stop when the model
-  returns a final text answer.
+- Loop: send the system prompt + message + history + tool declarations. If the
+  model returns tool calls, execute them, append results, and re-invoke. Stop
+  when the model returns a final text answer.
+- The system prompt is a versioned file in the repository, not a string literal.
+  It ships with the loop and it changes under review, because a prompt edit
+  changes behavior as surely as a code edit. Open question 7 settles what it
+  says.
 - **Bound every turn.** Cap the iteration count, set a wall-clock deadline, and
   cap the bytes of each tool result. Emit `error` and stop when a bound trips.
   Without bounds, a model that keeps calling tools runs until the socket dies,
@@ -324,6 +328,9 @@ Vertex never calls back into DUOS. All tool execution is in-process.
   streams text needs an announced live region, focus management on open and
   close, a keyboard route to close, and respect for reduced-motion. Agree the
   detail with the designer in the UI story.
+- No component above captures whether an answer helped. If the launch needs a
+  feedback signal, it needs a control here and a place to put the result
+  (open question 9). Decide that before the UI story starts, not after.
 
 ### 5.2 Auth and transport
 
@@ -435,6 +442,14 @@ backend interface provider-neutral.
   researcher-supplied text that enters the model context. With read-only
   tools, the blast radius is data the user can already see. Review each new
   tool against this risk.
+- **The tool set is the capability boundary, not the system prompt.** The model
+  emits text and calls declared tools. It opens no sockets, writes no files and
+  runs no code, so it cannot reach an external service or spend compute on
+  anything but its own inference — whatever any text tells it to do. Injected
+  text can override an instruction in a prompt; it cannot add a tool that was
+  never declared. Enforce every capability limit in the tool declarations and
+  in the turn bounds (§3.2). Use the system prompt for behavior, and never as a
+  security control (open question 7).
 
 ---
 
@@ -476,3 +491,51 @@ backend interface provider-neutral.
 6. **Where the quota table lives.** The daily quota needs a durable table, and
    Consent owns the schema the BFF already uses. Decide before Chat 6: a Consent
    Liquibase changeset, or a schema the BFF owns. See §3.4.
+
+7. **What the system prompt says.** The loop needs one, so this is a question of
+   content and ownership, not of whether.
+
+   Start by separating the two jobs, because conflating them buys false comfort.
+   **Capability limits are not prompt work.** The model cannot make an external
+   request, run code, or spend compute on anything but its own inference, no
+   matter what any text asks of it — it emits text and calls two declared,
+   read-only tools. Those limits live in the tool declarations and the turn
+   bounds (§3.2, §7). Writing "do not call external services" into a prompt
+   restates something already impossible, and injected text can override a
+   prompt instruction while it cannot invent a tool.
+
+   What the prompt is genuinely for: scope and refusal (answer about DUOS
+   datasets and DARs; decline the rest and say why), never presenting itself as
+   an authority on an access decision, admitting when a tool returned nothing,
+   attributing answers to the data it retrieved, and tone.
+
+   Then settle the mechanics. Where does the prompt live, who reviews a change
+   to it, does a change trigger the evaluation set (Chat 4), and does the token
+   cost of sending it on every turn change the limit numbers (open question 4)?
+
+8. **Usage metrics, without keeping the text.** §3.2 already records the
+   operational shape of a turn — duration, iterations, tool calls, tokens,
+   errors. This is the different question: what are people asking about, which
+   tools actually get used, and how often does a question fall outside scope?
+
+   The constraint is §7: prompts and answers stay out of ordinary logs. So agree
+   what may be recorded — tool-call counts by tool, turn counts per user, a
+   coarse category label, an in-scope or out-of-scope flag — and what may not.
+   Anything recorded here also leaves DUOS as a metric, so it belongs in the
+   Chat 0 data contract (open question 5), not in a later story.
+
+9. **How we know the chat is having the right effect.** Three different
+   questions run together here, and only the first is already answered:
+
+   - *Does the loop work?* The evaluation set (Chat 4) covers tool choice and
+     plumbing.
+   - *What are people doing?* Open question 8.
+   - *Is it helping?* Unanswered, and it needs a decision before launch.
+
+   Define success while the plan is still cheap to change. Candidates: a thumbs
+   rating on an answer, a measured drop in support requests of the kind the chat
+   is meant to absorb, or a task the chat shortens against a measured baseline.
+   Each implies work: a rating needs a UI control and somewhere to store it
+   (§5.1), and a baseline has to be captured **before** launch or it cannot be
+   captured at all. Pick the measure, then decide whether it gates the staged
+   rollout (Chat 11) or only informs it.
