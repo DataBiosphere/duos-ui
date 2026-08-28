@@ -44,7 +44,7 @@ The sequence is this feature's own. It does not continue the BFF numbering in
 
 | ADR | Decision | Work item |
 |---|---|---|
-| [001](ai_chatbot_docs/ADR-001-local-inference-engine.md) | Run local inference on llama.cpp `llama-server`, not Ollama | Chat 3 |
+| [001](ai_chatbot_docs/ADR-001-model-backend.md) | Use Vertex AI in every environment; run no local model | Chat 2, Chat 9 |
 
 ---
 
@@ -92,8 +92,9 @@ Fastify BFF (same process as the existing server)
   │  csrfProtection onRequest hook rejects forged requests
   │  reads request.session.accessToken; refreshes via refreshAccessToken()
   │  drives the agentic loop against the configured LLM
-  │    local:      llama.cpp llama-server  (LOCAL_LLM_URL, OpenAI-compatible)
-  │    production: Vertex AI Gemini (Workload Identity, no key files)
+  │    every environment: Vertex AI Gemini, one pinned model version
+  │    developers authenticate with ADC; k8s uses Workload Identity
+  │    tests and CI use the stub backend (recorded fixtures, no network)
   │  executes each LLM tool call in-process against the Consent API
   │    with Authorization: Bearer <session accessToken>
   │  streams SSE events back to the browser as the loop runs
@@ -143,20 +144,23 @@ Record them here, and let Chat 1 pick the fix and the numbers:
 ### 3.2 Agentic loop
 
 - One module with two backends behind a common interface.
-- **Local:** llama.cpp `llama-server`, selected when `LOCAL_LLM_URL` is set.
-  Run it with `--jinja`, and add `--chat-template-file` when the model needs it;
-  without the flag the server rejects a request that carries tools. Pin the
-  model with `LOCAL_LLM_MODEL` (open question 1). See
-  [ADR-001](ai_chatbot_docs/ADR-001-local-inference-engine.md) for why this is
-  not Ollama.
-- The local backend talks to one OpenAI-compatible client, so a later engine
-  swap changes two env values and no code. Accept `tool_calls.arguments` as
-  either a JSON string or a JSON object: `llama-server` can return the object
-  form, which the OpenAI contract does not allow (ADR-001, accepted risk 1).
-- **Production:** Vertex AI Gemini through the Google Gen AI SDK
+- **Every environment: Vertex AI Gemini** through the Google Gen AI SDK
   (`@google/genai`). This is Google's current Node client;
-  `@google-cloud/vertexai` is the older one. Keep the interface
-  provider-neutral; do not shape the tool declarations to one vendor's schema.
+  `@google-cloud/vertexai` is the older one. Developers, dev, staging and
+  production all call the same service and the same pinned model version, so a
+  tool-call bug appears on a developer's machine instead of on first contact
+  with production. There is no local inference engine. See
+  [ADR-001](ai_chatbot_docs/ADR-001-model-backend.md) for why, including why
+  the local Postgres is not the precedent it looks like.
+- **Tests and CI: a stub backend** that replays recorded fixtures and reaches no
+  network. It is a first-class backend with its own work item (Chat 2), not a
+  mock inside a test file. It must serve multi-iteration turns and the failure
+  paths, because Chats 1 through 8 build against it while Chat 0 is in review.
+- Keep the interface provider-neutral. Do not shape the tool declarations to one
+  vendor's schema: if Compliance blocks Vertex AI, the fallback is self-hosted
+  vLLM (ADR-001, decision 5), and provider neutrality is what makes that a
+  configuration change instead of a rewrite.
+- Build nothing Vertex-specific until Chat 0 returns.
 - Loop: send message + history + tool declarations. If the model returns tool
   calls, execute them, append results, and re-invoke. Stop when the model
   returns a final text answer.
@@ -272,25 +276,35 @@ Size the chat limit against what is left of that budget, and handle the 429
 
 ## 4. Infrastructure
 
-### 4.1 Local: llama.cpp in docker-compose
+One backend, two credential paths. No compose service for the model, and no
+model files on anyone's disk (ADR-001).
 
-- Add a `llama-server` service, mount a model volume, and set `LOCAL_LLM_URL`
-  and `LOCAL_LLM_MODEL` on the app service.
-- Document the one-time GGUF file download in the compose README, with the
-  exact URL and a digest check. The engine reaches no registry, so no tag pull
-  exists (ADR-001, accepted risk 4).
-- Docker on Apple Silicon gives the container no Metal access, so the service
-  runs on the CPU. A developer who needs speed runs `llama-server` on the host
-  and points `LOCAL_LLM_URL` at it.
+### 4.1 Developers: Vertex AI through Application Default Credentials
 
-### 4.2 Production: Vertex AI via Workload Identity
+- Developers run `gcloud auth application-default login` against the dev
+  project. No key file, and no shared secret in `.env.local`.
+- Compose must mount `~/.config/gcloud` read-only into the `app` container and
+  set the project. That mount hands the container the developer's own Google
+  identity, which is wider than a scoped service account — DEVNOTES must say so.
+- Set the quota project (`gcloud auth application-default set-quota-project`),
+  or the first call fails with an unhelpful error.
+- **Verify the auth path under `node --enable-fips`.** The `app` service runs
+  with that flag, it restricts the OpenSSL algorithm set, and it has broken auth
+  libraries before. Test it in Chat 9, not later.
+- Each developer needs `roles/aiplatform.user` on the dev project. That grant
+  goes through Compliance and Infosec, so it travels with the data-governance
+  decision as one ask (Chat 0).
+- Development costs money. Set a budget alert on the dev project and measure a
+  real turn in Chat 9.
+
+### 4.2 Deployed environments: Vertex AI through Workload Identity
 
 - Create a dedicated GCP service account with only `roles/aiplatform.user`.
 - Bind it to the DUOS Kubernetes service account with Workload Identity.
 - Never put a key file in the image.
 - Deliver `projectId`, `region`, and `modelVersion` as plain env values in
   `terra-helmfile`, next to the existing `DUOS_*` variables from BFF Phase 0.
-- When neither backend is configured, `/api/chat` must return a clear `503`.
+- When no backend is configured, `/api/chat` must return a clear `503`.
 
 Vertex never calls back into DUOS. All tool execution is in-process.
 
@@ -339,32 +353,43 @@ Vertex never calls back into DUOS. All tool execution is in-process.
 
 ## 6. Sequencing
 
-Two unknowns carry most of the risk: whether SSE survives the reverse proxy
-(open question 2), and what the first real Vertex call does. Reach both early,
-before other work depends on the answer.
+Chat 0 is slow and it is not a stop-the-world gate. The role grant and the data
+contract go to the same reviewers, so they travel as one ask, and the stub
+backend (§3.2) carries every story below it while that review runs.
+
+The other unknown to reach early is whether SSE survives the reverse proxy
+(open question 2). Chat 1 answers it in about a day.
 
 ```
-Chat 0.  Data-governance sign-off + field-level data contract
-                                                      (gate — open question 5)
-Chat 1.  Stub POST /api/chat: CSRF, SSE, heartbeat, canned events, live in dev
-Chat 2.  Vertex service account + Workload Identity + one real call
-Chat 3.  llama-server in docker-compose               (local dev unblock)
-Chat 4.  Consent tool client + two bounded tool declarations
-Chat 5.  Evaluation fixtures + tool-choice harness
-Chat 6.  Agentic loop with hard bounds (local first, Vertex second)
-Chat 7.  Rate limit, daily turn quota, concurrency cap
-Chat 8.  Chat UI (panel, message, stream hook; chatEnabled gate; accessibility)
-Chat 9.  E2E test on the BFF Playwright harness
-Chat 10. Load and soak test, then a staged rollout by environment
+Chat 0.  Compliance + Infosec: field-level data contract AND the dev role grant,
+         one ask                                       (open question 5)
+         ── everything below runs against the stub, in parallel with Chat 0 ──
+Chat 1.  Stub POST /api/chat: CSRF, SSE, keep-alive, canned events, live in dev
+Chat 2.  Stub model backend: recorded fixtures, multi-iteration turns, failures
+Chat 3.  Consent tool client + two bounded tool declarations
+Chat 4.  Evaluation fixtures + tool-choice harness
+Chat 5.  Agentic loop with hard bounds
+Chat 6.  Rate limit, daily turn quota, concurrency cap
+Chat 7.  Chat UI (panel, message, stream hook; chatEnabled gate; accessibility)
+Chat 8.  E2E test on the BFF Playwright harness
+         ── gated on Chat 0 returning yes ──
+Chat 9.  Vertex: service account, Workload Identity, developer ADC, the FIPS
+         check, and the first real call
+Chat 10. Prompt tuning and the evaluation set run against Gemini
+Chat 11. Load and soak test, then a staged rollout by environment
 ── follow-on sprints ──
-Chat 11. Migrate chatEnabled to the Consent feature-flag service
-Chat 12. Add the get_dataset tool if usage shows the need
+Chat 12. Migrate chatEnabled to the Consent feature-flag service
+Chat 13. Add the get_dataset tool if usage shows the need
 ```
 
-Chat 1 answers open question 2 in about a day and de-risks every story after
-it. Chat 3 runs in parallel with Chat 2. Chat 5 comes before Chat 6 so the loop
-has a regression check from its first commit. Chats 11–12 do not block the
-first ship.
+Chat 4 comes before Chat 5, so the loop has a regression check from its first
+commit. Note what each half of that pair proves: built against the stub, the
+harness verifies the loop's plumbing; run against Gemini in Chat 10, it
+measures the model's tool choice. Chats 12–13 do not block the first ship.
+
+If Chat 0 returns no, Chats 9–11 change target rather than disappearing: the
+fallback is self-hosted vLLM (ADR-001, decision 5), which is why §3.2 keeps the
+backend interface provider-neutral.
 
 ---
 
@@ -393,10 +418,15 @@ first ship.
   are redacted, how long each side keeps the data, and whether request caching
   stays on. Record the region and who approved it before any code ships. See
   open question 5.
-- **No accidental third-party model.** The local engine loads a file from disk
-  and reaches no model registry, so no tag can route a developer's prompts to a
-  vendor cloud. This guard is structural, not a rule in a README. See
-  [ADR-001](ai_chatbot_docs/ADR-001-local-inference-engine.md).
+- **One model destination, everywhere.** Every environment calls one Vertex AI
+  project in one pinned region, and no credential in the stack reaches another
+  model provider. Tests reach no network at all. There is no registry, no model
+  tag and no local weights file, so no accident can route a developer's prompts
+  to a vendor cloud. See [ADR-001](ai_chatbot_docs/ADR-001-model-backend.md).
+- **Developer credentials.** Developers authenticate with ADC, so no key file
+  exists to leak. Compose mounts the credential directory read-only, and that
+  mount carries the developer's own Google identity — wider than the deployed
+  service account, and worth stating in DEVNOTES (§4.1).
 - **Least privilege on tools.** Keep the v1 tool set small and read-only.
   The collections tool is pinned to the `Researcher` role, so the model cannot
   choose a wider view (§3.3). Any state-changing tool, and any new role, needs
@@ -410,13 +440,11 @@ first ship.
 
 ## 8. Open questions
 
-1. **Model versions and region.** Pin an exact Gemini model version and Vertex
-   region before staging. For local work, pin one GGUF repository, one revision
-   and one SHA256 digest, and record the model license next to the pin. Prefer
-   Apache-2.0 or MIT weights, such as Qwen or Mistral-Nemo; the Llama and Gemma
-   terms are custom licenses, and the OSI has not approved them. Confirm the
-   model supports tool calling. See
-   [ADR-001](ai_chatbot_docs/ADR-001-local-inference-engine.md).
+1. **Model version and region.** Pin one exact Gemini model version and one
+   Vertex region, and use them in every environment — that shared pin is what
+   makes development predict production (ADR-001). Confirm the version supports
+   tool calling, and agree how a version bump is reviewed: the evaluation set
+   (Chat 4) is the check that a bump must pass.
 
 2. **SSE through the reverse proxy.** The app sits behind one reverse-proxy
    hop (`httpd-terra-proxy` sidecar in k8s). Verify that the proxy does not
@@ -431,14 +459,20 @@ first ship.
    count and the token count of a typical turn first, so the chat limits, the
    spend they imply, and the shared Consent budget (§3.4) are sized together.
 
-5. **Data-governance sign-off.** Who approves sending DUOS data to Vertex AI?
-   The decision covers prompts, answers, tool results, logs and metrics, not
-   only dataset and DAR text. Read Google's current retention, caching and
-   no-training terms first and record them: nobody on the team has confirmed
-   them yet. Decide whether the project needs caching turned off or an
-   abuse-monitoring exception. This gates Chat 0, and it is the item most likely
-   to block a launch late.
+5. **Data-governance sign-off, and the dev role grant with it.** Who approves
+   sending DUOS data to Vertex AI? The decision covers prompts, answers, tool
+   results, logs and metrics, not only dataset and DAR text. Read Google's
+   current retention, caching and no-training terms first and record them:
+   nobody on the team has confirmed them yet. Decide whether the project needs
+   caching turned off or an abuse-monitoring exception.
+
+   Two points of shape. First, `roles/aiplatform.user` on the dev project goes
+   to the same reviewers, so ask once rather than twice (§4.1). Second, ask for
+   dev, staging and production in one submission. A dev-only or synthetic-data
+   pilot answers a different question and guarantees a second cycle, and the
+   answer worth having early is whether DUOS text may reach Vertex **at all** —
+   because a no changes the architecture, not the schedule.
 
 6. **Where the quota table lives.** The daily quota needs a durable table, and
-   Consent owns the schema the BFF already uses. Decide before Chat 7: a Consent
+   Consent owns the schema the BFF already uses. Decide before Chat 6: a Consent
    Liquibase changeset, or a schema the BFF owns. See §3.4.
