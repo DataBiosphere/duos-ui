@@ -4,24 +4,6 @@
   padding: 50px clamp(24px, 10vw, 140px) 70px;
 }
 
-.user-profile-section {
-  margin-top: 48px;
-}
-
-.user-profile-card {
-  padding: 28px 32px 32px;
-  border: 1px solid #d9e4f2;
-  border-radius: 16px;
-  box-shadow: 0 10px 24px rgb(34 74 120 / 5%);
-}
-
-.user-profile-section-heading {
-  margin: 0 0 24px;
-  color: #01549f;
-  font-size: 20px;
-  font-weight: 600;
-}
-
 .user-profile-subheading {
   margin: 24px 0 12px;
   color: #000;
@@ -82,10 +64,6 @@
 @media (max-width: 700px) {
   .user-profile-page {
     padding-inline: 20px;
-  }
-
-  .user-profile-card {
-    padding: 20px;
   }
 
   .user-profile-name-row {
