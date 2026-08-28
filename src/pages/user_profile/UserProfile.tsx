@@ -115,8 +115,8 @@ export default function UserProfile() {
         description="Review and update the information DUOS holds about you"
         iconSize="none"
       />
-      <section className="user-profile-section user-profile-card">
-        <h1 className="user-profile-section-heading">Full Name</h1>
+      <section className="profile-card">
+        <h1 className="profile-card-heading">Full Name</h1>
         <div className="user-profile-name-row">
           <FormField
             type={FormFieldTypes.TEXT}
@@ -161,22 +161,22 @@ export default function UserProfile() {
           />
         </div>
       </section>
-      <section className="user-profile-section user-profile-card">
+      <section className="profile-card">
         <ExternalProfile
           readonly={false}
         />
       </section>
-      <section className="user-profile-section user-profile-card">
+      <section className="profile-card">
         <AffiliationAndRoles
           user={user as DuosUser}
         />
       </section>
-      <section className="user-profile-section user-profile-card">
+      <section className="profile-card">
         <ResearcherStatus
           user={user as DuosUser}
         />
       </section>
-      <section className="user-profile-section user-profile-card">
+      <section className="profile-card">
         <AcceptedAcknowledgements />
       </section>
     </main>

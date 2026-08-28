@@ -39,7 +39,7 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
 
   return (
     <div className="affiliation-and-roles">
-      <h1 className="user-profile-section-heading">Affiliation & Role</h1>
+      <h1 className="profile-card-heading">Affiliation & Role</h1>
       <div>
         <p className="user-profile-subheading">My Institution</p>
         {institution

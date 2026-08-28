@@ -1,0 +1,20 @@
+.profile-card {
+  margin-top: 48px;
+  padding: 28px 32px 32px;
+  border: 1px solid #d9e4f2;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgb(34 74 120 / 5%);
+}
+
+.profile-card-heading {
+  margin: 0 0 24px;
+  color: #01549f;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .profile-card {
+    padding: 20px;
+  }
+}

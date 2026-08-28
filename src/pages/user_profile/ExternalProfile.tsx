@@ -252,7 +252,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
     : (
         <div className="external-profile">
           <div className="header-container">
-            <h1 className="user-profile-section-heading">
+            <h1 className="profile-card-heading">
               External Profiles
             </h1>
           </div>

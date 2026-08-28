@@ -65,7 +65,7 @@ const ResearcherStatus: React.FC<ResearcherStatusProps> = (props) => {
 
   return (
     <>
-      <h1 className="user-profile-section-heading">Researcher Status</h1>
+      <h1 className="profile-card-heading">Researcher Status</h1>
       <p className="user-profile-subheading">Requestor Status</p>
       <Alert severity={hasCard ? 'success' : 'info'} sx={{ mb: 2 }}>
         {hasCard
