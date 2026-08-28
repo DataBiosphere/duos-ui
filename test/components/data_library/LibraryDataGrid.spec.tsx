@@ -244,6 +244,39 @@ describe('LibraryDataGrid', () => {
     expect(onSelectionChange).toHaveBeenCalledWith([101, 102])
   })
 
+  // Rows off the current page are not in `data`, so a rebuild would silently drop them.
+  it('preserves selections made on another page', async () => {
+    const user = userEvent.setup()
+    const onSelectionChange = vi.fn()
+    const { container } = mountGrid(
+      <LibraryDataGrid
+        assetType={AssetType.DATASETS}
+        data={datasets}
+        total={3}
+        {...{ ...baseProps, selectedDatasetIds: [999], onSelectionChange }}
+      />,
+    )
+    const checkbox = container.querySelector('.MuiDataGrid-row[data-id="101"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    await user.click(checkbox)
+    expect(onSelectionChange).toHaveBeenCalledWith([999, 101])
+  })
+
+  it('drops only this page\'s rows when they are deselected', async () => {
+    const user = userEvent.setup()
+    const onSelectionChange = vi.fn()
+    const { container } = mountGrid(
+      <LibraryDataGrid
+        assetType={AssetType.DATASETS}
+        data={datasets}
+        total={3}
+        {...{ ...baseProps, selectedDatasetIds: [999, 101], onSelectionChange }}
+      />,
+    )
+    const checkbox = container.querySelector('.MuiDataGrid-row[data-id="101"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    await user.click(checkbox)
+    expect(onSelectionChange).toHaveBeenCalledWith([999])
+  })
+
   it('calls onPaginationChange when page changes', async () => {
     const user = userEvent.setup()
     const onPaginationChange = vi.fn()

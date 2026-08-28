@@ -303,6 +303,11 @@ export interface FundingResourceAsset extends Omit<FundingResource, 'studyId'> {
   studyName: string
 }
 
+// Shared: MUI's DataGrid hides its rows-per-page control when the current size is not an option.
+export const PAGE_SIZE_OPTIONS = [25, 50, 100]
+
+export const DEFAULT_PAGE_SIZE = 25
+
 export const ALL_LIBRARY_TABS: TabConfig[] = [
   { key: AssetType.STUDIES, label: 'Studies' },
   { key: AssetType.DATASETS, label: 'Datasets' },

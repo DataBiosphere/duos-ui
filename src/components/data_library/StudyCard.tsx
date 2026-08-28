@@ -18,7 +18,10 @@ const MAX_VISIBLE_DATA_TYPES = 3
 
 interface StudyCardProps {
   study: StudyAggregation
+  /** True only when every one of the study's datasets is selected. */
   selected: boolean
+  /** Some but not all of the study's datasets are selected. */
+  indeterminate?: boolean
   onToggle: (studyId: number) => void
 }
 
@@ -45,7 +48,7 @@ const Stat = ({ icon, value, label }: { icon: React.ReactNode, value: number, la
 
 const outlinedPill = { 'height': 22, 'fontSize': '1.1rem', '& .MuiChip-label': { px: 1 } }
 
-export const StudyCard: React.FC<StudyCardProps> = ({ study, selected, onToggle }) => {
+export const StudyCard: React.FC<StudyCardProps> = ({ study, selected, indeterminate, onToggle }) => {
   const visibleDataTypes = study.dataTypes.slice(0, MAX_VISIBLE_DATA_TYPES)
   const hiddenDataTypeCount = study.dataTypes.length - visibleDataTypes.length
 
@@ -60,6 +63,7 @@ export const StudyCard: React.FC<StudyCardProps> = ({ study, selected, onToggle 
           <Checkbox
             size="small"
             checked={selected}
+            indeterminate={!selected && indeterminate}
             onChange={() => onToggle(study.studyId)}
             slotProps={{ input: { 'aria-label': `Select ${study.studyName}` } }}
             sx={{ p: 0, mt: '2px' }}

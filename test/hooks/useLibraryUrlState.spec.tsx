@@ -7,8 +7,8 @@ import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { AssetType } from 'src/types/library'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
-const TestComponent = () => {
-  const [state, updateState] = useLibraryUrlState()
+const TestComponent = ({ defaultTab }: { defaultTab?: AssetType } = {}) => {
+  const [state, updateState] = useLibraryUrlState(defaultTab)
   return (
     <div>
       <div id="library">{state.library}</div>
@@ -48,7 +48,7 @@ describe('useLibraryUrlState', () => {
       </MemoryRouter>,
     )
     expect(screen.getByText('duos')).toBeInTheDocument()
-    expect(screen.getByText(AssetType.STUDIES)).toBeInTheDocument()
+    expect(screen.getByText(AssetType.DATASETS)).toBeInTheDocument()
     const filtersEl = document.getElementById('filters')!
     const filters = JSON.parse(filtersEl.textContent!)
     expect(filters.accessManagement).toHaveLength(0)
@@ -211,6 +211,33 @@ describe('useLibraryUrlState', () => {
     )
     expect(document.getElementById('page')!.textContent).toBe('0')
     expect(document.getElementById('pageSize')!.textContent).toBe('25')
+  })
+
+  it('rejects a page size the grids do not offer', () => {
+    render(
+      <MemoryRouter initialEntries={['/?pageSize=10']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    expect(document.getElementById('pageSize')!.textContent).toBe('25')
+  })
+
+  it('uses the caller-supplied default tab when the URL carries none', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <TestComponent defaultTab={AssetType.STUDIES} />
+      </MemoryRouter>,
+    )
+    expect(document.getElementById('tab')!.textContent).toBe(AssetType.STUDIES)
+  })
+
+  it('lets the URL override the caller-supplied default tab', () => {
+    render(
+      <MemoryRouter initialEntries={['/?tab=datasets']}>
+        <TestComponent defaultTab={AssetType.STUDIES} />
+      </MemoryRouter>,
+    )
+    expect(document.getElementById('tab')!.textContent).toBe(AssetType.DATASETS)
   })
 })
 

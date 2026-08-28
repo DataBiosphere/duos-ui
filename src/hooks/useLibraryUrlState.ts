@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router'
 import { useCallback, useMemo } from 'react'
-import { AssetType, FilterState, LibraryUrlState, SortOrder } from 'src/types/library'
+import { AssetType, DEFAULT_PAGE_SIZE, FilterState, LibraryUrlState, PAGE_SIZE_OPTIONS, SortOrder } from 'src/types/library'
 
 type ArrayFilterParamConfig = {
   key: keyof Pick<
@@ -96,9 +96,10 @@ const parsePageParam = (searchParams: URLSearchParams): number => {
   return page !== undefined && page > 0 ? page : 0
 }
 
+// Restricted to the offered sizes: a size no grid offers leaves the user with no control to change it again.
 const parsePageSizeParam = (searchParams: URLSearchParams): number => {
   const pageSize = parseIntParam(searchParams.get('pageSize'))
-  return pageSize !== undefined && pageSize > 0 ? pageSize : 25
+  return pageSize !== undefined && PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : DEFAULT_PAGE_SIZE
 }
 
 const parseArrayParamValues = (searchParams: URLSearchParams, param: string): string[] => {
@@ -310,7 +311,7 @@ const applyPageSizeUpdate = (updates: Partial<LibraryUrlState>, searchParams: UR
     return
   }
 
-  if (updates.pageSize === 25) {
+  if (updates.pageSize === DEFAULT_PAGE_SIZE) {
     searchParams.delete('pageSize')
   }
   else {
@@ -343,9 +344,10 @@ const applyHideFiltersUpdate = (updates: Partial<LibraryUrlState>, searchParams:
 
 /**
  * Custom hook to manage library state in URL search params
+ * @param defaultTab tab used when the URL carries none; only the public Data Library opens on Studies
  * @returns [state, updateState] tuple
  */
-export const useLibraryUrlState = () => {
+export const useLibraryUrlState = (defaultTab: AssetType = AssetType.DATASETS) => {
   const [searchParams, setSearchParams] = useSearchParams()
 
   // react-router returns a stable `searchParams` reference per location, so
@@ -356,7 +358,7 @@ export const useLibraryUrlState = () => {
   // was parsed each time.
   const state: LibraryUrlState = useMemo(() => ({
     library: searchParams.get('library') || 'duos',
-    tab: (searchParams.get('tab') as AssetType) || AssetType.STUDIES,
+    tab: (searchParams.get('tab') as AssetType) || defaultTab,
     filters: parseFiltersFromUrl(searchParams),
     page: parsePageParam(searchParams),
     pageSize: parsePageSizeParam(searchParams),
@@ -364,7 +366,7 @@ export const useLibraryUrlState = () => {
     sortField: searchParams.get('sort') || undefined,
     sortOrder: (searchParams.get('order') as SortOrder) || undefined,
     hideFilters: searchParams.get('hideFilters') === 'true',
-  }), [searchParams])
+  }), [searchParams, defaultTab])
 
   const updateState = useCallback((updates: Partial<LibraryUrlState>) => {
     const newParams = new URLSearchParams(searchParams)
