@@ -351,9 +351,8 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   //   1. URL match (with state from tab click taking priority over findIndex)
   //   2. Context fallback for detail pages whose URL doesn't appear in any tab config
   //   3. Hidden sub-tab registration - a cold load of a detail page, with no context to keep
-  const resolvedTab = urlMatchedTab !== -1
-    ? urlMatchedTab
-    : (activeTab != null && tabs.length > activeTab ? activeTab : hiddenSearchTab)
+  const contextFallbackTab = activeTab != null && tabs.length > activeTab ? activeTab : hiddenSearchTab
+  const resolvedTab = urlMatchedTab !== -1 ? urlMatchedTab : contextFallbackTab
 
   useEffect(() => {
     if (resolvedTab !== -1) {
@@ -383,8 +382,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   // land on the first console the user can see. Only a user with no console roles at all falls
   // through to the first tab.
   if (initialTab === -1 && tabs.length > 0) {
-    const firstConsole = tabs.findIndex(tab => tab.isConsole)
-    initialTab = firstConsole >= 0 ? firstConsole : 0
+    initialTab = Math.max(tabs.findIndex(tab => tab.isConsole), 0)
   }
 
   return (

@@ -145,10 +145,8 @@ const mountHeaderThenNavigate = async (path: string, destination: string, user: 
   )
   await act(async () => {})
 
-  return async () => {
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'go to destination' }))
-    })
+  return () => {
+    fireEvent.click(screen.getByRole('button', { name: 'go to destination' }))
   }
 }
 
@@ -313,7 +311,7 @@ describe('DuosHeader', () => {
       const goToDetailPage = await mountHeaderThenNavigate(from, to, everyRole)
       expect(screen.getByRole('tab', { name: consoleLabel })).toHaveClass('Mui-selected')
 
-      await goToDetailPage()
+      goToDetailPage()
 
       expect(screen.getByRole('tab', { name: consoleLabel })).toHaveClass('Mui-selected')
       expect(screen.getByRole('tab', { name: 'Data Library' })).not.toHaveClass('Mui-selected')
