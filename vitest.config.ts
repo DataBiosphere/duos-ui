@@ -28,8 +28,14 @@ export default defineConfig({
     css: false,
     globals: true,
     environment: 'jsdom',
-    pool: 'vmThreads',
-    setupFiles: ['./test/setup.ts'],
+    // NB: vmThreads leaks memory across test files (its VM contexts are never
+    // released), so a full run grows unbounded and gets OOM-killed. Even with
+    // poolOptions.vmThreads.memoryLimit the run still gets killed, so use the
+    // standard threads pool, which runs the whole suite reliably.
+    pool: 'threads',
+    // setup.jsdom.ts repairs the web storage globals that the threads pool
+    // leaves broken; see the comment in that file itself.
+    setupFiles: ['./test/setup.ts', './test/setup.jsdom.ts'],
     // Vitest's 5s default is a wall-clock budget. Under heavy CI load, render-heavy
     // tests exhaust it and fail without any defect; worse, an abandoned test's pending
     // userEvent keystrokes then bleed into the next test. Give tests real headroom.

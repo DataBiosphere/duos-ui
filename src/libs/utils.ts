@@ -207,7 +207,8 @@ export const Navigation = {
   /**
    * This function is used to redirect the user to one of the following locations in order of priority:
    * - The redirectTo query parameter in the URL if it exists
-   * - The first console tab that is rendered for the user if it exists
+   * - The first console tab that is rendered for the user if it exists (the role-agnostic Data
+   *   Library tab is not a console, so it is never the landing page)
    * - The root path ("/") if no redirectTo or console tab is available
    *
    * @param user The user object to determine which console tabs are available
@@ -217,7 +218,7 @@ export const Navigation = {
   console: async (user: DuosUser, navigate?: (path: string) => void): Promise<void> => {
     const queryParams = new URLSearchParams(globalThis.location.search)
     const redirectTo = queryParams?.get('redirectTo')
-    const firstConsole = headerTabsConfig.find(config => config.isRendered(user))
+    const firstConsole = headerTabsConfig.find(config => config.isConsole && config.isRendered(user))
     const page = redirectTo || (firstConsole ? firstConsole.link : '/')
     if (navigate) {
       navigate(page)

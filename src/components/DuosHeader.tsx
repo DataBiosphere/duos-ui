@@ -20,8 +20,8 @@ import { DuosUser } from 'src/types/model'
 import { useNavigationState } from 'src/contexts/NavigationStateContext'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUserIsLogged } from 'src/hooks/useSession'
-import { SO_CONSOLE_SECTIONS, SO_DASHBOARD_ROUTE } from 'src/pages/signing_official_console/signingOfficialConsoleRoutes'
-import { RESEARCHER_CONSOLE_SECTIONS, RESEARCHER_DASHBOARD_ROUTE } from 'src/pages/researcher_console/researcherConsoleRoutes'
+import { MY_INSTITUTION_LIBRARY_ROUTE, SO_CONSOLE_SECTIONS, SO_DASHBOARD_ROUTE } from 'src/pages/signing_official_console/signingOfficialConsoleRoutes'
+import { RESEARCHER_CONSOLE_SECTIONS, RESEARCHER_DASHBOARD_ROUTE, RESEARCHER_DETAIL_ROUTES } from 'src/pages/researcher_console/researcherConsoleRoutes'
 
 export type { SubTab }
 
@@ -31,6 +31,11 @@ export interface Tab {
   search?: string
   children?: SubTab[]
   isRendered: (user: DuosUser) => boolean
+  /**
+   * Marks a role-scoped console landing page. `Navigation.console` sends a user to the first
+   * console they can see at sign-in, so the role-agnostic Data Library tab is not one.
+   */
+  isConsole?: boolean
 }
 
 interface DuosHeaderState {
@@ -59,17 +64,36 @@ const isOnlySigningOfficial = (user: DuosUser): boolean => {
   return user.isSigningOfficial && !(user.isAdmin || user.isChairPerson || user.isMember || user.isDataSubmitter)
 }
 
+export const DATA_LIBRARY_ROUTE = '/datalibrary'
+
 /**
  * Tab objects in this array support an `isRendered` function per top level Tab as well as
  * an optional `isRendered` (defaults to `true`) function for each sub-tab in `children`
  */
 export const headerTabsConfig: Tab[] = [
   {
+    // First in the bar and visible to every logged-in user, whatever their roles: the Data
+    // Library is not owned by any console. `search` keeps the tab highlighted across the other
+    // library versions (/datalibrary/anvil and friends); /datalibrary/myinstitution is the one
+    // exception, and stays with the SO Console via the exact-match tier in `isExactTabMatch`.
+    label: 'Data Library',
+    link: DATA_LIBRARY_ROUTE,
+    search: 'datalibrary',
+    // Study and dataset detail pages live outside /datalibrary, but are reached from its
+    // results. Keep them registered as hidden children so a direct load or refresh still
+    // highlights Data Library. The trailing slashes avoid claiming Researcher Console routes
+    // such as /datasets and /dataset_submissions.
+    children: [
+      { label: 'Study Details', link: '/studies', search: '/studies/', isRendered: () => false },
+      { label: 'Dataset Details', link: '/dataset', search: '/dataset/', isRendered: () => false },
+    ],
+    isRendered: () => true,
+  },
+  {
     label: 'Admin Console',
     link: '/admin_manage_dar_collections',
     children: [
       { label: 'Data Access Requests', link: '/admin_manage_dar_collections' },
-      { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
       { label: 'DACs', link: '/manage_dac' },
       { label: 'Users', link: '/admin_manage_users' },
       { label: 'Institutions', link: '/admin_manage_institutions' },
@@ -77,47 +101,53 @@ export const headerTabsConfig: Tab[] = [
       { label: 'DAA Associations', link: '/admin_daa_associations' },
     ],
     isRendered: user => user.isAdmin,
+    isConsole: true,
   },
   {
     label: 'SO Console',
     link: SO_DASHBOARD_ROUTE,
     children: [
       { label: 'Dashboard', link: SO_DASHBOARD_ROUTE, hideSubTabBar: true },
-      ...SO_CONSOLE_SECTIONS,
+      // The institution's Data Library is advertised on the Dashboard tile only, now that the
+      // Data Library has a tab of its own. It stays registered so its URL still resolves here
+      // rather than to that tab.
+      ...SO_CONSOLE_SECTIONS.map(section =>
+        section.link === MY_INSTITUTION_LIBRARY_ROUTE ? { ...section, isRendered: () => false } : section,
+      ),
     ],
     isRendered: user => user.isSigningOfficial,
+    isConsole: true,
   },
   {
     label: 'DAC Console',
     link: '/dac_console',
     search: 'dac_console',
+    // The Dashboard is this tab's own landing page and its tiles are the only advertised route
+    // to the sections below, so there is no sub-tab bar to draw. The sections are still
+    // registered so links carrying the active DAC tab do not fall through to another console
+    // that shares the same route.
     children: [
-      { label: 'Dashboard', link: '/dac_console' },
-      { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
-      // Dashboard-only destinations still need to be registered so links carrying the active DAC
-      // tab do not fall through to another console that shares the same route.
       { label: 'Data Access Requests', link: '/dac_console_dar_requests', isRendered: () => false },
       { label: 'DAC Datasets', link: '/dac_datasets', isRendered: () => false },
     ],
     isRendered: user => user.isChairPerson || user.isMember,
+    isConsole: true,
   },
   {
     label: 'Researcher Console',
-    // Lands on the Dashboard like the SO Console; `search` keeps the console highlighted
-    // anywhere in the Data Library. `Navigation.console` sends a researcher to this same `link`
-    // at sign-in, so the Dashboard is also the post-login landing page.
+    // Lands on the Dashboard like the SO Console. `Navigation.console` sends a researcher to this
+    // same `link` at sign-in, so the Dashboard is also the post-login landing page.
     link: RESEARCHER_DASHBOARD_ROUTE,
-    search: 'datalibrary',
-    children: [
-      { label: 'Dashboard', link: RESEARCHER_DASHBOARD_ROUTE },
-      { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
-      // The Dashboard is by design the only advertised route to these pages, so they stay out of
-      // the sub-tab bar. They are still registered here because isChildTabMatch reads the raw
-      // children: without an entry their URLs match no tab at all, and the header falls back to
-      // highlighting whichever console the user happens to have first.
-      ...RESEARCHER_CONSOLE_SECTIONS.map(section => ({ ...section, isRendered: () => false })),
-    ],
+    // As with the DAC Console, the Dashboard's tiles are the only advertised route to these
+    // pages, so they stay out of the sub-tab bar. They are still registered because
+    // isExactTabMatch and isSearchTabMatch read the raw children: without an entry their URLs
+    // match no tab at all, and the header falls back to the first console the user can see.
+    // The detail routes are here for that same reason - their URLs carry an id, so only a
+    // `search` fragment can claim them.
+    children: [...RESEARCHER_CONSOLE_SECTIONS, ...RESEARCHER_DETAIL_ROUTES]
+      .map(section => ({ ...section, isRendered: () => false })),
     isRendered: user => user.isResearcher && !isOnlySigningOfficial(user),
+    isConsole: true,
   },
 ]
 
@@ -274,21 +304,38 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
 
   const tabs = headerTabsConfig.filter(data => data.isRendered(currentUser))
 
-  // returns true if the tab's own link/search matches the current URL (not via children)
-  const isDirectTabMatch = (tab: Tab): boolean =>
-    tab.link === location.pathname || !!(tab.search && location.pathname.includes(tab.search))
+  // returns true if the current URL is exactly the tab's own link or one of its children's
+  const isExactTabMatch = (tab: Tab): boolean =>
+    tab.link === location.pathname
+    || (tab.children?.some(subtab => subtab.link === location.pathname) ?? false)
 
-  // returns true if any child of this tab matches the current URL
-  const isChildTabMatch = (tab: Tab): boolean =>
-    tab.children?.some(subtab =>
-      subtab.link === location.pathname || !!(subtab.search && location.pathname.includes(subtab.search)),
-    ) ?? false
+  const matchesSearch = (entry: Tab | SubTab): boolean =>
+    !!entry.search && location.pathname.includes(entry.search)
 
-  // Prefer a direct top-level match over a child-only match.
-  // This prevents e.g. Admin Console (which has /datalibrary as a child) from winning
-  // over Researcher Console (whose own link IS /datalibrary).
-  const directTabMatch = tabs.findIndex(isDirectTabMatch)
-  const urlDerivedTab = directTabMatch >= 0 ? directTabMatch : tabs.findIndex(isChildTabMatch)
+  // returns true if the tab claims the current URL by a `search` fragment of its own or of a
+  // sub-tab the user can actually see. That is real ownership of the URL, so it outranks the tab
+  // the user happened to be on before.
+  const isVisibleSearchTabMatch = (tab: Tab): boolean =>
+    matchesSearch(tab) || visibleSubTabs(tab.children, currentUser).some(matchesSearch)
+
+  // returns true if the only thing claiming the current URL is a sub-tab that is registered but
+  // never listed in the bar. Those entries exist to answer "which tab owns this URL" for a cold
+  // load, so they rank below the navigation context: a study opened from inside a console has to
+  // leave that console highlighted rather than jump the highlight to the Data Library.
+  const isHiddenSearchTabMatch = (tab: Tab): boolean => {
+    const visible = visibleSubTabs(tab.children, currentUser)
+    return (tab.children ?? []).some(subtab => !visible.includes(subtab) && matchesSearch(subtab))
+  }
+
+  const claimsUrl = (tab: Tab): boolean =>
+    isExactTabMatch(tab) || isVisibleSearchTabMatch(tab) || isHiddenSearchTabMatch(tab)
+
+  // Prefer an exact match over a `search` fragment match. This is what keeps
+  // /datalibrary/myinstitution on the SO Console, whose section link spells that route out, rather
+  // than on the Data Library tab, whose broader `search` covers every library version.
+  const exactTabMatch = tabs.findIndex(isExactTabMatch)
+  const urlDerivedTab = exactTabMatch >= 0 ? exactTabMatch : tabs.findIndex(isVisibleSearchTabMatch)
+  const hiddenSearchTab = tabs.findIndex(isHiddenSearchTabMatch)
 
   // NavigationTabsComponent always sets location.state.selectedMenuTab when a tab is clicked.
   // Honour that so clicking e.g. "Researcher Console" always wins, even when the destination
@@ -296,26 +343,28 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   const stateTab: number | undefined = location?.state?.selectedMenuTab
 
   let urlMatchedTab = urlDerivedTab
-  if (stateTab != null && tabs.length > stateTab && (isDirectTabMatch(tabs[stateTab]) || isChildTabMatch(tabs[stateTab]))) {
+  if (stateTab != null && tabs.length > stateTab && claimsUrl(tabs[stateTab])) {
     urlMatchedTab = stateTab
   }
 
+  // resolve the tab in priority order:
+  //   1. URL match (with state from tab click taking priority over findIndex)
+  //   2. Context fallback for detail pages whose URL doesn't appear in any tab config
+  //   3. Hidden sub-tab registration - a cold load of a detail page, with no context to keep
+  const contextFallbackTab = activeTab != null && tabs.length > activeTab ? activeTab : hiddenSearchTab
+  const resolvedTab = urlMatchedTab !== -1 ? urlMatchedTab : contextFallbackTab
+
   useEffect(() => {
-    if (urlMatchedTab !== -1) {
-      setActiveTab(urlMatchedTab)
+    if (resolvedTab !== -1) {
+      setActiveTab(resolvedTab)
     }
-  }, [urlMatchedTab, setActiveTab])
+  }, [resolvedTab, setActiveTab])
 
   let initialSubTab: number = -1
 
-  // populate initialTab:
-  //   1. URL match (with state from tab click taking priority over findIndex)
-  //   2. Context fallback for detail pages whose URL doesn't appear in any tab config
-  //   3. First available tab as last resort
-  let initialTab = urlMatchedTab
-  if (initialTab === -1 && activeTab != null && tabs.length > activeTab) {
-    initialTab = activeTab
-  }
+  // The last resort below is a guess rather than a match, so it is deliberately not written back
+  // to the navigation context by the effect above.
+  let initialTab = resolvedTab
 
   // populate initialSubTab
   if (initialTab !== -1) {
@@ -328,8 +377,12 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     )
   }
 
+  // A page that matches no tab at all, not even a hidden registration, and has no context to fall
+  // back on belongs to a console, not to the role-agnostic Data Library that sits at index 0 - so
+  // land on the first console the user can see. Only a user with no console roles at all falls
+  // through to the first tab.
   if (initialTab === -1 && tabs.length > 0) {
-    initialTab = 0
+    initialTab = Math.max(tabs.findIndex(tab => tab.isConsole), 0)
   }
 
   return (
