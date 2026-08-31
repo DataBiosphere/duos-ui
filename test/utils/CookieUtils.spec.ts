@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { CookieUtils } from 'src/utils/CookieUtils'
 
-// The stub below replaces `document.cookie` with a plain writable property, so
-// an assignment overwrites the whole string instead of appending one pair. That
-// is what makes the attribute assertions possible: the attributes a real
-// document.cookie setter consumes stay readable here.
+// Keep assigned attributes observable; a real document.cookie setter consumes them.
 describe('CookieUtils', () => {
   beforeEach(() => {
     Object.defineProperty(document, 'cookie', {
@@ -52,7 +49,7 @@ describe('CookieUtils', () => {
 
     it('should read back a value written by setAcknowledged', () => {
       CookieUtils.setAcknowledged()
-      // Drop the attributes the browser would strip before a read.
+      // Simulate browser reads by dropping the consumed attributes.
       document.cookie = document.cookie.split(';')[0]
       expect(CookieUtils.getAcknowledged()).toBe(true)
     })
@@ -77,7 +74,6 @@ describe('CookieUtils', () => {
       CookieUtils.setAcknowledged()
       expect(document.cookie).toContain('path=/')
       expect(document.cookie).toContain(`max-age=${400 * 24 * 60 * 60}`)
-      // Strict, not Lax: nothing needs this cookie on a cross-site navigation.
       expect(document.cookie).toContain('SameSite=Strict')
     })
 

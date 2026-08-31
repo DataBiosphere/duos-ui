@@ -1,6 +1,3 @@
-// Name of the GDPR cookie-banner preference cookie. The client reads it with
-// `document.cookie`, so HttpOnly cannot apply — the other hardening attributes
-// below are the full set available to it.
 const COOKIE_CONTROL = 'cookie_control'
 
 export const getCookiePairs = () => {
@@ -24,9 +21,7 @@ export const getAcknowledged = () => {
     return (control?.acknowledged === true)
   }
   catch {
-    // The value is user-controlled: anyone can hand-edit the cookie, and an
-    // older release wrote it unencoded. A corrupt value must read as "not
-    // acknowledged", not throw during render.
+    // Treat malformed or legacy values as unacknowledged.
     return false
   }
 }
@@ -36,13 +31,9 @@ export const setAcknowledged = () => {
   const control = { acknowledged: true, timestamp: Date.now() }
   // 400 - day cookie expiration (days * hours * minutes * seconds)
   const expiration = 400 * 24 * 60 * 60
-  // Strict, not Lax: this cookie takes no part in the OAuth callback, so
-  // nothing needs it on a cross-site navigation.
-  // Secure only over HTTPS — unconditional Secure would make plain-HTTP dev
-  // setups drop the cookie silently.
+  // Unlike the session cookie, this preference is not needed on cross-site redirects.
+  // Add Secure only when HTTPS is available; local development may use HTTP.
   const secure = window.location.protocol === 'https:' ? '; Secure' : ''
-  // The value is encoded because getCookiePairs() decodes. Raw JSON reads back
-  // unchanged today, but the two paths must agree.
   const value = encodeURIComponent(JSON.stringify(control))
   document.cookie = `${COOKIE_CONTROL}=${value}; path=/; max-age=${expiration}; SameSite=Strict${secure}`
 }

@@ -173,11 +173,6 @@ describe('plugin registration order', () => {
   })
 })
 
-// Story 5-D: the session cookie is configured in Epic 1; this block is the
-// hardening-phase verification that the PRODUCTION options are the strict set.
-// Asserted against the mocked @fastify/session registration because that is the
-// only place buildApp()'s own options are visible — session.test.ts and the load
-// harness stand the plugin up themselves and so cannot catch a drift here.
 describe('session cookie attributes', () => {
   async function sessionCookieOptions() {
     const { default: sessionPlugin } = await import('@fastify/session')
@@ -190,9 +185,6 @@ describe('session cookie attributes', () => {
   it('sets HttpOnly, SameSite=Lax and Path=/', async () => {
     const cookie = await sessionCookieOptions()
     expect(cookie.httpOnly).toBe(true)
-    // Lax, not Strict: Strict would strip the cookie from the top-level
-    // redirect B2C makes back to /auth/callback, which would arrive sessionless
-    // and lose the PKCE verifier and state.
     expect(cookie.sameSite).toBe('lax')
     expect(cookie.path).toBe('/')
   })
