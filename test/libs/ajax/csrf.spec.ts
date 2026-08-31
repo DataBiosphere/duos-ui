@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { CSRF_ERROR_CODE, getCsrfToken, isCsrfRejection, resetCsrfToken } from 'src/libs/ajax/csrf'
+import { CSRF_ERROR_CODE, CsrfTokenSessionExpiredError, getCsrfToken, isCsrfRejection, resetCsrfToken } from 'src/libs/ajax/csrf'
 
 describe('csrf', () => {
   let fetchMock: ReturnType<typeof vi.fn>
@@ -68,11 +68,32 @@ describe('csrf', () => {
 
   it('rejects on a non-ok response without caching it', async () => {
     fetchMock
-      .mockResolvedValueOnce({ ok: false, status: 401, json: () => Promise.resolve({}) })
+      .mockResolvedValueOnce({ ok: false, status: 500, json: () => Promise.resolve({}) })
+      .mockResolvedValueOnce(tokenResponse('csrf-after-recovery'))
+
+    await expect(getCsrfToken()).rejects.toThrow('500')
+    expect(await getCsrfToken()).toBe('csrf-after-recovery')
+  })
+
+  // /auth/csrf-token is gated on an authenticated session (story 5-B), so its
+  // 401 is a session-expired signal, not a generic failure — the adapter keys
+  // its redirect handling on this type.
+  it('throws the typed session-expired error on a 401, without caching it', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ ok: false, status: 401, json: () => Promise.resolve({ error: 'unauthenticated' }) })
       .mockResolvedValueOnce(tokenResponse('csrf-after-login'))
 
-    await expect(getCsrfToken()).rejects.toThrow('401')
+    await expect(getCsrfToken()).rejects.toBeInstanceOf(CsrfTokenSessionExpiredError)
     expect(await getCsrfToken()).toBe('csrf-after-login')
+  })
+
+  it('does not use the typed error for other non-ok statuses', async () => {
+    fetchMock.mockResolvedValueOnce({ ok: false, status: 502, json: () => Promise.resolve({}) })
+
+    const failure = await getCsrfToken().catch((e: unknown) => e)
+
+    expect(failure).toBeInstanceOf(Error)
+    expect(failure).not.toBeInstanceOf(CsrfTokenSessionExpiredError)
   })
 
   describe('isCsrfRejection', () => {

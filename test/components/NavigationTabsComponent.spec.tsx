@@ -134,6 +134,19 @@ describe('NavigationTabsComponent', () => {
     expect(hidden.container.querySelector('.navbar-sub')).not.toBeInTheDocument()
   })
 
+  // A section can be registered under a tab but kept out of the bar (advertised on a dashboard
+  // tile only), which leaves selectedSubTab at -1. The bar has to stay put so the tab's other
+  // sections remain reachable, rather than leaving the tab highlighted with no sub-navigation.
+  it('renders the subtab bar with nothing selected when the current page is not a listed subtab', () => {
+    const { container } = renderComponent({ initialTab: 0, initialSubTab: -1 })
+    const subTabBar = container.querySelector('.navbar-sub')
+
+    expect(subTabBar).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'SubTab 1' })).toBeVisible()
+    expect(screen.getByRole('tab', { name: 'SubTab 2' })).toBeVisible()
+    expect(subTabBar?.querySelector('[aria-selected="true"]')).toBeNull()
+  })
+
   it('displays sign-in button when not logged in and horizontal', () => {
     renderComponent({ isLogged: false })
     expect(screen.getByText('Sign In')).toBeVisible()

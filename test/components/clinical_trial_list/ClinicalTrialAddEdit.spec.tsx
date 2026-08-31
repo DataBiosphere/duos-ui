@@ -82,10 +82,7 @@ describe('ClinicalTrialAddEdit component', () => {
   it('edits existing trial and saves changes', async () => {
     const user = userEvent.setup()
     const trials: ClinicalTrial[] = [sampleTrial]
-    const onChangeFn = vi.fn((updated: ClinicalTrial[]) => {
-      expect(updated[0].title).toBe('Baseline Trial Edited')
-      expect(updated[0].phase).toBe(ClinicalTrialPhase.PHASE2)
-    })
+    const onChangeFn = vi.fn()
     const { container } = render(
       <ClinicalTrialAddEdit
         id={0}
@@ -98,5 +95,10 @@ describe('ClinicalTrialAddEdit component', () => {
     await user.clear(container.querySelector('#title')!)
     await user.type(container.querySelector('#title')!, 'Baseline Trial Edited')
     await user.click(container.querySelector('.collaborator-form-add-save-button')!)
+
+    expect(onChangeFn).toHaveBeenCalledTimes(1)
+    const [updated] = onChangeFn.mock.calls[0] as [ClinicalTrial[]]
+    expect(updated[0].title).toBe('Baseline Trial Edited')
+    expect(updated[0].phase).toBe(ClinicalTrialPhase.PHASE2)
   })
 })

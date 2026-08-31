@@ -45,7 +45,7 @@ export default function AcceptedAcknowledgements() {
 
   return (
     <div className="accepted-acknowledgements">
-      <h1 className="user-profile-section-heading">Accepted Terms & Policies</h1>
+      <h1 className="profile-card-heading">Accepted Terms & Policies</h1>
       {acceptedAcknowledgements.length === 0
         ? <p>No Accepted Terms & Policies Found</p>
         : (

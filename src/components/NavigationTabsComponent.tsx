@@ -240,9 +240,11 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
         )}
       </ul>
 
-      {/* Sub Tabs - only show if a valid subtab is selected */}
+      {/* Sub Tabs - the bar renders whenever the selected tab has any. `selectedSubTab` is -1 when
+          the current page is registered under the tab but kept out of the bar (a section reached
+          from a dashboard tile only), and the bar then renders with nothing selected rather than
+          disappearing and stranding the user with no sub-navigation. */}
       {renderedSubTabs.length > 0
-        && selectedSubTab >= 0
         && !renderedSubTabs[selectedSubTab]?.hideSubTabBar
         && (
           <Box className="duos-navigation-box navbar-sub">

@@ -12,9 +12,12 @@ the test is that the generated blank template lines up with what Consent actuall
 |---|---|---|
 | `valid/minimal-valid.csv` | `.../v1/valid/minimal-valid.csv` | `3731e0ee` |
 | `valid/multi-consent-group-valid.csv` | `.../v1/valid/multi-consent-group-valid.csv` | `3731e0ee` |
+| `invalid/unknown-field.csv` | `.../v1/invalid/unknown-field.csv` | `3731e0ee` |
 
-Only the two valid fixtures are copied; the invalid ones exercise the parser, which does not run in
-this repository.
+The valid fixtures are copied for the round-trip spec, and one invalid fixture for the end-to-end
+spec, which needs a template Consent will reject. `unknown-field.csv` is the smallest: exactly one
+error, so the assertion does not depend on ordering. The rest exercise the parser, which does not
+run here.
 
 Keep these byte-identical to their source. If the contract changes, re-copy rather than edit — and
 note that provenance cannot be recorded inside the CSVs themselves, since v1 requires the canonical

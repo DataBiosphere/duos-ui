@@ -324,6 +324,44 @@ describe('BFF auth route registration', () => {
     await localApp.close()
   })
 
+  // buildApp() must wire the GATED /auth/csrf-token handler (story 5-B), not
+  // the pre-gate inline route. With @fastify/session mocked away there is no
+  // session at all, so the gate's 401 — rather than the mocked generateCsrf's
+  // 'test-csrf-token' — is proof the shared handler is the one registered.
+  it('registers the gated /auth/csrf-token handler: anonymous requests get 401, no token', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({ method: 'GET', url: '/auth/csrf-token' })
+
+    expect(res.statusCode).toBe(401)
+    expect(res.json()).toEqual({ error: 'unauthenticated' })
+    expect(res.body).not.toContain('test-csrf-token')
+
+    await localApp.close()
+  })
+
+  // The Fetch Metadata guard (story 5-B) must sit on /auth/me — it fronts
+  // Consent's state-changing GET /api/user/me — and must NOT sit on
+  // /auth/callback, which is a legitimate cross-site navigation from B2C.
+  it('guards /auth/me with Fetch Metadata but leaves /auth/callback navigable', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const { getMe } = await import('../src/auth/me.js')
+    const { handleCallback } = await import('../src/auth/callback.js')
+    const crossSite = { 'sec-fetch-site': 'cross-site', 'sec-fetch-mode': 'navigate' }
+
+    const me = await localApp.inject({ method: 'GET', url: '/auth/me', headers: crossSite })
+    expect(me.statusCode).toBe(403)
+    expect(me.json()).toEqual({ error: 'cross_site_request_blocked' })
+    expect(getMe).not.toHaveBeenCalled()
+
+    const callback = await localApp.inject({ method: 'GET', url: '/auth/callback', headers: crossSite })
+    expect(callback.statusCode).toBe(200)
+    expect(handleCallback).toHaveBeenCalled()
+
+    await localApp.close()
+  })
+
   // The app's setNotFoundHandler() serves the SPA shell (200) for any
   // unmatched route, so an unregistered /auth/* route can't be distinguished
   // from a registered one by status code alone — assert the handler itself

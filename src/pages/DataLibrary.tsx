@@ -13,6 +13,9 @@ import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import { useLibraryExportableDatasets } from 'src/hooks/useLibraryExportableDatasets'
 import LibraryPageShell from 'src/components/data_library/LibraryPageShell'
 import LibraryFooter from 'src/components/data_library/LibraryFooter'
+import { selectedStudyIds as studyIdsForSelection, studyIdByDatasetId } from 'src/components/data_library/selectionStudyMap'
+import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
+import StudyCardGrid from 'src/components/data_library/StudyCardGrid'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import SearchBar from 'src/components/SearchBar'
 
@@ -68,7 +71,7 @@ export const DataLibrary: React.FC = () => {
     }
   }, [query, institutionId, institutionName, restrictToPublicVisibility])
 
-  const pageState = useLibraryPageState(libraryConfig)
+  const pageState = useLibraryPageState(libraryConfig, AssetType.STUDIES)
   const { urlState, data, currentAsset, handleSearchChange } = pageState
 
   const [selectedDatasetIds, setSelectedDatasetIds] = useState<number[]>([])
@@ -94,18 +97,35 @@ export const DataLibrary: React.FC = () => {
     [datasets],
   )
 
-  const selectedStudyIds = useMemo(() => {
-    if (!data?.items) return []
-    return currentAsset.getStudyIdsForSelection(data.items, selectedDatasetIds)
-  }, [data, selectedDatasetIds, currentAsset])
+  // Selection is global, so a footer counting only the current page's rows under-reports studies
+  // as soon as a selection spans pages. Rows are kept per asset: row ids mean different things
+  // across tabs, and each asset reads only its own row shape.
+  // Learned from the rows on screen as the user selects, because a study's datasets can sit on
+  // different pages: counting studies from the visible page alone drops one whose remaining
+  // selected datasets live elsewhere.
+  const [studyByDataset, setStudyByDataset] = useState<Map<number, number>>(new Map())
 
   const handleSelectionChange = useCallback((datasetIds: number[]) => {
     setSelectedDatasetIds(datasetIds)
-  }, [])
+    setStudyByDataset(previous => new Map([
+      ...previous,
+      ...studyIdByDatasetId(currentAsset, data?.items ?? []),
+    ]))
+  }, [data, currentAsset])
+
+  const selectedStudyIds = useMemo(
+    () => studyIdsForSelection(studyByDataset, selectedDatasetIds),
+    [studyByDataset, selectedDatasetIds],
+  )
 
   const handleApplyForAccess = () => {
     applyForAccess(selectedDatasetIds, navigate)
   }
+
+  const renderGrid = useCallback((gridProps: React.ComponentProps<typeof LibraryDataGrid>) =>
+    gridProps.assetType === AssetType.STUDIES
+      ? <StudyCardGrid {...gridProps} />
+      : <LibraryDataGrid {...gridProps} />, [])
 
   const header = (
     <>
@@ -128,6 +148,7 @@ export const DataLibrary: React.FC = () => {
       tabs={ALL_LIBRARY_TABS}
       header={header}
       showSoApprovalReminder
+      renderGrid={renderGrid}
       gridExtras={{
         selectedDatasetIds,
         onSelectionChange: handleSelectionChange,

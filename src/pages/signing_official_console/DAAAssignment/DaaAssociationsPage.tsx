@@ -70,6 +70,12 @@ export interface DaaAssociationsPageProps {
    * the `Admin` scope, which is read-only by definition.
    */
   readonly readOnly?: boolean
+  /**
+   * Optional guidance rendered between the header and the tab bar. The SO
+   * Console uses it for the Principal Investigator definition, which is only
+   * relevant where pre-authorization is actually granted.
+   */
+  readonly helpContent?: React.ReactNode
 }
 
 /**
@@ -86,6 +92,7 @@ export default function DaaAssociationsPage({
   description,
   scope,
   readOnly = false,
+  helpContent,
 }: Readonly<DaaAssociationsPageProps>): React.JSX.Element {
   usePageTitle(title)
   const [researchers, setResearchers] = useState<DuosUser[]>([])
@@ -152,6 +159,13 @@ export default function DaaAssociationsPage({
           description={description}
         />
       </Box>
+      {helpContent != null && (
+        // Left-aligned with the header above rather than the tab bar below, so
+        // the guidance reads as part of the page's introduction.
+        <Box sx={{ paddingLeft: '4rem', paddingRight: '5rem', marginBottom: '1.5rem' }}>
+          {helpContent}
+        </Box>
+      )}
       <Box
         sx={{
           borderTop: 1,
