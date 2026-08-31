@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Auth } from 'src/libs/auth/auth'
+import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
 import { TosService } from 'src/libs/TosService'
 import SimpleButton from 'src/components/SimpleButton'
-import { useNavigate } from 'react-router'
 import { useUserIsLogged } from 'src/hooks/useSession'
 
 export default function TermsOfService() {
-  const navigate = useNavigate()
   const [tosText, setTosText] = useState<React.ReactElement | null>(null)
   const isLogged = useUserIsLogged() ?? false
 
@@ -22,11 +20,13 @@ export default function TermsOfService() {
     // update Sam that ToS was rejected
     await TosService.rejectTos()
 
-    // Log the user out and send them back home. The navigation covers the
-    // legacy flow, where Auth.signOut only clears local state; in BFF mode
-    // Auth.signOut follows up with a full-page reload to '/'.
-    await Auth.signOut()
-    navigate('/')
+    // Log the user out and send them back home. Auth.signOut owns the
+    // navigation (story 5-E); an unconfirmed sign-out stays on this page and
+    // reports, because the session may still be live.
+    const result = await Auth.signOut('/')
+    if (result.status === 'unconfirmed') {
+      reportUnconfirmedSignOut()
+    }
   }
 
   return (

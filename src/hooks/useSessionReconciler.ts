@@ -153,6 +153,13 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
   // results still resident. Storage cannot answer "whose data does THIS
   // tab's cache hold", so the tab tracks it itself and clears on change.
   const cacheIdentityRef = useRef<number>(Storage.getCurrentUser().userId)
+  // Set when a bootstrap ended in an UNCONFIRMED sign-out (story 5-E): the
+  // session may still be authenticated, nothing was cleaned up, and the user
+  // holds a persistent Retry notice. State is unknown, so this tab stops
+  // classifying probes into fresh bootstraps — the failure that ended the run
+  // would repeat on every probe (focus, TTL) and stack a notice each time.
+  // Cleared when a probe reports the session finally gone.
+  const bootstrapHaltedRef = useRef<boolean>(false)
 
   // Unmount cancels whatever is in flight.
   useEffect(() => () => {
@@ -163,6 +170,9 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
 
   useEffect(() => {
     if (!sessionInfo?.authenticated) {
+      // The session is gone, so an earlier unconfirmed sign-out resolved
+      // itself — this tab may bootstrap again if a session reappears.
+      bootstrapHaltedRef.current = false
       // The session disappeared — genuine sign-out/expiry, or a transient
       // failure the probe reports as unauthenticated. An in-flight bootstrap
       // must not keep acting, and the token must be RETIRED, not just
@@ -228,6 +238,14 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
     }
 
     // Full bootstrap: no local identity, a different user, or no profile.
+    if (bootstrapHaltedRef.current) {
+      // Halted by an unconfirmed sign-out (see bootstrapHaltedRef). Record the
+      // classification anyway, or `unclassifiedIdentityChange` would hold the
+      // spinner up forever; the Retry notice owns the resolution.
+      // oxlint-disable-next-line react/set-state-in-effect
+      setSnapshot(prev => ({ ...prev, classifiedProbe: sessionInfo }))
+      return
+    }
     const token: ActiveBootstrap = { targetUserId, cancelled: false }
     activeBootstrapRef.current = token
     setSnapshot({ classifiedProbe: sessionInfo, bootstrapRunning: true })
@@ -255,6 +273,13 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
     ).then((outcome) => {
       if (activeBootstrapRef.current !== token) return
       activeBootstrapRef.current = null
+      // 'sign-out-unconfirmed' is NOT 'signed-out' (story 5-E): the session may
+      // still be live and storage still names the user, so this tab must not
+      // apply signed-out assumptions — and must not re-enter the bootstrap
+      // that just failed.
+      if (outcome === 'sign-out-unconfirmed') {
+        bootstrapHaltedRef.current = true
+      }
       // Apply the freshest profile a joined probe carried — but ONLY when the
       // run completed. A 'signed-out' run just cleared storage; re-populating
       // it here would resurrect a stale identity that survives the sign-out

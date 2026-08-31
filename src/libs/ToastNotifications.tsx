@@ -8,7 +8,9 @@ export type ToastPosition = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight
 interface NotificationRequiredProps extends NotificationProps {
   severity: AlertColor
   text: string
-  timeout: number
+  /** null never auto-hides — for notices the user must act on (an
+   *  unconfirmed sign-out and its Retry), which cannot expire on their own. */
+  timeout: number | null
   layout: ToastPosition | SnackbarOrigin
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
@@ -17,7 +19,8 @@ interface NotificationRequiredProps extends NotificationProps {
 interface NotificationProps {
   severity?: AlertColor
   text: string | React.ReactNode
-  timeout?: number
+  /** Milliseconds before the toast auto-hides; null keeps it until dismissed. */
+  timeout?: number | null
   layout?: ToastPosition | SnackbarOrigin
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any

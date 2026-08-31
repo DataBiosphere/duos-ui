@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { Configuration } from 'openid-client'
 import { handleLogout } from '../src/auth/logout.js'
@@ -12,7 +12,7 @@ vi.mock('../src/auth/oidcClient.js', async (importOriginal) => {
 
 vi.mock('openid-client', async (importOriginal) => {
   const actual = await importOriginal<typeof import('openid-client')>()
-  return { ...actual, tokenRevocation: vi.fn() }
+  return { ...actual, tokenRevocation: vi.fn(), buildEndSessionUrl: vi.fn() }
 })
 
 function makeConfig(revocationEndpoint?: string): Configuration {
@@ -23,19 +23,23 @@ function makeRequest(overrides: {
   accessToken?: string
   refreshToken?: string
   sessionId?: string
+  idToken?: string
 } = {}) {
   const query = vi.fn().mockResolvedValue({ rows: [] })
   const destroy = vi.fn().mockResolvedValue(undefined)
+  const logError = vi.fn()
   const request = {
     session: {
       accessToken: overrides.accessToken,
       refreshToken: overrides.refreshToken,
+      idToken: overrides.idToken,
       sessionId: overrides.sessionId ?? 'test-sid',
       destroy,
     },
     server: { pg: { query } },
+    log: { error: logError },
   }
-  return { request: request as unknown as FastifyRequest, query, destroy }
+  return { request: request as unknown as FastifyRequest, query, destroy, logError }
 }
 
 function makeReply() {
@@ -56,6 +60,17 @@ describe('handleLogout', () => {
 
     const oidc = await import('openid-client')
     vi.mocked(oidc.tokenRevocation).mockReset().mockResolvedValue(undefined)
+    // Defaults to the happy path: B2C exposes an end_session_endpoint.
+    vi.mocked(oidc.buildEndSessionUrl).mockReset().mockReturnValue(
+      new URL('https://terradevb2c.b2clogin.com/logout?id_token_hint=the-id-token'),
+    )
+    process.env.DUOS_POST_LOGOUT_REDIRECT_URI = 'https://duos.example.org/post-logout'
+    delete process.env.NODE_ENV
+  })
+
+  afterEach(() => {
+    delete process.env.DUOS_POST_LOGOUT_REDIRECT_URI
+    delete process.env.NODE_ENV
   })
 
   it('stamps the audit record for the session sid, destroys the session, and clears the cookie', async () => {
@@ -162,5 +177,132 @@ describe('handleLogout', () => {
     expect(destroy).toHaveBeenCalled()
     expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
     expect(reply.status).toHaveBeenCalledWith(204)
+  })
+})
+
+describe('handleLogout — front-channel (B2C) logout, story 5-E', () => {
+  beforeEach(async () => {
+    const oidcClient = await import('../src/auth/oidcClient.js')
+    vi.mocked(oidcClient.getOidcConfig).mockReset().mockResolvedValue(makeConfig(undefined))
+
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.tokenRevocation).mockReset().mockResolvedValue(undefined)
+    vi.mocked(oidc.buildEndSessionUrl).mockReset().mockReturnValue(
+      new URL('https://terradevb2c.b2clogin.com/logout?id_token_hint=the-id-token'),
+    )
+    process.env.DUOS_POST_LOGOUT_REDIRECT_URI = 'https://duos.example.org/post-logout'
+    delete process.env.NODE_ENV
+  })
+
+  afterEach(() => {
+    delete process.env.DUOS_POST_LOGOUT_REDIRECT_URI
+    delete process.env.NODE_ENV
+  })
+
+  it('answers 200 with the discovered end-session URL when the session holds an id token', async () => {
+    const { request, destroy } = makeRequest({ idToken: 'the-id-token' })
+    const reply = makeReply()
+
+    await handleLogout(request, reply)
+
+    const oidc = await import('openid-client')
+    expect(oidc.buildEndSessionUrl).toHaveBeenCalledWith(expect.anything(), {
+      id_token_hint: 'the-id-token',
+      post_logout_redirect_uri: 'https://duos.example.org/post-logout',
+    })
+    expect(reply.status).toHaveBeenCalledWith(200)
+    expect(reply.send).toHaveBeenCalledWith({
+      redirectUrl: 'https://terradevb2c.b2clogin.com/logout?id_token_hint=the-id-token',
+    })
+    expect(destroy).toHaveBeenCalled()
+    expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
+  })
+
+  it('reads the id token BEFORE the session is destroyed', async () => {
+    const { request, destroy } = makeRequest({ idToken: 'the-id-token' })
+
+    await handleLogout(request, makeReply())
+
+    const oidc = await import('openid-client')
+    const buildOrder = vi.mocked(oidc.buildEndSessionUrl).mock.invocationCallOrder[0]
+    expect(buildOrder).toBeLessThan(destroy.mock.invocationCallOrder[0])
+  })
+
+  it('answers 204 when the session holds no id token, without touching B2C', async () => {
+    const { request, destroy } = makeRequest() // no idToken
+    const reply = makeReply()
+
+    await handleLogout(request, reply)
+
+    const oidc = await import('openid-client')
+    expect(oidc.buildEndSessionUrl).not.toHaveBeenCalled()
+    expect(reply.status).toHaveBeenCalledWith(204)
+    expect(destroy).toHaveBeenCalled()
+  })
+
+  it('answers 204 and still destroys the session when DUOS_POST_LOGOUT_REDIRECT_URI is unset', async () => {
+    delete process.env.DUOS_POST_LOGOUT_REDIRECT_URI
+    const { request, destroy, logError } = makeRequest({ idToken: 'the-id-token' })
+    const reply = makeReply()
+
+    await handleLogout(request, reply)
+
+    expect(reply.status).toHaveBeenCalledWith(204)
+    expect(destroy).toHaveBeenCalled()
+    expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
+    expect(logError).toHaveBeenCalled()
+  })
+
+  it('answers 204 and still destroys the session when buildEndSessionUrl throws (no end_session_endpoint)', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.buildEndSessionUrl).mockImplementation(() => {
+      throw new TypeError('authorization server metadata does not contain end_session_endpoint')
+    })
+    const { request, destroy, logError } = makeRequest({ idToken: 'the-id-token' })
+    const reply = makeReply()
+
+    await handleLogout(request, reply)
+
+    expect(reply.status).toHaveBeenCalledWith(204)
+    expect(destroy).toHaveBeenCalled()
+    expect(logError).toHaveBeenCalled()
+  })
+
+  it('answers 204 and still destroys the session when discovery fails', async () => {
+    const oidcClient = await import('../src/auth/oidcClient.js')
+    vi.mocked(oidcClient.getOidcConfig).mockRejectedValue(new Error('B2C discovery unreachable'))
+    const { request, destroy } = makeRequest({ idToken: 'the-id-token' })
+    const reply = makeReply()
+
+    await handleLogout(request, reply)
+
+    expect(reply.status).toHaveBeenCalledWith(204)
+    expect(destroy).toHaveBeenCalled()
+  })
+
+  it('rejects a non-HTTPS end-session URL in production and falls back to 204', async () => {
+    process.env.NODE_ENV = 'production'
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.buildEndSessionUrl).mockReturnValue(new URL('http://b2c.example.org/logout'))
+    const { request, destroy, logError } = makeRequest({ idToken: 'the-id-token' })
+    const reply = makeReply()
+
+    await handleLogout(request, reply)
+
+    expect(reply.status).toHaveBeenCalledWith(204)
+    expect(destroy).toHaveBeenCalled()
+    expect(logError).toHaveBeenCalled()
+  })
+
+  it('allows a plain-HTTP end-session URL outside production (local development)', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.buildEndSessionUrl).mockReturnValue(new URL('http://localhost:9000/logout'))
+    const { request } = makeRequest({ idToken: 'the-id-token' })
+    const reply = makeReply()
+
+    await handleLogout(request, reply)
+
+    expect(reply.status).toHaveBeenCalledWith(200)
+    expect(reply.send).toHaveBeenCalledWith({ redirectUrl: 'http://localhost:9000/logout' })
   })
 })

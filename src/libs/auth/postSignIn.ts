@@ -13,7 +13,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import { User } from 'src/libs/ajax/User'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
-import { Auth } from 'src/libs/auth/auth'
+import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
 import { resetSessionCache } from 'src/libs/auth/session'
 import { Navigation, Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
@@ -57,8 +57,26 @@ export interface CompleteSignInOptions {
  * hydration) only on 'completed' — a 'signed-out' run has just cleared
  * storage, and re-populating it would resurrect a stale identity that
  * survives the sign-out reload.
+ *
+ * 'sign-out-unconfirmed' (story 5-E) is NOT a sign-out: the bootstrap failed,
+ * the sign-out that followed could not be confirmed, so the session may still
+ * be authenticated and no cleanup or navigation happened. The caller must
+ * treat it as "state unknown" rather than applying signed-out assumptions.
  */
-export type CompleteSignInOutcome = 'completed' | 'signed-out' | 'cancelled'
+export type CompleteSignInOutcome = 'completed' | 'signed-out' | 'sign-out-unconfirmed' | 'cancelled'
+
+/**
+ * The bootstrap-failure sign-out. Auth.signOut owns the navigation on a
+ * confirmed outcome; on an unconfirmed one nothing happened, so this reports
+ * the distinct outcome and dispatches the global persistent Retry notice —
+ * these paths are non-UI, so no component would otherwise own that notice.
+ */
+const signOutAfterBootstrapFailure = async (): Promise<CompleteSignInOutcome> => {
+  const result = await Auth.signOut()
+  if (result.status === 'confirmed') return 'signed-out'
+  reportUnconfirmedSignOut()
+  return 'sign-out-unconfirmed'
+}
 
 interface HttpishError {
   status?: number
@@ -157,8 +175,7 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
         }
         catch {
           if (cancelled()) return 'cancelled'
-          await Auth.signOut()
-          return 'signed-out'
+          return await signOutAfterBootstrapFailure()
         }
       }
       if (cancelled()) return 'cancelled'
@@ -170,8 +187,7 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
       // would let App mark the bootstrap done and unlock the routes with an
       // empty CurrentUser. Destroy the session instead — the reload lands
       // the user cleanly signed out, and signing in again retries.
-      await Auth.signOut()
-      return 'signed-out'
+      return await signOutAfterBootstrapFailure()
     }
   }
 
@@ -238,8 +254,7 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
     if (errorStatus(error) === 409 || errorMessage.toLowerCase().includes('azureb2c authentication error')) {
       // Long timeout: the message carries instructions and a support link.
       Notifications.showError({ text: errorMessage, timeout: 30000 })
-      await Auth.signOut()
-      return 'signed-out'
+      return await signOutAfterBootstrapFailure()
     }
     return await handleRegistration()
   }

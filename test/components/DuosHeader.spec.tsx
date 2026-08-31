@@ -13,6 +13,7 @@ import { Storage } from 'src/libs/storage'
 import { useUserIsLogged } from 'src/hooks/useSession'
 import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 import { DuosUser } from 'src/types/model'
+import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
 
 vi.mock('src/hooks/useSession', () => ({
   useUserIsLogged: vi.fn(),
@@ -28,17 +29,29 @@ vi.mock('src/components/modals/SupportRequestModal', () => ({
   SupportRequestModal: () => null,
 }))
 
+vi.mock('src/libs/auth/auth', () => ({
+  Auth: {
+    // Story 5-E: signOut resolves a discriminated result and never rejects.
+    signOut: vi.fn().mockResolvedValue({ status: 'confirmed' }),
+  },
+  reportUnconfirmedSignOut: vi.fn(),
+}))
+
 vi.mock('src/components/NavigationTabsComponent', () => ({
-  NavigationTabsComponent: ({ tabs, initialTab, isLogged, DuosLogo, orientation, contactUsButton }: {
+  NavigationTabsComponent: ({ tabs, initialTab, isLogged, DuosLogo, orientation, contactUsButton, signOut }: {
     tabs: Array<{ label: string, children?: Array<{ label: string }> }>
     initialTab: number
     isLogged: boolean
     DuosLogo: string
     orientation: string
     contactUsButton: React.ReactNode
+    signOut: () => void
   }) => (
     <div>
       {orientation === 'horizontal' && <img src={DuosLogo} alt="DUOS Logo" />}
+      {orientation === 'horizontal' && isLogged && (
+        <button onClick={signOut}>header sign out</button>
+      )}
       {isLogged && tabs.map((tab, i) => (
         <div key={tab.label}>
           <button role="tab" className={i === initialTab ? 'Mui-selected' : ''}>
@@ -435,6 +448,31 @@ describe('DuosHeader', () => {
       await mountHeader('/profile', { ...mockUser, isResearcher: false })
 
       expect(screen.getByRole('tab', { name: 'Data Library' })).toHaveClass('Mui-selected')
+    })
+  })
+
+  describe('Sign out (story 5-E)', () => {
+    it('hands the navigation to Auth.signOut and drops the query cache on a confirmed sign-out', async () => {
+      vi.mocked(Auth.signOut).mockResolvedValue({ status: 'confirmed' })
+      await mountHeader('/datalibrary', mockUser)
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'header sign out' }))
+      })
+
+      expect(Auth.signOut).toHaveBeenCalledWith('/home')
+      expect(reportUnconfirmedSignOut).not.toHaveBeenCalled()
+    })
+
+    it('reports an unconfirmed sign-out instead of claiming success', async () => {
+      vi.mocked(Auth.signOut).mockResolvedValue({ status: 'unconfirmed' })
+      await mountHeader('/datalibrary', mockUser)
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'header sign out' }))
+      })
+
+      expect(reportUnconfirmedSignOut).toHaveBeenCalledOnce()
     })
   })
 })

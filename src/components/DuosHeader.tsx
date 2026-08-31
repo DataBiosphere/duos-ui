@@ -8,7 +8,7 @@ import { SubTab, visibleSubTabs } from 'src/components/navigation/subTabVisibili
 import DuosLogo from 'src/images/duos-network-logo.svg'
 import contactUsStandard from 'src/images/navbar_icon_contact_us.svg'
 import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg'
-import { Auth } from 'src/libs/auth/auth'
+import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
 import { Banner, NotificationService } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import { withStyles } from 'tss-react/mui'
@@ -206,13 +206,19 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   const signOut = (): void => {
-    // The SPA navigation covers the legacy flow, where Auth.signOut only
-    // clears local state; in BFF mode Auth.signOut follows up with a full-page
-    // reload to the same destination, which supersedes both of these.
-    queryClient.clear()
-    navigate('/home')
     toggleDrawer(false)
-    void Auth.signOut('/home')
+    // Auth.signOut owns the navigation in BOTH modes (story 5-E) — an SPA
+    // navigation here would unload the page and abort the logout POST, the
+    // /auth/me verification, or the B2C end-session redirect. The query cache
+    // is dropped only on a confirmed sign-out; an unconfirmed one leaves the
+    // user signed in on this page, so it must report instead.
+    void Auth.signOut('/home').then((result) => {
+      if (result.status === 'unconfirmed') {
+        reportUnconfirmedSignOut()
+        return
+      }
+      queryClient.clear()
+    })
   }
 
   const supportRequestModal = (): void => {

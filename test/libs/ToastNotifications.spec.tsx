@@ -105,6 +105,46 @@ describe('ToastNotifications', () => {
       }
     })
 
+    it('should auto-hide after the default timeout', async () => {
+      vi.useFakeTimers()
+      try {
+        await act(async () => {
+          ToastNotifications.showNotification({ text: 'Transient notification' })
+        })
+
+        expect(document.querySelector('[data-cy="notification-alert"]')).toBeVisible()
+
+        await act(async () => {
+          vi.advanceTimersByTime(3500 + 350)
+        })
+
+        expect(document.querySelector('[data-cy="notification-alert"]')).not.toBeInTheDocument()
+      }
+      finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('should never auto-hide when timeout is null', async () => {
+      // Story 5-E: the unconfirmed-sign-out notice carries a Retry the user
+      // must be able to act on, so it cannot expire on its own.
+      vi.useFakeTimers()
+      try {
+        await act(async () => {
+          ToastNotifications.showNotification({ text: 'Persistent notification', timeout: null })
+        })
+
+        await act(async () => {
+          vi.advanceTimersByTime(60_000)
+        })
+
+        expect(document.querySelector('[data-cy="notification-alert"]')).toBeVisible()
+      }
+      finally {
+        vi.useRealTimers()
+      }
+    })
+
     it('should apply custom styling with sx prop', async () => {
       await act(async () => {
         ToastNotifications.showNotification({

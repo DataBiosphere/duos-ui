@@ -27,8 +27,10 @@ vi.mock('src/libs/TosService', () => ({
 
 vi.mock('src/libs/auth/auth', () => ({
   Auth: {
-    signOut: vi.fn().mockResolvedValue(undefined),
+    // Story 5-E: signOut resolves a discriminated result and never rejects.
+    signOut: vi.fn().mockResolvedValue({ status: 'confirmed' }),
   },
+  reportUnconfirmedSignOut: vi.fn(),
 }))
 
 vi.mock('src/hooks/useSession', () => ({
@@ -79,7 +81,7 @@ describe('Terms of Service Page', () => {
     expect(screen.getByText('Reject Terms of Service')).toBeInTheDocument()
   })
 
-  it('clicking reject calls rejectTos, signOut, and navigates to /', async () => {
+  it('clicking reject calls rejectTos and hands the navigation to signOut', async () => {
     const { TosService } = await import('src/libs/TosService')
     const { Auth } = await import('src/libs/auth/auth')
     vi.mocked(useUserIsLogged).mockReturnValue(true)
@@ -88,9 +90,22 @@ describe('Terms of Service Page', () => {
       fireEvent.click(screen.getByText('Reject Terms of Service'))
     })
     await waitFor(() => expect(TosService.rejectTos).toHaveBeenCalledOnce())
-    expect(Auth.signOut).toHaveBeenCalledOnce()
-    // The navigation covers the legacy flow, where Auth.signOut does not
-    // redirect; in BFF mode the full-page reload supersedes it.
-    expect(mockNavigate).toHaveBeenCalledWith('/')
+    expect(Auth.signOut).toHaveBeenCalledWith('/')
+    // Story 5-E: Auth.signOut owns the navigation in both modes — a router
+    // navigation here would race the logout request.
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('reports an unconfirmed sign-out instead of claiming success', async () => {
+    const { Auth, reportUnconfirmedSignOut } = await import('src/libs/auth/auth')
+    vi.mocked(Auth.signOut).mockResolvedValue({ status: 'unconfirmed' })
+    vi.mocked(useUserIsLogged).mockReturnValue(true)
+    await renderComponent()
+    await act(async () => {
+      fireEvent.click(screen.getByText('Reject Terms of Service'))
+    })
+
+    await waitFor(() => expect(reportUnconfirmedSignOut).toHaveBeenCalledOnce())
+    expect(mockNavigate).not.toHaveBeenCalled()
   })
 })
