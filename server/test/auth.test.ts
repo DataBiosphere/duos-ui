@@ -63,7 +63,7 @@ const SECRET = 'test-secret-that-is-at-least-32-characters'
 // ---------------------------------------------------------------------------
 // In-memory stand-in for the two Postgres tables the auth flow touches:
 //   - user_sessions       (read/written by createPgSessionStore)
-//   - user_session_audit  (UPDATEd by handleLogout)
+//   - user_session_audit  (UPDATEd by handleCallback's rotation and handleLogout)
 // It honours the exact SQL the store + logout issue, and records enough to
 // assert on. `set` awaits a macrotask to mimic the real DB round-trip — the
 // async gap between the handler resolving and @fastify/session's onSend save is
@@ -71,7 +71,7 @@ const SECRET = 'test-secret-that-is-at-least-32-characters'
 // ---------------------------------------------------------------------------
 function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>()) {
   const setSids: string[] = []
-  const auditUpdates: string[] = []
+  const auditUpdates: Array<{ reason: string, sid: string }> = []
   const query = async (sql: string, params: unknown[] = []) => {
     if (sql.includes('SELECT sess FROM user_sessions')) {
       const row = rows.get(params[0] as string)
@@ -91,7 +91,10 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
       return { rows: [] }
     }
     if (sql.includes('UPDATE user_session_audit')) {
-      auditUpdates.push(params[0] as string)
+      auditUpdates.push({
+        reason: /end_reason = '(\w+)'/.exec(sql)?.[1] ?? 'unknown',
+        sid: params[0] as string,
+      })
       return { rows: [] }
     }
     return { rows: [] }
@@ -154,15 +157,17 @@ function makeTokens(claims: Record<string, unknown> | undefined) {
 }
 
 function sessionCookieHeader(res: { cookies: Array<{ name: string, value: string }> }): string {
-  const cookie = res.cookies.find(c => c.name === 'sessionId')
-  if (!cookie) throw new Error('no session cookie set')
+  // Preserve browser semantics: the last sessionId Set-Cookie header wins.
+  const cookies = res.cookies.filter(c => c.name === 'sessionId')
+  const cookie = cookies[cookies.length - 1]
+  if (!cookie || cookie.value === '') throw new Error('no session cookie set')
   return `${cookie.name}=${cookie.value}`
 }
 
 describe('BFF OAuth flow (integration, openid-client mocked at the function boundary)', () => {
   let app: FastifyInstance
   let rows: Map<string, { sess: unknown, expire: Date }>
-  let auditUpdates: string[]
+  let auditUpdates: Array<{ reason: string, sid: string }>
 
   beforeEach(async () => {
     Object.assign(process.env, ENV)
@@ -203,6 +208,17 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
   async function csrfToken(cookie: string): Promise<string> {
     const res = await app.inject({ method: 'GET', url: '/auth/csrf-token', headers: { cookie } })
     return res.json().token as string
+  }
+
+  // The callback rotates the session; return both cookies for assertions.
+  async function authenticate(returnTo?: string) {
+    const { cookie: preAuthCookie } = await login(returnTo)
+    const res = await app.inject({
+      method: 'GET',
+      url: '/auth/callback?code=test-code&state=test-state',
+      headers: { cookie: preAuthCookie },
+    })
+    return { res, cookie: sessionCookieHeader(res), preAuthCookie }
   }
 
   describe('POST /auth/login', () => {
@@ -275,15 +291,10 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       expect(res.headers.location).toBe('/')
     })
 
-    it('clears the PKCE fields from the persisted session after a successful exchange', async () => {
-      const { cookie } = await login()
+    it('leaves exactly one persisted session, holding tokens and no PKCE material', async () => {
+      await authenticate()
 
-      await app.inject({
-        method: 'GET',
-        url: '/auth/callback?code=test-code&state=test-state',
-        headers: { cookie },
-      })
-
+      expect(rows.size).toBe(1)
       const sess = [...rows.values()][0].sess as Record<string, unknown>
       expect(sess.pkceVerifier).toBeUndefined()
       expect(sess.pkceState).toBeUndefined()
@@ -302,13 +313,71 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     })
   })
 
+  describe('session fixation protection', () => {
+    it('rotates the sessionId cookie across the callback', async () => {
+      const { cookie, preAuthCookie } = await authenticate()
+
+      expect(cookie).not.toBe(preAuthCookie)
+    })
+
+    it('authenticates /auth/me with the NEW cookie — tokens survived the rotation', async () => {
+      const { cookie } = await authenticate()
+
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        status: 200, ok: true, json: async () => ({ email: 'user@example.com' }),
+      }))
+      const me = await app.inject({ method: 'GET', url: '/auth/me', headers: { cookie } })
+      vi.unstubAllGlobals()
+
+      expect(me.statusCode).toBe(200)
+    })
+
+    it('rejects a replay of the PRE-AUTH cookie with 401 — a fixated sid never authenticates', async () => {
+      const { preAuthCookie } = await authenticate()
+
+      const fetchSpy = vi.fn()
+      vi.stubGlobal('fetch', fetchSpy)
+      const me = await app.inject({ method: 'GET', url: '/auth/me', headers: { cookie: preAuthCookie } })
+      vi.unstubAllGlobals()
+
+      expect(me.statusCode).toBe(401)
+      expect(fetchSpy).not.toHaveBeenCalled()
+    })
+
+    it('destroys the pre-auth session row in the store', async () => {
+      const { cookie: loginCookie } = await login()
+      const preAuthSid = [...rows.keys()][0]
+
+      await app.inject({
+        method: 'GET',
+        url: '/auth/callback?code=test-code&state=test-state',
+        headers: { cookie: loginCookie },
+      })
+
+      expect(rows.has(preAuthSid)).toBe(false)
+      expect(rows.size).toBe(1)
+    })
+
+    it('stamps the pre-auth audit row as rotated, not as an expiry', async () => {
+      const { cookie: loginCookie } = await login()
+      const preAuthSid = [...rows.keys()][0]
+
+      await app.inject({
+        method: 'GET',
+        url: '/auth/callback?code=test-code&state=test-state',
+        headers: { cookie: loginCookie },
+      })
+
+      expect(auditUpdates).toEqual([{ reason: 'rotated', sid: preAuthSid }])
+    })
+  })
+
   describe('idp sub-provider derivation (observed via /auth/me)', () => {
     async function idpAfterCallback(claims: Record<string, unknown>): Promise<unknown> {
       const oidc = await import('openid-client')
       vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue(makeTokens(claims))
 
-      const { cookie } = await login()
-      await app.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie } })
+      const { cookie } = await authenticate()
 
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
         status: 200, ok: true, json: async () => ({ email: 'user@example.com' }),
@@ -345,8 +414,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       vi.mocked(oidc.authorizationCodeGrant)
         .mockResolvedValue(makeTokens({ email: 'user@example.com', idp: 'google.com' }))
 
-      const { cookie } = await login()
-      await app.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie } })
+      const { cookie } = await authenticate()
 
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
         status: 200, ok: true, json: async () => ({ email: 'user@example.com', displayName: 'Test User' }),
@@ -365,8 +433,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
 
   describe('POST /auth/logout', () => {
     it('destroys the session, stamps the audit record, and clears the cookie', async () => {
-      const { cookie } = await login()
-      await app.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie } })
+      const { cookie } = await authenticate()
       expect(rows.size).toBe(1)
 
       const token = await csrfToken(cookie)
@@ -378,7 +445,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
 
       expect(res.statusCode).toBe(204)
       expect(rows.size).toBe(0) // session row deleted
-      expect(auditUpdates).toHaveLength(1) // end_reason='logout' UPDATE issued
+      expect(auditUpdates.filter(u => u.reason === 'logout')).toHaveLength(1)
       const cleared = res.cookies.find(c => c.name === 'sessionId')
       expect(cleared).toBeDefined()
       expect(cleared!.value).toBe('') // cookie cleared
@@ -394,10 +461,8 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
   })
 
   describe('CSRF protection (story 2-J)', () => {
-    // Establishes an authenticated session and returns its cookie.
     async function authenticatedCookie(): Promise<string> {
-      const { cookie } = await login()
-      await app.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie } })
+      const { cookie } = await authenticate()
       return cookie
     }
 
@@ -409,7 +474,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
 
       expect(res.statusCode).toBe(403)
       expect(rows.size).toBe(1) // session NOT destroyed
-      expect(auditUpdates).toHaveLength(0) // handler never ran
+      expect(auditUpdates.filter(u => u.reason === 'logout')).toHaveLength(0) // handler never ran
     })
 
     it('accepts POST /auth/logout with a valid session-bound X-CSRF-Token (204)', async () => {
@@ -467,7 +532,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
 
       expect(res.statusCode).toBe(403)
       expect(rows.size).toBe(1) // session survives
-      expect(auditUpdates).toHaveLength(0) // handler never ran
+      expect(auditUpdates.filter(u => u.reason === 'logout')).toHaveLength(0) // handler never ran
     })
   })
 
@@ -499,8 +564,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     })
 
     it('issues a token to an authenticated session, persisted before the reply', async () => {
-      const { cookie } = await login()
-      await app.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie } })
+      const { cookie } = await authenticate()
 
       const res = await app.inject({ method: 'GET', url: '/auth/csrf-token', headers: { cookie } })
 
@@ -519,9 +583,9 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     // guard's full matrix lives in fetchMetadata.test.ts; these pin that
     // /auth/me is wired with it, that rejected requests never reach the
     // upstream, and that the legitimate shapes still work.
+    // Use the rotated cookie so the guard is exercised as authenticated.
     async function authenticatedCookie(): Promise<string> {
-      const { cookie } = await login()
-      await app.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie } })
+      const { cookie } = await authenticate()
       return cookie
     }
 
@@ -584,15 +648,12 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       const fake = makeInMemoryPg()
       const guardedApp = await buildAuthApp(fake.pg, errorLog)
 
-      // Each request must persist the session EXACTLY once. The double-send bug
-      // is a redundant onSend save racing the handler's own save(); measuring
-      // the store-write delta per request catches that directly. A regression
-      // (e.g. flipping `rolling` back on) makes onSend re-save the cookie-bearing
-      // callback request, so its delta would be 2.
+      // regenerate() writes the empty new session; save() writes its tokens.
       const beforeLogin = fake.setSids.length
       const loginRes = await guardedApp.inject({ method: 'POST', url: '/auth/login' })
       expect(loginRes.statusCode).toBe(200)
       expect(fake.setSids.length - beforeLogin).toBe(1)
+      const loginSid = fake.setSids[fake.setSids.length - 1]
       const cookie = sessionCookieHeader(loginRes)
 
       const beforeCallback = fake.setSids.length
@@ -602,7 +663,10 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
         headers: { cookie },
       })
       expect(cbRes.statusCode).toBe(302)
-      expect(fake.setSids.length - beforeCallback).toBe(1)
+      const callbackWrites = fake.setSids.slice(beforeCallback)
+      expect(callbackWrites).toHaveLength(2)
+      expect(new Set(callbackWrites).size).toBe(1) // both writes hit the rotated sid
+      expect(callbackWrites[0]).not.toBe(loginSid)
 
       await guardedApp.close()
 
