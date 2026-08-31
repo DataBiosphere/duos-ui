@@ -53,26 +53,30 @@ function makeReply() {
   }
 }
 
+/*
+  Both suites below need exactly this setup, so the hooks live at file level
+  rather than being repeated per describe.
+*/
+beforeEach(async () => {
+  const oidcClient = await import('../src/auth/oidcClient.js')
+  vi.mocked(oidcClient.getOidcConfig).mockReset().mockResolvedValue(makeConfig(undefined))
+
+  const oidc = await import('openid-client')
+  vi.mocked(oidc.tokenRevocation).mockReset().mockResolvedValue(undefined)
+  // Defaults to the happy path: B2C exposes an end_session_endpoint.
+  vi.mocked(oidc.buildEndSessionUrl).mockReset().mockReturnValue(
+    new URL('https://terradevb2c.b2clogin.com/logout?id_token_hint=the-id-token'),
+  )
+  process.env.DUOS_POST_LOGOUT_REDIRECT_URI = 'https://duos.example.org/post-logout'
+  delete process.env.NODE_ENV
+})
+
+afterEach(() => {
+  delete process.env.DUOS_POST_LOGOUT_REDIRECT_URI
+  delete process.env.NODE_ENV
+})
+
 describe('handleLogout', () => {
-  beforeEach(async () => {
-    const oidcClient = await import('../src/auth/oidcClient.js')
-    vi.mocked(oidcClient.getOidcConfig).mockReset().mockResolvedValue(makeConfig(undefined))
-
-    const oidc = await import('openid-client')
-    vi.mocked(oidc.tokenRevocation).mockReset().mockResolvedValue(undefined)
-    // Defaults to the happy path: B2C exposes an end_session_endpoint.
-    vi.mocked(oidc.buildEndSessionUrl).mockReset().mockReturnValue(
-      new URL('https://terradevb2c.b2clogin.com/logout?id_token_hint=the-id-token'),
-    )
-    process.env.DUOS_POST_LOGOUT_REDIRECT_URI = 'https://duos.example.org/post-logout'
-    delete process.env.NODE_ENV
-  })
-
-  afterEach(() => {
-    delete process.env.DUOS_POST_LOGOUT_REDIRECT_URI
-    delete process.env.NODE_ENV
-  })
-
   it('stamps the audit record for the session sid, destroys the session, and clears the cookie', async () => {
     const { request, query, destroy } = makeRequest({ sessionId: 'the-sid' })
     const reply = makeReply()
@@ -181,24 +185,6 @@ describe('handleLogout', () => {
 })
 
 describe('handleLogout — front-channel (B2C) logout, story 5-E', () => {
-  beforeEach(async () => {
-    const oidcClient = await import('../src/auth/oidcClient.js')
-    vi.mocked(oidcClient.getOidcConfig).mockReset().mockResolvedValue(makeConfig(undefined))
-
-    const oidc = await import('openid-client')
-    vi.mocked(oidc.tokenRevocation).mockReset().mockResolvedValue(undefined)
-    vi.mocked(oidc.buildEndSessionUrl).mockReset().mockReturnValue(
-      new URL('https://terradevb2c.b2clogin.com/logout?id_token_hint=the-id-token'),
-    )
-    process.env.DUOS_POST_LOGOUT_REDIRECT_URI = 'https://duos.example.org/post-logout'
-    delete process.env.NODE_ENV
-  })
-
-  afterEach(() => {
-    delete process.env.DUOS_POST_LOGOUT_REDIRECT_URI
-    delete process.env.NODE_ENV
-  })
-
   it('answers 200 with the discovered end-session URL when the session holds an id token', async () => {
     const { request, destroy } = makeRequest({ idToken: 'the-id-token' })
     const reply = makeReply()
