@@ -578,3 +578,137 @@ describe('envBool', () => {
     for (const v of ['true', 'True', '1', 'yes', 'on']) expect(envBool(v, false)).toBe(true)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Security headers (Phase 5, story 5-F)
+// ---------------------------------------------------------------------------
+// The policy itself — the mode split, the dev allowances, the report sink — is
+// unit-tested in csp.test.ts and cspReport.test.ts. What only this suite can
+// show is the *wiring*: that buildApp() reaches the browser with these headers,
+// on every route, under both cutover switches. The suite runs with NODE_ENV
+// unset, so index.ts's isDev is true and the dev allowances apply.
+describe('security headers', () => {
+  let dir: string
+
+  afterEach(async () => {
+    delete process.env.CONFIG_PATH
+    delete process.env.DUOS_CSP_REPORT_ONLY
+    const { resetConfigCache } = await import('../src/config.js')
+    resetConfigCache()
+    if (dir) rmSync(dir, { recursive: true, force: true })
+  })
+
+  async function buildAppWithConfig(config: Record<string, unknown>) {
+    dir = mkdtempSync(path.join(tmpdir(), 'duos-csp-config-'))
+    const file = path.join(dir, 'config.json')
+    writeFileSync(file, JSON.stringify(config))
+    process.env.CONFIG_PATH = file
+
+    const { resetConfigCache } = await import('../src/config.js')
+    resetConfigCache()
+
+    const { buildApp } = await import('../src/index.js')
+    return buildApp()
+  }
+
+  it('sends the report-only policy by default, so a strict policy cannot break a page unannounced', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['content-security-policy-report-only']).toContain('default-src \'self\'')
+    expect(res.headers['content-security-policy']).toBeUndefined()
+  })
+
+  it('enforces the policy once DUOS_CSP_REPORT_ONLY is off', async () => {
+    process.env.DUOS_CSP_REPORT_ONLY = 'false'
+    const localApp = await buildAppWithConfig({})
+
+    const res = await localApp.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['content-security-policy']).toContain('default-src \'self\'')
+    expect(res.headers['content-security-policy-report-only']).toBeUndefined()
+
+    await localApp.close()
+  })
+
+  it('gives the report-to group an address through Reporting-Endpoints', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['reporting-endpoints']).toBe('csp-endpoint="/csp-report"')
+    expect(res.headers['content-security-policy-report-only']).toContain('report-to csp-endpoint')
+  })
+
+  it('allows popups through COOP, which the legacy sign-in flow still drives', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['cross-origin-opener-policy']).toBe('same-origin-allow-popups')
+    expect(res.headers['cross-origin-embedder-policy']).toBeUndefined()
+  })
+
+  it('omits HSTS outside production, so a plain-HTTP dev setup keeps working', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['strict-transport-security']).toBeUndefined()
+    expect(res.headers['content-security-policy-report-only']).not.toContain('upgrade-insecure-requests')
+  })
+
+  it('derives connect-src from the config, and omits the proxied upstreams in BFF mode', async () => {
+    // DUOS_API_URL overrides the file's apiUrl (see config.ts), so the policy
+    // must follow the override rather than the static file — otherwise a
+    // deployment that redirects Consent would have its own calls blocked.
+    process.env.DUOS_API_URL = 'https://consent-override.example.org'
+    const localApp = await buildAppWithConfig({
+      bffEnabled: true,
+      apiUrl: 'https://consent-in-the-file.example.org',
+      bardApiUrl: 'https://bard.example.org',
+      ecmApiUrl: 'https://ecm.example.org',
+      tdrApiUrl: 'https://tdr.example.org',
+    })
+
+    const policy = String((await localApp.inject({ method: 'GET', url: '/health' }))
+      .headers['content-security-policy-report-only'])
+
+    expect(policy).toContain('https://consent-override.example.org')
+    expect(policy).not.toContain('consent-in-the-file.example.org')
+    expect(policy).toContain('https://bard.example.org')
+    // ECM and TDR go through the same-origin proxies after cutover.
+    expect(policy).not.toContain('ecm.example.org')
+    expect(policy).not.toContain('tdr.example.org')
+
+    await localApp.close()
+  })
+
+  it('keeps the ECM and TDR origins for a legacy deployment, which calls them directly', async () => {
+    const localApp = await buildAppWithConfig({
+      bffEnabled: false,
+      apiUrl: 'https://consent.example.org',
+      ecmApiUrl: 'https://ecm.example.org',
+      tdrApiUrl: 'https://tdr.example.org',
+    })
+
+    const policy = String((await localApp.inject({ method: 'GET', url: '/health' }))
+      .headers['content-security-policy-report-only'])
+
+    expect(policy).toContain('https://ecm.example.org')
+    expect(policy).toContain('https://tdr.example.org')
+
+    await localApp.close()
+  })
+
+  it('registers the report sink outside both cutover switches', async () => {
+    // A legacy deployment sets neither bffEnabled nor DUOS_DB_HOST, and still
+    // needs somewhere for its browsers to post violations.
+    delete process.env.DUOS_DB_HOST
+    const localApp = await buildAppWithConfig({ bffEnabled: false })
+
+    const res = await localApp.inject({
+      method: 'POST',
+      url: '/csp-report',
+      headers: { 'content-type': 'application/csp-report' },
+      payload: JSON.stringify({ 'csp-report': { 'blocked-uri': 'https://example.org/x' } }),
+    })
+
+    expect(res.statusCode).toBe(204)
+
+    await localApp.close()
+  })
+})

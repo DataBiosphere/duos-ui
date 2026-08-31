@@ -9,7 +9,10 @@ import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
+import fastifyHelmet from '@fastify/helmet'
 import { createPgSessionStore } from './session/pgStore.js'
+import { helmetOptions } from './security/csp.js'
+import { REPORTING_ENDPOINTS_HEADER, cspReportRoute } from './security/cspReport.js'
 import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
 import { fetchMetadataGuard } from './security/fetchMetadata.js'
 import { getOidcConfig } from './auth/oidcClient.js'
@@ -69,7 +72,34 @@ export async function buildApp(): Promise<AppInstance> {
   // (memoized) config.
   const configJsonPath = configPath(PROJECT_ROOT, isDev)
 
-  // 1. DB pool + session — registered only when the deployment provides the
+  // Read once, here. Two things need it: the CSP below, whose `connect-src`
+  // allowlist is derived from the configured upstream origins and differs by
+  // mode, and the `bffEnabled` cutover check further down. readConfig memoises
+  // for the life of the process, so a second call would return this same
+  // object — binding it makes that explicit and keeps the two in step.
+  const clientConfig = await readConfig(configJsonPath, fastify.log)
+
+  // 1. Security headers, including the Content Security Policy (Phase 5, 5-F).
+  // Registered first so its onRequest hook runs ahead of every route, and
+  // outside both switches below: the legacy client needs the same headers.
+  //
+  // Report-only until a deployment says otherwise. A strict policy is the kind
+  // of change that breaks a page nobody tested, so each environment collects
+  // violations at /csp-report first and flips DUOS_CSP_REPORT_ONLY=false once
+  // the report run is clean. See docs/plans/bff_adrs/ADR-013-content-security-policy.md.
+  const cspReportOnly = envBool(process.env.DUOS_CSP_REPORT_ONLY, true)
+  fastify.log.info(`[server] Content Security Policy is ${cspReportOnly ? 'report-only (set DUOS_CSP_REPORT_ONLY=false to enforce)' : 'enforced'}`)
+  await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly }))
+
+  // Gives the policy's `report-to` group an address. The `report-uri` fallback
+  // in the same policy needs no header, but Chrome prefers `report-to`.
+  fastify.addHook('onRequest', async (_request, reply) => {
+    reply.header('reporting-endpoints', REPORTING_ENDPOINTS_HEADER)
+  })
+
+  await fastify.register(cspReportRoute)
+
+  // 2. DB pool + session — registered only when the deployment provides the
   // BFF database configuration. Session infrastructure is deployment config
   // (env vars via helmfile/compose), not a runtime flag: every pod of a given
   // deployment behaves identically, with no network dependency at boot.
@@ -191,12 +221,12 @@ export async function buildApp(): Promise<AppInstance> {
     fastify.log.info('[server] DUOS_DB_HOST is not set — starting without DB/session infrastructure (legacy client-side auth)')
   }
 
-  // 2. BFF auth routes — the cutover switch. Checked once at startup via the
-  // same readConfig() the /config.json route below serves, so the server and
+  // 3. BFF auth routes — the cutover switch. Read at startup from the same
+  // config object the /config.json route below serves, so the server and
   // client agree on bffEnabled by construction. A missing key defaults to
   // false and the routes stay dark — the fail-safe is the legacy
   // client-side flow. See docs/plans/BFF_Overview.md § Rollout strategy.
-  const { bffEnabled } = await readConfig(configJsonPath, fastify.log)
+  const { bffEnabled } = clientConfig
   if (bffEnabled === true) {
     // The two switches are meant to be independent (session infra can be on
     // ahead of cutover), but not in this direction: routing users into the
