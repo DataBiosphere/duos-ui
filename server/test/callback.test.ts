@@ -38,6 +38,7 @@ function makeRequest(overrides: {
   destroyError?: Error
   destroyThrows?: boolean
   regenerateError?: Error
+  auditError?: Error
 } = {}): FastifyRequest {
   // Emulate @fastify/session's regenerate(): request.session is REPLACED with
   // a new, empty session object carrying a new sid. Both halves are
@@ -67,6 +68,16 @@ function makeRequest(overrides: {
       pkceVerifier: 'pkceVerifier' in overrides ? overrides.pkceVerifier : 'test-verifier',
       pkceState: 'pkceState' in overrides ? overrides.pkceState : 'test-state',
       returnTo: overrides.returnTo,
+    },
+    // handleCallback stamps the pre-auth audit row through request.server.pg,
+    // the same way handleLogout does.
+    server: {
+      pg: {
+        query: vi.fn(async () => {
+          if (overrides.auditError) throw overrides.auditError
+          return { rows: [] }
+        }),
+      },
     },
     sessionStore: {
       destroy: vi.fn((_sid: string, callback: (err?: Error | null) => void) => {
@@ -269,6 +280,38 @@ describe('handleCallback', () => {
         { err: expect.any(Error) },
         expect.stringContaining('destroy'),
       )
+      expect(reply.redirect).toHaveBeenCalledWith('/datalibrary')
+    })
+
+    it('stamps the pre-auth audit row as rotated before deleting it', async () => {
+      const request = makeRequest()
+
+      await handleCallback(request, makeReply())
+
+      // The DELETE fires audit_session_end, which defaults end_reason to
+      // 'expired' — so the stamp has to land first, or every successful login
+      // is filed as an expiry.
+      const query = vi.mocked(request.server.pg.query)
+      const [sql, params] = query.mock.calls[0] as unknown as [string, unknown[]]
+      expect(sql).toContain('UPDATE user_session_audit')
+      expect(sql).toMatch(/end_reason = 'rotated'/)
+      expect(params).toEqual(['pre-auth-sid'])
+      const destroy = vi.mocked(request.sessionStore.destroy)
+      expect(query.mock.invocationCallOrder[0]).toBeLessThan(destroy.mock.invocationCallOrder[0])
+    })
+
+    it('logs but does not fail the login when the audit stamp errors', async () => {
+      const request = makeRequest({ auditError: new Error('pg down'), returnTo: '/datalibrary' })
+      const reply = makeReply()
+
+      await handleCallback(request, reply)
+
+      expect(request.log.error).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        expect.stringContaining('audit'),
+      )
+      // The row still goes, and the login still lands.
+      expect(request.sessionStore.destroy).toHaveBeenCalledWith('pre-auth-sid', expect.any(Function))
       expect(reply.redirect).toHaveBeenCalledWith('/datalibrary')
     })
 

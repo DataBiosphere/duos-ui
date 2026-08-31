@@ -63,7 +63,7 @@ const SECRET = 'test-secret-that-is-at-least-32-characters'
 // ---------------------------------------------------------------------------
 // In-memory stand-in for the two Postgres tables the auth flow touches:
 //   - user_sessions       (read/written by createPgSessionStore)
-//   - user_session_audit  (UPDATEd by handleLogout)
+//   - user_session_audit  (UPDATEd by handleCallback's rotation and handleLogout)
 // It honours the exact SQL the store + logout issue, and records enough to
 // assert on. `set` awaits a macrotask to mimic the real DB round-trip — the
 // async gap between the handler resolving and @fastify/session's onSend save is
@@ -71,7 +71,9 @@ const SECRET = 'test-secret-that-is-at-least-32-characters'
 // ---------------------------------------------------------------------------
 function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>()) {
   const setSids: string[] = []
-  const auditUpdates: string[] = []
+  // Reason as well as sid: the callback's rotation stamp and logout's stamp
+  // hit the same table, so counting rows alone cannot tell them apart.
+  const auditUpdates: Array<{ reason: string, sid: string }> = []
   const query = async (sql: string, params: unknown[] = []) => {
     if (sql.includes('SELECT sess FROM user_sessions')) {
       const row = rows.get(params[0] as string)
@@ -91,7 +93,10 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
       return { rows: [] }
     }
     if (sql.includes('UPDATE user_session_audit')) {
-      auditUpdates.push(params[0] as string)
+      auditUpdates.push({
+        reason: /end_reason = '(\w+)'/.exec(sql)?.[1] ?? 'unknown',
+        sid: params[0] as string,
+      })
       return { rows: [] }
     }
     return { rows: [] }
@@ -169,7 +174,7 @@ function sessionCookieHeader(res: { cookies: Array<{ name: string, value: string
 describe('BFF OAuth flow (integration, openid-client mocked at the function boundary)', () => {
   let app: FastifyInstance
   let rows: Map<string, { sess: unknown, expire: Date }>
-  let auditUpdates: string[]
+  let auditUpdates: Array<{ reason: string, sid: string }>
 
   beforeEach(async () => {
     Object.assign(process.env, ENV)
@@ -363,6 +368,23 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       expect(rows.has(preAuthSid)).toBe(false)
       expect(rows.size).toBe(1)
     })
+
+    it('stamps the pre-auth audit row as rotated, not as an expiry', async () => {
+      const { cookie: loginCookie } = await login()
+      const preAuthSid = [...rows.keys()][0]
+
+      await app.inject({
+        method: 'GET',
+        url: '/auth/callback?code=test-code&state=test-state',
+        headers: { cookie: loginCookie },
+      })
+
+      // Rotation leaves two audit rows per login: this one, and the
+      // authenticated row the new sid's INSERT created. Without the stamp the
+      // DELETE's audit_session_end trigger would default this one to
+      // 'expired', filing every successful login as an expiry.
+      expect(auditUpdates).toEqual([{ reason: 'rotated', sid: preAuthSid }])
+    })
   })
 
   describe('idp sub-provider derivation (observed via /auth/me)', () => {
@@ -438,7 +460,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
 
       expect(res.statusCode).toBe(204)
       expect(rows.size).toBe(0) // session row deleted
-      expect(auditUpdates).toHaveLength(1) // end_reason='logout' UPDATE issued
+      expect(auditUpdates.filter(u => u.reason === 'logout')).toHaveLength(1)
       const cleared = res.cookies.find(c => c.name === 'sessionId')
       expect(cleared).toBeDefined()
       expect(cleared!.value).toBe('') // cookie cleared
@@ -468,7 +490,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
 
       expect(res.statusCode).toBe(403)
       expect(rows.size).toBe(1) // session NOT destroyed
-      expect(auditUpdates).toHaveLength(0) // handler never ran
+      expect(auditUpdates.filter(u => u.reason === 'logout')).toHaveLength(0) // handler never ran
     })
 
     it('accepts POST /auth/logout with a valid session-bound X-CSRF-Token (204)', async () => {
@@ -526,7 +548,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
 
       expect(res.statusCode).toBe(403)
       expect(rows.size).toBe(1) // session survives
-      expect(auditUpdates).toHaveLength(0) // handler never ran
+      expect(auditUpdates.filter(u => u.reason === 'logout')).toHaveLength(0) // handler never ran
     })
   })
 

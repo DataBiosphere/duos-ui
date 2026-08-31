@@ -3,6 +3,60 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 import { getOidcConfig, requireEnv } from './oidcClient.js'
 
 /**
+ * Retires the pre-auth session row once rotation has succeeded: stamp its audit
+ * row, then delete it.
+ *
+ * Every step is best-effort and logged. The old row never received tokens, so
+ * replaying its sid yields 401 whatever happens here — a failure is an
+ * audit/cleanup problem, not a fixation attack, and must not fail a login that
+ * has already succeeded.
+ */
+async function retirePreAuthSession(request: FastifyRequest, preAuthSid: string): Promise<void> {
+  // Stamp the audit row BEFORE the delete. The delete fires Consent's
+  // audit_session_end trigger, which fills end_reason with COALESCE(end_reason,
+  // 'expired') — so without this, every successful login files its pre-auth row
+  // as an expiry, and the audit table carries two rows per login where it used
+  // to carry one. Same SQL, same hashing convention, and same best-effort
+  // handling as the 'logout' stamp in logout.ts; user_session_audit and its
+  // sid_hash-keyed triggers are Epic 1 infrastructure (DT-3606).
+  try {
+    await request.server.pg.query(
+      `UPDATE user_session_audit
+          SET end_reason = 'rotated'
+        WHERE sid_hash = encode(sha256($1::bytea), 'hex') AND ended_at IS NULL`,
+      [preAuthSid],
+    )
+  }
+  catch (err: unknown) {
+    request.log.error({ err }, '[auth] failed to stamp the pre-auth audit row as rotated')
+  }
+
+  // Destroy the pre-auth row so a fixated sid cannot linger as a live session.
+  // request.session now points at the NEW session, so this must go through the
+  // store, not request.session.destroy().
+  //
+  // The try/catch is the second half of "best-effort": the callback covers a
+  // store that reports an error, this covers one that throws SYNCHRONOUSLY
+  // instead of calling back (the Promise constructor turns that throw into a
+  // rejection). pgStore always calls back (see pgStore.ts's run()), so nothing
+  // reaches the catch today — but without it, a store that changed that
+  // contract would 500 a login that has already succeeded. A store that
+  // silently never calls back is out of reach of any catch and would hang the
+  // handler; calling back exactly once is the SessionStore contract.
+  try {
+    await new Promise<void>((resolve) => {
+      request.sessionStore.destroy(preAuthSid, (err) => {
+        if (err) request.log.error({ err }, '[auth] failed to destroy pre-auth session row after rotation')
+        resolve()
+      })
+    })
+  }
+  catch (err: unknown) {
+    request.log.error({ err }, '[auth] failed to destroy pre-auth session row after rotation')
+  }
+}
+
+/**
  * Exchanges the B2C authorization code for tokens, validates the `id_token`,
  * extracts the sub-provider from the B2C `idp` claim, and writes all tokens to
  * the session. The browser never sees a token — only the post-login redirect.
@@ -85,32 +139,7 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
   // this succeeds, authentication has succeeded.
   await request.session.save()
 
-  // Destroy the pre-auth row so a fixated sid cannot linger as a live session.
-  // request.session now points at the NEW session, so this must go through the
-  // store, not request.session.destroy(). In Postgres this DELETE fires the
-  // audit_session_end trigger, which stamps the pre-auth audit row's ended_at.
-  // Best-effort: the old row never received tokens, so replaying it yields 401
-  // regardless — a transient deletion failure is an audit/cleanup problem, not
-  // a fixation attack, and must not fail an otherwise successful login.
-  // The try/catch is the second half of "best-effort": the callback covers a
-  // store that reports an error, this covers one that throws SYNCHRONOUSLY
-  // instead of calling back (the Promise constructor turns that throw into a
-  // rejection). pgStore always calls back (see pgStore.ts's run()), so nothing
-  // reaches the catch today — but without it, a store that changed that
-  // contract would 500 a login that has already succeeded. A store that
-  // silently never calls back is out of reach of any catch and would hang the
-  // handler; calling back exactly once is the SessionStore contract.
-  try {
-    await new Promise<void>((resolve) => {
-      request.sessionStore.destroy(preAuthSid, (err) => {
-        if (err) request.log.error({ err }, '[auth] failed to destroy pre-auth session row after rotation')
-        resolve()
-      })
-    })
-  }
-  catch (err: unknown) {
-    request.log.error({ err }, '[auth] failed to destroy pre-auth session row after rotation')
-  }
+  await retirePreAuthSession(request, preAuthSid)
 
   // Use the captured local — the returnTo field died with the pre-auth session.
   reply.redirect(returnTo)
