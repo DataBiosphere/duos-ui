@@ -1,8 +1,6 @@
 const COOKIE_CONTROL = 'cookie_control'
 
-// decodeURIComponent throws URIError on a malformed sequence, and any cookie can
-// hold one (a raw '%', or a legacy unencoded value). Fall back to the raw text so
-// one bad cookie cannot break the whole document.cookie read.
+// Preserve malformed values so one bad cookie cannot break the entire read.
 const decodeValue = (value: string) => {
   try {
     return decodeURIComponent(value)
@@ -39,9 +37,7 @@ export const getAcknowledged = () => {
 }
 
 export const setAcknowledged = () => {
-  // Base cookie control object
   const control = { acknowledged: true, timestamp: Date.now() }
-  // 400 - day cookie expiration (days * hours * minutes * seconds)
   const expiration = 400 * 24 * 60 * 60
   // Unlike the session cookie, this preference is not needed on cross-site redirects.
   // Add Secure only when HTTPS is available; local development may use HTTP.
