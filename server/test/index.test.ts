@@ -173,6 +173,58 @@ describe('plugin registration order', () => {
   })
 })
 
+// Story 5-D: the session cookie is configured in Epic 1; this block is the
+// hardening-phase verification that the PRODUCTION options are the strict set.
+// Asserted against the mocked @fastify/session registration because that is the
+// only place buildApp()'s own options are visible — session.test.ts and the load
+// harness stand the plugin up themselves and so cannot catch a drift here.
+describe('session cookie attributes', () => {
+  async function sessionCookieOptions() {
+    const { default: sessionPlugin } = await import('@fastify/session')
+    const calls = vi.mocked(sessionPlugin).mock.calls
+    expect(calls.length).toBeGreaterThan(0)
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    return (calls.at(-1)![1] as any).cookie as Record<string, unknown>
+  }
+
+  it('sets HttpOnly, SameSite=Lax and Path=/', async () => {
+    const cookie = await sessionCookieOptions()
+    expect(cookie.httpOnly).toBe(true)
+    // Lax, not Strict: Strict would strip the cookie from the top-level
+    // redirect B2C makes back to /auth/callback, which would arrive sessionless
+    // and lose the PKCE verifier and state.
+    expect(cookie.sameSite).toBe('lax')
+    expect(cookie.path).toBe('/')
+  })
+
+  it('sets Secure in production', async () => {
+    const previous = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+    vi.resetModules()
+    try {
+      const { resetConfigCache } = await import('../src/config.js')
+      resetConfigCache()
+      const { buildApp } = await import('../src/index.js')
+      const localApp = await buildApp()
+      const cookie = await sessionCookieOptions()
+      expect(cookie.secure).toBe(true)
+      expect(cookie.httpOnly).toBe(true)
+      expect(cookie.sameSite).toBe('lax')
+      expect(cookie.path).toBe('/')
+      await localApp.close()
+    }
+    finally {
+      process.env.NODE_ENV = previous
+      vi.resetModules()
+    }
+  })
+
+  it('leaves Secure off outside production so plain-HTTP dev keeps its session', async () => {
+    const cookie = await sessionCookieOptions()
+    expect(cookie.secure).toBe(false)
+  })
+})
+
 describe('GET /config.json', () => {
   let dir: string
 
