@@ -128,12 +128,19 @@ export function contentSecurityPolicyOptions(config: Record<string, unknown>, en
     // this directive, so dropping 'unsafe-inline' would blank the whole app.
     styleSrc: ['\'self\'', '\'unsafe-inline\''],
     // `data:` — bundled SVGs embed raster fallbacks as data URIs.
-    // `blob:` — object URLs the app mints itself for uploaded-file previews.
+    // `blob:` — object URLs the app mints for uploads and downloads. No live
+    // `<img src="blob:">` was found in the audit, but blob: images are a
+    // routine React pattern and such a URL can only be created by same-origin
+    // script, so the allowance is kept rather than risk an unexamined path.
     // Deliberately not `https:`, which would trust every origin on the web.
     imgSrc: ['\'self\'', 'data:', 'blob:'],
-    // The PDF preview window frames a blob: object URL of the user's own
-    // upload (components/forms/DocumentUpload.tsx).
-    frameSrc: ['\'self\'', 'blob:'],
+    // The app frames nothing today. `openPreviewWindow` in
+    // components/forms/DocumentUpload.tsx looks like it frames a blob: object
+    // URL, but it opens the window with `noopener`, and `window.open` returns
+    // null for that by specification — so it always takes the download
+    // fallback and the iframe is never created. Repairing that preview means
+    // adding `blob:` back here.
+    frameSrc: ['\'self\''],
     connectSrc: connectSources(config, env),
     // The Roboto and Montserrat faces are vendored under public/css.
     fontSrc: ['\'self\''],
@@ -146,9 +153,12 @@ export function contentSecurityPolicyOptions(config: Record<string, unknown>, en
     reportTo: [CSP_REPORT_GROUP],
   }
 
-  // Production only: plain-HTTP local and docker-compose setups must keep
-  // working, and this directive would rewrite every one of their requests to
-  // https and break them.
+  // Gated on NODE_ENV, which is what `isDev` reads — not on the transport.
+  // That keeps `pnpm start:server` working, where this directive would rewrite
+  // every request to https. Note it does NOT spare docker-compose:
+  // docker-compose.yaml defaults NODE_ENV to production, so a compose stack
+  // reached over plain HTTP on :80 gets its subresources upgraded and lands on
+  // the :443 mapping instead. Use the https port there.
   if (!env.isDev) {
     directives.upgradeInsecureRequests = []
   }
@@ -165,12 +175,28 @@ export function contentSecurityPolicyOptions(config: Record<string, unknown>, en
 export function helmetOptions(config: Record<string, unknown>, env: CspEnvironment): FastifyHelmetOptions {
   return {
     contentSecurityPolicy: contentSecurityPolicyOptions(config, env),
-    // `same-origin` — helmet's default — severs `window.opener` for popups.
-    // The legacy sign-in flow drives a B2C popup and reads the result through
-    // that reference (docs/plans/BFF_Overview.md), so it would break until
-    // Epic 6 removes the legacy client. `-allow-popups` keeps the isolation
-    // for *incoming* cross-origin openers, which is the part that matters.
-    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+    // COOP is OFF in legacy mode, and `same-origin-allow-popups` is not a
+    // safe middle ground there — this was measured, not assumed.
+    //
+    // The legacy sign-in flow opens a popup, sends it to B2C, and B2C
+    // redirects it back to `${origin}/redirect-from-oauth`, where
+    // oidc-client-ts posts the result to `window.opener`
+    // (src/libs/auth/oidcBroker.ts, src/index.tsx). `-allow-popups` only
+    // spares a popup on its *initial* navigation, and only while the popup's
+    // own document is `unsafe-none`. The return leg is a different comparison:
+    // the popup's current document is B2C (`unsafe-none`) and the incoming one
+    // is ours (COOP set), which is a mismatch — so the browser swaps browsing
+    // context groups and `window.opener` becomes null. `postMessage` then
+    // throws, the opener never hears back, and `signinPopup()` never resolves.
+    //
+    // Nothing about this is covered by DUOS_CSP_REPORT_ONLY: COOP is not part
+    // of the CSP and has no report-only mode. Getting it wrong breaks sign-in
+    // on the first deploy, so legacy deployments get no COOP at all until
+    // Epic 6 retires that flow. BFF sign-in is a top-level redirect with no
+    // popup and no opener, so it keeps the isolation.
+    crossOriginOpenerPolicy: config.bffEnabled === true
+      ? { policy: 'same-origin-allow-popups' }
+      : false,
     // COEP demands CORP or CORS headers on every cross-origin subresource.
     // The banner bucket and the feature-flag/metrics upstreams send neither,
     // so enabling it would block them. Off until those are same-origin.
@@ -180,8 +206,10 @@ export function helmetOptions(config: Record<string, unknown>, env: CspEnvironme
     // Belt and braces with `frame-ancestors 'none'`, for anything that reads
     // only the legacy header.
     xFrameOptions: { action: 'deny' },
-    // Production only. A dev or docker-compose setup served over plain HTTP
-    // would be pinned to https for a year by a single stray response.
+    // Gated on NODE_ENV, like upgrade-insecure-requests above, so that
+    // `pnpm start:server` cannot pin a developer's browser to https for a
+    // year. A compose stack runs as production and does send it; browsers
+    // ignore HSTS delivered over plain HTTP, so that costs nothing there.
     strictTransportSecurity: env.isDev
       ? false
       : { maxAge: 31536000, includeSubDomains: true, preload: false },

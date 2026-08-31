@@ -156,8 +156,24 @@ describe('contentSecurityPolicyOptions', () => {
 })
 
 describe('helmetOptions', () => {
-  it('allows popups through COOP, which the legacy sign-in flow still needs', () => {
+  it('sends no COOP at all in legacy mode, where a popup carries the sign-in result', () => {
+    // Measured, not assumed: `same-origin-allow-popups` does NOT save this
+    // flow. It spares a popup only on its initial navigation while the popup's
+    // own document is unsafe-none. On the return leg from B2C the comparison
+    // is unsafe-none against our COOP, which mismatches — the browser swaps
+    // browsing context groups and window.opener goes null, so oidc-client-ts
+    // can never postMessage the result back and signinPopup() hangs.
+    expect(helmetOptions(fullConfig(false), PROD).crossOriginOpenerPolicy).toBe(false)
+  })
+
+  it('keeps COOP in BFF mode, where sign-in is a top-level redirect with no opener', () => {
     expect(helmetOptions(fullConfig(true), PROD).crossOriginOpenerPolicy).toEqual({ policy: 'same-origin-allow-popups' })
+  })
+
+  it('treats a missing bffEnabled key as legacy mode, the fail-safe direction', () => {
+    const config = fullConfig(false)
+    delete config.bffEnabled
+    expect(helmetOptions(config, PROD).crossOriginOpenerPolicy).toBe(false)
   })
 
   it('leaves COEP off, since the banner and metrics origins send no CORP header', () => {
@@ -243,19 +259,28 @@ describe('the proxy download sandbox', () => {
   })
 
   it('keeps its per-reply sandbox value instead of the global policy', async () => {
-    // helmet writes its header onto the raw response; the proxy sets its own
-    // through reply.headers(), which Fastify passes to writeHead — and
-    // writeHead values win over setHeader ones. Proxied uploads are served from
+    // Both writes land on the same raw response through setHeader, and the
+    // proxy's runs second, so it wins. (Not through writeHead: the proxy
+    // replies with a stream, and Fastify's stream path deliberately avoids
+    // writeHead — see the comment at fastify/lib/reply.js `sendStream`. The
+    // ordering is what makes this work, so a future change that moved helmet
+    // later would silently strip the sandbox.) Proxied uploads are served from
     // the SPA's own origin, so losing `sandbox` here would let one execute.
     app = await buildAppShell()
     await app.register(fastifyHelmet, helmetOptions(fullConfig(true), PROD))
     seedSession(app, { accessToken: 'session-access-token', tokenExpiry: nowSeconds() + 3600 })
     await app.register(apiProxy)
+    // A non-proxy route in the same app, to prove helmet is live here. Without
+    // it this case would also pass against an app where helmet never ran.
+    app.get('/not-proxied', async () => ({ ok: true }))
 
-    const res = await app.inject({ method: 'GET', url: '/duos-api/api/dataset/1' })
+    const proxied = await app.inject({ method: 'GET', url: '/duos-api/api/dataset/1' })
+    const plain = await app.inject({ method: 'GET', url: '/not-proxied' })
 
-    expect(res.statusCode).toBe(200)
-    expect(res.headers['content-security-policy']).toBe('sandbox')
-    expect(res.headers['x-content-type-options']).toBe('nosniff')
+    expect(proxied.statusCode).toBe(200)
+    expect(proxied.headers['content-security-policy']).toBe('sandbox')
+    expect(proxied.headers['x-content-type-options']).toBe('nosniff')
+    // Same app, same helmet registration — the full policy, not `sandbox`.
+    expect(String(plain.headers['content-security-policy'])).toContain('default-src \'self\'')
   })
 })

@@ -73,8 +73,9 @@ calls.
 `DUOS_CSP_REPORT_ONLY` defaults to **true**. Each environment collects
 violations first and is flipped to enforcement once a run over every flow is
 clean. Collection is real, not console-only: `POST /csp-report` accepts the
-reports, and `test/e2e/csp.spec.ts` drives the flows in CI with the same
-policy attached and asserts nothing was reported.
+reports, and `test/e2e/csp.spec.ts` drives the flows with the same policy
+attached and asserts nothing was reported. That spec runs **locally only** —
+see the Consequences section for why CI cannot run it yet, and what it costs.
 
 The report sink is an unauthenticated POST, so it is bounded four ways: an
 8 KB body limit, exactly two accepted media types (everything else gets 415
@@ -85,15 +86,26 @@ outside both cutover switches — a legacy deployment needs it too.
 
 ### 3. Two helmet defaults are overridden, and two headers are production-only
 
-- **`Cross-Origin-Opener-Policy: same-origin-allow-popups`**, not helmet's
-  `same-origin`. The latter severs `window.opener`, which the legacy B2C popup
-  sign-in flow reads. Revisit in Epic 6.
+- **`Cross-Origin-Opener-Policy` is off in legacy mode**, and set to
+  `same-origin-allow-popups` only under `bffEnabled`. `-allow-popups` is *not*
+  a safe middle ground for the legacy flow, which was measured rather than
+  assumed: it spares a popup only on its initial navigation, while the popup's
+  own document is `unsafe-none`. The return leg from B2C compares the popup's
+  current document (`unsafe-none`) against ours (COOP set) — a mismatch — so
+  the browser swaps browsing context groups, `window.opener` becomes null,
+  `postMessage` throws, and `signinPopup()` never resolves. COOP is not part
+  of the CSP and has no report-only mode, so `DUOS_CSP_REPORT_ONLY` would not
+  have caught this: it breaks sign-in on the first deploy. BFF sign-in is a
+  top-level redirect with no popup, so it keeps the isolation. Revisit when
+  Epic 6 retires the legacy client.
 - **`Cross-Origin-Embedder-Policy` off.** It demands CORP or CORS headers on
   every cross-origin subresource; the banner bucket and the two direct
   upstreams send neither.
-- **HSTS and `upgrade-insecure-requests` in production only.** A plain-HTTP
-  dev or docker-compose setup would otherwise be pinned to https by a single
-  stray response.
+- **HSTS and `upgrade-insecure-requests` gated on `NODE_ENV`**, so that
+  `pnpm start:server` cannot pin a developer's browser to https for a year.
+  The gate is on the environment, not the transport: docker-compose defaults
+  `NODE_ENV` to production and does send both, so reach a compose stack on its
+  :443 mapping rather than :80.
 - **Vite HMR allowances behind `isDev`.** The dev server injects the React
   Fast Refresh preamble as an inline module script and opens an HMR websocket,
   so dev adds `'unsafe-inline'` to `script-src` and `ws:`/`wss:` to
@@ -102,11 +114,15 @@ outside both cutover switches — a legacy deployment needs it too.
 ### 4. The proxy's per-reply sandbox still wins
 
 `upstreamProxy.ts` sets `content-security-policy: sandbox` on proxied
-responses so a proxied upload cannot execute on the SPA's origin. Helmet
-writes its header onto the raw response; Fastify passes the proxy's through
-`writeHead`, and `writeHead` values take precedence. `server/test/csp.test.ts`
-asserts this against the real proxy rather than leaving it to Node's
-documentation.
+responses so a proxied upload cannot execute on the SPA's origin. Both writes
+reach the same raw response through `setHeader`, and the proxy's runs second,
+so it wins. Not through `writeHead`: the proxy replies with a stream, and
+Fastify's stream path deliberately avoids `writeHead` so it can still turn a
+late stream error into a proper status. **Ordering is the whole mechanism**,
+which makes it fragile — registering helmet later would silently strip the
+sandbox. `server/test/csp.test.ts` asserts it against the real proxy, and
+asserts a sibling route in the same app carries the full policy, so the case
+cannot pass against an app where helmet never ran.
 
 ### 5. `style-src` keeps `'unsafe-inline'`
 
@@ -119,6 +135,12 @@ is a much larger piece of work than this story.
 
 - Every `connect-src` entry traces to the inventory table above and to a
   config field, so a new upstream is a config change, not a code change.
+- `frame-src` is `'self'` — the app frames nothing. `openPreviewWindow` in
+  `components/forms/DocumentUpload.tsx` reads as though it frames a `blob:`
+  object URL, but it opens the window with `noopener`, and `window.open`
+  returns null for that by specification, so it always takes the download
+  fallback and the iframe is never created. Repairing that preview means
+  adding `blob:` back to this directive.
 - BFF-mode `connect-src` cannot reach `'self'` alone until the three direct
   flows move to dedicated public BFF endpoints (`/public/notifications`,
   `/public/features/*`, `/public/metrics/event`). That is the filed follow-up

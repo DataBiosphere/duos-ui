@@ -630,6 +630,29 @@ describe('security headers', () => {
     await localApp.close()
   })
 
+  it('reaches the SPA document itself, not just the API routes', async () => {
+    // /health is a root-scope JSON route; the response that actually needs the
+    // policy is the HTML document. A deep link falls through to
+    // setNotFoundHandler -> reply.html(), the same path a real page load takes.
+    // Asserting only on /health would keep passing if a future registration
+    // ordering dropped the policy from the document.
+    const res = await app.inject({ method: 'GET', url: '/datalibrary/some-deep-link' })
+
+    expect(res.headers['content-security-policy-report-only']).toContain('default-src \'self\'')
+  })
+
+  it('reaches the report sink, which lives in its own encapsulated scope', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/csp-report',
+      headers: { 'content-type': 'application/csp-report' },
+      payload: JSON.stringify({ 'csp-report': { 'blocked-uri': 'https://example.org/x' } }),
+    })
+
+    expect(res.statusCode).toBe(204)
+    expect(res.headers['content-security-policy-report-only']).toContain('default-src \'self\'')
+  })
+
   it('gives the report-to group an address through Reporting-Endpoints', async () => {
     const res = await app.inject({ method: 'GET', url: '/health' })
 
@@ -637,11 +660,24 @@ describe('security headers', () => {
     expect(res.headers['content-security-policy-report-only']).toContain('report-to csp-endpoint')
   })
 
-  it('allows popups through COOP, which the legacy sign-in flow still drives', async () => {
+  it('sends no COOP header at all to a legacy deployment', async () => {
+    // The outer fixture config has no bffEnabled key, so this is legacy mode.
+    // COOP there would sever window.opener on the popup's return leg from B2C
+    // and hang sign-in — and COOP has no report-only mode to catch it first.
     const res = await app.inject({ method: 'GET', url: '/health' })
 
-    expect(res.headers['cross-origin-opener-policy']).toBe('same-origin-allow-popups')
+    expect(res.headers['cross-origin-opener-policy']).toBeUndefined()
     expect(res.headers['cross-origin-embedder-policy']).toBeUndefined()
+  })
+
+  it('sends COOP once bffEnabled is on and no popup carries the sign-in result', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['cross-origin-opener-policy']).toBe('same-origin-allow-popups')
+
+    await localApp.close()
   })
 
   it('omits HSTS outside production, so a plain-HTTP dev setup keeps working', async () => {
