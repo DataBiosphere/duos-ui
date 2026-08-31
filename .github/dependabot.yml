@@ -11,12 +11,12 @@ updates:
     commit-message:
       prefix: "[DT-400-actions]"
     groups:
-      action-major-updates:
+      action-major:
         patterns:
           - "*"
         update-types:
           - "major"
-      action-other-updates:
+      action-minor-patch:
         update-types:
           - "minor"
           - "patch"
@@ -34,12 +34,12 @@ updates:
     commit-message:
       prefix: "[DT-400-pnpm]"
     groups:
-      pnpm-major-updates:
+      pnpm-major:
         patterns:
           - "*"
         update-types:
           - "major"
-      pnpm-other-updates:
+      pnpm-minor-patch:
         update-types:
           - "minor"
           - "patch"
@@ -57,12 +57,12 @@ updates:
     commit-message:
       prefix: "[DT-400-docker]"
     groups:
-      docker-major-updates:
+      docker-major:
         patterns:
           - "*"
         update-types:
           - "major"
-      docker-other-updates:
+      docker-minor-patch:
         update-types:
           - "minor"
           - "patch"
