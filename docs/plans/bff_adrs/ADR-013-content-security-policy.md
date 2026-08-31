@@ -123,9 +123,15 @@ is a much larger piece of work than this story.
   flows move to dedicated public BFF endpoints (`/public/notifications`,
   `/public/features/*`, `/public/metrics/event`). That is the filed follow-up
   to this story, and it is what will let this allowlist shrink.
-- The e2e collector attaches the policy to the document itself, because
-  `pnpm run serve` is `vite preview` and sends no headers. Once the e2e harness
-  serves through the Fastify server (Epic 6), the attachment can be deleted and
-  the spec can read the header the server already sends.
+- **The e2e collector runs locally, not in CI.** `pnpm run serve` is
+  `vite preview`, which sends no headers, so the spec fulfils the document
+  itself to attach the policy. Chrome then treats that document as coming from
+  an unknown address space, which makes every same-origin subresource a
+  public-to-loopback Private Network Access transition: allowed from a secure
+  context, blocked without one. Locally the preview server speaks HTTPS and the
+  page loads; in CI it speaks plain HTTP and nothing loads. The spec is
+  therefore skipped under `CI`. The fix is not a browser flag — it is to serve
+  the e2e run through the Fastify server, which sends the real header and needs
+  no interception. Tracked with the Epic 6 harness work.
 - Enforcement is a per-environment decision recorded in deployment config, so
   a bad policy is one env var away from being backed out.

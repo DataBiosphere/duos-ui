@@ -16,6 +16,22 @@ import { attachReportOnlyPolicy, collectViolations, policyHeader } from './suppo
 const SETTLE_MS = 1500
 
 test.describe('Content Security Policy', () => {
+  // Local only, and not by choice. `pnpm run serve` is `vite preview`, which
+  // sends no security headers, so support/csp.ts fulfils the document itself to
+  // attach the policy. Chrome treats a fulfilled document as coming from an
+  // unknown address space, which makes every same-origin subresource a
+  // public-to-loopback Private Network Access transition — allowed from a
+  // secure context, blocked without one. Locally the preview server speaks
+  // HTTPS and the page loads; in CI it speaks plain HTTP and every stylesheet
+  // and script is blocked before the policy is ever exercised.
+  //
+  // The fix is not a browser flag: it is to serve the e2e run through the
+  // Fastify server, which sends the real header and needs no interception at
+  // all. That is tracked with the Epic 6 harness work. Until then, run this
+  // locally (`pnpm exec playwright test test/e2e/csp.spec.ts`) whenever the
+  // policy or the app's outbound calls change.
+  test.skip(Boolean(process.env.CI), 'needs a server that sends the header; see the comment above')
+
   test('The collector reports a violation when one happens', async ({ page }) => {
     // Without this, a harness that silently stopped attaching the header — or
     // stopped listening — would report every other case in this file as clean.
