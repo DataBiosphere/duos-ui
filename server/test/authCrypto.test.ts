@@ -6,6 +6,7 @@ import type { PostgresDb } from '@fastify/postgres'
 import * as oidc from 'openid-client'
 import * as jose from 'jose'
 import { createPgSessionStore } from '../src/session/pgStore.js'
+import { sessionPluginOptions } from '../src/session/sessionOptions.js'
 import { handleLogin } from '../src/auth/login.js'
 import { handleCallback } from '../src/auth/callback.js'
 import '../src/types/session.js'
@@ -141,13 +142,13 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
 async function buildApp(pg: PostgresDb): Promise<FastifyInstance> {
   const app = Fastify({ logger: false })
   await app.register(fastifyCookie)
-  await app.register(fastifySession, {
+  // index.ts's own options (src/session/sessionOptions.ts), imported rather
+  // than restated. `secure: false` because this harness serves plain HTTP.
+  await app.register(fastifySession, sessionPluginOptions({
     secret: SECRET,
     store: createPgSessionStore(pg),
-    cookie: { httpOnly: true, secure: false, sameSite: 'lax', maxAge: 8 * 60 * 60 * 1000, path: '/' },
-    saveUninitialized: false,
-    rolling: false,
-  })
+    secure: false,
+  }))
   app.post('/auth/login', handleLogin)
   app.get('/auth/callback', handleCallback)
   return app

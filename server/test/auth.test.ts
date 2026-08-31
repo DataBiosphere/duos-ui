@@ -6,6 +6,7 @@ import fastifyCsrf from '@fastify/csrf-protection'
 import type { PostgresDb } from '@fastify/postgres'
 import type { Configuration } from 'openid-client'
 import { createPgSessionStore } from '../src/session/pgStore.js'
+import { sessionPluginOptions } from '../src/session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from '../src/auth/csrf.js'
 import { fetchMetadataGuard } from '../src/security/fetchMetadata.js'
 import { handleLogin } from '../src/auth/login.js'
@@ -102,31 +103,36 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
   return { pg: { query } as unknown as PostgresDb, rows, setSids, auditUpdates }
 }
 
-async function buildAuthApp(pg: PostgresDb, errorLog?: string[]): Promise<FastifyInstance> {
+interface AuthAppOptions {
+  /** Collects error-level log lines for the double-send regression guard. */
+  errorLog?: string[]
+  /**
+   * TEST ONLY — hands the session plugin a Strict (or None) cookie instead of
+   * production's Lax. Only the SameSite suite below uses it, to build an app
+   * whose cookie a browser would withhold from the B2C callback redirect.
+   */
+  sameSiteOverride?: 'strict' | 'none'
+}
+
+async function buildAuthApp(pg: PostgresDb, options: AuthAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify(
-    errorLog
-      ? { logger: { level: 'error', stream: { write: (line: string) => { errorLog.push(line) } } } }
+    options.errorLog
+      ? { logger: { level: 'error', stream: { write: (line: string) => { options.errorLog!.push(line) } } } }
       : { logger: false },
   )
   // handleLogout reads request.server.pg; the real app gets it from
   // @fastify/postgres, which needs a live DB — decorate the stand-in instead.
   app.decorate('pg', pg as never)
   await app.register(fastifyCookie)
-  // Mirror index.ts's session config exactly — rolling:false and
-  // saveUninitialized:false are load-bearing for the double-send fix.
-  await app.register(fastifySession, {
+  // index.ts's own session options, imported rather than restated: sameSite,
+  // rolling:false, and saveUninitialized:false are all asserted in this file,
+  // and a local copy would keep those assertions green after production
+  // changed. See src/session/sessionOptions.ts.
+  await app.register(fastifySession, sessionPluginOptions({
     secret: SECRET,
     store: createPgSessionStore(pg),
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 8 * 60 * 60 * 1000,
-      path: '/',
-    },
-    saveUninitialized: false,
-    rolling: false,
-  })
+    sameSiteOverride: options.sameSiteOverride,
+  }))
   // Real CSRF plugin, registered with index.ts's own options — after
   // @fastify/session, so the token secret lives in the session. The options are
   // imported rather than restated: registered with the plugin's bare defaults,
@@ -162,6 +168,75 @@ function sessionCookieHeader(res: { cookies: Array<{ name: string, value: string
   const cookie = cookies[cookies.length - 1]
   if (!cookie || cookie.value === '') throw new Error('no session cookie set')
   return `${cookie.name}=${cookie.value}`
+}
+
+/**
+ * Models the browser's SameSite decision for the one navigation the whole flow
+ * depends on: B2C's 302 back to `/auth/callback`.
+ *
+ * `b2clogin.com` and `*.broadinstitute.org` are different registrable domains,
+ * so that redirect is a **cross-site, top-level GET navigation**. Per RFC
+ * 6265bis a `Lax` (or `None`) cookie is sent on it; a `Strict` cookie is
+ * withheld, and the callback then arrives on a fresh, empty session. This
+ * assumes B2C returns via GET — `response_mode=query`, the code-flow default.
+ * With `response_mode=form_post` the redirect back would be a cross-site POST
+ * and even `Lax` would withhold the cookie. See ADR-012.
+ *
+ * `app.inject()` has no cookie jar, so the decision has to be made explicitly.
+ * It is read from the `SameSite` attribute the app actually set on the login
+ * response, not from a constant — so flipping the shared session config
+ * changes what this returns, and the Lax test below fails.
+ */
+function cookieAfterB2cRedirect(
+  res: { cookies: Array<{ name: string, value: string, sameSite?: string }> },
+): string | undefined {
+  const cookie = res.cookies.find(c => c.name === 'sessionId')
+  if (!cookie) throw new Error('no session cookie set')
+  // An absent attribute is Lax in every current browser.
+  const attribute = String(cookie.sameSite ?? 'lax').toLowerCase()
+  switch (attribute) {
+    case 'lax':
+    case 'none':
+      return `${cookie.name}=${cookie.value}`
+    case 'strict':
+      return undefined
+    default:
+      throw new Error(`unhandled SameSite attribute '${attribute}' — extend this browser model`)
+  }
+}
+
+/**
+ * Replaces the suite's default permissive `authorizationCodeGrant` mock with
+ * one that performs openid-client v6's real state check, transcribed from
+ * `oauth4webapi`'s `validateAuthResponse`:
+ *
+ *   - no `expectedState` (a sessionless callback) → any `state` in the URL is
+ *     rejected outright;
+ *   - an `expectedState` that does not match the URL's `state` → rejected;
+ *   - a match → the exchange proceeds.
+ *
+ * The real behavior is already proven against a fake B2C in authCrypto.test.ts;
+ * this reproduces it here because the default mock ignores `checks` entirely,
+ * which would let a sessionless callback succeed and hide exactly the failure
+ * the Strict test is meant to show.
+ */
+function mockStateCheckingGrant(
+  oidc: typeof import('openid-client'),
+  claims: Record<string, unknown> = { email: 'user@example.com' },
+): void {
+  vi.mocked(oidc.authorizationCodeGrant).mockImplementation(async (_config, currentUrl, checks) => {
+    const state = new URL(String(currentUrl)).searchParams.get('state')
+    const expected = checks?.expectedState
+    if (typeof expected !== 'string') {
+      if (state !== null) throw new Error('unexpected "state" response parameter encountered')
+    }
+    else if (state !== expected) {
+      throw new Error(state === null
+        ? 'response parameter "state" missing'
+        : 'unexpected "state" response parameter value')
+    }
+    return makeTokens(claims)
+  })
 }
 
 describe('BFF OAuth flow (integration, openid-client mocked at the function boundary)', () => {
@@ -310,6 +385,86 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
 
       expect(res.statusCode).toBe(400)
       expect(res.json()).toEqual({ error: 'token_missing_email_claim' })
+    })
+  })
+
+  // -------------------------------------------------------------------------
+  // SameSite on the B2C callback redirect (DT-3996).
+  //
+  // The session cookie is `SameSite=Lax` by necessity, not by preference, and
+  // the code comment saying so was the only record of it. These two tests make
+  // the claim executable: the browser model above reads the attribute the app
+  // really set, so the pair is a mutation test on the shared session config —
+  // set `sameSite: 'strict'` in src/session/sessionOptions.ts and the Lax test
+  // fails at the cookie-withheld step. Full reasoning: ADR-012.
+  // -------------------------------------------------------------------------
+  describe('SameSite on the B2C callback redirect (DT-3996)', () => {
+    it('Lax: the browser sends the cookie on the cross-site redirect, so the callback completes', async () => {
+      const oidc = await import('openid-client')
+      mockStateCheckingGrant(oidc)
+
+      const { res, cookie } = await login('/datalibrary')
+      const stored = [...rows.values()][0].sess as Record<string, string>
+
+      // Production's attribute is Lax, so the model sends the cookie.
+      const sent = cookieAfterB2cRedirect(res)
+      expect(sent).toBe(cookie)
+
+      const callback = await app.inject({
+        method: 'GET',
+        url: `/auth/callback?code=test-code&state=${encodeURIComponent(stored.pkceState)}`,
+        headers: { cookie: sent! },
+      })
+
+      // The session survived the redirect, so the real PKCE material reached
+      // the exchange and the state check passed.
+      expect(oidc.authorizationCodeGrant).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.any(URL),
+        { pkceCodeVerifier: stored.pkceVerifier, expectedState: stored.pkceState },
+      )
+      expect(callback.statusCode).toBe(302)
+      expect(callback.headers.location).toBe('/datalibrary')
+    })
+
+    it('Strict: the browser withholds the cookie, so the callback is sessionless and every login fails', async () => {
+      const oidc = await import('openid-client')
+      mockStateCheckingGrant(oidc)
+
+      // The only caller of the Strict override — an app configured the way the
+      // "why not Strict?" question proposes.
+      const fake = makeInMemoryPg()
+      const strictApp = await buildAuthApp(fake.pg, { sameSiteOverride: 'strict' })
+      try {
+        const loginRes = await strictApp.inject({ method: 'POST', url: '/auth/login' })
+        expect(loginRes.statusCode).toBe(200)
+        const stored = [...fake.rows.values()][0].sess as Record<string, string>
+
+        // Strict → withheld from a cross-site-initiated navigation.
+        expect(cookieAfterB2cRedirect(loginRes)).toBeUndefined()
+
+        const callback = await strictApp.inject({
+          method: 'GET',
+          url: `/auth/callback?code=test-code&state=${encodeURIComponent(stored.pkceState)}`,
+        })
+
+        // A fresh, empty session: the verifier and state login persisted are
+        // unreachable, so the exchange is attempted with neither.
+        expect(oidc.authorizationCodeGrant).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.any(URL),
+          { pkceCodeVerifier: undefined, expectedState: undefined },
+        )
+        // openid-client rejects the unexpected `state`; the handler does not
+        // catch it, so it surfaces as a 500 — sign-in is broken outright, not
+        // degraded.
+        expect(callback.statusCode).toBe(500)
+        const sess = [...fake.rows.values()][0].sess as Record<string, unknown>
+        expect(sess.accessToken).toBeUndefined()
+      }
+      finally {
+        await strictApp.close()
+      }
     })
   })
 
@@ -646,7 +801,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       // would surface here as an "already sent"/ERR_HTTP_HEADERS_SENT log line.
       const errorLog: string[] = []
       const fake = makeInMemoryPg()
-      const guardedApp = await buildAuthApp(fake.pg, errorLog)
+      const guardedApp = await buildAuthApp(fake.pg, { errorLog })
 
       // regenerate() writes the empty new session; save() writes its tokens.
       const beforeLogin = fake.setSids.length

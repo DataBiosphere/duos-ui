@@ -5,6 +5,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { createPgSessionStore } from '../../src/session/pgStore.js'
+import { SESSION_COOKIE_NAME, sessionPluginOptions } from '../../src/session/sessionOptions.js'
 import { csrfPluginOptions } from '../../src/auth/csrf.js'
 import { TRUST_PROXY } from '../../src/config.js'
 import { apiProxy } from '../../src/proxy/apiProxy.js'
@@ -12,7 +13,7 @@ import { envBool } from '../../src/index.js'
 
 const SEED_PATH = '/__load/seed'
 
-const SESSION_COOKIE = 'sessionId'
+const SESSION_COOKIE = SESSION_COOKIE_NAME
 
 export interface SeededSession {
   cookie: string
@@ -91,13 +92,13 @@ export async function startLoadTarget(options: LoadTargetOptions): Promise<LoadT
   }
 
   await app.register(fastifyCookie)
-  await app.register(fastifySession, {
+  // index.ts's own options (src/session/sessionOptions.ts), imported rather
+  // than restated. `secure: false` because the load harness serves plain HTTP.
+  await app.register(fastifySession, sessionPluginOptions({
     secret: 'a-load-test-session-secret-at-least-32-characters-long',
     store,
-    cookie: { httpOnly: true, secure: false, sameSite: 'lax', path: '/' },
-    saveUninitialized: false,
-    rolling: false,
-  })
+    secure: false,
+  }))
   await app.register(fastifyCsrf, csrfPluginOptions)
 
   app.post(SEED_PATH, async (request, reply) => {

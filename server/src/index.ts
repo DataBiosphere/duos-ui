@@ -10,6 +10,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { createPgSessionStore } from './session/pgStore.js'
+import { sessionPluginOptions } from './session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
 import { fetchMetadataGuard } from './security/fetchMetadata.js'
 import { getOidcConfig } from './auth/oidcClient.js'
@@ -124,49 +125,22 @@ export async function buildApp(): Promise<AppInstance> {
 
     // Cookie + session — the store reads fastify.pg registered above
     await fastify.register(fastifyCookie)
-    await fastify.register(fastifySession, {
+    // Session options — including the SameSite/rolling/saveUninitialized
+    // fields the suite asserts on — live in session/sessionOptions.ts, so the
+    // test harnesses register the plugin exactly as this does. Restated inline,
+    // they drifted across six copies: see that file.
+    await fastify.register(fastifySession, sessionPluginOptions({
       secret: sessionSecret,
       store: createPgSessionStore(fastify.pg),
-      cookie: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        // Lax, not Strict: the OAuth callback is a top-level redirect from
-        // B2C, and Strict cookies are withheld from any navigation initiated
-        // cross-site — the callback would arrive sessionless and lose the
-        // PKCE verifier/state. Lax still withholds the cookie from cross-site
-        // POSTs/fetches; CSRF tokens (introduced with the endpoints they
-        // protect, Phases 2-4) cover state-changing routes.
-        sameSite: 'lax',
-        maxAge: Number(process.env.DUOS_SESSION_MAX_AGE_MS) || 8 * 60 * 60 * 1000,
-        path: '/',
-      },
-      saveUninitialized: false,
-      // `rolling: false` — MUST be set explicitly: @fastify/session defaults it
-      // to true. Two reasons it matters here:
-      //   1. Behavior: sessions get a fixed maxAge from creation. Rolling expiry
-      //      would re-save the session (SELECT + UPSERT) on every session-bearing
-      //      request just to bump `expire`. Phase 2 adds a throttled sliding
-      //      expiry instead — re-save only when the session is near expiry.
-      //   2. Correctness: with rolling on, the onSend save hook fires an async
-      //      DB write on every request that carries a session cookie, even when
-      //      the handler already called `request.session.save()` and nothing
-      //      else mutated the session. That async onSend leaves `reply.sent`
-      //      false when the async route handler resolves, so Fastify's
-      //      wrapThenable fires a SECOND reply.send(); the later save's writeHead
-      //      then throws ERR_HTTP_HEADERS_SENT and crashes the process. With
-      //      rolling off (+ saveUninitialized off + the pre-response save() in
-      //      the auth handlers), onSend finds the session unmodified and skips
-      //      the write synchronously, so the reply is fully sent before the
-      //      handler promise resolves and no second send happens.
-      rolling: false,
-    })
+    }))
 
     // CSRF protection for cookie-authenticated, state-changing auth routes
     // (currently POST /auth/logout). SameSite=Lax withholds the session cookie
     // from cross-site POSTs, but is not sufficient alone here: dev/staging live
     // under *.broadinstitute.org, where SameSite treats every sibling subdomain
     // as same-site — a compromised sibling could still forge cookie-bearing
-    // POSTs. CSRF tokens don't depend on the registrable domain. The secret is
+    // POSTs. CSRF tokens don't depend on the registrable domain — the full
+    // threat model is ADR-012 (docs/plans/bff_adrs). The secret is
     // stored in the session, so it must be registered after @fastify/session.
     //
     // The options — including the header-only `getToken` narrowing — live in
