@@ -190,8 +190,11 @@ describe('session cookie attributes', () => {
   })
 
   it('sets Secure in production', async () => {
-    const previous = process.env.NODE_ENV
-    process.env.NODE_ENV = 'production'
+    // stubEnv, not a manual save/restore: assigning back an undefined `previous`
+    // would set NODE_ENV to the literal string 'undefined'. Vitest happens to
+    // set NODE_ENV=test, so that cannot bite today, but the test should not
+    // depend on knowing that.
+    vi.stubEnv('NODE_ENV', 'production')
     vi.resetModules()
     try {
       const { resetConfigCache } = await import('../src/config.js')
@@ -206,7 +209,7 @@ describe('session cookie attributes', () => {
       await localApp.close()
     }
     finally {
-      process.env.NODE_ENV = previous
+      vi.unstubAllEnvs()
       vi.resetModules()
     }
   })
