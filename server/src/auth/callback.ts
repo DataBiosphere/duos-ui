@@ -2,23 +2,9 @@ import * as oidc from 'openid-client'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { getOidcConfig, requireEnv } from './oidcClient.js'
 
-/**
- * Retires the pre-auth session row once rotation has succeeded: stamp its audit
- * row, then delete it.
- *
- * Every step is best-effort and logged. The old row never received tokens, so
- * replaying its sid yields 401 whatever happens here — a failure is an
- * audit/cleanup problem, not a fixation attack, and must not fail a login that
- * has already succeeded.
- */
+/** Best-effort audit and cleanup after a successful session rotation. */
 async function retirePreAuthSession(request: FastifyRequest, preAuthSid: string): Promise<void> {
-  // Stamp the audit row BEFORE the delete. The delete fires Consent's
-  // audit_session_end trigger, which fills end_reason with COALESCE(end_reason,
-  // 'expired') — so without this, every successful login files its pre-auth row
-  // as an expiry, and the audit table carries two rows per login where it used
-  // to carry one. Same SQL, same hashing convention, and same best-effort
-  // handling as the 'logout' stamp in logout.ts; user_session_audit and its
-  // sid_hash-keyed triggers are Epic 1 infrastructure (DT-3606).
+  // Consent's delete trigger otherwise records the pre-auth session as expired.
   try {
     await request.server.pg.query(
       `UPDATE user_session_audit
@@ -31,18 +17,7 @@ async function retirePreAuthSession(request: FastifyRequest, preAuthSid: string)
     request.log.error({ err }, '[auth] failed to stamp the pre-auth audit row as rotated')
   }
 
-  // Destroy the pre-auth row so a fixated sid cannot linger as a live session.
-  // request.session now points at the NEW session, so this must go through the
-  // store, not request.session.destroy().
-  //
-  // The try/catch is the second half of "best-effort": the callback covers a
-  // store that reports an error, this covers one that throws SYNCHRONOUSLY
-  // instead of calling back (the Promise constructor turns that throw into a
-  // rejection). pgStore always calls back (see pgStore.ts's run()), so nothing
-  // reaches the catch today — but without it, a store that changed that
-  // contract would 500 a login that has already succeeded. A store that
-  // silently never calls back is out of reach of any catch and would hang the
-  // handler; calling back exactly once is the SessionStore contract.
+  // request.session now points at the new session; delete the old SID via the store.
   try {
     await new Promise<void>((resolve) => {
       request.sessionStore.destroy(preAuthSid, (err) => {
@@ -104,16 +79,9 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
   // Verify the exact claim name ('idp' vs 'identityProvider') against the dev B2C tenant.
   const subProvider: 'google' | 'microsoft' = claims.idp === 'google.com' ? 'google' : 'microsoft'
 
-  // Session fixation protection: rotate the session ID now that authentication
-  // succeeded, so a sid planted before login never becomes an authenticated
-  // session. regenerate() creates a NEW, EMPTY session and repoints
-  // request.session at it — so capture what the pre-auth session must
-  // hand over BEFORE rotating, and write tokens only AFTER. It never destroys
-  // the old row, so that happens explicitly below via the store.
+  // regenerate() replaces the session with an empty one, so preserve returnTo
+  // and write tokens only after rotating the pre-auth SID.
   const preAuthSid = request.session.sessionId
-  // returnTo was validated to a same-origin path by safeReturnTo() at login —
-  // only sanitized values ever reach the session. The pkce fields die with the
-  // pre-auth session; nothing else carries over.
   const returnTo = request.session.returnTo ?? '/'
 
   await request.session.regenerate()
@@ -127,20 +95,10 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
   request.session.userId = claims.email
   request.session.idp = subProvider
 
-  // Persist the session BEFORE responding. Otherwise, @fastify/session saves it
-  // in an async onSend hook (pgStore.set is a DB round-trip); since this handler
-  // is async, its promise resolves while that save is still in flight, so
-  // reply.sent is still false and Fastify's wrapThenable fires a SECOND
-  // reply.send() — a duplicate onSend/session-save whose late writeHead throws
-  // ERR_HTTP_HEADERS_SENT and crashes the process. Saving here resets the
-  // session's modified-hash, so onSend finds it unmodified, skips the async
-  // store write, and completes synchronously — no second send. regenerate()
-  // does not remove that requirement. Save before destroying the old row: once
-  // this succeeds, authentication has succeeded.
+  // Avoid an async onSend save racing Fastify's reply lifecycle.
   await request.session.save()
 
   await retirePreAuthSession(request, preAuthSid)
 
-  // Use the captured local — the returnTo field died with the pre-auth session.
   reply.redirect(returnTo)
 }

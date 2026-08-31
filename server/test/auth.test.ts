@@ -71,8 +71,6 @@ const SECRET = 'test-secret-that-is-at-least-32-characters'
 // ---------------------------------------------------------------------------
 function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>()) {
   const setSids: string[] = []
-  // Reason as well as sid: the callback's rotation stamp and logout's stamp
-  // hit the same table, so counting rows alone cannot tell them apart.
   const auditUpdates: Array<{ reason: string, sid: string }> = []
   const query = async (sql: string, params: unknown[] = []) => {
     if (sql.includes('SELECT sess FROM user_sessions')) {
@@ -159,12 +157,7 @@ function makeTokens(claims: Record<string, unknown> | undefined) {
 }
 
 function sessionCookieHeader(res: { cookies: Array<{ name: string, value: string }> }): string {
-  // The rotated callback response carries TWO sessionId Set-Cookie headers: a
-  // clear of the pre-auth cookie (empty value) followed by the new session's
-  // cookie. Mirror the browser exactly — the LAST header wins, whatever its
-  // value — and then reject an empty one. Filtering the empties out instead
-  // would hand back a live-looking cookie from a response that went on to
-  // clear it (logout's shape), which is the opposite of what callers assert.
+  // Preserve browser semantics: the last sessionId Set-Cookie header wins.
   const cookies = res.cookies.filter(c => c.name === 'sessionId')
   const cookie = cookies[cookies.length - 1]
   if (!cookie || cookie.value === '') throw new Error('no session cookie set')
@@ -217,9 +210,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     return res.json().token as string
   }
 
-  // Full login→callback. The callback rotates the session so the
-  // authenticated cookie is the one the CALLBACK response sets — the login
-  // cookie is dead afterward. Returns both so tests can assert on the old one.
+  // The callback rotates the session; return both cookies for assertions.
   async function authenticate(returnTo?: string) {
     const { cookie: preAuthCookie } = await login(returnTo)
     const res = await app.inject({
@@ -303,8 +294,6 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     it('leaves exactly one persisted session, holding tokens and no PKCE material', async () => {
       await authenticate()
 
-      // Rotation leaves one row: the fresh post-auth session. The
-      // PKCE fields died with the destroyed pre-auth row.
       expect(rows.size).toBe(1)
       const sess = [...rows.values()][0].sess as Record<string, unknown>
       expect(sess.pkceVerifier).toBeUndefined()
@@ -379,10 +368,6 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
         headers: { cookie: loginCookie },
       })
 
-      // Rotation leaves two audit rows per login: this one, and the
-      // authenticated row the new sid's INSERT created. Without the stamp the
-      // DELETE's audit_session_end trigger would default this one to
-      // 'expired', filing every successful login as an expiry.
       expect(auditUpdates).toEqual([{ reason: 'rotated', sid: preAuthSid }])
     })
   })
@@ -476,7 +461,6 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
   })
 
   describe('CSRF protection (story 2-J)', () => {
-    // Establishes an authenticated session and returns its (post-rotation) cookie.
     async function authenticatedCookie(): Promise<string> {
       const { cookie } = await authenticate()
       return cookie
@@ -580,8 +564,6 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     })
 
     it('issues a token to an authenticated session, persisted before the reply', async () => {
-      // authenticate(), not login() + callback: the callback rotates the
-      // session, so the login cookie is dead and this route would 401 on it.
       const { cookie } = await authenticate()
 
       const res = await app.inject({ method: 'GET', url: '/auth/csrf-token', headers: { cookie } })
@@ -601,10 +583,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     // guard's full matrix lives in fetchMetadata.test.ts; these pin that
     // /auth/me is wired with it, that rejected requests never reach the
     // upstream, and that the legitimate shapes still work.
-    // The POST-ROTATION cookie. Handing back the login cookie instead would
-    // leave every case below running on an anonymous session — the 403 cases
-    // would still pass, on the guard alone, and stop proving that it blocks an
-    // AUTHENTICATED cross-site request.
+    // Use the rotated cookie so the guard is exercised as authenticated.
     async function authenticatedCookie(): Promise<string> {
       const { cookie } = await authenticate()
       return cookie
@@ -669,14 +648,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       const fake = makeInMemoryPg()
       const guardedApp = await buildAuthApp(fake.pg, errorLog)
 
-      // Each request must persist the session an EXACT number of times. The
-      // double-send bug is a redundant onSend save racing the handler's own
-      // save(); measuring the store-write delta per request catches that
-      // directly. Login writes once. The callback writes exactly twice, both to
-      // the NEW sid: regenerate() persists the fresh empty session, then the
-      // handler's save() persists the tokens. A regression (e.g. flipping
-      // `rolling` back on) makes onSend re-save the cookie-bearing callback
-      // request, adding a third write.
+      // regenerate() writes the empty new session; save() writes its tokens.
       const beforeLogin = fake.setSids.length
       const loginRes = await guardedApp.inject({ method: 'POST', url: '/auth/login' })
       expect(loginRes.statusCode).toBe(200)
