@@ -156,10 +156,13 @@ function makeTokens(claims: Record<string, unknown> | undefined) {
 function sessionCookieHeader(res: { cookies: Array<{ name: string, value: string }> }): string {
   // The rotated callback response carries TWO sessionId Set-Cookie headers: a
   // clear of the pre-auth cookie (empty value) followed by the new session's
-  // cookie. Mirror the browser: the last non-empty value wins.
-  const cookies = res.cookies.filter(c => c.name === 'sessionId' && c.value !== '')
+  // cookie. Mirror the browser exactly — the LAST header wins, whatever its
+  // value — and then reject an empty one. Filtering the empties out instead
+  // would hand back a live-looking cookie from a response that went on to
+  // clear it (logout's shape), which is the opposite of what callers assert.
+  const cookies = res.cookies.filter(c => c.name === 'sessionId')
   const cookie = cookies[cookies.length - 1]
-  if (!cookie) throw new Error('no session cookie set')
+  if (!cookie || cookie.value === '') throw new Error('no session cookie set')
   return `${cookie.name}=${cookie.value}`
 }
 
@@ -555,8 +558,9 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     })
 
     it('issues a token to an authenticated session, persisted before the reply', async () => {
-      const { cookie } = await login()
-      await app.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie } })
+      // authenticate(), not login() + callback: the callback rotates the
+      // session, so the login cookie is dead and this route would 401 on it.
+      const { cookie } = await authenticate()
 
       const res = await app.inject({ method: 'GET', url: '/auth/csrf-token', headers: { cookie } })
 
@@ -575,9 +579,12 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     // guard's full matrix lives in fetchMetadata.test.ts; these pin that
     // /auth/me is wired with it, that rejected requests never reach the
     // upstream, and that the legitimate shapes still work.
+    // The POST-ROTATION cookie. Handing back the login cookie instead would
+    // leave every case below running on an anonymous session — the 403 cases
+    // would still pass, on the guard alone, and stop proving that it blocks an
+    // AUTHENTICATED cross-site request.
     async function authenticatedCookie(): Promise<string> {
-      const { cookie } = await login()
-      await app.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie } })
+      const { cookie } = await authenticate()
       return cookie
     }
 

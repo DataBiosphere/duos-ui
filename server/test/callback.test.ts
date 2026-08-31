@@ -36,6 +36,8 @@ function makeRequest(overrides: {
   pkceState?: string
   returnTo?: string
   destroyError?: Error
+  destroyThrows?: boolean
+  regenerateError?: Error
 } = {}): FastifyRequest {
   const session: Record<string, unknown> = {
     sessionId: 'pre-auth-sid',
@@ -50,6 +52,7 @@ function makeRequest(overrides: {
   // the rotation (returnTo read after, tokens written before) is lost, exactly
   // as in production.
   session.regenerate = vi.fn().mockImplementation(async () => {
+    if (overrides.regenerateError) throw overrides.regenerateError
     for (const key of Object.keys(session)) {
       if (key !== 'sessionId' && key !== 'save' && key !== 'regenerate') delete session[key]
     }
@@ -59,8 +62,12 @@ function makeRequest(overrides: {
     url: overrides.url ?? '/auth/callback?code=test-code&state=test-state',
     session,
     sessionStore: {
-      destroy: vi.fn((_sid: string, callback: (err?: Error | null) => void) =>
-        callback(overrides.destroyError ?? null)),
+      destroy: vi.fn((_sid: string, callback: (err?: Error | null) => void) => {
+        // A store that throws instead of calling back — the contract pgStore
+        // keeps, but that the handler must not depend on.
+        if (overrides.destroyThrows) throw new Error('store threw')
+        callback(overrides.destroyError ?? null)
+      }),
     },
     log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   } as unknown as FastifyRequest
@@ -248,6 +255,34 @@ describe('handleCallback', () => {
         expect.stringContaining('destroy'),
       )
       expect(reply.redirect).toHaveBeenCalledWith('/datalibrary')
+    })
+
+    it('logs but does not fail the login when the store throws instead of calling back', async () => {
+      const request = makeRequest({ destroyThrows: true, returnTo: '/datalibrary' })
+      const reply = makeReply()
+
+      await handleCallback(request, reply)
+
+      expect(request.log.error).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        expect.stringContaining('destroy'),
+      )
+      expect(reply.redirect).toHaveBeenCalledWith('/datalibrary')
+    })
+
+    it('writes no tokens and does not redirect when the rotation itself fails', async () => {
+      // regenerate() persists the fresh session, so a store outage fails it.
+      // Nothing has been written at that point and nothing must be: the login
+      // fails whole, and the pre-auth row (PKCE material only) stays put.
+      const request = makeRequest({ regenerateError: new Error('pg down') })
+      const reply = makeReply()
+
+      await expect(handleCallback(request, reply)).rejects.toThrow('pg down')
+
+      expect(request.session.accessToken).toBeUndefined()
+      expect(request.session.save).not.toHaveBeenCalled()
+      expect(request.sessionStore.destroy).not.toHaveBeenCalled()
+      expect(reply.redirect).not.toHaveBeenCalled()
     })
 
     it('redirects to the returnTo captured BEFORE rotation (the field dies with the pre-auth session)', async () => {
