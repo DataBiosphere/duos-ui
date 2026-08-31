@@ -1,12 +1,24 @@
 const COOKIE_CONTROL = 'cookie_control'
 
+// decodeURIComponent throws URIError on a malformed sequence, and any cookie can
+// hold one (a raw '%', or a legacy unencoded value). Fall back to the raw text so
+// one bad cookie cannot break the whole document.cookie read.
+const decodeValue = (value: string) => {
+  try {
+    return decodeURIComponent(value)
+  }
+  catch {
+    return value
+  }
+}
+
 export const getCookiePairs = () => {
   const cookies = document.cookie
   const cookiePairs: Record<string, string> = {}
   for (const cookieStr of cookies
     .split(';')) {
     const [name, ...rest] = cookieStr.split('=')
-    cookiePairs[name.trim()] = decodeURIComponent(rest.join('=').trim())
+    cookiePairs[name.trim()] = decodeValue(rest.join('=').trim())
   }
   return cookiePairs
 }

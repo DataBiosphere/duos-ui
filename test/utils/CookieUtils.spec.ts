@@ -21,6 +21,12 @@ describe('CookieUtils', () => {
       const pairs = CookieUtils.getCookiePairs()
       expect(pairs).toEqual({ foo: 'bar', baz: 'qux' })
     })
+
+    it('should fall back to the raw value when the encoding is malformed', () => {
+      document.cookie = 'discount=100%; foo=bar'
+      const pairs = CookieUtils.getCookiePairs()
+      expect(pairs).toEqual({ discount: '100%', foo: 'bar' })
+    })
   })
 
   describe('getAcknowledged', () => {
@@ -45,6 +51,18 @@ describe('CookieUtils', () => {
       document.cookie = 'cookie_control=not-json'
       expect(() => CookieUtils.getAcknowledged()).not.toThrow()
       expect(CookieUtils.getAcknowledged()).toBe(false)
+    })
+
+    it('should return false, not throw, if the value has malformed encoding', () => {
+      document.cookie = 'cookie_control=%'
+      expect(() => CookieUtils.getAcknowledged()).not.toThrow()
+      expect(CookieUtils.getAcknowledged()).toBe(false)
+    })
+
+    it('should still read cookie_control when an unrelated cookie is malformed', () => {
+      const control = { acknowledged: true }
+      document.cookie = `discount=100%; cookie_control=${encodeURIComponent(JSON.stringify(control))}`
+      expect(CookieUtils.getAcknowledged()).toBe(true)
     })
 
     it('should read back a value written by setAcknowledged', () => {
