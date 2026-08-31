@@ -93,10 +93,13 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
   // regardless — a transient deletion failure is an audit/cleanup problem, not
   // a fixation attack, and must not fail an otherwise successful login.
   // The try/catch is the second half of "best-effort": the callback covers a
-  // store that reports an error, this covers a store that throws or rejects
-  // instead of calling back. pgStore always calls back (see pgStore.ts's run()),
-  // so nothing reaches the catch today — but without it, a store that changed
-  // that contract would 500 a login that has already succeeded.
+  // store that reports an error, this covers one that throws SYNCHRONOUSLY
+  // instead of calling back (the Promise constructor turns that throw into a
+  // rejection). pgStore always calls back (see pgStore.ts's run()), so nothing
+  // reaches the catch today — but without it, a store that changed that
+  // contract would 500 a login that has already succeeded. A store that
+  // silently never calls back is out of reach of any catch and would hang the
+  // handler; calling back exactly once is the SessionStore contract.
   try {
     await new Promise<void>((resolve) => {
       request.sessionStore.destroy(preAuthSid, (err) => {
