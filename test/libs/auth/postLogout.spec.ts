@@ -75,7 +75,7 @@ describe('the stored post-logout target', () => {
 
     expect(takePostLogoutTarget()).toBe('/datalibrary')
     expect(takePostLogoutTarget()).toBe('/')
-    expect(sessionStorage.length).toBe(0)
+    expect(sessionStorage).toHaveLength(0)
   })
 
   it('defaults to / when nothing was stored', () => {
@@ -87,7 +87,7 @@ describe('the stored post-logout target', () => {
 
     clearPostLogoutTarget()
 
-    expect(sessionStorage.length).toBe(0)
+    expect(sessionStorage).toHaveLength(0)
   })
 
   it('survives storage being unavailable', () => {

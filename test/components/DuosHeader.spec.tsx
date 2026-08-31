@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DuosHeader, { headerTabsConfig } from 'src/components/DuosHeader'
@@ -452,15 +452,13 @@ describe('DuosHeader', () => {
   })
 
   describe('Sign out (story 5-E)', () => {
-    it('hands the navigation to Auth.signOut and drops the query cache on a confirmed sign-out', async () => {
+    it('hands the navigation to Auth.signOut rather than navigating itself', async () => {
       vi.mocked(Auth.signOut).mockResolvedValue({ status: 'confirmed' })
       await mountHeader('/datalibrary', mockUser)
 
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: 'header sign out' }))
-      })
+      fireEvent.click(screen.getByRole('button', { name: 'header sign out' }))
 
-      expect(Auth.signOut).toHaveBeenCalledWith('/home')
+      await waitFor(() => expect(Auth.signOut).toHaveBeenCalledWith('/home'))
       expect(reportUnconfirmedSignOut).not.toHaveBeenCalled()
     })
 
@@ -468,11 +466,9 @@ describe('DuosHeader', () => {
       vi.mocked(Auth.signOut).mockResolvedValue({ status: 'unconfirmed' })
       await mountHeader('/datalibrary', mockUser)
 
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: 'header sign out' }))
-      })
+      fireEvent.click(screen.getByRole('button', { name: 'header sign out' }))
 
-      expect(reportUnconfirmedSignOut).toHaveBeenCalledOnce()
+      await waitFor(() => expect(reportUnconfirmedSignOut).toHaveBeenCalledOnce())
     })
   })
 })

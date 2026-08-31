@@ -101,9 +101,7 @@ describe('Terms of Service Page', () => {
     vi.mocked(Auth.signOut).mockResolvedValue({ status: 'unconfirmed' })
     vi.mocked(useUserIsLogged).mockReturnValue(true)
     await renderComponent()
-    await act(async () => {
-      fireEvent.click(screen.getByText('Reject Terms of Service'))
-    })
+    fireEvent.click(screen.getByText('Reject Terms of Service'))
 
     await waitFor(() => expect(reportUnconfirmedSignOut).toHaveBeenCalledOnce())
     expect(mockNavigate).not.toHaveBeenCalled()

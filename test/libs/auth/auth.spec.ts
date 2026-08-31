@@ -435,7 +435,7 @@ describe('Auth.signOut classification (BFF, story 5-E)', () => {
 
     expect(Storage.getData('key')).toBe('val')
     // Nothing will consume the stored target, so it must not linger.
-    expect(sessionStorage.length).toBe(0)
+    expect(sessionStorage).toHaveLength(0)
   })
 
   it('retries the logout once when /auth/me reports the session is still live', async () => {

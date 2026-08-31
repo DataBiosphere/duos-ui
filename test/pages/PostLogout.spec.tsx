@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { act, render } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import PostLogout from 'src/pages/PostLogout'
 import { Redirect } from 'src/libs/auth/auth'
@@ -25,53 +25,51 @@ describe('PostLogout', () => {
     sessionStorage.clear()
   })
 
-  const renderPage = async () => {
-    await act(async () => {
-      render(<PostLogout />)
-    })
+  const renderPage = () => {
+    render(<PostLogout />)
   }
 
-  it('replaces the current entry with the stored target', async () => {
+  it('replaces the current entry with the stored target', () => {
     storePostLogoutTarget('/home?redirectTo=/datalibrary')
 
-    await renderPage()
+    renderPage()
 
     expect(replaceSpy).toHaveBeenCalledWith('/home?redirectTo=/datalibrary')
   })
 
-  it('deletes the target, so a later visit cannot reuse it', async () => {
+  it('deletes the target, so a later visit cannot reuse it', () => {
     storePostLogoutTarget('/datalibrary')
 
-    await renderPage()
-    expect(sessionStorage.length).toBe(0)
+    renderPage()
+    expect(sessionStorage).toHaveLength(0)
 
     replaceSpy.mockClear()
-    await renderPage()
+    renderPage()
 
     expect(replaceSpy).toHaveBeenCalledWith('/')
   })
 
-  it('falls back to / when no target was stored', async () => {
-    await renderPage()
+  it('falls back to / when no target was stored', () => {
+    renderPage()
 
     expect(replaceSpy).toHaveBeenCalledWith('/')
   })
 
-  it('never navigates off-site, even from a tampered stored value', async () => {
+  it('never navigates off-site, even from a tampered stored value', () => {
     storePostLogoutTarget('/home')
     sessionStorage.setItem(Object.keys(sessionStorage)[0], 'https://evil.example.com/steal')
 
-    await renderPage()
+    renderPage()
 
     expect(replaceSpy).toHaveBeenCalledWith('/')
   })
 
-  it('makes no request of its own — a state-changing GET here would reintroduce CSRF', async () => {
+  it('makes no request of its own — a state-changing GET here would reintroduce CSRF', () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
     storePostLogoutTarget('/datalibrary')
 
-    await renderPage()
+    renderPage()
 
     expect(fetchMock).not.toHaveBeenCalled()
     vi.unstubAllGlobals()

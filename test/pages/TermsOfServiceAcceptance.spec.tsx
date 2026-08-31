@@ -73,9 +73,7 @@ describe('Terms of Service Acceptance Page', () => {
     const { Auth, reportUnconfirmedSignOut } = await import('src/libs/auth/auth')
     vi.mocked(Auth.signOut).mockResolvedValue({ status: 'unconfirmed' })
     await renderComponent()
-    await act(async () => {
-      fireEvent.click(screen.getByText('Reject Terms of Service'))
-    })
+    fireEvent.click(screen.getByText('Reject Terms of Service'))
 
     await waitFor(() => expect(reportUnconfirmedSignOut).toHaveBeenCalledOnce())
     expect(mockNavigate).not.toHaveBeenCalled()

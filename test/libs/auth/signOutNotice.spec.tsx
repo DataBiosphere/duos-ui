@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { act, render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { showUnconfirmedSignOutNotice, resetSignOutNoticeState } from 'src/libs/auth/signOutNotice'
 import { ToastNotifications } from 'src/libs/ToastNotifications'
@@ -30,29 +30,23 @@ describe('showUnconfirmedSignOutNotice', () => {
     expect(noticeSpy.mock.calls[0][0]).toMatchObject({ timeout: null })
   })
 
-  it('tells the user the session may still be live, and offers a Retry', async () => {
+  it('tells the user the session may still be live, and offers a Retry', () => {
     showUnconfirmedSignOutNotice(() => {})
     const { text } = noticeSpy.mock.calls[0][0] as { text: React.ReactNode }
 
-    await act(async () => {
-      render(<>{text}</>)
-    })
+    render(<>{text}</>)
 
     expect(screen.getByText(/could not confirm that you were signed out/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument()
   })
 
-  it('runs the caller\'s retry when Retry is clicked', async () => {
+  it('runs the caller\'s retry when Retry is clicked', () => {
     const retry = vi.fn()
     showUnconfirmedSignOutNotice(retry)
     const { text } = noticeSpy.mock.calls[0][0] as { text: React.ReactNode }
 
-    await act(async () => {
-      render(<>{text}</>)
-    })
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
-    })
+    render(<>{text}</>)
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
 
     expect(retry).toHaveBeenCalledTimes(1)
   })
@@ -65,15 +59,11 @@ describe('showUnconfirmedSignOutNotice', () => {
     expect(noticeSpy).toHaveBeenCalledTimes(1)
   })
 
-  it('can report again after a retry, so a failed retry is not silent', async () => {
+  it('can report again after a retry, so a failed retry is not silent', () => {
     showUnconfirmedSignOutNotice(() => {})
     const { text } = noticeSpy.mock.calls[0][0] as { text: React.ReactNode }
-    await act(async () => {
-      render(<>{text}</>)
-    })
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
-    })
+    render(<>{text}</>)
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
 
     showUnconfirmedSignOutNotice(() => {})
 
