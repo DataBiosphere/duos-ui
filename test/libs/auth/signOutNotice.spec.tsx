@@ -110,9 +110,9 @@ describe('showUnconfirmedSignOutNotice through the real toast', () => {
     expect(alerts()).toHaveLength(1)
 
     const closeButton = document.querySelector('[data-cy="notification-alert"] .MuiAlert-action button') as HTMLElement
-    await act(async () => {
-      fireEvent.click(closeButton)
-    })
+    fireEvent.click(closeButton)
+    // The act calls that remain wrap non-RTL work: ToastNotifications renders
+    // its own root, and the unmount sits behind a timer.
     await act(async () => {
       vi.advanceTimersByTime(350)
     })
