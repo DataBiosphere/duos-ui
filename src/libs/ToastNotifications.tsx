@@ -22,6 +22,14 @@ interface NotificationProps {
   /** Milliseconds before the toast auto-hides; null keeps it until dismissed. */
   timeout?: number | null
   layout?: ToastPosition | SnackbarOrigin
+  /**
+   * Called once when the toast closes — the close button, Escape, or the
+   * auto-hide timer. NOT called for a clickaway, which leaves the toast open.
+   * Needed by callers that track whether their notice is still on screen; do
+   * not pass `onClose` for this, because the props spread below would replace
+   * the Snackbar's own handler and break the unmount.
+   */
+  onDismiss?: () => void
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
 }
@@ -55,6 +63,9 @@ export const ToastNotifications = {
     text = defaultProps.text,
     timeout = defaultProps.timeout,
     layout = defaultProps.layout,
+    // Destructured out of the spread below: it is this module's own callback,
+    // not a Snackbar prop.
+    onDismiss,
     ...props
   }: NotificationProps): void => {
     const snackbarLayout = convertToSnackbarOrigin(layout)
@@ -68,6 +79,7 @@ export const ToastNotifications = {
       const handleClose = (_event: React.SyntheticEvent | Event, reason?: string): void => {
         if (reason === 'clickaway') return
         setOpen(false)
+        onDismiss?.()
         setTimeout(() => {
           root.unmount()
           notificationRoot.remove()

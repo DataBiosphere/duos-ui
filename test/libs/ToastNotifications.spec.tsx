@@ -145,6 +145,57 @@ describe('ToastNotifications', () => {
       }
     })
 
+    it('should call onDismiss when the close button closes the notification', async () => {
+      const onDismiss = vi.fn()
+      vi.useFakeTimers()
+      try {
+        await act(async () => {
+          ToastNotifications.showNotification({ text: 'Dismissible notification', onDismiss })
+        })
+
+        const closeButton = document.querySelector('[data-cy="notification-alert"] .MuiAlert-action button') as HTMLElement
+        fireEvent.click(closeButton)
+
+        await act(async () => {
+          vi.advanceTimersByTime(350)
+        })
+
+        expect(onDismiss).toHaveBeenCalledOnce()
+      }
+      finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('should call onDismiss when the auto-hide timer closes the notification', async () => {
+      const onDismiss = vi.fn()
+      vi.useFakeTimers()
+      try {
+        await act(async () => {
+          ToastNotifications.showNotification({ text: 'Transient notification', onDismiss })
+        })
+
+        await act(async () => {
+          vi.advanceTimersByTime(3500 + 350)
+        })
+
+        expect(onDismiss).toHaveBeenCalledOnce()
+      }
+      finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('should not forward onDismiss to the Snackbar element', async () => {
+      // It is this module's own callback — spreading it onto the DOM would
+      // draw a React unknown-prop warning.
+      await act(async () => {
+        ToastNotifications.showNotification({ text: 'Dismissible notification', onDismiss: () => {} })
+      })
+
+      expect(document.querySelector('.MuiSnackbar-root')).not.toHaveAttribute('onDismiss')
+    })
+
     it('should apply custom styling with sx prop', async () => {
       await act(async () => {
         ToastNotifications.showNotification({

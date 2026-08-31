@@ -18,7 +18,9 @@ import { ToastNotifications } from 'src/libs/ToastNotifications'
 
 /** One notice at a time: concurrent 401s share one sign-out attempt, but each
  *  caller consumes the same result and would otherwise stack a toast apiece.
- *  Retry clears the flag, so a failed retry can report again. */
+ *  The flag clears the moment the notice leaves the screen — on Retry, and on
+ *  a dismissal through the toast's own close button — or a later, unrelated
+ *  unconfirmed sign-out would be suppressed in silence. */
 let noticePending = false
 
 export const showUnconfirmedSignOutNotice = (retry: () => void): void => {
@@ -33,6 +35,9 @@ export const showUnconfirmedSignOutNotice = (retry: () => void): void => {
   ToastNotifications.showError({
     // Persistent: a security-relevant Retry cannot auto-hide.
     timeout: null,
+    onDismiss: () => {
+      noticePending = false
+    },
     text: (
       <span data-cy="unconfirmed-sign-out-notice">
         We could not confirm that you were signed out. You may still be signed in.
