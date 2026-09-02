@@ -256,24 +256,33 @@ and provenance machinery a graceful in-place merge kept demanding.
 
 **Full record:** [bff_adrs/ADR-012-session-cookie-samesite.md](bff_adrs/ADR-012-session-cookie-samesite.md)
 — the threat model, the alternatives, and the `response_mode=query` assumption.
-**Infosec answer:** [infosec-session-cookie-samesite.md](infosec-session-cookie-samesite.md).
+It is also the written infosec answer linked from
+[DT-3996](https://broadworkbench.atlassian.net/browse/DT-3996); its opening
+section, [The infosec question, answered](bff_adrs/ADR-012-session-cookie-samesite.md#the-infosec-question-answered),
+is the short version.
 
 `Strict` is unusable, not merely stricter: B2C's `302` back to `/auth/callback`
 is a cross-site top-level GET, so a `Strict` cookie is withheld, the callback
 arrives sessionless, and every login fails. `Lax` blocks cross-site POSTs and
 credentialed fetches but treats sibling `*.broadinstitute.org` subdomains as
 same-site, so it is not sufficient alone — session-bound CSRF tokens, which do
-not depend on the registrable domain, are what cover unsafe routes, and the PKCE
-`state` binding is what neutralizes login CSRF on the deliberately exempt
+not depend on the registrable domain, are what cover the cookie-authenticated
+unsafe routes (`POST /auth/logout` and the proxies' unsafe methods, minus the two
+unauthenticated Contact Us POSTs that receive no session credentials), and the
+PKCE `state` binding is what neutralizes login CSRF on the deliberately exempt
 `/auth/login`.
 
-The `Lax` rescue depends on B2C returning via GET (`response_mode=query`, the
-code-flow default); `form_post` would break login exactly as `Strict` does. A
-`Strict` session cookie paired with a short-lived `Lax` OAuth-transaction cookie
-was considered and rejected — it does not close the sibling-subdomain gap, which
-is same-site either way. `__Host-` prefixing is recorded as complementary later
-hardening (it blocks cookie tossing, not CSRF) and needs `Secure` unconditionally,
-including in CI.
+The `Lax` rescue depends on B2C returning via GET (`response_mode=query`, which
+`login.ts` now sends explicitly); `form_post` would break login exactly as
+`Strict` does, and a change on the B2C policy side is invisible to CI — it has to
+be caught by review. A `Strict` session cookie paired with a short-lived `Lax`
+OAuth-transaction cookie was considered and rejected: it *would* narrow ADR-009's
+state-changing-GET residual, including on browsers that send no Fetch Metadata
+headers, but it leaves the higher-priority sibling-subdomain threat untouched
+(those requests are same-site either way), and the GET residual belongs upstream
+in DT-3945. `__Host-` prefixing is recorded as complementary later hardening (it
+blocks cookie tossing, not CSRF) and needs `Secure` unconditionally, including in
+CI.
 
 The options are defined once in `server/src/session/sessionOptions.ts` and
 imported by the server and all five test harnesses, so changing `sameSite` or

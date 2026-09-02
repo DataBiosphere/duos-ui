@@ -49,6 +49,17 @@ export async function handleLogin(request: FastifyRequest, reply: FastifyReply):
     code_challenge: await pkce.challenge(verifier),
     code_challenge_method: 'S256',
     state,
+    // Spelled out rather than left to the code flow's default, because the
+    // session cookie's `SameSite=Lax` depends on it: `query` makes B2C's
+    // return trip a cross-site top-level GET navigation, which a Lax cookie
+    // rides along on. `form_post` would make it a cross-site POST, from which
+    // Lax is withheld just as Strict is — the callback would arrive
+    // sessionless and every sign-in would fail. This line is the one place
+    // that decides which, so the assumption is asserted here (see the
+    // DT-3996 SameSite suite in server/test/auth.test.ts, whose browser model
+    // reads this value) instead of resting on a library default.
+    // Reasoning: ADR-012 (session cookie SameSite).
+    response_mode: 'query',
     // Force the B2C login screen even when B2C still holds an SSO cookie.
     prompt: 'login',
   })

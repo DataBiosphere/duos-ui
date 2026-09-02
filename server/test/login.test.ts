@@ -91,7 +91,7 @@ describe('handleLogin', () => {
     expect(request.session.returnTo).toBe('/')
   })
 
-  it('builds the authorization URL with the configured redirect_uri, B2C scope quirk, S256 PKCE params, and a forced login prompt', async () => {
+  it('builds the authorization URL with the configured redirect_uri, B2C scope quirk, S256 PKCE params, an explicit query response_mode, and a forced login prompt', async () => {
     await handleLogin(makeRequest(), makeReply())
 
     const oidc = await import('openid-client')
@@ -101,6 +101,11 @@ describe('handleLogin', () => {
       code_challenge: 'test-challenge',
       code_challenge_method: 'S256',
       state: 'test-state',
+      // response_mode=query keeps B2C's return trip a top-level GET, which is
+      // what the SameSite=Lax session cookie is sent on. form_post would make
+      // it a cross-site POST and break sign-in outright — see ADR-012 and the
+      // DT-3996 suite in auth.test.ts.
+      response_mode: 'query',
       // prompt=login forces the B2C login screen even when B2C's own SSO
       // cookie survives a DUOS sign-out.
       prompt: 'login',

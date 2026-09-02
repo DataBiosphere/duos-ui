@@ -19,7 +19,16 @@ import type { FastifySessionOptions, SessionStore } from '@fastify/session'
  * records why `sameSite` is `Lax` and what closes the gap Lax leaves open.
  */
 
-/** The `@fastify/session` default, and what index.ts and me.ts clear by name. */
+/**
+ * The session cookie's wire name — the single source of truth for it.
+ *
+ * It is also `@fastify/session`'s own default, but it is passed to the plugin
+ * explicitly as `cookieName` below and imported by every handler that clears
+ * the cookie by name (auth/logout.ts, auth/me.ts, proxy/upstreamProxy.ts).
+ * Left implicit, changing this constant would have renamed nothing: the plugin
+ * would have kept its default and the handlers their string literals, so the
+ * three would have silently disagreed.
+ */
 export const SESSION_COOKIE_NAME = 'sessionId'
 
 const DEFAULT_MAX_AGE_MS = 8 * 60 * 60 * 1000
@@ -57,6 +66,9 @@ export function sessionPluginOptions(input: SessionOptionsInput): FastifySession
   return {
     secret: input.secret,
     store: input.store,
+    // Same value as the plugin's default, stated so SESSION_COOKIE_NAME
+    // actually governs the wire name rather than merely describing it.
+    cookieName: SESSION_COOKIE_NAME,
     cookie: {
       httpOnly: true,
       secure: input.secure ?? process.env.NODE_ENV === 'production',
@@ -68,10 +80,12 @@ export function sessionPluginOptions(input: SessionOptionsInput): FastifySession
       // because Lax treats sibling `*.broadinstitute.org` subdomains as
       // same-site and so does not protect against a compromised sibling.
       //
-      // This depends on B2C returning via GET (`response_mode=query`, the
-      // code-flow default): with `response_mode=form_post` the redirect back
-      // would be a cross-site POST and even Lax would withhold the cookie.
-      // See ADR-012.
+      // This depends on B2C returning via GET, which `../auth/login.ts`
+      // secures by passing `response_mode: 'query'` explicitly rather than
+      // relying on the code-flow default: with `response_mode=form_post` the
+      // return trip would be a cross-site POST and even Lax would withhold
+      // the cookie. That pairing is asserted by the DT-3996 suite in
+      // test/auth.test.ts. See ADR-012.
       sameSite: input.sameSiteOverride ?? 'lax',
       maxAge: input.maxAge ?? (Number(process.env.DUOS_SESSION_MAX_AGE_MS) || DEFAULT_MAX_AGE_MS),
       path: '/',
