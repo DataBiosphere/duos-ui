@@ -21,7 +21,7 @@
     "@fastify/static": "10.1.3",
     "@fastify/vite": "10.0.0",
     "fastify": "5.12.1",
-    "open": "11.0.1",
+    "open": "11.0.2",
     "openid-client": "6.8.7"
   },
   "devDependencies": {
