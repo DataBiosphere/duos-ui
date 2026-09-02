@@ -16,27 +16,40 @@ import { ToastNotifications } from 'src/libs/ToastNotifications'
  * and it carries a Retry that starts a FRESH sign-out attempt.
  */
 
-/** One notice at a time: concurrent 401s share one sign-out attempt, but each
- *  caller consumes the same result and would otherwise stack a toast apiece.
- *  The flag clears the moment the notice leaves the screen — on Retry, and on
- *  a dismissal through the toast's own close button — or a later, unrelated
- *  unconfirmed sign-out would be suppressed in silence. */
-let noticePending = false
+/**
+ * The notice currently on screen, or null. One notice at a time: concurrent
+ * 401s share one sign-out attempt, but each caller consumes the same result
+ * and would otherwise stack a persistent toast apiece.
+ *
+ * A token rather than a boolean, so only the notice that OWNS the guard can
+ * release it — a late close event from a superseded toast must never unlock a
+ * live one.
+ */
+let activeNotice: symbol | null = null
 
 export const showUnconfirmedSignOutNotice = (retry: () => void): void => {
-  if (noticePending) return
-  noticePending = true
+  if (activeNotice !== null) return
+  const notice = Symbol('unconfirmed-sign-out-notice')
+  activeNotice = notice
 
   const onRetry = (): void => {
-    noticePending = false
+    // The guard stays HELD. Retry starts a fresh sign-out attempt but does not
+    // close this notice, so an unconfirmed retry must reuse it rather than
+    // stack a second persistent toast — the notice already states the
+    // unresolved case and still offers Retry. A confirmed attempt navigates
+    // away, taking the notice with it.
     retry()
   }
 
   ToastNotifications.showError({
     // Persistent: a security-relevant Retry cannot auto-hide.
     timeout: null,
+    // Released only when the notice actually leaves the screen, or a later,
+    // unrelated unconfirmed sign-out would be suppressed in silence.
     onDismiss: () => {
-      noticePending = false
+      if (activeNotice === notice) {
+        activeNotice = null
+      }
     },
     text: (
       <span data-cy="unconfirmed-sign-out-notice">
@@ -57,5 +70,5 @@ export const showUnconfirmedSignOutNotice = (retry: () => void): void => {
 
 /** Test seam: forget that a notice is on screen. */
 export const resetSignOutNoticeState = (): void => {
-  noticePending = false
+  activeNotice = null
 }

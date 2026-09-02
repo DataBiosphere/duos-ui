@@ -71,12 +71,29 @@ describe('showUnconfirmedSignOutNotice', () => {
     expect(noticeSpy).toHaveBeenCalledTimes(2)
   })
 
-  it('can report again after a retry, so a failed retry is not silent', () => {
+  it('holds the guard across Retry, so an unconfirmed retry reuses this notice', () => {
+    // Retry does not close the notice, so releasing the guard here would let
+    // an unconfirmed retry stack a second persistent toast on top.
     showUnconfirmedSignOutNotice(() => {})
     const { text } = noticeSpy.mock.calls[0][0] as { text: React.ReactNode }
     render(<>{text}</>)
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
 
+    showUnconfirmedSignOutNotice(() => {})
+
+    expect(noticeSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('ignores a late dismissal from a superseded notice', () => {
+    // Only the notice that owns the guard may release it: a stale close event
+    // must not unlock the guard while a newer notice is on screen.
+    showUnconfirmedSignOutNotice(() => {})
+    const first = noticeSpy.mock.calls[0][0] as { onDismiss: () => void }
+    first.onDismiss()
+    showUnconfirmedSignOutNotice(() => {})
+    expect(noticeSpy).toHaveBeenCalledTimes(2)
+
+    first.onDismiss()
     showUnconfirmedSignOutNotice(() => {})
 
     expect(noticeSpy).toHaveBeenCalledTimes(2)
@@ -120,6 +137,26 @@ describe('showUnconfirmedSignOutNotice through the real toast', () => {
 
     await act(async () => {
       showUnconfirmedSignOutNotice(() => {})
+    })
+
+    expect(alerts()).toHaveLength(1)
+  })
+
+  it('does not stack a second notice when the retry is also unconfirmed', async () => {
+    // Retry starts a fresh sign-out attempt but does NOT close this notice, so
+    // an unconfirmed retry must reuse it rather than pile a second persistent
+    // toast on top — the notice already states the case and still offers Retry.
+    const retry = (): void => {
+      // What reportUnconfirmedSignOut does when the retry comes back unconfirmed.
+      showUnconfirmedSignOutNotice(retry)
+    }
+    await act(async () => {
+      showUnconfirmedSignOutNotice(retry)
+    })
+    expect(alerts()).toHaveLength(1)
+
+    await act(async () => {
+      fireEvent.click(document.querySelector('[data-cy="unconfirmed-sign-out-retry"]') as HTMLElement)
     })
 
     expect(alerts()).toHaveLength(1)
