@@ -24,6 +24,7 @@ export const showUnconfirmedSignOutNotice = (retry: () => void): void => {
     text: (
       <span data-cy="unconfirmed-sign-out-notice">
         We could not confirm that you were signed out. You may still be signed in.
+        Select Retry to try again.
         <Button
           data-cy="unconfirmed-sign-out-retry"
           size="small"

@@ -32,6 +32,9 @@ describe('showUnconfirmedSignOutNotice', () => {
     render(<>{text}</>)
 
     expect(screen.getByText(/could not confirm that you were signed out/i)).toBeInTheDocument()
+    // The notice asks for the click outright — a Retry button alone leaves the
+    // user guessing what to do about it.
+    expect(screen.getByText(/select retry to try again/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument()
   })
 

@@ -22,6 +22,12 @@ async function buildEndSessionUrl(request: FastifyRequest, idTokenHint: string |
   }
 }
 
+// One revocation endpoint, because there is one issuer: every session token
+// comes from the single B2C token exchange in callback.ts. The session's `idp`
+// records which sub-provider the user picked AT B2C — DUOS never holds a
+// Google or Microsoft token — so there is no per-provider endpoint to look up
+// and no upstream credential to revoke. B2C attempts federated sign-out
+// itself; `prompt: 'login'` in login.ts is what guarantees a login screen.
 async function revokeTokens(request: FastifyRequest): Promise<void> {
   try {
     const config = await getOidcConfig()
