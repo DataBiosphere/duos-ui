@@ -173,6 +173,49 @@ describe('plugin registration order', () => {
   })
 })
 
+describe('session cookie attributes', () => {
+  async function sessionCookieOptions() {
+    const { default: sessionPlugin } = await import('@fastify/session')
+    const calls = vi.mocked(sessionPlugin).mock.calls
+    expect(calls.length).toBeGreaterThan(0)
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    return (calls.at(-1)![1] as any).cookie as Record<string, unknown>
+  }
+
+  it('sets HttpOnly, SameSite=Lax and Path=/', async () => {
+    const cookie = await sessionCookieOptions()
+    expect(cookie.httpOnly).toBe(true)
+    expect(cookie.sameSite).toBe('lax')
+    expect(cookie.path).toBe('/')
+  })
+
+  it('sets Secure in production', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.resetModules()
+    try {
+      const { resetConfigCache } = await import('../src/config.js')
+      resetConfigCache()
+      const { buildApp } = await import('../src/index.js')
+      const localApp = await buildApp()
+      const cookie = await sessionCookieOptions()
+      expect(cookie.secure).toBe(true)
+      expect(cookie.httpOnly).toBe(true)
+      expect(cookie.sameSite).toBe('lax')
+      expect(cookie.path).toBe('/')
+      await localApp.close()
+    }
+    finally {
+      vi.unstubAllEnvs()
+      vi.resetModules()
+    }
+  })
+
+  it('leaves Secure off outside production so plain-HTTP dev keeps its session', async () => {
+    const cookie = await sessionCookieOptions()
+    expect(cookie.secure).toBe(false)
+  })
+})
+
 describe('GET /config.json', () => {
   let dir: string
 
