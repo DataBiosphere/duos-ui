@@ -42,9 +42,6 @@ const SECRET = 'test-secret-that-is-at-least-32-characters'
 async function buildSessionApp(pg: PostgresDb): Promise<FastifyInstance> {
   const app = Fastify({ logger: false })
   await app.register(fastifyCookie)
-  // index.ts's own options, imported rather than restated — the SameSite and
-  // saveUninitialized assertions below are only meaningful against the real
-  // config. See src/session/sessionOptions.ts.
   await app.register(fastifySession, sessionPluginOptions({
     secret: SECRET,
     store: createPgSessionStore(pg),

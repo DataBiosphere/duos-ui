@@ -92,8 +92,6 @@ export async function startLoadTarget(options: LoadTargetOptions): Promise<LoadT
   }
 
   await app.register(fastifyCookie)
-  // index.ts's own options (src/session/sessionOptions.ts), imported rather
-  // than restated. `secure: false` because the load harness serves plain HTTP.
   await app.register(fastifySession, sessionPluginOptions({
     secret: 'a-load-test-session-secret-at-least-32-characters-long',
     store,

@@ -90,14 +90,11 @@ export interface SessionSeed {
   tokenExpiry?: number
 }
 
-/** Re-exported under the name the proxy suites already use. */
 export const SESSION_COOKIE = SESSION_COOKIE_NAME
 
 export async function buildAppShell(): Promise<FastifyInstance> {
   const app = Fastify({ logger: false, trustProxy: TRUST_PROXY })
   await app.register(fastifyCookie)
-  // index.ts's own options (src/session/sessionOptions.ts), imported rather
-  // than restated; no store, so @fastify/session's in-memory default is used.
   await app.register(fastifySession, sessionPluginOptions({
     secret: 'a-test-session-secret-at-least-32-characters-long',
     secure: false,

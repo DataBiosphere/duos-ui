@@ -104,13 +104,7 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
 }
 
 interface AuthAppOptions {
-  /** Collects error-level log lines for the double-send regression guard. */
   errorLog?: string[]
-  /**
-   * TEST ONLY — hands the session plugin a Strict (or None) cookie instead of
-   * production's Lax. Only the SameSite suite below uses it, to build an app
-   * whose cookie a browser would withhold from the B2C callback redirect.
-   */
   sameSiteOverride?: 'strict' | 'none'
 }
 
@@ -124,10 +118,6 @@ async function buildAuthApp(pg: PostgresDb, options: AuthAppOptions = {}): Promi
   // @fastify/postgres, which needs a live DB — decorate the stand-in instead.
   app.decorate('pg', pg as never)
   await app.register(fastifyCookie)
-  // index.ts's own session options, imported rather than restated: sameSite,
-  // rolling:false, and saveUninitialized:false are all asserted in this file,
-  // and a local copy would keep those assertions green after production
-  // changed. See src/session/sessionOptions.ts.
   await app.register(fastifySession, sessionPluginOptions({
     secret: SECRET,
     store: createPgSessionStore(pg),
@@ -170,16 +160,7 @@ function sessionCookieHeader(res: { cookies: Array<{ name: string, value: string
   return `${cookie.name}=${cookie.value}`
 }
 
-/**
- * The HTTP method B2C's return trip to `/auth/callback` uses, derived from the
- * `response_mode` production actually asked for — read out of the recorded
- * `buildAuthorizationUrl` call rather than assumed, so the browser model below
- * observes login's real choice.
- *
- * `query` (the code-flow default, spelled out in src/auth/login.ts) returns the
- * code in the query string of a 302, i.e. a top-level GET navigation.
- * `form_post` returns it as a self-submitting form, i.e. a POST.
- */
+/** Maps the requested OAuth response mode to B2C's callback method. */
 function b2cReturnTripMethod(oidc: typeof import('openid-client')): 'GET' | 'POST' {
   const calls = vi.mocked(oidc.buildAuthorizationUrl).mock.calls
   const parameters = calls[calls.length - 1]?.[1]
@@ -187,8 +168,6 @@ function b2cReturnTripMethod(oidc: typeof import('openid-client')): 'GET' | 'POS
   const mode = parameters instanceof URLSearchParams
     ? parameters.get('response_mode')
     : parameters.response_mode
-  // Absent means `query` for the authorization-code flow. That login spells it
-  // out anyway is pinned by its own assertion in the Lax test below.
   switch (mode ?? 'query') {
     case 'query':
       return 'GET'
@@ -199,26 +178,7 @@ function b2cReturnTripMethod(oidc: typeof import('openid-client')): 'GET' | 'POS
   }
 }
 
-/**
- * Models the browser's SameSite decision for the one navigation the whole flow
- * depends on: B2C's return to `/auth/callback`.
- *
- * `b2clogin.com` and `*.broadinstitute.org` are different registrable domains,
- * so that return trip is **cross-site**, and both axes of the browser's
- * decision matter (RFC 6265bis §5.5):
- *
- *   | return trip                          | Lax      | Strict   |
- *   |--------------------------------------|----------|----------|
- *   | top-level GET (`response_mode=query`)| sent     | withheld |
- *   | POST (`response_mode=form_post`)     | withheld | withheld |
- *
- * `app.inject()` has no cookie jar, so the decision has to be made explicitly.
- * Neither input is a constant: `sameSite` is read from the attribute the app
- * actually set on the login response, and `returnTrip` from the `response_mode`
- * login actually requested. So flipping either — the shared session config to
- * `strict`, or login's `response_mode` to `form_post` — changes what this
- * returns and fails the Lax test below. See ADR-012.
- */
+/** Models cookie handling because `app.inject()` has no browser cookie jar. */
 function cookieAfterB2cRedirect(
   res: { cookies: Array<{ name: string, value: string, sameSite?: string }> },
   returnTrip: 'GET' | 'POST',
@@ -231,9 +191,6 @@ function cookieAfterB2cRedirect(
     case 'none':
       return `${cookie.name}=${cookie.value}`
     case 'lax':
-      // Lax rides along on a cross-site *top-level navigation* only, which
-      // means a safe method — a cross-site POST withholds it exactly as
-      // Strict does.
       return returnTrip === 'GET' ? `${cookie.name}=${cookie.value}` : undefined
     case 'strict':
       return undefined
@@ -242,21 +199,7 @@ function cookieAfterB2cRedirect(
   }
 }
 
-/**
- * Replaces the suite's default permissive `authorizationCodeGrant` mock with
- * one that performs openid-client v6's real state check, transcribed from
- * `oauth4webapi`'s `validateAuthResponse`:
- *
- *   - no `expectedState` (a sessionless callback) → any `state` in the URL is
- *     rejected outright;
- *   - an `expectedState` that does not match the URL's `state` → rejected;
- *   - a match → the exchange proceeds.
- *
- * The real behavior is already proven against a fake B2C in authCrypto.test.ts;
- * this reproduces it here because the default mock ignores `checks` entirely,
- * which would let a sessionless callback succeed and hide exactly the failure
- * the Strict test is meant to show.
- */
+/** Adds the state validation omitted by this suite's default OIDC mock. */
 function mockStateCheckingGrant(
   oidc: typeof import('openid-client'),
   claims: Record<string, unknown> = { email: 'user@example.com' },
@@ -425,20 +368,6 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     })
   })
 
-  // -------------------------------------------------------------------------
-  // SameSite on the B2C callback redirect (DT-3996).
-  //
-  // The session cookie is `SameSite=Lax` by necessity, not by preference, and
-  // the code comment saying so was the only record of it. These two tests make
-  // the claim executable: the browser model above reads the attribute the app
-  // really set AND the `response_mode` login really requested, so the pair is
-  // a mutation test on both halves of the invariant —
-  //   - `sameSite: 'strict'` in src/session/sessionOptions.ts, or
-  //   - `response_mode: 'form_post'` in src/auth/login.ts
-  // each fails the Lax test at the cookie-withheld step (and the second also
-  // fails the direct response_mode assertion, so the diagnosis is named).
-  // Full reasoning: ADR-012.
-  // -------------------------------------------------------------------------
   describe('SameSite on the B2C callback redirect (DT-3996)', () => {
     it('Lax: the browser sends the cookie on the cross-site redirect, so the callback completes', async () => {
       const oidc = await import('openid-client')
@@ -447,17 +376,11 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       const { res, cookie } = await login('/datalibrary')
       const stored = [...rows.values()][0].sess as Record<string, string>
 
-      // The invariant Lax rests on, asserted where it is decided: login must
-      // request the GET return trip. `form_post` here would break real
-      // sign-in, so it must break this test by name and not only via the
-      // withheld cookie below.
       expect(oidc.buildAuthorizationUrl).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ response_mode: 'query' }),
       )
 
-      // Derived from that response_mode, not hard-coded: `query` → a top-level
-      // GET navigation, which a Lax cookie is sent on.
       const method = b2cReturnTripMethod(oidc)
       const sent = cookieAfterB2cRedirect(res, method)
       expect(sent).toBe(cookie)
@@ -468,8 +391,6 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
         headers: sent ? { cookie: sent } : {},
       })
 
-      // The session survived the redirect, so the real PKCE material reached
-      // the exchange and the state check passed.
       expect(oidc.authorizationCodeGrant).toHaveBeenCalledWith(
         expect.anything(),
         expect.any(URL),
@@ -483,8 +404,6 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       const oidc = await import('openid-client')
       mockStateCheckingGrant(oidc)
 
-      // The only caller of the Strict override — an app configured the way the
-      // "why not Strict?" question proposes.
       const fake = makeInMemoryPg()
       const strictApp = await buildAuthApp(fake.pg, { sameSiteOverride: 'strict' })
       try {
@@ -492,10 +411,6 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
         expect(loginRes.statusCode).toBe(200)
         const stored = [...fake.rows.values()][0].sess as Record<string, string>
 
-        // Strict → withheld even from the friendliest return trip there is, a
-        // top-level GET. This test isolates the SameSite axis, so the return
-        // trip is pinned to GET rather than derived; the response_mode axis is
-        // the Lax test's job above.
         expect(cookieAfterB2cRedirect(loginRes, 'GET')).toBeUndefined()
 
         const callback = await strictApp.inject({
@@ -503,16 +418,11 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
           url: `/auth/callback?code=test-code&state=${encodeURIComponent(stored.pkceState)}`,
         })
 
-        // A fresh, empty session: the verifier and state login persisted are
-        // unreachable, so the exchange is attempted with neither.
         expect(oidc.authorizationCodeGrant).toHaveBeenCalledWith(
           expect.anything(),
           expect.any(URL),
           { pkceCodeVerifier: undefined, expectedState: undefined },
         )
-        // openid-client rejects the unexpected `state`; the handler does not
-        // catch it, so it surfaces as a 500 — sign-in is broken outright, not
-        // degraded.
         expect(callback.statusCode).toBe(500)
         const sess = [...fake.rows.values()][0].sess as Record<string, unknown>
         expect(sess.accessToken).toBeUndefined()

@@ -142,8 +142,6 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
 async function buildApp(pg: PostgresDb): Promise<FastifyInstance> {
   const app = Fastify({ logger: false })
   await app.register(fastifyCookie)
-  // index.ts's own options (src/session/sessionOptions.ts), imported rather
-  // than restated. `secure: false` because this harness serves plain HTTP.
   await app.register(fastifySession, sessionPluginOptions({
     secret: SECRET,
     store: createPgSessionStore(pg),

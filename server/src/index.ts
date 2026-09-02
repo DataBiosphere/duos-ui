@@ -125,10 +125,6 @@ export async function buildApp(): Promise<AppInstance> {
 
     // Cookie + session — the store reads fastify.pg registered above
     await fastify.register(fastifyCookie)
-    // Session options — including the SameSite/rolling/saveUninitialized
-    // fields the suite asserts on — live in session/sessionOptions.ts, so the
-    // test harnesses register the plugin exactly as this does. Restated inline,
-    // they drifted across six copies: see that file.
     await fastify.register(fastifySession, sessionPluginOptions({
       secret: sessionSecret,
       store: createPgSessionStore(fastify.pg),
@@ -139,8 +135,7 @@ export async function buildApp(): Promise<AppInstance> {
     // from cross-site POSTs, but is not sufficient alone here: dev/staging live
     // under *.broadinstitute.org, where SameSite treats every sibling subdomain
     // as same-site — a compromised sibling could still forge cookie-bearing
-    // POSTs. CSRF tokens don't depend on the registrable domain — the full
-    // threat model is ADR-012 (docs/plans/bff_adrs). The secret is
+    // POSTs. CSRF tokens don't depend on the registrable domain. The secret is
     // stored in the session, so it must be registered after @fastify/session.
     //
     // The options — including the header-only `getToken` narrowing — live in
