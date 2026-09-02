@@ -126,8 +126,6 @@ describe('ToastNotifications', () => {
     })
 
     it('should never auto-hide when timeout is null', async () => {
-      // Story 5-E: the unconfirmed-sign-out notice carries a Retry the user
-      // must be able to act on, so it cannot expire on its own.
       vi.useFakeTimers()
       try {
         await act(async () => {
@@ -187,8 +185,6 @@ describe('ToastNotifications', () => {
     })
 
     it('should not forward onDismiss to the Snackbar element', async () => {
-      // It is this module's own callback — spreading it onto the DOM would
-      // draw a React unknown-prop warning.
       await act(async () => {
         ToastNotifications.showNotification({ text: 'Dismissible notification', onDismiss: () => {} })
       })

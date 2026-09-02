@@ -6,12 +6,6 @@ import PostLogout from 'src/pages/PostLogout'
 import { Redirect } from 'src/libs/auth/auth'
 import { storePostLogoutTarget } from 'src/libs/auth/postLogout'
 
-/*
-  Story 5-E: /post-logout is the ONE fixed post_logout_redirect_uri registered
-  with B2C. It reads the stored local target, deletes it, validates it again,
-  and replaces the history entry with it.
-*/
-
 describe('PostLogout', () => {
   let replaceSpy: ReturnType<typeof vi.spyOn>
 

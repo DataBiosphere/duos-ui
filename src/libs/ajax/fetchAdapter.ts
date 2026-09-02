@@ -153,9 +153,6 @@ const recordAutoLogout401 = async (url: string): Promise<void> => {
     // The sign-out must start even if the metric throws, and the flag must
     // clear so a later 401 in a page that did not navigate still records.
     autoLogoutInFlight = false
-    // Deliberately not awaited: this handler runs inside the rejected 401's
-    // path, and redirectOnLogout consumes its own result (including the
-    // unconfirmed-sign-out notice) and never rejects.
     void redirectOnLogout()
   }
 }

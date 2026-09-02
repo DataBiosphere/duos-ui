@@ -5,11 +5,6 @@ import '@testing-library/jest-dom/vitest'
 import { showUnconfirmedSignOutNotice, resetSignOutNoticeState } from 'src/libs/auth/signOutNotice'
 import { ToastNotifications } from 'src/libs/ToastNotifications'
 
-/*
-  Story 5-E: an unconfirmed sign-out is security-relevant, so its notice must
-  persist until dismissed and must offer a Retry that starts a fresh attempt.
-*/
-
 describe('showUnconfirmedSignOutNotice', () => {
   let noticeSpy: ReturnType<typeof vi.spyOn>
 
@@ -63,8 +58,6 @@ describe('showUnconfirmedSignOutNotice', () => {
     showUnconfirmedSignOutNotice(() => {})
     const { onDismiss } = noticeSpy.mock.calls[0][0] as { onDismiss: () => void }
 
-    // The shared toast calls this when its close button, Escape, or auto-hide
-    // closes the notice.
     onDismiss()
     showUnconfirmedSignOutNotice(() => {})
 
@@ -72,8 +65,6 @@ describe('showUnconfirmedSignOutNotice', () => {
   })
 
   it('holds the guard across Retry, so an unconfirmed retry reuses this notice', () => {
-    // Retry does not close the notice, so releasing the guard here would let
-    // an unconfirmed retry stack a second persistent toast on top.
     showUnconfirmedSignOutNotice(() => {})
     const { text } = noticeSpy.mock.calls[0][0] as { text: React.ReactNode }
     render(<>{text}</>)
@@ -85,8 +76,6 @@ describe('showUnconfirmedSignOutNotice', () => {
   })
 
   it('ignores a late dismissal from a superseded notice', () => {
-    // Only the notice that owns the guard may release it: a stale close event
-    // must not unlock the guard while a newer notice is on screen.
     showUnconfirmedSignOutNotice(() => {})
     const first = noticeSpy.mock.calls[0][0] as { onDismiss: () => void }
     first.onDismiss()
@@ -101,9 +90,6 @@ describe('showUnconfirmedSignOutNotice', () => {
 })
 
 describe('showUnconfirmedSignOutNotice through the real toast', () => {
-  // No ToastNotifications spy here: the point is that dismissing the ACTUAL
-  // rendered notice frees the guard. A stale guard would silence every later
-  // unconfirmed sign-out for the rest of the page's life.
   beforeEach(() => {
     resetSignOutNoticeState()
     vi.useFakeTimers({ shouldAdvanceTime: true })
@@ -128,8 +114,6 @@ describe('showUnconfirmedSignOutNotice through the real toast', () => {
 
     const closeButton = document.querySelector('[data-cy="notification-alert"] .MuiAlert-action button') as HTMLElement
     fireEvent.click(closeButton)
-    // The act calls that remain wrap non-RTL work: ToastNotifications renders
-    // its own root, and the unmount sits behind a timer.
     await act(async () => {
       vi.advanceTimersByTime(350)
     })
@@ -143,11 +127,7 @@ describe('showUnconfirmedSignOutNotice through the real toast', () => {
   })
 
   it('does not stack a second notice when the retry is also unconfirmed', async () => {
-    // Retry starts a fresh sign-out attempt but does NOT close this notice, so
-    // an unconfirmed retry must reuse it rather than pile a second persistent
-    // toast on top — the notice already states the case and still offers Retry.
     const retry = (): void => {
-      // What reportUnconfirmedSignOut does when the retry comes back unconfirmed.
       showUnconfirmedSignOutNotice(retry)
     }
     await act(async () => {
@@ -156,8 +136,6 @@ describe('showUnconfirmedSignOutNotice through the real toast', () => {
     expect(alerts()).toHaveLength(1)
 
     fireEvent.click(document.querySelector('[data-cy="unconfirmed-sign-out-retry"]') as HTMLElement)
-    // Flush whatever the handler started: a second notice would render its own
-    // React root, outside this library's automatic wrapping.
     await act(async () => {})
 
     expect(alerts()).toHaveLength(1)

@@ -20,9 +20,6 @@ export default function TermsOfService() {
     // update Sam that ToS was rejected
     await TosService.rejectTos()
 
-    // Log the user out and send them back home. Auth.signOut owns the
-    // navigation (story 5-E); an unconfirmed sign-out stays on this page and
-    // reports, because the session may still be live.
     const result = await Auth.signOut('/')
     if (result.status === 'unconfirmed') {
       reportUnconfirmedSignOut()

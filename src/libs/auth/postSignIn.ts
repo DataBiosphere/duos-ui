@@ -57,20 +57,10 @@ export interface CompleteSignInOptions {
  * hydration) only on 'completed' — a 'signed-out' run has just cleared
  * storage, and re-populating it would resurrect a stale identity that
  * survives the sign-out reload.
- *
- * 'sign-out-unconfirmed' (story 5-E) is NOT a sign-out: the bootstrap failed,
- * the sign-out that followed could not be confirmed, so the session may still
- * be authenticated and no cleanup or navigation happened. The caller must
- * treat it as "state unknown" rather than applying signed-out assumptions.
+ * `sign-out-unconfirmed` leaves the session state unknown.
  */
 export type CompleteSignInOutcome = 'completed' | 'signed-out' | 'sign-out-unconfirmed' | 'cancelled'
 
-/**
- * The bootstrap-failure sign-out. Auth.signOut owns the navigation on a
- * confirmed outcome; on an unconfirmed one nothing happened, so this reports
- * the distinct outcome and dispatches the global persistent Retry notice —
- * these paths are non-UI, so no component would otherwise own that notice.
- */
 const signOutAfterBootstrapFailure = async (): Promise<CompleteSignInOutcome> => {
   const result = await Auth.signOut()
   if (result.status === 'confirmed') return 'signed-out'

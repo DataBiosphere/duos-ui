@@ -7,12 +7,6 @@ import {
   takePostLogoutTarget,
 } from 'src/libs/auth/postLogout'
 
-/*
-  Story 5-E: the /post-logout hand-off. B2C requires an exact-match
-  post_logout_redirect_uri, so the local destination rides in sessionStorage
-  instead — validated on write AND on read, and deleted on read.
-*/
-
 describe('safeLocalPath', () => {
   it('keeps a same-origin path with its query and fragment', () => {
     expect(safeLocalPath('/home?redirectTo=/datalibrary#top'))
@@ -63,7 +57,6 @@ describe('the stored post-logout target', () => {
 
   it('validates again on read, so a tampered value cannot navigate off-site', () => {
     storePostLogoutTarget('/home')
-    // Simulate a value written by something other than storePostLogoutTarget.
     const key = Object.keys(sessionStorage)[0]
     sessionStorage.setItem(key, '//evil.example.com/steal')
 

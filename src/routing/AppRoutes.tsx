@@ -68,8 +68,6 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/nih_pilot_info" element={<NIHPilotInfo />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/cookie_policy" element={<CookiePolicy />} />
-      {/* The fixed B2C post_logout_redirect_uri — public by definition: the
-          user arrives here signed out (story 5-E). */}
       <Route path="/post-logout" element={<PostLogout />} />
       <Route path="/tos" element={<TermsOfService />} />
       <Route path="/tos_acceptance" element={<TermsOfServiceAcceptance />} />

@@ -207,11 +207,6 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
 
   const signOut = (): void => {
     toggleDrawer(false)
-    // Auth.signOut owns the navigation in BOTH modes (story 5-E) — an SPA
-    // navigation here would unload the page and abort the logout POST, the
-    // /auth/me verification, or the B2C end-session redirect. The query cache
-    // is dropped only on a confirmed sign-out; an unconfirmed one leaves the
-    // user signed in on this page, so it must report instead.
     void Auth.signOut('/home').then((result) => {
       if (result.status === 'unconfirmed') {
         reportUnconfirmedSignOut()

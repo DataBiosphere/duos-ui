@@ -3,8 +3,6 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { Configuration } from 'openid-client'
 import { handleLogout } from '../src/auth/logout.js'
 
-// Mock getOidcConfig() (network) — tokenRevocation() is also mocked since it
-// would otherwise perform a real network call.
 vi.mock('../src/auth/oidcClient.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../src/auth/oidcClient.js')>()
   return { ...actual, getOidcConfig: vi.fn() }
@@ -53,17 +51,12 @@ function makeReply() {
   }
 }
 
-/*
-  Both suites below need exactly this setup, so the hooks live at file level
-  rather than being repeated per describe.
-*/
 beforeEach(async () => {
   const oidcClient = await import('../src/auth/oidcClient.js')
   vi.mocked(oidcClient.getOidcConfig).mockReset().mockResolvedValue(makeConfig(undefined))
 
   const oidc = await import('openid-client')
   vi.mocked(oidc.tokenRevocation).mockReset().mockResolvedValue(undefined)
-  // Defaults to the happy path: B2C exposes an end_session_endpoint.
   vi.mocked(oidc.buildEndSessionUrl).mockReset().mockReturnValue(
     new URL('https://terradevb2c.b2clogin.com/logout?id_token_hint=the-id-token'),
   )

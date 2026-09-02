@@ -8,8 +8,7 @@ export type ToastPosition = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight
 interface NotificationRequiredProps extends NotificationProps {
   severity: AlertColor
   text: string
-  /** null never auto-hides — for notices the user must act on (an
-   *  unconfirmed sign-out and its Retry), which cannot expire on their own. */
+  /** null disables auto-hide. */
   timeout: number | null
   layout: ToastPosition | SnackbarOrigin
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,16 +18,10 @@ interface NotificationRequiredProps extends NotificationProps {
 interface NotificationProps {
   severity?: AlertColor
   text: string | React.ReactNode
-  /** Milliseconds before the toast auto-hides; null keeps it until dismissed. */
+  /** Milliseconds before auto-hide; null keeps the toast open. */
   timeout?: number | null
   layout?: ToastPosition | SnackbarOrigin
-  /**
-   * Called once when the toast closes — the close button, Escape, or the
-   * auto-hide timer. NOT called for a clickaway, which leaves the toast open.
-   * Needed by callers that track whether their notice is still on screen; do
-   * not pass `onClose` for this, because the props spread below would replace
-   * the Snackbar's own handler and break the unmount.
-   */
+  /** Called when the toast closes, excluding clickaway events. */
   onDismiss?: () => void
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
@@ -63,8 +56,6 @@ export const ToastNotifications = {
     text = defaultProps.text,
     timeout = defaultProps.timeout,
     layout = defaultProps.layout,
-    // Destructured out of the spread below: it is this module's own callback,
-    // not a Snackbar prop.
     onDismiss,
     ...props
   }: NotificationProps): void => {

@@ -29,8 +29,6 @@ export default function TermsOfServiceAcceptance() {
   }, [navigate])
 
   const signOut = async () => {
-    // Auth.signOut owns the navigation (story 5-E); an unconfirmed sign-out
-    // stays on this page and reports, because the session may still be live.
     const result = await Auth.signOut('/')
     if (result.status === 'unconfirmed') {
       reportUnconfirmedSignOut()

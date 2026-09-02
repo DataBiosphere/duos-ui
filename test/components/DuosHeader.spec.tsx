@@ -31,7 +31,6 @@ vi.mock('src/components/modals/SupportRequestModal', () => ({
 
 vi.mock('src/libs/auth/auth', () => ({
   Auth: {
-    // Story 5-E: signOut resolves a discriminated result and never rejects.
     signOut: vi.fn().mockResolvedValue({ status: 'confirmed' }),
   },
   reportUnconfirmedSignOut: vi.fn(),

@@ -26,7 +26,6 @@ vi.mock('src/libs/TosService', () => ({
 
 vi.mock('src/libs/auth/auth', () => ({
   Auth: {
-    // Story 5-E: signOut resolves a discriminated result and never rejects.
     signOut: vi.fn().mockResolvedValue({ status: 'confirmed' }),
   },
   reportUnconfirmedSignOut: vi.fn(),
@@ -65,7 +64,6 @@ describe('Terms of Service Acceptance Page', () => {
       fireEvent.click(screen.getByText('Reject Terms of Service'))
     })
     await waitFor(() => expect(Auth.signOut).toHaveBeenCalledWith('/'))
-    // Story 5-E: Auth.signOut owns the navigation in both modes.
     expect(mockNavigate).not.toHaveBeenCalled()
   })
 

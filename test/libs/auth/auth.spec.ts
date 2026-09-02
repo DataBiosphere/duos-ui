@@ -84,7 +84,6 @@ describe('Auth Success', () => {
     expect(Storage.getAnonymousId()).toBeNull()
     expect(Storage.getData('key')).toBeNull()
     expect(Storage.getEnv()).toBeNull()
-    // Story 5-E: Auth.signOut owns the navigation in BOTH modes.
     expect(redirectSpy).toHaveBeenCalledWith('/')
   })
 
@@ -114,7 +113,6 @@ describe('Auth Success', () => {
     expect(Storage.getAnonymousId()).toBeNull()
     expect(Storage.getData('key')).toBeNull()
     expect(Storage.getEnv()).toBeNull()
-    // Auth.signOut owns the navigation — redirectOnLogout adds none.
     expect(redirectSpy).toHaveBeenCalledTimes(1)
   })
 })
@@ -193,16 +191,6 @@ describe('Auth (BFF mode)', () => {
   })
 })
 
-/*
-  Story 5-E: front-channel logout.
-
-  Auth.signOut classifies the logout response against ONE contract — only a
-  200 with a well-formed redirectUrl and a bare 204 confirm anything — and owns
-  every navigation. These suites cover the classification, the /auth/me
-  verification that replaces the old swallow-and-assume catch, and the
-  coalescing that keeps concurrent 401s to one attempt.
-*/
-
 const B2C_LOGOUT_URL = 'https://terradevb2c.b2clogin.com/logout?id_token_hint=abc'
 
 const jsonResponse = (status: number, body: unknown): Response =>
@@ -210,7 +198,6 @@ const jsonResponse = (status: number, body: unknown): Response =>
 
 const emptyResponse = (status: number): Response => new Response(null, { status })
 
-/** A 200 whose body is not JSON at all. */
 const malformedOk = (): Response =>
   new Response('<html>gateway</html>', { status: 200, headers: { 'content-type': 'text/html' } })
 
@@ -221,18 +208,11 @@ const b2cLogoutOk = (url: string = B2C_LOGOUT_URL): Response =>
   jsonResponse(200, { redirectUrl: url })
 
 interface RouteQueues {
-  /** Defaults to an inexhaustible 200 { token } — override only to test the
-   *  gated endpoint answering 401. */
   csrf?: (Response | Error)[]
   logout?: (Response | Error)[]
   me?: (Response | Error)[]
 }
 
-/**
- * Routes fetch by URL and consumes one queued answer per endpoint, so a
- * multi-step sign-out reads as "what each endpoint said" instead of as an
- * opaque call-order sequence.
- */
 const stubFetchRoutes = (routes: RouteQueues) => {
   const queues = {
     csrf: [...(routes.csrf ?? [])],
@@ -248,7 +228,6 @@ const stubFetchRoutes = (routes: RouteQueues) => {
     const route = routeOf(input)
     const next = queues[route].shift()
     if (next === undefined) {
-      // An inexhaustible CSRF token keeps the interesting queues short.
       if (route === 'csrf') return Promise.resolve(jsonResponse(200, { token: 'csrf-123' }))
       return Promise.reject(new Error(`unexpected fetch to ${input}`))
     }
@@ -289,7 +268,6 @@ describe('Auth.signOut classification (BFF, story 5-E)', () => {
     await expect(Auth.signOut('/home?redirectTo=/datalibrary')).resolves.toEqual({ status: 'confirmed' })
 
     expect(redirectSpy).toHaveBeenCalledWith(B2C_LOGOUT_URL)
-    // Local cleanup ran BEFORE the navigation away.
     expect(Storage.getData('key')).toBeNull()
   })
 
@@ -333,8 +311,6 @@ describe('Auth.signOut classification (BFF, story 5-E)', () => {
   })
 
   it('follows the CSRF retry and navigates to the SECOND response URL', async () => {
-    // The exact path the retry exists for: reading the first 403 instead of
-    // the retry's answer would skip the B2C navigation entirely.
     const secondUrl = 'https://terradevb2c.b2clogin.com/logout?id_token_hint=second'
     const { urlsFor } = stubFetchRoutes({
       logout: [csrfRejection(), b2cLogoutOk(secondUrl)],
@@ -349,7 +325,6 @@ describe('Auth.signOut classification (BFF, story 5-E)', () => {
   it('treats a final CSRF rejection as unconfirmed and performs no cleanup', async () => {
     Storage.setData('key', 'val')
     const { urlsFor } = stubFetchRoutes({
-      // Both attempts are rejected, and /auth/me says the session is alive.
       logout: [csrfRejection(), csrfRejection(), csrfRejection(), csrfRejection()],
       me: [jsonResponse(200, { authenticated: true })],
     })
@@ -358,7 +333,6 @@ describe('Auth.signOut classification (BFF, story 5-E)', () => {
 
     expect(redirectSpy).not.toHaveBeenCalled()
     expect(Storage.getData('key')).toBe('val')
-    // Bounded: two attempts of two POSTs each, and no loop.
     expect(urlsFor('logout')).toHaveLength(4)
     expect(urlsFor('me')).toHaveLength(1)
   })
@@ -387,8 +361,6 @@ describe('Auth.signOut classification (BFF, story 5-E)', () => {
   })
 
   it('verifies against /auth/me on a 200 without a redirectUrl', async () => {
-    // The server contract says a 200 always carries one, so this is an
-    // anomaly — not a signal that the session was destroyed.
     const { urlsFor } = stubFetchRoutes({
       logout: [jsonResponse(200, { loggedOut: true })],
       me: [emptyResponse(401)],
@@ -434,7 +406,6 @@ describe('Auth.signOut classification (BFF, story 5-E)', () => {
     await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'unconfirmed' })
 
     expect(Storage.getData('key')).toBe('val')
-    // Nothing will consume the stored target, so it must not linger.
     expect(sessionStorage).toHaveLength(0)
   })
 
@@ -451,9 +422,6 @@ describe('Auth.signOut classification (BFF, story 5-E)', () => {
   })
 
   it('drops the cached session answer before navigating away', async () => {
-    // A re-render in the window before the navigation unloads the page must
-    // re-probe rather than serve the cached pre-logout "authenticated" answer,
-    // which painted a signed-in header around the just-cleared empty user.
     stubFetchRoutes({
       me: [
         jsonResponse(200, { authenticated: true }),
@@ -469,10 +437,6 @@ describe('Auth.signOut classification (BFF, story 5-E)', () => {
   })
 
   it('leaves no stored target when cleanup itself throws', async () => {
-    // Storage.clearStorage reaches localStorage unguarded, so cleanup can
-    // throw where web storage is blocked. The wrapper reports that as
-    // unconfirmed, and an unconfirmed outcome must leave nothing behind for a
-    // later visit to /post-logout to consume.
     vi.spyOn(Storage, 'clearStorage').mockImplementation(() => {
       throw new Error('site data blocked')
     })
@@ -485,9 +449,6 @@ describe('Auth.signOut classification (BFF, story 5-E)', () => {
   })
 
   it('resolves the automatic terminal-401 path to a confirmed LOCAL logout', async () => {
-    // The proxy already destroyed the session, so /auth/csrf-token (gated on
-    // authentication) answers 401 and the logout POST never goes out. The
-    // /auth/me probe settles it — no B2C navigation is attempted.
     const { urlsFor } = stubFetchRoutes({
       csrf: [emptyResponse(401)],
       me: [emptyResponse(401)],
@@ -554,8 +515,6 @@ describe('Auth.signOut coalescing (BFF, story 5-E)', () => {
     })
 
     await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'unconfirmed' })
-    // The coalescing promise must be cleared, or Retry would re-await the
-    // failed attempt instead of trying again.
     await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'confirmed' })
 
     expect(urlsFor('logout')).toHaveLength(2)
@@ -588,8 +547,6 @@ describe('redirectOnLogout (story 5-E)', () => {
     await redirectOnLogout()
 
     expect(signOutSpy).toHaveBeenCalledWith('/home?redirectTo=/datalibrary')
-    // The ONLY navigation is Auth.signOut's own — an extra Redirect.to here
-    // would unload the page mid-flight.
     expect(redirectSpy).toHaveBeenCalledTimes(1)
     expect(redirectSpy).toHaveBeenCalledWith(POST_LOGOUT_PATH)
   })
@@ -643,9 +600,7 @@ describe('redirectOnLogout (story 5-E)', () => {
 
     await expect(redirectOnLogout()).resolves.toEqual({ status: 'unconfirmed' })
 
-    // Assert the dispatch itself, not merely the absence of a rejection.
     expect(noticeSpy).toHaveBeenCalledTimes(1)
-    // A security-relevant Retry cannot auto-hide.
     expect(noticeSpy.mock.calls[0][0]).toMatchObject({ timeout: null })
   })
 
