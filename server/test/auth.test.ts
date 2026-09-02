@@ -105,7 +105,7 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
 
 interface AuthAppOptions {
   errorLog?: string[]
-  sameSiteOverride?: 'strict' | 'none'
+  sameSiteOverride?: 'strict'
 }
 
 async function buildAuthApp(pg: PostgresDb, options: AuthAppOptions = {}): Promise<FastifyInstance> {
@@ -152,11 +152,30 @@ function makeTokens(claims: Record<string, unknown> | undefined) {
   } as never
 }
 
-function sessionCookieHeader(res: { cookies: Array<{ name: string, value: string }> }): string {
-  // Preserve browser semantics: the last sessionId Set-Cookie header wins.
+interface CookieBearingResponse {
+  cookies: Array<{ name: string, value: string, sameSite?: string }>
+}
+
+/**
+ * The session cookie a browser would be left holding after this response:
+ * the last `sessionId` Set-Cookie wins, and a cleared one holds nothing.
+ *
+ * The name is spelled literally rather than imported from
+ * `SESSION_COOKIE_NAME`, deliberately. This is the observable wire name, and
+ * ADR-012 § Alternatives contemplates renaming the cookie to
+ * `__Host-sessionId`; importing the constant would make that rename
+ * self-consistent and therefore invisible to the suite. Pinned as a literal,
+ * a rename has to be asserted rather than assumed.
+ */
+function sessionCookie(res: CookieBearingResponse): { name: string, value: string, sameSite?: string } {
   const cookies = res.cookies.filter(c => c.name === 'sessionId')
   const cookie = cookies[cookies.length - 1]
   if (!cookie || cookie.value === '') throw new Error('no session cookie set')
+  return cookie
+}
+
+function sessionCookieHeader(res: CookieBearingResponse): string {
+  const cookie = sessionCookie(res)
   return `${cookie.name}=${cookie.value}`
 }
 
@@ -180,20 +199,20 @@ function b2cReturnTripMethod(oidc: typeof import('openid-client')): 'GET' | 'POS
 
 /** Models cookie handling because `app.inject()` has no browser cookie jar. */
 function cookieAfterB2cRedirect(
-  res: { cookies: Array<{ name: string, value: string, sameSite?: string }> },
+  res: CookieBearingResponse,
   returnTrip: 'GET' | 'POST',
 ): string | undefined {
-  const cookie = res.cookies.find(c => c.name === 'sessionId')
-  if (!cookie) throw new Error('no session cookie set')
+  const cookie = sessionCookie(res)
   // An absent attribute is Lax in every current browser.
   const attribute = String(cookie.sameSite ?? 'lax').toLowerCase()
   switch (attribute) {
-    case 'none':
-      return `${cookie.name}=${cookie.value}`
     case 'lax':
       return returnTrip === 'GET' ? `${cookie.name}=${cookie.value}` : undefined
     case 'strict':
       return undefined
+    // `none` is absent on purpose: nothing here builds a SameSite=None cookie,
+    // and a browser would reject one without Secure. It lands in the throw
+    // below rather than being modelled speculatively.
     default:
       throw new Error(`unhandled SameSite attribute '${attribute}' — extend this browser model`)
   }

@@ -9,8 +9,18 @@ export interface SessionOptionsInput {
   store?: SessionStore
   secure?: boolean
   maxAge?: number
-  /** Test-only input for exercising non-production SameSite behavior. */
-  sameSiteOverride?: 'strict' | 'none'
+  /**
+   * Test-only input for exercising non-production SameSite behavior.
+   *
+   * `'strict'` is the only value, and the type is the enforcement. `'lax'` is
+   * excluded so a harness cannot restate the production value (the drift this
+   * module exists to stop), and `'none'` is excluded because a browser rejects
+   * a `SameSite=None` cookie that is not also `Secure` — with `secure`
+   * defaulting to production-only, that pairing would build a config no
+   * browser would accept and no `app.inject()` test would notice. Nothing
+   * needs `None`; if that changes, add it together with a `secure` guard.
+   */
+  sameSiteOverride?: 'strict'
 }
 
 export function sessionPluginOptions(input: SessionOptionsInput): FastifySessionOptions {
