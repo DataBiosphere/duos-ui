@@ -45,6 +45,21 @@ The sequence is this feature's own. It does not continue the BFF numbering in
 | ADR | Decision | Work item |
 |---|---|---|
 | [001](ai_chatbot_docs/ADR-001-model-backend.md) | Use Vertex AI in every environment; run no local model | Chat 2, Chat 9 |
+| [002](ai_chatbot_docs/ADR-002-sse-transport.md) | Stream chat turns with SSE over a hijacked Fastify reply | Chat 1, Chat 5 |
+
+### Phase documents
+
+Chats 0 through 5 are expanded into ticket-sized stories. Chats 6 through 13
+are still high level here; expand them when their phase starts.
+
+| Phase | Covers | Stories |
+|---|---|---|
+| [PHASE-0](ai_chatbot_docs/PHASE-0-compliance-and-data-contract.md) | Chat 0 — Compliance and Infosec, one ask | 4 |
+| [PHASE-1](ai_chatbot_docs/PHASE-1-chat-route-and-sse.md) | Chat 1 — stub route, CSRF, SSE | 7 |
+| [PHASE-2](ai_chatbot_docs/PHASE-2-stub-model-backend.md) | Chat 2 — stub model backend | 6 |
+| [PHASE-3](ai_chatbot_docs/PHASE-3-consent-tool-client.md) | Chat 3 — Consent tool client and the two v1 tools | 6 |
+| [PHASE-4](ai_chatbot_docs/PHASE-4-evaluation-harness.md) | Chat 4 — evaluation fixtures and tool-choice harness | 5 |
+| [PHASE-5](ai_chatbot_docs/PHASE-5-agentic-loop.md) | Chat 5 — agentic loop with hard bounds | 6 |
 
 ---
 
@@ -366,6 +381,15 @@ backend (§3.2) carries every story below it while that review runs.
 
 The other unknown to reach early is whether SSE survives the reverse proxy
 (open question 2). Chat 1 answers it in about a day.
+
+Chats 0 through 5 are expanded into stories in the phase documents:
+[PHASE-0](ai_chatbot_docs/PHASE-0-compliance-and-data-contract.md),
+[PHASE-1](ai_chatbot_docs/PHASE-1-chat-route-and-sse.md),
+[PHASE-2](ai_chatbot_docs/PHASE-2-stub-model-backend.md),
+[PHASE-3](ai_chatbot_docs/PHASE-3-consent-tool-client.md),
+[PHASE-4](ai_chatbot_docs/PHASE-4-evaluation-harness.md) and
+[PHASE-5](ai_chatbot_docs/PHASE-5-agentic-loop.md). Chats 6 through 13 stay
+high level here until their phase starts.
 
 ```
 Chat 0.  Compliance + Infosec: field-level data contract AND the dev role grant,
