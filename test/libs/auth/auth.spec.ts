@@ -468,6 +468,22 @@ describe('Auth.signOut classification (BFF, story 5-E)', () => {
     await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
   })
 
+  it('leaves no stored target when cleanup itself throws', async () => {
+    // Storage.clearStorage reaches localStorage unguarded, so cleanup can
+    // throw where web storage is blocked. The wrapper reports that as
+    // unconfirmed, and an unconfirmed outcome must leave nothing behind for a
+    // later visit to /post-logout to consume.
+    vi.spyOn(Storage, 'clearStorage').mockImplementation(() => {
+      throw new Error('site data blocked')
+    })
+    stubFetchRoutes({ logout: [emptyResponse(204)] })
+
+    await expect(Auth.signOut('/home?redirectTo=/datalibrary')).resolves.toEqual({ status: 'unconfirmed' })
+
+    expect(redirectSpy).not.toHaveBeenCalled()
+    expect(sessionStorage).toHaveLength(0)
+  })
+
   it('resolves the automatic terminal-401 path to a confirmed LOCAL logout', async () => {
     // The proxy already destroyed the session, so /auth/csrf-token (gated on
     // authentication) answers 401 and the logout POST never goes out. The

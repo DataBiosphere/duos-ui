@@ -222,7 +222,14 @@ let signOutInFlight: Promise<SignOutResult> | null = null
 
 const coalescedBffSignOut = (redirectTo: string): Promise<SignOutResult> => {
   signOutInFlight ??= bffSignOut(redirectTo)
-    .catch(() => UNCONFIRMED)
+    .catch(() => {
+      // An unexpected throw — localCleanup reaches web storage unguarded, so
+      // blocked site data lands here — is still an unconfirmed outcome, and no
+      // navigation happened. Leave nothing for a later visit to /post-logout
+      // to consume, exactly as the classified unconfirmed path does.
+      clearPostLogoutTarget()
+      return UNCONFIRMED
+    })
     .finally(() => {
       signOutInFlight = null
     })
