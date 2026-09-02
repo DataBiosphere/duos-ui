@@ -155,9 +155,10 @@ describe('showUnconfirmedSignOutNotice through the real toast', () => {
     })
     expect(alerts()).toHaveLength(1)
 
-    await act(async () => {
-      fireEvent.click(document.querySelector('[data-cy="unconfirmed-sign-out-retry"]') as HTMLElement)
-    })
+    fireEvent.click(document.querySelector('[data-cy="unconfirmed-sign-out-retry"]') as HTMLElement)
+    // Flush whatever the handler started: a second notice would render its own
+    // React root, outside this library's automatic wrapping.
+    await act(async () => {})
 
     expect(alerts()).toHaveLength(1)
   })
