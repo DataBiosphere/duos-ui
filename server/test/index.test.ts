@@ -636,6 +636,11 @@ describe('security headers', () => {
   afterEach(async () => {
     delete process.env.CONFIG_PATH
     delete process.env.DUOS_CSP_REPORT_ONLY
+    // The connect-src case overrides this to prove the policy follows the
+    // override rather than the file. The outer beforeEach resets it for the
+    // next test in this file, but vitest reuses a worker across files — so
+    // clear it here rather than leak an override into another suite.
+    delete process.env.DUOS_API_URL
     const { resetConfigCache } = await import('../src/config.js')
     resetConfigCache()
     if (dir) rmSync(dir, { recursive: true, force: true })

@@ -103,7 +103,7 @@ the migration plan and are summarised below; the ones that needed fuller
 treatment — because they were resolved during implementation, with alternatives
 and residual risk worth recording — have their own files under
 [`bff_adrs/`](bff_adrs/). That is why the directory holds 004 and 009 through
-012 rather than 001 through 003: the numbers belong to this list, not to the
+013 rather than 001 through 003: the numbers belong to this list, not to the
 directory.
 
 | ADR | Decision | Phase |
@@ -120,6 +120,7 @@ directory.
 | [010](#adr-010--the-proxy-scope-declares-its-own-error-shape) | The proxy scope declares its own error shape | 3, 4 |
 | [011](#adr-011--one-identity-per-browser-cross-tab-account-switching-reloads-the-stale-tab) | One identity per browser: cross-tab account switching reloads the stale tab | 4 |
 | [012](#adr-012--session-cookie-is-samesitelax-with-csrf-tokens-closing-the-gap) | Session cookie is `SameSite=Lax`, with CSRF tokens closing the gap | 1, 2–4 |
+| [013](#adr-013--the-content-security-policy-is-derived-from-runtime-config-and-ships-report-only) | The Content Security Policy is derived from runtime config, and ships report-only | 5 |
 
 ### ADR-001 — PostgreSQL-backed sessions via `@fastify/session`
 
@@ -287,6 +288,31 @@ CI.
 The options are defined once in `server/src/session/sessionOptions.ts` and
 imported by the server and all five test harnesses, so changing `sameSite` or
 `rolling` fails the suite.
+
+### ADR-013 — The Content Security Policy is derived from runtime config, and ships report-only
+
+**Full record:** [bff_adrs/ADR-013-content-security-policy.md](bff_adrs/ADR-013-content-security-policy.md)
+— the `connect-src` inventory, the helmet defaults that had to be overridden,
+and the follow-up that shrinks the allowlist.
+
+`connect-src` is built at startup from the same `config.json` the client reads,
+so a new upstream is a config change rather than a code change. Only
+inventoried, active fields count, and the list is mode-specific: under
+`bffEnabled` ECM and TDR are omitted because those calls are same-origin
+through the proxies, while a legacy deployment keeps all four upstream origins
+until Epic 6. Nothing is hardcoded except `'self'` and the banner bucket.
+
+The policy ships **report-only**. `DUOS_CSP_REPORT_ONLY` defaults to true and
+each environment is flipped to enforcement only after a collection run over
+every flow comes back clean; `POST /csp-report` is the sink.
+
+Two helmet defaults are not safe here. `Cross-Origin-Opener-Policy` is off
+entirely in legacy mode — `same-origin-allow-popups` is not a middle ground,
+because on the return leg from B2C the popup's `window.opener` still goes null
+and `signinPopup()` never resolves. COOP is not part of the CSP and has no
+report-only mode, so that one would have broken sign-in on the first deploy.
+`Cross-Origin-Embedder-Policy` stays off because the banner bucket and the two
+direct upstreams send no CORP header.
 
 ### Decisions not tracked as ADRs
 

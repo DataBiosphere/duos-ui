@@ -25,8 +25,22 @@ oversights:
 | Connection | Where | Why it stays direct |
 |---|---|---|
 | Banner notifications, `storage.googleapis.com/broad-duos-banners` | `src/libs/notificationService.ts` | A public bucket; no session involved. |
-| Feature flags, `/feature` and `/feature/:key` on Consent | `src/libs/ajax/FeatureFlag.ts` | Unauthenticated and read before login; the session-guarded proxy would 401 them. |
+| Feature flags, `/feature` and `/feature/:key` on Consent | `src/libs/ajax/FeatureFlag.ts` | Unauthenticated and read before login; the session-guarded proxy would 401 them. **But see below — no caller today.** |
 | Anonymous Bard metrics | `src/libs/ajax/Metrics.ts` | Deliberately carries no credentials. Identified events go through `/bard-api`. |
+
+The feature-flag entry is inherited from the story's inventory and does not
+describe the tree as it stands: `FeatureFlag.ts` has **no caller anywhere in
+`src/`** — `getFlagNhgriDacId`, `getFeatureFlag`, and `getAllFeatureFlags` are
+reached only from their own unit test. Nothing else calls
+`getUpstreamApiUrl` outside the legacy-only `oidcBroker.ts`, so BFF-mode
+`connect-src` needs no `apiUrl` entry for a flow that runs today.
+
+It is kept anyway, deliberately. The policy ships report-only, so a
+superfluous entry costs nothing now, and the module reads as one about to be
+wired up rather than one to delete — dropping the origin would greet whoever
+wires it with a blocked request and no obvious cause. The consequence worth
+carrying forward is for the follow-up: `/public/features/*` may have no
+consumer to serve, and that should be settled before it is built.
 
 Folding these into the existing proxies as "unauthenticated paths" does not
 work as those are built. `unauthenticatedPaths` is an **exact** set match
@@ -67,6 +81,37 @@ accident.
 `DUOS_API_URL` overrides the file's `apiUrl` (see `config.ts`), and the policy
 follows the override — otherwise a redirected deployment would block its own
 calls.
+
+A deployment whose rendered config omits `bffEnabled` gets the **legacy**
+list, which is a superset. `config/base_config.json` ships without the key, so
+this is the common case, not an edge one. It fails open on the allowlist and
+safe on breakage, which is the right direction while both modes exist.
+
+**B2C is the one origin the browser reaches that no config field names, and it
+needs no entry.** The authority URL does not live in `config.json` at all: it
+arrives at runtime in Consent's `/oauth2/configuration` response as
+`authorityEndpoint` (`src/libs/ajax/OAuth2.ts`). The legacy client never
+`fetch`es it, so `connect-src` never has to name it — audited through
+`oidc-client-ts` 3.5.0:
+
+| Request that would need B2C in `connect-src` | Why it never happens |
+|---|---|
+| OpenID discovery | `oidcBroker.ts` passes an explicit `metadata` object, and `MetadataService` returns that cache without ever reading `_metadataUrl`. |
+| JWKS | `getSigningKeys()` has no call site in the bundle. |
+| userinfo | `loadUserInfo` defaults false, and `_processClaims` short-circuits on it. |
+| Session monitor, end-session, revocation | `monitorSession` defaults false; sign-out calls only `removeUser()` and `clearStaleState()`. |
+| Silent-renew iframe | `silent_redirect_uri` falls back to `redirect_uri`, which the broker sets to `''`, so `signinSilent()` throws before an iframe exists. The live branch is a refresh-token POST to `token_endpoint` — the `apiUrl` origin. |
+
+`signinPopup` reaches B2C by **navigating** the popup to
+`${apiUrl}/oauth2/authorize`, which redirects onward. No directive in this
+policy governs navigation.
+
+Four one-line edits would each turn that into a broken sign-in with no
+config field to fix it from: dropping the `metadata` override, setting
+`loadUserInfo: true`, setting `monitorSession: true`, or giving
+`redirect_uri`/`silent_redirect_uri` a real value. The last also needs
+`frame-src`. Any of them means adding the authority origin here — sourced from
+Consent's response, not from `config.json`.
 
 ### 2. Report-only by default, enforced per environment
 
@@ -143,8 +188,18 @@ is a much larger piece of work than this story.
   adding `blob:` back to this directive.
 - BFF-mode `connect-src` cannot reach `'self'` alone until the three direct
   flows move to dedicated public BFF endpoints (`/public/notifications`,
-  `/public/features/*`, `/public/metrics/event`). That is the filed follow-up
-  to this story, and it is what will let this allowlist shrink.
+  `/public/features/*`, `/public/metrics/event`). That is the follow-up to this
+  story, and it is what will let this allowlist shrink.
+- `img-src` has no `https:`, so an **operator-authored** remote image would be
+  blocked. Banner messages, Consent's terms-of-service text, and DAC bot rule
+  text all render through `ReactMarkdown`, and that content lives outside this
+  repo. Nothing in the tree can prove it never carries a remote image, so it is
+  a signal to watch during the report-only run rather than a settled question.
+- `configuredOrigin` accepts an `http:` upstream, but production also sends
+  `upgrade-insecure-requests`, which rewrites that request to `https:`. Running
+  in production mode against a plain-HTTP upstream — the `apiUrl` in
+  `config-example.json`, for instance — therefore fails. This is the same
+  caveat as the docker-compose one above, from the other side.
 - **The e2e collector runs locally, not in CI.** `pnpm run serve` is
   `vite preview`, which sends no headers, so the spec fulfils the document
   itself to attach the policy. Chrome then treats that document as coming from

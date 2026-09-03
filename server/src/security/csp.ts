@@ -46,7 +46,25 @@ export const CSP_REPORT_GROUP = 'csp-endpoint'
  */
 const BFF_CONNECT_FIELDS = ['apiUrl', 'bardApiUrl'] as const
 
-/** Legacy mode calls all four upstreams directly from the browser. */
+/**
+ * Legacy mode calls all four upstreams directly from the browser.
+ *
+ * B2C is absent from this list too, and that is load-bearing rather than an
+ * oversight. The authority URL is not a config.json field at all — it arrives
+ * in Consent's /oauth2/configuration response — so if the browser ever
+ * *fetched* B2C there would be nothing here to derive an entry from.
+ *
+ * It never does. `oidcBroker.ts` passes oidc-client-ts an explicit `metadata`
+ * object, which short-circuits discovery; JWKS, userinfo, and the session
+ * monitor are all dead in this configuration; and silent renew falls back to a
+ * refresh-token POST to `token_endpoint`, which is the apiUrl origin. The
+ * popup reaches B2C by navigation, which no directive here governs.
+ *
+ * Four edits in that file would each break sign-in with no config field to
+ * repair it from: dropping the `metadata` override, `loadUserInfo: true`,
+ * `monitorSession: true`, or a real `redirect_uri`/`silent_redirect_uri` (the
+ * last needs `frame-src` too). See ADR-013 for the audit.
+ */
 const LEGACY_CONNECT_FIELDS = ['apiUrl', 'bardApiUrl', 'ecmApiUrl', 'tdrApiUrl'] as const
 
 export interface CspEnvironment {

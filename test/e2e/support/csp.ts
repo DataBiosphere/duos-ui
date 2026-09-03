@@ -62,10 +62,16 @@ export async function attachReportOnlyPolicy(page: Page, header: string): Promis
       return
     }
     const response = await route.fetch()
-    await route.fulfill({
-      response,
-      headers: { ...response.headers(), 'content-security-policy-report-only': header },
-    })
+    const headers: Record<string, string> = { ...response.headers(), 'content-security-policy-report-only': header }
+    // route.fetch() hands back an already-decoded body, so the upstream's
+    // content-encoding and content-length no longer describe what is being
+    // fulfilled — copying them over makes the browser fail to decode the
+    // document. `vite preview` compresses nothing today, but the Fastify server
+    // this harness moves to (Epic 6) does, and the failure there is an opaque
+    // navigation error rather than a CSP result.
+    delete headers['content-encoding']
+    delete headers['content-length']
+    await route.fulfill({ response, headers })
   })
 }
 
@@ -89,5 +95,20 @@ export async function collectViolations(page: Page): Promise<Violation[]> {
       })
     })
   })
+  return violations
+}
+
+/**
+ * Returns the collected violations once every report the browser has already
+ * raised has actually crossed back into Node.
+ *
+ * `exposeFunction` bindings and `evaluate` results travel the same ordered
+ * channel, so one round-trip through the page after the flows have finished
+ * guarantees any binding call the page made earlier was already delivered.
+ * Without it, a case asserting the array is empty can read it in the same tick
+ * the browser raised a report and see nothing.
+ */
+export async function drainViolations(page: Page, violations: Violation[]): Promise<Violation[]> {
+  await page.evaluate(() => true)
   return violations
 }

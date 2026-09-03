@@ -1,4 +1,4 @@
-import type { FastifyBaseLogger, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyBaseLogger, FastifyError, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { CSP_REPORT_GROUP, CSP_REPORT_PATH } from './csp.js'
 
 /**
@@ -6,15 +6,31 @@ import { CSP_REPORT_GROUP, CSP_REPORT_PATH } from './csp.js'
  *
  * This is an unauthenticated POST that any browser on the internet can be made
  * to hit, and everything it accepts ends up in the pod's logs — a
- * log-amplification target. Four controls bound that:
+ * log-amplification target. Five controls bound that:
  *
  *  1. A small body limit (8 KB), enforced by Fastify before the parser runs.
  *  2. Exactly two accepted media types; everything else gets 415 without
  *     reaching a handler.
- *  3. A field allowlist — only the report fields the spec defines survive,
+ *  3. A cap on how many reports one request may contribute. Neither parser
+ *     checks the body's shape, so an 8 KB array of minimal entries — around
+ *     170 of them fit — is one request that would otherwise write 170 lines.
+ *  4. A field allowlist — only the report fields the spec defines survive,
  *     each truncated. Unknown keys never reach the log.
- *  4. A fixed-window cap on how many reports are logged per minute. Requests
- *     over the cap still answer 204; they are simply not written.
+ *  5. A fixed-window budget charged once per *request*, not once per report,
+ *     so no single request can spend more than one unit of it. Requests over
+ *     the budget still answer 204; they are simply not written.
+ *
+ * Fastify's own per-request logging is switched off for this route
+ * (`logLevel: 'silent'`). Without that, every POST — including the ones
+ * rejected with 415 or 413 before any handler runs — would still emit an
+ * `incoming request` / `request completed` pair that none of the controls
+ * above bounds, and log volume would track request rate directly. The report
+ * lines go through `app.log` rather than `request.log` for the same reason;
+ * see the note at the route.
+ *
+ * The budget is per process, and so per pod. An operator sizing log ingest from
+ * MAX_LOGGED_PER_WINDOW × MAX_REPORTS_PER_REQUEST must multiply by the replica
+ * count; the constants below are one pod's ceiling, not the deployment's.
  *
  * Story 5-G adds real per-route rate limiting at the edge and through
  * `@fastify/rate-limit`; the counter here is the log-volume floor beneath it.
@@ -29,7 +45,15 @@ export const REPORT_BODY_LIMIT = 8 * 1024
 /** Longest string value written to the log, per field. */
 const MAX_FIELD_LENGTH = 512
 
-/** Reports logged per window before the rest are counted and dropped. */
+/**
+ * Reports one request may contribute to the log. `report-uri` posts exactly
+ * one; `report-to` posts whatever the browser has queued for the endpoint,
+ * which for a single page load is a handful. Eight leaves a genuine batch
+ * intact while keeping a hand-built array from writing more than eight lines.
+ */
+export const MAX_REPORTS_PER_REQUEST = 8
+
+/** Requests allowed to log per window before the rest are counted and dropped. */
 const MAX_LOGGED_PER_WINDOW = 60
 const LOG_WINDOW_MS = 60_000
 
@@ -92,31 +116,63 @@ export function extractReports(body: unknown): unknown[] {
   return []
 }
 
+interface LogBudget {
+  /**
+   * Reserves this request's single unit of budget. `reportCount` is only used
+   * to size the dropped tally when the answer is no.
+   */
+  admit: (reportCount: number) => boolean
+  /** Stops the heartbeat and writes any count still pending. */
+  close: () => void
+}
+
 /**
  * Fixed-window log budget. Closed over per registration rather than held at
  * module scope so each built app — and so each test — starts fresh.
+ *
+ * The dropped tally is written through the app's logger, not a request's. It
+ * describes traffic the caller of the moment had nothing to do with, and
+ * borrowing `request.log` would stamp it with an unrelated `reqId`.
  */
-function createLogBudget() {
+function createLogBudget(log: FastifyBaseLogger): LogBudget {
   let windowStart = 0
   let logged = 0
   let dropped = 0
 
-  return (log: FastifyBaseLogger): boolean => {
-    const now = Date.now()
-    if (now - windowStart >= LOG_WINDOW_MS) {
-      if (dropped > 0) {
-        log.warn({ dropped }, '[csp] violation reports dropped without logging — over the per-minute budget')
+  function flush(): void {
+    if (dropped === 0) return
+    log.warn({ dropped }, '[csp] violation reports dropped without logging — over the per-minute budget')
+    dropped = 0
+  }
+
+  // The window only rolls over when a later request arrives, so a flood
+  // followed by silence — a quiet environment, or overnight — would leave the
+  // count unwritten indefinitely. This bounds that wait to one window.
+  // unref()'d so it never by itself holds the process, or a test run, open.
+  const heartbeat = setInterval(flush, LOG_WINDOW_MS)
+  heartbeat.unref()
+
+  return {
+    admit(reportCount: number): boolean {
+      const now = Date.now()
+      if (now - windowStart >= LOG_WINDOW_MS) {
+        flush()
+        windowStart = now
+        logged = 0
       }
-      windowStart = now
-      logged = 0
-      dropped = 0
-    }
-    if (logged >= MAX_LOGGED_PER_WINDOW) {
-      dropped += 1
-      return false
-    }
-    logged += 1
-    return true
+      if (logged >= MAX_LOGGED_PER_WINDOW) {
+        dropped += reportCount
+        return false
+      }
+      logged += 1
+      return true
+    },
+    close(): void {
+      clearInterval(heartbeat)
+      // A pod rolled by a deploy is the other way the count gets lost; this is
+      // the last chance to write it.
+      flush()
+    },
   }
 }
 
@@ -133,7 +189,20 @@ export const REPORTING_ENDPOINTS_HEADER = `${CSP_REPORT_GROUP}="${CSP_REPORT_PAT
  * to this scope alone and leaves the rest of the app's parsers untouched.
  */
 export async function cspReportRoute(app: FastifyInstance): Promise<void> {
-  const mayLog = createLogBudget()
+  const budget = createLogBudget(app.log)
+  app.addHook('onClose', async () => budget.close())
+
+  // The app-level error handler is installed in index.ts *after* this plugin is
+  // registered, so Fastify never resolves it for this route. Without one here,
+  // the default serialiser answers 415 with FST_ERR_CTP_INVALID_MEDIA_TYPE and
+  // 413 with FST_ERR_CTP_BODY_TOO_LARGE — naming the framework to an
+  // unauthenticated caller, where every other route generalises. The status is
+  // the whole useful response here, as it is for the handler's own 204: the
+  // browser discards a report POST's body either way. Deliberately not logged —
+  // writing a line per rejected request is the amplification this file exists
+  // to prevent.
+  app.setErrorHandler((error: FastifyError, _request: FastifyRequest, reply: FastifyReply) =>
+    reply.status(error.statusCode ?? 500).send())
 
   // Cleared, then exactly the two report media types re-added. Anything else —
   // including the JSON and text parsers inherited from the parent scope — now
@@ -152,13 +221,33 @@ export async function cspReportRoute(app: FastifyInstance): Promise<void> {
     })
   }
 
-  app.post(CSP_REPORT_PATH, { bodyLimit: REPORT_BODY_LIMIT }, async (request: FastifyRequest, reply: FastifyReply) => {
-    for (const raw of extractReports(request.body)) {
-      const report = sanitizeReport(raw)
-      if (report && mayLog(request.log)) {
-        request.log.warn({ report }, '[csp] violation report')
-      }
+  // `logLevel: 'silent'` turns off Fastify's own `incoming request` /
+  // `request completed` pair for this route — emitted even for the 415s and
+  // 413s that never reach the handler, and so the one source of log volume
+  // none of the controls above bounds.
+  //
+  // It silences `request.log` with it, which is why the report lines below go
+  // through `app.log` instead. A route level *pins* rather than raises: had
+  // this been `'warn'` to keep `request.log`, the route would have overridden
+  // a deployment that deliberately set FASTIFY_LOG_LEVEL lower. `app.log`
+  // honours that setting, and carrying `reqId` explicitly keeps the one thing
+  // request.log was worth here — telling which lines arrived together.
+  const routeOptions = { bodyLimit: REPORT_BODY_LIMIT, logLevel: 'silent' as const }
+
+  app.post(CSP_REPORT_PATH, routeOptions, async (request: FastifyRequest, reply: FastifyReply) => {
+    // Capped before sanitising, so the work a request can provoke is bounded
+    // too, and charged as one unit however many survive: 174 entries fit in an
+    // 8 KB body, and charging per report would let one POST spend the whole
+    // window and silence every genuine report until it rolled over.
+    const reports = extractReports(request.body)
+      .slice(0, MAX_REPORTS_PER_REQUEST)
+      .map(sanitizeReport)
+      .filter((report): report is Record<string, string | number> => report !== undefined)
+
+    if (reports.length > 0 && budget.admit(reports.length)) {
+      for (const report of reports) app.log.warn({ reqId: request.id, report }, '[csp] violation report')
     }
+
     // Always 204, and never a body: the browser ignores the response, and a
     // status that varied with the content would turn this into an oracle.
     return reply.status(204).send()
