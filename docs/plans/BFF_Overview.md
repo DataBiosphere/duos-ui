@@ -350,6 +350,38 @@ sequenceDiagram
 
 ### Sign-out Flow
 
+Destroying the BFF session is only half of a sign-out: the browser also holds
+Azure B2C's own single sign-on cookie. `POST /auth/logout` therefore returns the
+B2C end-session URL and the client navigates to it (front-channel logout, Phase
+5). Because the client calls the endpoint with `fetch`, the server cannot
+redirect the browser itself, so the response mirrors `/auth/login`'s
+`{ redirectUrl }` shape.
+
+Only two answers confirm anything, and the client treats every other response —
+a malformed body, a 200 without a `redirectUrl`, a 403, a 500, a transport
+failure — as an **unconfirmed** sign-out. An unconfirmed sign-out performs no
+local cleanup and claims no success: the client probes `GET /auth/me` instead,
+and a 401 there proves the session is gone. When even that is unknowable, the
+user sees a persistent notice with a Retry.
+
+| Response | Meaning | Client action |
+| --- | --- | --- |
+| `200 { redirectUrl }` | The session is destroyed and B2C exposes an end-session endpoint | Local cleanup, then navigate to B2C |
+| `204` | The session is destroyed; no single sign-out could be arranged | Local cleanup, then navigate to `/post-logout` |
+| anything else | Unknown | Verify with `GET /auth/me`, then retry or report |
+
+B2C requires `post_logout_redirect_uri` to match a registered URI exactly, so
+the local destination cannot ride in it. `/post-logout` is the one registered
+URI (env var `DUOS_POST_LOGOUT_REDIRECT_URI`); the client stores its
+destination in `sessionStorage` before the logout, and `/post-logout` reads it,
+deletes it, validates it again, and replaces the history entry with it.
+
+Automatic sign-out on a terminal upstream 401 is local-only by design. The
+proxy destroys the session before the 401 reaches the browser, so the
+`id_token_hint` is already gone and no B2C leg is possible. `prompt: 'login'`
+on every authorization request remains the guarantee that the B2C login screen
+always appears.
+
 ```mermaid
 sequenceDiagram
     participant B   as Browser
@@ -361,8 +393,12 @@ sequenceDiagram
         Note over B,B2C: Sign-Out
 
         B->>BFF: POST /auth/logout [cookie: sessionId]
-        BFF->>PG: Read session — accessToken, refreshToken
+        BFF->>PG: Read session — idToken, accessToken, refreshToken
         PG-->>BFF: session data
+
+        opt end_session_endpoint + idToken available
+            BFF->>BFF: Build the end-session URL (id_token_hint, post_logout_redirect_uri)
+        end
 
         opt revocation_endpoint available (B2C typically does not expose one)
             BFF->>B2C: POST /revoke (access_token)
@@ -375,6 +411,15 @@ sequenceDiagram
         PG-->>BFF: ok
         BFF->>PG: Destroy session
         PG-->>BFF: ok
-        BFF-->>B: 204 + Set-Cookie: sessionId (cleared, Max-Age=0)
+
+        alt End-session URL built
+            BFF-->>B: 200 { redirectUrl } + Set-Cookie: sessionId (cleared, Max-Age=0)
+            B->>B2C: GET end_session_endpoint (front-channel logout)
+            B2C-->>B: 302 /post-logout
+            B->>B: /post-logout reads, deletes, and replaces with the stored target
+        else No end-session URL (no idToken, no endpoint, or misconfiguration)
+            BFF-->>B: 204 + Set-Cookie: sessionId (cleared, Max-Age=0)
+            B->>B: Navigate to /post-logout
+        end
     end
 ```

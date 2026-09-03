@@ -348,6 +348,46 @@ describe('useSessionReconciler', () => {
     expect(setCurrentUser).not.toHaveBeenCalled()
   })
 
+  it('treats sign-out-unconfirmed as state unknown, not as signed out', async () => {
+    let resolveBootstrap!: (outcome: 'sign-out-unconfirmed') => void
+    vi.mocked(completeSignIn).mockReturnValue(new Promise((resolve) => {
+      resolveBootstrap = resolve
+    }))
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+
+    const { result, rerender } = renderReconciler()
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+
+    await act(async () => {
+      resolveBootstrap('sign-out-unconfirmed')
+    })
+
+    expect(result.current.reconciling).toBe(false)
+
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+    rerender()
+    await waitFor(() => expect(result.current.reconciling).toBe(false))
+
+    expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce()
+  })
+
+  it('resumes bootstrapping once a probe reports the session finally gone', async () => {
+    vi.mocked(completeSignIn).mockResolvedValue('sign-out-unconfirmed')
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+
+    const { rerender } = renderReconciler()
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: false })
+    rerender()
+
+    vi.mocked(completeSignIn).mockResolvedValue('completed')
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+    rerender()
+
+    await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledTimes(2))
+  })
+
   it('cancels the in-flight bootstrap on unmount', async () => {
     vi.mocked(completeSignIn).mockReturnValue(new Promise(() => {}))
     vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })

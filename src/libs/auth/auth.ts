@@ -11,6 +11,8 @@ import { Storage } from './../storage'
 import { Config } from './../config'
 import { resetSessionCache } from './session'
 import { getCsrfToken, isCsrfRejection, resetCsrfToken } from './../ajax/csrf'
+import { POST_LOGOUT_PATH, clearPostLogoutTarget, safeLocalPath, storePostLogoutTarget } from './postLogout'
+import { showUnconfirmedSignOutNotice } from './signOutNotice'
 import { UserManager } from 'oidc-client-ts'
 
 const purgeLegacyOidcKeys = (): void => {
@@ -24,6 +26,9 @@ export const Redirect = {
   to: (url: string): void => {
     globalThis.location.href = url
   },
+  replace: (url: string): void => {
+    globalThis.location.replace(url)
+  },
   /**
    * A guaranteed reload of the current page. Assigning location.href to the
    * current URL does NOT reload when the URL carries a #fragment — the
@@ -33,6 +38,133 @@ export const Redirect = {
   reload: (): void => {
     globalThis.location.reload()
   },
+}
+
+/** An unconfirmed result performs no cleanup or navigation. */
+export type SignOutResult = { status: 'confirmed' } | { status: 'unconfirmed' }
+
+const CONFIRMED: SignOutResult = { status: 'confirmed' }
+const UNCONFIRMED: SignOutResult = { status: 'unconfirmed' }
+
+type LogoutReading
+  = | { outcome: 'b2c', redirectUrl: string }
+    | { outcome: 'local' }
+    | { outcome: 'unconfirmed' }
+
+// The server validates the B2C origin; the client can only validate structure.
+const wellFormedRedirectUrl = (value: unknown): value is string => {
+  if (typeof value !== 'string' || value.length === 0) return false
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' || url.protocol === 'http:'
+  }
+  catch {
+    return false
+  }
+}
+
+const readLogoutResponse = async (res: Response): Promise<LogoutReading> => {
+  if (res.status === 204) return { outcome: 'local' }
+  if (res.status !== 200) return { outcome: 'unconfirmed' }
+  try {
+    const body = await res.json() as { redirectUrl?: unknown }
+    if (wellFormedRedirectUrl(body.redirectUrl)) {
+      return { outcome: 'b2c', redirectUrl: body.redirectUrl }
+    }
+  }
+  catch {}
+  return { outcome: 'unconfirmed' }
+}
+
+const postLogout = async (): Promise<Response> =>
+  fetch('/auth/logout', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'X-CSRF-Token': await getCsrfToken() },
+  })
+
+/** Posts logout with at most one retry for a stale CSRF token. */
+const attemptLogout = async (): Promise<LogoutReading> => {
+  try {
+    let res = await postLogout()
+    if (await isCsrfRejection(res)) {
+      resetCsrfToken()
+      res = await postLogout()
+    }
+    return await readLogoutResponse(res)
+  }
+  catch {
+    return { outcome: 'unconfirmed' }
+  }
+}
+
+type Verification = 'gone' | 'live' | 'unknown'
+
+// Bypass the session cache when verifying the result of a logout.
+const verifySession = async (): Promise<Verification> => {
+  try {
+    const res = await fetch('/auth/me', { credentials: 'include' })
+    if (res.status === 401) return 'gone'
+    if (res.ok) return 'live'
+    return 'unknown'
+  }
+  catch {
+    return 'unknown'
+  }
+}
+
+/** Clears browser state only after the server session is confirmed gone. */
+const localCleanup = (): void => {
+  resetCsrfToken()
+  Storage.clearStorage()
+  resetSessionCache()
+  purgeLegacyOidcKeys()
+}
+
+const bffSignOut = async (redirectTo: string): Promise<SignOutResult> => {
+  // B2C requires an exact post_logout_redirect_uri, so carry the local target separately.
+  storePostLogoutTarget(redirectTo)
+
+  let reading = await attemptLogout()
+  if (reading.outcome === 'unconfirmed') {
+    const verified = await verifySession()
+    if (verified === 'gone') reading = { outcome: 'local' }
+    else if (verified === 'live') reading = await attemptLogout()
+  }
+
+  if (reading.outcome === 'unconfirmed') {
+    clearPostLogoutTarget()
+    return UNCONFIRMED
+  }
+
+  localCleanup()
+  Redirect.to(reading.outcome === 'b2c' ? reading.redirectUrl : POST_LOGOUT_PATH)
+  return CONFIRMED
+}
+
+// Concurrent 401s share one attempt; clearing on settle allows a later retry.
+let signOutInFlight: Promise<SignOutResult> | null = null
+
+const coalescedBffSignOut = (redirectTo: string): Promise<SignOutResult> => {
+  signOutInFlight ??= bffSignOut(redirectTo)
+    .catch(() => {
+      clearPostLogoutTarget()
+      return UNCONFIRMED
+    })
+    .finally(() => {
+      signOutInFlight = null
+    })
+  return signOutInFlight
+}
+
+const legacySignOut = async (redirectTo: string): Promise<SignOutResult> => {
+  Storage.clearStorage()
+  try {
+    await OidcBroker.signOut()
+  }
+  catch {}
+  Redirect.to(safeLocalPath(redirectTo))
+  return CONFIRMED
 }
 
 export const Auth = {
@@ -55,7 +187,7 @@ export const Auth = {
       // TODO: DUOS-3082 Add an alert that session will expire soon
     })
     um.events.addAccessTokenExpired((): void => {
-      Auth.signOut()
+      void Auth.signOut()
       // TODO: DUOS-3082 Add an alert that session has expired
     })
   },
@@ -82,54 +214,38 @@ export const Auth = {
     Storage.setOidcUser(user)
     return user
   },
-  signOut: async (redirectTo: string = '/'): Promise<void> => {
-    if (await Config.isBffEnabled()) {
-      // POST /auth/logout is CSRF-guarded, so fetch a token first.
-      try {
-        const postLogout = async (): Promise<Response> =>
-          fetch('/auth/logout', {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'X-CSRF-Token': await getCsrfToken() },
-          })
-        const res = await postLogout()
-        // A cached token can be stale (session rotation at login discards the
-        // old secret) — refetch once and retry, or the logout silently fails
-        // and the server session survives the local cleanup below.
-        if (await isCsrfRejection(res)) {
-          resetCsrfToken()
-          await postLogout()
-        }
-        // Any other failure is a server-side problem the client can't act on;
-        // fall through to the local cleanup either way.
-      }
-      catch {
-        // Session destruction is server-side state; local cleanup still applies.
-      }
-      // The session (and with it the server-side CSRF secret) is gone — any cached token is stale.
-      resetCsrfToken()
-      Storage.clearStorage()
-      // The probe cache still holds the pre-logout "authenticated" answer;
-      // callers navigate before the redirect below unloads the page, and a
-      // re-render in that window must not paint a signed-in header around
-      // the just-cleared (empty) stored user.
-      resetSessionCache()
-      purgeLegacyOidcKeys()
-      Redirect.to(redirectTo)
-      return
+  /** Owns navigation and returns an outcome rather than rejecting. */
+  signOut: async (redirectTo: string = '/'): Promise<SignOutResult> => {
+    let bffEnabled: boolean
+    try {
+      bffEnabled = await Config.isBffEnabled()
     }
-    Storage.clearStorage()
-    await OidcBroker.signOut()
+    catch {
+      return UNCONFIRMED
+    }
+    if (bffEnabled) {
+      return coalescedBffSignOut(safeLocalPath(redirectTo))
+    }
+    return legacySignOut(redirectTo)
   },
 }
 
-export const redirectOnLogout = () => {
+export const reportUnconfirmedSignOut = (): void => {
+  showUnconfirmedSignOutNotice(() => {
+    void redirectOnLogout()
+  })
+}
+
+export const redirectOnLogout = async (): Promise<SignOutResult> => {
   // '/' and '/home' are landing pages, not destinations worth returning to
   // (the same rule SignInButton applies). A 401 can fire after the app has
   // already navigated home — an in-flight request racing a sign-out — and
   // must not produce a self-referential /home?redirectTo=/home.
   const path = globalThis.location.pathname
   const redirectTo = path === '/' || path === '/home' ? '/home' : `/home?redirectTo=${path}`
-  void Auth.signOut(redirectTo)
-  Redirect.to(redirectTo)
+  const result = await Auth.signOut(redirectTo)
+  if (result.status === 'unconfirmed') {
+    reportUnconfirmedSignOut()
+  }
+  return result
 }

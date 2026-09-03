@@ -2,6 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { OidcBroker } from 'src/libs/auth/oidcBroker'
 import { Auth, Redirect, redirectOnLogout } from 'src/libs/auth/auth'
 import { getSessionInfo, resetSessionProbeState } from 'src/libs/auth/session'
+import { resetCsrfToken } from 'src/libs/ajax/csrf'
+import { POST_LOGOUT_PATH, takePostLogoutTarget } from 'src/libs/auth/postLogout'
+import { resetSignOutNoticeState } from 'src/libs/auth/signOutNotice'
+import { ToastNotifications } from 'src/libs/ToastNotifications'
 import { Storage } from 'src/libs/storage'
 import { Config } from 'src/libs/config'
 import { v4 as uuid } from 'uuid'
@@ -72,11 +76,23 @@ describe('Auth Success', () => {
     expect(Storage.getAnonymousId()).not.toBeNull()
     expect(Storage.getData('key')).not.toBeNull()
     expect(Storage.getEnv()).not.toBeNull()
-    await Auth.signOut()
+    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+
+    await expect(Auth.signOut()).resolves.toEqual({ status: 'confirmed' })
+
     expect(Storage.userIsLogged()).toBe(false)
     expect(Storage.getAnonymousId()).toBeNull()
     expect(Storage.getData('key')).toBeNull()
     expect(Storage.getEnv()).toBeNull()
+    expect(redirectSpy).toHaveBeenCalledWith('/')
+  })
+
+  it('Sign Out validates the legacy redirect target', async () => {
+    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+
+    await Auth.signOut('//evil.example.com/steal')
+
+    expect(redirectSpy).toHaveBeenCalledWith('/')
   })
 
   it('redirectOnLogout clears storage and calls signOut', async () => {
@@ -87,20 +103,17 @@ describe('Auth Success', () => {
     expect(Storage.getData('key')).not.toBeNull()
     expect(Storage.getEnv()).not.toBeNull()
 
+    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
     const signOutSpy = vi.spyOn(Auth, 'signOut')
-    try {
-      redirectOnLogout()
-    }
-    catch (_e) {
-      // ignore location redirect errors in jsdom
-    }
-    // await the async signOut that redirectOnLogout fires-and-forgets
-    await signOutSpy.mock.results[0].value
+
+    await expect(redirectOnLogout()).resolves.toEqual({ status: 'confirmed' })
+
     expect(signOutSpy).toHaveBeenCalled()
     expect(Storage.userIsLogged()).toBe(false)
     expect(Storage.getAnonymousId()).toBeNull()
     expect(Storage.getData('key')).toBeNull()
     expect(Storage.getEnv()).toBeNull()
+    expect(redirectSpy).toHaveBeenCalledTimes(1)
   })
 })
 
@@ -176,136 +189,432 @@ describe('Auth (BFF mode)', () => {
     await expect(Auth.signIn()).rejects.toThrow(Auth.signInError())
     expect(redirectSpy).not.toHaveBeenCalled()
   })
+})
 
-  it('signOut fetches a CSRF token, POSTs logout with it, clears storage, and redirects', async () => {
-    Storage.setAnonymousId(uuid())
-    Storage.setData('key', 'val')
-    const fetchMock = vi.fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-123' }) })
-      .mockResolvedValueOnce({ ok: true, status: 204 })
-    vi.stubGlobal('fetch', fetchMock)
-    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+const B2C_LOGOUT_URL = 'https://terradevb2c.b2clogin.com/logout?id_token_hint=abc'
 
-    await Auth.signOut()
+const jsonResponse = (status: number, body: unknown): Response =>
+  new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 
-    expect(fetchMock).toHaveBeenNthCalledWith(1, '/auth/csrf-token', { credentials: 'include' })
-    expect(fetchMock).toHaveBeenNthCalledWith(2, '/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'X-CSRF-Token': 'csrf-123' },
-    })
-    expect(Storage.getAnonymousId()).toBeNull()
-    expect(Storage.getData('key')).toBeNull()
-    // No OidcUser placeholder survives sign-out in BFF mode
-    expect(localStorage.getItem('OidcUser')).toBeNull()
-    expect(redirectSpy).toHaveBeenCalledWith('/')
+const emptyResponse = (status: number): Response => new Response(null, { status })
+
+const malformedOk = (): Response =>
+  new Response('<html>gateway</html>', { status: 200, headers: { 'content-type': 'text/html' } })
+
+const csrfRejection = (): Response =>
+  jsonResponse(403, { error: 'csrf_validation_failed', reason: 'missing_secret' })
+
+const b2cLogoutOk = (url: string = B2C_LOGOUT_URL): Response =>
+  jsonResponse(200, { redirectUrl: url })
+
+interface RouteQueues {
+  csrf?: (Response | Error)[]
+  logout?: (Response | Error)[]
+  me?: (Response | Error)[]
+}
+
+const stubFetchRoutes = (routes: RouteQueues) => {
+  const queues = {
+    csrf: [...(routes.csrf ?? [])],
+    logout: [...(routes.logout ?? [])],
+    me: [...(routes.me ?? [])],
+  }
+  const routeOf = (url: string): keyof typeof queues => {
+    if (url.startsWith('/auth/csrf-token')) return 'csrf'
+    if (url.startsWith('/auth/logout')) return 'logout'
+    return 'me'
+  }
+  const fetchMock = vi.fn((input: string) => {
+    const route = routeOf(input)
+    const next = queues[route].shift()
+    if (next === undefined) {
+      if (route === 'csrf') return Promise.resolve(jsonResponse(200, { token: 'csrf-123' }))
+      return Promise.reject(new Error(`unexpected fetch to ${input}`))
+    }
+    if (next instanceof Error) return Promise.reject(next)
+    return Promise.resolve(next)
+  })
+  vi.stubGlobal('fetch', fetchMock)
+  const urlsFor = (route: keyof typeof queues): string[] =>
+    fetchMock.mock.calls.map(call => call[0]).filter(url => routeOf(url) === route)
+  return { fetchMock, urlsFor }
+}
+
+describe('Auth.signOut classification (BFF, story 5-E)', () => {
+  let redirectSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(true)
+    redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+    resetCsrfToken()
+    resetSessionProbeState()
+    resetSignOutNoticeState()
+    sessionStorage.clear()
+    localStorage.clear()
+    globalThis.history.replaceState({}, '', '/')
   })
 
-  it('signOut still clears local state and redirects when the logout request fails', async () => {
-    Storage.setData('key', 'val')
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')))
-    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
-
-    await Auth.signOut()
-
-    expect(Storage.getData('key')).toBeNull()
-    expect(localStorage.getItem('OidcUser')).toBeNull()
-    expect(redirectSpy).toHaveBeenCalledWith('/')
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+    localStorage.clear()
+    sessionStorage.clear()
   })
 
-  it('signOut redirects to the requested target', async () => {
-    vi.stubGlobal('fetch', vi.fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-123' }) })
-      .mockResolvedValueOnce({ ok: true, status: 204 }))
-    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+  it('navigates to the B2C end-session URL on 200 { redirectUrl }', async () => {
+    Storage.setData('key', 'val')
+    stubFetchRoutes({ logout: [b2cLogoutOk()] })
+
+    await expect(Auth.signOut('/home?redirectTo=/datalibrary')).resolves.toEqual({ status: 'confirmed' })
+
+    expect(redirectSpy).toHaveBeenCalledWith(B2C_LOGOUT_URL)
+    expect(Storage.getData('key')).toBeNull()
+  })
+
+  it('stores the validated local target for /post-logout to consume', async () => {
+    stubFetchRoutes({ logout: [b2cLogoutOk()] })
 
     await Auth.signOut('/home?redirectTo=/datalibrary')
 
-    expect(redirectSpy).toHaveBeenCalledWith('/home?redirectTo=/datalibrary')
+    expect(takePostLogoutTarget()).toBe('/home?redirectTo=/datalibrary')
   })
 
-  it('signOut refetches the CSRF token and retries once when logout is rejected', async () => {
-    // A cached token can be stale after session rotation — the logout must not
-    // silently 403 and leave the server session alive
-    const csrfRejection = new Response(
-      JSON.stringify({ error: 'csrf_validation_failed', reason: 'missing_secret' }),
-      { status: 403, headers: { 'content-type': 'application/json' } },
-    )
-    const fetchMock = vi.fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-stale' }) })
-      .mockResolvedValueOnce(csrfRejection)
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-fresh' }) })
-      .mockResolvedValueOnce({ ok: true, status: 204 })
-    vi.stubGlobal('fetch', fetchMock)
-    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+  it('never stores an external target', async () => {
+    stubFetchRoutes({ logout: [b2cLogoutOk()] })
 
-    await Auth.signOut()
+    await Auth.signOut('https://evil.example.com/steal')
 
-    expect(fetchMock).toHaveBeenCalledTimes(4)
-    expect(fetchMock).toHaveBeenNthCalledWith(4, '/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'X-CSRF-Token': 'csrf-fresh' },
+    expect(takePostLogoutTarget()).toBe('/')
+  })
+
+  it('navigates to /post-logout on a bare 204', async () => {
+    Storage.setData('key', 'val')
+    stubFetchRoutes({ logout: [emptyResponse(204)] })
+
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'confirmed' })
+
+    expect(redirectSpy).toHaveBeenCalledWith(POST_LOGOUT_PATH)
+    expect(Storage.getData('key')).toBeNull()
+  })
+
+  it('runs local cleanup before the navigation, in that order', async () => {
+    localStorage.setItem('OidcUser', JSON.stringify({ access_token: 'stale' }))
+    let storageStillPopulatedAtRedirect = true
+    stubFetchRoutes({ logout: [emptyResponse(204)] })
+    redirectSpy.mockImplementation(() => {
+      storageStillPopulatedAtRedirect = localStorage.getItem('OidcUser') !== null
     })
-    expect(redirectSpy).toHaveBeenCalledWith('/')
+
+    await Auth.signOut('/home')
+
+    expect(storageStillPopulatedAtRedirect).toBe(false)
   })
 
-  it('signOut drops the cached session answer before redirecting', async () => {
-    // DuosHeader navigates before Auth.signOut's redirect unloads the page;
-    // a re-render in that window must re-probe rather than serve the cached
-    // pre-logout "authenticated" — which painted a signed-in header around
-    // the just-cleared empty user.
-    resetSessionProbeState()
-    const fetchMock = vi.fn()
-      // 1: session probe → cached authenticated answer
-      .mockResolvedValueOnce(new Response(JSON.stringify({ authenticated: true }), { status: 200 }))
-      // 2: CSRF token, 3: logout
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-123' }) } as never)
-      .mockResolvedValueOnce({ ok: true, status: 204 } as never)
-      // 4: the post-signOut ask must reach the network again
-      .mockResolvedValueOnce(new Response(JSON.stringify({ authenticated: false }), { status: 401 }))
-    vi.stubGlobal('fetch', fetchMock)
-    vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+  it('follows the CSRF retry and navigates to the SECOND response URL', async () => {
+    const secondUrl = 'https://terradevb2c.b2clogin.com/logout?id_token_hint=second'
+    const { urlsFor } = stubFetchRoutes({
+      logout: [csrfRejection(), b2cLogoutOk(secondUrl)],
+    })
+
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'confirmed' })
+
+    expect(redirectSpy).toHaveBeenCalledWith(secondUrl)
+    expect(urlsFor('logout')).toHaveLength(2)
+  })
+
+  it('treats a final CSRF rejection as unconfirmed and performs no cleanup', async () => {
+    Storage.setData('key', 'val')
+    const { urlsFor } = stubFetchRoutes({
+      logout: [csrfRejection(), csrfRejection(), csrfRejection(), csrfRejection()],
+      me: [jsonResponse(200, { authenticated: true })],
+    })
+
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'unconfirmed' })
+
+    expect(redirectSpy).not.toHaveBeenCalled()
+    expect(Storage.getData('key')).toBe('val')
+    expect(urlsFor('logout')).toHaveLength(4)
+    expect(urlsFor('me')).toHaveLength(1)
+  })
+
+  it('verifies against /auth/me on a 500 rather than assuming a logout', async () => {
+    const { urlsFor } = stubFetchRoutes({
+      logout: [emptyResponse(500)],
+      me: [emptyResponse(401)],
+    })
+
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'confirmed' })
+
+    expect(urlsFor('me')).toEqual(['/auth/me'])
+    expect(redirectSpy).toHaveBeenCalledWith(POST_LOGOUT_PATH)
+  })
+
+  it('verifies against /auth/me on a malformed 200 body', async () => {
+    const { urlsFor } = stubFetchRoutes({
+      logout: [malformedOk()],
+      me: [emptyResponse(401)],
+    })
+
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'confirmed' })
+
+    expect(urlsFor('me')).toEqual(['/auth/me'])
+  })
+
+  it('verifies against /auth/me on a 200 without a redirectUrl', async () => {
+    const { urlsFor } = stubFetchRoutes({
+      logout: [jsonResponse(200, { loggedOut: true })],
+      me: [emptyResponse(401)],
+    })
+
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'confirmed' })
+
+    expect(urlsFor('me')).toEqual(['/auth/me'])
+  })
+
+  it('rejects a 200 whose redirectUrl is not a well-formed absolute URL', async () => {
+    const { urlsFor } = stubFetchRoutes({
+      logout: [jsonResponse(200, { redirectUrl: '/not-absolute' })],
+      me: [emptyResponse(401)],
+    })
+
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'confirmed' })
+
+    expect(redirectSpy).toHaveBeenCalledWith(POST_LOGOUT_PATH)
+    expect(urlsFor('me')).toEqual(['/auth/me'])
+  })
+
+  it('reports unconfirmed when /auth/me answers 502', async () => {
+    Storage.setData('key', 'val')
+    stubFetchRoutes({
+      logout: [emptyResponse(500)],
+      me: [emptyResponse(502)],
+    })
+
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'unconfirmed' })
+
+    expect(redirectSpy).not.toHaveBeenCalled()
+    expect(Storage.getData('key')).toBe('val')
+  })
+
+  it('reports unconfirmed when the /auth/me probe fails at the transport', async () => {
+    Storage.setData('key', 'val')
+    stubFetchRoutes({
+      logout: [new Error('network down')],
+      me: [new Error('network down')],
+    })
+
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'unconfirmed' })
+
+    expect(Storage.getData('key')).toBe('val')
+    expect(sessionStorage).toHaveLength(0)
+  })
+
+  it('retries the logout once when /auth/me reports the session is still live', async () => {
+    const { urlsFor } = stubFetchRoutes({
+      logout: [new Error('network down'), emptyResponse(204)],
+      me: [jsonResponse(200, { authenticated: true })],
+    })
+
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'confirmed' })
+
+    expect(urlsFor('logout')).toHaveLength(2)
+    expect(redirectSpy).toHaveBeenCalledWith(POST_LOGOUT_PATH)
+  })
+
+  it('drops the cached session answer before navigating away', async () => {
+    stubFetchRoutes({
+      me: [
+        jsonResponse(200, { authenticated: true }),
+        emptyResponse(401),
+      ],
+      logout: [emptyResponse(204)],
+    })
 
     await expect(getSessionInfo()).resolves.toMatchObject({ authenticated: true })
-    await Auth.signOut()
-    await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
+    await Auth.signOut('/home')
 
-    expect(fetchMock).toHaveBeenNthCalledWith(4, '/auth/me', { credentials: 'include' })
+    await expect(getSessionInfo()).resolves.toEqual({ authenticated: false })
   })
 
-  it('redirectOnLogout signs out with the /home redirect target', async () => {
-    vi.stubGlobal('fetch', vi.fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-123' }) })
-      .mockResolvedValueOnce({ ok: true, status: 204 }))
+  it('leaves no stored target when cleanup itself throws', async () => {
+    vi.spyOn(Storage, 'clearStorage').mockImplementation(() => {
+      throw new Error('site data blocked')
+    })
+    stubFetchRoutes({ logout: [emptyResponse(204)] })
+
+    await expect(Auth.signOut('/home?redirectTo=/datalibrary')).resolves.toEqual({ status: 'unconfirmed' })
+
+    expect(redirectSpy).not.toHaveBeenCalled()
+    expect(sessionStorage).toHaveLength(0)
+  })
+
+  it('resolves the automatic terminal-401 path to a confirmed LOCAL logout', async () => {
+    const { urlsFor } = stubFetchRoutes({
+      csrf: [emptyResponse(401)],
+      me: [emptyResponse(401)],
+    })
+
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'confirmed' })
+
+    expect(urlsFor('logout')).toHaveLength(0)
+    expect(redirectSpy).toHaveBeenCalledWith(POST_LOGOUT_PATH)
+  })
+})
+
+describe('Auth.signOut coalescing (BFF, story 5-E)', () => {
+  beforeEach(() => {
+    vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(true)
+    vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+    resetCsrfToken()
+    resetSessionProbeState()
+    resetSignOutNoticeState()
+    sessionStorage.clear()
+    localStorage.clear()
+    globalThis.history.replaceState({}, '', '/')
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+    localStorage.clear()
+    sessionStorage.clear()
+  })
+
+  it('shares one attempt between concurrent callers', async () => {
+    const { urlsFor } = stubFetchRoutes({ logout: [emptyResponse(204)] })
+
+    const results = await Promise.all([
+      Auth.signOut('/home'),
+      Auth.signOut('/home'),
+      Auth.signOut('/home'),
+    ])
+
+    expect(results).toEqual([
+      { status: 'confirmed' },
+      { status: 'confirmed' },
+      { status: 'confirmed' },
+    ])
+    expect(urlsFor('logout')).toHaveLength(1)
+  })
+
+  it('lets the first caller\'s validated target win', async () => {
+    stubFetchRoutes({ logout: [emptyResponse(204)] })
+
+    await Promise.all([
+      Auth.signOut('/home?redirectTo=/datalibrary'),
+      Auth.signOut('/home?redirectTo=/profile'),
+    ])
+
+    expect(takePostLogoutTarget()).toBe('/home?redirectTo=/datalibrary')
+  })
+
+  it('starts a NEW attempt after an unconfirmed result', async () => {
+    const { urlsFor } = stubFetchRoutes({
+      logout: [emptyResponse(500), emptyResponse(204)],
+      me: [emptyResponse(502)],
+    })
+
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'unconfirmed' })
+    await expect(Auth.signOut('/home')).resolves.toEqual({ status: 'confirmed' })
+
+    expect(urlsFor('logout')).toHaveLength(2)
+  })
+})
+
+describe('redirectOnLogout (story 5-E)', () => {
+  beforeEach(() => {
+    vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(true)
+    resetCsrfToken()
+    resetSessionProbeState()
+    resetSignOutNoticeState()
+    sessionStorage.clear()
+    localStorage.clear()
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+    localStorage.clear()
+    sessionStorage.clear()
+  })
+
+  it('signs out with the /home redirect target and performs no navigation of its own', async () => {
     globalThis.history.replaceState({}, '', '/datalibrary')
+    stubFetchRoutes({ logout: [emptyResponse(204)] })
     const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
     const signOutSpy = vi.spyOn(Auth, 'signOut')
 
-    redirectOnLogout()
+    await redirectOnLogout()
 
     expect(signOutSpy).toHaveBeenCalledWith('/home?redirectTo=/datalibrary')
-    await signOutSpy.mock.results[0].value
-    expect(redirectSpy).toHaveBeenCalledWith('/home?redirectTo=/datalibrary')
+    expect(redirectSpy).toHaveBeenCalledTimes(1)
+    expect(redirectSpy).toHaveBeenCalledWith(POST_LOGOUT_PATH)
   })
 
   it.each(['/home', '/'])(
-    'redirectOnLogout from %s does not append a self-referential redirectTo',
+    'from %s does not append a self-referential redirectTo',
     async (path) => {
-      // The sign-out race: DuosHeader has already navigated home when an
-      // in-flight 401 lands, and the user must not end on /home?redirectTo=/home.
-      vi.stubGlobal('fetch', vi.fn()
-        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ token: 'csrf-123' }) })
-        .mockResolvedValueOnce({ ok: true, status: 204 }))
       globalThis.history.replaceState({}, '', path)
-      const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+      stubFetchRoutes({ logout: [emptyResponse(204)] })
+      vi.spyOn(Redirect, 'to').mockImplementation(() => {})
       const signOutSpy = vi.spyOn(Auth, 'signOut')
 
-      redirectOnLogout()
+      await redirectOnLogout()
 
       expect(signOutSpy).toHaveBeenCalledWith('/home')
-      await signOutSpy.mock.results[0].value
-      expect(redirectSpy).toHaveBeenCalledWith('/home')
     },
   )
+
+  it('does not navigate before the logout request settles', async () => {
+    globalThis.history.replaceState({}, '', '/datalibrary')
+    let releaseLogout: (res: Response) => void = () => {}
+    const logoutSettled = new Promise<Response>((resolve) => {
+      releaseLogout = resolve
+    })
+    const fetchMock = vi.fn((input: string) => {
+      if (input.startsWith('/auth/csrf-token')) {
+        return Promise.resolve(jsonResponse(200, { token: 'csrf-123' }))
+      }
+      return logoutSettled
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    const redirectSpy = vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+
+    const pending = redirectOnLogout()
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    expect(redirectSpy).not.toHaveBeenCalled()
+
+    releaseLogout(emptyResponse(204))
+    await pending
+    expect(redirectSpy).toHaveBeenCalledWith(POST_LOGOUT_PATH)
+  })
+
+  it('surfaces an unconfirmed result as a persistent notice with a Retry', async () => {
+    globalThis.history.replaceState({}, '', '/datalibrary')
+    stubFetchRoutes({
+      logout: [emptyResponse(500)],
+      me: [emptyResponse(502)],
+    })
+    vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+    const noticeSpy = vi.spyOn(ToastNotifications, 'showError').mockImplementation(() => {})
+
+    await expect(redirectOnLogout()).resolves.toEqual({ status: 'unconfirmed' })
+
+    expect(noticeSpy).toHaveBeenCalledTimes(1)
+    expect(noticeSpy.mock.calls[0][0]).toMatchObject({ timeout: null })
+  })
+
+  it('does not stack a notice per concurrent caller', async () => {
+    globalThis.history.replaceState({}, '', '/datalibrary')
+    stubFetchRoutes({
+      logout: [emptyResponse(500)],
+      me: [emptyResponse(502)],
+    })
+    vi.spyOn(Redirect, 'to').mockImplementation(() => {})
+    const noticeSpy = vi.spyOn(ToastNotifications, 'showError').mockImplementation(() => {})
+
+    await Promise.all([redirectOnLogout(), redirectOnLogout(), redirectOnLogout()])
+
+    expect(noticeSpy).toHaveBeenCalledTimes(1)
+  })
 })

@@ -138,7 +138,7 @@ Visit https://local.dsde-dev.broadinstitute.org/ to see the instance running und
 
 ### Environment variables
 
-The server reads sensitive configuration from `.env.local` in the project root (gitignored). Create this file before running `docker compose up` — `./scripts/render-configs.sh --write_env true` generates it fully populated, including the Azure B2C client secret and consent DB credentials fetched from the dev cluster (see the render-configs notes above). Under docker compose, also change `DUOS_OAUTH_REDIRECT_URI` to the portless variant (`https://local.dsde-dev.broadinstitute.org/auth/callback`) — both variants are registered in B2C, but the script's default (with `:3000`) targets the pnpm dev server. The required variables are:
+The server reads sensitive configuration from `.env.local` in the project root (gitignored). Create this file before running `docker compose up` — `./scripts/render-configs.sh --write_env true` generates it fully populated, including the Azure B2C client secret and consent DB credentials fetched from the dev cluster (see the render-configs notes above). Under docker compose, also change `DUOS_OAUTH_REDIRECT_URI` to the portless variant (`https://local.dsde-dev.broadinstitute.org/auth/callback`) — both variants are registered in B2C, but the script's default (with `:3000`) targets the pnpm dev server. `DUOS_POST_LOGOUT_REDIRECT_URI` (the B2C front-channel logout return URI, `.../post-logout`) follows the same port rule, and B2C requires an exact match against a URI registered on the app registration. The required variables are:
 
 ```properties
 # Fastify session

@@ -153,6 +153,8 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
   // results still resident. Storage cannot answer "whose data does THIS
   // tab's cache hold", so the tab tracks it itself and clears on change.
   const cacheIdentityRef = useRef<number>(Storage.getCurrentUser().userId)
+  // Avoid repeating a failed bootstrap until the session is known to be gone.
+  const bootstrapHaltedRef = useRef<boolean>(false)
 
   // Unmount cancels whatever is in flight.
   useEffect(() => () => {
@@ -163,6 +165,7 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
 
   useEffect(() => {
     if (!sessionInfo?.authenticated) {
+      bootstrapHaltedRef.current = false
       // The session disappeared — genuine sign-out/expiry, or a transient
       // failure the probe reports as unauthenticated. An in-flight bootstrap
       // must not keep acting, and the token must be RETIRED, not just
@@ -228,6 +231,11 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
     }
 
     // Full bootstrap: no local identity, a different user, or no profile.
+    if (bootstrapHaltedRef.current) {
+      // oxlint-disable-next-line react/set-state-in-effect
+      setSnapshot(prev => ({ ...prev, classifiedProbe: sessionInfo }))
+      return
+    }
     const token: ActiveBootstrap = { targetUserId, cancelled: false }
     activeBootstrapRef.current = token
     setSnapshot({ classifiedProbe: sessionInfo, bootstrapRunning: true })
@@ -255,6 +263,9 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
     ).then((outcome) => {
       if (activeBootstrapRef.current !== token) return
       activeBootstrapRef.current = null
+      if (outcome === 'sign-out-unconfirmed') {
+        bootstrapHaltedRef.current = true
+      }
       // Apply the freshest profile a joined probe carried — but ONLY when the
       // run completed. A 'signed-out' run just cleared storage; re-populating
       // it here would resurrect a stale identity that survives the sign-out

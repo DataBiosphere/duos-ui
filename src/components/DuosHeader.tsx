@@ -8,7 +8,7 @@ import { SubTab, visibleSubTabs } from 'src/components/navigation/subTabVisibili
 import DuosLogo from 'src/images/duos-network-logo.svg'
 import contactUsStandard from 'src/images/navbar_icon_contact_us.svg'
 import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg'
-import { Auth } from 'src/libs/auth/auth'
+import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
 import { Banner, NotificationService } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import { withStyles } from 'tss-react/mui'
@@ -206,13 +206,14 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   const signOut = (): void => {
-    // The SPA navigation covers the legacy flow, where Auth.signOut only
-    // clears local state; in BFF mode Auth.signOut follows up with a full-page
-    // reload to the same destination, which supersedes both of these.
-    queryClient.clear()
-    navigate('/home')
     toggleDrawer(false)
-    void Auth.signOut('/home')
+    void Auth.signOut('/home').then((result) => {
+      if (result.status === 'unconfirmed') {
+        reportUnconfirmedSignOut()
+        return
+      }
+      queryClient.clear()
+    })
   }
 
   const supportRequestModal = (): void => {

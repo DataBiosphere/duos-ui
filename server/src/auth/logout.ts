@@ -1,23 +1,37 @@
 import * as oidc from 'openid-client'
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { getOidcConfig } from './oidcClient.js'
+import { getOidcConfig, requireEnv } from './oidcClient.js'
 
-/**
- * Stamps the audit record, attempts token revocation (if B2C exposes a
- * revocation endpoint), destroys the session, and clears the cookie. Session
- * destruction is the primary logout control in the BFF model — revocation is
- * best-effort on top of it.
- */
-export async function handleLogout(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-  // Revocation is best-effort on top of session destruction (the primary
-  // logout control below) — a discovery failure here (network blip, missing
-  // Azure env var) must not stop logout from completing.
+/** Falls back to local logout when a B2C end-session URL cannot be built. */
+async function buildEndSessionUrl(request: FastifyRequest, idTokenHint: string | undefined): Promise<string | undefined> {
+  if (!idTokenHint) return undefined
+  try {
+    const config = await getOidcConfig()
+    const url = oidc.buildEndSessionUrl(config, {
+      id_token_hint: idTokenHint,
+      post_logout_redirect_uri: requireEnv('DUOS_POST_LOGOUT_REDIRECT_URI'),
+    })
+    if (process.env.NODE_ENV === 'production' && url.protocol !== 'https:') {
+      throw new Error(`the discovered end_session_endpoint is not HTTPS (${url.protocol})`)
+    }
+    return url.href
+  }
+  catch (err) {
+    request.log.error({ err }, '[auth] could not build the B2C end-session URL — falling back to local logout')
+    return undefined
+  }
+}
+
+// One revocation endpoint, because there is one issuer: every session token
+// comes from the single B2C token exchange in callback.ts. The session's `idp`
+// records which sub-provider the user picked AT B2C — DUOS never holds a
+// Google or Microsoft token — so there is no per-provider endpoint to look up
+// and no upstream credential to revoke. B2C attempts federated sign-out
+// itself; `prompt: 'login'` in login.ts is what guarantees a login screen.
+async function revokeTokens(request: FastifyRequest): Promise<void> {
   try {
     const config = await getOidcConfig()
 
-    // B2C does not reliably expose a revocation_endpoint in its discovery
-    // document, so revocation is typically skipped here. v6: the endpoint is
-    // read from config.serverMetadata(), and revocation is tokenRevocation().
     if (config.serverMetadata().revocation_endpoint) {
       const revocations: Promise<unknown>[] = []
       if (request.session.accessToken) {
@@ -29,19 +43,12 @@ export async function handleLogout(request: FastifyRequest, reply: FastifyReply)
       await Promise.all(revocations.map(revocation => revocation.catch(() => {})))
     }
   }
-  catch {
-    // getOidcConfig() failed — skip revocation and fall through to session
-    // destruction below.
-  }
+  catch {}
+}
 
-  // Best-effort, like revocation above — the audit trail is the least
-  // critical step here, so a transient DB error must not leave the session
-  // (and its cookie) alive.
+async function stampAuditRecord(request: FastifyRequest): Promise<void> {
   try {
-    // user_session_audit + its sid_hash-keyed triggers are Epic 1
-    // infrastructure (DT-3606) — the same hashing convention as the INSERT
-    // trigger there, so this UPDATE targets the row that trigger created for
-    // this sid.
+    // Match the hash used by the user_session_audit INSERT trigger.
     await request.server.pg.query(
       `UPDATE user_session_audit
           SET end_reason = 'logout'
@@ -49,10 +56,27 @@ export async function handleLogout(request: FastifyRequest, reply: FastifyReply)
       [request.session.sessionId],
     )
   }
-  catch {
-    // Audit write failed — fall through to session destruction below.
-  }
+  catch {}
+}
+
+/**
+ * Returns the B2C end-session URL when available; otherwise completes a
+ * local-only logout with 204. Revocation and auditing are best-effort.
+ */
+export async function handleLogout(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  const idTokenHint = request.session.idToken
+
+  const endSessionUrl = await buildEndSessionUrl(request, idTokenHint)
+
+  await revokeTokens(request)
+  await stampAuditRecord(request)
 
   await request.session.destroy()
-  reply.clearCookie('sessionId').status(204).send()
+  reply.clearCookie('sessionId')
+
+  if (endSessionUrl) {
+    reply.status(200).send({ redirectUrl: endSessionUrl })
+    return
+  }
+  reply.status(204).send()
 }
