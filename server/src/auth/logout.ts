@@ -1,6 +1,7 @@
 import * as oidc from 'openid-client'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { getOidcConfig, requireEnv } from './oidcClient.js'
+import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
 /** Falls back to local logout when a B2C end-session URL cannot be built. */
 async function buildEndSessionUrl(request: FastifyRequest, idTokenHint: string | undefined): Promise<string | undefined> {
@@ -72,7 +73,7 @@ export async function handleLogout(request: FastifyRequest, reply: FastifyReply)
   await stampAuditRecord(request)
 
   await request.session.destroy()
-  reply.clearCookie('sessionId')
+  reply.clearCookie(SESSION_COOKIE_NAME)
 
   if (endSessionUrl) {
     reply.status(200).send({ redirectUrl: endSessionUrl })

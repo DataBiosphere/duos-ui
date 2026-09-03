@@ -103,7 +103,7 @@ the migration plan and are summarised below; the ones that needed fuller
 treatment — because they were resolved during implementation, with alternatives
 and residual risk worth recording — have their own files under
 [`bff_adrs/`](bff_adrs/). That is why the directory holds 004 and 009 through
-011 rather than 001 through 003: the numbers belong to this list, not to the
+012 rather than 001 through 003: the numbers belong to this list, not to the
 directory.
 
 | ADR | Decision | Phase |
@@ -119,6 +119,7 @@ directory.
 | [009](#adr-009--state-changing-upstream-gets-are-proxied-not-blocked) | State-changing upstream GETs are proxied, not blocked | 3, 5 |
 | [010](#adr-010--the-proxy-scope-declares-its-own-error-shape) | The proxy scope declares its own error shape | 3, 4 |
 | [011](#adr-011--one-identity-per-browser-cross-tab-account-switching-reloads-the-stale-tab) | One identity per browser: cross-tab account switching reloads the stale tab | 4 |
+| [012](#adr-012--session-cookie-is-samesitelax-with-csrf-tokens-closing-the-gap) | Session cookie is `SameSite=Lax`, with CSRF tokens closing the gap | 1, 2–4 |
 
 ### ADR-001 — PostgreSQL-backed sessions via `@fastify/session`
 
@@ -250,6 +251,42 @@ a conflict with no bootstrap in flight re-bootstraps in place, and a conflict
 under an in-flight bootstrap cancels it and hard-reloads the tab. The reload
 discards transient tab state — an accepted cost that removed the supersede
 and provenance machinery a graceful in-place merge kept demanding.
+
+### ADR-012 — Session cookie is `SameSite=Lax`, with CSRF tokens closing the gap
+
+**Full record:** [bff_adrs/ADR-012-session-cookie-samesite.md](bff_adrs/ADR-012-session-cookie-samesite.md)
+— the threat model, the alternatives, and the `response_mode=query` assumption.
+It is also the written infosec answer linked from
+[DT-3996](https://broadworkbench.atlassian.net/browse/DT-3996); its opening
+section, [The infosec question, answered](bff_adrs/ADR-012-session-cookie-samesite.md#the-infosec-question-answered),
+is the short version.
+
+`Strict` is unusable, not merely stricter: B2C's `302` back to `/auth/callback`
+is a cross-site top-level GET, so a `Strict` cookie is withheld, the callback
+arrives sessionless, and every login fails. `Lax` blocks cross-site POSTs and
+credentialed fetches but treats sibling `*.broadinstitute.org` subdomains as
+same-site, so it is not sufficient alone — session-bound CSRF tokens, which do
+not depend on the registrable domain, are what cover the cookie-authenticated
+unsafe routes (`POST /auth/logout` and the proxies' unsafe methods, minus the two
+unauthenticated Contact Us POSTs that receive no session credentials), and the
+PKCE `state` binding is what neutralizes login CSRF on the deliberately exempt
+`/auth/login`.
+
+The `Lax` rescue depends on B2C returning via GET (`response_mode=query`, which
+`login.ts` now sends explicitly); `form_post` would break login exactly as
+`Strict` does, and a change on the B2C policy side is invisible to CI — it has to
+be caught by review. A `Strict` session cookie paired with a short-lived `Lax`
+OAuth-transaction cookie was considered and rejected: it *would* narrow ADR-009's
+state-changing-GET residual, including on browsers that send no Fetch Metadata
+headers, but it leaves the higher-priority sibling-subdomain threat untouched
+(those requests are same-site either way), and the GET residual belongs upstream
+in DT-3945. `__Host-` prefixing is recorded as complementary later hardening (it
+blocks cookie tossing, not CSRF) and needs `Secure` unconditionally, including in
+CI.
+
+The options are defined once in `server/src/session/sessionOptions.ts` and
+imported by the server and all five test harnesses, so changing `sameSite` or
+`rolling` fails the suite.
 
 ### Decisions not tracked as ADRs
 

@@ -6,6 +6,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { csrfPluginOptions, handleCsrfToken } from '../src/auth/csrf.js'
+import { SESSION_COOKIE_NAME, sessionPluginOptions } from '../src/session/sessionOptions.js'
 import { TRUST_PROXY } from '../src/config.js'
 
 /**
@@ -89,18 +90,15 @@ export interface SessionSeed {
   tokenExpiry?: number
 }
 
-/** The @fastify/session default, and what index.ts and me.ts clear by name. */
-export const SESSION_COOKIE = 'sessionId'
+export const SESSION_COOKIE = SESSION_COOKIE_NAME
 
 export async function buildAppShell(): Promise<FastifyInstance> {
   const app = Fastify({ logger: false, trustProxy: TRUST_PROXY })
   await app.register(fastifyCookie)
-  await app.register(fastifySession, {
+  await app.register(fastifySession, sessionPluginOptions({
     secret: 'a-test-session-secret-at-least-32-characters-long',
-    cookie: { secure: false, path: '/' },
-    saveUninitialized: false,
-    rolling: false,
-  })
+    secure: false,
+  }))
   await app.register(fastifyCsrf, csrfPluginOptions)
   // The real /auth/csrf-token handler, not a copy — the only way a client gets
   // a token, and therefore the only way these tests can produce a valid one.

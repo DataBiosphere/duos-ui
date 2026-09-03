@@ -1,7 +1,7 @@
 # ADR-009 — Accept the two state-changing GETs rather than excluding them from the proxy
 
 **Status:** Accepted (2026-07-31) &nbsp;|&nbsp; **Phase:** 3, story 3-D
-**Related:** [ADR-004](ADR-004-api-proxy-layer.md) (the proxy layer this applies to)
+**Related:** [ADR-004](ADR-004-api-proxy-layer.md) (the proxy layer this applies to), [ADR-012](ADR-012-session-cookie-samesite.md) (why the cookie is `SameSite=Lax`)
 **Upstream follow-up:** [DT-3945](https://broadworkbench.atlassian.net/browse/DT-3945) — remove the sync side effect from `GET /api/user/me` (see [The real fix is upstream](#the-real-fix-is-upstream--tracked-as-dt-3945))
 
 ---

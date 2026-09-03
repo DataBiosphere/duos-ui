@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { requireEnv } from './oidcClient.js'
 import { REFRESH_WINDOW_SECONDS, RefreshFailedError, refreshAccessToken } from './refresh.js'
+import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
 const UPSTREAM_TIMEOUT_MS = 5000
 
@@ -21,7 +22,7 @@ async function destroySession(request: FastifyRequest, reply: FastifyReply): Pro
   catch (err: unknown) {
     request.log.error({ err }, '[auth] upstream rejected the session but it could not be destroyed — answering as signed out anyway')
   }
-  reply.clearCookie('sessionId')
+  reply.clearCookie(SESSION_COOKIE_NAME)
 }
 
 /**
@@ -44,7 +45,7 @@ async function refreshedIfExpiring(request: FastifyRequest, reply: FastifyReply)
     if (err instanceof RefreshFailedError) {
       // Terminal: B2C rejected the refresh token and refreshAccessToken has
       // already destroyed the session — clear the dead cookie.
-      reply.clearCookie('sessionId').status(401).send({ authenticated: false })
+      reply.clearCookie(SESSION_COOKIE_NAME).status(401).send({ authenticated: false })
       return false
     }
     // Transient (network blip, B2C 5xx, store error) — the session is
