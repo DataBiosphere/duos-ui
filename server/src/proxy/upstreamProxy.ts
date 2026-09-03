@@ -13,6 +13,7 @@ import fastifyReplyFrom from '@fastify/reply-from'
 import { requireEnv } from '../auth/oidcClient.js'
 import { REFRESH_WINDOW_SECONDS, RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
 import { fetchMetadataGuard } from '../security/fetchMetadata.js'
+import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
 /**
  * The BFF upstream proxy machinery.
@@ -287,7 +288,7 @@ export async function registerUpstreamProxy(
         // destroyed. Clear the cookie so the browser stops presenting a dead sid,
         // as /auth/me does on the same verdict.
         request.log.info({ err }, `[${logTag}] session cannot be refreshed — returning 401`)
-        return reply.clearCookie('sessionId').status(401).send({ error: 'session_expired' })
+        return reply.clearCookie(SESSION_COOKIE_NAME).status(401).send({ error: 'session_expired' })
       }
       // Transient — a network blip, B2C 5xx, a rotated-wrong client secret, a DB
       // error while saving. The session is intact, so this must NOT be a 401:
@@ -547,5 +548,5 @@ async function endRejectedSession(request: ProxyRequest, reply: ProxyReply, logT
   catch (err: unknown) {
     request.log.error({ err }, `[${logTag}] upstream rejected the session access token but the session could not be destroyed — returning 401 anyway`)
   }
-  reply.clearCookie('sessionId').status(401).send({ error: 'session_expired' })
+  reply.clearCookie(SESSION_COOKIE_NAME).status(401).send({ error: 'session_expired' })
 }

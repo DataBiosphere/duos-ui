@@ -4,7 +4,7 @@ import { completeSignIn } from 'src/libs/auth/postSignIn'
 import { User } from 'src/libs/ajax/User'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
-import { Auth } from 'src/libs/auth/auth'
+import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
 import { resetSessionCache } from 'src/libs/auth/session'
 import { Navigation, Notifications } from 'src/libs/utils'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
@@ -16,8 +16,9 @@ vi.mock('src/libs/ErrorReporter')
 vi.mock('src/libs/auth/session', () => ({ resetSessionCache: vi.fn() }))
 vi.mock('src/libs/auth/auth', () => ({
   Auth: {
-    signOut: vi.fn().mockResolvedValue(undefined),
+    signOut: vi.fn().mockResolvedValue({ status: 'confirmed' }),
   },
+  reportUnconfirmedSignOut: vi.fn(),
 }))
 vi.mock('src/libs/utils', async (importOriginal) => {
   const actual = await importOriginal<typeof import('src/libs/utils')>()
@@ -78,6 +79,7 @@ describe('completeSignIn', () => {
     vi.mocked(Metrics.captureEvent).mockResolvedValue(undefined as never)
     vi.mocked(ErrorReporter.report).mockResolvedValue(undefined)
     vi.mocked(Navigation.console).mockResolvedValue(undefined)
+    vi.mocked(Auth.signOut).mockResolvedValue({ status: 'confirmed' })
   })
 
   afterEach(() => {
@@ -258,6 +260,17 @@ describe('completeSignIn', () => {
       // Resolving with an empty CurrentUser would unlock the authenticated
       // routes — destroy the session instead so the user lands signed out.
       expect(vi.mocked(Auth.signOut)).toHaveBeenCalled()
+      expect(navigate).not.toHaveBeenCalled()
+    })
+
+    it('reports sign-out-unconfirmed (not signed-out) when the bootstrap sign-out cannot be confirmed', async () => {
+      vi.mocked(User.getMe).mockRejectedValue(new Error('not found'))
+      vi.mocked(User.registerUser).mockRejectedValue(adapterHttpError(500, 'boom'))
+      vi.mocked(Auth.signOut).mockResolvedValue({ status: 'unconfirmed' })
+
+      await expect(run('/')).resolves.toBe('sign-out-unconfirmed')
+
+      expect(vi.mocked(reportUnconfirmedSignOut)).toHaveBeenCalled()
       expect(navigate).not.toHaveBeenCalled()
     })
   })

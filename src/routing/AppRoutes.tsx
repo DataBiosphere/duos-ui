@@ -10,6 +10,7 @@ import BackgroundSignIn from 'src/pages/BackgroundSignIn'
 import NIHPilotInfo from 'src/pages/NIHPilotInfo'
 import PrivacyPolicy from 'src/pages/PrivacyPolicy'
 import CookiePolicy from 'src/pages/CookiePolicy'
+import PostLogout from 'src/pages/PostLogout'
 import TermsOfService from 'src/pages/TermsOfService'
 import TermsOfServiceAcceptance from 'src/pages/TermsOfServiceAcceptance'
 import { AnVILDMSPolicyInfo, NIHDMSPolicyInfo } from 'src/pages/DMSPolicyInfo'
@@ -67,6 +68,7 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/nih_pilot_info" element={<NIHPilotInfo />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/cookie_policy" element={<CookiePolicy />} />
+      <Route path="/post-logout" element={<PostLogout />} />
       <Route path="/tos" element={<TermsOfService />} />
       <Route path="/tos_acceptance" element={<TermsOfServiceAcceptance />} />
       <Route path="/nih_dms_policy" element={<NIHDMSPolicyInfo />} />

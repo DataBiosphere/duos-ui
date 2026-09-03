@@ -26,8 +26,9 @@ vi.mock('src/libs/TosService', () => ({
 
 vi.mock('src/libs/auth/auth', () => ({
   Auth: {
-    signOut: vi.fn().mockResolvedValue(undefined),
+    signOut: vi.fn().mockResolvedValue({ status: 'confirmed' }),
   },
+  reportUnconfirmedSignOut: vi.fn(),
 }))
 
 const renderComponent = async () => {
@@ -56,16 +57,24 @@ describe('Terms of Service Acceptance Page', () => {
     expect(screen.getByTestId('tos-content')).toBeInTheDocument()
   })
 
-  it('clicking the reject button calls Auth.signOut', async () => {
+  it('clicking the reject button hands the navigation to Auth.signOut', async () => {
     const { Auth } = await import('src/libs/auth/auth')
     await renderComponent()
     await act(async () => {
       fireEvent.click(screen.getByText('Reject Terms of Service'))
     })
-    await waitFor(() => expect(Auth.signOut).toHaveBeenCalledOnce())
-    // The router navigation covers the legacy flow, where Auth.signOut does
-    // not redirect; in BFF mode the full-page reload supersedes it.
-    expect(mockNavigate).toHaveBeenCalledWith('/')
+    await waitFor(() => expect(Auth.signOut).toHaveBeenCalledWith('/'))
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('reports an unconfirmed sign-out instead of claiming success', async () => {
+    const { Auth, reportUnconfirmedSignOut } = await import('src/libs/auth/auth')
+    vi.mocked(Auth.signOut).mockResolvedValue({ status: 'unconfirmed' })
+    await renderComponent()
+    fireEvent.click(screen.getByText('Reject Terms of Service'))
+
+    await waitFor(() => expect(reportUnconfirmedSignOut).toHaveBeenCalledOnce())
+    expect(mockNavigate).not.toHaveBeenCalled()
   })
 
   it('clicking the accept button calls acceptTos and navigates', async () => {

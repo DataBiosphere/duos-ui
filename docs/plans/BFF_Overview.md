@@ -103,7 +103,7 @@ the migration plan and are summarised below; the ones that needed fuller
 treatment — because they were resolved during implementation, with alternatives
 and residual risk worth recording — have their own files under
 [`bff_adrs/`](bff_adrs/). That is why the directory holds 004 and 009 through
-011 rather than 001 through 003: the numbers belong to this list, not to the
+012 rather than 001 through 003: the numbers belong to this list, not to the
 directory.
 
 | ADR | Decision | Phase |
@@ -119,6 +119,7 @@ directory.
 | [009](#adr-009--state-changing-upstream-gets-are-proxied-not-blocked) | State-changing upstream GETs are proxied, not blocked | 3, 5 |
 | [010](#adr-010--the-proxy-scope-declares-its-own-error-shape) | The proxy scope declares its own error shape | 3, 4 |
 | [011](#adr-011--one-identity-per-browser-cross-tab-account-switching-reloads-the-stale-tab) | One identity per browser: cross-tab account switching reloads the stale tab | 4 |
+| [012](#adr-012--session-cookie-is-samesitelax-with-csrf-tokens-closing-the-gap) | Session cookie is `SameSite=Lax`, with CSRF tokens closing the gap | 1, 2–4 |
 
 ### ADR-001 — PostgreSQL-backed sessions via `@fastify/session`
 
@@ -251,6 +252,42 @@ under an in-flight bootstrap cancels it and hard-reloads the tab. The reload
 discards transient tab state — an accepted cost that removed the supersede
 and provenance machinery a graceful in-place merge kept demanding.
 
+### ADR-012 — Session cookie is `SameSite=Lax`, with CSRF tokens closing the gap
+
+**Full record:** [bff_adrs/ADR-012-session-cookie-samesite.md](bff_adrs/ADR-012-session-cookie-samesite.md)
+— the threat model, the alternatives, and the `response_mode=query` assumption.
+It is also the written infosec answer linked from
+[DT-3996](https://broadworkbench.atlassian.net/browse/DT-3996); its opening
+section, [The infosec question, answered](bff_adrs/ADR-012-session-cookie-samesite.md#the-infosec-question-answered),
+is the short version.
+
+`Strict` is unusable, not merely stricter: B2C's `302` back to `/auth/callback`
+is a cross-site top-level GET, so a `Strict` cookie is withheld, the callback
+arrives sessionless, and every login fails. `Lax` blocks cross-site POSTs and
+credentialed fetches but treats sibling `*.broadinstitute.org` subdomains as
+same-site, so it is not sufficient alone — session-bound CSRF tokens, which do
+not depend on the registrable domain, are what cover the cookie-authenticated
+unsafe routes (`POST /auth/logout` and the proxies' unsafe methods, minus the two
+unauthenticated Contact Us POSTs that receive no session credentials), and the
+PKCE `state` binding is what neutralizes login CSRF on the deliberately exempt
+`/auth/login`.
+
+The `Lax` rescue depends on B2C returning via GET (`response_mode=query`, which
+`login.ts` now sends explicitly); `form_post` would break login exactly as
+`Strict` does, and a change on the B2C policy side is invisible to CI — it has to
+be caught by review. A `Strict` session cookie paired with a short-lived `Lax`
+OAuth-transaction cookie was considered and rejected: it *would* narrow ADR-009's
+state-changing-GET residual, including on browsers that send no Fetch Metadata
+headers, but it leaves the higher-priority sibling-subdomain threat untouched
+(those requests are same-site either way), and the GET residual belongs upstream
+in DT-3945. `__Host-` prefixing is recorded as complementary later hardening (it
+blocks cookie tossing, not CSRF) and needs `Secure` unconditionally, including in
+CI.
+
+The options are defined once in `server/src/session/sessionOptions.ts` and
+imported by the server and all five test harnesses, so changing `sameSite` or
+`rolling` fails the suite.
+
 ### Decisions not tracked as ADRs
 
 - **`openid-client` (v6) for all OAuth/OIDC operations** — library-maintained
@@ -350,6 +387,38 @@ sequenceDiagram
 
 ### Sign-out Flow
 
+Destroying the BFF session is only half of a sign-out: the browser also holds
+Azure B2C's own single sign-on cookie. `POST /auth/logout` therefore returns the
+B2C end-session URL and the client navigates to it (front-channel logout, Phase
+5). Because the client calls the endpoint with `fetch`, the server cannot
+redirect the browser itself, so the response mirrors `/auth/login`'s
+`{ redirectUrl }` shape.
+
+Only two answers confirm anything, and the client treats every other response —
+a malformed body, a 200 without a `redirectUrl`, a 403, a 500, a transport
+failure — as an **unconfirmed** sign-out. An unconfirmed sign-out performs no
+local cleanup and claims no success: the client probes `GET /auth/me` instead,
+and a 401 there proves the session is gone. When even that is unknowable, the
+user sees a persistent notice with a Retry.
+
+| Response | Meaning | Client action |
+| --- | --- | --- |
+| `200 { redirectUrl }` | The session is destroyed and B2C exposes an end-session endpoint | Local cleanup, then navigate to B2C |
+| `204` | The session is destroyed; no single sign-out could be arranged | Local cleanup, then navigate to `/post-logout` |
+| anything else | Unknown | Verify with `GET /auth/me`, then retry or report |
+
+B2C requires `post_logout_redirect_uri` to match a registered URI exactly, so
+the local destination cannot ride in it. `/post-logout` is the one registered
+URI (env var `DUOS_POST_LOGOUT_REDIRECT_URI`); the client stores its
+destination in `sessionStorage` before the logout, and `/post-logout` reads it,
+deletes it, validates it again, and replaces the history entry with it.
+
+Automatic sign-out on a terminal upstream 401 is local-only by design. The
+proxy destroys the session before the 401 reaches the browser, so the
+`id_token_hint` is already gone and no B2C leg is possible. `prompt: 'login'`
+on every authorization request remains the guarantee that the B2C login screen
+always appears.
+
 ```mermaid
 sequenceDiagram
     participant B   as Browser
@@ -361,8 +430,12 @@ sequenceDiagram
         Note over B,B2C: Sign-Out
 
         B->>BFF: POST /auth/logout [cookie: sessionId]
-        BFF->>PG: Read session — accessToken, refreshToken
+        BFF->>PG: Read session — idToken, accessToken, refreshToken
         PG-->>BFF: session data
+
+        opt end_session_endpoint + idToken available
+            BFF->>BFF: Build the end-session URL (id_token_hint, post_logout_redirect_uri)
+        end
 
         opt revocation_endpoint available (B2C typically does not expose one)
             BFF->>B2C: POST /revoke (access_token)
@@ -375,6 +448,15 @@ sequenceDiagram
         PG-->>BFF: ok
         BFF->>PG: Destroy session
         PG-->>BFF: ok
-        BFF-->>B: 204 + Set-Cookie: sessionId (cleared, Max-Age=0)
+
+        alt End-session URL built
+            BFF-->>B: 200 { redirectUrl } + Set-Cookie: sessionId (cleared, Max-Age=0)
+            B->>B2C: GET end_session_endpoint (front-channel logout)
+            B2C-->>B: 302 /post-logout
+            B->>B: /post-logout reads, deletes, and replaces with the stored target
+        else No end-session URL (no idToken, no endpoint, or misconfiguration)
+            BFF-->>B: 204 + Set-Cookie: sessionId (cleared, Max-Age=0)
+            B->>B: Navigate to /post-logout
+        end
     end
 ```

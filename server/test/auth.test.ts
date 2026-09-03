@@ -6,6 +6,7 @@ import fastifyCsrf from '@fastify/csrf-protection'
 import type { PostgresDb } from '@fastify/postgres'
 import type { Configuration } from 'openid-client'
 import { createPgSessionStore } from '../src/session/pgStore.js'
+import { sessionPluginOptions } from '../src/session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from '../src/auth/csrf.js'
 import { fetchMetadataGuard } from '../src/security/fetchMetadata.js'
 import { handleLogin } from '../src/auth/login.js'
@@ -102,31 +103,26 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
   return { pg: { query } as unknown as PostgresDb, rows, setSids, auditUpdates }
 }
 
-async function buildAuthApp(pg: PostgresDb, errorLog?: string[]): Promise<FastifyInstance> {
+interface AuthAppOptions {
+  errorLog?: string[]
+  sameSiteOverride?: 'strict'
+}
+
+async function buildAuthApp(pg: PostgresDb, options: AuthAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify(
-    errorLog
-      ? { logger: { level: 'error', stream: { write: (line: string) => { errorLog.push(line) } } } }
+    options.errorLog
+      ? { logger: { level: 'error', stream: { write: (line: string) => { options.errorLog!.push(line) } } } }
       : { logger: false },
   )
   // handleLogout reads request.server.pg; the real app gets it from
   // @fastify/postgres, which needs a live DB — decorate the stand-in instead.
   app.decorate('pg', pg as never)
   await app.register(fastifyCookie)
-  // Mirror index.ts's session config exactly — rolling:false and
-  // saveUninitialized:false are load-bearing for the double-send fix.
-  await app.register(fastifySession, {
+  await app.register(fastifySession, sessionPluginOptions({
     secret: SECRET,
     store: createPgSessionStore(pg),
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 8 * 60 * 60 * 1000,
-      path: '/',
-    },
-    saveUninitialized: false,
-    rolling: false,
-  })
+    sameSiteOverride: options.sameSiteOverride,
+  }))
   // Real CSRF plugin, registered with index.ts's own options — after
   // @fastify/session, so the token secret lives in the session. The options are
   // imported rather than restated: registered with the plugin's bare defaults,
@@ -156,12 +152,90 @@ function makeTokens(claims: Record<string, unknown> | undefined) {
   } as never
 }
 
-function sessionCookieHeader(res: { cookies: Array<{ name: string, value: string }> }): string {
-  // Preserve browser semantics: the last sessionId Set-Cookie header wins.
+interface CookieBearingResponse {
+  cookies: Array<{ name: string, value: string, sameSite?: string }>
+}
+
+/**
+ * The session cookie a browser would be left holding after this response:
+ * the last `sessionId` Set-Cookie wins, and a cleared one holds nothing.
+ *
+ * The name is spelled literally rather than imported from
+ * `SESSION_COOKIE_NAME`, deliberately. This is the observable wire name, and
+ * ADR-012 § Alternatives contemplates renaming the cookie to
+ * `__Host-sessionId`; importing the constant would make that rename
+ * self-consistent and therefore invisible to the suite. Pinned as a literal,
+ * a rename has to be asserted rather than assumed.
+ */
+function sessionCookie(res: CookieBearingResponse): { name: string, value: string, sameSite?: string } {
   const cookies = res.cookies.filter(c => c.name === 'sessionId')
   const cookie = cookies[cookies.length - 1]
   if (!cookie || cookie.value === '') throw new Error('no session cookie set')
+  return cookie
+}
+
+function sessionCookieHeader(res: CookieBearingResponse): string {
+  const cookie = sessionCookie(res)
   return `${cookie.name}=${cookie.value}`
+}
+
+/** Maps the requested OAuth response mode to B2C's callback method. */
+function b2cReturnTripMethod(oidc: typeof import('openid-client')): 'GET' | 'POST' {
+  const calls = vi.mocked(oidc.buildAuthorizationUrl).mock.calls
+  const parameters = calls[calls.length - 1]?.[1]
+  if (!parameters) throw new Error('buildAuthorizationUrl was never called — log in first')
+  const mode = parameters instanceof URLSearchParams
+    ? parameters.get('response_mode')
+    : parameters.response_mode
+  switch (mode ?? 'query') {
+    case 'query':
+      return 'GET'
+    case 'form_post':
+      return 'POST'
+    default:
+      throw new Error(`unhandled response_mode '${mode}' — extend this browser model`)
+  }
+}
+
+/** Models cookie handling because `app.inject()` has no browser cookie jar. */
+function cookieAfterB2cRedirect(
+  res: CookieBearingResponse,
+  returnTrip: 'GET' | 'POST',
+): string | undefined {
+  const cookie = sessionCookie(res)
+  // An absent attribute is Lax in every current browser.
+  const attribute = String(cookie.sameSite ?? 'lax').toLowerCase()
+  switch (attribute) {
+    case 'lax':
+      return returnTrip === 'GET' ? `${cookie.name}=${cookie.value}` : undefined
+    case 'strict':
+      return undefined
+    // `none` is absent on purpose: nothing here builds a SameSite=None cookie,
+    // and a browser would reject one without Secure. It lands in the throw
+    // below rather than being modelled speculatively.
+    default:
+      throw new Error(`unhandled SameSite attribute '${attribute}' — extend this browser model`)
+  }
+}
+
+/** Adds the state validation omitted by this suite's default OIDC mock. */
+function mockStateCheckingGrant(
+  oidc: typeof import('openid-client'),
+  claims: Record<string, unknown> = { email: 'user@example.com' },
+): void {
+  vi.mocked(oidc.authorizationCodeGrant).mockImplementation(async (_config, currentUrl, checks) => {
+    const state = new URL(String(currentUrl)).searchParams.get('state')
+    const expected = checks?.expectedState
+    if (typeof expected !== 'string') {
+      if (state !== null) throw new Error('unexpected "state" response parameter encountered')
+    }
+    else if (state !== expected) {
+      throw new Error(state === null
+        ? 'response parameter "state" missing'
+        : 'unexpected "state" response parameter value')
+    }
+    return makeTokens(claims)
+  })
 }
 
 describe('BFF OAuth flow (integration, openid-client mocked at the function boundary)', () => {
@@ -310,6 +384,71 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
 
       expect(res.statusCode).toBe(400)
       expect(res.json()).toEqual({ error: 'token_missing_email_claim' })
+    })
+  })
+
+  describe('SameSite on the B2C callback redirect (DT-3996)', () => {
+    it('Lax: the browser sends the cookie on the cross-site redirect, so the callback completes', async () => {
+      const oidc = await import('openid-client')
+      mockStateCheckingGrant(oidc)
+
+      const { res, cookie } = await login('/datalibrary')
+      const stored = [...rows.values()][0].sess as Record<string, string>
+
+      expect(oidc.buildAuthorizationUrl).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ response_mode: 'query' }),
+      )
+
+      const method = b2cReturnTripMethod(oidc)
+      const sent = cookieAfterB2cRedirect(res, method)
+      expect(sent).toBe(cookie)
+
+      const callback = await app.inject({
+        method,
+        url: `/auth/callback?code=test-code&state=${encodeURIComponent(stored.pkceState)}`,
+        headers: sent ? { cookie: sent } : {},
+      })
+
+      expect(oidc.authorizationCodeGrant).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.any(URL),
+        { pkceCodeVerifier: stored.pkceVerifier, expectedState: stored.pkceState },
+      )
+      expect(callback.statusCode).toBe(302)
+      expect(callback.headers.location).toBe('/datalibrary')
+    })
+
+    it('Strict: the browser withholds the cookie, so the callback is sessionless and every login fails', async () => {
+      const oidc = await import('openid-client')
+      mockStateCheckingGrant(oidc)
+
+      const fake = makeInMemoryPg()
+      const strictApp = await buildAuthApp(fake.pg, { sameSiteOverride: 'strict' })
+      try {
+        const loginRes = await strictApp.inject({ method: 'POST', url: '/auth/login' })
+        expect(loginRes.statusCode).toBe(200)
+        const stored = [...fake.rows.values()][0].sess as Record<string, string>
+
+        expect(cookieAfterB2cRedirect(loginRes, 'GET')).toBeUndefined()
+
+        const callback = await strictApp.inject({
+          method: 'GET',
+          url: `/auth/callback?code=test-code&state=${encodeURIComponent(stored.pkceState)}`,
+        })
+
+        expect(oidc.authorizationCodeGrant).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.any(URL),
+          { pkceCodeVerifier: undefined, expectedState: undefined },
+        )
+        expect(callback.statusCode).toBe(500)
+        const sess = [...fake.rows.values()][0].sess as Record<string, unknown>
+        expect(sess.accessToken).toBeUndefined()
+      }
+      finally {
+        await strictApp.close()
+      }
     })
   })
 
@@ -646,7 +785,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       // would surface here as an "already sent"/ERR_HTTP_HEADERS_SENT log line.
       const errorLog: string[] = []
       const fake = makeInMemoryPg()
-      const guardedApp = await buildAuthApp(fake.pg, errorLog)
+      const guardedApp = await buildAuthApp(fake.pg, { errorLog })
 
       // regenerate() writes the empty new session; save() writes its tokens.
       const beforeLogin = fake.setSids.length

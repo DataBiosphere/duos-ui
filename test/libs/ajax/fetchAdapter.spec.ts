@@ -813,7 +813,7 @@ describe('fetchAdapter - 401 Bard metric logging', () => {
     vi.mocked(Config.getApiUrl).mockResolvedValue('https://consent.example.org')
     vi.mocked(Config.getBardApiUrl).mockResolvedValue('https://bard.example.org')
     vi.mocked(Metrics.captureEvent).mockResolvedValue(undefined)
-    vi.mocked(redirectOnLogout).mockReturnValue(undefined)
+    vi.mocked(redirectOnLogout).mockResolvedValue({ status: 'confirmed' })
     vi.mocked(Storage.getOidcUser).mockReturnValue({
       profile: { exp: mockExpTime, sub: '', iss: '', aud: '', iat: 0 },
     } as unknown as OidcUser)

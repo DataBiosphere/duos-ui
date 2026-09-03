@@ -8,7 +8,8 @@ export type ToastPosition = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight
 interface NotificationRequiredProps extends NotificationProps {
   severity: AlertColor
   text: string
-  timeout: number
+  /** null disables auto-hide. */
+  timeout: number | null
   layout: ToastPosition | SnackbarOrigin
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
@@ -17,8 +18,11 @@ interface NotificationRequiredProps extends NotificationProps {
 interface NotificationProps {
   severity?: AlertColor
   text: string | React.ReactNode
-  timeout?: number
+  /** Milliseconds before auto-hide; null keeps the toast open. */
+  timeout?: number | null
   layout?: ToastPosition | SnackbarOrigin
+  /** Called when the toast closes, excluding clickaway events. */
+  onDismiss?: () => void
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
 }
@@ -52,6 +56,7 @@ export const ToastNotifications = {
     text = defaultProps.text,
     timeout = defaultProps.timeout,
     layout = defaultProps.layout,
+    onDismiss,
     ...props
   }: NotificationProps): void => {
     const snackbarLayout = convertToSnackbarOrigin(layout)
@@ -65,6 +70,7 @@ export const ToastNotifications = {
       const handleClose = (_event: React.SyntheticEvent | Event, reason?: string): void => {
         if (reason === 'clickaway') return
         setOpen(false)
+        onDismiss?.()
         setTimeout(() => {
           root.unmount()
           notificationRoot.remove()
