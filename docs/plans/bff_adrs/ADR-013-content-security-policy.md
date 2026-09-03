@@ -273,5 +273,22 @@ is a much larger piece of work than this story.
   overriding the header — and the story is not done when the env var flips, but
   when `curl -sI` against a deployed host returns *this* policy.
 
+  The change is six lines in `charts/duos/templates/_site.conf.tpl` — the
+  `Header unset` plus the five that replace it. That template is DUOS's own,
+  not shared with the other Terra apps, and the origins in it are terra-ui's:
+  googletagmanager, cloudinary, zendesk, `data.terra.bio`. Deleting the `unset`
+  matters as much as the rest — on its own it strips the app's header and sends
+  nothing at all.
+
+  `bffEnabled` does not enter into it, which is worth stating because it looks
+  as though it should. The flag gates the BFF auth routes and the API proxies,
+  not serving the app: Fastify is the app container's only process, it
+  registers `@fastify/vite` and the SPA fallback outside both switches, and
+  helmet registers ahead of both. Nor does any path bypass it — `PROXY_PATH`
+  defaults to `/` and `PROXY_URL` to `http://app:8080/` in the
+  `httpd-terra-proxy` image and the chart overrides neither, so the
+  `LocationMatch` covers everything except `/introspect/`, which its negative
+  lookahead excludes and which carries no CSP today either.
+
   COOP passing through is the reassuring half: the legacy-mode decision above
   is the one non-CSP header that both matters and actually arrives.
