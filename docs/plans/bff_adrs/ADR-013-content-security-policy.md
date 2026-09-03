@@ -249,3 +249,29 @@ is a much larger piece of work than this story.
   no interception. Tracked with the Epic 6 harness work.
 - Enforcement is a per-environment decision recorded in deployment config, so
   a bad policy is one env var away from being backed out.
+- **The httpd sidecar replaces this policy in deployed environments, so
+  enforcement does not yet reach the browser.** Its `site.conf` runs
+  `Header unset Content-Security-Policy` inside the `LocationMatch` that covers
+  every proxied path, then sets five of its own — a policy carrying
+  `'unsafe-inline'` and `'unsafe-eval'` on `script-src`, and no `default-src`,
+  `frame-ancestors`, `object-src`, `base-uri` or `form-action` at all.
+
+  Measured against a backend sending this app's exact headers:
+
+  | Header the app sends | What the browser receives |
+  |---|---|
+  | `Content-Security-Policy` (enforcing) | **replaced** by the sidecar's |
+  | `Content-Security-Policy-Report-Only` | passes through unchanged |
+  | `X-Frame-Options: DENY` | **replaced** with `SAMEORIGIN` |
+  | `Strict-Transport-Security` 1 year | **replaced** with 1 day |
+  | COOP, CORP, `Referrer-Policy` | pass through unchanged |
+
+  The report-only header surviving is what makes this quiet: the collection run
+  works, reports arrive, the run reads clean, and then flipping
+  `DUOS_CSP_REPORT_ONLY=false` changes nothing a browser acts on. Enforcement is
+  therefore blocked on a `terra-helmfile` change that stops the sidecar
+  overriding the header — and the story is not done when the env var flips, but
+  when `curl -sI` against a deployed host returns *this* policy.
+
+  COOP passing through is the reassuring half: the legacy-mode decision above
+  is the one non-CSP header that both matters and actually arrives.
