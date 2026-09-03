@@ -65,6 +65,17 @@ runtime config the client reads, reduces each to its origin, and drops blanks
 and unparseable values. Two literals remain: `'self'` and the banner bucket,
 which is a fixed public asset host rather than a deployment-configured upstream.
 
+The bucket is the one source written to a **path**,
+`https://storage.googleapis.com/broad-duos-banners/`, rather than an origin.
+`storage.googleapis.com` is shared by every public bucket on GCS, so the bare
+origin would hand injected script a ready exfiltration target — the thing this
+policy exists to close. A trailing slash matches by prefix, which covers every
+`<env>_notifications.json` the service builds. The narrowing applies to the
+direct request only: a browser drops the path when matching a redirect target,
+and GCS answers object reads without redirecting. The configured upstreams stay
+at origin granularity, because each is a whole service the app talks to across
+many paths and none shares a host with anybody else.
+
 The list is mode-specific:
 
 - **BFF mode** — `'self'`, `apiUrl`, `bardApiUrl`, the banner bucket.
@@ -122,12 +133,33 @@ reports, and `test/e2e/csp.spec.ts` drives the flows with the same policy
 attached and asserts nothing was reported. That spec runs **locally only** —
 see the Consequences section for why CI cannot run it yet, and what it costs.
 
-The report sink is an unauthenticated POST, so it is bounded four ways: an
-8 KB body limit, exactly two accepted media types (everything else gets 415
-before a handler runs), a field allowlist with truncation so an attacker
-cannot choose what is logged, and a fixed-window cap on reports logged per
-minute. It always answers 204, so it is no kind of oracle. It is registered
-outside both cutover switches — a legacy deployment needs it too.
+The report sink is an unauthenticated POST, so it is bounded six ways: an
+8 KB body limit; exactly two accepted media types (everything else gets 415
+before a handler runs); a cap on how many reports one request may contribute,
+because neither parser checks the body's shape and roughly 170 minimal entries
+fit inside 8 KB; a field allowlist with truncation so an attacker cannot choose
+what is logged; a fixed-window log budget charged once per *request*, so no one
+request can spend it; and a per-client rate limit through `@fastify/rate-limit`
+at 30 requests a minute, refusing the rest with a bare 429.
+
+The last two are separate controls on purpose. The budget bounds what is
+*written*; on its own it still reads and parses every request it is sent, and
+the rate limit is what stops that. Fastify's own per-request logging is
+switched off for this route as well (`logLevel: 'silent'`), or every rejected
+415 and 413 would still write a line that none of the other controls bounds.
+
+The plugin registers with `global: false` — this instance also serves every
+SPA asset, and one page load fetches many, so a global cap sized for this
+endpoint would block page loads. Story 5-G attaches the auth-route limits to
+the same registration. The default store is per process, so a deployment's
+real ceiling is these numbers times the replica count and it resets on every
+restart; that is why the epic puts flood protection at the ingress and treats
+this as the backstop beneath it.
+
+The sink always answers 204, so it is no kind of oracle, and every rejection —
+413, 415, 429 — carries the status alone rather than a framework error code.
+It is registered outside both cutover switches: a legacy deployment needs it
+too.
 
 ### 3. Two helmet defaults are overridden, and two headers are production-only
 
@@ -190,6 +222,11 @@ is a much larger piece of work than this story.
   flows move to dedicated public BFF endpoints (`/public/notifications`,
   `/public/features/*`, `/public/metrics/event`). That is the follow-up to this
   story, and it is what will let this allowlist shrink.
+- `img-src` carries `'self'` and `data:` only. `blob:` is deliberately absent:
+  the audit found no `<img src="blob:">` in the tree — every object URL the app
+  mints is a download, which needs no directive, or the dead preview branch in
+  `DocumentUpload.tsx`. The story says to add it only once a report-only run
+  proves the need, and report-only is what makes that cheap to establish.
 - `img-src` has no `https:`, so an **operator-authored** remote image would be
   blocked. Banner messages, Consent's terms-of-service text, and DAC bot rule
   text all render through `ReactMarkdown`, and that content lives outside this

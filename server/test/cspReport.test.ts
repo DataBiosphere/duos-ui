@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import Fastify, { type FastifyInstance } from 'fastify'
+import fastifyRateLimit from '@fastify/rate-limit'
 import { CSP_REPORT_GROUP, CSP_REPORT_PATH } from '../src/security/csp.js'
-import { MAX_REPORTS_PER_REQUEST, REPORTING_ENDPOINTS_HEADER, REPORT_BODY_LIMIT, cspReportRoute, extractReports, sanitizeReport } from '../src/security/cspReport.js'
+import { MAX_REPORTS_PER_REQUEST, MAX_REQUESTS_PER_WINDOW, REPORTING_ENDPOINTS_HEADER, REPORT_BODY_LIMIT, cspReportRoute, extractReports, sanitizeReport } from '../src/security/cspReport.js'
 
 const CSP_REPORT_TYPE = 'application/csp-report'
 const REPORTS_JSON_TYPE = 'application/reports+json'
@@ -402,6 +403,64 @@ describe(`${CSP_REPORT_PATH} request logging`, () => {
 
     expect(drainMessages()).toEqual([])
     await quiet.close()
+  })
+})
+
+describe(`POST ${CSP_REPORT_PATH} under the rate limit`, () => {
+  let app: FastifyInstance
+
+  beforeEach(async () => {
+    app = Fastify({ logger: false })
+    // As index.ts registers it: global: false, because this instance also
+    // serves every SPA asset. The route carries its own config.
+    await app.register(fastifyRateLimit, { global: false })
+    await app.register(cspReportRoute)
+  })
+
+  afterEach(async () => {
+    await app.close()
+  })
+
+  const post = () => app.inject({
+    method: 'POST',
+    url: CSP_REPORT_PATH,
+    headers: { 'content-type': CSP_REPORT_TYPE },
+    payload: JSON.stringify(reportUriBody()),
+  })
+
+  it('refuses a client over the limit with 429, rather than parsing every request it is sent', async () => {
+    // The log budget bounds what gets written; on its own it still reads and
+    // JSON-parses an unlimited number of requests. This is the other half.
+    const accepted = []
+    for (let i = 0; i < MAX_REQUESTS_PER_WINDOW; i += 1) accepted.push((await post()).statusCode)
+    const refused = await post()
+
+    expect(accepted.every(status => status === 204)).toBe(true)
+    expect(refused.statusCode).toBe(429)
+  })
+
+  it('answers the refusal with no body, naming neither the plugin nor the retry window', async () => {
+    for (let i = 0; i < MAX_REQUESTS_PER_WINDOW; i += 1) await post()
+    const refused = await post()
+
+    // Bare, like the 415 and 413 above: the plugin throws the builder's return
+    // and the route's error handler answers with the status alone.
+    expect(refused.body).toBe('')
+    expect(refused.headers['content-type']).toBeUndefined()
+  })
+
+  it('leaves the limit off the routes around it, so SPA assets are unaffected', async () => {
+    // `global: false` is the whole reason: a page load fetches many assets,
+    // and a global cap sized for this endpoint would block one.
+    app.get('/asset', async () => ({ ok: true }))
+    await app.ready()
+
+    const statuses = []
+    for (let i = 0; i < MAX_REQUESTS_PER_WINDOW + 5; i += 1) {
+      statuses.push((await app.inject({ method: 'GET', url: '/asset' })).statusCode)
+    }
+
+    expect(statuses.every(status => status === 200)).toBe(true)
   })
 })
 

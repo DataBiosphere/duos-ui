@@ -10,6 +10,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import fastifyHelmet from '@fastify/helmet'
+import fastifyRateLimit from '@fastify/rate-limit'
 import { createPgSessionStore } from './session/pgStore.js'
 import { sessionPluginOptions } from './session/sessionOptions.js'
 import { helmetOptions } from './security/csp.js'
@@ -97,6 +98,17 @@ export async function buildApp(): Promise<AppInstance> {
   fastify.addHook('onRequest', async (_request, reply) => {
     reply.header('reporting-endpoints', REPORTING_ENDPOINTS_HEADER)
   })
+
+  // `global: false` — this same instance serves every SPA asset through
+  // @fastify/vite, and one page load fetches many of them, so a low global cap
+  // would block page loads outright. Limits are attached per route instead.
+  // Story 5-G registers the auth-route limits on this same plugin.
+  //
+  // The default store is per process, so a deployment's real ceiling is this
+  // number times the replica count, and it resets on every restart. That is
+  // why the epic puts flood protection at the ingress; this is the backstop
+  // beneath it, not the control.
+  await fastify.register(fastifyRateLimit, { global: false })
 
   await fastify.register(cspReportRoute)
 

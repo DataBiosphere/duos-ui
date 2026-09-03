@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import Fastify, { type FastifyInstance } from 'fastify'
 import fastifyHelmet from '@fastify/helmet'
 import {
-  BANNER_ORIGIN,
+  BANNER_SOURCE,
   CSP_REPORT_GROUP,
   CSP_REPORT_PATH,
   type CspEnvironment,
@@ -53,13 +53,13 @@ describe('connectSources', () => {
     // ECM and TDR are reached through same-origin proxies after cutover, so
     // their configured origins must NOT leak into the policy just because the
     // fields exist in config.json.
-    expect(connectSources(fullConfig(true), PROD)).toEqual(['\'self\'', CONSENT, BARD, BANNER_ORIGIN])
+    expect(connectSources(fullConfig(true), PROD)).toEqual(['\'self\'', CONSENT, BARD, BANNER_SOURCE])
   })
 
   it('allows all four configured upstreams in legacy mode', () => {
     // The legacy client calls each of these directly from the browser, and
     // oidc-client-ts fetches Consent's /oauth2/token — the apiUrl origin.
-    expect(connectSources(fullConfig(false), PROD)).toEqual(['\'self\'', CONSENT, BARD, ECM, TDR, BANNER_ORIGIN])
+    expect(connectSources(fullConfig(false), PROD)).toEqual(['\'self\'', CONSENT, BARD, ECM, TDR, BANNER_SOURCE])
   })
 
   it('treats a missing bffEnabled key as legacy mode', () => {
@@ -84,12 +84,20 @@ describe('connectSources', () => {
     ['a value that is not an absolute URL', '/duos-api'],
     ['a non-string', 42],
   ])('drops %s rather than emitting it as a source', (_label, apiUrl) => {
-    expect(connectSources({ bffEnabled: true, apiUrl }, PROD)).toEqual(['\'self\'', BANNER_ORIGIN])
+    expect(connectSources({ bffEnabled: true, apiUrl }, PROD)).toEqual(['\'self\'', BANNER_SOURCE])
   })
 
   it('adds the websocket schemes for Vite HMR in dev only', () => {
     expect(connectSources(fullConfig(true), DEV)).toEqual(expect.arrayContaining(['ws:', 'wss:']))
     expect(connectSources(fullConfig(true), PROD)).not.toEqual(expect.arrayContaining(['ws:', 'wss:']))
+  })
+
+  it('scopes the banner bucket to its path, not the whole shared GCS origin', () => {
+    // storage.googleapis.com hosts every public bucket on GCS, so the bare
+    // origin would be an exfiltration target for injected script.
+    const sources = connectSources(fullConfig(true), PROD)
+    expect(sources).toContain('https://storage.googleapis.com/broad-duos-banners/')
+    expect(sources).not.toContain('https://storage.googleapis.com')
   })
 
   it('emits each origin once when two fields share it', () => {
@@ -148,9 +156,11 @@ describe('contentSecurityPolicyOptions', () => {
     expect(contentSecurityPolicyOptions(fullConfig(true), PROD).directives.styleSrc).toEqual(['\'self\'', '\'unsafe-inline\''])
   })
 
-  it('allows data: and blob: images but never a bare https:', () => {
+  it('allows data: images but neither blob: nor a bare https:', () => {
+    // blob: is left out until a report-only run proves a live `<img src=blob:>`
+    // exists; the audit found only downloads, which need no directive.
     const { imgSrc } = contentSecurityPolicyOptions(fullConfig(true), PROD).directives
-    expect(imgSrc).toEqual(['\'self\'', 'data:', 'blob:'])
+    expect(imgSrc).toEqual(['\'self\'', 'data:'])
     expect(imgSrc).not.toContain('https:')
   })
 })
@@ -223,7 +233,7 @@ describe('the policy as helmet serialises it', () => {
     const res = await app.inject({ method: 'GET', url: '/page' })
     const policy = parsePolicy(String(res.headers['content-security-policy']))
 
-    expect(policy.get('connect-src')).toEqual(['\'self\'', CONSENT, BARD, BANNER_ORIGIN])
+    expect(policy.get('connect-src')).toEqual(['\'self\'', CONSENT, BARD, BANNER_SOURCE])
     expect(policy.get('script-src')).toEqual(['\'self\''])
     expect(policy.get('frame-ancestors')).toEqual(['\'none\''])
     expect(policy.get('report-uri')).toEqual([CSP_REPORT_PATH])

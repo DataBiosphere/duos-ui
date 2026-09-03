@@ -1,4 +1,5 @@
 import type { FastifyBaseLogger, FastifyError, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import type { RateLimitOptions } from '@fastify/rate-limit'
 import { CSP_REPORT_GROUP, CSP_REPORT_PATH } from './csp.js'
 
 /**
@@ -6,7 +7,7 @@ import { CSP_REPORT_GROUP, CSP_REPORT_PATH } from './csp.js'
  *
  * This is an unauthenticated POST that any browser on the internet can be made
  * to hit, and everything it accepts ends up in the pod's logs — a
- * log-amplification target. Five controls bound that:
+ * log-amplification target. Six controls bound that:
  *
  *  1. A small body limit (8 KB), enforced by Fastify before the parser runs.
  *  2. Exactly two accepted media types; everything else gets 415 without
@@ -19,6 +20,9 @@ import { CSP_REPORT_GROUP, CSP_REPORT_PATH } from './csp.js'
  *  5. A fixed-window budget charged once per *request*, not once per report,
  *     so no single request can spend more than one unit of it. Requests over
  *     the budget still answer 204; they are simply not written.
+ *  6. A per-client rate limit, so requests over it are refused with 429 rather
+ *     than accepted and parsed. The budget above bounds what is *written*; on
+ *     its own it leaves the endpoint reading every request it is sent.
  *
  * Fastify's own per-request logging is switched off for this route
  * (`logLevel: 'silent'`). Without that, every POST — including the ones
@@ -56,6 +60,22 @@ export const MAX_REPORTS_PER_REQUEST = 8
 /** Requests allowed to log per window before the rest are counted and dropped. */
 const MAX_LOGGED_PER_WINDOW = 60
 const LOG_WINDOW_MS = 60_000
+
+/**
+ * Requests one client may make per window before the endpoint refuses them
+ * with 429, independently of what gets logged.
+ *
+ * Deliberately below MAX_LOGGED_PER_WINDOW: the log budget is global to the
+ * pod, so a per-client limit above it would let one caller spend the whole
+ * thing. Thirty a minute still lets a genuinely broken page report freely —
+ * a violation that repeats past that adds nothing the first thirty did not
+ * already say.
+ *
+ * `request.ip` reads X-Forwarded-For because the app sets `trustProxy`, so
+ * this counts real clients rather than the sidecar. The store is per process:
+ * see the note in index.ts on why the edge is where flood protection belongs.
+ */
+export const MAX_REQUESTS_PER_WINDOW = 30
 
 /**
  * Report fields worth logging, in both spellings browsers use: the hyphenated
@@ -232,7 +252,27 @@ export async function cspReportRoute(app: FastifyInstance): Promise<void> {
   // a deployment that deliberately set FASTIFY_LOG_LEVEL lower. `app.log`
   // honours that setting, and carrying `reqId` explicitly keeps the one thing
   // request.log was worth here — telling which lines arrived together.
-  const routeOptions = { bodyLimit: REPORT_BODY_LIMIT, logLevel: 'silent' as const }
+  // Read by @fastify/rate-limit, which index.ts registers with `global: false`.
+  // Ignored when the plugin is absent, which is what lets the unit tests
+  // exercise this route on a bare instance. The story asks for a real rate
+  // limit here, not only a log budget: without one the endpoint still accepts
+  // and parses every request it is sent.
+  const rateLimit: RateLimitOptions = {
+    max: MAX_REQUESTS_PER_WINDOW,
+    timeWindow: LOG_WINDOW_MS,
+    // The plugin *throws* whatever this returns, so it has to carry the
+    // status; the route's own error handler above then answers with that and
+    // no body. Same reason as the bare 415: the browser discards this
+    // response, and the default builder's body would echo the retry window
+    // back to whoever is probing for it.
+    errorResponseBuilder: (_request, context) => ({ statusCode: context.statusCode }),
+  }
+
+  const routeOptions = {
+    bodyLimit: REPORT_BODY_LIMIT,
+    logLevel: 'silent' as const,
+    config: { rateLimit },
+  }
 
   app.post(CSP_REPORT_PATH, routeOptions, async (request: FastifyRequest, reply: FastifyReply) => {
     // Capped before sanitising, so the work a request can provoke is bounded

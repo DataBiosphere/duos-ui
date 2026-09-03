@@ -24,9 +24,24 @@ import type { FastifyHelmetOptions } from '@fastify/helmet'
 /**
  * Banner notifications are read straight from a public GCS bucket
  * (`src/libs/notificationService.ts`). It is a fixed public asset host, not a
- * deployment-configured upstream, so it is the one literal origin here.
+ * deployment-configured upstream, so it is the one literal source here.
+ *
+ * Scoped to the bucket's path, not just the origin: `storage.googleapis.com`
+ * is shared by every public bucket on GCS, so allowing the bare origin would
+ * leave injected script a ready exfiltration target — the precise thing this
+ * policy exists to close. CSP source expressions take a path, and a trailing
+ * slash matches by prefix, which covers every `<env>_notifications.json` the
+ * service builds.
+ *
+ * One limit worth knowing: a browser drops the path when matching the target
+ * of a redirect, so this narrows the direct request only. GCS answers object
+ * reads without redirecting, so that costs nothing here.
+ *
+ * The configured upstreams below stay at origin granularity on purpose. Each
+ * is a whole service the app talks to across many paths, and unlike this
+ * bucket none of them shares a host with anybody else.
  */
-export const BANNER_ORIGIN = 'https://storage.googleapis.com'
+export const BANNER_SOURCE = 'https://storage.googleapis.com/broad-duos-banners/'
 
 /** Where the browser posts violation reports. See security/cspReport.ts. */
 export const CSP_REPORT_PATH = '/csp-report'
@@ -105,7 +120,7 @@ export function connectSources(config: Record<string, unknown>, env: CspEnvironm
     const origin = configuredOrigin(config[field])
     if (origin) sources.add(origin)
   }
-  sources.add(BANNER_ORIGIN)
+  sources.add(BANNER_SOURCE)
   if (env.isDev) {
     // Vite's HMR client opens a websocket back to the dev server. `'self'`
     // covers ws/wss on the same origin under CSP3, but not every browser
@@ -146,12 +161,16 @@ export function contentSecurityPolicyOptions(config: Record<string, unknown>, en
     // this directive, so dropping 'unsafe-inline' would blank the whole app.
     styleSrc: ['\'self\'', '\'unsafe-inline\''],
     // `data:` — bundled SVGs embed raster fallbacks as data URIs.
-    // `blob:` — object URLs the app mints for uploads and downloads. No live
-    // `<img src="blob:">` was found in the audit, but blob: images are a
-    // routine React pattern and such a URL can only be created by same-origin
-    // script, so the allowance is kept rather than risk an unexamined path.
+    //
+    // Deliberately not `blob:`. The audit found no `<img src="blob:">` in the
+    // tree: every object URL the app mints is a download (`<a download>` in
+    // utils.ts, FileDownload.ts, EditDac.tsx) or the dead preview branch in
+    // DocumentUpload.tsx, and a download navigation needs no directive. The
+    // story says to add it only once a report-only run proves the need, and
+    // report-only is exactly what makes that cheap to find out.
+    //
     // Deliberately not `https:`, which would trust every origin on the web.
-    imgSrc: ['\'self\'', 'data:', 'blob:'],
+    imgSrc: ['\'self\'', 'data:'],
     // The app frames nothing today. `openPreviewWindow` in
     // components/forms/DocumentUpload.tsx looks like it frames a blob: object
     // URL, but it opens the window with `noopener`, and `window.open` returns
