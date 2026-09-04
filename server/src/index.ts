@@ -81,16 +81,22 @@ export async function buildApp(): Promise<AppInstance> {
   // the two in step.
   const clientConfig = await readConfig(configJsonPath, fastify.log)
 
-  // 1. Security response headers (Phase 5, story 5-F1). Registered first so
-  // its onRequest hook runs ahead of every route, and outside both switches
-  // below: the legacy client needs the same headers. The Content Security
-  // Policy is off here and lands in 5-F3 — COOP is the header that can break
-  // sign-in, and it ships on its own so a deploy can prove it did not.
-  await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev }))
+  // 1. Security response headers, including the Content Security Policy
+  // (Phase 5, stories 5-F1 and 5-F3). Registered first so its onRequest hook
+  // runs ahead of every route, and outside both switches below: the legacy
+  // client needs the same headers.
+  // Report-only until a deployment says otherwise. A strict policy is the kind
+  // of change that breaks a page nobody tested, so each environment collects
+  // violations at /csp-report first and flips DUOS_CSP_REPORT_ONLY=false once
+  // the report run is clean (story 5-F5). Note the deployed httpd sidecar
+  // replaces the enforcing header until the terra-helmfile change in 5-F4
+  // lands — see ADR-013.
+  const cspReportOnly = envBool(process.env.DUOS_CSP_REPORT_ONLY, true)
+  fastify.log.info(`[server] Content Security Policy is ${cspReportOnly ? 'report-only (set DUOS_CSP_REPORT_ONLY=false to enforce)' : 'enforced'}`)
+  await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly }))
 
-  // Gives story 5-F3's `report-to` group an address. The `report-uri`
-  // fallback in the same policy needs no header, but Chrome prefers
-  // `report-to`. Harmless before the policy exists — no browser will post.
+  // Gives the policy's `report-to` group an address. The `report-uri` fallback
+  // in the same policy needs no header, but Chrome prefers `report-to`.
   fastify.addHook('onRequest', async (_request, reply) => {
     reply.header('reporting-endpoints', REPORTING_ENDPOINTS_HEADER)
   })

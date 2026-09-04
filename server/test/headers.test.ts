@@ -1,12 +1,13 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import Fastify, { type FastifyInstance } from 'fastify'
 import fastifyHelmet from '@fastify/helmet'
-import { type SecurityHeaderEnvironment, helmetOptions } from '../src/security/headers.js'
+import { helmetOptions } from '../src/security/headers.js'
+import type { CspEnvironment } from '../src/security/csp.js'
 
 const config = (bffEnabled: boolean): Record<string, unknown> => ({ env: 'dev', bffEnabled })
 
-const PROD: SecurityHeaderEnvironment = { isDev: false }
-const DEV: SecurityHeaderEnvironment = { isDev: true }
+const PROD: CspEnvironment = { isDev: false, reportOnly: false }
+const DEV: CspEnvironment = { isDev: true, reportOnly: true }
 
 describe('helmetOptions', () => {
   it('sends no COOP at all in legacy mode, where a popup carries the sign-in result', () => {
@@ -40,15 +41,16 @@ describe('helmetOptions', () => {
     })
   })
 
-  it('sends no Content-Security-Policy yet — that is story 5-F3', () => {
-    expect(helmetOptions(config(true), PROD).contentSecurityPolicy).toBe(false)
+  it('carries the policy through from csp.ts', () => {
+    const csp = helmetOptions(config(true), PROD).contentSecurityPolicy
+    expect(csp).toMatchObject({ useDefaults: false })
   })
 })
 
 describe('the headers as helmet serialises them', () => {
   let app: FastifyInstance
 
-  async function buildHelmetApp(env: SecurityHeaderEnvironment, bffEnabled = true): Promise<FastifyInstance> {
+  async function buildHelmetApp(env: CspEnvironment, bffEnabled = true): Promise<FastifyInstance> {
     const instance = Fastify({ logger: false })
     await instance.register(fastifyHelmet, helmetOptions(config(bffEnabled), env))
     instance.get('/page', async () => ({ ok: true }))
@@ -59,7 +61,7 @@ describe('the headers as helmet serialises them', () => {
     await app?.close()
   })
 
-  it('sends the headers a browser acts on, and no policy header at all', async () => {
+  it('sends the headers a browser acts on, alongside the policy', async () => {
     app = await buildHelmetApp(PROD)
     const res = await app.inject({ method: 'GET', url: '/page' })
 
@@ -68,8 +70,7 @@ describe('the headers as helmet serialises them', () => {
     expect(res.headers['referrer-policy']).toBe('no-referrer')
     expect(res.headers['x-frame-options']).toBe('DENY')
     expect(res.headers['x-content-type-options']).toBe('nosniff')
-    expect(res.headers['content-security-policy']).toBeUndefined()
-    expect(res.headers['content-security-policy-report-only']).toBeUndefined()
+    expect(res.headers['content-security-policy']).toContain('default-src \'self\'')
   })
 
   it('omits the COOP header entirely for a legacy deployment', async () => {

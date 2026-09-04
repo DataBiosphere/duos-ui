@@ -1,30 +1,22 @@
 import type { FastifyHelmetOptions } from '@fastify/helmet'
+import { type CspEnvironment, contentSecurityPolicyOptions } from './csp.js'
 
 /**
  * The server's security response headers, via `@fastify/helmet`.
  *
  * Helmet's own defaults are the risk here, not the headers this app wants —
  * two of them break flows DUOS still depends on. Each is set deliberately
- * below, and `contentSecurityPolicy` is off for now: the policy is derived
- * from runtime config and lands in story 5-F3.
+ * below. The policy itself lives in csp.ts, derived from runtime config.
  *
  * See docs/plans/bff_adrs/ADR-013-content-security-policy.md.
  */
 
-export interface SecurityHeaderEnvironment {
-  /** `NODE_ENV !== 'production'`: HSTS off, so plain-HTTP dev keeps working. */
-  isDev: boolean
-}
-
 export function helmetOptions(
   config: Record<string, unknown>,
-  env: SecurityHeaderEnvironment,
+  env: CspEnvironment,
 ): FastifyHelmetOptions {
   return {
-    // Story 5-F3 replaces this with the runtime-derived policy. Registering
-    // helmet first, on its own, is deliberate: COOP below is the one header
-    // here that can break sign-in, and it deserves a deploy of its own.
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: contentSecurityPolicyOptions(config, env),
     // COOP is OFF in legacy mode, and `same-origin-allow-popups` is not a
     // safe middle ground there — this was measured, not assumed.
     //
@@ -53,8 +45,9 @@ export function helmetOptions(
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: { policy: 'same-origin' },
     referrerPolicy: { policy: 'no-referrer' },
-    // The deployed httpd sidecar also sets this, and its value wins. Ours is
-    // what a local or docker-compose run gets, where there is no proxy at all.
+    // Belt and braces with `frame-ancestors 'none'` in the policy, for
+    // anything that reads only the legacy header. The deployed httpd sidecar
+    // sets this too; ours is what a local or compose run gets.
     xFrameOptions: { action: 'deny' },
     // Gated on NODE_ENV, not on the transport, so that `pnpm start:server`
     // cannot pin a developer's browser to https for a year. A compose stack

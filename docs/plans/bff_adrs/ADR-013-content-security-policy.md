@@ -5,9 +5,9 @@
 **Implemented by:** `server/src/security/` (duos-ui, DT-4021)
 
 This record is written across the 5-F stack and grows with it. Stories 5-F1
-(helmet's non-CSP headers) and 5-F2 (the report sink) are recorded here. The
-policy itself (5-F3) and the sidecar change (5-F4) add their sections as they
-land.
+(helmet's non-CSP headers), 5-F2 (the report sink) and 5-F3 (the policy) are
+recorded here. The sidecar change (5-F4) is described under Consequences and
+lands in `terra-helmfile`.
 
 ---
 
@@ -125,12 +125,191 @@ The sink always answers 204, so it is no kind of oracle, and every rejection —
 The route sets its own error handler to get that: `index.ts` installs the
 app-level one after this plugin registers, so Fastify never resolves it here.
 
-## Consequences so far
+## Decision, part 3 — the policy itself
 
-- Sign-in is the thing to watch on the first deploy of 5-F1, in a **legacy**
-  environment. Every environment is legacy today.
-- `contentSecurityPolicy` is explicitly `false` until 5-F3. The tests assert its
-  absence, so the stack cannot quietly deliver half a policy.
-- `/csp-report` is live and reachable before anything reports to it. That is
-  deliberate — it means 5-F3 changes one flag rather than adding an endpoint and
-  a policy at once.
+### The `connect-src` allowlist is derived from `config.json`, never hardcoded
+
+`connectSources()` reads only **inventoried, active** fields of the same
+runtime config the client reads, reduces each to its origin, and drops blanks
+and unparseable values. Two literals remain: `'self'` and the banner bucket,
+which is a fixed public asset host rather than a deployment-configured upstream.
+
+The bucket is the one source written to a **path**,
+`https://storage.googleapis.com/broad-duos-banners/`, rather than an origin.
+`storage.googleapis.com` is shared by every public bucket on GCS, so the bare
+origin would hand injected script a ready exfiltration target — the thing this
+policy exists to close. A trailing slash matches by prefix, which covers every
+`<env>_notifications.json` the service builds. The narrowing applies to the
+direct request only: a browser drops the path when matching a redirect target,
+and GCS answers object reads without redirecting. The configured upstreams stay
+at origin granularity, because each is a whole service the app talks to across
+many paths and none shares a host with anybody else.
+
+The list is mode-specific:
+
+- **BFF mode** — `'self'`, `apiUrl`, `bardApiUrl`, the banner bucket.
+  `ecmApiUrl` and `tdrApiUrl` are omitted **on purpose**; those calls are
+  same-origin after cutover.
+- **Legacy mode** — the above plus `ecmApiUrl` and `tdrApiUrl`, until Epic 6
+  retires the legacy client.
+
+`terraUrl` is never allowlisted: it is navigated to, not fetched. The
+development config also carries convenience origins the browser never
+connects to, so sweeping up every URL-shaped value would allowlist them by
+accident.
+
+`DUOS_API_URL` overrides the file's `apiUrl` (see `config.ts`), and the policy
+follows the override — otherwise a redirected deployment would block its own
+calls.
+
+A deployment whose rendered config omits `bffEnabled` gets the **legacy**
+list, which is a superset. `config/base_config.json` ships without the key, so
+this is the common case, not an edge one. It fails open on the allowlist and
+safe on breakage, which is the right direction while both modes exist.
+
+**B2C is the one origin the browser reaches that no config field names, and it
+needs no entry.** The authority URL does not live in `config.json` at all: it
+arrives at runtime in Consent's `/oauth2/configuration` response as
+`authorityEndpoint` (`src/libs/ajax/OAuth2.ts`). The legacy client never
+`fetch`es it, so `connect-src` never has to name it — audited through
+`oidc-client-ts` 3.5.0:
+
+| Request that would need B2C in `connect-src` | Why it never happens |
+|---|---|
+| OpenID discovery | `oidcBroker.ts` passes an explicit `metadata` object, and `MetadataService` returns that cache without ever reading `_metadataUrl`. |
+| JWKS | `getSigningKeys()` has no call site in the bundle. |
+| userinfo | `loadUserInfo` defaults false, and `_processClaims` short-circuits on it. |
+| Session monitor, end-session, revocation | `monitorSession` defaults false; sign-out calls only `removeUser()` and `clearStaleState()`. |
+| Silent-renew iframe | `silent_redirect_uri` falls back to `redirect_uri`, which the broker sets to `''`, so `signinSilent()` throws before an iframe exists. The live branch is a refresh-token POST to `token_endpoint` — the `apiUrl` origin. |
+
+`signinPopup` reaches B2C by **navigating** the popup to
+`${apiUrl}/oauth2/authorize`, which redirects onward. No directive in this
+policy governs navigation.
+
+Four one-line edits would each turn that into a broken sign-in with no
+config field to fix it from: dropping the `metadata` override, setting
+`loadUserInfo: true`, setting `monitorSession: true`, or giving
+`redirect_uri`/`silent_redirect_uri` a real value. The last also needs
+`frame-src`. Any of them means adding the authority origin here — sourced from
+Consent's response, not from `config.json`.
+
+### Report-only by default, enforced per environment
+
+`DUOS_CSP_REPORT_ONLY` defaults to **true**. Each environment collects
+violations first and is flipped to enforcement once a run over every flow is
+clean — sign-in, protected pages, banner fetch, feature flags, anonymous
+metrics, a chart page, sign-out. That rollout is story 5-F5.
+
+Collection is real rather than console-only: the policy carries both
+`report-uri` and `report-to`, pointing at the sink from part 2 above.
+
+Two things make the flip less trivial than it looks. The deployed httpd sidecar
+replaces the enforcing header, so until 5-F4 lands the env var changes nothing a
+browser acts on — see Consequences. And the browser-level check that drives
+every flow and asserts nothing was reported is story **6-K**, in Epic 6: it
+needs the e2e run served through the Fastify server, which is harness work that
+epic already owns.
+
+### The proxy's per-reply sandbox still wins
+
+`upstreamProxy.ts` sets `content-security-policy: sandbox` on proxied
+responses so a proxied upload cannot execute on the SPA's origin. Both writes
+reach the same raw response through `setHeader`, and the proxy's runs second,
+so it wins. Not through `writeHead`: the proxy replies with a stream, and
+Fastify's stream path deliberately avoids `writeHead` so it can still turn a
+late stream error into a proper status. **Ordering is the whole mechanism**,
+which makes it fragile — registering helmet later would silently strip the
+sandbox. `server/test/csp.test.ts` asserts it against the real proxy, and
+asserts a sibling route in the same app carries the full policy, so the case
+cannot pass against an app where helmet never ran.
+
+### `style-src` keeps `'unsafe-inline'`
+
+`style-src-attr` falls back to `style-src`, and the component tree styles
+almost everything through React `style={{…}}` props. Dropping it would render
+the app unstyled. Removing it means moving the tree off inline styles, which
+is a much larger piece of work than this story.
+
+## Consequences
+
+- Every `connect-src` entry traces to the inventory table above and to a
+  config field, so a new upstream is a config change, not a code change.
+- `frame-src` is `'self'` — the app frames nothing. `openPreviewWindow` in
+  `components/forms/DocumentUpload.tsx` reads as though it frames a `blob:`
+  object URL, but it opens the window with `noopener`, and `window.open`
+  returns null for that by specification, so it always takes the download
+  fallback and the iframe is never created. Repairing that preview means
+  adding `blob:` back to this directive.
+- BFF-mode `connect-src` cannot reach `'self'` alone until the three direct
+  flows move to dedicated public BFF endpoints (`/public/notifications`,
+  `/public/features/*`, `/public/metrics/event`). That is the follow-up to this
+  story, and it is what will let this allowlist shrink.
+- `img-src` carries `'self'` and `data:` only. `blob:` is deliberately absent:
+  the audit found no `<img src="blob:">` in the tree — every object URL the app
+  mints is a download, which needs no directive, or the dead preview branch in
+  `DocumentUpload.tsx`. The story says to add it only once a report-only run
+  proves the need, and report-only is what makes that cheap to establish.
+- `img-src` has no `https:`, so an **operator-authored** remote image would be
+  blocked. Banner messages, Consent's terms-of-service text, and DAC bot rule
+  text all render through `ReactMarkdown`, and that content lives outside this
+  repo. Nothing in the tree can prove it never carries a remote image, so it is
+  a signal to watch during the report-only run rather than a settled question.
+- `configuredOrigin` accepts an `http:` upstream, but production also sends
+  `upgrade-insecure-requests`, which rewrites that request to `https:`. Running
+  in production mode against a plain-HTTP upstream — the `apiUrl` in
+  `config-example.json`, for instance — therefore fails. This is the same
+  caveat as the docker-compose one above, from the other side.
+- **No browser-level check ships with this story.** One was written and works
+  locally, but it cannot run in CI: `pnpm run serve` is `vite preview`, which
+  sends no headers, so the spec has to fulfil the document itself to attach the
+  policy — and Chrome then treats that document as coming from an unknown
+  address space, making every same-origin subresource a public-to-loopback
+  Private Network Access transition, blocked outside a secure context. The fix
+  is not a browser flag but serving the e2e run through the Fastify server,
+  which is harness work Epic 6 owns. Held back as story **6-K** rather than
+  merged skipped, since a spec that never runs is not coverage.
+- Enforcement is a per-environment decision recorded in deployment config, so
+  a bad policy is one env var away from being backed out.
+- **The httpd sidecar replaces this policy in deployed environments, so
+  enforcement does not yet reach the browser.** Its `site.conf` runs
+  `Header unset Content-Security-Policy` inside the `LocationMatch` that covers
+  every proxied path, then sets five of its own — a policy carrying
+  `'unsafe-inline'` and `'unsafe-eval'` on `script-src`, and no `default-src`,
+  `frame-ancestors`, `object-src`, `base-uri` or `form-action` at all.
+
+  Measured against a backend sending this app's exact headers:
+
+  | Header the app sends | What the browser receives |
+  |---|---|
+  | `Content-Security-Policy` (enforcing) | **replaced** by the sidecar's |
+  | `Content-Security-Policy-Report-Only` | passes through unchanged |
+  | `X-Frame-Options: DENY` | **replaced** with `SAMEORIGIN` |
+  | `Strict-Transport-Security` 1 year | **replaced** with 1 day |
+  | COOP, CORP, `Referrer-Policy` | pass through unchanged |
+
+  The report-only header surviving is what makes this quiet: the collection run
+  works, reports arrive, the run reads clean, and then flipping
+  `DUOS_CSP_REPORT_ONLY=false` changes nothing a browser acts on. Enforcement is
+  therefore blocked on a `terra-helmfile` change that stops the sidecar
+  overriding the header — and the story is not done when the env var flips, but
+  when `curl -sI` against a deployed host returns *this* policy.
+
+  The change is six lines in `charts/duos/templates/_site.conf.tpl` — the
+  `Header unset` plus the five that replace it. That template is DUOS's own,
+  not shared with the other Terra apps, and the origins in it are terra-ui's:
+  googletagmanager, cloudinary, zendesk, `data.terra.bio`. Deleting the `unset`
+  matters as much as the rest — on its own it strips the app's header and sends
+  nothing at all.
+
+  `bffEnabled` does not enter into it, which is worth stating because it looks
+  as though it should. The flag gates the BFF auth routes and the API proxies,
+  not serving the app: Fastify is the app container's only process, it
+  registers `@fastify/vite` and the SPA fallback outside both switches, and
+  helmet registers ahead of both. Nor does any path bypass it — `PROXY_PATH`
+  defaults to `/` and `PROXY_URL` to `http://app:8080/` in the
+  `httpd-terra-proxy` image and the chart overrides neither, so the
+  `LocationMatch` covers everything except `/introspect/`, which its negative
+  lookahead excludes and which carries no CSP today either.
+
+  COOP passing through is the reassuring half: the legacy-mode decision above
+  is the one non-CSP header that both matters and actually arrives.

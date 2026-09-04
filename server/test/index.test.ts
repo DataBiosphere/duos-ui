@@ -695,12 +695,16 @@ describe('security headers', () => {
     }
   })
 
-  it('sends no Content-Security-Policy yet, in either spelling', async () => {
-    // The policy is story 5-F3. Asserting its absence here keeps this PR
-    // honest about what it delivers.
+  it('sends the report-only policy by default, so a strict policy cannot break a page unannounced', async () => {
     const res = await app.inject({ method: 'GET', url: '/health' })
 
+    expect(res.headers['content-security-policy-report-only']).toContain('default-src \'self\'')
     expect(res.headers['content-security-policy']).toBeUndefined()
-    expect(res.headers['content-security-policy-report-only']).toBeUndefined()
+  })
+
+  it('reaches the SPA document with the policy, not just the API routes', async () => {
+    const res = await app.inject({ method: 'GET', url: '/datalibrary/some-deep-link' })
+
+    expect(res.headers['content-security-policy-report-only']).toContain('default-src \'self\'')
   })
 })
