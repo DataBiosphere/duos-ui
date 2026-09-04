@@ -9,6 +9,7 @@ import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
+import rateLimit from '@fastify/rate-limit'
 import fastifyHelmet from '@fastify/helmet'
 import fastifyRateLimit from '@fastify/rate-limit'
 import { createPgSessionStore } from './session/pgStore.js'
@@ -17,6 +18,7 @@ import { REPORTING_ENDPOINTS_HEADER, cspReportRoute } from './security/cspReport
 import { sessionPluginOptions } from './session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
 import { fetchMetadataGuard } from './security/fetchMetadata.js'
+import { RATE_LIMIT_ERROR_CODE, isRateLimitError, loginRateLimit, rateLimitPluginOptions } from './security/rateLimit.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
 import { handleCallback } from './auth/callback.js'
@@ -53,6 +55,10 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
  * can carry internal detail, and no client branches on it.
  */
 export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
+  if (isRateLimitError(err)) {
+    request.log.warn({ ip: request.ip, url: request.url }, '[server] rate limit exceeded')
+    return reply.status(err.statusCode ?? 429).send({ error: RATE_LIMIT_ERROR_CODE })
+  }
   request.log.error({ err }, '[server] Unhandled error:')
   const status = err.statusCode ?? (err as { status?: number }).status ?? 500
   return reply.status(status >= 400 ? status : 500).send({ error: 'An unexpected error occurred.' })
@@ -81,6 +87,9 @@ export async function buildApp(): Promise<AppInstance> {
 
   // Registered before any routes so all errors, including those in plugins, are caught.
   fastify.setErrorHandler(handleServerError)
+
+  // Rate limiting. Registered at app level, ahead of both cutover switches and every route.
+  await fastify.register(rateLimit, rateLimitPluginOptions)
 
   // Path to the static client config.json — computed once so both the
   // /config.json route below and the bffEnabled startup check read the same
@@ -210,7 +219,14 @@ export async function buildApp(): Promise<AppInstance> {
       throw new Error('bffEnabled is true in config.json but DUOS_API_URL is not set — /auth/me and the API proxy both forward to it')
     }
     fastify.log.info('[server] bffEnabled is true — registering BFF auth routes and the API proxy')
-    fastify.post('/auth/login', handleLogin)
+
+    // Resolved once, so the effective number reaches the log an operator
+    // reads when a limit is questioned — and so a bad override fails startup
+    // here rather than on the first request.
+    const loginLimit = loginRateLimit()
+    fastify.log.info({ login: loginLimit.max }, '[server] auth rate limits, in requests per minute per client IP')
+
+    fastify.post('/auth/login', { config: { rateLimit: loginLimit } }, handleLogin)
     fastify.get('/auth/callback', handleCallback)
     fastify.get('/auth/csrf-token', handleCsrfToken)
     fastify.post('/auth/logout', { onRequest: fastify.csrfProtection }, handleLogout)

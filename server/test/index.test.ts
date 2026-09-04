@@ -227,6 +227,22 @@ describe('handleServerError', () => {
 
     expect(request.log.error).toHaveBeenCalledWith({ err: thrown }, '[server] Unhandled error:')
   })
+
+  // A flood must not fill the error log
+  it('logs a throttled request at warn and answers with the rate_limited code', async () => {
+    const { RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } = await import('../src/security/rateLimit.js')
+    const err = rateLimitPluginOptions.errorResponseBuilder(
+      {} as FastifyRequest,
+      { statusCode: 429, ban: false, after: '1 minute', max: 30, ttl: 60_000 },
+    )
+
+    const { request, reply } = await run(err as unknown as Error)
+
+    expect(request.log.warn).toHaveBeenCalled()
+    expect(request.log.error).not.toHaveBeenCalled()
+    expect(reply.sentStatus).toBe(429)
+    expect(reply.sentBody).toEqual({ error: RATE_LIMIT_ERROR_CODE })
+  })
 })
 
 describe('plugin registration order', () => {
@@ -712,6 +728,138 @@ describe('envBool', () => {
     const { envBool } = await import('../src/index.js')
     for (const v of ['false', 'FALSE', '0', 'no', 'off']) expect(envBool(v, true)).toBe(false)
     for (const v of ['true', 'True', '1', 'yes', 'on']) expect(envBool(v, false)).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Rate limiting
+// ---------------------------------------------------------------------------
+describe('auth endpoint rate limiting', () => {
+  let dir: string
+
+  afterEach(async () => {
+    delete process.env.CONFIG_PATH
+    vi.unstubAllEnvs()
+    vi.useRealTimers()
+    const { resetConfigCache } = await import('../src/config.js')
+    resetConfigCache()
+    if (dir) rmSync(dir, { recursive: true, force: true })
+  })
+
+  // Same reasoning as the sibling describe: buildApp() caches config.json
+  // process-wide, so the cache must be cleared right before the build.
+  async function buildLimitedApp(loginMax?: string) {
+    const { LOGIN_MAX_ENV_VAR } = await import('../src/security/rateLimit.js')
+    if (loginMax) vi.stubEnv(LOGIN_MAX_ENV_VAR, loginMax)
+
+    dir = mkdtempSync(path.join(tmpdir(), 'duos-ratelimit-config-'))
+    const file = path.join(dir, 'config.json')
+    writeFileSync(file, JSON.stringify({ bffEnabled: true }))
+    process.env.CONFIG_PATH = file
+
+    const { resetConfigCache } = await import('../src/config.js')
+    resetConfigCache()
+    const { buildApp } = await import('../src/index.js')
+    return buildApp()
+  }
+
+  // The limiter keys on request.ip, which honours X-Forwarded-For because
+  // TRUST_PROXY names the loopback peer that app.inject() presents as.
+  const from = (ip: string) => ({ 'x-forwarded-for': ip })
+
+  it('returns 429 with Retry-After and the rate_limited code once /auth/login exceeds its limit', async () => {
+    const app = await buildLimitedApp('2')
+    const { RATE_LIMIT_ERROR_CODE } = await import('../src/security/rateLimit.js')
+
+    for (let i = 0; i < 2; i++) {
+      const ok = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.7') })
+      expect(ok.statusCode).toBe(200)
+    }
+
+    const blocked = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.7') })
+
+    expect(blocked.statusCode).toBe(429)
+    expect(blocked.json()).toEqual({ error: RATE_LIMIT_ERROR_CODE })
+    expect(Number(blocked.headers['retry-after'])).toBeGreaterThan(0)
+
+    await app.close()
+  })
+
+  it('counts each client IP in its own bucket', async () => {
+    const app = await buildLimitedApp('1')
+
+    await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.11') })
+    const sameIp = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.11') })
+    const otherIp = await app.inject({ method: 'POST', url: '/auth/login', headers: from('198.51.100.4') })
+
+    expect(sameIp.statusCode).toBe(429)
+    expect(otherIp.statusCode).toBe(200)
+
+    await app.close()
+  })
+
+  it('lets a client through again once the time window passes', async () => {
+    const app = await buildLimitedApp('1')
+    // The store measures the window with Date.now(); fake only the clock, so
+    // inject()'s own async machinery keeps running on real timers.
+    vi.useFakeTimers({ toFake: ['Date'] })
+
+    await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.12') })
+    const blocked = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.12') })
+    vi.setSystemTime(Date.now() + 61_000)
+    const afterWindow = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.12') })
+
+    expect(blocked.statusCode).toBe(429)
+    expect(afterWindow.statusCode).toBe(200)
+
+    await app.close()
+  })
+
+  // Deliberately unlimited: /auth/csrf-token is gated on an authenticated
+  // session (5-B) and /auth/logout on the CSRF token, and a low cap on either
+  // breaks multiple tabs and the client's retry path.
+  it('leaves /auth/csrf-token and /auth/logout unlimited', async () => {
+    const app = await buildLimitedApp('1')
+
+    for (let i = 0; i < 5; i++) {
+      const token = await app.inject({ method: 'GET', url: '/auth/csrf-token', headers: from('203.0.113.13') })
+      const logout = await app.inject({ method: 'POST', url: '/auth/logout', headers: from('203.0.113.13') })
+      expect(token.statusCode).toBe(401)
+      expect(logout.statusCode).toBe(204)
+    }
+
+    await app.close()
+  })
+
+  // The regression this guards: registering the plugin globally.
+  it('never limits a route that did not opt in', async () => {
+    const app = await buildLimitedApp('1')
+    app.get('/assets/chunk.js', async () => 'export default 1')
+
+    for (let i = 0; i < 12; i++) {
+      const asset = await app.inject({ method: 'GET', url: '/assets/chunk.js', headers: from('203.0.113.14') })
+      expect(asset.statusCode).toBe(200)
+      // Status alone would not catch it: the plugin's own global default is
+      // 1000/minute, so 12 requests pass even under `global: true`. The
+      // headers appear on every reply the limiter processed, and on no other.
+      expect(asset.headers['x-ratelimit-limit']).toBeUndefined()
+    }
+
+    await app.close()
+  })
+
+  it('applies the shipped default when no override is set', async () => {
+    const app = await buildLimitedApp()
+
+    const login = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.15') })
+
+    expect(login.headers['x-ratelimit-limit']).toBe('30')
+
+    await app.close()
+  })
+
+  it('fails loud at startup when the limit override is not a positive integer', async () => {
+    await expect(buildLimitedApp('lots')).rejects.toThrow('DUOS_RATE_LIMIT_LOGIN_MAX')
   })
 })
 
