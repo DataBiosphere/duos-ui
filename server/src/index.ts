@@ -72,11 +72,7 @@ export async function buildApp(): Promise<AppInstance> {
   // (memoized) config.
   const configJsonPath = configPath(PROJECT_ROOT, isDev)
 
-  // Read once, here. Two things need it: the security headers below, whose
-  // COOP value differs by mode, and the `bffEnabled` cutover check further
-  // down. readConfig memoises for the life of the process, so a second call
-  // would return this same object — binding it makes that explicit and keeps
-  // the two in step.
+  // Keep CSP construction and BFF route gating on the config served to the client.
   const clientConfig = await readConfig(configJsonPath, fastify.log)
 
   // 1. Security response headers (Phase 5, story 5-F1). Registered first so
