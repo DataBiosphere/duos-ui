@@ -4,7 +4,7 @@ import path from 'node:path'
 import http from 'node:http'
 import https from 'node:https'
 import open from 'open'
-import Fastify, { FastifyError, FastifyInstance } from 'fastify'
+import Fastify, { FastifyError, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
@@ -46,6 +46,16 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
   return defaultValue
 }
 
+/**
+ * The app-level error handler. The body is always generic: an error message
+ * can carry internal detail, and no client branches on it.
+ */
+export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
+  request.log.error({ err }, '[server] Unhandled error:')
+  const status = err.statusCode ?? (err as { status?: number }).status ?? 500
+  return reply.status(status >= 400 ? status : 500).send({ error: 'An unexpected error occurred.' })
+}
+
 export async function buildApp(): Promise<AppInstance> {
   // The app always sits behind exactly one reverse-proxy hop (the
   // httpd-terra-proxy sidecar in k8s, or the `proxy` container in
@@ -66,6 +76,9 @@ export async function buildApp(): Promise<AppInstance> {
       })
     : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' }, trustProxy: TRUST_PROXY })
   ) as AppInstance
+
+  // Registered before any routes so all errors, including those in plugins, are caught.
+  fastify.setErrorHandler(handleServerError)
 
   // Path to the static client config.json — computed once so both the
   // /config.json route below and the bffEnabled startup check read the same
@@ -233,12 +246,6 @@ export async function buildApp(): Promise<AppInstance> {
 
   // SPA fallback
   fastify.setNotFoundHandler((_req, reply) => reply.html())
-
-  // The encapsulated proxy declares its own error handler (ADR-010).
-  fastify.setErrorHandler((err: FastifyError, request, reply) => {
-    request.log.error({ err }, '[server] Unhandled error:')
-    return reply.status(err.statusCode ?? 500).send({ error: 'An unexpected error occurred.' })
-  })
 
   return fastify
 }

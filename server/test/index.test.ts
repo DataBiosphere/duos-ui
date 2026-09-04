@@ -158,6 +158,76 @@ describe('error handler', () => {
   })
 })
 
+describe('handleServerError', () => {
+  // The whole contract of the handler. The status varies with the error; the
+  // body never does. Nothing a client reads is derived from err.message.
+  const GENERIC_BODY = { error: 'An unexpected error occurred.' }
+
+  function fakeRequest() {
+    return { ip: '203.0.113.1', url: '/auth/login', log: { warn: vi.fn(), error: vi.fn() } }
+  }
+
+  function fakeReply() {
+    const reply = {
+      sentStatus: 0,
+      sentBody: undefined as unknown,
+      status: vi.fn((code: number) => {
+        reply.sentStatus = code
+        return reply
+      }),
+      send: vi.fn((body: unknown) => {
+        reply.sentBody = body
+        return reply
+      }),
+    }
+    return reply
+  }
+
+  async function run(err: Error) {
+    const { handleServerError } = await import('../src/index.js')
+    const request = fakeRequest()
+    const reply = fakeReply()
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    handleServerError(err as any, request as any, reply as any)
+    return { request, reply }
+  }
+
+  // Every shape of error the handler can be given. Each message holds detail a
+  // client must never see: a 4xx message reads like client-safe text, which is
+  // the case most likely to tempt a future edit that forwards err.message.
+  const cases = [
+    { name: 'a 5xx statusCode', err: () => Object.assign(new Error('upstream token endpoint said: invalid_client'), { statusCode: 502 }), status: 502 },
+    { name: 'no status at all', err: () => new Error('DUOS_OIDC_CLIENT_SECRET is not set'), status: 500 },
+    { name: 'only err.status, not statusCode', err: () => Object.assign(new Error('bad input for column "ssn"'), { status: 400 }), status: 400 },
+    // A 3xx would answer an error with a JSON body and no Location header, so
+    // the handler refuses it and uses 500.
+    { name: 'a non-error 3xx status', err: () => Object.assign(new Error('confused'), { statusCode: 302 }), status: 500 },
+  ]
+
+  it.each(cases)('answers $name with the generic body and no part of err.message', async ({ err }) => {
+    const thrown = err()
+
+    const { reply } = await run(thrown)
+
+    expect(reply.sentBody).toEqual(GENERIC_BODY)
+    expect(JSON.stringify(reply.sentBody)).not.toContain(thrown.message)
+  })
+
+  it.each(cases)('maps $name to status $status', async ({ err, status }) => {
+    const { reply } = await run(err())
+
+    expect(reply.sentStatus).toBe(status)
+  })
+
+  it('logs the error server-side, which is the only place the message survives', async () => {
+    const thrown = Object.assign(new Error('internal secret data'), { statusCode: 502 })
+
+    const { request } = await run(thrown)
+
+    expect(request.log.error).toHaveBeenCalledWith({ err: thrown }, '[server] Unhandled error:')
+  })
+})
+
 describe('plugin registration order', () => {
   it('registers postgres before cookie before session', async () => {
     const { default: pgPlugin } = await import('@fastify/postgres')
@@ -589,6 +659,28 @@ describe('BFF auth route registration', () => {
     expect(read({ 'csrf-token': 'the-token' })).toBeUndefined()
     expect(read({ 'xsrf-token': 'the-token' })).toBeUndefined()
     expect(read({ 'x-xsrf-token': 'the-token' })).toBeUndefined()
+
+    await localApp.close()
+  })
+
+  // The regression this guards: setErrorHandler moving back to the end of
+  // buildApp(). Fastify binds a route's error handler when the route
+  // registers, so every route built inside buildApp() would fall back to
+  // Fastify's default handler, which serialises err.message to the client.
+  // The /boom case in the 'error handler' describe cannot catch that — it
+  // registers its route after buildApp() has returned.
+  it('applies the app error handler to a route registered inside buildApp', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+    const { handleLogin } = await import('../src/auth/login.js')
+    vi.mocked(handleLogin).mockImplementationOnce(() => {
+      throw new Error('internal secret data')
+    })
+
+    const res = await localApp.inject({ method: 'POST', url: '/auth/login' })
+
+    expect(res.statusCode).toBe(500)
+    expect(res.json()).toEqual({ error: 'An unexpected error occurred.' })
+    expect(res.payload).not.toContain('internal secret data')
 
     await localApp.close()
   })
