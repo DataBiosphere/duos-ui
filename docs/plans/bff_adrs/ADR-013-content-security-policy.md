@@ -184,10 +184,17 @@ cause, and while the policy is report-only the entry costs nothing.
 It does not hold `apiUrl` in the allowlist, though. Story 5-F6 points
 `FeatureFlag.ts` at `/public/features/*` under `bffEnabled` using the same
 prefix-and-flag pattern `Metrics.ts` already uses, so a future caller reaches
-the proxy rather than Consent directly, and the origin can go with the other
-two. What the decision does mean is that the endpoint is built for a consumer
-that does not exist — so its tests are the only proof it works, and no amount of
-exercising the app will tell anyone if it is broken.
+the proxy rather than Consent directly. What the decision does mean is that the
+endpoint is built for a consumer that does not exist — so its tests are the only
+proof it works, and no amount of exercising the app will tell anyone if it is
+broken.
+
+**BFF-mode `connect-src` will not reach `'self'` in one step after all.** 5-F6
+drops `apiUrl` and `bardApiUrl`, leaving `'self'` and the banner bucket. The
+bucket stays: a separate backlog item rewrites `notificationService.ts` to read
+environment-specific buckets, and proxying GCS is worth deciding once that
+lands rather than building against a URL shape about to change. Until then the
+banner fetch stays direct and the literal stays in the policy.
 
 `terraUrl` is never allowlisted: it is navigated to, not fetched. The
 development config also carries convenience origins the browser never
