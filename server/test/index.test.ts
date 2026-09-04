@@ -231,9 +231,7 @@ describe('handleServerError', () => {
     expect(request.log.error).toHaveBeenCalledWith({ err: thrown }, '[server] Unhandled error:')
   })
 
-  // A flood must not fill the error log: at `error` level the very thing the
-  // limiter exists to absorb becomes a second denial of service, this time on
-  // the log pipeline.
+  // A flood must not fill the error log
   it('logs a throttled request at warn and answers with the rate_limited code', async () => {
     const { RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } = await import('../src/security/rateLimit.js')
     const err = rateLimitPluginOptions.errorResponseBuilder!(

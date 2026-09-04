@@ -51,13 +51,8 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
 }
 
 /**
- * The app-level error handler. Every response body is generic — an upstream
- * error message can carry internal detail — except a throttled request, which
- * is an expected outcome rather than a fault: the generic message would leave
- * the client unable to tell throttling from a server error, and at `error`
- * level a flood would turn the log pipeline into a second denial of service.
- * The rate-limit headers the plugin set on the reply survive, because it sets
- * them before it throws.
+ * The app-level error handler. The body is always generic: an error message
+ * can carry internal detail, and no client branches on it.
  */
 export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
@@ -230,12 +225,6 @@ export async function buildApp(): Promise<AppInstance> {
 
     fastify.post('/auth/login', { config: { rateLimit: loginLimit } }, handleLogin)
     fastify.get('/auth/callback', { config: { rateLimit: callbackLimit }, errorHandler: handleCallbackError }, handleCallback)
-    // The client fetches this after sign-in and echoes the token in an
-    // X-CSRF-Token header on unsafe auth requests. Gated on an authenticated
-    // session (story 5-B): an anonymous request gets 401 and mints no session
-    // row — see the handler in auth/csrf.ts. After session rotation (Phase 5,
-    // 5-C) the pre-auth secret is discarded, so the client must (re)fetch this
-    // once login completes.
     fastify.get('/auth/csrf-token', handleCsrfToken)
     fastify.post('/auth/logout', { onRequest: fastify.csrfProtection }, handleLogout)
     fastify.get('/auth/me', { onRequest: fetchMetadataGuard }, getMe)
