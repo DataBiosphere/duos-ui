@@ -159,9 +159,6 @@ describe('error handler', () => {
 })
 
 describe('handleServerError', () => {
-  // Driven with a hand-built request and reply: that is the only way to put a
-  // specific `err` shape through the handler. The wiring itself is covered
-  // end-to-end by the /boom case above and by the buildApp case further down.
   function fakeRequest() {
     return { ip: '203.0.113.1', url: '/auth/login', log: { warn: vi.fn(), error: vi.fn() } }
   }

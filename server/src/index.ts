@@ -47,20 +47,9 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
 /**
  * The app-level error handler. The body is always generic: an error message
  * can carry internal detail, and no client branches on it.
- *
- * Named and exported rather than inlined at the registration site so the
- * status handling below is directly assertable — a request built by hand is
- * the only way to drive a specific `err` shape through it.
  */
 export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   request.log.error({ err }, '[server] Unhandled error:')
-  // Keeps two behaviours of the default handler this one now displaces on the
-  // routes built here: `status` is honoured alongside `statusCode` (libraries
-  // set either), and a non-error status is never used to answer an error — a
-  // 3xx would send a JSON body with no Location. Header propagation
-  // (`err.headers`) is deliberately not carried over: no error raised in this
-  // app sets it, and forwarding headers off an arbitrary error is a wider
-  // surface than the parity is worth.
   const status = err.statusCode ?? (err as { status?: number }).status ?? 500
   return reply.status(status >= 400 ? status : 500).send({ error: 'An unexpected error occurred.' })
 }
@@ -86,12 +75,7 @@ export async function buildApp(): Promise<AppInstance> {
     : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' }, trustProxy: TRUST_PROXY })
   ) as AppInstance
 
-  // Registered before any route: Fastify binds a route's error handler when
-  // the route is registered, so a handler set at the end of this function
-  // would only ever reach routes added afterwards (the tests' own) — every
-  // /auth/* and /health route would fall back to Fastify's default handler,
-  // which serialises `err.message` to the client. The encapsulated proxy
-  // declares its own error handler (ADR-010) and is unaffected either way.
+  // Registered before any routes so all errors, including those in plugins, are caught.
   fastify.setErrorHandler(handleServerError)
 
   // Path to the static client config.json — computed once so both the
