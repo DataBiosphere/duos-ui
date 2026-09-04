@@ -61,7 +61,8 @@ Under `bffEnabled`, sign-in has no popup and no opener, so it keeps
 
 COEP demands a CORP or CORS header on every cross-origin subresource. The banner
 bucket and the two direct upstreams send neither, so enabling it would block
-them. It stays off until those become same-origin (5-F6).
+them. Two of the three became same-origin in 5-F6; COEP stays off while the
+banner bucket is still fetched directly.
 
 ### HSTS is production-only
 
@@ -171,30 +172,26 @@ exists — marking it unauthenticated would silently turn *identified* metrics
 anonymous. Dedicated `/public/*` endpoints are the answer, and they are story
 5-F6.
 
-One entry in that table describes an intention rather than the tree as it
-stands: `FeatureFlag.ts` has **no caller anywhere in `src/`** — only its own
-unit test — and nothing else calls `getUpstreamApiUrl` outside the legacy-only
-`oidcBroker.ts`. BFF-mode `connect-src` therefore allowlists `apiUrl` for a flow
-that does not run today.
+**Story 5-F6 has since closed two of those three**, and the field list is now
+empty under `bffEnabled`. Feature flags go to `/public/features/*` and anonymous
+metrics to `/public/metrics/event` — dedicated endpoints that inject no session
+token, structurally rather than by configuration (`server/src/proxy/publicProxy.ts`).
+`apiUrl` and `bardApiUrl` left the allowlist with them.
 
-**Settled 2026-09-04: the module stays**, against a future caller. Dropping the
-origin now would greet whoever wires it up with a blocked request and no obvious
-cause, and while the policy is report-only the entry costs nothing.
+One entry in that table always described an intention rather than the tree:
+`FeatureFlag.ts` has **no caller anywhere in `src/`**, only its own unit test.
+**Settled 2026-09-04: the module stays**, against a future caller, and 5-F6
+repointed it at the new prefix so whoever wires it up reaches the proxy rather
+than Consent. The consequence is narrow but real — the endpoint has no consumer
+to validate it, so its tests are the only proof it works, and no amount of
+exercising the app would reveal it broken.
 
-It does not hold `apiUrl` in the allowlist, though. Story 5-F6 points
-`FeatureFlag.ts` at `/public/features/*` under `bffEnabled` using the same
-prefix-and-flag pattern `Metrics.ts` already uses, so a future caller reaches
-the proxy rather than Consent directly. What the decision does mean is that the
-endpoint is built for a consumer that does not exist — so its tests are the only
-proof it works, and no amount of exercising the app will tell anyone if it is
-broken.
-
-**BFF-mode `connect-src` will not reach `'self'` in one step after all.** 5-F6
-drops `apiUrl` and `bardApiUrl`, leaving `'self'` and the banner bucket. The
-bucket stays: a separate backlog item rewrites `notificationService.ts` to read
-environment-specific buckets, and proxying GCS is worth deciding once that
-lands rather than building against a URL shape about to change. Until then the
-banner fetch stays direct and the literal stays in the policy.
+**BFF-mode `connect-src` did not reach `'self'` outright.** It is `'self'` plus
+the banner bucket. The bucket stays because a separate backlog item first
+rewrites `notificationService.ts` to read environment-specific buckets, and
+proxying GCS — the one endpoint of the three with no existing pattern to copy —
+is worth deciding once that lands rather than building against a URL shape about
+to change. Until then the banner fetch stays direct and the literal stays here.
 
 `terraUrl` is never allowlisted: it is navigated to, not fetched. The
 development config also carries convenience origins the browser never
@@ -301,10 +298,10 @@ is a much larger piece of work than this story.
   returns null for that by specification, so it always takes the download
   fallback and the iframe is never created. Repairing that preview means
   adding `blob:` back to this directive.
-- BFF-mode `connect-src` cannot reach `'self'` alone until the three direct
-  flows move to dedicated public BFF endpoints (`/public/notifications`,
-  `/public/features/*`, `/public/metrics/event`). That is the follow-up to this
-  story, and it is what will let this allowlist shrink.
+- BFF-mode `connect-src` is `'self'` plus the banner bucket. Story 5-F6 moved
+  feature flags and anonymous metrics onto `/public/features/*` and
+  `/public/metrics/event`; `/public/notifications` waits on the backlog item
+  that repoints the notifications service at environment-specific buckets.
 - `img-src` carries `'self'` and `data:` only. `blob:` is deliberately absent:
   the audit found no `<img src="blob:">` in the tree — every object URL the app
   mints is a download, which needs no directive, or the dead preview branch in

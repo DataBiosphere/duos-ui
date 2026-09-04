@@ -1,4 +1,4 @@
-import { Config } from 'src/libs/config'
+import { BFF_PUBLIC_FEATURES_PREFIX, Config } from 'src/libs/config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
 export interface FeatureFlag {
@@ -8,21 +8,38 @@ export interface FeatureFlag {
   updateDate: number
 }
 
-// BFF NOTE: /feature must stay at the absolute Consent URL post-cutover — it
-// is unauthenticated and consulted pre-login (e.g. NHGRI_RESTRICTED_DAC), and
-// the session-guarded BFF proxy returns 401 for sessionless requests. Hence
-// getUpstreamApiUrl, never the proxied getApiUrl.
+// BFF NOTE: /feature is unauthenticated and consulted pre-login (e.g.
+// NHGRI_RESTRICTED_DAC), so it cannot ride the session-guarded /duos-api proxy,
+// which 401s a sessionless request. Until story 5-F6 that meant staying on the
+// absolute Consent URL and keeping `apiUrl` in the BFF `connect-src` allowlist.
+// It now has a dedicated public endpoint instead — same upstream path, no
+// session read, no token injected — so under bffEnabled these calls are
+// same-origin and the allowlist entry is gone. Legacy keeps getUpstreamApiUrl,
+// never the proxied getApiUrl.
+//
+// Note for anyone changing this: nothing in src/ calls either function today
+// (only the unit tests do), so the app cannot be exercised to check the
+// endpoint. test/libs/ajax/FeatureFlag.spec.ts and
+// server/test/publicProxy.test.ts are the only proof this pair lines up.
+const featuresUrl = async (path: string): Promise<string> => {
+  if (await Config.isBffEnabled()) {
+    return `${BFF_PUBLIC_FEATURES_PREFIX}${path}`
+  }
+  return `${await Config.getUpstreamApiUrl()}/feature${path}`
+}
+
 export async function getAllFeatureFlags(): Promise<Record<string, FeatureFlag> | FeatureFlag[]> {
-  const url = `${await Config.getUpstreamApiUrl()}/feature`
+  const url = await featuresUrl('')
   // authOpts() stays for legacy parity (signed-in legacy users send their
   // token even though /feature doesn't need it); in BFF mode the fetch
-  // adapter strips the Authorization header before sending.
+  // adapter strips the Authorization header before sending, and the endpoint
+  // drops anything that survived that before forwarding.
   const res = await fetchGet<Record<string, FeatureFlag> | FeatureFlag[]>(url, Config.authOpts())
   return res.data
 }
 
 export async function getFeatureFlag(key: string): Promise<FeatureFlag | undefined> {
-  const url = `${await Config.getUpstreamApiUrl()}/feature/${encodeURIComponent(key)}`
+  const url = await featuresUrl(`/${encodeURIComponent(key)}`)
   try {
     const res = await fetchGet<FeatureFlag>(url, Config.authOpts())
     return res.data

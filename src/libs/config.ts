@@ -111,6 +111,19 @@ const BFF_TDR_PREFIX = '/tdr-api'
 export const BFF_BARD_PREFIX = '/bard-api'
 
 /**
+ * The public BFF endpoints (story 5-F6), which are a different thing from the
+ * prefixes above: those proxies attach the session's token and 401 without a
+ * session, while these two carry no credentials in either direction and are
+ * reachable pre-login. They exist so the two remaining direct browser
+ * connections become same-origin, which is what lets BFF-mode `connect-src`
+ * drop the Consent and Bard origins (server/src/security/csp.ts).
+ *
+ * Each must match the path server/src/proxy/publicProxy.ts registers.
+ */
+export const BFF_PUBLIC_FEATURES_PREFIX = '/public/features'
+export const BFF_PUBLIC_METRICS_PREFIX = '/public/metrics'
+
+/**
  * Base URL for DUOS API calls.
  */
 export const getApiUrl = async (): Promise<string> => {

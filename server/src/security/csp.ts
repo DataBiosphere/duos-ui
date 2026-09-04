@@ -11,14 +11,15 @@ import { CSP_REPORT_GROUP, CSP_REPORT_PATH } from './cspReport.js'
  *     The development config also carries convenience origins the browser
  *     never connects to; sweeping up every URL-shaped value would allowlist
  *     them by accident.
- *  2. **The allowlist is mode-specific.** Under `bffEnabled`, ECM and TDR are
- *     reached through same-origin proxies, so their origins must NOT appear.
- *     Legacy deployments still call them directly and must keep them until
- *     Epic 6 retires the legacy client.
+ *  2. **The allowlist is mode-specific.** Under `bffEnabled` every configured
+ *     upstream is reached through a same-origin endpoint, so no configured
+ *     origin appears at all — BFF-mode `connect-src` is `'self'` plus the
+ *     banner bucket. Legacy deployments still call all four directly and must
+ *     keep them until Epic 6 retires the legacy client.
  *
  * See docs/plans/bff_adrs/ADR-013-content-security-policy.md for the audit
- * that produced the inventory, and for the follow-up that collapses BFF-mode
- * `connect-src` to `'self'`.
+ * that produced the inventory; story 5-F6 completed the follow-up it names by
+ * moving the last two direct flows onto public BFF endpoints.
  */
 
 /**
@@ -46,14 +47,23 @@ export const BANNER_SOURCE = 'https://storage.googleapis.com/broad-duos-banners/
 /**
  * config.json fields that name an origin the *browser* connects to.
  *
- * BFF mode keeps only the two flows that stay direct after cutover:
- *   - `apiUrl` — unauthenticated feature flags (`/feature`, `/feature/:key`),
- *     consulted pre-login, so the session-guarded proxy would 401 them.
- *   - `bardApiUrl` — anonymous metrics, which deliberately carry no
- *     credentials; identified events go through the /bard-api proxy.
- * `ecmApiUrl` and `tdrApiUrl` are absent on purpose: those calls are proxied.
+ * Empty under the BFF since story 5-F6: every browser connection is now
+ * same-origin, and `'self'` covers it.
+ *   - `ecmApiUrl` and `tdrApiUrl` went first — those calls are proxied.
+ *   - `apiUrl` was held by the unauthenticated feature flags (`/feature`,
+ *     `/feature/:key`), which are read pre-login and so could not use the
+ *     session-guarded proxy. They now go to `/public/features/*`, which injects
+ *     no token (server/src/proxy/publicProxy.ts).
+ *   - `bardApiUrl` was held by anonymous metrics, which deliberately carry no
+ *     credentials. They now go to `/public/metrics/event`, on the same terms.
+ *
+ * `BANNER_SOURCE` is what stops this reducing to `'self'` outright. The banner
+ * fetch is the one flow with no BFF endpoint yet: a backlog item first rewrites
+ * `notificationService.ts` to read environment-specific buckets, and building
+ * the endpoint against a URL shape that is about to change would mean writing
+ * it twice. It stays direct, and so stays in the policy, until that lands.
  */
-const BFF_CONNECT_FIELDS = ['apiUrl', 'bardApiUrl'] as const
+const BFF_CONNECT_FIELDS: readonly string[] = []
 
 /**
  * Legacy mode calls all four upstreams directly from the browser.

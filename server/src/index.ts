@@ -26,6 +26,7 @@ import { apiProxy } from './proxy/apiProxy.js'
 import { ECM_PROXY_PREFIX, ecmProxy } from './proxy/ecmProxy.js'
 import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
+import { publicProxy } from './proxy/publicProxy.js'
 import { TRUST_PROXY, configPath, readConfig } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -117,7 +118,17 @@ export async function buildApp(): Promise<AppInstance> {
   // reports too. Inert until 5-F3's policy points a browser at it.
   await fastify.register(cspReportRoute)
 
-  // 3. DB pool + session — registered only when the deployment provides the
+  // 3. The public BFF endpoints (Phase 5, story 5-F6) — the feature flags read
+  // pre-login and the anonymous Bard event. Registered here beside the report
+  // sink, outside both switches below, and deliberately not inside the
+  // `bffEnabled` block the other proxies live in: they carry no credentials, so
+  // they depend on neither the session infrastructure nor the cutover, and
+  // gating them on either would make a pre-login flow unavailable exactly when
+  // it is needed. Each of the two upstreams is optional and checked
+  // independently inside — see proxy/publicProxy.ts.
+  await fastify.register(publicProxy)
+
+  // 4. DB pool + session — registered only when the deployment provides the
   // BFF database configuration. Session infrastructure is deployment config
   // (env vars via helmfile/compose), not a runtime flag: every pod of a given
   // deployment behaves identically, with no network dependency at boot.
@@ -207,7 +218,7 @@ export async function buildApp(): Promise<AppInstance> {
     fastify.log.info('[server] DUOS_DB_HOST is not set — starting without DB/session infrastructure (legacy client-side auth)')
   }
 
-  // 4. BFF auth routes — the cutover switch. Read at startup from the same
+  // 5. BFF auth routes — the cutover switch. Read at startup from the same
   // config object the /config.json route below serves, so the server and
   // client agree on bffEnabled by construction. A missing key defaults to
   // false and the routes stay dark — the fail-safe is the legacy
