@@ -81,19 +81,19 @@ export async function buildApp(): Promise<AppInstance> {
   // its onRequest hook runs ahead of every route.
   await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev }))
 
-  // 2. DB pool + session — registered only when the deployment provides the
-  // BFF database configuration.
-  // Gives story 5-F3's `report-to` group an address. The `report-uri`
-  // fallback in the same policy needs no header, but Chrome prefers
-  // `report-to`. Harmless before the policy exists — no browser will post.
+  // 2. The Reporting-Endpoints header. Gives story 5-F3's `report-to` group
+  // an address. The `report-uri` fallback in the same policy needs no header,
+  // but Chrome prefers `report-to`. Harmless before the policy exists — no
+  // browser will post.
   fastify.addHook('onRequest', async (_request, reply) => {
     reply.header('reporting-endpoints', REPORTING_ENDPOINTS_HEADER)
   })
 
-  // `global: false` — this same instance serves every SPA asset through
-  // @fastify/vite, and one page load fetches many of them, so a low global cap
-  // would block page loads outright. Limits are attached per route instead.
-  // Story 5-G registers the auth-route limits on this same plugin.
+  // 3. Rate limiting. `global: false` — this same instance serves every SPA
+  // asset through @fastify/vite, and one page load fetches many of them, so a
+  // low global cap would block page loads outright. Limits are attached per
+  // route instead. Story 5-G registers the auth-route limits on this same
+  // plugin.
   //
   // The default store is per process, so a deployment's real ceiling is this
   // number times the replica count, and it resets on every restart. That is
@@ -101,18 +101,13 @@ export async function buildApp(): Promise<AppInstance> {
   // beneath it, not the control.
   await fastify.register(fastifyRateLimit, { global: false })
 
-  // 2. The CSP violation report sink (Phase 5, story 5-F2). Registered outside
+  // 4. The CSP violation report sink (Phase 5, story 5-F2). Registered outside
   // both switches below, like the headers above: a legacy deployment collects
   // reports too. Inert until 5-F3's policy points a browser at it.
   await fastify.register(cspReportRoute)
 
-  // 3. DB pool + session — registered only when the deployment provides the
-  // BFF database configuration. Session infrastructure is deployment config
-  // (env vars via helmfile/compose), not a runtime flag: every pod of a given
-  // deployment behaves identically, with no network dependency at boot.
-  // Directing users to the BFF sign-in flow is a separate switch — the
-  // boolean `bffEnabled` in config.json, checked at startup — see
-  // docs/plans/BFF_Overview.md.
+  // 5. DB pool + session — registered only when the deployment provides the
+  // BFF database configuration.
   if (process.env.DUOS_DB_HOST) {
     fastify.log.info('[server] DUOS_DB_HOST is set — enabling BFF session infrastructure')
 
@@ -196,12 +191,7 @@ export async function buildApp(): Promise<AppInstance> {
     fastify.log.info('[server] DUOS_DB_HOST is not set — starting without DB/session infrastructure (legacy client-side auth)')
   }
 
-  // 4. BFF auth routes — the cutover switch. Read at startup from the same
-  // config object the /config.json route below serves, so the server and
-  // client agree on bffEnabled by construction. A missing key defaults to
-  // false and the routes stay dark — the fail-safe is the legacy
-  // client-side flow. See docs/plans/BFF_Overview.md § Rollout strategy.
-  // 3. BFF auth routes — the cutover switch. Read at startup from the same
+  // 6. BFF auth routes — the cutover switch. Read at startup from the same
   // config object the /config.json route below serves.
   const { bffEnabled } = clientConfig
   if (bffEnabled === true) {
