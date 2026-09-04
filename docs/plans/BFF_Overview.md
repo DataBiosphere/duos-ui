@@ -294,6 +294,27 @@ imported by the server and all five test harnesses, so changing `sameSite` or
   PKCE, token exchange, and ID-token validation (signature, `iss`, `aud`,
   `exp`) rather than hand-rolled crypto.
 
+- **Application-level rate limiting is a backstop, not the primary control**
+  (story 5-G) — `@fastify/rate-limit`'s default store is per-process, so in a
+  multi-pod deployment the effective limit multiplies by the replica count and
+  resets on every restart. Production flood protection belongs at the
+  ingress/edge or a shared store; the in-app limits are a floor against a
+  flood from one source, not a distributed one. The plugin is registered with
+  `global: false` because the same Fastify instance serves every SPA asset
+  through `@fastify/vite` — only the auth routes opt in.
+  `/auth/csrf-token` is gated on authentication instead (5-B) and
+  `/auth/logout` on the CSRF token, because a low cap on either breaks
+  multiple tabs and the client's retry path. Limits are per client IP and
+  environment-overridable, so tightening them from measured traffic is a
+  deployment change rather than a code release. Three items stay open and are
+  recorded in `server/src/security/rateLimit.ts`: edge or shared-store
+  enforcement (infrastructure); confirming that the httpd sidecar sets or
+  appends `X-Forwarded-For` rather than passing a client-supplied header
+  through; and the unauthenticated, CSRF-exempt `POST /duos-api/support/*`
+  proxy writes, which no limit covers yet. A caller inside the trusted ranges
+  (`TRUST_PROXY` trusts `uniquelocal`) can still choose its own bucket — a
+  property of `TRUST_PROXY`, and another reason the edge is the real control.
+
 ## Target Architecture Sequence Diagrams
 
 Three flows are shown: sign-in (including B2C provider selection, PKCE, and

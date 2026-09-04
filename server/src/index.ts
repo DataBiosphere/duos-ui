@@ -9,10 +9,12 @@ import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
+import rateLimit from '@fastify/rate-limit'
 import { createPgSessionStore } from './session/pgStore.js'
 import { sessionPluginOptions } from './session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
 import { fetchMetadataGuard } from './security/fetchMetadata.js'
+import { RATE_LIMIT_ERROR_CODE, isRateLimitError, loginRateLimit, rateLimitPluginOptions } from './security/rateLimit.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
 import { handleCallback } from './auth/callback.js'
@@ -45,14 +47,25 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
 }
 
 /**
- * The app-level error handler. The body is always generic: an error message
- * can carry internal detail, and no client branches on it.
+ * The app-level error handler. The body is always generic — an error message
+ * can carry internal detail — except a throttled request, which is an
+ * expected outcome rather than a fault: the generic message would leave the
+ * client unable to tell throttling from a server error, and at `error` level
+ * a flood would turn the log pipeline into a second denial of service. The
+ * rate-limit headers the plugin set on the reply survive, because it sets
+ * them before it throws.
  *
- * Named and exported rather than inlined at the registration site so the
- * status handling below is directly assertable — a request built by hand is
- * the only way to drive a specific `err` shape through it.
+ * Named and exported rather than inlined at the registration site so both
+ * branches, and the status handling below, are directly assertable — a
+ * request built by hand is the only way to drive a specific `err` shape
+ * through it, and the child-logger factory a route uses is fixed when that
+ * route registers, so a built app's request.log cannot be stubbed afterwards.
  */
 export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
+  if (isRateLimitError(err)) {
+    request.log.warn({ ip: request.ip, url: request.url }, '[server] rate limit exceeded')
+    return reply.status(err.statusCode ?? 429).send({ error: RATE_LIMIT_ERROR_CODE })
+  }
   request.log.error({ err }, '[server] Unhandled error:')
   // Keeps two behaviours of the default handler this one now displaces on the
   // routes built here: `status` is honoured alongside `statusCode` (libraries
@@ -93,6 +106,23 @@ export async function buildApp(): Promise<AppInstance> {
   // which serialises `err.message` to the client. The encapsulated proxy
   // declares its own error handler (ADR-010) and is unaffected either way.
   fastify.setErrorHandler(handleServerError)
+
+  // Rate limiting. Registered at app level, ahead of both cutover switches
+  // and every route: the plugin attaches its per-route hook from an `onRoute`
+  // listener, so it has to be in place before any route registers, and the
+  // CSP report endpoint (story 5-F2) sits outside the `bffEnabled` block and
+  // shares this one registration. A second `register` call would install a
+  // second `onRoute` listener.
+  //
+  // `global: false` is what makes an app-level registration safe: only a
+  // route carrying its own `config.rateLimit` is counted. This instance also
+  // serves every SPA asset through @fastify/vite, and one page load fetches
+  // many of them, so a global cap would 429 an ordinary page load. Which
+  // routes opt in, which deliberately do not, and why the numbers are what
+  // they are all live in security/rateLimit.ts. These limits are a backstop;
+  // the per-process store means production flood protection belongs at the
+  // ingress/edge.
+  await fastify.register(rateLimit, rateLimitPluginOptions)
 
   // Path to the static client config.json — computed once so both the
   // /config.json route below and the bffEnabled startup check read the same
@@ -212,7 +242,14 @@ export async function buildApp(): Promise<AppInstance> {
       throw new Error('bffEnabled is true in config.json but DUOS_API_URL is not set — /auth/me and the API proxy both forward to it')
     }
     fastify.log.info('[server] bffEnabled is true — registering BFF auth routes and the API proxy')
-    fastify.post('/auth/login', handleLogin)
+
+    // Resolved once, so the effective number reaches the log an operator
+    // reads when a limit is questioned — and so a bad override fails startup
+    // here rather than on the first request.
+    const loginLimit = loginRateLimit()
+    fastify.log.info({ login: loginLimit.max }, '[server] auth rate limits, in requests per minute per client IP')
+
+    fastify.post('/auth/login', { config: { rateLimit: loginLimit } }, handleLogin)
     fastify.get('/auth/callback', handleCallback)
     // The client fetches this after sign-in and echoes the token in an
     // X-CSRF-Token header on unsafe auth requests. Gated on an authenticated
