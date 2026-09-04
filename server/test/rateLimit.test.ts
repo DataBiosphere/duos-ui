@@ -1,7 +1,9 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import type { FastifyRequest } from 'fastify'
 import {
+  CALLBACK_MAX_ENV_VAR,
   LOGIN_MAX_ENV_VAR,
+  callbackRateLimit,
   isRateLimitError,
   loginRateLimit,
   rateLimitPluginOptions,
@@ -69,5 +71,26 @@ describe('loginRateLimit', () => {
     vi.stubEnv(LOGIN_MAX_ENV_VAR, value)
 
     expect(() => loginRateLimit()).toThrow(LOGIN_MAX_ENV_VAR)
+  })
+})
+
+describe('callbackRateLimit', () => {
+  // Deliberately more generous than login: guessing is already constrained by
+  // the signed session state and PKCE, so a tight limit here would only break
+  // legitimate multi-tab sign-ins.
+  it('defaults to 60 requests a minute', () => {
+    expect(callbackRateLimit()).toEqual({ max: 60, timeWindow: '1 minute' })
+  })
+
+  it('honors the environment override', () => {
+    vi.stubEnv(CALLBACK_MAX_ENV_VAR, '200')
+
+    expect(callbackRateLimit().max).toBe(200)
+  })
+
+  it('throws when the override is not a positive integer', () => {
+    vi.stubEnv(CALLBACK_MAX_ENV_VAR, '0')
+
+    expect(() => callbackRateLimit()).toThrow(CALLBACK_MAX_ENV_VAR)
   })
 })

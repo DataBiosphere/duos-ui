@@ -1,7 +1,7 @@
 import type { RateLimitOptions, RateLimitPluginOptions } from '@fastify/rate-limit'
 
 /**
- * Rate limiting for the auth endpoints.
+ * Rate limiting for the auth endpoints (Phase 5, stories 5-G2 and 5-G3).
  *
  * **This is a backstop, not the primary control.** The default
  * `@fastify/rate-limit` store is per-process: in a multi-pod deployment the
@@ -23,8 +23,8 @@ import type { RateLimitOptions, RateLimitPluginOptions } from '@fastify/rate-lim
  * | Route              | Limited | Why                                                       |
  * |--------------------|---------|-----------------------------------------------------------|
  * | `POST /auth/login` | yes     | Session-row creation and OIDC discovery flood control     |
- * | `GET /auth/callback` | not yet | Story DT-4022 (5-G3). It is a top-level navigation from B2C, so a 429 needs to land the user back in the SPA rather than send a JSON body — a separate change with its own client half |
- * | `/auth/csrf-token` | no      | The authentication gate is the control; a low cap breaks multiple tabs and the client's retry path |
+ * | `GET /auth/callback` | yes   | Callback flood control only — generous on purpose         |
+ * | `/auth/csrf-token` | no      | The authentication gate (5-B) is the control; a low cap breaks multiple tabs and the client's retry path |
  * | `/auth/logout`     | no      | Already gated by the CSRF guard                           |
  * | SPA assets         | no      | See `global: false` above                                 |
  * | `POST /duos-api/support/request`, `POST /duos-api/support/upload` | **no — open gap** | See below |
@@ -48,11 +48,11 @@ import type { RateLimitOptions, RateLimitPluginOptions } from '@fastify/rate-lim
  * 429 fits the proxy's own error shape under ADR-010), so it is named here
  * rather than silently omitted, and left to its own story.
  *
- * ## Why the default is not the lower number first proposed
+ * ## Why the defaults are not the lower numbers first proposed
  *
  * Many users share one institutional NAT egress IP, so a per-IP bucket is
- * really a per-org bucket. The default starts deliberately generous and is
- * meant to be tightened from measured traffic — which is why it is
+ * really a per-org bucket. The defaults start deliberately generous and
+ * are meant to be tightened from measured traffic — which is why they are
  * environment-overridable (see below) rather than fixed in code: tightening
  * is then a deployment config change, not a code release.
  *
@@ -88,10 +88,12 @@ import type { RateLimitOptions, RateLimitPluginOptions } from '@fastify/rate-lim
 export const RATE_LIMIT_ERROR_CODE = 'rate_limited'
 const RATE_LIMIT_ERROR_MARKER = 'DUOS_RATE_LIMITED'
 
-/** Names the tuning knob so tests and docs cannot drift from the read below. */
+/** Names the tuning knobs so tests and docs cannot drift from the reads below. */
 export const LOGIN_MAX_ENV_VAR = 'DUOS_RATE_LIMIT_LOGIN_MAX'
+export const CALLBACK_MAX_ENV_VAR = 'DUOS_RATE_LIMIT_CALLBACK_MAX'
 
 const DEFAULT_LOGIN_MAX = 30
+const DEFAULT_CALLBACK_MAX = 60
 const TIME_WINDOW = '1 minute'
 
 /**
@@ -113,6 +115,11 @@ export const rateLimitPluginOptions = {
     new Error(`Rate limit exceeded, retry in ${context.after}`),
     { statusCode: context.statusCode, code: RATE_LIMIT_ERROR_MARKER },
   ),
+  // NOTE: a `cache` set here would be silently ignored. The plugin reads
+  // `cache` for the parent store only, and a route that carries its own
+  // `config.rateLimit` gets a child store built from the *merged route*
+  // params, which never inherit it. To size the LRU, put `cache` in the
+  // objects the two functions below return.
 } as const satisfies RateLimitPluginOptions
 
 export function isRateLimitError(err: unknown): boolean {
@@ -121,4 +128,9 @@ export function isRateLimitError(err: unknown): boolean {
 
 export function loginRateLimit(): RateLimitOptions {
   return { max: maxFromEnv(LOGIN_MAX_ENV_VAR, DEFAULT_LOGIN_MAX), timeWindow: TIME_WINDOW }
+}
+
+/** Route `config.rateLimit` for `GET /auth/callback`. */
+export function callbackRateLimit(): RateLimitOptions {
+  return { max: maxFromEnv(CALLBACK_MAX_ENV_VAR, DEFAULT_CALLBACK_MAX), timeWindow: TIME_WINDOW }
 }
