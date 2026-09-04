@@ -4,7 +4,7 @@ import path from 'node:path'
 import http from 'node:http'
 import https from 'node:https'
 import open from 'open'
-import Fastify, { FastifyError, FastifyInstance } from 'fastify'
+import Fastify, { FastifyError, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
@@ -48,6 +48,16 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
   return defaultValue
 }
 
+/**
+ * The app-level error handler. The body is always generic: an error message
+ * can carry internal detail, and no client branches on it.
+ */
+export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
+  request.log.error({ err }, '[server] Unhandled error:')
+  const status = err.statusCode ?? (err as { status?: number }).status ?? 500
+  return reply.status(status >= 400 ? status : 500).send({ error: 'An unexpected error occurred.' })
+}
+
 export async function buildApp(): Promise<AppInstance> {
   // The app always sits behind exactly one reverse-proxy hop (the
   // httpd-terra-proxy sidecar in k8s, or the `proxy` container in
@@ -68,6 +78,9 @@ export async function buildApp(): Promise<AppInstance> {
       })
     : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' }, trustProxy: TRUST_PROXY })
   ) as AppInstance
+
+  // Registered before any routes so all errors, including those in plugins, are caught.
+  fastify.setErrorHandler(handleServerError)
 
   // Path to the static client config.json — computed once so both the
   // /config.json route below and the bffEnabled startup check read the same
@@ -178,25 +191,11 @@ export async function buildApp(): Promise<AppInstance> {
     }))
 
     // CSRF protection for cookie-authenticated, state-changing auth routes
-    // (currently POST /auth/logout). SameSite=Lax withholds the session cookie
-    // from cross-site POSTs, but is not sufficient alone here: dev/staging live
-    // under *.broadinstitute.org, where SameSite treats every sibling subdomain
-    // as same-site — a compromised sibling could still forge cookie-bearing
-    // POSTs. CSRF tokens don't depend on the registrable domain. The secret is
-    // stored in the session, so it must be registered after @fastify/session.
-    //
-    // The options — including the header-only `getToken` narrowing — live in
-    // auth/csrf.ts so the test harnesses register the plugin exactly as this
-    // does. Inline, they drifted: see that file.
+    // (currently POST /auth/logout).
     await fastify.register(fastifyCsrf, csrfPluginOptions)
 
     // Warm the B2C OIDC discovery cache so the first login doesn't pay the
-    // discovery round-trip. Gated on the Azure env vars being present: DB/
-    // session infra (this block) can be enabled ahead of B2C being configured
-    // during the phased rollout, and warming up against unset vars would log
-    // an error on every single startup for no benefit. Not awaited and never
-    // fatal either way — on failure the error is logged and getOidcConfig()
-    // retries lazily on first use.
+    // discovery round-trip.
     if (process.env.DUOS_AZURE_ISSUER_URL && process.env.DUOS_AZURE_CLIENT_ID && process.env.DUOS_AZURE_CLIENT_SECRET) {
       getOidcConfig().catch((err: unknown) => {
         fastify.log.error({ err }, '[auth] B2C OIDC discovery warm-up failed')
@@ -221,42 +220,15 @@ export async function buildApp(): Promise<AppInstance> {
     if (!process.env.DUOS_DB_HOST) {
       throw new Error('bffEnabled is true in config.json but DUOS_DB_HOST is not set — the BFF auth routes require the session infrastructure to be configured')
     }
-    // Both /auth/me and the API proxy forward to this upstream, so a cutover
-    // without it is a deployment that boots, passes health checks, and then
-    // fails on the first user request. Checked here rather than left to the
-    // proxy's own requireEnv so the error arrives at startup, next to the
-    // switch that made it mandatory.
     if (!process.env.DUOS_API_URL) {
       throw new Error('bffEnabled is true in config.json but DUOS_API_URL is not set — /auth/me and the API proxy both forward to it')
     }
     fastify.log.info('[server] bffEnabled is true — registering BFF auth routes and the API proxy')
     fastify.post('/auth/login', handleLogin)
     fastify.get('/auth/callback', handleCallback)
-    // The client fetches this after sign-in and echoes the token in an
-    // X-CSRF-Token header on unsafe auth requests. Gated on an authenticated
-    // session (story 5-B): an anonymous request gets 401 and mints no session
-    // row — see the handler in auth/csrf.ts. After session rotation (Phase 5,
-    // 5-C) the pre-auth secret is discarded, so the client must (re)fetch this
-    // once login completes.
     fastify.get('/auth/csrf-token', handleCsrfToken)
-    // /auth/login is deliberately exempt from CSRF: it is pre-authentication
-    // (no token to have fetched yet), and login CSRF is neutralized by the
-    // PKCE state binding the flow to the session. Only logout is guarded.
     fastify.post('/auth/logout', { onRequest: fastify.csrfProtection }, handleLogout)
-    // /auth/me is a safe GET here, but it calls Consent's state-changing
-    // GET /api/user/me server-side, so it carries the Fetch Metadata guard the
-    // proxies get from their shared machinery (story 5-B; see
-    // security/fetchMetadata.ts). /auth/login and /auth/callback must NOT get
-    // it — the callback is a legitimate cross-site navigation from B2C.
     fastify.get('/auth/me', { onRequest: fetchMetadataGuard }, getMe)
-
-    // The API proxy (Phase 3). Registered here, inside both switches, rather
-    // than alongside /health: it depends on @fastify/cookie, @fastify/session
-    // and @fastify/csrf-protection, all of which are registered above only when
-    // DUOS_DB_HOST is set. Gating it on bffEnabled too keeps it dark until
-    // cutover — the client does not call /duos-api until Phase 4 points
-    // getApiUrl() at it — so a deployment running the legacy client-side flow
-    // exposes no proxy route at all.
     await fastify.register(apiProxy)
 
     // The single-feature upstream proxies. Same gates as the DUOS API proxy,
@@ -287,16 +259,7 @@ export async function buildApp(): Promise<AppInstance> {
   // Client config — intercepted via onRequest rather than a route, because
   // @fastify/vite's production static plugin (wildcard: false) walks build/
   // and registers its own explicit GET/HEAD route for every file it finds
-  // there, including config.json. A competing `fastify.get('/config.json', ...)`
-  // collides with that at startup (FST_ERR_DUPLICATED_ROUTE); onRequest fires
-  // before that nested route's handler regardless of which scope declared it,
-  // so this lets DUOS_API_URL override the static file's `apiUrl` without
-  // fighting Vite for the route — see config.ts for why.
-  // HEAD must be intercepted along with GET: the static plugin registers both,
-  // so a HEAD that fell through would describe the raw un-overridden file and
-  // disagree with GET's body (mismatched Content-Length for caches/validators).
-  // Node itself omits the body for HEAD responses; sending the same payload
-  // yields matching headers.
+  // there, including config.json.
   fastify.addHook('onRequest', async (request, reply) => {
     if ((request.method === 'GET' || request.method === 'HEAD')
       && (request.url === '/config.json' || request.url.startsWith('/config.json?'))) {
@@ -313,15 +276,8 @@ export async function buildApp(): Promise<AppInstance> {
 
   await fastify.vite.ready()
 
-  // SPA fallback — @fastify/vite sets up the Vite middleware and reply.html decorator
-  // but does not register routes; we wire the catch-all ourselves.
+  // SPA fallback
   fastify.setNotFoundHandler((_req, reply) => reply.html())
-
-  // The encapsulated proxy declares its own error handler (ADR-010).
-  fastify.setErrorHandler((err: FastifyError, request, reply) => {
-    request.log.error({ err }, '[server] Unhandled error:')
-    return reply.status(err.statusCode ?? 500).send({ error: 'An unexpected error occurred.' })
-  })
 
   return fastify
 }

@@ -113,12 +113,10 @@ describe(`POST ${CSP_REPORT_PATH}`, () => {
   beforeEach(async () => {
     app = Fastify({ logger: false })
     warn = vi.fn()
-    // Reports log through request.log; the dropped tally logs through app.log.
-    // Under `logger: false` those are the same abstract-logging object, but
-    // stubbing both keeps the test honest about which one each line uses.
-    app.addHook('onRequest', async (request) => {
-      request.log.warn = warn as unknown as typeof request.log.warn
-    })
+    // Every line the route writes — the report lines and the dropped tally —
+    // goes through `app.log`, because `logLevel: 'silent'` silences
+    // `request.log` for this route. Stubbing `app.log.warn` therefore captures
+    // all of them.
     app.log.warn = warn as unknown as typeof app.log.warn
     await app.register(cspReportRoute)
 
