@@ -182,15 +182,33 @@ describe('handleServerError', () => {
     expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
   })
 
-  it('honors err.status when the error carries no statusCode', async () => {
+  it('answers with 500 when the error carries no status at all', async () => {
     const { handleServerError } = await import('../src/index.js')
-    const err = Object.assign(new Error('bad input'), { status: 400 })
+    const reply = fakeReply()
+
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    handleServerError(new Error('internal secret data') as any, fakeRequest() as any, reply as any)
+
+    expect(reply.status).toHaveBeenCalledWith(500)
+    expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
+  })
+
+  // A 4xx message reads like client-safe text, so it is the case most likely to
+  // tempt a future edit that forwards err.message. It must not: the status is
+  // the only part of the error that reaches the client, and the body stays the
+  // same generic string as a 5xx. Here 'bad input' names a column that the
+  // client must never see.
+  it('honors err.status when the error carries no statusCode, and still hides the message', async () => {
+    const { handleServerError } = await import('../src/index.js')
+    const err = Object.assign(new Error('bad input for column "ssn"'), { status: 400 })
     const reply = fakeReply()
 
     // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     handleServerError(err as any, fakeRequest() as any, reply as any)
 
     expect(reply.status).toHaveBeenCalledWith(400)
+    expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
+    expect(reply.send).not.toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('ssn') }))
   })
 
   // A 3xx would answer an error with a JSON body and no Location header.
@@ -203,6 +221,7 @@ describe('handleServerError', () => {
     handleServerError(err as any, fakeRequest() as any, reply as any)
 
     expect(reply.status).toHaveBeenCalledWith(500)
+    expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
   })
 })
 
