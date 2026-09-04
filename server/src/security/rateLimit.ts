@@ -27,7 +27,7 @@ import type { RateLimitOptions, RateLimitPluginOptions } from '@fastify/rate-lim
  * | `/auth/csrf-token` | no      | The authentication gate (5-B) is the control; a low cap breaks multiple tabs and the client's retry path |
  * | `/auth/logout`     | no      | Already gated by the CSRF guard                           |
  * | SPA assets         | no      | See `global: false` above                                 |
- * | `POST /duos-api/support/request`, `/support/upload` | **no — open gap** | See below |
+ * | `POST /duos-api/support/request`, `POST /duos-api/support/upload` | **no — open gap** | See below |
  *
  * `/auth/login` verifies no credentials itself — it mints PKCE state, writes
  * an anonymous session row, and returns a B2C redirect URL. Its limit
