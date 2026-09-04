@@ -1,7 +1,7 @@
 import { getDefaultProperties } from '@databiosphere/bard-client'
 
 import { Storage } from 'src/libs/storage'
-import { BFF_BARD_PREFIX, Config, Token } from 'src/libs/config'
+import { BFF_BARD_PREFIX, BFF_PUBLIC_METRICS_PREFIX, Config, Token } from 'src/libs/config'
 import { MetricsEventName } from 'src/libs/events'
 import { retryFetchPost } from 'src/libs/ajax/fetchAdapter'
 
@@ -11,10 +11,20 @@ const defaultSignal: AbortSignal = AbortSignal.timeout(30000)
 // BFF NOTE: identified Bard calls authenticate with the user's token, which
 // the browser no longer holds post-cutover — they go through the /bard-api
 // proxy, where the session's token is attached server-side (Epic 3, story
-// 3-K). Anonymous events carry no credentials and stay on the direct Bard URL.
+// 3-K). Anonymous events carry no credentials, and until story 5-F6 that meant
+// posting straight to Bard, which is what kept `bardApiUrl` in the BFF
+// `connect-src` allowlist. They now go to a dedicated public endpoint that
+// injects no token either, so the anonymous call is same-origin too and the
+// allowlist entry is gone. Legacy posts direct to Bard in both cases.
+//
+// The anonymous branch ignores `path` rather than appending it: the public
+// endpoint is a single named route, not a wildcard proxy, so it exposes exactly
+// the one Bard path a signed-out caller uses and nothing else. `captureEvent`
+// is the only call that reaches this branch and it always passes `/api/event`,
+// so the mapping is total.
 const bardUrl = async (identified: boolean, path: string): Promise<string> => {
-  if (identified && await Config.isBffEnabled()) {
-    return `${BFF_BARD_PREFIX}${path}`
+  if (await Config.isBffEnabled()) {
+    return identified ? `${BFF_BARD_PREFIX}${path}` : `${BFF_PUBLIC_METRICS_PREFIX}/event`
   }
   return `${await Config.getBardApiUrl()}${path}`
 }

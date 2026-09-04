@@ -27,6 +27,7 @@ import { apiProxy } from './proxy/apiProxy.js'
 import { ECM_PROXY_PREFIX, ecmProxy } from './proxy/ecmProxy.js'
 import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
+import { publicProxy } from './proxy/publicProxy.js'
 import { configPath, readConfig, TRUST_PROXY } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -106,6 +107,12 @@ export async function buildApp(): Promise<AppInstance> {
 
   // Collect CSP reports in both legacy and BFF modes.
   await fastify.register(cspReportRoute)
+
+  // Public BFF endpoints (story 5-F6) — pre-login feature flags and the
+  // anonymous Bard event. Outside both switches below: they carry no
+  // credentials, so they need neither the session infrastructure nor the
+  // cutover, and gating them would break a pre-login flow.
+  await fastify.register(publicProxy)
 
   // DB/session infrastructure is configured independently of BFF cutover.
   if (process.env.DUOS_DB_HOST) {

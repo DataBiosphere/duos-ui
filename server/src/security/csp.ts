@@ -5,8 +5,11 @@ import { CSP_REPORT_GROUP, CSP_REPORT_PATH } from './cspReport.js'
 // Scope access to this bucket; the GCS origin is shared by public buckets.
 export const BANNER_SOURCE = 'https://storage.googleapis.com/broad-duos-banners/'
 
-// Feature flags and anonymous metrics remain direct in BFF mode.
-const BFF_CONNECT_FIELDS = ['apiUrl', 'bardApiUrl'] as const
+// Empty since 5-F6: every BFF-mode browser connection is same-origin, so
+// 'self' covers it. Feature flags and anonymous metrics now go to
+// /public/features/* and /public/metrics/event. BANNER_SOURCE is the one
+// flow with no endpoint yet, so the policy is not 'self' alone.
+const BFF_CONNECT_FIELDS: readonly string[] = []
 
 // Legacy mode calls all upstreams directly. B2C is navigated to, not fetched.
 const LEGACY_CONNECT_FIELDS = ['apiUrl', 'bardApiUrl', 'ecmApiUrl', 'tdrApiUrl'] as const
