@@ -11,14 +11,13 @@ import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import rateLimit from '@fastify/rate-limit'
 import fastifyHelmet from '@fastify/helmet'
-import fastifyRateLimit from '@fastify/rate-limit'
 import { createPgSessionStore } from './session/pgStore.js'
 import { helmetOptions } from './security/headers.js'
-import { REPORTING_ENDPOINTS_HEADER, cspReportRoute } from './security/cspReport.js'
+import { cspReportRoute, REPORTING_ENDPOINTS_HEADER } from './security/cspReport.js'
 import { sessionPluginOptions } from './session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
 import { fetchMetadataGuard } from './security/fetchMetadata.js'
-import { RATE_LIMIT_ERROR_CODE, callbackRateLimit, isRateLimitError, loginRateLimit, rateLimitPluginOptions } from './security/rateLimit.js'
+import { callbackRateLimit, isRateLimitError, loginRateLimit, RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } from './security/rateLimit.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
 import { handleCallback } from './auth/callback.js'
@@ -28,7 +27,7 @@ import { apiProxy } from './proxy/apiProxy.js'
 import { ECM_PROXY_PREFIX, ecmProxy } from './proxy/ecmProxy.js'
 import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
-import { TRUST_PROXY, configPath, readConfig } from './config.js'
+import { configPath, readConfig, TRUST_PROXY } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
 
@@ -106,31 +105,24 @@ export async function buildApp(): Promise<AppInstance> {
   // Rate limiting. Registered at app level, ahead of both cutover switches and every route.
   await fastify.register(rateLimit, rateLimitPluginOptions)
 
-  // Path to the static client config.json — computed once so both the
-  // /config.json route below and the bffEnabled startup check read the same
-  // (memoized) config.
+  // Use the same memoized config for headers, route gating, and /config.json.
   const configJsonPath = configPath(PROJECT_ROOT, isDev)
-
-  // Keep CSP construction and BFF route gating on the config served to the client.
   const clientConfig = await readConfig(configJsonPath, fastify.log)
 
-  // 1. Security response headers registered first. Registered first so
-  // its onRequest hook runs ahead of every route.
-  await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev }))
+  // Register before routes so Helmet's hooks cover every response.
+  const cspReportOnly = envBool(process.env.DUOS_CSP_REPORT_ONLY, true)
+  fastify.log.info(`[server] Content Security Policy is ${cspReportOnly ? 'report-only (set DUOS_CSP_REPORT_ONLY=false to enforce)' : 'enforced'}`)
+  await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly }))
 
-  // 2. The Reporting-Endpoints header.
+  // Resolves the policy's `report-to` group; `report-uri` remains the fallback.
   fastify.addHook('onRequest', async (_request, reply) => {
     reply.header('reporting-endpoints', REPORTING_ENDPOINTS_HEADER)
   })
 
-  // 3. Rate limiting. `global: false`
-  await fastify.register(fastifyRateLimit, { global: false })
-
-  // 4. The CSP violation report sink. Registered outside both switches below
+  // Collect CSP reports in both legacy and BFF modes.
   await fastify.register(cspReportRoute)
 
-  // 5. DB pool + session — registered only when the deployment provides the
-  // BFF database configuration.
+  // DB/session infrastructure is configured independently of BFF cutover.
   if (process.env.DUOS_DB_HOST) {
     fastify.log.info('[server] DUOS_DB_HOST is set — enabling BFF session infrastructure')
 
@@ -200,8 +192,7 @@ export async function buildApp(): Promise<AppInstance> {
     fastify.log.info('[server] DUOS_DB_HOST is not set — starting without DB/session infrastructure (legacy client-side auth)')
   }
 
-  // 6. BFF auth routes — the cutover switch. Read at startup from the same
-  // config object the /config.json route below serves.
+  // A missing bffEnabled key keeps the legacy auth flow.
   const { bffEnabled } = clientConfig
   if (bffEnabled === true) {
     // The two switches are meant to be independent (session infra can be on

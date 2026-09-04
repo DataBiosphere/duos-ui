@@ -65,6 +65,46 @@ describe('sanitizeReport', () => {
     expect(String(report?.['blocked-uri']).endsWith('…')).toBe(true)
   })
 
+  it('redacts the query string of the OAuth callback URL, in both spellings', () => {
+    const callback = 'https://duos.broadinstitute.org/redirect-from-oauth?code=SECRET_CODE&state=SECRET_STATE'
+    expect(sanitizeReport({ 'document-uri': callback, 'referrer': callback }))
+      .toEqual({
+        'document-uri': 'https://duos.broadinstitute.org/redirect-from-oauth?<redacted>',
+        'referrer': 'https://duos.broadinstitute.org/redirect-from-oauth?<redacted>',
+      })
+    expect(sanitizeReport({ documentURL: callback }))
+      .toEqual({ documentURL: 'https://duos.broadinstitute.org/redirect-from-oauth?<redacted>' })
+  })
+
+  it('redacts the query string of every URL-valued field', () => {
+    expect(sanitizeReport({
+      'blocked-uri': 'https://example.org/t.json?token=abc',
+      'source-file': 'https://duos.broadinstitute.org/main.js?v=1',
+      'blockedURL': 'https://example.org/t.json?token=abc',
+      'sourceFile': 'https://duos.broadinstitute.org/main.js?v=1',
+    })).toEqual({
+      'blocked-uri': 'https://example.org/t.json?<redacted>',
+      'source-file': 'https://duos.broadinstitute.org/main.js?<redacted>',
+      'blockedURL': 'https://example.org/t.json?<redacted>',
+      'sourceFile': 'https://duos.broadinstitute.org/main.js?<redacted>',
+    })
+  })
+
+  it('redacts a fragment as well, since a fragment can carry OAuth material too', () => {
+    expect(sanitizeReport({ 'document-uri': 'https://duos.broadinstitute.org/x#id_token=SECRET' }))
+      .toEqual({ 'document-uri': 'https://duos.broadinstitute.org/x?<redacted>' })
+  })
+
+  it('leaves URL fields that carry no query alone, keywords included', () => {
+    expect(sanitizeReport({ 'blocked-uri': 'inline', 'document-uri': 'https://duos.broadinstitute.org/datalibrary' }))
+      .toEqual({ 'blocked-uri': 'inline', 'document-uri': 'https://duos.broadinstitute.org/datalibrary' })
+  })
+
+  it('does not redact fields that are not URLs', () => {
+    expect(sanitizeReport({ 'original-policy': 'default-src \'self\'; report-uri /csp-report?x=1' }))
+      .toEqual({ 'original-policy': 'default-src \'self\'; report-uri /csp-report?x=1' })
+  })
+
   it('flattens control characters so one report cannot become many log lines', () => {
     expect(sanitizeReport({ referrer: 'a\nb\r\tc' })).toEqual({ referrer: 'a b  c' })
   })

@@ -15,7 +15,8 @@ import type { RateLimitOptions } from '@fastify/rate-limit'
  *     checks the body's shape, so an 8 KB array of minimal entries — 174 of
  *     them fit — is one request that would otherwise write 174 lines.
  *  4. A field allowlist — only the report fields the spec defines survive,
- *     each truncated. Unknown keys never reach the log.
+ *     each truncated, and the URL-valued ones stripped of their query string.
+ *     Unknown keys never reach the log.
  *  5. A fixed-window budget charged once per *request*, not once per report,
  *     so no single request can spend more than one unit of it. Requests over
  *     the budget still answer 204; they are simply not written.
@@ -105,6 +106,20 @@ const ALLOWED_REPORT_FIELDS: ReadonlySet<string> = new Set([
   'violated-directive', 'violatedDirective',
 ])
 
+// CSP reports preserve query strings, including OAuth callback code and state.
+const URL_REPORT_FIELDS: ReadonlySet<string> = new Set([
+  'blocked-uri', 'blockedURL',
+  'document-uri', 'documentURL',
+  'referrer',
+  'source-file', 'sourceFile',
+])
+
+// Avoid URL parsing because these fields may contain CSP keywords such as `inline`.
+function redactQuery(value: string): string {
+  const cut = value.search(/[?#]/)
+  return cut === -1 ? value : `${value.slice(0, cut)}?<redacted>`
+}
+
 /** Truncated, and stripped of control characters so one report stays one log line. */
 function sanitizeValue(value: string): string {
   // oxlint-disable-next-line no-control-regex
@@ -118,7 +133,7 @@ export function sanitizeReport(raw: unknown): Record<string, string | number> | 
   const report: Record<string, string | number> = {}
   for (const [key, value] of Object.entries(raw)) {
     if (!ALLOWED_REPORT_FIELDS.has(key)) continue
-    if (typeof value === 'string') report[key] = sanitizeValue(value)
+    if (typeof value === 'string') report[key] = sanitizeValue(URL_REPORT_FIELDS.has(key) ? redactQuery(value) : value)
     else if (typeof value === 'number' && Number.isFinite(value)) report[key] = value
   }
   return Object.keys(report).length > 0 ? report : undefined

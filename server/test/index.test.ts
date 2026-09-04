@@ -917,6 +917,7 @@ describe('auth endpoint rate limiting', () => {
 })
 
 describe('security headers', () => {
+  // The fixture omits bffEnabled, so these exercise legacy mode.
   it('reaches a root-scope route', async () => {
     const res = await app.inject({ method: 'GET', url: '/health' })
 
@@ -980,10 +981,16 @@ describe('security headers', () => {
     }
   })
 
-  it('sends no Content-Security-Policy yet, in either spelling', async () => {
+  it('sends the report-only policy by default, so a strict policy cannot break a page unannounced', async () => {
     const res = await app.inject({ method: 'GET', url: '/health' })
 
+    expect(res.headers['content-security-policy-report-only']).toContain('default-src \'self\'')
     expect(res.headers['content-security-policy']).toBeUndefined()
-    expect(res.headers['content-security-policy-report-only']).toBeUndefined()
+  })
+
+  it('reaches the SPA document with the policy, not just the API routes', async () => {
+    const res = await app.inject({ method: 'GET', url: '/datalibrary/some-deep-link' })
+
+    expect(res.headers['content-security-policy-report-only']).toContain('default-src \'self\'')
   })
 })

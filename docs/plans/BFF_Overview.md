@@ -306,7 +306,18 @@ report-only mode, so that one breaks sign-in on the first deploy — which is wh
 it ships on its own. `Cross-Origin-Embedder-Policy` stays off because the banner
 bucket and the two direct upstreams send no CORP header. HSTS is production-only.
 
-The Content Security Policy itself is explicitly off until story 5-F3.
+The policy itself is derived at startup from the same `config.json` the client
+reads, so a new upstream is a config change rather than a code change. Only
+inventoried, active fields count, and the list is mode-specific: under
+`bffEnabled` ECM and TDR are omitted because those calls are same-origin
+through the proxies, while a legacy deployment keeps all four upstream origins
+until Epic 6. It ships **report-only** — `DUOS_CSP_REPORT_ONLY` defaults to
+true, and each environment is flipped only after a clean collection run.
+
+One catch worth knowing before anyone flips it: the deployed httpd sidecar
+replaces the enforcing header with its own, so until the `terra-helmfile` change
+in story 5-F4 lands, the env var changes nothing a browser acts on. The
+report-only header passes through untouched, which is what makes that quiet.
 
 ### Decisions not tracked as ADRs
 
