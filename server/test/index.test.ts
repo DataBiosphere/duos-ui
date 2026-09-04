@@ -159,69 +159,72 @@ describe('error handler', () => {
 })
 
 describe('handleServerError', () => {
+  // The whole contract of the handler. The status varies with the error; the
+  // body never does. Nothing a client reads is derived from err.message.
+  const GENERIC_BODY = { error: 'An unexpected error occurred.' }
+
   function fakeRequest() {
     return { ip: '203.0.113.1', url: '/auth/login', log: { warn: vi.fn(), error: vi.fn() } }
   }
 
   function fakeReply() {
-    const reply = { status: vi.fn(() => reply), send: vi.fn(() => reply) }
+    const reply = {
+      sentStatus: 0,
+      sentBody: undefined as unknown,
+      status: vi.fn((code: number) => {
+        reply.sentStatus = code
+        return reply
+      }),
+      send: vi.fn((body: unknown) => {
+        reply.sentBody = body
+        return reply
+      }),
+    }
     return reply
   }
 
-  it('logs the failure at error and hides its message', async () => {
+  async function run(err: Error) {
     const { handleServerError } = await import('../src/index.js')
-    const err = Object.assign(new Error('internal secret data'), { statusCode: 502 })
     const request = fakeRequest()
     const reply = fakeReply()
-
     // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     handleServerError(err as any, request as any, reply as any)
+    return { request, reply }
+  }
 
-    expect(request.log.error).toHaveBeenCalled()
-    expect(reply.status).toHaveBeenCalledWith(502)
-    expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
+  // Every shape of error the handler can be given. Each message holds detail a
+  // client must never see: a 4xx message reads like client-safe text, which is
+  // the case most likely to tempt a future edit that forwards err.message.
+  const cases = [
+    { name: 'a 5xx statusCode', err: () => Object.assign(new Error('upstream token endpoint said: invalid_client'), { statusCode: 502 }), status: 502 },
+    { name: 'no status at all', err: () => new Error('DUOS_OIDC_CLIENT_SECRET is not set'), status: 500 },
+    { name: 'only err.status, not statusCode', err: () => Object.assign(new Error('bad input for column "ssn"'), { status: 400 }), status: 400 },
+    // A 3xx would answer an error with a JSON body and no Location header, so
+    // the handler refuses it and uses 500.
+    { name: 'a non-error 3xx status', err: () => Object.assign(new Error('confused'), { statusCode: 302 }), status: 500 },
+  ]
+
+  it.each(cases)('answers $name with the generic body and no part of err.message', async ({ err }) => {
+    const thrown = err()
+
+    const { reply } = await run(thrown)
+
+    expect(reply.sentBody).toEqual(GENERIC_BODY)
+    expect(JSON.stringify(reply.sentBody)).not.toContain(thrown.message)
   })
 
-  it('answers with 500 when the error carries no status at all', async () => {
-    const { handleServerError } = await import('../src/index.js')
-    const reply = fakeReply()
+  it.each(cases)('maps $name to status $status', async ({ err, status }) => {
+    const { reply } = await run(err())
 
-    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-    handleServerError(new Error('internal secret data') as any, fakeRequest() as any, reply as any)
-
-    expect(reply.status).toHaveBeenCalledWith(500)
-    expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
+    expect(reply.sentStatus).toBe(status)
   })
 
-  // A 4xx message reads like client-safe text, so it is the case most likely to
-  // tempt a future edit that forwards err.message. It must not: the status is
-  // the only part of the error that reaches the client, and the body stays the
-  // same generic string as a 5xx. Here 'bad input' names a column that the
-  // client must never see.
-  it('honors err.status when the error carries no statusCode, and still hides the message', async () => {
-    const { handleServerError } = await import('../src/index.js')
-    const err = Object.assign(new Error('bad input for column "ssn"'), { status: 400 })
-    const reply = fakeReply()
+  it('logs the error server-side, which is the only place the message survives', async () => {
+    const thrown = Object.assign(new Error('internal secret data'), { statusCode: 502 })
 
-    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-    handleServerError(err as any, fakeRequest() as any, reply as any)
+    const { request } = await run(thrown)
 
-    expect(reply.status).toHaveBeenCalledWith(400)
-    expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
-    expect(reply.send).not.toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('ssn') }))
-  })
-
-  // A 3xx would answer an error with a JSON body and no Location header.
-  it('answers with 500 when the error names a non-error status', async () => {
-    const { handleServerError } = await import('../src/index.js')
-    const err = Object.assign(new Error('confused'), { statusCode: 302 })
-    const reply = fakeReply()
-
-    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-    handleServerError(err as any, fakeRequest() as any, reply as any)
-
-    expect(reply.status).toHaveBeenCalledWith(500)
-    expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
+    expect(request.log.error).toHaveBeenCalledWith({ err: thrown }, '[server] Unhandled error:')
   })
 })
 
