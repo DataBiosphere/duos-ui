@@ -158,6 +158,57 @@ describe('error handler', () => {
   })
 })
 
+describe('handleServerError', () => {
+  // Driven with a hand-built request and reply: that is the only way to put a
+  // specific `err` shape through the handler. The wiring itself is covered
+  // end-to-end by the /boom case above and by the buildApp case further down.
+  function fakeRequest() {
+    return { ip: '203.0.113.1', url: '/auth/login', log: { warn: vi.fn(), error: vi.fn() } }
+  }
+
+  function fakeReply() {
+    const reply = { status: vi.fn(() => reply), send: vi.fn(() => reply) }
+    return reply
+  }
+
+  it('logs the failure at error and hides its message', async () => {
+    const { handleServerError } = await import('../src/index.js')
+    const err = Object.assign(new Error('internal secret data'), { statusCode: 502 })
+    const request = fakeRequest()
+    const reply = fakeReply()
+
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    handleServerError(err as any, request as any, reply as any)
+
+    expect(request.log.error).toHaveBeenCalled()
+    expect(reply.status).toHaveBeenCalledWith(502)
+    expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
+  })
+
+  it('honors err.status when the error carries no statusCode', async () => {
+    const { handleServerError } = await import('../src/index.js')
+    const err = Object.assign(new Error('bad input'), { status: 400 })
+    const reply = fakeReply()
+
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    handleServerError(err as any, fakeRequest() as any, reply as any)
+
+    expect(reply.status).toHaveBeenCalledWith(400)
+  })
+
+  // A 3xx would answer an error with a JSON body and no Location header.
+  it('answers with 500 when the error names a non-error status', async () => {
+    const { handleServerError } = await import('../src/index.js')
+    const err = Object.assign(new Error('confused'), { statusCode: 302 })
+    const reply = fakeReply()
+
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    handleServerError(err as any, fakeRequest() as any, reply as any)
+
+    expect(reply.status).toHaveBeenCalledWith(500)
+  })
+})
+
 describe('plugin registration order', () => {
   it('registers postgres before cookie before session', async () => {
     const { default: pgPlugin } = await import('@fastify/postgres')
@@ -589,6 +640,28 @@ describe('BFF auth route registration', () => {
     expect(read({ 'csrf-token': 'the-token' })).toBeUndefined()
     expect(read({ 'xsrf-token': 'the-token' })).toBeUndefined()
     expect(read({ 'x-xsrf-token': 'the-token' })).toBeUndefined()
+
+    await localApp.close()
+  })
+
+  // The regression this guards: setErrorHandler moving back to the end of
+  // buildApp(). Fastify binds a route's error handler when the route
+  // registers, so every route built inside buildApp() would fall back to
+  // Fastify's default handler, which serialises err.message to the client.
+  // The /boom case in the 'error handler' describe cannot catch that — it
+  // registers its route after buildApp() has returned.
+  it('applies the app error handler to a route registered inside buildApp', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+    const { handleLogin } = await import('../src/auth/login.js')
+    vi.mocked(handleLogin).mockImplementationOnce(() => {
+      throw new Error('internal secret data')
+    })
+
+    const res = await localApp.inject({ method: 'POST', url: '/auth/login' })
+
+    expect(res.statusCode).toBe(500)
+    expect(res.json()).toEqual({ error: 'An unexpected error occurred.' })
+    expect(res.payload).not.toContain('internal secret data')
 
     await localApp.close()
   })
