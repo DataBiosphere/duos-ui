@@ -160,12 +160,7 @@ describe('error handler', () => {
 
 describe('handleServerError', () => {
   // The whole contract of the handler. The status varies with the error; the
-  // body never does, except for the throttled case below. Nothing else a
-  // client reads is derived from err.message.
-  //
-  // Driven with a hand-built request and reply: that is the only way to put a
-  // specific `err` shape through the handler. The wiring itself is covered
-  // end-to-end by the /boom case above and by the buildApp case further down.
+  // body never does. Nothing a client reads is derived from err.message.
   const GENERIC_BODY = { error: 'An unexpected error occurred.' }
 
   function fakeRequest() {
@@ -232,11 +227,7 @@ describe('handleServerError', () => {
     expect(request.log.error).toHaveBeenCalledWith({ err: thrown }, '[server] Unhandled error:')
   })
 
-  // A flood must not fill the error log: at `error` level the very thing the
-  // limiter exists to absorb becomes a second denial of service, this time on
-  // the log pipeline. This branch is the one exception to the generic body
-  // above: a client that cannot tell throttling from a server error cannot
-  // back off.
+  // A flood must not fill the error log
   it('logs a throttled request at warn and answers with the rate_limited code', async () => {
     const { RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } = await import('../src/security/rateLimit.js')
     const err = rateLimitPluginOptions.errorResponseBuilder(
@@ -740,7 +731,7 @@ describe('envBool', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Rate limiting (story 5-G2)
+// Rate limiting
 // ---------------------------------------------------------------------------
 describe('auth endpoint rate limiting', () => {
   let dir: string
@@ -839,16 +830,7 @@ describe('auth endpoint rate limiting', () => {
     await app.close()
   })
 
-  // The regression this guards: registering the plugin globally. This instance
-  // also serves every SPA asset through @fastify/vite, and one page load
-  // fetches many of them, so a global cap would 429 an ordinary page load.
-  //
-  // A stand-in route, not an unmatched /assets/... URL: @fastify/vite is
-  // mocked here, so an unmatched URL falls through to setNotFoundHandler —
-  // and the plugin attaches its hook from an `onRoute` listener, which
-  // setNotFoundHandler never fires. An unmatched URL is therefore unlimited
-  // whatever `global` says, and could not detect the regression. A registered
-  // route models what @fastify/vite really serves.
+  // The regression this guards: registering the plugin globally.
   it('never limits a route that did not opt in', async () => {
     const app = await buildLimitedApp('1')
     app.get('/assets/chunk.js', async () => 'export default 1')

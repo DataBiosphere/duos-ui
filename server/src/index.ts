@@ -49,19 +49,8 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
 }
 
 /**
- * The app-level error handler. The body is always generic — an error message
- * can carry internal detail — except a throttled request, which is an
- * expected outcome rather than a fault: the generic message would leave the
- * client unable to tell throttling from a server error, and at `error` level
- * a flood would turn the log pipeline into a second denial of service. The
- * rate-limit headers the plugin set on the reply survive, because it sets
- * them before it throws.
- *
- * Named and exported rather than inlined at the registration site so both
- * branches, and the status handling below, are directly assertable — a
- * request built by hand is the only way to drive a specific `err` shape
- * through it, and the child-logger factory a route uses is fixed when that
- * route registers, so a built app's request.log cannot be stubbed afterwards.
+ * The app-level error handler. The body is always generic: an error message
+ * can carry internal detail, and no client branches on it.
  */
 export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
@@ -69,13 +58,6 @@ export function handleServerError(err: FastifyError, request: FastifyRequest, re
     return reply.status(err.statusCode ?? 429).send({ error: RATE_LIMIT_ERROR_CODE })
   }
   request.log.error({ err }, '[server] Unhandled error:')
-  // Keeps two behaviours of the default handler this one now displaces on the
-  // routes built here: `status` is honoured alongside `statusCode` (libraries
-  // set either), and a non-error status is never used to answer an error — a
-  // 3xx would send a JSON body with no Location. Header propagation
-  // (`err.headers`) is deliberately not carried over: no error raised in this
-  // app sets it, and forwarding headers off an arbitrary error is a wider
-  // surface than the parity is worth.
   const status = err.statusCode ?? (err as { status?: number }).status ?? 500
   return reply.status(status >= 400 ? status : 500).send({ error: 'An unexpected error occurred.' })
 }
@@ -101,29 +83,10 @@ export async function buildApp(): Promise<AppInstance> {
     : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' }, trustProxy: TRUST_PROXY })
   ) as AppInstance
 
-  // Registered before any route: Fastify binds a route's error handler when
-  // the route is registered, so a handler set at the end of this function
-  // would only ever reach routes added afterwards (the tests' own) — every
-  // /auth/* and /health route would fall back to Fastify's default handler,
-  // which serialises `err.message` to the client. The encapsulated proxy
-  // declares its own error handler (ADR-010) and is unaffected either way.
+  // Registered before any routes so all errors, including those in plugins, are caught.
   fastify.setErrorHandler(handleServerError)
 
-  // Rate limiting. Registered at app level, ahead of both cutover switches
-  // and every route: the plugin attaches its per-route hook from an `onRoute`
-  // listener, so it has to be in place before any route registers, and the
-  // CSP report endpoint (story 5-F2) sits outside the `bffEnabled` block and
-  // shares this one registration. A second `register` call would install a
-  // second `onRoute` listener.
-  //
-  // `global: false` is what makes an app-level registration safe: only a
-  // route carrying its own `config.rateLimit` is counted. This instance also
-  // serves every SPA asset through @fastify/vite, and one page load fetches
-  // many of them, so a global cap would 429 an ordinary page load. Which
-  // routes opt in, which deliberately do not, and why the numbers are what
-  // they are all live in security/rateLimit.ts. These limits are a backstop;
-  // the per-process store means production flood protection belongs at the
-  // ingress/edge.
+  // Rate limiting. Registered at app level, ahead of both cutover switches and every route.
   await fastify.register(rateLimit, rateLimitPluginOptions)
 
   // Path to the static client config.json — computed once so both the

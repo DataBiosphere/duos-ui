@@ -1,7 +1,7 @@
 import type { RateLimitOptions, RateLimitPluginOptions } from '@fastify/rate-limit'
 
 /**
- * Rate limiting for the auth endpoints (Phase 5, story 5-G2).
+ * Rate limiting for the auth endpoints.
  *
  * **This is a backstop, not the primary control.** The default
  * `@fastify/rate-limit` store is per-process: in a multi-pod deployment the
@@ -23,8 +23,8 @@ import type { RateLimitOptions, RateLimitPluginOptions } from '@fastify/rate-lim
  * | Route              | Limited | Why                                                       |
  * |--------------------|---------|-----------------------------------------------------------|
  * | `POST /auth/login` | yes     | Session-row creation and OIDC discovery flood control     |
- * | `GET /auth/callback` | not yet | Story 5-G3. It is a top-level navigation from B2C, so a 429 needs to land the user back in the SPA rather than send a JSON body — a separate change with its own client half |
- * | `/auth/csrf-token` | no      | The authentication gate (5-B) is the control; a low cap breaks multiple tabs and the client's retry path |
+ * | `GET /auth/callback` | not yet | Story DT-4022 (5-G3). It is a top-level navigation from B2C, so a 429 needs to land the user back in the SPA rather than send a JSON body — a separate change with its own client half |
+ * | `/auth/csrf-token` | no      | The authentication gate is the control; a low cap breaks multiple tabs and the client's retry path |
  * | `/auth/logout`     | no      | Already gated by the CSRF guard                           |
  * | SPA assets         | no      | See `global: false` above                                 |
  * | `POST /duos-api/support/request`, `POST /duos-api/support/upload` | **no — open gap** | See below |
@@ -51,7 +51,7 @@ import type { RateLimitOptions, RateLimitPluginOptions } from '@fastify/rate-lim
  * ## Why the default is not the lower number first proposed
  *
  * Many users share one institutional NAT egress IP, so a per-IP bucket is
- * really a per-campus bucket. The default starts deliberately generous and is
+ * really a per-org bucket. The default starts deliberately generous and is
  * meant to be tightened from measured traffic — which is why it is
  * environment-overridable (see below) rather than fixed in code: tightening
  * is then a deployment config change, not a code release.
@@ -85,21 +85,7 @@ import type { RateLimitOptions, RateLimitPluginOptions } from '@fastify/rate-lim
  * so one client cannot spend 2^64 buckets.
  */
 
-/**
- * The code the 429 body carries. It names the reason in the response and in
- * the server log rather than leaving a bare status; no client branches on it
- * today (`Auth.signIn` branches on `res.ok` alone), so surfacing a retry hint
- * in the sign-in UI is a separate, client-side change.
- */
 export const RATE_LIMIT_ERROR_CODE = 'rate_limited'
-
-/**
- * Marks the errors this module builds. The app's error handler renders any
- * error with a `statusCode` as a generic message; it needs to recognize
- * *these* to send {@link RATE_LIMIT_ERROR_CODE} instead, and to log a flood
- * at `warn` rather than as an unhandled `error`. Matching on the status code
- * alone would also catch an upstream's own 429 relayed through the proxy.
- */
 const RATE_LIMIT_ERROR_MARKER = 'DUOS_RATE_LIMITED'
 
 /** Names the tuning knob so tests and docs cannot drift from the read below. */
@@ -109,12 +95,7 @@ const DEFAULT_LOGIN_MAX = 30
 const TIME_WINDOW = '1 minute'
 
 /**
- * A blank or unset value means "use the default"; anything else must be plain
- * decimal digits naming a positive count. A silent fallback would hide an
- * operator's typo, and `max: 0` blocks every request — so a bad value fails
- * at startup with an error naming the variable, the same posture
- * `DUOS_DB_PORT` takes in index.ts. The digits-only test is deliberately
- * stricter than `Number()`, which would also accept `1e3`, `0x1e` and `30.0`.
+ * A blank or unset value means "use the default"
  */
 function maxFromEnv(envVar: string, defaultMax: number): number {
   const raw = process.env[envVar]?.trim()
@@ -128,31 +109,16 @@ function maxFromEnv(envVar: string, defaultMax: number): number {
 
 export const rateLimitPluginOptions = {
   global: false,
-  // The plugin throws whatever this returns, so it reaches the app's error
-  // handler. `statusCode` comes from the context rather than a literal 429 so
-  // a future `ban` (which the plugin reports as 403) still renders correctly.
-  // The message never reaches the wire — the error handler substitutes the
-  // code — but it names the cause in a stack trace if the error ever escapes
-  // to a handler that does not recognize the marker.
   errorResponseBuilder: (_request, context) => Object.assign(
     new Error(`Rate limit exceeded, retry in ${context.after}`),
     { statusCode: context.statusCode, code: RATE_LIMIT_ERROR_MARKER },
   ),
-  // NOTE: a `cache` set here would be silently ignored. The plugin reads
-  // `cache` for the parent store only, and a route that carries its own
-  // `config.rateLimit` gets a child store built from the *merged route*
-  // params, which never inherit it. To size the LRU, put `cache` in the
-  // object the function below returns.
 } as const satisfies RateLimitPluginOptions
 
-// Returns a plain boolean, not a type predicate: `FastifyError` already
-// declares `code`, so a predicate would narrow the *negative* branch of the
-// app's error handler to `never` and break the fallback path.
 export function isRateLimitError(err: unknown): boolean {
   return err instanceof Error && (err as { code?: string }).code === RATE_LIMIT_ERROR_MARKER
 }
 
-/** Route `config.rateLimit` for `POST /auth/login`. Read at startup, so an override applies without a code change. */
 export function loginRateLimit(): RateLimitOptions {
   return { max: maxFromEnv(LOGIN_MAX_ENV_VAR, DEFAULT_LOGIN_MAX), timeWindow: TIME_WINDOW }
 }
