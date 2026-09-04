@@ -81,29 +81,15 @@ export async function buildApp(): Promise<AppInstance> {
   // its onRequest hook runs ahead of every route.
   await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev }))
 
-  // 2. The Reporting-Endpoints header. Gives story 5-F3's `report-to` group
-  // an address. The `report-uri` fallback in the same policy needs no header,
-  // but Chrome prefers `report-to`. Harmless before the policy exists — no
-  // browser will post.
+  // 2. The Reporting-Endpoints header.
   fastify.addHook('onRequest', async (_request, reply) => {
     reply.header('reporting-endpoints', REPORTING_ENDPOINTS_HEADER)
   })
 
-  // 3. Rate limiting. `global: false` — this same instance serves every SPA
-  // asset through @fastify/vite, and one page load fetches many of them, so a
-  // low global cap would block page loads outright. Limits are attached per
-  // route instead. Story 5-G registers the auth-route limits on this same
-  // plugin.
-  //
-  // The default store is per process, so a deployment's real ceiling is this
-  // number times the replica count, and it resets on every restart. That is
-  // why the epic puts flood protection at the ingress; this is the backstop
-  // beneath it, not the control.
+  // 3. Rate limiting. `global: false`
   await fastify.register(fastifyRateLimit, { global: false })
 
-  // 4. The CSP violation report sink (Phase 5, story 5-F2). Registered outside
-  // both switches below, like the headers above: a legacy deployment collects
-  // reports too. Inert until 5-F3's policy points a browser at it.
+  // 4. The CSP violation report sink. Registered outside both switches below
   await fastify.register(cspReportRoute)
 
   // 5. DB pool + session — registered only when the deployment provides the
@@ -162,25 +148,11 @@ export async function buildApp(): Promise<AppInstance> {
     }))
 
     // CSRF protection for cookie-authenticated, state-changing auth routes
-    // (currently POST /auth/logout). SameSite=Lax withholds the session cookie
-    // from cross-site POSTs, but is not sufficient alone here: dev/staging live
-    // under *.broadinstitute.org, where SameSite treats every sibling subdomain
-    // as same-site — a compromised sibling could still forge cookie-bearing
-    // POSTs. CSRF tokens don't depend on the registrable domain. The secret is
-    // stored in the session, so it must be registered after @fastify/session.
-    //
-    // The options — including the header-only `getToken` narrowing — live in
-    // auth/csrf.ts so the test harnesses register the plugin exactly as this
-    // does. Inline, they drifted: see that file.
+    // (currently POST /auth/logout).
     await fastify.register(fastifyCsrf, csrfPluginOptions)
 
     // Warm the B2C OIDC discovery cache so the first login doesn't pay the
-    // discovery round-trip. Gated on the Azure env vars being present: DB/
-    // session infra (this block) can be enabled ahead of B2C being configured
-    // during the phased rollout, and warming up against unset vars would log
-    // an error on every single startup for no benefit. Not awaited and never
-    // fatal either way — on failure the error is logged and getOidcConfig()
-    // retries lazily on first use.
+    // discovery round-trip.
     if (process.env.DUOS_AZURE_ISSUER_URL && process.env.DUOS_AZURE_CLIENT_ID && process.env.DUOS_AZURE_CLIENT_SECRET) {
       getOidcConfig().catch((err: unknown) => {
         fastify.log.error({ err }, '[auth] B2C OIDC discovery warm-up failed')
