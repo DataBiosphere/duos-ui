@@ -10,7 +10,6 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import rateLimit from '@fastify/rate-limit'
-import fastifyRateLimit from '@fastify/rate-limit'
 import fastifyHelmet from '@fastify/helmet'
 import { createPgSessionStore } from './session/pgStore.js'
 import { helmetOptions } from './security/headers.js'
@@ -114,11 +113,6 @@ export async function buildApp(): Promise<AppInstance> {
   fastify.addHook('onRequest', async (_request, reply) => {
     reply.header('reporting-endpoints', REPORTING_ENDPOINTS_HEADER)
   })
-
-  // `global: false` — this same instance serves every SPA asset through
-  // @fastify/vite, and one page load fetches many of them, so a low global cap
-  // would block page loads outright. Limits are attached per route instead.
-  await fastify.register(fastifyRateLimit, { global: false })
 
   // 2. The CSP violation report sink (Phase 5, story 5-F2). Registered outside
   // both switches below, like the headers above: a legacy deployment collects
