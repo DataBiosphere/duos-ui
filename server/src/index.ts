@@ -10,8 +10,10 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import fastifyHelmet from '@fastify/helmet'
+import fastifyRateLimit from '@fastify/rate-limit'
 import { createPgSessionStore } from './session/pgStore.js'
 import { helmetOptions } from './security/headers.js'
+import { REPORTING_ENDPOINTS_HEADER, cspReportRoute } from './security/cspReport.js'
 import { sessionPluginOptions } from './session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
 import { fetchMetadataGuard } from './security/fetchMetadata.js'
@@ -92,7 +94,18 @@ export async function buildApp(): Promise<AppInstance> {
   // its onRequest hook runs ahead of every route.
   await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev }))
 
-  // 2. DB pool + session — registered only when the deployment provides the
+  // 2. The Reporting-Endpoints header.
+  fastify.addHook('onRequest', async (_request, reply) => {
+    reply.header('reporting-endpoints', REPORTING_ENDPOINTS_HEADER)
+  })
+
+  // 3. Rate limiting. `global: false`
+  await fastify.register(fastifyRateLimit, { global: false })
+
+  // 4. The CSP violation report sink. Registered outside both switches below
+  await fastify.register(cspReportRoute)
+
+  // 5. DB pool + session — registered only when the deployment provides the
   // BFF database configuration.
   if (process.env.DUOS_DB_HOST) {
     fastify.log.info('[server] DUOS_DB_HOST is set — enabling BFF session infrastructure')
@@ -148,25 +161,11 @@ export async function buildApp(): Promise<AppInstance> {
     }))
 
     // CSRF protection for cookie-authenticated, state-changing auth routes
-    // (currently POST /auth/logout). SameSite=Lax withholds the session cookie
-    // from cross-site POSTs, but is not sufficient alone here: dev/staging live
-    // under *.broadinstitute.org, where SameSite treats every sibling subdomain
-    // as same-site — a compromised sibling could still forge cookie-bearing
-    // POSTs. CSRF tokens don't depend on the registrable domain. The secret is
-    // stored in the session, so it must be registered after @fastify/session.
-    //
-    // The options — including the header-only `getToken` narrowing — live in
-    // auth/csrf.ts so the test harnesses register the plugin exactly as this
-    // does. Inline, they drifted: see that file.
+    // (currently POST /auth/logout).
     await fastify.register(fastifyCsrf, csrfPluginOptions)
 
     // Warm the B2C OIDC discovery cache so the first login doesn't pay the
-    // discovery round-trip. Gated on the Azure env vars being present: DB/
-    // session infra (this block) can be enabled ahead of B2C being configured
-    // during the phased rollout, and warming up against unset vars would log
-    // an error on every single startup for no benefit. Not awaited and never
-    // fatal either way — on failure the error is logged and getOidcConfig()
-    // retries lazily on first use.
+    // discovery round-trip.
     if (process.env.DUOS_AZURE_ISSUER_URL && process.env.DUOS_AZURE_CLIENT_ID && process.env.DUOS_AZURE_CLIENT_SECRET) {
       getOidcConfig().catch((err: unknown) => {
         fastify.log.error({ err }, '[auth] B2C OIDC discovery warm-up failed')
@@ -177,7 +176,7 @@ export async function buildApp(): Promise<AppInstance> {
     fastify.log.info('[server] DUOS_DB_HOST is not set — starting without DB/session infrastructure (legacy client-side auth)')
   }
 
-  // 3. BFF auth routes — the cutover switch. Read at startup from the same
+  // 6. BFF auth routes — the cutover switch. Read at startup from the same
   // config object the /config.json route below serves.
   const { bffEnabled } = clientConfig
   if (bffEnabled === true) {

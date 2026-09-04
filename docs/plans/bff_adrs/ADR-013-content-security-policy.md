@@ -4,9 +4,10 @@
 **Related:** [ADR-004](ADR-004-api-proxy-layer.md) (the proxies that make ECM and TDR same-origin)
 **Implemented by:** `server/src/security/` (duos-ui, DT-4021)
 
-This record is written across the 5-F stack and grows with it. Story 5-F1 —
-helmet's non-CSP headers — is recorded here. The report sink (5-F2), the policy
-itself (5-F3), and the sidecar change (5-F4) add their sections as they land.
+This record is written across the 5-F stack and grows with it. Stories 5-F1
+(helmet's non-CSP headers) and 5-F2 (the report sink) are recorded here. The
+policy itself (5-F3) and the sidecar change (5-F4) add their sections as they
+land.
 
 ---
 
@@ -77,9 +78,60 @@ that costs nothing there.
 its values win — ours are what a local or compose run gets, where there is no
 proxy at all.
 
+## Decision, part 2 — the violation report sink is bounded six ways
+
+`reportOnly: true` on its own collects nothing centrally, so the policy needs a
+real endpoint to report to. `POST /csp-report` lands before the policy, and is
+inert until 5-F3 points a browser at it.
+
+It is an unauthenticated POST that anyone on the internet can reach, and
+everything it accepts reaches the pod's logs. Six controls bound that:
+
+1. An 8 KB body limit, enforced by Fastify before the parser runs.
+2. Exactly two accepted media types; everything else gets 415 without reaching
+   a handler.
+3. A cap on how many reports one request may contribute. Neither content-type
+   parser checks the body's shape, so an 8 KB array of minimal entries — around
+   170 of them fit — is one request that would otherwise write 170 lines.
+4. A logged-field allowlist, each value truncated and stripped of control
+   characters. Unknown keys never reach the log.
+5. A fixed-window log budget charged once per **request**, not once per report.
+6. A per-client rate limit through `@fastify/rate-limit`, at 30 requests a
+   minute, refusing the rest with a bare 429.
+
+Controls 3, 5 and 6 exist because the obvious design fails in both directions.
+Charging the budget per *report* lets a single 8 KB POST a minute exhaust the
+window and silently drop every genuine report — the security-monitoring
+equivalent of switching the sink off, for the cost of one request a minute. And
+a budget alone bounds only what is *written*: without a rate limit the endpoint
+still reads and parses everything it is sent.
+
+Fastify's own per-request logging is switched off for this route
+(`logLevel: 'silent'`). Without it, every POST — including the 415s and 413s
+rejected before any handler runs — still emits an `incoming request` /
+`request completed` pair that none of the six controls bounds. The report lines
+go through `app.log` rather than `request.log` as a result: a route level
+*pins* rather than raises, so logging at `warn` to keep `request.log` would have
+overridden a deployment that deliberately configured a lower level.
+
+The plugin registers `global: false`. This instance also serves every SPA asset
+and one page load fetches many, so a global cap sized for this endpoint would
+block page loads. Story 5-G attaches the auth-route limits to the same
+registration. The store is per process, so a deployment's real ceiling is these
+numbers times the replica count, and it resets on every restart — which is why
+the epic puts flood protection at the ingress and treats this as the backstop.
+
+The sink always answers 204, so it is no kind of oracle, and every rejection —
+413, 415, 429 — carries the status alone rather than a framework error code.
+The route sets its own error handler to get that: `index.ts` installs the
+app-level one after this plugin registers, so Fastify never resolves it here.
+
 ## Consequences so far
 
 - Sign-in is the thing to watch on the first deploy of 5-F1, in a **legacy**
   environment. Every environment is legacy today.
 - `contentSecurityPolicy` is explicitly `false` until 5-F3. The tests assert its
   absence, so the stack cannot quietly deliver half a policy.
+- `/csp-report` is live and reachable before anything reports to it. That is
+  deliberate — it means 5-F3 changes one flag rather than adding an endpoint and
+  a policy at once.

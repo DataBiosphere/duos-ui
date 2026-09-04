@@ -3,6 +3,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
+import { MAX_REQUESTS_PER_WINDOW } from '../src/security/cspReport.js'
 
 // ---------------------------------------------------------------------------
 // Mock all plugins that require external resources (DB, secrets, build dir)
@@ -734,6 +735,48 @@ describe('security headers', () => {
     const res = await app.inject({ method: 'GET', url: '/health' })
 
     expect(res.headers['cross-origin-opener-policy']).toBeUndefined()
+  })
+
+  it('reaches the report sink, which lives in its own encapsulated scope', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/csp-report',
+      headers: { 'content-type': 'application/csp-report' },
+      payload: JSON.stringify({ 'csp-report': { 'blocked-uri': 'https://example.org/x' } }),
+    })
+
+    expect(res.statusCode).toBe(204)
+  })
+
+  it('gives the report-to group an address through Reporting-Endpoints', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['reporting-endpoints']).toBe('csp-endpoint="/csp-report"')
+  })
+
+  it('rate-limits the report sink in the real app, not only in its unit tests', async () => {
+    // The route carries its own rateLimit config, but that config does nothing
+    // unless buildApp() actually registers the plugin. Assert the wiring, not
+    // the numbers — those are covered in cspReport.test.ts.
+    const post = () => app.inject({
+      method: 'POST',
+      url: '/csp-report',
+      headers: { 'content-type': 'application/csp-report' },
+      payload: JSON.stringify({ 'csp-report': { 'blocked-uri': 'https://example.org/x' } }),
+    })
+
+    let last = 0
+    for (let i = 0; i < MAX_REQUESTS_PER_WINDOW + 1; i += 1) last = (await post()).statusCode
+
+    expect(last).toBe(429)
+  })
+
+  it('leaves the SPA and health routes outside the limit, which is why it registers global: false', async () => {
+    // The same instance serves every SPA asset; a global cap sized for the
+    // report sink would block a page load.
+    for (let i = 0; i < MAX_REQUESTS_PER_WINDOW + 5; i += 1) {
+      expect((await app.inject({ method: 'GET', url: '/health' })).statusCode).toBe(200)
+    }
   })
 
   it('sends no Content-Security-Policy yet, in either spelling', async () => {
