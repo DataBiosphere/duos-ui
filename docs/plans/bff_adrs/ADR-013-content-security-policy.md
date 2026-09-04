@@ -7,7 +7,9 @@
 This record is written across the 5-F stack and grows with it. Stories 5-F1
 (helmet's non-CSP headers), 5-F2 (the report sink) and 5-F3 (the policy) are
 recorded here. The sidecar change (5-F4) is described under Consequences and
-lands in `terra-helmfile`.
+lands in `terra-helmfile`. The local run that measures this decision against a
+real proxy sidecar is
+[Story 5-F5 — Local Verification Run](phase_5_story_F5_header_verification.md).
 
 ---
 
@@ -262,6 +264,13 @@ violations first and is flipped to enforcement once a run over every flow is
 clean — sign-in, protected pages, banner fetch, feature flags, anonymous
 metrics, a chart page, sign-out. That rollout is story 5-F5.
 
+A local stack with the sidecar has already driven those flows in both modes and
+reported nothing, in report-only and under enforcement. See
+[Story 5-F5 — Local Verification Run](phase_5_story_F5_header_verification.md)
+for the headers as sent, the flows driven, and the gaps that run cannot close.
+It is the pre-check, not the rollout: dev traffic and the per-environment flip
+still have to happen.
+
 Collection is real rather than console-only: the policy carries both
 `report-uri` and `report-to`, pointing at the sink from part 2 above.
 
@@ -375,3 +384,9 @@ is a much larger piece of work than this story.
 
   COOP passing through is the reassuring half: the legacy-mode decision above
   is the one non-CSP header that both matters and actually arrives.
+
+  A local stack carrying the fixed `site.conf` confirms the whole of this
+  bullet, header by header, in
+  [Story 5-F5 — Local Verification Run](phase_5_story_F5_header_verification.md).
+  It also measures what the sidecar replaced before the fix: `SAMEORIGIN` for
+  `X-Frame-Options`, and a one-day HSTS for the app's one year.
