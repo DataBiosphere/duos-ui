@@ -3,6 +3,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
+import { MAX_REQUESTS_PER_WINDOW } from '../src/security/cspReport.js'
 
 // ---------------------------------------------------------------------------
 // Mock all plugins that require external resources (DB, secrets, build dir)
@@ -159,6 +160,10 @@ describe('error handler', () => {
 })
 
 describe('handleServerError', () => {
+  // The whole contract of the handler. The status varies with the error; the
+  // body never does. Nothing a client reads is derived from err.message.
+  const GENERIC_BODY = { error: 'An unexpected error occurred.' }
+
   // Asserted against the exported handler rather than through app.inject():
   // the child-logger factory a route uses is fixed when that route registers,
   // so a built app's request.log cannot be stubbed afterwards.
@@ -167,53 +172,81 @@ describe('handleServerError', () => {
   }
 
   function fakeReply() {
-    const reply = { status: vi.fn(() => reply), send: vi.fn(() => reply) }
+    const reply = {
+      sentStatus: 0,
+      sentBody: undefined as unknown,
+      status: vi.fn((code: number) => {
+        reply.sentStatus = code
+        return reply
+      }),
+      send: vi.fn((body: unknown) => {
+        reply.sentBody = body
+        return reply
+      }),
+    }
     return reply
   }
+
+  async function run(err: Error) {
+    const { handleServerError } = await import('../src/index.js')
+    const request = fakeRequest()
+    const reply = fakeReply()
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    handleServerError(err as any, request as any, reply as any)
+    return { request, reply }
+  }
+
+  // Every shape of error the handler can be given. Each message holds detail a
+  // client must never see: a 4xx message reads like client-safe text, which is
+  // the case most likely to tempt a future edit that forwards err.message.
+  const cases = [
+    { name: 'a 5xx statusCode', err: () => Object.assign(new Error('upstream token endpoint said: invalid_client'), { statusCode: 502 }), status: 502 },
+    { name: 'no status at all', err: () => new Error('DUOS_OIDC_CLIENT_SECRET is not set'), status: 500 },
+    { name: 'only err.status, not statusCode', err: () => Object.assign(new Error('bad input for column "ssn"'), { status: 400 }), status: 400 },
+    // A 3xx would answer an error with a JSON body and no Location header, so
+    // the handler refuses it and uses 500.
+    { name: 'a non-error 3xx status', err: () => Object.assign(new Error('confused'), { statusCode: 302 }), status: 500 },
+  ]
+
+  it.each(cases)('answers $name with the generic body and no part of err.message', async ({ err }) => {
+    const thrown = err()
+
+    const { reply } = await run(thrown)
+
+    expect(reply.sentBody).toEqual(GENERIC_BODY)
+    expect(JSON.stringify(reply.sentBody)).not.toContain(thrown.message)
+  })
+
+  it.each(cases)('maps $name to status $status', async ({ err, status }) => {
+    const { reply } = await run(err())
+
+    expect(reply.sentStatus).toBe(status)
+  })
+
+  it('logs the error server-side, which is the only place the message survives', async () => {
+    const thrown = Object.assign(new Error('internal secret data'), { statusCode: 502 })
+
+    const { request } = await run(thrown)
+
+    expect(request.log.error).toHaveBeenCalledWith({ err: thrown }, '[server] Unhandled error:')
+  })
 
   // A flood must not fill the error log: at `error` level the very thing the
   // limiter exists to absorb becomes a second denial of service, this time on
   // the log pipeline.
   it('logs a throttled request at warn and answers with the rate_limited code', async () => {
-    const { handleServerError } = await import('../src/index.js')
     const { RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } = await import('../src/security/rateLimit.js')
     const err = rateLimitPluginOptions.errorResponseBuilder!(
       {} as FastifyRequest,
       { statusCode: 429, ban: false, after: '1 minute', max: 30, ttl: 60_000 },
     )
-    const request = fakeRequest()
-    const reply = fakeReply()
 
-    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-    handleServerError(err as any, request as any, reply as any)
+    const { request, reply } = await run(err as unknown as Error)
 
     expect(request.log.warn).toHaveBeenCalled()
     expect(request.log.error).not.toHaveBeenCalled()
-    expect(reply.status).toHaveBeenCalledWith(429)
-    expect(reply.send).toHaveBeenCalledWith({ error: RATE_LIMIT_ERROR_CODE })
-  })
-
-  it('honors err.status when the error carries no statusCode', async () => {
-    const { handleServerError } = await import('../src/index.js')
-    const err = Object.assign(new Error('bad input'), { status: 400 })
-    const reply = fakeReply()
-
-    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-    handleServerError(err as any, fakeRequest() as any, reply as any)
-
-    expect(reply.status).toHaveBeenCalledWith(400)
-  })
-
-  // A 3xx would answer an error with a JSON body and no Location header.
-  it('answers with 500 when the error names a non-error status', async () => {
-    const { handleServerError } = await import('../src/index.js')
-    const err = Object.assign(new Error('confused'), { statusCode: 302 })
-    const reply = fakeReply()
-
-    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-    handleServerError(err as any, fakeRequest() as any, reply as any)
-
-    expect(reply.status).toHaveBeenCalledWith(500)
+    expect(reply.sentStatus).toBe(429)
+    expect(reply.sentBody).toEqual({ error: RATE_LIMIT_ERROR_CODE })
   })
 
   it('logs any other failure at error and hides its message', async () => {
@@ -851,16 +884,7 @@ describe('auth endpoint rate limiting', () => {
     await app.close()
   })
 
-  // The regression this guards: registering the plugin globally. This instance
-  // also serves every SPA asset through @fastify/vite, and one page load
-  // fetches many of them, so a global cap would 429 an ordinary page load.
-  //
-  // A stand-in route, not an unmatched /assets/... URL: @fastify/vite is
-  // mocked here, so an unmatched URL falls through to setNotFoundHandler —
-  // and the plugin attaches its hook from an `onRoute` listener, which
-  // setNotFoundHandler never fires. An unmatched URL is therefore unlimited
-  // whatever `global` says, and could not detect the regression. A registered
-  // route models what @fastify/vite really serves.
+  // The regression this guards: registering the plugin globally.
   it('never limits a route that did not opt in', async () => {
     const app = await buildLimitedApp({ login: '1' })
     app.get('/assets/chunk.js', async () => 'export default 1')
@@ -891,5 +915,77 @@ describe('auth endpoint rate limiting', () => {
 
   it('fails loud at startup when a limit override is not a positive integer', async () => {
     await expect(buildLimitedApp({ login: 'lots' })).rejects.toThrow('DUOS_RATE_LIMIT_LOGIN_MAX')
+  })
+})
+
+describe('security headers', () => {
+  it('reaches a root-scope route', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['cross-origin-resource-policy']).toBe('same-origin')
+    expect(res.headers['referrer-policy']).toBe('no-referrer')
+    expect(res.headers['x-frame-options']).toBe('DENY')
+  })
+
+  it('reaches the SPA document itself, not just the API routes', async () => {
+    const res = await app.inject({ method: 'GET', url: '/datalibrary/some-deep-link' })
+
+    expect(res.headers['x-frame-options']).toBe('DENY')
+    expect(res.headers['referrer-policy']).toBe('no-referrer')
+  })
+
+  it('sends no COOP header at all to a legacy deployment', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['cross-origin-opener-policy']).toBeUndefined()
+  })
+
+  it('reaches the report sink, which lives in its own encapsulated scope', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/csp-report',
+      headers: { 'content-type': 'application/csp-report' },
+      payload: JSON.stringify({ 'csp-report': { 'blocked-uri': 'https://example.org/x' } }),
+    })
+
+    expect(res.statusCode).toBe(204)
+  })
+
+  it('gives the report-to group an address through Reporting-Endpoints', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['reporting-endpoints']).toBe('csp-endpoint="/csp-report"')
+  })
+
+  it('rate-limits the report sink in the real app, not only in its unit tests', async () => {
+    // The route carries its own rateLimit config, but that config does nothing
+    // unless buildApp() actually registers the plugin. Assert the wiring, not
+    // the numbers — those are covered in cspReport.test.ts.
+    const post = () => app.inject({
+      method: 'POST',
+      url: '/csp-report',
+      headers: { 'content-type': 'application/csp-report' },
+      payload: JSON.stringify({ 'csp-report': { 'blocked-uri': 'https://example.org/x' } }),
+    })
+
+    let last = 0
+    for (let i = 0; i < MAX_REQUESTS_PER_WINDOW + 1; i += 1) last = (await post()).statusCode
+
+    expect(last).toBe(429)
+  })
+
+  it('leaves the SPA and health routes outside the limit, which is why it registers global: false', async () => {
+    // The same instance serves every SPA asset; a global cap sized for the
+    // report sink would block a page load.
+    for (let i = 0; i < MAX_REQUESTS_PER_WINDOW + 5; i += 1) {
+      expect((await app.inject({ method: 'GET', url: '/health' })).statusCode).toBe(200)
+    }
+  })
+
+  it('sends no Content-Security-Policy yet, in either spelling', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['content-security-policy']).toBeUndefined()
+    expect(res.headers['content-security-policy-report-only']).toBeUndefined()
   })
 })

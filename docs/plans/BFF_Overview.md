@@ -103,7 +103,7 @@ the migration plan and are summarised below; the ones that needed fuller
 treatment — because they were resolved during implementation, with alternatives
 and residual risk worth recording — have their own files under
 [`bff_adrs/`](bff_adrs/). That is why the directory holds 004 and 009 through
-012 rather than 001 through 003: the numbers belong to this list, not to the
+013 rather than 001 through 003: the numbers belong to this list, not to the
 directory.
 
 | ADR | Decision | Phase |
@@ -120,6 +120,7 @@ directory.
 | [010](#adr-010--the-proxy-scope-declares-its-own-error-shape) | The proxy scope declares its own error shape | 3, 4 |
 | [011](#adr-011--one-identity-per-browser-cross-tab-account-switching-reloads-the-stale-tab) | One identity per browser: cross-tab account switching reloads the stale tab | 4 |
 | [012](#adr-012--session-cookie-is-samesitelax-with-csrf-tokens-closing-the-gap) | Session cookie is `SameSite=Lax`, with CSRF tokens closing the gap | 1, 2–4 |
+| [013](#adr-013--security-headers-and-a-content-security-policy-derived-from-runtime-config) | Security headers, and a CSP derived from runtime config | 5 |
 
 ### ADR-001 — PostgreSQL-backed sessions via `@fastify/session`
 
@@ -287,6 +288,25 @@ CI.
 The options are defined once in `server/src/session/sessionOptions.ts` and
 imported by the server and all five test harnesses, so changing `sameSite` or
 `rolling` fails the suite.
+
+### ADR-013 — Security headers, and a Content Security Policy derived from runtime config
+
+**Full record:** [bff_adrs/ADR-013-content-security-policy.md](bff_adrs/ADR-013-content-security-policy.md)
+— written across the 5-F stack and growing with it.
+
+`@fastify/helmet` registers ahead of every route and outside both cutover
+switches: a legacy deployment needs these headers too. Two of its defaults would
+break flows this app depends on.
+
+`Cross-Origin-Opener-Policy` is **off entirely in legacy mode**.
+`same-origin-allow-popups` is not a safe middle ground, which was measured: on
+the return leg from B2C the popup's `window.opener` still goes null and
+`signinPopup()` never resolves. COOP is not part of the CSP and has no
+report-only mode, so that one breaks sign-in on the first deploy — which is why
+it ships on its own. `Cross-Origin-Embedder-Policy` stays off because the banner
+bucket and the two direct upstreams send no CORP header. HSTS is production-only.
+
+The Content Security Policy itself is explicitly off until story 5-F3.
 
 ### Decisions not tracked as ADRs
 
