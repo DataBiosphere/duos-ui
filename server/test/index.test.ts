@@ -159,76 +159,97 @@ describe('error handler', () => {
 })
 
 describe('handleServerError', () => {
+  // The whole contract of the handler. The status varies with the error; the
+  // body never does, except for the throttled case below. Nothing else a
+  // client reads is derived from err.message.
+  //
   // Driven with a hand-built request and reply: that is the only way to put a
   // specific `err` shape through the handler. The wiring itself is covered
   // end-to-end by the /boom case above and by the buildApp case further down.
+  const GENERIC_BODY = { error: 'An unexpected error occurred.' }
+
   function fakeRequest() {
     return { ip: '203.0.113.1', url: '/auth/login', log: { warn: vi.fn(), error: vi.fn() } }
   }
 
   function fakeReply() {
-    const reply = { status: vi.fn(() => reply), send: vi.fn(() => reply) }
+    const reply = {
+      sentStatus: 0,
+      sentBody: undefined as unknown,
+      status: vi.fn((code: number) => {
+        reply.sentStatus = code
+        return reply
+      }),
+      send: vi.fn((body: unknown) => {
+        reply.sentBody = body
+        return reply
+      }),
+    }
     return reply
   }
 
-  it('logs the failure at error and hides its message', async () => {
+  async function run(err: Error) {
     const { handleServerError } = await import('../src/index.js')
-    const err = Object.assign(new Error('internal secret data'), { statusCode: 502 })
     const request = fakeRequest()
     const reply = fakeReply()
-
     // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     handleServerError(err as any, request as any, reply as any)
+    return { request, reply }
+  }
 
-    expect(request.log.error).toHaveBeenCalled()
-    expect(request.log.warn).not.toHaveBeenCalled()
-    expect(reply.status).toHaveBeenCalledWith(502)
-    expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
+  // Every shape of error the handler can be given. Each message holds detail a
+  // client must never see: a 4xx message reads like client-safe text, which is
+  // the case most likely to tempt a future edit that forwards err.message.
+  const cases = [
+    { name: 'a 5xx statusCode', err: () => Object.assign(new Error('upstream token endpoint said: invalid_client'), { statusCode: 502 }), status: 502 },
+    { name: 'no status at all', err: () => new Error('DUOS_OIDC_CLIENT_SECRET is not set'), status: 500 },
+    { name: 'only err.status, not statusCode', err: () => Object.assign(new Error('bad input for column "ssn"'), { status: 400 }), status: 400 },
+    // A 3xx would answer an error with a JSON body and no Location header, so
+    // the handler refuses it and uses 500.
+    { name: 'a non-error 3xx status', err: () => Object.assign(new Error('confused'), { statusCode: 302 }), status: 500 },
+  ]
+
+  it.each(cases)('answers $name with the generic body and no part of err.message', async ({ err }) => {
+    const thrown = err()
+
+    const { reply } = await run(thrown)
+
+    expect(reply.sentBody).toEqual(GENERIC_BODY)
+    expect(JSON.stringify(reply.sentBody)).not.toContain(thrown.message)
+  })
+
+  it.each(cases)('maps $name to status $status', async ({ err, status }) => {
+    const { reply } = await run(err())
+
+    expect(reply.sentStatus).toBe(status)
+  })
+
+  it('logs the error server-side, which is the only place the message survives', async () => {
+    const thrown = Object.assign(new Error('internal secret data'), { statusCode: 502 })
+
+    const { request } = await run(thrown)
+
+    expect(request.log.error).toHaveBeenCalledWith({ err: thrown }, '[server] Unhandled error:')
   })
 
   // A flood must not fill the error log: at `error` level the very thing the
   // limiter exists to absorb becomes a second denial of service, this time on
-  // the log pipeline.
+  // the log pipeline. This branch is the one exception to the generic body
+  // above: a client that cannot tell throttling from a server error cannot
+  // back off.
   it('logs a throttled request at warn and answers with the rate_limited code', async () => {
-    const { handleServerError } = await import('../src/index.js')
     const { RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } = await import('../src/security/rateLimit.js')
     const err = rateLimitPluginOptions.errorResponseBuilder(
       {} as FastifyRequest,
       { statusCode: 429, ban: false, after: '1 minute', max: 30, ttl: 60_000 },
     )
-    const request = fakeRequest()
-    const reply = fakeReply()
 
-    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-    handleServerError(err as any, request as any, reply as any)
+    const { request, reply } = await run(err as unknown as Error)
 
     expect(request.log.warn).toHaveBeenCalled()
     expect(request.log.error).not.toHaveBeenCalled()
-    expect(reply.status).toHaveBeenCalledWith(429)
-    expect(reply.send).toHaveBeenCalledWith({ error: RATE_LIMIT_ERROR_CODE })
-  })
-
-  it('honors err.status when the error carries no statusCode', async () => {
-    const { handleServerError } = await import('../src/index.js')
-    const err = Object.assign(new Error('bad input'), { status: 400 })
-    const reply = fakeReply()
-
-    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-    handleServerError(err as any, fakeRequest() as any, reply as any)
-
-    expect(reply.status).toHaveBeenCalledWith(400)
-  })
-
-  // A 3xx would answer an error with a JSON body and no Location header.
-  it('answers with 500 when the error names a non-error status', async () => {
-    const { handleServerError } = await import('../src/index.js')
-    const err = Object.assign(new Error('confused'), { statusCode: 302 })
-    const reply = fakeReply()
-
-    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-    handleServerError(err as any, fakeRequest() as any, reply as any)
-
-    expect(reply.status).toHaveBeenCalledWith(500)
+    expect(reply.sentStatus).toBe(429)
+    expect(reply.sentBody).toEqual({ error: RATE_LIMIT_ERROR_CODE })
   })
 })
 
@@ -856,5 +877,35 @@ describe('auth endpoint rate limiting', () => {
 
   it('fails loud at startup when the limit override is not a positive integer', async () => {
     await expect(buildLimitedApp('lots')).rejects.toThrow('DUOS_RATE_LIMIT_LOGIN_MAX')
+  })
+})
+
+describe('security headers', () => {
+  it('reaches a root-scope route', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['cross-origin-resource-policy']).toBe('same-origin')
+    expect(res.headers['referrer-policy']).toBe('no-referrer')
+    expect(res.headers['x-frame-options']).toBe('DENY')
+  })
+
+  it('reaches the SPA document itself, not just the API routes', async () => {
+    const res = await app.inject({ method: 'GET', url: '/datalibrary/some-deep-link' })
+
+    expect(res.headers['x-frame-options']).toBe('DENY')
+    expect(res.headers['referrer-policy']).toBe('no-referrer')
+  })
+
+  it('sends no COOP header at all to a legacy deployment', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['cross-origin-opener-policy']).toBeUndefined()
+  })
+
+  it('sends no Content-Security-Policy yet, in either spelling', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['content-security-policy']).toBeUndefined()
+    expect(res.headers['content-security-policy-report-only']).toBeUndefined()
   })
 })
