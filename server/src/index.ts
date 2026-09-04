@@ -18,7 +18,7 @@ import { REPORTING_ENDPOINTS_HEADER, cspReportRoute } from './security/cspReport
 import { sessionPluginOptions } from './session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
 import { fetchMetadataGuard } from './security/fetchMetadata.js'
-import { RATE_LIMIT_ERROR_CODE, isRateLimitError, loginRateLimit, rateLimitPluginOptions } from './security/rateLimit.js'
+import { RATE_LIMIT_ERROR_CODE, callbackRateLimit, isRateLimitError, loginRateLimit, rateLimitPluginOptions } from './security/rateLimit.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
 import { handleCallback } from './auth/callback.js'
@@ -62,6 +62,21 @@ export function handleServerError(err: FastifyError, request: FastifyRequest, re
   request.log.error({ err }, '[server] Unhandled error:')
   const status = err.statusCode ?? (err as { status?: number }).status ?? 500
   return reply.status(status >= 400 ? status : 500).send({ error: 'An unexpected error occurred.' })
+}
+
+/**
+ * `/auth/callback` is a top-level browser navigation from B2C, so answering a
+ * throttled request with a JSON body would leave the user looking at
+ * `{"error":"rate_limited"}` in the address bar with no route back into the
+ * app. Land them in the SPA instead, the way an error from B2C itself does
+ * (auth/callback.ts). Everything else delegates unchanged.
+ */
+export function handleCallbackError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
+  if (isRateLimitError(err)) {
+    request.log.warn({ ip: request.ip }, '[server] rate limit exceeded on the OAuth callback')
+    return reply.redirect(`/?signInError=${RATE_LIMIT_ERROR_CODE}`)
+  }
+  return handleServerError(err, request, reply)
 }
 
 export async function buildApp(): Promise<AppInstance> {
@@ -201,14 +216,15 @@ export async function buildApp(): Promise<AppInstance> {
     }
     fastify.log.info('[server] bffEnabled is true — registering BFF auth routes and the API proxy')
 
-    // Resolved once, so the effective number reaches the log an operator
-    // reads when a limit is questioned — and so a bad override fails startup
-    // here rather than on the first request.
+    // Resolved once, so the effective numbers reach the log an operator reads
+    // when a limit is questioned — and so a bad override fails startup here
+    // rather than on the first request.
     const loginLimit = loginRateLimit()
-    fastify.log.info({ login: loginLimit.max }, '[server] auth rate limits, in requests per minute per client IP')
+    const callbackLimit = callbackRateLimit()
+    fastify.log.info({ login: loginLimit.max, callback: callbackLimit.max }, '[server] auth rate limits, in requests per minute per client IP')
 
     fastify.post('/auth/login', { config: { rateLimit: loginLimit } }, handleLogin)
-    fastify.get('/auth/callback', handleCallback)
+    fastify.get('/auth/callback', { config: { rateLimit: callbackLimit }, errorHandler: handleCallbackError }, handleCallback)
     fastify.get('/auth/csrf-token', handleCsrfToken)
     fastify.post('/auth/logout', { onRequest: fastify.csrfProtection }, handleLogout)
     fastify.get('/auth/me', { onRequest: fetchMetadataGuard }, getMe)

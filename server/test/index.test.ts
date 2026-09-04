@@ -164,6 +164,9 @@ describe('handleServerError', () => {
   // body never does. Nothing a client reads is derived from err.message.
   const GENERIC_BODY = { error: 'An unexpected error occurred.' }
 
+  // Asserted against the exported handler rather than through app.inject():
+  // the child-logger factory a route uses is fixed when that route registers,
+  // so a built app's request.log cannot be stubbed afterwards.
   function fakeRequest() {
     return { ip: '203.0.113.1', url: '/auth/login', log: { warn: vi.fn(), error: vi.fn() } }
   }
@@ -231,7 +234,7 @@ describe('handleServerError', () => {
   // A flood must not fill the error log
   it('logs a throttled request at warn and answers with the rate_limited code', async () => {
     const { RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } = await import('../src/security/rateLimit.js')
-    const err = rateLimitPluginOptions.errorResponseBuilder(
+    const err = rateLimitPluginOptions.errorResponseBuilder!(
       {} as FastifyRequest,
       { statusCode: 429, ban: false, after: '1 minute', max: 30, ttl: 60_000 },
     )
@@ -242,6 +245,21 @@ describe('handleServerError', () => {
     expect(request.log.error).not.toHaveBeenCalled()
     expect(reply.sentStatus).toBe(429)
     expect(reply.sentBody).toEqual({ error: RATE_LIMIT_ERROR_CODE })
+  })
+
+  it('logs any other failure at error and hides its message', async () => {
+    const { handleServerError } = await import('../src/index.js')
+    const err = Object.assign(new Error('internal secret data'), { statusCode: 502 })
+    const request = fakeRequest()
+    const reply = fakeReply()
+
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    handleServerError(err as any, request as any, reply as any)
+
+    expect(request.log.error).toHaveBeenCalled()
+    expect(request.log.warn).not.toHaveBeenCalled()
+    expect(reply.status).toHaveBeenCalledWith(502)
+    expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
   })
 })
 
@@ -732,7 +750,7 @@ describe('envBool', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Rate limiting
+// Rate limiting (stories 5-G2 and 5-G3)
 // ---------------------------------------------------------------------------
 describe('auth endpoint rate limiting', () => {
   let dir: string
@@ -748,9 +766,10 @@ describe('auth endpoint rate limiting', () => {
 
   // Same reasoning as the sibling describe: buildApp() caches config.json
   // process-wide, so the cache must be cleared right before the build.
-  async function buildLimitedApp(loginMax?: string) {
-    const { LOGIN_MAX_ENV_VAR } = await import('../src/security/rateLimit.js')
-    if (loginMax) vi.stubEnv(LOGIN_MAX_ENV_VAR, loginMax)
+  async function buildLimitedApp(maxima?: { login?: string, callback?: string }) {
+    const { LOGIN_MAX_ENV_VAR, CALLBACK_MAX_ENV_VAR } = await import('../src/security/rateLimit.js')
+    if (maxima?.login) vi.stubEnv(LOGIN_MAX_ENV_VAR, maxima.login)
+    if (maxima?.callback) vi.stubEnv(CALLBACK_MAX_ENV_VAR, maxima.callback)
 
     dir = mkdtempSync(path.join(tmpdir(), 'duos-ratelimit-config-'))
     const file = path.join(dir, 'config.json')
@@ -763,12 +782,12 @@ describe('auth endpoint rate limiting', () => {
     return buildApp()
   }
 
-  // The limiter keys on request.ip, which honours X-Forwarded-For because
+  // The rate limiter keys on request.ip, which honours X-Forwarded-For because
   // TRUST_PROXY names the loopback peer that app.inject() presents as.
   const from = (ip: string) => ({ 'x-forwarded-for': ip })
 
   it('returns 429 with Retry-After and the rate_limited code once /auth/login exceeds its limit', async () => {
-    const app = await buildLimitedApp('2')
+    const app = await buildLimitedApp({ login: '2' })
     const { RATE_LIMIT_ERROR_CODE } = await import('../src/security/rateLimit.js')
 
     for (let i = 0; i < 2; i++) {
@@ -785,8 +804,40 @@ describe('auth endpoint rate limiting', () => {
     await app.close()
   })
 
+  it('counts /auth/login and /auth/callback in separate buckets, each with its own cap', async () => {
+    const app = await buildLimitedApp({ login: '1', callback: '1' })
+
+    await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.10') })
+    const blockedLogin = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.10') })
+    // Unspent by the login flood, so the bucket is its own …
+    const callback = await app.inject({ method: 'GET', url: '/auth/callback', headers: from('203.0.113.10') })
+    // … and capped, so the route really does carry a config of its own.
+    const blockedCallback = await app.inject({ method: 'GET', url: '/auth/callback', headers: from('203.0.113.10') })
+
+    expect(blockedLogin.statusCode).toBe(429)
+    expect(callback.statusCode).toBe(200)
+    expect(blockedCallback.statusCode).toBe(302)
+
+    await app.close()
+  })
+
+  // /auth/callback is a top-level navigation from B2C, so a JSON body would
+  // leave the user on `{"error":"rate_limited"}` with no route back.
+  it('lands a throttled /auth/callback back in the SPA instead of sending JSON', async () => {
+    const app = await buildLimitedApp({ callback: '1' })
+
+    await app.inject({ method: 'GET', url: '/auth/callback', headers: from('203.0.113.16') })
+    const blocked = await app.inject({ method: 'GET', url: '/auth/callback', headers: from('203.0.113.16') })
+
+    expect(blocked.statusCode).toBe(302)
+    expect(blocked.headers.location).toBe('/?signInError=rate_limited')
+    expect(blocked.payload).not.toContain('rate_limited')
+
+    await app.close()
+  })
+
   it('counts each client IP in its own bucket', async () => {
-    const app = await buildLimitedApp('1')
+    const app = await buildLimitedApp({ login: '1' })
 
     await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.11') })
     const sameIp = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.11') })
@@ -799,7 +850,7 @@ describe('auth endpoint rate limiting', () => {
   })
 
   it('lets a client through again once the time window passes', async () => {
-    const app = await buildLimitedApp('1')
+    const app = await buildLimitedApp({ login: '1' })
     // The store measures the window with Date.now(); fake only the clock, so
     // inject()'s own async machinery keeps running on real timers.
     vi.useFakeTimers({ toFake: ['Date'] })
@@ -819,7 +870,7 @@ describe('auth endpoint rate limiting', () => {
   // session (5-B) and /auth/logout on the CSRF token, and a low cap on either
   // breaks multiple tabs and the client's retry path.
   it('leaves /auth/csrf-token and /auth/logout unlimited', async () => {
-    const app = await buildLimitedApp('1')
+    const app = await buildLimitedApp({ login: '1' })
 
     for (let i = 0; i < 5; i++) {
       const token = await app.inject({ method: 'GET', url: '/auth/csrf-token', headers: from('203.0.113.13') })
@@ -833,7 +884,7 @@ describe('auth endpoint rate limiting', () => {
 
   // The regression this guards: registering the plugin globally.
   it('never limits a route that did not opt in', async () => {
-    const app = await buildLimitedApp('1')
+    const app = await buildLimitedApp({ login: '1' })
     app.get('/assets/chunk.js', async () => 'export default 1')
 
     for (let i = 0; i < 12; i++) {
@@ -848,18 +899,20 @@ describe('auth endpoint rate limiting', () => {
     await app.close()
   })
 
-  it('applies the shipped default when no override is set', async () => {
+  it('applies the shipped defaults when no override is set', async () => {
     const app = await buildLimitedApp()
 
     const login = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.15') })
+    const callback = await app.inject({ method: 'GET', url: '/auth/callback', headers: from('203.0.113.15') })
 
     expect(login.headers['x-ratelimit-limit']).toBe('30')
+    expect(callback.headers['x-ratelimit-limit']).toBe('60')
 
     await app.close()
   })
 
-  it('fails loud at startup when the limit override is not a positive integer', async () => {
-    await expect(buildLimitedApp('lots')).rejects.toThrow('DUOS_RATE_LIMIT_LOGIN_MAX')
+  it('fails loud at startup when a limit override is not a positive integer', async () => {
+    await expect(buildLimitedApp({ login: 'lots' })).rejects.toThrow('DUOS_RATE_LIMIT_LOGIN_MAX')
   })
 })
 
