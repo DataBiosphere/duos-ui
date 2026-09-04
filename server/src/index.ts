@@ -74,40 +74,23 @@ export async function buildApp(): Promise<AppInstance> {
   // (memoized) config.
   const configJsonPath = configPath(PROJECT_ROOT, isDev)
 
-  // Read once, here. Two things need it: the CSP below, whose `connect-src`
-  // allowlist is derived from the configured upstream origins and differs by
-  // mode, and the `bffEnabled` cutover check further down. readConfig memoises
-  // for the life of the process, so a second call would return this same
-  // object — binding it makes that explicit and keeps the two in step.
+  // Keep CSP construction and BFF route gating on the config served to the client.
   const clientConfig = await readConfig(configJsonPath, fastify.log)
 
   // 1. Security headers, including the Content Security Policy (Phase 5, 5-F).
-  // Registered first so its onRequest hook runs ahead of every route, and
-  // outside both switches below: the legacy client needs the same headers.
-  //
-  // Report-only until a deployment says otherwise. A strict policy is the kind
-  // of change that breaks a page nobody tested, so each environment collects
-  // violations at /csp-report first and flips DUOS_CSP_REPORT_ONLY=false once
-  // the report run is clean. See docs/plans/bff_adrs/ADR-013-content-security-policy.md.
+  // Register before routes and outside the BFF switches so every response gets them.
+  // Enforce only after an environment's report-only run is clean.
   const cspReportOnly = envBool(process.env.DUOS_CSP_REPORT_ONLY, true)
   fastify.log.info(`[server] Content Security Policy is ${cspReportOnly ? 'report-only (set DUOS_CSP_REPORT_ONLY=false to enforce)' : 'enforced'}`)
   await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly }))
 
-  // Gives the policy's `report-to` group an address. The `report-uri` fallback
-  // in the same policy needs no header, but Chrome prefers `report-to`.
+  // `report-to` needs a Reporting-Endpoints group; `report-uri` is the fallback.
   fastify.addHook('onRequest', async (_request, reply) => {
     reply.header('reporting-endpoints', REPORTING_ENDPOINTS_HEADER)
   })
 
-  // `global: false` — this same instance serves every SPA asset through
-  // @fastify/vite, and one page load fetches many of them, so a low global cap
-  // would block page loads outright. Limits are attached per route instead.
-  // Story 5-G registers the auth-route limits on this same plugin.
-  //
-  // The default store is per process, so a deployment's real ceiling is this
-  // number times the replica count, and it resets on every restart. That is
-  // why the epic puts flood protection at the ingress; this is the backstop
-  // beneath it, not the control.
+  // Limits are opt-in per route; a global limit would also throttle SPA assets.
+  // The in-memory store is a per-process backstop, not edge flood protection.
   await fastify.register(fastifyRateLimit, { global: false })
 
   await fastify.register(cspReportRoute)
