@@ -12,8 +12,8 @@ import type { RateLimitOptions } from '@fastify/rate-limit'
  *  2. Exactly two accepted media types; everything else gets 415 without
  *     reaching a handler.
  *  3. A cap on how many reports one request may contribute. Neither parser
- *     checks the body's shape, so an 8 KB array of minimal entries — around
- *     170 of them fit — is one request that would otherwise write 170 lines.
+ *     checks the body's shape, so an 8 KB array of minimal entries — 174 of
+ *     them fit — is one request that would otherwise write 174 lines.
  *  4. A field allowlist — only the report fields the spec defines survive,
  *     each truncated. Unknown keys never reach the log.
  *  5. A fixed-window budget charged once per *request*, not once per report,
@@ -35,8 +35,11 @@ import type { RateLimitOptions } from '@fastify/rate-limit'
  * MAX_LOGGED_PER_WINDOW × MAX_REPORTS_PER_REQUEST must multiply by the replica
  * count; the constants below are one pod's ceiling, not the deployment's.
  *
- * Story 5-G adds real per-route rate limiting at the edge and through
- * `@fastify/rate-limit`; the counter here is the log-volume floor beneath it.
+ * The per-client limit is enforced by `@fastify/rate-limit`, which index.ts
+ * registers once with `global: false`; story 5-G attaches the auth-route
+ * limits to that same registration. Its store is per process too, which is why
+ * the epic puts flood protection at the ingress and treats both counters here
+ * as the backstop beneath it.
  */
 
 /** Where the browser posts violation reports. Story 5-F3's policy points here. */
@@ -257,7 +260,9 @@ export async function cspReportRoute(app: FastifyInstance): Promise<void> {
   // a deployment that deliberately set FASTIFY_LOG_LEVEL lower. `app.log`
   // honours that setting, and carrying `reqId` explicitly keeps the one thing
   // request.log was worth here — telling which lines arrived together.
-  // Read by @fastify/rate-limit, which index.ts registers with `global: false`.
+
+  // The rate limit below is read by @fastify/rate-limit, which index.ts
+  // registers with `global: false`.
   // Ignored when the plugin is absent, which is what lets the unit tests
   // exercise this route on a bare instance. The story asks for a real rate
   // limit here, not only a log budget: without one the endpoint still accepts
