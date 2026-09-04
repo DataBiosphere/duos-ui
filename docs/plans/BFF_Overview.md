@@ -298,10 +298,10 @@ imported by the server and all five test harnesses, so changing `sameSite` or
   (story 5-G) — `@fastify/rate-limit`'s default store is per-process, so in a
   multi-pod deployment the effective limit multiplies by the replica count and
   resets on every restart. Production flood protection belongs at the
-  ingress/edge or a shared store; the in-app limits are a floor against a
-  flood from one source, not a distributed one. The plugin is registered with
-  `global: false` because the same Fastify instance serves every SPA asset
-  through `@fastify/vite` — only the auth routes opt in.
+  ingress/edge or a shared store; the in-app limits are a floor that survives
+  an edge misconfiguration. The plugin is registered with `global: false`
+  because the same Fastify instance serves every SPA asset through
+  `@fastify/vite` — only `POST /auth/login` and `GET /auth/callback` opt in.
   `/auth/csrf-token` is gated on authentication instead (5-B) and
   `/auth/logout` on the CSRF token, because a low cap on either breaks
   multiple tabs and the client's retry path. Limits are per client IP and

@@ -14,7 +14,7 @@ import { createPgSessionStore } from './session/pgStore.js'
 import { sessionPluginOptions } from './session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
 import { fetchMetadataGuard } from './security/fetchMetadata.js'
-import { RATE_LIMIT_ERROR_CODE, isRateLimitError, loginRateLimit, rateLimitPluginOptions } from './security/rateLimit.js'
+import { RATE_LIMIT_ERROR_CODE, callbackRateLimit, isRateLimitError, loginRateLimit, rateLimitPluginOptions } from './security/rateLimit.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
 import { handleCallback } from './auth/callback.js'
@@ -47,19 +47,13 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
 }
 
 /**
- * The app-level error handler. The body is always generic — an error message
- * can carry internal detail — except a throttled request, which is an
- * expected outcome rather than a fault: the generic message would leave the
- * client unable to tell throttling from a server error, and at `error` level
- * a flood would turn the log pipeline into a second denial of service. The
- * rate-limit headers the plugin set on the reply survive, because it sets
+ * The app-level error handler. Every response body is generic — an upstream
+ * error message can carry internal detail — except a throttled request, which
+ * is an expected outcome rather than a fault: the generic message would leave
+ * the client unable to tell throttling from a server error, and at `error`
+ * level a flood would turn the log pipeline into a second denial of service.
+ * The rate-limit headers the plugin set on the reply survive, because it sets
  * them before it throws.
- *
- * Named and exported rather than inlined at the registration site so both
- * branches, and the status handling below, are directly assertable — a
- * request built by hand is the only way to drive a specific `err` shape
- * through it, and the child-logger factory a route uses is fixed when that
- * route registers, so a built app's request.log cannot be stubbed afterwards.
  */
 export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
@@ -76,6 +70,21 @@ export function handleServerError(err: FastifyError, request: FastifyRequest, re
   // surface than the parity is worth.
   const status = err.statusCode ?? (err as { status?: number }).status ?? 500
   return reply.status(status >= 400 ? status : 500).send({ error: 'An unexpected error occurred.' })
+}
+
+/**
+ * `/auth/callback` is a top-level browser navigation from B2C, so answering a
+ * throttled request with a JSON body would leave the user looking at
+ * `{"error":"rate_limited"}` in the address bar with no route back into the
+ * app. Land them in the SPA instead, the way an error from B2C itself does
+ * (auth/callback.ts). Everything else delegates unchanged.
+ */
+export function handleCallbackError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
+  if (isRateLimitError(err)) {
+    request.log.warn({ ip: request.ip }, '[server] rate limit exceeded on the OAuth callback')
+    return reply.redirect(`/?signInError=${RATE_LIMIT_ERROR_CODE}`)
+  }
+  return handleServerError(err, request, reply)
 }
 
 export async function buildApp(): Promise<AppInstance> {
@@ -243,14 +252,15 @@ export async function buildApp(): Promise<AppInstance> {
     }
     fastify.log.info('[server] bffEnabled is true — registering BFF auth routes and the API proxy')
 
-    // Resolved once, so the effective number reaches the log an operator
-    // reads when a limit is questioned — and so a bad override fails startup
-    // here rather than on the first request.
+    // Resolved once, so the effective numbers reach the log an operator reads
+    // when a limit is questioned — and so a bad override fails startup here
+    // rather than on the first request.
     const loginLimit = loginRateLimit()
-    fastify.log.info({ login: loginLimit.max }, '[server] auth rate limits, in requests per minute per client IP')
+    const callbackLimit = callbackRateLimit()
+    fastify.log.info({ login: loginLimit.max, callback: callbackLimit.max }, '[server] auth rate limits, in requests per minute per client IP')
 
     fastify.post('/auth/login', { config: { rateLimit: loginLimit } }, handleLogin)
-    fastify.get('/auth/callback', handleCallback)
+    fastify.get('/auth/callback', { config: { rateLimit: callbackLimit }, errorHandler: handleCallbackError }, handleCallback)
     // The client fetches this after sign-in and echoes the token in an
     // X-CSRF-Token header on unsafe auth requests. Gated on an authenticated
     // session (story 5-B): an anonymous request gets 401 and mints no session
