@@ -13,9 +13,10 @@ land.
 
 ## Context
 
-The server sent no security headers at all. Adding them is the last large
-control in Phase 5, and the risky one: a header that is one value wrong does
-not fail a test, it breaks sign-in for everybody or blanks a page for one user.
+The BFF server sent no security headers, those are being provided by the
+standard Terra proxy. Adding them is the last large control in Phase 5,
+and the risky one: a header that is one value wrong does not fail a test,
+it breaks sign-in for everybody or blanks a page for one user.
 
 The app also still runs in two modes. Under `bffEnabled` sign-in is a top-level
 redirect. A legacy deployment opens a popup, sends it to B2C, and reads the

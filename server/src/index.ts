@@ -74,20 +74,15 @@ export async function buildApp(): Promise<AppInstance> {
   // (memoized) config.
   const configJsonPath = configPath(PROJECT_ROOT, isDev)
 
-  // Read once, here. Two things need it: the security headers below, whose
-  // COOP value differs by mode, and the `bffEnabled` cutover check further
-  // down. readConfig memoises for the life of the process, so a second call
-  // would return this same object — binding it makes that explicit and keeps
-  // the two in step.
+  // Keep CSP construction and BFF route gating on the config served to the client.
   const clientConfig = await readConfig(configJsonPath, fastify.log)
 
-  // 1. Security response headers (Phase 5, story 5-F1). Registered first so
-  // its onRequest hook runs ahead of every route, and outside both switches
-  // below: the legacy client needs the same headers. The Content Security
-  // Policy is off here and lands in 5-F3 — COOP is the header that can break
-  // sign-in, and it ships on its own so a deploy can prove it did not.
+  // 1. Security response headers registered first. Registered first so
+  // its onRequest hook runs ahead of every route.
   await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev }))
 
+  // 2. DB pool + session — registered only when the deployment provides the
+  // BFF database configuration.
   // Gives story 5-F3's `report-to` group an address. The `report-uri`
   // fallback in the same policy needs no header, but Chrome prefers
   // `report-to`. Harmless before the policy exists — no browser will post.
@@ -206,6 +201,8 @@ export async function buildApp(): Promise<AppInstance> {
   // client agree on bffEnabled by construction. A missing key defaults to
   // false and the routes stay dark — the fail-safe is the legacy
   // client-side flow. See docs/plans/BFF_Overview.md § Rollout strategy.
+  // 3. BFF auth routes — the cutover switch. Read at startup from the same
+  // config object the /config.json route below serves.
   const { bffEnabled } = clientConfig
   if (bffEnabled === true) {
     // The two switches are meant to be independent (session infra can be on
@@ -215,42 +212,15 @@ export async function buildApp(): Promise<AppInstance> {
     if (!process.env.DUOS_DB_HOST) {
       throw new Error('bffEnabled is true in config.json but DUOS_DB_HOST is not set — the BFF auth routes require the session infrastructure to be configured')
     }
-    // Both /auth/me and the API proxy forward to this upstream, so a cutover
-    // without it is a deployment that boots, passes health checks, and then
-    // fails on the first user request. Checked here rather than left to the
-    // proxy's own requireEnv so the error arrives at startup, next to the
-    // switch that made it mandatory.
     if (!process.env.DUOS_API_URL) {
       throw new Error('bffEnabled is true in config.json but DUOS_API_URL is not set — /auth/me and the API proxy both forward to it')
     }
     fastify.log.info('[server] bffEnabled is true — registering BFF auth routes and the API proxy')
     fastify.post('/auth/login', handleLogin)
     fastify.get('/auth/callback', handleCallback)
-    // The client fetches this after sign-in and echoes the token in an
-    // X-CSRF-Token header on unsafe auth requests. Gated on an authenticated
-    // session (story 5-B): an anonymous request gets 401 and mints no session
-    // row — see the handler in auth/csrf.ts. After session rotation (Phase 5,
-    // 5-C) the pre-auth secret is discarded, so the client must (re)fetch this
-    // once login completes.
     fastify.get('/auth/csrf-token', handleCsrfToken)
-    // /auth/login is deliberately exempt from CSRF: it is pre-authentication
-    // (no token to have fetched yet), and login CSRF is neutralized by the
-    // PKCE state binding the flow to the session. Only logout is guarded.
     fastify.post('/auth/logout', { onRequest: fastify.csrfProtection }, handleLogout)
-    // /auth/me is a safe GET here, but it calls Consent's state-changing
-    // GET /api/user/me server-side, so it carries the Fetch Metadata guard the
-    // proxies get from their shared machinery (story 5-B; see
-    // security/fetchMetadata.ts). /auth/login and /auth/callback must NOT get
-    // it — the callback is a legitimate cross-site navigation from B2C.
     fastify.get('/auth/me', { onRequest: fetchMetadataGuard }, getMe)
-
-    // The API proxy (Phase 3). Registered here, inside both switches, rather
-    // than alongside /health: it depends on @fastify/cookie, @fastify/session
-    // and @fastify/csrf-protection, all of which are registered above only when
-    // DUOS_DB_HOST is set. Gating it on bffEnabled too keeps it dark until
-    // cutover — the client does not call /duos-api until Phase 4 points
-    // getApiUrl() at it — so a deployment running the legacy client-side flow
-    // exposes no proxy route at all.
     await fastify.register(apiProxy)
 
     // The single-feature upstream proxies. Same gates as the DUOS API proxy,
@@ -281,16 +251,7 @@ export async function buildApp(): Promise<AppInstance> {
   // Client config — intercepted via onRequest rather than a route, because
   // @fastify/vite's production static plugin (wildcard: false) walks build/
   // and registers its own explicit GET/HEAD route for every file it finds
-  // there, including config.json. A competing `fastify.get('/config.json', ...)`
-  // collides with that at startup (FST_ERR_DUPLICATED_ROUTE); onRequest fires
-  // before that nested route's handler regardless of which scope declared it,
-  // so this lets DUOS_API_URL override the static file's `apiUrl` without
-  // fighting Vite for the route — see config.ts for why.
-  // HEAD must be intercepted along with GET: the static plugin registers both,
-  // so a HEAD that fell through would describe the raw un-overridden file and
-  // disagree with GET's body (mismatched Content-Length for caches/validators).
-  // Node itself omits the body for HEAD responses; sending the same payload
-  // yields matching headers.
+  // there, including config.json.
   fastify.addHook('onRequest', async (request, reply) => {
     if ((request.method === 'GET' || request.method === 'HEAD')
       && (request.url === '/config.json' || request.url.startsWith('/config.json?'))) {
@@ -307,8 +268,7 @@ export async function buildApp(): Promise<AppInstance> {
 
   await fastify.vite.ready()
 
-  // SPA fallback — @fastify/vite sets up the Vite middleware and reply.html decorator
-  // but does not register routes; we wire the catch-all ourselves.
+  // SPA fallback
   fastify.setNotFoundHandler((_req, reply) => reply.html())
 
   // The encapsulated proxy declares its own error handler (ADR-010).
