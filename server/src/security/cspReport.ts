@@ -106,14 +106,7 @@ const ALLOWED_REPORT_FIELDS: ReadonlySet<string> = new Set([
   'violated-directive', 'violatedDirective',
 ])
 
-/**
- * Allowlisted fields whose value is a URL. A browser removes a document's
- * fragment from these but keeps its query string, and in the legacy sign-in
- * flow that query string carries the OAuth `code` and `state`: B2C returns the
- * popup to `/redirect-from-oauth?code=…&state=…` (src/libs/auth/oidcBroker.ts).
- * A violation reported from that page would write both to the pod's log, so
- * the query goes before anything else is done with the value.
- */
+// CSP reports preserve query strings, including OAuth callback code and state.
 const URL_REPORT_FIELDS: ReadonlySet<string> = new Set([
   'blocked-uri', 'blockedURL',
   'document-uri', 'documentURL',
@@ -121,14 +114,7 @@ const URL_REPORT_FIELDS: ReadonlySet<string> = new Set([
   'source-file', 'sourceFile',
 ])
 
-/**
- * Everything from the first `?` or `#` replaced by a marker, so the log still
- * says that parameters were there and does not say what they were.
- *
- * Deliberately string-based rather than URL-parsed: these fields also carry
- * values that are not URLs at all — `inline`, `eval`, `data`, a bare origin, a
- * relative path — and every one of them keeps its meaning under this.
- */
+// Avoid URL parsing because these fields may contain CSP keywords such as `inline`.
 function redactQuery(value: string): string {
   const cut = value.search(/[?#]/)
   return cut === -1 ? value : `${value.slice(0, cut)}?<redacted>`

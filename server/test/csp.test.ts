@@ -12,7 +12,7 @@ import { helmetOptions } from '../src/security/headers.js'
 import { apiProxy } from '../src/proxy/apiProxy.js'
 import { type Upstream, buildAppShell, nowSeconds, seedSession, startUpstream } from './proxyTestHarness.js'
 
-// refreshAccessToken is replaced so the proxy case below never reaches B2C.
+// Keep the proxy test local.
 vi.mock('../src/auth/refresh.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../src/auth/refresh.js')>()
   return { ...actual, refreshAccessToken: vi.fn() }
@@ -24,7 +24,6 @@ const ECM = 'https://externalcreds.dsde-dev.broadinstitute.org'
 const TDR = 'https://jade.datarepo-dev.broadinstitute.org'
 const TERRA = 'https://bvdp-saturn-dev.appspot.com'
 
-/** A config.json with every inventoried field populated, as dev.json ships it. */
 const fullConfig = (bffEnabled: boolean): Record<string, unknown> => ({
   env: 'dev',
   bffEnabled,
@@ -39,7 +38,6 @@ const fullConfig = (bffEnabled: boolean): Record<string, unknown> => ({
 const PROD: CspEnvironment = { isDev: false, reportOnly: false }
 const DEV: CspEnvironment = { isDev: true, reportOnly: true }
 
-/** Splits a policy header back into `directive -> values`. */
 function parsePolicy(header: string): Map<string, string[]> {
   return new Map(header.split(';').map((part) => {
     const [name, ...values] = part.trim().split(/\s+/)
@@ -49,15 +47,10 @@ function parsePolicy(header: string): Map<string, string[]> {
 
 describe('connectSources', () => {
   it('allows only the two direct flows plus the banner bucket in BFF mode', () => {
-    // ECM and TDR are reached through same-origin proxies after cutover, so
-    // their configured origins must NOT leak into the policy just because the
-    // fields exist in config.json.
     expect(connectSources(fullConfig(true), PROD)).toEqual(['\'self\'', CONSENT, BARD, BANNER_SOURCE])
   })
 
   it('allows all four configured upstreams in legacy mode', () => {
-    // The legacy client calls each of these directly from the browser, and
-    // oidc-client-ts fetches Consent's /oauth2/token — the apiUrl origin.
     expect(connectSources(fullConfig(false), PROD)).toEqual(['\'self\'', CONSENT, BARD, ECM, TDR, BANNER_SOURCE])
   })
 
@@ -92,8 +85,6 @@ describe('connectSources', () => {
   })
 
   it('scopes the banner bucket to its path, not the whole shared GCS origin', () => {
-    // storage.googleapis.com hosts every public bucket on GCS, so the bare
-    // origin would be an exfiltration target for injected script.
     const sources = connectSources(fullConfig(true), PROD)
     expect(sources).toContain('https://storage.googleapis.com/broad-duos-banners/')
     expect(sources).not.toContain('https://storage.googleapis.com')
@@ -107,8 +98,6 @@ describe('connectSources', () => {
 
 describe('contentSecurityPolicyOptions', () => {
   it('states every directive itself instead of inheriting helmet defaults', () => {
-    // helmet's defaults carry `style-src https:` and an unconditional
-    // upgrade-insecure-requests, neither of which this app wants.
     expect(contentSecurityPolicyOptions(fullConfig(true), PROD).useDefaults).toBe(false)
   })
 
@@ -150,14 +139,10 @@ describe('contentSecurityPolicyOptions', () => {
   })
 
   it('keeps unsafe-inline for styles, which the React style prop depends on', () => {
-    // style-src-attr falls back to style-src; without this every `style={{…}}`
-    // prop in the tree would be dropped and the app would render unstyled.
     expect(contentSecurityPolicyOptions(fullConfig(true), PROD).directives.styleSrc).toEqual(['\'self\'', '\'unsafe-inline\''])
   })
 
   it('allows data: images but neither blob: nor a bare https:', () => {
-    // blob: is left out until a report-only run proves a live `<img src=blob:>`
-    // exists; the audit found only downloads, which need no directive.
     const { imgSrc } = contentSecurityPolicyOptions(fullConfig(true), PROD).directives
     expect(imgSrc).toEqual(['\'self\'', 'data:'])
     expect(imgSrc).not.toContain('https:')
@@ -202,7 +187,6 @@ describe('the policy as helmet serialises it', () => {
     expect(policy.get('frame-ancestors')).toEqual(['\'none\''])
     expect(policy.get('report-uri')).toEqual([CSP_REPORT_PATH])
     expect(policy.get('report-to')).toEqual([CSP_REPORT_GROUP])
-    // A valueless directive serialises as the bare name.
     expect(policy.get('upgrade-insecure-requests')).toEqual([])
   })
 
@@ -233,19 +217,12 @@ describe('the proxy download sandbox', () => {
   })
 
   it('keeps its per-reply sandbox value instead of the global policy', async () => {
-    // Both writes land on the same raw response through setHeader, and the
-    // proxy's runs second, so it wins. (Not through writeHead: the proxy
-    // replies with a stream, and Fastify's stream path deliberately avoids
-    // writeHead — see the comment at fastify/lib/reply.js `sendStream`. The
-    // ordering is what makes this work, so a future change that moved helmet
-    // later would silently strip the sandbox.) Proxied uploads are served from
-    // the SPA's own origin, so losing `sandbox` here would let one execute.
+    // The proxy writes its stricter header after Helmet; registration order matters.
     app = await buildAppShell()
     await app.register(fastifyHelmet, helmetOptions(fullConfig(true), PROD))
     seedSession(app, { accessToken: 'session-access-token', tokenExpiry: nowSeconds() + 3600 })
     await app.register(apiProxy)
-    // A non-proxy route in the same app, to prove helmet is live here. Without
-    // it this case would also pass against an app where helmet never ran.
+    // The sibling route proves Helmet is active in this app.
     app.get('/not-proxied', async () => ({ ok: true }))
 
     const proxied = await app.inject({ method: 'GET', url: '/duos-api/api/dataset/1' })
@@ -254,7 +231,6 @@ describe('the proxy download sandbox', () => {
     expect(proxied.statusCode).toBe(200)
     expect(proxied.headers['content-security-policy']).toBe('sandbox')
     expect(proxied.headers['x-content-type-options']).toBe('nosniff')
-    // Same app, same helmet registration — the full policy, not `sandbox`.
     expect(String(plain.headers['content-security-policy'])).toContain('default-src \'self\'')
   })
 })

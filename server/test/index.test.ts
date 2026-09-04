@@ -864,8 +864,7 @@ describe('auth endpoint rate limiting', () => {
 })
 
 describe('security headers', () => {
-  // The outer fixture config carries no bffEnabled key, so every case here is
-  // a legacy deployment — the mode where COOP would sever sign-in.
+  // The fixture omits bffEnabled, so these exercise legacy mode.
   it('reaches a root-scope route', async () => {
     const res = await app.inject({ method: 'GET', url: '/health' })
 
@@ -882,7 +881,6 @@ describe('security headers', () => {
   })
 
   it('sends no COOP header at all to a legacy deployment', async () => {
-    // Absent, not `unsafe-none`. The legacy popup sign-in dies on any value.
     const res = await app.inject({ method: 'GET', url: '/health' })
 
     expect(res.headers['cross-origin-opener-policy']).toBeUndefined()

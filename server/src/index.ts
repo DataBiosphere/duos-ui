@@ -90,42 +90,24 @@ export async function buildApp(): Promise<AppInstance> {
   // Rate limiting. Registered at app level, ahead of both cutover switches and every route.
   await fastify.register(rateLimit, rateLimitPluginOptions)
 
-  // Path to the static client config.json — computed once so both the
-  // /config.json route below and the bffEnabled startup check read the same
-  // (memoized) config.
+  // Use the same memoized config for headers, route gating, and /config.json.
   const configJsonPath = configPath(PROJECT_ROOT, isDev)
-
-  // Read once, here. Two things need it: the security headers below, whose
-  // COOP value differs by mode, and the `bffEnabled` cutover check further
-  // down. readConfig memoises for the life of the process, so a second call
-  // would return this same object — binding it makes that explicit and keeps
-  // the two in step.
   const clientConfig = await readConfig(configJsonPath, fastify.log)
 
-  // 1. Security response headers, including the Content Security Policy. Registered
-  // first so its onRequest hook runs ahead of every route
+  // Register before routes so Helmet's hooks cover every response.
   const cspReportOnly = envBool(process.env.DUOS_CSP_REPORT_ONLY, true)
   fastify.log.info(`[server] Content Security Policy is ${cspReportOnly ? 'report-only (set DUOS_CSP_REPORT_ONLY=false to enforce)' : 'enforced'}`)
   await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly }))
 
-  // Gives the policy's `report-to` group an address. The `report-uri` fallback
-  // in the same policy needs no header, but Chrome prefers `report-to`.
+  // Resolves the policy's `report-to` group; `report-uri` remains the fallback.
   fastify.addHook('onRequest', async (_request, reply) => {
     reply.header('reporting-endpoints', REPORTING_ENDPOINTS_HEADER)
   })
 
-  // 2. The CSP violation report sink (Phase 5, story 5-F2). Registered outside
-  // both switches below, like the headers above: a legacy deployment collects
-  // reports too. Inert until 5-F3's policy points a browser at it.
+  // Collect CSP reports in both legacy and BFF modes.
   await fastify.register(cspReportRoute)
 
-  // 3. DB pool + session — registered only when the deployment provides the
-  // BFF database configuration. Session infrastructure is deployment config
-  // (env vars via helmfile/compose), not a runtime flag: every pod of a given
-  // deployment behaves identically, with no network dependency at boot.
-  // Directing users to the BFF sign-in flow is a separate switch — the
-  // boolean `bffEnabled` in config.json, checked at startup — see
-  // docs/plans/BFF_Overview.md.
+  // DB/session infrastructure is configured independently of BFF cutover.
   if (process.env.DUOS_DB_HOST) {
     fastify.log.info('[server] DUOS_DB_HOST is set — enabling BFF session infrastructure')
 
@@ -195,11 +177,7 @@ export async function buildApp(): Promise<AppInstance> {
     fastify.log.info('[server] DUOS_DB_HOST is not set — starting without DB/session infrastructure (legacy client-side auth)')
   }
 
-  // 4. BFF auth routes — the cutover switch. Read at startup from the same
-  // config object the /config.json route below serves, so the server and
-  // client agree on bffEnabled by construction. A missing key defaults to
-  // false and the routes stay dark — the fail-safe is the legacy
-  // client-side flow. See docs/plans/BFF_Overview.md § Rollout strategy.
+  // A missing bffEnabled key keeps the legacy auth flow.
   const { bffEnabled } = clientConfig
   if (bffEnabled === true) {
     // The two switches are meant to be independent (session infra can be on
