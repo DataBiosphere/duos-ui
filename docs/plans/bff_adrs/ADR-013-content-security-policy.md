@@ -153,6 +153,38 @@ The list is mode-specific:
 - **Legacy mode** — the above plus `ecmApiUrl` and `tdrApiUrl`, until Epic 6
   retires the legacy client.
 
+**Three browser connections stay direct even after cutover.** They are not
+oversights, and they are why BFF-mode `connect-src` is not `'self'` alone:
+
+| Connection | Where | Why it stays direct |
+|---|---|---|
+| Banner notifications, `storage.googleapis.com/broad-duos-banners` | `src/libs/notificationService.ts` | A public bucket; no session involved. |
+| Feature flags, `/feature` and `/feature/:key` on Consent | `src/libs/ajax/FeatureFlag.ts` | Unauthenticated and read before login; the session-guarded proxy would 401 them. |
+| Anonymous Bard metrics | `src/libs/ajax/Metrics.ts` | Deliberately carries no credentials. Identified events go through `/bard-api`. |
+
+Folding these into the existing proxies as "unauthenticated paths" does not
+work as those are built. `unauthenticatedPaths` is an **exact** set match
+(`upstreamProxy.ts`), so an entry for `/feature` still leaves `/feature/:key`
+returning 401. Worse, anonymous and identified metrics share `POST /api/event`,
+and the proxy injects no token for an unauthenticated path even when a session
+exists — marking it unauthenticated would silently turn *identified* metrics
+anonymous. Dedicated `/public/*` endpoints are the answer, and they are story
+5-F6.
+
+One entry in that table describes an intention rather than the tree as it
+stands: `FeatureFlag.ts` has **no caller anywhere in `src/`** — only its own
+unit test — and nothing else calls `getUpstreamApiUrl` outside the legacy-only
+`oidcBroker.ts`. BFF-mode `connect-src` therefore allowlists `apiUrl` for a flow
+that does not run today.
+
+**Settled 2026-09-04: the module stays**, against a future caller. Dropping the
+origin would greet whoever wires it up with a blocked request and no obvious
+cause, and while the policy is report-only the entry costs nothing. Two
+consequences carry into 5-F6: `/public/features/*` is built for a consumer that
+does not exist yet, so its tests are the only proof it works; and `apiUrl` stays
+in BFF-mode `connect-src` until a caller exists **and** uses the new endpoint.
+BFF-mode `connect-src` reaches `'self'` in two steps, not one.
+
 `terraUrl` is never allowlisted: it is navigated to, not fetched. The
 development config also carries convenience origins the browser never
 connects to, so sweeping up every URL-shaped value would allowlist them by
@@ -192,6 +224,24 @@ config field to fix it from: dropping the `metadata` override, setting
 `redirect_uri`/`silent_redirect_uri` a real value. The last also needs
 `frame-src`. Any of them means adding the authority origin here — sourced from
 Consent's response, not from `config.json`.
+
+### `script-src` stays `'self'`, with no hash and no nonce
+
+The audit found exactly one inline-script problem: none. The root `index.html`
+carries no inline script or style, and neither does the built `build/index.html`
+— it emits only hashed files under `/assets` plus a stylesheet link. Story 5-A
+removed `react-google-charts`, which was the one runtime third-party script, so
+nothing needs an external origin either.
+
+Dev is the exception, behind the existing `isDev` flag: Vite rewrites
+`index.html` to add the React Fast Refresh preamble as an inline module script,
+and its HMR client opens a websocket, so `'unsafe-inline'` and `ws:`/`wss:` are
+allowed there and only there.
+
+`img-src` carries `'self'` and `data:` only. No live `<img src="blob:">` exists
+— every object URL the app mints is a download, which no directive covers, or
+the dead preview branch in `DocumentUpload.tsx` — so `blob:` waits until a
+report-only run proves it is needed.
 
 ### Report-only by default, enforced per environment
 
