@@ -178,12 +178,16 @@ unit test — and nothing else calls `getUpstreamApiUrl` outside the legacy-only
 that does not run today.
 
 **Settled 2026-09-04: the module stays**, against a future caller. Dropping the
-origin would greet whoever wires it up with a blocked request and no obvious
-cause, and while the policy is report-only the entry costs nothing. Two
-consequences carry into 5-F6: `/public/features/*` is built for a consumer that
-does not exist yet, so its tests are the only proof it works; and `apiUrl` stays
-in BFF-mode `connect-src` until a caller exists **and** uses the new endpoint.
-BFF-mode `connect-src` reaches `'self'` in two steps, not one.
+origin now would greet whoever wires it up with a blocked request and no obvious
+cause, and while the policy is report-only the entry costs nothing.
+
+It does not hold `apiUrl` in the allowlist, though. Story 5-F6 points
+`FeatureFlag.ts` at `/public/features/*` under `bffEnabled` using the same
+prefix-and-flag pattern `Metrics.ts` already uses, so a future caller reaches
+the proxy rather than Consent directly, and the origin can go with the other
+two. What the decision does mean is that the endpoint is built for a consumer
+that does not exist — so its tests are the only proof it works, and no amount of
+exercising the app will tell anyone if it is broken.
 
 `terraUrl` is never allowlisted: it is navigated to, not fetched. The
 development config also carries convenience origins the browser never
