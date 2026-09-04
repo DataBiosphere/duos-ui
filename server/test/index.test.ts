@@ -727,11 +727,6 @@ describe('security headers', () => {
   })
 
   it('reaches the SPA document itself, not just the API routes', async () => {
-    // /health is a root-scope JSON route; the response that actually needs the
-    // headers is the HTML document. A deep link falls through to
-    // setNotFoundHandler -> reply.html(), the same path a real page load takes.
-    // Asserting only on /health would keep passing if a future registration
-    // ordering dropped them from the document.
     const res = await app.inject({ method: 'GET', url: '/datalibrary/some-deep-link' })
 
     expect(res.headers['x-frame-options']).toBe('DENY')

@@ -94,16 +94,8 @@ export async function buildApp(): Promise<AppInstance> {
   // the two in step.
   const clientConfig = await readConfig(configJsonPath, fastify.log)
 
-  // 1. Security response headers, including the Content Security Policy
-  // (Phase 5, stories 5-F1 and 5-F3). Registered first so its onRequest hook
-  // runs ahead of every route, and outside both switches below: the legacy
-  // client needs the same headers.
-  // Report-only until a deployment says otherwise. A strict policy is the kind
-  // of change that breaks a page nobody tested, so each environment collects
-  // violations at /csp-report first and flips DUOS_CSP_REPORT_ONLY=false once
-  // the report run is clean (story 5-F5). Note the deployed httpd sidecar
-  // replaces the enforcing header until the terra-helmfile change in 5-F4
-  // lands — see ADR-013.
+  // 1. Security response headers, including the Content Security Policy. Registered
+  // first so its onRequest hook runs ahead of every route
   const cspReportOnly = envBool(process.env.DUOS_CSP_REPORT_ONLY, true)
   fastify.log.info(`[server] Content Security Policy is ${cspReportOnly ? 'report-only (set DUOS_CSP_REPORT_ONLY=false to enforce)' : 'enforced'}`)
   await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly }))
@@ -117,12 +109,6 @@ export async function buildApp(): Promise<AppInstance> {
   // `global: false` — this same instance serves every SPA asset through
   // @fastify/vite, and one page load fetches many of them, so a low global cap
   // would block page loads outright. Limits are attached per route instead.
-  // Story 5-G registers the auth-route limits on this same plugin.
-  //
-  // The default store is per process, so a deployment's real ceiling is this
-  // number times the replica count, and it resets on every restart. That is
-  // why the epic puts flood protection at the ingress; this is the backstop
-  // beneath it, not the control.
   await fastify.register(fastifyRateLimit, { global: false })
 
   // 2. The CSP violation report sink (Phase 5, story 5-F2). Registered outside
