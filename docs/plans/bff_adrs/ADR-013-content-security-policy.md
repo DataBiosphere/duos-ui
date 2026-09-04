@@ -8,9 +8,10 @@
 
 ## Context
 
-The server sent no security headers. Adding a Content Security Policy is the
-last large control in Phase 5, and the risky one: a policy that is one entry
-short does not fail a test, it blanks a page for a user.
+The BFF server sent no security headers, those are being provided by the
+standard Terra proxy. Adding a Content Security Policy is the  last large
+control in Phase 5, and the risky one: a policy that is one entry  short
+does not fail a test, it blanks a page for a user.
 
 Three facts shaped the policy.
 
@@ -19,8 +20,7 @@ reached through same-origin proxies. A legacy deployment calls all four
 upstreams straight from the browser, and `oidc-client-ts` fetches Consent's
 `/oauth2/token` as well. One `connect-src` list cannot be correct for both.
 
-**Three browser connections stay direct even after cutover.** They are not
-oversights:
+**Three browser connections stay direct even after cutover.**
 
 | Connection | Where | Why it stays direct |
 |---|---|---|
