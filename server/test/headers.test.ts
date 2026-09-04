@@ -10,12 +10,6 @@ const DEV: SecurityHeaderEnvironment = { isDev: true }
 
 describe('helmetOptions', () => {
   it('sends no COOP at all in legacy mode, where a popup carries the sign-in result', () => {
-    // Measured, not assumed: `same-origin-allow-popups` does NOT save this
-    // flow. It spares a popup only on its initial navigation while the popup's
-    // own document is unsafe-none. On the return leg from B2C the comparison
-    // is unsafe-none against our COOP, which mismatches — the browser swaps
-    // browsing context groups and window.opener goes null, so oidc-client-ts
-    // can never postMessage the result back and signinPopup() hangs.
     expect(helmetOptions(config(false), PROD).crossOriginOpenerPolicy).toBe(false)
   })
 
