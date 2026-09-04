@@ -621,3 +621,43 @@ describe('envBool', () => {
     for (const v of ['true', 'True', '1', 'yes', 'on']) expect(envBool(v, false)).toBe(true)
   })
 })
+
+describe('security headers', () => {
+  // The outer fixture config carries no bffEnabled key, so every case here is
+  // a legacy deployment — the mode where COOP would sever sign-in.
+  it('reaches a root-scope route', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['cross-origin-resource-policy']).toBe('same-origin')
+    expect(res.headers['referrer-policy']).toBe('no-referrer')
+    expect(res.headers['x-frame-options']).toBe('DENY')
+  })
+
+  it('reaches the SPA document itself, not just the API routes', async () => {
+    // /health is a root-scope JSON route; the response that actually needs the
+    // headers is the HTML document. A deep link falls through to
+    // setNotFoundHandler -> reply.html(), the same path a real page load takes.
+    // Asserting only on /health would keep passing if a future registration
+    // ordering dropped them from the document.
+    const res = await app.inject({ method: 'GET', url: '/datalibrary/some-deep-link' })
+
+    expect(res.headers['x-frame-options']).toBe('DENY')
+    expect(res.headers['referrer-policy']).toBe('no-referrer')
+  })
+
+  it('sends no COOP header at all to a legacy deployment', async () => {
+    // Absent, not `unsafe-none`. The legacy popup sign-in dies on any value.
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['cross-origin-opener-policy']).toBeUndefined()
+  })
+
+  it('sends no Content-Security-Policy yet, in either spelling', async () => {
+    // The policy is story 5-F3. Asserting its absence here keeps this PR
+    // honest about what it delivers.
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['content-security-policy']).toBeUndefined()
+    expect(res.headers['content-security-policy-report-only']).toBeUndefined()
+  })
+})
