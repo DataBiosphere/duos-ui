@@ -4,7 +4,7 @@ import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
-import { BFF_BARD_PREFIX, Config } from 'src/libs/config'
+import { BFF_BARD_PREFIX, BFF_PUBLIC_METRICS_EVENT_PATH, Config } from 'src/libs/config'
 import { CsrfTokenSessionExpiredError, getCsrfToken, isCsrfRejection, resetCsrfToken } from 'src/libs/ajax/csrf'
 
 export type ResponseType = 'blob' | 'json' | 'text'
@@ -50,12 +50,20 @@ export interface FetchData<T> {
 
 const HELP_DESK_MESSAGE = 'Please contact the help desk at duos@duos.org.'
 
+/**
+ * True for the anonymous metrics POST, whatever form its URL takes (the call
+ * site builds a relative path; reportError can also see an absolute one).
+ */
+const isPublicMetricsEvent = (url: string): boolean =>
+  new URL(url, globalThis.location.origin).pathname === BFF_PUBLIC_METRICS_EVENT_PATH
+
 export const reportError = async (url: string, status: number): Promise<void> => {
   // Requests to the Bard API are metrics calls (its only consumer). ErrorReporter
   // reports via metrics, so reporting a Bard failure would recurse infinitely.
-  // In BFF mode identified metrics ride the /bard-api proxy — same recursion.
+  // In BFF mode identified metrics ride the /bard-api proxy and anonymous ones
+  // the public metrics endpoint — the same recursion by a different route.
   const bardApiUrl = await Config.getBardApiUrl()
-  if (url.startsWith(bardApiUrl) || url.startsWith(`${BFF_BARD_PREFIX}/`)) {
+  if (url.startsWith(bardApiUrl) || url.startsWith(`${BFF_BARD_PREFIX}/`) || isPublicMetricsEvent(url)) {
     return
   }
   const msg = 'Error fetching response: '
@@ -75,14 +83,19 @@ const isSameOrigin = (url: string): boolean =>
 
 /**
  * Unsafe requests that must NOT carry (or fetch) a CSRF token: the signed-out
- * Contact Us form. Mirrors the server's CSRF_EXEMPT_UNSAFE_REQUESTS
- * (server/src/proxy/apiProxy.ts) — the server ignores the header here, and
- * fetching a token for a signed-out user would create an anonymous session
- * row per submission and hard-fail the form whenever /auth/csrf-token errors.
+ * Contact Us form and the anonymous metrics event. Mirrors the server's
+ * CSRF_EXEMPT_UNSAFE_REQUESTS (server/src/proxy/apiProxy.ts) and the public
+ * endpoints, which enforce no CSRF at all (server/src/proxy/publicProxy.ts) —
+ * the server ignores the header here, and fetching a token for a signed-out
+ * caller means a 401 from the gated /auth/csrf-token, which the adapter reads
+ * as a dead session and answers with a logout. The metrics event only ever
+ * reaches this path when the caller IS signed out, so the token fetch could
+ * never succeed.
  */
 const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
   'POST /duos-api/support/request',
   'POST /duos-api/support/upload',
+  `POST ${BFF_PUBLIC_METRICS_EVENT_PATH}`,
 ])
 
 const isCsrfExempt = (method: Method, url: string): boolean =>

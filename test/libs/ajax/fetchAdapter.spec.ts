@@ -12,7 +12,7 @@ import {
 } from 'src/libs/ajax/fetchAdapter'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
-import { Config } from 'src/libs/config'
+import { BFF_PUBLIC_METRICS_EVENT_PATH, Config } from 'src/libs/config'
 import { redirectOnLogout } from 'src/libs/auth/auth'
 import { CsrfTokenSessionExpiredError, getCsrfToken, resetCsrfToken } from 'src/libs/ajax/csrf'
 import type { OidcUser } from 'src/libs/auth/oidcBroker'
@@ -620,6 +620,20 @@ describe('fetchAdapter - Fetch methods', () => {
       expect(ErrorReporter.report).not.toHaveBeenCalled()
     })
 
+    it('does not report failures of the public metrics endpoint (BFF mode)', async () => {
+      fetchMock.mockResolvedValue(
+        new Response('Too Many Requests', {
+          status: 429,
+          headers: { 'content-type': 'text/html' },
+        }),
+      )
+
+      await fetchPost(BFF_PUBLIC_METRICS_EVENT_PATH, { event: 'test' }).catch(() => {})
+      await new Promise(resolve => setTimeout(resolve, 0))
+
+      expect(ErrorReporter.report).not.toHaveBeenCalled()
+    })
+
     it('reports failures of other endpoints', async () => {
       fetchMock.mockResolvedValue(
         new Response('Not Found', {
@@ -1036,6 +1050,18 @@ describe('fetchAdapter - BFF mode', () => {
       expect((init as StubOptions).headers).not.toHaveProperty('X-CSRF-Token')
     },
   )
+
+  it('never fetches a CSRF token for an anonymous metrics event, so a signed-out visitor is not logged out', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({}))
+    vi.mocked(getCsrfToken).mockRejectedValue(new CsrfTokenSessionExpiredError())
+
+    await retryFetchPost(BFF_PUBLIC_METRICS_EVENT_PATH, { event: 'test' })
+
+    expect(getCsrfToken).not.toHaveBeenCalled()
+    expect(redirectOnLogout).not.toHaveBeenCalled()
+    const [, init] = fetchMock.mock.calls[0]
+    expect((init as StubOptions).headers).not.toHaveProperty('X-CSRF-Token')
+  })
 
   it('reports and wraps a CSRF token acquisition failure like any other request failure', async () => {
     vi.mocked(getCsrfToken).mockRejectedValue(new Error('csrf endpoint down'))

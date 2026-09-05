@@ -123,11 +123,12 @@ describe('Metrics Tests', () => {
 
       await Metrics.captureEvent(Object.keys(eventList)[0] as MetricsEventName)
 
-      expect(retryFetchPost).toHaveBeenCalledWith(
-        '/public/metrics/event',
-        expect.any(Object),
-        expect.objectContaining({ headers: undefined }),
-      )
+      const [url, , options] = vi.mocked(retryFetchPost).mock.calls[0]
+      expect(url).toBe('/public/metrics/event')
+      // Asserts the absence of the header, not the absence of a headers
+      // object: passing `headers: {}` or an unrelated header stays correct.
+      const headers = (options as { headers?: Record<string, string> } | undefined)?.headers ?? {}
+      expect(Object.keys(headers).map(key => key.toLowerCase())).not.toContain('authorization')
     })
 
     it('keeps identify and syncProfile off the public endpoint, which exposes only the event path', async () => {

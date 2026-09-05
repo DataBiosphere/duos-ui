@@ -102,7 +102,7 @@ export const getEnv = async (): Promise<string> => {
  * The same-origin base paths of the BFF proxies. Each must match the prefix
  * the server registers in server/src/proxy/. BFF_BARD_PREFIX is exported for
  * Metrics.ts, which routes only its *identified* calls through the proxy —
- * anonymous events stay on the direct Bard URL, so getBardApiUrl() is not
+ * anonymous events go to the public endpoint below, so getBardApiUrl() is not
  * gated the way the other upstream getters are.
  */
 const BFF_API_PREFIX = '/duos-api'
@@ -122,6 +122,13 @@ export const BFF_BARD_PREFIX = '/bard-api'
  */
 export const BFF_PUBLIC_FEATURES_PREFIX = '/public/features'
 export const BFF_PUBLIC_METRICS_PREFIX = '/public/metrics'
+
+/**
+ * The one route under BFF_PUBLIC_METRICS_PREFIX. Exported as a whole path
+ * because fetchAdapter.ts must recognise it exactly: it is the anonymous
+ * metrics POST, so it takes no CSRF token and must never be error-reported.
+ */
+export const BFF_PUBLIC_METRICS_EVENT_PATH = `${BFF_PUBLIC_METRICS_PREFIX}/event`
 
 /**
  * Base URL for DUOS API calls.
