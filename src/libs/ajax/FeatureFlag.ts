@@ -8,19 +8,8 @@ export interface FeatureFlag {
   updateDate: number
 }
 
-// BFF NOTE: /feature is unauthenticated and consulted pre-login (e.g.
-// NHGRI_RESTRICTED_DAC), so it cannot ride the session-guarded /duos-api proxy,
-// which 401s a sessionless request. Until story 5-F6 that meant staying on the
-// absolute Consent URL and keeping `apiUrl` in the BFF `connect-src` allowlist.
-// It now has a dedicated public endpoint instead — same upstream path, no
-// session read, no token injected — so under bffEnabled these calls are
-// same-origin and the allowlist entry is gone. Legacy keeps getUpstreamApiUrl,
-// never the proxied getApiUrl.
-//
-// Note for anyone changing this: nothing in src/ calls either function today
-// (only the unit tests do), so the app cannot be exercised to check the
-// endpoint. test/libs/ajax/FeatureFlag.spec.ts and
-// server/test/publicProxy.test.ts are the only proof this pair lines up.
+// Public routes allow pre-login reads. This module currently has no app callers;
+// retain it for future use per ADR-013 and validate routing through tests.
 const featuresUrl = async (path: string): Promise<string> => {
   if (await Config.isBffEnabled()) {
     return `${BFF_PUBLIC_FEATURES_PREFIX}${path}`
@@ -30,10 +19,7 @@ const featuresUrl = async (path: string): Promise<string> => {
 
 export async function getAllFeatureFlags(): Promise<Record<string, FeatureFlag> | FeatureFlag[]> {
   const url = await featuresUrl('')
-  // authOpts() stays for legacy parity (signed-in legacy users send their
-  // token even though /feature doesn't need it); in BFF mode the fetch
-  // adapter strips the Authorization header before sending, and the endpoint
-  // drops anything that survived that before forwarding.
+  // Retain legacy auth headers; the BFF adapter and public proxy strip Authorization.
   const res = await fetchGet<Record<string, FeatureFlag> | FeatureFlag[]>(url, Config.authOpts())
   return res.data
 }

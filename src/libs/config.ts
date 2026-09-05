@@ -98,36 +98,17 @@ export const getEnv = async (): Promise<string> => {
   return config.env
 }
 
-/**
- * The same-origin base paths of the BFF proxies. Each must match the prefix
- * the server registers in server/src/proxy/. BFF_BARD_PREFIX is exported for
- * Metrics.ts, which routes only its *identified* calls through the proxy —
- * anonymous events go to the public endpoint below, so getBardApiUrl() is not
- * gated the way the other upstream getters are.
- */
+// Keep these prefixes aligned with server/src/proxy/.
 const BFF_API_PREFIX = '/duos-api'
 const BFF_ECM_PREFIX = '/ecm-api'
 const BFF_TDR_PREFIX = '/tdr-api'
 export const BFF_BARD_PREFIX = '/bard-api'
 
-/**
- * The public BFF endpoints (story 5-F6), which are a different thing from the
- * prefixes above: those proxies attach the session's token and 401 without a
- * session, while these two carry no credentials in either direction and are
- * reachable pre-login. They exist so the two remaining direct browser
- * connections become same-origin, which is what lets BFF-mode `connect-src`
- * drop the Consent and Bard origins (server/src/security/csp.ts).
- *
- * Each must match the path server/src/proxy/publicProxy.ts registers.
- */
+// Public routes must match server/src/proxy/publicProxy.ts.
 export const BFF_PUBLIC_FEATURES_PREFIX = '/public/features'
 export const BFF_PUBLIC_METRICS_PREFIX = '/public/metrics'
 
-/**
- * The one route under BFF_PUBLIC_METRICS_PREFIX. Exported as a whole path
- * because fetchAdapter.ts must recognise it exactly: it is the anonymous
- * metrics POST, so it takes no CSRF token and must never be error-reported.
- */
+// Shared with the adapter's CSRF exemption and metrics error-reporting guard.
 export const BFF_PUBLIC_METRICS_EVENT_PATH = `${BFF_PUBLIC_METRICS_PREFIX}/event`
 
 /**

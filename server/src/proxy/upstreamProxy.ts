@@ -432,12 +432,6 @@ function onUpstreamTransportError(reply: ProxyReply, { error }: { error: Error }
  * registration so a bad value fails at startup naming the variable, rather than
  * 500ing every proxied request.
  *
- * Exported for publicProxy.ts, which shares this and `upstreamPath` but
- * deliberately none of the request- or response-leg machinery above. Both are
- * pure URL plumbing with no notion of a session, so sharing them cannot carry
- * token injection into a public endpoint; see that file's opening comment for
- * where the line is drawn and why.
- *
  * All three ways to get it wrong have to name the variable, or the guard does
  * not do the job it exists for. A missing scheme is the likeliest — a bare
  * hostname is what a Helm value tends to look like — and `new URL()` rejects it

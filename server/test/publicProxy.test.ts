@@ -17,22 +17,6 @@ import {
   startUpstream,
 } from './proxyTestHarness.js'
 
-/**
- * The public BFF endpoints (story 5-F6).
- *
- * These tests are not one more layer of confidence over a working feature —
- * they are the only evidence the feature works. `FeatureFlag.ts` has no caller
- * anywhere in `src/` today, so no amount of exercising the app touches
- * `/public/features/*`, and the anonymous metrics call is fire-and-forget and
- * swallows its own failures. Nothing here can be caught by using the app.
- *
- * The load-bearing case is "the upstream sees no Authorization header even
- * though a session with an access token is right there". Everything else about
- * these endpoints — the rate limits, the body cap, the JSON check — is bounding
- * abuse of an unauthenticated route; that one is the property the whole module
- * exists to guarantee.
- */
-
 const FEATURE_KEY = 'NHGRI_RESTRICTED_DAC'
 
 describe('publicProxy', () => {
@@ -56,21 +40,13 @@ describe('publicProxy', () => {
     delete process.env.DUOS_BARD_URL
   })
 
-  /** The endpoints as index.ts registers them: no session infrastructure at all. */
   async function buildPublicApp(): Promise<FastifyInstance> {
     const instance = Fastify({ logger: false, trustProxy: TRUST_PROXY })
-    // As index.ts registers it: global: false, because that instance also
-    // serves every SPA asset. Each route carries its own config.
     await instance.register(fastifyRateLimit, { global: false })
     await instance.register(publicProxy)
     return instance
   }
 
-  /**
-   * The same endpoints in an app that *does* have sessions and CSRF, which is
-   * what a real BFF deployment looks like. Used for the cases whose whole point
-   * is that the endpoints ignore both.
-   */
   async function buildPublicAppWithSession(accessToken: string): Promise<FastifyInstance> {
     const instance = await buildAppShell()
     seedSession(instance, { accessToken, tokenExpiry: Math.floor(Date.now() / 1000) + 3600 })
@@ -126,8 +102,6 @@ describe('publicProxy', () => {
     })
 
     it('exposes no other Bard path, so identified metrics cannot be posted anonymously through it', async () => {
-      // POST /api/identify and /api/syncProfile stay behind the session-carrying
-      // /bard-api proxy; this endpoint is a named route, not a wildcard.
       app = await buildPublicApp()
 
       const res = await app.inject({ method: 'POST', url: '/public/metrics/identify' })
@@ -139,8 +113,6 @@ describe('publicProxy', () => {
 
   describe('the request leg omits the session token structurally', () => {
     it('sends no Authorization header upstream even when the request carries a session holding an access token', async () => {
-      // The central assertion of the story. The session is present, populated
-      // and refreshable — the endpoint simply never looks at it.
       app = await buildPublicAppWithSession('a-live-session-access-token')
       const { cookie } = await csrfCredentials(app)
 
@@ -165,8 +137,6 @@ describe('publicProxy', () => {
     })
 
     it('drops a client-supplied Authorization header instead of forwarding it', async () => {
-      // A legacy client builds its own bearer header; whatever the browser
-      // sends must not reach the upstream on a public endpoint.
       app = await buildPublicApp()
 
       await app.inject({
@@ -209,9 +179,6 @@ describe('publicProxy', () => {
 
   describe('the response leg', () => {
     it('does not let an upstream set a cookie on this origin', async () => {
-      // A public endpoint is the last place a Set-Cookie should be reachable:
-      // nothing about the request proves who the caller is, so an upstream that
-      // could write `sessionId` here could hand any visitor a chosen session.
       app = await buildPublicApp()
       api.respondWith((_req, res) => {
         res.writeHead(200, {
@@ -262,9 +229,6 @@ describe('publicProxy', () => {
     })
 
     it('answers 502 rather than streaming a non-JSON upstream body onto this origin', async () => {
-      // The clients parse JSON and nothing else, so an HTML body is already a
-      // broken upstream — and serving an upstream-chosen document from an
-      // unauthenticated same-origin URL is worth refusing outright.
       app = await buildPublicApp()
       api.respondWith((_req, res) => {
         res.writeHead(200, { 'content-type': 'text/html' })
@@ -373,9 +337,6 @@ describe('publicProxy', () => {
     })
 
     it('leaks no framework error code when a request is rejected before the handler', async () => {
-      // index.ts installs the app-level handler after this plugin registers, so
-      // without the scope's own handler Fastify's default serialiser would put
-      // FST_ERR_CTP_BODY_TOO_LARGE in front of an unauthenticated caller.
       app = await buildPublicApp()
 
       const res = await app.inject({
@@ -407,10 +368,6 @@ describe('publicProxy', () => {
 
   describe('no CSRF and no Fetch Metadata guard', () => {
     it('accepts the metrics POST with no CSRF token, in an app where CSRF is registered', async () => {
-      // The request borrows no ambient authority — no cookie is forwarded and
-      // no token is injected — so a forged one reaches Bard with exactly the
-      // authority anyone already has by calling Bard directly. Requiring a
-      // token would also make the endpoint unusable pre-login, its whole point.
       app = await buildPublicAppWithSession('a-live-session-access-token')
       const { cookie } = await csrfCredentials(app)
 
@@ -426,10 +383,6 @@ describe('publicProxy', () => {
     })
 
     it('serves a cross-site request the Fetch Metadata guard would have rejected on a proxy route', async () => {
-      // The guard protects endpoints that carry the session cookie. These do
-      // not, so it would buy nothing and only risk rejecting a legitimate call
-      // shape — a metrics event fired from a context whose Sec-Fetch-Site is
-      // not what the guard expects.
       app = await buildPublicApp()
 
       const res = await app.inject({
@@ -456,9 +409,6 @@ describe('publicProxy', () => {
 
   describe('registration against a partly configured deployment', () => {
     it('boots with neither upstream configured, because it registers outside both cutover switches', async () => {
-      // A legacy deployment sets neither variable, and this plugin sits beside
-      // the CSP report sink ahead of both switches — so a missing upstream must
-      // disable one endpoint, never fail startup.
       delete process.env.DUOS_API_URL
       delete process.env.DUOS_BARD_URL
       app = await buildPublicApp()
@@ -480,8 +430,6 @@ describe('publicProxy', () => {
       ['DUOS_API_URL', 'consent.dsde-dev.broadinstitute.org'],
       ['DUOS_BARD_URL', 'https://terra-bard-dev.appspot.com/api'],
     ])('refuses to register when %s is set but not a bare origin', async (envVar, value) => {
-      // A variable that is set must be usable: a malformed one fails at startup
-      // naming itself, rather than 500ing every call to the endpoint.
       process.env[envVar] = value
       const shell = Fastify({ logger: false })
       shell.register(publicProxy)
