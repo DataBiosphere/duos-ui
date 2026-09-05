@@ -50,18 +50,11 @@ export interface FetchData<T> {
 
 const HELP_DESK_MESSAGE = 'Please contact the help desk at duos@duos.org.'
 
-/**
- * True for the anonymous metrics POST, whatever form its URL takes (the call
- * site builds a relative path; reportError can also see an absolute one).
- */
 const isPublicMetricsEvent = (url: string): boolean =>
   new URL(url, globalThis.location.origin).pathname === BFF_PUBLIC_METRICS_EVENT_PATH
 
 export const reportError = async (url: string, status: number): Promise<void> => {
-  // Requests to the Bard API are metrics calls (its only consumer). ErrorReporter
-  // reports via metrics, so reporting a Bard failure would recurse infinitely.
-  // In BFF mode identified metrics ride the /bard-api proxy and anonymous ones
-  // the public metrics endpoint — the same recursion by a different route.
+  // ErrorReporter emits metrics; reporting metrics failures would recurse.
   const bardApiUrl = await Config.getBardApiUrl()
   if (url.startsWith(bardApiUrl) || url.startsWith(`${BFF_BARD_PREFIX}/`) || isPublicMetricsEvent(url)) {
     return
@@ -81,17 +74,7 @@ const UNSAFE_METHODS: ReadonlySet<Method> = new Set(['POST', 'PUT', 'PATCH', 'DE
 const isSameOrigin = (url: string): boolean =>
   new URL(url, globalThis.location.origin).origin === globalThis.location.origin
 
-/**
- * Unsafe requests that must NOT carry (or fetch) a CSRF token: the signed-out
- * Contact Us form and the anonymous metrics event. Mirrors the server's
- * CSRF_EXEMPT_UNSAFE_REQUESTS (server/src/proxy/apiProxy.ts) and the public
- * endpoints, which enforce no CSRF at all (server/src/proxy/publicProxy.ts) —
- * the server ignores the header here, and fetching a token for a signed-out
- * caller means a 401 from the gated /auth/csrf-token, which the adapter reads
- * as a dead session and answers with a logout. The metrics event only ever
- * reaches this path when the caller IS signed out, so the token fetch could
- * never succeed.
- */
+// Public POSTs must skip the authenticated CSRF endpoint to avoid signed-out logout handling.
 const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
   'POST /duos-api/support/request',
   'POST /duos-api/support/upload',

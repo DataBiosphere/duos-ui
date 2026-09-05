@@ -100,11 +100,6 @@ describe('Metrics Tests', () => {
     })
 
     it('routes anonymous events through the public endpoint, not the direct Bard URL', async () => {
-      // Story 5-F6: the anonymous event carried no credentials and so went
-      // straight to Bard, which is what kept bardApiUrl in the BFF connect-src
-      // allowlist. The public endpoint injects no token either, so the call is
-      // same-origin now. The path is a single named route rather than a mirror
-      // of Bard's /api/event — it must match server/src/proxy/publicProxy.ts.
       vi.spyOn(Storage, 'userIsLogged').mockReturnValue(false)
 
       await Metrics.captureEvent(Object.keys(eventList)[0] as MetricsEventName)
@@ -117,16 +112,12 @@ describe('Metrics Tests', () => {
     })
 
     it('sends no Authorization header on the anonymous event', async () => {
-      // The public endpoint takes no credential, and the identified branch is
-      // the only one that has a token to send.
       vi.spyOn(Storage, 'userIsLogged').mockReturnValue(false)
 
       await Metrics.captureEvent(Object.keys(eventList)[0] as MetricsEventName)
 
       const [url, , options] = vi.mocked(retryFetchPost).mock.calls[0]
       expect(url).toBe('/public/metrics/event')
-      // Asserts the absence of the header, not the absence of a headers
-      // object: passing `headers: {}` or an unrelated header stays correct.
       const headers = (options as { headers?: Record<string, string> } | undefined)?.headers ?? {}
       expect(Object.keys(headers).map(key => key.toLowerCase())).not.toContain('authorization')
     })

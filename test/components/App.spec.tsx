@@ -4,8 +4,7 @@ import '@testing-library/jest-dom/vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router'
 
-// The real module is spread in so the exported path constants keep their
-// production values; only Config's async getters are stubbed.
+// Keep production path constants while mocking Config getters.
 vi.mock('src/libs/config', async importOriginal => ({
   ...(await importOriginal<typeof import('src/libs/config')>()),
   Config: {

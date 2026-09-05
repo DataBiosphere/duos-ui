@@ -123,10 +123,7 @@ export async function buildApp(): Promise<AppInstance> {
   // Collect CSP reports in both legacy and BFF modes.
   await fastify.register(cspReportRoute)
 
-  // Public BFF endpoints (story 5-F6) — pre-login feature flags and the
-  // anonymous Bard event. Outside both switches below: they carry no
-  // credentials, so they need neither the session infrastructure nor the
-  // cutover, and gating them would break a pre-login flow.
+  // Public routes must not depend on session infrastructure or the BFF cutover.
   await fastify.register(publicProxy)
 
   // DB/session infrastructure is configured independently of BFF cutover.

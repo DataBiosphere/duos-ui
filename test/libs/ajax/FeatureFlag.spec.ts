@@ -95,12 +95,6 @@ describe('FeatureFlag ajax', () => {
     })
   })
 
-  /**
-   * These four cases are the only proof the client and server halves of story
-   * 5-F6 line up: nothing in src/ calls this module, so no test that exercises
-   * the app can reach either URL. The paths asserted here must match the routes
-   * server/src/proxy/publicProxy.ts registers.
-   */
   describe('URL selection', () => {
     it('calls the absolute Consent URL in legacy mode, which is what the legacy client has always done', async () => {
       vi.spyOn(Config, 'getUpstreamApiUrl').mockResolvedValue(CONSENT)
