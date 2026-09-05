@@ -1,4 +1,4 @@
-import { Config } from 'src/libs/config'
+import { BFF_PUBLIC_FEATURES_PREFIX, Config } from 'src/libs/config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 
 export interface FeatureFlag {
@@ -8,21 +8,24 @@ export interface FeatureFlag {
   updateDate: number
 }
 
-// BFF NOTE: /feature must stay at the absolute Consent URL post-cutover — it
-// is unauthenticated and consulted pre-login (e.g. NHGRI_RESTRICTED_DAC), and
-// the session-guarded BFF proxy returns 401 for sessionless requests. Hence
-// getUpstreamApiUrl, never the proxied getApiUrl.
+// Public routes allow pre-login reads. This module currently has no app callers;
+// retain it for future use per ADR-013 and validate routing through tests.
+const featuresUrl = async (path: string): Promise<string> => {
+  if (await Config.isBffEnabled()) {
+    return `${BFF_PUBLIC_FEATURES_PREFIX}${path}`
+  }
+  return `${await Config.getUpstreamApiUrl()}/feature${path}`
+}
+
 export async function getAllFeatureFlags(): Promise<Record<string, FeatureFlag> | FeatureFlag[]> {
-  const url = `${await Config.getUpstreamApiUrl()}/feature`
-  // authOpts() stays for legacy parity (signed-in legacy users send their
-  // token even though /feature doesn't need it); in BFF mode the fetch
-  // adapter strips the Authorization header before sending.
+  const url = await featuresUrl('')
+  // Retain legacy auth headers; the BFF adapter and public proxy strip Authorization.
   const res = await fetchGet<Record<string, FeatureFlag> | FeatureFlag[]>(url, Config.authOpts())
   return res.data
 }
 
 export async function getFeatureFlag(key: string): Promise<FeatureFlag | undefined> {
-  const url = `${await Config.getUpstreamApiUrl()}/feature/${encodeURIComponent(key)}`
+  const url = await featuresUrl(`/${encodeURIComponent(key)}`)
   try {
     const res = await fetchGet<FeatureFlag>(url, Config.authOpts())
     return res.data

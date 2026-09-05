@@ -4,7 +4,7 @@ import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
-import { BFF_BARD_PREFIX, Config } from 'src/libs/config'
+import { BFF_BARD_PREFIX, BFF_PUBLIC_METRICS_EVENT_PATH, Config } from 'src/libs/config'
 import { CsrfTokenSessionExpiredError, getCsrfToken, isCsrfRejection, resetCsrfToken } from 'src/libs/ajax/csrf'
 
 export type ResponseType = 'blob' | 'json' | 'text'
@@ -50,12 +50,13 @@ export interface FetchData<T> {
 
 const HELP_DESK_MESSAGE = 'Please contact the help desk at duos@duos.org.'
 
+const isPublicMetricsEvent = (url: string): boolean =>
+  new URL(url, globalThis.location.origin).pathname === BFF_PUBLIC_METRICS_EVENT_PATH
+
 export const reportError = async (url: string, status: number): Promise<void> => {
-  // Requests to the Bard API are metrics calls (its only consumer). ErrorReporter
-  // reports via metrics, so reporting a Bard failure would recurse infinitely.
-  // In BFF mode identified metrics ride the /bard-api proxy — same recursion.
+  // ErrorReporter emits metrics; reporting metrics failures would recurse.
   const bardApiUrl = await Config.getBardApiUrl()
-  if (url.startsWith(bardApiUrl) || url.startsWith(`${BFF_BARD_PREFIX}/`)) {
+  if (url.startsWith(bardApiUrl) || url.startsWith(`${BFF_BARD_PREFIX}/`) || isPublicMetricsEvent(url)) {
     return
   }
   const msg = 'Error fetching response: '
@@ -73,16 +74,11 @@ const UNSAFE_METHODS: ReadonlySet<Method> = new Set(['POST', 'PUT', 'PATCH', 'DE
 const isSameOrigin = (url: string): boolean =>
   new URL(url, globalThis.location.origin).origin === globalThis.location.origin
 
-/**
- * Unsafe requests that must NOT carry (or fetch) a CSRF token: the signed-out
- * Contact Us form. Mirrors the server's CSRF_EXEMPT_UNSAFE_REQUESTS
- * (server/src/proxy/apiProxy.ts) — the server ignores the header here, and
- * fetching a token for a signed-out user would create an anonymous session
- * row per submission and hard-fail the form whenever /auth/csrf-token errors.
- */
+// Public POSTs must skip the authenticated CSRF endpoint to avoid signed-out logout handling.
 const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
   'POST /duos-api/support/request',
   'POST /duos-api/support/upload',
+  `POST ${BFF_PUBLIC_METRICS_EVENT_PATH}`,
 ])
 
 const isCsrfExempt = (method: Method, url: string): boolean =>

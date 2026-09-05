@@ -27,6 +27,7 @@ import { apiProxy } from './proxy/apiProxy.js'
 import { ECM_PROXY_PREFIX, ecmProxy } from './proxy/ecmProxy.js'
 import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
+import { publicProxy } from './proxy/publicProxy.js'
 import { configPath, readConfig, TRUST_PROXY } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -121,6 +122,9 @@ export async function buildApp(): Promise<AppInstance> {
 
   // Collect CSP reports in both legacy and BFF modes.
   await fastify.register(cspReportRoute)
+
+  // Public routes must not depend on session infrastructure or the BFF cutover.
+  await fastify.register(publicProxy)
 
   // DB/session infrastructure is configured independently of BFF cutover.
   if (process.env.DUOS_DB_HOST) {

@@ -4,7 +4,9 @@ import '@testing-library/jest-dom/vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router'
 
-vi.mock('src/libs/config', () => ({
+// Keep production path constants while mocking Config getters.
+vi.mock('src/libs/config', async importOriginal => ({
+  ...(await importOriginal<typeof import('src/libs/config')>()),
   Config: {
     getEnv: vi.fn().mockResolvedValue('ci'),
     getApiUrl: vi.fn().mockResolvedValue('http://localhost'),

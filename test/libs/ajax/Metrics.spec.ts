@@ -99,16 +99,36 @@ describe('Metrics Tests', () => {
       )
     })
 
-    it('keeps anonymous events on the direct Bard URL', async () => {
+    it('routes anonymous events through the public endpoint, not the direct Bard URL', async () => {
       vi.spyOn(Storage, 'userIsLogged').mockReturnValue(false)
 
       await Metrics.captureEvent(Object.keys(eventList)[0] as MetricsEventName)
 
       expect(retryFetchPost).toHaveBeenCalledWith(
-        `${bardUrl}/api/event`,
+        '/public/metrics/event',
         expect.any(Object),
         expect.any(Object),
       )
+    })
+
+    it('sends no Authorization header on the anonymous event', async () => {
+      vi.spyOn(Storage, 'userIsLogged').mockReturnValue(false)
+
+      await Metrics.captureEvent(Object.keys(eventList)[0] as MetricsEventName)
+
+      const [url, , options] = vi.mocked(retryFetchPost).mock.calls[0]
+      expect(url).toBe('/public/metrics/event')
+      const headers = (options as { headers?: Record<string, string> } | undefined)?.headers ?? {}
+      expect(Object.keys(headers).map(key => key.toLowerCase())).not.toContain('authorization')
+    })
+
+    it('keeps identify and syncProfile off the public endpoint, which exposes only the event path', async () => {
+      await Metrics.identify('anonymousId')
+      await Metrics.syncProfile()
+
+      for (const [url] of vi.mocked(retryFetchPost).mock.calls) {
+        expect(url).not.toContain('/public/metrics')
+      }
     })
 
     it('treats a persisted registered profile as signed in — the legacy token check is always false under the BFF', async () => {

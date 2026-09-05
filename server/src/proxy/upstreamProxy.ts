@@ -440,7 +440,7 @@ function onUpstreamTransportError(reply: ProxyReply, { error }: { error: Error }
  * (protocol `localhost:`, pathname `8000`) from a genuine path, which would
  * otherwise be reported as "has a path".
  */
-function upstreamBase(envVar: string): string {
+export function upstreamBase(envVar: string): string {
   const base = requireEnv(envVar)
   const mustBeOrigin = 'it must be a bare origin (scheme, host, and port only), because the proxy appends the upstream path to it'
 
