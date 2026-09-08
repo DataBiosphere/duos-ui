@@ -176,9 +176,15 @@ importers:
       '@fastify/csrf-protection':
         specifier: 8.0.1
         version: 8.0.1
+      '@fastify/helmet':
+        specifier: 13.1.1
+        version: 13.1.1
       '@fastify/postgres':
         specifier: 6.1.0
         version: 6.1.0(pg@8.22.0)
+      '@fastify/rate-limit':
+        specifier: 11.2.0
+        version: 11.2.0
       '@fastify/reply-from':
         specifier: 12.6.4
         version: 12.6.4
@@ -639,6 +645,9 @@ packages:
   '@fastify/forwarded@3.0.2':
     resolution: {integrity: sha512-NE8HgKLgYejV9lDpqkEFaDKMLYelJBVfHekhB0UKvX0ghagXRJqg68feg8er1NPXxG4N9i6vPxzt8E+3wHfcmA==}
 
+  '@fastify/helmet@13.1.1':
+    resolution: {integrity: sha512-bSat5DTq8geASv8G6P0KW1UbltZ+xGD/zyd9S72pT7ogAHehcsWL85GdjMRCjDsExJvaEvgEZ52qU/2HXirVCw==}
+
   '@fastify/merge-json-schemas@0.2.1':
     resolution: {integrity: sha512-OA3KGBCy6KtIvLf8DINC5880o5iBlDX4SxzLQS8HorJAbqluzLRn80UXU0bxZn7UOFhFgpRJDasfwn9nG4FG4A==}
 
@@ -652,6 +661,9 @@ packages:
 
   '@fastify/proxy-addr@5.1.0':
     resolution: {integrity: sha512-INS+6gh91cLUjB+PVHfu1UqcB76Sqtpyp7bnL+FYojhjygvOPA9ctiD/JDKsyD9Xgu4hUhCSJBPig/w7duNajw==}
+
+  '@fastify/rate-limit@11.2.0':
+    resolution: {integrity: sha512-X7osJd4XSvMoejYrnJkSZYYjY1eNYoBqhjlzf1RakC2204qExFqZFTKj5+T7VuzA/iUI9Z3UoSqQRkB2HpG0oQ==}
 
   '@fastify/reply-from@12.6.4':
     resolution: {integrity: sha512-WpHqGNRKzEraRQwBFK64g2HijN0ZuDuiiwWg06r5LY0lv1iu0qYg1BfVM0iYcCMiovrM8kKXsKm5GDH9JH9aPA==}
@@ -2028,6 +2040,10 @@ packages:
   hdr-histogram-percentiles-obj@3.0.0:
     resolution: {integrity: sha512-7kIufnBqdsBGcSZLPJwqHT3yhk1QTsSlFsVD3kx5ixH/AlgBs9yM1q6DPhXZ8f8gtdqgh7N7/5btRLpQsS2gHw==}
 
+  helmet@8.3.0:
+    resolution: {integrity: sha512-Qgpiaws3Sm30Av8Eah6sjMCZZwjlBu+E68rhpCWBshY1lb09HtLwj5GviX0OyQIn+ulUS0iX0AxN5n3tLZzz1w==}
+    engines: {node: '>=18.0.0'}
+
   history@5.3.0:
     resolution: {integrity: sha512-ZqaKwjjrAYUYfLG+htGaIIZ4nioX2L70ZUMIFysS3xvBsSG4x/n1V6TXV3N8ZYNuFGlDirFg32T7B6WOUPDYcQ==}
 
@@ -2086,6 +2102,10 @@ packages:
 
   inline-style-parser@0.2.7:
     resolution: {integrity: sha512-Nb2ctOyNR8DqQoR0OwRG95uNWIC0C1lCgf5Naz5H6Ji72KZ8OcFZLz2P5sNgwlyoJ8Yif11oMuYs5pBQa86csA==}
+
+  ip-address@10.7.0:
+    resolution: {integrity: sha512-BGFsyJd5mpXp3rK6jIdADLNgpJUK1jnjzvYF8lK+VyDab9JAmqN0YOKDdP17HlgKb2+ehPgDc8EtnRLbGCAMhA==}
+    engines: {node: '>= 12'}
 
   ipaddr.js@2.5.0:
     resolution: {integrity: sha512-aq+t5NAc+cS6rZQQVWC2x98CPqGtKKTMDd4Gaodv0wShnItdKg/51djkGJ1hqH+Oy0ivDftCbSLCQob8zso01w==}
@@ -3752,6 +3772,11 @@ snapshots:
 
   '@fastify/forwarded@3.0.2': {}
 
+  '@fastify/helmet@13.1.1':
+    dependencies:
+      fastify-plugin: 6.0.0
+      helmet: 8.3.0
+
   '@fastify/merge-json-schemas@0.2.1':
     dependencies:
       dequal: 2.0.3
@@ -3773,6 +3798,13 @@ snapshots:
     dependencies:
       '@fastify/forwarded': 3.0.2
       ipaddr.js: 2.5.0
+
+  '@fastify/rate-limit@11.2.0':
+    dependencies:
+      '@lukeed/ms': 2.0.2
+      fastify-plugin: 6.0.0
+      ip-address: 10.7.0
+      toad-cache: 3.7.4
 
   '@fastify/reply-from@12.6.4':
     dependencies:
@@ -5176,6 +5208,8 @@ snapshots:
 
   hdr-histogram-percentiles-obj@3.0.0: {}
 
+  helmet@8.3.0: {}
+
   history@5.3.0:
     dependencies:
       '@babel/runtime': 7.29.7
@@ -5235,6 +5269,8 @@ snapshots:
   inherits@2.0.4: {}
 
   inline-style-parser@0.2.7: {}
+
+  ip-address@10.7.0: {}
 
   ipaddr.js@2.5.0: {}
 

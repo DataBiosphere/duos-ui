@@ -4,15 +4,20 @@ import path from 'node:path'
 import http from 'node:http'
 import https from 'node:https'
 import open from 'open'
-import Fastify, { FastifyError, FastifyInstance } from 'fastify'
+import Fastify, { FastifyError, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import fastifyPostgres from '@fastify/postgres'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
+import rateLimit from '@fastify/rate-limit'
+import fastifyHelmet from '@fastify/helmet'
 import { createPgSessionStore } from './session/pgStore.js'
+import { helmetOptions } from './security/headers.js'
+import { cspReportRoute, REPORTING_ENDPOINTS_HEADER } from './security/cspReport.js'
 import { sessionPluginOptions } from './session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
 import { fetchMetadataGuard } from './security/fetchMetadata.js'
+import { callbackRateLimit, isRateLimitError, loginRateLimit, RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } from './security/rateLimit.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { handleLogin } from './auth/login.js'
 import { handleCallback } from './auth/callback.js'
@@ -22,7 +27,7 @@ import { apiProxy } from './proxy/apiProxy.js'
 import { ECM_PROXY_PREFIX, ecmProxy } from './proxy/ecmProxy.js'
 import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
-import { TRUST_PROXY, configPath, readConfig } from './config.js'
+import { configPath, readConfig, TRUST_PROXY } from './config.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
 
@@ -42,6 +47,35 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
   if (['true', '1', 'yes', 'on'].includes(v)) return true
   if (['false', '0', 'no', 'off'].includes(v)) return false
   return defaultValue
+}
+
+/**
+ * The app-level error handler. The body is always generic: an error message
+ * can carry internal detail, and no client branches on it.
+ */
+export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
+  if (isRateLimitError(err)) {
+    request.log.warn({ ip: request.ip, url: request.url }, '[server] rate limit exceeded')
+    return reply.status(err.statusCode ?? 429).send({ error: RATE_LIMIT_ERROR_CODE })
+  }
+  request.log.error({ err }, '[server] Unhandled error:')
+  const status = err.statusCode ?? (err as { status?: number }).status ?? 500
+  return reply.status(status >= 400 ? status : 500).send({ error: 'An unexpected error occurred.' })
+}
+
+/**
+ * `/auth/callback` is a top-level browser navigation from B2C, so answering a
+ * throttled request with a JSON body would leave the user looking at
+ * `{"error":"rate_limited"}` in the address bar with no route back into the
+ * app. Land them in the SPA instead, the way an error from B2C itself does
+ * (auth/callback.ts). Everything else delegates unchanged.
+ */
+export function handleCallbackError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
+  if (isRateLimitError(err)) {
+    request.log.warn({ ip: request.ip }, '[server] rate limit exceeded on the OAuth callback')
+    return reply.redirect(`/?signInError=${RATE_LIMIT_ERROR_CODE}`)
+  }
+  return handleServerError(err, request, reply)
 }
 
 export async function buildApp(): Promise<AppInstance> {
@@ -65,18 +99,30 @@ export async function buildApp(): Promise<AppInstance> {
     : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' }, trustProxy: TRUST_PROXY })
   ) as AppInstance
 
-  // Path to the static client config.json — computed once so both the
-  // /config.json route below and the bffEnabled startup check read the same
-  // (memoized) config.
-  const configJsonPath = configPath(PROJECT_ROOT, isDev)
+  // Registered before any routes so all errors, including those in plugins, are caught.
+  fastify.setErrorHandler(handleServerError)
 
-  // 1. DB pool + session — registered only when the deployment provides the
-  // BFF database configuration. Session infrastructure is deployment config
-  // (env vars via helmfile/compose), not a runtime flag: every pod of a given
-  // deployment behaves identically, with no network dependency at boot.
-  // Directing users to the BFF sign-in flow is a separate switch — the
-  // boolean `bffEnabled` in config.json, checked at startup — see
-  // docs/plans/BFF_Overview.md.
+  // Rate limiting. Registered at app level, ahead of both cutover switches and every route.
+  await fastify.register(rateLimit, rateLimitPluginOptions)
+
+  // Use the same memoized config for headers, route gating, and /config.json.
+  const configJsonPath = configPath(PROJECT_ROOT, isDev)
+  const clientConfig = await readConfig(configJsonPath, fastify.log)
+
+  // Register before routes so Helmet's hooks cover every response.
+  const cspReportOnly = envBool(process.env.DUOS_CSP_REPORT_ONLY, true)
+  fastify.log.info(`[server] Content Security Policy is ${cspReportOnly ? 'report-only (set DUOS_CSP_REPORT_ONLY=false to enforce)' : 'enforced'}`)
+  await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly }))
+
+  // Resolves the policy's `report-to` group; `report-uri` remains the fallback.
+  fastify.addHook('onRequest', async (_request, reply) => {
+    reply.header('reporting-endpoints', REPORTING_ENDPOINTS_HEADER)
+  })
+
+  // Collect CSP reports in both legacy and BFF modes.
+  await fastify.register(cspReportRoute)
+
+  // DB/session infrastructure is configured independently of BFF cutover.
   if (process.env.DUOS_DB_HOST) {
     fastify.log.info('[server] DUOS_DB_HOST is set — enabling BFF session infrastructure')
 
@@ -131,25 +177,11 @@ export async function buildApp(): Promise<AppInstance> {
     }))
 
     // CSRF protection for cookie-authenticated, state-changing auth routes
-    // (currently POST /auth/logout). SameSite=Lax withholds the session cookie
-    // from cross-site POSTs, but is not sufficient alone here: dev/staging live
-    // under *.broadinstitute.org, where SameSite treats every sibling subdomain
-    // as same-site — a compromised sibling could still forge cookie-bearing
-    // POSTs. CSRF tokens don't depend on the registrable domain. The secret is
-    // stored in the session, so it must be registered after @fastify/session.
-    //
-    // The options — including the header-only `getToken` narrowing — live in
-    // auth/csrf.ts so the test harnesses register the plugin exactly as this
-    // does. Inline, they drifted: see that file.
+    // (currently POST /auth/logout).
     await fastify.register(fastifyCsrf, csrfPluginOptions)
 
     // Warm the B2C OIDC discovery cache so the first login doesn't pay the
-    // discovery round-trip. Gated on the Azure env vars being present: DB/
-    // session infra (this block) can be enabled ahead of B2C being configured
-    // during the phased rollout, and warming up against unset vars would log
-    // an error on every single startup for no benefit. Not awaited and never
-    // fatal either way — on failure the error is logged and getOidcConfig()
-    // retries lazily on first use.
+    // discovery round-trip.
     if (process.env.DUOS_AZURE_ISSUER_URL && process.env.DUOS_AZURE_CLIENT_ID && process.env.DUOS_AZURE_CLIENT_SECRET) {
       getOidcConfig().catch((err: unknown) => {
         fastify.log.error({ err }, '[auth] B2C OIDC discovery warm-up failed')
@@ -160,12 +192,8 @@ export async function buildApp(): Promise<AppInstance> {
     fastify.log.info('[server] DUOS_DB_HOST is not set — starting without DB/session infrastructure (legacy client-side auth)')
   }
 
-  // 2. BFF auth routes — the cutover switch. Checked once at startup via the
-  // same readConfig() the /config.json route below serves, so the server and
-  // client agree on bffEnabled by construction. A missing key defaults to
-  // false and the routes stay dark — the fail-safe is the legacy
-  // client-side flow. See docs/plans/BFF_Overview.md § Rollout strategy.
-  const { bffEnabled } = await readConfig(configJsonPath, fastify.log)
+  // A missing bffEnabled key keeps the legacy auth flow.
+  const { bffEnabled } = clientConfig
   if (bffEnabled === true) {
     // The two switches are meant to be independent (session infra can be on
     // ahead of cutover), but not in this direction: routing users into the
@@ -174,42 +202,23 @@ export async function buildApp(): Promise<AppInstance> {
     if (!process.env.DUOS_DB_HOST) {
       throw new Error('bffEnabled is true in config.json but DUOS_DB_HOST is not set — the BFF auth routes require the session infrastructure to be configured')
     }
-    // Both /auth/me and the API proxy forward to this upstream, so a cutover
-    // without it is a deployment that boots, passes health checks, and then
-    // fails on the first user request. Checked here rather than left to the
-    // proxy's own requireEnv so the error arrives at startup, next to the
-    // switch that made it mandatory.
     if (!process.env.DUOS_API_URL) {
       throw new Error('bffEnabled is true in config.json but DUOS_API_URL is not set — /auth/me and the API proxy both forward to it')
     }
     fastify.log.info('[server] bffEnabled is true — registering BFF auth routes and the API proxy')
-    fastify.post('/auth/login', handleLogin)
-    fastify.get('/auth/callback', handleCallback)
-    // The client fetches this after sign-in and echoes the token in an
-    // X-CSRF-Token header on unsafe auth requests. Gated on an authenticated
-    // session (story 5-B): an anonymous request gets 401 and mints no session
-    // row — see the handler in auth/csrf.ts. After session rotation (Phase 5,
-    // 5-C) the pre-auth secret is discarded, so the client must (re)fetch this
-    // once login completes.
-    fastify.get('/auth/csrf-token', handleCsrfToken)
-    // /auth/login is deliberately exempt from CSRF: it is pre-authentication
-    // (no token to have fetched yet), and login CSRF is neutralized by the
-    // PKCE state binding the flow to the session. Only logout is guarded.
-    fastify.post('/auth/logout', { onRequest: fastify.csrfProtection }, handleLogout)
-    // /auth/me is a safe GET here, but it calls Consent's state-changing
-    // GET /api/user/me server-side, so it carries the Fetch Metadata guard the
-    // proxies get from their shared machinery (story 5-B; see
-    // security/fetchMetadata.ts). /auth/login and /auth/callback must NOT get
-    // it — the callback is a legitimate cross-site navigation from B2C.
-    fastify.get('/auth/me', { onRequest: fetchMetadataGuard }, getMe)
 
-    // The API proxy (Phase 3). Registered here, inside both switches, rather
-    // than alongside /health: it depends on @fastify/cookie, @fastify/session
-    // and @fastify/csrf-protection, all of which are registered above only when
-    // DUOS_DB_HOST is set. Gating it on bffEnabled too keeps it dark until
-    // cutover — the client does not call /duos-api until Phase 4 points
-    // getApiUrl() at it — so a deployment running the legacy client-side flow
-    // exposes no proxy route at all.
+    // Resolved once, so the effective numbers reach the log an operator reads
+    // when a limit is questioned — and so a bad override fails startup here
+    // rather than on the first request.
+    const loginLimit = loginRateLimit()
+    const callbackLimit = callbackRateLimit()
+    fastify.log.info({ login: loginLimit.max, callback: callbackLimit.max }, '[server] auth rate limits, in requests per minute per client IP')
+
+    fastify.post('/auth/login', { config: { rateLimit: loginLimit } }, handleLogin)
+    fastify.get('/auth/callback', { config: { rateLimit: callbackLimit }, errorHandler: handleCallbackError }, handleCallback)
+    fastify.get('/auth/csrf-token', handleCsrfToken)
+    fastify.post('/auth/logout', { onRequest: fastify.csrfProtection }, handleLogout)
+    fastify.get('/auth/me', { onRequest: fetchMetadataGuard }, getMe)
     await fastify.register(apiProxy)
 
     // The single-feature upstream proxies. Same gates as the DUOS API proxy,
@@ -240,16 +249,7 @@ export async function buildApp(): Promise<AppInstance> {
   // Client config — intercepted via onRequest rather than a route, because
   // @fastify/vite's production static plugin (wildcard: false) walks build/
   // and registers its own explicit GET/HEAD route for every file it finds
-  // there, including config.json. A competing `fastify.get('/config.json', ...)`
-  // collides with that at startup (FST_ERR_DUPLICATED_ROUTE); onRequest fires
-  // before that nested route's handler regardless of which scope declared it,
-  // so this lets DUOS_API_URL override the static file's `apiUrl` without
-  // fighting Vite for the route — see config.ts for why.
-  // HEAD must be intercepted along with GET: the static plugin registers both,
-  // so a HEAD that fell through would describe the raw un-overridden file and
-  // disagree with GET's body (mismatched Content-Length for caches/validators).
-  // Node itself omits the body for HEAD responses; sending the same payload
-  // yields matching headers.
+  // there, including config.json.
   fastify.addHook('onRequest', async (request, reply) => {
     if ((request.method === 'GET' || request.method === 'HEAD')
       && (request.url === '/config.json' || request.url.startsWith('/config.json?'))) {
@@ -266,15 +266,8 @@ export async function buildApp(): Promise<AppInstance> {
 
   await fastify.vite.ready()
 
-  // SPA fallback — @fastify/vite sets up the Vite middleware and reply.html decorator
-  // but does not register routes; we wire the catch-all ourselves.
+  // SPA fallback
   fastify.setNotFoundHandler((_req, reply) => reply.html())
-
-  // The encapsulated proxy declares its own error handler (ADR-010).
-  fastify.setErrorHandler((err: FastifyError, request, reply) => {
-    request.log.error({ err }, '[server] Unhandled error:')
-    return reply.status(err.statusCode ?? 500).send({ error: 'An unexpected error occurred.' })
-  })
 
   return fastify
 }

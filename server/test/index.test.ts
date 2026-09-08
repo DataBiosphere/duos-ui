@@ -3,6 +3,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
+import { MAX_REQUESTS_PER_WINDOW } from '../src/security/cspReport.js'
 
 // ---------------------------------------------------------------------------
 // Mock all plugins that require external resources (DB, secrets, build dir)
@@ -155,6 +156,110 @@ describe('error handler', () => {
     })
     const res = await app.inject({ method: 'GET', url: '/not-found-route' })
     expect(res.statusCode).toBe(404)
+  })
+})
+
+describe('handleServerError', () => {
+  // The whole contract of the handler. The status varies with the error; the
+  // body never does. Nothing a client reads is derived from err.message.
+  const GENERIC_BODY = { error: 'An unexpected error occurred.' }
+
+  // Asserted against the exported handler rather than through app.inject():
+  // the child-logger factory a route uses is fixed when that route registers,
+  // so a built app's request.log cannot be stubbed afterwards.
+  function fakeRequest() {
+    return { ip: '203.0.113.1', url: '/auth/login', log: { warn: vi.fn(), error: vi.fn() } }
+  }
+
+  function fakeReply() {
+    const reply = {
+      sentStatus: 0,
+      sentBody: undefined as unknown,
+      status: vi.fn((code: number) => {
+        reply.sentStatus = code
+        return reply
+      }),
+      send: vi.fn((body: unknown) => {
+        reply.sentBody = body
+        return reply
+      }),
+    }
+    return reply
+  }
+
+  async function run(err: Error) {
+    const { handleServerError } = await import('../src/index.js')
+    const request = fakeRequest()
+    const reply = fakeReply()
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    handleServerError(err as any, request as any, reply as any)
+    return { request, reply }
+  }
+
+  // Every shape of error the handler can be given. Each message holds detail a
+  // client must never see: a 4xx message reads like client-safe text, which is
+  // the case most likely to tempt a future edit that forwards err.message.
+  const cases = [
+    { name: 'a 5xx statusCode', err: () => Object.assign(new Error('upstream token endpoint said: invalid_client'), { statusCode: 502 }), status: 502 },
+    { name: 'no status at all', err: () => new Error('DUOS_OIDC_CLIENT_SECRET is not set'), status: 500 },
+    { name: 'only err.status, not statusCode', err: () => Object.assign(new Error('bad input for column "ssn"'), { status: 400 }), status: 400 },
+    // A 3xx would answer an error with a JSON body and no Location header, so
+    // the handler refuses it and uses 500.
+    { name: 'a non-error 3xx status', err: () => Object.assign(new Error('confused'), { statusCode: 302 }), status: 500 },
+  ]
+
+  it.each(cases)('answers $name with the generic body and no part of err.message', async ({ err }) => {
+    const thrown = err()
+
+    const { reply } = await run(thrown)
+
+    expect(reply.sentBody).toEqual(GENERIC_BODY)
+    expect(JSON.stringify(reply.sentBody)).not.toContain(thrown.message)
+  })
+
+  it.each(cases)('maps $name to status $status', async ({ err, status }) => {
+    const { reply } = await run(err())
+
+    expect(reply.sentStatus).toBe(status)
+  })
+
+  it('logs the error server-side, which is the only place the message survives', async () => {
+    const thrown = Object.assign(new Error('internal secret data'), { statusCode: 502 })
+
+    const { request } = await run(thrown)
+
+    expect(request.log.error).toHaveBeenCalledWith({ err: thrown }, '[server] Unhandled error:')
+  })
+
+  // A flood must not fill the error log
+  it('logs a throttled request at warn and answers with the rate_limited code', async () => {
+    const { RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } = await import('../src/security/rateLimit.js')
+    const err = rateLimitPluginOptions.errorResponseBuilder!(
+      {} as FastifyRequest,
+      { statusCode: 429, ban: false, after: '1 minute', max: 30, ttl: 60_000 },
+    )
+
+    const { request, reply } = await run(err as unknown as Error)
+
+    expect(request.log.warn).toHaveBeenCalled()
+    expect(request.log.error).not.toHaveBeenCalled()
+    expect(reply.sentStatus).toBe(429)
+    expect(reply.sentBody).toEqual({ error: RATE_LIMIT_ERROR_CODE })
+  })
+
+  it('logs any other failure at error and hides its message', async () => {
+    const { handleServerError } = await import('../src/index.js')
+    const err = Object.assign(new Error('internal secret data'), { statusCode: 502 })
+    const request = fakeRequest()
+    const reply = fakeReply()
+
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    handleServerError(err as any, request as any, reply as any)
+
+    expect(request.log.error).toHaveBeenCalled()
+    expect(request.log.warn).not.toHaveBeenCalled()
+    expect(reply.status).toHaveBeenCalledWith(502)
+    expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
   })
 })
 
@@ -593,6 +698,28 @@ describe('BFF auth route registration', () => {
     await localApp.close()
   })
 
+  // The regression this guards: setErrorHandler moving back to the end of
+  // buildApp(). Fastify binds a route's error handler when the route
+  // registers, so every route built inside buildApp() would fall back to
+  // Fastify's default handler, which serialises err.message to the client.
+  // The /boom case in the 'error handler' describe cannot catch that — it
+  // registers its route after buildApp() has returned.
+  it('applies the app error handler to a route registered inside buildApp', async () => {
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+    const { handleLogin } = await import('../src/auth/login.js')
+    vi.mocked(handleLogin).mockImplementationOnce(() => {
+      throw new Error('internal secret data')
+    })
+
+    const res = await localApp.inject({ method: 'POST', url: '/auth/login' })
+
+    expect(res.statusCode).toBe(500)
+    expect(res.json()).toEqual({ error: 'An unexpected error occurred.' })
+    expect(res.payload).not.toContain('internal secret data')
+
+    await localApp.close()
+  })
+
   it('fails loud when bffEnabled is true but DUOS_API_URL is not set', async () => {
     delete process.env.DUOS_API_URL
 
@@ -619,5 +746,251 @@ describe('envBool', () => {
     const { envBool } = await import('../src/index.js')
     for (const v of ['false', 'FALSE', '0', 'no', 'off']) expect(envBool(v, true)).toBe(false)
     for (const v of ['true', 'True', '1', 'yes', 'on']) expect(envBool(v, false)).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Rate limiting (stories 5-G2 and 5-G3)
+// ---------------------------------------------------------------------------
+describe('auth endpoint rate limiting', () => {
+  let dir: string
+
+  afterEach(async () => {
+    delete process.env.CONFIG_PATH
+    vi.unstubAllEnvs()
+    vi.useRealTimers()
+    const { resetConfigCache } = await import('../src/config.js')
+    resetConfigCache()
+    if (dir) rmSync(dir, { recursive: true, force: true })
+  })
+
+  // Same reasoning as the sibling describe: buildApp() caches config.json
+  // process-wide, so the cache must be cleared right before the build.
+  async function buildLimitedApp(maxima?: { login?: string, callback?: string }) {
+    const { LOGIN_MAX_ENV_VAR, CALLBACK_MAX_ENV_VAR } = await import('../src/security/rateLimit.js')
+    if (maxima?.login) vi.stubEnv(LOGIN_MAX_ENV_VAR, maxima.login)
+    if (maxima?.callback) vi.stubEnv(CALLBACK_MAX_ENV_VAR, maxima.callback)
+
+    dir = mkdtempSync(path.join(tmpdir(), 'duos-ratelimit-config-'))
+    const file = path.join(dir, 'config.json')
+    writeFileSync(file, JSON.stringify({ bffEnabled: true }))
+    process.env.CONFIG_PATH = file
+
+    const { resetConfigCache } = await import('../src/config.js')
+    resetConfigCache()
+    const { buildApp } = await import('../src/index.js')
+    return buildApp()
+  }
+
+  // The rate limiter keys on request.ip, which honours X-Forwarded-For because
+  // TRUST_PROXY names the loopback peer that app.inject() presents as.
+  const from = (ip: string) => ({ 'x-forwarded-for': ip })
+
+  it('returns 429 with Retry-After and the rate_limited code once /auth/login exceeds its limit', async () => {
+    const app = await buildLimitedApp({ login: '2' })
+    const { RATE_LIMIT_ERROR_CODE } = await import('../src/security/rateLimit.js')
+
+    for (let i = 0; i < 2; i++) {
+      const ok = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.7') })
+      expect(ok.statusCode).toBe(200)
+    }
+
+    const blocked = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.7') })
+
+    expect(blocked.statusCode).toBe(429)
+    expect(blocked.json()).toEqual({ error: RATE_LIMIT_ERROR_CODE })
+    expect(Number(blocked.headers['retry-after'])).toBeGreaterThan(0)
+
+    await app.close()
+  })
+
+  it('counts /auth/login and /auth/callback in separate buckets, each with its own cap', async () => {
+    const app = await buildLimitedApp({ login: '1', callback: '1' })
+
+    await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.10') })
+    const blockedLogin = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.10') })
+    // Unspent by the login flood, so the bucket is its own …
+    const callback = await app.inject({ method: 'GET', url: '/auth/callback', headers: from('203.0.113.10') })
+    // … and capped, so the route really does carry a config of its own.
+    const blockedCallback = await app.inject({ method: 'GET', url: '/auth/callback', headers: from('203.0.113.10') })
+
+    expect(blockedLogin.statusCode).toBe(429)
+    expect(callback.statusCode).toBe(200)
+    expect(blockedCallback.statusCode).toBe(302)
+
+    await app.close()
+  })
+
+  // /auth/callback is a top-level navigation from B2C, so a JSON body would
+  // leave the user on `{"error":"rate_limited"}` with no route back.
+  it('lands a throttled /auth/callback back in the SPA instead of sending JSON', async () => {
+    const app = await buildLimitedApp({ callback: '1' })
+
+    await app.inject({ method: 'GET', url: '/auth/callback', headers: from('203.0.113.16') })
+    const blocked = await app.inject({ method: 'GET', url: '/auth/callback', headers: from('203.0.113.16') })
+
+    expect(blocked.statusCode).toBe(302)
+    expect(blocked.headers.location).toBe('/?signInError=rate_limited')
+    expect(blocked.payload).not.toContain('rate_limited')
+
+    await app.close()
+  })
+
+  it('counts each client IP in its own bucket', async () => {
+    const app = await buildLimitedApp({ login: '1' })
+
+    await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.11') })
+    const sameIp = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.11') })
+    const otherIp = await app.inject({ method: 'POST', url: '/auth/login', headers: from('198.51.100.4') })
+
+    expect(sameIp.statusCode).toBe(429)
+    expect(otherIp.statusCode).toBe(200)
+
+    await app.close()
+  })
+
+  it('lets a client through again once the time window passes', async () => {
+    const app = await buildLimitedApp({ login: '1' })
+    // The store measures the window with Date.now(); fake only the clock, so
+    // inject()'s own async machinery keeps running on real timers.
+    vi.useFakeTimers({ toFake: ['Date'] })
+
+    await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.12') })
+    const blocked = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.12') })
+    vi.setSystemTime(Date.now() + 61_000)
+    const afterWindow = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.12') })
+
+    expect(blocked.statusCode).toBe(429)
+    expect(afterWindow.statusCode).toBe(200)
+
+    await app.close()
+  })
+
+  // Deliberately unlimited: /auth/csrf-token is gated on an authenticated
+  // session (5-B) and /auth/logout on the CSRF token, and a low cap on either
+  // breaks multiple tabs and the client's retry path.
+  it('leaves /auth/csrf-token and /auth/logout unlimited', async () => {
+    const app = await buildLimitedApp({ login: '1' })
+
+    for (let i = 0; i < 5; i++) {
+      const token = await app.inject({ method: 'GET', url: '/auth/csrf-token', headers: from('203.0.113.13') })
+      const logout = await app.inject({ method: 'POST', url: '/auth/logout', headers: from('203.0.113.13') })
+      expect(token.statusCode).toBe(401)
+      expect(logout.statusCode).toBe(204)
+    }
+
+    await app.close()
+  })
+
+  // The regression this guards: registering the plugin globally.
+  it('never limits a route that did not opt in', async () => {
+    const app = await buildLimitedApp({ login: '1' })
+    app.get('/assets/chunk.js', async () => 'export default 1')
+
+    for (let i = 0; i < 12; i++) {
+      const asset = await app.inject({ method: 'GET', url: '/assets/chunk.js', headers: from('203.0.113.14') })
+      expect(asset.statusCode).toBe(200)
+      // Status alone would not catch it: the plugin's own global default is
+      // 1000/minute, so 12 requests pass even under `global: true`. The
+      // headers appear on every reply the limiter processed, and on no other.
+      expect(asset.headers['x-ratelimit-limit']).toBeUndefined()
+    }
+
+    await app.close()
+  })
+
+  it('applies the shipped defaults when no override is set', async () => {
+    const app = await buildLimitedApp()
+
+    const login = await app.inject({ method: 'POST', url: '/auth/login', headers: from('203.0.113.15') })
+    const callback = await app.inject({ method: 'GET', url: '/auth/callback', headers: from('203.0.113.15') })
+
+    expect(login.headers['x-ratelimit-limit']).toBe('30')
+    expect(callback.headers['x-ratelimit-limit']).toBe('60')
+
+    await app.close()
+  })
+
+  it('fails loud at startup when a limit override is not a positive integer', async () => {
+    await expect(buildLimitedApp({ login: 'lots' })).rejects.toThrow('DUOS_RATE_LIMIT_LOGIN_MAX')
+  })
+})
+
+describe('security headers', () => {
+  // The fixture omits bffEnabled, so these exercise legacy mode.
+  it('reaches a root-scope route', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['cross-origin-resource-policy']).toBe('same-origin')
+    expect(res.headers['referrer-policy']).toBe('no-referrer')
+    expect(res.headers['x-frame-options']).toBe('DENY')
+  })
+
+  it('reaches the SPA document itself, not just the API routes', async () => {
+    const res = await app.inject({ method: 'GET', url: '/datalibrary/some-deep-link' })
+
+    expect(res.headers['x-frame-options']).toBe('DENY')
+    expect(res.headers['referrer-policy']).toBe('no-referrer')
+  })
+
+  it('sends no COOP header at all to a legacy deployment', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['cross-origin-opener-policy']).toBeUndefined()
+  })
+
+  it('reaches the report sink, which lives in its own encapsulated scope', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/csp-report',
+      headers: { 'content-type': 'application/csp-report' },
+      payload: JSON.stringify({ 'csp-report': { 'blocked-uri': 'https://example.org/x' } }),
+    })
+
+    expect(res.statusCode).toBe(204)
+  })
+
+  it('gives the report-to group an address through Reporting-Endpoints', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['reporting-endpoints']).toBe('csp-endpoint="/csp-report"')
+  })
+
+  it('rate-limits the report sink in the real app, not only in its unit tests', async () => {
+    // The route carries its own rateLimit config, but that config does nothing
+    // unless buildApp() actually registers the plugin. Assert the wiring, not
+    // the numbers — those are covered in cspReport.test.ts.
+    const post = () => app.inject({
+      method: 'POST',
+      url: '/csp-report',
+      headers: { 'content-type': 'application/csp-report' },
+      payload: JSON.stringify({ 'csp-report': { 'blocked-uri': 'https://example.org/x' } }),
+    })
+
+    let last = 0
+    for (let i = 0; i < MAX_REQUESTS_PER_WINDOW + 1; i += 1) last = (await post()).statusCode
+
+    expect(last).toBe(429)
+  })
+
+  it('leaves the SPA and health routes outside the limit, which is why it registers global: false', async () => {
+    // The same instance serves every SPA asset; a global cap sized for the
+    // report sink would block a page load.
+    for (let i = 0; i < MAX_REQUESTS_PER_WINDOW + 5; i += 1) {
+      expect((await app.inject({ method: 'GET', url: '/health' })).statusCode).toBe(200)
+    }
+  })
+
+  it('sends the report-only policy by default, so a strict policy cannot break a page unannounced', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' })
+
+    expect(res.headers['content-security-policy-report-only']).toContain('default-src \'self\'')
+    expect(res.headers['content-security-policy']).toBeUndefined()
+  })
+
+  it('reaches the SPA document with the policy, not just the API routes', async () => {
+    const res = await app.inject({ method: 'GET', url: '/datalibrary/some-deep-link' })
+
+    expect(res.headers['content-security-policy-report-only']).toContain('default-src \'self\'')
   })
 })

@@ -50,17 +50,25 @@ function App() {
   }, [])
 
   /**
-   * The BFF /auth/callback lands here with ?signInError=provider when B2C answered the authorization request with an
-   * error instead of a code. The known case is B2C failing to connect to the chosen Microsoft provider (an expired
-   * federation client secret in the tenant fails every Microsoft sign-in). The message stays generic because the
-   * cause is on the provider side — the server log carries the B2C error and description.
+   * The BFF /auth/callback lands here when it cannot finish the sign-in, because the callback is a top-level browser
+   * navigation and a JSON error body would strand the user on it. Two markers:
+   *
+   * - `provider` — B2C answered the authorization request with an error instead of a code. The known case is B2C
+   *   failing to connect to the chosen Microsoft provider (an expired federation client secret in the tenant fails
+   *   every Microsoft sign-in). The message stays generic because the cause is on the provider side — the server log
+   *   carries the B2C error and description.
+   * - `rate_limited` — the callback's flood control rejected the request (Phase 5, story 5-G3). Retrying works, so the
+   *   message says so instead of pointing at the provider or at support.
    */
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search)
-    if (queryParams.get('signInError') === null) return
+    const marker = queryParams.get('signInError')
+    if (marker === null) return
     Notifications.showError({
-      text: 'Sign in could not be completed because the identity provider reported an error. '
-        + 'Please try again. If the problem continues, contact DUOS support.',
+      text: marker === 'rate_limited'
+        ? 'Sign in could not be completed because too many sign-in attempts arrived at once. Please wait a minute and try again.'
+        : 'Sign in could not be completed because the identity provider reported an error. '
+          + 'Please try again. If the problem continues, contact DUOS support.',
       // Long timeout: the message carries instructions the user must read.
       timeout: 30000,
     })

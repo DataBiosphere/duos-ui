@@ -160,6 +160,24 @@ describe('Main App Functions', () => {
     await waitFor(() => expect(searchSpy).toHaveBeenCalledWith(''))
   })
 
+  it('tells the user to wait and retry when the BFF callback lands with ?signInError=rate_limited', async () => {
+    // The callback's flood control rejects a top-level navigation, so the
+    // server redirects here rather than sending JSON. Retrying works, so the
+    // message must not blame the provider or send the user to support.
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: false })
+
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/', search: '?signInError=rate_limited' }]}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => expect(document.querySelector('[data-cy="notification-alert"]')).toBeVisible())
+    const text = document.querySelector('[data-cy="notification-alert"]')?.textContent
+    expect(text).toContain('too many sign-in attempts')
+    expect(text).not.toContain('identity provider')
+  })
+
   it('should process RAS query params (code, state) and navigate to the profile page when the parameter specifies it', async () => {
     vi.mocked(AuthenticateNIH.getECMProviderLinkInfo).mockResolvedValue(linkInfo as never)
     vi.mocked(AuthenticateNIH.getSyncedUser).mockResolvedValue(duosUser as never)

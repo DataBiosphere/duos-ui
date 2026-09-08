@@ -103,7 +103,7 @@ the migration plan and are summarised below; the ones that needed fuller
 treatment — because they were resolved during implementation, with alternatives
 and residual risk worth recording — have their own files under
 [`bff_adrs/`](bff_adrs/). That is why the directory holds 004 and 009 through
-012 rather than 001 through 003: the numbers belong to this list, not to the
+013 rather than 001 through 003: the numbers belong to this list, not to the
 directory.
 
 | ADR | Decision | Phase |
@@ -120,6 +120,7 @@ directory.
 | [010](#adr-010--the-proxy-scope-declares-its-own-error-shape) | The proxy scope declares its own error shape | 3, 4 |
 | [011](#adr-011--one-identity-per-browser-cross-tab-account-switching-reloads-the-stale-tab) | One identity per browser: cross-tab account switching reloads the stale tab | 4 |
 | [012](#adr-012--session-cookie-is-samesitelax-with-csrf-tokens-closing-the-gap) | Session cookie is `SameSite=Lax`, with CSRF tokens closing the gap | 1, 2–4 |
+| [013](#adr-013--security-headers-and-a-content-security-policy-derived-from-runtime-config) | Security headers, and a CSP derived from runtime config | 5 |
 
 ### ADR-001 — PostgreSQL-backed sessions via `@fastify/session`
 
@@ -288,11 +289,62 @@ The options are defined once in `server/src/session/sessionOptions.ts` and
 imported by the server and all five test harnesses, so changing `sameSite` or
 `rolling` fails the suite.
 
+### ADR-013 — Security headers, and a Content Security Policy derived from runtime config
+
+**Full record:** [bff_adrs/ADR-013-content-security-policy.md](bff_adrs/ADR-013-content-security-policy.md)
+— written across the 5-F stack and growing with it.
+
+`@fastify/helmet` registers ahead of every route and outside both cutover
+switches: a legacy deployment needs these headers too. Two of its defaults would
+break flows this app depends on.
+
+`Cross-Origin-Opener-Policy` is **off entirely in legacy mode**.
+`same-origin-allow-popups` is not a safe middle ground, which was measured: on
+the return leg from B2C the popup's `window.opener` still goes null and
+`signinPopup()` never resolves. COOP is not part of the CSP and has no
+report-only mode, so that one breaks sign-in on the first deploy — which is why
+it ships on its own. `Cross-Origin-Embedder-Policy` stays off because the banner
+bucket and the two direct upstreams send no CORP header. HSTS is production-only.
+
+The policy itself is derived at startup from the same `config.json` the client
+reads, so a new upstream is a config change rather than a code change. Only
+inventoried, active fields count, and the list is mode-specific: under
+`bffEnabled` ECM and TDR are omitted because those calls are same-origin
+through the proxies, while a legacy deployment keeps all four upstream origins
+until Epic 6. It ships **report-only** — `DUOS_CSP_REPORT_ONLY` defaults to
+true, and each environment is flipped only after a clean collection run.
+
+One catch worth knowing before anyone flips it: the deployed httpd sidecar
+replaces the enforcing header with its own, so until the `terra-helmfile` change
+in story 5-F4 lands, the env var changes nothing a browser acts on. The
+report-only header passes through untouched, which is what makes that quiet.
+
 ### Decisions not tracked as ADRs
 
 - **`openid-client` (v6) for all OAuth/OIDC operations** — library-maintained
   PKCE, token exchange, and ID-token validation (signature, `iss`, `aud`,
   `exp`) rather than hand-rolled crypto.
+
+- **Application-level rate limiting is a backstop, not the primary control**
+  (story 5-G) — `@fastify/rate-limit`'s default store is per-process, so in a
+  multi-pod deployment the effective limit multiplies by the replica count and
+  resets on every restart. Production flood protection belongs at the
+  ingress/edge or a shared store; the in-app limits are a floor that survives
+  an edge misconfiguration. The plugin is registered with `global: false`
+  because the same Fastify instance serves every SPA asset through
+  `@fastify/vite` — only `POST /auth/login` and `GET /auth/callback` opt in.
+  `/auth/csrf-token` is gated on authentication instead (5-B) and
+  `/auth/logout` on the CSRF token, because a low cap on either breaks
+  multiple tabs and the client's retry path. Limits are per client IP and
+  environment-overridable, so tightening them from measured traffic is a
+  deployment change rather than a code release. Three items stay open and are
+  recorded in `server/src/security/rateLimit.ts`: edge or shared-store
+  enforcement (infrastructure); confirming that the httpd sidecar sets or
+  appends `X-Forwarded-For` rather than passing a client-supplied header
+  through; and the unauthenticated, CSRF-exempt `POST /duos-api/support/*`
+  proxy writes, which no limit covers yet. A caller inside the trusted ranges
+  (`TRUST_PROXY` trusts `uniquelocal`) can still choose its own bucket — a
+  property of `TRUST_PROXY`, and another reason the edge is the real control.
 
 ## Target Architecture Sequence Diagrams
 
