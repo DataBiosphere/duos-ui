@@ -11,20 +11,11 @@ import {
 } from 'src/types/library'
 import { Study as StudyModel } from 'src/types/model'
 
-export interface StudyAssetCounts {
-  datasetCount: number
-  modelCount: number
-  workspaceCount: number
-  presentationCount: number
-  publicationCount: number
-  clinicalTrialCount: number
-  intellectualPropertyCount: number
-  fundingResourceCount: number
-  dataTypes: string[]
-}
-
 const assetsUrl = async (studyId: number | string, path: string): Promise<string> =>
   `${await Config.getApiUrl()}/api/dataset/study/${studyId}/assets/${path}`
+
+const getAssets = async <T>(studyId: number | string, path: string): Promise<T[]> =>
+  (await fetchGet<T[]>(await assetsUrl(studyId, path), Config.authOpts())).data
 
 export const Study = {
   /**
@@ -37,58 +28,42 @@ export const Study = {
     return res.data
   },
 
-  getAssetCounts: async (studyId: number | string): Promise<StudyAssetCounts> => {
-    const res = await fetchGet<StudyAssetCounts>(await assetsUrl(studyId, 'counts'), Config.authOpts())
-    return res.data
-  },
-
   /**
-   * Fetches the study directly from the relational store (not the Elasticsearch-backed search
-   * index used elsewhere on the study page), for fields the index doesn't carry, e.g. PI
-   * institution/external profile links.
+   * Fetches a study from the relational store, not the Elasticsearch-backed search index the
+   * study page uses elsewhere, for fields the index doesn't carry — PI institution and external
+   * profile links.
+   *
+   * The only implementation of this endpoint: `DataSet.getStudyById` delegates here, typing the
+   * same payload as the data-submission form's editable `Study` shape rather than this one.
    */
-  getById: async (studyId: number | string): Promise<StudyModel> => {
+  getById: async <T = StudyModel>(studyId: number | string): Promise<T> => {
     const url = `${await Config.getApiUrl()}/api/dataset/study/${studyId}`
-    const res = await fetchGet<StudyModel>(url, Config.authOpts())
+    const res = await fetchGet<T>(url, Config.authOpts())
     return res.data
   },
 
-  getModels: async (studyId: number | string): Promise<ModelAsset[]> => {
-    const res = await fetchGet<ModelAsset[]>(await assetsUrl(studyId, 'models'), Config.authOpts())
-    return res.data
-  },
+  getModels: (studyId: number | string) => getAssets<ModelAsset>(studyId, 'models'),
 
-  getWorkspaces: async (studyId: number | string): Promise<WorkspaceAsset[]> => {
-    const res = await fetchGet<WorkspaceAsset[]>(await assetsUrl(studyId, 'workspaces'), Config.authOpts())
-    return res.data
-  },
+  getWorkspaces: (studyId: number | string) => getAssets<WorkspaceAsset>(studyId, 'workspaces'),
 
-  getPresentations: async (studyId: number | string): Promise<PresentationAsset[]> => {
-    const res = await fetchGet<PresentationAsset[]>(await assetsUrl(studyId, 'presentations'), Config.authOpts())
-    return res.data
-  },
+  getPresentations: (studyId: number | string) => getAssets<PresentationAsset>(studyId, 'presentations'),
 
   getPublications: async (studyId: number | string): Promise<PublicationAsset[]> => {
-    const res = await fetchGet<PublicationAsset[]>(await assetsUrl(studyId, 'publications'), Config.authOpts())
-    return res.data
+    const publications = await getAssets<PublicationAsset>(studyId, 'publications')
+    return publications.map(publication => ({
+      ...publication,
+      studyName: publication.studyName ?? '',
+      authorNames: publication.authorNames
+        ?? publication.authors?.map(author => author.name).filter(Boolean)
+        ?? [],
+    }))
   },
 
-  getClinicalTrials: async (studyId: number | string): Promise<ClinicalTrialAsset[]> => {
-    const res = await fetchGet<ClinicalTrialAsset[]>(await assetsUrl(studyId, 'clinicalTrials'), Config.authOpts())
-    return res.data
-  },
+  getClinicalTrials: (studyId: number | string) => getAssets<ClinicalTrialAsset>(studyId, 'clinicalTrials'),
 
-  getIntellectualProperty: async (studyId: number | string): Promise<IntellectualPropertyAsset[]> => {
-    const res = await fetchGet<IntellectualPropertyAsset[]>(
-      await assetsUrl(studyId, 'intellectualProperty'), Config.authOpts(),
-    )
-    return res.data
-  },
+  getIntellectualProperty: (studyId: number | string) =>
+    getAssets<IntellectualPropertyAsset>(studyId, 'intellectualProperty'),
 
-  getFundingResources: async (studyId: number | string): Promise<FundingResourceAsset[]> => {
-    const res = await fetchGet<FundingResourceAsset[]>(
-      await assetsUrl(studyId, 'fundingResources'), Config.authOpts(),
-    )
-    return res.data
-  },
+  getFundingResources: (studyId: number | string) =>
+    getAssets<FundingResourceAsset>(studyId, 'fundingResources'),
 }

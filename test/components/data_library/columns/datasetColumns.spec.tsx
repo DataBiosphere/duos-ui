@@ -74,14 +74,31 @@ describe('datasetColumns — column order', () => {
 })
 
 describe('datasetColumns — Data Location column', () => {
-  it('renders the data location text', () => {
-    renderCell('dataLocation', 'AWS S3')
-    expect(screen.getByText('AWS S3')).toBeInTheDocument()
+  it('renders the friendly label for a known location, linked to the dataset url', () => {
+    renderCell('dataLocation', 'TDR Location', { url: 'https://example.org/snapshot' })
+    const link = screen.getByRole('link', { name: 'Terra Data Repo' })
+    expect(link).toHaveAttribute('href', 'https://example.org/snapshot')
+    expect(link).toHaveAttribute('target', '_blank')
+  })
+
+  it('falls back to "External to DUOS" for an unrecognized location', () => {
+    renderCell('dataLocation', 'AWS S3', { url: '' })
+    expect(screen.getByText('External to DUOS')).toBeInTheDocument()
+  })
+
+  it('renders the label without a link when the url is not a valid http url', () => {
+    const { container } = renderCell('dataLocation', 'Terra Workspace', { url: 'javascript:alert(1)' })
+    expect(screen.getByText('Terra Workspace')).toBeInTheDocument()
+    expect(container.querySelector('a')).not.toBeInTheDocument()
   })
 
   it('renders nothing when data location is empty', () => {
     const { container } = renderCell('dataLocation', '')
     expect(container.textContent).toBe('')
+  })
+
+  it('is not sortable, because the cell label differs from the stored value', () => {
+    expect(makeDatasetColumns().find(c => c.field === 'dataLocation')?.sortable).toBe(false)
   })
 })
 
@@ -359,10 +376,18 @@ describe('datasetColumns — Request Path column', () => {
     expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
   })
 
-  it('disables the "Request Now" button when datasets are selected elsewhere on the page', () => {
-    const columnsWithSelection = makeDatasetColumns({}, new Set(), undefined, true)
-    renderCell('requestLocation', null, { accessManagement: 'controlled' }, columnsWithSelection)
+  it('disables the "Request Now" button when another dataset is selected on the page', () => {
+    const columnsWithSelection = makeDatasetColumns({}, new Set(), undefined, [999])
+    renderCell('requestLocation', null, { accessManagement: 'controlled', datasetId: 1 }, columnsWithSelection)
     expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
+  })
+
+  it('keeps the "Request Now" button enabled when this row is the whole selection', () => {
+    // Requesting it would submit exactly what 'Apply for Access' would, so there is nothing
+    // to disambiguate — this is the case a study page's default selection produces.
+    const columnsWithSelection = makeDatasetColumns({}, new Set(), undefined, [1])
+    renderCell('requestLocation', null, { accessManagement: 'controlled', datasetId: 1 }, columnsWithSelection)
+    expect(screen.getByRole('button', { name: 'Request Now' })).not.toBeDisabled()
   })
 
   it('shows a link to the requestLocation for external datasets', () => {

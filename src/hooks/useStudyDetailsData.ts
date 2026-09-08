@@ -1,8 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { Study } from 'src/libs/ajax/Study'
+import { StudyComments } from 'src/libs/ajax/StudyComments'
 import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'src/utils/NodashUtil'
@@ -12,12 +13,13 @@ import { DatasetTerm, StudyTerm } from 'src/types/model'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 
 const STUDY_ASSETS_QUERY_KEY = 'study-assets'
+const STUDY_STALE_TIME = 5 * 60 * 1000
 
-export const useStudyAssetCounts = (studyId: string) => useQuery({
-  queryKey: [STUDY_ASSETS_QUERY_KEY, 'counts', studyId],
+const useStudyAsset = <T>(studyId: string, assetType: string, queryFn: () => Promise<T>) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, assetType, studyId],
   enabled: studyId.length > 0,
-  queryFn: () => Study.getAssetCounts(studyId),
-  staleTime: 5 * 60 * 1000,
+  queryFn,
+  staleTime: STUDY_STALE_TIME,
 })
 
 // The page's primary `study` object comes from the Elasticsearch-backed search index, which
@@ -26,84 +28,65 @@ export const usePiDetails = (studyId: string) => useQuery({
   queryKey: [STUDY_ASSETS_QUERY_KEY, 'pi-details', studyId],
   enabled: studyId.length > 0,
   queryFn: () => Study.getById(studyId),
-  staleTime: 5 * 60 * 1000,
+  staleTime: STUDY_STALE_TIME,
 })
 
-export const useStudyModels = (studyId: string) => useQuery({
-  queryKey: [STUDY_ASSETS_QUERY_KEY, 'models', studyId],
-  enabled: studyId.length > 0,
-  queryFn: () => Study.getModels(studyId),
-  staleTime: 5 * 60 * 1000,
-})
+export const useStudyModels = (studyId: string) =>
+  useStudyAsset(studyId, 'models', () => Study.getModels(studyId))
 
-export const useStudyWorkspaces = (studyId: string) => useQuery({
-  queryKey: [STUDY_ASSETS_QUERY_KEY, 'workspaces', studyId],
-  enabled: studyId.length > 0,
-  queryFn: () => Study.getWorkspaces(studyId),
-  staleTime: 5 * 60 * 1000,
-})
+export const useStudyWorkspaces = (studyId: string) =>
+  useStudyAsset(studyId, 'workspaces', () => Study.getWorkspaces(studyId))
 
-export const useStudyPresentations = (studyId: string) => useQuery({
-  queryKey: [STUDY_ASSETS_QUERY_KEY, 'presentations', studyId],
-  enabled: studyId.length > 0,
-  queryFn: () => Study.getPresentations(studyId),
-  staleTime: 5 * 60 * 1000,
-})
+export const useStudyPresentations = (studyId: string) =>
+  useStudyAsset(studyId, 'presentations', () => Study.getPresentations(studyId))
 
-export const useStudyPublications = (studyId: string) => useQuery({
-  queryKey: [STUDY_ASSETS_QUERY_KEY, 'publications', studyId],
-  enabled: studyId.length > 0,
-  queryFn: () => Study.getPublications(studyId),
-  staleTime: 5 * 60 * 1000,
-})
+export const useStudyPublications = (studyId: string) =>
+  useStudyAsset(studyId, 'publications', () => Study.getPublications(studyId))
 
-export const useStudyClinicalTrials = (studyId: string) => useQuery({
-  queryKey: [STUDY_ASSETS_QUERY_KEY, 'clinicalTrials', studyId],
-  enabled: studyId.length > 0,
-  queryFn: () => Study.getClinicalTrials(studyId),
-  staleTime: 5 * 60 * 1000,
-})
+export const useStudyClinicalTrials = (studyId: string) =>
+  useStudyAsset(studyId, 'clinicalTrials', () => Study.getClinicalTrials(studyId))
 
-export const useStudyIntellectualProperty = (studyId: string) => useQuery({
-  queryKey: [STUDY_ASSETS_QUERY_KEY, 'intellectualProperty', studyId],
-  enabled: studyId.length > 0,
-  queryFn: () => Study.getIntellectualProperty(studyId),
-  staleTime: 5 * 60 * 1000,
-})
+export const useStudyIntellectualProperty = (studyId: string) =>
+  useStudyAsset(studyId, 'intellectualProperty', () => Study.getIntellectualProperty(studyId))
 
-export const useStudyFundingResources = (studyId: string) => useQuery({
-  queryKey: [STUDY_ASSETS_QUERY_KEY, 'fundingResources', studyId],
+export const useStudyFundingResources = (studyId: string) =>
+  useStudyAsset(studyId, 'fundingResources', () => Study.getFundingResources(studyId))
+
+export const studyCommentsQueryKey = (studyId: string) => [STUDY_ASSETS_QUERY_KEY, 'comments', studyId]
+
+export const useStudyComments = (studyId: string) => useQuery({
+  queryKey: studyCommentsQueryKey(studyId),
   enabled: studyId.length > 0,
-  queryFn: () => Study.getFundingResources(studyId),
-  staleTime: 5 * 60 * 1000,
+  queryFn: () => StudyComments.listComments(studyId),
+  staleTime: STUDY_STALE_TIME,
 })
 
 export const useStudyDarHistory = (studyId: string) => useQuery({
   queryKey: ['study-dar-history', studyId],
   enabled: studyId.length > 0,
   queryFn: () => DatasetMetrics.getStudyStats(studyId),
-  staleTime: 5 * 60 * 1000,
+  staleTime: STUDY_STALE_TIME,
 })
 
 export const useStudyResearchOutputs = (studyId: string) => useQuery({
   queryKey: ['study-research-outputs', studyId],
   enabled: studyId.length > 0,
   queryFn: () => DatasetMetrics.getResearchOutputs(studyId),
-  staleTime: 5 * 60 * 1000,
+  staleTime: STUDY_STALE_TIME,
 })
 
 export const useSimilarStudies = (studyId: string) => useQuery({
   queryKey: ['study-recommendations-similar', studyId],
   enabled: studyId.length > 0,
   queryFn: () => StudyRecommendations.getSimilar(studyId),
-  staleTime: 5 * 60 * 1000,
+  staleTime: STUDY_STALE_TIME,
 })
 
 export const useFrequentlyRequestedWithStudies = (studyId: string) => useQuery({
   queryKey: ['study-recommendations-frequently-requested-with', studyId],
   enabled: studyId.length > 0,
   queryFn: () => StudyRecommendations.getFrequentlyRequestedWith(studyId),
-  staleTime: 5 * 60 * 1000,
+  staleTime: STUDY_STALE_TIME,
 })
 
 export const STUDY_DATASETS_QUERY_KEY = 'study-details-datasets'
@@ -185,7 +168,33 @@ export const useStudyDatasets = (
       participantCount: participantAggregation?.value,
     }
   },
-  staleTime: 5 * 60 * 1000,
+  // Hold the previous page's rows while the next one loads, so paging and sorting don't
+  // collapse the grid to its empty state and back.
+  placeholderData: keepPreviousData,
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const STUDY_SELECTABLE_IDS_QUERY_KEY = 'study-details-selectable-ids'
+
+/**
+ * Every selectable dataset id in the study, not just the ones on the visible grid page, so the
+ * default selection can't silently apply for a subset. `enabled` is the caller's job: the grid
+ * page already covers the whole study whenever `total` fits in one page, which is the common
+ * case, so this only costs a request for studies larger than the page size.
+ */
+export const useStudySelectableDatasetIds = (studyId: string, total: number, enabled: boolean) => useQuery({
+  queryKey: [STUDY_SELECTABLE_IDS_QUERY_KEY, studyId, total],
+  enabled: enabled && studyId.length > 0 && total > 0,
+  queryFn: async (): Promise<number[]> => {
+    const pagination = { page: 0, pageSize: total }
+    // Same query the grid runs, so the two can't disagree about which datasets belong here.
+    const response = await DataSet.searchDatasetIndexV2(buildStudyDatasetsQuery(studyId, pagination))
+    const page = datasetAsset.transformResponse(response, pagination)
+    return (page.items as DatasetTerm[])
+      .filter(dataset => datasetAsset.isRowSelectable(dataset))
+      .map(dataset => dataset.datasetId)
+  },
+  staleTime: STUDY_STALE_TIME,
 })
 
 export const useStudyExportableDatasets = (
@@ -212,6 +221,6 @@ export const useStudyExportableDatasets = (
         return EMPTY_EXPORTABLE_DATASETS
       }
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: STUDY_STALE_TIME,
   })
 }

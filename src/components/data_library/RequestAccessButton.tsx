@@ -2,7 +2,7 @@ import React from 'react'
 import { Button, Tooltip } from '@mui/material'
 import { useNavigate } from 'react-router'
 import { applyForAccess } from 'src/utils/accessUtils'
-import { Storage } from 'src/libs/storage'
+import { hasActiveResearcherStatus } from 'src/hooks/useApplyForAccessEligibility'
 
 interface RequestAccessButtonProps {
   datasetId: number
@@ -13,13 +13,13 @@ interface RequestAccessButtonProps {
 
 export const RequestAccessButton: React.FC<RequestAccessButtonProps> = ({ datasetId, disabledForSelection = false }) => {
   const navigate = useNavigate()
-  const hasActiveResearcherStatus = Storage.getCurrentUser()?.libraryCard != null
+  const isActiveResearcher = hasActiveResearcherStatus()
 
   let tooltip = ''
   if (disabledForSelection) {
     tooltip = 'Use \'Apply for Access\' below to request the selected datasets'
   }
-  else if (!hasActiveResearcherStatus) {
+  else if (!isActiveResearcher) {
     tooltip = 'Active Researcher Status is required to apply for data access'
   }
 
@@ -31,7 +31,7 @@ export const RequestAccessButton: React.FC<RequestAccessButtonProps> = ({ datase
           size="small"
           onClick={() => applyForAccess([datasetId], navigate)}
           sx={{ fontWeight: 600, fontSize: '12px' }}
-          disabled={disabledForSelection || !hasActiveResearcherStatus}
+          disabled={disabledForSelection || !isActiveResearcher}
         >
           Request Now
         </Button>

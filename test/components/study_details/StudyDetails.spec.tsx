@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
@@ -58,17 +58,6 @@ vi.mock('src/libs/ajax/StudyRecommendations', () => ({
 vi.mock('src/libs/ajax/Study', () => ({
   Study: {
     getStudyNames: vi.fn().mockResolvedValue([]),
-    getAssetCounts: vi.fn().mockResolvedValue({
-      datasetCount: 0,
-      modelCount: 0,
-      workspaceCount: 0,
-      presentationCount: 0,
-      publicationCount: 0,
-      clinicalTrialCount: 0,
-      intellectualPropertyCount: 0,
-      fundingResourceCount: 0,
-      dataTypes: [],
-    }),
     getModels: vi.fn().mockResolvedValue([]),
     getWorkspaces: vi.fn().mockResolvedValue([]),
     getPresentations: vi.fn().mockResolvedValue([]),
@@ -85,6 +74,8 @@ vi.mock('src/utils/accessUtils', () => ({
 }))
 
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { Study } from 'src/libs/ajax/Study'
+import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 
 const datasets = [
   {
@@ -368,19 +359,17 @@ describe('Study details test', () => {
     mountComponent()
     await screen.findByText(datasets[0].datasetName)
 
-    const initialQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[0][0] as ElasticsearchQuery
-    expect(initialQuery.from).toBe(0)
-    expect(initialQuery.size).toBe(25)
+    const queries = () => vi.mocked(DataSet.searchDatasetIndexV2).mock.calls.map(call => call[0] as ElasticsearchQuery)
+    const initialQuery = queries().find(query => query.from === 0 && query.size === 25)!
+    expect(initialQuery).toBeDefined()
     expect(initialQuery.size).not.toBe(10000)
     expect(initialQuery.query?.bool.must).toContainEqual({ match: { 'study.studyId': '1' } })
     expect(initialQuery.aggs).toHaveProperty('study_details')
     expect(initialQuery.aggs).toHaveProperty('total_participants')
 
     await user.click(screen.getByRole('button', { name: 'Go to next page' }))
-    await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalledTimes(2))
-    const nextPageQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[1][0] as ElasticsearchQuery
-    expect(nextPageQuery.from).toBe(25)
-    expect(nextPageQuery.size).toBe(25)
+    await waitFor(() => expect(queries().some(query => query.from === 25)).toBe(true))
+    expect(queries().find(query => query.from === 25)!.size).toBe(25)
   })
 
   it('uses the dataset asset server-side sort mapping with one active sort', async () => {
@@ -388,17 +377,17 @@ describe('Study details test', () => {
     mountComponent()
     await screen.findByText(datasets[0].datasetName)
 
+    const sorts = () => vi.mocked(DataSet.searchDatasetIndexV2).mock.calls
+      .map(call => (call[0] as ElasticsearchQuery).sort)
+      .filter(Boolean)
+
     await user.click(screen.getByRole('columnheader', { name: /Dataset Name/ }))
-    await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalledTimes(2))
-    const datasetNameSortQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[1][0] as ElasticsearchQuery
-    expect(datasetNameSortQuery.sort).toEqual([{ 'datasetName.keyword': { order: 'asc' } }])
+    await waitFor(() => expect(sorts()).toContainEqual([{ 'datasetName.keyword': { order: 'asc' } }]))
 
     await user.keyboard('{Shift>}')
     await user.click(screen.getByRole('columnheader', { name: /Identifier/ }))
     await user.keyboard('{/Shift}')
-    await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalledTimes(3))
-    const identifierSortQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[2][0] as ElasticsearchQuery
-    expect(identifierSortQuery.sort).toEqual([{ 'datasetIdentifier.keyword': { order: 'asc' } }])
+    await waitFor(() => expect(sorts()).toContainEqual([{ 'datasetIdentifier.keyword': { order: 'asc' } }]))
     expect(screen.getByRole('columnheader', { name: /Dataset Name/ })).toHaveAttribute('aria-sort', 'none')
     expect(screen.getByRole('columnheader', { name: /Identifier/ })).toHaveAttribute('aria-sort', 'ascending')
   })
@@ -425,7 +414,36 @@ describe('Study details test', () => {
     expect(screen.getByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
   })
 
-  it('selects controlled datasets by default, displays LibraryFooter, and applies for access', async () => {
+  it('does not re-seed the default selection after the user clears it', async () => {
+    const user = userEvent.setup()
+    const nextPageDatasets = [{
+      ...datasets[0],
+      datasetId: 223456,
+      datasetIdentifier: 'DUOS-223456',
+      datasetName: 'Next Page Dataset',
+    }]
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) =>
+      (query.from === 25
+        ? makeSearchResponse(nextPageDatasets, 26, 6)
+        : makeSearchResponse(datasets, 26, 6)) as never)
+
+    const { container } = mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
+
+    const controlledCheckbox = container
+      .querySelector('.MuiDataGrid-row[data-id="123456"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    await user.click(controlledCheckbox)
+    await waitFor(() => expect(screen.queryByText(/dataset selected from/i)).not.toBeInTheDocument())
+
+    // The next page re-runs the search, so the default-selection seeding gets another chance to
+    // run. It must stay latched rather than reinstating what the user just cleared.
+    await user.click(screen.getByRole('button', { name: 'Go to next page' }))
+    expect(await screen.findByText('Next Page Dataset')).toBeInTheDocument()
+    expect(screen.queryByText(/dataset selected from/i)).not.toBeInTheDocument()
+  })
+
+  it('selects controlled datasets by default and applies for access from the sidebar', async () => {
     const user = userEvent.setup()
     mountComponent()
     await screen.findByText(datasets[0].datasetName)
@@ -478,5 +496,219 @@ describe('Study details test', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Unable to load datasets: Unknown error')
     expect(screen.getByRole('alert')).not.toHaveTextContent('Unable to load datasets: Unable to load datasets')
+  })
+
+  it('keeps the DAR, publication, and recommendation sections visible when empty', async () => {
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+
+    expect(screen.getByRole('heading', { name: 'Data Access Requests for this Study' })).toBeInTheDocument()
+    expect(screen.getByText('No granted data access requests yet.')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Primary Study Publications' })).toBeInTheDocument()
+    expect(screen.getByText('No primary study publications have been added yet.')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Studies often Requested with this Study' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Recommended Studies based on Data Type' })).toBeInTheDocument()
+    expect(await screen.findAllByText('No study recommendations yet.')).toHaveLength(2)
+  })
+
+  it('shows primary study publications as cards, linking only plain http urls', async () => {
+    vi.mocked(Study.getPublications).mockResolvedValueOnce([
+      {
+        publicationId: 'pub-1', title: 'Genomic variation at scale', authorNames: ['Ada Lovelace', 'Alan Turing'],
+        journal: 'Nature Genetics', publishedDate: '2025-04-01', doi: '10.1000/xyz123', url: 'https://example.org/pub-1',
+      },
+      {
+        publicationId: 'pub-2', title: 'Follow-up analysis', authorNames: [],
+        journal: 'Cell', publishedDate: '2026-01-15', url: 'javascript:alert(document.cookie)',
+      },
+    ] as never)
+    mountComponent()
+
+    expect(await screen.findByText('Genomic variation at scale')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Genomic variation at scale' }))
+      .toHaveAttribute('href', 'https://example.org/pub-1')
+    expect(screen.getByText('Ada Lovelace, Alan Turing')).toBeInTheDocument()
+    expect(screen.getByText('Nature Genetics · 2025-04-01')).toBeInTheDocument()
+    expect(screen.getByText('DOI: 10.1000/xyz123')).toBeInTheDocument()
+    // A submitter-supplied url that is not http(s) renders as plain text
+    expect(screen.getByText('Follow-up analysis')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Follow-up analysis' })).not.toBeInTheDocument()
+    expect(screen.queryByText('No primary study publications have been added yet.')).not.toBeInTheDocument()
+  })
+
+  it('groups self-reported secondary research outputs by type', async () => {
+    vi.mocked(DatasetMetrics.getResearchOutputs).mockResolvedValueOnce({
+      presentations: [{ title: 'ASHG 2025 talk', url: 'https://example.org/talk' }],
+      publications: [{ title: 'Downstream findings' }, { title: 'Second downstream paper' }],
+      intellectualProperties: [{ title: 'Assay patent' }],
+    } as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    // Each type is its own group, labelled with its own count
+    expect(await screen.findByText('Presentations (1)')).toBeInTheDocument()
+    expect(screen.getByText('Publications (2)')).toBeInTheDocument()
+    expect(screen.getByText('Intellectual Property (1)')).toBeInTheDocument()
+
+    // The groups start collapsed, so their entries are only reachable once expanded
+    await user.click(screen.getByText('Presentations (1)'))
+    expect(await screen.findByRole('link', { name: 'ASHG 2025 talk' }))
+      .toHaveAttribute('href', 'https://example.org/talk')
+    await user.click(screen.getByText('Publications (2)'))
+    expect(await screen.findByText('Downstream findings')).toBeInTheDocument()
+    expect(screen.getByText('Second downstream paper')).toBeInTheDocument()
+    await user.click(screen.getByText('Intellectual Property (1)'))
+    expect(await screen.findByText('Assay patent')).toBeInTheDocument()
+  })
+
+  it('shows the PI profile links even when the search index has no PI name', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      piOrcid: '0000-0001-2345-6789',
+    } as never)
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
+      makeSearchResponse(datasets.map(dataset => ({ ...dataset, study: { ...dataset.study, piName: '' } }))) as never,
+    )
+    mountComponent()
+
+    expect(await screen.findByRole('link', { name: 'ORCID profile' })).toBeInTheDocument()
+    expect(screen.getByText('PI Name')).toBeInTheDocument()
+  })
+
+  it('omits the PI row entirely when there is neither a name nor a profile link', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
+      makeSearchResponse(datasets.map(dataset => ({ ...dataset, study: { ...dataset.study, piName: '' } }))) as never,
+    )
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+
+    expect(screen.queryByText('PI Name')).not.toBeInTheDocument()
+  })
+
+  it('does not link a PI website that is not a plain http url', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      piInstitution: { id: 7, name: 'Broad Institute' },
+      piWebsiteUrl: 'javascript:alert(document.cookie)',
+    } as never)
+    mountComponent()
+
+    await screen.findByText('Broad Institute')
+    expect(screen.queryByRole('link', { name: 'PI website' })).not.toBeInTheDocument()
+  })
+
+  it('shows PI institution and external profile links', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      piInstitution: { id: 7, name: 'Broad Institute' },
+      piOrcid: '0000-0001-2345-6789',
+      piLinkedinUrl: 'https://linkedin.com/in/example',
+      piWebsiteUrl: 'https://example.org',
+    } as never)
+    mountComponent()
+
+    expect(await screen.findByText('Broad Institute')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'ORCID profile' })).toHaveAttribute('href', 'https://orcid.org/0000-0001-2345-6789')
+    expect(screen.getByRole('link', { name: 'LinkedIn profile' })).toHaveAttribute('href', 'https://linkedin.com/in/example')
+    expect(screen.getByRole('link', { name: 'PI website' })).toHaveAttribute('href', 'https://example.org')
+  })
+
+  it('shows granted DAR details and expands the research use statement', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([{
+      projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+      nonTechRus: 'Study cancer outcomes.', expired: false, piName: 'Dr Researcher',
+      institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+    }])
+    const user = userEvent.setup()
+    mountComponent()
+
+    expect(await screen.findByText('Cancer genomics')).toBeInTheDocument()
+    expect(screen.getByText('PI: Dr Researcher')).toBeInTheDocument()
+    expect(screen.getByText('Institution: Research University')).toBeInTheDocument()
+    expect(screen.getByText('Current')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Show research use statement' }))
+    expect(screen.getByText('Study cancer outcomes.')).toBeInTheDocument()
+  })
+
+  it('shows the public identity disclosure to active researchers before posting', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Your name and institution will be shared publicly with this comment.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Post comment' })).toBeDisabled()
+  })
+
+  it('requires the Researcher role in addition to Active Researcher Status', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: false, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Active Researcher Status is required to comment or rate this study.'))
+      .toBeInTheDocument()
+    expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
+  })
+
+  it('requires an active library card in addition to the Researcher role', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42, isResearcher: true } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Active Researcher Status is required to comment or rate this study.'))
+      .toBeInTheDocument()
+    expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
+  })
+
+  it('does not let the sidebar start a request without Active Researcher Status', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42 } as DuosUser)
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    await screen.findByText(/1 dataset selected from 1 study/i)
+
+    const applyButton = screen.getByRole('button', { name: 'Apply for Access' })
+    expect(applyButton).toBeDisabled()
+    // fireEvent, not userEvent: a disabled button has pointer-events none, which userEvent
+    // refuses to click at all, so it could never observe the handler not running.
+    fireEvent.click(applyButton)
+    expect(applyForAccess).not.toHaveBeenCalled()
+
+    fireEvent.mouseOver(applyButton.parentElement as HTMLElement)
+    expect(await screen.findByRole('tooltip'))
+      .toHaveTextContent('Active Researcher Status is required to apply for data access')
+  })
+
+  it('selects every controlled dataset in the study, not just the visible page', async () => {
+    const offPageDatasets = [4, 5].map(index => ({
+      ...datasets[0],
+      datasetId: 200000 + index,
+      datasetIdentifier: `DUOS-20000${index}`,
+      datasetName: `Off Page Dataset ${index}`,
+    }))
+    // The grid page holds three of the study's five datasets; the study-wide id lookup asks
+    // for all five, so the default selection covers the three controlled ones.
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) =>
+      (query.size === 5
+        ? makeSearchResponse([...datasets, ...offPageDatasets], 5)
+        : makeSearchResponse(datasets, 5)) as never)
+
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    expect(await screen.findByText(/3 datasets selected from 1 study/i)).toBeInTheDocument()
+  })
+
+  it('reports a failed asset fetch instead of an empty section', async () => {
+    vi.mocked(Study.getModels).mockRejectedValueOnce(new Error('models unavailable'))
+    mountComponent()
+
+    expect(await screen.findByText('Unable to load AI models.')).toBeInTheDocument()
+    expect(screen.queryByText('No AI models have been added yet.')).not.toBeInTheDocument()
+  })
+
+  it('keeps the per-dataset request path available for the default selection', async () => {
+    // Auto-selecting the study's single controlled dataset must not disable the row's own
+    // request button: clicking it submits exactly what 'Apply for Access' would.
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    await screen.findByText(/1 dataset selected from 1 study/i)
+
+    expect(screen.getByRole('button', { name: 'Request Now' })).not.toBeDisabled()
   })
 })

@@ -117,7 +117,7 @@ describe('LibraryDataGrid', () => {
   })
 
   it('renders dataset data correctly', () => {
-    mountGrid(
+    const { container } = mountGrid(
       <LibraryDataGrid assetType={AssetType.DATASETS} data={datasets} total={3} {...baseProps} />,
     )
     expect(screen.getByText('Dataset 101')).toBeInTheDocument()
@@ -126,9 +126,14 @@ describe('LibraryDataGrid', () => {
     expect(screen.getByText('40')).toBeInTheDocument()
     expect(screen.getByText('Dataset 103')).toBeInTheDocument()
     expect(screen.getByText('20')).toBeInTheDocument()
-    expect(screen.getByText('via DUOS').closest('.MuiChip-root')).toHaveClass('MuiChip-colorPrimary')
-    expect(screen.getByText('Open Access').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSuccess')
-    expect(screen.getByText('External to DUOS').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSecondary')
+    // Scoped to the Access cell: 'External to DUOS' is also how the Data Location column
+    // labels a location outside Terra, so the bare text is not unique on the row.
+    const accessCell = (datasetId: number) => container.querySelector(
+      `.MuiDataGrid-row[data-id="${datasetId}"] [data-field="accessManagement"]`,
+    ) as HTMLElement
+    expect(within(accessCell(101)).getByText('via DUOS').closest('.MuiChip-root')).toHaveClass('MuiChip-colorPrimary')
+    expect(within(accessCell(102)).getByText('Open Access').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSuccess')
+    expect(within(accessCell(103)).getByText('External to DUOS').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSecondary')
   })
 
   it('renders loading state', () => {
@@ -156,7 +161,7 @@ describe('LibraryDataGrid', () => {
       mountGrid(
         <LibraryDataGrid assetType={AssetType.DATASETS} data={[exportableDataset]} total={1} {...baseProps} exportableDatasets={exportableDatasets} />,
       )
-      expect(screen.getByText('Export')).toBeInTheDocument()
+      expect(screen.getByRole('columnheader', { name: 'Export' })).toBeInTheDocument()
     })
 
     it('renders an Export link for a dataset with matching snapshots', () => {

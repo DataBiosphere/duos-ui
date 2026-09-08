@@ -48,17 +48,15 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
 }) => {
   const asset = assetRegistry[assetType]
 
-  const hasSelection = selectedDatasetIds.length > 0
-
   const columns = useMemo(() => {
-    const base = asset.makeColumns({ exportableDatasets, radarEnabledDatasetIds, soApprovalModelByDatasetId, hasSelection })
+    const base = asset.makeColumns({ exportableDatasets, radarEnabledDatasetIds, soApprovalModelByDatasetId, selectedDatasetIds })
     if (!extraColumns || extraColumns.length === 0) return base
     const extraFields = new Set(extraColumns.map(c => c.field))
     return [
       ...base.filter(col => !extraFields.has(col.field)),
       ...extraColumns,
     ]
-  }, [asset, exportableDatasets, radarEnabledDatasetIds, soApprovalModelByDatasetId, hasSelection, extraColumns])
+  }, [asset, exportableDatasets, radarEnabledDatasetIds, soApprovalModelByDatasetId, selectedDatasetIds, extraColumns])
 
   const getRowId = (row: LibraryRow) => asset.getRowId(row)
 

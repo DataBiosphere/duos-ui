@@ -410,7 +410,7 @@ export interface Study {
   description: string
   dataTypes: string[]
   piName: string
-  piInstitution?: { id: number; name: string }
+  piInstitution?: { id: number, name: string }
   piOrcid?: string
   piLinkedinUrl?: string
   piWebsiteUrl?: string

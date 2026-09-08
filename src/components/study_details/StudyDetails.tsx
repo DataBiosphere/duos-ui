@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Link, useParams, useNavigate } from 'react-router'
 import { Typography, useMediaQuery, useTheme } from '@mui/material'
@@ -30,6 +30,8 @@ import {
   useStudyIntellectualProperty,
   useStudyModels,
   useStudyPresentations,
+  useStudyPublications,
+  useStudySelectableDatasetIds,
   useStudyWorkspaces,
 } from 'src/hooks/useStudyDetailsData'
 import { TocProvider, TableOfContents } from 'src/components/study_details/TableOfContents'
@@ -40,6 +42,7 @@ import StudyAssetCountBadges from 'src/components/study_details/StudyAssetCountB
 import StudyTitleBadges from 'src/components/study_details/StudyTitleBadges'
 import StudyInfoTable from 'src/components/study_details/StudyInfoTable'
 import PiExternalProfileIcons from 'src/components/study_details/PiExternalProfileIcons'
+import { getPiProfileLinks } from 'src/components/study_details/piProfileLinks'
 import StudyRecommendationCarousel from 'src/components/study_details/StudyRecommendationCarousel'
 import StudyDarHistory from 'src/components/study_details/StudyDarHistory'
 import StudySecondaryResearchOutputs from 'src/components/study_details/StudySecondaryResearchOutputs'
@@ -89,6 +92,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const models = useStudyModels(studyId)
   const workspaces = useStudyWorkspaces(studyId)
   const presentations = useStudyPresentations(studyId)
+  const publications = useStudyPublications(studyId)
   const clinicalTrials = useStudyClinicalTrials(studyId)
   const intellectualProperty = useStudyIntellectualProperty(studyId)
   const fundingResources = useStudyFundingResources(studyId)
@@ -98,21 +102,44 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
     ? [study.studyId]
     : []
   const errorMessage = getErrorMessage(error)
-  const hasSelectableDatasets = datasets.some(dataset => datasetAsset.isRowSelectable(dataset))
+  const piProfileLinks = getPiProfileLinks({
+    orcid: piDetails?.piOrcid,
+    linkedinUrl: piDetails?.piLinkedinUrl,
+    websiteUrl: piDetails?.piWebsiteUrl,
+  })
   const theme = useTheme()
   const isNarrowViewport = useMediaQuery(theme.breakpoints.down('md'))
   // Header row + one row per dataset (up to a full page) + pagination footer, so a study with
-  // few datasets doesn't reserve a full page's worth of empty grid space.
-  const datasetGridHeight = 56 + Math.max(datasets.length, 1) * 52 + 56
+  // few datasets doesn't reserve a full page's worth of empty grid space. With no rows the grid
+  // renders its own 50vh spinner/empty state instead, so the wrapper has to leave room for it.
+  const datasetGridHeight = datasets.length === 0 ? '50vh' : 56 + datasets.length * 52 + 56
 
-  const hasInitializedSelection = useRef(false)
-  useEffect(() => {
-    if (hasInitializedSelection.current || loading || datasets.length === 0) return
-    hasInitializedSelection.current = true
-    setSelectedDatasets(
-      datasets.filter(dataset => datasetAsset.isRowSelectable(dataset)).map(dataset => dataset.datasetId),
-    )
-  }, [loading, datasets])
+  // The default selection has to cover the whole study, not just the visible page, or
+  // 'Apply for Access' would silently submit a subset of a study larger than one page.
+  const pageSelectableIds = datasets
+    .filter(dataset => datasetAsset.isRowSelectable(dataset))
+    .map(dataset => dataset.datasetId)
+  const needsStudyWideIds = data.total > datasets.length
+  const studyWideIds = useStudySelectableDatasetIds(studyId, data.total, needsStudyWideIds)
+  const selectableDatasetIds = needsStudyWideIds
+    // Better a page-scoped default than none at all if the study-wide lookup fails
+    ? studyWideIds.data ?? (studyWideIds.isError ? pageSelectableIds : undefined)
+    : pageSelectableIds
+
+  // Seed the default selection once, on the first render where the ids are known. Adjusting
+  // state during render rather than from an effect: React re-runs the component before it
+  // commits, so the grid never paints an empty selection it immediately replaces. The latch
+  // keeps a later page, sort, or refetch from overwriting what the user has since selected.
+  const [hasInitializedSelection, setHasInitializedSelection] = useState(false)
+  if (
+    !hasInitializedSelection
+    && !loading
+    && datasets.length > 0
+    && selectableDatasetIds !== undefined
+  ) {
+    setHasInitializedSelection(true)
+    setSelectedDatasets(selectableDatasetIds)
+  }
 
   return (
     <TocProvider>
@@ -140,8 +167,15 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             <Typography variant="h5" sx={{ fontWeight: Theme.font.weight.semibold, pt: 1 }}>
               {study?.studyName}
             </Typography>
-            <StudyTitleBadges datasets={datasets} />
-            <StudyAssetCountBadges studyId={studyId} />
+            <StudyTitleBadges dataTypes={study?.dataTypes} />
+            <StudyAssetCountBadges
+              counts={[
+                ['Datasets', data.total],
+                ['Models', models.data?.length ?? 0],
+                ['Workspaces', workspaces.data?.length ?? 0],
+                ['Publications', publications.data?.length ?? 0],
+              ]}
+            />
             <Typography variant="body1" sx={{ pt: 2.5 }}>
               {study?.description}
             </Typography>
@@ -152,16 +186,17 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
                 { label: 'Species', value: study?.species },
                 {
                   label: 'PI Name',
-                  value: study?.piName && (
-                    <>
-                      {study.piName}
-                      <PiExternalProfileIcons
-                        orcid={piDetails?.piOrcid}
-                        linkedinUrl={piDetails?.piLinkedinUrl}
-                        websiteUrl={piDetails?.piWebsiteUrl}
-                      />
-                    </>
-                  ),
+                  // The profile links live in this row, and StudyInfoTable drops rows with a
+                  // falsy value, so the row's presence can't hinge on piName alone — the search
+                  // index sometimes has none for a study whose PI profile links are populated.
+                  value: (study?.piName || piProfileLinks.length > 0)
+                    ? (
+                        <>
+                          {study?.piName}
+                          <PiExternalProfileIcons links={piProfileLinks} />
+                        </>
+                      )
+                    : undefined,
                 },
                 { label: 'PI Institution', value: piDetails?.piInstitution?.name },
                 { label: 'Data Custodian', value: study?.dataCustodianEmail?.join(', ') },
@@ -191,7 +226,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             id="models"
             heading="AI Models"
             data={models.data}
-            isFetching={models.isFetching}
+            isPending={models.isPending}
+            error={models.error}
+            emptyMessage="No AI models have been added yet."
+            errorMessage="Unable to load AI models."
             columns={makeModelColumns()}
             getRowId={row => row.modelId}
           />
@@ -199,7 +237,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             id="workspaces"
             heading="Workspaces"
             data={workspaces.data}
-            isFetching={workspaces.isFetching}
+            isPending={workspaces.isPending}
+            error={workspaces.error}
+            emptyMessage="No workspaces have been added yet."
+            errorMessage="Unable to load workspaces."
             columns={makeWorkspaceColumns()}
             getRowId={row => row.workspaceId}
           />
@@ -207,7 +248,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             id="presentations"
             heading="Presentations"
             data={presentations.data}
-            isFetching={presentations.isFetching}
+            isPending={presentations.isPending}
+            error={presentations.error}
+            emptyMessage="No presentations have been added yet."
+            errorMessage="Unable to load presentations."
             columns={makePresentationColumns()}
             getRowId={row => row.presentationId}
           />
@@ -216,7 +260,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             id="clinical-trials"
             heading="Clinical Trials"
             data={clinicalTrials.data}
-            isFetching={clinicalTrials.isFetching}
+            isPending={clinicalTrials.isPending}
+            error={clinicalTrials.error}
+            emptyMessage="No clinical trials have been added yet."
+            errorMessage="Unable to load clinical trials."
             columns={makeClinicalTrialColumns()}
             getRowId={row => row.clinicalTrialId}
           />
@@ -224,7 +271,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             id="intellectual-property"
             heading="Intellectual Property"
             data={intellectualProperty.data}
-            isFetching={intellectualProperty.isFetching}
+            isPending={intellectualProperty.isPending}
+            error={intellectualProperty.error}
+            emptyMessage="No intellectual property has been added yet."
+            errorMessage="Unable to load intellectual property."
             columns={makeIntellectualPropertyColumns()}
             getRowId={row => row.ipId}
           />
@@ -232,7 +282,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             id="funding-resources"
             heading="Funding Resources"
             data={fundingResources.data}
-            isFetching={fundingResources.isFetching}
+            isPending={fundingResources.isPending}
+            error={fundingResources.error}
+            emptyMessage="No funding resources have been added yet."
+            errorMessage="Unable to load funding resources."
             columns={makeFundingResourceColumns()}
             getRowId={row => row.fundingId}
           />
@@ -241,11 +294,15 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             id="frequently-requested-with"
             heading="Studies often Requested with this Study"
             recommendations={frequentlyRequestedWith.data}
+            isPending={frequentlyRequestedWith.isPending}
+            error={frequentlyRequestedWith.error}
           />
           <StudyRecommendationCarousel
             id="similar-studies"
             heading="Recommended Studies based on Data Type"
             recommendations={similarStudies.data}
+            isPending={similarStudies.isPending}
+            error={similarStudies.error}
           />
           <StudyPageSection id="comments" heading="Comments & Ratings">
             <StudyCommentsSection studyId={studyId} />
@@ -256,7 +313,6 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             selectedDatasetIds={selectedDatasets}
             selectedStudyIds={selectedStudyIds}
             onApplyForAccess={() => applyForAccess(selectedDatasets, navigate)}
-            hasSelectableDatasets={hasSelectableDatasets}
           >
             <TableOfContents />
           </StudySidebar>

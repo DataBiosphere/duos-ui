@@ -142,7 +142,7 @@ export const datasetAsset: AssetDefinition = {
       props?.exportableDatasets,
       props?.radarEnabledDatasetIds,
       props?.soApprovalModelByDatasetId,
-      props?.hasSelection,
+      props?.selectedDatasetIds,
     ) as GridColDef[]
   },
 }

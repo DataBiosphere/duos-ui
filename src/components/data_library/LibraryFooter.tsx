@@ -8,8 +8,8 @@ export const LibraryFooter: React.FC<LibraryFooterProps> = ({
   selectedStudyIds,
   onApplyForAccess,
 }) => {
-  const { hasSelection, hasActiveResearcherStatus, datasetText, studyText } =
-    useApplyForAccessEligibility(selectedDatasetIds, selectedStudyIds)
+  const { hasSelection, hasActiveResearcherStatus, datasetText, studyText }
+    = useApplyForAccessEligibility(selectedDatasetIds, selectedStudyIds)
 
   return (
     <Slide direction="up" in={hasSelection} mountOnEnter unmountOnExit>
