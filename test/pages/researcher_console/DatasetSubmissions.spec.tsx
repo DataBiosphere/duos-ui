@@ -7,6 +7,7 @@ import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions'
 import { AssetType } from 'src/types/library'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Storage } from 'src/libs/storage'
+import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import { Notifications } from 'src/libs/utils'
 import { DuosUser } from 'src/types/model'
 import { GridColDef } from '@mui/x-data-grid'
@@ -130,6 +131,12 @@ describe('DatasetSubmissions', () => {
     expect(screen.getByRole('button', { name: /ADD DATASET/i })).toBeInTheDocument()
   })
 
+  // This page's Submitter/Status/Delete columns live on the Datasets tab, so it must land there.
+  it('does not ask for a default tab, leaving the hook on Datasets', () => {
+    renderComponent()
+    expect(vi.mocked(useLibraryPageState)).toHaveBeenCalledWith(expect.anything())
+  })
+
   it('does not render the Signing Official approval reminder — that is Data Library only', () => {
     renderComponent()
     expect(screen.queryByText(/require Signing Officials to approve/)).not.toBeInTheDocument()
@@ -160,6 +167,44 @@ describe('DatasetSubmissions', () => {
     renderComponent()
     fireEvent.click(screen.getByRole('button', { name: /ADD DATASET/i }))
     expect(navigateMock).toHaveBeenCalledWith('/data_submission_form')
+  })
+
+  // ── UPLOAD TEMPLATE button ─────────────────────────────────────────────────
+
+  it('renders the UPLOAD TEMPLATE button', () => {
+    renderComponent()
+    expect(screen.getByRole('button', { name: /UPLOAD TEMPLATE/i })).toBeInTheDocument()
+  })
+
+  // Deliberately wider than ADD DATASET's data-submitter-only rule: it matches the route's own
+  // RoleBAC guard, since chairpersons and admins register studies too.
+  it.each([
+    ['data submitter', { isDataSubmitter: true }],
+    ['chairperson', { isChairPerson: true }],
+    ['admin', { isAdmin: true }],
+  ])('UPLOAD TEMPLATE button is enabled for a %s', (_role, roleFlags) => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ ...baseUser, ...roleFlags })
+    renderComponent()
+    expect(screen.getByRole('button', { name: /UPLOAD TEMPLATE/i })).not.toBeDisabled()
+  })
+
+  it('UPLOAD TEMPLATE button is disabled for a user with none of those roles', () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ ...baseUser, isResearcher: true })
+    renderComponent()
+    expect(screen.getByRole('button', { name: /UPLOAD TEMPLATE/i })).toBeDisabled()
+  })
+
+  it('clicking UPLOAD TEMPLATE navigates to /data_submission_template', () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ ...baseUser, isDataSubmitter: true })
+    renderComponent()
+    fireEvent.click(screen.getByRole('button', { name: /UPLOAD TEMPLATE/i }))
+    expect(navigateMock).toHaveBeenCalledWith('/data_submission_template')
+  })
+
+  it('leaves the manual ADD DATASET path untouched for a chairperson', () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ ...baseUser, isChairPerson: true })
+    renderComponent()
+    expect(screen.getByRole('button', { name: /ADD DATASET/i })).toBeDisabled()
   })
 
   // ── Delete dialog ──────────────────────────────────────────────────────────

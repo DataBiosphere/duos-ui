@@ -1,0 +1,40 @@
+{
+  "document": {
+    "piName": "Synthetic Investigator",
+    "dataTypes": [
+      "Genomic"
+    ],
+    "studyName": "Synthetic Minimal Study",
+    "nihAnvilUse": "I am not NHGRI funded and do not plan to store data in AnVIL",
+    "consentGroups": [
+      {
+        "accessManagement": "open",
+        "consentGroupName": "Synthetic Open Dataset",
+        "numberOfParticipants": 10
+      }
+    ],
+    "publicVisibility": true,
+    "studyDescription": "A synthetic study used only for contract tests."
+  },
+  "meta": {
+    "createDate": 1787184054319,
+    "updateDate": 1787184054319,
+    "name": "Synthetic Minimal Study",
+    "createUser": {
+      "userId": 1,
+      "email": "submitter@example.org",
+      "displayName": "Synthetic Submitter",
+      "createDate": 1787184054175,
+      "emailPreference": true
+    },
+    "updateUser": {
+      "userId": 1,
+      "email": "submitter@example.org",
+      "displayName": "Synthetic Submitter",
+      "createDate": 1787184054175,
+      "emailPreference": true
+    },
+    "uuid": "0393c587-343b-4c85-8969-e69e3f4f5aa8",
+    "draftType": "StudyDatasetSubmissionV1"
+  }
+}

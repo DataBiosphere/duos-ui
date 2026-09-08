@@ -233,10 +233,16 @@ export interface StudyAggregation {
   species: string
   phenotype: string
   dataCustodianEmail: string[]
+  dataTypes: string[]
+  /** Distinct DUO data use codes (e.g. `HMB`, `GRU`) across the study's datasets */
+  dataUseCodes: string[]
+  /** Distinct `accessManagement` values (e.g. `open`, `controlled`, `external`) across the study's datasets */
+  accessTypes: string[]
   datasetCount: number
   totalParticipants: number
   datasetIds: number[]
-  accessTypes?: string[]
+  modelCount: number
+  workspaceCount: number
 }
 
 export interface PaginationState {
@@ -296,6 +302,11 @@ export interface FundingResourceAsset extends Omit<FundingResource, 'studyId'> {
   studyId: number
   studyName: string
 }
+
+// Shared: MUI's DataGrid hides its rows-per-page control when the current size is not an option.
+export const PAGE_SIZE_OPTIONS = [25, 50, 100]
+
+export const DEFAULT_PAGE_SIZE = 25
 
 export const ALL_LIBRARY_TABS: TabConfig[] = [
   { key: AssetType.STUDIES, label: 'Studies' },

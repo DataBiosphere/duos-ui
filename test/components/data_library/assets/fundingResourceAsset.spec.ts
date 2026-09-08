@@ -268,6 +268,24 @@ describe('fundingResourceAsset — transformResponse', () => {
     expect(result.total).toBe(1)
     expect((result.items[0] as FundingResourceRow).fundingId).toBe('f-in-range')
   })
+
+  // An inverted range builds no ES clause, so it must not narrow rows here
+  // either — otherwise the grid empties while the panel flags the range.
+  it('ignores an inverted fundingDate range instead of filtering everything out', () => {
+    const response = makeResponse([
+      makeBucket('1', [
+        { fundingId: 'f-1', startDate: '2018-01-01', endDate: '2019-01-01' },
+        { fundingId: 'f-2', startDate: '2021-01-01', endDate: '2022-06-30' },
+      ]),
+    ])
+
+    const result = fundingResourceAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      fundingDate: { startDate: '2024-01-01', endDate: '2023-01-01' },
+    })
+
+    expect(result.total).toBe(2)
+  })
 })
 
 describe('fundingResourceAsset — getRowId', () => {

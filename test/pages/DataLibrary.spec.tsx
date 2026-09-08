@@ -29,6 +29,7 @@ const ACCESS_REQUEST_PROCESS_LABEL = 'Access Request Process'
 const CLEAR_FILTERS_LABEL = 'Clear'
 const CONFIG_PATH = '/config.json'
 const DATA_GRID_ROW_SELECTOR = '.MuiDataGrid-row'
+const STUDY_CARD_SELECTOR = '[data-cy="study-card"]'
 const DATASETS_TAB_PATH = '/?tab=datasets'
 const DUOS_DATA_LIBRARY_TITLE = 'DUOS Data Library'
 const EXPORT_LABEL = 'Export to...'
@@ -81,10 +82,19 @@ const getFilterToggleButton = (selector: string): HTMLElement => {
 }
 
 const queryRows = () => document.querySelectorAll(DATA_GRID_ROW_SELECTOR)
+const queryStudyCards = () => document.querySelectorAll(STUDY_CARD_SELECTOR)
 
 const getSingleDataGridRow = async (): Promise<Element> => {
   await waitFor(() => expect(queryRows()).toHaveLength(1))
   return queryRows()[0]
+}
+
+// Studies render as cards rather than DataGrid rows; this mirrors
+// getSingleDataGridRow for the card view (studies are still selected via a
+// checkbox, so getRowCheckbox works unchanged on a card element).
+const getSingleStudyCard = async (): Promise<Element> => {
+  await waitFor(() => expect(queryStudyCards()).toHaveLength(1))
+  return queryStudyCards()[0]
 }
 
 const getRowCheckbox = (row: Element): HTMLInputElement => {
@@ -364,15 +374,16 @@ describe('DataLibrary', () => {
     renderLibrary('/')
     await screen.findByText(DUOS_DATA_LIBRARY_TITLE)
 
+    // Studies is the default tab.
     await waitFor(() =>
-      expect(screen.getByRole('tab', { name: /Datasets/i })).toHaveAttribute('aria-selected', 'true'),
+      expect(screen.getByRole('tab', { name: /Studies/i })).toHaveAttribute('aria-selected', 'true'),
     )
 
-    await user.click(screen.getByRole('tab', { name: /Studies/i }))
+    await user.click(screen.getByRole('tab', { name: /Datasets/i }))
 
     await waitFor(() => {
-      expect(screen.getByRole('tab', { name: /Studies/i })).toHaveAttribute('aria-selected', 'true')
-      expect(screen.getByRole('tab', { name: /Datasets/i })).toHaveAttribute('aria-selected', 'false')
+      expect(screen.getByRole('tab', { name: /Datasets/i })).toHaveAttribute('aria-selected', 'true')
+      expect(screen.getByRole('tab', { name: /Studies/i })).toHaveAttribute('aria-selected', 'false')
     })
   })
 
@@ -480,9 +491,9 @@ describe('DataLibrary', () => {
   it('shows footer when a study is selected', async () => {
     renderLibrary(STUDIES_TAB_PATH)
 
-    const row = await getSingleDataGridRow()
+    const card = await getSingleStudyCard()
 
-    fireEvent.click(getRowCheckbox(row))
+    fireEvent.click(getRowCheckbox(card))
 
     await waitFor(() => expect(document.querySelector(FOOTER_SELECTOR)).toBeInTheDocument())
     expect(screen.getByText(/2 datasets selected from 1 study/)).toBeInTheDocument()
@@ -549,7 +560,7 @@ describe('DataLibrary', () => {
 
       // Rows render from the data query while the counts query is still pending,
       // so no count badge is shown yet.
-      await getSingleDataGridRow()
+      await getSingleStudyCard()
       expect(screen.queryByLabelText('2 items')).not.toBeInTheDocument()
 
       resolveCounts(asSearchResponse(mockStudiesResponse))
@@ -614,7 +625,7 @@ describe('DataLibrary', () => {
 
       renderLibrary(STUDIES_TAB_PATH)
 
-      await waitFor(() => expect(queryRows().length).toBeGreaterThanOrEqual(1))
+      await waitFor(() => expect(queryStudyCards().length).toBeGreaterThanOrEqual(1))
       expect(TerraDataRepo.listSnapshotsByDatasetIds).not.toHaveBeenCalled()
       expect(screen.queryByText(EXPORT_LABEL)).not.toBeInTheDocument()
     })

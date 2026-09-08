@@ -22,8 +22,9 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { FilterKey, LibraryFilterSection, LibraryFiltersProps } from 'src/types/library'
-import { COUNT_BADGE_SX } from 'src/components/data_library/countBadgeStyles'
-import { isFilterActive } from 'src/components/data_library/filterRegistry'
+import { COUNT_BADGE_COLOR, COUNT_BADGE_SX } from 'src/components/data_library/countBadgeStyles'
+import { isFilterActive, isInvertedDateRange } from 'src/components/data_library/filterRegistry'
+import { muiCheckboxFix, muiTextFieldFix } from 'src/libs/muiThemeFix'
 
 const CHECKBOX_FILTER_KEYS = [
   'accessManagement',
@@ -47,6 +48,156 @@ type CheckboxFilterKey = (typeof CHECKBOX_FILTER_KEYS)[number]
 
 const isCheckboxFilterKey = (key: FilterKey): key is CheckboxFilterKey =>
   (CHECKBOX_FILTER_KEYS as readonly string[]).includes(key)
+
+const COMPACT_ACCORDION_SX = {
+  '&:before': { display: 'none' },
+}
+
+const COMPACT_SUMMARY_SX = {
+  'minHeight': 40,
+  'px': 1,
+  '& .MuiAccordionSummary-content': { my: 1 },
+}
+
+const COMPACT_DETAILS_SX = {
+  px: 1,
+  py: 1,
+}
+
+// Weight is the only cue left that a section label is a heading: `::before` is
+// hidden above and `subtitle2` already resolves to 14px against 12px options.
+const SECTION_LABEL_SX = { fontWeight: 600 }
+
+// A dot rather than a number — the count badge pill is sized for digits.
+const ACTIVE_DOT_SX = {
+  width: 6,
+  height: 6,
+  flexShrink: 0,
+  borderRadius: '50%',
+  backgroundColor: COUNT_BADGE_COLOR,
+}
+
+const COMPACT_OPTION_ROW_SX = { my: 0 }
+const COMPACT_OPTION_CONTROL_SX = { ...muiCheckboxFix, p: 0.5 }
+const COMPACT_OPTION_LABEL_SX = { fontSize: '1.2rem' }
+
+const COMPACT_RANGE_FIELD_SX = { flex: 1, minWidth: 0 }
+
+// Two `type="date"` inputs share ~248px here, so Chrome's ~20px picker
+// indicator does not fit alongside `mm/dd/yyyy` and would be clipped by the
+// sidebar's `overflowX: 'hidden'`. Hidden; the fields stay typeable.
+const COMPACT_DATE_FIELD_SX = {
+  'flex': 1,
+  'minWidth': 0,
+  '& input::-webkit-calendar-picker-indicator': { display: 'none' },
+}
+
+// `inputLabel` collides with muiTextFieldFix's own, so merge rather than spread.
+const DATE_FIELD_SLOT_PROPS = {
+  ...muiTextFieldFix,
+  inputLabel: { ...muiTextFieldFix.inputLabel, shrink: true },
+}
+
+// The two fields each date section renders, plus the message shown when their
+// bounds cross. The inversion rule itself lives in isInvertedDateRange so the
+// panel, the active-filter indicator and the query cannot disagree.
+const DATE_SECTION_CONFIG = {
+  clinicalTrialDates: {
+    fields: [
+      { stateKey: 'startDate', label: 'Start Date' },
+      { stateKey: 'endDate', label: 'End Date' },
+    ],
+    invertedMessage: 'Start Date cannot be after End Date',
+  },
+  biospecimenCollectionDate: {
+    fields: [
+      { stateKey: 'before', label: 'Collected Before' },
+      { stateKey: 'after', label: 'Collected After' },
+    ],
+    invertedMessage: 'Collected After cannot be later than Collected Before',
+  },
+  ipFiledDate: {
+    fields: [
+      { stateKey: 'before', label: 'Filed Before' },
+      { stateKey: 'after', label: 'Filed After' },
+    ],
+    invertedMessage: 'Filed After cannot be later than Filed Before',
+  },
+  fundingDate: {
+    fields: [
+      { stateKey: 'startDate', label: 'Start Date' },
+      { stateKey: 'endDate', label: 'End Date' },
+    ],
+    invertedMessage: 'Start Date cannot be after End Date',
+  },
+} as const
+
+type DateFilterSectionKey = keyof typeof DATE_SECTION_CONFIG
+
+// Native date inputs report an empty value both when explicitly cleared and
+// while an existing date is being edited. Keep that ambiguous empty value local
+// until blur; every complete value still commits immediately.
+const isCompleteDate = (value: string) => value === '' || /^\d{4}-\d{2}-\d{2}$/.test(value)
+
+interface DateFilterFieldProps {
+  label: string
+  value: string
+  error: boolean
+  errorId?: string
+  onCommit: (value: string | undefined) => void
+}
+
+/**
+ * A `type="date"` filter input that keeps in-progress dates local: while typing
+ * it commits every date that reads as finished, including years below 1000,
+ * and on blur it commits any complete value not already applied. The draft
+ * state is not optional: React
+ * restores a controlled input's DOM value after a change event that leaves the
+ * rendered value untouched, so suppressing the commit alone would wipe every
+ * segment the moment a date became complete.
+ */
+const DateFilterField: React.FC<DateFilterFieldProps> = ({ label, value, error, errorId, onCommit }) => {
+  const [draft, setDraft] = React.useState(value)
+
+  // Adopt values that changed upstream (Clear, a removed chip, a tab switch)
+  // without clobbering a date the user is part-way through typing: while the
+  // date is incomplete `value` does not change, so this does not fire. Adjusted
+  // during render rather than in an effect so the stale draft is never painted.
+  const [prevValue, setPrevValue] = React.useState(value)
+  if (value !== prevValue) {
+    setPrevValue(value)
+    setDraft(value)
+  }
+
+  return (
+    <TextField
+      type="date"
+      label={label}
+      size="small"
+      sx={COMPACT_DATE_FIELD_SX}
+      slotProps={{
+        ...DATE_FIELD_SLOT_PROPS,
+        htmlInput: { 'aria-describedby': errorId },
+      }}
+      value={draft}
+      error={error}
+      onChange={(event) => {
+        const next = event.target.value
+        setDraft(next)
+        if (next !== '' && isCompleteDate(next) && next !== value) {
+          onCommit(next || undefined)
+        }
+      }}
+      // Blur resolves an empty draft as an intentional clear and also remains
+      // a fallback for browsers that defer completed-date change events.
+      onBlur={() => {
+        if (isCompleteDate(draft) && draft !== value) {
+          onCommit(draft || undefined)
+        }
+      }}
+    />
+  )
+}
 
 // Yes/No/Any radio groups. A registered key claimed by neither this list nor
 // CHECKBOX_FILTER_KEYS renders nothing at all.
@@ -106,12 +257,6 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
     })
   }
 
-  const hasInvalidClinicalTrialDateRange = !!(
-    filters.clinicalTrialDates.startDate
-    && filters.clinicalTrialDates.endDate
-    && filters.clinicalTrialDates.startDate > filters.clinicalTrialDates.endDate
-  )
-
   const hasPostMortemIntervalValue = (
     filters.biospecimenPostMortemInterval.min !== undefined
     || filters.biospecimenPostMortemInterval.max !== undefined
@@ -134,17 +279,26 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   const activeFilterCount = activeSectionCount + externalFilterCount
   const hasActiveFilters = activeFilterCount > 0
 
+  const renderSectionLabel = (key: FilterKey, label: string) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, overflow: 'hidden' }}>
+      <Typography variant="subtitle2" sx={SECTION_LABEL_SX} title={label} noWrap>{label}</Typography>
+      {isFilterActive(key, filters) && (
+        <Box component="span" role="img" aria-label="Filter active" sx={ACTIVE_DOT_SX} />
+      )}
+    </Box>
+  )
+
   const renderCheckboxSection = (section: LibraryFilterSection) => {
     const { key, label, options = [] } = section
     if (!isCheckboxFilterKey(key)) {
       return null
     }
     return (
-      <Accordion key={key} defaultExpanded={key === 'accessManagement'}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{label}</Typography>
+      <Accordion key={key} disableGutters defaultExpanded={key === 'accessManagement'} sx={COMPACT_ACCORDION_SX}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={COMPACT_SUMMARY_SX}>
+          {renderSectionLabel(key, label)}
         </AccordionSummary>
-        <AccordionDetails>
+        <AccordionDetails sx={COMPACT_DETAILS_SX}>
           {options.length === 0
             ? (
                 <Typography variant="body2" color="text.secondary">
@@ -156,15 +310,17 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
                   {options.map(option => (
                     <FormControlLabel
                       key={option.value}
+                      sx={COMPACT_OPTION_ROW_SX}
                       control={(
                         <Checkbox
                           checked={(filters[key]).includes(option.value)}
                           onChange={() => handleFilterToggle(key, option.value)}
                           size="small"
+                          sx={COMPACT_OPTION_CONTROL_SX}
                         />
                       )}
                       label={(
-                        <Typography variant="body2">
+                        <Typography variant="body2" sx={COMPACT_OPTION_LABEL_SX}>
                           {option.label}
                           {option.count !== undefined && ` (${option.count})`}
                         </Typography>
@@ -178,23 +334,25 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
     )
   }
 
-  const renderParticipantSection = (label: string) => (
-    <Accordion key="participantCount">
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{label}</Typography>
+  const renderParticipantSection = (section: LibraryFilterSection) => (
+    <Accordion key="participantCount" disableGutters sx={COMPACT_ACCORDION_SX}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={COMPACT_SUMMARY_SX}>
+        {renderSectionLabel('participantCount', section.label)}
       </AccordionSummary>
-      <AccordionDetails>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <AccordionDetails sx={COMPACT_DETAILS_SX}>
+        <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
           <TextField
             type="number"
             label="Minimum"
             size="small"
+            sx={COMPACT_RANGE_FIELD_SX}
             value={filters.participantCount.min ?? ''}
             onChange={e => handleParticipantChange('min', e.target.value)}
             slotProps={{
+              ...muiTextFieldFix,
               htmlInput: {
-                min: sections.find(section => section.key === 'participantCount')?.range?.min,
-                max: sections.find(section => section.key === 'participantCount')?.range?.max,
+                min: section.range?.min,
+                max: section.range?.max,
               },
             }}
           />
@@ -202,12 +360,14 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
             type="number"
             label="Maximum"
             size="small"
+            sx={COMPACT_RANGE_FIELD_SX}
             value={filters.participantCount.max ?? ''}
             onChange={e => handleParticipantChange('max', e.target.value)}
             slotProps={{
+              ...muiTextFieldFix,
               htmlInput: {
-                min: sections.find(section => section.key === 'participantCount')?.range?.min,
-                max: sections.find(section => section.key === 'participantCount')?.range?.max,
+                min: section.range?.min,
+                max: section.range?.max,
               },
             }}
           />
@@ -217,40 +377,46 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   )
 
   const renderPostMortemIntervalSection = (section: LibraryFilterSection) => (
-    <Accordion key="biospecimenPostMortemInterval">
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{section.label}</Typography>
+    <Accordion key="biospecimenPostMortemInterval" disableGutters sx={COMPACT_ACCORDION_SX}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={COMPACT_SUMMARY_SX}>
+        {renderSectionLabel('biospecimenPostMortemInterval', section.label)}
       </AccordionSummary>
-      <AccordionDetails>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            type="number"
-            label="Minimum"
-            size="small"
-            value={filters.biospecimenPostMortemInterval.min ?? ''}
-            onChange={e => handlePostMortemIntervalChange('min', e.target.value)}
-            slotProps={{
-              htmlInput: {
-                min: section.range?.min,
-                max: section.range?.max,
-              },
-            }}
-          />
-          <TextField
-            type="number"
-            label="Maximum"
-            size="small"
-            value={filters.biospecimenPostMortemInterval.max ?? ''}
-            onChange={e => handlePostMortemIntervalChange('max', e.target.value)}
-            slotProps={{
-              htmlInput: {
-                min: section.range?.min,
-                max: section.range?.max,
-              },
-            }}
-          />
+      <AccordionDetails sx={COMPACT_DETAILS_SX}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+            <TextField
+              type="number"
+              label="Minimum"
+              size="small"
+              sx={COMPACT_RANGE_FIELD_SX}
+              value={filters.biospecimenPostMortemInterval.min ?? ''}
+              onChange={e => handlePostMortemIntervalChange('min', e.target.value)}
+              slotProps={{
+                ...muiTextFieldFix,
+                htmlInput: {
+                  min: section.range?.min,
+                  max: section.range?.max,
+                },
+              }}
+            />
+            <TextField
+              type="number"
+              label="Maximum"
+              size="small"
+              sx={COMPACT_RANGE_FIELD_SX}
+              value={filters.biospecimenPostMortemInterval.max ?? ''}
+              onChange={e => handlePostMortemIntervalChange('max', e.target.value)}
+              slotProps={{
+                ...muiTextFieldFix,
+                htmlInput: {
+                  min: section.range?.min,
+                  max: section.range?.max,
+                },
+              }}
+            />
+          </Box>
           {hasPostMortemIntervalWithoutUnit && (
-            <Typography color="warning.main" variant="body2">
+            <Typography color="warning.main" variant="body2" sx={COMPACT_OPTION_LABEL_SX}>
               Select a post-mortem interval unit to avoid ambiguous results.
             </Typography>
           )}
@@ -259,65 +425,46 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
     </Accordion>
   )
 
-  const renderDateSection = (
-    key: 'clinicalTrialDates' | 'biospecimenCollectionDate' | 'ipFiledDate' | 'fundingDate',
-    label: string,
-  ) => {
-    const dateFieldsBySection = {
-      clinicalTrialDates: [
-        { stateKey: 'startDate', label: 'Start Date' },
-        { stateKey: 'endDate', label: 'End Date' },
-      ],
-      biospecimenCollectionDate: [
-        { stateKey: 'before', label: 'Collected Before' },
-        { stateKey: 'after', label: 'Collected After' },
-      ],
-      ipFiledDate: [
-        { stateKey: 'before', label: 'Filed Before' },
-        { stateKey: 'after', label: 'Filed After' },
-      ],
-      fundingDate: [
-        { stateKey: 'startDate', label: 'Start Date' },
-        { stateKey: 'endDate', label: 'End Date' },
-      ],
-    } as const
-
-    const dateFields = dateFieldsBySection[key]
+  const renderDateSection = (key: DateFilterSectionKey, label: string) => {
+    const { fields, invertedMessage } = DATE_SECTION_CONFIG[key]
+    const hasDateRangeError = isInvertedDateRange(key, filters)
+    // The error moved out of `helperText`, so wire aria-describedby by hand —
+    // otherwise the fields are aria-invalid with no reachable explanation.
+    const dateRangeErrorId = hasDateRangeError ? `${key}-date-range-error` : undefined
 
     return (
-      <Accordion key={key}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{label}</Typography>
+      <Accordion key={key} disableGutters sx={COMPACT_ACCORDION_SX}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={COMPACT_SUMMARY_SX}>
+          {renderSectionLabel(key, label)}
         </AccordionSummary>
-        <AccordionDetails>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {dateFields.map(dateField => (
-              <TextField
-                key={dateField.stateKey}
-                type="date"
-                label={dateField.label}
-                size="small"
-                slotProps={{
-                  inputLabel: { shrink: true },
-                }}
-                value={(filters[key] as Record<string, string | undefined>)[dateField.stateKey] || ''}
-                onChange={(event) => {
-                  onChange({
-                    ...filters,
-                    [key]: {
-                      ...(filters[key] as Record<string, string | undefined>),
-                      [dateField.stateKey]: event.target.value || undefined,
-                    },
-                  })
-                }}
-                error={key === 'clinicalTrialDates' && hasInvalidClinicalTrialDateRange}
-                helperText={
-                  key === 'clinicalTrialDates' && dateField.stateKey === 'endDate' && hasInvalidClinicalTrialDateRange
-                    ? 'Start Date cannot be after End Date'
-                    : undefined
-                }
-              />
-            ))}
+        <AccordionDetails sx={COMPACT_DETAILS_SX}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+              {fields.map(dateField => (
+                <DateFilterField
+                  key={dateField.stateKey}
+                  label={dateField.label}
+                  value={(filters[key] as Record<string, string | undefined>)[dateField.stateKey] || ''}
+                  error={hasDateRangeError}
+                  errorId={dateRangeErrorId}
+                  onCommit={(nextValue) => {
+                    onChange({
+                      ...filters,
+                      [key]: {
+                        ...(filters[key] as Record<string, string | undefined>),
+                        [dateField.stateKey]: nextValue,
+                      },
+                    })
+                  }}
+                />
+              ))}
+            </Box>
+            {/* Full width below the row: as helperText it wraps to 4-5 lines. */}
+            {hasDateRangeError && (
+              <Typography id={dateRangeErrorId} color="error" variant="body2" sx={COMPACT_OPTION_LABEL_SX}>
+                {invertedMessage}
+              </Typography>
+            )}
           </Box>
         </AccordionDetails>
       </Accordion>
@@ -325,11 +472,11 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   }
 
   const renderBooleanSection = (key: BooleanFilterKey, label: string) => (
-    <Accordion key={key}>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{label}</Typography>
+    <Accordion key={key} disableGutters sx={COMPACT_ACCORDION_SX}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={COMPACT_SUMMARY_SX}>
+        {renderSectionLabel(key, label)}
       </AccordionSummary>
-      <AccordionDetails>
+      <AccordionDetails sx={COMPACT_DETAILS_SX}>
         <FormControl>
           <RadioGroup
             aria-label={label}
@@ -346,14 +493,16 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
               <FormControlLabel
                 key={option.value}
                 value={option.value}
-                control={<Radio size="small" />}
-                label={option.label}
+                sx={COMPACT_OPTION_ROW_SX}
+                control={<Radio size="small" sx={COMPACT_OPTION_CONTROL_SX} />}
+                label={<Typography variant="body2" sx={COMPACT_OPTION_LABEL_SX}>{option.label}</Typography>}
               />
             ))}
             <FormControlLabel
               value=""
-              control={<Radio size="small" />}
-              label="Any"
+              sx={COMPACT_OPTION_ROW_SX}
+              control={<Radio size="small" sx={COMPACT_OPTION_CONTROL_SX} />}
+              label={<Typography variant="body2" sx={COMPACT_OPTION_LABEL_SX}>Any</Typography>}
             />
           </RadioGroup>
         </FormControl>
@@ -368,7 +517,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mb: 2,
+          mb: 1,
         }}
       >
         <Box
@@ -386,7 +535,7 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
               </IconButton>
             </Tooltip>
           )}
-          {isOpen && <Typography variant="h6">Filters</Typography>}
+          {isOpen && <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Filters</Typography>}
           {!isOpen && onToggle && (
             <>
               {activeFilterCount > 0 && (
@@ -430,8 +579,8 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
       </Box>
 
       {isOpen && externalFilters.length > 0 && (
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
             Filters from other views
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -451,16 +600,16 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
       {isOpen && (loading
         ? (
             <>
-              <Skeleton height={60} />
-              <Skeleton height={60} />
-              <Skeleton height={60} />
+              <Skeleton height={40} />
+              <Skeleton height={40} />
+              <Skeleton height={40} />
             </>
           )
         : (
             <>
               {sections.map((section) => {
                 if (section.key === 'participantCount') {
-                  return renderParticipantSection(section.label)
+                  return renderParticipantSection(section)
                 }
 
                 if (section.key === 'biospecimenPostMortemInterval') {

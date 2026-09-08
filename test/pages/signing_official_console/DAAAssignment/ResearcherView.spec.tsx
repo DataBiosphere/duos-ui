@@ -11,7 +11,7 @@ import {
 } from 'src/pages/signing_official_console/DAAAssignment/researcherViewHelpers'
 import { DAA } from 'src/libs/ajax/DAA'
 import { User } from 'src/libs/ajax/User'
-import { Notifications } from 'src/libs/utils'
+import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { DuosUser, DAAObject, DaaBulkRelationResult } from 'src/types/model'
 import { makeDaa, makeResearcher } from './fixtures'
 
@@ -33,11 +33,13 @@ const mockResearchers: DuosUser[] = [
     displayName: 'Test User Alpha',
     email: 'test.user.alpha@test.org',
     daaDetails: [{ daaId: 1 }],
+    institutionName: 'Institution Alpha',
   }),
   makeResearcher({
     userId: 2,
     displayName: 'Test User Beta',
     email: 'test.user.beta@test.org',
+    institutionName: 'Institution Beta',
   }),
 ]
 
@@ -155,6 +157,31 @@ describe('ResearcherView', () => {
     expect(container.querySelector('[data-cy="researcher-row-2"]')).not.toBeInTheDocument()
   })
 
+  // Institution search is opt-in: the SO list is one institution, so the term
+  // would only ever match everything or nothing there.
+  it('does not filter by institution unless showInstitution is set', async () => {
+    const user = userEvent.setup()
+    const { container } = mount()
+    await user.type(container.querySelector('[data-cy="researcher-search"] input') as HTMLElement, 'Institution Beta')
+    expect(container.querySelector('[data-cy="researcher-empty-message"]')).toBeInTheDocument()
+  })
+
+  it('filters researchers by institution when showInstitution is set', async () => {
+    const user = userEvent.setup()
+    const { container } = mount({ showInstitution: true })
+    await user.type(container.querySelector('[data-cy="researcher-search"] input') as HTMLElement, 'Institution Beta')
+    expect(container.querySelector('[data-cy="researcher-row-2"]')).toBeInTheDocument()
+    expect(container.querySelector('[data-cy="researcher-row-1"]')).not.toBeInTheDocument()
+  })
+
+  it('still filters by name and email when institution search is on', async () => {
+    const user = userEvent.setup()
+    const { container } = mount({ showInstitution: true })
+    await user.type(container.querySelector('[data-cy="researcher-search"] input') as HTMLElement, 'test.user.alpha')
+    expect(container.querySelector('[data-cy="researcher-row-1"]')).toBeInTheDocument()
+    expect(container.querySelector('[data-cy="researcher-row-2"]')).not.toBeInTheDocument()
+  })
+
   it('shows empty message when search has no matches', async () => {
     const user = userEvent.setup()
     const { container } = mount()
@@ -213,6 +240,29 @@ describe('ResearcherView', () => {
     await user.click(document.body.querySelector('[data-cy="confirm-dialog-confirm"]') as HTMLElement)
     await waitFor(() => expect(DAA.createDaaLcLink).toHaveBeenCalledOnce())
     await waitFor(() => expect(User.list).toHaveBeenCalled())
+  })
+
+  it('refreshes with the institution-scoped list by default', async () => {
+    vi.spyOn(DAA, 'createDaaLcLink').mockResolvedValue(undefined as unknown as DAAObject)
+    const user = userEvent.setup()
+    const { container } = mount()
+    await user.click(container.querySelector('[data-cy="researcher-row-toggle-2"]') as HTMLElement)
+    await user.click(container.querySelector('[data-cy="daa-row-1"] [data-cy="auth-action-authorize"]') as HTMLElement)
+    await user.click(document.body.querySelector('[data-cy="confirm-dialog-confirm"]') as HTMLElement)
+    await waitFor(() => expect(User.list).toHaveBeenCalledWith(USER_ROLES.signingOfficial))
+  })
+
+  // The page owns the scope; a refresh must reload the same list it loaded, not
+  // a differently-scoped one.
+  it('refreshes with the scope it was given', async () => {
+    vi.spyOn(DAA, 'createDaaLcLink').mockResolvedValue(undefined as unknown as DAAObject)
+    const user = userEvent.setup()
+    const { container } = mount({ scope: USER_ROLES.admin })
+    await user.click(container.querySelector('[data-cy="researcher-row-toggle-2"]') as HTMLElement)
+    await user.click(container.querySelector('[data-cy="daa-row-1"] [data-cy="auth-action-authorize"]') as HTMLElement)
+    await user.click(document.body.querySelector('[data-cy="confirm-dialog-confirm"]') as HTMLElement)
+    await waitFor(() => expect(User.list).toHaveBeenCalledWith(USER_ROLES.admin))
+    expect(User.list).not.toHaveBeenCalledWith(USER_ROLES.signingOfficial)
   })
 
   it('opens revoke confirm dialog when Revoke is clicked', async () => {

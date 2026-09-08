@@ -1,11 +1,18 @@
 import React from 'react'
-import { Storage } from 'src/libs/storage'
 import { Navigate, Outlet, useLocation } from 'react-router'
+import { useUserIsLogged } from 'src/hooks/useSession'
 
 const Authenticated = () => {
   const location = useLocation()
+  const isLogged = useUserIsLogged()
 
-  return Storage.userIsLogged()
+  // Session probe still in flight — render nothing rather than bouncing a
+  // signed-in user to the sign-in page before the answer arrives.
+  if (isLogged === undefined) {
+    return null
+  }
+
+  return isLogged
     ? <Outlet />
     : <Navigate to={location.pathname ? `/?redirectTo=${location.pathname}` : '/'} />
 }

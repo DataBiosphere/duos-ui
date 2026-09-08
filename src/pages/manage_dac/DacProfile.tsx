@@ -11,27 +11,13 @@ import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Spinner } from 'src/components/Spinner'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import { DACBotComponent } from 'src/components/dac_bot/DACBotComponent'
+import { DacProfileSection } from 'src/pages/manage_dac/DacProfileSection'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 import type { DacObject, Dataset, DatasetProperty } from 'src/types/model'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import editDACIcon from 'src/images/dac_icon.svg'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
-
-const SECTION_DIVIDER: React.CSSProperties = {
-  border: 'none',
-  borderTop: '1px solid #e0e0e0',
-  margin: '3rem 0 0 0',
-}
-
-const SECTION_TITLE_SX = {
-  fontFamily: 'Montserrat',
-  fontWeight: 600,
-  fontSize: '2rem',
-  color: '#1f3b50',
-  mt: 3,
-  mb: 2,
-}
 
 const DATAGRID_SX = {
   '& .MuiDataGrid-cell:focus': { outline: 'none' },
@@ -251,15 +237,13 @@ export const DacProfile: React.FC = () => {
         />
       )}
 
-      {/* ── Rule Automation for DARs (RADAR) ── */}
-      <hr style={SECTION_DIVIDER} />
-      <Typography sx={SECTION_TITLE_SX}>Rule Automation for DARs (RADAR)</Typography>
-      {dacId !== undefined && <DACBotComponent dacId={dacId} />}
+      <DacProfileSection title="Rule Automation for DARs (RADAR)">
+        {dacId !== undefined && <DACBotComponent dacId={dacId} />}
+      </DacProfileSection>
 
-      {/* ── Datasets Managed by this DAC ── */}
-      <hr style={SECTION_DIVIDER} />
-      <Typography sx={SECTION_TITLE_SX}>Datasets Managed by this DAC</Typography>
-      {datasetsContent}
+      <DacProfileSection title="Datasets Managed by this DAC">
+        {datasetsContent}
+      </DacProfileSection>
     </div>
   )
 }

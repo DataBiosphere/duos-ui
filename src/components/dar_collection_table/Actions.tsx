@@ -12,16 +12,37 @@ const duosBlue = '#0948B7'
 const cancelGray = '#333F52'
 
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER
-const baseCancelButtonStyle = {
+const baseCancelButtonStyle: React.CSSProperties = {
   ...Styles.TABLE.TABLE_ICON_BUTTON,
   color: cancelGray,
   alignItems: 'center',
-  marginRight: '5px',
+  marginRight: '4px',
+  height: '2rem',
+  minHeight: '2rem',
+  fontSize: '1.8rem',
+  boxSizing: 'border-box',
 }
 
 const hoverPrimaryButtonStyle = {
   backgroundColor: 'rgb(38 138 204)',
   color: 'white',
+}
+
+// Compact sizing so every action button fits on a single line within the DataGrid row's
+// fixed height, rather than the larger size used when these rendered in the old SimpleTable.
+// Height is pinned explicitly rather than left to padding/line-height: these buttons inherit
+// `line-height` from ancestors (via the app's global `button { line-height: inherit }` rule),
+// which was inflating their rendered height beyond what padding alone could control. Pinning
+// `height`/`lineHeight` directly guarantees the button is only slightly taller than its text,
+// regardless of what line-height it would otherwise inherit.
+const compactButtonSize: React.CSSProperties = {
+  fontSize: '1.1rem',
+  fontWeight: 600,
+  marginRight: 4,
+  height: '2rem',
+  lineHeight: '2rem',
+  padding: '0 10px',
+  boxSizing: 'border-box',
 }
 
 export interface ActionsProps {
@@ -49,11 +70,8 @@ export default function Actions({ showConfirmationModal, collection, goToVote, c
       color: 'white',
     },
     additionalStyle: {
-      padding: '3% 7%',
-      fontSize: '1.45rem',
-      fontWeight: 600,
+      ...compactButtonSize,
       color: 'white',
-      marginRight: 5,
     },
   }
 
@@ -76,11 +94,8 @@ export default function Actions({ showConfirmationModal, collection, goToVote, c
       color: 'white',
     },
     additionalStyle: {
-      padding: '3% 7%',
-      fontSize: '1.45rem',
-      fontWeight: 600,
+      ...compactButtonSize,
       color: 'white',
-      marginRight: 5,
       border: `1px ${duosBlue} solid`,
     },
   }
@@ -95,11 +110,8 @@ export default function Actions({ showConfirmationModal, collection, goToVote, c
       color: duosBlue,
     },
     additionalStyle: {
-      padding: '3% 7%',
-      fontSize: '1.45rem',
-      fontWeight: 600,
+      ...compactButtonSize,
       color: duosBlue,
-      marginRight: 5,
       border: `1px ${duosBlue} solid`,
     },
   }
@@ -115,11 +127,8 @@ export default function Actions({ showConfirmationModal, collection, goToVote, c
       color: 'white',
     },
     additionalStyle: {
-      padding: '3%',
-      fontSize: '1.45rem',
-      fontWeight: 600,
+      ...compactButtonSize,
       border: `1px solid ${Theme.palette.secondary}`,
-      marginRight: 5,
     },
   }
 
@@ -134,11 +143,8 @@ export default function Actions({ showConfirmationModal, collection, goToVote, c
       color: 'white',
     },
     additionalStyle: {
-      padding: '3%',
-      fontSize: '1.45rem',
-      fontWeight: 600,
+      ...compactButtonSize,
       border: `1px solid ${Theme.palette.secondary}`,
-      marginRight: 5,
     },
   }
 
@@ -160,10 +166,7 @@ export default function Actions({ showConfirmationModal, collection, goToVote, c
     fontColor: 'white',
     hoverStyle: hoverPrimaryButtonStyle,
     additionalStyle: {
-      padding: '3%',
-      marginRight: 5,
-      fontSize: '1.45rem',
-      fontWeight: 600,
+      ...compactButtonSize,
       border: `1px solid ${Theme.palette.secondary}`,
     },
   }
@@ -172,12 +175,7 @@ export default function Actions({ showConfirmationModal, collection, goToVote, c
     keyProp: `${consoleType}-revise-${uniqueId}`,
     label: 'Revise',
     baseColor: Theme.palette.secondary,
-    additionalStyle: {
-      padding: '3%',
-      fontSize: '1.45rem',
-      fontWeight: 600,
-      marginRight: 5,
-    },
+    additionalStyle: compactButtonSize,
     hoverStyle: hoverPrimaryButtonStyle,
     onClick: () => showConfirmationModal(collection, 'revise'),
   }
@@ -192,11 +190,8 @@ export default function Actions({ showConfirmationModal, collection, goToVote, c
       color: 'white',
     },
     additionalStyle: {
-      padding: '3% 7%',
-      fontSize: '1.45rem',
-      fontWeight: 600,
+      ...compactButtonSize,
       color: 'white',
-      marginRight: 5,
     },
   }
 
@@ -211,11 +206,8 @@ export default function Actions({ showConfirmationModal, collection, goToVote, c
       color: 'white',
     },
     additionalStyle: {
-      padding: '3%',
-      fontSize: '1.45rem',
-      fontWeight: 600,
+      ...compactButtonSize,
       border: `1px solid ${Theme.palette.secondary}`,
-      marginRight: 5,
     },
   }
 
@@ -226,7 +218,7 @@ export default function Actions({ showConfirmationModal, collection, goToVote, c
       id={`${consoleType}-actions-${collectionId}`}
       style={{
         display: 'flex',
-        padding: '10px 5px',
+        padding: '4px 6px',
         justifyContent: 'flex-start',
         alignItems: 'center',
       }}

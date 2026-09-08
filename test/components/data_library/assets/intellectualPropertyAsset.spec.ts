@@ -251,6 +251,24 @@ describe('intellectualPropertyAsset — transformResponse', () => {
     expect((result.items[0] as IntellectualPropertyAsset).ipId).toBe('ip-in-range')
   })
 
+  // An inverted range builds no ES clause, so it must not narrow rows here
+  // either — otherwise the grid empties while the panel flags the range.
+  it('ignores an inverted ipFiledDate range instead of filtering everything out', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { ipId: 'ip-old', filingDate: '2019-05-01' },
+        { ipId: 'ip-new', filingDate: '2025-01-01' },
+      ]),
+    ])
+
+    const result = intellectualPropertyAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      ipFiledDate: { after: '2024-01-01', before: '2020-01-01' },
+    })
+
+    expect(result.total).toBe(2)
+  })
+
   it('handles studies with no intellectualProperties assets', () => {
     const response = makeResponse([makeBucket(7, [])])
     const result = intellectualPropertyAsset.transformResponse(response, pagination)

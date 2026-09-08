@@ -10,6 +10,8 @@ import { DuosUser } from 'src/types/model'
 import ResearcherDAASubtable from './ResearcherDAASubtable'
 import BulkActionButtons from './BulkActionButtons'
 import { DAARowData } from './types'
+import { accordionHeaderKeyboardProps } from './accordionHeaderKeyboard'
+import { institutionLabel } from './researcherViewHelpers'
 
 const FONT = 'Montserrat'
 
@@ -25,6 +27,14 @@ interface ResearcherAccordionRowProps {
   onApproveAll: (daaIds: number[]) => void
   /** Bulk "Remove All" — receives the ids of every currently-authorized DAA */
   onRemoveAll: (daaIds: number[]) => void
+  /** Read-only mode (Admin Console): renders no bulk or per-row action buttons. */
+  readOnly?: boolean
+  /**
+   * Shows the researcher's institution in the card header. Only meaningful when
+   * the list spans more than one institution, which is the Admin Console's
+   * cross-institution scope.
+   */
+  showInstitution?: boolean
 }
 
 /**
@@ -32,6 +42,9 @@ interface ResearcherAccordionRowProps {
  *
  * The card header shows the researcher's name, email, and summary badge counts.
  * When expanded, a sub-table lists each DAA with its status and an action button.
+ *
+ * In read-only mode the bulk action buttons are omitted from the header and the
+ * sub-table drops its Action column, leaving status information only.
  */
 export default function ResearcherAccordionRow({
   researcher,
@@ -43,6 +56,8 @@ export default function ResearcherAccordionRow({
   onRevoke,
   onApproveAll,
   onRemoveAll,
+  readOnly = false,
+  showInstitution = false,
 }: Readonly<ResearcherAccordionRowProps>) {
   const researcherId = researcher.userId
 
@@ -73,6 +88,7 @@ export default function ResearcherAccordionRow({
         aria-controls={`researcher-daa-panel-${researcherId}`}
         data-cy={`researcher-row-toggle-${researcherId}`}
         onClick={onToggle}
+        {...accordionHeaderKeyboardProps(onToggle)}
         sx={{
           'display': 'flex',
           'alignItems': 'center',
@@ -108,6 +124,14 @@ export default function ResearcherAccordionRow({
             <Typography sx={{ fontFamily: FONT, fontSize: 12, color: '#888' }}>
               {researcher.email}
             </Typography>
+            {showInstitution && (
+              <Typography
+                data-cy={`researcher-institution-${researcherId}`}
+                sx={{ fontFamily: FONT, fontSize: 12, color: '#888' }}
+              >
+                {institutionLabel(researcher)}
+              </Typography>
+            )}
           </Box>
         </Box>
 
@@ -135,13 +159,15 @@ export default function ResearcherAccordionRow({
               No pre-auth status
             </Typography>
           )}
-          <BulkActionButtons
-            dataCyPrefix={`researcher-${researcherId}`}
-            approveAllDisabled={unauthorizedDaaIds.length === 0}
-            removeAllDisabled={authorizedDaaIds.length === 0}
-            onApproveAll={() => onApproveAll(unauthorizedDaaIds)}
-            onRemoveAll={() => onRemoveAll(authorizedDaaIds)}
-          />
+          {!readOnly && (
+            <BulkActionButtons
+              dataCyPrefix={`researcher-${researcherId}`}
+              approveAllDisabled={unauthorizedDaaIds.length === 0}
+              removeAllDisabled={authorizedDaaIds.length === 0}
+              onApproveAll={() => onApproveAll(unauthorizedDaaIds)}
+              onRemoveAll={() => onRemoveAll(authorizedDaaIds)}
+            />
+          )}
         </Box>
       </Box>
 
@@ -156,6 +182,7 @@ export default function ResearcherAccordionRow({
           daaRows={daaRows}
           onAuthorize={onAuthorize}
           onRevoke={onRevoke}
+          readOnly={readOnly}
         />
       </Collapse>
     </Paper>

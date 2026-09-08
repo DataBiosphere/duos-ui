@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Auth } from 'src/libs/auth/auth'
+import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
 import { TosService } from 'src/libs/TosService'
 import SimpleButton from 'src/components/SimpleButton'
 import { Theme } from 'src/libs/theme'
@@ -29,8 +29,10 @@ export default function TermsOfServiceAcceptance() {
   }, [navigate])
 
   const signOut = async () => {
-    await Auth.signOut()
-    navigate('/')
+    const result = await Auth.signOut('/')
+    if (result.status === 'unconfirmed') {
+      reportUnconfirmedSignOut()
+    }
   }
 
   return (

@@ -3,6 +3,7 @@ import { ElasticsearchQuery, ElasticsearchResponse, IntellectualPropertyStudyAgg
 import { FilterState, IntellectualPropertyAsset, PaginationState, SortState } from 'src/types/library'
 import { makeIntellectualPropertyColumns } from 'src/components/data_library/columns/intellectualPropertyColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
 // The Elasticsearch clause for ipFiledDate only decides which *studies* enter
 // the shared aggregation; every IP asset of a qualifying study comes back, so
@@ -10,6 +11,12 @@ import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } f
 // from this same function) includes assets filed outside the requested range.
 const matchesIntellectualPropertyFilters = (ip: IntellectualPropertyAsset, filters?: FilterState) => {
   if (!filters) {
+    return true
+  }
+
+  // Inverted bounds build no ES clause, so they must not narrow rows here
+  // either — otherwise the grid empties while the panel flags the range.
+  if (!isFilterActive('ipFiledDate', filters)) {
     return true
   }
 

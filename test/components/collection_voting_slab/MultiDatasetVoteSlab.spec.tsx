@@ -27,7 +27,6 @@ vi.mock('src/libs/ajax/Email', () => ({
   Email: { sendReminderEmail: vi.fn() },
 }))
 
-// VotesPieChart uses react-google-charts which cannot render in jsdom
 vi.mock('src/components/common/VotesPieChart', () => ({
   default: () => <div data-testid="votes-pie-chart" />,
 }))

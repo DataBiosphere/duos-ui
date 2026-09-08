@@ -49,6 +49,8 @@ export async function handleLogin(request: FastifyRequest, reply: FastifyReply):
     code_challenge: await pkce.challenge(verifier),
     code_challenge_method: 'S256',
     state,
+    // Lax cookies are sent on B2C's cross-site GET callback, but not form_post.
+    response_mode: 'query',
     // Force the B2C login screen even when B2C still holds an SSO cookie.
     prompt: 'login',
   })

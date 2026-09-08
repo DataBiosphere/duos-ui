@@ -4,6 +4,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import type { PostgresDb } from '@fastify/postgres'
 import { createPgSessionStore } from '../src/session/pgStore.js'
+import { sessionPluginOptions } from '../src/session/sessionOptions.js'
 import '../src/types/session.js'
 
 // ---------------------------------------------------------------------------
@@ -41,18 +42,10 @@ const SECRET = 'test-secret-that-is-at-least-32-characters'
 async function buildSessionApp(pg: PostgresDb): Promise<FastifyInstance> {
   const app = Fastify({ logger: false })
   await app.register(fastifyCookie)
-  await app.register(fastifySession, {
+  await app.register(fastifySession, sessionPluginOptions({
     secret: SECRET,
     store: createPgSessionStore(pg),
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // Strict would strip the cookie from the OAuth callback redirect — see index.ts
-      maxAge: 8 * 60 * 60 * 1000,
-      path: '/',
-    },
-    saveUninitialized: false,
-  })
+  }))
 
   app.post('/login', async (request) => {
     request.session.userId = 'user@example.com'

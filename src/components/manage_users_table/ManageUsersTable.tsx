@@ -1,37 +1,19 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Box } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid'
 import { Link } from 'react-router'
-import { getSearchFilterFunctions } from 'src/libs/utils'
-import { Theme } from 'src/libs/theme'
-import { formatUserRoles, institutionName } from 'src/components/manage_users_table/manageUsersTableUtils'
-import { DuosUser } from 'src/types/model'
+import { getSearchFilterFunctions, hasDataSubmitterRole } from 'src/libs/utils'
+import { DATA_GRID_CONTAINER_SX, DATA_GRID_SX } from 'src/components/dataGridDefaults'
+import { dacNameMap, formatUserDacs, formatUserRoles, institutionName, UserDac, userDacs, yesNo } from 'src/components/manage_users_table/manageUsersTableUtils'
+import { isNil } from 'src/utils/NodashUtil'
+import { DacObject, DuosUser } from 'src/types/model'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
-
-// MUI rings on plain :focus, which fires on click; keyboard focus keeps a ring via :focus-visible.
-const DATAGRID_SX = {
-  '& .MuiDataGrid-cell:focus': { outline: 'none' },
-  '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
-  '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
-  '& .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
-  '& .MuiDataGrid-cell:focus-visible, & .MuiDataGrid-columnHeader:focus-visible': {
-    outline: `2px solid ${Theme.palette.link}`,
-    outlineOffset: '-2px',
-  },
-  // The link takes focus in its cell's place, and index.css resets link outlines.
-  '& .MuiDataGrid-cell a:focus-visible': {
-    outline: `2px solid ${Theme.palette.link}`,
-    outlineOffset: '2px',
-  },
-}
-
-// Left inset matches SearchBar's own margin, negative right mirrors the search and add button row.
-const gridContainerSx = { marginTop: '2rem', marginLeft: 3, marginRight: '-2rem' }
 
 export interface ManageUsersTableProps {
   isLoading: boolean
   userList: DuosUser[]
+  dacList?: DacObject[]
   searchText: string
 }
 
@@ -41,16 +23,28 @@ interface UserRow {
   email: string
   institution: string
   roles: string
+  dacs: string
+  dacDetails: UserDac[]
+  researcherStatus: string
+  dataSubmitterStatus: string
 }
 
 // Roles and institution are flattened to their displayed text, so every column sorts on what is read.
-const toUserRow = (user: DuosUser): UserRow => ({
-  id: user.userId,
-  displayName: user.displayName,
-  email: user.email,
-  institution: institutionName(user.institution),
-  roles: formatUserRoles(user.roles, user.libraryCard),
-})
+// The isResearcher/isDataSubmitter flags are set for the signed-in user only, so a list response has neither.
+const toUserRow = (user: DuosUser, dacNameById: Map<number, string>): UserRow => {
+  const dacDetails = userDacs(user.roles, dacNameById)
+  return {
+    id: user.userId,
+    displayName: user.displayName,
+    email: user.email,
+    institution: institutionName(user.institution),
+    roles: formatUserRoles(user.roles, user.libraryCard),
+    dacs: formatUserDacs(dacDetails),
+    dacDetails,
+    researcherStatus: yesNo(!isNil(user.libraryCard)),
+    dataSubmitterStatus: yesNo(hasDataSubmitterRole(user)),
+  }
+}
 
 const COLUMNS: GridColDef<UserRow>[] = [
   {
@@ -68,19 +62,50 @@ const COLUMNS: GridColDef<UserRow>[] = [
   { field: 'email', headerName: 'Email', flex: 1.25, minWidth: 200 },
   { field: 'institution', headerName: 'Institution', flex: 1, minWidth: 180 },
   { field: 'roles', headerName: 'Roles', flex: 1, minWidth: 180 },
+  {
+    field: 'dacs',
+    headerName: 'DACs',
+    flex: 1,
+    minWidth: 180,
+    // One DAC per line, so every link is visible and followable however many a user belongs to.
+    renderCell: ({ row, tabIndex }: GridRenderCellParams<UserRow>) => (
+      <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        {row.dacDetails.length === 0
+          ? 'None'
+          : row.dacDetails.map(dac => (
+              <Link key={dac.dacId} to={`/manage_dac/${dac.dacId}`} tabIndex={tabIndex}>
+                {dac.name}
+              </Link>
+            ))}
+      </Box>
+    ),
+  },
+  { field: 'researcherStatus', headerName: 'Researcher Status', flex: 0.75, minWidth: 150 },
+  { field: 'dataSubmitterStatus', headerName: 'Data Submitter Status', flex: 0.75, minWidth: 170 },
 ]
+
+const GROW_ROW_TO_FIT_CONTENT = () => 'auto' as const
+
+// An auto-height cell lays its content out itself, so the padding and centering the fixed row height
+// used to supply have to be spelled out.
+const AUTO_HEIGHT_DATA_GRID_SX = {
+  ...DATA_GRID_SX,
+  '& .MuiDataGrid-cell': { display: 'flex', alignItems: 'center', paddingY: 1 },
+}
 
 const filterFn = getSearchFilterFunctions().users
 
-export const ManageUsersTable = function ManageUsersTable({ isLoading, userList, searchText }: ManageUsersTableProps) {
+export const ManageUsersTable = function ManageUsersTable({ isLoading, userList, dacList = [], searchText }: ManageUsersTableProps) {
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: PAGE_SIZE_OPTIONS[0] })
   const [lastSearchText, setLastSearchText] = useState(searchText)
+
+  const dacNameById = useMemo(() => dacNameMap(dacList), [dacList])
 
   // Filtering is derived, so a keystroke costs one render rather than a cascade of effects.
   const rows = useMemo(() => {
     const terms = searchText.split(' ').filter(term => term.length > 0)
-    return terms.reduce((list, term) => filterFn(term, list), userList ?? []).map(toUserRow)
-  }, [userList, searchText])
+    return terms.reduce((list, term) => filterFn(term, list), userList ?? []).map(user => toUserRow(user, dacNameById))
+  }, [userList, searchText, dacNameById])
 
   const lastPage = Math.max(0, Math.ceil(rows.length / paginationModel.pageSize) - 1)
 
@@ -97,7 +122,7 @@ export const ManageUsersTable = function ManageUsersTable({ isLoading, userList,
   const page = Math.min(paginationModel.page, lastPage)
 
   return (
-    <Box sx={gridContainerSx}>
+    <Box sx={DATA_GRID_CONTAINER_SX}>
       <DataGrid
         rows={rows}
         columns={COLUMNS}
@@ -111,7 +136,9 @@ export const ManageUsersTable = function ManageUsersTable({ isLoading, userList,
         initialState={{ sorting: { sortModel: [{ field: 'displayName', sort: 'asc' }] } }}
         disableRowSelectionOnClick
         autoHeight
-        sx={DATAGRID_SX}
+        // A row grows to fit its DACs column, rather than clipping every DAC after the first.
+        getRowHeight={GROW_ROW_TO_FIT_CONTENT}
+        sx={AUTO_HEIGHT_DATA_GRID_SX}
       />
     </Box>
   )

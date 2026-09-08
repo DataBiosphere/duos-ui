@@ -13,6 +13,9 @@ export default defineConfig({
   },
   test: {
     name: 'browser',
+    setupFiles: ['./test/setup.ts'],
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
     globals: true,
     include: ['test/browser/**/*.{spec,test}.{js,jsx,ts,tsx}'],
     browser: {

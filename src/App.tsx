@@ -12,6 +12,7 @@ import { useNavigate, useLocation } from 'react-router'
 import { Storage } from 'src/libs/storage'
 import AppRoutes from 'src/routing/AppRoutes'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
+import { useSessionReconciler } from 'src/hooks/useSessionReconciler'
 import { extractError } from 'src/utils/ErrorUtils'
 import { Spinner } from 'src/components/Spinner'
 
@@ -27,11 +28,15 @@ const queryClient = new QueryClient({
 })
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [env, setEnv] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const [isLoading, setIsLoading] = useState(false)
+  // Auth state comes from the BFF session probe (GET /auth/me), not
+  // localStorage. The reconciler classifies every fresh probe (hydrate the
+  // stored profile, or run the full post-sign-in bootstrap) and reports when
+  // the routes must stay hidden — see useSessionReconciler for the rules.
+  const { isLoggedIn, reconciling } = useSessionReconciler(queryClient)
 
   useEffect(() => {
     const setEnvironment = async () => {
@@ -40,15 +45,36 @@ function App() {
       Storage.setEnv(environment)
     }
     setEnvironment()
-  })
+    // The environment never changes within a page load — look it up once on
+    // mount instead of on every render.
+  }, [])
 
+  /**
+   * The BFF /auth/callback lands here when it cannot finish the sign-in, because the callback is a top-level browser
+   * navigation and a JSON error body would strand the user on it. Two markers:
+   *
+   * - `provider` — B2C answered the authorization request with an error instead of a code. The known case is B2C
+   *   failing to connect to the chosen Microsoft provider (an expired federation client secret in the tenant fails
+   *   every Microsoft sign-in). The message stays generic because the cause is on the provider side — the server log
+   *   carries the B2C error and description.
+   * - `rate_limited` — the callback's flood control rejected the request (Phase 5, story 5-G3). Retrying works, so the
+   *   message says so instead of pointing at the provider or at support.
+   */
   useEffect(() => {
-    const setUserIsLogged = () => {
-      const isLogged = Storage.userIsLogged()
-      setIsLoggedIn(isLogged)
-    }
-    setUserIsLogged()
-  })
+    const queryParams = new URLSearchParams(location.search)
+    const marker = queryParams.get('signInError')
+    if (marker === null) return
+    Notifications.showError({
+      text: marker === 'rate_limited'
+        ? 'Sign in could not be completed because too many sign-in attempts arrived at once. Please wait a minute and try again.'
+        : 'Sign in could not be completed because the identity provider reported an error. '
+          + 'Please try again. If the problem continues, contact DUOS support.',
+      // Long timeout: the message carries instructions the user must read.
+      timeout: 30000,
+    })
+    queryParams.delete('signInError')
+    navigate({ pathname: location.pathname, search: queryParams.toString() }, { replace: true })
+  }, [navigate, location.pathname, location.search])
 
   /**
      * Check for RAS Authentication URL params. If we have a code and state, we will call ECM APIs to get redirect
@@ -101,9 +127,12 @@ function App() {
           <div className="body">
             <div className="wrap">
               <div className="main">
-                <DuosHeader />
-                {isLoading && <div style={loadingSyle}><Spinner /></div>}
-                {!isLoading && <AppRoutes isLogged={isLoggedIn} env={env} />}
+                {/* The header derives role tabs and the profile menu from
+                    Storage.getCurrentUser() — it is identity-bearing UI and
+                    must hide during reconciliation like the routes do. */}
+                {!reconciling && <DuosHeader />}
+                {(isLoading || reconciling) && <div style={loadingSyle}><Spinner /></div>}
+                {!(isLoading || reconciling) && <AppRoutes isLogged={isLoggedIn} env={env} />}
               </div>
             </div>
             <DuosFooter />

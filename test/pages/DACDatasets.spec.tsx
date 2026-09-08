@@ -85,10 +85,6 @@ vi.mock('src/components/dac_dataset_table/DACDatasetConstants.js', () => ({
   },
 }))
 
-vi.mock('src/components/dac_dataset_table/DACDatasetTableCellData', () => ({
-  consoleTypes: { CHAIR: 'CHAIR' },
-}))
-
 vi.mock('src/components/AddObjectButton', () => ({
   default: ({ label, onClick }: { label: string, onClick: () => void }) => (
     <button onClick={onClick}>{label}</button>

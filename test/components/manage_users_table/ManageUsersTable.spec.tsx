@@ -4,7 +4,7 @@ import { fireEvent, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { ManageUsersTable, ManageUsersTableProps } from 'src/components/manage_users_table/ManageUsersTable'
 import { renderWithRouter } from '../../test-utils'
-import { DuosUser, InstitutionInterface, LibraryCard } from 'src/types/model'
+import { DacObject, DuosUser, InstitutionInterface, LibraryCard } from 'src/types/model'
 
 const institution = (name: string): InstitutionInterface => ({ id: 1, name } as unknown as InstitutionInterface)
 
@@ -25,7 +25,7 @@ const makeUser = (overrides: Partial<DuosUser> & { userId: number, displayName: 
   isChairPerson: false,
   isDataSubmitter: false,
   isMember: false,
-  isResearcher: true,
+  isResearcher: false,
   isSigningOfficial: false,
   roles: [{ roleId: 1, name: 'Researcher', userId: overrides.userId, userRoleId: overrides.userId }],
   ...overrides,
@@ -53,6 +53,18 @@ const carol = makeUser({
   email: 'carol@test.com',
   libraryCard: libraryCard(3),
 })
+
+const dave = makeUser({
+  userId: 4,
+  displayName: 'Dave Chair',
+  email: 'dave@test.com',
+  roles: [
+    { roleId: 8, name: 'Chairperson', userId: 4, userRoleId: 8, dacId: 1 },
+    { roleId: 9, name: 'Member', userId: 4, userRoleId: 9, dacId: 2 },
+  ],
+})
+
+const testDacs: DacObject[] = [{ dacId: 1, name: 'Cancer DAC' }, { dacId: 2, name: 'Rare Disease DAC' }]
 
 const testUsers = [carol, alice, bob]
 
@@ -98,6 +110,13 @@ const emittedRules = (): string[] =>
     .join('')
     .split('}')
 
+// Yes and No repeat across the two status columns, so the assertions read a cell by column position.
+const RESEARCHER_STATUS = 5
+const DATA_SUBMITTER_STATUS = 6
+
+const cellText = (row: HTMLElement, column: number): string =>
+  within(row).queryAllByRole('gridcell')[column]?.textContent ?? ''
+
 const rowFor = async (name: string): Promise<HTMLElement> => {
   const cell = await screen.findByText(name)
   const row = cell.closest('[role="row"]')
@@ -109,7 +128,7 @@ describe('ManageUsersTable', () => {
   it('renders a column for every user attribute', () => {
     renderTable()
 
-    for (const label of ['User Name', 'Email', 'Institution', 'Roles']) {
+    for (const label of ['User Name', 'Email', 'Institution', 'Roles', 'DACs', 'Researcher Status', 'Data Submitter Status']) {
       expect(columnHeader(label)).toBeInTheDocument()
     }
   })
@@ -121,6 +140,27 @@ describe('ManageUsersTable', () => {
     expect(within(row).getByText(alice.email)).toBeInTheDocument()
     expect(within(row).getByText('Broad Institute')).toBeInTheDocument()
     expect(within(row).getByText('Admin')).toBeInTheDocument()
+  })
+
+  // Every fixture leaves the flags false, as a list response does, so only the card and the role can drive these.
+  it('reads researcher status off the library card', async () => {
+    renderTable()
+
+    expect(cellText(await rowFor(carol.displayName), RESEARCHER_STATUS)).toBe('Yes')
+    expect(cellText(await rowFor(alice.displayName), RESEARCHER_STATUS)).toBe('No')
+  })
+
+  it('reads data submitter status off the DataSubmitter role', async () => {
+    const dave = makeUser({
+      userId: 4,
+      displayName: 'Dave Lee',
+      email: 'dave@test.com',
+      roles: [{ roleId: 8, name: 'DataSubmitter', userId: 4, userRoleId: 4 }],
+    })
+    renderWithRouter(<ManageUsersTable isLoading={false} userList={[alice, dave]} searchText="" />)
+
+    expect(cellText(await rowFor(dave.displayName), DATA_SUBMITTER_STATUS)).toBe('Yes')
+    expect(cellText(await rowFor(alice.displayName), DATA_SUBMITTER_STATUS)).toBe('No')
   })
 
   it('links each user name to their edit page', async () => {
@@ -146,6 +186,38 @@ describe('ManageUsersTable', () => {
     const row = await rowFor(carol.displayName)
     expect(within(row).getByText('N/A')).toBeInTheDocument()
     expect(within(row).getByText('Library Card')).toBeInTheDocument()
+  })
+
+  it('reads None in the DACs column for a user with no chair or member role', async () => {
+    renderTable()
+
+    const row = await rowFor(alice.displayName)
+    expect(within(row).getByText('None')).toBeInTheDocument()
+  })
+
+  it('links each DAC a user chairs or belongs to, to its manage page', async () => {
+    renderTable({ userList: [dave], dacList: testDacs })
+
+    const row = await rowFor(dave.displayName)
+    expect(within(row).getByRole('link', { name: 'Cancer DAC' })).toHaveAttribute('href', '/manage_dac/1')
+    expect(within(row).getByRole('link', { name: 'Rare Disease DAC' })).toHaveAttribute('href', '/manage_dac/2')
+  })
+
+  it('lists each DAC on its own line rather than running them together', async () => {
+    renderTable({ userList: [dave], dacList: testDacs })
+
+    const row = await rowFor(dave.displayName)
+    const cell = within(row).getByRole('link', { name: 'Cancer DAC' }).parentElement as HTMLElement
+    // Stacked children, so no separator text sits between the names.
+    expect(cell.textContent).toBe('Cancer DACRare Disease DAC')
+    expect(Array.from(cell.children).map(child => child.textContent)).toEqual(['Cancer DAC', 'Rare Disease DAC'])
+  })
+
+  it('reads Unknown for a DAC role whose id is missing from the DAC list', async () => {
+    renderTable({ userList: [dave], dacList: [] })
+
+    const row = await rowFor(dave.displayName)
+    expect(within(row).getAllByRole('link', { name: 'Unknown' })).toHaveLength(2)
   })
 
   it('lists users alphabetically before any column is sorted', async () => {

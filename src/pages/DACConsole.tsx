@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import SearchBar from 'src/components/SearchBar'
 import { Storage } from 'src/libs/storage'
-import { User } from 'src/libs/ajax/User'
 import { Collections } from 'src/libs/ajax/Collections'
 import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
@@ -11,7 +10,7 @@ import { cancelCollectionFn, consoleTypes, openCollectionFn, updateCollectionFn 
 import { useResponsiveDarCollectionColumns } from 'src/hooks/useResponsiveDarCollectionColumns'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
-import { DarCollectionSummary, Dataset } from 'src/types/model'
+import { DarCollectionSummary } from 'src/types/model'
 
 const mergeCollectionSummaries = (
   summariesByRole: DarCollectionSummary[][],
@@ -58,7 +57,6 @@ export default function DACConsole() {
 
   const [collections, setCollections] = useState<DarCollectionSummary[]>([])
   const [filteredList, setFilteredList] = useState<DarCollectionSummary[]>([])
-  const [relevantDatasets, setRelevantDatasets] = useState<Dataset[] | undefined>()
   const [isLoading, setIsLoading] = useState(true)
   const [searchText, setSearchText] = useState('')
   const filterFn = getSearchFilterFunctions().darCollections
@@ -73,15 +71,11 @@ export default function DACConsole() {
   useEffect(() => {
     const init = async () => {
       try {
-        const [summariesByRole, datasets] = await Promise.all([
-          Promise.all(roles.map(collectionRole =>
-            Collections.getCollectionSummariesByRoleName(collectionRole),
-          )),
-          User.getUserRelevantDatasets(),
-        ])
+        const summariesByRole = await Promise.all(roles.map(collectionRole =>
+          Collections.getCollectionSummariesByRoleName(collectionRole),
+        ))
         const cols = mergeCollectionSummaries(summariesByRole)
         setCollections(cols)
-        setRelevantDatasets(datasets)
         setFilteredList(cols)
         setIsLoading(false)
       }
@@ -128,7 +122,6 @@ export default function DACConsole() {
           collections={filteredList}
           columns={responsiveColumns}
           isLoading={isLoading}
-          relevantDatasets={relevantDatasets}
           cancelCollection={isChair ? cancelCollection : undefined}
           reviseCollection={null}
           openCollection={isChair ? openCollection : undefined}

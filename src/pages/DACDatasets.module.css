@@ -1,13 +1,16 @@
 .btn-primary-dac-datasets {
-    font-size: 15px !important;
+    /* Sized to sit in a DataGrid cell: 12px/28px matches the Data Library's `size="small"` chips.
+       min-width defeats MUI Button's 64px default so REJECT can shrink to its text. */
+    font-size: 12px !important;
     font-weight: 500;
-    border: 2px solid #0948B7 !important;
-    border-radius: 5px;
-    height: 40px;
-    margin-right: 1em !important;
+    border: 1px solid #0948B7 !important;
+    border-radius: 4px;
+    height: 28px;
+    min-width: 0 !important;
     cursor: pointer;
     color: #0948B7 !important;
-    padding: 10px 20px;
+    padding: 0 6px !important;
+    white-space: nowrap;
 }
 
 .add-button {

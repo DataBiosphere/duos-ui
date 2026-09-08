@@ -353,7 +353,7 @@ export const processRestrictionStatements = async (
   }
 
   if (key !== 'diseaseRestrictions') {
-    return processDefinedLimitations(key, dataUse, consentTranslations)
+    return processDefinedLimitations(key, consentTranslations)
   }
 
   const diseaseValue = value as (string | { label: string })[]
@@ -368,28 +368,13 @@ export const processRestrictionStatements = async (
   return processDiseaseRestrictionsWithUrls(diseaseValue as string[])
 }
 
+/** Only `diseaseRestrictions` is function-valued, and it resolves through its own path. */
 export const processDefinedLimitations = (
   key: string,
-  dataUse: DataUse,
   translations: ConsentTranslationsMap,
 ): TranslationEntry | undefined => {
-  const targetKeys = ['hmbResearch', 'populationOriginsAncestry', 'generalUse']
-  const isHMBActive = !!dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions)
-  const isPOAActive = !!dataUse.populationOriginsAncestry
-  const isGeneralUseActive = !!dataUse.generalUse && !isHMBActive && !isPOAActive && isEmpty(dataUse.diseaseRestrictions)
-  let statement: TranslationEntry | undefined
-  if (
-    !targetKeys.includes(key)
-    || (key === 'hmbResearch' && isHMBActive)
-    || (key === 'populationOriginsAncestry' && isPOAActive)
-    || (key === 'generalUse' && isGeneralUseActive)
-  ) {
-    const translation = translations[key]
-    if (translation && typeof translation !== 'function') {
-      statement = translation
-    }
-  }
-  return statement
+  const translation = translations[key]
+  return translation && typeof translation !== 'function' ? translation : undefined
 }
 
 // Extend DataUse to include otherRestrictions for runtime compatibility
@@ -412,7 +397,8 @@ const processOtherInDataUse = (
       Promise.resolve({
         code: 'OTH1',
         description: `Primary Other: ${isEmpty(dataUse.other) ? 'Not provided' : dataUse.other}`,
-        type: ControlledAccessType.modifiers,
+        // A permission, like OTHER in the classifier and srpTranslations.other; only OTH2 is not.
+        type: ControlledAccessType.permissions,
       }),
     )
   }
