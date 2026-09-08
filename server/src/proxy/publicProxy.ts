@@ -196,8 +196,10 @@ async function anonymousMetricsRoute(app: FastifyInstance): Promise<void> {
   }
 
   // Expose only the anonymous event route.
-  app.post(PUBLIC_METRICS_EVENT_PATH, routeOptions, (_request, reply) => {
+  app.post(PUBLIC_METRICS_EVENT_PATH, routeOptions, (request, reply) => {
     reply.from('/api/event', {
+      body: request.body as string,
+      contentType: request.headers['content-type'],
       rewriteRequestHeaders,
       rewriteHeaders: rewriteResponseHeaders,
       onError: onUpstreamTransportError,
@@ -206,26 +208,62 @@ async function anonymousMetricsRoute(app: FastifyInstance): Promise<void> {
 }
 
 /**
+ * Bare bodies, like the session proxies' error shape under ADR-010: a parser
+ * or rate-limit error message can carry framework detail, and no client reads
+ * it. Logging still happens here, because this handler replaces the app-level
+ * handleServerError for the whole /public scope.
+ */
+function handlePublicError(error: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
+  const statusCode = error.statusCode ?? 500
+  if (statusCode === 429) {
+    request.log.warn({ ip: request.ip, url: request.url }, '[public-proxy] rate limit exceeded')
+  }
+  else if (statusCode >= 500) {
+    request.log.error({ err: error }, '[public-proxy] unhandled error')
+  }
+  return reply.status(statusCode).send()
+}
+
+/** Accept only well-formed JSON, but keep the raw string so the proxy forwards the client's bytes. */
+function parseJsonBody(
+  _request: FastifyRequest,
+  body: string | Buffer,
+  done: (err: Error | null, body?: string) => void,
+): void {
+  const raw = body.toString()
+  try {
+    JSON.parse(raw)
+    done(null, raw)
+  }
+  catch {
+    const invalid = new Error('invalid JSON body') as Error & { statusCode?: number }
+    invalid.statusCode = 400
+    done(invalid)
+  }
+}
+
+/**
+ * A route that answers for an upstream nobody configured.
+ */
+function registerUnconfiguredUpstream(app: FastifyInstance, envVar: string, routes: { method: 'GET' | 'POST', url: string }[], feature: string): void {
+  app.log.warn(`[server] ${envVar} is not set — ${routes.map(route => route.url).join(' and ')} answer 503, so ${feature} will fail in this environment`)
+  for (const { method, url } of routes) {
+    app.route({ method, url, handler: (_request, reply) => reply.status(503).send({ error: 'upstream_not_configured' }) })
+  }
+}
+
+/**
  * Keep this plugin encapsulated so its parsers do not affect other routes.
- * Missing upstreams disable their routes; malformed configured origins fail startup.
  */
 export async function publicProxy(app: FastifyInstance): Promise<void> {
-  // Return bare statuses for parser and rate-limit errors.
-  app.setErrorHandler((error: FastifyError, _request: FastifyRequest, reply: FastifyReply) =>
-    reply.status(error.statusCode ?? 500).send())
+  if (!app.hasDecorator('rateLimit')) {
+    throw new Error(`the ${PUBLIC_FEATURES_PREFIX} and ${PUBLIC_METRICS_EVENT_PATH} routes require @fastify/rate-limit to be registered first — their per-route limits do nothing without it`)
+  }
 
-  // Buffer JSON to enforce the body limit; reply-from serializes the parsed body.
+  app.setErrorHandler(handlePublicError)
+
   app.removeAllContentTypeParsers()
-  app.addContentTypeParser('application/json', { parseAs: 'string', bodyLimit: METRICS_BODY_LIMIT }, (_request, body, done) => {
-    try {
-      done(null, JSON.parse(body as string))
-    }
-    catch {
-      const invalid = new Error('invalid JSON body') as Error & { statusCode?: number }
-      invalid.statusCode = 400
-      done(invalid)
-    }
-  })
+  app.addContentTypeParser('application/json', { parseAs: 'string' }, parseJsonBody)
 
   app.addHook('onSend', (_request, reply, _payload, done) => {
     reply.headers(RESPONSE_HARDENING)
@@ -236,13 +274,16 @@ export async function publicProxy(app: FastifyInstance): Promise<void> {
     await app.register(featureFlagRoutes)
   }
   else {
-    app.log.warn(`[server] DUOS_API_URL is not set — ${PUBLIC_FEATURES_PREFIX} is disabled, so pre-login feature flags will fail in this environment`)
+    registerUnconfiguredUpstream(app, 'DUOS_API_URL', [
+      { method: 'GET', url: PUBLIC_FEATURES_PREFIX },
+      { method: 'GET', url: `${PUBLIC_FEATURES_PREFIX}/:key` },
+    ], 'pre-login feature flags')
   }
 
   if (process.env.DUOS_BARD_URL) {
     await app.register(anonymousMetricsRoute)
   }
   else {
-    app.log.warn(`[server] DUOS_BARD_URL is not set — ${PUBLIC_METRICS_EVENT_PATH} is disabled, so anonymous usage metrics will fail in this environment`)
+    registerUnconfiguredUpstream(app, 'DUOS_BARD_URL', [{ method: 'POST', url: PUBLIC_METRICS_EVENT_PATH }], 'anonymous usage metrics')
   }
 }

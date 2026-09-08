@@ -40,8 +40,11 @@ describe('publicProxy', () => {
     delete process.env.DUOS_BARD_URL
   })
 
-  async function buildPublicApp(): Promise<FastifyInstance> {
-    const instance = Fastify({ logger: false, trustProxy: TRUST_PROXY })
+  async function buildPublicApp(logLines?: string[]): Promise<FastifyInstance> {
+    const logger = logLines
+      ? { level: 'info', stream: { write: (line: string) => { logLines.push(line) } } }
+      : false
+    const instance = Fastify({ logger, trustProxy: TRUST_PROXY })
     await instance.register(fastifyRateLimit, { global: false })
     await instance.register(publicProxy)
     return instance
@@ -49,6 +52,7 @@ describe('publicProxy', () => {
 
   async function buildPublicAppWithSession(accessToken: string): Promise<FastifyInstance> {
     const instance = await buildAppShell()
+    await instance.register(fastifyRateLimit, { global: false })
     seedSession(instance, { accessToken, tokenExpiry: Math.floor(Date.now() / 1000) + 3600 })
     await instance.register(publicProxy)
     return instance
@@ -350,6 +354,69 @@ describe('publicProxy', () => {
       expect(res.body).not.toContain('FST_ERR')
     })
 
+    it('forwards the metrics body byte-for-byte rather than re-serializing a parsed copy', async () => {
+      // reply-from JSON.stringify()s a parsed body: 1.10 would reach Bard as 1.1.
+      app = await buildPublicApp()
+      const raw = '{"event":"duos:page_view","properties":{"ratio":1.10,"note":"a\\u0041"}}'
+
+      const res = await app.inject({
+        method: 'POST',
+        url: PUBLIC_METRICS_EVENT_PATH,
+        headers: { 'content-type': 'application/json' },
+        payload: raw,
+      })
+
+      expect(res.statusCode).toBe(200)
+      expect(bard.last().body.toString()).toBe(raw)
+      expect(bard.last().headers['content-length']).toBe(String(Buffer.byteLength(raw)))
+    })
+
+    it('forwards a falsy JSON body (null) instead of an empty body with a stale content-length', async () => {
+      app = await buildPublicApp()
+
+      const res = await app.inject({
+        method: 'POST',
+        url: PUBLIC_METRICS_EVENT_PATH,
+        headers: { 'content-type': 'application/json' },
+        payload: 'null',
+      })
+
+      expect(res.statusCode).toBe(200)
+      expect(bard.last().body.toString()).toBe('null')
+      expect(bard.last().headers['content-length']).toBe('4')
+    })
+
+    it('logs a rate-limit refusal, so the bare 429 does not also hide the event from operators', async () => {
+      const logLines: string[] = []
+      app = await buildPublicApp(logLines)
+      for (let i = 0; i < FEATURES_MAX_PER_WINDOW; i += 1) {
+        await app.inject({ method: 'GET', url: PUBLIC_FEATURES_PREFIX })
+      }
+
+      await app.inject({ method: 'GET', url: PUBLIC_FEATURES_PREFIX })
+
+      const warning = logLines.map(line => JSON.parse(line) as { level: number, msg: string, url?: string })
+        .find(entry => entry.msg.includes('rate limit exceeded'))
+      expect(warning).toBeDefined()
+      expect(warning?.level).toBe(40) // pino warn
+      expect(warning?.url).toBe(PUBLIC_FEATURES_PREFIX)
+    })
+
+    it('does not log a client-side 4xx (malformed JSON) as a server error', async () => {
+      const logLines: string[] = []
+      app = await buildPublicApp(logLines)
+
+      await app.inject({
+        method: 'POST',
+        url: PUBLIC_METRICS_EVENT_PATH,
+        headers: { 'content-type': 'application/json' },
+        payload: '{"event":',
+      })
+
+      const errors = logLines.map(line => JSON.parse(line) as { level: number }).filter(entry => entry.level >= 50)
+      expect(errors).toHaveLength(0)
+    })
+
     it('answers a malformed JSON body with a bare 400', async () => {
       app = await buildPublicApp()
 
@@ -414,8 +481,24 @@ describe('publicProxy', () => {
       app = await buildPublicApp()
 
       await expect(app.ready()).resolves.toBeDefined()
-      expect((await app.inject({ method: 'GET', url: PUBLIC_FEATURES_PREFIX })).statusCode).toBe(404)
-      expect((await app.inject({ method: 'POST', url: PUBLIC_METRICS_EVENT_PATH })).statusCode).toBe(404)
+      expect((await app.inject({ method: 'GET', url: PUBLIC_FEATURES_PREFIX })).statusCode).toBe(503)
+      expect((await app.inject({ method: 'POST', url: PUBLIC_METRICS_EVENT_PATH })).statusCode).toBe(503)
+    })
+
+    it('answers 503 for an unconfigured upstream, so the SPA fallback cannot turn a lost event into a 200', async () => {
+      delete process.env.DUOS_BARD_URL
+      app = await buildPublicApp()
+      app.setNotFoundHandler((_req, reply) => reply.type('text/html').send('<html></html>'))
+
+      const res = await app.inject({
+        method: 'POST',
+        url: PUBLIC_METRICS_EVENT_PATH,
+        headers: { 'content-type': 'application/json' },
+        payload: '{"event":"duos:page_view"}',
+      })
+
+      expect(res.statusCode).toBe(503)
+      expect(res.json()).toEqual({ error: 'upstream_not_configured' })
     })
 
     it('registers the feature flags when only the DUOS API is configured', async () => {
@@ -423,7 +506,15 @@ describe('publicProxy', () => {
       app = await buildPublicApp()
 
       expect((await app.inject({ method: 'GET', url: PUBLIC_FEATURES_PREFIX })).statusCode).toBe(200)
-      expect((await app.inject({ method: 'POST', url: PUBLIC_METRICS_EVENT_PATH })).statusCode).toBe(404)
+      expect((await app.inject({ method: 'POST', url: PUBLIC_METRICS_EVENT_PATH })).statusCode).toBe(503)
+    })
+
+    it('refuses to register without @fastify/rate-limit, whose absence would silently drop the route limits', async () => {
+      const shell = Fastify({ logger: false })
+      shell.register(publicProxy)
+
+      await expect(shell.ready()).rejects.toThrow('@fastify/rate-limit')
+      await shell.close()
     })
 
     it.each([
@@ -432,6 +523,7 @@ describe('publicProxy', () => {
     ])('refuses to register when %s is set but not a bare origin', async (envVar, value) => {
       process.env[envVar] = value
       const shell = Fastify({ logger: false })
+      await shell.register(fastifyRateLimit, { global: false })
       shell.register(publicProxy)
 
       await expect(shell.ready()).rejects.toThrow(envVar)

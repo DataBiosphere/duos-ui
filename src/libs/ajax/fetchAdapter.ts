@@ -4,7 +4,7 @@ import { Metrics } from 'src/libs/ajax/Metrics'
 import { Storage } from 'src/libs/storage'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
 import { shouldSkip401Redirect } from 'src/utils/AuthRedirectUtils'
-import { BFF_BARD_PREFIX, BFF_PUBLIC_METRICS_EVENT_PATH, Config } from 'src/libs/config'
+import { BFF_BARD_PREFIX, BFF_PUBLIC_METRICS_EVENT_PATH, BFF_PUBLIC_PREFIX, Config } from 'src/libs/config'
 import { CsrfTokenSessionExpiredError, getCsrfToken, isCsrfRejection, resetCsrfToken } from 'src/libs/ajax/csrf'
 
 export type ResponseType = 'blob' | 'json' | 'text'
@@ -50,13 +50,35 @@ export interface FetchData<T> {
 
 const HELP_DESK_MESSAGE = 'Please contact the help desk at duos@duos.org.'
 
+// Callers of reportError do not await it, so a throw here would surface as an
+// unhandled rejection. A URL fetch already rejected as malformed must not throw again.
+const parseUrl = (url: string): URL | undefined => {
+  try {
+    return new URL(url, globalThis.location.origin)
+  }
+  catch {
+    return undefined
+  }
+}
+
+// The CSRF token only means something to the BFF's own proxies — it must not
+// be sent to another origin.
+const isSameOrigin = (url: string): boolean =>
+  parseUrl(url)?.origin === globalThis.location.origin
+
+// Same-origin only: a foreign host that happens to share the path is not our metrics endpoint.
 const isPublicMetricsEvent = (url: string): boolean =>
-  new URL(url, globalThis.location.origin).pathname === BFF_PUBLIC_METRICS_EVENT_PATH
+  isSameOrigin(url) && parseUrl(url)?.pathname === BFF_PUBLIC_METRICS_EVENT_PATH
+
+// A blank bardApiUrl (the base config default, and plausible in BFF mode where
+// nothing else reads it) must not match every URL through ''.startsWith.
+const isLegacyBardUrl = (url: string, bardApiUrl: string): boolean =>
+  bardApiUrl !== '' && url.startsWith(bardApiUrl)
 
 export const reportError = async (url: string, status: number): Promise<void> => {
   // ErrorReporter emits metrics; reporting metrics failures would recurse.
   const bardApiUrl = await Config.getBardApiUrl()
-  if (url.startsWith(bardApiUrl) || url.startsWith(`${BFF_BARD_PREFIX}/`) || isPublicMetricsEvent(url)) {
+  if (isLegacyBardUrl(url, bardApiUrl) || url.startsWith(`${BFF_BARD_PREFIX}/`) || isPublicMetricsEvent(url)) {
     return
   }
   const msg = 'Error fetching response: '
@@ -69,20 +91,19 @@ export const reportError = async (url: string, status: number): Promise<void> =>
 
 const UNSAFE_METHODS: ReadonlySet<Method> = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
 
-// The CSRF token only means something to the BFF's own proxies — it must not
-// be sent to another origin.
-const isSameOrigin = (url: string): boolean =>
-  new URL(url, globalThis.location.origin).origin === globalThis.location.origin
-
 // Public POSTs must skip the authenticated CSRF endpoint to avoid signed-out logout handling.
 const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
   'POST /duos-api/support/request',
   'POST /duos-api/support/upload',
-  `POST ${BFF_PUBLIC_METRICS_EVENT_PATH}`,
 ])
 
-const isCsrfExempt = (method: Method, url: string): boolean =>
-  CSRF_EXEMPT_UNSAFE_REQUESTS.has(`${method} ${new URL(url, globalThis.location.origin).pathname}`)
+// The whole /public/ prefix is exempt
+const CSRF_EXEMPT_PREFIX = `${BFF_PUBLIC_PREFIX}/`
+
+const isCsrfExempt = (method: Method, url: string): boolean => {
+  const pathname = parseUrl(url)?.pathname ?? ''
+  return pathname.startsWith(CSRF_EXEMPT_PREFIX) || CSRF_EXEMPT_UNSAFE_REQUESTS.has(`${method} ${pathname}`)
+}
 
 const needsCsrfToken = (method: Method, url: string): boolean =>
   UNSAFE_METHODS.has(method) && isSameOrigin(url) && !isCsrfExempt(method, url)

@@ -104,9 +104,11 @@ const BFF_ECM_PREFIX = '/ecm-api'
 const BFF_TDR_PREFIX = '/tdr-api'
 export const BFF_BARD_PREFIX = '/bard-api'
 
-// Public routes must match server/src/proxy/publicProxy.ts.
-export const BFF_PUBLIC_FEATURES_PREFIX = '/public/features'
-export const BFF_PUBLIC_METRICS_PREFIX = '/public/metrics'
+// Public routes must match server/src/proxy/publicProxy.ts. Every route under
+// this prefix is unauthenticated, so the adapter exempts the whole prefix from CSRF.
+export const BFF_PUBLIC_PREFIX = '/public'
+export const BFF_PUBLIC_FEATURES_PREFIX = `${BFF_PUBLIC_PREFIX}/features`
+export const BFF_PUBLIC_METRICS_PREFIX = `${BFF_PUBLIC_PREFIX}/metrics`
 
 // Shared with the adapter's CSRF exemption and metrics error-reporting guard.
 export const BFF_PUBLIC_METRICS_EVENT_PATH = `${BFF_PUBLIC_METRICS_PREFIX}/event`
