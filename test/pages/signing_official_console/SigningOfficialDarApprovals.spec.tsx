@@ -112,6 +112,8 @@ describe('SigningOfficialDarApprovals', () => {
     render(<SigningOfficialDarApprovals />)
 
     expect(screen.getByText('My Institution\'s Data Access Approvals')).toBeInTheDocument()
+    expect(screen.getByText(/Review all approved Data Access Requests \(DARs\) submitted by researchers at your institution/))
+      .toBeInTheDocument()
 
     await waitFor(() => {
       expect(Collections.getCollectionSummariesByRoleName).toHaveBeenCalledWith(USER_ROLES.signingOfficial)
