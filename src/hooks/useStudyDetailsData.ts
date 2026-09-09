@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
@@ -7,6 +7,8 @@ import { AggregationResult, ElasticsearchQuery } from 'src/types/elastic'
 import { ExportableDatasets, PaginationState, SortState } from 'src/types/library'
 import { DatasetTerm, StudyTerm } from 'src/types/model'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
+
+const STUDY_STALE_TIME = 5 * 60 * 1000
 
 export const STUDY_DATASETS_QUERY_KEY = 'study-details-datasets'
 export const STUDY_EXPORTS_QUERY_KEY = 'study-details-exports'
@@ -87,7 +89,33 @@ export const useStudyDatasets = (
       participantCount: participantAggregation?.value,
     }
   },
-  staleTime: 5 * 60 * 1000,
+  // Hold the previous page's rows while the next one loads, so paging and sorting don't
+  // collapse the grid to its empty state and back.
+  placeholderData: keepPreviousData,
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const STUDY_SELECTABLE_IDS_QUERY_KEY = 'study-details-selectable-ids'
+
+/**
+ * Every selectable dataset id in the study, not just the ones on the visible grid page, so the
+ * default selection can't silently apply for a subset. `enabled` is the caller's job: the grid
+ * page already covers the whole study whenever `total` fits in one page, which is the common
+ * case, so this only costs a request for studies larger than the page size.
+ */
+export const useStudySelectableDatasetIds = (studyId: string, total: number, enabled: boolean) => useQuery({
+  queryKey: [STUDY_SELECTABLE_IDS_QUERY_KEY, studyId, total],
+  enabled: enabled && studyId.length > 0 && total > 0,
+  queryFn: async (): Promise<number[]> => {
+    const pagination = { page: 0, pageSize: total }
+    // Same query the grid runs, so the two can't disagree about which datasets belong here.
+    const response = await DataSet.searchDatasetIndexV2(buildStudyDatasetsQuery(studyId, pagination))
+    const page = datasetAsset.transformResponse(response, pagination)
+    return (page.items as DatasetTerm[])
+      .filter(dataset => datasetAsset.isRowSelectable(dataset))
+      .map(dataset => dataset.datasetId)
+  },
+  staleTime: STUDY_STALE_TIME,
 })
 
 export const useStudyExportableDatasets = (
@@ -114,6 +142,6 @@ export const useStudyExportableDatasets = (
         return EMPTY_EXPORTABLE_DATASETS
       }
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: STUDY_STALE_TIME,
   })
 }
