@@ -182,7 +182,7 @@ describe('ElectionWithMemberVotesTable', () => {
     expect(row2[2]).toHaveTextContent('2023-01-15')
     expect(row2[3]).toHaveTextContent('Closed')
     expect(row2[4]).toHaveTextContent('1/2')
-    expect(row2[5]).toHaveTextContent(/1 Yes/)
+    expect(row2[5]).toHaveTextContent('1 Yes')
   })
 
   it('re-derives the row order when the sort changes', async () => {
