@@ -70,8 +70,9 @@ export interface ColumnsProps {
   exportableDatasets?: ExportableDatasets
   radarEnabledDatasetIds?: Set<number>
   soApprovalModelByDatasetId?: Map<number, SoApprovalModel>
-  /** Whether any datasets are currently selected — selection mode disables row-level request actions */
-  hasSelection?: boolean
+  /** The datasets currently selected on the page. A row-level request action is disabled while
+   *  any *other* dataset is selected, so clicking it can never silently drop the rest. */
+  selectedDatasetIds?: number[]
 }
 
 export interface AssetDefinition {
