@@ -81,6 +81,23 @@ describe('TableHeaderSection', () => {
     expect(screen.getByText('Custom Description')).toBeVisible()
   })
 
+  it('leaves header text free to wrap instead of pinning it to a fixed width', () => {
+    const { container } = render(
+      <TableHeaderSection
+        title="Test Title"
+        description="Test Description"
+      />,
+    )
+    const titleEl = container.querySelector('[data-cy="table-header-title"]') as HTMLElement
+    const descEl = container.querySelector('[data-cy="table-header-description"]') as HTMLElement
+    const headerContainer = titleEl.parentElement as HTMLElement
+
+    expect(titleEl.style.width).toBe('')
+    expect(descEl.style.width).toBe('')
+    expect(headerContainer.style.width).toBe('')
+    expect(headerContainer.style.minWidth).toBe('0px')
+  })
+
   it('has correct data-cy attributes', () => {
     const { container } = render(
       <TableHeaderSection

@@ -113,6 +113,8 @@ describe('SigningOfficialDarApprovals', () => {
     render(<SigningOfficialDarApprovals />)
 
     expect(screen.getByText('My Institution\'s Data Access Approvals')).toBeInTheDocument()
+    expect(screen.getByText(/Review all approved Data Access Requests \(DARs\) submitted by researchers at your institution/))
+      .toBeInTheDocument()
     expect(screen.getByText(PI_QUALIFICATION, { exact: false })).toBeInTheDocument()
 
     await waitFor(() => {

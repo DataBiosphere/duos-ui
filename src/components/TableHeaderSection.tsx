@@ -36,14 +36,13 @@ export const TableHeaderSection: React.FC<TableHeaderSectionProps> = ({
             />
           </div>
         )}
-        <div style={{ ...Styles.HEADER_CONTAINER as React.CSSProperties, width: '120%' }}>
+        <div style={{ ...Styles.HEADER_CONTAINER as React.CSSProperties, flex: 1, minWidth: 0 }}>
           <div
             data-cy="table-header-title"
             style={{
               fontFamily: 'Montserrat',
               fontWeight: 600,
               fontSize: '2.8rem',
-              width: '150%',
             }}
           >
             {title}
@@ -53,7 +52,6 @@ export const TableHeaderSection: React.FC<TableHeaderSectionProps> = ({
             style={{
               fontFamily: 'Montserrat',
               fontSize: '1.6rem',
-              width: '150%',
             }}
           >
             {description}
