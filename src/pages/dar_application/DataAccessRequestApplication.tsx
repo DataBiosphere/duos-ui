@@ -85,6 +85,26 @@ const fetchAllDatasets = async (dsIds: number[]): Promise<Dataset[]> => {
   return DataSet.getDatasetsByIds(filteredDatasetIds)
 }
 
+const resolvePageTitle = (isProgressReportApplication: boolean, existingDarsReadOnlyMode?: boolean) => {
+  if (isProgressReportApplication) return 'Progress Report'
+  if (existingDarsReadOnlyMode) return 'DAR Application Review'
+  return 'DAR Application'
+}
+
+type ApplicationPageHeadingProps = Pick<DarFormData, 'darCode' | 'projectTitle'> & {
+  readOnly?: boolean
+}
+
+const ApplicationPageHeading = ({ readOnly, darCode, projectTitle }: ApplicationPageHeadingProps) => (
+  <div className={darCode === null ? 'col-lg-12 col-md-12 col-sm-12 ' : 'col-lg-12 col-md-12 col-sm-9 '}>
+    <PageHeading
+      id="dar-application-heading"
+      title={(readOnly ? darCode : 'Data Access Request Application') ?? ''}
+      description={readOnly ? projectTitle : 'Please complete the fields below to request access to data.'}
+    />
+  </div>
+)
+
 export interface DataAccessRequestApplicationProps {
   draftDar: boolean
   isProgressReportApplication: boolean
@@ -161,15 +181,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
   const { existingDarsReadOnlyMode, embedded, draftDar, isProgressReportApplication, collection } = props
 
-  // Set page title based on mode
-  let pageTitle = 'DAR Application'
-  if (isProgressReportApplication) {
-    pageTitle = 'Progress Report'
-  }
-  else if (existingDarsReadOnlyMode) {
-    pageTitle = 'DAR Application Review'
-  }
-  usePageTitle(pageTitle)
+  usePageTitle(resolvePageTitle(isProgressReportApplication, existingDarsReadOnlyMode))
 
   const [formValidation, setFormValidation] = useState<DARFormValidationResult>({
     researcherInfoErrors: {},
@@ -665,17 +677,11 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
           <div className="row no-margin">
             <Notification notificationData={notificationData} />
             {!embedded && (
-              <div
-                className={(formData.darCode === null
-                  ? 'col-lg-12 col-md-12 col-sm-12 '
-                  : 'col-lg-12 col-md-12 col-sm-9 ')}
-              >
-                <PageHeading
-                  id="dar-application-heading"
-                  title={(existingDarsReadOnlyMode ? formData.darCode : 'Data Access Request Application') ?? ''}
-                  description={existingDarsReadOnlyMode ? formData.projectTitle : 'Please complete the fields below to request access to data.'}
-                />
-              </div>
+              <ApplicationPageHeading
+                readOnly={existingDarsReadOnlyMode}
+                darCode={formData.darCode}
+                projectTitle={formData.projectTitle}
+              />
             )}
             {formData.darCode !== null
               && !existingDarsReadOnlyMode

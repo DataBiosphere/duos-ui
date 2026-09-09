@@ -421,25 +421,25 @@ describe('DataAccessRequestApplication', () => {
     vi.mocked(DAR.getPartialDarRequest).mockResolvedValue(darCollection.dars[darId])
     vi.mocked(DAR.getDatasetDaaSnapshots).mockResolvedValue([] as Awaited<ReturnType<typeof DAR.getDatasetDaaSnapshots>>)
 
-    await act(async () => {
-      render(
-        <MemoryRouter initialEntries={['/dar_application_review/211']}>
-          <Routes>
-            <Route
-              path="/dar_application_review/:collectionId"
-              element={(
-                <DataAccessRequestApplication
-                  draftDar={false}
-                  isProgressReportApplication={false}
-                  existingDarsReadOnlyMode={true}
-                  embedded={embedded}
-                />
-              )}
-            />
-          </Routes>
-        </MemoryRouter>,
-      )
-    })
+    render(
+      <MemoryRouter initialEntries={['/dar_application_review/211']}>
+        <Routes>
+          <Route
+            path="/dar_application_review/:collectionId"
+            element={(
+              <DataAccessRequestApplication
+                draftDar={false}
+                isProgressReportApplication={false}
+                existingDarsReadOnlyMode={true}
+                embedded={embedded}
+              />
+            )}
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+    // The page shows a spinner until the collection resolves; the step tabs mark it loaded.
+    await screen.findAllByRole('tab')
   }
 
   // PageHeading suffixes the id it is given.
