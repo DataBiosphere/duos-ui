@@ -650,5 +650,4 @@ describe('Study details test', () => {
       .toBeInTheDocument()
     expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
   })
-
 })
