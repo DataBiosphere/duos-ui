@@ -164,19 +164,16 @@ fieldset[disabled] .regular-checkbox:before {
   align-self: flex-start;
 }
 
-.multi-step-buttons-container .MuiButtonBase-root {
+.multi-step-buttons-container .MuiTab-root {
   align-items: flex-start;
+  margin-top: 25px;
+  padding-left: 20px;
 }
 
 .multi-step-buttons-container .MuiTabs-indicator {
   width: 5px;
   right: unset;
   left: 0;
-}
-
-.multi-step-buttons-container .MuiButtonBase-root {
-  margin-top: 25px;
-  padding-left: 20px;
 }
 
 .multi-step-buttons-container .step,
@@ -232,7 +229,7 @@ fieldset[disabled] .regular-checkbox:before {
     width: 100%;
   }
 
-  .multi-step-buttons-container .MuiButtonBase-root {
+  .multi-step-buttons-container .MuiTab-root {
     margin-top: 10px;
   }
 }

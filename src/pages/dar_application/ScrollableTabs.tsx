@@ -117,6 +117,7 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange
     <div className={containerClassName}>
       <Tabs
         value={selectedStepNumber}
+        aria-label="Application sections"
         variant="scrollable"
         scrollButtons="auto"
         orientation={orientation}
