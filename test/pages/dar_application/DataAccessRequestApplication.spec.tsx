@@ -445,18 +445,20 @@ describe('DataAccessRequestApplication', () => {
   // PageHeading suffixes the id it is given.
   const pageHeading = () => document.getElementById('dar-application-heading_heading')
 
-  it('keeps its own heading and side panel on the standalone read-only route', async () => {
+  it('keeps its own heading, side panel and voting history on the standalone read-only route', async () => {
     await renderReadOnly()
 
-    expect(pageHeading()).not.toBeNull()
-    expect(document.querySelector('.multi-step-buttons-container')).not.toBeNull()
+    expect(pageHeading()).toBeInTheDocument()
+    expect(document.querySelector('.multi-step-buttons-container')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Voting History' })).toBeInTheDocument()
   })
 
-  it('drops the heading and stacks the step tabs when embedded in the Full DAR tab', async () => {
+  it('drops the heading, stacks the step tabs and defers voting history when embedded in the Full DAR tab', async () => {
     await renderReadOnly(true)
 
-    expect(pageHeading()).toBeNull()
-    expect(document.querySelector('.step-tabs-container--horizontal')).not.toBeNull()
-    expect(document.querySelector('.multi-step-buttons-container')).toBeNull()
+    expect(pageHeading()).not.toBeInTheDocument()
+    expect(document.querySelector('.step-tabs-container--horizontal')).toBeInTheDocument()
+    expect(document.querySelector('.multi-step-buttons-container')).not.toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Voting History' })).not.toBeInTheDocument()
   })
 })

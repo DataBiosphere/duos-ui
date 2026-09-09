@@ -1,0 +1,57 @@
+.voting-history-container {
+    padding: 32px;
+    border-radius: 8px;
+}
+
+.voting-history-title,
+.voting-history-subtitle {
+    margin-bottom: 1em;
+    color: #2c3e50;
+}
+
+.dar-overview {
+    margin-bottom: 2em;
+    padding: 1em;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e1e4e8;
+}
+
+.voting-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fafbfc;
+    margin-bottom: 1em;
+}
+
+.voting-history-table th,
+.voting-history-table td {
+    border: 1px solid #e1e4e8;
+    padding: 0.75em 1em;
+    text-align: left;
+    vertical-align: top;
+}
+
+.voting-history-table th {
+    background: #f1f3f6;
+    font-weight: 600;
+}
+
+.header-subtext {
+    color: #888;
+    font-size: 0.9em;
+}
+
+.rationale-btn {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.95em;
+    margin-left: 0.5em;
+}
+
+.rationale-btn:hover {
+    text-decoration: underline;
+}

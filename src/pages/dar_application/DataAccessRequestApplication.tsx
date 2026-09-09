@@ -30,6 +30,8 @@ import { usePageTitle } from 'src/hooks/usePageTitle'
 import { stepTabsSx } from 'src/pages/dar_collection_review/reviewTabStyles'
 import { Countries } from 'src/libs/ajax/Countries'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
+import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview'
+import { buildVoteRecords, getDarStatus } from 'src/pages/dar_application/votingHistoryData'
 import { useNavigate, useParams } from 'react-router'
 import {
   CombinedDataAccessRequest,
@@ -49,6 +51,7 @@ const DATA_ACCESS_AGREEMENTS_TAB_ID = 'data-access-agreements'
 const PROGRESS_REPORT_TAB_ID_PREFIX = 'progress-report-'
 const PROGRESS_REPORT_APPLICATION_TAB_ID = 'progress-report-app'
 const ADDENDUM_TAB_ID = 'addendum'
+const VOTING_HISTORY_TAB_ID = 'voting-history-info'
 
 interface AppTab {
   name: string
@@ -423,10 +426,13 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
           const itemLabel = isLast ? formData.darCode : 'Progress Report ' + whichPRIsThis
           return { name: itemLabel ?? '', id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
         }),
+        // The voting page shows its own Voting History tab alongside this one, so only the
+        // standalone read-only pages carry it here.
+        ...(embedded ? [] : [{ name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false }]),
       ]
     }
     return [...ApplicationTabs, { name: 'Data Access Agreements (DAA)', id: DATA_ACCESS_AGREEMENTS_TAB_ID }]
-  }, [formData.darCode, isProgressReportApplication, existingDarsReadOnlyMode, reverseOrderedDARs])
+  }, [formData.darCode, isProgressReportApplication, existingDarsReadOnlyMode, embedded, reverseOrderedDARs])
 
   const applicationTabs = useMemo<AppTab[]>(
     () => showAddendum
@@ -652,6 +658,18 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
         })
       }
     }
+  }
+
+  const votes = useMemo(
+    () => embedded ? [] : buildVoteRecords(reverseOrderedDARs, datasets),
+    [embedded, reverseOrderedDARs, datasets],
+  )
+
+  const dar = {
+    referenceId: formData.darCode || '',
+    piName: formData.piName || '',
+    institution: formData.institution || '',
+    status: getDarStatus(votes),
   }
 
   const back = () => {
@@ -883,6 +901,13 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                       isLoading={isLoading}
                       datasets={selectedDatasets}
                     />
+                  </div>
+                )}
+
+              {!isEmpty(votes)
+                && (
+                  <div id={VOTING_HISTORY_TAB_ID} className={stepContainerClassName}>
+                    <VotingHistoryOverview dar={dar} votes={votes} />
                   </div>
                 )}
             </div>
