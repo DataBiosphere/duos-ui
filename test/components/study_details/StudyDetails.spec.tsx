@@ -9,6 +9,7 @@ import { Storage } from 'src/libs/storage'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { DuosUser, LibraryCard } from 'src/types/model'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
+import { StudyComments } from 'src/libs/ajax/StudyComments'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ElasticsearchQuery } from 'src/types/elastic'
 
@@ -29,6 +30,14 @@ vi.mock('src/libs/ajax/TerraDataRepo', () => ({
 vi.mock('src/libs/ajax/DataSet', () => ({
   DataSet: {
     searchDatasetIndexV2: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/ajax/StudyComments', () => ({
+  StudyComments: {
+    listComments: vi.fn().mockResolvedValue({ comments: [], averageRating: undefined }),
+    postComment: vi.fn(),
+    deleteComment: vi.fn(),
   },
 }))
 
@@ -600,6 +609,46 @@ describe('Study details test', () => {
     expect(screen.getByRole('link', { name: 'ORCID profile' })).toHaveAttribute('href', 'https://orcid.org/0000-0001-2345-6789')
     expect(screen.getByRole('link', { name: 'LinkedIn profile' })).toHaveAttribute('href', 'https://linkedin.com/in/example')
     expect(screen.getByRole('link', { name: 'PI website' })).toHaveAttribute('href', 'https://example.org')
+  })
+
+  it('reports a failed comment fetch instead of showing an empty comment list', async () => {
+    vi.mocked(StudyComments.listComments).mockRejectedValueOnce(new Error('comments unavailable'))
+    mountComponent()
+
+    expect(await screen.findByText('Unable to load comments and ratings.')).toBeInTheDocument()
+    // The composer is what an empty-but-loaded section shows, so its absence is what
+    // distinguishes a failure from a study nobody has commented on yet.
+    expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
+  })
+
+  it('shows the public identity disclosure to active researchers before posting', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Your name and institution will be shared publicly with this comment.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Post comment' })).toBeDisabled()
+  })
+
+  it('requires the Researcher role in addition to Active Researcher Status', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: false, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Active Researcher Status is required to comment or rate this study.'))
+      .toBeInTheDocument()
+    expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
+  })
+
+  it('requires an active library card in addition to the Researcher role', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42, isResearcher: true } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Active Researcher Status is required to comment or rate this study.'))
+      .toBeInTheDocument()
+    expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
   })
 
 })

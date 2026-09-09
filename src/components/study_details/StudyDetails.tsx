@@ -18,6 +18,7 @@ import {
 import { TocProvider, TableOfContents } from 'src/components/study_details/TableOfContents'
 import StudyPageSection from 'src/components/study_details/StudyPageSection'
 import StudySidebar from 'src/components/study_details/StudySidebar'
+import StudyCommentsSection from 'src/components/study_details/StudyCommentsSection'
 import StudyTitleBadges from 'src/components/study_details/StudyTitleBadges'
 import StudyInfoTable from 'src/components/study_details/StudyInfoTable'
 import PiExternalProfileIcons from 'src/components/study_details/PiExternalProfileIcons'
@@ -183,6 +184,9 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
                 exportableDatasets={exportableDatasets}
               />
             </div>
+          </StudyPageSection>
+          <StudyPageSection id="comments" heading="Comments & Ratings">
+            <StudyCommentsSection studyId={studyId} />
           </StudyPageSection>
         </div>
         {!isNarrowViewport && (

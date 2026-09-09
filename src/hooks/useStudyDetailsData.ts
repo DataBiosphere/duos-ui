@@ -2,6 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Study } from 'src/libs/ajax/Study'
+import { StudyComments } from 'src/libs/ajax/StudyComments'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'src/utils/NodashUtil'
 import { AggregationResult, ElasticsearchQuery } from 'src/types/elastic'
@@ -18,6 +19,15 @@ export const usePiDetails = (studyId: string) => useQuery({
   queryKey: [STUDY_ASSETS_QUERY_KEY, 'pi-details', studyId],
   enabled: studyId.length > 0,
   queryFn: () => Study.getById(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const studyCommentsQueryKey = (studyId: string) => [STUDY_ASSETS_QUERY_KEY, 'comments', studyId]
+
+export const useStudyComments = (studyId: string) => useQuery({
+  queryKey: studyCommentsQueryKey(studyId),
+  enabled: studyId.length > 0,
+  queryFn: () => StudyComments.listComments(studyId),
   staleTime: STUDY_STALE_TIME,
 })
 
