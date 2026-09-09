@@ -33,6 +33,14 @@ vi.mock('src/libs/ajax/DataSet', () => ({
   },
 }))
 
+vi.mock('src/libs/ajax/StudyComments', () => ({
+  StudyComments: {
+    listComments: vi.fn().mockResolvedValue({ comments: [], averageRating: undefined }),
+    postComment: vi.fn(),
+    deleteComment: vi.fn(),
+  },
+}))
+
 vi.mock('src/libs/ajax/DatasetMetrics', () => ({
   DatasetMetrics: {
     getDatasetStats: vi.fn().mockResolvedValue([]),
@@ -48,17 +56,16 @@ vi.mock('src/libs/ajax/StudyRecommendations', () => ({
   },
 }))
 
-vi.mock('src/libs/ajax/StudyComments', () => ({
-  StudyComments: {
-    listComments: vi.fn().mockResolvedValue({ comments: [], averageRating: undefined }),
-    postComment: vi.fn(),
-    deleteComment: vi.fn(),
-  },
-}))
-
 vi.mock('src/libs/ajax/Study', () => ({
   Study: {
     getStudyNames: vi.fn().mockResolvedValue([]),
+    getModels: vi.fn().mockResolvedValue([]),
+    getWorkspaces: vi.fn().mockResolvedValue([]),
+    getPresentations: vi.fn().mockResolvedValue([]),
+    getPublications: vi.fn().mockResolvedValue([]),
+    getClinicalTrials: vi.fn().mockResolvedValue([]),
+    getIntellectualProperty: vi.fn().mockResolvedValue([]),
+    getFundingResources: vi.fn().mockResolvedValue([]),
     getById: vi.fn().mockResolvedValue({}),
   },
 }))
@@ -492,41 +499,42 @@ describe('Study details test', () => {
     expect(screen.getByRole('alert')).not.toHaveTextContent('Unable to load datasets: Unable to load datasets')
   })
 
-  it('does not let the sidebar start a request without Active Researcher Status', async () => {
-    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42 } as DuosUser)
+  it('keeps the DAR, publication, and recommendation sections visible when empty', async () => {
     mountComponent()
     await screen.findByText(datasets[0].datasetName)
-    await screen.findByText(/1 dataset selected from 1 study/i)
 
-    const applyButton = screen.getByRole('button', { name: 'Apply for Access' })
-    expect(applyButton).toBeDisabled()
-    // fireEvent, not userEvent: a disabled button has pointer-events none, which userEvent
-    // refuses to click at all, so it could never observe the handler not running.
-    fireEvent.click(applyButton)
-    expect(applyForAccess).not.toHaveBeenCalled()
-
-    fireEvent.mouseOver(applyButton.parentElement as HTMLElement)
-    expect(await screen.findByRole('tooltip'))
-      .toHaveTextContent('Active Researcher Status is required to apply for data access')
+    expect(screen.getByRole('heading', { name: 'Data Access Requests for this Study' })).toBeInTheDocument()
+    expect(screen.getByText('No granted data access requests yet.')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Primary Study Publications' })).toBeInTheDocument()
+    expect(screen.getByText('No primary study publications have been added yet.')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Studies often Requested with this Study' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Recommended Studies based on Data Type' })).toBeInTheDocument()
+    expect(await screen.findAllByText('No study recommendations yet.')).toHaveLength(2)
   })
 
-  it('selects every controlled dataset in the study, not just the visible page', async () => {
-    const offPageDatasets = [4, 5].map(index => ({
-      ...datasets[0],
-      datasetId: 200000 + index,
-      datasetIdentifier: `DUOS-20000${index}`,
-      datasetName: `Off Page Dataset ${index}`,
-    }))
-    // The grid page holds three of the study's five datasets; the study-wide id lookup asks
-    // for all five, so the default selection covers the three controlled ones.
-    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) =>
-      (query.size === 5
-        ? makeSearchResponse([...datasets, ...offPageDatasets], 5)
-        : makeSearchResponse(datasets, 5)) as never)
-
+  it('shows primary study publications as cards, linking only plain http urls', async () => {
+    vi.mocked(Study.getPublications).mockResolvedValueOnce([
+      {
+        publicationId: 'pub-1', title: 'Genomic variation at scale', authorNames: ['Ada Lovelace', 'Alan Turing'],
+        journal: 'Nature Genetics', publishedDate: '2025-04-01', doi: '10.1000/xyz123', url: 'https://example.org/pub-1',
+      },
+      {
+        publicationId: 'pub-2', title: 'Follow-up analysis', authorNames: [],
+        journal: 'Cell', publishedDate: '2026-01-15', url: 'javascript:alert(document.cookie)',
+      },
+    ] as never)
     mountComponent()
-    await screen.findByText(datasets[0].datasetName)
-    expect(await screen.findByText(/3 datasets selected from 1 study/i)).toBeInTheDocument()
+
+    expect(await screen.findByText('Genomic variation at scale')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Genomic variation at scale' }))
+      .toHaveAttribute('href', 'https://example.org/pub-1')
+    expect(screen.getByText('Ada Lovelace, Alan Turing')).toBeInTheDocument()
+    expect(screen.getByText('Nature Genetics · 2025-04-01')).toBeInTheDocument()
+    expect(screen.getByText('DOI: 10.1000/xyz123')).toBeInTheDocument()
+    // A submitter-supplied url that is not http(s) renders as plain text
+    expect(screen.getByText('Follow-up analysis')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Follow-up analysis' })).not.toBeInTheDocument()
+    expect(screen.queryByText('No primary study publications have been added yet.')).not.toBeInTheDocument()
   })
 
   it('does not overwrite a user selection when the study-wide default arrives later', async () => {
@@ -569,15 +577,32 @@ describe('Study details test', () => {
     expect(await screen.findByText(/unable to select every controlled dataset automatically/i)).toBeInTheDocument()
     expect(screen.queryByText(/dataset selected from/i)).not.toBeInTheDocument()
   })
-  it('keeps the per-dataset request path available for the default selection', async () => {
-    // Auto-selecting the study's single controlled dataset must not disable the row's own
-    // request button: clicking it submits exactly what 'Apply for Access' would.
-    mountComponent()
-    await screen.findByText(datasets[0].datasetName)
-    await screen.findByText(/1 dataset selected from 1 study/i)
 
-    expect(screen.getByRole('button', { name: 'Request Now' })).not.toBeDisabled()
+  it('groups self-reported secondary research outputs by type', async () => {
+    vi.mocked(DatasetMetrics.getResearchOutputs).mockResolvedValueOnce({
+      presentations: [{ title: 'ASHG 2025 talk', url: 'https://example.org/talk' }],
+      publications: [{ title: 'Downstream findings' }, { title: 'Second downstream paper' }],
+      intellectualProperties: [{ title: 'Assay patent' }],
+    } as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    // Each type is its own group, labelled with its own count
+    expect(await screen.findByText('Presentations (1)')).toBeInTheDocument()
+    expect(screen.getByText('Publications (2)')).toBeInTheDocument()
+    expect(screen.getByText('Intellectual Property (1)')).toBeInTheDocument()
+
+    // The groups start collapsed, so their entries are only reachable once expanded
+    await user.click(screen.getByText('Presentations (1)'))
+    expect(await screen.findByRole('link', { name: 'ASHG 2025 talk' }))
+      .toHaveAttribute('href', 'https://example.org/talk')
+    await user.click(screen.getByText('Publications (2)'))
+    expect(await screen.findByText('Downstream findings')).toBeInTheDocument()
+    expect(screen.getByText('Second downstream paper')).toBeInTheDocument()
+    await user.click(screen.getByText('Intellectual Property (1)'))
+    expect(await screen.findByText('Assay patent')).toBeInTheDocument()
   })
+
   it('shows the PI profile links even when the search index has no PI name', async () => {
     vi.mocked(Study.getById).mockResolvedValueOnce({
       piOrcid: '0000-0001-2345-6789',
@@ -637,6 +662,23 @@ describe('Study details test', () => {
     expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
   })
 
+  it('shows granted DAR details and expands the research use statement', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([{
+      projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+      nonTechRus: 'Study cancer outcomes.', expired: false, piName: 'Dr Researcher',
+      institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+    }])
+    const user = userEvent.setup()
+    mountComponent()
+
+    expect(await screen.findByText('Cancer genomics')).toBeInTheDocument()
+    expect(screen.getByText('PI: Dr Researcher')).toBeInTheDocument()
+    expect(screen.getByText('Institution: Research University')).toBeInTheDocument()
+    expect(screen.getByText('Current')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Show research use statement' }))
+    expect(screen.getByText('Study cancer outcomes.')).toBeInTheDocument()
+  })
+
   it('shows the public identity disclosure to active researchers before posting', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue({
       userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
@@ -667,46 +709,84 @@ describe('Study details test', () => {
     expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
   })
 
-  it('shows granted DAR details and expands the research use statement', async () => {
-    vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([{
-      projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
-      nonTechRus: 'Study cancer outcomes.', expired: false, piName: 'Dr Researcher',
-      institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
-    }])
-    const user = userEvent.setup()
+  it('does not let the sidebar start a request without Active Researcher Status', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42 } as DuosUser)
     mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    await screen.findByText(/1 dataset selected from 1 study/i)
 
-    expect(await screen.findByText('Cancer genomics')).toBeInTheDocument()
-    expect(screen.getByText('PI: Dr Researcher')).toBeInTheDocument()
-    expect(screen.getByText('Institution: Research University')).toBeInTheDocument()
-    expect(screen.getByText('Current')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Show research use statement' }))
-    expect(screen.getByText('Study cancer outcomes.')).toBeInTheDocument()
+    const applyButton = screen.getByRole('button', { name: 'Apply for Access' })
+    expect(applyButton).toBeDisabled()
+    // fireEvent, not userEvent: a disabled button has pointer-events none, which userEvent
+    // refuses to click at all, so it could never observe the handler not running.
+    fireEvent.click(applyButton)
+    expect(applyForAccess).not.toHaveBeenCalled()
+
+    fireEvent.mouseOver(applyButton.parentElement as HTMLElement)
+    expect(await screen.findByRole('tooltip'))
+      .toHaveTextContent('Active Researcher Status is required to apply for data access')
   })
 
-  it('groups self-reported secondary research outputs by type', async () => {
-    vi.mocked(DatasetMetrics.getResearchOutputs).mockResolvedValueOnce({
-      presentations: [{ title: 'ASHG 2025 talk', url: 'https://example.org/talk' }],
-      publications: [{ title: 'Downstream findings' }, { title: 'Second downstream paper' }],
-      intellectualProperties: [{ title: 'Assay patent' }],
-    } as never)
-    const user = userEvent.setup()
+  it('selects every controlled dataset in the study, not just the visible page', async () => {
+    const offPageDatasets = [4, 5].map(index => ({
+      ...datasets[0],
+      datasetId: 200000 + index,
+      datasetIdentifier: `DUOS-20000${index}`,
+      datasetName: `Off Page Dataset ${index}`,
+    }))
+    // The grid page holds three of the study's five datasets; the study-wide id lookup asks
+    // for all five, so the default selection covers the three controlled ones.
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) =>
+      (query.size === 5
+        ? makeSearchResponse([...datasets, ...offPageDatasets], 5)
+        : makeSearchResponse(datasets, 5)) as never)
+
     mountComponent()
-
-    // Each type is its own group, labelled with its own count
-    expect(await screen.findByText('Presentations (1)')).toBeInTheDocument()
-    expect(screen.getByText('Publications (2)')).toBeInTheDocument()
-    expect(screen.getByText('Intellectual Property (1)')).toBeInTheDocument()
-
-    // The groups start collapsed, so their entries are only reachable once expanded
-    await user.click(screen.getByText('Presentations (1)'))
-    expect(await screen.findByRole('link', { name: 'ASHG 2025 talk' }))
-      .toHaveAttribute('href', 'https://example.org/talk')
-    await user.click(screen.getByText('Publications (2)'))
-    expect(await screen.findByText('Downstream findings')).toBeInTheDocument()
-    expect(screen.getByText('Second downstream paper')).toBeInTheDocument()
-    await user.click(screen.getByText('Intellectual Property (1)'))
-    expect(await screen.findByText('Assay patent')).toBeInTheDocument()
+    await screen.findByText(datasets[0].datasetName)
+    expect(await screen.findByText(/3 datasets selected from 1 study/i)).toBeInTheDocument()
   })
 
+  it('reports a failed asset fetch instead of an empty section', async () => {
+    vi.mocked(Study.getModels).mockRejectedValueOnce(new Error('models unavailable'))
+    mountComponent()
+
+    expect(await screen.findByText('Unable to load AI models.')).toBeInTheDocument()
+    expect(screen.queryByText('No AI models have been added yet.')).not.toBeInTheDocument()
+  })
+
+  it('renders a row per asset even when the registered ids are blank', async () => {
+    // Registration payloads routinely carry an empty modelId; two of them are one row id to
+    // the grid, which would drop an asset from the page without saying so.
+    vi.mocked(Study.getModels).mockResolvedValueOnce([
+      { modelId: '', name: 'First Model', tags: [] },
+      { modelId: '', name: 'Second Model', tags: [] },
+    ] as never)
+    mountComponent()
+
+    expect(await screen.findByText('First Model')).toBeInTheDocument()
+    expect(screen.getByText('Second Model')).toBeInTheDocument()
+  })
+
+  it('drops the library Study column from a single-study asset table', async () => {
+    // The reused column set carries it for the cross-study library view; here the study is
+    // the page, and these endpoints return no study name to fill the cell with.
+    vi.mocked(Study.getModels).mockResolvedValueOnce([
+      { modelId: 'model-1', name: 'First Model', tags: [] },
+    ] as never)
+    mountComponent()
+
+    await screen.findByText('First Model')
+    expect(screen.getByRole('columnheader', { name: 'Model Name' })).toBeInTheDocument()
+    expect(screen.queryByRole('columnheader', { name: 'Study' })).not.toBeInTheDocument()
+  })
+
+  it('keeps the per-dataset request path available for the default selection', async () => {
+    // Auto-selecting the study's single controlled dataset must not disable the row's own
+    // request button: clicking it submits exactly what 'Apply for Access' would.
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    await screen.findByText(/1 dataset selected from 1 study/i)
+
+    expect(screen.getByRole('button', { name: 'Request Now' })).not.toBeDisabled()
+  })
 })
