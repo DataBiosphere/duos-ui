@@ -41,6 +41,13 @@ vi.mock('src/libs/ajax/DatasetMetrics', () => ({
   },
 }))
 
+vi.mock('src/libs/ajax/StudyRecommendations', () => ({
+  StudyRecommendations: {
+    getSimilar: vi.fn().mockResolvedValue([]),
+    getFrequentlyRequestedWith: vi.fn().mockResolvedValue([]),
+  },
+}))
+
 vi.mock('src/libs/ajax/StudyComments', () => ({
   StudyComments: {
     listComments: vi.fn().mockResolvedValue({ comments: [], averageRating: undefined }),

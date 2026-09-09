@@ -2,6 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 import { Study } from 'src/libs/ajax/Study'
 import { StudyComments } from 'src/libs/ajax/StudyComments'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
@@ -43,6 +44,20 @@ export const useStudyResearchOutputs = (studyId: string) => useQuery({
   queryKey: ['study-research-outputs', studyId],
   enabled: studyId.length > 0,
   queryFn: () => DatasetMetrics.getResearchOutputs(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const useSimilarStudies = (studyId: string) => useQuery({
+  queryKey: ['study-recommendations-similar', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => StudyRecommendations.getSimilar(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const useFrequentlyRequestedWithStudies = (studyId: string) => useQuery({
+  queryKey: ['study-recommendations-frequently-requested-with', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => StudyRecommendations.getFrequentlyRequestedWith(studyId),
   staleTime: STUDY_STALE_TIME,
 })
 
