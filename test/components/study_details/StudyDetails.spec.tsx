@@ -496,6 +496,46 @@ describe('Study details test', () => {
     expect(await screen.findByText(/3 datasets selected from 1 study/i)).toBeInTheDocument()
   })
 
+  it('does not overwrite a user selection when the study-wide default arrives later', async () => {
+    let resolveStudyWideIds!: (value: ReturnType<typeof makeSearchResponse>) => void
+    const studyWideIds = new Promise<ReturnType<typeof makeSearchResponse>>((resolve) => {
+      resolveStudyWideIds = resolve
+    })
+    const offPageDatasets = [4, 5].map(index => ({
+      ...datasets[0],
+      datasetId: 200000 + index,
+      datasetIdentifier: `DUOS-20000${index}`,
+      datasetName: `Off Page Dataset ${index}`,
+    }))
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) =>
+      query.size === 5 ? studyWideIds as never : makeSearchResponse(datasets, 5) as never)
+
+    const user = userEvent.setup()
+    const { container } = mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    const controlledCheckbox = container
+      .querySelector('.MuiDataGrid-row[data-id="123456"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    await user.click(controlledCheckbox)
+    expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
+
+    resolveStudyWideIds(makeSearchResponse([...datasets, ...offPageDatasets], 5))
+    await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalledWith(
+      expect.objectContaining({ size: 5 }),
+    ))
+    expect(screen.getByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
+    expect(screen.queryByText(/3 datasets selected from 1 study/i)).not.toBeInTheDocument()
+  })
+
+  it('does not default to a partial page when the study-wide selection fails', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) => {
+      if (query.size === 5) throw new Error('selection lookup failed')
+      return makeSearchResponse(datasets, 5) as never
+    })
+
+    mountComponent()
+    expect(await screen.findByText(/unable to select every controlled dataset automatically/i)).toBeInTheDocument()
+    expect(screen.queryByText(/dataset selected from/i)).not.toBeInTheDocument()
+  })
   it('keeps the per-dataset request path available for the default selection', async () => {
     // Auto-selecting the study's single controlled dataset must not disable the row's own
     // request button: clicking it submits exactly what 'Apply for Access' would.

@@ -43,6 +43,7 @@ interface StudyDetailsContentProps {
 const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const navigate = useNavigate()
   const [selectedDatasets, setSelectedDatasets] = useState<number[]>([])
+  const [hasInitializedSelection, setHasInitializedSelection] = useState(false)
   const [paginationModel, setPaginationModel] = useState(INITIAL_PAGINATION)
   const [sortModel, setSortModel] = useState<StudySortModel>([])
   const sort: SortState | undefined = sortModel[0]?.sort
@@ -72,15 +73,13 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const needsStudyWideIds = data.total > datasets.length
   const studyWideIds = useStudySelectableDatasetIds(studyId, data.total, needsStudyWideIds)
   const selectableDatasetIds = needsStudyWideIds
-    // Better a page-scoped default than none at all if the study-wide lookup fails
-    ? studyWideIds.data ?? (studyWideIds.isError ? pageSelectableIds : undefined)
+    ? studyWideIds.data
     : pageSelectableIds
 
   // Seed the default selection once, on the first render where the ids are known. Adjusting
   // state during render rather than from an effect: React re-runs the component before it
   // commits, so the grid never paints an empty selection it immediately replaces. The latch
   // keeps a later page, sort, or refetch from overwriting what the user has since selected.
-  const [hasInitializedSelection, setHasInitializedSelection] = useState(false)
   if (
     !hasInitializedSelection
     && !loading
@@ -89,6 +88,14 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   ) {
     setHasInitializedSelection(true)
     setSelectedDatasets(selectableDatasetIds)
+  }
+
+  // A person can interact with the visible page before the study-wide id request completes.
+  // Treat that as initialization too, so the late response cannot replace their deliberate
+  // choice with every controlled dataset in the study.
+  const handleSelectionChange = (datasetIds: number[]) => {
+    setHasInitializedSelection(true)
+    setSelectedDatasets(datasetIds)
   }
 
   return (
@@ -133,6 +140,11 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
           </StudyPageSection>
           <StudyPageSection id="datasets" heading="Datasets">
             {errorMessage && <div role="alert">Unable to load datasets: {errorMessage}</div>}
+            {studyWideIds.isError && (
+              <div role="alert">
+                Unable to select every controlled dataset automatically. Select datasets manually before applying for access.
+              </div>
+            )}
             <div style={{ height: datasetGridHeight, marginTop: errorMessage ? 20 : 0 }}>
               <LibraryDataGrid
                 assetType={AssetType.DATASETS}
@@ -144,7 +156,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
                 sortModel={sortModel}
                 onSortChange={setSortModel}
                 selectedDatasetIds={selectedDatasets}
-                onSelectionChange={setSelectedDatasets}
+                onSelectionChange={handleSelectionChange}
                 exportableDatasets={exportableDatasets}
               />
             </div>
