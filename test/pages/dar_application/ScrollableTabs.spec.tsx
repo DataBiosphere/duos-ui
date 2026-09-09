@@ -106,7 +106,8 @@ describe('ScrollableTabs', () => {
         <ScrollableTabs applicationTabs={mockApplicationTabs} orientation="horizontal" />
       </BrowserRouter>,
     )
-    expect(screen.getByRole('tablist')).not.toHaveAttribute('aria-orientation')
+    // MUI may omit aria-orientation or set it to "horizontal", so assert only that it is not vertical.
+    expect(screen.getByRole('tablist')).not.toHaveAttribute('aria-orientation', 'vertical')
     expect(container.querySelector('.step-tabs-container--horizontal')).toBeInTheDocument()
     expect(container.querySelector('.multi-step-buttons-container')).not.toBeInTheDocument()
   })
