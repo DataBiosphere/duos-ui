@@ -708,5 +708,4 @@ describe('Study details test', () => {
     await user.click(screen.getByText('Intellectual Property (1)'))
     expect(await screen.findByText('Assay patent')).toBeInTheDocument()
   })
-
 })
