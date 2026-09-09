@@ -18,20 +18,20 @@
     "@fastify/helmet": "13.1.1",
     "@fastify/postgres": "6.1.0",
     "@fastify/rate-limit": "11.2.0",
-    "@fastify/reply-from": "12.6.4",
+    "@fastify/reply-from": "12.6.5",
     "@fastify/session": "11.1.2",
     "@fastify/static": "10.1.3",
     "@fastify/vite": "10.0.0",
-    "fastify": "5.12.1",
+    "fastify": "5.12.3",
     "open": "11.0.2",
-    "openid-client": "6.8.7"
+    "openid-client": "6.8.8"
   },
   "devDependencies": {
     "@types/autocannon": "7.12.7",
-    "@types/node": "26.4.0",
+    "@types/node": "26.4.1",
     "@vitest/coverage-v8": "4.1.11",
     "autocannon": "8.0.0",
-    "jose": "6.2.10",
+    "jose": "6.2.12",
     "typescript": "6.0.3",
     "vitest": "4.1.11"
   }
