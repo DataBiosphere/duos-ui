@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { Study } from 'src/libs/ajax/Study'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'src/utils/NodashUtil'
 import { AggregationResult, ElasticsearchQuery } from 'src/types/elastic'
@@ -8,7 +9,17 @@ import { ExportableDatasets, PaginationState, SortState } from 'src/types/librar
 import { DatasetTerm, StudyTerm } from 'src/types/model'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 
+const STUDY_ASSETS_QUERY_KEY = 'study-assets'
 const STUDY_STALE_TIME = 5 * 60 * 1000
+
+// The page's primary `study` object comes from the Elasticsearch-backed search index, which
+// doesn't carry PI institution/external profile fields. Fetch those from the relational store.
+export const usePiDetails = (studyId: string) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, 'pi-details', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => Study.getById(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
 
 export const STUDY_DATASETS_QUERY_KEY = 'study-details-datasets'
 export const STUDY_EXPORTS_QUERY_KEY = 'study-details-exports'

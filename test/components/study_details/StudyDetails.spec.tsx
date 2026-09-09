@@ -32,11 +32,19 @@ vi.mock('src/libs/ajax/DataSet', () => ({
   },
 }))
 
+vi.mock('src/libs/ajax/Study', () => ({
+  Study: {
+    getStudyNames: vi.fn().mockResolvedValue([]),
+    getById: vi.fn().mockResolvedValue({}),
+  },
+}))
+
 vi.mock('src/utils/accessUtils', () => ({
   applyForAccess: vi.fn(),
 }))
 
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { Study } from 'src/libs/ajax/Study'
 
 const datasets = [
   {
@@ -545,4 +553,53 @@ describe('Study details test', () => {
 
     expect(screen.getByRole('button', { name: 'Request Now' })).not.toBeDisabled()
   })
+  it('shows the PI profile links even when the search index has no PI name', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      piOrcid: '0000-0001-2345-6789',
+    } as never)
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
+      makeSearchResponse(datasets.map(dataset => ({ ...dataset, study: { ...dataset.study, piName: '' } }))) as never,
+    )
+    mountComponent()
+
+    expect(await screen.findByRole('link', { name: 'ORCID profile' })).toBeInTheDocument()
+    expect(screen.getByText('PI Name')).toBeInTheDocument()
+  })
+
+  it('omits the PI row entirely when there is neither a name nor a profile link', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
+      makeSearchResponse(datasets.map(dataset => ({ ...dataset, study: { ...dataset.study, piName: '' } }))) as never,
+    )
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+
+    expect(screen.queryByText('PI Name')).not.toBeInTheDocument()
+  })
+
+  it('does not link a PI website that is not a plain http url', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      piInstitution: { id: 7, name: 'Broad Institute' },
+      piWebsiteUrl: 'javascript:alert(document.cookie)',
+    } as never)
+    mountComponent()
+
+    await screen.findByText('Broad Institute')
+    expect(screen.queryByRole('link', { name: 'PI website' })).not.toBeInTheDocument()
+  })
+
+  it('shows PI institution and external profile links', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      piInstitution: { id: 7, name: 'Broad Institute' },
+      piOrcid: '0000-0001-2345-6789',
+      piLinkedinUrl: 'https://linkedin.com/in/example',
+      piWebsiteUrl: 'https://example.org',
+    } as never)
+    mountComponent()
+
+    expect(await screen.findByText('Broad Institute')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'ORCID profile' })).toHaveAttribute('href', 'https://orcid.org/0000-0001-2345-6789')
+    expect(screen.getByRole('link', { name: 'LinkedIn profile' })).toHaveAttribute('href', 'https://linkedin.com/in/example')
+    expect(screen.getByRole('link', { name: 'PI website' })).toHaveAttribute('href', 'https://example.org')
+  })
+
 })

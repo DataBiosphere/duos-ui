@@ -10,6 +10,7 @@ import LibraryFooter from 'src/components/data_library/LibraryFooter'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { AssetType, SortOrder, SortState } from 'src/types/library'
 import {
+  usePiDetails,
   useStudyDatasets,
   useStudyExportableDatasets,
   useStudySelectableDatasetIds,
@@ -19,6 +20,8 @@ import StudyPageSection from 'src/components/study_details/StudyPageSection'
 import StudySidebar from 'src/components/study_details/StudySidebar'
 import StudyTitleBadges from 'src/components/study_details/StudyTitleBadges'
 import StudyInfoTable from 'src/components/study_details/StudyInfoTable'
+import PiExternalProfileIcons from 'src/components/study_details/PiExternalProfileIcons'
+import { getPiProfileLinks } from 'src/components/study_details/piProfileLinks'
 
 const INITIAL_PAGINATION = { page: 0, pageSize: 25 }
 const EMPTY_PAGE = {
@@ -54,10 +57,16 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const study = data.study
   const participantCount = data.participantCount
   const { data: exportableDatasets } = useStudyExportableDatasets(studyId, datasets)
+  const { data: piDetails } = usePiDetails(studyId)
   const selectedStudyIds = selectedDatasets.length > 0 && study
     ? [study.studyId]
     : []
   const errorMessage = getErrorMessage(error)
+  const piProfileLinks = getPiProfileLinks({
+    orcid: piDetails?.piOrcid,
+    linkedinUrl: piDetails?.piLinkedinUrl,
+    websiteUrl: piDetails?.piWebsiteUrl,
+  })
   const theme = useTheme()
   const isNarrowViewport = useMediaQuery(theme.breakpoints.down('md'))
   // Header row + one row per dataset (up to a full page) + pagination footer, so a study with
@@ -133,7 +142,21 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
                 { label: 'Participants', value: participantCount },
                 { label: 'Phenotype', value: study?.phenotype },
                 { label: 'Species', value: study?.species },
-                { label: 'PI Name', value: study?.piName },
+                {
+                  label: 'PI Name',
+                  // The profile links live in this row, and StudyInfoTable drops rows with a
+                  // falsy value, so the row's presence can't hinge on piName alone — the search
+                  // index sometimes has none for a study whose PI profile links are populated.
+                  value: (study?.piName || piProfileLinks.length > 0)
+                    ? (
+                        <>
+                          {study?.piName}
+                          <PiExternalProfileIcons links={piProfileLinks} />
+                        </>
+                      )
+                    : undefined,
+                },
+                { label: 'PI Institution', value: piDetails?.piInstitution?.name },
                 { label: 'Data Custodian', value: study?.dataCustodianEmail?.join(', ') },
               ]}
             />
