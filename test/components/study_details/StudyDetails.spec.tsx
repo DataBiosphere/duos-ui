@@ -601,5 +601,4 @@ describe('Study details test', () => {
     expect(screen.getByRole('link', { name: 'LinkedIn profile' })).toHaveAttribute('href', 'https://linkedin.com/in/example')
     expect(screen.getByRole('link', { name: 'PI website' })).toHaveAttribute('href', 'https://example.org')
   })
-
 })
