@@ -19,6 +19,8 @@ import { TocProvider, TableOfContents } from 'src/components/study_details/Table
 import StudyPageSection from 'src/components/study_details/StudyPageSection'
 import StudySidebar from 'src/components/study_details/StudySidebar'
 import StudyCommentsSection from 'src/components/study_details/StudyCommentsSection'
+import StudyDarHistory from 'src/components/study_details/StudyDarHistory'
+import StudySecondaryResearchOutputs from 'src/components/study_details/StudySecondaryResearchOutputs'
 import StudyTitleBadges from 'src/components/study_details/StudyTitleBadges'
 import StudyInfoTable from 'src/components/study_details/StudyInfoTable'
 import PiExternalProfileIcons from 'src/components/study_details/PiExternalProfileIcons'
@@ -185,6 +187,8 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
               />
             </div>
           </StudyPageSection>
+          <StudyDarHistory studyId={studyId} />
+          <StudySecondaryResearchOutputs studyId={studyId} />
           <StudyPageSection id="comments" heading="Comments & Ratings">
             <StudyCommentsSection studyId={studyId} />
           </StudyPageSection>

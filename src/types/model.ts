@@ -655,6 +655,9 @@ export interface DatasetStatisticsDar {
   nonTechRus: string
   referenceId: string
   expired: boolean
+  piName?: string
+  institutionName?: string
+  submissionDate?: number
 }
 
 /**
