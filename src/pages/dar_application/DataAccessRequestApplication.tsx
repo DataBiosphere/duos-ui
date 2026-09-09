@@ -426,8 +426,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
           const itemLabel = isLast ? formData.darCode : 'Progress Report ' + whichPRIsThis
           return { name: itemLabel ?? '', id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
         }),
-        // The voting page shows its own Voting History tab alongside this one, so only the
-        // standalone read-only pages carry it here.
+        // The voting page has its own Voting History tab; only the standalone pages need this one.
         ...(embedded ? [] : [{ name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false }]),
       ]
     }
