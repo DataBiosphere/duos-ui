@@ -110,6 +110,14 @@ const ApplicationPageHeading = ({ readOnly, darCode, projectTitle }: Application
   </div>
 )
 
+/** The header the voting history reads, with the placeholders it expects for a DAR still in draft. */
+const toVotingHistoryDar = (formData: DarFormData, votes: ReturnType<typeof buildVoteRecords>) => ({
+  referenceId: formData.darCode || '',
+  piName: formData.piName || '',
+  institution: formData.institution || '',
+  status: getDarStatus(votes),
+})
+
 const pageContainerProps = (readOnly?: boolean) => readOnly
   ? { className: 'application-information-page', style: { padding: '2% 3%', backgroundColor: 'white' } }
   : { className: 'container', style: { padding: '0 0 2%' } }
@@ -698,12 +706,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     [embedded, reverseOrderedDARs, datasets],
   )
 
-  const dar = {
-    referenceId: formData.darCode || '',
-    piName: formData.piName || '',
-    institution: formData.institution || '',
-    status: getDarStatus(votes),
-  }
+  const dar = toVotingHistoryDar(formData, votes)
 
   // Which sections render is mode-dependent, so a section only claims panel semantics when
   // the step tabs actually offer the tab that labels it.
