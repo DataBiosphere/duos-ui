@@ -101,7 +101,8 @@ export const buildVoteRecords = (dars: DataAccessRequestModel[], datasets: Datas
     return createVoteRecord(dar, datasetId, election, datasets)
   })
 }).sort((a, b) => {
-  // Most recent vote first, then open elections before closed, then request type, then dataset name.
+  // Rows with no recorded vote date first, then most recent vote, then open elections before
+  // closed, then request type, then dataset name.
   if (a.voteDateRaw && b.voteDateRaw) {
     const dateCompare = new Date(b.voteDateRaw).getTime() - new Date(a.voteDateRaw).getTime()
     if (dateCompare !== 0) return dateCompare
