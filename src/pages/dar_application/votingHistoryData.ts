@@ -73,6 +73,9 @@ const createVoteRecord = (dar: DataAccessRequestModel, datasetId: number, electi
     if (hasFinalVote) {
       return 'No rationale provided.'
     }
+    if (!election) {
+      return NO_ELECTION_STATUS
+    }
     if (isElectionClosed) {
       return 'Election Closed - No Final Vote'
     }
