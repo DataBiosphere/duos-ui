@@ -34,8 +34,12 @@ vi.mock('src/libs/ajax/DataSet', () => ({
 }))
 
 vi.mock('src/libs/ajax/StudyComments', () => ({
+  COMMENTS_PAGE_SIZE: 25,
+  MAX_COMMENT_LENGTH: 2000,
   StudyComments: {
-    listComments: vi.fn().mockResolvedValue({ comments: [], averageRating: undefined }),
+    listComments: vi.fn().mockResolvedValue({
+      comments: [], averageRating: undefined, total: 0, yourComment: undefined,
+    }),
     postComment: vi.fn(),
     deleteComment: vi.fn(),
   },
@@ -609,6 +613,63 @@ describe('Study details test', () => {
     expect(screen.getByRole('link', { name: 'ORCID profile' })).toHaveAttribute('href', 'https://orcid.org/0000-0001-2345-6789')
     expect(screen.getByRole('link', { name: 'LinkedIn profile' })).toHaveAttribute('href', 'https://linkedin.com/in/example')
     expect(screen.getByRole('link', { name: 'PI website' })).toHaveAttribute('href', 'https://example.org')
+  })
+
+  it('appends the next page of comments rather than replacing the one on screen', async () => {
+    const page = (ids: number[], total: number) => ({
+      total,
+      averageRating: 4,
+      yourComment: undefined,
+      comments: ids.map(id => ({
+        studyCommentId: id, studyId: 1, userId: 100 + id, rating: 4,
+        commentText: `Comment ${id}`, createDate: '', updateDate: '',
+        displayName: `Reviewer ${id}`, institutionName: 'Broad',
+      })),
+    })
+    vi.mocked(StudyComments.listComments)
+      .mockResolvedValueOnce(page([1], 2) as never)
+      .mockResolvedValueOnce(page([2], 2) as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    expect(await screen.findByText('Comment 1')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Show more comments \(1 of 2\)/ }))
+
+    // The first page is still there; the second was appended, not swapped in
+    expect(await screen.findByText('Comment 2')).toBeInTheDocument()
+    expect(screen.getByText('Comment 1')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Show more comments/ })).not.toBeInTheDocument()
+  })
+
+  it('treats the reader\'s own comment as an edit even when it is not on the loaded page', async () => {
+    // The whole reason the backend carries yourComment separately: paging can hide it.
+    vi.mocked(StudyComments.listComments).mockResolvedValueOnce({
+      total: 40,
+      averageRating: 4,
+      comments: [],
+      yourComment: {
+        studyCommentId: 99, studyId: 1, userId: 42, rating: 3, commentText: 'Mine',
+        createDate: '', updateDate: '', displayName: 'Me', institutionName: 'Broad',
+      },
+    } as never)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Edit your comment')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Comment')).toHaveValue('Mine')
+  })
+
+  it('stops the composer at the length the backend accepts', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    const field = await screen.findByLabelText('Comment')
+    expect(field).toHaveAttribute('maxlength', '2000')
   })
 
   it('reports a failed comment fetch instead of showing an empty comment list', async () => {
