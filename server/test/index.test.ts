@@ -664,6 +664,23 @@ describe('BFF auth route registration', () => {
     await localApp.close()
   })
 
+  it('answers the public metrics route with 503 rather than the SPA page when DUOS_BARD_URL is not set', async () => {
+    delete process.env.DUOS_BARD_URL
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({
+      method: 'POST',
+      url: '/public/metrics/event',
+      headers: { 'content-type': 'application/json' },
+      payload: '{"event":"duos:page_view"}',
+    })
+
+    expect(res.statusCode).toBe(503)
+    expect(res.headers['content-type']).toContain('application/json')
+
+    await localApp.close()
+  })
+
   it('does not register the /bard-api proxy route when bffEnabled is false, even with DUOS_BARD_URL set', async () => {
     process.env.DUOS_BARD_URL = 'https://terra-bard-dev.appspot.com'
     const localApp = await buildAppWithConfig({ bffEnabled: false })
