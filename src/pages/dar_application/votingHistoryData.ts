@@ -101,25 +101,21 @@ export const buildVoteRecords = (dars: DataAccessRequestModel[], datasets: Datas
     return createVoteRecord(dar, datasetId, election, datasets)
   })
 }).sort((a, b) => {
-  // Compare by vote date (most recent first)
+  // Most recent vote first, then open elections before closed, then request type, then dataset name.
   if (a.voteDateRaw && b.voteDateRaw) {
     const dateCompare = new Date(b.voteDateRaw).getTime() - new Date(a.voteDateRaw).getTime()
     if (dateCompare !== 0) return dateCompare
   }
-  // Handle cases where one or both dates are missing
   else if (!a.voteDateRaw && b.voteDateRaw) return -1
   else if (a.voteDateRaw && !b.voteDateRaw) return 1
 
-  // Compare by election status (Open > Closed > Awaiting Election)
   const statusOrder: Record<string, number> = { [ElectionStatus.OPEN]: 0, [ElectionStatus.CLOSED]: 1, [NO_ELECTION_STATUS]: 2 }
   const statusCompare = (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3)
   if (statusCompare !== 0) return statusCompare
 
-  // Compare by request type (Initial DAR vs Progress Report)
   const typeCompare = a.requestType.localeCompare(b.requestType)
   if (typeCompare !== 0) return typeCompare
 
-  // Compare by dataset name as final tiebreaker
   return a.datasetName.localeCompare(b.datasetName)
 })
 
