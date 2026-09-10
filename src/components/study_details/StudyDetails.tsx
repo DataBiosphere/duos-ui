@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Link, useParams, useNavigate } from 'react-router'
 import { Typography, useMediaQuery, useTheme } from '@mui/material'
@@ -243,6 +243,13 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
 export const StudyDetails = () => {
   usePageTitle('Study Details')
   const { studyId = '' } = useParams<{ studyId: string }>()
+
+  // Recommendation cards live near the bottom of this long page. BrowserRouter preserves the
+  // current document offset during an in-app navigation, so reset it whenever the route points at
+  // a different study rather than opening the next study at the same deep scroll position.
+  useEffect(() => {
+    globalThis.scrollTo({ top: 0, left: 0 })
+  }, [studyId])
 
   // Remount local grid state when navigating directly between study routes.
   return <StudyDetailsContent key={studyId} studyId={studyId} />

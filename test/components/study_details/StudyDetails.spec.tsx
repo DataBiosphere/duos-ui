@@ -245,6 +245,7 @@ beforeEach(() => {
     userId: 42,
     libraryCard: {} as LibraryCard,
   } as DuosUser)
+  vi.spyOn(globalThis, 'scrollTo').mockImplementation(() => {})
 })
 
 afterEach(() => {
@@ -254,6 +255,17 @@ afterEach(() => {
 })
 
 describe('Study details test', () => {
+  it('scrolls to the overview when navigating directly between studies', async () => {
+    const user = userEvent.setup()
+    mountComponent(true)
+    await screen.findByText(datasets[0].datasetName)
+    vi.mocked(globalThis.scrollTo).mockClear()
+
+    await user.click(screen.getByRole('button', { name: 'View study 2' }))
+
+    await waitFor(() => expect(globalThis.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0 }))
+  })
+
   it('does not show a participant total while datasets are loading', () => {
     vi.mocked(DataSet.searchDatasetIndexV2).mockReturnValueOnce(new Promise(() => {}) as never)
     mountComponent()
