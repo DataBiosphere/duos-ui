@@ -335,6 +335,25 @@ describe('Study details test', () => {
     expect(document.querySelectorAll('[role=row]')).toHaveLength(datasets.length + 1)
   })
 
+  it('shows relational study metadata when the study has no dataset search documents', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValueOnce(makeSearchResponse([]) as never)
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      studyId: 1,
+      name: 'Study without datasets',
+      description: 'Study metadata from the relational store',
+      dataTypes: ['Genomic'],
+      piName: 'Dr. Example',
+    } as never)
+
+    mountComponent()
+
+    expect(await screen.findByRole('heading', { name: 'Study without datasets' })).toBeInTheDocument()
+    expect(screen.getByText('Study metadata from the relational store')).toBeInTheDocument()
+    expect(screen.getByText('Genomic')).toBeInTheDocument()
+    expect(screen.getByText('Dr. Example')).toBeInTheDocument()
+    expect(screen.getByText('No datasets found matching your criteria')).toBeInTheDocument()
+  })
+
   it('requests server-side pages for the current study without a fixed result cap', async () => {
     const user = userEvent.setup()
     vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(makeSearchResponse(datasets, 26) as never)
