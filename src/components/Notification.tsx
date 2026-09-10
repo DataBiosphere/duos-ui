@@ -1,12 +1,6 @@
-import { isEmpty } from 'src/utils/NodashUtil'
 import React from 'react'
+import Alert, { AlertColor } from '@mui/material/Alert'
 import ReactMarkdown from 'react-markdown'
-import WarningIcon from '@mui/icons-material/Warning'
-import InfoIcon from '@mui/icons-material/Info'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import ReportIcon from '@mui/icons-material/Report'
-import style from 'src/components/Notification.module.css'
-import CloseIconComponent from 'src/components/CloseIconComponent'
 
 export interface NotificationData {
   message: string
@@ -15,52 +9,39 @@ export interface NotificationData {
 
 interface NotificationProps {
   notificationData?: NotificationData | null
-  index?: number
-  customStyle?: React.CSSProperties
   onDismiss?: () => void
 }
 
-const iconStyle: React.CSSProperties = {
-  marginRight: '1rem',
-  height: 30,
-  width: 30,
+/** The ops banner feed speaks Bootstrap's vocabulary, which names one severity differently to MUI. */
+const SEVERITY: Record<NonNullable<NotificationData['level']>, AlertColor> = {
+  info: 'info',
+  success: 'success',
+  warning: 'warning',
+  danger: 'error',
 }
 
-const getIcon = (level: NotificationData['level']): React.ReactElement => {
-  switch (level) {
-    case 'success':
-      return <CheckCircleIcon fill="#3c763d" style={iconStyle} />
-    case 'info':
-      return <InfoIcon fill="#31708f" style={iconStyle} />
-    case 'warning':
-      return <WarningIcon fill="#8a6d3b" style={iconStyle} />
-    case 'danger':
-      return <ReportIcon fill="#a94442" style={iconStyle} />
-    default:
-      return <InfoIcon fill="#3c763d" style={iconStyle} />
-  }
+const BANNER_SX = {
+  'alignItems': 'center',
+  // Banner copy is markdown, so its links have to shout back at the global
+  // `a, input { text-decoration: none !important }` in index.css to stay discoverable.
+  '& a': { textDecoration: 'underline !important' },
+  '& p:first-of-type': { marginTop: 0 },
+  '& p:last-of-type': { marginBottom: 0 },
 }
 
-export const Notification = (props: Readonly<NotificationProps>) => {
-  const { notificationData, index = 1, customStyle, onDismiss } = props
-
-  if (isEmpty(notificationData) || !notificationData) {
-    return <div key={index} style={{ display: 'none' }} />
+export const Notification = ({ notificationData, onDismiss }: Readonly<NotificationProps>) => {
+  if (!notificationData?.message) {
+    return null
   }
-
-  const level = notificationData.level ?? 'info'
 
   return (
-    <div
-      key={index}
-      className={`row alert alert-${level}`}
-      style={{ margin: 0, padding: '1.5rem', alignItems: 'center', position: 'relative', ...customStyle }}
+    <Alert
+      severity={SEVERITY[notificationData.level ?? 'info']}
+      onClose={onDismiss}
+      closeText="Dismiss notification"
+      sx={BANNER_SX}
     >
-      <div style={{ float: 'left' }}>{getIcon(level)}</div>
-      <div className={style['underlined']} style={{ margin: '0.5rem auto' }}>
-        <ReactMarkdown>{notificationData.message}</ReactMarkdown>
-      </div>
-      {onDismiss && <CloseIconComponent closeFn={onDismiss} label="Dismiss notification" />}
-    </div>
+      <ReactMarkdown>{notificationData.message}</ReactMarkdown>
+    </Alert>
   )
 }

@@ -15,6 +15,7 @@ import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 import { DuosUser } from 'src/types/model'
 import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
 import { NotificationService, dismissBanner, isBannerDismissed } from 'src/libs/notificationService'
+import type { Banner } from 'src/libs/notificationService'
 
 vi.mock('src/hooks/useSession', () => ({
   useUserIsLogged: vi.fn(),
@@ -510,6 +511,31 @@ describe('DuosHeader', () => {
 
       expect(dismissBanner).toHaveBeenCalledWith('banner-3')
       expect(screen.queryByText('Dismiss me')).not.toBeInTheDocument()
+    })
+
+    it('leaves the other active banners showing when one is dismissed', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
+        { id: 'banner-4', active: true, message: 'Dismiss me', level: 'info' },
+        { id: 'banner-5', active: true, message: 'Keep me', level: 'warning' },
+      ])
+      vi.mocked(isBannerDismissed).mockReturnValue(false)
+
+      await mountHeader('/home')
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Dismiss notification' })[0])
+
+      expect(dismissBanner).toHaveBeenCalledExactlyOnceWith('banner-4')
+      expect(screen.queryByText('Dismiss me')).not.toBeInTheDocument()
+      expect(screen.getByText('Keep me')).toBeInTheDocument()
+    })
+
+    // GCS serves the banner feed, so a malformed payload must not take the header down with it.
+    it('renders no banners when the feed does not come back as a list', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue(null as unknown as Banner[])
+
+      await mountHeader('/home')
+
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     })
   })
 })

@@ -9,8 +9,6 @@ vi.mock('react-markdown', () => ({
   default: ({ children }: { children: string }) => <span>{children}</span>,
 }))
 
-vi.mock('./Notification.module.css', () => ({ default: { underlined: 'underlined' } }))
-
 const makeBanner = (overrides: Partial<Banner> = {}): Banner => ({
   id: 'test-banner',
   active: true,
@@ -19,42 +17,43 @@ const makeBanner = (overrides: Partial<Banner> = {}): Banner => ({
   ...overrides,
 })
 
+const alertRoot = (container: HTMLElement): HTMLElement =>
+  container.querySelector('.MuiAlert-root') as HTMLElement
+
 describe('Notification', () => {
-  it('renders nothing visible when notificationData is undefined', () => {
+  it('renders nothing when notificationData is undefined', () => {
     const { container } = render(<Notification />)
-    const div = container.querySelector('div') as HTMLElement
-    expect(div.style.display).toBe('none')
+    expect(container).toBeEmptyDOMElement()
   })
 
-  it('renders nothing visible when notificationData is null', () => {
+  it('renders nothing when notificationData is null', () => {
     const { container } = render(<Notification notificationData={null} />)
-    const div = container.querySelector('div') as HTMLElement
-    expect(div.style.display).toBe('none')
+    expect(container).toBeEmptyDOMElement()
   })
 
-  it('renders the banner message', () => {
+  it('renders nothing when the banner carries no message', () => {
+    const { container } = render(<Notification notificationData={makeBanner({ message: '' })} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders the banner message in an alert', () => {
     render(<Notification notificationData={makeBanner({ message: 'Hello world' })} />)
-    expect(screen.getByText('Hello world')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('Hello world')
   })
 
-  it('applies the correct alert class for each level', () => {
-    const levels: Banner['level'][] = ['success', 'info', 'warning', 'danger']
-    for (const level of levels) {
-      const { container } = render(<Notification notificationData={makeBanner({ level })} />)
-      const alertDiv = container.querySelector('.alert') as HTMLElement
-      expect(alertDiv).toHaveClass(`alert-${level}`)
-    }
+  it.each([
+    ['info', 'MuiAlert-colorInfo'],
+    ['success', 'MuiAlert-colorSuccess'],
+    ['warning', 'MuiAlert-colorWarning'],
+    ['danger', 'MuiAlert-colorError'],
+  ] as const)('maps the %s level onto its MUI severity', (level, expectedClass) => {
+    const { container } = render(<Notification notificationData={makeBanner({ level })} />)
+    expect(alertRoot(container)).toHaveClass(expectedClass)
   })
 
-  it('merges customStyle into the container', () => {
-    const { container } = render(
-      <Notification
-        notificationData={makeBanner()}
-        customStyle={{ backgroundColor: 'rgb(255, 0, 0)' }}
-      />,
-    )
-    const alertDiv = container.querySelector('.alert') as HTMLElement
-    expect(alertDiv.style.backgroundColor).toBe('rgb(255, 0, 0)')
+  it('falls back to info when the banner carries no level', () => {
+    const { container } = render(<Notification notificationData={makeBanner({ level: undefined })} />)
+    expect(alertRoot(container)).toHaveClass('MuiAlert-colorInfo')
   })
 
   it('does not render a close button when onDismiss is omitted', () => {

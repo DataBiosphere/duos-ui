@@ -243,11 +243,10 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   const makeNotifications = (): React.ReactNode[] => {
-    return state.notificationData.map((d, index) => (
+    return state.notificationData.map(d => (
       <Notification
         notificationData={d}
-        key={d.message}
-        index={index}
+        key={d.id}
         onDismiss={() => dismissNotification(d.id)}
       />
     ))
