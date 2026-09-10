@@ -647,6 +647,7 @@ describe('Study details test', () => {
     })
     vi.mocked(StudyComments.listComments)
       .mockResolvedValueOnce(page([1], 2) as never)
+      .mockResolvedValueOnce(page([1], 2) as never)
       .mockResolvedValueOnce(page([2], 2) as never)
     const user = userEvent.setup()
     mountComponent()
@@ -658,6 +659,30 @@ describe('Study details test', () => {
     expect(await screen.findByText('Comment 2')).toBeInTheDocument()
     expect(screen.getByText('Comment 1')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Show more comments/ })).not.toBeInTheDocument()
+  })
+
+  it('refreshes the loaded comment prefix before requesting the next offset', async () => {
+    const comment = (id: number) => ({
+      studyCommentId: id, studyId: 1, userId: 100 + id, rating: 4,
+      commentText: `Comment ${id}`, createDate: '', updateDate: '',
+      displayName: `Reviewer ${id}`, institutionName: 'Broad',
+    })
+    vi.mocked(StudyComments.listComments)
+      // Initial page, followed by a new comment arriving before the reader asks for more.
+      .mockResolvedValueOnce({ comments: [comment(2)], averageRating: 4, total: 2 } as never)
+      .mockResolvedValueOnce({ comments: [comment(3)], averageRating: 4, total: 3 } as never)
+      .mockResolvedValueOnce({ comments: [comment(2), comment(1)], averageRating: 4, total: 3 } as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    await screen.findByText('Comment 2')
+    await user.click(screen.getByRole('button', { name: /Show more comments/ }))
+
+    expect(await screen.findByText('Comment 3')).toBeInTheDocument()
+    expect(screen.getByText('Comment 2')).toBeInTheDocument()
+    expect(screen.getByText('Comment 1')).toBeInTheDocument()
+    expect(vi.mocked(StudyComments.listComments).mock.calls.map(([, offset]) => offset))
+      .toEqual([0, 0, 1])
   })
 
   it('treats the reader\'s own comment as an edit even when it is not on the loaded page', async () => {
