@@ -23,7 +23,8 @@ const useStudyAsset = <T>(studyId: string, assetType: string, queryFn: () => Pro
 })
 
 // The page's primary `study` object comes from the Elasticsearch-backed search index, which
-// doesn't carry PI institution/external profile fields. Fetch those from the relational store.
+// cannot supply metadata when a study has no datasets and doesn't carry PI institution/external
+// profile fields. Fetch those from the relational store.
 export const usePiDetails = (studyId: string) => useQuery({
   queryKey: [STUDY_ASSETS_QUERY_KEY, 'pi-details', studyId],
   enabled: studyId.length > 0,
