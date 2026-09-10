@@ -110,6 +110,33 @@ const ApplicationPageHeading = ({ readOnly, darCode, projectTitle }: Application
   </div>
 )
 
+interface ApplicationTabsInput {
+  readOnly?: boolean
+  isProgressReportApplication: boolean
+  dars: DataAccessRequestModel[]
+  darCode?: string | null
+  embedded?: boolean
+}
+
+/** Editing shows the four form steps; review shows one tab per progress report instead. */
+const buildApplicationTabs = ({ readOnly, isProgressReportApplication, dars, darCode, embedded }: ApplicationTabsInput): AppTab[] => {
+  if (!readOnly) {
+    return [...ApplicationTabs, { name: 'Data Access Agreements (DAA)', id: DATA_ACCESS_AGREEMENTS_TAB_ID }]
+  }
+  // A progress report being drafted has no DAR of its own yet, so it needs a tab adding for it.
+  const draftTab = isProgressReportApplication
+    ? [{ name: `Progress Report ${dars.length}`, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
+    : []
+  const reportTabs = dars.map((_dar, index) => {
+    const whichPRIsThis = dars.length - index - 1
+    const itemLabel = index === dars.length - 1 ? darCode : `Progress Report ${whichPRIsThis}`
+    return { name: itemLabel ?? '', id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
+  })
+  // The voting page has its own Voting History tab; only the standalone pages need this one.
+  const votingTab = embedded ? [] : [{ name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false }]
+  return [...draftTab, ...reportTabs, ...votingTab]
+}
+
 /** The header the voting history reads, with the placeholders it expects for a DAR still in draft. */
 const toVotingHistoryDar = (formData: DarFormData, votes: ReturnType<typeof buildVoteRecords>) => ({
   referenceId: formData.darCode || '',
@@ -460,26 +487,16 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     setIsLoading(false)
   }, [researcher, existingDarsReadOnlyMode, resolveInitialFormData, batchFormFieldChange])
 
-  const baseApplicationTabs = useMemo<AppTab[]>(() => {
-    if (existingDarsReadOnlyMode) {
-      let appTabs: AppTab[] = []
-      if (isProgressReportApplication) {
-        // if we are creating a new progress report, we need to add another tab for the application
-        appTabs = [{ name: 'Progress Report ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
-      }
-      return [...appTabs,
-        ...reverseOrderedDARs.map((_dar, index) => {
-          const whichPRIsThis = reverseOrderedDARs.length - index - 1
-          const isLast = index === reverseOrderedDARs.length - 1
-          const itemLabel = isLast ? formData.darCode : 'Progress Report ' + whichPRIsThis
-          return { name: itemLabel ?? '', id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
-        }),
-        // The voting page has its own Voting History tab; only the standalone pages need this one.
-        ...(embedded ? [] : [{ name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false }]),
-      ]
-    }
-    return [...ApplicationTabs, { name: 'Data Access Agreements (DAA)', id: DATA_ACCESS_AGREEMENTS_TAB_ID }]
-  }, [formData.darCode, isProgressReportApplication, existingDarsReadOnlyMode, embedded, reverseOrderedDARs])
+  const baseApplicationTabs = useMemo<AppTab[]>(
+    () => buildApplicationTabs({
+      readOnly: existingDarsReadOnlyMode,
+      isProgressReportApplication,
+      dars: reverseOrderedDARs,
+      darCode: formData.darCode,
+      embedded,
+    }),
+    [formData.darCode, isProgressReportApplication, existingDarsReadOnlyMode, embedded, reverseOrderedDARs],
+  )
 
   const applicationTabs = useMemo<AppTab[]>(
     () => showAddendum
