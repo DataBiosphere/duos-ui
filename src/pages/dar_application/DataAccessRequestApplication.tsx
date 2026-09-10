@@ -675,7 +675,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
   // Which sections render is mode-dependent, so a section only claims panel semantics when
   // the step tabs actually offer the tab that labels it.
   const panelProps = (id: string) => applicationTabs.some(tab => tab.id === id)
-    ? { role: 'tabpanel', 'aria-labelledby': tabElementId(id) }
+    ? { 'role': 'tabpanel', 'aria-labelledby': tabElementId(id) }
     : {}
 
   const back = () => {
