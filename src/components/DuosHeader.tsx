@@ -190,8 +190,9 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   useEffect(() => {
     const fetchNotificationData = async (): Promise<void> => {
       const notificationData = await NotificationService.getActiveBanners()
+      // Ops-authored JSON: an entry with no id can neither be dismissed nor keyed, so it is dropped.
       const visibleNotificationData = Array.isArray(notificationData)
-        ? notificationData.filter(banner => !isBannerDismissed(banner.id))
+        ? notificationData.filter(banner => banner?.id && !isBannerDismissed(banner.id))
         : []
       setState(prev => ({
         ...prev,

@@ -110,6 +110,46 @@ const ApplicationPageHeading = ({ readOnly, darCode, projectTitle }: Application
   </div>
 )
 
+const pageContainerProps = (readOnly?: boolean) => readOnly
+  ? { className: 'application-information-page', style: { padding: '2% 3%', backgroundColor: 'white' } }
+  : { className: 'container', style: { padding: '0 0 2%' } }
+
+interface PreviousProgressReportsProps {
+  dars: DataAccessRequestModel[]
+  datasets: Dataset[]
+  researcher: DuosUser
+  countriesOfOperation: string[]
+  panelProps: (id: string) => Record<string, string | undefined>
+}
+
+/** The earlier progress reports in a collection; the newest is rendered by the current-DAR section. */
+const PreviousProgressReports = ({ dars, datasets, researcher, countriesOfOperation, panelProps }: PreviousProgressReportsProps) => (
+  <div className="dar-summary">
+    <h3>Previous Updates</h3>
+    {dars.slice(0, -1).map((dar, index) => {
+      const whichPRIsThis = dars.length - index - 1
+      const sectionId = `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`
+      return (
+        <div key={dar.referenceId} id={sectionId} {...panelProps(sectionId)}>
+          <ConditionalAccordion
+            condition={true}
+            title={`Progress Report ${whichPRIsThis}`}
+            defaultExpanded={index === 0}
+          >
+            <ProgressReportApplication
+              readOnlyMode={true}
+              datasets={datasets}
+              dar={merge({}, dar?.data, dar) as CombinedDataAccessRequest}
+              researcher={researcher}
+              countriesOfOperation={countriesOfOperation}
+            />
+          </ConditionalAccordion>
+        </div>
+      )
+    })}
+  </div>
+)
+
 export interface DataAccessRequestApplicationProps {
   draftDar: boolean
   isProgressReportApplication: boolean
@@ -689,7 +729,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
   return (
     <div>
-      <div className={existingDarsReadOnlyMode ? 'application-information-page' : 'container'} style={{ padding: existingDarsReadOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: existingDarsReadOnlyMode ? 'white' : '' }}>
+      <div {...pageContainerProps(existingDarsReadOnlyMode)}>
         <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div className="row no-margin">
             <Notification
@@ -773,33 +813,13 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
               </div>
             )}
             {existingDarsReadOnlyMode && reverseOrderedDARs.length > 1 && (
-              <div className="dar-summary">
-                <h3>Previous Updates</h3>
-                {reverseOrderedDARs.map((dar, index) => {
-                  if ((index + 1 !== reverseOrderedDARs.length)) {
-                    const sectionId = `${PROGRESS_REPORT_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`
-                    return (
-                      <div key={dar.referenceId} id={sectionId} {...panelProps(sectionId)}>
-                        <ConditionalAccordion
-                          key={dar.referenceId}
-                          condition={true}
-                          title={`Progress Report ${reverseOrderedDARs.length - index - 1}`}
-                          defaultExpanded={index === 0}
-                        >
-                          <ProgressReportApplication
-                            readOnlyMode={true}
-                            datasets={datasets}
-                            dar={merge({}, dar?.data, dar) as CombinedDataAccessRequest}
-                            researcher={researcher as DuosUser}
-                            countriesOfOperation={countriesOfOperation}
-                          />
-                        </ConditionalAccordion>
-                      </div>
-                    )
-                  }
-                  return null
-                })}
-              </div>
+              <PreviousProgressReports
+                dars={reverseOrderedDARs}
+                datasets={datasets}
+                researcher={researcher as DuosUser}
+                countriesOfOperation={countriesOfOperation}
+                panelProps={panelProps}
+              />
             )}
             <div id={CURRENT_DAR_TAB_ID} {...panelProps(CURRENT_DAR_TAB_ID)} className={existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
               {existingDarsReadOnlyMode && (

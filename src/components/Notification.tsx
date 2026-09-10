@@ -12,7 +12,7 @@ interface NotificationProps {
   onDismiss?: () => void
 }
 
-/** The banner feed speaks Bootstrap's vocabulary; MUI names one severity differently. */
+// The feed is ops-authored JSON, so an unknown level reaches here untyped and falls back to info.
 const SEVERITY: Record<NonNullable<NotificationData['level']>, AlertColor> = {
   info: 'info',
   success: 'success',
@@ -35,7 +35,7 @@ export const Notification = ({ notificationData, onDismiss }: Readonly<Notificat
 
   return (
     <Alert
-      severity={SEVERITY[notificationData.level ?? 'info']}
+      severity={SEVERITY[notificationData.level as keyof typeof SEVERITY] ?? 'info'}
       onClose={onDismiss}
       closeText="Dismiss notification"
       sx={BANNER_SX}

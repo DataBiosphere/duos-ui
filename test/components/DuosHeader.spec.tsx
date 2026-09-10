@@ -529,6 +529,18 @@ describe('DuosHeader', () => {
       expect(screen.getByText('Keep me')).toBeInTheDocument()
     })
 
+    it('skips a feed entry that carries no id, and keeps the rest', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
+        { active: true, message: 'No id here', level: 'info' },
+        { id: 'banner-6', active: true, message: 'Well formed', level: 'info' },
+      ] as Banner[])
+
+      await mountHeader('/home')
+
+      expect(screen.queryByText('No id here')).not.toBeInTheDocument()
+      expect(screen.getByText('Well formed')).toBeInTheDocument()
+    })
+
     // GCS serves the banner feed, so a malformed payload must not take the header down with it.
     it('renders no banners when the feed does not come back as a list', async () => {
       vi.mocked(NotificationService.getActiveBanners).mockResolvedValue(null as unknown as Banner[])

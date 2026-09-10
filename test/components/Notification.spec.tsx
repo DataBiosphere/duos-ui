@@ -56,6 +56,14 @@ describe('Notification', () => {
     expect(alertRoot(container)).toHaveClass('MuiAlert-colorInfo')
   })
 
+  // The feed is ops-authored, so a level outside the four known ones can reach the component.
+  it('falls back to info when the banner carries an unknown level', () => {
+    const { container } = render(
+      <Notification notificationData={{ message: 'odd level', level: 'critical' as Banner['level'] }} />,
+    )
+    expect(alertRoot(container)).toHaveClass('MuiAlert-colorInfo')
+  })
+
   it('does not render a close button when onDismiss is omitted', () => {
     render(<Notification notificationData={makeBanner()} />)
     expect(screen.queryByRole('button', { name: 'Dismiss notification' })).not.toBeInTheDocument()

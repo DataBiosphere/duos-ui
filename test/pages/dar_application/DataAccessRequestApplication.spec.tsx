@@ -1,6 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom/vitest'
 import { MemoryRouter, Routes, Route } from 'react-router'
 import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication'
@@ -136,433 +137,6 @@ const userSigningOfficials = [
   },
 ]
 
-describe('DataAccessRequestApplication', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    setupTestEnvironment()
-  })
-
-  it('shows spinner when submitting', async () => {
-    // Mocks
-    vi.mocked(Countries.getCountries).mockResolvedValue(['United States of America (the)', 'Canada'])
-    vi.mocked(Storage.getCurrentUser).mockReturnValue(user as ReturnType<typeof Storage.getCurrentUser>)
-    vi.mocked(User.getMe).mockResolvedValue(user as Awaited<ReturnType<typeof User.getMe>>)
-    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue(userSigningOfficials as Awaited<ReturnType<typeof User.getSOsForCurrentUser>>)
-    vi.mocked(Collections.getCollectionById).mockResolvedValue(darCollection)
-    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue(datasets as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>)
-    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue(undefined)
-    vi.mocked(DAR.getPartialDarRequest).mockResolvedValue(
-      darCollection.dars[darId],
-    )
-    vi.mocked(DAA.getDaas).mockResolvedValue([
-      {
-        daaId: 100,
-        createUserId: 1,
-        createDate: '1',
-        updateUserId: 1,
-        updateDate: '1',
-        initialDacId: 1,
-        dacs: [{ dacId: 1, dacName: 'Test DAC', email: 'dac@test.com' }],
-        file: { fileStorageObjectId: 1, entityId: '1', fileName: 'TestDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
-      },
-    ] as Awaited<ReturnType<typeof DAA.getDaas>>)
-    vi.mocked(Metrics.captureEvent).mockResolvedValue(undefined)
-
-    // Make updateDarDraft hang until we resolve it so we can assert the spinner during save
-    let resolveSave: (value: { referenceId: string }) => void
-    const savePromise = new Promise<{ referenceId: string }>((resolve) => {
-      resolveSave = resolve
-    })
-    vi.mocked(DAR.updateDarDraft).mockImplementation(async () => {
-      return savePromise as unknown as ReturnType<typeof DAR.updateDarDraft> extends Promise<infer T> ? T : never
-    })
-    vi.mocked(DAR.uploadDARDocument).mockResolvedValue({ data: null })
-    vi.mocked(DAR.postDarDraft).mockResolvedValue({ referenceId: 'ref-123' } as Awaited<ReturnType<typeof DAR.postDarDraft>>)
-
-    // Mock DAR submission to hang so we can see the spinner
-    let resolveSubmit: (value: unknown) => void
-    const submitPromise = new Promise((resolve) => {
-      resolveSubmit = resolve
-    })
-    vi.mocked(DAR.postDar).mockImplementation(async () => {
-      return submitPromise as unknown as ReturnType<typeof DAR.postDar> extends Promise<infer T> ? T : never
-    })
-
-    await act(async () => {
-      render(
-        <MemoryRouter initialEntries={[`/dar_application/${darId}`]}>
-          <Routes>
-            <Route
-              path="/dar_application/:dataRequestId"
-              element={(
-                <DataAccessRequestApplication
-                  draftDar={true}
-                  isProgressReportApplication={false}
-                  existingDarsReadOnlyMode={false}
-                />
-              )}
-            />
-          </Routes>
-        </MemoryRouter>,
-      )
-    })
-
-    // Wait for data to load
-    expect(screen.getByText('Data Access Request Application')).toBeInTheDocument()
-
-    // Fill out required fields
-    await selectOptionByLabel('piCountryOfOperation', 'United States')
-    await selectOptionByLabel('signingOfficial', 'SO 1')
-    await typeById('itDirector', 'Some IT Director')
-    await typeById('itDirectorEmail', 'it@good.org')
-    await clickById('anvilUse_yes')
-    await typeById('projectTitle', 'Title')
-    await typeById('rus', 'asdf')
-    await typeById('nonTechRus', 'asdf asdf')
-    await fillDarDataUseCheckboxes()
-
-    // Click "Save" to save the draft and assert spinner shows while saving
-    await clickById('btn_saveDar')
-    expect(screen.getByText('Save changes?')).toBeInTheDocument()
-    await act(async () => {
-      fireEvent.click(document.getElementById('btn_submit')!)
-    })
-
-    // Spinner should be visible while save is in progress
-    await waitFor(() => {
-      expect(document.getElementById('btn_submit')).toHaveAttribute('aria-busy', 'true')
-    })
-
-    // Verify that updateDarDraft was called and then resolve the save
-    expect(DAR.updateDarDraft).toHaveBeenCalled()
-    await act(async () => {
-      resolveSave({ referenceId: 'ref-123' })
-    })
-
-    // The Addendum tab is not shown until the user attests.
-    expect(screen.queryByRole('tab', { name: /Addendum/i })).not.toBeInTheDocument()
-
-    // Click "Attest"
-    await clickById('btn_attest')
-
-    // Attesting reveals the Addendum tab.
-    expect(screen.getByRole('tab', { name: /Addendum/i })).toBeInTheDocument()
-
-    // Now on Addendum tab, click "Submit"
-    await clickById('btn_openSubmitModal')
-
-    // The dialog should be open.
-    expect(screen.getByText('Submit Data Access Request?')).toBeInTheDocument()
-
-    // Click "Yes" in the dialog
-    await act(async () => {
-      fireEvent.click(document.getElementById('btn_submit')!)
-    })
-
-    // Now verify the spinner is visible for submit.
-    await waitFor(() => {
-      expect(document.getElementById('btn_submit')).toHaveAttribute('aria-busy', 'true')
-    })
-
-    // Verify that postDar was called
-    expect(DAR.postDar).toHaveBeenCalled()
-    const submittedDar = vi.mocked(DAR.postDar).mock.calls[0][0] as { daaIds: number[] }
-    expect(submittedDar.daaIds).toEqual([100])
-    await act(async () => {
-      resolveSubmit({})
-    })
-  })
-
-  const renderAndSaveDraft = async () => {
-    vi.mocked(Countries.getCountries).mockResolvedValue(['United States of America (the)', 'Canada'])
-    vi.mocked(Storage.getCurrentUser).mockReturnValue(user as ReturnType<typeof Storage.getCurrentUser>)
-    vi.mocked(User.getMe).mockResolvedValue(user as Awaited<ReturnType<typeof User.getMe>>)
-    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue(userSigningOfficials as Awaited<ReturnType<typeof User.getSOsForCurrentUser>>)
-    vi.mocked(Collections.getCollectionById).mockResolvedValue(darCollection)
-    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue(datasets as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>)
-    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue(undefined)
-    vi.mocked(DAR.getPartialDarRequest).mockResolvedValue(darCollection.dars[darId])
-    vi.mocked(DAA.getDaas).mockResolvedValue([
-      {
-        daaId: 100,
-        createUserId: 1,
-        createDate: '1',
-        updateUserId: 1,
-        updateDate: '1',
-        initialDacId: 1,
-        dacs: [{ dacId: 1, dacName: 'Test DAC', email: 'dac@test.com' }],
-        file: { fileStorageObjectId: 1, entityId: '1', fileName: 'TestDAA.pdf', category: 'dataAccessAgreement', mediaType: 'application/pdf', createUserId: 1, createDate: 1 },
-      },
-    ] as Awaited<ReturnType<typeof DAA.getDaas>>)
-    vi.mocked(Metrics.captureEvent).mockResolvedValue(undefined)
-    vi.mocked(DAR.uploadDARDocument).mockResolvedValue({ data: null })
-
-    await act(async () => {
-      render(
-        <MemoryRouter initialEntries={[`/dar_application/${darId}`]}>
-          <Routes>
-            <Route
-              path="/dar_application/:dataRequestId"
-              element={(
-                <DataAccessRequestApplication
-                  draftDar={true}
-                  isProgressReportApplication={false}
-                  existingDarsReadOnlyMode={false}
-                />
-              )}
-            />
-          </Routes>
-        </MemoryRouter>,
-      )
-    })
-
-    expect(screen.getByText('Data Access Request Application')).toBeInTheDocument()
-
-    await selectOptionByLabel('piCountryOfOperation', 'United States')
-    await selectOptionByLabel('signingOfficial', 'SO 1')
-    await typeById('itDirector', 'Some IT Director')
-    await typeById('itDirectorEmail', 'it@good.org')
-    await clickById('anvilUse_yes')
-    await typeById('projectTitle', 'Title')
-    await typeById('rus', 'asdf')
-    await typeById('nonTechRus', 'asdf asdf')
-    await fillDarDataUseCheckboxes()
-
-    await clickById('btn_saveDar')
-    expect(screen.getByText('Save changes?')).toBeInTheDocument()
-    await act(async () => {
-      fireEvent.click(document.getElementById('btn_submit')!)
-    })
-  }
-
-  it('surfaces the server validation message when saving a draft fails with a validation error', async () => {
-    const validationError = Object.assign(new Error('File name is invalid'), {
-      response: { data: { code: 400, message: 'File name is invalid' } },
-    })
-    vi.mocked(DAR.updateDarDraft).mockRejectedValue(validationError)
-
-    await renderAndSaveDraft()
-
-    await waitFor(() => {
-      expect(Notifications.showError).toHaveBeenCalled()
-    })
-
-    const call = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: React.ReactElement<{ children: string }> }
-    expect(call.text.props.children).toBe('File name is invalid')
-  })
-
-  it('falls back to the generic save-failure toast for an unexpected error', async () => {
-    vi.mocked(DAR.updateDarDraft).mockRejectedValue(new Error('network exploded'))
-
-    await renderAndSaveDraft()
-
-    await waitFor(() => {
-      expect(Notifications.showError).toHaveBeenCalled()
-    })
-
-    const call = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: string }
-    expect(call.text).toBe('Error saving Data Access Request. Please try again in a few moments.')
-  })
-
-  it('shows the eRACommonsOutage banner and hides it after dismissal', async () => {
-    vi.mocked(Countries.getCountries).mockResolvedValue(['United States of America (the)', 'Canada'])
-    vi.mocked(Storage.getCurrentUser).mockReturnValue(user as ReturnType<typeof Storage.getCurrentUser>)
-    vi.mocked(User.getMe).mockResolvedValue(user as Awaited<ReturnType<typeof User.getMe>>)
-    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue(userSigningOfficials as Awaited<ReturnType<typeof User.getSOsForCurrentUser>>)
-    vi.mocked(Collections.getCollectionById).mockResolvedValue(darCollection)
-    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue(datasets as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>)
-    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue({
-      id: 'eRACommonsOutage',
-      active: true,
-      message: 'eRA Commons is down',
-      level: 'warning',
-    })
-    vi.mocked(DAR.getPartialDarRequest).mockResolvedValue(darCollection.dars[darId])
-    vi.mocked(DAA.getDaas).mockResolvedValue([] as Awaited<ReturnType<typeof DAA.getDaas>>)
-    vi.mocked(Metrics.captureEvent).mockResolvedValue(undefined)
-
-    await act(async () => {
-      render(
-        <MemoryRouter initialEntries={[`/dar_application/${darId}`]}>
-          <Routes>
-            <Route
-              path="/dar_application/:dataRequestId"
-              element={(
-                <DataAccessRequestApplication
-                  draftDar={true}
-                  isProgressReportApplication={false}
-                  existingDarsReadOnlyMode={false}
-                />
-              )}
-            />
-          </Routes>
-        </MemoryRouter>,
-      )
-    })
-
-    expect(screen.getByText('Data Access Request Application')).toBeInTheDocument()
-    await waitFor(() => {
-      expect(screen.getByText('eRA Commons is down')).toBeInTheDocument()
-    })
-
-    fireEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
-
-    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage')
-    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
-  })
-
-  it('does not show an already-dismissed eRACommonsOutage banner', async () => {
-    vi.mocked(Countries.getCountries).mockResolvedValue(['United States of America (the)', 'Canada'])
-    vi.mocked(Storage.getCurrentUser).mockReturnValue(user as ReturnType<typeof Storage.getCurrentUser>)
-    vi.mocked(User.getMe).mockResolvedValue(user as Awaited<ReturnType<typeof User.getMe>>)
-    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue(userSigningOfficials as Awaited<ReturnType<typeof User.getSOsForCurrentUser>>)
-    vi.mocked(Collections.getCollectionById).mockResolvedValue(darCollection)
-    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue(datasets as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>)
-    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue({
-      id: 'eRACommonsOutage',
-      active: true,
-      message: 'eRA Commons is down',
-      level: 'warning',
-    })
-    vi.mocked(isBannerDismissed).mockReturnValue(true)
-    vi.mocked(DAR.getPartialDarRequest).mockResolvedValue(darCollection.dars[darId])
-    vi.mocked(DAA.getDaas).mockResolvedValue([] as Awaited<ReturnType<typeof DAA.getDaas>>)
-    vi.mocked(Metrics.captureEvent).mockResolvedValue(undefined)
-
-    await act(async () => {
-      render(
-        <MemoryRouter initialEntries={[`/dar_application/${darId}`]}>
-          <Routes>
-            <Route
-              path="/dar_application/:dataRequestId"
-              element={(
-                <DataAccessRequestApplication
-                  draftDar={true}
-                  isProgressReportApplication={false}
-                  existingDarsReadOnlyMode={false}
-                />
-              )}
-            />
-          </Routes>
-        </MemoryRouter>,
-      )
-    })
-
-    expect(screen.getByText('Data Access Request Application')).toBeInTheDocument()
-    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
-  })
-
-  it('loads dataset/DAA snapshots in submitted read-only DAR review container', async () => {
-    vi.mocked(Countries.getCountries).mockResolvedValue(['United States of America (the)', 'Canada'])
-    vi.mocked(Storage.getCurrentUser).mockReturnValue(user as ReturnType<typeof Storage.getCurrentUser>)
-    vi.mocked(Collections.getCollectionById).mockResolvedValue(darCollection)
-    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue([
-      {
-        datasetId: 2352,
-        datasetIdentifier: 'DUOS-READONLY-2352',
-        name: 'Read-only Dataset',
-        dacId: 1,
-        dataUse: {},
-      },
-    ] as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>)
-    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue(undefined)
-    vi.mocked(DAR.getPartialDarRequest).mockResolvedValue(
-      darCollection.dars[darId],
-    )
-    vi.mocked(DAR.getDatasetDaaSnapshots).mockResolvedValue([
-      {
-        datasetId: 2352,
-        daaId: 100,
-        daaFileName: 'ReadonlyDAA.pdf',
-      },
-    ] as Awaited<ReturnType<typeof DAR.getDatasetDaaSnapshots>>)
-
-    await act(async () => {
-      render(
-        <MemoryRouter initialEntries={['/dar_application_review/211']}>
-          <Routes>
-            <Route
-              path="/dar_application_review/:collectionId"
-              element={(
-                <DataAccessRequestApplication
-                  draftDar={false}
-                  isProgressReportApplication={false}
-                  existingDarsReadOnlyMode={true}
-                />
-              )}
-            />
-          </Routes>
-        </MemoryRouter>,
-      )
-    })
-
-    expect(document.querySelector('.dar-summary')).not.toBeNull()
-    expect(DAR.getDatasetDaaSnapshots).toHaveBeenCalledWith(darId)
-  })
-
-  const renderReadOnly = async (embedded?: boolean) => {
-    vi.mocked(Countries.getCountries).mockResolvedValue(['United States of America (the)'])
-    vi.mocked(Storage.getCurrentUser).mockReturnValue(user as ReturnType<typeof Storage.getCurrentUser>)
-    vi.mocked(Collections.getCollectionById).mockResolvedValue(darCollection)
-    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue(datasets as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>)
-    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue(undefined)
-    vi.mocked(DAR.getPartialDarRequest).mockResolvedValue(darCollection.dars[darId])
-    vi.mocked(DAR.getDatasetDaaSnapshots).mockResolvedValue([] as Awaited<ReturnType<typeof DAR.getDatasetDaaSnapshots>>)
-
-    render(
-      <MemoryRouter initialEntries={['/dar_application_review/211']}>
-        <Routes>
-          <Route
-            path="/dar_application_review/:collectionId"
-            element={(
-              <DataAccessRequestApplication
-                draftDar={false}
-                isProgressReportApplication={false}
-                existingDarsReadOnlyMode={true}
-                embedded={embedded}
-              />
-            )}
-          />
-        </Routes>
-      </MemoryRouter>,
-    )
-    // The page shows a spinner until the collection resolves; the step tabs mark it loaded.
-    await screen.findAllByRole('tab')
-  }
-
-  // PageHeading suffixes the id it is given.
-  const pageHeading = () => document.getElementById('dar-application-heading_heading')
-
-  it('keeps its own heading, side panel and voting history on the standalone read-only route', async () => {
-    await renderReadOnly()
-
-    expect(pageHeading()).toBeInTheDocument()
-    expect(document.querySelector('.multi-step-buttons-container')).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Voting History' })).toBeInTheDocument()
-  })
-
-  it('labels every step section by the tab that scrolls to it', async () => {
-    await renderReadOnly()
-
-    const tabs = screen.getAllByRole('tab')
-    expect(tabs.length).toBeGreaterThan(1)
-    tabs.forEach((tab) => {
-      const panel = document.getElementById(tab.getAttribute('aria-controls') ?? '')
-      expect(panel).toHaveAttribute('role', 'tabpanel')
-      expect(panel).toHaveAttribute('aria-labelledby', tab.id)
-    })
-  })
-
-  it('drops the heading, stacks the step tabs and defers voting history when embedded in the Full DAR tab', async () => {
-    await renderReadOnly(true)
-
-    expect(pageHeading()).not.toBeInTheDocument()
-    expect(document.querySelector('.step-tabs-container--horizontal')).toBeInTheDocument()
-    expect(document.querySelector('.multi-step-buttons-container')).not.toBeInTheDocument()
-    expect(screen.queryByRole('tab', { name: 'Voting History' })).not.toBeInTheDocument()
-  })
-})
-
 const daaList = [
   {
     daaId: 100,
@@ -652,13 +226,211 @@ const multiDarCollection = (): DarCollection => {
   } as unknown as DarCollection
 }
 
-describe('DataAccessRequestApplication - page modes', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    setupTestEnvironment()
-    mockServices()
+/** userEvent.upload cannot express "no file", so clearing goes through a change event. */
+const clearFileInput = async (id: string) => {
+  fireEvent.change(document.getElementById(id)!, { target: { files: [] } })
+  await waitFor(() => expect(document.getElementById(id)).toBeInTheDocument())
+}
+
+const eraOutageBanner = {
+  id: 'eRACommonsOutage',
+  active: true,
+  message: 'eRA Commons is down',
+  level: 'warning',
+} as const
+
+const clickDialogNo = () => userEvent.click(screen.getByRole('button', { name: 'No' }))
+
+const clickDialogYes = () => userEvent.click(document.getElementById('btn_submit')!)
+
+/** Fills every required field, so only the case under test can fail validation. */
+const completeTheForm = async () => {
+  await selectOptionByLabel('piCountryOfOperation', 'United States')
+  await selectOptionByLabel('signingOfficial', 'SO 1')
+  await typeById('itDirector', 'Some IT Director')
+  await typeById('itDirectorEmail', 'it@good.org')
+  await clickById('anvilUse_yes')
+  await typeById('projectTitle', 'Title')
+  await typeById('rus', 'asdf')
+  await typeById('nonTechRus', 'asdf asdf')
+  await fillDarDataUseCheckboxes()
+}
+
+const selectedTabName = (): string =>
+  screen.getAllByRole('tab').find(tab => tab.getAttribute('aria-selected') === 'true')?.textContent ?? ''
+
+const docDatasets = [
+  {
+    datasetId: 123456,
+    datasetIdentifier: 'DUOS-123456',
+    name: 'Some Dataset',
+    dacId: 1,
+    dataUse: { ethicsApprovalRequired: true, collaboratorRequired: true },
+  },
+] as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>
+
+const uploadTo = async (id: string, fileName: string) => {
+  const input = await waitFor(() => {
+    const found = document.getElementById(id)
+    expect(found).not.toBeNull()
+    return found as HTMLInputElement
+  })
+  await userEvent.upload(input, new File(['x'], fileName, { type: 'application/pdf' }))
+}
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  setupTestEnvironment()
+  mockServices()
+})
+
+describe('DataAccessRequestApplication', () => {
+  it('shows spinner when submitting', async () => {
+    // Both writes hang until released, so the spinner can be asserted mid-flight.
+    let resolveSave: (value: { referenceId: string }) => void = () => {}
+    vi.mocked(DAR.updateDarDraft).mockReturnValue(new Promise((resolve) => {
+      resolveSave = resolve as (value: { referenceId: string }) => void
+    }) as ReturnType<typeof DAR.updateDarDraft>)
+    let resolveSubmit: (value: never) => void = () => {}
+    vi.mocked(DAR.postDar).mockReturnValue(new Promise((resolve) => {
+      resolveSubmit = resolve as (value: never) => void
+    }) as ReturnType<typeof DAR.postDar>)
+
+    await renderDraft()
+    expect(screen.getByText('Data Access Request Application')).toBeInTheDocument()
+    await completeTheForm()
+
+    await clickById('btn_saveDar')
+    expect(screen.getByText('Save changes?')).toBeInTheDocument()
+    await clickDialogYes()
+
+    await waitFor(() => {
+      expect(document.getElementById('btn_submit')).toHaveAttribute('aria-busy', 'true')
+    })
+    expect(DAR.updateDarDraft).toHaveBeenCalled()
+    await act(async () => {
+      resolveSave({ referenceId: 'ref-123' })
+    })
+
+    // The Addendum tab is not shown until the user attests.
+    expect(screen.queryByRole('tab', { name: /Addendum/i })).not.toBeInTheDocument()
+    await clickById('btn_attest')
+    expect(screen.getByRole('tab', { name: /Addendum/i })).toBeInTheDocument()
+
+    await clickById('btn_openSubmitModal')
+    expect(screen.getByText('Submit Data Access Request?')).toBeInTheDocument()
+    await clickDialogYes()
+
+    await waitFor(() => {
+      expect(document.getElementById('btn_submit')).toHaveAttribute('aria-busy', 'true')
+    })
+    expect(DAR.postDar).toHaveBeenCalled()
+    const submittedDar = vi.mocked(DAR.postDar).mock.calls[0][0] as { daaIds: number[] }
+    expect(submittedDar.daaIds).toEqual([100])
+    await act(async () => {
+      resolveSubmit({} as never)
+    })
   })
 
+  const renderAndSaveDraft = async () => {
+    await renderDraft()
+    await completeTheForm()
+    await clickById('btn_saveDar')
+    expect(screen.getByText('Save changes?')).toBeInTheDocument()
+    await clickDialogYes()
+  }
+
+  it('surfaces the server validation message when saving a draft fails with a validation error', async () => {
+    vi.mocked(DAR.updateDarDraft).mockRejectedValue(Object.assign(new Error('File name is invalid'), {
+      response: { data: { code: 400, message: 'File name is invalid' } },
+    }))
+
+    await renderAndSaveDraft()
+
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalled())
+    const call = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: React.ReactElement<{ children: string }> }
+    expect(call.text.props.children).toBe('File name is invalid')
+  })
+
+  it('falls back to the generic save-failure toast for an unexpected error', async () => {
+    vi.mocked(DAR.updateDarDraft).mockRejectedValue(new Error('network exploded'))
+
+    await renderAndSaveDraft()
+
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalled())
+    const call = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: string }
+    expect(call.text).toBe('Error saving Data Access Request. Please try again in a few moments.')
+  })
+
+  it('shows the eRACommonsOutage banner and hides it after dismissal', async () => {
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue(eraOutageBanner)
+
+    await renderDraft()
+
+    expect(await screen.findByText('eRA Commons is down')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
+
+    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage')
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
+  })
+
+  it('does not show an already-dismissed eRACommonsOutage banner', async () => {
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue(eraOutageBanner)
+    vi.mocked(isBannerDismissed).mockReturnValue(true)
+
+    await renderDraft()
+
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
+  })
+
+  it('loads dataset/DAA snapshots in submitted read-only DAR review container', async () => {
+    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue([
+      { datasetId: 2352, datasetIdentifier: 'DUOS-READONLY-2352', name: 'Read-only Dataset', dacId: 1, dataUse: {} },
+    ] as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>)
+    vi.mocked(DAR.getDatasetDaaSnapshots).mockResolvedValue([
+      { datasetId: 2352, daaId: 100, daaFileName: 'ReadonlyDAA.pdf' },
+    ] as Awaited<ReturnType<typeof DAR.getDatasetDaaSnapshots>>)
+
+    await renderReview()
+
+    expect(document.querySelector('.dar-summary')).not.toBeNull()
+    expect(DAR.getDatasetDaaSnapshots).toHaveBeenCalledWith(darId)
+  })
+
+  // PageHeading suffixes the id it is given.
+  const pageHeading = () => document.getElementById('dar-application-heading_heading')
+
+  it('keeps its own heading, side panel and voting history on the standalone read-only route', async () => {
+    await renderReview()
+
+    expect(pageHeading()).toBeInTheDocument()
+    expect(document.querySelector('.multi-step-buttons-container')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Voting History' })).toBeInTheDocument()
+  })
+
+  it('labels every step section by the tab that scrolls to it', async () => {
+    await renderReview()
+
+    const tabs = screen.getAllByRole('tab')
+    expect(tabs.length).toBeGreaterThan(1)
+    tabs.forEach((tab) => {
+      const panel = document.getElementById(tab.getAttribute('aria-controls') ?? '')
+      expect(panel).toHaveAttribute('role', 'tabpanel')
+      expect(panel).toHaveAttribute('aria-labelledby', tab.id)
+    })
+  })
+
+  it('drops the heading, stacks the step tabs and defers voting history when embedded in the Full DAR tab', async () => {
+    await renderReview({ embedded: true })
+
+    expect(pageHeading()).not.toBeInTheDocument()
+    expect(document.querySelector('.step-tabs-container--horizontal')).toBeInTheDocument()
+    expect(document.querySelector('.multi-step-buttons-container')).not.toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Voting History' })).not.toBeInTheDocument()
+  })
+})
+
+describe('DataAccessRequestApplication - page modes', () => {
   it('titles the page Progress Report when building one', async () => {
     await renderReview({ isProgressReportApplication: true })
 
@@ -693,9 +465,7 @@ describe('DataAccessRequestApplication - page modes', () => {
   it('navigates back when the Back button is used', async () => {
     await renderDraft()
 
-    await act(async () => {
-      fireEvent.click(document.getElementById('btn_back')!)
-    })
+    await userEvent.click(document.getElementById('btn_back')!)
 
     expect(screen.getByText('Data Access Request Application')).toBeInTheDocument()
   })
@@ -719,41 +489,7 @@ describe('DataAccessRequestApplication - page modes', () => {
 })
 
 // The addendum's Save button shares btn_save with the dialog's No, so this matches on the label.
-const clickDialogNo = async () => {
-  await act(async () => {
-    fireEvent.click(screen.getByRole('button', { name: 'No' }))
-  })
-}
-
-const clickDialogYes = async () => {
-  await act(async () => {
-    fireEvent.click(document.getElementById('btn_submit')!)
-  })
-}
-
-/** Fills every required field, so only the case under test can fail validation. */
-const completeTheForm = async () => {
-  await selectOptionByLabel('piCountryOfOperation', 'United States')
-  await selectOptionByLabel('signingOfficial', 'SO 1')
-  await typeById('itDirector', 'Some IT Director')
-  await typeById('itDirectorEmail', 'it@good.org')
-  await clickById('anvilUse_yes')
-  await typeById('projectTitle', 'Title')
-  await typeById('rus', 'asdf')
-  await typeById('nonTechRus', 'asdf asdf')
-  await fillDarDataUseCheckboxes()
-}
-
-const selectedTabName = (): string =>
-  screen.getAllByRole('tab').find(tab => tab.getAttribute('aria-selected') === 'true')?.textContent ?? ''
-
 describe('DataAccessRequestApplication - dialogs and attestation', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    setupTestEnvironment()
-    mockServices()
-  })
-
   it('closes the save dialog without saving when the user declines', async () => {
     await renderDraft()
     await completeTheForm()
@@ -836,12 +572,6 @@ describe('DataAccessRequestApplication - dialogs and attestation', () => {
 })
 
 describe('DataAccessRequestApplication - submission failures', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    setupTestEnvironment()
-    mockServices()
-  })
-
   const attestAndSubmit = async () => {
     await renderDraft()
     await completeTheForm()
@@ -878,23 +608,6 @@ describe('DataAccessRequestApplication - submission failures', () => {
     expect(call.text).toBe('Error saving Data Access Request. Please try again in a few moments.')
   })
 })
-
-const docDatasets = [
-  {
-    datasetId: 123456,
-    datasetIdentifier: 'DUOS-123456',
-    name: 'Some Dataset',
-    dacId: 1,
-    dataUse: { ethicsApprovalRequired: true, collaboratorRequired: true },
-  },
-] as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>
-
-const uploadTo = async (id: string, fileName: string) => {
-  const input = document.getElementById(id) as HTMLInputElement
-  await act(async () => {
-    fireEvent.change(input, { target: { files: [new File(['x'], fileName, { type: 'application/pdf' })] } })
-  })
-}
 
 describe('DataAccessRequestApplication - supporting documents', () => {
   beforeEach(() => {
@@ -949,12 +662,6 @@ describe('DataAccessRequestApplication - supporting documents', () => {
 })
 
 describe('DataAccessRequestApplication - draft creation', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    setupTestEnvironment()
-    mockServices()
-  })
-
   it('posts a new draft and routes to it when the DAR has no reference id yet', async () => {
     vi.mocked(Storage.getData).mockReturnValue({ datasetIds: [123456] } as ReturnType<typeof Storage.getData>)
 
@@ -992,12 +699,6 @@ describe('DataAccessRequestApplication - draft creation', () => {
 })
 
 describe('DataAccessRequestApplication - unmounting mid-flight', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    setupTestEnvironment()
-    mockServices()
-  })
-
   const renderThenUnmount = async (settle: () => void) => {
     const { unmount } = render(
       <MemoryRouter initialEntries={[`/dar_application/${darId}`]}>
@@ -1064,12 +765,6 @@ describe('DataAccessRequestApplication - unmounting mid-flight', () => {
 })
 
 describe('DataAccessRequestApplication - review-mode edge cases', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    setupTestEnvironment()
-    mockServices()
-  })
-
   it('renders a review whose collection names no creating user', async () => {
     mockServices({ collection: { ...darCollection, createUser: undefined } as unknown as DarCollection })
 
@@ -1115,10 +810,8 @@ describe('DataAccessRequestApplication - review-mode edge cases', () => {
     await renderDraft()
     await uploadTo('irbDocument', 'irb.pdf')
 
-    await act(async () => {
-      fireEvent.change(document.getElementById('irbDocument')!, { target: { files: [] } })
-      fireEvent.change(document.getElementById('collaborationLetter')!, { target: { files: [] } })
-    })
+    await clearFileInput('irbDocument')
+    await clearFileInput('collaborationLetter')
     await completeTheForm()
 
     await clickById('btn_saveDar')
