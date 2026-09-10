@@ -411,4 +411,66 @@ describe('DataAccessRequestApplication', () => {
     expect(document.querySelector('.dar-summary')).not.toBeNull()
     expect(DAR.getDatasetDaaSnapshots).toHaveBeenCalledWith(darId)
   })
+
+  const renderReadOnly = async (embedded?: boolean) => {
+    vi.mocked(Countries.getCountries).mockResolvedValue(['United States of America (the)'])
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(user as ReturnType<typeof Storage.getCurrentUser>)
+    vi.mocked(Collections.getCollectionById).mockResolvedValue(darCollection)
+    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue(datasets as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>)
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue(undefined)
+    vi.mocked(DAR.getPartialDarRequest).mockResolvedValue(darCollection.dars[darId])
+    vi.mocked(DAR.getDatasetDaaSnapshots).mockResolvedValue([] as Awaited<ReturnType<typeof DAR.getDatasetDaaSnapshots>>)
+
+    render(
+      <MemoryRouter initialEntries={['/dar_application_review/211']}>
+        <Routes>
+          <Route
+            path="/dar_application_review/:collectionId"
+            element={(
+              <DataAccessRequestApplication
+                draftDar={false}
+                isProgressReportApplication={false}
+                existingDarsReadOnlyMode={true}
+                embedded={embedded}
+              />
+            )}
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+    // The page shows a spinner until the collection resolves; the step tabs mark it loaded.
+    await screen.findAllByRole('tab')
+  }
+
+  // PageHeading suffixes the id it is given.
+  const pageHeading = () => document.getElementById('dar-application-heading_heading')
+
+  it('keeps its own heading, side panel and voting history on the standalone read-only route', async () => {
+    await renderReadOnly()
+
+    expect(pageHeading()).toBeInTheDocument()
+    expect(document.querySelector('.multi-step-buttons-container')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Voting History' })).toBeInTheDocument()
+  })
+
+  it('labels every step section by the tab that scrolls to it', async () => {
+    await renderReadOnly()
+
+    const tabs = screen.getAllByRole('tab')
+    expect(tabs.length).toBeGreaterThan(1)
+    tabs.forEach((tab) => {
+      const panel = document.getElementById(tab.getAttribute('aria-controls') ?? '')
+      expect(panel).toHaveAttribute('role', 'tabpanel')
+      expect(panel).toHaveAttribute('aria-labelledby', tab.id)
+    })
+  })
+
+  it('drops the heading, stacks the step tabs and defers voting history when embedded in the Full DAR tab', async () => {
+    await renderReadOnly(true)
+
+    expect(pageHeading()).not.toBeInTheDocument()
+    expect(document.querySelector('.step-tabs-container--horizontal')).toBeInTheDocument()
+    expect(document.querySelector('.multi-step-buttons-container')).not.toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Voting History' })).not.toBeInTheDocument()
+  })
 })
