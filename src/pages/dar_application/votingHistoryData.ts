@@ -77,7 +77,7 @@ const createVoteRecord = (dar: DataAccessRequestModel, datasetId: number, electi
   return {
     datasetId,
     datasetName,
-    voteDate: voteDateRaw ? formatDate(voteDateRaw) : NO_FINAL_VOTE_STATUS,
+    voteDate: voteDateRaw === null ? NO_FINAL_VOTE_STATUS : formatDate(voteDateRaw),
     voteDateRaw,
     requestType: dar.progressReport ? 'Progress Report' : 'Initial DAR',
     linkedDarId: String(dar.collectionId),
@@ -96,14 +96,15 @@ export const buildVoteRecords = (dars: DataAccessRequestModel[], datasets: Datas
     return createVoteRecord(dar, datasetId, election, datasets)
   })
 }).sort((a, b) => {
-  // Rows with no recorded vote date first, then most recent vote, then open elections before
-  // closed, then request type, then dataset name.
-  if (a.voteDateRaw && b.voteDateRaw) {
+  // Rows with no recorded vote date first (null rather than falsy, so an epoch of 0 still
+  // counts), then most recent vote, then open elections before closed, then request type,
+  // then dataset name.
+  if (a.voteDateRaw !== null && b.voteDateRaw !== null) {
     const dateCompare = new Date(b.voteDateRaw).getTime() - new Date(a.voteDateRaw).getTime()
     if (dateCompare !== 0) return dateCompare
   }
-  else if (!a.voteDateRaw && b.voteDateRaw) return -1
-  else if (a.voteDateRaw && !b.voteDateRaw) return 1
+  else if (a.voteDateRaw === null && b.voteDateRaw !== null) return -1
+  else if (a.voteDateRaw !== null && b.voteDateRaw === null) return 1
 
   const statusOrder: Record<string, number> = { [ElectionStatus.OPEN]: 0, [ElectionStatus.CLOSED]: 1, [NO_ELECTION_STATUS]: 2 }
   const statusCompare = (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3)
