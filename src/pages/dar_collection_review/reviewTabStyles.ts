@@ -17,3 +17,10 @@ export const reviewTabsSx: SxProps<MuiTheme> = {
   },
   '& .MuiTab-root.Mui-selected': { color: Theme.palette.primary },
 }
+
+// The Full DAR tab's step tabs are a bare MUI Tabs rather than a TabControl, so they have to
+// suppress uppercasing themselves to match the review page's other tab bars.
+export const stepTabsSx: SxProps<MuiTheme> = [
+  reviewTabsSx,
+  { '& .MuiTab-root': { textTransform: 'none' } },
+]

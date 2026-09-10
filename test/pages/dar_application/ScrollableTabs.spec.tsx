@@ -5,6 +5,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BrowserRouter } from 'react-router'
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
+import { tabElementId } from 'src/pages/dar_application/stepTabs'
 
 const mockApplicationTabs = [
   { id: 'researcher-info', name: 'Researcher Information', showStep: true },
@@ -98,6 +99,39 @@ describe('ScrollableTabs', () => {
     )
     expect(container.querySelector('.step')).not.toBeInTheDocument()
     expect(container.querySelectorAll('.title')).toHaveLength(3)
+  })
+
+  it('stacks the tabs horizontally when orientation is horizontal', () => {
+    const { container } = render(
+      <BrowserRouter>
+        <ScrollableTabs applicationTabs={mockApplicationTabs} orientation="horizontal" />
+      </BrowserRouter>,
+    )
+    // MUI may omit aria-orientation or set it to "horizontal", so assert only that it is not vertical.
+    expect(screen.getByRole('tablist')).not.toHaveAttribute('aria-orientation', 'vertical')
+    expect(container.querySelector('.step-tabs-container--horizontal')).toBeInTheDocument()
+    expect(container.querySelector('.multi-step-buttons-container')).not.toBeInTheDocument()
+  })
+
+  it('points each tab at the section it scrolls to', () => {
+    render(
+      <BrowserRouter>
+        <ScrollableTabs applicationTabs={mockApplicationTabs} />
+      </BrowserRouter>,
+    )
+
+    const tab = screen.getByRole('tab', { name: /Data Access Request/ })
+    expect(tab).toHaveAttribute('aria-controls', 'data-access-request')
+    expect(tab).toHaveAttribute('id', tabElementId('data-access-request'))
+  })
+
+  it('renders the side panel by default', () => {
+    render(
+      <BrowserRouter>
+        <ScrollableTabs applicationTabs={mockApplicationTabs} />
+      </BrowserRouter>,
+    )
+    expect(screen.getByRole('tablist')).toHaveAttribute('aria-orientation', 'vertical')
   })
 
   it('selects last tab based on formSelectedTabId', () => {

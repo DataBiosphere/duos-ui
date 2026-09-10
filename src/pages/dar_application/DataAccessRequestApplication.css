@@ -114,6 +114,14 @@ fieldset[disabled] .regular-checkbox:before {
   align-items: flex-start;
 }
 
+/* Embedded in the Full DAR tab: no page heading above to divide off from, and the step
+   tabs stack above the content rather than sitting beside it. */
+.forms-v2--flush {
+  border-top: none;
+  margin-top: 0;
+  flex-direction: column;
+}
+
 .step-container {
   clear: both;
   width: 100%;
@@ -156,19 +164,16 @@ fieldset[disabled] .regular-checkbox:before {
   align-self: flex-start;
 }
 
-.multi-step-buttons-container .MuiButtonBase-root {
+.multi-step-buttons-container .MuiTab-root {
   align-items: flex-start;
+  margin-top: 25px;
+  padding-left: 20px;
 }
 
 .multi-step-buttons-container .MuiTabs-indicator {
   width: 5px;
   right: unset;
   left: 0;
-}
-
-.multi-step-buttons-container .MuiButtonBase-root {
-  margin-top: 25px;
-  padding-left: 20px;
 }
 
 .multi-step-buttons-container .step,
@@ -199,6 +204,13 @@ fieldset[disabled] .regular-checkbox:before {
   background-color: rgba(43, 189, 155, .3);
 }
 
+/* Layout only; the tab bar itself is styled by stepTabsSx so it matches the review
+   page's other tab bars. */
+.step-tabs-container--horizontal {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
 @media (max-width: 1024px) {
   .forms-v2 {
     flex-direction: column;
@@ -217,7 +229,7 @@ fieldset[disabled] .regular-checkbox:before {
     width: 100%;
   }
 
-  .multi-step-buttons-container .MuiButtonBase-root {
+  .multi-step-buttons-container .MuiTab-root {
     margin-top: 10px;
   }
 }
