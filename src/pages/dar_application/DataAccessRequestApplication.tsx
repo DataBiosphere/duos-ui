@@ -25,7 +25,7 @@ import { ConditionalAccordion } from 'src/components/forms/ConditionalAccordion'
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication'
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
 import { tabElementId } from 'src/pages/dar_application/stepTabs'
-import { validateDARFormData, validationFailed, DARFormValidationResult } from 'src/utils/darFormUtils'
+import { normalizeDaaIds, validateDARFormData, validationFailed, DARFormValidationResult } from 'src/utils/darFormUtils'
 import { assign, cloneDeep, get, isArray, isEmpty, isEqual, isNil, isString, map, merge, set } from 'src/utils/NodashUtil'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { stepTabsSx } from 'src/pages/dar_collection_review/reviewTabStyles'
@@ -258,9 +258,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
   }, [])
 
   const onDaaIdsChange = useCallback((ids: number[]) => {
-    const normalizedIds = [...new Set((ids ?? [])
-      .map(Number)
-      .filter(id => Number.isInteger(id) && id > 0))]
+    const normalizedIds = normalizeDaaIds(ids)
     setFormData((prevFormData) => {
       if (isEqual(prevFormData.daaIds, normalizedIds)) {
         return prevFormData
@@ -481,9 +479,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     if (!isEmpty(validation.darErrors)) {
       return DATA_ACCESS_REQUEST_TAB_ID
     }
-    if (isEmpty(validation.rusErrors)) {
-      return RESEARCHER_INFO_TAB_ID
-    }
+    // Only reached once the other sections are clean, so the RUS is what failed.
     return RESEARCH_PURPOSE_STATEMENT_TAB_ID
   }
 
@@ -498,7 +494,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
   const attemptSubmit = async (): Promise<boolean> => {
     const validation = validateDARFormData({
       formData,
-      datasets: draftDar ? selectedDatasets : datasets,
+      datasets: selectedDatasets,
       dataUseTranslations,
       irbDocument: uploadedIrbDocument,
       collaborationLetter: uploadedCollaborationLetter,
@@ -547,9 +543,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
       }
     }
     formattedFormData.userId = userId
-    formattedFormData.daaIds = [...new Set(((formData.daaIds ?? []) as number[])
-      .map(Number)
-      .filter(id => Number.isInteger(id) && id > 0))]
+    formattedFormData.daaIds = normalizeDaaIds(formData.daaIds)
 
     try {
       const referenceId = formData.referenceId
@@ -619,9 +613,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     const formattedFormData: Record<string, unknown> = cloneDeep(formData)
     // DAR datasetIds needs to be a list of ids
     formattedFormData.datasetIds = selectedDatasets.map(d => d.datasetId)
-    formattedFormData.daaIds = [...new Set(((formData.daaIds ?? []) as number[])
-      .map(Number)
-      .filter(id => Number.isInteger(id) && id > 0))]
+    formattedFormData.daaIds = normalizeDaaIds(formData.daaIds)
 
     // Make sure we navigate back to the current DAR after saving.
     try {

@@ -12,7 +12,7 @@ interface NotificationProps {
   onDismiss?: () => void
 }
 
-/** The ops banner feed speaks Bootstrap's vocabulary, which names one severity differently to MUI. */
+/** The banner feed speaks Bootstrap's vocabulary; MUI names one severity differently. */
 const SEVERITY: Record<NonNullable<NotificationData['level']>, AlertColor> = {
   info: 'info',
   success: 'success',
@@ -22,8 +22,7 @@ const SEVERITY: Record<NonNullable<NotificationData['level']>, AlertColor> = {
 
 const BANNER_SX = {
   'alignItems': 'center',
-  // Banner copy is markdown, so its links have to shout back at the global
-  // `a, input { text-decoration: none !important }` in index.css to stay discoverable.
+  // Beats the global `a, input { text-decoration: none !important }` in index.css.
   '& a': { textDecoration: 'underline !important' },
   '& p:first-of-type': { marginTop: 0 },
   '& p:last-of-type': { marginBottom: 0 },
