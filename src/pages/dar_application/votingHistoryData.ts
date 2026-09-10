@@ -81,7 +81,7 @@ const createVoteRecord = (dar: DataAccessRequestModel, datasetId: number, electi
   return {
     datasetId,
     datasetName,
-    voteDate: voteDateRaw === null ? NO_FINAL_VOTE_STATUS : formatDate(voteDateRaw),
+    voteDate: voteDateRaw === null ? (election ? NO_FINAL_VOTE_STATUS : NO_ELECTION_STATUS) : formatDate(voteDateRaw),
     voteDateRaw,
     requestType: dar.progressReport ? 'Progress Report' : 'Initial DAR',
     linkedDarId: String(dar.collectionId),
