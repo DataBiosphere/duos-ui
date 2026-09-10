@@ -55,7 +55,7 @@ const convertToSnackbarOrigin = (layout: ToastPosition | SnackbarOrigin): Snackb
 const activeNotifications = new Set<() => void>()
 
 export const dismissAllNotifications = (): void => {
-  for (const teardown of [...activeNotifications]) teardown()
+  for (const teardown of activeNotifications) teardown()
 }
 
 export const ToastNotifications = {
@@ -72,8 +72,12 @@ export const ToastNotifications = {
     document.body.appendChild(notificationRoot)
     const root = createRoot(notificationRoot)
 
+    // Dismissing all notifications can beat the exit animation's timer to it, so leaving
+    // the set is what makes a notification torn down, and doing it twice is a no-op.
+    let exitTimeout: ReturnType<typeof setTimeout> | undefined
     const teardown = () => {
-      activeNotifications.delete(teardown)
+      if (!activeNotifications.delete(teardown)) return
+      clearTimeout(exitTimeout)
       root.unmount()
       notificationRoot.remove()
     }
@@ -86,7 +90,7 @@ export const ToastNotifications = {
         if (reason === 'clickaway') return
         setOpen(false)
         onDismiss?.()
-        setTimeout(teardown, 300)
+        exitTimeout = setTimeout(teardown, 300)
       }
 
       return (
