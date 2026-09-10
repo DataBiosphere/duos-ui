@@ -33,6 +33,15 @@ describe('buildVoteRecords', () => {
     expect(record.voteDate).toBe('Awaiting Final Vote')
   })
 
+  it('says an election is still to open when the dataset has none', () => {
+    const dar = buildDar([1], {})
+
+    const [record] = buildVoteRecords([dar], datasets)
+
+    expect(record.voteDateRaw).toBeNull()
+    expect(record.voteDate).toBe('Awaiting Election Opening')
+  })
+
   it('dates a cast final vote by when it was created if it was never updated', () => {
     const dar = buildDar([1], { one: closedElection(1, [{ type: 'FINAL', vote: true, createDate: '2024-06-03T12:00:00Z' }]) })
 
