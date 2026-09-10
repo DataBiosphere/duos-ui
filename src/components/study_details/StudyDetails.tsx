@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Link, useParams, useNavigate } from 'react-router'
 import { Typography, useMediaQuery, useTheme } from '@mui/material'
@@ -106,6 +106,13 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const clinicalTrials = useStudyClinicalTrials(studyId)
   const intellectualProperty = useStudyIntellectualProperty(studyId)
   const fundingResources = useStudyFundingResources(studyId)
+  // Dataset search is not a reliable source of study-level metadata: a valid study may have no
+  // datasets (and therefore no matching index document). The relational response is already
+  // loaded for PI details, so use it as the fallback for the fields both payloads carry.
+  const studyName = study?.studyName ?? piDetails?.name
+  const studyDescription = study?.description ?? piDetails?.description
+  const studyDataTypes = study?.dataTypes ?? piDetails?.dataTypes
+  const piName = study?.piName ?? piDetails?.piName
   const similarStudies = useSimilarStudies(studyId)
   const frequentlyRequestedWith = useFrequentlyRequestedWithStudies(studyId)
   const selectedStudyIds = selectedDatasets.length > 0 && study
@@ -181,9 +188,9 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
               </Link>
             </Typography>
             <Typography variant="h5" sx={{ fontWeight: Theme.font.weight.semibold, pt: 1 }}>
-              {study?.studyName}
+              {studyName}
             </Typography>
-            <StudyTitleBadges dataTypes={study?.dataTypes} />
+            <StudyTitleBadges dataTypes={studyDataTypes} />
             <StudyAssetCountBadges
               counts={[
                 ['Datasets', data.total],
@@ -193,7 +200,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
               ]}
             />
             <Typography variant="body1" sx={{ pt: 2.5 }}>
-              {study?.description}
+              {studyDescription}
             </Typography>
             <StudyInfoTable
               rows={[
@@ -205,10 +212,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
                   // The profile links live in this row, and StudyInfoTable drops rows with a
                   // falsy value, so the row's presence can't hinge on piName alone — the search
                   // index sometimes has none for a study whose PI profile links are populated.
-                  value: (study?.piName || piProfileLinks.length > 0)
+                  value: (piName || piProfileLinks.length > 0)
                     ? (
                         <>
-                          {study?.piName}
+                          {piName}
                           <PiExternalProfileIcons links={piProfileLinks} />
                         </>
                       )
@@ -347,6 +354,13 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
 export const StudyDetails = () => {
   usePageTitle('Study Details')
   const { studyId = '' } = useParams<{ studyId: string }>()
+
+  // Recommendation cards live near the bottom of this long page. BrowserRouter preserves the
+  // current document offset during an in-app navigation, so reset it whenever the route points at
+  // a different study rather than opening the next study at the same deep scroll position.
+  useEffect(() => {
+    globalThis.scrollTo({ top: 0, left: 0 })
+  }, [studyId])
 
   // Remount local grid state when navigating directly between study routes.
   return <StudyDetailsContent key={studyId} studyId={studyId} />
