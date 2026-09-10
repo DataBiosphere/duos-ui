@@ -1,9 +1,8 @@
-import { ElectionStatus, VOTE_TYPES } from 'src/utils/DarUtils'
+import { ElectionStatus, VOTE_TYPES, VoteDecision } from 'src/utils/DarUtils'
 import { DataAccessRequest as DataAccessRequestModel, Dataset, Election } from 'src/types/model'
 
 const NO_ELECTION_STATUS = 'Awaiting Election Opening'
 const NO_FINAL_VOTE_STATUS = 'Awaiting Final Vote'
-const PENDING_STATUS = 'Pending'
 
 export interface VoteRecord {
   datasetId: number
@@ -41,7 +40,7 @@ const createVoteRecord = (dar: DataAccessRequestModel, datasetId: number, electi
     })
   }
 
-  const isElectionClosed = !hasFinalVote && (election?.status === ElectionStatus.CLOSED || election?.status === 'Canceled')
+  const isElectionClosed = !hasFinalVote && (election?.status === ElectionStatus.CLOSED || election?.status === ElectionStatus.CANCELED)
 
   // The row's date and its sort key are the same value, so neither can contradict the other.
   const resolveVoteDate = () => {
@@ -55,15 +54,15 @@ const createVoteRecord = (dar: DataAccessRequestModel, datasetId: number, electi
 
   const getDecision = () => {
     if (finalVote?.vote === true) {
-      return 'Approved'
+      return VoteDecision.APPROVED
     }
     if (finalVote?.vote === false) {
-      return 'Denied'
+      return VoteDecision.DENIED
     }
     if (isElectionClosed && election) {
       return election.status
     }
-    return PENDING_STATUS
+    return VoteDecision.PENDING
   }
 
   const getRationale = () => {
