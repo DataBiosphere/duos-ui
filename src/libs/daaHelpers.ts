@@ -1,5 +1,10 @@
 import type { DAAObject } from 'src/types/model'
 
+/** Human-readable DAA label: the uploaded file's name, or a stable `DAA-<id>` token. */
+export function daaLabel(daa: DAAObject): string {
+  return daa.file?.fileName ?? `DAA-${daa.daaId}`
+}
+
 /**
  * Get DAAs that were created (uploaded) by a specific DAC
  * @param daas - All available DAAs

@@ -43,3 +43,22 @@ export const userDacs = (roles: UserRole[] | undefined, dacNameById: Map<number,
 }
 
 export const formatUserDacs = (dacs: UserDac[]): string => dacs.map(dac => dac.name).join(', ') || 'None'
+
+// Read in UTC: formatDate's local getters report the previous day west of UTC.
+export const formatRegistrationDate = (createDate: Date | string | undefined): string => {
+  if (isNil(createDate)) {
+    return '- -'
+  }
+  const date = new Date(createDate)
+  return Number.isNaN(date.getTime()) ? '- -' : date.toISOString().slice(0, 10)
+}
+
+/** Labels a user's pre-authorized DAAs, falling back to a stable token for a DAA missing from the lookup. */
+export const formatPreAuth = (
+  libraryCard: LibraryCard | undefined,
+  daaLabelsById: Map<number, string>,
+): string => {
+  const labels = (libraryCard?.daaDetails ?? [])
+    .map(({ daaId }) => daaLabelsById.get(daaId) ?? `DAA-${daaId}`)
+  return uniq(labels).join(', ') || 'None'
+}

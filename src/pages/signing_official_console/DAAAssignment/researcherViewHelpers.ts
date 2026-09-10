@@ -115,15 +115,6 @@ function dedupeDaas(daas: readonly DAAObject[]): DAAObject[] {
 }
 
 /**
- * Human-readable label for a DAA. Uses the uploaded file's name, falling back to
- * a stable `DAA-<id>` token when no file name is available. Single source of truth
- * for the DAA label shown across the DAA-assignment views, dialogs, and toasts.
- */
-export function daaLabel(daa: DAAObject): string {
-  return daa.file?.fileName ?? `DAA-${daa.daaId}`
-}
-
-/**
  * Display name of a researcher's institution.
  *
  * Falls back to a dash rather than the users table's "N/A" so it matches the
