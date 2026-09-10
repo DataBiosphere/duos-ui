@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { dismissBanner, isBannerDismissed, NotificationService } from 'src/libs/notificationService'
+import { dismissBanner, isBannerDismissed, isBannerVisible, NotificationService, visibleBanner } from 'src/libs/notificationService'
 import { Config } from 'src/libs/config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 import { Storage } from 'src/libs/storage'
@@ -168,6 +168,48 @@ describe('NotificationService', () => {
       dismissBanner('banner-1')
 
       expect(setCurrentUserSettings).toHaveBeenCalledWith('dismissedBanner_banner-1', true)
+    })
+  })
+
+  describe('isBannerVisible', () => {
+    const banner = { id: 'banner-1', active: true, message: 'Hello', level: 'info' } as const
+
+    it('shows a banner the user has not dismissed', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(undefined)
+
+      expect(isBannerVisible(banner)).toBe(true)
+    })
+
+    it('hides a banner the user has dismissed', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockImplementation(
+        (key: string) => key === 'dismissedBanner_banner-1',
+      )
+
+      expect(isBannerVisible(banner)).toBe(false)
+    })
+
+    // The feed is ops-authored JSON, so an entry can arrive without the id a dismissal is keyed on.
+    it('hides an entry with no id, and a missing one', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(undefined)
+
+      expect(isBannerVisible({ active: true, message: 'No id' } as unknown as typeof banner)).toBe(false)
+      expect(isBannerVisible(null)).toBe(false)
+      expect(isBannerVisible(undefined)).toBe(false)
+    })
+  })
+
+  describe('visibleBanner', () => {
+    it('reads back a banner the user can still see', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(undefined)
+      const banner = { id: 'banner-1', active: true, message: 'Hello', level: 'info' } as const
+
+      expect(visibleBanner(banner)).toBe(banner)
+    })
+
+    it('reads null for a dismissed banner', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(true)
+
+      expect(visibleBanner({ id: 'banner-1', active: true, message: 'Hello', level: 'info' } as const)).toBeNull()
     })
   })
 })

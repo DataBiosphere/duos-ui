@@ -26,7 +26,7 @@ vi.mock('src/libs/notificationService', () => ({
     getBannerObjectById: vi.fn(),
   },
   dismissBanner: vi.fn(),
-  isBannerDismissed: vi.fn().mockReturnValue(false),
+  visibleBanner: vi.fn(banner => banner ?? null),
 }))
 
 vi.mock('src/libs/utils', () => ({
@@ -99,7 +99,7 @@ vi.mock('src/components/forms/forms', () => {
 
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
-import { dismissBanner, isBannerDismissed, NotificationService } from 'src/libs/notificationService'
+import { dismissBanner, NotificationService, visibleBanner } from 'src/libs/notificationService'
 import { Notifications } from 'src/libs/utils'
 
 const mockUser: DuosUser = {
@@ -301,7 +301,7 @@ describe('UserProfile', () => {
       message: 'eRA Commons is down',
       level: 'warning',
     })
-    vi.mocked(isBannerDismissed).mockReturnValue(true)
+    vi.mocked(visibleBanner).mockReturnValue(null)
 
     renderUserProfile()
     await waitFor(() => screen.getByDisplayValue('Test User'))

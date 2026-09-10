@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { FormControlLabel, Switch } from '@mui/material'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
-import { Notification } from 'src/components/Notification'
+import { DismissibleBanner } from 'src/components/DismissibleBanner'
 import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
-import { Banner, dismissBanner, isBannerDismissed, NotificationService } from 'src/libs/notificationService'
+import { Banner, NotificationService, visibleBanner } from 'src/libs/notificationService'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import AffiliationAndRoles from './AffiliationAndRoles'
 import ResearcherStatus from './ResearcherStatus'
@@ -95,8 +95,7 @@ export default function UserProfile() {
         setUser(user)
         setName(user.displayName)
         setEmailPreference(Boolean(user.emailPreference))
-        const banner = await NotificationService.getBannerObjectById('eRACommonsOutage')
-        setNotificationData(banner && !isBannerDismissed(banner.id) ? banner : null)
+        setNotificationData(visibleBanner(await NotificationService.getBannerObjectById('eRACommonsOutage')))
       }
       catch {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' })
@@ -108,15 +107,7 @@ export default function UserProfile() {
 
   return (
     <main className="user-profile-page">
-      <Notification
-        notificationData={notificationData}
-        onDismiss={notificationData
-          ? () => {
-              dismissBanner(notificationData.id)
-              setNotificationData(null)
-            }
-          : undefined}
-      />
+      <DismissibleBanner banner={notificationData} onDismissed={() => setNotificationData(null)} />
       <PageHeading
         id="researcherProfile"
         color="common"

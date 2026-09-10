@@ -9,7 +9,7 @@ import DuosLogo from 'src/images/duos-network-logo.svg'
 import contactUsStandard from 'src/images/navbar_icon_contact_us.svg'
 import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg'
 import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
-import { Banner, dismissBanner, isBannerDismissed, NotificationService } from 'src/libs/notificationService'
+import { Banner, dismissBanner, isBannerVisible, NotificationService } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import { withStyles } from 'tss-react/mui'
 import { SupportRequestModal } from './modals/SupportRequestModal'
@@ -190,9 +190,8 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   useEffect(() => {
     const fetchNotificationData = async (): Promise<void> => {
       const notificationData = await NotificationService.getActiveBanners()
-      // Ops-authored JSON: an entry with no id can neither be dismissed nor keyed, so it is dropped.
       const visibleNotificationData = Array.isArray(notificationData)
-        ? notificationData.filter(banner => banner?.id && !isBannerDismissed(banner.id))
+        ? notificationData.filter(isBannerVisible)
         : []
       setState(prev => ({
         ...prev,

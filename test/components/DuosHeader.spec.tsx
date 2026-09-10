@@ -14,7 +14,7 @@ import { useUserIsLogged } from 'src/hooks/useSession'
 import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 import { DuosUser } from 'src/types/model'
 import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
-import { NotificationService, dismissBanner, isBannerDismissed } from 'src/libs/notificationService'
+import { NotificationService, dismissBanner, isBannerVisible } from 'src/libs/notificationService'
 import type { Banner } from 'src/libs/notificationService'
 
 vi.mock('src/hooks/useSession', () => ({
@@ -26,7 +26,7 @@ vi.mock('src/libs/notificationService', () => ({
     getActiveBanners: vi.fn().mockResolvedValue([]),
   },
   dismissBanner: vi.fn(),
-  isBannerDismissed: vi.fn().mockReturnValue(false),
+  isBannerVisible: vi.fn().mockReturnValue(true),
 }))
 
 vi.mock('src/components/modals/SupportRequestModal', () => ({
@@ -480,7 +480,7 @@ describe('DuosHeader', () => {
       vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
         { id: 'banner-1', active: true, message: 'Already dismissed', level: 'info' },
       ])
-      vi.mocked(isBannerDismissed).mockReturnValue(true)
+      vi.mocked(isBannerVisible).mockReturnValue(false)
 
       await mountHeader('/home')
 
@@ -491,7 +491,7 @@ describe('DuosHeader', () => {
       vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
         { id: 'banner-2', active: true, message: 'Still active', level: 'info' },
       ])
-      vi.mocked(isBannerDismissed).mockReturnValue(false)
+      vi.mocked(isBannerVisible).mockReturnValue(true)
 
       await mountHeader('/home')
 
@@ -502,7 +502,7 @@ describe('DuosHeader', () => {
       vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
         { id: 'banner-3', active: true, message: 'Dismiss me', level: 'info' },
       ])
-      vi.mocked(isBannerDismissed).mockReturnValue(false)
+      vi.mocked(isBannerVisible).mockReturnValue(true)
 
       await mountHeader('/home')
       expect(screen.getByText('Dismiss me')).toBeInTheDocument()
@@ -518,7 +518,7 @@ describe('DuosHeader', () => {
         { id: 'banner-4', active: true, message: 'Dismiss me', level: 'info' },
         { id: 'banner-5', active: true, message: 'Keep me', level: 'warning' },
       ])
-      vi.mocked(isBannerDismissed).mockReturnValue(false)
+      vi.mocked(isBannerVisible).mockReturnValue(true)
 
       await mountHeader('/home')
 
@@ -534,6 +534,7 @@ describe('DuosHeader', () => {
         { active: true, message: 'No id here', level: 'info' },
         { id: 'banner-6', active: true, message: 'Well formed', level: 'info' },
       ] as Banner[])
+      vi.mocked(isBannerVisible).mockImplementation((banner): banner is Banner => Boolean(banner?.id))
 
       await mountHeader('/home')
 

@@ -34,6 +34,13 @@ export const dismissBanner = (id: string): void => {
   Storage.setCurrentUserSettings<boolean>(dismissedBannerKey(id), true)
 }
 
+/** Shown only when the banner can be identified and this user has not dismissed it. */
+export const isBannerVisible = (banner: Banner | null | undefined): banner is Banner =>
+  !!banner?.id && !isBannerDismissed(banner.id)
+
+export const visibleBanner = (banner: Banner | null | undefined): Banner | null =>
+  isBannerVisible(banner) ? banner : null
+
 export const NotificationService = {
 
   /**

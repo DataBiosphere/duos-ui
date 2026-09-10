@@ -91,7 +91,7 @@ import { User } from 'src/libs/ajax/User'
 import { Collections } from 'src/libs/ajax/Collections'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Countries } from 'src/libs/ajax/Countries'
-import { dismissBanner, isBannerDismissed, NotificationService } from 'src/libs/notificationService'
+import { dismissBanner, NotificationService, visibleBanner } from 'src/libs/notificationService'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Notifications } from 'src/libs/utils'
 
@@ -401,7 +401,11 @@ describe('DataAccessRequestApplication', () => {
     await screen.findByText('Data Access Request Application')
   }
 
+  const showsTheBanner = () => vi.mocked(visibleBanner).mockImplementation(banner => banner ?? null)
+
   it('shows the eRACommonsOutage banner and hides it after dismissal', async () => {
+    showsTheBanner()
+
     await renderWithOutageBanner()
 
     expect(await screen.findByText('eRA Commons is down')).toBeInTheDocument()
@@ -412,7 +416,7 @@ describe('DataAccessRequestApplication', () => {
   })
 
   it('does not show an already-dismissed eRACommonsOutage banner', async () => {
-    vi.mocked(isBannerDismissed).mockReturnValue(true)
+    vi.mocked(visibleBanner).mockReturnValue(null)
 
     await renderWithOutageBanner()
 
