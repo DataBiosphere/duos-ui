@@ -453,12 +453,16 @@ describe('DataAccessRequestApplication', () => {
     expect(screen.getByRole('tab', { name: 'Voting History' })).toBeInTheDocument()
   })
 
-  it('labels each step section by the tab that scrolls to it', async () => {
+  it('labels every step section by the tab that scrolls to it', async () => {
     await renderReadOnly()
 
-    const tab = screen.getByRole('tab', { name: 'Voting History' })
-
-    expect(screen.getByRole('tabpanel', { name: 'Voting History' })).toHaveAttribute('id', tab.getAttribute('aria-controls'))
+    const tabs = screen.getAllByRole('tab')
+    expect(tabs.length).toBeGreaterThan(1)
+    tabs.forEach((tab) => {
+      const panel = document.getElementById(tab.getAttribute('aria-controls') ?? '')
+      expect(panel).toHaveAttribute('role', 'tabpanel')
+      expect(panel).toHaveAttribute('aria-labelledby', tab.id)
+    })
   })
 
   it('drops the heading, stacks the step tabs and defers voting history when embedded in the Full DAR tab', async () => {

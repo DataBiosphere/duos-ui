@@ -52,6 +52,7 @@ const DATA_ACCESS_AGREEMENTS_TAB_ID = 'data-access-agreements'
 const PROGRESS_REPORT_TAB_ID_PREFIX = 'progress-report-'
 const PROGRESS_REPORT_APPLICATION_TAB_ID = 'progress-report-app'
 const ADDENDUM_TAB_ID = 'addendum'
+const CURRENT_DAR_TAB_ID = `${PROGRESS_REPORT_TAB_ID_PREFIX}0`
 const VOTING_HISTORY_TAB_ID = 'voting-history-info'
 
 interface AppTab {
@@ -800,7 +801,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                 })}
               </div>
             )}
-            <div id={`${PROGRESS_REPORT_TAB_ID_PREFIX}0`} className={existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
+            <div id={CURRENT_DAR_TAB_ID} {...panelProps(CURRENT_DAR_TAB_ID)} className={existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
               {existingDarsReadOnlyMode && (
                 <h3>
                   {formData.darCode}
