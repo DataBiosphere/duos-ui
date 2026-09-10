@@ -61,6 +61,13 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const participantCount = data.participantCount
   const { data: exportableDatasets } = useStudyExportableDatasets(studyId, datasets)
   const { data: piDetails } = usePiDetails(studyId)
+  // Dataset search is not a reliable source of study-level metadata: a valid study may have no
+  // datasets (and therefore no matching index document). The relational response is already
+  // loaded for PI details, so use it as the fallback for the fields both payloads carry.
+  const studyName = study?.studyName ?? piDetails?.name
+  const studyDescription = study?.description ?? piDetails?.description
+  const studyDataTypes = study?.dataTypes ?? piDetails?.dataTypes
+  const piName = study?.piName ?? piDetails?.piName
   const selectedStudyIds = selectedDatasets.length > 0 && study
     ? [study.studyId]
     : []
@@ -134,11 +141,11 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
               </Link>
             </Typography>
             <Typography variant="h5" sx={{ fontWeight: Theme.font.weight.semibold, pt: 1 }}>
-              {study?.studyName}
+              {studyName}
             </Typography>
-            <StudyTitleBadges dataTypes={study?.dataTypes} />
+            <StudyTitleBadges dataTypes={studyDataTypes} />
             <Typography variant="body1" sx={{ pt: 2.5 }}>
-              {study?.description}
+              {studyDescription}
             </Typography>
             <StudyInfoTable
               rows={[
@@ -150,10 +157,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
                   // The profile links live in this row, and StudyInfoTable drops rows with a
                   // falsy value, so the row's presence can't hinge on piName alone — the search
                   // index sometimes has none for a study whose PI profile links are populated.
-                  value: (study?.piName || piProfileLinks.length > 0)
+                  value: (piName || piProfileLinks.length > 0)
                     ? (
                         <>
-                          {study?.piName}
+                          {piName}
                           <PiExternalProfileIcons links={piProfileLinks} />
                         </>
                       )
