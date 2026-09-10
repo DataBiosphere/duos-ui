@@ -1,5 +1,6 @@
 import { afterAll } from 'vitest'
 import { act, cleanup, configure } from '@testing-library/react'
+import { dismissAllNotifications } from 'src/libs/ToastNotifications'
 
 // Testing Library's default `asyncUtilTimeout` is 1000ms, which is the wall-clock
 // budget every bare `waitFor`/`findBy*` call gets. On a loaded CI machine a single
@@ -29,6 +30,7 @@ if (queueImmediate) {
 
 afterAll(async () => {
   cleanup()
+  dismissAllNotifications()
   await act(async () => {})
   if (!queueImmediate) return
   // Bounded so a self-perpetuating callback stalls this file rather than the whole run.
