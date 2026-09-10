@@ -121,7 +121,8 @@ interface VoteFixture {
   type: string
   vote: boolean | null
   rationale: string
-  updateDate: string
+  createDate?: string
+  updateDate?: string
 }
 
 interface ElectionFixture {
@@ -332,6 +333,32 @@ describe('Voting History - Vote Status Display', () => {
     expect(document.body.textContent).toContain('Denied')
     await toggleRationale(0) // The denied vote is first
     expect(document.body.textContent).toContain('No rationale provided.')
+  })
+
+  it('dates a final vote that was never updated by when it was cast', async () => {
+    mockVotingHistoryCollection([123456], {
+      'election-1': {
+        electionType: 'DataAccess',
+        datasetId: 123456,
+        status: 'Closed',
+        votes: [
+          {
+            type: VOTE_TYPES.FINAL,
+            vote: true,
+            rationale: 'Approved on the first pass.',
+            // Midday UTC so the rendered date is the same one in any time zone.
+            createDate: '2024-06-03T12:00:00Z',
+          },
+        ],
+      },
+    })
+
+    await mountDataAccessRequestApp(darCollection)
+    await openVotingHistoryTab()
+
+    expect(document.body.textContent).toContain('Approved')
+    expect(document.body.textContent).toContain('June 3, 2024')
+    expect(document.body.textContent).not.toContain('Awaiting Final Vote')
   })
 
   it('orders a closed election with no final vote by the date it displays', async () => {

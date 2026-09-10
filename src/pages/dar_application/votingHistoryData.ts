@@ -43,19 +43,9 @@ const createVoteRecord = (dar: DataAccessRequestModel, datasetId: number, electi
 
   const isElectionClosed = !hasFinalVote && (election?.status === ElectionStatus.CLOSED || election?.status === 'Canceled')
 
-  // Sorted on the date the row shows, so a closed election with no final vote isn't undated.
+  // The row's date and its sort key are the same value, so neither can contradict the other.
   const voteDateRaw = finalVote?.updateDate || finalVote?.createDate
     || (isElectionClosed ? election?.createDate : null) || null
-
-  const getVoteDate = () => {
-    if (finalVote?.updateDate) {
-      return formatDate(finalVote.updateDate)
-    }
-    if (isElectionClosed && election?.createDate) {
-      return formatDate(election.createDate)
-    }
-    return NO_FINAL_VOTE_STATUS
-  }
 
   const getDecision = () => {
     if (finalVote?.vote === true) {
@@ -86,7 +76,7 @@ const createVoteRecord = (dar: DataAccessRequestModel, datasetId: number, electi
   return {
     datasetId,
     datasetName,
-    voteDate: getVoteDate(),
+    voteDate: voteDateRaw ? formatDate(voteDateRaw) : NO_FINAL_VOTE_STATUS,
     voteDateRaw,
     requestType: dar.progressReport ? 'Progress Report' : 'Initial DAR',
     linkedDarId: String(dar.collectionId),
