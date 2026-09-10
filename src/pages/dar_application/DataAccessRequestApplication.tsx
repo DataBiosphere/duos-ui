@@ -145,6 +145,16 @@ const toVotingHistoryDar = (formData: DarFormData, votes: ReturnType<typeof buil
   status: getDarStatus(votes),
 })
 
+const stepTabsLayout = (embedded?: boolean) => embedded
+  ? { orientation: 'horizontal' as const, sx: stepTabsSx, formClassName: 'forms-v2 forms-v2--flush' }
+  : { orientation: 'vertical' as const, sx: undefined, formClassName: 'forms-v2' }
+
+const eRACommonsDestinationFor = (dataRequestId?: string) =>
+  isNil(dataRequestId) ? 'dar_application' : `dar_application/${dataRequestId}`
+
+const stepContainerClassNameFor = (readOnly?: boolean) =>
+  readOnly ? 'accordion-step-container' : 'step-container'
+
 const pageContainerProps = (readOnly?: boolean) => readOnly
   ? { className: 'application-information-page', style: { padding: '2% 3%', backgroundColor: 'white' } }
   : { className: 'container', style: { padding: '0 0 2%' } }
@@ -735,9 +745,11 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     navigate(-1)
   }
 
-  const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId)
-
-  const stepContainerClassName = existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'
+  const eRACommonsDestination = eRACommonsDestinationFor(dataRequestId)
+  const stepContainerClassName = stepContainerClassNameFor(existingDarsReadOnlyMode)
+  const tabsLayout = stepTabsLayout(embedded)
+  // Attesting freezes the form the same way review mode does.
+  const fieldsAreReadOnly = existingDarsReadOnlyMode || isAttested
 
   if (isLoading) {
     return (
@@ -783,13 +795,13 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
         </div>
 
         <div style={{ clear: 'both' }} />
-        <form name="form" noValidate={true} className={embedded ? 'forms-v2 forms-v2--flush' : 'forms-v2'}>
+        <form name="form" noValidate={true} className={tabsLayout.formClassName}>
           <ScrollableTabs
             applicationTabs={applicationTabs}
             formSelectedTabId={tab}
             onTabChange={setTab}
-            orientation={embedded ? 'horizontal' : 'vertical'}
-            sx={embedded ? stepTabsSx : undefined}
+            orientation={tabsLayout.orientation}
+            sx={tabsLayout.sx}
           />
 
           <div id="form-views">
@@ -856,7 +868,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                   defaultExpanded={reverseOrderedDARs.length === 1}
                 >
                   <ResearcherInfo
-                    readOnlyMode={existingDarsReadOnlyMode || isAttested}
+                    readOnlyMode={fieldsAreReadOnly}
                     includeInstructions={!existingDarsReadOnlyMode}
                     darCode={formData.darCode}
                     formData={formData}
@@ -884,7 +896,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                 >
                   <DataAccessRequest
                     formData={formData}
-                    readOnlyMode={(existingDarsReadOnlyMode || isAttested)}
+                    readOnlyMode={fieldsAreReadOnly}
                     includeInstructions={!existingDarsReadOnlyMode}
                     datasets={datasets}
                     validation={formValidation.darErrors}
@@ -909,7 +921,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                 >
                   <ResearchPurposeStatement
                     darCode={formData.darCode}
-                    readOnlyMode={(existingDarsReadOnlyMode || isAttested)}
+                    readOnlyMode={fieldsAreReadOnly}
                     validation={formValidation.rusErrors}
                     formValidationChange={(val: { key: string, validation: ValidationError }) => formValidationChange('rusErrors', val)}
                     formFieldChange={formFieldChange}
