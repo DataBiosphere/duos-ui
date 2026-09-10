@@ -13,11 +13,16 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
   const [commentText, setCommentText] = useState('')
   // Seeded from the user's existing comment once the list arrives; see the latch below.
   const [seeded, setSeeded] = useState(false)
-  const { data, isPending, error, hasNextPage, fetchNextPage, isFetchingNextPage }
+  const { data, isPending, error, hasNextPage, fetchNextPage, isFetching, refetch }
     = useStudyComments(studyId)
   // Every page repeats the study-wide figures, so the first page is where they are read from.
   const summary = data?.pages[0]
-  const comments = data?.pages.flatMap(page => page.comments) ?? []
+  // Offset pagination can repeat a boundary item if another reader posts while pages are being
+  // loaded. Keep one copy on screen even if the list changes during the requests.
+  const comments = Array.from(new Map(
+    (data?.pages.flatMap(page => page.comments) ?? [])
+      .map(comment => [comment.studyCommentId, comment]),
+  ).values())
   const currentUser = Storage.getCurrentUser()
   // A person holds one rating per study — study_comment is unique on (study_id, user_id) and the
   // DAO upserts — so posting again revises this comment rather than adding a second one. The
@@ -45,6 +50,13 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
   // Match StudyCommentService's post-time authorization. The role and current library card are
   // independent requirements, so the composer is only useful when both are present.
   const canComment = currentUser?.isResearcher === true && hasActiveResearcherStatus()
+  const showMoreComments = async () => {
+    // Refresh the pages already on screen before calculating the next offset. Since comments are
+    // newest-first, this realigns every loaded boundary when a comment was added or removed since
+    // the reader opened the section.
+    const refreshed = await refetch()
+    if (!refreshed.isError) await fetchNextPage()
+  }
 
   return (
     // No `isEmpty`: a study with no comments yet is exactly when the composer matters most,
@@ -84,10 +96,10 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
         {hasNextPage && (
           <Button
             sx={{ alignSelf: 'flex-start' }}
-            disabled={isFetchingNextPage}
-            onClick={() => fetchNextPage()}
+            disabled={isFetching}
+            onClick={showMoreComments}
           >
-            {isFetchingNextPage
+            {isFetching
               ? 'Loading…'
               : `Show more comments (${comments.length} of ${summary?.total})`}
           </Button>

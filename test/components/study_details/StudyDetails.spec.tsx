@@ -351,6 +351,25 @@ describe('Study details test', () => {
     expect(document.querySelectorAll('[role=row]')).toHaveLength(datasets.length + 1)
   })
 
+  it('shows relational study metadata when the study has no dataset search documents', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValueOnce(makeSearchResponse([]) as never)
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      studyId: 1,
+      name: 'Study without datasets',
+      description: 'Study metadata from the relational store',
+      dataTypes: ['Genomic'],
+      piName: 'Dr. Example',
+    } as never)
+
+    mountComponent()
+
+    expect(await screen.findByRole('heading', { name: 'Study without datasets' })).toBeInTheDocument()
+    expect(screen.getByText('Study metadata from the relational store')).toBeInTheDocument()
+    expect(screen.getByText('Genomic')).toBeInTheDocument()
+    expect(screen.getByText('Dr. Example')).toBeInTheDocument()
+    expect(screen.getByText('No datasets found matching your criteria')).toBeInTheDocument()
+  })
+
   it('requests server-side pages for the current study without a fixed result cap', async () => {
     const user = userEvent.setup()
     vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(makeSearchResponse(datasets, 26) as never)
@@ -644,6 +663,7 @@ describe('Study details test', () => {
     })
     vi.mocked(StudyComments.listComments)
       .mockResolvedValueOnce(page([1], 2) as never)
+      .mockResolvedValueOnce(page([1], 2) as never)
       .mockResolvedValueOnce(page([2], 2) as never)
     const user = userEvent.setup()
     mountComponent()
@@ -655,6 +675,30 @@ describe('Study details test', () => {
     expect(await screen.findByText('Comment 2')).toBeInTheDocument()
     expect(screen.getByText('Comment 1')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Show more comments/ })).not.toBeInTheDocument()
+  })
+
+  it('refreshes the loaded comment prefix before requesting the next offset', async () => {
+    const comment = (id: number) => ({
+      studyCommentId: id, studyId: 1, userId: 100 + id, rating: 4,
+      commentText: `Comment ${id}`, createDate: '', updateDate: '',
+      displayName: `Reviewer ${id}`, institutionName: 'Broad',
+    })
+    vi.mocked(StudyComments.listComments)
+      // Initial page, followed by a new comment arriving before the reader asks for more.
+      .mockResolvedValueOnce({ comments: [comment(2)], averageRating: 4, total: 2 } as never)
+      .mockResolvedValueOnce({ comments: [comment(3)], averageRating: 4, total: 3 } as never)
+      .mockResolvedValueOnce({ comments: [comment(2), comment(1)], averageRating: 4, total: 3 } as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    await screen.findByText('Comment 2')
+    await user.click(screen.getByRole('button', { name: /Show more comments/ }))
+
+    expect(await screen.findByText('Comment 3')).toBeInTheDocument()
+    expect(screen.getByText('Comment 2')).toBeInTheDocument()
+    expect(screen.getByText('Comment 1')).toBeInTheDocument()
+    expect(vi.mocked(StudyComments.listComments).mock.calls.map(([, offset]) => offset))
+      .toEqual([0, 0, 1])
   })
 
   it('treats the reader\'s own comment as an edit even when it is not on the loaded page', async () => {
