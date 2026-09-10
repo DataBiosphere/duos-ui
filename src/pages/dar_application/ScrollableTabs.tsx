@@ -3,6 +3,7 @@ import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import { SxProps, Theme as MuiTheme } from '@mui/material/styles'
 import { findIndex } from 'src/utils/NodashUtil'
+import { tabElementId } from 'src/pages/dar_application/stepTabs'
 
 type ApplicationTab = {
   id: string
@@ -143,6 +144,8 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange
           return (
             <Tab
               key={`step-${index}-${name}`}
+              id={tabElementId(tabConfig.id)}
+              aria-controls={tabConfig.id}
               label={(
                 <div>
                   {showStep && <div className="step">{`Step ${index + 1}`}</div>}

@@ -24,6 +24,7 @@ import loadingImage from 'src/images/loading-indicator.svg'
 import { ConditionalAccordion } from 'src/components/forms/ConditionalAccordion'
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication'
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
+import { tabElementId } from 'src/pages/dar_application/stepTabs'
 import { validateDARFormData, validationFailed, DARFormValidationResult } from 'src/utils/darFormUtils'
 import { assign, cloneDeep, get, isArray, isEmpty, isEqual, isNil, isString, map, merge, set } from 'src/utils/NodashUtil'
 import { usePageTitle } from 'src/hooks/usePageTitle'
@@ -671,6 +672,12 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     status: getDarStatus(votes),
   }
 
+  // Which sections render is mode-dependent, so a section only claims panel semantics when
+  // the step tabs actually offer the tab that labels it.
+  const panelProps = (id: string) => applicationTabs.some(tab => tab.id === id)
+    ? { role: 'tabpanel', 'aria-labelledby': tabElementId(id) }
+    : {}
+
   const back = () => {
     navigate(-1)
   }
@@ -749,7 +756,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
             </AsyncConfirmationDialog>
 
             {isProgressReportApplication && (
-              <div id={PROGRESS_REPORT_APPLICATION_TAB_ID} className="dar-steps">
+              <div id={PROGRESS_REPORT_APPLICATION_TAB_ID} {...panelProps(PROGRESS_REPORT_APPLICATION_TAB_ID)} className="dar-steps">
                 <ConditionalAccordion
                   condition={false}
                   title={`Progress Report ${reverseOrderedDARs.length}`}
@@ -769,8 +776,9 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                 <h3>Previous Updates</h3>
                 {reverseOrderedDARs.map((dar, index) => {
                   if ((index + 1 !== reverseOrderedDARs.length)) {
+                    const sectionId = `${PROGRESS_REPORT_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`
                     return (
-                      <div key={dar.referenceId} id={`${PROGRESS_REPORT_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`}>
+                      <div key={dar.referenceId} id={sectionId} {...panelProps(sectionId)}>
                         <ConditionalAccordion
                           key={dar.referenceId}
                           condition={true}
@@ -800,7 +808,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                   Summary
                 </h3>
               )}
-              <div id={RESEARCHER_INFO_TAB_ID} className={stepContainerClassName}>
+              <div id={RESEARCHER_INFO_TAB_ID} {...panelProps(RESEARCHER_INFO_TAB_ID)} className={stepContainerClassName}>
                 <ConditionalAccordion
                   condition={!!existingDarsReadOnlyMode}
                   title="Step 1: Researcher Information"
@@ -828,7 +836,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                 </ConditionalAccordion>
               </div>
 
-              <div id={DATA_ACCESS_REQUEST_TAB_ID} className={stepContainerClassName}>
+              <div id={DATA_ACCESS_REQUEST_TAB_ID} {...panelProps(DATA_ACCESS_REQUEST_TAB_ID)} className={stepContainerClassName}>
                 <ConditionalAccordion
                   condition={!!existingDarsReadOnlyMode}
                   title="Step 2: Data Access Request"
@@ -853,7 +861,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                 </ConditionalAccordion>
               </div>
 
-              <div id={RESEARCH_PURPOSE_STATEMENT_TAB_ID} className={stepContainerClassName}>
+              <div id={RESEARCH_PURPOSE_STATEMENT_TAB_ID} {...panelProps(RESEARCH_PURPOSE_STATEMENT_TAB_ID)} className={stepContainerClassName}>
                 <ConditionalAccordion
                   condition={!!existingDarsReadOnlyMode}
                   title="Step 3: Research Purpose Statement"
@@ -872,7 +880,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
               {existingDarsReadOnlyMode
                 ? <div />
                 : (
-                    <div id={DATA_ACCESS_AGREEMENTS_TAB_ID} className="step-container">
+                    <div id={DATA_ACCESS_AGREEMENTS_TAB_ID} {...panelProps(DATA_ACCESS_AGREEMENTS_TAB_ID)} className="step-container">
                       <DataAccessAgreements
                         datasets={selectedDatasets}
                         onDaaIdsChange={onDaaIdsChange}
@@ -893,7 +901,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
               {isAttested
                 && (
-                  <div id={ADDENDUM_TAB_ID} className="step-container">
+                  <div id={ADDENDUM_TAB_ID} {...panelProps(ADDENDUM_TAB_ID)} className="step-container">
                     <DucAddendum
                       doSubmit={doSubmit}
                       save={() => setShowDialogSave(true)}
@@ -905,7 +913,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
               {!isEmpty(votes)
                 && (
-                  <div id={VOTING_HISTORY_TAB_ID} className={stepContainerClassName}>
+                  <div id={VOTING_HISTORY_TAB_ID} {...panelProps(VOTING_HISTORY_TAB_ID)} className={stepContainerClassName}>
                     <VotingHistoryOverview dar={dar} votes={votes} />
                   </div>
                 )}

@@ -5,6 +5,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BrowserRouter } from 'react-router'
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
+import { tabElementId } from 'src/pages/dar_application/stepTabs'
 
 const mockApplicationTabs = [
   { id: 'researcher-info', name: 'Researcher Information', showStep: true },
@@ -110,6 +111,18 @@ describe('ScrollableTabs', () => {
     expect(screen.getByRole('tablist')).not.toHaveAttribute('aria-orientation', 'vertical')
     expect(container.querySelector('.step-tabs-container--horizontal')).toBeInTheDocument()
     expect(container.querySelector('.multi-step-buttons-container')).not.toBeInTheDocument()
+  })
+
+  it('points each tab at the section it scrolls to', () => {
+    render(
+      <BrowserRouter>
+        <ScrollableTabs applicationTabs={mockApplicationTabs} />
+      </BrowserRouter>,
+    )
+
+    const tab = screen.getByRole('tab', { name: /Data Access Request/ })
+    expect(tab).toHaveAttribute('aria-controls', 'data-access-request')
+    expect(tab).toHaveAttribute('id', tabElementId('data-access-request'))
   })
 
   it('renders the side panel by default', () => {
