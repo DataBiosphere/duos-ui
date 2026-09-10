@@ -10,7 +10,8 @@ configure({ asyncUtilTimeout: 5000 })
 
 // React flushes on a macrotask, so work still queued at file end runs after Vitest has
 // torn down jsdom and fails the shard with `window is not defined`. Drain it first.
+// setImmediate is the queue React uses under jsdom; the browser config has no such global.
 afterAll(async () => {
   cleanup()
-  await new Promise(resolve => setImmediate(resolve))
+  await new Promise(resolve => typeof setImmediate === 'function' ? setImmediate(resolve) : setTimeout(resolve, 0))
 })
