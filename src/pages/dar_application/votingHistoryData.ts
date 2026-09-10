@@ -44,8 +44,9 @@ const createVoteRecord = (dar: DataAccessRequestModel, datasetId: number, electi
   const isElectionClosed = !hasFinalVote && (election?.status === ElectionStatus.CLOSED || election?.status === 'Canceled')
 
   // The row's date and its sort key are the same value, so neither can contradict the other.
-  const voteDateRaw = finalVote?.updateDate || finalVote?.createDate
-    || (isElectionClosed ? election?.createDate : null) || null
+  const voteDateRaw = hasFinalVote
+    ? (finalVote?.updateDate ?? finalVote?.createDate ?? null)
+    : (isElectionClosed ? (election?.createDate ?? null) : null)
 
   const getDecision = () => {
     if (finalVote?.vote === true) {
