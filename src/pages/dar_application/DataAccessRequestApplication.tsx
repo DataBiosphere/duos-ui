@@ -25,7 +25,7 @@ import { ConditionalAccordion } from 'src/components/forms/ConditionalAccordion'
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication'
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
 import { tabElementId } from 'src/pages/dar_application/stepTabs'
-import { normalizeDaaIds, validateDARFormData, validationFailed, DARFormValidationResult } from 'src/utils/darFormUtils'
+import { validateDARFormData, validationFailed, DARFormValidationResult } from 'src/utils/darFormUtils'
 import { assign, cloneDeep, get, isArray, isEmpty, isEqual, isNil, isString, map, merge, set } from 'src/utils/NodashUtil'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { stepTabsSx } from 'src/pages/dar_collection_review/reviewTabStyles'
@@ -107,91 +107,6 @@ const ApplicationPageHeading = ({ readOnly, darCode, projectTitle }: Application
       title={(readOnly ? darCode : 'Data Access Request Application') ?? ''}
       description={readOnly ? projectTitle : 'Please complete the fields below to request access to data.'}
     />
-  </div>
-)
-
-interface ApplicationTabsInput {
-  readOnly?: boolean
-  isProgressReportApplication: boolean
-  dars: DataAccessRequestModel[]
-  darCode?: string | null
-  embedded?: boolean
-}
-
-/** Editing shows the four form steps; review shows one tab per progress report instead. */
-const buildApplicationTabs = ({ readOnly, isProgressReportApplication, dars, darCode, embedded }: ApplicationTabsInput): AppTab[] => {
-  if (!readOnly) {
-    return [...ApplicationTabs, { name: 'Data Access Agreements (DAA)', id: DATA_ACCESS_AGREEMENTS_TAB_ID }]
-  }
-  // A progress report being drafted has no DAR of its own yet, so it needs a tab adding for it.
-  const draftTab = isProgressReportApplication
-    ? [{ name: `Progress Report ${dars.length}`, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
-    : []
-  const reportTabs = dars.map((_dar, index) => {
-    const whichPRIsThis = dars.length - index - 1
-    const itemLabel = index === dars.length - 1 ? darCode : `Progress Report ${whichPRIsThis}`
-    return { name: itemLabel ?? '', id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
-  })
-  // The voting page has its own Voting History tab; only the standalone pages need this one.
-  const votingTab = embedded ? [] : [{ name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false }]
-  return [...draftTab, ...reportTabs, ...votingTab]
-}
-
-/** The header the voting history reads, with the placeholders it expects for a DAR still in draft. */
-const toVotingHistoryDar = (formData: DarFormData, votes: ReturnType<typeof buildVoteRecords>) => ({
-  referenceId: formData.darCode || '',
-  piName: formData.piName || '',
-  institution: formData.institution || '',
-  status: getDarStatus(votes),
-})
-
-const stepTabsLayout = (embedded?: boolean) => embedded
-  ? { orientation: 'horizontal' as const, sx: stepTabsSx, formClassName: 'forms-v2 forms-v2--flush' }
-  : { orientation: 'vertical' as const, sx: undefined, formClassName: 'forms-v2' }
-
-const eRACommonsDestinationFor = (dataRequestId?: string) =>
-  isNil(dataRequestId) ? 'dar_application' : `dar_application/${dataRequestId}`
-
-const stepContainerClassNameFor = (readOnly?: boolean) =>
-  readOnly ? 'accordion-step-container' : 'step-container'
-
-const pageContainerProps = (readOnly?: boolean) => readOnly
-  ? { className: 'application-information-page', style: { padding: '2% 3%', backgroundColor: 'white' } }
-  : { className: 'container', style: { padding: '0 0 2%' } }
-
-interface PreviousProgressReportsProps {
-  dars: DataAccessRequestModel[]
-  datasets: Dataset[]
-  researcher: DuosUser
-  countriesOfOperation: string[]
-  panelProps: (id: string) => Record<string, string | undefined>
-}
-
-/** The earlier progress reports in a collection; the newest is rendered by the current-DAR section. */
-const PreviousProgressReports = ({ dars, datasets, researcher, countriesOfOperation, panelProps }: PreviousProgressReportsProps) => (
-  <div className="dar-summary">
-    <h3>Previous Updates</h3>
-    {dars.slice(0, -1).map((dar, index) => {
-      const whichPRIsThis = dars.length - index - 1
-      const sectionId = `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`
-      return (
-        <div key={dar.referenceId} id={sectionId} {...panelProps(sectionId)}>
-          <ConditionalAccordion
-            condition={true}
-            title={`Progress Report ${whichPRIsThis}`}
-            defaultExpanded={index === 0}
-          >
-            <ProgressReportApplication
-              readOnlyMode={true}
-              datasets={datasets}
-              dar={merge({}, dar?.data, dar) as CombinedDataAccessRequest}
-              researcher={researcher}
-              countriesOfOperation={countriesOfOperation}
-            />
-          </ConditionalAccordion>
-        </div>
-      )
-    })}
   </div>
 )
 
@@ -343,7 +258,9 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
   }, [])
 
   const onDaaIdsChange = useCallback((ids: number[]) => {
-    const normalizedIds = normalizeDaaIds(ids)
+    const normalizedIds = [...new Set((ids ?? [])
+      .map(Number)
+      .filter(id => Number.isInteger(id) && id > 0))]
     setFormData((prevFormData) => {
       if (isEqual(prevFormData.daaIds, normalizedIds)) {
         return prevFormData
@@ -497,16 +414,26 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     setIsLoading(false)
   }, [researcher, existingDarsReadOnlyMode, resolveInitialFormData, batchFormFieldChange])
 
-  const baseApplicationTabs = useMemo<AppTab[]>(
-    () => buildApplicationTabs({
-      readOnly: existingDarsReadOnlyMode,
-      isProgressReportApplication,
-      dars: reverseOrderedDARs,
-      darCode: formData.darCode,
-      embedded,
-    }),
-    [formData.darCode, isProgressReportApplication, existingDarsReadOnlyMode, embedded, reverseOrderedDARs],
-  )
+  const baseApplicationTabs = useMemo<AppTab[]>(() => {
+    if (existingDarsReadOnlyMode) {
+      let appTabs: AppTab[] = []
+      if (isProgressReportApplication) {
+        // if we are creating a new progress report, we need to add another tab for the application
+        appTabs = [{ name: 'Progress Report ' + reverseOrderedDARs.length, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
+      }
+      return [...appTabs,
+        ...reverseOrderedDARs.map((_dar, index) => {
+          const whichPRIsThis = reverseOrderedDARs.length - index - 1
+          const isLast = index === reverseOrderedDARs.length - 1
+          const itemLabel = isLast ? formData.darCode : 'Progress Report ' + whichPRIsThis
+          return { name: itemLabel ?? '', id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
+        }),
+        // The voting page has its own Voting History tab; only the standalone pages need this one.
+        ...(embedded ? [] : [{ name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false }]),
+      ]
+    }
+    return [...ApplicationTabs, { name: 'Data Access Agreements (DAA)', id: DATA_ACCESS_AGREEMENTS_TAB_ID }]
+  }, [formData.darCode, isProgressReportApplication, existingDarsReadOnlyMode, embedded, reverseOrderedDARs])
 
   const applicationTabs = useMemo<AppTab[]>(
     () => showAddendum
@@ -554,7 +481,9 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     if (!isEmpty(validation.darErrors)) {
       return DATA_ACCESS_REQUEST_TAB_ID
     }
-    // Only reached once the other sections are clean, so the RUS is what failed.
+    if (isEmpty(validation.rusErrors)) {
+      return RESEARCHER_INFO_TAB_ID
+    }
     return RESEARCH_PURPOSE_STATEMENT_TAB_ID
   }
 
@@ -569,7 +498,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
   const attemptSubmit = async (): Promise<boolean> => {
     const validation = validateDARFormData({
       formData,
-      datasets: selectedDatasets,
+      datasets: draftDar ? selectedDatasets : datasets,
       dataUseTranslations,
       irbDocument: uploadedIrbDocument,
       collaborationLetter: uploadedCollaborationLetter,
@@ -618,7 +547,9 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
       }
     }
     formattedFormData.userId = userId
-    formattedFormData.daaIds = normalizeDaaIds(formData.daaIds)
+    formattedFormData.daaIds = [...new Set(((formData.daaIds ?? []) as number[])
+      .map(Number)
+      .filter(id => Number.isInteger(id) && id > 0))]
 
     try {
       const referenceId = formData.referenceId
@@ -688,7 +619,9 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     const formattedFormData: Record<string, unknown> = cloneDeep(formData)
     // DAR datasetIds needs to be a list of ids
     formattedFormData.datasetIds = selectedDatasets.map(d => d.datasetId)
-    formattedFormData.daaIds = normalizeDaaIds(formData.daaIds)
+    formattedFormData.daaIds = [...new Set(((formData.daaIds ?? []) as number[])
+      .map(Number)
+      .filter(id => Number.isInteger(id) && id > 0))]
 
     // Make sure we navigate back to the current DAR after saving.
     try {
@@ -733,7 +666,12 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     [embedded, reverseOrderedDARs, datasets],
   )
 
-  const dar = toVotingHistoryDar(formData, votes)
+  const dar = {
+    referenceId: formData.darCode || '',
+    piName: formData.piName || '',
+    institution: formData.institution || '',
+    status: getDarStatus(votes),
+  }
 
   // Which sections render is mode-dependent, so a section only claims panel semantics when
   // the step tabs actually offer the tab that labels it.
@@ -745,11 +683,9 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     navigate(-1)
   }
 
-  const eRACommonsDestination = eRACommonsDestinationFor(dataRequestId)
-  const stepContainerClassName = stepContainerClassNameFor(existingDarsReadOnlyMode)
-  const tabsLayout = stepTabsLayout(embedded)
-  // Attesting freezes the form the same way review mode does.
-  const fieldsAreReadOnly = existingDarsReadOnlyMode || isAttested
+  const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId)
+
+  const stepContainerClassName = existingDarsReadOnlyMode ? 'accordion-step-container' : 'step-container'
 
   if (isLoading) {
     return (
@@ -761,7 +697,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
   return (
     <div>
-      <div {...pageContainerProps(existingDarsReadOnlyMode)}>
+      <div className={existingDarsReadOnlyMode ? 'application-information-page' : 'container'} style={{ padding: existingDarsReadOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: existingDarsReadOnlyMode ? 'white' : '' }}>
         <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div className="row no-margin">
             <Notification
@@ -795,13 +731,13 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
         </div>
 
         <div style={{ clear: 'both' }} />
-        <form name="form" noValidate={true} className={tabsLayout.formClassName}>
+        <form name="form" noValidate={true} className={embedded ? 'forms-v2 forms-v2--flush' : 'forms-v2'}>
           <ScrollableTabs
             applicationTabs={applicationTabs}
             formSelectedTabId={tab}
             onTabChange={setTab}
-            orientation={tabsLayout.orientation}
-            sx={tabsLayout.sx}
+            orientation={embedded ? 'horizontal' : 'vertical'}
+            sx={embedded ? stepTabsSx : undefined}
           />
 
           <div id="form-views">
@@ -845,13 +781,33 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
               </div>
             )}
             {existingDarsReadOnlyMode && reverseOrderedDARs.length > 1 && (
-              <PreviousProgressReports
-                dars={reverseOrderedDARs}
-                datasets={datasets}
-                researcher={researcher as DuosUser}
-                countriesOfOperation={countriesOfOperation}
-                panelProps={panelProps}
-              />
+              <div className="dar-summary">
+                <h3>Previous Updates</h3>
+                {reverseOrderedDARs.map((dar, index) => {
+                  if ((index + 1 !== reverseOrderedDARs.length)) {
+                    const sectionId = `${PROGRESS_REPORT_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`
+                    return (
+                      <div key={dar.referenceId} id={sectionId} {...panelProps(sectionId)}>
+                        <ConditionalAccordion
+                          key={dar.referenceId}
+                          condition={true}
+                          title={`Progress Report ${reverseOrderedDARs.length - index - 1}`}
+                          defaultExpanded={index === 0}
+                        >
+                          <ProgressReportApplication
+                            readOnlyMode={true}
+                            datasets={datasets}
+                            dar={merge({}, dar?.data, dar) as CombinedDataAccessRequest}
+                            researcher={researcher as DuosUser}
+                            countriesOfOperation={countriesOfOperation}
+                          />
+                        </ConditionalAccordion>
+                      </div>
+                    )
+                  }
+                  return null
+                })}
+              </div>
             )}
             <div id={CURRENT_DAR_TAB_ID} {...panelProps(CURRENT_DAR_TAB_ID)} className={existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
               {existingDarsReadOnlyMode && (
@@ -868,7 +824,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                   defaultExpanded={reverseOrderedDARs.length === 1}
                 >
                   <ResearcherInfo
-                    readOnlyMode={fieldsAreReadOnly}
+                    readOnlyMode={existingDarsReadOnlyMode || isAttested}
                     includeInstructions={!existingDarsReadOnlyMode}
                     darCode={formData.darCode}
                     formData={formData}
@@ -896,7 +852,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                 >
                   <DataAccessRequest
                     formData={formData}
-                    readOnlyMode={fieldsAreReadOnly}
+                    readOnlyMode={(existingDarsReadOnlyMode || isAttested)}
                     includeInstructions={!existingDarsReadOnlyMode}
                     datasets={datasets}
                     validation={formValidation.darErrors}
@@ -921,7 +877,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                 >
                   <ResearchPurposeStatement
                     darCode={formData.darCode}
-                    readOnlyMode={fieldsAreReadOnly}
+                    readOnlyMode={(existingDarsReadOnlyMode || isAttested)}
                     validation={formValidation.rusErrors}
                     formValidationChange={(val: { key: string, validation: ValidationError }) => formValidationChange('rusErrors', val)}
                     formFieldChange={formFieldChange}

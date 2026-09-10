@@ -135,10 +135,6 @@ export const computeCollaboratorErrors = ({
   return errors
 }
 
-/** Positive integer DAA ids, deduplicated. */
-export const normalizeDaaIds = (ids: number[] | undefined): number[] =>
-  [...new Set((ids ?? []).map(Number).filter(id => Number.isInteger(id) && id > 0))]
-
 export const validationFailed = (validation: unknown): boolean => {
   if (!validation || typeof validation !== 'object') return false
   return Object.keys(validation).some(key => !isEmpty((validation as Record<string, unknown>)[key]))
