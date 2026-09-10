@@ -40,6 +40,7 @@ describe('buildVoteRecords', () => {
 
     expect(record.voteDateRaw).toBeNull()
     expect(record.voteDate).toBe('Awaiting Election Opening')
+    expect(record.voteResult.rationale).toBe('Awaiting Election Opening')
   })
 
   it('dates a cast final vote by when it was created if it was never updated', () => {
