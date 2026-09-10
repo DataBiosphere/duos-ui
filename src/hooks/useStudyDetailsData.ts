@@ -10,6 +10,15 @@ import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel
 
 const STUDY_STALE_TIME = 5 * 60 * 1000
 
+// The dataset index cannot supply study metadata when a study has no datasets. Fetch the study
+// record independently so the overview still has its name, description, data types, and PI.
+export const useStudyRecord = (studyId: string) => useQuery({
+  queryKey: ['study-details-study', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => DataSet.getStudyById(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
 export const STUDY_DATASETS_QUERY_KEY = 'study-details-datasets'
 export const STUDY_EXPORTS_QUERY_KEY = 'study-details-exports'
 

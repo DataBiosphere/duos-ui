@@ -12,6 +12,7 @@ import { AssetType, SortOrder, SortState } from 'src/types/library'
 import {
   useStudyDatasets,
   useStudyExportableDatasets,
+  useStudyRecord,
   useStudySelectableDatasetIds,
 } from 'src/hooks/useStudyDetailsData'
 import { TocProvider, TableOfContents } from 'src/components/study_details/TableOfContents'
@@ -54,6 +55,11 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const study = data.study
   const participantCount = data.participantCount
   const { data: exportableDatasets } = useStudyExportableDatasets(studyId, datasets)
+  const { data: studyRecord } = useStudyRecord(studyId)
+  const studyName = study?.studyName ?? studyRecord?.name
+  const studyDescription = study?.description ?? studyRecord?.description
+  const studyDataTypes = study?.dataTypes ?? studyRecord?.dataTypes
+  const piName = study?.piName ?? studyRecord?.piName
   const selectedStudyIds = selectedDatasets.length > 0 && study
     ? [study.studyId]
     : []
@@ -122,18 +128,18 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
               </Link>
             </Typography>
             <Typography variant="h5" sx={{ fontWeight: Theme.font.weight.semibold, pt: 1 }}>
-              {study?.studyName}
+              {studyName}
             </Typography>
-            <StudyTitleBadges dataTypes={study?.dataTypes} />
+            <StudyTitleBadges dataTypes={studyDataTypes} />
             <Typography variant="body1" sx={{ pt: 2.5 }}>
-              {study?.description}
+              {studyDescription}
             </Typography>
             <StudyInfoTable
               rows={[
                 { label: 'Participants', value: participantCount },
                 { label: 'Phenotype', value: study?.phenotype },
                 { label: 'Species', value: study?.species },
-                { label: 'PI Name', value: study?.piName },
+                { label: 'PI Name', value: piName },
                 { label: 'Data Custodian', value: study?.dataCustodianEmail?.join(', ') },
               ]}
             />
