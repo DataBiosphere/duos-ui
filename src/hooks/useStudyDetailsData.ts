@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
@@ -24,12 +24,30 @@ export const usePiDetails = (studyId: string) => useQuery({
   staleTime: STUDY_STALE_TIME,
 })
 
+/**
+ * Every page of one study's comments. The offset is deliberately absent: posting invalidates this
+ * prefix, so a revision refreshes whichever pages the reader has open rather than only the first.
+ */
 export const studyCommentsQueryKey = (studyId: string) => [STUDY_ASSETS_QUERY_KEY, 'comments', studyId]
 
-export const useStudyComments = (studyId: string) => useQuery({
+/**
+ * A study's comments, a page at a time.
+ *
+ * The endpoint is paged and its page size is capped, so 'show more' has to fetch the next page
+ * and append rather than ask for a bigger one. Every page repeats the study-wide `averageRating`,
+ * `total` and `yourComment`, so the first page is enough to read those from.
+ */
+export const useStudyComments = (studyId: string) => useInfiniteQuery({
   queryKey: studyCommentsQueryKey(studyId),
   enabled: studyId.length > 0,
-  queryFn: () => StudyComments.listComments(studyId),
+  initialPageParam: 0,
+  queryFn: ({ pageParam }) => StudyComments.listComments(studyId, pageParam),
+  getNextPageParam: (lastPage, allPages) => {
+    const loaded = allPages.reduce((count, page) => count + page.comments.length, 0)
+    // A page shorter than requested also means the end, so a comment deleted mid-paging cannot
+    // leave this asking for an offset past the list forever.
+    return loaded < lastPage.total && lastPage.comments.length > 0 ? loaded : undefined
+  },
   staleTime: STUDY_STALE_TIME,
 })
 
