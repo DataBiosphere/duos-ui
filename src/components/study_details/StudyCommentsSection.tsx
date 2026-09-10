@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Alert, Button, Chip, Divider, Rating, Stack, TextField, Typography } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { StudyComments } from 'src/libs/ajax/StudyComments'
+import { MAX_COMMENT_LENGTH, StudyComments } from 'src/libs/ajax/StudyComments'
 import { Storage } from 'src/libs/storage'
 import { studyCommentsQueryKey, useStudyComments } from 'src/hooks/useStudyDetailsData'
 import { hasActiveResearcherStatus } from 'src/hooks/useApplyForAccessEligibility'
@@ -13,12 +13,18 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
   const [commentText, setCommentText] = useState('')
   // Seeded from the user's existing comment once the list arrives; see the latch below.
   const [seeded, setSeeded] = useState(false)
-  const { data, isPending, error } = useStudyComments(studyId)
+  const { data, isPending, error, hasNextPage, fetchNextPage, isFetchingNextPage }
+    = useStudyComments(studyId)
+  // Every page repeats the study-wide figures, so the first page is where they are read from.
+  const summary = data?.pages[0]
+  const comments = data?.pages.flatMap(page => page.comments) ?? []
   const currentUser = Storage.getCurrentUser()
   // A person holds one rating per study — study_comment is unique on (study_id, user_id) and the
   // DAO upserts — so posting again revises this comment rather than adding a second one. The
   // composer has to say so, or a revision reads as a lost comment and an unexplained average.
-  const ownComment = data?.comments.find(comment => comment.userId === currentUser?.userId)
+  // Read from the payload, not from the page: paging would otherwise hide it on a later page and
+  // the composer would offer to add a comment this user already has.
+  const ownComment = summary?.yourComment
   const mutation = useMutation({
     mutationFn: () => StudyComments.postComment(studyId, rating ?? 0, commentText),
     onSuccess: async () => {
@@ -31,7 +37,7 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
   // Adjusting state during render behind a latch, as StudyDetails does for its dataset
   // selection: React re-runs the component before it commits, so the form never paints empty
   // and then fills itself in, and a background refetch can't overwrite what the user has typed.
-  if (!seeded && data) {
+  if (!seeded && summary) {
     setSeeded(true)
     setRating(ownComment?.rating ?? null)
     setCommentText(ownComment?.commentText ?? '')
@@ -49,13 +55,16 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
       errorMessage="Unable to load comments and ratings."
     >
       <Stack spacing={2}>
-        {data?.averageRating != null && (
+        {summary?.averageRating != null && (
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <Rating readOnly value={data.averageRating} precision={0.1} />
-            <Typography>{data.averageRating.toFixed(1)}</Typography>
+            <Rating readOnly value={summary.averageRating} precision={0.1} />
+            <Typography>
+              {summary.averageRating.toFixed(1)}
+              {summary.total > 0 && ` (${summary.total})`}
+            </Typography>
           </Stack>
         )}
-        {(data?.comments ?? []).map(comment => (
+        {comments.map(comment => (
           <div key={comment.studyCommentId}>
             <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
@@ -72,6 +81,17 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
             <Divider sx={{ mt: 2 }} />
           </div>
         ))}
+        {hasNextPage && (
+          <Button
+            sx={{ alignSelf: 'flex-start' }}
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage
+              ? 'Loading…'
+              : `Show more comments (${comments.length} of ${summary?.total})`}
+          </Button>
+        )}
         {canComment
           ? (
               <Stack spacing={1.5}>
@@ -90,6 +110,10 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
                   minRows={3}
                   label="Comment"
                   value={commentText}
+                  // The backend rejects anything longer, so stop it at the field rather than
+                  // letting the save fail on something the reader cannot see is too long.
+                  slotProps={{ htmlInput: { maxLength: MAX_COMMENT_LENGTH } }}
+                  helperText={`${commentText.length} / ${MAX_COMMENT_LENGTH}`}
                   onChange={event => setCommentText(event.target.value)}
                 />
                 <Alert severity="info" role="status">
