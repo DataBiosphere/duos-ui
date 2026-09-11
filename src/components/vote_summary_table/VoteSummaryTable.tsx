@@ -1,13 +1,13 @@
 import React, { useCallback, useId, useMemo, useState } from 'react'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
-import SimpleTable, { type CellData } from '../SimpleTable'
+import SimpleTable, { type CellData, type TableStyles } from '../SimpleTable'
 import { Styles } from 'src/libs/theme'
 import { isEmpty, isNil } from 'src/utils/NodashUtil'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { Email } from 'src/libs/ajax/Email'
 import { ChatBubbleOutlineOutlined } from '@mui/icons-material'
 
-const styles = {
+const defaultStyles = {
   baseStyle: {
     fontFamily: 'Montserrat',
     fontSize: '1.25rem',
@@ -57,7 +57,7 @@ const wrapSafeCellStyle: React.CSSProperties = {
 // shrink narrower than that header text, nor wrap it to a second line. It's centered in its column
 // and given extra right padding so it doesn't sit flush against the table's right edge.
 const rationaleColumnStyle: React.CSSProperties = {
-  width: styles.cellWidths.rationale,
+  width: defaultStyles.cellWidths.rationale,
   flexShrink: 0,
   whiteSpace: 'nowrap',
   textAlign: 'center',
@@ -65,9 +65,9 @@ const rationaleColumnStyle: React.CSSProperties = {
 }
 
 const columnHeaderFormat = {
-  vote: { label: 'Vote', cellStyle: { width: styles.cellWidths.vote, ...wrapSafeCellStyle } },
-  name: { label: 'Name', cellStyle: { width: styles.cellWidths.name, ...wrapSafeCellStyle } },
-  date: { label: 'Date', cellStyle: { width: styles.cellWidths.date, ...wrapSafeCellStyle } },
+  vote: { label: 'Vote', cellStyle: { width: defaultStyles.cellWidths.vote, ...wrapSafeCellStyle } },
+  name: { label: 'Name', cellStyle: { width: defaultStyles.cellWidths.name, ...wrapSafeCellStyle } },
+  date: { label: 'Date', cellStyle: { width: defaultStyles.cellWidths.date, ...wrapSafeCellStyle } },
   rationale: { label: 'Rationale', cellStyle: rationaleColumnStyle },
 }
 
@@ -92,6 +92,7 @@ interface VoteSummaryTableProps {
   isLoading?: boolean
   isChair?: boolean
   adminPage?: boolean
+  styles?: TableStyles
 }
 
 const columnHeaderData = () => {
@@ -194,7 +195,7 @@ function rationaleCellData({ rationale, voteId, tooltipId, label = 'rationale' }
   return { data, id: voteId, label, style: rationaleColumnStyle }
 }
 
-export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false }: Readonly<VoteSummaryTableProps>) {
+export default function VoteSummaryTable({ dacVotes, isLoading, isChair = false, styles = defaultStyles }: Readonly<VoteSummaryTableProps>) {
   const rationaleTooltipId = useId()
   const [reminderSentState, setReminderSentState] = useState<Record<number, ReminderState>>({})
 
