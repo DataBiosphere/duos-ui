@@ -40,7 +40,8 @@ export default function UserProfile() {
   const [notificationData, setNotificationData] = useState<Banner | null | undefined>(null)
 
   const clearBanner = useCallback(() => setNotificationData(null), [])
-  const isLogged = useUserIsLogged() ?? false
+  // Undefined while the session probe is in flight: "not known yet", not "signed out".
+  const authState = useUserIsLogged()
 
   const updateRef = ({ value }: { key: string, value: string, isValid: boolean }) => {
     setName(value)
@@ -99,7 +100,6 @@ export default function UserProfile() {
         setUser(user)
         setName(user.displayName)
         setEmailPreference(Boolean(user.emailPreference))
-        setNotificationData(visibleBanner(await NotificationService.getBannerObjectById('eRACommonsOutage'), isLogged))
       }
       catch {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' })
@@ -109,9 +109,22 @@ export default function UserProfile() {
     init()
   }, [])
 
+  // Keyed on auth so a user signing in is not checked against the anonymous dismissal bucket.
+  useEffect(() => {
+    if (authState === undefined) return
+    let superseded = false
+    NotificationService.getBannerObjectById('eRACommonsOutage').then((banner) => {
+      if (superseded) return
+      setNotificationData(visibleBanner(banner, authState))
+    })
+    return () => {
+      superseded = true
+    }
+  }, [authState])
+
   return (
     <main className="user-profile-page">
-      <DismissibleBanner banner={notificationData} isLogged={isLogged} onDismissed={clearBanner} />
+      <DismissibleBanner banner={notificationData} isLogged={authState ?? false} onDismissed={clearBanner} />
       <PageHeading
         id="researcherProfile"
         color="common"

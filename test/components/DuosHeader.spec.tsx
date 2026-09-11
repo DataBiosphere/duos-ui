@@ -117,6 +117,19 @@ beforeEach(() => {
 
 afterEach(() => vi.restoreAllMocks())
 
+/** The header on its own, with whatever auth state the caller has already stubbed. */
+const renderHeaderAt = (path: string) => render(
+  <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+    <MemoryRouter initialEntries={[path]}>
+      <NavigationStateProvider>
+        <Routes>
+          <Route path="*" element={<DuosHeader classes={{ drawerPaper: '' }} />} />
+        </Routes>
+      </NavigationStateProvider>
+    </MemoryRouter>
+  </QueryClientProvider>,
+)
+
 const mountHeader = async (path: string, user?: DuosUser) => {
   // Auth state comes from the BFF session probe now, not localStorage.
   vi.mocked(useUserIsLogged).mockReturnValue(!!user)
@@ -553,6 +566,21 @@ describe('DuosHeader', () => {
       expect(screen.getByText('Well formed')).toBeInTheDocument()
     })
 
+    // useUserIsLogged is undefined until the session probe lands; filtering then would read the
+    // anonymous bucket for someone who is in fact signing in.
+    it('waits for the session probe before filtering the feed', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
+        { id: 'banner-8', active: true, message: 'Needs auth first', level: 'info' },
+      ] as Banner[])
+      vi.mocked(useUserIsLogged).mockReturnValue(undefined)
+
+      renderHeaderAt('/home')
+      await waitFor(() => expect(NotificationService.getActiveBanners).not.toHaveBeenCalled())
+
+      expect(isBannerVisible).not.toHaveBeenCalled()
+      expect(screen.queryByText('Needs auth first')).not.toBeInTheDocument()
+    })
+
     // Dismissals are keyed per user, so a switch has to re-evaluate what this one can see.
     it('re-filters the feed when the signed-in user changes', async () => {
       vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
@@ -563,17 +591,7 @@ describe('DuosHeader', () => {
       // Stubbed before the first render, so user 101 is genuinely the one being filtered for.
       vi.mocked(useUserIsLogged).mockReturnValue(true)
       vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ ...defaultUser, userId: 101 } as DuosUser)
-      const { rerender } = render(
-        <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-          <MemoryRouter initialEntries={['/home']}>
-            <NavigationStateProvider>
-              <Routes>
-                <Route path="*" element={<DuosHeader classes={{ drawerPaper: '' }} />} />
-              </Routes>
-            </NavigationStateProvider>
-          </MemoryRouter>
-        </QueryClientProvider>,
-      )
+      const { rerender } = renderHeaderAt('/home')
       await waitFor(() => expect(isBannerVisible).toHaveBeenCalled())
       expect(screen.queryByText('Visible to the second user')).not.toBeInTheDocument()
 
