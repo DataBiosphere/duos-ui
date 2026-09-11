@@ -2,6 +2,9 @@ import React from 'react'
 import { Tabs, Tab, Box } from '@mui/material'
 import { COUNT_BADGE_SX } from 'src/components/data_library/countBadgeStyles'
 
+export const voteHistoryTabId = (key: string) => `vote-history-tab-${key}`
+export const voteHistoryTabPanelId = (key: string) => `vote-history-tabpanel-${key}`
+
 export interface VoteHistoryTabConfig {
   key: string
   label: string
@@ -34,6 +37,8 @@ export const VoteHistoryTabs: React.FC<VoteHistoryTabsProps> = ({ value, onChang
           <Tab
             key={tab.key}
             value={tab.key}
+            id={voteHistoryTabId(tab.key)}
+            aria-controls={voteHistoryTabPanelId(tab.key)}
             label={(
               <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                 {tab.label}

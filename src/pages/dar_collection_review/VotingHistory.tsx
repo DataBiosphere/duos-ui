@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import ChairVoteHistoryTable from 'src/components/vote_history_table/ChairVoteHistoryTable'
 import ElectionWithMemberVotesTable from 'src/components/vote_history_table/ElectionWithMemberVotesTable'
-import VoteHistoryTabs from 'src/components/vote_history_table/VoteHistoryTabs'
+import VoteHistoryTabs, { voteHistoryTabId, voteHistoryTabPanelId } from 'src/components/vote_history_table/VoteHistoryTabs'
 import { Styles } from 'src/libs/theme'
 import { DarCollection, DataAccessRequest, Election, ElectionWithMemberVotes, Vote, VoteHistoryRow } from 'src/types/model'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
@@ -145,10 +145,25 @@ export default function VotingHistory({ darCollection, dacIds }: VotingHistoryPr
         />
       </div>
 
+      {/* Both panels stay mounted so each table keeps its own sort and expanded-row state
+          across tab switches; only the inactive one is hidden. */}
       <div style={styles.tableWrapper}>
-        {activeTab === VOTE_HISTORY_TABS.CHAIR
-          ? <ChairVoteHistoryTable voteHistory={chairVotes} />
-          : <ElectionWithMemberVotesTable electionsWithMemberVotes={memberVotes} />}
+        <div
+          role="tabpanel"
+          id={voteHistoryTabPanelId(VOTE_HISTORY_TABS.CHAIR)}
+          aria-labelledby={voteHistoryTabId(VOTE_HISTORY_TABS.CHAIR)}
+          hidden={activeTab !== VOTE_HISTORY_TABS.CHAIR}
+        >
+          <ChairVoteHistoryTable voteHistory={chairVotes} />
+        </div>
+        <div
+          role="tabpanel"
+          id={voteHistoryTabPanelId(VOTE_HISTORY_TABS.MEMBER)}
+          aria-labelledby={voteHistoryTabId(VOTE_HISTORY_TABS.MEMBER)}
+          hidden={activeTab !== VOTE_HISTORY_TABS.MEMBER}
+        >
+          <ElectionWithMemberVotesTable electionsWithMemberVotes={memberVotes} />
+        </div>
       </div>
     </div>
   )
