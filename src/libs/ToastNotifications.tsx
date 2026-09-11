@@ -50,6 +50,14 @@ const convertToSnackbarOrigin = (layout: ToastPosition | SnackbarOrigin): Snackb
   return layout
 }
 
+// Each notification owns a React root that only goes away once it is dismissed or auto-hides,
+// so callers that outlive their notifications need a way to take them down.
+const activeNotifications = new Set<() => void>()
+
+export const dismissAllNotifications = (): void => {
+  for (const teardown of activeNotifications) teardown()
+}
+
 export const ToastNotifications = {
   showNotification: ({
     severity = defaultProps.severity,
@@ -64,6 +72,17 @@ export const ToastNotifications = {
     document.body.appendChild(notificationRoot)
     const root = createRoot(notificationRoot)
 
+    // Dismissing all notifications can beat the exit animation's timer to it, so leaving
+    // the set is what makes a notification torn down, and doing it twice is a no-op.
+    let exitTimeout: ReturnType<typeof setTimeout> | undefined
+    const teardown = () => {
+      if (!activeNotifications.delete(teardown)) return
+      clearTimeout(exitTimeout)
+      root.unmount()
+      notificationRoot.remove()
+    }
+    activeNotifications.add(teardown)
+
     const NotificationComponent = (): React.JSX.Element => {
       const [open, setOpen] = React.useState(true)
 
@@ -71,10 +90,7 @@ export const ToastNotifications = {
         if (reason === 'clickaway') return
         setOpen(false)
         onDismiss?.()
-        setTimeout(() => {
-          root.unmount()
-          notificationRoot.remove()
-        }, 300)
+        exitTimeout = setTimeout(teardown, 300)
       }
 
       return (
