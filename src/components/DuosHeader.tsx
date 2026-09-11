@@ -186,6 +186,9 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
 
   const { activeTab, setActiveTab } = useNavigationState()
   const queryClient = useQueryClient()
+  const isLogged = useUserIsLogged() ?? false
+  // Dismissals are stored per user, so a cross-tab account switch has to re-filter the feed.
+  const currentUserId = isLogged ? Storage.getCurrentUser().userId : undefined
 
   useEffect(() => {
     const fetchNotificationData = async (): Promise<void> => {
@@ -199,7 +202,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
       }))
     }
     void fetchNotificationData()
-  }, [])
+  }, [currentUserId])
 
   // The same banner can be dismissed from a page below, so the header follows suit.
   useEffect(() => onBannerDismissed((bannerId) => {
@@ -268,7 +271,6 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     toggleDrawer(false)
   }
 
-  const isLogged = useUserIsLogged() ?? false
   let currentUser: DuosUser = {
     createDate: new Date(),
     displayName: '',

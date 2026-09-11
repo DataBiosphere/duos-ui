@@ -552,6 +552,47 @@ describe('DuosHeader', () => {
       expect(screen.getByText('Well formed')).toBeInTheDocument()
     })
 
+    // Dismissals are keyed per user, so a switch has to re-evaluate what this one can see.
+    it('re-filters the feed when the signed-in user changes', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
+        { id: 'banner-7', active: true, message: 'Visible to the second user', level: 'info' },
+      ] as Banner[])
+      vi.mocked(isBannerVisible).mockReturnValue(false)
+
+      const firstUser = { ...defaultUser, userId: 101 } as DuosUser
+      const { rerender } = render(
+        <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+          <MemoryRouter initialEntries={['/home']}>
+            <NavigationStateProvider>
+              <Routes>
+                <Route path="*" element={<DuosHeader classes={{ drawerPaper: '' }} />} />
+              </Routes>
+            </NavigationStateProvider>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+      vi.mocked(useUserIsLogged).mockReturnValue(true)
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(firstUser)
+      await waitFor(() => expect(screen.queryByText('Visible to the second user')).not.toBeInTheDocument())
+
+      // The second user has not dismissed it, so it comes back without a remount.
+      vi.mocked(isBannerVisible).mockReturnValue(true)
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ ...defaultUser, userId: 202 } as DuosUser)
+      rerender(
+        <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+          <MemoryRouter initialEntries={['/home']}>
+            <NavigationStateProvider>
+              <Routes>
+                <Route path="*" element={<DuosHeader classes={{ drawerPaper: '' }} />} />
+              </Routes>
+            </NavigationStateProvider>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+
+      expect(await screen.findByText('Visible to the second user')).toBeInTheDocument()
+    })
+
     // GCS serves the banner feed, so a malformed payload must not take the header down with it.
     it('renders no banners when the feed does not come back as a list', async () => {
       vi.mocked(NotificationService.getActiveBanners).mockResolvedValue(null as unknown as Banner[])

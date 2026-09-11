@@ -26,8 +26,8 @@ const severityFor = (level: NotificationData['level']): AlertColor =>
 
 const BANNER_SX = {
   'alignItems': 'center',
-  // Beats the global `a, input { text-decoration: none !important }` in index.css.
-  '& a': { textDecoration: 'underline !important' },
+  // Beats `a, input` and `a:hover` in index.css, both of which strip underlines with !important.
+  '& a, & a:hover': { textDecoration: 'underline !important' },
   '& p:first-of-type': { marginTop: 0 },
   '& p:last-of-type': { marginBottom: 0 },
 }
