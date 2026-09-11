@@ -7,6 +7,7 @@ import {
   needsDsAcknowledgement,
   newIrbDocumentExpirationDate,
   validationFailed,
+  normalizeDaaIds,
   computeCollaboratorErrors,
   calcPublicationErrors,
   calcPresentationErrors,
@@ -597,6 +598,24 @@ describe('darFormUtils - DAR Form Validation', () => {
       })
 
       expect(result.researcherInfoErrors.dataStorageAndAnalysis).toBeDefined()
+    })
+  })
+
+  describe('normalizeDaaIds', () => {
+    it('reads no ids when the form carries none', () => {
+      expect(normalizeDaaIds(undefined)).toEqual([])
+    })
+
+    it('keeps positive integer ids', () => {
+      expect(normalizeDaaIds([3, 1])).toEqual([3, 1])
+    })
+
+    it('drops an id repeated by more than one dataset', () => {
+      expect(normalizeDaaIds([2, 2, 5])).toEqual([2, 5])
+    })
+
+    it('drops ids that are not positive integers', () => {
+      expect(normalizeDaaIds([0, -1, 1.5, 4])).toEqual([4])
     })
   })
 })
