@@ -20,8 +20,6 @@ interface RowData {
   onClick?: () => void
 }
 
-const styles = voteHistoryTableStyles
-
 // Styling for the nested member-vote summary table shown when a row is expanded, matching
 // the same Data-Library-like look as the parent table but at the summary table's smaller scale.
 const memberVoteSummaryStyles: TableStyles = {
@@ -131,7 +129,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
       return (
         <div key={`expanded-${electionId}`}>
           {renderedRow}
-          <div style={{ width: '80%', margin: 'auto' }}>
+          <div style={{ width: '80%', margin: 'auto', padding: '0.5rem 0 1.5rem' }}>
             <VoteSummaryTable
               isChair={false}
               isLoading={false}
@@ -157,7 +155,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
     <SimpleTable
       columnHeaders={columnHeaderData()}
       rowData={sortedElections}
-      styles={styles}
+      styles={voteHistoryTableStyles}
       rowWrapper={showMemberVoteDropdownWrapper}
       sort={sort}
       onSort={setSort}

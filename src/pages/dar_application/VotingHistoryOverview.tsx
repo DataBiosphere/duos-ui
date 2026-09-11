@@ -38,7 +38,6 @@ const headerStyle: React.CSSProperties = {
   whiteSpace: 'normal',
   wordBreak: 'break-word',
   overflowWrap: 'anywhere',
-  borderBottom: `1px solid ${VOTE_TABLE_BORDER_COLOR}`,
 }
 
 const cellWrapStyle: React.CSSProperties = {
@@ -48,8 +47,8 @@ const cellWrapStyle: React.CSSProperties = {
 }
 
 const styles = {
-  baseStyle: { display: 'flex', alignItems: 'center', minHeight: 40, ...cellWrapStyle },
-  columnStyle: { display: 'flex', background: '#FFFFFF', ...cellWrapStyle },
+  baseStyle: { display: 'flex', alignItems: 'center', minHeight: 40, borderTop: `1px solid ${VOTE_TABLE_BORDER_COLOR}`, ...cellWrapStyle },
+  columnStyle: { display: 'flex', background: '#FFFFFF', borderTop: 'none', ...cellWrapStyle },
   containerOverride: { ...voteHistoryContainerOverride, width: '100%', overflowX: 'auto' as const },
 }
 

@@ -210,6 +210,30 @@ describe('VotingHistory', () => {
     expect(screen.getByText('Member Votes')).toBeInTheDocument()
   })
 
+  it('shows one table at a time, defaulting to Chair Votes', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
+
+    expect(screen.getByRole('tab', { name: /Chair Votes/ })).toHaveAttribute('aria-selected', 'true')
+    expect(container.querySelectorAll('.table-data')).toHaveLength(1)
+    // Vote Type is a Chair-table-only column
+    expect(screen.getByText('Vote Type')).toBeInTheDocument()
+    expect(screen.queryByText('Election Status')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: /Member Votes/ }))
+
+    await waitFor(() => expect(screen.getByText('Election Status')).toBeInTheDocument())
+    expect(container.querySelectorAll('.table-data')).toHaveLength(1)
+    expect(screen.queryByText('Vote Type')).not.toBeInTheDocument()
+  })
+
+  it('labels each tab with the number of rows it holds', () => {
+    render(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
+    // two chair votes (FINAL + RADAR_APPROVE) and one member-vote election survive the DAC filter
+    expect(screen.getByRole('tab', { name: 'Chair Votes2 items' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Member Votes1 item' })).toBeInTheDocument()
+  })
+
   it('renders with correct elections and votes filtered by DAC IDs and election type', async () => {
     const user = userEvent.setup()
     const { container } = render(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)

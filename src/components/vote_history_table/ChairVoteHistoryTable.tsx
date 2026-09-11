@@ -15,8 +15,6 @@ interface RowData {
   id: number | string
 }
 
-const styles = voteHistoryTableStyles
-
 const getVoteText = (vote: boolean | null | undefined) => {
   if (vote === true) return 'Yes'
   if (vote === false) return 'No'
@@ -74,7 +72,7 @@ const ChairVoteHistoryTable: React.FC<ChairVoteHistoryTableProps> = ({ voteHisto
     <SimpleTable
       columnHeaders={columnHeaderData()}
       rowData={sortedVotes}
-      styles={styles}
+      styles={voteHistoryTableStyles}
       sort={sort}
       onSort={setSort}
     />
