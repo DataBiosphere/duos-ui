@@ -638,9 +638,11 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
       const responseError = error as { response?: { status?: number, data?: { code?: string, message?: string } } }
 
-      // Make DAR editable if we get a 400 status (Bad Request) error
+      // Make DAR editable if we get a 400 status (Bad Request) error. The addendum tab goes with
+      // the attestation, as it does on cancel - otherwise it lingers pointing at nothing.
       if (responseError.response?.status === 400) {
         setIsAttested(false)
+        removeAddendumTab()
       }
 
       if (responseError.response?.data?.code && responseError.response.data.message) {

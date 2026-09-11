@@ -435,11 +435,22 @@ describe('DataAccessRequestApplication - page modes', () => {
   })
 
   it('navigates back when the Back button is used', async () => {
-    await renderDraft()
+    render(
+      <MemoryRouter initialEntries={['/dar_collection/1', `/dar_application/${darId}`]} initialIndex={1}>
+        <Routes>
+          <Route path="/dar_collection/:collectionId" element={<div>Where we came from</div>} />
+          <Route
+            path="/dar_application/:dataRequestId"
+            element={<DataAccessRequestApplication draftDar={true} isProgressReportApplication={false} />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+    await screen.findAllByRole('tab')
 
     await userEvent.click(document.getElementById('btn_back')!)
 
-    expect(screen.getByText('Data Access Request Application')).toBeInTheDocument()
+    expect(await screen.findByText('Where we came from')).toBeInTheDocument()
   })
 
   it('warns when the researcher cannot be loaded', async () => {
@@ -558,6 +569,7 @@ describe('DataAccessRequestApplication - submission failures', () => {
     await attestAndSubmit()
 
     expect(document.getElementById('btn_openSubmitModal')).not.toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: /Addendum/i })).not.toBeInTheDocument()
   })
 
   it('surfaces the server message when submission fails with one', async () => {
