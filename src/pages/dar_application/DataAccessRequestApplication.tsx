@@ -24,13 +24,15 @@ import loadingImage from 'src/images/loading-indicator.svg'
 import { ConditionalAccordion } from 'src/components/forms/ConditionalAccordion'
 import { ProgressReportApplication } from 'src/pages/dar_application/ProgressReportApplication'
 import { ScrollableTabs } from 'src/pages/dar_application/ScrollableTabs'
+import { tabElementId } from 'src/pages/dar_application/stepTabs'
 import { validateDARFormData, validationFailed, DARFormValidationResult } from 'src/utils/darFormUtils'
 import { assign, cloneDeep, get, isArray, isEmpty, isEqual, isNil, isString, map, merge, set } from 'src/utils/NodashUtil'
 import { usePageTitle } from 'src/hooks/usePageTitle'
+import { stepTabsSx } from 'src/pages/dar_collection_review/reviewTabStyles'
 import { Countries } from 'src/libs/ajax/Countries'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview'
-import { ElectionStatus, VOTE_TYPES } from 'src/utils/DarUtils'
+import { buildVoteRecords, getDarStatus } from 'src/pages/dar_application/votingHistoryData'
 import { useNavigate, useParams } from 'react-router'
 import {
   CombinedDataAccessRequest,
@@ -38,7 +40,6 @@ import {
   DataAccessRequest as DataAccessRequestModel,
   Dataset,
   DuosUser,
-  Election,
   SimplifiedDuosUser,
 } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
@@ -51,6 +52,7 @@ const DATA_ACCESS_AGREEMENTS_TAB_ID = 'data-access-agreements'
 const PROGRESS_REPORT_TAB_ID_PREFIX = 'progress-report-'
 const PROGRESS_REPORT_APPLICATION_TAB_ID = 'progress-report-app'
 const ADDENDUM_TAB_ID = 'addendum'
+const CURRENT_DAR_TAB_ID = `${PROGRESS_REPORT_TAB_ID_PREFIX}0`
 const VOTING_HISTORY_TAB_ID = 'voting-history-info'
 
 interface AppTab {
@@ -88,10 +90,33 @@ const fetchAllDatasets = async (dsIds: number[]): Promise<Dataset[]> => {
   return DataSet.getDatasetsByIds(filteredDatasetIds)
 }
 
+const resolvePageTitle = (isProgressReportApplication: boolean, existingDarsReadOnlyMode?: boolean) => {
+  if (isProgressReportApplication) return 'Progress Report'
+  if (existingDarsReadOnlyMode) return 'DAR Application Review'
+  return 'DAR Application'
+}
+
+type ApplicationPageHeadingProps = Pick<DarFormData, 'darCode' | 'projectTitle'> & {
+  readOnly?: boolean
+}
+
+const ApplicationPageHeading = ({ readOnly, darCode, projectTitle }: ApplicationPageHeadingProps) => (
+  <div className={darCode === null ? 'col-lg-12 col-md-12 col-sm-12 ' : 'col-lg-12 col-md-12 col-sm-9 '}>
+    <PageHeading
+      id="dar-application-heading"
+      title={(readOnly ? darCode : 'Data Access Request Application') ?? ''}
+      description={readOnly ? projectTitle : 'Please complete the fields below to request access to data.'}
+    />
+  </div>
+)
+
 export interface DataAccessRequestApplicationProps {
   draftDar: boolean
   isProgressReportApplication: boolean
   existingDarsReadOnlyMode?: boolean
+  // Set only by DarCollectionReview's Full DAR tab, whose own header already carries the
+  // DAR code and project title. The read-only routes render this page standalone.
+  embedded?: boolean
   collection?: DarCollection | Record<string, never>
 }
 
@@ -159,17 +184,9 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     collaborationLetterName: '',
   })
 
-  const { existingDarsReadOnlyMode, draftDar, isProgressReportApplication, collection } = props
+  const { existingDarsReadOnlyMode, embedded, draftDar, isProgressReportApplication, collection } = props
 
-  // Set page title based on mode
-  let pageTitle = 'DAR Application'
-  if (isProgressReportApplication) {
-    pageTitle = 'Progress Report'
-  }
-  else if (existingDarsReadOnlyMode) {
-    pageTitle = 'DAR Application Review'
-  }
-  usePageTitle(pageTitle)
+  usePageTitle(resolvePageTitle(isProgressReportApplication, existingDarsReadOnlyMode))
 
   const [formValidation, setFormValidation] = useState<DARFormValidationResult>({
     researcherInfoErrors: {},
@@ -411,11 +428,12 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
           const itemLabel = isLast ? formData.darCode : 'Progress Report ' + whichPRIsThis
           return { name: itemLabel ?? '', id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
         }),
-        { name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false },
+        // The voting page has its own Voting History tab; only the standalone pages need this one.
+        ...(embedded ? [] : [{ name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false }]),
       ]
     }
     return [...ApplicationTabs, { name: 'Data Access Agreements (DAA)', id: DATA_ACCESS_AGREEMENTS_TAB_ID }]
-  }, [formData.darCode, isProgressReportApplication, existingDarsReadOnlyMode, reverseOrderedDARs])
+  }, [formData.darCode, isProgressReportApplication, existingDarsReadOnlyMode, embedded, reverseOrderedDARs])
 
   const applicationTabs = useMemo<AppTab[]>(
     () => showAddendum
@@ -643,130 +661,10 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     }
   }
 
-  const NO_ELECTION_STATUS = 'Awaiting Election Opening'
-  const NO_FINAL_VOTE_STATUS = 'Awaiting Final Vote'
-  const PENDING_STATUS = 'Pending'
-
-  const createVoteRecord = (dar: DataAccessRequestModel, datasetId: number, election: Election | undefined, datasets: Dataset[]) => {
-    const getElectionVotes = (election: Election | undefined) => {
-      if (Array.isArray(election?.votes)) {
-        return election.votes
-      }
-      return election?.votes ? Object.values(election.votes) : []
-    }
-
-    const votes = getElectionVotes(election)
-
-    const finalVote = votes.find(v => v.type === VOTE_TYPES.FINAL || v.type === VOTE_TYPES.RADAR_APPROVE)
-    const hasFinalVote = finalVote?.vote !== undefined && finalVote?.vote !== null
-    const hasFinalVoteRationale = hasFinalVote && typeof finalVote?.rationale === 'string' && finalVote.rationale.trim().length > 0
-
-    const dataset = datasets.find(d => d.datasetId === datasetId)
-    const datasetName = dataset?.name ?? NO_ELECTION_STATUS
-
-    const formatDate = (dateString: string | number): string => {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    }
-
-    const isElectionClosed = !hasFinalVote && (election?.status === ElectionStatus.CLOSED || election?.status === 'Canceled')
-
-    const getVoteDate = () => {
-      if (finalVote?.updateDate) {
-        return formatDate(finalVote.updateDate)
-      }
-      if (isElectionClosed && election?.createDate) {
-        return formatDate(election.createDate)
-      }
-      return NO_FINAL_VOTE_STATUS
-    }
-
-    const getDecision = () => {
-      if (finalVote?.vote === true) {
-        return 'Approved'
-      }
-      if (finalVote?.vote === false) {
-        return 'Denied'
-      }
-      if (isElectionClosed && election) {
-        return election.status
-      }
-      return PENDING_STATUS
-    }
-
-    const getRationale = () => {
-      if (hasFinalVoteRationale) {
-        return finalVote?.rationale ?? ''
-      }
-      if (hasFinalVote) {
-        return 'No rationale provided.'
-      }
-      if (isElectionClosed) {
-        return 'Election Closed - No Final Vote'
-      }
-      return NO_FINAL_VOTE_STATUS
-    }
-
-    const voteDate = getVoteDate()
-    const decision = getDecision()
-    const rationale = getRationale()
-
-    return {
-      datasetId,
-      datasetName,
-      voteDate,
-      voteDateRaw: finalVote?.updateDate || finalVote?.createDate || null,
-      requestType: dar.progressReport ? 'Progress Report' : 'Initial DAR',
-      linkedDarId: String(dar.collectionId),
-      voteResult: { decision, rationale },
-      status: election?.status ?? NO_ELECTION_STATUS,
-    }
-  }
-
-  const votes = reverseOrderedDARs.flatMap((dar) => {
-    const elections = dar.elections
-      ? Object.values(dar.elections).filter(e => e.electionType === 'DataAccess')
-      : []
-
-    return (dar.datasetIds || []).map((datasetId) => {
-      const election = elections.find(e => e.datasetId === datasetId)
-      return createVoteRecord(dar, datasetId, election, datasets)
-    })
-  }).sort((a, b) => {
-    // Compare by vote date (most recent first)
-    if (a.voteDateRaw && b.voteDateRaw) {
-      const dateCompare = new Date(b.voteDateRaw).getTime() - new Date(a.voteDateRaw).getTime()
-      if (dateCompare !== 0) return dateCompare
-    }
-    // Handle cases where one or both dates are missing
-    else if (!a.voteDateRaw && b.voteDateRaw) return -1
-    else if (a.voteDateRaw && !b.voteDateRaw) return 1
-
-    // Compare by election status (Open > Closed > Awaiting Election)
-    const statusOrder: Record<string, number> = { [ElectionStatus.OPEN]: 0, [ElectionStatus.CLOSED]: 1, [NO_ELECTION_STATUS]: 2 }
-    const statusCompare = (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3)
-    if (statusCompare !== 0) return statusCompare
-
-    // Compare by request type (Initial DAR vs Progress Report)
-    const typeCompare = a.requestType.localeCompare(b.requestType)
-    if (typeCompare !== 0) return typeCompare
-
-    // Compare by dataset name as final tiebreaker
-    return a.datasetName.localeCompare(b.datasetName)
-  })
-
-  const getDarStatus = (votes: { status: string }[]): string => {
-    if (votes.some(vote => vote.status === ElectionStatus.OPEN)) {
-      return ElectionStatus.OPEN
-    }
-    if (votes.every(vote => vote.status === NO_ELECTION_STATUS)) {
-      return NO_ELECTION_STATUS
-    }
-    return ElectionStatus.CLOSED
-  }
+  const votes = useMemo(
+    () => embedded ? [] : buildVoteRecords(reverseOrderedDARs, datasets),
+    [embedded, reverseOrderedDARs, datasets],
+  )
 
   const dar = {
     referenceId: formData.darCode || '',
@@ -774,6 +672,12 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     institution: formData.institution || '',
     status: getDarStatus(votes),
   }
+
+  // Which sections render is mode-dependent, so a section only claims panel semantics when
+  // the step tabs actually offer the tab that labels it.
+  const panelProps = (id: string) => applicationTabs.some(tab => tab.id === id)
+    ? { 'role': 'tabpanel', 'aria-labelledby': tabElementId(id) }
+    : {}
 
   const back = () => {
     navigate(-1)
@@ -797,17 +701,13 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
         <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div className="row no-margin">
             <Notification notificationData={notificationData} />
-            <div
-              className={(formData.darCode === null
-                ? 'col-lg-12 col-md-12 col-sm-12 '
-                : 'col-lg-12 col-md-12 col-sm-9 ')}
-            >
-              <PageHeading
-                id="dar-application-heading"
-                title={(existingDarsReadOnlyMode ? formData.darCode : 'Data Access Request Application') ?? ''}
-                description={existingDarsReadOnlyMode ? formData.projectTitle : 'Please complete the fields below to request access to data.'}
+            {!embedded && (
+              <ApplicationPageHeading
+                readOnly={existingDarsReadOnlyMode}
+                darCode={formData.darCode}
+                projectTitle={formData.projectTitle}
               />
-            </div>
+            )}
             {formData.darCode !== null
               && !existingDarsReadOnlyMode
               && (
@@ -823,8 +723,14 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
         </div>
 
         <div style={{ clear: 'both' }} />
-        <form name="form" noValidate={true} className="forms-v2">
-          <ScrollableTabs applicationTabs={applicationTabs} formSelectedTabId={tab} onTabChange={setTab} />
+        <form name="form" noValidate={true} className={embedded ? 'forms-v2 forms-v2--flush' : 'forms-v2'}>
+          <ScrollableTabs
+            applicationTabs={applicationTabs}
+            formSelectedTabId={tab}
+            onTabChange={setTab}
+            orientation={embedded ? 'horizontal' : 'vertical'}
+            sx={embedded ? stepTabsSx : undefined}
+          />
 
           <div id="form-views">
             <AsyncConfirmationDialog
@@ -851,7 +757,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
             </AsyncConfirmationDialog>
 
             {isProgressReportApplication && (
-              <div id={PROGRESS_REPORT_APPLICATION_TAB_ID} className="dar-steps">
+              <div id={PROGRESS_REPORT_APPLICATION_TAB_ID} {...panelProps(PROGRESS_REPORT_APPLICATION_TAB_ID)} className="dar-steps">
                 <ConditionalAccordion
                   condition={false}
                   title={`Progress Report ${reverseOrderedDARs.length}`}
@@ -871,8 +777,9 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                 <h3>Previous Updates</h3>
                 {reverseOrderedDARs.map((dar, index) => {
                   if ((index + 1 !== reverseOrderedDARs.length)) {
+                    const sectionId = `${PROGRESS_REPORT_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`
                     return (
-                      <div key={dar.referenceId} id={`${PROGRESS_REPORT_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`}>
+                      <div key={dar.referenceId} id={sectionId} {...panelProps(sectionId)}>
                         <ConditionalAccordion
                           key={dar.referenceId}
                           condition={true}
@@ -894,7 +801,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                 })}
               </div>
             )}
-            <div id={`${PROGRESS_REPORT_TAB_ID_PREFIX}0`} className={existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
+            <div id={CURRENT_DAR_TAB_ID} {...panelProps(CURRENT_DAR_TAB_ID)} className={existingDarsReadOnlyMode ? 'dar-summary' : 'dar-steps'}>
               {existingDarsReadOnlyMode && (
                 <h3>
                   {formData.darCode}
@@ -902,7 +809,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                   Summary
                 </h3>
               )}
-              <div id={RESEARCHER_INFO_TAB_ID} className={stepContainerClassName}>
+              <div id={RESEARCHER_INFO_TAB_ID} {...panelProps(RESEARCHER_INFO_TAB_ID)} className={stepContainerClassName}>
                 <ConditionalAccordion
                   condition={!!existingDarsReadOnlyMode}
                   title="Step 1: Researcher Information"
@@ -930,7 +837,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                 </ConditionalAccordion>
               </div>
 
-              <div id={DATA_ACCESS_REQUEST_TAB_ID} className={stepContainerClassName}>
+              <div id={DATA_ACCESS_REQUEST_TAB_ID} {...panelProps(DATA_ACCESS_REQUEST_TAB_ID)} className={stepContainerClassName}>
                 <ConditionalAccordion
                   condition={!!existingDarsReadOnlyMode}
                   title="Step 2: Data Access Request"
@@ -955,7 +862,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                 </ConditionalAccordion>
               </div>
 
-              <div id={RESEARCH_PURPOSE_STATEMENT_TAB_ID} className={stepContainerClassName}>
+              <div id={RESEARCH_PURPOSE_STATEMENT_TAB_ID} {...panelProps(RESEARCH_PURPOSE_STATEMENT_TAB_ID)} className={stepContainerClassName}>
                 <ConditionalAccordion
                   condition={!!existingDarsReadOnlyMode}
                   title="Step 3: Research Purpose Statement"
@@ -974,7 +881,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
               {existingDarsReadOnlyMode
                 ? <div />
                 : (
-                    <div id={DATA_ACCESS_AGREEMENTS_TAB_ID} className="step-container">
+                    <div id={DATA_ACCESS_AGREEMENTS_TAB_ID} {...panelProps(DATA_ACCESS_AGREEMENTS_TAB_ID)} className="step-container">
                       <DataAccessAgreements
                         datasets={selectedDatasets}
                         onDaaIdsChange={onDaaIdsChange}
@@ -995,7 +902,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
               {isAttested
                 && (
-                  <div id={ADDENDUM_TAB_ID} className="step-container">
+                  <div id={ADDENDUM_TAB_ID} {...panelProps(ADDENDUM_TAB_ID)} className="step-container">
                     <DucAddendum
                       doSubmit={doSubmit}
                       save={() => setShowDialogSave(true)}
@@ -1004,9 +911,10 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
                     />
                   </div>
                 )}
+
               {!isEmpty(votes)
                 && (
-                  <div id={VOTING_HISTORY_TAB_ID} className={stepContainerClassName}>
+                  <div id={VOTING_HISTORY_TAB_ID} {...panelProps(VOTING_HISTORY_TAB_ID)} className={stepContainerClassName}>
                     <VotingHistoryOverview dar={dar} votes={votes} />
                   </div>
                 )}

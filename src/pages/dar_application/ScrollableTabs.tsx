@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
+import { SxProps, Theme as MuiTheme } from '@mui/material/styles'
 import { findIndex } from 'src/utils/NodashUtil'
+import { tabElementId } from 'src/pages/dar_application/stepTabs'
 
 type ApplicationTab = {
   id: string
@@ -13,10 +15,11 @@ type ScrollableTabsProps = {
   applicationTabs: ApplicationTab[]
   formSelectedTabId?: string
   onTabChange?: (tabId: string) => void
+  orientation?: 'vertical' | 'horizontal'
+  sx?: SxProps<MuiTheme>
 }
 
-export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange }: ScrollableTabsProps) => {
-  // Use positive check for clarity (suggested improvement)
+export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange, orientation = 'vertical', sx }: ScrollableTabsProps) => {
   const selectedStepNumber
     = typeof formSelectedTabId === 'string'
       ? findIndex(applicationTabs, tab => tab.id === formSelectedTabId) + 1
@@ -107,13 +110,19 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange
     }
   }, [applicationTabs, formSelectedTabId, onTabChange])
 
+  const containerClassName = orientation === 'horizontal'
+    ? 'step-tabs-container--horizontal'
+    : 'multi-step-buttons-container'
+
   return (
-    <div className="multi-step-buttons-container">
+    <div className={containerClassName}>
       <Tabs
         value={selectedStepNumber}
+        aria-label="Application sections"
         variant="scrollable"
         scrollButtons="auto"
-        orientation="vertical"
+        orientation={orientation}
+        sx={sx}
         slotProps={{
           indicator: { style: { background: '#2BBD9B' } },
         }}
@@ -135,6 +144,8 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId, onTabChange
           return (
             <Tab
               key={`step-${index}-${name}`}
+              id={tabElementId(tabConfig.id)}
+              aria-controls={tabConfig.id}
               label={(
                 <div>
                   {showStep && <div className="step">{`Step ${index + 1}`}</div>}
