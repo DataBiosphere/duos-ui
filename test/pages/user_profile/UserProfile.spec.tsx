@@ -297,7 +297,7 @@ describe('UserProfile', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
 
-    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage', expect.any(Boolean))
+    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage')
     expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
   })
 

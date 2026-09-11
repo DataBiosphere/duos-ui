@@ -31,19 +31,19 @@ describe('DismissibleBanner', () => {
   })
 
   it('renders nothing when there is no banner', () => {
-    const { container } = render(<DismissibleBanner banner={null} isLogged={true} onDismissed={vi.fn()} />)
+    const { container } = render(<DismissibleBanner banner={null} onDismissed={vi.fn()} />)
     expect(container).toBeEmptyDOMElement()
   })
 
   it('renders the banner message', () => {
-    render(<DismissibleBanner banner={banner} isLogged={true} onDismissed={vi.fn()} />)
+    render(<DismissibleBanner banner={banner} onDismissed={vi.fn()} />)
     expect(screen.getByRole('alert')).toHaveTextContent('Scheduled maintenance')
   })
 
   // App mounts DuosHeader alongside the page, so the same banner can be on screen twice.
   it('drops the banner when the same one is dismissed somewhere else', async () => {
     const onDismissed = vi.fn()
-    render(<DismissibleBanner banner={banner} isLogged={true} onDismissed={onDismissed} />)
+    render(<DismissibleBanner banner={banner} onDismissed={onDismissed} />)
 
     dismissalBus.publish('banner-1')
 
@@ -52,7 +52,7 @@ describe('DismissibleBanner', () => {
 
   it('ignores a dismissal of a different banner', async () => {
     const onDismissed = vi.fn()
-    render(<DismissibleBanner banner={banner} isLogged={true} onDismissed={onDismissed} />)
+    render(<DismissibleBanner banner={banner} onDismissed={onDismissed} />)
 
     dismissalBus.publish('some-other-banner')
 
@@ -61,11 +61,11 @@ describe('DismissibleBanner', () => {
 
   it('records the dismissal and tells the page once the close button is used', async () => {
     const onDismissed = vi.fn()
-    render(<DismissibleBanner banner={banner} isLogged={true} onDismissed={onDismissed} />)
+    render(<DismissibleBanner banner={banner} onDismissed={onDismissed} />)
 
     await userEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
 
-    expect(dismissBanner).toHaveBeenCalledWith('banner-1', true)
+    expect(dismissBanner).toHaveBeenCalledWith('banner-1')
     expect(onDismissed).toHaveBeenCalledOnce()
   })
 })

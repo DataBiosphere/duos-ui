@@ -117,19 +117,6 @@ beforeEach(() => {
 
 afterEach(() => vi.restoreAllMocks())
 
-/** The header on its own, with whatever auth state the caller has already stubbed. */
-const renderHeaderAt = (path: string) => render(
-  <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-    <MemoryRouter initialEntries={[path]}>
-      <NavigationStateProvider>
-        <Routes>
-          <Route path="*" element={<DuosHeader classes={{ drawerPaper: '' }} />} />
-        </Routes>
-      </NavigationStateProvider>
-    </MemoryRouter>
-  </QueryClientProvider>,
-)
-
 const mountHeader = async (path: string, user?: DuosUser) => {
   // Auth state comes from the BFF session probe now, not localStorage.
   vi.mocked(useUserIsLogged).mockReturnValue(!!user)
@@ -533,7 +520,7 @@ describe('DuosHeader', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
 
-      expect(dismissBanner).toHaveBeenCalledWith('banner-3', false)
+      expect(dismissBanner).toHaveBeenCalledWith('banner-3')
       expect(screen.queryByText('Dismiss me')).not.toBeInTheDocument()
     })
 
@@ -548,7 +535,7 @@ describe('DuosHeader', () => {
 
       fireEvent.click(screen.getAllByRole('button', { name: 'Dismiss notification' })[0])
 
-      expect(dismissBanner).toHaveBeenCalledExactlyOnceWith('banner-4', false)
+      expect(dismissBanner).toHaveBeenCalledExactlyOnceWith('banner-4')
       expect(screen.queryByText('Dismiss me')).not.toBeInTheDocument()
       expect(screen.getByText('Keep me')).toBeInTheDocument()
     })
@@ -567,51 +554,6 @@ describe('DuosHeader', () => {
     })
 
     // useUserIsLogged is undefined until the session probe lands; filtering then would read the
-    // anonymous bucket for someone who is in fact signing in.
-    it('waits for the session probe before filtering the feed', async () => {
-      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
-        { id: 'banner-8', active: true, message: 'Needs auth first', level: 'info' },
-      ] as Banner[])
-      vi.mocked(useUserIsLogged).mockReturnValue(undefined)
-
-      renderHeaderAt('/home')
-      await waitFor(() => expect(NotificationService.getActiveBanners).not.toHaveBeenCalled())
-
-      expect(isBannerVisible).not.toHaveBeenCalled()
-      expect(screen.queryByText('Needs auth first')).not.toBeInTheDocument()
-    })
-
-    // Dismissals are keyed per user, so a switch has to re-evaluate what this one can see.
-    it('re-filters the feed when the signed-in user changes', async () => {
-      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
-        { id: 'banner-7', active: true, message: 'Visible to the second user', level: 'info' },
-      ] as Banner[])
-      vi.mocked(isBannerVisible).mockReturnValue(false)
-
-      // Stubbed before the first render, so user 101 is genuinely the one being filtered for.
-      vi.mocked(useUserIsLogged).mockReturnValue(true)
-      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ ...defaultUser, userId: 101 } as DuosUser)
-      const { rerender } = renderHeaderAt('/home')
-      await waitFor(() => expect(isBannerVisible).toHaveBeenCalled())
-      expect(screen.queryByText('Visible to the second user')).not.toBeInTheDocument()
-
-      // The second user has not dismissed it, so it comes back without a remount.
-      vi.mocked(isBannerVisible).mockReturnValue(true)
-      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ ...defaultUser, userId: 202 } as DuosUser)
-      rerender(
-        <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-          <MemoryRouter initialEntries={['/home']}>
-            <NavigationStateProvider>
-              <Routes>
-                <Route path="*" element={<DuosHeader classes={{ drawerPaper: '' }} />} />
-              </Routes>
-            </NavigationStateProvider>
-          </MemoryRouter>
-        </QueryClientProvider>,
-      )
-
-      expect(await screen.findByText('Visible to the second user')).toBeInTheDocument()
-    })
 
     // GCS serves the banner feed, so a malformed payload must not take the header down with it.
     it('renders no banners when the feed does not come back as a list', async () => {

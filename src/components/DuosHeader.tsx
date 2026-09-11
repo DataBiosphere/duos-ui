@@ -186,22 +186,12 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
 
   const { activeTab, setActiveTab } = useNavigationState()
   const queryClient = useQueryClient()
-  // Undefined while the session probe is in flight: "not known yet", not "signed out".
-  const authState = useUserIsLogged()
-  const isLogged = authState ?? false
-  // Dismissals are stored per user, so a cross-tab account switch has to re-filter the feed.
-  const currentUserId = isLogged ? Storage.getCurrentUser().userId : undefined
 
   useEffect(() => {
-    // Filtering before auth resolves would read the anonymous bucket for a user who is signing in.
-    if (authState === undefined) return
-    let superseded = false
     const fetchNotificationData = async (): Promise<void> => {
       const notificationData = await NotificationService.getActiveBanners()
-      // A slower earlier request must not repopulate the header after a newer one.
-      if (superseded) return
       const visibleNotificationData = Array.isArray(notificationData)
-        ? notificationData.filter(banner => isBannerVisible(banner, authState))
+        ? notificationData.filter(isBannerVisible)
         : []
       setState(prev => ({
         ...prev,
@@ -209,10 +199,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
       }))
     }
     void fetchNotificationData()
-    return () => {
-      superseded = true
-    }
-  }, [currentUserId, authState])
+  }, [])
 
   // The same banner can be dismissed from a page below, so the header follows suit.
   useEffect(() => onBannerDismissed((bannerId) => {
@@ -256,7 +243,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   const dismissNotification = (bannerId: string): void => {
-    dismissBanner(bannerId, isLogged)
+    dismissBanner(bannerId)
   }
 
   const makeNotifications = (): React.ReactNode[] => {
@@ -281,6 +268,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     toggleDrawer(false)
   }
 
+  const isLogged = useUserIsLogged() ?? false
   let currentUser: DuosUser = {
     createDate: new Date(),
     displayName: '',

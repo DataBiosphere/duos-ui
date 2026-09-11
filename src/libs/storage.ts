@@ -7,7 +7,6 @@ const CurrentUser = 'CurrentUser'
 const OidcUser = 'OidcUser'
 const UserSettings = 'UserSettings'
 const anonymousId = 'anonymousId'
-const DismissedBanners = 'dismissedBanners'
 const ENV = 'env'
 
 interface UserSettingsType {
@@ -64,13 +63,7 @@ const DEFAULT_OIDC_USER: OidcUserType = {
 
 export const Storage = {
   clearStorage: (): void => {
-    // Dismissed banners are not user data worth clearing: losing them makes an announcement the
-    // user has already seen reappear on their next sign-in.
-    const dismissedBanners = localStorage.getItem(DismissedBanners)
     localStorage.clear()
-    if (dismissedBanners !== null) {
-      localStorage.setItem(DismissedBanners, dismissedBanners)
-    }
     localStorage.setItem(CurrentUser, JSON.stringify(DEFAULT_DUOS_USER))
     localStorage.setItem(OidcUser, JSON.stringify(DEFAULT_OIDC_USER))
   },
@@ -88,18 +81,6 @@ export const Storage = {
     const id = Storage.getCurrentUser().userId
     const userSettings = JSON.parse(localStorage.getItem(UserSettings) || '{}') as UserSettingsType
     return userSettings[id]?.[key] as T | undefined
-  },
-
-  /** Banner ids this bucket has dismissed. Buckets are a user id, or "anonymous" when signed out. */
-  getDismissedBanners: (bucket: string): string[] => {
-    const dismissed = JSON.parse(localStorage.getItem(DismissedBanners) || '{}') as Record<string, string[]>
-    return dismissed[bucket] ?? []
-  },
-
-  addDismissedBanner: (bucket: string, id: string): void => {
-    const dismissed = JSON.parse(localStorage.getItem(DismissedBanners) || '{}') as Record<string, string[]>
-    dismissed[bucket] = [...new Set([...(dismissed[bucket] ?? []), id])]
-    localStorage.setItem(DismissedBanners, JSON.stringify(dismissed))
   },
 
   getAnonymousId: (): string | null => {

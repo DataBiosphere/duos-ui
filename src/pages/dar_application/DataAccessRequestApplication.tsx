@@ -31,7 +31,6 @@ import { usePageTitle } from 'src/hooks/usePageTitle'
 import { stepTabsSx } from 'src/pages/dar_collection_review/reviewTabStyles'
 import { Countries } from 'src/libs/ajax/Countries'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
-import { useUserIsLogged } from 'src/hooks/useSession'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview'
 import { buildVoteRecords, getDarStatus } from 'src/pages/dar_application/votingHistoryData'
 import { useNavigate, useParams } from 'react-router'
@@ -211,8 +210,6 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
   const [tab, setTab] = useState<string | undefined>(undefined)
   const [notificationData, setNotificationData] = useState<Banner | null | undefined>(undefined)
   const clearBanner = useCallback(() => setNotificationData(null), [])
-  // Undefined while the session probe is in flight: "not known yet", not "signed out".
-  const authState = useUserIsLogged()
 
   const [researcher, setResearcher] = useState<DuosUser | Record<string, never>>({})
   const [allSigningOfficials, setAllSigningOfficials] = useState<SimplifiedDuosUser[]>([])
@@ -449,24 +446,15 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
   React.useEffect(() => {
     // oxlint-disable-next-line react/react-compiler
     init()
+    NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
+      if (!isMountedRef.current) return
+      setNotificationData(visibleBanner(notificationData))
+    })
     Countries.getCountries().then((isoCountriesData: string[]) => {
       if (!isMountedRef.current) return
       setCountriesOfOperation(isoCountriesData)
     })
   }, [init])
-
-  // Separate from init: re-running that on an auth change would reinitialise the form over edits.
-  useEffect(() => {
-    if (authState === undefined) return
-    let superseded = false
-    NotificationService.getBannerObjectById('eRACommonsOutage').then((banner) => {
-      if (superseded || !isMountedRef.current) return
-      setNotificationData(visibleBanner(banner, authState))
-    })
-    return () => {
-      superseded = true
-    }
-  }, [authState])
 
   // Can't do uploads in parallel since endpoints are post and they both alter attributes in JSON column
   // If done in parallel, updated attribute of one document will be overwritten by the outdated value on the other
@@ -713,7 +701,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
       <div className={existingDarsReadOnlyMode ? 'application-information-page' : 'container'} style={{ padding: existingDarsReadOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: existingDarsReadOnlyMode ? 'white' : '' }}>
         <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div className="row no-margin">
-            <DismissibleBanner banner={notificationData} isLogged={authState ?? false} onDismissed={clearBanner} />
+            <DismissibleBanner banner={notificationData} onDismissed={clearBanner} />
             {!embedded && (
               <ApplicationPageHeading
                 readOnly={existingDarsReadOnlyMode}

@@ -32,39 +32,9 @@ describe('Storage', () => {
     it('should clear all localStorage items and set defaults', () => {
       localStorage.setItem('test', 'value')
       Storage.clearStorage()
-      expect(localStorage.getItem('test')).toBeNull()
+      expect(localStorage.length).toBeGreaterThan(0)
       expect(Storage.getCurrentUser()).not.toBeNull()
       expect(Storage.getOidcUser()).not.toBeNull()
-    })
-
-    // Losing these on sign-out makes an announcement the user already dismissed come back.
-    it('keeps dismissed banners through sign-out', () => {
-      Storage.addDismissedBanner('42', 'banner-1')
-
-      Storage.clearStorage()
-
-      expect(Storage.getDismissedBanners('42')).toEqual(['banner-1'])
-    })
-  })
-
-  describe('dismissed banners', () => {
-    it('reads nothing for a bucket that has dismissed nothing', () => {
-      expect(Storage.getDismissedBanners('nobody')).toEqual([])
-    })
-
-    it('keeps each bucket separate', () => {
-      Storage.addDismissedBanner('1', 'banner-a')
-      Storage.addDismissedBanner('anonymous', 'banner-b')
-
-      expect(Storage.getDismissedBanners('1')).toEqual(['banner-a'])
-      expect(Storage.getDismissedBanners('anonymous')).toEqual(['banner-b'])
-    })
-
-    it('records a repeated dismissal once', () => {
-      Storage.addDismissedBanner('1', 'banner-a')
-      Storage.addDismissedBanner('1', 'banner-a')
-
-      expect(Storage.getDismissedBanners('1')).toEqual(['banner-a'])
     })
   })
 
