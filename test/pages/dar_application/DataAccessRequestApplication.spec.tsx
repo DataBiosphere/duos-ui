@@ -634,6 +634,18 @@ describe('DataAccessRequestApplication - supporting documents', () => {
   })
 
   it('clears the previously stored document names when new files replace them', async () => {
+    // The DAR already carries documents, so the upload has something to clear.
+    mockServices({
+      partialDar: {
+        ...darCollection.dars[darId],
+        irbDocumentName: 'old-irb.pdf',
+        irbDocumentLocation: 'gs://bucket/old-irb.pdf',
+        collaborationLetterName: 'old-collab.pdf',
+        collaborationLetterLocation: 'gs://bucket/old-collab.pdf',
+      },
+    })
+    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue(docDatasets)
+
     await renderDraft()
     await uploadTo('irbDocument', 'replacement.pdf')
     await uploadTo('collaborationLetter', 'replacement-collab.pdf')
@@ -644,7 +656,9 @@ describe('DataAccessRequestApplication - supporting documents', () => {
 
     const saved = vi.mocked(DAR.updateDarDraft).mock.calls[0][0] as Record<string, unknown>
     expect(saved.irbDocumentName).toBe('')
+    expect(saved.irbDocumentLocation).toBe('')
     expect(saved.collaborationLetterName).toBe('')
+    expect(saved.collaborationLetterLocation).toBe('')
   })
 })
 
