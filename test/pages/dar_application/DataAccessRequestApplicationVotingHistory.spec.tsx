@@ -121,13 +121,15 @@ interface VoteFixture {
   type: string
   vote: boolean | null
   rationale: string
-  updateDate: string
+  createDate?: string
+  updateDate?: string
 }
 
 interface ElectionFixture {
   electionType: string
   datasetId: number
   status: string
+  createDate?: string
   votes: VoteFixture[]
 }
 
@@ -331,6 +333,65 @@ describe('Voting History - Vote Status Display', () => {
     expect(document.body.textContent).toContain('Denied')
     await toggleRationale(0) // The denied vote is first
     expect(document.body.textContent).toContain('No rationale provided.')
+  })
+
+  it('dates a final vote that was never updated by when it was cast', async () => {
+    mockVotingHistoryCollection([123456], {
+      'election-1': {
+        electionType: 'DataAccess',
+        datasetId: 123456,
+        status: 'Closed',
+        votes: [
+          {
+            type: VOTE_TYPES.FINAL,
+            vote: true,
+            rationale: 'Approved on the first pass.',
+            // Midday UTC so the rendered date is the same one in any time zone.
+            createDate: '2024-06-03T12:00:00Z',
+          },
+        ],
+      },
+    })
+
+    await mountDataAccessRequestApp(darCollection)
+    await openVotingHistoryTab()
+
+    expect(document.body.textContent).toContain('Approved')
+    expect(document.body.textContent).toContain('June 3, 2024')
+    expect(document.body.textContent).not.toContain('Awaiting Final Vote')
+  })
+
+  it('orders a closed election with no final vote by the date it displays', async () => {
+    mockVotingHistoryCollection([123456, 123457], {
+      'election-1': {
+        electionType: 'DataAccess',
+        datasetId: 123456,
+        status: 'Closed',
+        // Midday UTC so the rendered date is the same one in any time zone.
+        createDate: '2024-06-01T12:00:00Z',
+        votes: [],
+      },
+      'election-2': {
+        electionType: 'DataAccess',
+        datasetId: 123457,
+        status: 'Closed',
+        votes: [
+          {
+            type: VOTE_TYPES.FINAL,
+            vote: true,
+            rationale: 'Approved for dataset B.',
+            updateDate: '2024-06-07T12:00:00Z',
+          },
+        ],
+      },
+    })
+
+    await mountDataAccessRequestApp(darCollection)
+    await openVotingHistoryTab()
+
+    const body = document.body.textContent ?? ''
+    expect(body).toContain('June 1, 2024')
+    expect(body.indexOf('June 7, 2024')).toBeLessThan(body.indexOf('June 1, 2024'))
   })
 
   it('displays Pending and Awaiting Final Vote when election exists but no votes at all', async () => {
