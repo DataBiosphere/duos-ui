@@ -564,6 +564,8 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
   const removeAddendumTab = () => {
     setShowAddendum(false)
+    // The tab strip selects by index, so leaving the departing tab selected leaves it with none.
+    setTab(DATA_ACCESS_AGREEMENTS_TAB_ID)
   }
 
   const attemptSubmit = async (): Promise<boolean> => {

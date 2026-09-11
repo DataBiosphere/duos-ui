@@ -561,6 +561,8 @@ describe('DataAccessRequestApplication - submission failures', () => {
     await clickById('btn_attest')
     await clickById('btn_openSubmitModal')
     await clickDialogYes()
+    // The rejection resolves after the click, so every caller would otherwise race it.
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalled())
   }
 
   it('reopens the form for editing when the server rejects the DAR as invalid', async () => {
@@ -570,6 +572,7 @@ describe('DataAccessRequestApplication - submission failures', () => {
 
     expect(document.getElementById('btn_openSubmitModal')).not.toBeInTheDocument()
     expect(screen.queryByRole('tab', { name: /Addendum/i })).not.toBeInTheDocument()
+    expect(selectedTabName()).toContain('Data Access Agreements')
   })
 
   it('surfaces the server message when submission fails with one', async () => {
