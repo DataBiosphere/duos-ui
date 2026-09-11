@@ -194,7 +194,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     const fetchNotificationData = async (): Promise<void> => {
       const notificationData = await NotificationService.getActiveBanners()
       const visibleNotificationData = Array.isArray(notificationData)
-        ? notificationData.filter(isBannerVisible)
+        ? notificationData.filter(banner => isBannerVisible(banner, isLogged))
         : []
       setState(prev => ({
         ...prev,
@@ -202,7 +202,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
       }))
     }
     void fetchNotificationData()
-  }, [currentUserId])
+  }, [currentUserId, isLogged])
 
   // The same banner can be dismissed from a page below, so the header follows suit.
   useEffect(() => onBannerDismissed((bannerId) => {
@@ -246,7 +246,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   const dismissNotification = (bannerId: string): void => {
-    dismissBanner(bannerId)
+    dismissBanner(bannerId, isLogged)
   }
 
   const makeNotifications = (): React.ReactNode[] => {

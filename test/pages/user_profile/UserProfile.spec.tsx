@@ -72,7 +72,7 @@ vi.mock('src/components/Notification', () => ({
       ? (
           <div>
             {notificationData.message}
-            {onDismiss && <button onClick={onDismiss}>Close banner</button>}
+            {onDismiss && <button onClick={onDismiss}>Dismiss notification</button>}
           </div>
         )
       : null
@@ -102,8 +102,6 @@ import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
 import { dismissBanner, NotificationService, onBannerDismissed, visibleBanner } from 'src/libs/notificationService'
 import { bannerDismissalBus } from '../../test-utils'
-
-const dismissalBus = bannerDismissalBus()
 import { Notifications } from 'src/libs/utils'
 
 const mockUser: DuosUser = {
@@ -129,6 +127,8 @@ function renderUserProfile() {
     </BrowserRouter>,
   )
 }
+
+const dismissalBus = bannerDismissalBus()
 
 describe('UserProfile', () => {
   beforeEach(() => {
@@ -295,9 +295,9 @@ describe('UserProfile', () => {
       expect(screen.getByText('eRA Commons is down')).toBeInTheDocument()
     })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Close banner' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
 
-    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage')
+    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage', expect.any(Boolean))
     expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
   })
 
@@ -308,7 +308,7 @@ describe('UserProfile', () => {
       message: 'eRA Commons is down',
       level: 'warning',
     })
-    vi.mocked(visibleBanner).mockReturnValue(null)
+    vi.mocked(visibleBanner).mockReturnValueOnce(null)
 
     renderUserProfile()
     await waitFor(() => screen.getByDisplayValue('Test User'))

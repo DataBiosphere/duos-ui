@@ -1,5 +1,5 @@
 import React from 'react'
-import { describe, it, expect, vi } from 'vitest'
+import { beforeEach, describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { Notification } from 'src/components/Notification'
@@ -17,10 +17,13 @@ const makeBanner = (overrides: Partial<Banner> = {}): Banner => ({
   ...overrides,
 })
 
-const alertRoot = (container: HTMLElement): HTMLElement =>
-  container.querySelector('.MuiAlert-root') as HTMLElement
+const alertRoot = (): HTMLElement => screen.getByRole('alert')
 
 describe('Notification', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('renders nothing when notificationData is undefined', () => {
     const { container } = render(<Notification />)
     expect(container).toBeEmptyDOMElement()
@@ -47,29 +50,29 @@ describe('Notification', () => {
     ['warning', 'MuiAlert-colorWarning'],
     ['danger', 'MuiAlert-colorError'],
   ] as const)('maps the %s level onto its MUI severity', (level, expectedClass) => {
-    const { container } = render(<Notification notificationData={makeBanner({ level })} />)
-    expect(alertRoot(container)).toHaveClass(expectedClass)
+    render(<Notification notificationData={makeBanner({ level })} />)
+    expect(alertRoot()).toHaveClass(expectedClass)
   })
 
   it('falls back to info when the banner carries no level', () => {
-    const { container } = render(<Notification notificationData={makeBanner({ level: undefined })} />)
-    expect(alertRoot(container)).toHaveClass('MuiAlert-colorInfo')
+    render(<Notification notificationData={makeBanner({ level: undefined })} />)
+    expect(alertRoot()).toHaveClass('MuiAlert-colorInfo')
   })
 
   // The feed is ops-authored, so a level outside the four known ones can reach the component.
   it('falls back to info when the banner carries an unknown level', () => {
-    const { container } = render(
+    render(
       <Notification notificationData={{ message: 'odd level', level: 'critical' as Banner['level'] }} />,
     )
-    expect(alertRoot(container)).toHaveClass('MuiAlert-colorInfo')
+    expect(alertRoot()).toHaveClass('MuiAlert-colorInfo')
   })
 
   // SEVERITY is a plain object, so an inherited key must not reach MUI as a severity.
   it('falls back to info for a level that names an Object prototype member', () => {
-    const { container } = render(
+    render(
       <Notification notificationData={{ message: 'inherited', level: 'toString' as Banner['level'] }} />,
     )
-    expect(alertRoot(container)).toHaveClass('MuiAlert-colorInfo')
+    expect(alertRoot()).toHaveClass('MuiAlert-colorInfo')
   })
 
   it('does not render a close button when onDismiss is omitted', () => {

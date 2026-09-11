@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { dismissBanner, isBannerDismissed, isBannerVisible, NotificationService, onBannerDismissed, visibleBanner } from 'src/libs/notificationService'
 import { Config } from 'src/libs/config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
@@ -23,6 +23,10 @@ const banners = [
 describe('NotificationService', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   // ── getBanners ─────────────────────────────────────────────────────────────
@@ -143,86 +147,112 @@ describe('NotificationService', () => {
     })
   })
 
-  // ── isBannerDismissed / dismissBanner ──────────────────────────────────────
+  // ── dismissals ─────────────────────────────────────────────────────────────
+
+  const banner = { id: 'banner-1', active: true, message: 'Hello', level: 'info' } as const
+  const SIGNED_IN = true
+  const SIGNED_OUT = false
 
   describe('isBannerDismissed', () => {
-    it('returns false when the banner has not been dismissed', () => {
-      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(undefined)
+    it('reads false when this user has not dismissed the banner', () => {
+      vi.spyOn(Storage, 'getDismissedBanners').mockReturnValue([])
 
-      expect(isBannerDismissed('banner-1')).toBe(false)
+      expect(isBannerDismissed('banner-1', SIGNED_IN)).toBe(false)
     })
 
-    it('returns true when the banner has been dismissed', () => {
-      vi.spyOn(Storage, 'getCurrentUserSettings').mockImplementation(
-        (key: string) => key === 'dismissedBanner_banner-1',
-      )
+    it('reads true when this user has dismissed it', () => {
+      vi.spyOn(Storage, 'getDismissedBanners').mockReturnValue(['banner-1'])
 
-      expect(isBannerDismissed('banner-1')).toBe(true)
+      expect(isBannerDismissed('banner-1', SIGNED_IN)).toBe(true)
+    })
+
+    // A BFF session expiry leaves CurrentUser in place, so the bucket has to follow live auth state.
+    it('reads the anonymous bucket when signed out, not the stored profile', () => {
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ userId: 42 } as ReturnType<typeof Storage.getCurrentUser>)
+      const getDismissedBanners = vi.spyOn(Storage, 'getDismissedBanners').mockReturnValue([])
+
+      isBannerDismissed('banner-1', SIGNED_OUT)
+
+      expect(getDismissedBanners).toHaveBeenCalledWith('anonymous')
+    })
+
+    it('reads the signed-in user\'s own bucket', () => {
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ userId: 42 } as ReturnType<typeof Storage.getCurrentUser>)
+      const getDismissedBanners = vi.spyOn(Storage, 'getDismissedBanners').mockReturnValue([])
+
+      isBannerDismissed('banner-1', SIGNED_IN)
+
+      expect(getDismissedBanners).toHaveBeenCalledWith('42')
     })
   })
 
   describe('dismissBanner', () => {
-    it('persists the dismissal under a banner-specific key', () => {
-      const setCurrentUserSettings = vi.spyOn(Storage, 'setCurrentUserSettings').mockReturnValue(undefined)
+    it('records the dismissal against this user', () => {
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ userId: 42 } as ReturnType<typeof Storage.getCurrentUser>)
+      const addDismissedBanner = vi.spyOn(Storage, 'addDismissedBanner').mockReturnValue(undefined)
 
-      dismissBanner('banner-1')
+      dismissBanner('banner-1', SIGNED_IN)
 
-      expect(setCurrentUserSettings).toHaveBeenCalledWith('dismissedBanner_banner-1', true)
+      expect(addDismissedBanner).toHaveBeenCalledWith('42', 'banner-1')
+    })
+
+    it('records an anonymous dismissal separately', () => {
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ userId: 42 } as ReturnType<typeof Storage.getCurrentUser>)
+      const addDismissedBanner = vi.spyOn(Storage, 'addDismissedBanner').mockReturnValue(undefined)
+
+      dismissBanner('banner-1', SIGNED_OUT)
+
+      expect(addDismissedBanner).toHaveBeenCalledWith('anonymous', 'banner-1')
     })
   })
 
   describe('isBannerVisible', () => {
-    const banner = { id: 'banner-1', active: true, message: 'Hello', level: 'info' } as const
-
     it('shows a banner the user has not dismissed', () => {
-      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(undefined)
+      vi.spyOn(Storage, 'getDismissedBanners').mockReturnValue([])
 
-      expect(isBannerVisible(banner)).toBe(true)
+      expect(isBannerVisible(banner, SIGNED_IN)).toBe(true)
     })
 
     it('hides a banner the user has dismissed', () => {
-      vi.spyOn(Storage, 'getCurrentUserSettings').mockImplementation(
-        (key: string) => key === 'dismissedBanner_banner-1',
-      )
+      vi.spyOn(Storage, 'getDismissedBanners').mockReturnValue(['banner-1'])
 
-      expect(isBannerVisible(banner)).toBe(false)
+      expect(isBannerVisible(banner, SIGNED_IN)).toBe(false)
     })
 
     // The feed is ops-authored JSON, so an entry can arrive without the id a dismissal is keyed on.
     it('hides an entry with no id, and a missing one', () => {
-      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(undefined)
+      vi.spyOn(Storage, 'getDismissedBanners').mockReturnValue([])
 
-      expect(isBannerVisible({ active: true, message: 'No id' } as unknown as typeof banner)).toBe(false)
-      expect(isBannerVisible(null)).toBe(false)
-      expect(isBannerVisible(undefined)).toBe(false)
+      expect(isBannerVisible({ active: true, message: 'No id' } as unknown as typeof banner, SIGNED_IN)).toBe(false)
+      expect(isBannerVisible(null, SIGNED_IN)).toBe(false)
+      expect(isBannerVisible(undefined, SIGNED_IN)).toBe(false)
     })
   })
 
   describe('visibleBanner', () => {
     it('reads back a banner the user can still see', () => {
-      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(undefined)
-      const banner = { id: 'banner-1', active: true, message: 'Hello', level: 'info' } as const
+      vi.spyOn(Storage, 'getDismissedBanners').mockReturnValue([])
 
-      expect(visibleBanner(banner)).toBe(banner)
+      expect(visibleBanner(banner, SIGNED_IN)).toBe(banner)
     })
 
     it('reads null for a dismissed banner', () => {
-      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(true)
+      vi.spyOn(Storage, 'getDismissedBanners').mockReturnValue(['banner-1'])
 
-      expect(visibleBanner({ id: 'banner-1', active: true, message: 'Hello', level: 'info' } as const)).toBeNull()
+      expect(visibleBanner(banner, SIGNED_IN)).toBeNull()
     })
   })
 
   describe('onBannerDismissed', () => {
     beforeEach(() => {
-      vi.spyOn(Storage, 'setCurrentUserSettings').mockReturnValue(undefined)
+      vi.spyOn(Storage, 'addDismissedBanner').mockReturnValue(undefined)
     })
 
     it('tells subscribers which banner went, so every copy on screen can drop it', () => {
       const listener = vi.fn()
       const unsubscribe = onBannerDismissed(listener)
 
-      dismissBanner('banner-1')
+      dismissBanner('banner-1', true)
 
       expect(listener).toHaveBeenCalledExactlyOnceWith('banner-1')
       unsubscribe()
@@ -233,7 +263,7 @@ describe('NotificationService', () => {
       const page = vi.fn()
       const unsubscribes = [onBannerDismissed(header), onBannerDismissed(page)]
 
-      dismissBanner('banner-2')
+      dismissBanner('banner-2', true)
 
       expect(header).toHaveBeenCalledWith('banner-2')
       expect(page).toHaveBeenCalledWith('banner-2')
@@ -244,7 +274,7 @@ describe('NotificationService', () => {
       const listener = vi.fn()
       onBannerDismissed(listener)()
 
-      dismissBanner('banner-3')
+      dismissBanner('banner-3', true)
 
       expect(listener).not.toHaveBeenCalled()
     })

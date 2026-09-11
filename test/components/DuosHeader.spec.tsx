@@ -109,6 +109,7 @@ const defaultUser: DuosUser = {
 const dismissalBus = bannerDismissalBus()
 
 beforeEach(() => {
+  vi.clearAllMocks()
   dismissalBus.reset()
   vi.mocked(onBannerDismissed).mockImplementation(dismissalBus.subscribe)
   vi.mocked(dismissBanner).mockImplementation(dismissalBus.publish)
@@ -519,7 +520,7 @@ describe('DuosHeader', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
 
-      expect(dismissBanner).toHaveBeenCalledWith('banner-3')
+      expect(dismissBanner).toHaveBeenCalledWith('banner-3', false)
       expect(screen.queryByText('Dismiss me')).not.toBeInTheDocument()
     })
 
@@ -534,7 +535,7 @@ describe('DuosHeader', () => {
 
       fireEvent.click(screen.getAllByRole('button', { name: 'Dismiss notification' })[0])
 
-      expect(dismissBanner).toHaveBeenCalledExactlyOnceWith('banner-4')
+      expect(dismissBanner).toHaveBeenCalledExactlyOnceWith('banner-4', false)
       expect(screen.queryByText('Dismiss me')).not.toBeInTheDocument()
       expect(screen.getByText('Keep me')).toBeInTheDocument()
     })
@@ -559,7 +560,9 @@ describe('DuosHeader', () => {
       ] as Banner[])
       vi.mocked(isBannerVisible).mockReturnValue(false)
 
-      const firstUser = { ...defaultUser, userId: 101 } as DuosUser
+      // Stubbed before the first render, so user 101 is genuinely the one being filtered for.
+      vi.mocked(useUserIsLogged).mockReturnValue(true)
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ ...defaultUser, userId: 101 } as DuosUser)
       const { rerender } = render(
         <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
           <MemoryRouter initialEntries={['/home']}>
@@ -571,9 +574,8 @@ describe('DuosHeader', () => {
           </MemoryRouter>
         </QueryClientProvider>,
       )
-      vi.mocked(useUserIsLogged).mockReturnValue(true)
-      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(firstUser)
-      await waitFor(() => expect(screen.queryByText('Visible to the second user')).not.toBeInTheDocument())
+      await waitFor(() => expect(isBannerVisible).toHaveBeenCalled())
+      expect(screen.queryByText('Visible to the second user')).not.toBeInTheDocument()
 
       // The second user has not dismissed it, so it comes back without a remount.
       vi.mocked(isBannerVisible).mockReturnValue(true)

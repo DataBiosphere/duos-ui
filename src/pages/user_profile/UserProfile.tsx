@@ -6,6 +6,7 @@ import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
 import { Banner, NotificationService, visibleBanner } from 'src/libs/notificationService'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
+import { useUserIsLogged } from 'src/hooks/useSession'
 import AffiliationAndRoles from './AffiliationAndRoles'
 import ResearcherStatus from './ResearcherStatus'
 import AcceptedAcknowledgements from './AcceptedAcknowledgements'
@@ -39,6 +40,7 @@ export default function UserProfile() {
   const [notificationData, setNotificationData] = useState<Banner | null | undefined>(null)
 
   const clearBanner = useCallback(() => setNotificationData(null), [])
+  const isLogged = useUserIsLogged() ?? false
 
   const updateRef = ({ value }: { key: string, value: string, isValid: boolean }) => {
     setName(value)
@@ -97,7 +99,7 @@ export default function UserProfile() {
         setUser(user)
         setName(user.displayName)
         setEmailPreference(Boolean(user.emailPreference))
-        setNotificationData(visibleBanner(await NotificationService.getBannerObjectById('eRACommonsOutage')))
+        setNotificationData(visibleBanner(await NotificationService.getBannerObjectById('eRACommonsOutage'), isLogged))
       }
       catch {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' })
@@ -109,7 +111,7 @@ export default function UserProfile() {
 
   return (
     <main className="user-profile-page">
-      <DismissibleBanner banner={notificationData} onDismissed={clearBanner} />
+      <DismissibleBanner banner={notificationData} isLogged={isLogged} onDismissed={clearBanner} />
       <PageHeading
         id="researcherProfile"
         color="common"

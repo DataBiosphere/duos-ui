@@ -14,16 +14,18 @@ export interface Banner {
   level: 'info' | 'warning' | 'danger' | 'success'
 }
 
-const dismissedBannerKey = (id: string): string => `dismissedBanner_${id}`
-
 /**
- * Has the current user (or anonymous browser) dismissed this banner?
- * @param {string} id - the banner id to check
- * @returns {boolean}
+ * Which set of dismissals applies. Keyed off live auth state rather than the stored profile: a BFF
+ * session expiry leaves CurrentUser in place, and an anonymous browser must not inherit the
+ * previous user's dismissals.
  */
-export const isBannerDismissed = (id: string): boolean => {
-  return Storage.getCurrentUserSettings<boolean>(dismissedBannerKey(id)) ?? false
-}
+const ANONYMOUS_BUCKET = 'anonymous'
+
+const dismissalBucket = (isLogged: boolean): string =>
+  isLogged ? String(Storage.getCurrentUser().userId) : ANONYMOUS_BUCKET
+
+export const isBannerDismissed = (id: string, isLogged: boolean): boolean =>
+  Storage.getDismissedBanners(dismissalBucket(isLogged)).includes(id)
 
 /**
  * The same banner can render in the header and inline on a page at once, so a dismissal has to
@@ -38,18 +40,18 @@ export const onBannerDismissed = (listener: (id: string) => void): (() => void) 
   }
 }
 
-/** Record that the current user (or anonymous browser) has dismissed this banner. */
-export const dismissBanner = (id: string): void => {
-  Storage.setCurrentUserSettings<boolean>(dismissedBannerKey(id), true)
+/** Record that this user (or the anonymous browser) has dismissed this banner. */
+export const dismissBanner = (id: string, isLogged: boolean): void => {
+  Storage.addDismissedBanner(dismissalBucket(isLogged), id)
   dismissalListeners.forEach(listener => listener(id))
 }
 
 /** Shown only when the banner can be identified and this user has not dismissed it. */
-export const isBannerVisible = (banner: Banner | null | undefined): banner is Banner =>
-  !!banner?.id && !isBannerDismissed(banner.id)
+export const isBannerVisible = (banner: Banner | null | undefined, isLogged: boolean): banner is Banner =>
+  !!banner?.id && !isBannerDismissed(banner.id, isLogged)
 
-export const visibleBanner = (banner: Banner | null | undefined): Banner | null =>
-  isBannerVisible(banner) ? banner : null
+export const visibleBanner = (banner: Banner | null | undefined, isLogged: boolean): Banner | null =>
+  isBannerVisible(banner, isLogged) ? banner : null
 
 export const NotificationService = {
 

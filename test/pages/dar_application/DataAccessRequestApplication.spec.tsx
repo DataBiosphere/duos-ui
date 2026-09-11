@@ -417,7 +417,7 @@ describe('DataAccessRequestApplication', () => {
     expect(await screen.findByText('eRA Commons is down')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
 
-    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage')
+    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage', expect.any(Boolean))
     expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
   })
 
@@ -426,6 +426,8 @@ describe('DataAccessRequestApplication', () => {
 
     await renderWithOutageBanner()
 
+    // Anchored on the filter having run, so this cannot pass merely by being early.
+    await waitFor(() => expect(visibleBanner).toHaveBeenCalled())
     expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
   })
 
