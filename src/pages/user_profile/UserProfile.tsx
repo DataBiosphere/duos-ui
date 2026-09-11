@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { FormControlLabel, Switch } from '@mui/material'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
 import { DismissibleBanner } from 'src/components/DismissibleBanner'
@@ -37,6 +37,8 @@ export default function UserProfile() {
   const [savingEmailPreference, setSavingEmailPreference] = useState<boolean>(false)
 
   const [notificationData, setNotificationData] = useState<Banner | null | undefined>(null)
+
+  const clearBanner = useCallback(() => setNotificationData(null), [])
 
   const updateRef = ({ value }: { key: string, value: string, isValid: boolean }) => {
     setName(value)
@@ -107,7 +109,7 @@ export default function UserProfile() {
 
   return (
     <main className="user-profile-page">
-      <DismissibleBanner banner={notificationData} onDismissed={() => setNotificationData(null)} />
+      <DismissibleBanner banner={notificationData} onDismissed={clearBanner} />
       <PageHeading
         id="researcherProfile"
         color="common"

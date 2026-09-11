@@ -20,6 +20,10 @@ const SEVERITY: Record<NonNullable<NotificationData['level']>, AlertColor> = {
   danger: 'error',
 }
 
+// An own-property check, so a level like "toString" cannot reach MUI as an inherited value.
+const severityFor = (level: NotificationData['level']): AlertColor =>
+  level !== undefined && Object.hasOwn(SEVERITY, level) ? SEVERITY[level] : 'info'
+
 const BANNER_SX = {
   'alignItems': 'center',
   // Beats the global `a, input { text-decoration: none !important }` in index.css.
@@ -35,7 +39,7 @@ export const Notification = ({ notificationData, onDismiss }: Readonly<Notificat
 
   return (
     <Alert
-      severity={SEVERITY[notificationData.level as keyof typeof SEVERITY] ?? 'info'}
+      severity={severityFor(notificationData.level)}
       onClose={onDismiss}
       closeText="Dismiss notification"
       sx={BANNER_SX}

@@ -27,6 +27,7 @@ vi.mock('src/libs/notificationService', () => ({
   },
   dismissBanner: vi.fn(),
   visibleBanner: vi.fn(banner => banner ?? null),
+  onBannerDismissed: vi.fn(() => () => {}),
 }))
 
 vi.mock('src/libs/utils', () => ({
@@ -99,7 +100,10 @@ vi.mock('src/components/forms/forms', () => {
 
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
-import { dismissBanner, NotificationService, visibleBanner } from 'src/libs/notificationService'
+import { dismissBanner, NotificationService, onBannerDismissed, visibleBanner } from 'src/libs/notificationService'
+import { bannerDismissalBus } from '../../test-utils'
+
+const dismissalBus = bannerDismissalBus()
 import { Notifications } from 'src/libs/utils'
 
 const mockUser: DuosUser = {
@@ -129,6 +133,9 @@ function renderUserProfile() {
 describe('UserProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    dismissalBus.reset()
+    vi.mocked(onBannerDismissed).mockImplementation(dismissalBus.subscribe)
+    vi.mocked(dismissBanner).mockImplementation(dismissalBus.publish)
     vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser)
     vi.mocked(User.getMe).mockResolvedValue(mockUser)
     vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue(null)

@@ -209,6 +209,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
   const [tab, setTab] = useState<string | undefined>(undefined)
   const [notificationData, setNotificationData] = useState<Banner | null | undefined>(undefined)
+  const clearBanner = useCallback(() => setNotificationData(null), [])
 
   const [researcher, setResearcher] = useState<DuosUser | Record<string, never>>({})
   const [allSigningOfficials, setAllSigningOfficials] = useState<SimplifiedDuosUser[]>([])
@@ -700,7 +701,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
       <div className={existingDarsReadOnlyMode ? 'application-information-page' : 'container'} style={{ padding: existingDarsReadOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: existingDarsReadOnlyMode ? 'white' : '' }}>
         <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div className="row no-margin">
-            <DismissibleBanner banner={notificationData} onDismissed={() => setNotificationData(null)} />
+            <DismissibleBanner banner={notificationData} onDismissed={clearBanner} />
             {!embedded && (
               <ApplicationPageHeading
                 readOnly={existingDarsReadOnlyMode}

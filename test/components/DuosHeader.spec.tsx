@@ -1,5 +1,5 @@
 import React from 'react'
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
@@ -14,7 +14,8 @@ import { useUserIsLogged } from 'src/hooks/useSession'
 import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 import { DuosUser } from 'src/types/model'
 import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
-import { NotificationService, dismissBanner, isBannerVisible } from 'src/libs/notificationService'
+import { NotificationService, dismissBanner, isBannerVisible, onBannerDismissed } from 'src/libs/notificationService'
+import { bannerDismissalBus } from '../test-utils'
 import type { Banner } from 'src/libs/notificationService'
 
 vi.mock('src/hooks/useSession', () => ({
@@ -27,6 +28,7 @@ vi.mock('src/libs/notificationService', () => ({
   },
   dismissBanner: vi.fn(),
   isBannerVisible: vi.fn().mockReturnValue(true),
+  onBannerDismissed: vi.fn(() => () => {}),
 }))
 
 vi.mock('src/components/modals/SupportRequestModal', () => ({
@@ -103,6 +105,14 @@ const defaultUser: DuosUser = {
   roles: [],
   userId: 0,
 }
+
+const dismissalBus = bannerDismissalBus()
+
+beforeEach(() => {
+  dismissalBus.reset()
+  vi.mocked(onBannerDismissed).mockImplementation(dismissalBus.subscribe)
+  vi.mocked(dismissBanner).mockImplementation(dismissalBus.publish)
+})
 
 afterEach(() => vi.restoreAllMocks())
 

@@ -9,7 +9,7 @@ import DuosLogo from 'src/images/duos-network-logo.svg'
 import contactUsStandard from 'src/images/navbar_icon_contact_us.svg'
 import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg'
 import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
-import { Banner, dismissBanner, isBannerVisible, NotificationService } from 'src/libs/notificationService'
+import { Banner, dismissBanner, isBannerVisible, NotificationService, onBannerDismissed } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import { withStyles } from 'tss-react/mui'
 import { SupportRequestModal } from './modals/SupportRequestModal'
@@ -201,6 +201,14 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     void fetchNotificationData()
   }, [])
 
+  // The same banner can be dismissed from a page below, so the header follows suit.
+  useEffect(() => onBannerDismissed((bannerId) => {
+    setState(prev => ({
+      ...prev,
+      notificationData: prev.notificationData.filter(banner => banner.id !== bannerId),
+    }))
+  }), [])
+
   const toggleHover = (): void => {
     setState({
       ...state,
@@ -236,10 +244,6 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
 
   const dismissNotification = (bannerId: string): void => {
     dismissBanner(bannerId)
-    setState(prev => ({
-      ...prev,
-      notificationData: prev.notificationData.filter(banner => banner.id !== bannerId),
-    }))
   }
 
   const makeNotifications = (): React.ReactNode[] => {

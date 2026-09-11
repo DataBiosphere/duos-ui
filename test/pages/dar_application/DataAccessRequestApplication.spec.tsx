@@ -91,7 +91,8 @@ import { User } from 'src/libs/ajax/User'
 import { Collections } from 'src/libs/ajax/Collections'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Countries } from 'src/libs/ajax/Countries'
-import { dismissBanner, NotificationService, visibleBanner } from 'src/libs/notificationService'
+import { dismissBanner, NotificationService, onBannerDismissed, visibleBanner } from 'src/libs/notificationService'
+import { bannerDismissalBus } from '../../test-utils'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Notifications } from 'src/libs/utils'
 
@@ -137,10 +138,15 @@ const userSigningOfficials = [
   },
 ]
 
+const dismissalBus = bannerDismissalBus()
+
 describe('DataAccessRequestApplication', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     setupTestEnvironment()
+    dismissalBus.reset()
+    vi.mocked(onBannerDismissed).mockImplementation(dismissalBus.subscribe)
+    vi.mocked(dismissBanner).mockImplementation(dismissalBus.publish)
   })
 
   it('shows spinner when submitting', async () => {

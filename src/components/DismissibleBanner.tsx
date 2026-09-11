@@ -1,21 +1,25 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Notification } from 'src/components/Notification'
-import { Banner, dismissBanner } from 'src/libs/notificationService'
+import { Banner, dismissBanner, onBannerDismissed } from 'src/libs/notificationService'
 
 interface DismissibleBannerProps {
   banner?: Banner | null
-  /** Called after the dismissal is recorded, so the page can drop the banner from its state. */
+  /** Called when this banner is dismissed, here or anywhere else it is on screen. */
   onDismissed: () => void
 }
 
-export const DismissibleBanner = ({ banner, onDismissed }: DismissibleBannerProps) => (
-  <Notification
-    notificationData={banner}
-    onDismiss={banner
-      ? () => {
-          dismissBanner(banner.id)
-          onDismissed()
-        }
-      : undefined}
-  />
-)
+export const DismissibleBanner = ({ banner, onDismissed }: DismissibleBannerProps) => {
+  const bannerId = banner?.id
+  useEffect(() => onBannerDismissed((dismissedId) => {
+    if (dismissedId === bannerId) {
+      onDismissed()
+    }
+  }), [bannerId, onDismissed])
+
+  return (
+    <Notification
+      notificationData={banner}
+      onDismiss={banner ? () => dismissBanner(banner.id) : undefined}
+    />
+  )
+}

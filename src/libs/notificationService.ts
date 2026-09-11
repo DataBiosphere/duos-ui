@@ -26,12 +26,22 @@ export const isBannerDismissed = (id: string): boolean => {
 }
 
 /**
- * Record that the current user (or anonymous browser) has dismissed this banner
- * @param {string} id - the banner id to dismiss
- * @returns {void}
+ * The same banner can render in the header and inline on a page at once, so a dismissal has to
+ * reach every copy - localStorage alone only takes effect on the next mount.
  */
+const dismissalListeners = new Set<(id: string) => void>()
+
+export const onBannerDismissed = (listener: (id: string) => void): (() => void) => {
+  dismissalListeners.add(listener)
+  return () => {
+    dismissalListeners.delete(listener)
+  }
+}
+
+/** Record that the current user (or anonymous browser) has dismissed this banner. */
 export const dismissBanner = (id: string): void => {
   Storage.setCurrentUserSettings<boolean>(dismissedBannerKey(id), true)
+  dismissalListeners.forEach(listener => listener(id))
 }
 
 /** Shown only when the banner can be identified and this user has not dismissed it. */

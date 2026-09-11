@@ -64,6 +64,14 @@ describe('Notification', () => {
     expect(alertRoot(container)).toHaveClass('MuiAlert-colorInfo')
   })
 
+  // SEVERITY is a plain object, so an inherited key must not reach MUI as a severity.
+  it('falls back to info for a level that names an Object prototype member', () => {
+    const { container } = render(
+      <Notification notificationData={{ message: 'inherited', level: 'toString' as Banner['level'] }} />,
+    )
+    expect(alertRoot(container)).toHaveClass('MuiAlert-colorInfo')
+  })
+
   it('does not render a close button when onDismiss is omitted', () => {
     render(<Notification notificationData={makeBanner()} />)
     expect(screen.queryByRole('button', { name: 'Dismiss notification' })).not.toBeInTheDocument()

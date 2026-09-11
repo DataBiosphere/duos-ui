@@ -33,6 +33,7 @@ vi.mock('src/libs/notificationService', () => ({
   },
   isBannerVisible: vi.fn().mockReturnValue(true),
   dismissBanner: vi.fn(),
+  onBannerDismissed: vi.fn(() => () => {}),
 }))
 
 // Both vi.fn()s default to undefined: the probe reads as in-flight, so every
