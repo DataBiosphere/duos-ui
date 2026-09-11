@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { MemoryRouter, Routes, Route } from 'react-router'
+import userEvent from '@testing-library/user-event'
 import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication'
 import rawDarCollection from './darCollection.json'
 import { DarCollection } from 'src/types/model'
@@ -90,7 +91,8 @@ import { User } from 'src/libs/ajax/User'
 import { Collections } from 'src/libs/ajax/Collections'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Countries } from 'src/libs/ajax/Countries'
-import { NotificationService } from 'src/libs/notificationService'
+import { dismissBanner, NotificationService, onBannerDismissed, visibleBanner } from 'src/libs/notificationService'
+import { bannerDismissalBus } from '../../test-utils'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Notifications } from 'src/libs/utils'
 
@@ -136,10 +138,15 @@ const userSigningOfficials = [
   },
 ]
 
+const dismissalBus = bannerDismissalBus()
+
 describe('DataAccessRequestApplication', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     setupTestEnvironment()
+    dismissalBus.reset()
+    vi.mocked(onBannerDismissed).mockImplementation(dismissalBus.subscribe)
+    vi.mocked(dismissBanner).mockImplementation(dismissalBus.publish)
   })
 
   it('shows spinner when submitting', async () => {
@@ -362,6 +369,66 @@ describe('DataAccessRequestApplication', () => {
 
     const call = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: string }
     expect(call.text).toBe('Error saving Data Access Request. Please try again in a few moments.')
+  })
+
+  const renderWithOutageBanner = async () => {
+    vi.mocked(Countries.getCountries).mockResolvedValue(['United States of America (the)', 'Canada'])
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(user as ReturnType<typeof Storage.getCurrentUser>)
+    vi.mocked(User.getMe).mockResolvedValue(user as Awaited<ReturnType<typeof User.getMe>>)
+    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue(userSigningOfficials as Awaited<ReturnType<typeof User.getSOsForCurrentUser>>)
+    vi.mocked(Collections.getCollectionById).mockResolvedValue(darCollection)
+    vi.mocked(DataSet.getDatasetsByIds).mockResolvedValue(datasets as Awaited<ReturnType<typeof DataSet.getDatasetsByIds>>)
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue({
+      id: 'eRACommonsOutage',
+      active: true,
+      message: 'eRA Commons is down',
+      level: 'warning',
+    })
+    vi.mocked(DAR.getPartialDarRequest).mockResolvedValue(darCollection.dars[darId])
+    vi.mocked(DAA.getDaas).mockResolvedValue([] as Awaited<ReturnType<typeof DAA.getDaas>>)
+    vi.mocked(Metrics.captureEvent).mockResolvedValue(undefined)
+
+    render(
+      <MemoryRouter initialEntries={[`/dar_application/${darId}`]}>
+        <Routes>
+          <Route
+            path="/dar_application/:dataRequestId"
+            element={(
+              <DataAccessRequestApplication
+                draftDar={true}
+                isProgressReportApplication={false}
+                existingDarsReadOnlyMode={false}
+              />
+            )}
+          />
+        </Routes>
+      </MemoryRouter>,
+    )
+    await screen.findByText('Data Access Request Application')
+  }
+
+  const showsTheBanner = () => vi.mocked(visibleBanner).mockImplementation(banner => banner ?? null)
+
+  it('shows the eRACommonsOutage banner and hides it after dismissal', async () => {
+    showsTheBanner()
+
+    await renderWithOutageBanner()
+
+    expect(await screen.findByText('eRA Commons is down')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
+
+    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage')
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
+  })
+
+  it('does not show an already-dismissed eRACommonsOutage banner', async () => {
+    vi.mocked(visibleBanner).mockReturnValue(null)
+
+    await renderWithOutageBanner()
+
+    // Anchored on the filter having run, so this cannot pass merely by being early.
+    await waitFor(() => expect(visibleBanner).toHaveBeenCalled())
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
   })
 
   it('loads dataset/DAA snapshots in submitted read-only DAR review container', async () => {

@@ -1,5 +1,5 @@
 import React from 'react'
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
@@ -14,6 +14,9 @@ import { useUserIsLogged } from 'src/hooks/useSession'
 import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 import { DuosUser } from 'src/types/model'
 import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
+import { NotificationService, dismissBanner, isBannerVisible, onBannerDismissed } from 'src/libs/notificationService'
+import { bannerDismissalBus } from '../test-utils'
+import type { Banner } from 'src/libs/notificationService'
 
 vi.mock('src/hooks/useSession', () => ({
   useUserIsLogged: vi.fn(),
@@ -23,6 +26,9 @@ vi.mock('src/libs/notificationService', () => ({
   NotificationService: {
     getActiveBanners: vi.fn().mockResolvedValue([]),
   },
+  dismissBanner: vi.fn(),
+  isBannerVisible: vi.fn().mockReturnValue(true),
+  onBannerDismissed: vi.fn(() => () => {}),
 }))
 
 vi.mock('src/components/modals/SupportRequestModal', () => ({
@@ -99,6 +105,15 @@ const defaultUser: DuosUser = {
   roles: [],
   userId: 0,
 }
+
+const dismissalBus = bannerDismissalBus()
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  dismissalBus.reset()
+  vi.mocked(onBannerDismissed).mockImplementation(dismissalBus.subscribe)
+  vi.mocked(dismissBanner).mockImplementation(dismissalBus.publish)
+})
 
 afterEach(() => vi.restoreAllMocks())
 
@@ -468,6 +483,85 @@ describe('DuosHeader', () => {
       fireEvent.click(screen.getByRole('button', { name: 'header sign out' }))
 
       await waitFor(() => expect(reportUnconfirmedSignOut).toHaveBeenCalledOnce())
+    })
+  })
+
+  describe('Banner notifications', () => {
+    it('does not render a banner the user has already dismissed', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
+        { id: 'banner-1', active: true, message: 'Already dismissed', level: 'info' },
+      ])
+      vi.mocked(isBannerVisible).mockReturnValue(false)
+
+      await mountHeader('/home')
+
+      expect(screen.queryByText('Already dismissed')).not.toBeInTheDocument()
+    })
+
+    it('renders an active banner that has not been dismissed', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
+        { id: 'banner-2', active: true, message: 'Still active', level: 'info' },
+      ])
+      vi.mocked(isBannerVisible).mockReturnValue(true)
+
+      await mountHeader('/home')
+
+      expect(screen.getByText('Still active')).toBeInTheDocument()
+    })
+
+    it('dismisses a banner and removes it from view when its close button is clicked', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
+        { id: 'banner-3', active: true, message: 'Dismiss me', level: 'info' },
+      ])
+      vi.mocked(isBannerVisible).mockReturnValue(true)
+
+      await mountHeader('/home')
+      expect(screen.getByText('Dismiss me')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
+
+      expect(dismissBanner).toHaveBeenCalledWith('banner-3')
+      expect(screen.queryByText('Dismiss me')).not.toBeInTheDocument()
+    })
+
+    it('leaves the other active banners showing when one is dismissed', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
+        { id: 'banner-4', active: true, message: 'Dismiss me', level: 'info' },
+        { id: 'banner-5', active: true, message: 'Keep me', level: 'warning' },
+      ])
+      vi.mocked(isBannerVisible).mockReturnValue(true)
+
+      await mountHeader('/home')
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Dismiss notification' })[0])
+
+      expect(dismissBanner).toHaveBeenCalledExactlyOnceWith('banner-4')
+      expect(screen.queryByText('Dismiss me')).not.toBeInTheDocument()
+      expect(screen.getByText('Keep me')).toBeInTheDocument()
+    })
+
+    it('skips a feed entry that carries no id, and keeps the rest', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue([
+        { active: true, message: 'No id here', level: 'info' },
+        { id: 'banner-6', active: true, message: 'Well formed', level: 'info' },
+      ] as Banner[])
+      vi.mocked(isBannerVisible).mockImplementation((banner): banner is Banner => Boolean(banner?.id))
+
+      await mountHeader('/home')
+
+      expect(screen.queryByText('No id here')).not.toBeInTheDocument()
+      expect(screen.getByText('Well formed')).toBeInTheDocument()
+    })
+
+    // useUserIsLogged is undefined until the session probe lands; filtering then would read the
+
+    // GCS serves the banner feed, so a malformed payload must not take the header down with it.
+    it('renders no banners when the feed does not come back as a list', async () => {
+      vi.mocked(NotificationService.getActiveBanners).mockResolvedValue(null as unknown as Banner[])
+
+      await mountHeader('/home')
+
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     })
   })
 })
