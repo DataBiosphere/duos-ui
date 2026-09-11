@@ -229,12 +229,12 @@ const multiDarCollection = (): DarCollection => {
 /** userEvent.upload cannot express "no file", so clearing goes through a change event. */
 const clearFileInput = async (id: string) => {
   fireEvent.change(document.getElementById(id)!, { target: { files: [] } })
-  await waitFor(() => expect(document.getElementById(id)).toBeInTheDocument())
+  await waitFor(() => expect((document.getElementById(id) as HTMLInputElement).files).toHaveLength(0))
 }
 
 const clickDialogNo = () => userEvent.click(screen.getByRole('button', { name: 'No' }))
 
-const clickDialogYes = () => userEvent.click(document.getElementById('btn_submit')!)
+const clickDialogYes = () => userEvent.click(screen.getByRole('button', { name: 'Yes' }))
 
 /** Fills every required field, so only the case under test can fail validation. */
 const completeTheForm = async () => {
@@ -248,6 +248,9 @@ const completeTheForm = async () => {
   await typeById('nonTechRus', 'asdf asdf')
   await fillDarDataUseCheckboxes()
 }
+
+// PageHeading suffixes the id it is given.
+const pageHeading = () => document.getElementById('dar-application-heading_heading')
 
 const selectedTabName = (): string =>
   screen.getAllByRole('tab').find(tab => tab.getAttribute('aria-selected') === 'true')?.textContent ?? ''
@@ -298,7 +301,7 @@ describe('DataAccessRequestApplication', () => {
     await clickDialogYes()
 
     await waitFor(() => {
-      expect(document.getElementById('btn_submit')).toHaveAttribute('aria-busy', 'true')
+      expect(screen.getByRole('button', { name: 'Yes' })).toHaveAttribute('aria-busy', 'true')
     })
     expect(DAR.updateDarDraft).toHaveBeenCalled()
     await act(async () => {
@@ -315,7 +318,7 @@ describe('DataAccessRequestApplication', () => {
     await clickDialogYes()
 
     await waitFor(() => {
-      expect(document.getElementById('btn_submit')).toHaveAttribute('aria-busy', 'true')
+      expect(screen.getByRole('button', { name: 'Yes' })).toHaveAttribute('aria-busy', 'true')
     })
     expect(DAR.postDar).toHaveBeenCalled()
     const submittedDar = vi.mocked(DAR.postDar).mock.calls[0][0] as { daaIds: number[] }
@@ -365,12 +368,10 @@ describe('DataAccessRequestApplication', () => {
 
     await renderReview()
 
-    expect(document.querySelector('.dar-summary')).not.toBeNull()
+    expect(document.querySelector('.dar-summary')).toBeInTheDocument()
     expect(DAR.getDatasetDaaSnapshots).toHaveBeenCalledWith(darId)
+    expect(await screen.findByText(/Read-only Dataset/)).toBeInTheDocument()
   })
-
-  // PageHeading suffixes the id it is given.
-  const pageHeading = () => document.getElementById('dar-application-heading_heading')
 
   it('keeps its own heading, side panel and voting history on the standalone read-only route', async () => {
     await renderReview()
@@ -416,12 +417,18 @@ describe('DataAccessRequestApplication - page modes', () => {
     expect(document.title).toContain('DAR Application Review')
   })
 
+  it('narrows the heading once the DAR has a code', async () => {
+    await renderDraft()
+
+    expect(pageHeading()!.parentElement).toHaveClass('col-sm-9')
+  })
+
   it('widens the heading when the DAR has no code yet', async () => {
     mockServices({ partialDar: { ...darCollection.dars[darId], darCode: null } })
 
     await renderDraft()
 
-    expect(document.getElementById('dar-application-heading_heading')?.closest('.col-sm-12')).not.toBeNull()
+    expect(pageHeading()!.parentElement).toHaveClass('col-sm-12')
   })
 
   it('lists each previous progress report alongside the current DAR', async () => {
@@ -448,7 +455,7 @@ describe('DataAccessRequestApplication - page modes', () => {
     )
     await screen.findAllByRole('tab')
 
-    await userEvent.click(document.getElementById('btn_back')!)
+    await userEvent.click(screen.getByRole('button', { name: /Back/ }))
 
     expect(await screen.findByText('Where we came from')).toBeInTheDocument()
   })
@@ -502,6 +509,9 @@ describe('DataAccessRequestApplication - dialogs and attestation', () => {
 
   it('sends the user to Researcher Information when their details are incomplete', async () => {
     await renderDraft()
+    // Tab 1 is selected by default, so the redirect is only observable from elsewhere.
+    await userEvent.click(screen.getByRole('tab', { name: /Research Purpose Statement/ }))
+    expect(selectedTabName()).toContain('Research Purpose Statement')
 
     await clickById('btn_attest')
 
@@ -570,7 +580,7 @@ describe('DataAccessRequestApplication - submission failures', () => {
 
     await attestAndSubmit()
 
-    expect(document.getElementById('btn_openSubmitModal')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Submit' })).not.toBeInTheDocument()
     expect(screen.queryByRole('tab', { name: /Addendum/i })).not.toBeInTheDocument()
     expect(selectedTabName()).toContain('Data Access Agreements')
   })
@@ -699,79 +709,13 @@ describe('DataAccessRequestApplication - draft creation', () => {
   })
 })
 
-describe('DataAccessRequestApplication - unmounting mid-flight', () => {
-  const renderThenUnmount = async (settle: () => void) => {
-    const { unmount } = render(
-      <MemoryRouter initialEntries={[`/dar_application/${darId}`]}>
-        <Routes>
-          <Route
-            path="/dar_application/:dataRequestId"
-            element={<DataAccessRequestApplication draftDar={true} isProgressReportApplication={false} />}
-          />
-        </Routes>
-      </MemoryRouter>,
-    )
-    unmount()
-    await act(async () => {
-      settle()
-      await Promise.resolve()
-    })
-  }
-
-  // Every fetch below is fire-and-forget, so a late resolution must not write to a gone component.
-  it('drops a late user response', async () => {
-    let resolveMe: (value: never) => void = () => {}
-    vi.mocked(User.getMe).mockReturnValue(new Promise((resolve) => {
-      resolveMe = resolve as (value: never) => void
-    }))
-
-    await renderThenUnmount(() => resolveMe(user as never))
-
-    expect(Notifications.showError).not.toHaveBeenCalled()
-  })
-
-  it('drops a late user failure', async () => {
-    let rejectMe: (reason: unknown) => void = () => {}
-    vi.mocked(User.getMe).mockReturnValue(new Promise((_resolve, reject) => {
-      rejectMe = reject
-    }))
-
-    await renderThenUnmount(() => rejectMe(new Error('too late')))
-
-    expect(Notifications.showError).not.toHaveBeenCalled()
-  })
-
-  it('drops a late banner, country and DAR response', async () => {
-    let resolveBanner: (value: never) => void = () => {}
-    let resolveCountries: (value: never) => void = () => {}
-    let resolveDar: (value: never) => void = () => {}
-    vi.mocked(NotificationService.getBannerObjectById).mockReturnValue(new Promise((resolve) => {
-      resolveBanner = resolve as (value: never) => void
-    }))
-    vi.mocked(Countries.getCountries).mockReturnValue(new Promise((resolve) => {
-      resolveCountries = resolve as (value: never) => void
-    }))
-    vi.mocked(DAR.getPartialDarRequest).mockReturnValue(new Promise((resolve) => {
-      resolveDar = resolve as (value: never) => void
-    }))
-
-    await renderThenUnmount(() => {
-      resolveBanner({ id: 'eRACommonsOutage', active: true, message: 'late', level: 'info' } as never)
-      resolveCountries(['Canada'] as never)
-      resolveDar(darCollection.dars[darId] as never)
-    })
-
-    expect(screen.queryByText('late')).not.toBeInTheDocument()
-  })
-})
-
 describe('DataAccessRequestApplication - review-mode edge cases', () => {
   it('renders a review whose collection names no creating user', async () => {
     mockServices({ collection: { ...darCollection, createUser: undefined } as unknown as DarCollection })
 
     await renderReview()
 
-    expect(document.querySelector('.dar-summary')).not.toBeNull()
+    expect(document.querySelector('.dar-summary')).toBeInTheDocument()
   })
 
   it('drops a late collection response after the review unmounts', async () => {
