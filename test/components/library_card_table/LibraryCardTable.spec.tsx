@@ -77,13 +77,11 @@ describe('Library Card Table Tests', () => {
     })
   })
 
-  it('renders the create date as the UTC calendar date rather than the viewer local one', async () => {
+  it('renders the create date as the UTC calendar date rather than the viewer local one', () => {
     const props: LibraryCardTableProps = {
       libraryCards: [{ ...libraryCardList[0], createDate: new Date('2022-01-01T00:30:00.000Z') }],
     }
-    await act(async () => {
-      render(<LibraryCardTable {...props} />)
-    })
+    render(<LibraryCardTable {...props} />)
     expect(screen.getByText('2022-01-01')).toBeInTheDocument()
   })
 
