@@ -27,6 +27,14 @@ interface LibraryPageShellProps {
   footer?: React.ReactNode
   /** Only the Data Library surfaces the Signing Official authorization model */
   showSoApprovalReminder?: boolean
+  /**
+   * Overrides how the active tab's data renders. Defaults to `LibraryDataGrid`
+   * (an MUI DataGrid table) when omitted. Lets a specific page (e.g. the public
+   * Data Library) swap in an alternate view — a card grid for Studies, say —
+   * for a given asset type without changing that view for other consumers of
+   * this shell, such as the researcher console's submissions table.
+   */
+  renderGrid?: (props: React.ComponentProps<typeof LibraryDataGrid>) => React.ReactNode
 }
 
 export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
@@ -36,6 +44,7 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
   gridExtras = {},
   footer,
   showSoApprovalReminder = false,
+  renderGrid,
 }) => {
   const {
     urlState,
@@ -138,25 +147,28 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
             {radarEnabledDatasetIds !== undefined && <InstantApprovalBadge />}
           </Box>
           <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-            <LibraryDataGrid
-              assetType={urlState.tab}
-              data={data?.items || []}
-              loading={isFetching}
-              total={data?.total || 0}
-              paginationModel={{ page: urlState.page, pageSize: urlState.pageSize }}
-              onPaginationChange={(model) => {
-                updateUrlState({ page: model.page, pageSize: model.pageSize })
-              }}
-              sortModel={sortModel}
-              onSortChange={handleSortChange}
-              selectedDatasetIds={selectedDatasetIds}
-              onSelectionChange={onSelectionChange}
-              exportableDatasets={exportableDatasets}
-              radarEnabledDatasetIds={radarEnabledDatasetIds}
-              soApprovalModelByDatasetId={soApprovalModelByDatasetId}
-              extraColumns={extraColumns}
-              checkboxSelection={checkboxSelection}
-            />
+            {(() => {
+              const gridProps: React.ComponentProps<typeof LibraryDataGrid> = {
+                assetType: urlState.tab,
+                data: data?.items || [],
+                loading: isFetching,
+                total: data?.total || 0,
+                paginationModel: { page: urlState.page, pageSize: urlState.pageSize },
+                onPaginationChange: (model) => {
+                  updateUrlState({ page: model.page, pageSize: model.pageSize })
+                },
+                sortModel,
+                onSortChange: handleSortChange,
+                selectedDatasetIds,
+                onSelectionChange,
+                exportableDatasets,
+                radarEnabledDatasetIds,
+                soApprovalModelByDatasetId,
+                extraColumns,
+                checkboxSelection,
+              }
+              return renderGrid ? renderGrid(gridProps) : <LibraryDataGrid {...gridProps} />
+            })()}
           </Box>
         </Box>
       </Box>

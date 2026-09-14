@@ -71,8 +71,8 @@ const makeDatasetTerm = (overrides: Partial<DatasetTerm> = {}): DatasetTerm => (
 } as DatasetTerm)
 
 const studies: StudyAggregation[] = [
-  { studyId: 1, studyName: 'Study 1', piName: 'PI 1', species: 'Human', phenotype: 'Condition A', dataCustodianEmail: ['custodian1@example.com'], datasetCount: 2, totalParticipants: 100, datasetIds: [101, 102] },
-  { studyId: 2, studyName: 'Study 2', piName: 'PI 2', species: 'Mouse', phenotype: 'Condition B', dataCustodianEmail: ['custodian2@example.com'], datasetCount: 1, totalParticipants: 50, datasetIds: [201] },
+  { studyId: 1, studyName: 'Study 1', piName: 'PI 1', species: 'Human', phenotype: 'Condition A', dataCustodianEmail: ['custodian1@example.com'], dataTypes: [], dataUseCodes: [], accessTypes: [], datasetCount: 2, totalParticipants: 100, datasetIds: [101, 102], modelCount: 0, workspaceCount: 0 },
+  { studyId: 2, studyName: 'Study 2', piName: 'PI 2', species: 'Mouse', phenotype: 'Condition B', dataCustodianEmail: ['custodian2@example.com'], dataTypes: [], dataUseCodes: [], accessTypes: [], datasetCount: 1, totalParticipants: 50, datasetIds: [201], modelCount: 0, workspaceCount: 0 },
 ]
 
 const datasets = [
@@ -242,6 +242,39 @@ describe('LibraryDataGrid', () => {
     const checkbox = container.querySelector('.MuiDataGrid-row[data-id="1"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
     await user.click(checkbox)
     expect(onSelectionChange).toHaveBeenCalledWith([101, 102])
+  })
+
+  // Rows off the current page are not in `data`, so a rebuild would silently drop them.
+  it('preserves selections made on another page', async () => {
+    const user = userEvent.setup()
+    const onSelectionChange = vi.fn()
+    const { container } = mountGrid(
+      <LibraryDataGrid
+        assetType={AssetType.DATASETS}
+        data={datasets}
+        total={3}
+        {...{ ...baseProps, selectedDatasetIds: [999], onSelectionChange }}
+      />,
+    )
+    const checkbox = container.querySelector('.MuiDataGrid-row[data-id="101"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    await user.click(checkbox)
+    expect(onSelectionChange).toHaveBeenCalledWith([999, 101])
+  })
+
+  it('drops only this page\'s rows when they are deselected', async () => {
+    const user = userEvent.setup()
+    const onSelectionChange = vi.fn()
+    const { container } = mountGrid(
+      <LibraryDataGrid
+        assetType={AssetType.DATASETS}
+        data={datasets}
+        total={3}
+        {...{ ...baseProps, selectedDatasetIds: [999, 101], onSelectionChange }}
+      />,
+    )
+    const checkbox = container.querySelector('.MuiDataGrid-row[data-id="101"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    await user.click(checkbox)
+    expect(onSelectionChange).toHaveBeenCalledWith([999])
   })
 
   it('calls onPaginationChange when page changes', async () => {

@@ -191,6 +191,41 @@ export const EMPTY_FILTERS: FilterState = {
  * also count as inactive everywhere; encoding that once here keeps the badge, the
  * chips, and the query in lockstep.
  */
+/**
+ * The two bounds of each date-range filter, lower bound first. A range whose
+ * bounds cross can match nothing (both bounds are ANDed, and for the start/end
+ * pairs an asset would have to end before it starts), so it builds no clause
+ * and must read as inactive everywhere — see isFilterActive.
+ */
+const DATE_RANGE_BOUNDS = {
+  clinicalTrialDates: ['startDate', 'endDate'],
+  fundingDate: ['startDate', 'endDate'],
+  biospecimenCollectionDate: ['after', 'before'],
+  ipFiledDate: ['after', 'before'],
+  presentationDate: ['after', 'before'],
+  publicationPublishedDate: ['after', 'before'],
+} as const
+
+/**
+ * True when both bounds of a date-range filter are set and crossed. The single
+ * encoding of the rule: the filter panel's validation message, isFilterActive
+ * (and through it the badge, the chips and the query clause), and the
+ * client-side row filters in the funding/IP/biospecimen transforms all use it.
+ */
+export const isInvertedDateRange = (key: FilterKey, filters: FilterState): boolean => {
+  const bounds = DATE_RANGE_BOUNDS[key as keyof typeof DATE_RANGE_BOUNDS]
+  if (!bounds) {
+    return false
+  }
+
+  const [lowerKey, upperKey] = bounds
+  const value = filters[key] as Record<string, string | undefined>
+  const lower = value[lowerKey]
+  const upper = value[upperKey]
+
+  return !!lower && !!upper && lower > upper
+}
+
 export const isFilterActive = (key: FilterKey, filters: FilterState): boolean => {
   switch (key) {
     // Multi-select (array) filters are active once any value is selected.
@@ -234,16 +269,13 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
     case 'biospecimenPostMortemInterval':
       return filters[key].min !== undefined || filters[key].max !== undefined
 
-    case 'clinicalTrialDates': {
-      const { startDate, endDate } = filters.clinicalTrialDates
-      // An inverted range builds no clause (see buildClause), so it is inactive.
-      if (startDate && endDate && startDate > endDate) {
+    // An inverted range builds no clause (see buildClause), so it is inactive.
+    case 'clinicalTrialDates':
+    case 'fundingDate': {
+      if (isInvertedDateRange(key, filters)) {
         return false
       }
-      return !!startDate || !!endDate
-    }
-    case 'fundingDate': {
-      const { startDate, endDate } = filters.fundingDate
+      const { startDate, endDate } = filters[key]
       return !!startDate || !!endDate
     }
 
@@ -251,6 +283,9 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
     case 'ipFiledDate':
     case 'presentationDate':
     case 'publicationPublishedDate': {
+      if (isInvertedDateRange(key, filters)) {
+        return false
+      }
       const { after, before } = filters[key]
       return !!after || !!before
     }
@@ -619,10 +654,10 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   biospecimenCollectionDate: {
     label: 'Collection Date',
     buildClause: (filters) => {
-      const { after, before } = filters.biospecimenCollectionDate
-      if (!after && !before) {
+      if (!isFilterActive('biospecimenCollectionDate', filters)) {
         return undefined
       }
+      const { after, before } = filters.biospecimenCollectionDate
 
       return {
         range: {
@@ -644,10 +679,10 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   ipFiledDate: {
     label: 'Filed Date',
     buildClause: (filters) => {
-      const { after, before } = filters.ipFiledDate
-      if (!after && !before) {
+      if (!isFilterActive('ipFiledDate', filters)) {
         return undefined
       }
+      const { after, before } = filters.ipFiledDate
 
       return {
         range: {
@@ -697,10 +732,10 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   presentationDate: {
     label: 'Presentation Date',
     buildClause: (filters) => {
-      const { after, before } = filters.presentationDate
-      if (!after && !before) {
+      if (!isFilterActive('presentationDate', filters)) {
         return undefined
       }
+      const { after, before } = filters.presentationDate
 
       return {
         range: {
@@ -729,10 +764,10 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   publicationPublishedDate: {
     label: 'Published Date',
     buildClause: (filters) => {
-      const { after, before } = filters.publicationPublishedDate
-      if (!after && !before) {
+      if (!isFilterActive('publicationPublishedDate', filters)) {
         return undefined
       }
+      const { after, before } = filters.publicationPublishedDate
 
       return {
         range: {
@@ -754,10 +789,10 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   fundingDate: {
     label: 'Funding Dates',
     buildClause: (filters) => {
-      const { startDate, endDate } = filters.fundingDate
-      if (!startDate && !endDate) {
+      if (!isFilterActive('fundingDate', filters)) {
         return undefined
       }
+      const { startDate, endDate } = filters.fundingDate
 
       const clauses: QueryClause[] = []
       if (startDate) {

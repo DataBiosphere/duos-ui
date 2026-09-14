@@ -6,6 +6,7 @@ import type { PostgresDb } from '@fastify/postgres'
 import * as oidc from 'openid-client'
 import * as jose from 'jose'
 import { createPgSessionStore } from '../src/session/pgStore.js'
+import { sessionPluginOptions } from '../src/session/sessionOptions.js'
 import { handleLogin } from '../src/auth/login.js'
 import { handleCallback } from '../src/auth/callback.js'
 import '../src/types/session.js'
@@ -141,13 +142,11 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
 async function buildApp(pg: PostgresDb): Promise<FastifyInstance> {
   const app = Fastify({ logger: false })
   await app.register(fastifyCookie)
-  await app.register(fastifySession, {
+  await app.register(fastifySession, sessionPluginOptions({
     secret: SECRET,
     store: createPgSessionStore(pg),
-    cookie: { httpOnly: true, secure: false, sameSite: 'lax', maxAge: 8 * 60 * 60 * 1000, path: '/' },
-    saveUninitialized: false,
-    rolling: false,
-  })
+    secure: false,
+  }))
   app.post('/auth/login', handleLogin)
   app.get('/auth/callback', handleCallback)
   return app
@@ -308,6 +307,41 @@ describe('B2C OAuth callback (real openid-client validation against a fake B2C)'
     })
 
     expect(res.statusCode).toBe(500)
+  })
+
+  it('redirects to /?signInError=provider when B2C answers with an error instead of a code', async () => {
+    // Edge case: B2C cannot complete the federated sign-in (observed when a
+    // tenant's federation client secret to the upstream Microsoft provider
+    // has expired — every Microsoft account then fails). B2C redirects back
+    // with error=server_error — the real authorizationCodeGrant throws
+    // AuthorizationResponseError, which must land the browser in the SPA
+    const { cookie, state } = await login()
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/auth/callback?error=server_error&error_description=AADB2C90289&state=${state}`,
+      headers: { cookie },
+    })
+
+    expect(res.statusCode).toBe(302)
+    expect(res.headers.location).toBe('/?signInError=provider')
+    const sess = [...rows.values()][0].sess as Record<string, unknown>
+    expect(sess.accessToken).toBeUndefined()
+  })
+
+  it('redirects home silently when the user cancels on the B2C page (access_denied)', async () => {
+    const { cookie, state } = await login()
+
+    const res = await app.inject({
+      method: 'GET',
+      url: `/auth/callback?error=access_denied&error_description=AADB2C90091&state=${state}`,
+      headers: { cookie },
+    })
+
+    expect(res.statusCode).toBe(302)
+    expect(res.headers.location).toBe('/')
+    const sess = [...rows.values()][0].sess as Record<string, unknown>
+    expect(sess.accessToken).toBeUndefined()
   })
 
   it('returns 400 token_missing_email_claim when a valid id_token has no email', async () => {

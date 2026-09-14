@@ -10,6 +10,7 @@ import BackgroundSignIn from 'src/pages/BackgroundSignIn'
 import NIHPilotInfo from 'src/pages/NIHPilotInfo'
 import PrivacyPolicy from 'src/pages/PrivacyPolicy'
 import CookiePolicy from 'src/pages/CookiePolicy'
+import PostLogout from 'src/pages/PostLogout'
 import TermsOfService from 'src/pages/TermsOfService'
 import TermsOfServiceAcceptance from 'src/pages/TermsOfServiceAcceptance'
 import { AnVILDMSPolicyInfo, NIHDMSPolicyInfo } from 'src/pages/DMSPolicyInfo'
@@ -30,6 +31,7 @@ import { InstitutionDetails } from 'src/components/institution_table/Institution
 import { FORM_MODES } from 'src/components/institution_table/InstitutionFormMode'
 import AdminManageInstitutions from 'src/pages/AdminManageInstitutions'
 import AdminManageLC from 'src/pages/AdminManageLC'
+import AdminDaaAssociations from 'src/pages/AdminDaaAssociations'
 import AdminManageDarCollections from 'src/pages/AdminManageDarCollections'
 import ManageDac from 'src/pages/manage_dac/ManageDac'
 import ManageRadar from 'src/pages/manage_dac/ManageRadar'
@@ -46,6 +48,7 @@ import SigningOfficialLibraryCards from 'src/pages/signing_official_console/Sign
 import SigningOfficialDarRequests from 'src/pages/signing_official_console/SigningOfficialDarRequests'
 import ManageResearcherDAAs from 'src/pages/signing_official_console/ManageResearcherDAAs'
 import { DataSubmissionFormV2 } from 'src/pages/data_submission/v2/DataSubmissionFormV2'
+import { StudyTemplateUpload } from 'src/pages/data_submission/StudyTemplateUpload'
 import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
 import { DataLibrary } from 'src/pages/DataLibrary'
 import { StudyNameSearch } from 'src/routing/StudyNameSearch'
@@ -65,6 +68,7 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/nih_pilot_info" element={<NIHPilotInfo />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/cookie_policy" element={<CookiePolicy />} />
+      <Route path="/post-logout" element={<PostLogout />} />
       <Route path="/tos" element={<TermsOfService />} />
       <Route path="/tos_acceptance" element={<TermsOfServiceAcceptance />} />
       <Route path="/nih_dms_policy" element={<NIHDMSPolicyInfo />} />
@@ -91,9 +95,11 @@ const AppRoutes = (props: AppRoutesProps) => {
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.dataSubmitter, USER_ROLES.chairperson, USER_ROLES.admin]} />}>
           <Route path="/dataset_submissions" element={<DatasetSubmissions />} />
+          <Route path="/data_submission_template" element={<StudyTemplateUpload />} />
           <Route path="/data_submission_form" element={<DataSubmissionFormV2 />}>
             <Route path=":studyId" element={<DataSubmissionFormV2 />} />
           </Route>
+          <Route path="/data_submission_form/draft/study-dataset/:draftUuid" element={<DataSubmissionFormV2 />} />
           <Route path="/study_update/:studyId" element={<DataSubmissionFormV2 onSaveRoute="/dataset_submissions" />} />
           <Route path="/dataset_update/:datasetId" element={<DatasetUpdateForm />} />
         </Route>
@@ -138,6 +144,7 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/admin_manage_institutions/institutions/:institutionId" element={<InstitutionDetails formMode={FORM_MODES.editExisting} />} />
           <Route path="/admin_manage_institutions" element={<AdminManageInstitutions />} />
           <Route path="/admin_manage_lc/" element={<AdminManageLC />} />
+          <Route path="/admin_daa_associations" element={<AdminDaaAssociations />} />
           <Route path="/admin_manage_dar_collections/" element={<AdminManageDarCollections />} />
           <Route path="/manage_add_dac_daa" element={<EditDac />} />
         </Route>

@@ -47,6 +47,14 @@ interface RefreshedTokens {
  * store write, so it is not removed until the rotated token is persisted — see
  * `refreshAccessToken`.
  */
+/**
+ * How early to renew the access token. Wide enough that a request which passes
+ * this check still has a usable token by the time it reaches the upstream, so
+ * ordinary expiry never reaches the browser as a 401. Refresh policy, so it
+ * lives here; the proxy layer re-exports it for its existing consumers.
+ */
+export const REFRESH_WINDOW_SECONDS = 60
+
 const inFlight = new Map<string, Promise<RefreshedTokens>>()
 
 /**

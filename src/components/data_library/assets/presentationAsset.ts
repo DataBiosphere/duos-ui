@@ -3,6 +3,7 @@ import { ElasticsearchQuery, ElasticsearchResponse, PresentationStudyAggregation
 import { FilterState, PaginationState, PresentationAsset, SortState } from 'src/types/library'
 import { makePresentationColumns } from 'src/components/data_library/columns/presentationColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
 // The Elasticsearch clauses for these filters only decide which *studies* enter
 // the shared aggregation; every presentation of a qualifying study comes back,
@@ -23,6 +24,12 @@ const matchesPresentationFilters = (presentation: PresentationAsset, filters?: F
 
   if (filters.presentationAccess.length > 0 && !filters.presentationAccess.includes(presentation.access || '')) {
     return false
+  }
+
+  // Inverted bounds build no ES clause, so they must not narrow rows here
+  // either — otherwise the grid empties while the panel flags the range.
+  if (!isFilterActive('presentationDate', filters)) {
+    return true
   }
 
   const date = presentation.date || ''

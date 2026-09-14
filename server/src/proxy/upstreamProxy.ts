@@ -11,7 +11,9 @@ import type {
 } from 'fastify'
 import fastifyReplyFrom from '@fastify/reply-from'
 import { requireEnv } from '../auth/oidcClient.js'
-import { RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
+import { REFRESH_WINDOW_SECONDS, RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
+import { fetchMetadataGuard } from '../security/fetchMetadata.js'
+import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
 /**
  * The BFF upstream proxy machinery.
@@ -84,12 +86,9 @@ export interface UpstreamProxyConfig {
   destroySessionOnUpstream401: boolean
 }
 
-/**
- * How early to renew the access token. Wide enough that a request which passes
- * this check still has a usable token by the time it reaches the upstream, so
- * ordinary expiry never reaches the browser as a 401.
- */
-export const REFRESH_WINDOW_SECONDS = 60
+// Re-exported for existing consumers; the constant is refresh policy and
+// lives with refreshAccessToken (auth/refresh.ts), not in the proxy layer.
+export { REFRESH_WINDOW_SECONDS } from '../auth/refresh.js'
 
 /**
  * Bounded rather than undici's unbounded default (`connections: null` lets a
@@ -289,7 +288,7 @@ export async function registerUpstreamProxy(
         // destroyed. Clear the cookie so the browser stops presenting a dead sid,
         // as /auth/me does on the same verdict.
         request.log.info({ err }, `[${logTag}] session cannot be refreshed — returning 401`)
-        return reply.clearCookie('sessionId').status(401).send({ error: 'session_expired' })
+        return reply.clearCookie(SESSION_COOKIE_NAME).status(401).send({ error: 'session_expired' })
       }
       // Transient — a network blip, B2C 5xx, a rotated-wrong client secret, a DB
       // error while saving. The session is intact, so this must NOT be a 401:
@@ -391,8 +390,14 @@ export async function registerUpstreamProxy(
     undici: { connections: options.undiciConnections ?? UPSTREAM_POOL_CONNECTIONS },
   })
 
+  // The Fetch Metadata guard runs first, on every method and every path under
+  // the prefix (allowlisted unauthenticated paths included — they are fetched
+  // same-origin by the client too), so a rejected request costs no CSRF work,
+  // no session read, no token refresh, and never reaches the upstream. Part of
+  // the shared machinery deliberately: like the CSRF hook, a new upstream
+  // cannot opt out of it. See security/fetchMetadata.ts for the rule.
   app.all(`${prefix}/*`, {
-    onRequest: csrfForUnsafeMethods,
+    onRequest: [fetchMetadataGuard, csrfForUnsafeMethods],
     preHandler: ensureUpstreamAuth,
   }, (request, reply) => {
     reply.from(pathFor(request.url), {
@@ -543,5 +548,5 @@ async function endRejectedSession(request: ProxyRequest, reply: ProxyReply, logT
   catch (err: unknown) {
     request.log.error({ err }, `[${logTag}] upstream rejected the session access token but the session could not be destroyed — returning 401 anyway`)
   }
-  reply.clearCookie('sessionId').status(401).send({ error: 'session_expired' })
+  reply.clearCookie(SESSION_COOKIE_NAME).status(401).send({ error: 'session_expired' })
 }

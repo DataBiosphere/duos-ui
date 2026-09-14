@@ -1,5 +1,13 @@
 ## DUOS B2C Authentication Overview
 
+> **This document describes the LEGACY client-side flow** (`oidc-client-ts`,
+> tokens in browser `localStorage`). DUOS is migrating to the Backend For
+> Frontend (BFF) pattern, where the server owns the OAuth flow and the browser
+> holds only a session cookie — see
+> [plans/BFF_Overview.md](plans/BFF_Overview.md). Each deployment runs the
+> flow that its `config.json` `bffEnabled` flag selects; the legacy flow
+> below is removed in BFF Phase 6.
+
 DUOS' implementation of B2C authentication follows a similar pattern that
 Terra has adopted. In short, we use OIDC libraries to direct a user to a
 DSP-specific B2C tenant. That tenant offers up two ways of providing an

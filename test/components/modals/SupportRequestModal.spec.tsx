@@ -6,10 +6,14 @@ import userEvent from '@testing-library/user-event'
 import { BrowserRouter } from 'react-router'
 import { Storage } from 'src/libs/storage'
 import { Support } from 'src/libs/ajax/Support'
+import { useUserIsLogged } from 'src/hooks/useSession'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 
 vi.mock('src/libs/storage')
 vi.mock('src/libs/ajax/Support')
+vi.mock('src/hooks/useSession', () => ({
+  useUserIsLogged: vi.fn(),
+}))
 vi.mock('src/libs/utils', async (importOriginal) => {
   const actual = await importOriginal<typeof import('src/libs/utils')>()
   return { ...actual, Notifications: { showError: vi.fn(), showSuccess: vi.fn() } }
@@ -17,6 +21,10 @@ vi.mock('src/libs/utils', async (importOriginal) => {
 vi.mock('src/libs/signInUtils', () => ({ handleSignIn: vi.fn() }))
 
 const mockUser = { displayName: 'Display Name', email: 'email@test.com' }
+// getCurrentUser never returns undefined — signed-out storage usually holds
+// the default (empty) user, but an expired session can leave a previous
+// user's data behind, so the prefill is gated on the session state.
+const signedOutUser = { displayName: '', email: '' }
 const handler = vi.fn()
 
 const mountModal = () =>
@@ -27,13 +35,13 @@ const mountModal = () =>
   )
 
 const setupLoggedIn = () => {
-  vi.mocked(Storage.userIsLogged).mockReturnValue(true)
+  vi.mocked(useUserIsLogged).mockReturnValue(true)
   vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser as never)
 }
 
 const setupLoggedOut = () => {
-  vi.mocked(Storage.userIsLogged).mockReturnValue(false)
-  vi.mocked(Storage.getCurrentUser).mockReturnValue(undefined as never)
+  vi.mocked(useUserIsLogged).mockReturnValue(false)
+  vi.mocked(Storage.getCurrentUser).mockReturnValue(signedOutUser as never)
 }
 
 const selectType = async (user: ReturnType<typeof userEvent.setup>, name: string) => {
@@ -66,10 +74,10 @@ describe('Support Request Modal Tests', () => {
 
   it.each([
     { label: 'logged in', isLogged: true, currentUser: mockUser as never, showEmailName: false },
-    { label: 'not logged in', isLogged: false, currentUser: undefined as never, showEmailName: true },
+    { label: 'not logged in', isLogged: false, currentUser: signedOutUser as never, showEmailName: true },
     { label: 'logged in with undefined user values', isLogged: true, currentUser: { displayName: undefined, email: undefined } as never, showEmailName: false },
   ])('Renders form correctly when $label', ({ isLogged, currentUser, showEmailName }) => {
-    vi.mocked(Storage.userIsLogged).mockReturnValue(isLogged)
+    vi.mocked(useUserIsLogged).mockReturnValue(isLogged)
     vi.mocked(Storage.getCurrentUser).mockReturnValue(currentUser)
     mountModal()
     expect(document.querySelector('[data-cy="closeButton"]')).toBeInTheDocument()
@@ -88,6 +96,81 @@ describe('Support Request Modal Tests', () => {
     expect(document.querySelector('[data-cy="supportFormAttachment"]')).toBeInTheDocument()
     expect(document.querySelector('[data-cy="supportFormSubmit"]')).toBeDisabled()
     expect(document.querySelector('[data-cy="supportFormCancel"]')).not.toBeDisabled()
+  })
+
+  it('does not leak a previous user\'s name/email into the signed-out form', () => {
+    // An expired session never runs clearStorage(), so CurrentUser can still
+    // hold the previous user's data while the session probe reports signed out.
+    vi.mocked(useUserIsLogged).mockReturnValue(false)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser as never)
+    mountModal()
+    const nameInput = document.querySelector('[data-cy="supportFormName"] input') as HTMLInputElement
+    const emailInput = document.querySelector('[data-cy="supportFormEmail"] input') as HTMLInputElement
+    expect(nameInput.value).toBe('')
+    expect(emailInput.value).toBe('')
+  })
+
+  it('picks up the profile the post-sign-in bootstrap persists AFTER authentication flips', async () => {
+    // BFF callback ordering: the probe reports authenticated before
+    // completeSignIn has persisted CurrentUser. The prefill must not freeze
+    // on the empty profile it sees at that moment.
+    vi.mocked(useUserIsLogged).mockReturnValue(false)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(signedOutUser as never)
+    const view = mountModal()
+
+    // Auth flips true while storage still holds the empty default.
+    vi.mocked(useUserIsLogged).mockReturnValue(true)
+    view.rerender(
+      <BrowserRouter>
+        <SupportRequestModal onCloseRequest={handler} url="url" showModal={true} />
+      </BrowserRouter>,
+    )
+
+    // The bootstrap persists the real profile afterward.
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser as never)
+    view.rerender(
+      <BrowserRouter>
+        <SupportRequestModal onCloseRequest={handler} url="url" showModal={true} />
+      </BrowserRouter>,
+    )
+
+    // Submit uses formData.name/email even though the fields are hidden when
+    // signed in — a frozen empty prefill would make the form unsubmittable.
+    const user = userEvent.setup()
+    await user.type(document.querySelector('[data-cy="supportFormSubject"] input')!, 'Subject')
+    await user.type(document.querySelector('[data-cy="supportFormDescription"] textarea')!, 'Description')
+    await selectType(user, 'Bug')
+    expect(document.querySelector('[data-cy="supportFormSubmit"]')).not.toBeDisabled()
+
+    await user.click(document.querySelector('[data-cy="supportFormSubmit"]')!)
+    await waitFor(() => expect(vi.mocked(Support.createTicket)).toHaveBeenCalledWith(
+      mockUser.displayName, expect.anything(), mockUser.email, 'Subject', 'Description', expect.anything(), expect.anything(),
+    ))
+  })
+
+  it('preserves typed content when the session probe resolves mid-typing', async () => {
+    const user = userEvent.setup()
+    vi.mocked(useUserIsLogged).mockReturnValue(false)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(signedOutUser as never)
+    const view = mountModal()
+
+    await user.type(document.querySelector('[data-cy="supportFormSubject"] input')!, 'Half-typed subject')
+    await user.type(document.querySelector('[data-cy="supportFormDescription"] textarea')!, 'Details so far')
+
+    // The probe (or a focus revalidation) flips the auth state mid-typing.
+    vi.mocked(useUserIsLogged).mockReturnValue(true)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser as never)
+    view.rerender(
+      <BrowserRouter>
+        <SupportRequestModal onCloseRequest={handler} url="url" showModal={true} />
+      </BrowserRouter>,
+    )
+
+    // Only the prefill re-derives; the user's work survives.
+    const subjectInput = document.querySelector('[data-cy="supportFormSubject"] input') as HTMLInputElement
+    const descriptionInput = document.querySelector('[data-cy="supportFormDescription"] textarea') as HTMLTextAreaElement
+    expect(subjectInput.value).toBe('Half-typed subject')
+    expect(descriptionInput.value).toBe('Details so far')
   })
 
   describe('When a user is logged in:', () => {
@@ -163,7 +246,7 @@ describe('Support Request Modal Tests', () => {
 
   describe('When a user is logged in but current user values are undefined:', () => {
     beforeEach(() => {
-      vi.mocked(Storage.userIsLogged).mockReturnValue(true)
+      vi.mocked(useUserIsLogged).mockReturnValue(true)
       vi.mocked(Storage.getCurrentUser).mockReturnValue({
         displayName: undefined,
         email: undefined,

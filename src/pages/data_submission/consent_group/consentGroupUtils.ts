@@ -3,10 +3,11 @@ import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
 import { FileStorageObject } from 'src/types/model'
 import { DatasetDataMetadata } from 'src/libs/data-metadata'
 
+/** The primary data use fields of a `ConsentGroup2`, which is what every caller narrows in. */
 export interface ConsentGroup {
   generalResearchUse?: boolean
   hmb?: boolean
-  diseaseSpecificUse?: boolean
+  diseaseSpecificUse?: string[]
   poa?: boolean
   otherPrimary?: string
 }
@@ -50,6 +51,11 @@ export interface FileType {
   functionalEquivalence: string
 }
 
+/**
+ * Which primary radio renders as selected. Precedence follows the classifier's category order so a
+ * legacy multi-primary record resolves the same way here as in Consent. One deliberate divergence:
+ * an empty `diseaseSpecificUse` counts as selected, keeping the radio lit while diseases are picked.
+ */
 export const selectedPrimaryGroup = (consentGroup: ConsentGroup) => {
   if (isNil(consentGroup)) return undefined
   if (!isNil(consentGroup.generalResearchUse) && consentGroup.generalResearchUse) {
@@ -58,11 +64,11 @@ export const selectedPrimaryGroup = (consentGroup: ConsentGroup) => {
   else if (!isNil(consentGroup.hmb) && consentGroup.hmb) {
     return 'hmb'
   }
-  else if (!isNil(consentGroup.diseaseSpecificUse)) {
-    return 'diseaseSpecificUse'
-  }
   else if (!isNil(consentGroup.poa) && consentGroup.poa) {
     return 'poa'
+  }
+  else if (!isNil(consentGroup.diseaseSpecificUse)) {
+    return 'diseaseSpecificUse'
   }
   else if (!isNil(consentGroup.otherPrimary) && isString(consentGroup.otherPrimary)) {
     return 'otherPrimary'

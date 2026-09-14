@@ -25,7 +25,11 @@ export type UserRoleName
     | 'ServiceAccount'
     | 'All'
 
-export enum AbstainDataUseCodes {
+/**
+ * Secondary data use codes that suppress a legacy (v1/v2) system match. Scoped to legacy results
+ * on purpose: from v3 Consent decides abstention itself — see `calculateAlgorithmResultForBucket`.
+ */
+export const AbstainDataUseCodes: ReadonlySet<string> = new Set([
   'OTHER',
   'POP-M',
   'POP-F',
@@ -35,7 +39,7 @@ export enum AbstainDataUseCodes {
   'PUB',
   'MOR',
   'POP-PD',
-}
+])
 
 export interface UserRole {
   roleId: number
@@ -718,6 +722,26 @@ export interface DarCollection {
   datasets: Dataset[]
 }
 
+export interface DataUseGroupDataset {
+  datasetId: number
+  name: string
+  datasetIdentifier: string
+}
+
+export interface DataUseGroupVote {
+  userId: number
+  vote?: boolean
+  displayName: string
+}
+
+/** A collection's datasets grouped by shared data use, as served on the collection summary. */
+export interface DataUseGroup {
+  key: number[]
+  dataUse?: DataUseSummary
+  datasets: DataUseGroupDataset[]
+  votes: DataUseGroupVote[]
+}
+
 export interface DarCollectionSummary {
   actions: string[]
   dacNames: string[]
@@ -739,6 +763,7 @@ export interface DarCollectionSummary {
   soApproverTimestamp?: number
   status: string
   submissionDate: number
+  dataUseGroups?: DataUseGroup[]
 }
 
 export interface DataAccessRequest {

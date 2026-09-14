@@ -37,14 +37,18 @@ describe('ResearcherDAASubtable', () => {
     revokeSpy = vi.fn()
   })
 
-  const mount = (rows = mockDaaRows) =>
+  const mount = (rows = mockDaaRows, readOnly = false) =>
     render(
       <ResearcherDAASubtable
         daaRows={rows}
         onAuthorize={authorizeSpy}
         onRevoke={revokeSpy}
+        readOnly={readOnly}
       />,
     )
+
+  const columnHeaders = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll('th')).map(th => th.textContent)
 
   it('renders all DAA rows', () => {
     const { container } = mount()
@@ -98,5 +102,37 @@ describe('ResearcherDAASubtable', () => {
     const { container } = mount([])
     expect(container.querySelector('[data-cy="daa-subtable"]')).toBeInTheDocument()
     expect(container.querySelector('[data-cy^="daa-row-"]')).not.toBeInTheDocument()
+  })
+
+  it('renders the Action column by default', () => {
+    const { container } = mount()
+    expect(columnHeaders(container)).toEqual(['DAA', 'DAC', 'Effective Date', 'Status', 'Action'])
+  })
+
+  describe('read-only mode', () => {
+    it('omits the Action column header', () => {
+      const { container } = mount(mockDaaRows, true)
+      expect(columnHeaders(container)).toEqual(['DAA', 'DAC', 'Effective Date', 'Status'])
+    })
+
+    it('renders no action buttons in any row', () => {
+      const { container } = mount(mockDaaRows, true)
+      expect(container.querySelector('[data-cy="auth-action-revoke"]')).not.toBeInTheDocument()
+      expect(container.querySelector('[data-cy="auth-action-authorize"]')).not.toBeInTheDocument()
+      expect(container.querySelector('[data-cy="auth-action-reauthorize"]')).not.toBeInTheDocument()
+    })
+
+    it('still renders every row with its status chip', () => {
+      const { container } = mount(mockDaaRows, true)
+      expect(container.querySelectorAll('[data-cy^="daa-row-"]')).toHaveLength(3)
+      expect(container.querySelector('[data-cy="daa-row-1"] [data-cy="auth-status-chip-authorized"]')).toBeInTheDocument()
+      expect(container.querySelector('[data-cy="daa-row-2"] [data-cy="auth-status-chip-not_requested"]')).toBeInTheDocument()
+    })
+
+    it('keeps each row cell count aligned with the header', () => {
+      const { container } = mount(mockDaaRows, true)
+      const row1 = container.querySelector('[data-cy="daa-row-1"]') as HTMLElement
+      expect(row1.querySelectorAll('td')).toHaveLength(columnHeaders(container).length)
+    })
   })
 })

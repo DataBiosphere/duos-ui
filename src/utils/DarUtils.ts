@@ -23,6 +23,12 @@ export const ElectionType = {
 export const ElectionStatus = {
   OPEN: 'Open',
   CLOSED: 'Closed',
+  CANCELED: 'Canceled',
+}
+export const VoteDecision = {
+  APPROVED: 'Approved',
+  DENIED: 'Denied',
+  PENDING: 'Pending',
 }
 
 export function getApprovedElectionDatasetIds(elections: Array<Election>): Array<number> {

@@ -3,6 +3,15 @@ import React from 'react'
 import { Box, Menu, MenuItem, PopoverOrigin, Typography } from '@mui/material'
 import { DuosUser } from 'src/types/model'
 import { Link } from 'react-router'
+import { useSessionInfo } from 'src/hooks/useSession'
+import type { SessionInfo } from 'src/libs/auth/session'
+
+// Keyed off the SessionInfo union so adding a provider without a label (or
+// typo-ing one) is a compile error.
+const IDP_LABELS = {
+  google: 'Google',
+  microsoft: 'Microsoft',
+} satisfies Record<NonNullable<SessionInfo['idp']>, string>
 
 interface ProfileLinksProps {
   currentUser: DuosUser
@@ -14,6 +23,10 @@ interface ProfileLinksProps {
 
 export const ProfileLinks: React.FC<ProfileLinksProps> = (props) => {
   const { currentUser, onSubtabChange, signOut, orientation, menuWidth } = props
+  // /auth/me reports which sub-provider (Google or Microsoft) the user chose
+  // on the B2C login page — display only, nothing sensitive is stored.
+  const idp = useSessionInfo()?.idp
+  const idpLabel = idp ? IDP_LABELS[idp] : undefined
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget)
@@ -73,6 +86,13 @@ export const ProfileLinks: React.FC<ProfileLinksProps> = (props) => {
         open={Boolean(anchorElUser)}
         onClose={handleCloseUserMenu}
       >
+        {idpLabel && (
+          <MenuItem key="idp" disabled sx={{ opacity: 1 }}>
+            <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+              Signed in with {idpLabel}
+            </Typography>
+          </MenuItem>
+        )}
         <MenuItem key="profile" onClick={handleCloseUserMenu}>
           <Typography sx={{ fontSize: 12 }}>
             <Link id="link_profile" to="/profile" onClick={e => onSubtabChange(e, 0)}>Your Profile</Link>

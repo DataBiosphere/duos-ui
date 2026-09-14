@@ -67,8 +67,8 @@ const dataUseModifierLabel = (code: string): string =>
   DATA_USE_MODIFIER_LABELS[code]
   ?? (code.startsWith('GS-') ? `Geographic Restriction (${code})` : code)
 
-export function useLibraryPageState(libraryConfig: LibraryVersionNew) {
-  const [urlState, updateUrlState] = useLibraryUrlState()
+export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab?: AssetType) {
+  const [urlState, updateUrlState] = useLibraryUrlState(defaultTab)
 
   const { data: metadata, isLoading: isMetadataLoading } = useLibraryMetadata(libraryConfig)
 

@@ -36,6 +36,22 @@ export const isCsrfRejection = async (res: Response): Promise<boolean> => {
   }
 }
 
+/**
+ * Thrown when /auth/csrf-token answers 401 — the endpoint is gated on an
+ * authenticated session (Epic 5, story 5-B), so its 401 means the BFF session
+ * is expired or signed out. Typed so the fetch adapter can run the normal
+ * session-expired handling (metric + redirectOnLogout) instead of surfacing a
+ * generic help-desk error for a request that never got sent. This signal comes
+ * from the BFF itself, so it is authoritative about the DUOS session no matter
+ * which upstream the blocked request was headed for.
+ */
+export class CsrfTokenSessionExpiredError extends Error {
+  constructor() {
+    super('The CSRF token request returned 401: the BFF session is expired or signed out')
+    this.name = 'CsrfTokenSessionExpiredError'
+  }
+}
+
 // A promise rather than the token itself, so concurrent unsafe requests share
 // one /auth/csrf-token round-trip instead of racing to fetch their own.
 let csrfTokenPromise: Promise<string> | null = null
@@ -43,6 +59,9 @@ let csrfTokenPromise: Promise<string> | null = null
 export const getCsrfToken = (): Promise<string> => {
   csrfTokenPromise ??= fetch('/auth/csrf-token', { credentials: 'include' })
     .then(async (res) => {
+      if (res.status === 401) {
+        throw new CsrfTokenSessionExpiredError()
+      }
       if (!res.ok) {
         throw new Error(`CSRF token request failed with status ${res.status}`)
       }

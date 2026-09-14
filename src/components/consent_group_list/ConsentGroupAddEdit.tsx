@@ -69,10 +69,14 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
   const [showGSText, setShowGSText] = useState(!isNil(consentGroup?.gs))
   const [gsText, setGSText] = useState(consentGroup?.gs || undefined)
 
-  const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(!isNil(consentGroup?.otherPrimary))
+  // Follow the radio `selectedPrimaryGroup` lights: reading each field alone checks one primary
+  // beside another's input.
+  const initialPrimaryGroup = selectedPrimaryGroup(consentGroup as ConsentGroup)
+
+  const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(initialPrimaryGroup === 'otherPrimary')
   const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup?.otherPrimary || undefined)
 
-  const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isEmpty(consentGroup?.diseaseSpecificUse))
+  const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(initialPrimaryGroup === 'diseaseSpecificUse')
   const [selectedDiseases, setSelectedDiseases] = useState<{ displayText: string, id: string }[]>([])
 
   const diseaseSpecificUse = consentGroup?.diseaseSpecificUse
@@ -146,7 +150,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
     setValidation(calcErrors(next))
   }
 
-  const onPrimaryChange = ({ key, value }: { key: string, value: boolean | string | string[] | { displayText: string, id: string }[] }) => {
+  const onPrimaryChange = ({ key, value }: { key: string, value: boolean | string | string[] }) => {
     const next = structuredClone(current)
     next.generalResearchUse = false
     next.hmb = false
@@ -158,14 +162,12 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
 
     setShowDiseaseSpecificUseSearchbar(key === 'diseaseSpecificUse')
     setShowOtherPrimaryText(key === 'otherPrimary')
-    if (!current.otherPrimary) {
+    if (!next.otherPrimary) {
       setOtherPrimaryText(undefined)
     }
-    if (!current.diseaseSpecificUse) {
+    if (isNil(next.diseaseSpecificUse)) {
       setSelectedDiseases([])
     }
-    setShowDiseaseSpecificUseSearchbar(key === 'diseaseSpecificUse')
-    setShowOtherPrimaryText(key === 'otherPrimary')
 
     setValidation(calcErrors(next))
   }
@@ -354,7 +356,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
                   onChange={({ value }: { value: string }) => {
                     onPrimaryChange({
                       key: value,
-                      value: selectedDiseases,
+                      value: selectedDiseases.map(disease => disease.id),
                     })
                   }}
                   validation={validation.primaryConsent}
@@ -415,7 +417,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
                   toggleText="Other"
                   defaultValue={selectedPrimaryGroup(current as ConsentGroup)}
                   onChange={({ value }: { value: string }) => {
-                    onPrimaryChange({ key: value, value: value })
+                    onPrimaryChange({ key: value, value: otherPrimaryText ?? '' })
                   }}
                   disabled={readOnly}
                   validation={validation.primaryConsent}

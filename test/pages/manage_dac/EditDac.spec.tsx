@@ -12,6 +12,7 @@ import { Institution } from 'src/libs/ajax/Institution'
 import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
 import type { DAAObject, DacObject, DuosUser } from 'src/types/model'
+import { renderWithRouter } from '../../test-utils'
 
 vi.mock('src/libs/ajax/DAC')
 vi.mock('src/libs/ajax/DAA')
@@ -264,6 +265,9 @@ const mountExistingEditDac = (dacId: number) =>
       </Routes>
     </MemoryRouter>,
   )
+
+const mountProfileEditDac = (dacId: number) =>
+  renderWithRouter(<EditDac dacId={dacId} hideHeader profileMode />, { route: `/dac_profile/${dacId}` })
 
 const fillForm = (
   container: HTMLElement,
@@ -914,5 +918,34 @@ describe('EditDAC Tests - No DAAs Configured', () => {
     })
 
     expect(container.querySelector('[data-cy="daa_upload_button"]')).toBeEnabled()
+  })
+})
+
+describe('EditDAC Tests - Profile Mode Sections', () => {
+  it.each([
+    'DAC Membership',
+    'DAC Info',
+    'Select a Data Access Agreement',
+  ])('renders the %s section as its own card', async (title) => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.get).mockResolvedValue(existingDac as never)
+    vi.mocked(DAA.getDaas).mockResolvedValue([])
+    mountProfileEditDac(existingDac.dacId as number)
+
+    const section = await screen.findByRole('region', { name: title })
+    expect(section).toContainElement(screen.getByRole('heading', { name: title }))
+  })
+
+  it('renders no section cards outside profile mode', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.get).mockResolvedValue(existingDac as never)
+    vi.mocked(DAA.getDaas).mockResolvedValue([])
+    const { container } = mountExistingEditDac(existingDac.dacId as number)
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-cy="dac_name"]')).toBeInTheDocument()
+    })
+
+    expect(screen.queryAllByRole('region')).toHaveLength(0)
   })
 })

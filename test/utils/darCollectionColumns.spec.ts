@@ -42,6 +42,22 @@ describe('darCollectionColumns', () => {
         expect(columns).toContain(DarCollectionTableColumnOptions.DAR_CODE)
       })
 
+      it('includes VOTES right after DATA_USE for chair and member consoles', () => {
+        for (const consoleType of [consoleTypes.CHAIR, consoleTypes.MEMBER]) {
+          // Above every console's DATA_USE breakpoint, so DATA_USE itself isn't hidden here.
+          const columns = getDarCollectionColumns(consoleType, 2000)
+          const dataUseIndex = columns.indexOf(DarCollectionTableColumnOptions.DATA_USE)
+          expect(columns.indexOf(DarCollectionTableColumnOptions.VOTES)).toBe(dataUseIndex + 1)
+        }
+      })
+
+      it('excludes VOTES for admin, researcher, and signing official consoles', () => {
+        for (const consoleType of [consoleTypes.ADMIN, consoleTypes.RESEARCHER, consoleTypes.SIGNING_OFFICIAL]) {
+          const columns = getDarCollectionColumns(consoleType, 2000)
+          expect(columns).not.toContain(DarCollectionTableColumnOptions.VOTES)
+        }
+      })
+
       it('defaults to admin breakpoints for unknown console type', () => {
         const columns = getDarCollectionColumns('unknownConsoleType', 1600)
 

@@ -140,6 +140,24 @@ describe('tdrProxy', () => {
     })
   })
 
+  // One representative case: the guard is shared machinery (fetchMetadata.test.ts
+  // owns the matrix); this pins that THIS prefix is covered by it.
+  describe('Fetch Metadata enforcement (story 5-B)', () => {
+    it('rejects a same-site cross-origin request without calling TDR', async () => {
+      app = await buildTdrApp(freshSession())
+
+      const res = await app.inject({
+        method: 'GET',
+        url: `${TDR_PROXY_PREFIX}${SNAPSHOTS_PATH}`,
+        headers: { 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors' },
+      })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toEqual({ error: 'cross_site_request_blocked' })
+      expect(upstream.received).toHaveLength(0)
+    })
+  })
+
   describe('CSRF enforcement', () => {
     it('rejects a POST without a token before it reaches TDR', async () => {
       app = await buildTdrApp(freshSession())

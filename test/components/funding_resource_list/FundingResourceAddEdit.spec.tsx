@@ -50,9 +50,7 @@ describe('FundingResourceAddEdit component', () => {
   it('edits existing funding resource and saves changes', async () => {
     const user = userEvent.setup({ delay: null })
     const resources: FundingResource[] = [sampleFunding]
-    const onFundingResourcesChange = vi.fn((updated: FundingResource[]) => {
-      expect(updated[0].funderName).toBe('Funder A Edited')
-    })
+    const onFundingResourcesChange = vi.fn()
     const { container } = render(
       <FundingResourceAddEdit
         id={0}
@@ -65,5 +63,9 @@ describe('FundingResourceAddEdit component', () => {
     await user.clear(container.querySelector('#funderName')!)
     await user.type(container.querySelector('#funderName')!, 'Funder A Edited')
     await user.click(container.querySelector('.collaborator-form-add-save-button')!)
+
+    expect(onFundingResourcesChange).toHaveBeenCalledTimes(1)
+    const [updated] = onFundingResourcesChange.mock.calls[0] as [FundingResource[]]
+    expect(updated[0].funderName).toBe('Funder A Edited')
   }, 15000)
 })

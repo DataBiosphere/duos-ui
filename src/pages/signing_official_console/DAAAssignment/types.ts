@@ -1,6 +1,14 @@
 import { DAAObject, DuosUser } from 'src/types/model'
+import type { User } from 'src/libs/ajax/User'
 
 export type AuthStatus = 'authorized' | 'not_requested' | 'revoked'
+
+/**
+ * Which user list the DAA association views work against: `SigningOfficial`
+ * scopes to the signed-in SO's institution, `Admin` spans every institution.
+ * Derived from `User.list` so the two cannot drift apart.
+ */
+export type UserListScope = Parameters<typeof User.list>[0]
 
 // ── Researcher View types ──────────────────────────────────────────────────────
 

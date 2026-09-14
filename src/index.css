@@ -1,5 +1,6 @@
 @import './styles/buttons.css';
 @import './styles/display.css';
+@import './styles/profile-card.css';
 @import './styles/typography.css';
 
 html, body, .body, #root {

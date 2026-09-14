@@ -54,8 +54,8 @@ The work is split into seven phases, delivered in order.
 | 1 | Server Foundation & Session Infrastructure | Add session middleware to the Fastify server with a PostgreSQL-backed session store, automated expired-session cleanup, and a metadata-only session audit trail. No user-visible changes. | [DT-3606](https://broadworkbench.atlassian.net/browse/DT-3606) | ✅ |
 | 2 | Server-Side OAuth Flow | Implement the BFF auth routes (`/auth/login`, `/auth/callback`, `/auth/logout`, `/auth/me`) using `openid-client` against the single Azure B2C client, with PKCE; the callback extracts the sub-provider from the B2C `id_token`. Runs alongside the legacy client-side flow during rollout. | [DT-3607](https://broadworkbench.atlassian.net/browse/DT-3607) | ✅ |
 | 3 | API Proxy Layer | Add a reverse proxy so the client calls relative `/duos-api/*` URLs; the server injects the Bearer token from the session and proactively refreshes tokens before expiry. | [DT-3608](https://broadworkbench.atlassian.net/browse/DT-3608) | ✅ |
-| 4 | Client Refactor | Remove all token handling from the React client: drop `oidc-client-ts` and localStorage token storage, switch the fetch layer to relative URLs, and replace the popup sign-in with a full-page redirect to the B2C login page (which presents the Google/Microsoft choice, unchanged). | [DT-3609](https://broadworkbench.atlassian.net/browse/DT-3609) |        |
-| 5 | Security Hardening | Layer additional defenses: strict Content Security Policy, end-to-end verification of CSRF coverage (enforcement lands with the endpoints in Phases 2–4), session-fixation protection (session ID regeneration), token revocation on logout, SRI/third-party script audit, and rate limiting on auth endpoints. | [DT-3610](https://broadworkbench.atlassian.net/browse/DT-3610) |        |
+| 4 | Client Refactor | Move all token handling out of the BFF-mode React client: switch the fetch layer to relative URLs and replace the popup sign-in with a full-page redirect to the B2C login page (which presents the Google/Microsoft choice, unchanged). The legacy `oidc-client-ts` flow (tokens in localStorage) remains behind `bffEnabled` until Phase 6 removes it. | [DT-3609](https://broadworkbench.atlassian.net/browse/DT-3609) | ✅ |
+| 5 | Security Hardening | Layer additional defenses: strict Content Security Policy, end-to-end verification of CSRF coverage (enforcement lands with the endpoints in Phases 2–4) plus Fetch Metadata enforcement, session-fixation protection (session ID regeneration), cookie-attribute hardening, B2C front-channel logout, replacement of the runtime-loaded Google Charts script, and rate limiting on auth endpoints. | [DT-3610](https://broadworkbench.atlassian.net/browse/DT-3610) |        |
 | 6 | Testing, Observability & Rollout | E2E test coverage, auth/session metrics and alerting, and a config-driven (`bffEnabled` in `config.json`) per-environment cutover. The legacy flow is removed only after the new flow is stable in production. | [DT-3611](https://broadworkbench.atlassian.net/browse/DT-3611) |        |
 
 ## Rollout strategy
@@ -91,8 +91,10 @@ Both sub-providers (Google-federated and Microsoft) flow through the same B2C
 client behind the same flag, so we can test both sign-in paths in each
 environment before cutting over.
 
-> Status: as of Phase 1 nothing reads `bffEnabled` yet — the flag-gated
-> routing lands with the Phase 2 auth routes.
+> Status: the flag-gated routing is live. The server gates the BFF auth
+> routes and proxies on `bffEnabled` at startup (Phase 2/3), and the Phase 4
+> client directs sign-in through the BFF flow when it is true. Per-environment
+> cutover is Phase 6 work.
 
 ## Architecture decision records
 
@@ -100,21 +102,25 @@ One sequence, numbered continuously. ADR-001 through ADR-008 were settled with
 the migration plan and are summarised below; the ones that needed fuller
 treatment — because they were resolved during implementation, with alternatives
 and residual risk worth recording — have their own files under
-[`bff_adrs/`](bff_adrs/). That is why the directory holds 004, 009 and 010 rather
-than 001 through 003: the numbers belong to this list, not to the directory.
+[`bff_adrs/`](bff_adrs/). That is why the directory holds 004 and 009 through
+013 rather than 001 through 003: the numbers belong to this list, not to the
+directory.
 
 | ADR | Decision | Phase |
 |---|---|---|
 | [001](#adr-001--postgresql-backed-sessions-via-fastifysession) | PostgreSQL-backed sessions via `@fastify/session` | 1 |
 | [002](#adr-002--full-page-redirect-for-oauth-instead-of-popup) | Full-page redirect for OAuth instead of popup | 2, 4 |
-| [003](#adr-003--remove-oidc-client-ts-entirely-in-phase-4) | Remove `oidc-client-ts` entirely | 4 |
+| [003](#adr-003--remove-oidc-client-ts-entirely-in-phase-6) | Remove `oidc-client-ts` entirely | 4, 6 |
 | [004](#adr-004--fastifyreply-from-on-a-duos-api-prefix-for-the-proxy) | `@fastify/reply-from` on a `/duos-api` prefix for the proxy | 3 |
 | [005](#adr-005--single-authcallback-route) | Single `/auth/callback` route | 2 |
 | [006](#adr-006--lazy-oidc-client-initialization-with-startup-warm-up) | Lazy OIDC client init with startup warm-up | 2 |
 | [007](#adr-007--idp-stored-in-session-as-sub-provider) | `idp` stored as sub-provider, from the B2C `id_token` claim | 2 |
 | [008](#adr-008--azure-b2c-as-single-oidc-entry-point) | Azure B2C as the single OIDC entry point | 0, 2 |
-| [009](#adr-009--state-changing-upstream-gets-are-proxied-not-blocked) | State-changing upstream GETs are proxied, not blocked | 3 |
+| [009](#adr-009--state-changing-upstream-gets-are-proxied-not-blocked) | State-changing upstream GETs are proxied, not blocked | 3, 5 |
 | [010](#adr-010--the-proxy-scope-declares-its-own-error-shape) | The proxy scope declares its own error shape | 3, 4 |
+| [011](#adr-011--one-identity-per-browser-cross-tab-account-switching-reloads-the-stale-tab) | One identity per browser: cross-tab account switching reloads the stale tab | 4 |
+| [012](#adr-012--session-cookie-is-samesitelax-with-csrf-tokens-closing-the-gap) | Session cookie is `SameSite=Lax`, with CSRF tokens closing the gap | 1, 2–4 |
+| [013](#adr-013--security-headers-and-a-content-security-policy-derived-from-runtime-config) | Security headers, and a CSP derived from runtime config | 5 |
 
 ### ADR-001 — PostgreSQL-backed sessions via `@fastify/session`
 
@@ -137,13 +143,15 @@ navigation, but the session cookie survives the redirect naturally and a
 `returnTo` field in the session restores the user's destination. A full-page
 redirect is unaffected by COOP headers on the IdP's domain.
 
-### ADR-003 — Remove `oidc-client-ts` entirely in Phase 4
+### ADR-003 — Remove `oidc-client-ts` entirely in Phase 6
 
 The library's event system is only used for client-side token expiry, which
 server-side proactive refresh (60 s before expiry, in the proxy) makes
-unnecessary. It is removed rather than left in place: keeping it invites reuse of
-its `WebStorageStateStore`, which would re-introduce the vulnerability this
-migration exists to close.
+unnecessary. It will be removed rather than left in place: keeping it invites
+reuse of its `WebStorageStateStore`, which would re-introduce the vulnerability
+this migration exists to close. Phase 4 stopped the BFF-mode client from using
+it; the legacy flow still uses it behind `bffEnabled`, so the removal itself is
+Phase 6 work, after the BFF flow is stable in production.
 
 ### ADR-004 — `@fastify/reply-from` on a `/duos-api` prefix for the proxy
 
@@ -207,8 +215,15 @@ changes `DUOS_AZURE_ISSUER_URL` and its siblings, not the BFF's structure.
 `SameSite=Lax` is required by the OAuth callback redirect and a CSRF token cannot
 guard a GET, which leaves two upstream endpoints that mutate state on GET
 forgeable by a plain link. Blocking either breaks the app — one is how the client
-learns who the user is — so the residual risk is accepted, documented, and the
-real fix (making the side effect a POST) belongs upstream in Consent.
+learns who the user is — so the residual risk was accepted and documented, and the
+real fix (making the side effect a POST) belongs upstream in Consent (DT-3945).
+
+Phase 5 (story 5-B) then closed the residual for modern browsers with Fetch
+Metadata enforcement: a positive allowlist requiring `Sec-Fetch-Site:
+same-origin` plus a `cors`/`same-origin` mode, applied to every proxy prefix
+and to `/auth/me` (`server/src/security/fetchMetadata.ts`). Requests without
+the headers — older browsers and non-browser clients — are allowed and remain
+covered only by the original accepted-risk analysis.
 
 ### ADR-010 — The proxy scope declares its own error shape
 
@@ -224,11 +239,112 @@ same generic body as the rest of the app. The client needs that one code because
 arrives as a 403 too, as an ordinary proxied response — so Phase 4 keys its single
 refetch-and-retry on the body, not the status.
 
+### ADR-011 — One identity per browser: cross-tab account switching reloads the stale tab
+
+**Full record:** [bff_adrs/ADR-011-single-identity-per-browser.md](bff_adrs/ADR-011-single-identity-per-browser.md)
+— the interleavings behind it, the join rule, and the accepted risks.
+
+With the BFF, every tab shares one session cookie, so "two users in two tabs"
+is not a state the system can be in — only a stale tab displaying a previous
+user. The client's session reconciler (`useSessionReconciler`) resolves a
+detected identity conflict the way mainstream multi-account applications do:
+a conflict with no bootstrap in flight re-bootstraps in place, and a conflict
+under an in-flight bootstrap cancels it and hard-reloads the tab. The reload
+discards transient tab state — an accepted cost that removed the supersede
+and provenance machinery a graceful in-place merge kept demanding.
+
+### ADR-012 — Session cookie is `SameSite=Lax`, with CSRF tokens closing the gap
+
+**Full record:** [bff_adrs/ADR-012-session-cookie-samesite.md](bff_adrs/ADR-012-session-cookie-samesite.md)
+— the threat model, the alternatives, and the `response_mode=query` assumption.
+It is also the written infosec answer linked from
+[DT-3996](https://broadworkbench.atlassian.net/browse/DT-3996); its opening
+section, [The infosec question, answered](bff_adrs/ADR-012-session-cookie-samesite.md#the-infosec-question-answered),
+is the short version.
+
+`Strict` is unusable, not merely stricter: B2C's `302` back to `/auth/callback`
+is a cross-site top-level GET, so a `Strict` cookie is withheld, the callback
+arrives sessionless, and every login fails. `Lax` blocks cross-site POSTs and
+credentialed fetches but treats sibling `*.broadinstitute.org` subdomains as
+same-site, so it is not sufficient alone — session-bound CSRF tokens, which do
+not depend on the registrable domain, are what cover the cookie-authenticated
+unsafe routes (`POST /auth/logout` and the proxies' unsafe methods, minus the two
+unauthenticated Contact Us POSTs that receive no session credentials), and the
+PKCE `state` binding is what neutralizes login CSRF on the deliberately exempt
+`/auth/login`.
+
+The `Lax` rescue depends on B2C returning via GET (`response_mode=query`, which
+`login.ts` now sends explicitly); `form_post` would break login exactly as
+`Strict` does, and a change on the B2C policy side is invisible to CI — it has to
+be caught by review. A `Strict` session cookie paired with a short-lived `Lax`
+OAuth-transaction cookie was considered and rejected: it *would* narrow ADR-009's
+state-changing-GET residual, including on browsers that send no Fetch Metadata
+headers, but it leaves the higher-priority sibling-subdomain threat untouched
+(those requests are same-site either way), and the GET residual belongs upstream
+in DT-3945. `__Host-` prefixing is recorded as complementary later hardening (it
+blocks cookie tossing, not CSRF) and needs `Secure` unconditionally, including in
+CI.
+
+The options are defined once in `server/src/session/sessionOptions.ts` and
+imported by the server and all five test harnesses, so changing `sameSite` or
+`rolling` fails the suite.
+
+### ADR-013 — Security headers, and a Content Security Policy derived from runtime config
+
+**Full record:** [bff_adrs/ADR-013-content-security-policy.md](bff_adrs/ADR-013-content-security-policy.md)
+— written across the 5-F stack and growing with it.
+
+`@fastify/helmet` registers ahead of every route and outside both cutover
+switches: a legacy deployment needs these headers too. Two of its defaults would
+break flows this app depends on.
+
+`Cross-Origin-Opener-Policy` is **off entirely in legacy mode**.
+`same-origin-allow-popups` is not a safe middle ground, which was measured: on
+the return leg from B2C the popup's `window.opener` still goes null and
+`signinPopup()` never resolves. COOP is not part of the CSP and has no
+report-only mode, so that one breaks sign-in on the first deploy — which is why
+it ships on its own. `Cross-Origin-Embedder-Policy` stays off because the banner
+bucket and the two direct upstreams send no CORP header. HSTS is production-only.
+
+The policy itself is derived at startup from the same `config.json` the client
+reads, so a new upstream is a config change rather than a code change. Only
+inventoried, active fields count, and the list is mode-specific: under
+`bffEnabled` ECM and TDR are omitted because those calls are same-origin
+through the proxies, while a legacy deployment keeps all four upstream origins
+until Epic 6. It ships **report-only** — `DUOS_CSP_REPORT_ONLY` defaults to
+true, and each environment is flipped only after a clean collection run.
+
+One catch worth knowing before anyone flips it: the deployed httpd sidecar
+replaces the enforcing header with its own, so until the `terra-helmfile` change
+in story 5-F4 lands, the env var changes nothing a browser acts on. The
+report-only header passes through untouched, which is what makes that quiet.
+
 ### Decisions not tracked as ADRs
 
 - **`openid-client` (v6) for all OAuth/OIDC operations** — library-maintained
   PKCE, token exchange, and ID-token validation (signature, `iss`, `aud`,
   `exp`) rather than hand-rolled crypto.
+
+- **Application-level rate limiting is a backstop, not the primary control**
+  (story 5-G) — `@fastify/rate-limit`'s default store is per-process, so in a
+  multi-pod deployment the effective limit multiplies by the replica count and
+  resets on every restart. Production flood protection belongs at the
+  ingress/edge or a shared store; the in-app limits are a floor that survives
+  an edge misconfiguration. The plugin is registered with `global: false`
+  because the same Fastify instance serves every SPA asset through
+  `@fastify/vite` — only `POST /auth/login` and `GET /auth/callback` opt in.
+  `/auth/csrf-token` is gated on authentication instead (5-B) and
+  `/auth/logout` on the CSRF token, because a low cap on either breaks
+  multiple tabs and the client's retry path. Limits are per client IP and
+  environment-overridable, so tightening them from measured traffic is a
+  deployment change rather than a code release. Three items stay open and are
+  recorded in `server/src/security/rateLimit.ts`: edge or shared-store
+  enforcement (infrastructure); confirming that the httpd sidecar sets or
+  appends `X-Forwarded-For` rather than passing a client-supplied header
+  through; and the unauthenticated, CSRF-exempt `POST /duos-api/support/*`
+  proxy writes, which no limit covers yet. A caller inside the trusted ranges
+  (`TRUST_PROXY` trusts `uniquelocal`) can still choose its own bucket — a
+  property of `TRUST_PROXY`, and another reason the edge is the real control.
 
 ## Target Architecture Sequence Diagrams
 
@@ -323,6 +439,38 @@ sequenceDiagram
 
 ### Sign-out Flow
 
+Destroying the BFF session is only half of a sign-out: the browser also holds
+Azure B2C's own single sign-on cookie. `POST /auth/logout` therefore returns the
+B2C end-session URL and the client navigates to it (front-channel logout, Phase
+5). Because the client calls the endpoint with `fetch`, the server cannot
+redirect the browser itself, so the response mirrors `/auth/login`'s
+`{ redirectUrl }` shape.
+
+Only two answers confirm anything, and the client treats every other response —
+a malformed body, a 200 without a `redirectUrl`, a 403, a 500, a transport
+failure — as an **unconfirmed** sign-out. An unconfirmed sign-out performs no
+local cleanup and claims no success: the client probes `GET /auth/me` instead,
+and a 401 there proves the session is gone. When even that is unknowable, the
+user sees a persistent notice with a Retry.
+
+| Response | Meaning | Client action |
+| --- | --- | --- |
+| `200 { redirectUrl }` | The session is destroyed and B2C exposes an end-session endpoint | Local cleanup, then navigate to B2C |
+| `204` | The session is destroyed; no single sign-out could be arranged | Local cleanup, then navigate to `/post-logout` |
+| anything else | Unknown | Verify with `GET /auth/me`, then retry or report |
+
+B2C requires `post_logout_redirect_uri` to match a registered URI exactly, so
+the local destination cannot ride in it. `/post-logout` is the one registered
+URI (env var `DUOS_POST_LOGOUT_REDIRECT_URI`); the client stores its
+destination in `sessionStorage` before the logout, and `/post-logout` reads it,
+deletes it, validates it again, and replaces the history entry with it.
+
+Automatic sign-out on a terminal upstream 401 is local-only by design. The
+proxy destroys the session before the 401 reaches the browser, so the
+`id_token_hint` is already gone and no B2C leg is possible. `prompt: 'login'`
+on every authorization request remains the guarantee that the B2C login screen
+always appears.
+
 ```mermaid
 sequenceDiagram
     participant B   as Browser
@@ -334,8 +482,12 @@ sequenceDiagram
         Note over B,B2C: Sign-Out
 
         B->>BFF: POST /auth/logout [cookie: sessionId]
-        BFF->>PG: Read session — accessToken, refreshToken
+        BFF->>PG: Read session — idToken, accessToken, refreshToken
         PG-->>BFF: session data
+
+        opt end_session_endpoint + idToken available
+            BFF->>BFF: Build the end-session URL (id_token_hint, post_logout_redirect_uri)
+        end
 
         opt revocation_endpoint available (B2C typically does not expose one)
             BFF->>B2C: POST /revoke (access_token)
@@ -348,6 +500,15 @@ sequenceDiagram
         PG-->>BFF: ok
         BFF->>PG: Destroy session
         PG-->>BFF: ok
-        BFF-->>B: 204 + Set-Cookie: sessionId (cleared, Max-Age=0)
+
+        alt End-session URL built
+            BFF-->>B: 200 { redirectUrl } + Set-Cookie: sessionId (cleared, Max-Age=0)
+            B->>B2C: GET end_session_endpoint (front-channel logout)
+            B2C-->>B: 302 /post-logout
+            B->>B: /post-logout reads, deletes, and replaces with the stored target
+        else No end-session URL (no idToken, no endpoint, or misconfiguration)
+            BFF-->>B: 204 + Set-Cookie: sessionId (cleared, Max-Age=0)
+            B->>B: Navigate to /post-logout
+        end
     end
 ```

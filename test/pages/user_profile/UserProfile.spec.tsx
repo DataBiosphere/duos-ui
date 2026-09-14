@@ -25,6 +25,9 @@ vi.mock('src/libs/notificationService', () => ({
   NotificationService: {
     getBannerObjectById: vi.fn(),
   },
+  dismissBanner: vi.fn(),
+  visibleBanner: vi.fn(banner => banner ?? null),
+  onBannerDismissed: vi.fn(() => () => {}),
 }))
 
 vi.mock('src/libs/utils', () => ({
@@ -61,54 +64,44 @@ vi.mock('src/pages/user_profile/ExternalProfile', () => ({
 }))
 
 vi.mock('src/components/Notification', () => ({
-  Notification: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Notification: ({ notificationData, onDismiss }: {
+    notificationData?: { message: string } | null
+    onDismiss?: () => void
+  }) => (
+    notificationData
+      ? (
+          <div>
+            {notificationData.message}
+            {onDismiss && <button onClick={onDismiss}>Dismiss notification</button>}
+          </div>
+        )
+      : null
+  ),
 }))
 
 vi.mock('src/components/forms/forms', () => {
-  const FormFieldTypes = { TEXT: 'text', YESNORADIOGROUP: 'yesnoradiogroup' }
-  const FormField = ({ id, type, onChange, defaultValue, disabled }: {
+  const FormFieldTypes = { TEXT: 'text' }
+  const FormField = ({ id, onChange, defaultValue, disabled }: {
     id: string
-    type: string
-    onChange?: (field: { key: string, value: string | boolean, isValid: boolean }) => void
-    defaultValue?: string | boolean
+    onChange?: (field: { key: string, value: string, isValid: boolean }) => void
+    defaultValue?: string
     disabled?: boolean
-  }) => {
-    if (type === FormFieldTypes.YESNORADIOGROUP) {
-      return (
-        <>
-          <label htmlFor={`${id}_yes`}>Yes</label>
-          <input
-            type="radio"
-            id={`${id}_yes`}
-            name={id}
-            onChange={() => onChange?.({ key: id, value: true, isValid: true })}
-          />
-          <label htmlFor={`${id}_no`}>No</label>
-          <input
-            type="radio"
-            id={`${id}_no`}
-            name={id}
-            onChange={() => onChange?.({ key: id, value: false, isValid: true })}
-          />
-        </>
-      )
-    }
-    return (
-      <input
-        id={id}
-        type="text"
-        defaultValue={typeof defaultValue === 'string' ? defaultValue : ''}
-        disabled={disabled}
-        onChange={e => onChange?.({ key: id, value: e.target.value, isValid: true })}
-      />
-    )
-  }
+  }) => (
+    <input
+      id={id}
+      type="text"
+      defaultValue={defaultValue ?? ''}
+      disabled={disabled}
+      onChange={e => onChange?.({ key: id, value: e.target.value, isValid: true })}
+    />
+  )
   return { FormField, FormFieldTypes }
 })
 
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
-import { NotificationService } from 'src/libs/notificationService'
+import { dismissBanner, NotificationService, onBannerDismissed, visibleBanner } from 'src/libs/notificationService'
+import { bannerDismissalBus } from '../../test-utils'
 import { Notifications } from 'src/libs/utils'
 
 const mockUser: DuosUser = {
@@ -135,9 +128,14 @@ function renderUserProfile() {
   )
 }
 
+const dismissalBus = bannerDismissalBus()
+
 describe('UserProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    dismissalBus.reset()
+    vi.mocked(onBannerDismissed).mockImplementation(dismissalBus.subscribe)
+    vi.mocked(dismissBanner).mockImplementation(dismissalBus.publish)
     vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser)
     vi.mocked(User.getMe).mockResolvedValue(mockUser)
     vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue(null)
@@ -186,7 +184,7 @@ describe('UserProfile', () => {
 
   it('clicking Save without editing the name shows an informational notification', async () => {
     renderUserProfile()
-    await waitFor(() => screen.getByDisplayValue('Test User'))
+    await screen.findByDisplayValue('Test User')
 
     await userEvent.click(screen.getByRole('button', { name: 'Save' }))
 
@@ -198,7 +196,7 @@ describe('UserProfile', () => {
   it('saving an edited name calls User.updateSelf and shows success', async () => {
     vi.mocked(User.updateSelf).mockResolvedValue(mockUser)
     renderUserProfile()
-    await waitFor(() => screen.getByDisplayValue('Test User'))
+    await screen.findByDisplayValue('Test User')
 
     const nameInput = screen.getByDisplayValue('Test User')
     await userEvent.clear(nameInput)
@@ -213,18 +211,62 @@ describe('UserProfile', () => {
     })
   })
 
-  it('changing the email preference calls User.updateSelf and shows success', async () => {
+  it('reflects the saved email preference in the notification toggle', async () => {
+    vi.mocked(User.getMe).mockResolvedValue({ ...mockUser, emailPreference: true })
+    renderUserProfile()
+
+    await waitFor(() => {
+      expect(screen.getByRole('switch', { name: 'Send me email notifications' })).toBeChecked()
+    })
+  })
+
+  it('turning on the email notification toggle calls User.updateSelf and shows success', async () => {
     vi.mocked(User.updateSelf).mockResolvedValue(mockUser)
     renderUserProfile()
-    await waitFor(() => screen.getByDisplayValue('Test User'))
+    await screen.findByDisplayValue('Test User')
 
-    await userEvent.click(screen.getByRole('radio', { name: 'Yes' }))
+    await userEvent.click(screen.getByRole('switch', { name: 'Send me email notifications' }))
 
     await waitFor(() => {
       expect(User.updateSelf).toHaveBeenCalledWith({ emailPreference: true })
       expect(Notifications.showSuccess).toHaveBeenCalledWith({
         text: 'Email preference updated successfully!',
       })
+    })
+  })
+
+  it('disables the email notification toggle while the update is in flight', async () => {
+    let resolveUpdate: (user: DuosUser) => void = () => {}
+    vi.mocked(User.updateSelf).mockReturnValue(new Promise((resolve) => {
+      resolveUpdate = resolve
+    }))
+    renderUserProfile()
+    await screen.findByDisplayValue('Test User')
+
+    const toggle = screen.getByRole('switch', { name: 'Send me email notifications' })
+    await userEvent.click(toggle)
+
+    await waitFor(() => expect(toggle).toBeDisabled())
+
+    resolveUpdate(mockUser)
+
+    await waitFor(() => expect(toggle).toBeEnabled())
+    expect(User.updateSelf).toHaveBeenCalledOnce()
+  })
+
+  it('reverts the email notification toggle when the update fails', async () => {
+    vi.mocked(User.updateSelf).mockRejectedValue(new Error('API error'))
+    renderUserProfile()
+    await screen.findByDisplayValue('Test User')
+
+    const toggle = screen.getByRole('switch', { name: 'Send me email notifications' })
+    await userEvent.click(toggle)
+
+    await waitFor(() => {
+      expect(Notifications.showError).toHaveBeenCalledWith({
+        text: 'Some errors occurred, the user\'s email preference was not updated.',
+      })
+      expect(toggle).not.toBeChecked()
     })
   })
 
@@ -238,5 +280,39 @@ describe('UserProfile', () => {
         text: 'Error: Unable to retrieve user data from server',
       })
     })
+  })
+
+  it('shows the eRACommonsOutage banner and hides it after dismissal', async () => {
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue({
+      id: 'eRACommonsOutage',
+      active: true,
+      message: 'eRA Commons is down',
+      level: 'warning',
+    })
+
+    renderUserProfile()
+    await waitFor(() => {
+      expect(screen.getByText('eRA Commons is down')).toBeInTheDocument()
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
+
+    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage')
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
+  })
+
+  it('does not show an already-dismissed eRACommonsOutage banner', async () => {
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue({
+      id: 'eRACommonsOutage',
+      active: true,
+      message: 'eRA Commons is down',
+      level: 'warning',
+    })
+    vi.mocked(visibleBanner).mockReturnValueOnce(null)
+
+    renderUserProfile()
+    await waitFor(() => screen.getByDisplayValue('Test User'))
+
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
   })
 })

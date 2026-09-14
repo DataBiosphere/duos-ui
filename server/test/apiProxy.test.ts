@@ -228,6 +228,87 @@ describe('apiProxy', () => {
     })
   })
 
+  // The ADR-009 residual: CSRF tokens cannot guard GET, and SameSite=Lax still
+  // sends the cookie same-SITE — so a compromised sibling subdomain could drive
+  // the two state-changing upstream GETs. The positive allowlist closes all
+  // three forgery shapes (navigation, no-cors subresource, credentialed cors
+  // fetch). The full header matrix lives in fetchMetadata.test.ts; these pin
+  // that the shared proxy machinery wires the guard ahead of everything else.
+  describe('Fetch Metadata enforcement (story 5-B)', () => {
+    const BLOCKED = { error: 'cross_site_request_blocked' }
+
+    it.each([
+      ['a same-site credentialed cors fetch', { 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors' }],
+      ['a same-site no-cors subresource (<img src>)', { 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'no-cors' }],
+      ['a top-level navigation', { 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'navigate' }],
+    ])('rejects %s to a state-changing GET, without calling the upstream', async (_name, headers) => {
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/nih/sync`, headers })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toEqual(BLOCKED)
+      expect(upstream.received).toHaveLength(0)
+    })
+
+    it('rejects a cross-site request on an unsafe method before the CSRF guard runs', async () => {
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({
+        method: 'POST',
+        url: `${PROXY_PREFIX}/api/dataset/1`,
+        headers: { 'sec-fetch-site': 'cross-site', 'sec-fetch-mode': 'cors' },
+      })
+
+      expect(res.statusCode).toBe(403)
+      // The Fetch Metadata rejection, not the CSRF one — the guard is first.
+      expect(res.json()).toEqual(BLOCKED)
+      expect(upstream.received).toHaveLength(0)
+    })
+
+    // The guard covers the allowlisted unauthenticated paths too: the client
+    // fetches those same-origin as well, and a same-site subresource load of
+    // /status has no legitimate caller either.
+    it('applies to allowlisted unauthenticated paths', async () => {
+      app = await buildProxyApp()
+
+      const res = await app.inject({
+        method: 'GET',
+        url: `${PROXY_PREFIX}/status`,
+        headers: { 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'no-cors' },
+      })
+
+      expect(res.statusCode).toBe(403)
+      expect(upstream.received).toHaveLength(0)
+    })
+
+    it('passes a legitimate same-origin fetch through', async () => {
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({
+        method: 'GET',
+        url: `${PROXY_PREFIX}/api/user/me`,
+        headers: { 'sec-fetch-site': 'same-origin', 'sec-fetch-mode': 'cors' },
+      })
+
+      expect(res.statusCode).toBe(200)
+      expect(upstream.received).toHaveLength(1)
+    })
+
+    // Older browsers send no Fetch Metadata; the request proceeds and the
+    // CSRF/session controls carry the load alone. Documented in
+    // security/fetchMetadata.ts — this is the pre-guard posture, kept
+    // deliberately rather than breaking those browsers.
+    it('allows a request without Fetch Metadata headers (older browsers)', async () => {
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/user/me` })
+
+      expect(res.statusCode).toBe(200)
+      expect(upstream.received).toHaveLength(1)
+    })
+  })
+
   // The proxy turns every DUOS API write into a cookie-authenticated request,
   // so without this any site could drive them using a signed-in victim's cookie.
   describe('CSRF enforcement', () => {
@@ -249,6 +330,51 @@ describe('apiProxy', () => {
         expect(upstream.received).toHaveLength(0)
       },
     )
+
+    // The classic CSRF shape against a proxied mutation, end to end: an
+    // attacker page auto-submits a cross-origin form in a signed-in victim's
+    // browser. The cookie rides along (same-site siblings defeat Lax), the
+    // custom header cannot. Two variants, because two guards apply: a modern
+    // browser's form POST carries Fetch Metadata and dies at that guard; an
+    // older browser's carries none and dies at the CSRF check. Both must 403
+    // without touching the upstream.
+    it('rejects a forged cross-origin form POST (modern browser, Fetch Metadata present)', async () => {
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({
+        method: 'POST',
+        url: `${PROXY_PREFIX}/api/dataset/1`,
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+          'origin': 'https://evil.example.org',
+          'sec-fetch-site': 'cross-site',
+          'sec-fetch-mode': 'navigate',
+        },
+        payload: 'name=forged',
+      })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toEqual({ error: 'cross_site_request_blocked' })
+      expect(upstream.received).toHaveLength(0)
+    })
+
+    it('rejects a forged cross-origin form POST (older browser, no Fetch Metadata)', async () => {
+      app = await buildProxyApp(freshSession())
+
+      const res = await app.inject({
+        method: 'POST',
+        url: `${PROXY_PREFIX}/api/dataset/1`,
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+          'origin': 'https://evil.example.org',
+        },
+        payload: 'name=forged',
+      })
+
+      expect(res.statusCode).toBe(403)
+      expect(res.json()).toEqual(rejection(MISSING_SECRET))
+      expect(upstream.received).toHaveLength(0)
+    })
 
     // The case the four above do NOT cover: a real signed-in session that has a
     // secret, on a request that simply carries no token — a client that forgot

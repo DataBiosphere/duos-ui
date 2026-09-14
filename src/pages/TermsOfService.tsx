@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { Auth } from 'src/libs/auth/auth'
-import { Storage } from 'src/libs/storage'
+import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
 import { TosService } from 'src/libs/TosService'
 import SimpleButton from 'src/components/SimpleButton'
-import { useNavigate } from 'react-router'
+import { useUserIsLogged } from 'src/hooks/useSession'
 
 export default function TermsOfService() {
-  const navigate = useNavigate()
   const [tosText, setTosText] = useState<React.ReactElement | null>(null)
-  const isLogged = Storage.userIsLogged()
+  const isLogged = useUserIsLogged() ?? false
 
   useEffect(() => {
     const init = async () => {
@@ -22,9 +20,10 @@ export default function TermsOfService() {
     // update Sam that ToS was rejected
     await TosService.rejectTos()
 
-    // log user out and send them back home.
-    await Auth.signOut()
-    navigate('/')
+    const result = await Auth.signOut('/')
+    if (result.status === 'unconfirmed') {
+      reportUnconfirmedSignOut()
+    }
   }
 
   return (

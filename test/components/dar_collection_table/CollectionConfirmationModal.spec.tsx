@@ -4,6 +4,7 @@ import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CollectionConfirmationModal, { CollectionConfirmationModalProps } from 'src/components/dar_collection_table/CollectionConfirmationModal'
+import { PI_QUALIFICATION } from 'src/definitions/definitions-en-us'
 import { DarCollectionSummary } from 'src/types/model'
 
 vi.mock('src/libs/utils', async () => {
@@ -141,7 +142,9 @@ describe('CollectionConfirmationModal - consoleAction: open', () => {
 })
 
 const affiliationAttestation = 'Are affiliated with their listed institution or corporation.'
-const qualificationAttestation = 'Is a permanent employee of their institution at a level equivalent to, but not limited to, that of an academic professor (e.g., assistant, associate, or non-tenure or tenure-track professor) or senior researcher. This does not include lab technicians or trainees, e.g., post-docs or graduate students.'
+// Composed the same way the modal renders it: the bullet supplies the subject's verb,
+// the shared constant supplies the qualification language.
+const qualificationAttestation = `Is ${PI_QUALIFICATION}`
 
 describe('CollectionConfirmationModal - consoleAction: approve', () => {
   it('renders the approve modal title', () => {

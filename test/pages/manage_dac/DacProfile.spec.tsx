@@ -139,7 +139,21 @@ describe('DacProfile', () => {
 
     await renderDacProfile()
 
-    expect(screen.getByText('No datasets are associated with this DAC.')).toBeTruthy()
+    const datasetsSection = screen.getByRole('region', { name: 'Datasets Managed by this DAC' })
+    expect(datasetsSection.textContent).toContain('No datasets are associated with this DAC.')
+  })
+
+  it.each([
+    'Rule Automation for DARs (RADAR)',
+    'Datasets Managed by this DAC',
+  ])('renders the %s section as its own card', async (title) => {
+    vi.mocked(DAC.get).mockResolvedValue(existingDac)
+    vi.mocked(DAC.datasets).mockResolvedValue([])
+
+    await renderDacProfile()
+
+    const section = screen.getByRole('region', { name: title })
+    expect(section.contains(screen.getByRole('heading', { name: title }))).toBe(true)
   })
 
   it('does not show a spinner and makes no API calls for an invalid dacId', async () => {

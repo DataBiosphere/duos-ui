@@ -27,6 +27,7 @@ import { Support } from 'src/libs/ajax/Support'
 import { Storage } from 'src/libs/storage'
 import { Notifications, isEmailAddress } from 'src/libs/utils'
 import { handleSignIn } from 'src/libs/signInUtils'
+import { useUserIsLogged } from 'src/hooks/useSession'
 import { AsyncSpinnerMuiButton } from 'src/components/AsyncSpinnerMuiButton'
 
 interface SupportRequestModalProps {
@@ -69,8 +70,11 @@ interface FormData {
   email: string
 }
 
-const resetFormData = (): FormData => {
-  const isLogged = Storage.userIsLogged()
+// The prefill is gated on the live session state, not just on CurrentUser:
+// an expired session never runs clearStorage(), so localStorage can retain
+// the previous user's name/email — they must not leak into the signed-out
+// support form.
+const resetFormData = (isLogged: boolean): FormData => {
   const currentUser = Storage.getCurrentUser()
   return {
     name: isLogged ? currentUser.displayName : '',
@@ -84,13 +88,29 @@ const resetFormData = (): FormData => {
 
 export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) => {
   const { showModal, onCloseRequest, url } = props
-  const [formData, setFormData] = useState<FormData>(resetFormData)
 
-  const isLogged = Storage.userIsLogged()
+  const isLogged = useUserIsLogged() ?? false
+  const [formData, setFormData] = useState<FormData>(() => resetFormData(isLogged))
   const isEmailValid = isEmailAddress(formData.email)
 
+  // The prefill tracks the identity, not the auth boolean: on a BFF callback
+  // authentication flips true before the post-sign-in bootstrap persists
+  // CurrentUser, so keying on isLogged alone would freeze an empty (or a
+  // previous user's) prefill. Deriving the key from the prefill values means
+  // any change — sign-in, sign-out, the bootstrap persisting the profile,
+  // identity reconciliation swapping accounts — re-derives exactly once
+  // (adjust-state-during-render pattern). Only the prefilled fields change:
+  // typed subject/description/attachments must survive.
+  const { name: prefillName, email: prefillEmail } = resetFormData(isLogged)
+  const prefillKey = `${isLogged}:${prefillName}:${prefillEmail}`
+  const [prevPrefillKey, setPrevPrefillKey] = useState(prefillKey)
+  if (prevPrefillKey !== prefillKey) {
+    setPrevPrefillKey(prefillKey)
+    setFormData(prev => ({ ...prev, name: prefillName, email: prefillEmail }))
+  }
+
   const closeHandler = () => {
-    setFormData(resetFormData())
+    setFormData(resetFormData(isLogged))
     onCloseRequest('support')
   }
 

@@ -56,6 +56,7 @@ AZURE_ISSUER_URL_DEFAULT="https://terradevb2c.b2clogin.com/terradevb2c.onmicroso
 # Both redirect URIs are registered in B2C: this one (with :3000) matches the
 # pnpm-start dev server; drop the port when running under docker compose.
 OAUTH_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/auth/callback"
+POST_LOGOUT_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/post-logout"
 API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
 # The single-feature proxy upstreams (ECM, TDR, Bard). Optional server-side —
 # the BFF boots without them and leaves each route dark — but written here so
@@ -166,6 +167,7 @@ write_env() {
   AZURE_CLIENT_ID=$(existing_env DUOS_AZURE_CLIENT_ID)
   ISSUER_URL=$(existing_env DUOS_AZURE_ISSUER_URL)
   REDIRECT_URI=$(existing_env DUOS_OAUTH_REDIRECT_URI)
+  POST_LOGOUT_REDIRECT_URI=$(existing_env DUOS_POST_LOGOUT_REDIRECT_URI)
   API_URL=$(existing_env DUOS_API_URL)
   ECM_URL=$(existing_env DUOS_ECM_URL)
   TDR_URL=$(existing_env DUOS_TDR_URL)
@@ -208,6 +210,7 @@ DUOS_AZURE_CLIENT_ID=${AZURE_CLIENT_ID:-$AZURE_CLIENT_ID_DEFAULT}
 DUOS_AZURE_CLIENT_SECRET='$AZURE_CLIENT_SECRET'
 DUOS_AZURE_ISSUER_URL=${ISSUER_URL:-$AZURE_ISSUER_URL_DEFAULT}
 DUOS_OAUTH_REDIRECT_URI=${REDIRECT_URI:-$OAUTH_REDIRECT_URI_DEFAULT}
+DUOS_POST_LOGOUT_REDIRECT_URI=${POST_LOGOUT_REDIRECT_URI:-$POST_LOGOUT_REDIRECT_URI_DEFAULT}
 DUOS_API_URL=${API_URL:-$API_URL_DEFAULT}
 DUOS_ECM_URL=${ECM_URL:-$ECM_URL_DEFAULT}
 DUOS_TDR_URL=${TDR_URL:-$TDR_URL_DEFAULT}

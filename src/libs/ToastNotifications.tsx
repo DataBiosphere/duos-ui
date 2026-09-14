@@ -8,7 +8,8 @@ export type ToastPosition = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight
 interface NotificationRequiredProps extends NotificationProps {
   severity: AlertColor
   text: string
-  timeout: number
+  /** null disables auto-hide. */
+  timeout: number | null
   layout: ToastPosition | SnackbarOrigin
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
@@ -17,8 +18,11 @@ interface NotificationRequiredProps extends NotificationProps {
 interface NotificationProps {
   severity?: AlertColor
   text: string | React.ReactNode
-  timeout?: number
+  /** Milliseconds before auto-hide; null keeps the toast open. */
+  timeout?: number | null
   layout?: ToastPosition | SnackbarOrigin
+  /** Called when the toast closes, excluding clickaway events. */
+  onDismiss?: () => void
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
 }
@@ -46,12 +50,21 @@ const convertToSnackbarOrigin = (layout: ToastPosition | SnackbarOrigin): Snackb
   return layout
 }
 
+// Each notification owns a React root that only goes away once it is dismissed or auto-hides,
+// so callers that outlive their notifications need a way to take them down.
+const activeNotifications = new Set<() => void>()
+
+export const dismissAllNotifications = (): void => {
+  for (const teardown of activeNotifications) teardown()
+}
+
 export const ToastNotifications = {
   showNotification: ({
     severity = defaultProps.severity,
     text = defaultProps.text,
     timeout = defaultProps.timeout,
     layout = defaultProps.layout,
+    onDismiss,
     ...props
   }: NotificationProps): void => {
     const snackbarLayout = convertToSnackbarOrigin(layout)
@@ -59,16 +72,25 @@ export const ToastNotifications = {
     document.body.appendChild(notificationRoot)
     const root = createRoot(notificationRoot)
 
+    // Dismissing all notifications can beat the exit animation's timer to it, so leaving
+    // the set is what makes a notification torn down, and doing it twice is a no-op.
+    let exitTimeout: ReturnType<typeof setTimeout> | undefined
+    const teardown = () => {
+      if (!activeNotifications.delete(teardown)) return
+      clearTimeout(exitTimeout)
+      root.unmount()
+      notificationRoot.remove()
+    }
+    activeNotifications.add(teardown)
+
     const NotificationComponent = (): React.JSX.Element => {
       const [open, setOpen] = React.useState(true)
 
       const handleClose = (_event: React.SyntheticEvent | Event, reason?: string): void => {
         if (reason === 'clickaway') return
         setOpen(false)
-        setTimeout(() => {
-          root.unmount()
-          notificationRoot.remove()
-        }, 300)
+        onDismiss?.()
+        exitTimeout = setTimeout(teardown, 300)
       }
 
       return (

@@ -41,7 +41,13 @@ export const Metrics = {
  */
 // oxlint-disable-next-line @typescript-eslint/no-explicit-any
 const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, details: object = {}): Promise<any> => {
+  // Legacy: the synchronous oidc-client-ts token check. BFF: the browser
+  // holds no token (the legacy keys are purged), so a persisted registered
+  // profile is what "signed in" looks like — without this every BFF event
+  // posted anonymously, while identify/syncProfile in the same sign-in flow
+  // posted identified, and Bard saw two disagreeing users.
   const isSignedIn = Storage.userIsLogged()
+    || (await Config.isBffEnabled() && Storage.getCurrentUser().userId !== 0)
   const isRegistered = isSignedIn && Storage.getCurrentUser()
 
   if (!isRegistered && !Storage.getAnonymousId()) {

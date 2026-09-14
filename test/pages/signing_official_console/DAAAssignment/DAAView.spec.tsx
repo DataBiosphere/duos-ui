@@ -10,7 +10,7 @@ import {
 } from 'src/pages/signing_official_console/DAAAssignment/researcherViewHelpers'
 import { DAA } from 'src/libs/ajax/DAA'
 import { User } from 'src/libs/ajax/User'
-import { Notifications } from 'src/libs/utils'
+import { Notifications, USER_ROLES } from 'src/libs/utils'
 import { DuosUser, DAAObject, DaaBulkRelationResult } from 'src/types/model'
 import { makeDaa, makeResearcher } from './fixtures'
 
@@ -262,6 +262,38 @@ describe('DAAView', () => {
     await user.click(document.body.querySelector('[data-cy="confirm-dialog-confirm"]') as HTMLElement)
     await waitFor(() => expect(DAA.createDaaLcLink).toHaveBeenCalledWith(1, 2))
     await waitFor(() => expect(User.list).toHaveBeenCalled())
+  })
+
+  // `expanded` starts empty, so an unguarded lookup would pass undefined and React
+  // would omit the attribute entirely.
+  it('exposes aria-expanded on every DAA header before any row is toggled', () => {
+    const { container } = mount()
+    container.querySelectorAll('[data-cy^="daa-accordion-toggle-"]').forEach((header) => {
+      expect(header).toHaveAttribute('aria-expanded', 'false')
+    })
+  })
+
+  it('refreshes with the institution-scoped list by default', async () => {
+    vi.spyOn(DAA, 'createDaaLcLink').mockResolvedValue(undefined as unknown as DAAObject)
+    const user = userEvent.setup()
+    const { container } = mount()
+    await user.click(container.querySelector('[data-cy="daa-accordion-toggle-1"]') as HTMLElement)
+    await user.click(container.querySelector('[data-cy="daa-researcher-row-2"] [data-cy="auth-action-authorize"]') as HTMLElement)
+    await user.click(document.body.querySelector('[data-cy="confirm-dialog-confirm"]') as HTMLElement)
+    await waitFor(() => expect(User.list).toHaveBeenCalledWith(USER_ROLES.signingOfficial))
+  })
+
+  // The page owns the scope; a refresh must reload the same list it loaded, not
+  // a differently-scoped one.
+  it('refreshes with the scope it was given', async () => {
+    vi.spyOn(DAA, 'createDaaLcLink').mockResolvedValue(undefined as unknown as DAAObject)
+    const user = userEvent.setup()
+    const { container } = mount({ scope: USER_ROLES.admin })
+    await user.click(container.querySelector('[data-cy="daa-accordion-toggle-1"]') as HTMLElement)
+    await user.click(container.querySelector('[data-cy="daa-researcher-row-2"] [data-cy="auth-action-authorize"]') as HTMLElement)
+    await user.click(document.body.querySelector('[data-cy="confirm-dialog-confirm"]') as HTMLElement)
+    await waitFor(() => expect(User.list).toHaveBeenCalledWith(USER_ROLES.admin))
+    expect(User.list).not.toHaveBeenCalledWith(USER_ROLES.signingOfficial)
   })
 
   it('opens revoke confirm dialog when Revoke is clicked for an authorized researcher', async () => {

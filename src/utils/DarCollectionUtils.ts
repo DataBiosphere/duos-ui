@@ -402,6 +402,8 @@ export const DarCollectionTableColumnOptions = {
   RESEARCHER: 'researcher',
   INSTITUTION: 'institution',
   DATASET_COUNT: 'datasetCount',
+  DATA_USE: 'dataUse',
+  VOTES: 'votes',
   EXPIRES_AT: 'expiresAt',
   STATUS: 'status',
   ACTIONS: 'actions',

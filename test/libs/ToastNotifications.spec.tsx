@@ -105,6 +105,93 @@ describe('ToastNotifications', () => {
       }
     })
 
+    it('should auto-hide after the default timeout', async () => {
+      vi.useFakeTimers()
+      try {
+        await act(async () => {
+          ToastNotifications.showNotification({ text: 'Transient notification' })
+        })
+
+        expect(document.querySelector('[data-cy="notification-alert"]')).toBeVisible()
+
+        await act(async () => {
+          vi.advanceTimersByTime(3500 + 350)
+        })
+
+        expect(document.querySelector('[data-cy="notification-alert"]')).not.toBeInTheDocument()
+      }
+      finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('should never auto-hide when timeout is null', async () => {
+      vi.useFakeTimers()
+      try {
+        await act(async () => {
+          ToastNotifications.showNotification({ text: 'Persistent notification', timeout: null })
+        })
+
+        await act(async () => {
+          vi.advanceTimersByTime(60_000)
+        })
+
+        expect(document.querySelector('[data-cy="notification-alert"]')).toBeVisible()
+      }
+      finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('should call onDismiss when the close button closes the notification', async () => {
+      const onDismiss = vi.fn()
+      vi.useFakeTimers()
+      try {
+        await act(async () => {
+          ToastNotifications.showNotification({ text: 'Dismissible notification', onDismiss })
+        })
+
+        const closeButton = document.querySelector('[data-cy="notification-alert"] .MuiAlert-action button') as HTMLElement
+        fireEvent.click(closeButton)
+
+        await act(async () => {
+          vi.advanceTimersByTime(350)
+        })
+
+        expect(onDismiss).toHaveBeenCalledOnce()
+      }
+      finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('should call onDismiss when the auto-hide timer closes the notification', async () => {
+      const onDismiss = vi.fn()
+      vi.useFakeTimers()
+      try {
+        await act(async () => {
+          ToastNotifications.showNotification({ text: 'Transient notification', onDismiss })
+        })
+
+        await act(async () => {
+          vi.advanceTimersByTime(3500 + 350)
+        })
+
+        expect(onDismiss).toHaveBeenCalledOnce()
+      }
+      finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('should not forward onDismiss to the Snackbar element', async () => {
+      await act(async () => {
+        ToastNotifications.showNotification({ text: 'Dismissible notification', onDismiss: () => {} })
+      })
+
+      expect(document.querySelector('.MuiSnackbar-root')).not.toHaveAttribute('onDismiss')
+    })
+
     it('should apply custom styling with sx prop', async () => {
       await act(async () => {
         ToastNotifications.showNotification({

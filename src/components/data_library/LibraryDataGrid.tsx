@@ -6,7 +6,7 @@ import {
 } from '@mui/x-data-grid'
 import { Box, Typography, CircularProgress } from '@mui/material'
 import { isEmpty } from 'src/utils/NodashUtil'
-import { LibraryDataGridProps } from 'src/types/library'
+import { LibraryDataGridProps, PAGE_SIZE_OPTIONS } from 'src/types/library'
 import { assetRegistry, LibraryRow } from 'src/components/data_library/assets'
 
 const EMPTY_RADAR_IDS = new Set<number>()
@@ -71,13 +71,16 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
     ),
   }), [asset, data, selectedDatasetIds])
 
+  // Applied as a delta over this page's rows: replacing the whole selection would discard
+  // anything selected on another page or another tab.
   const handleSelectionChange = (newSelection: GridRowSelectionModel) => {
-    onSelectionChange(
-      asset.selectionToDatasetIds(
-        Array.isArray(data) ? data as LibraryRow[] : [],
-        Array.from(newSelection.ids),
-      ),
-    )
+    const rows = Array.isArray(data) ? data as LibraryRow[] : []
+    const pageDatasetIds = asset.selectionToDatasetIds(rows, rows.map(row => asset.getRowId(row)))
+    const stillSelected = new Set(asset.selectionToDatasetIds(rows, Array.from(newSelection.ids)))
+
+    const next = new Set(selectedDatasetIds)
+    pageDatasetIds.forEach(id => (stillSelected.has(id) ? next.add(id) : next.delete(id)))
+    onSelectionChange(Array.from(next))
   }
 
   const isRowSelectable = (params: { row: LibraryRow }) =>
@@ -126,7 +129,7 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
         columns={columns}
         rowCount={total}
         loading={loading}
-        pageSizeOptions={[25, 50, 100]}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
         paginationModel={paginationModel}
         paginationMode="server"
         onPaginationModelChange={onPaginationChange}

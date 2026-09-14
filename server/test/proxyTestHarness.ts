@@ -5,7 +5,9 @@ import Fastify, { type FastifyInstance, type FastifyRequest, type Session } from
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
-import { csrfPluginOptions } from '../src/auth/csrf.js'
+import { csrfPluginOptions, handleCsrfToken } from '../src/auth/csrf.js'
+import { SESSION_COOKIE_NAME, sessionPluginOptions } from '../src/session/sessionOptions.js'
+import { TRUST_PROXY } from '../src/config.js'
 
 /**
  * The shared harness for the per-upstream proxy suites (apiProxy.test.ts,
@@ -88,22 +90,21 @@ export interface SessionSeed {
   tokenExpiry?: number
 }
 
-/** The @fastify/session default, and what index.ts and me.ts clear by name. */
-export const SESSION_COOKIE = 'sessionId'
+export const SESSION_COOKIE = SESSION_COOKIE_NAME
 
 export async function buildAppShell(): Promise<FastifyInstance> {
-  const app = Fastify({ logger: false, trustProxy: 1 })
+  const app = Fastify({ logger: false, trustProxy: TRUST_PROXY })
   await app.register(fastifyCookie)
-  await app.register(fastifySession, {
+  await app.register(fastifySession, sessionPluginOptions({
     secret: 'a-test-session-secret-at-least-32-characters-long',
-    cookie: { secure: false, path: '/' },
-    saveUninitialized: false,
-    rolling: false,
-  })
+    secure: false,
+  }))
   await app.register(fastifyCsrf, csrfPluginOptions)
-  // Mirrors index.ts's /auth/csrf-token — the only way a client gets a token,
-  // and therefore the only way these tests can produce a valid one.
-  app.get('/auth/csrf-token', async (_request, reply) => reply.send({ token: reply.generateCsrf() }))
+  // The real /auth/csrf-token handler, not a copy — the only way a client gets
+  // a token, and therefore the only way these tests can produce a valid one.
+  // Since story 5-B it is gated on an authenticated session, so a suite that
+  // needs a token must seed one (seedSession applies to this route too).
+  app.get('/auth/csrf-token', handleCsrfToken)
   return app
 }
 

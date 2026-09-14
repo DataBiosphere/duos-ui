@@ -3,6 +3,7 @@ import { ElasticsearchQuery, ElasticsearchResponse, PublicationStudyAggregationR
 import { FilterState, PaginationState, PublicationAsset, SortState } from 'src/types/library'
 import { makePublicationColumns } from 'src/components/data_library/columns/publicationColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
 // The Elasticsearch clauses for these filters only decide which *studies* enter
 // the shared aggregation; every publication of a qualifying study comes back,
@@ -19,6 +20,12 @@ const matchesPublicationFilters = (publication: PublicationAsset, filters?: Filt
 
   if (filters.publicationAccess.length > 0 && !filters.publicationAccess.includes(publication.access || '')) {
     return false
+  }
+
+  // Inverted bounds build no ES clause, so they must not narrow rows here
+  // either — otherwise the grid empties while the panel flags the range.
+  if (!isFilterActive('publicationPublishedDate', filters)) {
+    return true
   }
 
   const publishedDate = publication.publishedDate || ''

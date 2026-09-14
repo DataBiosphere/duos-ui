@@ -110,5 +110,24 @@ describe('Metrics Tests', () => {
         expect.any(Object),
       )
     })
+
+    it('treats a persisted registered profile as signed in — the legacy token check is always false under the BFF', async () => {
+      // The legacy oidc keys are purged in BFF mode, so userIsLogged() is
+      // false for every signed-in BFF user. The stored profile is the
+      // identity: the event must post identified (proxy URL, no anonymous
+      // distinct_id), matching identify/syncProfile in the same flow.
+      vi.spyOn(Storage, 'userIsLogged').mockReturnValue(false)
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ userId: 7 } as ReturnType<typeof Storage.getCurrentUser>)
+
+      await Metrics.captureEvent(Object.keys(eventList)[0] as MetricsEventName)
+
+      expect(retryFetchPost).toHaveBeenCalledWith(
+        '/bard-api/api/event',
+        expect.objectContaining({
+          properties: expect.objectContaining({ distinct_id: undefined }),
+        }),
+        expect.any(Object),
+      )
+    })
   })
 })
