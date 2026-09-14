@@ -7,7 +7,7 @@ import { MemoryRouter, Routes, Route } from 'react-router'
 import DataAccessRequestApplication from 'src/pages/dar_application/DataAccessRequestApplication'
 import rawDarCollection from './darCollection.json'
 import { DarCollection } from 'src/types/model'
-import { clickById, typeById, selectOptionByLabel } from '../../test-utils'
+import { bannerDismissalBus, clickById, typeById, selectOptionByLabel } from '../../test-utils'
 import { MockSelectOption, MockSelectProps, fillDarDataUseCheckboxes, setupTestEnvironment } from './DataAccessRequestApplicationTestUtils'
 
 // The fixture is a hand-trimmed subset of a real API response, so it needs one bridging
@@ -91,7 +91,7 @@ import { User } from 'src/libs/ajax/User'
 import { Collections } from 'src/libs/ajax/Collections'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Countries } from 'src/libs/ajax/Countries'
-import { NotificationService } from 'src/libs/notificationService'
+import { dismissBanner, NotificationService, onBannerDismissed, visibleBanner } from 'src/libs/notificationService'
 import { Metrics } from 'src/libs/ajax/Metrics'
 import { Notifications } from 'src/libs/utils'
 
@@ -763,5 +763,43 @@ describe('DataAccessRequestApplication - review-mode edge cases', () => {
     await clickDialogYes()
 
     expect(DAR.uploadDARDocument).not.toHaveBeenCalled()
+  })
+})
+
+describe('DataAccessRequestApplication - outage banner', () => {
+  const dismissalBus = bannerDismissalBus()
+
+  beforeEach(() => {
+    dismissalBus.reset()
+    vi.mocked(onBannerDismissed).mockImplementation(dismissalBus.subscribe)
+    vi.mocked(dismissBanner).mockImplementation(dismissalBus.publish)
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue({
+      id: 'eRACommonsOutage',
+      active: true,
+      message: 'eRA Commons is down',
+      level: 'warning',
+    })
+  })
+
+  it('shows the eRACommonsOutage banner and hides it after dismissal', async () => {
+    vi.mocked(visibleBanner).mockImplementation(banner => banner ?? null)
+
+    await renderDraft()
+
+    expect(await screen.findByText('eRA Commons is down')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
+
+    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage')
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
+  })
+
+  it('does not show an already-dismissed eRACommonsOutage banner', async () => {
+    vi.mocked(visibleBanner).mockReturnValue(null)
+
+    await renderDraft()
+
+    // Anchored on the filter having run, so this cannot pass merely by being early.
+    await waitFor(() => expect(visibleBanner).toHaveBeenCalled())
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
   })
 })

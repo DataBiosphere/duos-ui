@@ -6,13 +6,13 @@ import ResearchPurposeStatement from 'src/pages/dar_application/ResearchPurposeS
 import { translateDataUseRestrictionsFromDataUseArray, TranslationEntry } from 'src/libs/dataUseTranslation'
 import { Navigation, Notifications } from 'src/libs/utils'
 import { AsyncConfirmationDialog } from 'src/components/AsyncConfirmationDialog'
-import { Notification } from 'src/components/Notification'
+import { DismissibleBanner } from 'src/components/DismissibleBanner'
 import { PageHeading } from 'src/components/PageHeading'
 import { User } from 'src/libs/ajax/User'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DAR } from 'src/libs/ajax/DAR'
 import { Collections } from 'src/libs/ajax/Collections'
-import { NotificationService, Banner } from 'src/libs/notificationService'
+import { NotificationService, Banner, visibleBanner } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import 'src/pages/dar_application/DataAccessRequestApplication.css'
 import DucAddendum from 'src/pages/dar_application/DucAddendum'
@@ -294,6 +294,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
   const [tab, setTab] = useState<string | undefined>(undefined)
   const [notificationData, setNotificationData] = useState<Banner | null | undefined>(undefined)
+  const clearBanner = useCallback(() => setNotificationData(null), [])
 
   const [researcher, setResearcher] = useState<DuosUser | Record<string, never>>({})
   const [allSigningOfficials, setAllSigningOfficials] = useState<SimplifiedDuosUser[]>([])
@@ -520,7 +521,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
     init()
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
       if (!isMountedRef.current) return
-      setNotificationData(notificationData)
+      setNotificationData(visibleBanner(notificationData))
     })
     Countries.getCountries().then((isoCountriesData: string[]) => {
       if (!isMountedRef.current) return
@@ -768,7 +769,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
       <div {...pageContainerProps(existingDarsReadOnlyMode)}>
         <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div className="row no-margin">
-            <Notification notificationData={notificationData} />
+            <DismissibleBanner banner={notificationData} onDismissed={clearBanner} />
             {!embedded && (
               <ApplicationPageHeading
                 readOnly={existingDarsReadOnlyMode}
