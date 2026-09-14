@@ -1,10 +1,11 @@
 import { useCallback, useMemo } from 'react'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
-import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
+import { useLibraryTabCounts, useLibraryTabCountsFor } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { computeTabCounts, STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
 import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, PaginationState, SortOrder } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
+import { assetFilterRegistry } from 'src/libs/dataLibraryFilterConfig'
 import {
   EMPTY_FILTERS,
   getExternalActiveFilters,
@@ -110,17 +111,24 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     urlState.query ?? '',
   )
 
-  // Option lists come from a corpus narrowed only by the search term. Every
-  // active filter is applied to the counts query at the Elasticsearch level,
-  // and those clauses match whole *studies*, so a value that exists only in a
-  // study some other selection filtered out could never be offered again —
-  // clearing filters client-side cannot bring back a study the response never
-  // carried. When nothing is filtered this resolves to the identical query key
-  // as the counts query above, so it shares that request rather than adding one.
-  const { data: optionCorpusResponse } = useLibraryTabCounts(
-    libraryConfig,
-    EMPTY_FILTERS,
-    urlState.query ?? '',
+  // An asset's option lists have to come from a corpus its *own* filters never
+  // narrowed. The filter clauses match whole studies, so selecting one value
+  // drops every study without it, and a sibling value living only in one of
+  // those studies could never be offered again — no client-side pass can
+  // recover a study the response never carried. Filters owned by other tabs
+  // stay applied, so the options stay scoped the way the grid is.
+  const optionCorpusFilterSets = useMemo(
+    () => STUDY_ASSET_TABS.map(assetType =>
+      assetFilterRegistry[assetType].visibleFilters.reduce<FilterState>(
+        (cleared, key) => ({ ...cleared, [key]: EMPTY_FILTERS[key] }),
+        urlState.filters,
+      )),
+    [urlState.filters],
+  )
+  const optionCorpusResults = useLibraryTabCountsFor(libraryConfig, optionCorpusFilterSets, urlState.query ?? '')
+  const optionCorpusByAsset = useMemo(
+    () => new Map(STUDY_ASSET_TABS.map((assetType, i) => [assetType, optionCorpusResults[i]?.data])),
+    [optionCorpusResults],
   )
 
   // Badge counts are derived at render time from the shared response with the
@@ -183,10 +191,14 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     // moment the user switched to a different tab.
     const FULL_CORPUS_PAGINATION: PaginationState = { page: 0, pageSize: Number.MAX_SAFE_INTEGER }
 
-    const fullCorpusItems = <T>(assetType: AssetType): T[] =>
-      (optionCorpusResponse
-        ? assetRegistry[assetType].transformResponse(optionCorpusResponse, FULL_CORPUS_PAGINATION, EMPTY_FILTERS).items
+    // The asset's own keys are cleared in this corpus's filter set, so its
+    // transform does no row-level filtering of its own either.
+    const fullCorpusItems = <T>(assetType: AssetType): T[] => {
+      const response = optionCorpusByAsset.get(assetType)
+      return (response
+        ? assetRegistry[assetType].transformResponse(response, FULL_CORPUS_PAGINATION, EMPTY_FILTERS).items
         : []) as T[]
+    }
 
     const modelItems = fullCorpusItems<{ format?: string, license?: string, cloud?: string[], tags?: string[] }>(AssetType.MODELS)
     const workspaceItems = fullCorpusItems<{ tools?: string[], platform?: string, cloud?: string[], access?: string }>(AssetType.WORKSPACES)
@@ -251,7 +263,7 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
       biospecimenPostMortemIntervalRange: { min: 0, max: 1000000 },
       participantCountRange: { min: 0, max: 100000 },
     }
-  }, [metadata, optionCorpusResponse])
+  }, [metadata, optionCorpusByAsset])
 
   const filterSections = useMemo(
     () => getFilterSectionsForAsset(urlState.tab, availableFilters),

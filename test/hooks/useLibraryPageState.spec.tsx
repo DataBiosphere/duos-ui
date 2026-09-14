@@ -5,8 +5,9 @@ import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import { AssetType, FilterState, LibraryVersionNew } from 'src/types/library'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
-import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
+import { useLibraryTabCounts, useLibraryTabCountsFor } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
+import { STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
 
 vi.mock('src/hooks/useLibraryData')
 vi.mock('src/hooks/useLibraryTabCounts')
@@ -49,6 +50,18 @@ const tabCountsResponse = {
 
 const updateUrlState = vi.fn()
 
+// The counts query and the per-asset option corpora are the same query with
+// different filter sets, so both mocks answer from one function of the filters.
+const mockCorpus = (responseFor: (filters: FilterState) => unknown) => {
+  vi.mocked(useLibraryTabCounts).mockImplementation((_config, filters) => ({
+    data: responseFor(filters),
+    isFetching: false,
+    error: null,
+  } as unknown as ReturnType<typeof useLibraryTabCounts>))
+  vi.mocked(useLibraryTabCountsFor).mockImplementation((_config, filterSets) =>
+    filterSets.map(filters => ({ data: responseFor(filters) })) as unknown as ReturnType<typeof useLibraryTabCountsFor>)
+}
+
 const setup = (tab: AssetType, filters: FilterState = EMPTY_FILTERS) => {
   vi.mocked(useLibraryUrlState).mockReturnValue([
     { library: 'duos', tab, filters, query: '', page: 0, pageSize: 25, hideFilters: false },
@@ -64,11 +77,7 @@ beforeEach(() => {
     isFetching: false,
     error: null,
   } as unknown as ReturnType<typeof useLibraryData>)
-  vi.mocked(useLibraryTabCounts).mockReturnValue({
-    data: tabCountsResponse,
-    isFetching: false,
-    error: null,
-  } as unknown as ReturnType<typeof useLibraryTabCounts>)
+  mockCorpus(() => tabCountsResponse)
 })
 
 describe('useLibraryPageState — tab-count wiring', () => {
@@ -293,11 +302,7 @@ describe('useLibraryPageState — dynamic filter option derivation', () => {
   }
 
   beforeEach(() => {
-    vi.mocked(useLibraryTabCounts).mockReturnValue({
-      data: responseWithBucket,
-      isFetching: false,
-      error: null,
-    } as unknown as ReturnType<typeof useLibraryTabCounts>)
+    mockCorpus(() => responseWithBucket)
   })
 
   it('populates an asset-specific option list even while a different tab is active', () => {
@@ -369,16 +374,12 @@ describe('useLibraryPageState — dynamic filter option derivation', () => {
     })
     const allStudies = [oneModelStudy(1, 'ONNX'), oneModelStudy(2, 'PyTorch')]
 
-    vi.mocked(useLibraryTabCounts).mockImplementation((_config, filters) => {
-      const selected = (filters as FilterState).modelFormat
+    mockCorpus((filters) => {
+      const selected = filters.modelFormat
       const buckets = selected.length > 0
         ? allStudies.filter(b => selected.includes(b.study_details.hits.hits[0]._source.study.assets.models[0].format))
         : allStudies
-      return {
-        data: { aggregations: { total_studies: { value: buckets.length }, datasets_count: { doc_count: 0 }, studies: { buckets } } },
-        isFetching: false,
-        error: null,
-      } as unknown as ReturnType<typeof useLibraryTabCounts>
+      return { aggregations: { total_studies: { value: buckets.length }, datasets_count: { doc_count: 0 }, studies: { buckets } } }
     })
 
     setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
@@ -387,5 +388,18 @@ describe('useLibraryPageState — dynamic filter option derivation', () => {
     expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
     // The grid still shows only the matching study's model.
     expect(result.current.data?.items).toHaveLength(1)
+  })
+
+  // Only the asset's own keys are dropped. A filter owned by another tab still
+  // scopes the corpus, so the options cannot offer a value the grid excludes.
+  it('keeps filters owned by other tabs applied when deriving an asset\'s options', () => {
+    setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'], accessManagement: ['controlled'] })
+    renderHook(() => useLibraryPageState(libraryConfig))
+
+    const modelsCorpusFilters = vi.mocked(useLibraryTabCountsFor).mock.calls.at(-1)![1][
+      STUDY_ASSET_TABS.indexOf(AssetType.MODELS)
+    ]
+    expect(modelsCorpusFilters.modelFormat).toEqual([])
+    expect(modelsCorpusFilters.accessManagement).toEqual(['controlled'])
   })
 })

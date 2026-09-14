@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
 import { FilterState, LibraryVersionNew } from 'src/types/library'
@@ -46,31 +46,51 @@ const buildTabCountsQuery = (
  * even while a refetch is in flight and this hook is serving the previous
  * response as placeholder data.
  */
+const tabCountsQueryOptions = (
+  libraryConfig: LibraryVersionNew,
+  filters: FilterState,
+  queryTerm: string,
+) => ({
+  queryKey: [
+    LIBRARY_TAB_COUNTS_QUERY_KEY,
+    libraryConfig.key,
+    filters,
+    queryTerm,
+  ],
+  queryFn: async (): Promise<ElasticsearchResponse> => {
+    const { queryChunks, filterQuery } = buildCommonQueryClauses(
+      libraryConfig,
+      filters,
+      queryTerm,
+      ALL_SEARCH_FIELDS,
+    )
+    const query = buildTabCountsQuery(queryChunks, filterQuery, libraryConfig.showAllControlled)
+    return DataSet.searchDatasetIndexV2(query)
+  },
+  staleTime: 5 * 60 * 1000, // 5 minutes
+  retry: 1,
+  // Keep the previous counts visible while a new query loads to avoid flicker.
+  placeholderData: (previousData?: ElasticsearchResponse) => previousData,
+})
+
 export const useLibraryTabCounts = (
   libraryConfig: LibraryVersionNew,
   filters: FilterState,
   queryTerm: string,
-) => {
-  return useQuery({
-    queryKey: [
-      LIBRARY_TAB_COUNTS_QUERY_KEY,
-      libraryConfig.key,
-      filters,
-      queryTerm,
-    ],
-    queryFn: async (): Promise<ElasticsearchResponse> => {
-      const { queryChunks, filterQuery } = buildCommonQueryClauses(
-        libraryConfig,
-        filters,
-        queryTerm,
-        ALL_SEARCH_FIELDS,
-      )
-      const query = buildTabCountsQuery(queryChunks, filterQuery, libraryConfig.showAllControlled)
-      return DataSet.searchDatasetIndexV2(query)
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1,
-    // Keep the previous counts visible while a new query loads to avoid flicker.
-    placeholderData: previousData => previousData,
-  })
-}
+) => useQuery(tabCountsQueryOptions(libraryConfig, filters, queryTerm))
+
+/**
+ * The same query run once per filter set, for deriving each asset's filter
+ * option lists from a corpus its own filters have not narrowed.
+ *
+ * Sets that come out identical share one cache entry, so this costs one
+ * request plus one per asset that actually owns an active filter — with
+ * nothing filtered it is a single request, shared with the counts query.
+ */
+export const useLibraryTabCountsFor = (
+  libraryConfig: LibraryVersionNew,
+  filterSets: FilterState[],
+  queryTerm: string,
+) => useQueries({
+  queries: filterSets.map(filters => tabCountsQueryOptions(libraryConfig, filters, queryTerm)),
+})
