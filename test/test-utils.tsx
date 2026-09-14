@@ -39,3 +39,21 @@ export const selectOptionByLabel = async (selectId: string, labelSubstring: stri
     fireEvent.change(select, { target: { value: option!.value } })
   })
 }
+
+/**
+ * Stands in for notificationService's dismissal pub/sub, so specs that mock the module still see a
+ * dismissal reach every banner on screen the way it does at runtime.
+ */
+export const bannerDismissalBus = () => {
+  const listeners = new Set<(id: string) => void>()
+  return {
+    subscribe: (listener: (id: string) => void) => {
+      listeners.add(listener)
+      return () => {
+        listeners.delete(listener)
+      }
+    },
+    publish: (id: string) => listeners.forEach(listener => listener(id)),
+    reset: () => listeners.clear(),
+  }
+}

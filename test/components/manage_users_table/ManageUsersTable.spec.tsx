@@ -51,7 +51,7 @@ const carol = makeUser({
   userId: 3,
   displayName: 'Carol White',
   email: 'carol@test.com',
-  libraryCard: libraryCard(3),
+  libraryCard: { ...libraryCard(3), daaDetails: [{ daaId: 9 }] },
 })
 
 const dave = makeUser({
@@ -68,8 +68,10 @@ const testDacs: DacObject[] = [{ dacId: 1, name: 'Cancer DAC' }, { dacId: 2, nam
 
 const testUsers = [carol, alice, bob]
 
+const daaLabelsById = new Map([[9, 'Broad DAA v2.pdf']])
+
 const renderTable = (props: Partial<ManageUsersTableProps> = {}) => renderWithRouter(
-  <ManageUsersTable isLoading={false} userList={testUsers} searchText="" {...props} />,
+  <ManageUsersTable isLoading={false} userList={testUsers} searchText="" daaLabelsById={daaLabelsById} {...props} />,
 )
 
 const numberedUsers = (count: number): DuosUser[] => Array.from({ length: count }, (_, index) => makeUser({
@@ -110,9 +112,11 @@ const emittedRules = (): string[] =>
     .join('')
     .split('}')
 
-// Yes and No repeat across the two status columns, so the assertions read a cell by column position.
-const RESEARCHER_STATUS = 5
-const DATA_SUBMITTER_STATUS = 6
+// None, Yes and No repeat across columns, so the assertions read a cell by column position.
+const PREAUTH = 5
+const DACS = 6
+const RESEARCHER_STATUS = 7
+const DATA_SUBMITTER_STATUS = 8
 
 const cellText = (row: HTMLElement, column: number): string =>
   within(row).queryAllByRole('gridcell')[column]?.textContent ?? ''
@@ -128,17 +132,21 @@ describe('ManageUsersTable', () => {
   it('renders a column for every user attribute', () => {
     renderTable()
 
-    for (const label of ['User Name', 'Email', 'Institution', 'Roles', 'DACs', 'Researcher Status', 'Data Submitter Status']) {
+    for (const label of [
+      'User Name', 'Email', 'Institution', 'Registration Date', 'Roles', 'Pre-Auth',
+      'DACs', 'Researcher Status', 'Data Submitter Status',
+    ]) {
       expect(columnHeader(label)).toBeInTheDocument()
     }
   })
 
-  it('renders each user with their email, institution and roles', async () => {
+  it('renders each user with their email, institution, registration date and roles', async () => {
     renderTable()
 
     const row = await rowFor(alice.displayName)
     expect(within(row).getByText(alice.email)).toBeInTheDocument()
     expect(within(row).getByText('Broad Institute')).toBeInTheDocument()
+    expect(within(row).getByText('2022-01-01')).toBeInTheDocument()
     expect(within(row).getByText('Admin')).toBeInTheDocument()
   })
 
@@ -188,11 +196,22 @@ describe('ManageUsersTable', () => {
     expect(within(row).getByText('Library Card')).toBeInTheDocument()
   })
 
+  it('labels a pre-authorized DAA using the lookup map', async () => {
+    renderTable()
+
+    expect(cellText(await rowFor(carol.displayName), PREAUTH)).toBe('Broad DAA v2.pdf')
+  })
+
+  it('reads None in the Pre-Auth column for a user with no library card', async () => {
+    renderTable()
+
+    expect(cellText(await rowFor(alice.displayName), PREAUTH)).toBe('None')
+  })
+
   it('reads None in the DACs column for a user with no chair or member role', async () => {
     renderTable()
 
-    const row = await rowFor(alice.displayName)
-    expect(within(row).getByText('None')).toBeInTheDocument()
+    expect(cellText(await rowFor(alice.displayName), DACS)).toBe('None')
   })
 
   it('links each DAC a user chairs or belongs to, to its manage page', async () => {
@@ -252,7 +271,7 @@ describe('ManageUsersTable', () => {
 
     await rowFor(alice.displayName)
     // User Name goes last: it starts ascending, so a click would flip it.
-    for (const label of ['Email', 'Institution', 'Roles', 'User Name']) {
+    for (const label of ['Email', 'Institution', 'Registration Date', 'Roles', 'Pre-Auth', 'User Name']) {
       sortBy(label)
       expect(columnHeader(label)).toHaveAttribute('aria-sort', 'ascending')
     }
