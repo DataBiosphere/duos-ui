@@ -210,13 +210,81 @@ describe('VotingHistory', () => {
     expect(screen.getByText('Member Votes')).toBeInTheDocument()
   })
 
+  it('shows one panel at a time, defaulting to Chair Votes', async () => {
+    const user = userEvent.setup()
+    render(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
+
+    expect(screen.getByRole('tab', { name: /Chair Votes/ })).toHaveAttribute('aria-selected', 'true')
+    // hidden panels are out of the accessibility tree, so only the active one is returned
+    const [chairPanel] = screen.getAllByRole('tabpanel')
+    expect(screen.getAllByRole('tabpanel')).toHaveLength(1)
+    // Vote Type is a Chair-table-only column
+    expect(within(chairPanel).getByText('Vote Type')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: /Member Votes/ }))
+
+    await waitFor(() => {
+      const [memberPanel] = screen.getAllByRole('tabpanel')
+      expect(within(memberPanel).getByText('Election Status')).toBeInTheDocument()
+    })
+    expect(screen.getAllByRole('tabpanel')).toHaveLength(1)
+  })
+
+  it('associates each tab with its panel', () => {
+    render(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
+    const chairTab = screen.getByRole('tab', { name: /Chair Votes/ })
+    const [chairPanel] = screen.getAllByRole('tabpanel')
+    expect(chairTab).toHaveAttribute('aria-controls', chairPanel.id)
+    expect(chairPanel).toHaveAttribute('aria-labelledby', chairTab.id)
+  })
+
+  it('keeps each table\'s sort and expanded rows across a tab switch', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
+
+    const chairPanel = container.querySelector('#vote-history-tabpanel-chair') as HTMLElement
+    const memberPanel = container.querySelector('#vote-history-tabpanel-member') as HTMLElement
+
+    const rowOrder = (panel: HTMLElement) =>
+      Array.from(panel.querySelectorAll('[class^="row-data-"]')).map(r => r.textContent)
+
+    // Sort by Name, then toggle to descending. The two chair rows share a vote date, so only a
+    // column whose values differ proves the sort applied at all — and asc vs desc is guaranteed to
+    // differ, so the persistence assertion below cannot pass trivially.
+    const nameHeader = within(chairPanel).getByRole('button', { name: /Name/ })
+    await user.click(nameHeader)
+    const ascOrder = rowOrder(chairPanel)
+    await user.click(nameHeader)
+    await waitFor(() => expect(rowOrder(chairPanel)).not.toEqual(ascOrder))
+    const sortedOrder = rowOrder(chairPanel)
+
+    // expand a member row, then round-trip both tabs
+    await user.click(screen.getByRole('tab', { name: /Member Votes/ }))
+    await user.click(within(memberPanel).getByTestId('ExpandMoreIcon'))
+    await waitFor(() => expect(within(memberPanel).getByText('DAC Member 1')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('tab', { name: /Chair Votes/ }))
+    await user.click(screen.getByRole('tab', { name: /Member Votes/ }))
+
+    // the chair sort survived the round-trip rather than resetting to the default
+    expect(rowOrder(chairPanel)).toEqual(sortedOrder)
+    // and so did the expanded member row
+    expect(within(memberPanel).getByText('DAC Member 1')).toBeInTheDocument()
+  })
+
+  it('labels each tab with the number of rows it holds', () => {
+    render(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
+    // two chair votes (FINAL + RADAR_APPROVE) and one member-vote election survive the DAC filter
+    expect(screen.getByRole('tab', { name: 'Chair Votes2 items' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Member Votes1 item' })).toBeInTheDocument()
+  })
+
   it('renders with correct elections and votes filtered by DAC IDs and election type', async () => {
     const user = userEvent.setup()
     const { container } = render(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
 
-    const tables = container.querySelectorAll('.table-data')
-    const chairTable = tables[0] as HTMLElement
-    const memberTable = tables[1] as HTMLElement
+    // both panels stay mounted; scope each assertion to its own panel
+    const chairTable = container.querySelector('#vote-history-tabpanel-chair') as HTMLElement
 
     // chair table shows election for datasetId 13 (dacId 1), not datasetId 14 (dacId 2)
     // date appears in multiple rows (per-vote rows), so use getAllByText
@@ -238,6 +306,10 @@ describe('VotingHistory', () => {
     expect(within(chairTable).queryByText('DAC')).not.toBeInTheDocument()
     expect(within(chairTable).queryByText('AGREEMENT')).not.toBeInTheDocument()
     expect(within(chairTable).queryByText('Chairperson')).not.toBeInTheDocument()
+
+    // switch to the Member Votes tab
+    await user.click(screen.getByRole('tab', { name: /Member Votes/ }))
+    const memberTable = container.querySelector('#vote-history-tabpanel-member') as HTMLElement
 
     // member table shows election for datasetId 13 (DataAccess)
     expect(within(memberTable).getAllByText('2022-11-21').length).toBeGreaterThan(0)
