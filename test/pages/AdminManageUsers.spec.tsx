@@ -5,17 +5,22 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { AdminManageUsers } from 'src/pages/AdminManageUsers'
 import { User } from 'src/libs/ajax/User'
 import { DAC } from 'src/libs/ajax/DAC'
+import { DAA } from 'src/libs/ajax/DAA'
 import { Notifications, USER_ROLES } from 'src/libs/utils'
-import { DacObject, DuosUser } from 'src/types/model'
+import { DAAObject, DacObject, DuosUser } from 'src/types/model'
 
 vi.mock('src/libs/ajax/User', () => ({
   User: { list: vi.fn() },
 }))
 
-// The page loads users and DACs together, so an unmocked DAC.list would reach the network
-// and fail the pair.
+// The page loads users, DACs and DAAs together, so an unmocked call would reach the network
+// and fail the set.
 vi.mock('src/libs/ajax/DAC', () => ({
   DAC: { list: vi.fn() },
+}))
+
+vi.mock('src/libs/ajax/DAA', () => ({
+  DAA: { getDaas: vi.fn() },
 }))
 
 vi.mock('src/libs/utils', async (importActual) => {
@@ -27,8 +32,13 @@ vi.mock('src/libs/utils', async (importActual) => {
 })
 
 vi.mock('src/components/manage_users_table/ManageUsersTable', () => ({
-  ManageUsersTable: ({ userList, dacList, isLoading }: { userList: DuosUser[], dacList: DacObject[], isLoading: boolean }) => (
-    <div data-testid="manage-users-table" data-loading={isLoading}>
+  ManageUsersTable: ({ userList, dacList, isLoading, daaLabelsById }: {
+    userList: DuosUser[]
+    dacList: DacObject[]
+    isLoading: boolean
+    daaLabelsById: Map<number, string>
+  }) => (
+    <div data-testid="manage-users-table" data-loading={isLoading} data-daa-label-count={daaLabelsById.size}>
       {userList.map(u => <span key={u.userId}>{u.displayName}</span>)}
       {dacList.map(dac => <span key={dac.dacId}>{dac.name}</span>)}
     </div>
@@ -90,8 +100,9 @@ const renderPage = async (): Promise<void> => {
 describe('AdminManageUsers', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // Every test loads the page, and only the DAC tests care what comes back.
+    // Every test loads the page, and only the DAC and DAA tests care what comes back.
     vi.mocked(DAC.list).mockResolvedValue([])
+    vi.mocked(DAA.getDaas).mockResolvedValue([])
   })
 
   it('renders the page title and description', async () => {
@@ -129,6 +140,25 @@ describe('AdminManageUsers', () => {
     await waitFor(() => expect(Notifications.showError).toHaveBeenCalledWith({
       text: 'Error: Unable to retrieve user data from server',
     }))
+  })
+
+  it('builds a daa label lookup map and passes it to ManageUsersTable', async () => {
+    vi.mocked(User.list).mockResolvedValue([])
+    vi.mocked(DAA.getDaas).mockResolvedValue([
+      { daaId: 1, file: { fileName: 'Broad DAA v2.pdf' } } as DAAObject,
+      { daaId: 2, file: { fileName: 'MGH DAA.pdf' } } as DAAObject,
+    ])
+    await renderPage()
+    expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-daa-label-count', '2')
+  })
+
+  it('degrades gracefully when the daa fetch fails, without blocking the user list', async () => {
+    vi.mocked(User.list).mockResolvedValue(testUsers)
+    vi.mocked(DAA.getDaas).mockRejectedValue(new Error('daa service unavailable'))
+    await renderPage()
+    expect(screen.getByText('Alice Admin')).toBeInTheDocument()
+    expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-daa-label-count', '0')
+    expect(Notifications.showError).not.toHaveBeenCalled()
   })
 
   it('shows loading state while fetching', () => {
