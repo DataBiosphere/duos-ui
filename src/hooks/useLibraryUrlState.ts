@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router'
 import { useCallback, useMemo } from 'react'
 import { AssetType, DEFAULT_PAGE_SIZE, FilterState, LibraryUrlState, PAGE_SIZE_OPTIONS, SortOrder } from 'src/types/library'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 type ArrayFilterParamConfig = {
   key: keyof Pick<
@@ -270,10 +271,16 @@ const serializeBooleanFilterToUrl = (
 }
 
 /**
- * Parse filters from URL search params
+ * Parse filters from URL search params.
+ *
+ * Seeded with EMPTY_FILTERS so a FilterState key that nobody registered in a
+ * param config above still arrives as its empty value rather than undefined.
+ * The spreads below are `Record`s, so the `as FilterState` cast cannot catch
+ * the omission, and the first `filters[key].length` read would throw.
  */
 const parseFiltersFromUrl = (searchParams: URLSearchParams): FilterState => {
   return {
+    ...EMPTY_FILTERS,
     ...parseArrayFilters(searchParams),
     ...parseRangeFilters(searchParams),
     ...parseDateFilters(searchParams),

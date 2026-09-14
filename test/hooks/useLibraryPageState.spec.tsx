@@ -331,4 +331,31 @@ describe('useLibraryPageState — dynamic filter option derivation', () => {
     expect(result.current.availableFilters.modelCloud.map(o => o.value)).toEqual(['AWS', 'GCP'])
     expect(result.current.availableFilters.workspaceCloud.map(o => o.value)).toEqual(['AWS'])
   })
+
+  // Without this the corpus the options are read from is already narrowed to
+  // the checked value, the sibling options vanish, and a multi-select checkbox
+  // group can never hold more than one value.
+  it('keeps every value selectable once one of them is checked', () => {
+    setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+    // The grid itself still honours the filter — only the option list ignores it.
+    expect(result.current.data?.items).toHaveLength(1)
+  })
+
+  it('clears the whole asset\'s filters when deriving its options, so sibling lists stay complete', () => {
+    setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.modelLicense.map(o => o.value)).toEqual(['Apache-2.0', 'MIT'])
+    expect(result.current.availableFilters.modelCloud.map(o => o.value)).toEqual(['AWS', 'GCP'])
+  })
+
+  it('leaves another asset\'s option list alone when this asset is filtered', () => {
+    setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.workspaceCloud.map(o => o.value)).toEqual(['AWS'])
+  })
 })

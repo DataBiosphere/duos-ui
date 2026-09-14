@@ -5,6 +5,7 @@ import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { computeTabCounts, STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
 import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, PaginationState, SortOrder } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
+import { assetFilterRegistry } from 'src/libs/dataLibraryFilterConfig'
 import {
   EMPTY_FILTERS,
   getExternalActiveFilters,
@@ -169,9 +170,23 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     // only reflect whichever page happened to be on screen, and would go empty the
     // moment the user switched to a different tab.
     const FULL_CORPUS_PAGINATION: PaginationState = { page: 0, pageSize: Number.MAX_SAFE_INTEGER }
+
+    // An asset's own filters are cleared before its options are derived, so a
+    // checkbox list still offers every value once one of them is checked. Left
+    // applied, the list would collapse to the checked value and the control
+    // would be single-select in practice — you could never OR two values.
+    // Filters set on *other* tabs stay applied (as does the search term, already
+    // baked into the response), so the options remain scoped to the corpus the
+    // user is actually looking at.
+    const optionSourceFilters = (assetType: AssetType): FilterState =>
+      assetFilterRegistry[assetType].visibleFilters.reduce<FilterState>(
+        (cleared, key) => ({ ...cleared, [key]: EMPTY_FILTERS[key] }),
+        urlState.filters,
+      )
+
     const fullCorpusItems = <T>(assetType: AssetType): T[] =>
       (tabCountsResponse
-        ? assetRegistry[assetType].transformResponse(tabCountsResponse, FULL_CORPUS_PAGINATION, urlState.filters).items
+        ? assetRegistry[assetType].transformResponse(tabCountsResponse, FULL_CORPUS_PAGINATION, optionSourceFilters(assetType)).items
         : []) as T[]
 
     const modelItems = fullCorpusItems<{ format?: string, license?: string, cloud?: string[], tags?: string[] }>(AssetType.MODELS)

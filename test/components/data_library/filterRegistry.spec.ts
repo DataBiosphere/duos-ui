@@ -89,6 +89,75 @@ describe('filterRegistry', () => {
     expect(serialized).toContain('study.assets.presentations.event')
   })
 
+  // A wrong `study.assets.*` path builds a perfectly valid query that quietly
+  // matches nothing, and neither typecheck nor a row-level test can catch it —
+  // every asset filter's indexed field is pinned here.
+  describe('asset filter field paths', () => {
+    const checkboxCases: Array<[keyof FilterState, string]> = [
+      ['modelFormat', 'study.assets.models.format'],
+      ['modelLicense', 'study.assets.models.license'],
+      ['modelCloud', 'study.assets.models.cloud'],
+      ['modelTags', 'study.assets.models.tags'],
+      ['workspaceTools', 'study.assets.workspaces.tools'],
+      ['workspacePlatform', 'study.assets.workspaces.platform'],
+      ['workspaceCloud', 'study.assets.workspaces.cloud'],
+      ['workspaceAccess', 'study.assets.workspaces.access'],
+      ['ipType', 'study.assets.intellectualProperties.type'],
+      ['ipStatus', 'study.assets.intellectualProperties.status'],
+      ['presentationEvent', 'study.assets.presentations.event'],
+      ['presentationFormat', 'study.assets.presentations.format'],
+      ['presentationAccess', 'study.assets.presentations.access'],
+      ['publicationJournal', 'study.assets.publications.journal'],
+      ['publicationAccess', 'study.assets.publications.access'],
+      ['fundingFunderName', 'study.assets.funding.funderName'],
+    ]
+
+    it.each(checkboxCases)('%s phrase-matches on %s', (key, field) => {
+      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: ['a', 'b'] })
+
+      // Two selected values OR together in one clause, so both stay reachable.
+      expect(clauses).toEqual([{
+        bool: {
+          should: [
+            { match_phrase: { [field]: 'a' } },
+            { match_phrase: { [field]: 'b' } },
+          ],
+        },
+      }])
+    })
+
+    it.each(checkboxCases)('%s builds no clause when nothing is selected', (_key, field) => {
+      expect(JSON.stringify(buildActiveFilterClauses(EMPTY_FILTERS))).not.toContain(field)
+    })
+
+    const dateCases: Array<[keyof FilterState, string]> = [
+      ['ipFiledDate', 'study.assets.intellectualProperties.filingDate'],
+      ['biospecimenCollectionDate', 'study.assets.biospecimens.dateOfCollection'],
+      ['presentationDate', 'study.assets.presentations.date'],
+      ['publicationPublishedDate', 'study.assets.publications.publishedDate'],
+    ]
+
+    it.each(dateCases)('%s ranges over %s', (key, field) => {
+      const clauses = buildActiveFilterClauses({
+        ...EMPTY_FILTERS,
+        [key]: { after: '2020-01-01', before: '2021-12-31' },
+      })
+
+      expect(clauses).toEqual([{
+        range: { [field]: { gte: '2020-01-01', lte: '2021-12-31' } },
+      }])
+    })
+
+    it.each(dateCases)('%s builds no clause when its bounds are inverted', (key, field) => {
+      const clauses = buildActiveFilterClauses({
+        ...EMPTY_FILTERS,
+        [key]: { after: '2021-12-31', before: '2020-01-01' },
+      })
+
+      expect(JSON.stringify(clauses)).not.toContain(field)
+    })
+  })
+
   describe('data use modifiers', () => {
     it('is offered on the tabs that carry data use, right after the primary codes', () => {
       for (const tab of [AssetType.DATASETS, AssetType.STUDIES]) {

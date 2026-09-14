@@ -4,8 +4,35 @@ import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType } from 'src/types/library'
+import { AssetType, FilterState } from 'src/types/library'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
+
+// EMPTY_FILTERS holds `{}` for every object-shaped filter, so their bounds
+// cannot be read off it — the two non-default shapes are named here and
+// anything else object-shaped is an after/before range. A new filter in a
+// shape this doesn't know fails the round-trip below rather than skipping it.
+const NUMERIC_RANGE_KEYS = ['participantCount', 'biospecimenPostMortemInterval']
+const START_END_DATE_KEYS = ['clinicalTrialDates', 'fundingDate']
+
+// A distinct non-empty value for every FilterState key, so a key that no param
+// config covers cannot quietly round-trip as empty.
+const POPULATED_FILTERS: FilterState = Object.fromEntries(
+  Object.entries(EMPTY_FILTERS).map(([key, empty]) => {
+    if (Array.isArray(empty)) {
+      return [key, [`${key}-value`]]
+    }
+    if (NUMERIC_RANGE_KEYS.includes(key)) {
+      return [key, { min: 1, max: 2 }]
+    }
+    if (START_END_DATE_KEYS.includes(key)) {
+      return [key, { startDate: '2020-01-01', endDate: '2021-01-01' }]
+    }
+    if (empty !== null && typeof empty === 'object') {
+      return [key, { after: '2020-01-01', before: '2021-01-01' }]
+    }
+    return [key, true]
+  }),
+) as FilterState
 
 const TestComponent = ({ defaultTab }: { defaultTab?: AssetType } = {}) => {
   const [state, updateState] = useLibraryUrlState(defaultTab)
@@ -36,6 +63,7 @@ const TestComponent = ({ defaultTab }: { defaultTab?: AssetType } = {}) => {
         })}
       >Update Filters
       </button>
+      <button id="update-all-filters" onClick={() => updateState({ filters: POPULATED_FILTERS })}>Update All Filters</button>
     </div>
   )
 }
@@ -53,6 +81,38 @@ describe('useLibraryUrlState', () => {
     const filters = JSON.parse(filtersEl.textContent!)
     expect(filters.accessManagement).toHaveLength(0)
     expect(filters.participantCount.min).toBeUndefined()
+  })
+
+  // A FilterState key missing from every param config used to parse as
+  // undefined, and the first filters[key].length read crashed the page. The
+  // parse is seeded with EMPTY_FILTERS so the omission degrades to "no value".
+  it('yields a value for every filter key, even ones no param config covers', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+
+    for (const key of Object.keys(EMPTY_FILTERS)) {
+      expect({ key, value: filters[key] }).toEqual({ key, value: EMPTY_FILTERS[key as keyof typeof EMPTY_FILTERS] })
+    }
+  })
+
+  // The seed above keeps an unregistered key from crashing the page, but it
+  // also hides it — the filter would silently stop surviving a reload. Every
+  // key is round-tripped through the URL here so a new one added to
+  // FilterState without a param config fails loudly instead.
+  it('round-trips every filter key through the URL', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    fireEvent.click(document.getElementById('update-all-filters')!)
+
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters).toEqual(JSON.parse(JSON.stringify(POPULATED_FILTERS)))
   })
 
   it('initializes with values from search params', () => {
