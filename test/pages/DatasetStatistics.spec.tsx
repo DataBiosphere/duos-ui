@@ -140,16 +140,23 @@ describe('DatasetStatistics', () => {
     dars = mockDarsResponse,
     tdrResponse = mockEmptyTdrResponse,
     tdrError,
+    darsError,
     dacRules = [],
   }: {
     dataset?: DatasetTerm
     dars?: DatasetStatisticsDar[]
     tdrResponse?: ReturnType<typeof buildTdrResponse>
     tdrError?: Error
+    darsError?: unknown
     dacRules?: unknown[]
   } = {}) => {
     vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([dataset])
-    vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(dars)
+    if (darsError) {
+      vi.mocked(DatasetMetrics.getDatasetStats).mockRejectedValue(darsError)
+    }
+    else {
+      vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(dars)
+    }
     vi.mocked(DAC.fetchDACbotRules).mockResolvedValue(dacRules as never)
 
     if (tdrError) {
@@ -284,6 +291,39 @@ describe('DatasetStatistics', () => {
     expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeTruthy()
     expect(await screen.findByText('DAR-001')).toBeTruthy()
     expect(await screen.findByText('Test Project')).toBeTruthy()
+  })
+
+  /**
+   * consent gates GET /api/metrics/dar-summaries/{datasetId} on being able to read the dataset, so
+   * a dataset whose study is unpublished answers 403 to everyone but its owners. The dataset
+   * itself still loaded, so only this section is withheld - and saying so beats the generic
+   * "unable to retrieve" the failure would otherwise read as.
+   */
+  it('explains who can see the request history when the study is not published', async () => {
+    const forbidden = Object.assign(new Error('User does not have permission'), {
+      response: { status: 403 },
+    })
+    renderDatasetStatistics({ darsError: forbidden })
+
+    expect(
+      await screen.findByText(/has not been published, so its data access request/),
+    ).toBeInTheDocument()
+    // Distinct from a study that simply has no requests yet
+    expect(
+      screen.queryByText(/No Data Access Requests have been created for this dataset/),
+    ).not.toBeInTheDocument()
+    // The rest of the page is unaffected
+    expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeTruthy()
+  })
+
+  it('still reports a genuine server failure as an error', async () => {
+    const serverError = Object.assign(new Error('boom'), { response: { status: 500 } })
+    renderDatasetStatistics({ darsError: serverError })
+
+    expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeTruthy()
+    expect(
+      screen.queryByText(/has not been published, so its data access request/),
+    ).not.toBeInTheDocument()
   })
 
   it('displays empty message when no data access requests exist', async () => {

@@ -14,7 +14,7 @@ import {
 } from 'src/types/model'
 import { ElasticsearchQuery } from 'src/types/elastic'
 import { SnapshotSummaryModel, EnumerateSnapshotModel } from 'src/types/tdrModel'
-import { extractError } from 'src/utils/ErrorUtils'
+import { extractError, extractStatus } from 'src/utils/ErrorUtils'
 import { createDataUseDisplay } from 'src/utils/DataUseUtils'
 import { useParams, useNavigate } from 'react-router'
 import { usePageTitle } from 'src/hooks/usePageTitle'
@@ -50,6 +50,8 @@ export default function DatasetStatistics() {
   const datasetIdentifier = params.datasetIdentifier || ''
   const [datasetTerm, setDatasetTerm] = useState<DatasetTerm>()
   const [dars, setDars] = useState<Array<DatasetStatisticsDar>>()
+  // Set when the request history is withheld rather than absent, so the section can say which.
+  const [darsRestricted, setDarsRestricted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [exportableSnapshots, setExportableSnapshots] = useState<SnapshotSummaryModel[]>([])
 
@@ -118,8 +120,22 @@ export default function DatasetStatistics() {
 
         if (datasetTerms.length === 1) {
           setDatasetTerm(datasetTerms[0])
-          const dars: Array<DatasetStatisticsDar> = await DatasetMetrics.getDatasetStats(datasetTerms[0].datasetId)
-          setDars(dars)
+          try {
+            const dars: Array<DatasetStatisticsDar> = await DatasetMetrics.getDatasetStats(datasetTerms[0].datasetId)
+            setDars(dars)
+          }
+          catch (error) {
+            // The dataset itself loaded, so a refusal here costs only this section. The endpoint
+            // is gated on being able to read the dataset's study, and an unpublished study is
+            // readable by its creator, its custodians, and admins alone - which is a different
+            // thing to tell the reader than "the server failed".
+            if (extractStatus(error) === 403) {
+              setDarsRestricted(true)
+            }
+            else {
+              showError('Unable to retrieve dataset statistics from server: ' + extractError(error))
+            }
+          }
           setIsLoading(false)
         }
         else {
@@ -271,7 +287,13 @@ export default function DatasetStatistics() {
           </div>
           <div style={{ paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%' }} />
           <div style={Styles.SUB_HEADER}>Data Access Requests for this dataset</div>
-          {dars?.length === 0
+          {darsRestricted && (
+            <div style={{ paddingTop: '20px', fontStyle: 'italic' }} role="status">
+              The study this dataset belongs to has not been published, so its data access request
+              history is available only to the study&apos;s creator, its custodians, and admins.
+            </div>
+          )}
+          {!darsRestricted && dars?.length === 0
             && (
               <div style={{ paddingTop: '20px', fontStyle: 'italic' }}>
                 No Data Access Requests have been created for this dataset.
