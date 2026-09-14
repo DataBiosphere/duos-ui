@@ -62,3 +62,22 @@ export const truncatedTextColumn = <T extends GridValidRowModel>(
     )
   },
 })
+
+/**
+ * Whether the asset cites datasets. A row indexed without the field reads as
+ * "No", matching how both transforms default it (`citation ?? false`). The
+ * citation text itself, where the index carries it, goes in the tooltip.
+ */
+export const citationColumn = <T extends GridValidRowModel>(
+  getCitationText: (row: T) => string,
+): GridColDef<T> => ({
+  field: 'citation',
+  headerName: 'Datasets Cited',
+  width: 130,
+  valueGetter: (value: boolean | undefined) => (value ? 'Yes' : 'No'),
+  renderCell: (params) => {
+    const text = getCitationText(params.row)
+    const label = params.row.citation ? 'Yes' : 'No'
+    return text ? <Tooltip title={text} placement="top"><Box>{label}</Box></Tooltip> : <Box>{label}</Box>
+  },
+})
