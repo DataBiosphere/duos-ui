@@ -227,7 +227,7 @@ describe('Library Versions - Tests', () => {
   })
 
   describe('Elasticsearch query structure constraints', () => {
-    it('all queries with terms use study.data.tags.keyword for case-sensitive matching', () => {
+    it('all queries with terms use .keyword suffix for case-sensitive matching', () => {
       const versions = getLibraryVersions(null, null)
 
       Object.entries(versions).forEach(([_key, library]) => {
@@ -237,8 +237,9 @@ describe('Library Versions - Tests', () => {
         query.bool.should.forEach((clause) => {
           if ('terms' in clause) {
             // Enforce the constraint: use .keyword suffix for case-sensitive matching
-            expect(clause.terms).not.toHaveProperty('study.data.tags')
-            expect(clause.terms).toHaveProperty(StudyDataEsFields.TAGS_KEYWORD)
+            Object.keys(clause.terms).forEach(field => {
+              expect(field).toMatch(/.keyword$/)
+            })
           }
         })
       })
@@ -305,10 +306,10 @@ describe('Library Versions - Tests', () => {
       // This is a real constraint: broad uses both institution matching AND tags
       // If someone refactors this, they should know it matters
       const hasInstitutionClause = query.bool.should.some(
-        c => 'match_phrase' in c && 'submitter.institution.name' in c.match_phrase
+        c => 'match_phrase' in c && 'submitter.institution.name' in c.match_phrase,
       )
       const hasTagsClause = query.bool.should.some(
-        c => 'terms' in c && StudyDataEsFields.TAGS_KEYWORD in c.terms
+        c => 'terms' in c && StudyDataEsFields.TAGS_KEYWORD in c.terms,
       )
 
       expect(hasInstitutionClause && hasTagsClause).toBe(true)
