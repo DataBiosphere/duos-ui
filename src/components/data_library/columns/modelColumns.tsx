@@ -1,9 +1,10 @@
 import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
-import { Link, Chip, Box, Tooltip } from '@mui/material'
+import { Link, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router'
 import { ModelAsset } from 'src/types/library'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
+import { chipListColumn } from 'src/components/data_library/columns/sharedColumns'
 
 /**
  * Column definitions for AI model view
@@ -84,30 +85,7 @@ export const makeModelColumns = (): GridColDef<ModelAsset>[] => [
       )
     },
   },
-  {
-    field: 'cloud',
-    headerName: 'Cloud',
-    flex: 1,
-    minWidth: 130,
-    sortable: false,
-    valueGetter: (_value, row) => (row.cloud || []).join(', '),
-    renderCell: (params) => {
-      const cloud = params.row.cloud || []
-      if (cloud.length === 0) return null
-      return (
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-          {cloud.slice(0, 3).map(c => (
-            <Chip key={c} label={c} size="small" variant="outlined" />
-          ))}
-          {cloud.length > 3 && (
-            <Tooltip title={cloud.slice(3).join(', ')}>
-              <Chip label={`+${cloud.length - 3}`} size="small" variant="outlined" />
-            </Tooltip>
-          )}
-        </Box>
-      )
-    },
-  },
+  chipListColumn<ModelAsset>('cloud', 'Cloud', row => row.cloud || [], 130),
   {
     field: 'maintainer',
     headerName: 'Maintainer',
@@ -153,28 +131,5 @@ export const makeModelColumns = (): GridColDef<ModelAsset>[] => [
         : null
     },
   },
-  {
-    field: 'tags',
-    headerName: 'Tags',
-    flex: 1,
-    minWidth: 150,
-    sortable: false,
-    valueGetter: (_value, row) => (row.tags || []).join(', '),
-    renderCell: (params) => {
-      const tags = params.row.tags || []
-      if (tags.length === 0) return null
-      return (
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-          {tags.slice(0, 3).map((tag, i) => (
-            <Chip key={i} label={tag} size="small" variant="outlined" />
-          ))}
-          {tags.length > 3 && (
-            <Tooltip title={tags.slice(3).join(', ')}>
-              <Chip label={`+${tags.length - 3}`} size="small" variant="outlined" />
-            </Tooltip>
-          )}
-        </Box>
-      )
-    },
-  },
+  chipListColumn<ModelAsset>('tags', 'Tags', row => row.tags || [], 150),
 ]

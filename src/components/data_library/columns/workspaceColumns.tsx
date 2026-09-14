@@ -4,6 +4,7 @@ import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router'
 import { WorkspaceAsset } from 'src/types/library'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
+import { chipListColumn, truncatedTextColumn } from 'src/components/data_library/columns/sharedColumns'
 
 /**
  * Column definitions for the Workspaces view
@@ -130,73 +131,7 @@ export const makeWorkspaceColumns = (): GridColDef<WorkspaceAsset>[] => [
       )
     },
   },
-  {
-    field: 'cloud',
-    headerName: 'Cloud',
-    flex: 1,
-    minWidth: 130,
-    sortable: false,
-    valueGetter: (_value, row) => (row.cloud || []).join(', '),
-    renderCell: (params) => {
-      const cloud = params.row.cloud || []
-      if (cloud.length === 0) return null
-      return (
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-          {cloud.slice(0, 3).map(c => (
-            <Chip key={c} label={c} size="small" variant="outlined" />
-          ))}
-          {cloud.length > 3 && (
-            <Tooltip title={cloud.slice(3).join(', ')}>
-              <Chip label={`+${cloud.length - 3}`} size="small" variant="outlined" />
-            </Tooltip>
-          )}
-        </Box>
-      )
-    },
-  },
-  {
-    field: 'access',
-    headerName: 'Access',
-    width: 120,
-    renderCell: (params) => {
-      const text = params.value || ''
-      return (
-        <Tooltip title={text} placement="top">
-          <Box
-            sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {text}
-          </Box>
-        </Tooltip>
-      )
-    },
-  },
-  {
-    field: 'tags',
-    headerName: 'Tags',
-    flex: 1,
-    minWidth: 150,
-    sortable: false,
-    valueGetter: (_value, row) => (row.tags || []).join(', '),
-    renderCell: (params) => {
-      const tags = params.row.tags || []
-      if (tags.length === 0) return null
-      return (
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-          {tags.slice(0, 3).map((tag, i) => (
-            <Chip key={i} label={tag} size="small" variant="outlined" />
-          ))}
-          {tags.length > 3 && (
-            <Tooltip title={tags.slice(3).join(', ')}>
-              <Chip label={`+${tags.length - 3}`} size="small" variant="outlined" />
-            </Tooltip>
-          )}
-        </Box>
-      )
-    },
-  },
+  chipListColumn<WorkspaceAsset>('cloud', 'Cloud', row => row.cloud || [], 130),
+  truncatedTextColumn<WorkspaceAsset>('access', 'Access', 120),
+  chipListColumn<WorkspaceAsset>('tags', 'Tags', row => row.tags || [], 150),
 ]

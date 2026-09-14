@@ -4,6 +4,7 @@ import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router'
 import { PublicationAsset } from 'src/types/library'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
+import { truncatedTextColumn } from 'src/components/data_library/columns/sharedColumns'
 
 /**
  * Column definitions for the Publications view in the Data Library.
@@ -132,27 +133,7 @@ export const makePublicationColumns = (): GridColDef<PublicationAsset>[] => [
       )
     },
   },
-  {
-    field: 'access',
-    headerName: 'Access',
-    width: 120,
-    renderCell: (params) => {
-      const text = params.value || ''
-      return (
-        <Tooltip title={text} placement="top">
-          <Box
-            sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {text}
-          </Box>
-        </Tooltip>
-      )
-    },
-  },
+  truncatedTextColumn<PublicationAsset>('access', 'Access', 120),
   {
     field: 'authorNames',
     headerName: 'Authors',
