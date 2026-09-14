@@ -237,7 +237,7 @@ describe('Library Versions - Tests', () => {
         query.bool.should.forEach((clause) => {
           if ('terms' in clause) {
             // Enforce the constraint: use .keyword suffix for case-sensitive matching
-            Object.keys(clause.terms).forEach(field => {
+            Object.keys(clause.terms).forEach((field) => {
               expect(field).toMatch(/.keyword$/)
             })
           }
@@ -260,7 +260,7 @@ describe('Library Versions - Tests', () => {
 
           query.bool.should.forEach((clause) => {
             // Each clause should have exactly one query type
-            const queryTypes = ['match_phrase', 'term', 'terms'].filter(type => type in clause)
+            const queryTypes = ['match_phrase', 'term', 'terms'].filter((type) => type in clause)
             expect(queryTypes.length).toBe(1)
           })
         }
@@ -284,10 +284,10 @@ describe('Library Versions - Tests', () => {
 
         query.bool.should.forEach((clause) => {
           if ('terms' in clause) {
-            Object.keys(clause.terms).forEach(field => allFields.add(field))
+            Object.keys(clause.terms).forEach((field) => allFields.add(field))
           }
           if ('match_phrase' in clause) {
-            Object.keys(clause.match_phrase).forEach(field => allFields.add(field))
+            Object.keys(clause.match_phrase).forEach((field) => allFields.add(field))
           }
         })
 
@@ -306,10 +306,10 @@ describe('Library Versions - Tests', () => {
       // This is a real constraint: broad uses both institution matching AND tags
       // If someone refactors this, they should know it matters
       const hasInstitutionClause = query.bool.should.some(
-        c => 'match_phrase' in c && 'submitter.institution.name' in c.match_phrase,
+        (c) => 'match_phrase' in c && 'submitter.institution.name' in c.match_phrase,
       )
       const hasTagsClause = query.bool.should.some(
-        c => 'terms' in c && StudyDataEsFields.TAGS_KEYWORD in c.terms,
+        (c) => 'terms' in c && StudyDataEsFields.TAGS_KEYWORD in c.terms,
       )
 
       expect(hasInstitutionClause && hasTagsClause).toBe(true)
