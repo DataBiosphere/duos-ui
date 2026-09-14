@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import {
@@ -19,6 +20,8 @@ import TableIconButton from 'src/components/TableIconButton'
 import { LibraryCard } from 'src/types/model'
 import { extractError } from 'src/utils/ErrorUtils'
 import TableHeaderSection from 'src/components/TableHeaderSection'
+
+dayjs.extend(utc)
 
 export interface LibraryCardTableProps {
   libraryCards?: LibraryCard[]
@@ -82,10 +85,11 @@ const userNameCell = (userName: string | undefined, id?: number): TableCell => {
   }
 }
 
+// Read in UTC: dayjs parses in local time, which reports the previous day west of UTC.
 const createDateCell = (createDate: string | Date | undefined, id?: number): TableCell => {
   return {
     id,
-    data: isNil(createDate) ? '- -' : dayjs(createDate).format('YYYY-MM-DD'),
+    data: isNil(createDate) ? '- -' : dayjs.utc(createDate).format('YYYY-MM-DD'),
     style: { width: styles.cellWidths.createDate },
     label: 'create-date',
   }

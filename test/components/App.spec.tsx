@@ -28,9 +28,17 @@ vi.mock('src/libs/ajax/ServiceStatus', () => ({
 }))
 
 vi.mock('src/libs/notificationService', () => ({
+  // AppRoutes statically imports UserProfile and DataAccessRequestApplication, so the mock has to
+  // carry what they use as well as the header's.
   NotificationService: {
     getActiveBanners: vi.fn().mockResolvedValue([]),
+    getBannerObjectById: vi.fn().mockResolvedValue(null),
   },
+  isBannerVisible: vi.fn().mockReturnValue(true),
+  isBannerDismissed: vi.fn().mockReturnValue(false),
+  visibleBanner: vi.fn(banner => banner ?? null),
+  dismissBanner: vi.fn(),
+  onBannerDismissed: vi.fn(() => () => {}),
 }))
 
 // Both vi.fn()s default to undefined: the probe reads as in-flight, so every
