@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { NotificationService } from 'src/libs/notificationService'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { dismissBanner, isBannerDismissed, isBannerVisible, NotificationService, onBannerDismissed, visibleBanner } from 'src/libs/notificationService'
 import { Config } from 'src/libs/config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
+import { Storage } from 'src/libs/storage'
 
 vi.mock('src/libs/config', () => ({
   Config: {
@@ -22,6 +23,10 @@ const banners = [
 describe('NotificationService', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   // ── getBanners ─────────────────────────────────────────────────────────────
@@ -139,6 +144,110 @@ describe('NotificationService', () => {
       const result = await NotificationService.getBannerObjectById('banner-1')
 
       expect(result).toBeUndefined()
+    })
+  })
+
+  // ── isBannerDismissed / dismissBanner ──────────────────────────────────────
+
+  const banner = { id: 'banner-1', active: true, message: 'Hello', level: 'info' } as const
+
+  describe('isBannerDismissed', () => {
+    it('returns false when the banner has not been dismissed', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(undefined)
+
+      expect(isBannerDismissed('banner-1')).toBe(false)
+    })
+
+    it('returns true when the banner has been dismissed', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockImplementation(
+        (key: string) => key === 'dismissedBanner_banner-1',
+      )
+
+      expect(isBannerDismissed('banner-1')).toBe(true)
+    })
+  })
+
+  describe('dismissBanner', () => {
+    it('persists the dismissal under a banner-specific key', () => {
+      const setCurrentUserSettings = vi.spyOn(Storage, 'setCurrentUserSettings').mockReturnValue(undefined)
+
+      dismissBanner('banner-1')
+
+      expect(setCurrentUserSettings).toHaveBeenCalledWith('dismissedBanner_banner-1', true)
+    })
+  })
+
+  describe('isBannerVisible', () => {
+    it('shows a banner the user has not dismissed', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(undefined)
+
+      expect(isBannerVisible(banner)).toBe(true)
+    })
+
+    it('hides a banner the user has dismissed', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(true)
+
+      expect(isBannerVisible(banner)).toBe(false)
+    })
+
+    // The feed is ops-authored JSON, so an entry can arrive without the id a dismissal is keyed on.
+    it('hides an entry with no id, and a missing one', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(undefined)
+
+      expect(isBannerVisible({ active: true, message: 'No id' } as unknown as typeof banner)).toBe(false)
+      expect(isBannerVisible(null)).toBe(false)
+      expect(isBannerVisible(undefined)).toBe(false)
+    })
+  })
+
+  describe('visibleBanner', () => {
+    it('reads back a banner the user can still see', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(undefined)
+
+      expect(visibleBanner(banner)).toBe(banner)
+    })
+
+    it('reads null for a dismissed banner', () => {
+      vi.spyOn(Storage, 'getCurrentUserSettings').mockReturnValue(true)
+
+      expect(visibleBanner(banner)).toBeNull()
+    })
+  })
+
+  describe('onBannerDismissed', () => {
+    beforeEach(() => {
+      vi.spyOn(Storage, 'setCurrentUserSettings').mockReturnValue(undefined)
+    })
+
+    it('tells subscribers which banner went, so every copy on screen can drop it', () => {
+      const listener = vi.fn()
+      const unsubscribe = onBannerDismissed(listener)
+
+      dismissBanner('banner-1')
+
+      expect(listener).toHaveBeenCalledExactlyOnceWith('banner-1')
+      unsubscribe()
+    })
+
+    it('reaches every subscriber', () => {
+      const header = vi.fn()
+      const page = vi.fn()
+      const unsubscribes = [onBannerDismissed(header), onBannerDismissed(page)]
+
+      dismissBanner('banner-2')
+
+      expect(header).toHaveBeenCalledWith('banner-2')
+      expect(page).toHaveBeenCalledWith('banner-2')
+      unsubscribes.forEach(unsubscribe => unsubscribe())
+    })
+
+    it('stops telling a subscriber once it unsubscribes', () => {
+      const listener = vi.fn()
+      onBannerDismissed(listener)()
+
+      dismissBanner('banner-3')
+
+      expect(listener).not.toHaveBeenCalled()
     })
   })
 })
