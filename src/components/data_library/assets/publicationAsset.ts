@@ -28,12 +28,13 @@ const matchesPublicationFilters = (publication: PublicationAsset, filters?: Filt
     return true
   }
 
-  const publishedDate = publication.publishedDate || ''
+  // A missing date matches neither bound, as in the ES range clause, which
+  // never matches a document without the field.
   const { after, before } = filters.publicationPublishedDate
-  if (after && publishedDate < after) {
+  if (after && (!publication.publishedDate || publication.publishedDate < after)) {
     return false
   }
-  return !(before && publishedDate > before)
+  return !(before && (!publication.publishedDate || publication.publishedDate > before))
 }
 
 export const publicationAsset: AssetDefinition = {

@@ -251,6 +251,29 @@ describe('intellectualPropertyAsset — transformResponse', () => {
     expect((result.items[0] as IntellectualPropertyAsset).ipId).toBe('ip-in-range')
   })
 
+  // The ES range clause never matches a document missing the field, so a row
+  // with no filing date must not slip through a one-sided bound here either.
+  it('excludes an asset with no filing date from either one-sided bound', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { ipId: 'ip-dated', filingDate: '2022-03-01' },
+        { ipId: 'ip-undated' },
+      ]),
+    ])
+
+    const before = intellectualPropertyAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      ipFiledDate: { before: '2023-12-31' },
+    })
+    expect(before.items.map(i => (i as IntellectualPropertyAsset).ipId)).toEqual(['ip-dated'])
+
+    const after = intellectualPropertyAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      ipFiledDate: { after: '2020-01-01' },
+    })
+    expect(after.items.map(i => (i as IntellectualPropertyAsset).ipId)).toEqual(['ip-dated'])
+  })
+
   it('returns only assets matching the type filter', () => {
     const response = makeResponse([
       makeBucket(1, [

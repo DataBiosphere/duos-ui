@@ -5,7 +5,6 @@ import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { computeTabCounts, STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
 import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, PaginationState, SortOrder } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
-import { assetFilterRegistry } from 'src/libs/dataLibraryFilterConfig'
 import {
   EMPTY_FILTERS,
   getExternalActiveFilters,
@@ -111,6 +110,19 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     urlState.query ?? '',
   )
 
+  // Option lists come from a corpus narrowed only by the search term. Every
+  // active filter is applied to the counts query at the Elasticsearch level,
+  // and those clauses match whole *studies*, so a value that exists only in a
+  // study some other selection filtered out could never be offered again —
+  // clearing filters client-side cannot bring back a study the response never
+  // carried. When nothing is filtered this resolves to the identical query key
+  // as the counts query above, so it shares that request rather than adding one.
+  const { data: optionCorpusResponse } = useLibraryTabCounts(
+    libraryConfig,
+    EMPTY_FILTERS,
+    urlState.query ?? '',
+  )
+
   // Badge counts are derived at render time from the shared response with the
   // *current* filters — the same inputs the study-asset grids are derived from
   // below — so a badge and its grid always agree, even while a refetch for new
@@ -171,18 +183,9 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     // moment the user switched to a different tab.
     const FULL_CORPUS_PAGINATION: PaginationState = { page: 0, pageSize: Number.MAX_SAFE_INTEGER }
 
-    // An asset's own filters are cleared first: derived from a corpus already
-    // narrowed by the filter being offered, a checkbox list would collapse to
-    // the checked value and never hold two. Other tabs' filters still apply.
-    const optionSourceFilters = (assetType: AssetType): FilterState =>
-      assetFilterRegistry[assetType].visibleFilters.reduce<FilterState>(
-        (cleared, key) => ({ ...cleared, [key]: EMPTY_FILTERS[key] }),
-        urlState.filters,
-      )
-
     const fullCorpusItems = <T>(assetType: AssetType): T[] =>
-      (tabCountsResponse
-        ? assetRegistry[assetType].transformResponse(tabCountsResponse, FULL_CORPUS_PAGINATION, optionSourceFilters(assetType)).items
+      (optionCorpusResponse
+        ? assetRegistry[assetType].transformResponse(optionCorpusResponse, FULL_CORPUS_PAGINATION, EMPTY_FILTERS).items
         : []) as T[]
 
     const modelItems = fullCorpusItems<{ format?: string, license?: string, cloud?: string[], tags?: string[] }>(AssetType.MODELS)
@@ -248,7 +251,7 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
       biospecimenPostMortemIntervalRange: { min: 0, max: 1000000 },
       participantCountRange: { min: 0, max: 100000 },
     }
-  }, [metadata, tabCountsResponse, urlState.filters])
+  }, [metadata, optionCorpusResponse])
 
   const filterSections = useMemo(
     () => getFilterSectionsForAsset(urlState.tab, availableFilters),

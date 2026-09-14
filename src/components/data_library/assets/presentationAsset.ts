@@ -32,12 +32,13 @@ const matchesPresentationFilters = (presentation: PresentationAsset, filters?: F
     return true
   }
 
-  const date = presentation.date || ''
+  // A missing date matches neither bound, as in the ES range clause, which
+  // never matches a document without the field.
   const { after, before } = filters.presentationDate
-  if (after && date < after) {
+  if (after && (!presentation.date || presentation.date < after)) {
     return false
   }
-  return !(before && date > before)
+  return !(before && (!presentation.date || presentation.date > before))
 }
 
 export const presentationAsset: AssetDefinition = {

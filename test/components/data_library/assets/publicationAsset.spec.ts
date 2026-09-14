@@ -309,6 +309,29 @@ describe('publicationAsset — transformResponse', () => {
     expect(result.total).toBe(1)
     expect((result.items[0] as PublicationAsset).publicationId).toBe('p-in-range')
   })
+
+  // The ES range clause never matches a document missing the field, so a row
+  // with no date must not slip through a one-sided bound here either.
+  it('excludes a publication with no published date from either one-sided bound', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { publicationId: 'p-dated', publishedDate: '2022-03-01' },
+        { publicationId: 'p-undated' },
+      ]),
+    ])
+
+    const before = publicationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      publicationPublishedDate: { before: '2023-12-31' },
+    })
+    expect(before.items.map(i => (i as PublicationAsset).publicationId)).toEqual(['p-dated'])
+
+    const after = publicationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      publicationPublishedDate: { after: '2020-01-01' },
+    })
+    expect(after.items.map(i => (i as PublicationAsset).publicationId)).toEqual(['p-dated'])
+  })
 })
 
 describe('publicationAsset — getRowId', () => {

@@ -321,6 +321,29 @@ describe('presentationAsset — transformResponse', () => {
     expect(result.total).toBe(1)
     expect((result.items[0] as PresentationAsset).presentationId).toBe('p-in-range')
   })
+
+  // The ES range clause never matches a document missing the field, so a row
+  // with no date must not slip through a one-sided bound here either.
+  it('excludes a presentation with no date from either one-sided bound', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { presentationId: 'p-dated', date: '2022-03-01' },
+        { presentationId: 'p-undated' },
+      ]),
+    ])
+
+    const before = presentationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      presentationDate: { before: '2023-12-31' },
+    })
+    expect(before.items.map(i => (i as PresentationAsset).presentationId)).toEqual(['p-dated'])
+
+    const after = presentationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      presentationDate: { after: '2020-01-01' },
+    })
+    expect(after.items.map(i => (i as PresentationAsset).presentationId)).toEqual(['p-dated'])
+  })
 })
 
 describe('presentationAsset — getRowId', () => {

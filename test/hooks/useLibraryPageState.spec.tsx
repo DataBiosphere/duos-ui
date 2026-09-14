@@ -356,4 +356,36 @@ describe('useLibraryPageState — dynamic filter option derivation', () => {
 
     expect(result.current.availableFilters.workspaceCloud.map(o => o.value)).toEqual(['AWS'])
   })
+
+  // The filter clauses match whole studies, so a selection removes every study
+  // with no matching model from the response — a value living only in one of
+  // those studies cannot be recovered by ignoring the filter client-side.
+  it('offers a value whose only study the active filter removes from the response', () => {
+    const oneModelStudy = (studyId: number, format: string) => ({
+      key: studyId,
+      study_details: {
+        hits: { hits: [{ _source: { study: { studyId, studyName: `Study ${studyId}`, assets: { models: [{ modelId: `m${studyId}`, format }] } } } }] },
+      },
+    })
+    const allStudies = [oneModelStudy(1, 'ONNX'), oneModelStudy(2, 'PyTorch')]
+
+    vi.mocked(useLibraryTabCounts).mockImplementation((_config, filters) => {
+      const selected = (filters as FilterState).modelFormat
+      const buckets = selected.length > 0
+        ? allStudies.filter(b => selected.includes(b.study_details.hits.hits[0]._source.study.assets.models[0].format))
+        : allStudies
+      return {
+        data: { aggregations: { total_studies: { value: buckets.length }, datasets_count: { doc_count: 0 }, studies: { buckets } } },
+        isFetching: false,
+        error: null,
+      } as unknown as ReturnType<typeof useLibraryTabCounts>
+    })
+
+    setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+    // The grid still shows only the matching study's model.
+    expect(result.current.data?.items).toHaveLength(1)
+  })
 })
