@@ -98,6 +98,32 @@ describe('useLibraryUrlState', () => {
   // The seed above also hides an unregistered key, so round-trip every one: a
   // filter added without a param config fails here instead of silently
   // dropping out of the URL.
+  // These params are no longer parsed or written, so nothing else would ever
+  // remove them from a URL that already carries them.
+  it('drops the retired Datasets Cited params on the next filter change', () => {
+    const Harness = () => {
+      const [, updateState] = useLibraryUrlState()
+      const location = useLocation()
+      return (
+        <div>
+          <div id="search">{location.search}</div>
+          <button onClick={() => updateState({ filters: { ...EMPTY_FILTERS, accessManagement: ['controlled'] } })}>Go</button>
+        </div>
+      )
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/?datasetsCited=true&presentationsDatasetsCited=false&publicationsDatasetsCited=true']}>
+        <Harness />
+      </MemoryRouter>,
+    )
+    fireEvent.click(screen.getByText('Go'))
+
+    const search = document.getElementById('search')!.textContent!
+    expect(search).not.toContain('atasetsCited')
+    expect(search).toContain('access=controlled')
+  })
+
   it('round-trips every filter key through the URL', () => {
     render(
       <MemoryRouter initialEntries={['/']}>

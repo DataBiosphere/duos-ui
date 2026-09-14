@@ -1,4 +1,4 @@
-import { useQueries, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
 import { FilterState, LibraryVersionNew } from 'src/types/library'
@@ -78,19 +78,3 @@ export const useLibraryTabCounts = (
   filters: FilterState,
   queryTerm: string,
 ) => useQuery(tabCountsQueryOptions(libraryConfig, filters, queryTerm))
-
-/**
- * The same query run once per filter set, for deriving each asset's filter
- * option lists from a corpus its own filters have not narrowed.
- *
- * Sets that come out identical share one cache entry, so this costs one
- * request plus one per asset that actually owns an active filter — with
- * nothing filtered it is a single request, shared with the counts query.
- */
-export const useLibraryTabCountsFor = (
-  libraryConfig: LibraryVersionNew,
-  filterSets: FilterState[],
-  queryTerm: string,
-) => useQueries({
-  queries: filterSets.map(filters => tabCountsQueryOptions(libraryConfig, filters, queryTerm)),
-})

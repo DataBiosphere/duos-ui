@@ -5,9 +5,8 @@ import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import { AssetType, FilterState, LibraryVersionNew } from 'src/types/library'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
-import { useLibraryTabCounts, useLibraryTabCountsFor } from 'src/hooks/useLibraryTabCounts'
+import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
 
 vi.mock('src/hooks/useLibraryData')
 vi.mock('src/hooks/useLibraryTabCounts')
@@ -50,16 +49,14 @@ const tabCountsResponse = {
 
 const updateUrlState = vi.fn()
 
-// The counts query and the per-asset option corpora are the same query with
-// different filter sets, so both mocks answer from one function of the filters.
+// The counts query and the visible tab's option corpus are the same query with
+// different filter sets, so the mock answers from one function of the filters.
 const mockCorpus = (responseFor: (filters: FilterState) => unknown) => {
-  vi.mocked(useLibraryTabCounts).mockImplementation((_config, filters) => ({
+  vi.mocked(useLibraryTabCounts).mockImplementation((_config, filters: FilterState) => ({
     data: responseFor(filters),
     isFetching: false,
     error: null,
   } as unknown as ReturnType<typeof useLibraryTabCounts>))
-  vi.mocked(useLibraryTabCountsFor).mockImplementation((_config, filterSets) =>
-    filterSets.map(filters => ({ data: responseFor(filters) })) as unknown as ReturnType<typeof useLibraryTabCountsFor>)
 }
 
 const setup = (tab: AssetType, filters: FilterState = EMPTY_FILTERS) => {
@@ -396,11 +393,11 @@ describe('useLibraryPageState — dynamic filter option derivation', () => {
     setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'], accessManagement: ['controlled'] })
     renderHook(() => useLibraryPageState(libraryConfig))
 
-    const modelsCorpusFilters = vi.mocked(useLibraryTabCountsFor).mock.calls.at(-1)![1][
-      STUDY_ASSET_TABS.indexOf(AssetType.MODELS)
-    ]
-    expect(modelsCorpusFilters.modelFormat).toEqual([])
-    expect(modelsCorpusFilters.accessManagement).toEqual(['controlled'])
+    // Two calls: the counts query with every filter, and the Models corpus with
+    // only the Models keys cleared.
+    const corpusFilters = vi.mocked(useLibraryTabCounts).mock.calls.map(call => call[1])
+    expect(corpusFilters).toContainEqual(expect.objectContaining({ modelFormat: [], accessManagement: ['controlled'] }))
+    expect(corpusFilters).toContainEqual(expect.objectContaining({ modelFormat: ['ONNX'], accessManagement: ['controlled'] }))
   })
 
   // Each filter set is a new query key and useQueries starts it empty, so
@@ -410,9 +407,9 @@ describe('useLibraryPageState — dynamic filter option derivation', () => {
     const { result, rerender } = renderHook(() => useLibraryPageState(libraryConfig))
     expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
 
-    // The next corpus is still in flight: no data on any query.
-    vi.mocked(useLibraryTabCountsFor).mockImplementation((_config, filterSets) =>
-      filterSets.map(() => ({ data: undefined })) as unknown as ReturnType<typeof useLibraryTabCountsFor>)
+    // The corpus for the cleared set is still in flight; the counts query,
+    // keyed on the full filter set, already has its answer.
+    mockCorpus(filters => (filters.modelFormat.length === 0 ? undefined : responseWithBucket))
     setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
     rerender()
 

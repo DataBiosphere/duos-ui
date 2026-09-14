@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
-import { useLibraryTabCounts, useLibraryTabCountsFor } from 'src/hooks/useLibraryTabCounts'
+import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { computeTabCounts, STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
 import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, PaginationState, SortOrder } from 'src/types/library'
@@ -111,33 +111,33 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     urlState.query ?? '',
   )
 
-  // An asset's option lists have to come from a corpus its *own* filters never
-  // narrowed. The filter clauses match whole studies, so selecting one value
-  // drops every study without it, and a sibling value living only in one of
-  // those studies could never be offered again — no client-side pass can
+  // The visible tab's option lists have to come from a corpus its *own* filters
+  // never narrowed. The filter clauses match whole studies, so selecting one
+  // value drops every study without it, and a sibling value living only in one
+  // of those studies could never be offered again — no client-side pass can
   // recover a study the response never carried. Filters owned by other tabs
   // stay applied, so the options stay scoped the way the grid is.
-  const optionCorpusFilterSets = useMemo(
-    () => STUDY_ASSET_TABS.map(assetType =>
-      assetFilterRegistry[assetType].visibleFilters.reduce<FilterState>(
-        (cleared, key) => ({ ...cleared, [key]: EMPTY_FILTERS[key] }),
-        urlState.filters,
-      )),
-    [urlState.filters],
+  //
+  // Only the visible tab gets its own corpus. Every other asset reads the
+  // counts response, which is already loaded: their options are only used to
+  // label external chips, and those fall back to the raw value. Clearing the
+  // tab's own keys is a no-op unless it actually has one set, so this shares
+  // the counts query's key — and its request — until it does.
+  const optionCorpusFilters = useMemo(
+    () => (isStudyAssetTab
+      ? assetFilterRegistry[urlState.tab].visibleFilters.reduce<FilterState>(
+          (cleared, key) => ({ ...cleared, [key]: EMPTY_FILTERS[key] }),
+          urlState.filters,
+        )
+      : urlState.filters),
+    [isStudyAssetTab, urlState.tab, urlState.filters],
   )
-  const optionCorpusResults = useLibraryTabCountsFor(libraryConfig, optionCorpusFilterSets, urlState.query ?? '')
+  const { data: visibleTabCorpus } = useLibraryTabCounts(libraryConfig, optionCorpusFilters, urlState.query ?? '')
 
-  // Toggling a filter on the tab being viewed leaves that tab's corpus key
-  // untouched (its own keys are cleared either way), so the usual interaction
-  // never refetches these. A filter set on *another* tab does change the key,
-  // and useQueries starts a new key empty rather than carrying the previous
-  // answer, so fall back to the counts response — already loaded, and narrower
-  // only by this asset's own filters — instead of blanking every section to
-  // "No filters available" for a tick. It converges as soon as the query lands.
   const optionCorpusByAsset = useMemo(
-    () => new Map(STUDY_ASSET_TABS.map((assetType, i) =>
-      [assetType, optionCorpusResults[i]?.data ?? tabCountsResponse])),
-    [optionCorpusResults, tabCountsResponse],
+    () => new Map(STUDY_ASSET_TABS.map(assetType =>
+      [assetType, assetType === urlState.tab ? (visibleTabCorpus ?? tabCountsResponse) : tabCountsResponse])),
+    [urlState.tab, visibleTabCorpus, tabCountsResponse],
   )
 
   // Badge counts are derived at render time from the shared response with the

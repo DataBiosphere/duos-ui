@@ -98,6 +98,10 @@ const RANGE_FILTER_PARAM_CONFIG: RangeFilterParamConfig[] = [
   },
 ]
 
+// Params from filters this app no longer offers (the presentation/publication
+// "Datasets Cited" booleans).
+const RETIRED_PARAMS = ['datasetsCited', 'presentationsDatasetsCited', 'publicationsDatasetsCited']
+
 const DATE_FILTER_PARAM_CONFIG: DateFilterParamConfig[] = [
   { key: 'clinicalTrialDates', startParam: 'clinicalTrialStartDate', endParam: 'clinicalTrialEndDate' },
   { key: 'biospecimenCollectionDate', startParam: 'biospecimenCollectedAfter', endParam: 'biospecimenCollectedBefore', startKey: 'after', endKey: 'before' },
@@ -293,6 +297,11 @@ const serializeFiltersToUrl = (
   searchParams: URLSearchParams,
 ): void => {
   serializeArrayFiltersToUrl(filters, searchParams)
+  // updateState serializes over a copy of the current params, so a param no
+  // filter writes any more is never removed. These three are no longer parsed
+  // or written, and would otherwise ride along in the URL forever once an old
+  // link introduced them.
+  RETIRED_PARAMS.forEach(param => searchParams.delete(param))
   serializeBooleanFilterToUrl(filters.instantApproval, 'instantApproval', searchParams)
   serializeRangeFiltersToUrl(filters, searchParams)
   serializeDateFiltersToUrl(filters, searchParams)
