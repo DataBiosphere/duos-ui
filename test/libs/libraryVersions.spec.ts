@@ -284,10 +284,10 @@ describe('Library Versions - Tests', () => {
 
         query.bool.should.forEach((clause) => {
           if ('terms' in clause) {
-            Object.keys(clause.terms).forEach((field) => allFields.add(field))
+            Object.keys(clause.terms).forEach(field => allFields.add(field))
           }
           if ('match_phrase' in clause) {
-            Object.keys(clause.match_phrase).forEach((field) => allFields.add(field))
+            Object.keys(clause.match_phrase).forEach(field => allFields.add(field))
           }
         })
 
