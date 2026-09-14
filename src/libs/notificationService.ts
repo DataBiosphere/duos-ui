@@ -14,6 +14,7 @@ export interface Banner {
   level: 'info' | 'warning' | 'danger' | 'success'
 }
 
+// Keyed by id alone: new banner text needs a new id. See docs/notification-banners.md.
 const dismissedBannerKey = (id: string): string => `dismissedBanner_${id}`
 
 /**
