@@ -402,4 +402,20 @@ describe('useLibraryPageState — dynamic filter option derivation', () => {
     expect(modelsCorpusFilters.modelFormat).toEqual([])
     expect(modelsCorpusFilters.accessManagement).toEqual(['controlled'])
   })
+
+  // Each filter set is a new query key and useQueries starts it empty, so
+  // without holding the last answer the panel blanks on every filter edit.
+  it('keeps the previous options while the next corpus loads', () => {
+    setup(AssetType.MODELS)
+    const { result, rerender } = renderHook(() => useLibraryPageState(libraryConfig))
+    expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+
+    // The next corpus is still in flight: no data on any query.
+    vi.mocked(useLibraryTabCountsFor).mockImplementation((_config, filterSets) =>
+      filterSets.map(() => ({ data: undefined })) as unknown as ReturnType<typeof useLibraryTabCountsFor>)
+    setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+    rerender()
+
+    expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+  })
 })

@@ -126,9 +126,18 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     [urlState.filters],
   )
   const optionCorpusResults = useLibraryTabCountsFor(libraryConfig, optionCorpusFilterSets, urlState.query ?? '')
+
+  // Toggling a filter on the tab being viewed leaves that tab's corpus key
+  // untouched (its own keys are cleared either way), so the usual interaction
+  // never refetches these. A filter set on *another* tab does change the key,
+  // and useQueries starts a new key empty rather than carrying the previous
+  // answer, so fall back to the counts response — already loaded, and narrower
+  // only by this asset's own filters — instead of blanking every section to
+  // "No filters available" for a tick. It converges as soon as the query lands.
   const optionCorpusByAsset = useMemo(
-    () => new Map(STUDY_ASSET_TABS.map((assetType, i) => [assetType, optionCorpusResults[i]?.data])),
-    [optionCorpusResults],
+    () => new Map(STUDY_ASSET_TABS.map((assetType, i) =>
+      [assetType, optionCorpusResults[i]?.data ?? tabCountsResponse])),
+    [optionCorpusResults, tabCountsResponse],
   )
 
   // Badge counts are derived at render time from the shared response with the
@@ -266,8 +275,8 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
   }, [metadata, optionCorpusByAsset])
 
   const filterSections = useMemo(
-    () => getFilterSectionsForAsset(urlState.tab, availableFilters),
-    [urlState.tab, availableFilters],
+    () => getFilterSectionsForAsset(urlState.tab, availableFilters, urlState.filters),
+    [urlState.tab, availableFilters, urlState.filters],
   )
 
   // Filters set on other tabs are kept in state so they persist across tab

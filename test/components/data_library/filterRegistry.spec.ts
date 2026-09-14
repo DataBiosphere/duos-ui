@@ -91,6 +91,47 @@ describe('filterRegistry', () => {
 
   // A wrong path builds a valid query that matches nothing, which neither
   // typecheck nor a row-level test can catch.
+  // Cross-tab scoping can drop a selected value out of the corpus its options
+  // come from; the checkbox has to survive that or the filter cannot be cleared.
+  describe('selected values in option lists', () => {
+    const withModelFormats = (values: string[]): AvailableFilters => ({
+      ...availableFilters,
+      modelFormat: values.map(value => ({ value, label: value })),
+    })
+
+    it('re-adds a selected value the corpus no longer offers', () => {
+      const sections = getFilterSectionsForAsset(
+        AssetType.MODELS,
+        withModelFormats(['ONNX']),
+        { ...EMPTY_FILTERS, modelFormat: ['ONNX', 'PyTorch'] },
+      )
+      const format = sections.find(section => section.key === 'modelFormat')
+
+      expect(format?.options?.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+    })
+
+    it('leaves the corpus options untouched when every selection is present', () => {
+      const sections = getFilterSectionsForAsset(
+        AssetType.MODELS,
+        withModelFormats(['ONNX', 'PyTorch']),
+        { ...EMPTY_FILTERS, modelFormat: ['ONNX'] },
+      )
+      const format = sections.find(section => section.key === 'modelFormat')
+
+      expect(format?.options?.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+    })
+
+    it('does not touch a date-range section, which has no options', () => {
+      const sections = getFilterSectionsForAsset(
+        AssetType.PRESENTATIONS,
+        availableFilters,
+        { ...EMPTY_FILTERS, presentationDate: { after: '2020-01-01' } },
+      )
+
+      expect(sections.find(section => section.key === 'presentationDate')?.options).toBeUndefined()
+    })
+  })
+
   describe('asset filter field paths', () => {
     const checkboxCases: Array<[keyof FilterState, string]> = [
       ['modelFormat', 'study.assets.models.format'],
