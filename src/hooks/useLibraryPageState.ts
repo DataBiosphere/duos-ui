@@ -171,13 +171,9 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     // moment the user switched to a different tab.
     const FULL_CORPUS_PAGINATION: PaginationState = { page: 0, pageSize: Number.MAX_SAFE_INTEGER }
 
-    // An asset's own filters are cleared before its options are derived, so a
-    // checkbox list still offers every value once one of them is checked. Left
-    // applied, the list would collapse to the checked value and the control
-    // would be single-select in practice — you could never OR two values.
-    // Filters set on *other* tabs stay applied (as does the search term, already
-    // baked into the response), so the options remain scoped to the corpus the
-    // user is actually looking at.
+    // An asset's own filters are cleared first: derived from a corpus already
+    // narrowed by the filter being offered, a checkbox list would collapse to
+    // the checked value and never hold two. Other tabs' filters still apply.
     const optionSourceFilters = (assetType: AssetType): FilterState =>
       assetFilterRegistry[assetType].visibleFilters.reduce<FilterState>(
         (cleared, key) => ({ ...cleared, [key]: EMPTY_FILTERS[key] }),

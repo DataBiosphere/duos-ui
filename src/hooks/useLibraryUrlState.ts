@@ -271,12 +271,9 @@ const serializeBooleanFilterToUrl = (
 }
 
 /**
- * Parse filters from URL search params.
- *
- * Seeded with EMPTY_FILTERS so a FilterState key that nobody registered in a
- * param config above still arrives as its empty value rather than undefined.
- * The spreads below are `Record`s, so the `as FilterState` cast cannot catch
- * the omission, and the first `filters[key].length` read would throw.
+ * Parse filters from URL search params. Seeded with EMPTY_FILTERS because the
+ * spreads below are `Record`s the cast cannot check: a key missing from every
+ * param config would arrive undefined and throw on `filters[key].length`.
  */
 const parseFiltersFromUrl = (searchParams: URLSearchParams): FilterState => {
   return {

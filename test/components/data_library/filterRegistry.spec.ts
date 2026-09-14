@@ -89,9 +89,8 @@ describe('filterRegistry', () => {
     expect(serialized).toContain('study.assets.presentations.event')
   })
 
-  // A wrong `study.assets.*` path builds a perfectly valid query that quietly
-  // matches nothing, and neither typecheck nor a row-level test can catch it —
-  // every asset filter's indexed field is pinned here.
+  // A wrong path builds a valid query that matches nothing, which neither
+  // typecheck nor a row-level test can catch.
   describe('asset filter field paths', () => {
     const checkboxCases: Array<[keyof FilterState, string]> = [
       ['modelFormat', 'study.assets.models.format'],

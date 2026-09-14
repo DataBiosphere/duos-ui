@@ -7,15 +7,13 @@ import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { AssetType, FilterState } from 'src/types/library'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
-// EMPTY_FILTERS holds `{}` for every object-shaped filter, so their bounds
-// cannot be read off it — the two non-default shapes are named here and
-// anything else object-shaped is an after/before range. A new filter in a
-// shape this doesn't know fails the round-trip below rather than skipping it.
+// EMPTY_FILTERS holds `{}` for every object-shaped filter, so the bounds cannot
+// be read off it; the two non-default shapes are named here, anything else
+// object-shaped is an after/before range.
 const NUMERIC_RANGE_KEYS = ['participantCount', 'biospecimenPostMortemInterval']
 const START_END_DATE_KEYS = ['clinicalTrialDates', 'fundingDate']
 
-// A distinct non-empty value for every FilterState key, so a key that no param
-// config covers cannot quietly round-trip as empty.
+// A distinct non-empty value for every FilterState key.
 const POPULATED_FILTERS: FilterState = Object.fromEntries(
   Object.entries(EMPTY_FILTERS).map(([key, empty]) => {
     if (Array.isArray(empty)) {
@@ -83,9 +81,7 @@ describe('useLibraryUrlState', () => {
     expect(filters.participantCount.min).toBeUndefined()
   })
 
-  // A FilterState key missing from every param config used to parse as
-  // undefined, and the first filters[key].length read crashed the page. The
-  // parse is seeded with EMPTY_FILTERS so the omission degrades to "no value".
+  // An unregistered key used to parse as undefined and crash on .length.
   it('yields a value for every filter key, even ones no param config covers', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
@@ -99,10 +95,9 @@ describe('useLibraryUrlState', () => {
     }
   })
 
-  // The seed above keeps an unregistered key from crashing the page, but it
-  // also hides it — the filter would silently stop surviving a reload. Every
-  // key is round-tripped through the URL here so a new one added to
-  // FilterState without a param config fails loudly instead.
+  // The seed above also hides an unregistered key, so round-trip every one: a
+  // filter added without a param config fails here instead of silently
+  // dropping out of the URL.
   it('round-trips every filter key through the URL', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
