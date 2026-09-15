@@ -9,6 +9,7 @@ import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { DAC } from 'src/libs/ajax/DAC'
+import { Storage } from 'src/libs/storage'
 import { DatasetStatisticsDar, DatasetTerm, DataUseSummary } from 'src/types/model'
 import { SnapshotSummaryModel } from 'src/types/tdrModel'
 
@@ -363,6 +364,25 @@ describe('DatasetStatistics', () => {
     await screen.findByText(new RegExp(controlled.datasetIdentifier))
     expect(document.body).toHaveTextContent(controlled.datasetName)
     expect(await screen.findByText('Apply for Access')).toBeInTheDocument()
+  })
+
+  /**
+   * This route is public, so a visitor with no library card reaches it. It offered the request
+   * action ungated while every other entry point disabled it, which is the inconsistency the
+   * shared predicate exists to prevent.
+   */
+  it('disables the apply button without Active Researcher Status', async () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ libraryCard: null } as never)
+    mount({ ...mockDataset, accessManagement: 'controlled' })
+
+    expect(await screen.findByRole('button', { name: 'Apply for Access' })).toBeDisabled()
+  })
+
+  it('enables the apply button for a user holding a card', async () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ libraryCard: { cardNumber: '1' } } as never)
+    mount({ ...mockDataset, accessManagement: 'controlled' })
+
+    expect(await screen.findByRole('button', { name: 'Apply for Access' })).toBeEnabled()
   })
 
   it('Displays External Access Language With Location', async () => {
