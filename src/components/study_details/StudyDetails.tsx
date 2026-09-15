@@ -10,9 +10,9 @@ import LibraryFooter from 'src/components/data_library/LibraryFooter'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { AssetType, SortOrder, SortState } from 'src/types/library'
 import {
+  usePiDetails,
   useStudyDatasets,
   useStudyExportableDatasets,
-  useStudyRecord,
   useStudySelectableDatasetIds,
 } from 'src/hooks/useStudyDetailsData'
 import { TocProvider, TableOfContents } from 'src/components/study_details/TableOfContents'
@@ -20,6 +20,8 @@ import StudyPageSection from 'src/components/study_details/StudyPageSection'
 import StudySidebar from 'src/components/study_details/StudySidebar'
 import StudyTitleBadges from 'src/components/study_details/StudyTitleBadges'
 import StudyInfoTable from 'src/components/study_details/StudyInfoTable'
+import PiExternalProfileIcons from 'src/components/study_details/PiExternalProfileIcons'
+import { getPiProfileLinks } from 'src/components/study_details/piProfileLinks'
 
 const INITIAL_PAGINATION = { page: 0, pageSize: 25 }
 const EMPTY_PAGE = {
@@ -30,6 +32,15 @@ const EMPTY_PAGE = {
 }
 
 type StudySortModel = Array<{ field: string, sort: SortOrder | null }>
+
+/**
+ * An index value only when it is actually populated. The index document can exist while carrying
+ * '' or [] for a field it never filled, and `??` alone falls through on null/undefined only - so
+ * the empty value won and suppressed exactly the relational value the fallback exists to supply.
+ * One length check covers both, which a bare `||` would not: an empty array is truthy.
+ */
+const populated = <T extends string | unknown[]>(value: T | undefined): T | undefined =>
+  value === undefined || value.length === 0 ? undefined : value
 
 const getErrorMessage = (error: unknown): string | undefined => {
   if (error instanceof Error) return error.message
@@ -55,15 +66,23 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const study = data.study
   const participantCount = data.participantCount
   const { data: exportableDatasets } = useStudyExportableDatasets(studyId, datasets)
-  const { data: studyRecord } = useStudyRecord(studyId)
-  const studyName = study?.studyName ?? studyRecord?.name
-  const studyDescription = study?.description ?? studyRecord?.description
-  const studyDataTypes = study?.dataTypes ?? studyRecord?.dataTypes
-  const piName = study?.piName ?? studyRecord?.piName
+  const { data: piDetails } = usePiDetails(studyId)
+  // Dataset search is not a reliable source of study-level metadata: a valid study may have no
+  // datasets (and therefore no matching index document). The relational response is already
+  // loaded for PI details, so use it as the fallback for the fields both payloads carry.
+  const studyName = populated(study?.studyName) ?? piDetails?.name
+  const studyDescription = populated(study?.description) ?? piDetails?.description
+  const studyDataTypes = populated(study?.dataTypes) ?? piDetails?.dataTypes
+  const piName = populated(study?.piName) ?? piDetails?.piName
   const selectedStudyIds = selectedDatasets.length > 0 && study
     ? [study.studyId]
     : []
   const errorMessage = getErrorMessage(error)
+  const piProfileLinks = getPiProfileLinks({
+    orcid: piDetails?.piOrcid,
+    linkedinUrl: piDetails?.piLinkedinUrl,
+    websiteUrl: piDetails?.piWebsiteUrl,
+  })
   const theme = useTheme()
   const isNarrowViewport = useMediaQuery(theme.breakpoints.down('md'))
   // Header row + one row per dataset (up to a full page) + pagination footer, so a study with
@@ -139,7 +158,21 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
                 { label: 'Participants', value: participantCount },
                 { label: 'Phenotype', value: study?.phenotype },
                 { label: 'Species', value: study?.species },
-                { label: 'PI Name', value: piName },
+                {
+                  label: 'PI Name',
+                  // The profile links live in this row, and StudyInfoTable drops rows with a
+                  // falsy value, so the row's presence can't hinge on piName alone — the search
+                  // index sometimes has none for a study whose PI profile links are populated.
+                  value: (piName || piProfileLinks.length > 0)
+                    ? (
+                        <>
+                          {piName}
+                          <PiExternalProfileIcons links={piProfileLinks} />
+                        </>
+                      )
+                    : undefined,
+                },
+                { label: 'PI Institution', value: piDetails?.piInstitution?.name },
                 { label: 'Data Custodian', value: study?.dataCustodianEmail?.join(', ') },
               ]}
             />

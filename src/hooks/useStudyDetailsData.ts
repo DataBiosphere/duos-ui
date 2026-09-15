@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { Study } from 'src/libs/ajax/Study'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'src/utils/NodashUtil'
 import { AggregationResult, ElasticsearchQuery } from 'src/types/elastic'
@@ -8,14 +9,16 @@ import { ExportableDatasets, PaginationState, SortState } from 'src/types/librar
 import { DatasetTerm, StudyTerm } from 'src/types/model'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 
+const STUDY_ASSETS_QUERY_KEY = 'study-assets'
 const STUDY_STALE_TIME = 5 * 60 * 1000
 
-// The dataset index cannot supply study metadata when a study has no datasets. Fetch the study
-// record independently so the overview still has its name, description, data types, and PI.
-export const useStudyRecord = (studyId: string) => useQuery({
-  queryKey: ['study-details-study', studyId],
+// The page's primary `study` object comes from the Elasticsearch-backed search index, which
+// cannot supply metadata when a study has no datasets and doesn't carry PI institution/external
+// profile fields. Fetch those from the relational store.
+export const usePiDetails = (studyId: string) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, 'pi-details', studyId],
   enabled: studyId.length > 0,
-  queryFn: () => DataSet.getStudyById(studyId),
+  queryFn: () => Study.getById(studyId),
   staleTime: STUDY_STALE_TIME,
 })
 
