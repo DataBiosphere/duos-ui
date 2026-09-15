@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, WorkspaceStudyAggregationResponse, QueryClause } from 'src/types/elastic'
 import { FilterState, WorkspaceAsset, PaginationState, SortState } from 'src/types/library'
 import { makeWorkspaceColumns } from 'src/components/data_library/columns/workspaceColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, toStringArray } from 'src/components/data_library/assets/definition'
 
 const includesIgnoreCase = (source: string | undefined, values: string[]) => {
   if (values.length === 0) {
@@ -97,10 +97,10 @@ export const workspaceAsset: AssetDefinition = {
           platform: workspace.platform || '',
           url: workspace.url || '',
           description: workspace.description || '',
-          tools: workspace.tools || [],
-          cloud: workspace.cloud || [],
+          tools: toStringArray(workspace.tools),
+          cloud: toStringArray(workspace.cloud),
           access: workspace.access || '',
-          tags: workspace.tags || [],
+          tags: toStringArray(workspace.tags),
         }
 
         if (matchesWorkspaceFilters(row, filters)) {

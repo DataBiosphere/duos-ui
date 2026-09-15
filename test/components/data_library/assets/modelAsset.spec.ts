@@ -20,7 +20,7 @@ const makeBucket = (
     name?: string
     format?: string
     license?: string
-    cloud?: string[]
+    cloud?: string[] | string
     tags?: string[]
     url?: string
     maintainer?: { name: string, email: string }
@@ -242,6 +242,26 @@ describe('modelAsset — transformResponse', () => {
     const response = makeResponse([makeBucket(1, [{ modelId: 'm1', cloud: ['AWS', 'GCP'] }])])
     const row = modelAsset.transformResponse(response, pagination).items[0] as ModelAsset
     expect(row.cloud).toEqual(['AWS', 'GCP'])
+  })
+
+  it('normalizes a cloud indexed as a bare string into an array', () => {
+    const response = makeResponse([makeBucket(1, [{ modelId: 'm1', cloud: 'AWS' }])])
+    const row = modelAsset.transformResponse(response, pagination).items[0] as ModelAsset
+    expect(row.cloud).toEqual(['AWS'])
+  })
+
+  it('matches the cloud filter against a cloud indexed as a bare string', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { modelId: 'm1', cloud: 'AWS' },
+        { modelId: 'm2', cloud: 'GCP' },
+      ]),
+    ])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelCloud: ['GCP'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
   })
 
   // The ES clauses for these filters only decide which studies are aggregated;

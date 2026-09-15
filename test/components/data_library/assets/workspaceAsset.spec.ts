@@ -22,7 +22,7 @@ const makeBucket = (
     url?: string
     description?: string
     tools?: string[]
-    cloud?: string[]
+    cloud?: string[] | string
     access?: string
     tags?: string[]
   }> = [],
@@ -284,6 +284,29 @@ describe('workspaceAsset — transformResponse', () => {
     const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: ['AWS', 'Azure'] }])])
     const row = workspaceAsset.transformResponse(response, pagination).items[0] as WorkspaceAsset
     expect(row.cloud).toEqual(['AWS', 'Azure'])
+  })
+
+  it('normalizes a cloud indexed as a bare string into an array', () => {
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: 'Azure' }])])
+    const row = workspaceAsset.transformResponse(response, pagination).items[0] as WorkspaceAsset
+    expect(row.cloud).toEqual(['Azure'])
+  })
+
+  it('matches the cloud filter against a cloud indexed as a bare string', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { workspaceId: 'w1', cloud: 'AWS' },
+        { workspaceId: 'w2', cloud: 'GCP' },
+      ]),
+    ])
+
+    const result = workspaceAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      workspaceCloud: ['GCP'],
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w2')
   })
 
   it('returns only workspaces matching the cloud filter', () => {
