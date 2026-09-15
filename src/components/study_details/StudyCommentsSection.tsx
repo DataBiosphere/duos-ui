@@ -7,6 +7,21 @@ import { studyCommentsQueryKey, useStudyComments } from 'src/hooks/useStudyDetai
 import { hasActiveResearcherStatus } from 'src/hooks/useApplyForAccessEligibility'
 import StudyQueryResult from './StudyQueryResult'
 
+/**
+ * Why the composer is closed to this reader. Both requirements are named only when both are
+ * missing: naming the card alone would tell a chairperson or signing official who already holds
+ * one that they lack a status they have.
+ */
+const commentGateReason = (hasResearcherRole: boolean, hasCard: boolean): string => {
+  if (hasCard) {
+    return 'Commenting on and rating a study is limited to users with the Researcher role.'
+  }
+  if (hasResearcherRole) {
+    return 'Active Researcher Status is required to comment or rate this study.'
+  }
+  return 'Commenting on and rating a study requires the Researcher role and Active Researcher Status.'
+}
+
 const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
   const queryClient = useQueryClient()
   const [rating, setRating] = useState<number | null>(null)
@@ -56,13 +71,7 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
   const hasResearcherRole = currentUser?.isResearcher === true
   const hasCard = hasActiveResearcherStatus()
   const canComment = hasResearcherRole && hasCard
-  // Naming only the card would tell a chairperson or signing official who holds one that they
-  // lack a status they already have.
-  const cannotCommentReason = hasCard
-    ? 'Commenting on and rating a study is limited to users with the Researcher role.'
-    : hasResearcherRole
-      ? 'Active Researcher Status is required to comment or rate this study.'
-      : 'Commenting on and rating a study requires the Researcher role and Active Researcher Status.'
+  const cannotCommentReason = commentGateReason(hasResearcherRole, hasCard)
   const showMoreComments = async () => {
     // Refresh the pages already on screen before calculating the next offset. Since comments are
     // newest-first, this realigns every loaded boundary when a comment was added or removed since
