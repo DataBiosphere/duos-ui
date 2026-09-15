@@ -10,6 +10,7 @@ import { getAccessManagementColor, getAccessManagementLabel } from 'src/componen
 import BoltIcon from '@mui/icons-material/Bolt'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 import { DATA_USE_GRID_COLUMN } from 'src/components/dataUseGridColumn'
+import { getDataLocationLink } from 'src/utils/DataLocationUtils'
 
 const makeSoApprovalColumn = (soApprovalModelByDatasetId: Map<number, SoApprovalModel>): GridColDef<DatasetTerm> => ({
   field: 'soApprovalModel',
@@ -47,7 +48,7 @@ export const makeDatasetColumns = (
   exportableDatasets: ExportableDatasets = {},
   radarEnabledDatasetIds: Set<number> = new Set(),
   soApprovalModelByDatasetId?: Map<number, SoApprovalModel>,
-  hasSelection: boolean = false,
+  selectedDatasetIds: number[] = [],
 ): GridColDef<DatasetTerm>[] => [
   {
     field: 'datasetName',
@@ -117,7 +118,10 @@ export const makeDatasetColumns = (
         return '-'
       }
       if (params.row.accessManagement === AccessManagement.CONTROLLED) {
-        return <RequestAccessButton datasetId={params.row.datasetId} disabledForSelection={hasSelection} />
+        // Only a selection reaching beyond this row makes the single-dataset path misleading;
+        // a row that is the whole selection requests exactly what 'Apply for Access' would.
+        const otherDatasetsSelected = selectedDatasetIds.some(id => id !== params.row.datasetId)
+        return <RequestAccessButton datasetId={params.row.datasetId} disabledForSelection={otherDatasetsSelected} />
       }
       return params.value
         ? (
@@ -146,10 +150,26 @@ export const makeDatasetColumns = (
     width: 150,
     valueGetter: (_value, row) => row.dac?.dacName || '',
   },
+  {
+    field: 'dataLocation',
+    headerName: 'Data Location',
+    width: 150,
+    // The cell maps the stored enum to a friendly label, so sorting on the raw value would
+    // disagree with the order on screen.
+    sortable: false,
+    renderCell: (params) => {
+      if (!params.value) return null
+      return (
+        <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {getDataLocationLink(params.value, params.row.url)}
+        </Box>
+      )
+    },
+  },
   ...(soApprovalModelByDatasetId ? [makeSoApprovalColumn(soApprovalModelByDatasetId)] : []),
   {
-    field: 'actions',
-    headerName: 'Actions',
+    field: 'export',
+    headerName: 'Export',
     width: 120,
     sortable: false,
     renderCell: (params) => {
