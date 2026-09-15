@@ -2,9 +2,9 @@ import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-qu
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
-import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 import { Study } from 'src/libs/ajax/Study'
 import { StudyComments } from 'src/libs/ajax/StudyComments'
+import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'src/utils/NodashUtil'
 import { AggregationResult, ElasticsearchQuery } from 'src/types/elastic'
@@ -15,6 +15,13 @@ import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel
 const STUDY_ASSETS_QUERY_KEY = 'study-assets'
 const STUDY_STALE_TIME = 5 * 60 * 1000
 
+const useStudyAsset = <T>(studyId: string, assetType: string, queryFn: () => Promise<T>) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, assetType, studyId],
+  enabled: studyId.length > 0,
+  queryFn,
+  staleTime: STUDY_STALE_TIME,
+})
+
 // The page's primary `study` object comes from the Elasticsearch-backed search index, which
 // cannot supply metadata when a study has no datasets and doesn't carry PI institution/external
 // profile fields. Fetch those from the relational store.
@@ -24,6 +31,27 @@ export const usePiDetails = (studyId: string) => useQuery({
   queryFn: () => Study.getById(studyId),
   staleTime: STUDY_STALE_TIME,
 })
+
+export const useStudyModels = (studyId: string) =>
+  useStudyAsset(studyId, 'models', () => Study.getModels(studyId))
+
+export const useStudyWorkspaces = (studyId: string) =>
+  useStudyAsset(studyId, 'workspaces', () => Study.getWorkspaces(studyId))
+
+export const useStudyPresentations = (studyId: string) =>
+  useStudyAsset(studyId, 'presentations', () => Study.getPresentations(studyId))
+
+export const useStudyPublications = (studyId: string) =>
+  useStudyAsset(studyId, 'publications', () => Study.getPublications(studyId))
+
+export const useStudyClinicalTrials = (studyId: string) =>
+  useStudyAsset(studyId, 'clinicalTrials', () => Study.getClinicalTrials(studyId))
+
+export const useStudyIntellectualProperty = (studyId: string) =>
+  useStudyAsset(studyId, 'intellectualProperty', () => Study.getIntellectualProperty(studyId))
+
+export const useStudyFundingResources = (studyId: string) =>
+  useStudyAsset(studyId, 'fundingResources', () => Study.getFundingResources(studyId))
 
 /**
  * Every page of one study's comments. The offset is deliberately absent: posting invalidates this
