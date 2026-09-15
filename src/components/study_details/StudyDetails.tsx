@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Link, useParams, useNavigate } from 'react-router'
 import { Alert, Typography, useMediaQuery, useTheme } from '@mui/material'
@@ -10,7 +10,9 @@ import LibraryFooter from 'src/components/data_library/LibraryFooter'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { AssetType, SortOrder, SortState } from 'src/types/library'
 import {
+  useFrequentlyRequestedWithStudies,
   usePiDetails,
+  useSimilarStudies,
   useStudyDatasets,
   useStudyExportableDatasets,
   useStudySelectableDatasetIds,
@@ -21,6 +23,7 @@ import StudySidebar from 'src/components/study_details/StudySidebar'
 import StudyCommentsSection from 'src/components/study_details/StudyCommentsSection'
 import StudyDarHistory from 'src/components/study_details/StudyDarHistory'
 import StudySecondaryResearchOutputs from 'src/components/study_details/StudySecondaryResearchOutputs'
+import StudyRecommendationCarousel from 'src/components/study_details/StudyRecommendationCarousel'
 import StudyTitleBadges from 'src/components/study_details/StudyTitleBadges'
 import StudyInfoTable from 'src/components/study_details/StudyInfoTable'
 import PiExternalProfileIcons from 'src/components/study_details/PiExternalProfileIcons'
@@ -77,6 +80,8 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const studyDescription = populated(study?.description) ?? piDetails?.description
   const studyDataTypes = populated(study?.dataTypes) ?? piDetails?.dataTypes
   const piName = populated(study?.piName) ?? piDetails?.piName
+  const similarStudies = useSimilarStudies(studyId)
+  const frequentlyRequestedWith = useFrequentlyRequestedWithStudies(studyId)
   const selectedStudyIds = selectedDatasets.length > 0 && study
     ? [study.studyId]
     : []
@@ -209,6 +214,20 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
           </StudyPageSection>
           <StudyDarHistory studyId={studyId} />
           <StudySecondaryResearchOutputs studyId={studyId} />
+          <StudyRecommendationCarousel
+            id="frequently-requested-with"
+            heading="Studies often Requested with this Study"
+            recommendations={frequentlyRequestedWith.data}
+            isPending={frequentlyRequestedWith.isPending}
+            error={frequentlyRequestedWith.error}
+          />
+          <StudyRecommendationCarousel
+            id="similar-studies"
+            heading="Recommended Studies based on Data Type"
+            recommendations={similarStudies.data}
+            isPending={similarStudies.isPending}
+            error={similarStudies.error}
+          />
           <StudyPageSection id="comments" heading="Comments & Ratings">
             <StudyCommentsSection studyId={studyId} />
           </StudyPageSection>
@@ -237,6 +256,13 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
 export const StudyDetails = () => {
   usePageTitle('Study Details')
   const { studyId = '' } = useParams<{ studyId: string }>()
+
+  // Recommendation cards live near the bottom of this long page. BrowserRouter preserves the
+  // current document offset during an in-app navigation, so reset it whenever the route points at
+  // a different study rather than opening the next study at the same deep scroll position.
+  useEffect(() => {
+    globalThis.scrollTo({ top: 0, left: 0 })
+  }, [studyId])
 
   // Remount local grid state when navigating directly between study routes.
   return <StudyDetailsContent key={studyId} studyId={studyId} />
