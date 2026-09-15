@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
@@ -29,6 +29,7 @@ vi.mock('src/libs/ajax/TerraDataRepo', () => ({
 vi.mock('src/libs/ajax/DataSet', () => ({
   DataSet: {
     searchDatasetIndexV2: vi.fn(),
+    getStudyById: vi.fn().mockResolvedValue({}),
   },
 }))
 
@@ -189,6 +190,12 @@ beforeAll(() => {
     unobserve() {}
     disconnect() {}
   } as unknown as typeof ResizeObserver
+
+  global.IntersectionObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof IntersectionObserver
 })
 
 beforeEach(() => {
@@ -226,6 +233,8 @@ describe('Study details test', () => {
       datasetId: 223456,
       datasetIdentifier: 'DUOS-223456',
       datasetName: 'Study 2 Dataset',
+      // Not auto-selectable, so selection state after navigating is unambiguous
+      accessManagement: 'open',
       study: {
         ...datasets[0].study,
         studyId: 2,
@@ -240,10 +249,8 @@ describe('Study details test', () => {
       .mockResolvedValueOnce(makeSearchResponse() as never)
       .mockReturnValueOnce(nextStudyRequest as never)
 
-    const { container } = mountComponent(true)
+    mountComponent(true)
     await screen.findByText(datasets[0].datasetName)
-    const checkbox = container.querySelector('.MuiDataGrid-row[data-id="123456"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
-    await user.click(checkbox)
     expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'View study 2' }))
@@ -308,25 +315,42 @@ describe('Study details test', () => {
     expect(document.querySelectorAll('[role=row]')).toHaveLength(datasets.length + 1)
   })
 
+  it('shows relational study metadata when the study has no dataset search documents', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValueOnce(makeSearchResponse([]) as never)
+    vi.mocked(DataSet.getStudyById).mockResolvedValueOnce({
+      studyId: 1,
+      name: 'Study without datasets',
+      description: 'Study metadata from the relational store',
+      dataTypes: ['Genomic'],
+      piName: 'Dr. Example',
+    } as never)
+
+    mountComponent()
+
+    expect(await screen.findByRole('heading', { name: 'Study without datasets' })).toBeInTheDocument()
+    expect(screen.getByText('Study metadata from the relational store')).toBeInTheDocument()
+    expect(screen.getByText('Genomic')).toBeInTheDocument()
+    expect(screen.getByText('Dr. Example')).toBeInTheDocument()
+    expect(screen.getByText('No datasets found matching your criteria')).toBeInTheDocument()
+  })
+
   it('requests server-side pages for the current study without a fixed result cap', async () => {
     const user = userEvent.setup()
     vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(makeSearchResponse(datasets, 26) as never)
     mountComponent()
     await screen.findByText(datasets[0].datasetName)
 
-    const initialQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[0][0] as ElasticsearchQuery
-    expect(initialQuery.from).toBe(0)
-    expect(initialQuery.size).toBe(25)
+    const queries = () => vi.mocked(DataSet.searchDatasetIndexV2).mock.calls.map(call => call[0] as ElasticsearchQuery)
+    const initialQuery = queries().find(query => query.from === 0 && query.size === 25)!
+    expect(initialQuery).toBeDefined()
     expect(initialQuery.size).not.toBe(10000)
     expect(initialQuery.query?.bool.must).toContainEqual({ match: { 'study.studyId': '1' } })
     expect(initialQuery.aggs).toHaveProperty('study_details')
     expect(initialQuery.aggs).toHaveProperty('total_participants')
 
     await user.click(screen.getByRole('button', { name: 'Go to next page' }))
-    await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalledTimes(2))
-    const nextPageQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[1][0] as ElasticsearchQuery
-    expect(nextPageQuery.from).toBe(25)
-    expect(nextPageQuery.size).toBe(25)
+    await waitFor(() => expect(queries().some(query => query.from === 25)).toBe(true))
+    expect(queries().find(query => query.from === 25)!.size).toBe(25)
   })
 
   it('uses the dataset asset server-side sort mapping with one active sort', async () => {
@@ -334,17 +358,17 @@ describe('Study details test', () => {
     mountComponent()
     await screen.findByText(datasets[0].datasetName)
 
+    const sorts = () => vi.mocked(DataSet.searchDatasetIndexV2).mock.calls
+      .map(call => (call[0] as ElasticsearchQuery).sort)
+      .filter(Boolean)
+
     await user.click(screen.getByRole('columnheader', { name: /Dataset Name/ }))
-    await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalledTimes(2))
-    const datasetNameSortQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[1][0] as ElasticsearchQuery
-    expect(datasetNameSortQuery.sort).toEqual([{ 'datasetName.keyword': { order: 'asc' } }])
+    await waitFor(() => expect(sorts()).toContainEqual([{ 'datasetName.keyword': { order: 'asc' } }]))
 
     await user.keyboard('{Shift>}')
     await user.click(screen.getByRole('columnheader', { name: /Identifier/ }))
     await user.keyboard('{/Shift}')
-    await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalledTimes(3))
-    const identifierSortQuery = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[2][0] as ElasticsearchQuery
-    expect(identifierSortQuery.sort).toEqual([{ 'datasetIdentifier.keyword': { order: 'asc' } }])
+    await waitFor(() => expect(sorts()).toContainEqual([{ 'datasetIdentifier.keyword': { order: 'asc' } }]))
     expect(screen.getByRole('columnheader', { name: /Dataset Name/ })).toHaveAttribute('aria-sort', 'none')
     expect(screen.getByRole('columnheader', { name: /Identifier/ })).toHaveAttribute('aria-sort', 'ascending')
   })
@@ -362,10 +386,8 @@ describe('Study details test', () => {
         ? makeSearchResponse(nextPageDatasets, 26, 6)
         : makeSearchResponse(datasets, 26, 6)) as never)
 
-    const { container } = mountComponent()
+    mountComponent()
     await screen.findByText(datasets[0].datasetName)
-    const checkbox = container.querySelector('.MuiDataGrid-row[data-id="123456"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
-    await user.click(checkbox)
     expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Go to next page' }))
@@ -373,16 +395,54 @@ describe('Study details test', () => {
     expect(screen.getByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
   })
 
-  it('selects controlled datasets, displays LibraryFooter, and applies for access', async () => {
+  it('does not re-seed the default selection after the user clears it', async () => {
     const user = userEvent.setup()
+    const nextPageDatasets = [{
+      ...datasets[0],
+      datasetId: 223456,
+      datasetIdentifier: 'DUOS-223456',
+      datasetName: 'Next Page Dataset',
+    }]
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) =>
+      (query.from === 25
+        ? makeSearchResponse(nextPageDatasets, 26, 6)
+        : makeSearchResponse(datasets, 26, 6)) as never)
+
     const { container } = mountComponent()
     await screen.findByText(datasets[0].datasetName)
-    const checkbox = container.querySelector('.MuiDataGrid-row[data-id="123456"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
-    await user.click(checkbox)
+    expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
+
+    const controlledCheckbox = container
+      .querySelector('.MuiDataGrid-row[data-id="123456"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    await user.click(controlledCheckbox)
+    await waitFor(() => expect(screen.queryByText(/dataset selected from/i)).not.toBeInTheDocument())
+
+    // The next page re-runs the search, so the default-selection seeding gets another chance to
+    // run. It must stay latched rather than reinstating what the user just cleared.
+    await user.click(screen.getByRole('button', { name: 'Go to next page' }))
+    expect(await screen.findByText('Next Page Dataset')).toBeInTheDocument()
+    expect(screen.queryByText(/dataset selected from/i)).not.toBeInTheDocument()
+  })
+
+  it('selects controlled datasets by default and applies for access from the sidebar', async () => {
+    const user = userEvent.setup()
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
     expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Apply for Access' }))
     expect(applyForAccess).toHaveBeenCalledWith([123456], expect.any(Function))
+  })
+
+  it('does not select open or externally managed datasets by default', async () => {
+    const { container } = mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    await screen.findByText(/1 dataset selected from 1 study/i)
+
+    const externalCheckbox = container.querySelector('.MuiDataGrid-row[data-id="123457"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    const openCheckbox = container.querySelector('.MuiDataGrid-row[data-id="123458"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    expect(externalCheckbox).not.toBeChecked()
+    expect(openCheckbox).not.toBeChecked()
   })
 
   it('does not allow open or externally managed datasets to be selected', async () => {
@@ -417,5 +477,139 @@ describe('Study details test', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Unable to load datasets: Unknown error')
     expect(screen.getByRole('alert')).not.toHaveTextContent('Unable to load datasets: Unable to load datasets')
+  })
+
+  /**
+   * The apply-for-access control is the sidebar on a wide viewport and LibraryFooter on a narrow
+   * one, and the split is the only thing standing between a phone-sized reader and no way to
+   * apply at all. useMediaQuery reads window.matchMedia, which jsdom does not implement, so the
+   * desktop path is what every other test exercises by default.
+   */
+  it('swaps the sidebar for the footer on a narrow viewport', async () => {
+    const matchMedia = vi.fn().mockImplementation((query: string) => ({
+      // MUI asks breakpoints.down('md'); answer yes so the component takes the narrow path
+      matches: query.includes('max-width'),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }))
+    vi.stubGlobal('matchMedia', matchMedia)
+    try {
+      const { container } = mountComponent()
+      await screen.findByText(datasets[0].datasetName)
+
+      // LibraryFooter is there. Asserting it by its own marker rather than by the selection text,
+      // which the sidebar renders too - so the text alone would pass on either viewport.
+      await waitFor(() =>
+        expect(container.querySelector('[data-cy="library-footer"]')).toBeInTheDocument())
+      // ...and StudySidebar is not. It is the only <aside> on the page, and the table of contents
+      // it carries goes with it.
+      expect(container.querySelector('aside')).not.toBeInTheDocument()
+      expect(screen.queryByText('On this page')).not.toBeInTheDocument()
+    }
+    finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  /** The counterpart: on a wide viewport the sidebar carries the control and no footer appears. */
+  it('keeps the sidebar and no footer on a wide viewport', async () => {
+    const { container } = mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    await screen.findByText('On this page')
+
+    expect(container.querySelector('aside')).toBeInTheDocument()
+    expect(container.querySelector('[data-cy="library-footer"]')).not.toBeInTheDocument()
+  })
+
+  it('does not let the sidebar start a request without Active Researcher Status', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42 } as DuosUser)
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    await screen.findByText(/1 dataset selected from 1 study/i)
+
+    const applyButton = screen.getByRole('button', { name: 'Apply for Access' })
+    expect(applyButton).toBeDisabled()
+    // fireEvent, not userEvent: a disabled button has pointer-events none, which userEvent
+    // refuses to click at all, so it could never observe the handler not running.
+    fireEvent.click(applyButton)
+    expect(applyForAccess).not.toHaveBeenCalled()
+
+    fireEvent.mouseOver(applyButton.parentElement as HTMLElement)
+    expect(await screen.findByRole('tooltip'))
+      .toHaveTextContent('Active Researcher Status is required to apply for data access')
+  })
+
+  it('selects every controlled dataset in the study, not just the visible page', async () => {
+    const offPageDatasets = [4, 5].map(index => ({
+      ...datasets[0],
+      datasetId: 200000 + index,
+      datasetIdentifier: `DUOS-20000${index}`,
+      datasetName: `Off Page Dataset ${index}`,
+    }))
+    // The grid page holds three of the study's five datasets; the study-wide id lookup asks
+    // for all five, so the default selection covers the three controlled ones.
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) =>
+      (query.size === 5
+        ? makeSearchResponse([...datasets, ...offPageDatasets], 5)
+        : makeSearchResponse(datasets, 5)) as never)
+
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    expect(await screen.findByText(/3 datasets selected from 1 study/i)).toBeInTheDocument()
+  })
+
+  it('does not overwrite a user selection when the study-wide default arrives later', async () => {
+    let resolveStudyWideIds!: (value: ReturnType<typeof makeSearchResponse>) => void
+    const studyWideIds = new Promise<ReturnType<typeof makeSearchResponse>>((resolve) => {
+      resolveStudyWideIds = resolve
+    })
+    const offPageDatasets = [4, 5].map(index => ({
+      ...datasets[0],
+      datasetId: 200000 + index,
+      datasetIdentifier: `DUOS-20000${index}`,
+      datasetName: `Off Page Dataset ${index}`,
+    }))
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) =>
+      query.size === 5 ? studyWideIds as never : makeSearchResponse(datasets, 5) as never)
+
+    const user = userEvent.setup()
+    const { container } = mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    const controlledCheckbox = container
+      .querySelector('.MuiDataGrid-row[data-id="123456"] .MuiDataGrid-checkboxInput input') as HTMLInputElement
+    await user.click(controlledCheckbox)
+    expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
+
+    resolveStudyWideIds(makeSearchResponse([...datasets, ...offPageDatasets], 5))
+    await waitFor(() => expect(DataSet.searchDatasetIndexV2).toHaveBeenCalledWith(
+      expect.objectContaining({ size: 5 }),
+    ))
+    expect(screen.getByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
+    expect(screen.queryByText(/3 datasets selected from 1 study/i)).not.toBeInTheDocument()
+  })
+
+  it('does not default to a partial page when the study-wide selection fails', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) => {
+      if (query.size === 5) throw new Error('selection lookup failed')
+      return makeSearchResponse(datasets, 5) as never
+    })
+
+    mountComponent()
+    expect(await screen.findByText(/unable to select every controlled dataset automatically/i)).toBeInTheDocument()
+    expect(screen.queryByText(/dataset selected from/i)).not.toBeInTheDocument()
+  })
+  it('keeps the per-dataset request path available for the default selection', async () => {
+    // Auto-selecting the study's single controlled dataset must not disable the row's own
+    // request button: clicking it submits exactly what 'Apply for Access' would.
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    await screen.findByText(/1 dataset selected from 1 study/i)
+
+    expect(screen.getByRole('button', { name: 'Request Now' })).not.toBeDisabled()
   })
 })
