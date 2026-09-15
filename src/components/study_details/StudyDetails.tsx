@@ -109,10 +109,14 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   // Dataset search is not a reliable source of study-level metadata: a valid study may have no
   // datasets (and therefore no matching index document). The relational response is already
   // loaded for PI details, so use it as the fallback for the fields both payloads carry.
-  const studyName = study?.studyName ?? piDetails?.name
-  const studyDescription = study?.description ?? piDetails?.description
-  const studyDataTypes = study?.dataTypes ?? piDetails?.dataTypes
-  const piName = study?.piName ?? piDetails?.piName
+  // `||`, not `??`: the index document exists but carries '' for a field it never populated, and
+  // `??` only falls through on null/undefined, so the empty value won and suppressed exactly the
+  // relational field this fallback exists to supply. dataTypes needs the length check spelled out
+  // - an empty array is truthy, so `||` alone would keep it for the same reason.
+  const studyName = study?.studyName || piDetails?.name
+  const studyDescription = study?.description || piDetails?.description
+  const studyDataTypes = study?.dataTypes?.length ? study.dataTypes : piDetails?.dataTypes
+  const piName = study?.piName || piDetails?.piName
   const similarStudies = useSimilarStudies(studyId)
   const frequentlyRequestedWith = useFrequentlyRequestedWithStudies(studyId)
   const selectedStudyIds = selectedDatasets.length > 0 && study

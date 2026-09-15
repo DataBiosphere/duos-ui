@@ -13,7 +13,9 @@ const PiExternalProfileIcons = ({ links }: { links: PiProfileLink[] }) => (
   <span>
     {links.map(({ href, label, kind }) => (
       <IconButton
-        key={label}
+        // Keyed by href: a link demoted off its own label falls back to the generic website
+        // label, so two links can share one.
+        key={href}
         size="small"
         component="a"
         href={href}

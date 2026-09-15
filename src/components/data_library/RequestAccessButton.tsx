@@ -2,7 +2,7 @@ import React from 'react'
 import { Button, Tooltip } from '@mui/material'
 import { useNavigate } from 'react-router'
 import { applyForAccess } from 'src/utils/accessUtils'
-import { hasActiveResearcherStatus } from 'src/hooks/useApplyForAccessEligibility'
+import { ACTIVE_RESEARCHER_STATUS_REQUIRED, hasActiveResearcherStatus } from 'src/hooks/useApplyForAccessEligibility'
 
 interface RequestAccessButtonProps {
   datasetId: number
@@ -20,7 +20,7 @@ export const RequestAccessButton: React.FC<RequestAccessButtonProps> = ({ datase
     tooltip = 'Use \'Apply for Access\' below to request the selected datasets'
   }
   else if (!isActiveResearcher) {
-    tooltip = 'Active Researcher Status is required to apply for data access'
+    tooltip = ACTIVE_RESEARCHER_STATUS_REQUIRED
   }
 
   return (

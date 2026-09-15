@@ -1,8 +1,8 @@
-import { uniq, filter, isNil } from 'src/utils/NodashUtil'
+import { uniq, filter } from 'src/utils/NodashUtil'
 import { Button } from '@mui/material'
 import * as React from 'react'
 import { DatasetTerm } from 'src/types/model'
-import { Storage } from 'src/libs/storage'
+import { ACTIVE_RESEARCHER_STATUS_REQUIRED, hasActiveResearcherStatus } from 'src/hooks/useApplyForAccessEligibility'
 import Tooltip from '@mui/material/Tooltip'
 
 interface DatasetSearchFooterProps {
@@ -17,7 +17,10 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
       .map(dataset => dataset.study.studyId))
   const datasetText = selectedDatasets.length > 1 ? 'datasets' : 'dataset'
   const studyText = selectedStudies.length > 1 ? 'studies' : 'study'
-  const hasActiveResearcherStatus = !isNil(Storage.getCurrentUser().libraryCard)
+  // The shared predicate rather than a local copy, so this footer cannot drift from the other
+  // apply-for-access entry points. It also tolerates a signed-out visitor, which the copy did
+  // not: getCurrentUser() returns undefined there and reading .libraryCard off it throws.
+  const isActiveResearcher = hasActiveResearcherStatus()
 
   return (
     <div style={{
@@ -45,7 +48,7 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
         {studyText}
       </div>
       <Tooltip
-        title={hasActiveResearcherStatus ? '' : 'Active Researcher Status is required to apply for data access'}
+        title={isActiveResearcher ? '' : ACTIVE_RESEARCHER_STATUS_REQUIRED}
         slotProps={{
           tooltip: {
             sx: {
@@ -60,7 +63,7 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
             variant="contained"
             onClick={onClick}
             sx={{ fontWeight: 600, marginRight: 5 }}
-            disabled={!hasActiveResearcherStatus}
+            disabled={!isActiveResearcher}
           >
             Apply for Access
           </Button>
