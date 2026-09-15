@@ -52,7 +52,7 @@ const renderCell = (
 
 describe('datasetColumns — column order', () => {
   it('returns columns in the expected order', () => {
-    const fields = makeDatasetColumns().map(c => c.field)
+    const fields = makeDatasetColumns({}).map(c => c.field)
     expect(fields).toEqual([
       'datasetName',
       'studyName',
@@ -65,6 +65,17 @@ describe('datasetColumns — column order', () => {
       'dataLocation',
       'export',
     ])
+  })
+
+  /**
+   * My Data Submissions supplies no exports and overrides the trailing column with its own
+   * 'actions' column. That override matches by field name, so once this column was renamed from
+   * 'actions' to 'export' it no longer replaced anything and the page grew a second, permanently
+   * empty Export column. A column that can never render a control is not emitted at all.
+   */
+  it('omits the Export column for a caller that supplies no exports', () => {
+    expect(makeDatasetColumns().map(c => c.field)).not.toContain('export')
+    expect(makeDatasetColumns({}).map(c => c.field)).toContain('export')
   })
 
   it('includes the SO Approval column when authorization-model data is supplied', () => {
