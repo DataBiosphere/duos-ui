@@ -31,7 +31,7 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
   // this component stays mounted, and a boolean latch would leave the previous user's rating and
   // text in the composer for the new one to submit.
   const [seededFor, setSeededFor] = useState<{ userId: number | null } | null>(null)
-  const { data, isPending, error, hasNextPage, fetchNextPage, isFetching, refetch }
+  const { data, isPending, error, hasNextPage, fetchNextPage, isFetching }
     = useStudyComments(studyId)
   // Every page repeats the study-wide figures, so the first page is where they are read from.
   const summary = data?.pages[0]
@@ -72,23 +72,31 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
   const hasCard = hasActiveResearcherStatus()
   const canComment = hasResearcherRole && hasCard
   const cannotCommentReason = commentGateReason(hasResearcherRole, hasCard)
-  const showMoreComments = async () => {
-    // Refresh the pages already on screen before calculating the next offset. Since comments are
-    // newest-first, this realigns every loaded boundary when a comment was added or removed since
-    // the reader opened the section.
-    const refreshed = await refetch()
-    if (!refreshed.isError) await fetchNextPage()
-  }
+  // Just the next page. This used to refetch every loaded page first, to realign boundaries when
+  // someone posted while the reader was paging - but that costs a request per loaded page each
+  // time, so walking a 200-comment study ran ~44 GETs instead of 8, and every one of them was
+  // another chance to fail. The id-keyed dedupe below already absorbs a repeated boundary item,
+  // which is what the refetch was really protecting against.
+  const showMoreComments = () => fetchNextPage()
 
   return (
     // No `isEmpty`: a study with no comments yet is exactly when the composer matters most,
     // so only loading and failure short-circuit the section.
     <StudyQueryResult
       isPending={isPending}
-      error={error}
+      // Only when there is nothing to show. Gating on `error` alone meant a failed *background*
+      // refetch - the one after a successful post, say - replaced the loaded comments and the
+      // composer with an error, taking the reader's unsaved draft with it. With no retry on
+      // focus and a five-minute staleTime, it stayed that way.
+      error={summary ? undefined : error}
       errorMessage="Unable to load comments and ratings."
     >
       <Stack spacing={2}>
+        {summary && error && (
+          <Alert severity="warning" role="status">
+            Couldn't refresh comments just now. Showing the ones already loaded.
+          </Alert>
+        )}
         {summary?.averageRating != null && (
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <Rating readOnly value={summary.averageRating} precision={0.1} />
@@ -138,11 +146,14 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
                     replaces your existing rating and comment.
                   </Typography>
                 )}
-                <Rating value={rating} onChange={(_, value) => setRating(value)} />
+                {/* Frozen while the post is in flight: onSuccess re-seeds both fields from the
+                    saved copy, so anything typed meanwhile was discarded without a word. */}
+                <Rating value={rating} disabled={mutation.isPending} onChange={(_, value) => setRating(value)} />
                 <TextField
                   multiline
                   minRows={3}
                   label="Comment"
+                  disabled={mutation.isPending}
                   value={commentText}
                   // The backend rejects anything longer, so stop it at the field rather than
                   // letting the save fail on something the reader cannot see is too long.

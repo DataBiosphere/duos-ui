@@ -70,6 +70,20 @@ describe('StudyComments', () => {
     })
   })
 
+  /**
+   * The id is route-derived free text. Unencoded, '1%2F..%2F..%2Fsomething' decodes in the path
+   * and the request lands on a normalized, unintended endpoint with the caller's credentials.
+   */
+  it('encodes the study id rather than interpolating it into the path', async () => {
+    vi.mocked(fetchGet).mockResolvedValueOnce({ data: { comments: [], total: 0 } })
+
+    await StudyComments.listComments('1%2F..%2F..%2Fsomething')
+
+    const [url] = vi.mocked(fetchGet).mock.calls[0]
+    expect(url).toContain('/api/dataset/study/1%252F..%252F..%252Fsomething/comments')
+    expect(url).not.toContain('/api/dataset/study/1%2F..%2F..%2Fsomething/comments')
+  })
+
   describe('postComment', () => {
     it('posts the rating and text to the study comments url', async () => {
       await StudyComments.postComment(1, 4, 'Useful study')

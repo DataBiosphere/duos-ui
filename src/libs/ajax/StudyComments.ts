@@ -2,7 +2,11 @@ import { Config } from 'src/libs/config'
 import { fetchDelete, fetchGet, fetchPost } from 'src/libs/ajax/fetchAdapter'
 import { StudyComment, StudyCommentsSummary } from 'src/types/model'
 
-const urlFor = async (studyId: string | number) => `${await Config.getApiUrl()}/api/dataset/study/${studyId}/comments`
+// The id comes off the route, so it is attacker-shaped text until encoded: '1%2F..%2F..%2Fx'
+// decodes to '1/../../x' and would send an authenticated GET to a normalized, unintended path.
+// FileStorageObject and FeatureFlag encode their path ids for the same reason.
+const urlFor = async (studyId: string | number) =>
+  `${await Config.getApiUrl()}/api/dataset/study/${encodeURIComponent(studyId)}/comments`
 
 /** What the backend accepts per page, and what it rejects above. Keep in step with StudyCommentService. */
 export const COMMENTS_PAGE_SIZE = 25
