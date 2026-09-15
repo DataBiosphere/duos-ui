@@ -654,6 +654,26 @@ describe('Study details test', () => {
     expect(screen.getByText('Genomic')).toBeInTheDocument()
   })
 
+  /**
+   * The index document is external data: its types assert string[] but a field it never filled
+   * can arrive as null. Anything that reads .length off it, or hands it to a `= []` default that
+   * only fires on undefined, blanks the whole page.
+   */
+  it('survives an index document whose fields are null', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({ piName: null, dataTypes: null } as never)
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
+      // Cast because the declared types forbid null - which is the point: the index supplies it
+      // anyway, and the types are an assertion about external data rather than a guarantee.
+      makeSearchResponse(datasets.map(dataset => ({
+        ...dataset,
+        study: { ...dataset.study, piName: null, dataTypes: null },
+      })) as never) as never,
+    )
+    mountComponent()
+
+    expect(await screen.findByText(datasets[0].datasetName)).toBeInTheDocument()
+  })
+
   it('omits the PI row entirely when there is neither a name nor a profile link', async () => {
     vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
       makeSearchResponse(datasets.map(dataset => ({ ...dataset, study: { ...dataset.study, piName: '' } }))) as never,
