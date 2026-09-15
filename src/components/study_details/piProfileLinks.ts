@@ -16,8 +16,16 @@ interface PiProfileFields {
 
 // A bare identifier is expanded to its orcid.org URL; anything already absolute is validated
 // like every other study-submitted URL rather than trusted.
-const orcidHref = (orcid: string): string | undefined =>
-  validateHttpUrl(orcid.startsWith('http') ? orcid : `https://orcid.org/${orcid}`)
+const orcidHref = (orcid: string): string | undefined => {
+  // Trim before deciding which of the two this is. Checked untrimmed, a padded URL failed the
+  // startsWith test and was pasted onto the orcid.org base - a link to a nonsense path - and a
+  // whitespace-only value became a link to the ORCID home page once validateHttpUrl trimmed it.
+  const trimmed = orcid.trim()
+  if (!trimmed) {
+    return undefined
+  }
+  return validateHttpUrl(trimmed.startsWith('http') ? trimmed : `https://orcid.org/${trimmed}`)
+}
 
 /**
  * The PI's external profile links, dropping any the data submitter typed that isn't a plain

@@ -499,6 +499,39 @@ describe('Study details test', () => {
     expect(screen.getByRole('alert')).not.toHaveTextContent('Unable to load datasets: Unable to load datasets')
   })
 
+  /**
+   * The apply-for-access control is the sidebar on a wide viewport and LibraryFooter on a narrow
+   * one, and the split is the only thing standing between a phone-sized reader and no way to
+   * apply at all. useMediaQuery reads window.matchMedia, which jsdom does not implement, so the
+   * desktop path is what every other test exercises by default.
+   */
+  it('swaps the sidebar for the footer on a narrow viewport', async () => {
+    const matchMedia = vi.fn().mockImplementation((query: string) => ({
+      // MUI asks breakpoints.down('md'); answer yes so the component takes the narrow path
+      matches: query.includes('max-width'),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }))
+    vi.stubGlobal('matchMedia', matchMedia)
+    try {
+      mountComponent()
+      await screen.findByText(datasets[0].datasetName)
+
+      // LibraryFooter slides in only once something is selected, which the default selection does
+      expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
+      // ...and the table of contents, which lives in the sidebar, is gone with it
+      expect(screen.queryByText('On this page')).not.toBeInTheDocument()
+    }
+    finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
   it('does not let the sidebar start a request without Active Researcher Status', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42 } as DuosUser)
     mountComponent()
