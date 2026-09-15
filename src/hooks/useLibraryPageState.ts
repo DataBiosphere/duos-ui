@@ -3,8 +3,9 @@ import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
 import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { computeTabCounts, STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
-import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, SortOrder } from 'src/types/library'
+import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, PaginationState, SortOrder } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
+import { assetFilterRegistry } from 'src/libs/dataLibraryFilterConfig'
 import {
   EMPTY_FILTERS,
   getExternalActiveFilters,
@@ -110,6 +111,35 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     urlState.query ?? '',
   )
 
+  // The visible tab's option lists have to come from a corpus its *own* filters
+  // never narrowed. The filter clauses match whole studies, so selecting one
+  // value drops every study without it, and a sibling value living only in one
+  // of those studies could never be offered again — no client-side pass can
+  // recover a study the response never carried. Filters owned by other tabs
+  // stay applied, so the options stay scoped the way the grid is.
+  //
+  // Only the visible tab gets its own corpus. Every other asset reads the
+  // counts response, which is already loaded: their options are only used to
+  // label external chips, and those fall back to the raw value. Clearing the
+  // tab's own keys is a no-op unless it actually has one set, so this shares
+  // the counts query's key — and its request — until it does.
+  const optionCorpusFilters = useMemo(
+    () => (isStudyAssetTab
+      ? assetFilterRegistry[urlState.tab].visibleFilters.reduce<FilterState>(
+          (cleared, key) => ({ ...cleared, [key]: EMPTY_FILTERS[key] }),
+          urlState.filters,
+        )
+      : urlState.filters),
+    [isStudyAssetTab, urlState.tab, urlState.filters],
+  )
+  const { data: visibleTabCorpus } = useLibraryTabCounts(libraryConfig, optionCorpusFilters, urlState.query ?? '')
+
+  const optionCorpusByAsset = useMemo(
+    () => new Map(STUDY_ASSET_TABS.map(assetType =>
+      [assetType, assetType === urlState.tab ? (visibleTabCorpus ?? tabCountsResponse) : tabCountsResponse])),
+    [urlState.tab, visibleTabCorpus, tabCountsResponse],
+  )
+
   // Badge counts are derived at render time from the shared response with the
   // *current* filters — the same inputs the study-asset grids are derived from
   // below — so a badge and its grid always agree, even while a refetch for new
@@ -158,15 +188,29 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
         .sort((a, b) => a.localeCompare(b))
         .map(value => ({ value, label: value }))
 
-    const workspaceItems = urlState.tab === AssetType.WORKSPACES
-      ? data?.items as Array<{ tools?: string[], platform?: string }>
-      : []
-    const clinicalTrialItems = urlState.tab === AssetType.CLINICAL_TRIALS
-      ? data?.items as Array<{ registry?: string }>
-      : []
-    const biospecimenItems = urlState.tab === AssetType.BIOSPECIMENS
-      ? data?.items as Array<{ optionalDataUse?: string }>
-      : []
+    // Option lists are derived from the *entire* matching corpus, not just the
+    // active tab's current page: `tabCountsResponse` already carries every
+    // matching study (via STUDIES_AGG's `terms.size: 10000`), so re-running an
+    // asset's own `transformResponse` with an unbounded page size yields its
+    // full flattened item list whichever tab the user is viewing. This mirrors
+    // `libraryCounts.ts`, which already calls `transformResponse` a second time
+    // with different pagination purely to read `.total`. Without it an option
+    // list only reflects whichever page is on screen, and goes empty the moment
+    // the user switches tabs.
+    const FULL_CORPUS_PAGINATION: PaginationState = { page: 0, pageSize: Number.MAX_SAFE_INTEGER }
+
+    // The asset's own keys are cleared in this corpus's filter set, so its
+    // transform does no row-level filtering of its own either.
+    const fullCorpusItems = <T>(assetType: AssetType): T[] => {
+      const response = optionCorpusByAsset.get(assetType)
+      return (response
+        ? assetRegistry[assetType].transformResponse(response, FULL_CORPUS_PAGINATION, EMPTY_FILTERS).items
+        : []) as T[]
+    }
+
+    const workspaceItems = fullCorpusItems<{ tools?: string[], platform?: string }>(AssetType.WORKSPACES)
+    const clinicalTrialItems = fullCorpusItems<{ registry?: string }>(AssetType.CLINICAL_TRIALS)
+    const biospecimenItems = fullCorpusItems<{ optionalDataUse?: string }>(AssetType.BIOSPECIMENS)
 
     return {
       accessManagement: [
@@ -216,11 +260,11 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
       biospecimenPostMortemIntervalRange: { min: 0, max: 1000000 },
       participantCountRange: { min: 0, max: 100000 },
     }
-  }, [metadata, data?.items, urlState.tab])
+  }, [metadata, optionCorpusByAsset])
 
   const filterSections = useMemo(
-    () => getFilterSectionsForAsset(urlState.tab, availableFilters),
-    [urlState.tab, availableFilters],
+    () => getFilterSectionsForAsset(urlState.tab, availableFilters, urlState.filters),
+    [urlState.tab, availableFilters, urlState.filters],
   )
 
   // Filters set on other tabs are kept in state so they persist across tab
