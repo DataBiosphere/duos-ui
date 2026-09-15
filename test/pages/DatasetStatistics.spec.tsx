@@ -305,9 +305,10 @@ describe('DatasetStatistics', () => {
     })
     renderDatasetStatistics({ darsError: forbidden })
 
-    expect(
-      await screen.findByText(/has not been published, so its data access request/),
-    ).toBeInTheDocument()
+    // Announced to assistive tech: <output> carries an implicit status role, so a revert to a
+    // plain div would fail here rather than silently stop announcing.
+    const notice = await screen.findByRole('status')
+    expect(notice.textContent).toMatch(/has not been published, so its data access request/)
     // Distinct from a study that simply has no requests yet
     expect(
       screen.queryByText(/No Data Access Requests have been created for this dataset/),
