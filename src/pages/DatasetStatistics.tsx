@@ -288,10 +288,13 @@ export default function DatasetStatistics() {
           <div style={{ paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%' }} />
           <div style={Styles.SUB_HEADER}>Data Access Requests for this dataset</div>
           {darsRestricted && (
-            <div style={{ paddingTop: '20px', fontStyle: 'italic' }} role="status">
+            // <output> carries an implicit status role and is announced more reliably than a div
+            // wearing role="status". It is inline by default, so the block display keeps the
+            // spacing the surrounding notices have.
+            <output style={{ display: 'block', paddingTop: '20px', fontStyle: 'italic' }}>
               The study this dataset belongs to has not been published, so its data access request
               history is available only to the study&apos;s creator, its custodians, and admins.
-            </div>
+            </output>
           )}
           {!darsRestricted && dars?.length === 0
             && (
