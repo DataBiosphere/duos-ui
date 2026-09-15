@@ -745,7 +745,6 @@ describe('Study details test', () => {
     })
     vi.mocked(StudyComments.listComments)
       .mockResolvedValueOnce(page([1], 2) as never)
-      .mockResolvedValueOnce(page([1], 2) as never)
       .mockResolvedValueOnce(page([2], 2) as never)
     const user = userEvent.setup()
     mountComponent()
@@ -759,16 +758,21 @@ describe('Study details test', () => {
     expect(screen.queryByRole('button', { name: /Show more comments/ })).not.toBeInTheDocument()
   })
 
-  it('refreshes the loaded comment prefix before requesting the next offset', async () => {
+  /**
+   * Paging used to refetch every loaded page first, which cost a request per page on every click
+   * and left more chances to fail. The id-keyed dedupe is what actually protects the list from a
+   * boundary comment repeating, so this pins both: one request per click, and a repeat that
+   * neither duplicates a row nor hides the rest.
+   */
+  it('asks only for the next page, and survives a repeated boundary comment', async () => {
     const comment = (id: number) => ({
       studyCommentId: id, studyId: 1, userId: 100 + id, rating: 4,
       commentText: `Comment ${id}`, createDate: '', updateDate: '',
       displayName: `Reviewer ${id}`, institutionName: 'Broad',
     })
     vi.mocked(StudyComments.listComments)
-      // Initial page, followed by a new comment arriving before the reader asks for more.
-      .mockResolvedValueOnce({ comments: [comment(2)], averageRating: 4, total: 2 } as never)
-      .mockResolvedValueOnce({ comments: [comment(3)], averageRating: 4, total: 3 } as never)
+      .mockResolvedValueOnce({ comments: [comment(2)], averageRating: 4, total: 3 } as never)
+      // Someone posts mid-paging, so the server repeats comment 2 on the next offset.
       .mockResolvedValueOnce({ comments: [comment(2), comment(1)], averageRating: 4, total: 3 } as never)
     const user = userEvent.setup()
     mountComponent()
@@ -776,11 +780,62 @@ describe('Study details test', () => {
     await screen.findByText('Comment 2')
     await user.click(screen.getByRole('button', { name: /Show more comments/ }))
 
-    expect(await screen.findByText('Comment 3')).toBeInTheDocument()
-    expect(screen.getByText('Comment 2')).toBeInTheDocument()
-    expect(screen.getByText('Comment 1')).toBeInTheDocument()
+    expect(await screen.findByText('Comment 1')).toBeInTheDocument()
+    expect(screen.getAllByText('Comment 2')).toHaveLength(1)
+    // One request per click - offset 0, then offset 1 - not a refetch of everything loaded.
     expect(vi.mocked(StudyComments.listComments).mock.calls.map(([, offset]) => offset))
-      .toEqual([0, 0, 1])
+      .toEqual([0, 1])
+    // Three rows have been handed over but only two are distinct, and the study has three. Counted
+    // raw, that reads as complete and 'Show more' disappears with a comment still unseen.
+    expect(screen.getByRole('button', { name: /Show more comments/ })).toBeInTheDocument()
+  })
+
+  /**
+   * A refetch failing in the background - the one after a successful post, for instance - used to
+   * swap the whole section for an error, discarding the loaded comments and whatever the reader
+   * had typed but not yet saved.
+   */
+  it('keeps loaded comments and the draft when a background refetch fails', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    vi.mocked(StudyComments.listComments)
+      .mockResolvedValueOnce({
+        total: 2,
+        averageRating: 4,
+        comments: [{
+          studyCommentId: 1, studyId: 1, userId: 7, rating: 4, commentText: 'Comment 1',
+          createDate: '', updateDate: '', displayName: 'Reviewer', institutionName: 'Broad',
+        }],
+      } as never)
+      .mockRejectedValueOnce(new Error('refresh failed'))
+    const user = userEvent.setup()
+    mountComponent()
+
+    await screen.findByText('Comment 1')
+    await user.type(screen.getByLabelText('Comment'), 'my draft')
+    await user.click(screen.getByRole('button', { name: /Show more comments/ }))
+
+    expect(await screen.findByText(/Couldn't refresh comments just now/i)).toBeInTheDocument()
+    expect(screen.getByText('Comment 1')).toBeInTheDocument()
+    expect(screen.getByLabelText('Comment')).toHaveValue('my draft')
+    expect(screen.queryByText('Unable to load comments and ratings.')).not.toBeInTheDocument()
+  })
+
+  /** onSuccess re-seeds both fields from the saved copy, so typing mid-flight was thrown away. */
+  it('freezes the composer while the comment is being posted', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    vi.mocked(StudyComments.postComment).mockReturnValue(new Promise(() => {}) as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    await screen.findByLabelText('Comment')
+    fireEvent.click(screen.getByRole('radio', { name: '4 Stars' }))
+    await user.click(screen.getByRole('button', { name: 'Post comment' }))
+
+    await waitFor(() => expect(screen.getByLabelText('Comment')).toBeDisabled())
   })
 
   it('treats the reader\'s own comment as an edit even when it is not on the loaded page', async () => {
