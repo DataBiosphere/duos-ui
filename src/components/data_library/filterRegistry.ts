@@ -30,6 +30,9 @@ type ArrayFilterKey
     | 'presentationAccess'
     | 'publicationJournal'
     | 'publicationAccess'
+    | 'ipType'
+    | 'ipStatus'
+    | 'fundingFunderName'
     | 'clinicalTrialStatus'
     | 'clinicalTrialPhase'
     | 'clinicalTrialInterventionType'
@@ -58,6 +61,9 @@ const ARRAY_FILTER_KEYS: ArrayFilterKey[] = [
   'presentationAccess',
   'publicationJournal',
   'publicationAccess',
+  'ipType',
+  'ipStatus',
+  'fundingFunderName',
   'clinicalTrialStatus',
   'clinicalTrialPhase',
   'clinicalTrialInterventionType',
@@ -115,6 +121,9 @@ const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
   publicationAccess: 'checkbox',
   presentationDate: 'dateRange',
   publicationPublishedDate: 'dateRange',
+  ipType: 'checkbox',
+  ipStatus: 'checkbox',
+  fundingFunderName: 'checkbox',
   clinicalTrialStatus: 'checkbox',
   clinicalTrialPhase: 'checkbox',
   clinicalTrialInterventionType: 'checkbox',
@@ -155,6 +164,9 @@ export const EMPTY_FILTERS: FilterState = {
   publicationAccess: [],
   presentationDate: {},
   publicationPublishedDate: {},
+  ipType: [],
+  ipStatus: [],
+  fundingFunderName: [],
   clinicalTrialStatus: [],
   clinicalTrialPhase: [],
   clinicalTrialInterventionType: [],
@@ -242,6 +254,9 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
     case 'presentationAccess':
     case 'publicationJournal':
     case 'publicationAccess':
+    case 'ipType':
+    case 'ipStatus':
+    case 'fundingFunderName':
     case 'clinicalTrialStatus':
     case 'clinicalTrialPhase':
     case 'clinicalTrialInterventionType':
@@ -309,6 +324,9 @@ const getFilterOptions = (key: FilterKey, availableFilters: AvailableFilters) =>
     case 'presentationAccess':
     case 'publicationJournal':
     case 'publicationAccess':
+    case 'ipType':
+    case 'ipStatus':
+    case 'fundingFunderName':
     case 'clinicalTrialStatus':
     case 'clinicalTrialPhase':
     case 'clinicalTrialInterventionType':
@@ -666,6 +684,27 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
       const { after, before } = filters.publicationPublishedDate
       return dateRangeClause('study.assets.publications.publishedDate', { gte: after, lte: before })
     },
+  },
+  ipType: {
+    label: 'Type',
+    buildClause: filters =>
+      filters.ipType.length > 0
+        ? matchAny('study.assets.intellectualProperties.type', filters.ipType)
+        : undefined,
+  },
+  ipStatus: {
+    label: 'Status',
+    buildClause: filters =>
+      filters.ipStatus.length > 0
+        ? matchAny('study.assets.intellectualProperties.status', filters.ipStatus)
+        : undefined,
+  },
+  fundingFunderName: {
+    label: 'Funder Name',
+    buildClause: filters =>
+      filters.fundingFunderName.length > 0
+        ? matchAny('study.assets.funding.funderName', filters.fundingFunderName)
+        : undefined,
   },
   clinicalTrialStatus: {
     label: 'Status',

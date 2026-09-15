@@ -24,6 +24,9 @@ type ArrayFilterParamConfig = {
     | 'presentationAccess'
     | 'publicationJournal'
     | 'publicationAccess'
+    | 'ipType'
+    | 'ipStatus'
+    | 'fundingFunderName'
     | 'clinicalTrialStatus'
     | 'clinicalTrialPhase'
     | 'clinicalTrialInterventionType'
@@ -71,6 +74,9 @@ const ARRAY_FILTER_PARAM_CONFIG: ArrayFilterParamConfig[] = [
   { key: 'presentationAccess', param: 'presentationAccess' },
   { key: 'publicationJournal', param: 'publicationJournal' },
   { key: 'publicationAccess', param: 'publicationAccess' },
+  { key: 'ipType', param: 'ipType' },
+  { key: 'ipStatus', param: 'ipStatus' },
+  { key: 'fundingFunderName', param: 'fundingFunderName' },
   { key: 'clinicalTrialStatus', param: 'clinicalTrialStatus' },
   { key: 'clinicalTrialPhase', param: 'clinicalTrialPhase' },
   { key: 'clinicalTrialInterventionType', param: 'clinicalTrialInterventionType' },

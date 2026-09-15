@@ -48,9 +48,9 @@ export const assetFilterRegistry: Record<AssetType, AssetFilterConfig> = {
     visibleFilters: ['presentationEvent', 'presentationFormat', 'presentationAccess', 'presentationDate', 'datasetsCited'],
   },
   [AssetType.INTELLECTUAL_PROPERTY]: {
-    visibleFilters: ['ipFiledDate'],
+    visibleFilters: ['ipType', 'ipStatus', 'ipFiledDate'],
   },
   [AssetType.FUNDING_RESOURCES]: {
-    visibleFilters: ['fundingDate'],
+    visibleFilters: ['fundingFunderName', 'fundingDate'],
   },
 }

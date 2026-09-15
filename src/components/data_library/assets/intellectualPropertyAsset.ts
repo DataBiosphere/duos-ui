@@ -16,15 +16,23 @@ const matchesIntellectualPropertyFilters = (ip: IntellectualPropertyAsset, filte
 
   // Inverted bounds build no ES clause, so they must not narrow rows here
   // either — otherwise the grid empties while the panel flags the range.
-  if (!isFilterActive('ipFiledDate', filters)) {
-    return true
+  if (isFilterActive('ipFiledDate', filters)) {
+    // A missing date matches neither bound, as in the ES range clause, which
+    // never matches a document without the field.
+    const { after, before } = filters.ipFiledDate
+    if (after && (!ip.filingDate || ip.filingDate < after)) {
+      return false
+    }
+    if (before && (!ip.filingDate || ip.filingDate > before)) {
+      return false
+    }
   }
 
-  const filingDate = ip.filingDate || ''
-  if (filters.ipFiledDate.after && filingDate < filters.ipFiledDate.after) {
+  if (filters.ipType.length > 0 && !filters.ipType.includes(ip.type)) {
     return false
   }
-  return !(filters.ipFiledDate.before && filingDate > filters.ipFiledDate.before)
+
+  return filters.ipStatus.length === 0 || filters.ipStatus.includes(ip.status)
 }
 
 export const intellectualPropertyAsset: AssetDefinition = {

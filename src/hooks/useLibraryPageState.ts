@@ -215,6 +215,8 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     const workspaceItems = fullCorpusItems<{ tools?: string[], platform?: string, cloud?: string[], access?: string }>(AssetType.WORKSPACES)
     const presentationItems = fullCorpusItems<{ event?: string, format?: string, access?: string }>(AssetType.PRESENTATIONS)
     const publicationItems = fullCorpusItems<{ journal?: string, access?: string }>(AssetType.PUBLICATIONS)
+    const intellectualPropertyItems = fullCorpusItems<{ type?: string, status?: string }>(AssetType.INTELLECTUAL_PROPERTY)
+    const fundingResourceItems = fullCorpusItems<{ funderName?: string }>(AssetType.FUNDING_RESOURCES)
     const clinicalTrialItems = fullCorpusItems<{ registry?: string }>(AssetType.CLINICAL_TRIALS)
     const biospecimenItems = fullCorpusItems<{ optionalDataUse?: string }>(AssetType.BIOSPECIMENS)
 
@@ -251,6 +253,9 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
       presentationAccess: uniqueValues(presentationItems.map(item => item.access)),
       publicationJournal: uniqueValues(publicationItems.map(item => item.journal)),
       publicationAccess: uniqueValues(publicationItems.map(item => item.access)),
+      ipType: uniqueValues(intellectualPropertyItems.map(item => item.type)),
+      ipStatus: uniqueValues(intellectualPropertyItems.map(item => item.status)),
+      fundingFunderName: uniqueValues(fundingResourceItems.map(item => item.funderName)),
       clinicalTrialStatus: clinicalTrialStatusSelectOptions.map(o => ({ value: o.key, label: o.displayText })),
       clinicalTrialPhase: clinicalTrialPhaseSelectOptions.map(o => ({ value: o.key, label: o.displayText })),
       clinicalTrialInterventionType: clinicalTrialInterventionSelectOptions.map(o => ({ value: o.key, label: o.displayText })),

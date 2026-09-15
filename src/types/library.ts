@@ -68,6 +68,9 @@ export interface FilterState {
     after?: string
     before?: string
   }
+  ipType: string[]
+  ipStatus: string[]
+  fundingFunderName: string[]
   clinicalTrialStatus: string[]
   clinicalTrialPhase: string[]
   clinicalTrialInterventionType: string[]
@@ -150,6 +153,9 @@ export interface AvailableFilters {
   presentationAccess: FilterOption[]
   publicationJournal: FilterOption[]
   publicationAccess: FilterOption[]
+  ipType: FilterOption[]
+  ipStatus: FilterOption[]
+  fundingFunderName: FilterOption[]
   clinicalTrialStatus: FilterOption[]
   clinicalTrialPhase: FilterOption[]
   clinicalTrialInterventionType: FilterOption[]
