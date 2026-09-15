@@ -11,8 +11,11 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
   const queryClient = useQueryClient()
   const [rating, setRating] = useState<number | null>(null)
   const [commentText, setCommentText] = useState('')
-  // Seeded from the user's existing comment once the list arrives; see the latch below.
-  const [seeded, setSeeded] = useState(false)
+  // Which user the composer was seeded for, or null when it has not been seeded yet. Keyed to
+  // the user rather than a bare boolean: a cross-tab account switch clears the query cache while
+  // this component stays mounted, and a boolean latch would leave the previous user's rating and
+  // text in the composer for the new one to submit.
+  const [seededFor, setSeededFor] = useState<{ userId: number | null } | null>(null)
   const { data, isPending, error, hasNextPage, fetchNextPage, isFetching, refetch }
     = useStudyComments(studyId)
   // Every page repeats the study-wide figures, so the first page is where they are read from.
@@ -36,20 +39,30 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
       await queryClient.invalidateQueries({ queryKey: studyCommentsQueryKey(studyId) })
       // Re-seed from what was saved rather than blanking the form. The await resolves once the
       // refetch has landed, so the composer comes back showing the comment as it now stands.
-      setSeeded(false)
+      setSeededFor(null)
     },
   })
   // Adjusting state during render behind a latch, as StudyDetails does for its dataset
   // selection: React re-runs the component before it commits, so the form never paints empty
   // and then fills itself in, and a background refetch can't overwrite what the user has typed.
-  if (!seeded && summary) {
-    setSeeded(true)
+  const currentUserId = currentUser?.userId ?? null
+  if (summary && seededFor?.userId !== currentUserId) {
+    setSeededFor({ userId: currentUserId })
     setRating(ownComment?.rating ?? null)
     setCommentText(ownComment?.commentText ?? '')
   }
   // Match StudyCommentService's post-time authorization. The role and current library card are
   // independent requirements, so the composer is only useful when both are present.
-  const canComment = currentUser?.isResearcher === true && hasActiveResearcherStatus()
+  const hasResearcherRole = currentUser?.isResearcher === true
+  const hasCard = hasActiveResearcherStatus()
+  const canComment = hasResearcherRole && hasCard
+  // Naming only the card would tell a chairperson or signing official who holds one that they
+  // lack a status they already have.
+  const cannotCommentReason = hasCard
+    ? 'Commenting on and rating a study is limited to users with the Researcher role.'
+    : hasResearcherRole
+      ? 'Active Researcher Status is required to comment or rate this study.'
+      : 'Commenting on and rating a study requires the Researcher role and Active Researcher Status.'
   const showMoreComments = async () => {
     // Refresh the pages already on screen before calculating the next offset. Since comments are
     // newest-first, this realigns every loaded boundary when a comment was added or removed since
@@ -148,7 +161,7 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
             )
           : (
               <Alert severity="info" role="status">
-                Active Researcher Status is required to comment or rate this study.
+                {cannotCommentReason}
               </Alert>
             )}
       </Stack>

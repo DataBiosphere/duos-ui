@@ -769,18 +769,93 @@ describe('Study details test', () => {
     expect(screen.getByRole('button', { name: 'Post comment' })).toBeDisabled()
   })
 
-  it('requires the Researcher role in addition to Active Researcher Status', async () => {
+  /**
+   * A chairperson or signing official can hold a library card without the Researcher role. Naming
+   * only the card would tell them they lack a status they already have, so the notice names the
+   * requirement that is actually missing.
+   */
+  /** The core write path: nothing else in the suite invokes the mutation. */
+  it('posts a new comment with the rating and text the composer holds', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    vi.mocked(StudyComments.postComment).mockResolvedValue({} as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    await screen.findByText('Add your comment')
+    // MUI Rating's radios are visually hidden, so pointer interaction is refused; fireEvent
+    // sets the value the way the control itself does.
+    fireEvent.click(screen.getByRole('radio', { name: '4 Stars' }))
+    await user.type(screen.getByLabelText('Comment'), 'Useful study')
+    await user.click(screen.getByRole('button', { name: 'Post comment' }))
+
+    await waitFor(() =>
+      expect(StudyComments.postComment).toHaveBeenCalledWith('1', 4, 'Useful study'))
+  })
+
+  /**
+   * A second post revises in place, and the composer re-seeds from what was saved rather than
+   * blanking, so the reader can see the comment as it now stands.
+   */
+  it('saves an edit and re-seeds the composer from the refreshed comment', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    const mine = {
+      studyCommentId: 7, studyId: 1, userId: 42, rating: 3, commentText: 'First take',
+      createDate: '', updateDate: '', displayName: 'Me', institutionName: 'Broad',
+    }
+    vi.mocked(StudyComments.listComments)
+      .mockResolvedValueOnce({ comments: [mine], averageRating: 3, total: 1, yourComment: mine } as never)
+      .mockResolvedValue({
+        comments: [{ ...mine, rating: 5, commentText: 'Revised take' }],
+        averageRating: 5,
+        total: 1,
+        yourComment: { ...mine, rating: 5, commentText: 'Revised take' },
+      } as never)
+    vi.mocked(StudyComments.postComment).mockResolvedValue({} as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    // Seeded from the existing comment, so this is an edit rather than a first post
+    expect(await screen.findByText('Edit your comment')).toBeInTheDocument()
+    const field = screen.getByLabelText('Comment')
+    expect(field).toHaveValue('First take')
+
+    await user.clear(field)
+    await user.type(field, 'Revised take')
+    fireEvent.click(screen.getByRole('radio', { name: '5 Stars' }))
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+    await waitFor(() =>
+      expect(StudyComments.postComment).toHaveBeenCalledWith('1', 5, 'Revised take'))
+    // Re-seeded from the refetched comment rather than cleared
+    await waitFor(() => expect(screen.getByLabelText('Comment')).toHaveValue('Revised take'))
+  })
+
+  it('names the missing role when the card is held', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue({
       userId: 42, isResearcher: false, libraryCard: {} as LibraryCard,
     } as DuosUser)
     mountComponent()
 
-    expect(await screen.findByText('Active Researcher Status is required to comment or rate this study.'))
-      .toBeInTheDocument()
+    expect(await screen.findByText(
+      'Commenting on and rating a study is limited to users with the Researcher role.',
+    )).toBeInTheDocument()
     expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
   })
 
-  it('requires an active library card in addition to the Researcher role', async () => {
+  it('names both requirements when neither is held', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42, isResearcher: false } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText(
+      'Commenting on and rating a study requires the Researcher role and Active Researcher Status.',
+    )).toBeInTheDocument()
+  })
+
+  it('names the missing card when the Researcher role is held', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42, isResearcher: true } as DuosUser)
     mountComponent()
 
