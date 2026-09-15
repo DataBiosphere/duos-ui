@@ -8,6 +8,7 @@ describe('getPiProfileLinks', () => {
       href: 'https://orcid.org/0000-0002-1825-0097',
       label: 'ORCID profile',
       kind: 'orcid',
+      field: 'orcid',
     })
   })
 
@@ -42,7 +43,7 @@ describe('getPiProfileLinks', () => {
   /** Schemes are case-insensitive, so this is an absolute URL, not a bare identifier. */
   it('recognizes an uppercase scheme as a URL rather than an identifier', () => {
     expect(getPiProfileLinks({ orcid: 'HTTPS://orcid.org/0000-0002-1825-0097' }))
-      .toEqual([{ href: 'HTTPS://orcid.org/0000-0002-1825-0097', label: 'ORCID profile', kind: 'orcid' }])
+      .toEqual([{ href: 'HTTPS://orcid.org/0000-0002-1825-0097', label: 'ORCID profile', kind: 'orcid', field: 'orcid' }])
   })
 
   it('accepts an orcid.org subdomain', () => {
@@ -62,9 +63,9 @@ describe('getPiProfileLinks', () => {
    */
   it('demotes an off-host profile url to a plain website', () => {
     expect(getPiProfileLinks({ orcid: 'https://evil.example/0000-0002-1825-0097' }))
-      .toEqual([{ href: 'https://evil.example/0000-0002-1825-0097', label: 'PI website', kind: 'website' }])
+      .toEqual([{ href: 'https://evil.example/0000-0002-1825-0097', label: 'PI website', kind: 'website', field: 'orcid' }])
     expect(getPiProfileLinks({ linkedinUrl: 'https://evil.example/in/someone' }))
-      .toEqual([{ href: 'https://evil.example/in/someone', label: 'PI website', kind: 'website' }])
+      .toEqual([{ href: 'https://evil.example/in/someone', label: 'PI website', kind: 'website', field: 'linkedin' }])
   })
 
   /** A suffix test alone would accept this; the boundary dot is what rejects it. */
@@ -80,6 +81,27 @@ describe('getPiProfileLinks', () => {
       linkedinUrl: 'javascript:alert(1)',
       websiteUrl: 'not a url',
     })).toEqual([])
+  })
+
+  /**
+   * Keys have to survive a submitter reusing one URL across fields, and the demotion path, which
+   * gives two links the same generic label. The source field is the only value unique to each.
+   */
+  it('distinguishes links that share a url or a label', () => {
+    const sameUrl = getPiProfileLinks({
+      linkedinUrl: 'https://linkedin.com/in/someone',
+      websiteUrl: 'https://linkedin.com/in/someone',
+    })
+    expect(sameUrl.map(link => link.field)).toEqual(['linkedin', 'website'])
+    expect(new Set(sameUrl.map(link => link.field)).size).toBe(sameUrl.length)
+
+    const bothDemoted = getPiProfileLinks({
+      orcid: 'https://elsewhere.example/a',
+      linkedinUrl: 'https://elsewhere.example/b',
+      websiteUrl: 'https://elsewhere.example/c',
+    })
+    expect(bothDemoted.map(link => link.label)).toEqual(['PI website', 'PI website', 'PI website'])
+    expect(new Set(bothDemoted.map(link => link.field)).size).toBe(3)
   })
 
   it('returns the links that are present, in a stable order', () => {
