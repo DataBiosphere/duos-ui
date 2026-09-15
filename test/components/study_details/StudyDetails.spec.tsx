@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
@@ -978,6 +978,52 @@ describe('Study details test', () => {
 
     expect(await screen.findByText('Unable to load AI models.')).toBeInTheDocument()
     expect(screen.queryByText('No AI models have been added yet.')).not.toBeInTheDocument()
+  })
+
+  /**
+   * A refetch that fails while rows are on screen leaves data intact and sets error. Reporting
+   * that would replace a populated table with a line of error text, which is the opposite of the
+   * background-refetch behaviour the section promises.
+   */
+  it('keeps the asset rows up when a refetch fails', async () => {
+    vi.mocked(Study.getModels)
+      .mockResolvedValueOnce([{ modelId: 'm1', name: 'First Model', tags: [] }] as never)
+    mountComponent()
+    await screen.findByText('First Model')
+
+    // The section reports a failure only when it has nothing to show
+    expect(screen.queryByText('Unable to load AI models.')).not.toBeInTheDocument()
+  })
+
+  /**
+   * The community grid always paginates, and hideFooter removes only the controls, so a study
+   * with more assets than the default page size showed the first page and no way to the rest.
+   */
+  it('shows every asset rather than the first page of them', async () => {
+    const many = Array.from({ length: 120 }, (_, i) => ({
+      modelId: `m${i}`, name: `Model ${i}`, tags: [],
+    }))
+    vi.mocked(Study.getModels).mockResolvedValueOnce(many as never)
+    const { container } = mountComponent()
+    await screen.findByText('Model 0')
+
+    // Scoped to the AI Models section: the datasets grid at the top of the page has a pager of
+    // its own, so an unscoped query would pass whatever this table did.
+    const models = within(container.querySelector('#models') as HTMLElement)
+    // The community grid refuses a page size above 100, so the rest are reached by paging. The
+    // footer is what makes them reachable; hidden, the remaining assets had no route at all.
+    expect(models.getByRole('button', { name: /next page/i })).toBeEnabled()
+  })
+
+  /** No paging chrome on the small tables that are the common case. */
+  it('hides the footer when every asset fits on one page', async () => {
+    vi.mocked(Study.getModels)
+      .mockResolvedValueOnce([{ modelId: 'm1', name: 'Only Model', tags: [] }] as never)
+    const { container } = mountComponent()
+    await screen.findByText('Only Model')
+
+    const models = within(container.querySelector('#models') as HTMLElement)
+    expect(models.queryByRole('button', { name: /next page/i })).not.toBeInTheDocument()
   })
 
   it('renders a row per asset even when the registered ids are blank', async () => {

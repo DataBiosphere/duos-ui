@@ -1,10 +1,13 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { DataGrid, GridColDef, GridValidRowModel } from '@mui/x-data-grid'
 import StudyPageSection from './StudyPageSection'
 import StudyQueryResult from './StudyQueryResult'
 
 /** Where this table's own row id is kept, alongside the asset's fields. */
 const ROW_ID = '__studyAssetRowId'
+
+/** The largest page the community DataGrid accepts; it throws above this. */
+const ASSET_PAGE_SIZE = 100
 
 interface Props<T extends GridValidRowModel> {
   id: string
@@ -42,6 +45,8 @@ const StudyAssetTable = <T extends GridValidRowModel>({
   // Every reused column set carries a Study column, because the data library lists these assets
   // across all studies. On a page about one study it is redundant, and these endpoints return
   // the registration JSON, which has no study name to put in it.
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: ASSET_PAGE_SIZE })
+
   const studyScopedColumns = useMemo(
     () => columns.filter(column => column.field !== 'studyName'),
     [columns],
@@ -51,14 +56,25 @@ const StudyAssetTable = <T extends GridValidRowModel>({
     <StudyPageSection id={id} heading={heading}>
       <StudyQueryResult
         isPending={isPending}
-        error={error}
+        // Only when there is nothing to show. A refetch that fails while rows are already on
+        // screen leaves data intact and sets error; reporting that would replace a populated
+        // table with a line of error text, which is the opposite of keeping the rows up.
+        error={data.length === 0 ? error : undefined}
         isEmpty={data.length === 0}
         emptyMessage={emptyMessage}
         errorMessage={errorMessage}
       >
         <DataGrid
           autoHeight
-          hideFooter
+          // The community grid always paginates and refuses a page size above 100, so the whole
+          // list cannot be put on one page. hideFooter used to remove the controls regardless,
+          // which left anything past the first page unreachable. The footer now appears exactly
+          // when there is a further page to reach - no chrome on the small tables that are the
+          // common case, and a way through the rest when a study has more.
+          hideFooter={rows.length <= ASSET_PAGE_SIZE}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[ASSET_PAGE_SIZE]}
           rows={rows}
           columns={studyScopedColumns}
           getRowId={row => row[ROW_ID]}

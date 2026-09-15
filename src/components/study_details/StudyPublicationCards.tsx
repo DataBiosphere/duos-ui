@@ -22,9 +22,10 @@ const StudyPublicationCards = ({ studyId }: { studyId: string }) => {
             // Submitter-supplied, so only a plain http(s) URL becomes a link
             const href = validateHttpUrl(publication.url)
             return (
-              // publicationId is submitter-supplied and often blank, and two publications
-              // can share a title, so position is the only id always distinct.
-              <Grid key={publication.publicationId || `publication-${index}`} size={{ xs: 12, md: 6 }}>
+              // Position, as the asset tables key by. publicationId is submitter-supplied: it is
+              // often blank, and nothing stops two publications sharing a non-blank one, which
+              // would give React duplicate keys to reconcile on a refetch or reorder.
+              <Grid key={`publication-${index}`} size={{ xs: 12, md: 6 }}>
                 <Card variant="outlined" sx={{ height: '100%' }}>
                   <CardContent>
                     <Typography variant="h6">
