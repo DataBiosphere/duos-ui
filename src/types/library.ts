@@ -55,6 +55,19 @@ export interface FilterState {
   modelTags: string[]
   workspaceCloud: string[]
   workspaceAccess: string[]
+  presentationEvent: string[]
+  presentationFormat: string[]
+  presentationAccess: string[]
+  publicationJournal: string[]
+  publicationAccess: string[]
+  presentationDate: {
+    after?: string
+    before?: string
+  }
+  publicationPublishedDate: {
+    after?: string
+    before?: string
+  }
   clinicalTrialStatus: string[]
   clinicalTrialPhase: string[]
   clinicalTrialInterventionType: string[]
@@ -132,6 +145,11 @@ export interface AvailableFilters {
   modelTags: FilterOption[]
   workspaceCloud: FilterOption[]
   workspaceAccess: FilterOption[]
+  presentationEvent: FilterOption[]
+  presentationFormat: FilterOption[]
+  presentationAccess: FilterOption[]
+  publicationJournal: FilterOption[]
+  publicationAccess: FilterOption[]
   clinicalTrialStatus: FilterOption[]
   clinicalTrialPhase: FilterOption[]
   clinicalTrialInterventionType: FilterOption[]

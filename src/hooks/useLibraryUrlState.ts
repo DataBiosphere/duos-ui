@@ -19,6 +19,11 @@ type ArrayFilterParamConfig = {
     | 'modelTags'
     | 'workspaceCloud'
     | 'workspaceAccess'
+    | 'presentationEvent'
+    | 'presentationFormat'
+    | 'presentationAccess'
+    | 'publicationJournal'
+    | 'publicationAccess'
     | 'clinicalTrialStatus'
     | 'clinicalTrialPhase'
     | 'clinicalTrialInterventionType'
@@ -40,7 +45,7 @@ type RangeFilterParamConfig = {
 }
 
 type DateFilterParamConfig = {
-  key: keyof Pick<FilterState, 'clinicalTrialDates' | 'biospecimenCollectionDate' | 'ipFiledDate' | 'fundingDate'>
+  key: keyof Pick<FilterState, 'clinicalTrialDates' | 'biospecimenCollectionDate' | 'ipFiledDate' | 'fundingDate' | 'presentationDate' | 'publicationPublishedDate'>
   startParam: string
   endParam: string
   startKey?: string
@@ -61,6 +66,11 @@ const ARRAY_FILTER_PARAM_CONFIG: ArrayFilterParamConfig[] = [
   { key: 'modelTags', param: 'modelTags' },
   { key: 'workspaceCloud', param: 'workspaceCloud' },
   { key: 'workspaceAccess', param: 'workspaceAccess' },
+  { key: 'presentationEvent', param: 'presentationEvent' },
+  { key: 'presentationFormat', param: 'presentationFormat' },
+  { key: 'presentationAccess', param: 'presentationAccess' },
+  { key: 'publicationJournal', param: 'publicationJournal' },
+  { key: 'publicationAccess', param: 'publicationAccess' },
   { key: 'clinicalTrialStatus', param: 'clinicalTrialStatus' },
   { key: 'clinicalTrialPhase', param: 'clinicalTrialPhase' },
   { key: 'clinicalTrialInterventionType', param: 'clinicalTrialInterventionType' },
@@ -87,6 +97,8 @@ const DATE_FILTER_PARAM_CONFIG: DateFilterParamConfig[] = [
   { key: 'biospecimenCollectionDate', startParam: 'biospecimenCollectedAfter', endParam: 'biospecimenCollectedBefore', startKey: 'after', endKey: 'before' },
   { key: 'ipFiledDate', startParam: 'ipFiledAfter', endParam: 'ipFiledBefore', startKey: 'after', endKey: 'before' },
   { key: 'fundingDate', startParam: 'fundingStartDate', endParam: 'fundingEndDate' },
+  { key: 'presentationDate', startParam: 'presentedAfter', endParam: 'presentedBefore', startKey: 'after', endKey: 'before' },
+  { key: 'publicationPublishedDate', startParam: 'publishedAfter', endParam: 'publishedBefore', startKey: 'after', endKey: 'before' },
 ]
 
 // Parse an integer URL param defensively: a malformed value (e.g. ?page=abc)

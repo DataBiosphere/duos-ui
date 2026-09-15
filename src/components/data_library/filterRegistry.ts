@@ -25,6 +25,11 @@ type ArrayFilterKey
     | 'modelTags'
     | 'workspaceCloud'
     | 'workspaceAccess'
+    | 'presentationEvent'
+    | 'presentationFormat'
+    | 'presentationAccess'
+    | 'publicationJournal'
+    | 'publicationAccess'
     | 'clinicalTrialStatus'
     | 'clinicalTrialPhase'
     | 'clinicalTrialInterventionType'
@@ -48,6 +53,11 @@ const ARRAY_FILTER_KEYS: ArrayFilterKey[] = [
   'modelTags',
   'workspaceCloud',
   'workspaceAccess',
+  'presentationEvent',
+  'presentationFormat',
+  'presentationAccess',
+  'publicationJournal',
+  'publicationAccess',
   'clinicalTrialStatus',
   'clinicalTrialPhase',
   'clinicalTrialInterventionType',
@@ -65,6 +75,8 @@ const OBJECT_FILTER_KEYS: Array<
   | 'biospecimenCollectionDate'
   | 'ipFiledDate'
   | 'fundingDate'
+  | 'presentationDate'
+  | 'publicationPublishedDate'
 > = [
   'participantCount',
   'biospecimenPostMortemInterval',
@@ -72,6 +84,8 @@ const OBJECT_FILTER_KEYS: Array<
   'biospecimenCollectionDate',
   'ipFiledDate',
   'fundingDate',
+  'presentationDate',
+  'publicationPublishedDate',
 ]
 
 const BOOL_FILTER_KEYS: Array<'datasetsCited' | 'publicationsDatasetsCited' | 'instantApproval'> = [
@@ -94,6 +108,13 @@ const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
   modelTags: 'checkbox',
   workspaceCloud: 'checkbox',
   workspaceAccess: 'checkbox',
+  presentationEvent: 'checkbox',
+  presentationFormat: 'checkbox',
+  presentationAccess: 'checkbox',
+  publicationJournal: 'checkbox',
+  publicationAccess: 'checkbox',
+  presentationDate: 'dateRange',
+  publicationPublishedDate: 'dateRange',
   clinicalTrialStatus: 'checkbox',
   clinicalTrialPhase: 'checkbox',
   clinicalTrialInterventionType: 'checkbox',
@@ -127,6 +148,13 @@ export const EMPTY_FILTERS: FilterState = {
   modelTags: [],
   workspaceCloud: [],
   workspaceAccess: [],
+  presentationEvent: [],
+  presentationFormat: [],
+  presentationAccess: [],
+  publicationJournal: [],
+  publicationAccess: [],
+  presentationDate: {},
+  publicationPublishedDate: {},
   clinicalTrialStatus: [],
   clinicalTrialPhase: [],
   clinicalTrialInterventionType: [],
@@ -169,6 +197,8 @@ const DATE_RANGE_BOUNDS = {
   fundingDate: ['startDate', 'endDate'],
   biospecimenCollectionDate: ['after', 'before'],
   ipFiledDate: ['after', 'before'],
+  presentationDate: ['after', 'before'],
+  publicationPublishedDate: ['after', 'before'],
 } as const
 
 /**
@@ -207,6 +237,11 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
     case 'modelTags':
     case 'workspaceCloud':
     case 'workspaceAccess':
+    case 'presentationEvent':
+    case 'presentationFormat':
+    case 'presentationAccess':
+    case 'publicationJournal':
+    case 'publicationAccess':
     case 'clinicalTrialStatus':
     case 'clinicalTrialPhase':
     case 'clinicalTrialInterventionType':
@@ -239,7 +274,9 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
     }
 
     case 'biospecimenCollectionDate':
-    case 'ipFiledDate': {
+    case 'ipFiledDate':
+    case 'presentationDate':
+    case 'publicationPublishedDate': {
       if (isInvertedDateRange(key, filters)) {
         return false
       }
@@ -267,6 +304,11 @@ const getFilterOptions = (key: FilterKey, availableFilters: AvailableFilters) =>
     case 'modelTags':
     case 'workspaceCloud':
     case 'workspaceAccess':
+    case 'presentationEvent':
+    case 'presentationFormat':
+    case 'presentationAccess':
+    case 'publicationJournal':
+    case 'publicationAccess':
     case 'clinicalTrialStatus':
     case 'clinicalTrialPhase':
     case 'clinicalTrialInterventionType':
@@ -558,6 +600,61 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         ? matchAny('study.assets.workspaces.access', filters.workspaceAccess)
         : undefined,
   },
+  presentationEvent: {
+    label: 'Event',
+    buildClause: filters =>
+      filters.presentationEvent.length > 0
+        ? matchAny('study.assets.presentations.event', filters.presentationEvent)
+        : undefined,
+  },
+  presentationFormat: {
+    label: 'Format',
+    buildClause: filters =>
+      filters.presentationFormat.length > 0
+        ? matchAny('study.assets.presentations.format', filters.presentationFormat)
+        : undefined,
+  },
+  presentationAccess: {
+    label: 'Access',
+    buildClause: filters =>
+      filters.presentationAccess.length > 0
+        ? matchAny('study.assets.presentations.access', filters.presentationAccess)
+        : undefined,
+  },
+  presentationDate: {
+    label: 'Presentation Date',
+    buildClause: (filters) => {
+      if (!isFilterActive('presentationDate', filters)) {
+        return undefined
+      }
+      const { after, before } = filters.presentationDate
+      return dateRangeClause('study.assets.presentations.date', { gte: after, lte: before })
+    },
+  },
+  publicationJournal: {
+    label: 'Journal',
+    buildClause: filters =>
+      filters.publicationJournal.length > 0
+        ? matchAny('study.assets.publications.journal', filters.publicationJournal)
+        : undefined,
+  },
+  publicationAccess: {
+    label: 'Access',
+    buildClause: filters =>
+      filters.publicationAccess.length > 0
+        ? matchAny('study.assets.publications.access', filters.publicationAccess)
+        : undefined,
+  },
+  publicationPublishedDate: {
+    label: 'Published Date',
+    buildClause: (filters) => {
+      if (!isFilterActive('publicationPublishedDate', filters)) {
+        return undefined
+      }
+      const { after, before } = filters.publicationPublishedDate
+      return dateRangeClause('study.assets.publications.publishedDate', { gte: after, lte: before })
+    },
+  },
   clinicalTrialStatus: {
     label: 'Status',
     buildClause: filters =>
@@ -794,7 +891,9 @@ const describeObjectFilter = (key: typeof OBJECT_FILTER_KEYS[number], filters: F
       return formatDateRange(startDate, endDate)
     }
     case 'biospecimenCollectionDate':
-    case 'ipFiledDate': {
+    case 'ipFiledDate':
+    case 'presentationDate':
+    case 'publicationPublishedDate': {
       const { after, before } = filters[key]
       return formatDateRange(after, before)
     }

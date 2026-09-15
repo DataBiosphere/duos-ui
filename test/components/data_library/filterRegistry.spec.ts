@@ -23,6 +23,11 @@ const availableFilters: AvailableFilters = {
   modelTags: [],
   workspaceCloud: [],
   workspaceAccess: [],
+  presentationEvent: [],
+  presentationFormat: [],
+  presentationAccess: [],
+  publicationJournal: [],
+  publicationAccess: [],
   clinicalTrialStatus: [],
   clinicalTrialPhase: [],
   clinicalTrialInterventionType: [],
@@ -49,7 +54,7 @@ describe('filterRegistry', () => {
 
   it('returns asset-specific visible filters', () => {
     const publicationFilters = getFilterSectionsForAsset(AssetType.PUBLICATIONS, availableFilters)
-    expect(publicationFilters.map(section => section.key)).toEqual(['publicationsDatasetsCited'])
+    expect(publicationFilters.map(section => section.key)).toEqual(['publicationJournal', 'publicationAccess', 'publicationPublishedDate', 'publicationsDatasetsCited'])
   })
 
   it('returns the model-specific filters', () => {
@@ -62,9 +67,9 @@ describe('filterRegistry', () => {
     expect(workspaceFilters.map(section => section.key)).toEqual(['workspaceTools', 'workspacePlatform', 'workspaceCloud', 'workspaceAccess'])
   })
 
-  it('returns presentation-specific datasets cited filter', () => {
+  it('returns the presentation-specific filters', () => {
     const presentationFilters = getFilterSectionsForAsset(AssetType.PRESENTATIONS, availableFilters)
-    expect(presentationFilters.map(section => section.key)).toEqual(['datasetsCited'])
+    expect(presentationFilters.map(section => section.key)).toEqual(['presentationEvent', 'presentationFormat', 'presentationAccess', 'presentationDate', 'datasetsCited'])
   })
 
   describe('re-adding a selected value the corpus no longer offers', () => {
