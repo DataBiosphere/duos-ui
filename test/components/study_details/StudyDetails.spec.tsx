@@ -673,6 +673,28 @@ describe('Study details test', () => {
     expect(screen.getByText('PI Name')).toBeInTheDocument()
   })
 
+  /**
+   * The index document exists but carries '' / [] for fields it never populated. Under `??` those
+   * empty values won, so the relational payload - the whole reason the fallback is there - was
+   * suppressed exactly when it was needed.
+   */
+  it('falls back to the relational payload when the index carries empty values', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      piName: 'Ada Lovelace',
+      dataTypes: ['Genomic'],
+    } as never)
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
+      makeSearchResponse(datasets.map(dataset => ({
+        ...dataset,
+        study: { ...dataset.study, piName: '', dataTypes: [] },
+      }))) as never,
+    )
+    mountComponent()
+
+    expect(await screen.findByText('Ada Lovelace')).toBeInTheDocument()
+    expect(screen.getByText('Genomic')).toBeInTheDocument()
+  })
+
   it('omits the PI row entirely when there is neither a name nor a profile link', async () => {
     vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
       makeSearchResponse(datasets.map(dataset => ({ ...dataset, study: { ...dataset.study, piName: '' } }))) as never,
