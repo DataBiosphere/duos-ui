@@ -9,6 +9,7 @@ import { Storage } from 'src/libs/storage'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { DuosUser, LibraryCard } from 'src/types/model'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
+import { StudyComments } from 'src/libs/ajax/StudyComments'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ElasticsearchQuery } from 'src/types/elastic'
 
@@ -29,6 +30,18 @@ vi.mock('src/libs/ajax/TerraDataRepo', () => ({
 vi.mock('src/libs/ajax/DataSet', () => ({
   DataSet: {
     searchDatasetIndexV2: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/ajax/StudyComments', () => ({
+  COMMENTS_PAGE_SIZE: 25,
+  MAX_COMMENT_LENGTH: 2000,
+  StudyComments: {
+    listComments: vi.fn().mockResolvedValue({
+      comments: [], averageRating: undefined, total: 0, yourComment: undefined,
+    }),
+    postComment: vi.fn(),
+    deleteComment: vi.fn(),
   },
 }))
 
@@ -688,5 +701,202 @@ describe('Study details test', () => {
     expect(screen.getByRole('link', { name: 'ORCID profile' })).toHaveAttribute('href', 'https://orcid.org/0000-0001-2345-6789')
     expect(screen.getByRole('link', { name: 'LinkedIn profile' })).toHaveAttribute('href', 'https://linkedin.com/in/example')
     expect(screen.getByRole('link', { name: 'PI website' })).toHaveAttribute('href', 'https://example.org')
+  })
+
+  it('appends the next page of comments rather than replacing the one on screen', async () => {
+    const page = (ids: number[], total: number) => ({
+      total,
+      averageRating: 4,
+      yourComment: undefined,
+      comments: ids.map(id => ({
+        studyCommentId: id, studyId: 1, userId: 100 + id, rating: 4,
+        commentText: `Comment ${id}`, createDate: '', updateDate: '',
+        displayName: `Reviewer ${id}`, institutionName: 'Broad',
+      })),
+    })
+    vi.mocked(StudyComments.listComments)
+      .mockResolvedValueOnce(page([1], 2) as never)
+      .mockResolvedValueOnce(page([1], 2) as never)
+      .mockResolvedValueOnce(page([2], 2) as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    expect(await screen.findByText('Comment 1')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Show more comments \(1 of 2\)/ }))
+
+    // The first page is still there; the second was appended, not swapped in
+    expect(await screen.findByText('Comment 2')).toBeInTheDocument()
+    expect(screen.getByText('Comment 1')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Show more comments/ })).not.toBeInTheDocument()
+  })
+
+  it('refreshes the loaded comment prefix before requesting the next offset', async () => {
+    const comment = (id: number) => ({
+      studyCommentId: id, studyId: 1, userId: 100 + id, rating: 4,
+      commentText: `Comment ${id}`, createDate: '', updateDate: '',
+      displayName: `Reviewer ${id}`, institutionName: 'Broad',
+    })
+    vi.mocked(StudyComments.listComments)
+      // Initial page, followed by a new comment arriving before the reader asks for more.
+      .mockResolvedValueOnce({ comments: [comment(2)], averageRating: 4, total: 2 } as never)
+      .mockResolvedValueOnce({ comments: [comment(3)], averageRating: 4, total: 3 } as never)
+      .mockResolvedValueOnce({ comments: [comment(2), comment(1)], averageRating: 4, total: 3 } as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    await screen.findByText('Comment 2')
+    await user.click(screen.getByRole('button', { name: /Show more comments/ }))
+
+    expect(await screen.findByText('Comment 3')).toBeInTheDocument()
+    expect(screen.getByText('Comment 2')).toBeInTheDocument()
+    expect(screen.getByText('Comment 1')).toBeInTheDocument()
+    expect(vi.mocked(StudyComments.listComments).mock.calls.map(([, offset]) => offset))
+      .toEqual([0, 0, 1])
+  })
+
+  it('treats the reader\'s own comment as an edit even when it is not on the loaded page', async () => {
+    // The whole reason the backend carries yourComment separately: paging can hide it.
+    vi.mocked(StudyComments.listComments).mockResolvedValueOnce({
+      total: 40,
+      averageRating: 4,
+      comments: [],
+      yourComment: {
+        studyCommentId: 99, studyId: 1, userId: 42, rating: 3, commentText: 'Mine',
+        createDate: '', updateDate: '', displayName: 'Me', institutionName: 'Broad',
+      },
+    } as never)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Edit your comment')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Comment')).toHaveValue('Mine')
+  })
+
+  it('stops the composer at the length the backend accepts', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    const field = await screen.findByLabelText('Comment')
+    expect(field).toHaveAttribute('maxlength', '2000')
+  })
+
+  it('reports a failed comment fetch instead of showing an empty comment list', async () => {
+    vi.mocked(StudyComments.listComments).mockRejectedValueOnce(new Error('comments unavailable'))
+    mountComponent()
+
+    expect(await screen.findByText('Unable to load comments and ratings.')).toBeInTheDocument()
+    // The composer is what an empty-but-loaded section shows, so its absence is what
+    // distinguishes a failure from a study nobody has commented on yet.
+    expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
+  })
+
+  it('shows the public identity disclosure to active researchers before posting', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Your name and institution will be shared publicly with this comment.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Post comment' })).toBeDisabled()
+  })
+
+  /**
+   * A chairperson or signing official can hold a library card without the Researcher role. Naming
+   * only the card would tell them they lack a status they already have, so the notice names the
+   * requirement that is actually missing.
+   */
+  /** The core write path: nothing else in the suite invokes the mutation. */
+  it('posts a new comment with the rating and text the composer holds', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    vi.mocked(StudyComments.postComment).mockResolvedValue({} as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    await screen.findByText('Add your comment')
+    // MUI Rating's radios are visually hidden, so pointer interaction is refused; fireEvent
+    // sets the value the way the control itself does.
+    fireEvent.click(screen.getByRole('radio', { name: '4 Stars' }))
+    await user.type(screen.getByLabelText('Comment'), 'Useful study')
+    await user.click(screen.getByRole('button', { name: 'Post comment' }))
+
+    await waitFor(() =>
+      expect(StudyComments.postComment).toHaveBeenCalledWith('1', 4, 'Useful study'))
+  })
+
+  /**
+   * A second post revises in place, and the composer re-seeds from what was saved rather than
+   * blanking, so the reader can see the comment as it now stands.
+   */
+  it('saves an edit and re-seeds the composer from the refreshed comment', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    const mine = {
+      studyCommentId: 7, studyId: 1, userId: 42, rating: 3, commentText: 'First take',
+      createDate: '', updateDate: '', displayName: 'Me', institutionName: 'Broad',
+    }
+    vi.mocked(StudyComments.listComments)
+      .mockResolvedValueOnce({ comments: [mine], averageRating: 3, total: 1, yourComment: mine } as never)
+      .mockResolvedValue({
+        comments: [{ ...mine, rating: 5, commentText: 'Revised take' }],
+        averageRating: 5,
+        total: 1,
+        yourComment: { ...mine, rating: 5, commentText: 'Revised take' },
+      } as never)
+    vi.mocked(StudyComments.postComment).mockResolvedValue({} as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    // Seeded from the existing comment, so this is an edit rather than a first post
+    expect(await screen.findByText('Edit your comment')).toBeInTheDocument()
+    const field = screen.getByLabelText('Comment')
+    expect(field).toHaveValue('First take')
+
+    await user.clear(field)
+    await user.type(field, 'Revised take')
+    fireEvent.click(screen.getByRole('radio', { name: '5 Stars' }))
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+    await waitFor(() =>
+      expect(StudyComments.postComment).toHaveBeenCalledWith('1', 5, 'Revised take'))
+    // Re-seeded from the refetched comment rather than cleared
+    await waitFor(() => expect(screen.getByLabelText('Comment')).toHaveValue('Revised take'))
+  })
+
+  it('names the missing role when the card is held', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: false, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText(
+      'Commenting on and rating a study is limited to users with the Researcher role.',
+    )).toBeInTheDocument()
+    expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
+  })
+
+  it('names both requirements when neither is held', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42, isResearcher: false } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText(
+      'Commenting on and rating a study requires the Researcher role and Active Researcher Status.',
+    )).toBeInTheDocument()
+  })
+
+  it('names the missing card when the Researcher role is held', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42, isResearcher: true } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Active Researcher Status is required to comment or rate this study.'))
+      .toBeInTheDocument()
+    expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
   })
 })
