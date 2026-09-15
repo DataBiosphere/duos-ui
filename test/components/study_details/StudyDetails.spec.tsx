@@ -519,17 +519,31 @@ describe('Study details test', () => {
     }))
     vi.stubGlobal('matchMedia', matchMedia)
     try {
-      mountComponent()
+      const { container } = mountComponent()
       await screen.findByText(datasets[0].datasetName)
 
-      // LibraryFooter slides in only once something is selected, which the default selection does
-      expect(await screen.findByText(/1 dataset selected from 1 study/i)).toBeInTheDocument()
-      // ...and the table of contents, which lives in the sidebar, is gone with it
+      // LibraryFooter is there. Asserting it by its own marker rather than by the selection text,
+      // which the sidebar renders too - so the text alone would pass on either viewport.
+      await waitFor(() =>
+        expect(container.querySelector('[data-cy="library-footer"]')).toBeInTheDocument())
+      // ...and StudySidebar is not. It is the only <aside> on the page, and the table of contents
+      // it carries goes with it.
+      expect(container.querySelector('aside')).not.toBeInTheDocument()
       expect(screen.queryByText('On this page')).not.toBeInTheDocument()
     }
     finally {
       vi.unstubAllGlobals()
     }
+  })
+
+  /** The counterpart: on a wide viewport the sidebar carries the control and no footer appears. */
+  it('keeps the sidebar and no footer on a wide viewport', async () => {
+    const { container } = mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    await screen.findByText('On this page')
+
+    expect(container.querySelector('aside')).toBeInTheDocument()
+    expect(container.querySelector('[data-cy="library-footer"]')).not.toBeInTheDocument()
   })
 
   it('does not let the sidebar start a request without Active Researcher Status', async () => {
