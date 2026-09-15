@@ -25,6 +25,15 @@ describe('getPiProfileLinks', () => {
     expect(link.href).toBe('https://orcid.org/0000-0002-1825-0097')
   })
 
+  /** A leading slash would otherwise yield a doubled path under the orcid.org base. */
+  it.each(['/0000-0002-1825-0097', '//0000-0002-1825-0097', '  /0000-0002-1825-0097  '])(
+    'strips leading slashes from an identifier (%j)',
+    (orcid) => {
+      const [link] = getPiProfileLinks({ orcid })
+      expect(link.href).toBe('https://orcid.org/0000-0002-1825-0097')
+    },
+  )
+
   /** A whitespace-only value became a link to the ORCID home page once the base was trimmed. */
   it.each(['', '   ', '\t\n'])('omits a blank ORCID value (%j)', (orcid) => {
     expect(getPiProfileLinks({ orcid })).toEqual([])
