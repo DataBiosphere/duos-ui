@@ -3,17 +3,42 @@ import { ElasticsearchQuery, ElasticsearchResponse, PresentationStudyAggregation
 import { FilterState, PaginationState, PresentationAsset, SortState } from 'src/types/library'
 import { makePresentationColumns } from 'src/components/data_library/columns/presentationColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
+// The Elasticsearch clauses for these filters only decide which *studies* enter
+// the shared aggregation; every presentation of a qualifying study comes back,
+// so each row must be re-checked here or the grid (and the tab-count badge
+// derived from this same function) includes presentations that don't match.
 const matchesPresentationFilters = (presentation: PresentationAsset, filters?: FilterState) => {
   if (!filters) {
     return true
   }
 
-  if (filters.datasetsCited === undefined) {
+  if (filters.presentationEvent.length > 0 && !filters.presentationEvent.includes(presentation.event || '')) {
+    return false
+  }
+
+  if (filters.presentationFormat.length > 0 && !filters.presentationFormat.includes(presentation.format || '')) {
+    return false
+  }
+
+  if (filters.presentationAccess.length > 0 && !filters.presentationAccess.includes(presentation.access || '')) {
+    return false
+  }
+
+  // Inverted bounds build no ES clause, so they must not narrow rows here
+  // either — otherwise the grid empties while the panel flags the range.
+  if (!isFilterActive('presentationDate', filters)) {
     return true
   }
 
-  return presentation.citation === filters.datasetsCited
+  // A missing date matches neither bound, as in the ES range clause, which
+  // never matches a document without the field.
+  const { after, before } = filters.presentationDate
+  if (after && (!presentation.date || presentation.date < after)) {
+    return false
+  }
+  return !(before && (!presentation.date || presentation.date > before))
 }
 
 export const presentationAsset: AssetDefinition = {

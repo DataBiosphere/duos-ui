@@ -25,8 +25,14 @@ const availableFilters: AvailableFilters = {
     { value: 'Genomic', label: 'Genomic', count: 4 },
   ],
   dac: [],
+  modelFormat: [],
+  modelLicense: [],
+  modelCloud: [],
+  modelTags: [],
   workspaceTools: [],
   workspacePlatform: [],
+  workspaceCloud: [],
+  workspaceAccess: [],
   clinicalTrialStatus: [],
   clinicalTrialPhase: [],
   clinicalTrialInterventionType: [],
@@ -37,14 +43,14 @@ const availableFilters: AvailableFilters = {
     { value: 'HOURS', label: 'HOURS' },
     { value: 'DAYS', label: 'DAYS' },
   ],
-  datasetsCited: [
-    { value: 'true', label: 'Yes' },
-    { value: 'false', label: 'No' },
-  ],
-  publicationsDatasetsCited: [
-    { value: 'true', label: 'Yes' },
-    { value: 'false', label: 'No' },
-  ],
+  ipType: [],
+  ipStatus: [],
+  presentationEvent: [],
+  presentationFormat: [],
+  presentationAccess: [],
+  publicationJournal: [],
+  publicationAccess: [],
+  fundingFunderName: [],
   soApprovalModel: [
     { value: 'PER_REQUEST', label: 'Per-Request Approval' },
     { value: 'PRE_AUTHORIZED', label: 'Pre-Authorized Researchers' },
@@ -190,7 +196,7 @@ describe('LibraryFilters', () => {
         sections={getFilterSectionsForAsset(AssetType.PRESENTATIONS, availableFilters)}
       />,
     )
-    expect(screen.getByText('Datasets Cited (Presentations)?')).toBeInTheDocument()
+    expect(screen.getByText('Event')).toBeInTheDocument()
     expect(screen.queryByText('Participants')).not.toBeInTheDocument()
     expect(screen.queryByText('Access Request Process')).not.toBeInTheDocument()
   })

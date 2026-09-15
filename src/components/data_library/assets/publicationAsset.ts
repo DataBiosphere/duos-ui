@@ -3,17 +3,38 @@ import { ElasticsearchQuery, ElasticsearchResponse, PublicationStudyAggregationR
 import { FilterState, PaginationState, PublicationAsset, SortState } from 'src/types/library'
 import { makePublicationColumns } from 'src/components/data_library/columns/publicationColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
+// The Elasticsearch clauses for these filters only decide which *studies* enter
+// the shared aggregation; every publication of a qualifying study comes back,
+// so each row must be re-checked here or the grid (and the tab-count badge
+// derived from this same function) includes publications that don't match.
 const matchesPublicationFilters = (publication: PublicationAsset, filters?: FilterState) => {
   if (!filters) {
     return true
   }
 
-  if (filters.publicationsDatasetsCited === undefined) {
+  if (filters.publicationJournal.length > 0 && !filters.publicationJournal.includes(publication.journal || '')) {
+    return false
+  }
+
+  if (filters.publicationAccess.length > 0 && !filters.publicationAccess.includes(publication.access || '')) {
+    return false
+  }
+
+  // Inverted bounds build no ES clause, so they must not narrow rows here
+  // either — otherwise the grid empties while the panel flags the range.
+  if (!isFilterActive('publicationPublishedDate', filters)) {
     return true
   }
 
-  return publication.citation === filters.publicationsDatasetsCited
+  // A missing date matches neither bound, as in the ES range clause, which
+  // never matches a document without the field.
+  const { after, before } = filters.publicationPublishedDate
+  if (after && (!publication.publishedDate || publication.publishedDate < after)) {
+    return false
+  }
+  return !(before && (!publication.publishedDate || publication.publishedDate > before))
 }
 
 export const publicationAsset: AssetDefinition = {

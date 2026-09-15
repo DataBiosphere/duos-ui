@@ -47,8 +47,14 @@ export interface FilterState {
   dataUseModifiers: string[]
   dataType: string[]
   dac: string[]
+  modelFormat: string[]
+  modelLicense: string[]
+  modelCloud: string[]
+  modelTags: string[]
   workspaceTools: string[]
   workspacePlatform: string[]
+  workspaceCloud: string[]
+  workspaceAccess: string[]
   clinicalTrialStatus: string[]
   clinicalTrialPhase: string[]
   clinicalTrialInterventionType: string[]
@@ -57,8 +63,14 @@ export interface FilterState {
   biospecimenDataUse: string[]
   biospecimenPostMortemIntervalUnit: string[]
   soApprovalModel: string[]
-  datasetsCited?: boolean
-  publicationsDatasetsCited?: boolean
+  ipType: string[]
+  ipStatus: string[]
+  presentationEvent: string[]
+  presentationFormat: string[]
+  presentationAccess: string[]
+  publicationJournal: string[]
+  publicationAccess: string[]
+  fundingFunderName: string[]
   instantApproval?: boolean
   participantCount: {
     min?: number
@@ -83,6 +95,14 @@ export interface FilterState {
   fundingDate: {
     startDate?: string
     endDate?: string
+  }
+  presentationDate: {
+    after?: string
+    before?: string
+  }
+  publicationPublishedDate: {
+    after?: string
+    before?: string
   }
 }
 
@@ -118,8 +138,14 @@ export interface AvailableFilters {
   dataUseModifiers: FilterOption[]
   dataType: FilterOption[]
   dac: FilterOption[]
+  modelFormat: FilterOption[]
+  modelLicense: FilterOption[]
+  modelCloud: FilterOption[]
+  modelTags: FilterOption[]
   workspaceTools: FilterOption[]
   workspacePlatform: FilterOption[]
+  workspaceCloud: FilterOption[]
+  workspaceAccess: FilterOption[]
   clinicalTrialStatus: FilterOption[]
   clinicalTrialPhase: FilterOption[]
   clinicalTrialInterventionType: FilterOption[]
@@ -128,8 +154,14 @@ export interface AvailableFilters {
   biospecimenDataUse: FilterOption[]
   biospecimenPostMortemIntervalUnit: FilterOption[]
   soApprovalModel: FilterOption[]
-  datasetsCited: FilterOption[]
-  publicationsDatasetsCited: FilterOption[]
+  ipType: FilterOption[]
+  ipStatus: FilterOption[]
+  presentationEvent: FilterOption[]
+  presentationFormat: FilterOption[]
+  presentationAccess: FilterOption[]
+  publicationJournal: FilterOption[]
+  publicationAccess: FilterOption[]
+  fundingFunderName: FilterOption[]
   instantApproval: FilterOption[]
   biospecimenPostMortemIntervalRange: {
     min: number

@@ -4,6 +4,7 @@ import {
   AvailableFilters,
   AssetType,
   FilterKey,
+  FilterOption,
   FilterState,
   LibraryFilterSection,
   LibraryFilterSectionControl,
@@ -16,8 +17,14 @@ type ArrayFilterKey
     | 'dataUseModifiers'
     | 'dataType'
     | 'dac'
+    | 'modelFormat'
+    | 'modelLicense'
+    | 'modelCloud'
+    | 'modelTags'
     | 'workspaceTools'
     | 'workspacePlatform'
+    | 'workspaceCloud'
+    | 'workspaceAccess'
     | 'clinicalTrialStatus'
     | 'clinicalTrialPhase'
     | 'clinicalTrialInterventionType'
@@ -26,6 +33,14 @@ type ArrayFilterKey
     | 'biospecimenDataUse'
     | 'biospecimenPostMortemIntervalUnit'
     | 'soApprovalModel'
+    | 'ipType'
+    | 'ipStatus'
+    | 'presentationEvent'
+    | 'presentationFormat'
+    | 'presentationAccess'
+    | 'publicationJournal'
+    | 'publicationAccess'
+    | 'fundingFunderName'
 
 const ARRAY_FILTER_KEYS: ArrayFilterKey[] = [
   'accessManagement',
@@ -33,8 +48,14 @@ const ARRAY_FILTER_KEYS: ArrayFilterKey[] = [
   'dataUseModifiers',
   'dataType',
   'dac',
+  'modelFormat',
+  'modelLicense',
+  'modelCloud',
+  'modelTags',
   'workspaceTools',
   'workspacePlatform',
+  'workspaceCloud',
+  'workspaceAccess',
   'clinicalTrialStatus',
   'clinicalTrialPhase',
   'clinicalTrialInterventionType',
@@ -43,6 +64,14 @@ const ARRAY_FILTER_KEYS: ArrayFilterKey[] = [
   'biospecimenDataUse',
   'biospecimenPostMortemIntervalUnit',
   'soApprovalModel',
+  'ipType',
+  'ipStatus',
+  'presentationEvent',
+  'presentationFormat',
+  'presentationAccess',
+  'publicationJournal',
+  'publicationAccess',
+  'fundingFunderName',
 ]
 
 const OBJECT_FILTER_KEYS: Array<
@@ -52,6 +81,8 @@ const OBJECT_FILTER_KEYS: Array<
   | 'biospecimenCollectionDate'
   | 'ipFiledDate'
   | 'fundingDate'
+  | 'presentationDate'
+  | 'publicationPublishedDate'
 > = [
   'participantCount',
   'biospecimenPostMortemInterval',
@@ -59,11 +90,11 @@ const OBJECT_FILTER_KEYS: Array<
   'biospecimenCollectionDate',
   'ipFiledDate',
   'fundingDate',
+  'presentationDate',
+  'publicationPublishedDate',
 ]
 
-const BOOL_FILTER_KEYS: Array<'datasetsCited' | 'publicationsDatasetsCited' | 'instantApproval'> = [
-  'datasetsCited',
-  'publicationsDatasetsCited',
+const BOOL_FILTER_KEYS: Array<'instantApproval'> = [
   'instantApproval',
 ]
 
@@ -73,8 +104,14 @@ const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
   dataUseModifiers: 'checkbox',
   dataType: 'checkbox',
   dac: 'checkbox',
+  modelFormat: 'checkbox',
+  modelLicense: 'checkbox',
+  modelCloud: 'checkbox',
+  modelTags: 'checkbox',
   workspaceTools: 'checkbox',
   workspacePlatform: 'checkbox',
+  workspaceCloud: 'checkbox',
+  workspaceAccess: 'checkbox',
   clinicalTrialStatus: 'checkbox',
   clinicalTrialPhase: 'checkbox',
   clinicalTrialInterventionType: 'checkbox',
@@ -83,8 +120,14 @@ const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
   biospecimenDataUse: 'checkbox',
   biospecimenPostMortemIntervalUnit: 'checkbox',
   soApprovalModel: 'checkbox',
-  datasetsCited: 'boolean',
-  publicationsDatasetsCited: 'boolean',
+  ipType: 'checkbox',
+  ipStatus: 'checkbox',
+  presentationEvent: 'checkbox',
+  presentationFormat: 'checkbox',
+  presentationAccess: 'checkbox',
+  publicationJournal: 'checkbox',
+  publicationAccess: 'checkbox',
+  fundingFunderName: 'checkbox',
   instantApproval: 'boolean',
   participantCount: 'range',
   biospecimenPostMortemInterval: 'range',
@@ -92,6 +135,8 @@ const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
   biospecimenCollectionDate: 'dateRange',
   ipFiledDate: 'dateRange',
   fundingDate: 'dateRange',
+  presentationDate: 'dateRange',
+  publicationPublishedDate: 'dateRange',
 }
 
 export const EMPTY_FILTERS: FilterState = {
@@ -100,8 +145,14 @@ export const EMPTY_FILTERS: FilterState = {
   dataUseModifiers: [],
   dataType: [],
   dac: [],
+  modelFormat: [],
+  modelLicense: [],
+  modelCloud: [],
+  modelTags: [],
   workspaceTools: [],
   workspacePlatform: [],
+  workspaceCloud: [],
+  workspaceAccess: [],
   clinicalTrialStatus: [],
   clinicalTrialPhase: [],
   clinicalTrialInterventionType: [],
@@ -113,8 +164,16 @@ export const EMPTY_FILTERS: FilterState = {
   biospecimenPostMortemInterval: {},
   biospecimenCollectionDate: {},
   soApprovalModel: [],
-  datasetsCited: undefined,
-  publicationsDatasetsCited: undefined,
+  ipType: [],
+  ipStatus: [],
+  presentationEvent: [],
+  presentationFormat: [],
+  presentationAccess: [],
+  presentationDate: {},
+  publicationJournal: [],
+  publicationAccess: [],
+  publicationPublishedDate: {},
+  fundingFunderName: [],
   instantApproval: undefined,
   participantCount: {},
   ipFiledDate: {},
@@ -144,6 +203,8 @@ const DATE_RANGE_BOUNDS = {
   fundingDate: ['startDate', 'endDate'],
   biospecimenCollectionDate: ['after', 'before'],
   ipFiledDate: ['after', 'before'],
+  presentationDate: ['after', 'before'],
+  publicationPublishedDate: ['after', 'before'],
 } as const
 
 /**
@@ -174,8 +235,14 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
     case 'dataUseModifiers':
     case 'dataType':
     case 'dac':
+    case 'modelFormat':
+    case 'modelLicense':
+    case 'modelCloud':
+    case 'modelTags':
     case 'workspaceTools':
     case 'workspacePlatform':
+    case 'workspaceCloud':
+    case 'workspaceAccess':
     case 'clinicalTrialStatus':
     case 'clinicalTrialPhase':
     case 'clinicalTrialInterventionType':
@@ -184,11 +251,17 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
     case 'biospecimenDataUse':
     case 'biospecimenPostMortemIntervalUnit':
     case 'soApprovalModel':
+    case 'ipType':
+    case 'ipStatus':
+    case 'presentationEvent':
+    case 'presentationFormat':
+    case 'presentationAccess':
+    case 'publicationJournal':
+    case 'publicationAccess':
+    case 'fundingFunderName':
       return filters[key].length > 0
 
     // Boolean filters are active once explicitly set to Yes/No (not "Any").
-    case 'datasetsCited':
-    case 'publicationsDatasetsCited':
     case 'instantApproval':
       return filters[key] !== undefined
 
@@ -208,7 +281,9 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
     }
 
     case 'biospecimenCollectionDate':
-    case 'ipFiledDate': {
+    case 'ipFiledDate':
+    case 'presentationDate':
+    case 'publicationPublishedDate': {
       if (isInvertedDateRange(key, filters)) {
         return false
       }
@@ -228,8 +303,14 @@ const getFilterOptions = (key: FilterKey, availableFilters: AvailableFilters) =>
     case 'dataUseModifiers':
     case 'dataType':
     case 'dac':
+    case 'modelFormat':
+    case 'modelLicense':
+    case 'modelCloud':
+    case 'modelTags':
     case 'workspaceTools':
     case 'workspacePlatform':
+    case 'workspaceCloud':
+    case 'workspaceAccess':
     case 'clinicalTrialStatus':
     case 'clinicalTrialPhase':
     case 'clinicalTrialInterventionType':
@@ -238,8 +319,14 @@ const getFilterOptions = (key: FilterKey, availableFilters: AvailableFilters) =>
     case 'biospecimenDataUse':
     case 'biospecimenPostMortemIntervalUnit':
     case 'soApprovalModel':
-    case 'datasetsCited':
-    case 'publicationsDatasetsCited':
+    case 'ipType':
+    case 'ipStatus':
+    case 'presentationEvent':
+    case 'presentationFormat':
+    case 'presentationAccess':
+    case 'publicationJournal':
+    case 'publicationAccess':
+    case 'fundingFunderName':
     case 'instantApproval':
       return availableFilters[key]
     default:
@@ -280,31 +367,6 @@ const dateRangeClause = (field: string, range: { gte?: string, lte?: string }): 
   },
 } as unknown as QueryClause)
 
-/**
- * Clause for a nested-asset "cited datasets?" boolean.
- *
- * The grid treats a missing `citation` field as `false` (`citation ?? false`),
- * so the query must do the same or the two diverge. A bare `term: { citation:
- * false }` would exclude any asset indexed without the field — every pre-Oct-2025
- * record and any non-form ingestion path — even though the grid shows them as
- * "No". Selecting "No" therefore matches an explicit `false` OR the absence of the
- * field; "Yes" matches only an explicit `true`.
- */
-const citationClause = (field: string, cited: boolean): QueryClause => {
-  if (cited) {
-    return { term: { [field]: true } }
-  }
-  return {
-    bool: {
-      should: [
-        { term: { [field]: false } },
-        { bool: { must_not: [{ exists: { field } }] } },
-      ],
-      minimum_should_match: 1,
-    },
-  }
-}
-
 const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   soApprovalModel: {
     label: 'SO Approval',
@@ -329,9 +391,9 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         return undefined
       }
 
-      // Unlike citationClause, an absent flag means "unknown" rather than "No" — the index leaves
-      // it unset when the DAC's rules cannot be resolved, and the grid shows no badge for those.
-      // A bare term matches only documents carrying the field, so both sides exclude them.
+      // An absent flag means "unknown" rather than "No" — the index leaves it unset when the
+      // DAC's rules cannot be resolved, and the grid shows no badge for those. A bare term
+      // matches only documents carrying the field, so both sides exclude them.
       return { term: { instantApprovalEligible: filters.instantApproval } }
     },
   },
@@ -418,6 +480,34 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
       }
     },
   },
+  modelFormat: {
+    label: 'Format',
+    buildClause: filters =>
+      filters.modelFormat.length > 0
+        ? matchAny('study.assets.models.format', filters.modelFormat)
+        : undefined,
+  },
+  modelLicense: {
+    label: 'License',
+    buildClause: filters =>
+      filters.modelLicense.length > 0
+        ? matchAny('study.assets.models.license', filters.modelLicense)
+        : undefined,
+  },
+  modelCloud: {
+    label: 'Cloud',
+    buildClause: filters =>
+      filters.modelCloud.length > 0
+        ? matchAny('study.assets.models.cloud', filters.modelCloud)
+        : undefined,
+  },
+  modelTags: {
+    label: 'Tags',
+    buildClause: filters =>
+      filters.modelTags.length > 0
+        ? matchAny('study.assets.models.tags', filters.modelTags)
+        : undefined,
+  },
   participantCount: {
     label: 'Participants',
     buildClause: (filters) => {
@@ -477,6 +567,20 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
     buildClause: filters =>
       filters.workspacePlatform.length > 0
         ? matchAny('study.assets.workspaces.platform', filters.workspacePlatform)
+        : undefined,
+  },
+  workspaceCloud: {
+    label: 'Cloud',
+    buildClause: filters =>
+      filters.workspaceCloud.length > 0
+        ? matchAny('study.assets.workspaces.cloud', filters.workspaceCloud)
+        : undefined,
+  },
+  workspaceAccess: {
+    label: 'Access',
+    buildClause: filters =>
+      filters.workspaceAccess.length > 0
+        ? matchAny('study.assets.workspaces.access', filters.workspaceAccess)
         : undefined,
   },
   clinicalTrialStatus: {
@@ -573,26 +677,6 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         ? matchAny('study.assets.biospecimens.optionalDataUse', filters.biospecimenDataUse)
         : undefined,
   },
-  datasetsCited: {
-    label: 'Datasets Cited (Presentations)?',
-    buildClause: (filters) => {
-      if (filters.datasetsCited === undefined) {
-        return undefined
-      }
-
-      return citationClause('study.assets.presentations.citation', filters.datasetsCited)
-    },
-  },
-  publicationsDatasetsCited: {
-    label: 'Datasets Cited (Publications)?',
-    buildClause: (filters) => {
-      if (filters.publicationsDatasetsCited === undefined) {
-        return undefined
-      }
-
-      return citationClause('study.assets.publications.citation', filters.publicationsDatasetsCited)
-    },
-  },
   ipFiledDate: {
     label: 'Filed Date',
     buildClause: (filters) => {
@@ -610,6 +694,98 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         },
       } as unknown as QueryClause
     },
+  },
+  ipType: {
+    label: 'Type',
+    buildClause: filters =>
+      filters.ipType.length > 0
+        ? matchAny('study.assets.intellectualProperties.type', filters.ipType)
+        : undefined,
+  },
+  ipStatus: {
+    label: 'Status',
+    buildClause: filters =>
+      filters.ipStatus.length > 0
+        ? matchAny('study.assets.intellectualProperties.status', filters.ipStatus)
+        : undefined,
+  },
+  presentationEvent: {
+    label: 'Event',
+    buildClause: filters =>
+      filters.presentationEvent.length > 0
+        ? matchAny('study.assets.presentations.event', filters.presentationEvent)
+        : undefined,
+  },
+  presentationFormat: {
+    label: 'Format',
+    buildClause: filters =>
+      filters.presentationFormat.length > 0
+        ? matchAny('study.assets.presentations.format', filters.presentationFormat)
+        : undefined,
+  },
+  presentationAccess: {
+    label: 'Access',
+    buildClause: filters =>
+      filters.presentationAccess.length > 0
+        ? matchAny('study.assets.presentations.access', filters.presentationAccess)
+        : undefined,
+  },
+  presentationDate: {
+    label: 'Presentation Date',
+    buildClause: (filters) => {
+      if (!isFilterActive('presentationDate', filters)) {
+        return undefined
+      }
+      const { after, before } = filters.presentationDate
+
+      return {
+        range: {
+          'study.assets.presentations.date': {
+            ...(after && { gte: after }),
+            ...(before && { lte: before }),
+          },
+        },
+      } as unknown as QueryClause
+    },
+  },
+  publicationJournal: {
+    label: 'Journal',
+    buildClause: filters =>
+      filters.publicationJournal.length > 0
+        ? matchAny('study.assets.publications.journal', filters.publicationJournal)
+        : undefined,
+  },
+  publicationAccess: {
+    label: 'Access',
+    buildClause: filters =>
+      filters.publicationAccess.length > 0
+        ? matchAny('study.assets.publications.access', filters.publicationAccess)
+        : undefined,
+  },
+  publicationPublishedDate: {
+    label: 'Published Date',
+    buildClause: (filters) => {
+      if (!isFilterActive('publicationPublishedDate', filters)) {
+        return undefined
+      }
+      const { after, before } = filters.publicationPublishedDate
+
+      return {
+        range: {
+          'study.assets.publications.publishedDate': {
+            ...(after && { gte: after }),
+            ...(before && { lte: before }),
+          },
+        },
+      } as unknown as QueryClause
+    },
+  },
+  fundingFunderName: {
+    label: 'Funder Name',
+    buildClause: filters =>
+      filters.fundingFunderName.length > 0
+        ? matchAny('study.assets.funding.funderName', filters.fundingFunderName)
+        : undefined,
   },
   fundingDate: {
     label: 'Funding Dates',
@@ -636,9 +812,32 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   },
 }
 
+/**
+ * A selected value can be missing from the corpus its options are derived from,
+ * because a filter owned by another tab excludes every study carrying it.
+ * Without re-adding it the checkbox vanishes while the filter stays active, and
+ * the external chips deliberately skip keys the current tab renders itself — so
+ * nothing is left to clear it with short of resetting every filter.
+ */
+const withSelectedValues = (
+  key: FilterKey,
+  options: FilterOption[] | undefined,
+  filters?: FilterState,
+): FilterOption[] | undefined => {
+  if (!options || !filters || FILTER_CONTROL_BY_KEY[key] !== 'checkbox') {
+    return options
+  }
+
+  const missing = (filters[key] as string[]).filter(value => !options.some(option => option.value === value))
+  return missing.length > 0
+    ? [...options, ...missing.map(value => ({ value, label: value }))]
+    : options
+}
+
 export const getFilterSectionsForAsset = (
   assetType: AssetType,
   availableFilters: AvailableFilters,
+  filters?: FilterState,
 ): LibraryFilterSection[] => {
   const config = assetFilterRegistry[assetType]
   return config.visibleFilters.map((key) => {
@@ -647,7 +846,7 @@ export const getFilterSectionsForAsset = (
       key,
       label: config.labels?.[key] ?? FILTER_DEFINITIONS[key].label,
       control,
-      options: getFilterOptions(key, availableFilters),
+      options: withSelectedValues(key, getFilterOptions(key, availableFilters), filters),
       range: getFilterRange(key, availableFilters),
     }
   })
@@ -689,7 +888,9 @@ const describeObjectFilter = (key: typeof OBJECT_FILTER_KEYS[number], filters: F
       return formatDateRange(startDate, endDate)
     }
     case 'biospecimenCollectionDate':
-    case 'ipFiledDate': {
+    case 'ipFiledDate':
+    case 'presentationDate':
+    case 'publicationPublishedDate': {
       const { after, before } = filters[key]
       return formatDateRange(after, before)
     }

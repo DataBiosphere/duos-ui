@@ -4,8 +4,33 @@ import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
-import { AssetType } from 'src/types/library'
+import { AssetType, FilterState } from 'src/types/library'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
+
+// EMPTY_FILTERS holds `{}` for every object-shaped filter, so the bounds cannot
+// be read off it; the two non-default shapes are named here, anything else
+// object-shaped is an after/before range.
+const NUMERIC_RANGE_KEYS = ['participantCount', 'biospecimenPostMortemInterval']
+const START_END_DATE_KEYS = ['clinicalTrialDates', 'fundingDate']
+
+// A distinct non-empty value for every FilterState key.
+const POPULATED_FILTERS: FilterState = Object.fromEntries(
+  Object.entries(EMPTY_FILTERS).map(([key, empty]) => {
+    if (Array.isArray(empty)) {
+      return [key, [`${key}-value`]]
+    }
+    if (NUMERIC_RANGE_KEYS.includes(key)) {
+      return [key, { min: 1, max: 2 }]
+    }
+    if (START_END_DATE_KEYS.includes(key)) {
+      return [key, { startDate: '2020-01-01', endDate: '2021-01-01' }]
+    }
+    if (empty !== null && typeof empty === 'object') {
+      return [key, { after: '2020-01-01', before: '2021-01-01' }]
+    }
+    return [key, true]
+  }),
+) as FilterState
 
 const TestComponent = ({ defaultTab }: { defaultTab?: AssetType } = {}) => {
   const [state, updateState] = useLibraryUrlState(defaultTab)
@@ -36,6 +61,7 @@ const TestComponent = ({ defaultTab }: { defaultTab?: AssetType } = {}) => {
         })}
       >Update Filters
       </button>
+      <button id="update-all-filters" onClick={() => updateState({ filters: POPULATED_FILTERS })}>Update All Filters</button>
     </div>
   )
 }
@@ -53,6 +79,61 @@ describe('useLibraryUrlState', () => {
     const filters = JSON.parse(filtersEl.textContent!)
     expect(filters.accessManagement).toHaveLength(0)
     expect(filters.participantCount.min).toBeUndefined()
+  })
+
+  // An unregistered key used to parse as undefined and crash on .length.
+  it('yields a value for every filter key, even ones no param config covers', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+
+    for (const key of Object.keys(EMPTY_FILTERS)) {
+      expect({ key, value: filters[key] }).toEqual({ key, value: EMPTY_FILTERS[key as keyof typeof EMPTY_FILTERS] })
+    }
+  })
+
+  // The seed above also hides an unregistered key, so round-trip every one: a
+  // filter added without a param config fails here instead of silently
+  // dropping out of the URL.
+  // These params are no longer parsed or written, so nothing else would ever
+  // remove them from a URL that already carries them.
+  it('drops the retired Datasets Cited params on the next filter change', () => {
+    const Harness = () => {
+      const [, updateState] = useLibraryUrlState()
+      const location = useLocation()
+      return (
+        <div>
+          <div id="search">{location.search}</div>
+          <button onClick={() => updateState({ filters: { ...EMPTY_FILTERS, accessManagement: ['controlled'] } })}>Go</button>
+        </div>
+      )
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/?datasetsCited=true&presentationsDatasetsCited=false&publicationsDatasetsCited=true']}>
+        <Harness />
+      </MemoryRouter>,
+    )
+    fireEvent.click(screen.getByText('Go'))
+
+    const search = document.getElementById('search')!.textContent!
+    expect(search).not.toContain('atasetsCited')
+    expect(search).toContain('access=controlled')
+  })
+
+  it('round-trips every filter key through the URL', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    fireEvent.click(document.getElementById('update-all-filters')!)
+
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters).toEqual(JSON.parse(JSON.stringify(POPULATED_FILTERS)))
   })
 
   it('initializes with values from search params', () => {
@@ -241,89 +322,70 @@ describe('useLibraryUrlState', () => {
   })
 })
 
-const BooleanFilterHarness = () => {
-  const [state, updateState] = useLibraryUrlState()
-  const location = useLocation()
-  return (
-    <div>
-      <div id="filters">{JSON.stringify(state.filters)}</div>
-      <div id="search">{location.search}</div>
-      <button
-        id="set-both"
-        onClick={() => updateState({
-          filters: { ...EMPTY_FILTERS, datasetsCited: true, publicationsDatasetsCited: false },
-        })}
-      >Set Both
-      </button>
-      <button
-        id="clear-both"
-        onClick={() => updateState({ filters: EMPTY_FILTERS })}
-      >Clear Both
-      </button>
-    </div>
-  )
-}
-
-describe('useLibraryUrlState — datasets-cited boolean params', () => {
-  it('parses datasetsCited and publicationsDatasetsCited independently', () => {
+describe('useLibraryUrlState — new asset filter params', () => {
+  it('parses every new array filter key from its own param, defaulting the rest to empty arrays', () => {
     render(
-      <MemoryRouter initialEntries={['/?datasetsCited=true&publicationsDatasetsCited=false']}>
-        <BooleanFilterHarness />
+      <MemoryRouter initialEntries={['/?modelFormat=ONNX,PyTorch&workspaceCloud=AWS&ipType=Patent&presentationEvent=ASHG&publicationJournal=Nature&fundingFunderName=NIH']}>
+        <TestComponent />
       </MemoryRouter>,
     )
     const filters = JSON.parse(document.getElementById('filters')!.textContent!)
-    expect(filters.datasetsCited).toBe(true)
-    expect(filters.publicationsDatasetsCited).toBe(false)
+    expect(filters.modelFormat).toEqual(['ONNX', 'PyTorch'])
+    expect(filters.modelLicense).toEqual([])
+    expect(filters.workspaceCloud).toEqual(['AWS'])
+    expect(filters.ipType).toEqual(['Patent'])
+    expect(filters.presentationEvent).toEqual(['ASHG'])
+    expect(filters.publicationJournal).toEqual(['Nature'])
+    expect(filters.fundingFunderName).toEqual(['NIH'])
   })
 
-  it('treats the legacy presentationsDatasetsCited param as datasetsCited', () => {
+  it('parses the presentationDate and publicationPublishedDate ranges from their own params', () => {
     render(
-      <MemoryRouter initialEntries={['/?presentationsDatasetsCited=true']}>
-        <BooleanFilterHarness />
+      <MemoryRouter initialEntries={['/?presentedAfter=2020-01-01&presentedBefore=2023-12-31&publishedAfter=2019-01-01&publishedBefore=2022-06-30']}>
+        <TestComponent />
       </MemoryRouter>,
     )
     const filters = JSON.parse(document.getElementById('filters')!.textContent!)
-    expect(filters.datasetsCited).toBe(true)
-    // The legacy param must NOT leak into the new, independent publications filter.
-    expect(filters.publicationsDatasetsCited).toBeUndefined()
+    expect(filters.presentationDate).toEqual({ after: '2020-01-01', before: '2023-12-31' })
+    expect(filters.publicationPublishedDate).toEqual({ after: '2019-01-01', before: '2022-06-30' })
   })
 
-  it('leaves both undefined when neither param is present', () => {
+  it('round-trips a new array filter and a new date filter through updateState', () => {
+    const NewFilterHarness = () => {
+      const [state, updateState] = useLibraryUrlState()
+      const location = useLocation()
+      return (
+        <div>
+          <div id="filters">{JSON.stringify(state.filters)}</div>
+          <div id="search">{location.search}</div>
+          <button
+            onClick={() => updateState({
+              filters: {
+                ...EMPTY_FILTERS,
+                modelFormat: ['ONNX'],
+                presentationDate: { after: '2020-01-01' },
+              },
+            })}
+          >Update New Filters
+          </button>
+        </div>
+      )
+    }
+
     render(
       <MemoryRouter initialEntries={['/']}>
-        <BooleanFilterHarness />
+        <NewFilterHarness />
       </MemoryRouter>,
     )
+
+    fireEvent.click(screen.getByText('Update New Filters'))
+
     const filters = JSON.parse(document.getElementById('filters')!.textContent!)
-    expect(filters.datasetsCited).toBeUndefined()
-    expect(filters.publicationsDatasetsCited).toBeUndefined()
-  })
-
-  it('serializes both citation filters to their own params and clears the legacy one', () => {
-    render(
-      <MemoryRouter initialEntries={['/?presentationsDatasetsCited=true']}>
-        <BooleanFilterHarness />
-      </MemoryRouter>,
-    )
-    fireEvent.click(document.getElementById('set-both')!)
+    expect(filters.modelFormat).toEqual(['ONNX'])
+    expect(filters.presentationDate).toEqual({ after: '2020-01-01' })
 
     const search = document.getElementById('search')!.textContent!
-    expect(search).toContain('datasetsCited=true')
-    expect(search).toContain('publicationsDatasetsCited=false')
-    // The legacy alias is dropped once the canonical params are written.
-    expect(search).not.toContain('presentationsDatasetsCited')
-  })
-
-  it('removes the citation params from the URL when the filters are cleared', () => {
-    render(
-      <MemoryRouter initialEntries={['/?datasetsCited=true&publicationsDatasetsCited=false']}>
-        <BooleanFilterHarness />
-      </MemoryRouter>,
-    )
-    fireEvent.click(document.getElementById('clear-both')!)
-
-    const search = document.getElementById('search')!.textContent!
-    expect(search).not.toContain('datasetsCited')
-    expect(search).not.toContain('publicationsDatasetsCited')
+    expect(search).toContain('modelFormat=ONNX')
+    expect(search).toContain('presentedAfter=2020-01-01')
   })
 })

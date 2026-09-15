@@ -49,6 +49,16 @@ const tabCountsResponse = {
 
 const updateUrlState = vi.fn()
 
+// The counts query and the visible tab's option corpus are the same query with
+// different filter sets, so the mock answers from one function of the filters.
+const mockCorpus = (responseFor: (filters: FilterState) => unknown) => {
+  vi.mocked(useLibraryTabCounts).mockImplementation((_config, filters: FilterState) => ({
+    data: responseFor(filters),
+    isFetching: false,
+    error: null,
+  } as unknown as ReturnType<typeof useLibraryTabCounts>))
+}
+
 const setup = (tab: AssetType, filters: FilterState = EMPTY_FILTERS) => {
   vi.mocked(useLibraryUrlState).mockReturnValue([
     { library: 'duos', tab, filters, query: '', page: 0, pageSize: 25, hideFilters: false },
@@ -64,11 +74,7 @@ beforeEach(() => {
     isFetching: false,
     error: null,
   } as unknown as ReturnType<typeof useLibraryData>)
-  vi.mocked(useLibraryTabCounts).mockReturnValue({
-    data: tabCountsResponse,
-    isFetching: false,
-    error: null,
-  } as unknown as ReturnType<typeof useLibraryTabCounts>)
+  mockCorpus(() => tabCountsResponse)
 })
 
 describe('useLibraryPageState — tab-count wiring', () => {
@@ -253,5 +259,160 @@ describe('useLibraryPageState — data use modifier options', () => {
     setup(AssetType.DATASETS)
     const { result } = renderHook(() => useLibraryPageState(libraryConfig))
     expect(result.current.availableFilters.dataUseModifiers).toEqual([])
+  })
+})
+
+describe('useLibraryPageState — dynamic filter option derivation', () => {
+  // A single study bucket carrying two models and two workspaces, so option
+  // lists for both asset types can be derived from one shared response.
+  const bucket = {
+    key: 1,
+    study_details: {
+      hits: {
+        hits: [{
+          _source: {
+            study: {
+              studyId: 1,
+              studyName: 'Study 1',
+              assets: {
+                models: [
+                  { modelId: 'm1', format: 'ONNX', license: 'MIT', cloud: ['AWS'], tags: ['vision'] },
+                  { modelId: 'm2', format: 'PyTorch', license: 'Apache-2.0', cloud: ['GCP'], tags: ['nlp'] },
+                ],
+                workspaces: [
+                  { workspaceId: 'w1', tools: ['Jupyter'], platform: 'Terra', cloud: ['AWS'], access: 'open' },
+                ],
+              },
+            },
+          },
+        }],
+      },
+    },
+  }
+
+  const responseWithBucket = {
+    aggregations: {
+      total_studies: { value: 1 },
+      datasets_count: { doc_count: 0 },
+      studies: { buckets: [bucket] },
+    },
+  }
+
+  beforeEach(() => {
+    mockCorpus(() => responseWithBucket)
+  })
+
+  it('populates an asset-specific option list even while a different tab is active', () => {
+    // The active tab is Studies, not Models, yet the shared response already
+    // carries every model — so its option list must not go empty just because
+    // Models is not the tab currently on screen.
+    setup(AssetType.STUDIES)
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['Terra'])
+  })
+
+  it('derives options from the full corpus, not just the current page', () => {
+    vi.mocked(useLibraryUrlState).mockReturnValue([
+      { library: 'duos', tab: AssetType.MODELS, filters: EMPTY_FILTERS, query: '', page: 0, pageSize: 1, hideFilters: false },
+      updateUrlState,
+    ] as unknown as ReturnType<typeof useLibraryUrlState>)
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    // pageSize: 1 means the grid itself only renders one model, but both
+    // formats must still appear as filter options.
+    expect(result.current.data?.items).toHaveLength(1)
+    expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+  })
+
+  it('derives model and workspace cloud options independently by asset', () => {
+    setup(AssetType.MODELS)
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.modelCloud.map(o => o.value)).toEqual(['AWS', 'GCP'])
+    expect(result.current.availableFilters.workspaceCloud.map(o => o.value)).toEqual(['AWS'])
+  })
+
+  // Otherwise a multi-select checkbox group can never hold more than one value.
+  it('keeps every value selectable once one of them is checked', () => {
+    setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+    // The grid still honours the filter; only the option list ignores it.
+    expect(result.current.data?.items).toHaveLength(1)
+  })
+
+  it('clears the whole asset\'s filters when deriving its options, so sibling lists stay complete', () => {
+    setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.modelLicense.map(o => o.value)).toEqual(['Apache-2.0', 'MIT'])
+    expect(result.current.availableFilters.modelCloud.map(o => o.value)).toEqual(['AWS', 'GCP'])
+  })
+
+  it('leaves another asset\'s option list alone when this asset is filtered', () => {
+    setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.workspaceCloud.map(o => o.value)).toEqual(['AWS'])
+  })
+
+  // The filter clauses match whole studies, so a selection removes every study
+  // with no matching model from the response — a value living only in one of
+  // those studies cannot be recovered by ignoring the filter client-side.
+  it('offers a value whose only study the active filter removes from the response', () => {
+    const oneModelStudy = (studyId: number, format: string) => ({
+      key: studyId,
+      study_details: {
+        hits: { hits: [{ _source: { study: { studyId, studyName: `Study ${studyId}`, assets: { models: [{ modelId: `m${studyId}`, format }] } } } }] },
+      },
+    })
+    const allStudies = [oneModelStudy(1, 'ONNX'), oneModelStudy(2, 'PyTorch')]
+
+    mockCorpus((filters) => {
+      const selected = filters.modelFormat
+      const buckets = selected.length > 0
+        ? allStudies.filter(b => selected.includes(b.study_details.hits.hits[0]._source.study.assets.models[0].format))
+        : allStudies
+      return { aggregations: { total_studies: { value: buckets.length }, datasets_count: { doc_count: 0 }, studies: { buckets } } }
+    })
+
+    setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+    // The grid still shows only the matching study's model.
+    expect(result.current.data?.items).toHaveLength(1)
+  })
+
+  // Only the asset's own keys are dropped. A filter owned by another tab still
+  // scopes the corpus, so the options cannot offer a value the grid excludes.
+  it('keeps filters owned by other tabs applied when deriving an asset\'s options', () => {
+    setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'], accessManagement: ['controlled'] })
+    renderHook(() => useLibraryPageState(libraryConfig))
+
+    // Two calls: the counts query with every filter, and the Models corpus with
+    // only the Models keys cleared.
+    const corpusFilters = vi.mocked(useLibraryTabCounts).mock.calls.map(call => call[1])
+    expect(corpusFilters).toContainEqual(expect.objectContaining({ modelFormat: [], accessManagement: ['controlled'] }))
+    expect(corpusFilters).toContainEqual(expect.objectContaining({ modelFormat: ['ONNX'], accessManagement: ['controlled'] }))
+  })
+
+  // Each filter set is a new query key and useQueries starts it empty, so
+  // without holding the last answer the panel blanks on every filter edit.
+  it('keeps the previous options while the next corpus loads', () => {
+    setup(AssetType.MODELS)
+    const { result, rerender } = renderHook(() => useLibraryPageState(libraryConfig))
+    expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
+
+    // The corpus for the cleared set is still in flight; the counts query,
+    // keyed on the full filter set, already has its answer.
+    mockCorpus(filters => (filters.modelFormat.length === 0 ? undefined : responseWithBucket))
+    setup(AssetType.MODELS, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+    rerender()
+
+    expect(result.current.availableFilters.modelFormat.map(o => o.value)).toEqual(['ONNX', 'PyTorch'])
   })
 })

@@ -32,8 +32,14 @@ const CHECKBOX_FILTER_KEYS = [
   'dataUseModifiers',
   'dataType',
   'dac',
+  'modelFormat',
+  'modelLicense',
+  'modelCloud',
+  'modelTags',
   'workspaceTools',
   'workspacePlatform',
+  'workspaceCloud',
+  'workspaceAccess',
   'clinicalTrialStatus',
   'clinicalTrialPhase',
   'clinicalTrialInterventionType',
@@ -42,6 +48,14 @@ const CHECKBOX_FILTER_KEYS = [
   'biospecimenDataUse',
   'biospecimenPostMortemIntervalUnit',
   'soApprovalModel',
+  'ipType',
+  'ipStatus',
+  'presentationEvent',
+  'presentationFormat',
+  'presentationAccess',
+  'publicationJournal',
+  'publicationAccess',
+  'fundingFunderName',
 ] as const
 
 type CheckboxFilterKey = (typeof CHECKBOX_FILTER_KEYS)[number]
@@ -130,6 +144,20 @@ const DATE_SECTION_CONFIG = {
     ],
     invertedMessage: 'Start Date cannot be after End Date',
   },
+  presentationDate: {
+    fields: [
+      { stateKey: 'before', label: 'Presented Before' },
+      { stateKey: 'after', label: 'Presented After' },
+    ],
+    invertedMessage: 'Presented After cannot be later than Presented Before',
+  },
+  publicationPublishedDate: {
+    fields: [
+      { stateKey: 'before', label: 'Published Before' },
+      { stateKey: 'after', label: 'Published After' },
+    ],
+    invertedMessage: 'Published After cannot be later than Published Before',
+  },
 } as const
 
 type DateFilterSectionKey = keyof typeof DATE_SECTION_CONFIG
@@ -202,8 +230,6 @@ const DateFilterField: React.FC<DateFilterFieldProps> = ({ label, value, error, 
 // Yes/No/Any radio groups. A registered key claimed by neither this list nor
 // CHECKBOX_FILTER_KEYS renders nothing at all.
 const BOOLEAN_FILTER_KEYS = [
-  'datasetsCited',
-  'publicationsDatasetsCited',
   'instantApproval',
 ] as const
 
@@ -625,6 +651,8 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
                   || section.key === 'biospecimenCollectionDate'
                   || section.key === 'ipFiledDate'
                   || section.key === 'fundingDate'
+                  || section.key === 'presentationDate'
+                  || section.key === 'publicationPublishedDate'
                 ) {
                   return renderDateSection(section.key, section.label)
                 }

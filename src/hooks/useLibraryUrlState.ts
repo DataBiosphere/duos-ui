@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router'
 import { useCallback, useMemo } from 'react'
 import { AssetType, DEFAULT_PAGE_SIZE, FilterState, LibraryUrlState, PAGE_SIZE_OPTIONS, SortOrder } from 'src/types/library'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 type ArrayFilterParamConfig = {
   key: keyof Pick<
@@ -10,8 +11,14 @@ type ArrayFilterParamConfig = {
     | 'dataUseModifiers'
     | 'dataType'
     | 'dac'
+    | 'modelFormat'
+    | 'modelLicense'
+    | 'modelCloud'
+    | 'modelTags'
     | 'workspaceTools'
     | 'workspacePlatform'
+    | 'workspaceCloud'
+    | 'workspaceAccess'
     | 'clinicalTrialStatus'
     | 'clinicalTrialPhase'
     | 'clinicalTrialInterventionType'
@@ -20,6 +27,14 @@ type ArrayFilterParamConfig = {
     | 'biospecimenDataUse'
     | 'biospecimenPostMortemIntervalUnit'
     | 'soApprovalModel'
+    | 'ipType'
+    | 'ipStatus'
+    | 'presentationEvent'
+    | 'presentationFormat'
+    | 'presentationAccess'
+    | 'publicationJournal'
+    | 'publicationAccess'
+    | 'fundingFunderName'
   >
   param: string
 }
@@ -33,7 +48,7 @@ type RangeFilterParamConfig = {
 }
 
 type DateFilterParamConfig = {
-  key: keyof Pick<FilterState, 'clinicalTrialDates' | 'biospecimenCollectionDate' | 'ipFiledDate' | 'fundingDate'>
+  key: keyof Pick<FilterState, 'clinicalTrialDates' | 'biospecimenCollectionDate' | 'ipFiledDate' | 'fundingDate' | 'presentationDate' | 'publicationPublishedDate'>
   startParam: string
   endParam: string
   startKey?: string
@@ -46,8 +61,14 @@ const ARRAY_FILTER_PARAM_CONFIG: ArrayFilterParamConfig[] = [
   { key: 'dataUseModifiers', param: 'dataUseModifiers' },
   { key: 'dataType', param: 'dataType' },
   { key: 'dac', param: 'dac' },
+  { key: 'modelFormat', param: 'modelFormat' },
+  { key: 'modelLicense', param: 'modelLicense' },
+  { key: 'modelCloud', param: 'modelCloud' },
+  { key: 'modelTags', param: 'modelTags' },
   { key: 'workspaceTools', param: 'workspaceTools' },
   { key: 'workspacePlatform', param: 'workspacePlatform' },
+  { key: 'workspaceCloud', param: 'workspaceCloud' },
+  { key: 'workspaceAccess', param: 'workspaceAccess' },
   { key: 'clinicalTrialStatus', param: 'clinicalTrialStatus' },
   { key: 'clinicalTrialPhase', param: 'clinicalTrialPhase' },
   { key: 'clinicalTrialInterventionType', param: 'clinicalTrialInterventionType' },
@@ -56,6 +77,14 @@ const ARRAY_FILTER_PARAM_CONFIG: ArrayFilterParamConfig[] = [
   { key: 'biospecimenDataUse', param: 'biospecimenDataUse' },
   { key: 'biospecimenPostMortemIntervalUnit', param: 'biospecimenPostMortemIntervalUnit' },
   { key: 'soApprovalModel', param: 'soApprovalModel' },
+  { key: 'ipType', param: 'ipType' },
+  { key: 'ipStatus', param: 'ipStatus' },
+  { key: 'presentationEvent', param: 'presentationEvent' },
+  { key: 'presentationFormat', param: 'presentationFormat' },
+  { key: 'presentationAccess', param: 'presentationAccess' },
+  { key: 'publicationJournal', param: 'publicationJournal' },
+  { key: 'publicationAccess', param: 'publicationAccess' },
+  { key: 'fundingFunderName', param: 'fundingFunderName' },
 ]
 
 const RANGE_FILTER_PARAM_CONFIG: RangeFilterParamConfig[] = [
@@ -69,11 +98,17 @@ const RANGE_FILTER_PARAM_CONFIG: RangeFilterParamConfig[] = [
   },
 ]
 
+// Params from filters this app no longer offers (the presentation/publication
+// "Datasets Cited" booleans).
+const RETIRED_PARAMS = ['datasetsCited', 'presentationsDatasetsCited', 'publicationsDatasetsCited']
+
 const DATE_FILTER_PARAM_CONFIG: DateFilterParamConfig[] = [
   { key: 'clinicalTrialDates', startParam: 'clinicalTrialStartDate', endParam: 'clinicalTrialEndDate' },
   { key: 'biospecimenCollectionDate', startParam: 'biospecimenCollectedAfter', endParam: 'biospecimenCollectedBefore', startKey: 'after', endKey: 'before' },
   { key: 'ipFiledDate', startParam: 'ipFiledAfter', endParam: 'ipFiledBefore', startKey: 'after', endKey: 'before' },
   { key: 'fundingDate', startParam: 'fundingStartDate', endParam: 'fundingEndDate' },
+  { key: 'presentationDate', startParam: 'presentedAfter', endParam: 'presentedBefore', startKey: 'after', endKey: 'before' },
+  { key: 'publicationPublishedDate', startParam: 'publishedAfter', endParam: 'publishedBefore', startKey: 'after', endKey: 'before' },
 ]
 
 // Parse an integer URL param defensively: a malformed value (e.g. ?page=abc)
@@ -240,15 +275,16 @@ const serializeBooleanFilterToUrl = (
 }
 
 /**
- * Parse filters from URL search params
+ * Parse filters from URL search params. Seeded with EMPTY_FILTERS because the
+ * spreads below are `Record`s the cast cannot check: a key missing from every
+ * param config would arrive undefined and throw on `filters[key].length`.
  */
 const parseFiltersFromUrl = (searchParams: URLSearchParams): FilterState => {
   return {
+    ...EMPTY_FILTERS,
     ...parseArrayFilters(searchParams),
     ...parseRangeFilters(searchParams),
     ...parseDateFilters(searchParams),
-    datasetsCited: parseBooleanParam(searchParams, ['datasetsCited', 'presentationsDatasetsCited']),
-    publicationsDatasetsCited: parseBooleanParam(searchParams, ['publicationsDatasetsCited']),
     instantApproval: parseBooleanParam(searchParams, ['instantApproval']),
   } as FilterState
 }
@@ -261,8 +297,11 @@ const serializeFiltersToUrl = (
   searchParams: URLSearchParams,
 ): void => {
   serializeArrayFiltersToUrl(filters, searchParams)
-  serializeBooleanFilterToUrl(filters.datasetsCited, 'datasetsCited', searchParams, ['presentationsDatasetsCited'])
-  serializeBooleanFilterToUrl(filters.publicationsDatasetsCited, 'publicationsDatasetsCited', searchParams)
+  // updateState serializes over a copy of the current params, so a param no
+  // filter writes any more is never removed. These three are no longer parsed
+  // or written, and would otherwise ride along in the URL forever once an old
+  // link introduced them.
+  RETIRED_PARAMS.forEach(param => searchParams.delete(param))
   serializeBooleanFilterToUrl(filters.instantApproval, 'instantApproval', searchParams)
   serializeRangeFiltersToUrl(filters, searchParams)
   serializeDateFiltersToUrl(filters, searchParams)
