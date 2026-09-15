@@ -11,11 +11,12 @@ const ICONS: Record<PiProfileLinkKind, React.ReactNode> = {
 
 const PiExternalProfileIcons = ({ links }: { links: PiProfileLink[] }) => (
   <span>
-    {links.map(({ href, label, kind }) => (
+    {links.map(({ href, label, kind, field }) => (
       <IconButton
-        // Keyed by href: a link demoted off its own label falls back to the generic website
-        // label, so two links can share one.
-        key={href}
+        // Keyed by the field it came from: one link per field, so this is unique. Neither href
+        // nor label is - the same URL can be typed into two fields, and a demoted link takes the
+        // generic website label.
+        key={field}
         size="small"
         component="a"
         href={href}
