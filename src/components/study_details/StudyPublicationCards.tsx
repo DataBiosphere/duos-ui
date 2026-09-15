@@ -1,12 +1,34 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Card, CardContent, Grid, Link, Typography } from '@mui/material'
 import { useStudyPublications } from 'src/hooks/useStudyDetailsData'
+import { PublicationAsset } from 'src/types/library'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 import StudyPageSection from './StudyPageSection'
 import StudyQueryResult from './StudyQueryResult'
 
+/**
+ * Pairs each publication with a stable React key.
+ *
+ * publicationId is submitter-supplied: often blank, and nothing stops two publications sharing
+ * one, so identity falls back through the remaining identifiers to the title, and a repeat of
+ * whichever wins takes an occurrence suffix. Keying by array position instead survives neither a
+ * reorder nor an insertion, which is what Sonar objects to in typescript:S6479.
+ */
+const withKeys = (publications: PublicationAsset[]): Array<{ key: string, publication: PublicationAsset }> => {
+  const seen = new Map<string, number>()
+  return publications.map((publication) => {
+    const identity = [publication.publicationId, publication.doi, publication.pubmedId, publication.url, publication.title]
+      .map(value => value?.trim())
+      .find(value => value) ?? 'publication'
+    const seenBefore = seen.get(identity) ?? 0
+    seen.set(identity, seenBefore + 1)
+    return { key: seenBefore === 0 ? identity : `${identity}#${seenBefore}`, publication }
+  })
+}
+
 const StudyPublicationCards = ({ studyId }: { studyId: string }) => {
   const { data = [], isPending, error } = useStudyPublications(studyId)
+  const cards = useMemo(() => withKeys(data), [data])
 
   return (
     <StudyPageSection id="primary-study-publications" heading="Primary Study Publications">
@@ -18,14 +40,11 @@ const StudyPublicationCards = ({ studyId }: { studyId: string }) => {
         errorMessage="Unable to load publications."
       >
         <Grid container spacing={2}>
-          {data.map((publication, index) => {
+          {cards.map(({ key, publication }) => {
             // Submitter-supplied, so only a plain http(s) URL becomes a link
             const href = validateHttpUrl(publication.url)
             return (
-              // Position, as the asset tables key by. publicationId is submitter-supplied: it is
-              // often blank, and nothing stops two publications sharing a non-blank one, which
-              // would give React duplicate keys to reconcile on a refetch or reorder.
-              <Grid key={`publication-${index}`} size={{ xs: 12, md: 6 }}>
+              <Grid key={key} size={{ xs: 12, md: 6 }}>
                 <Card variant="outlined" sx={{ height: '100%' }}>
                   <CardContent>
                     <Typography variant="h6">

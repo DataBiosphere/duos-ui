@@ -619,6 +619,36 @@ describe('Study details test', () => {
     expect(screen.queryByText('No primary study publications have been added yet.')).not.toBeInTheDocument()
   })
 
+  /**
+   * publicationId is submitter-supplied, so blanks and repeats both reach us. React warns on
+   * duplicate keys rather than throwing, so the warning itself is the assertion - without it a
+   * regression to keying straight off publicationId would render two cards and pass silently.
+   */
+  it('keeps publications with blank or repeated ids distinct', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.mocked(Study.getPublications).mockResolvedValueOnce([
+      { publicationId: '', title: 'First untitled submission', authorNames: [], journal: 'Cell', publishedDate: '2025-01-01' },
+      { publicationId: '', title: 'Second untitled submission', authorNames: [], journal: 'Cell', publishedDate: '2025-02-01' },
+      { publicationId: 'dup', title: 'Shared id, first', authorNames: [], journal: 'Nature', publishedDate: '2025-03-01' },
+      { publicationId: 'dup', title: 'Shared id, second', authorNames: [], journal: 'Nature', publishedDate: '2025-04-01' },
+    ] as never)
+    try {
+      mountComponent()
+
+      expect(await screen.findByText('First untitled submission')).toBeInTheDocument()
+      expect(screen.getByText('Second untitled submission')).toBeInTheDocument()
+      expect(screen.getByText('Shared id, first')).toBeInTheDocument()
+      expect(screen.getByText('Shared id, second')).toBeInTheDocument()
+
+      const duplicateKeyWarnings = consoleError.mock.calls
+        .filter(call => String(call[0]).includes('same key'))
+      expect(duplicateKeyWarnings).toEqual([])
+    }
+    finally {
+      consoleError.mockRestore()
+    }
+  })
+
   it('does not overwrite a user selection when the study-wide default arrives later', async () => {
     let resolveStudyWideIds!: (value: ReturnType<typeof makeSearchResponse>) => void
     const studyWideIds = new Promise<ReturnType<typeof makeSearchResponse>>((resolve) => {
