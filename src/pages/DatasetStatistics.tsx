@@ -100,6 +100,13 @@ export default function DatasetStatistics() {
 
   useEffect(() => {
     const init = async () => {
+      // This page is not remounted between datasets - the route parameter changes and the effect
+      // re-runs - so last dataset's answers have to be cleared before asking about the next one.
+      // Left alone, a 403 on an unpublished study rendered the previous dataset's request history
+      // beside the restriction notice, and returning to a readable dataset kept the notice.
+      setDars(undefined)
+      setDarsRestricted(false)
+      setIsLoading(true)
       try {
         const datasetTerms: DatasetTerm[] = await DataSet.searchDatasetIndex({
           query: {

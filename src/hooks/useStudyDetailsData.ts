@@ -206,6 +206,12 @@ export const useStudySelectableDatasetIds = (studyId: string, total: number, ena
   enabled: enabled && studyId.length > 0 && total > 0,
   queryFn: async (): Promise<number[]> => {
     const pagination = { page: 0, pageSize: total }
+    // Asks for the study's datasets in one request. Elasticsearch refuses a `size` beyond
+    // index.max_result_window (10,000 by default), so this is bounded by how large a study can
+    // get: the largest in production holds 67 datasets, three orders of magnitude below the
+    // limit. If a study ever did exceed it the request fails rather than truncating, and the
+    // caller falls back to selecting the visible page - degraded, not silently wrong. Paging or
+    // a bulk-id endpoint is the fix if studies ever approach that size.
     // Same query the grid runs, so the two can't disagree about which datasets belong here.
     const response = await DataSet.searchDatasetIndexV2(buildStudyDatasetsQuery(studyId, pagination))
     const page = datasetAsset.transformResponse(response, pagination)

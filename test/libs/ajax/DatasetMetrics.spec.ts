@@ -78,4 +78,68 @@ describe('DatasetMetrics', () => {
       expect(extractError(error)).toBe('Dataset 123 not found')
     })
   })
+
+  describe('getStudyStats', () => {
+    it('requests the study-scoped DAR summaries', async () => {
+      vi.mocked(fetchGet).mockResolvedValueOnce({ data: [] })
+
+      await DatasetMetrics.getStudyStats(42)
+
+      expect(fetchGet).toHaveBeenCalledWith(
+        'https://duos.example.org/api/metrics/dar-summaries/study/42',
+        headers,
+      )
+    })
+
+    it('returns the summaries the endpoint sends', async () => {
+      const summaries = [buildDar('DAR-001'), buildDar('DAR-002')]
+      vi.mocked(fetchGet).mockResolvedValueOnce({ data: summaries })
+
+      expect(await DatasetMetrics.getStudyStats(42)).toEqual(summaries)
+    })
+
+    /** The study page distinguishes a refusal from a fault, so the status has to survive. */
+    it('propagates a rejection with its status intact', async () => {
+      const forbidden = Object.assign(new Error('User does not have permission'), {
+        response: { status: 403 },
+      })
+      vi.mocked(fetchGet).mockRejectedValueOnce(forbidden)
+
+      await expect(DatasetMetrics.getStudyStats(42)).rejects.toMatchObject({
+        response: { status: 403 },
+      })
+    })
+  })
+
+  describe('getResearchOutputs', () => {
+    it('requests the study-scoped research outputs', async () => {
+      vi.mocked(fetchGet).mockResolvedValueOnce({
+        data: { presentations: [], publications: [], intellectualProperties: [] },
+      })
+
+      await DatasetMetrics.getResearchOutputs(42)
+
+      expect(fetchGet).toHaveBeenCalledWith(
+        'https://duos.example.org/api/metrics/research-outputs/study/42',
+        headers,
+      )
+    })
+
+    it('returns the three grouped lists as sent', async () => {
+      const outputs = {
+        presentations: [{ title: 'A talk', url: 'https://example.org/talk' }],
+        publications: [{ title: 'A paper', url: '' }],
+        intellectualProperties: [],
+      }
+      vi.mocked(fetchGet).mockResolvedValueOnce({ data: outputs })
+
+      expect(await DatasetMetrics.getResearchOutputs(42)).toEqual(outputs)
+    })
+
+    it('propagates a failure rather than returning empty groups', async () => {
+      vi.mocked(fetchGet).mockRejectedValueOnce(new Error('outputs unavailable'))
+
+      await expect(DatasetMetrics.getResearchOutputs(42)).rejects.toThrow('outputs unavailable')
+    })
+  })
 })
