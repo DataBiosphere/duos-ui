@@ -1,6 +1,6 @@
 import React from 'react'
 import { Card, CardActionArea, CardContent, Grid, Typography } from '@mui/material'
-import { useNavigate } from 'react-router'
+import { Link as RouterLink } from 'react-router'
 import { StudyRecommendation } from 'src/types/model'
 import StudyPageSection from './StudyPageSection'
 import StudyQueryResult from './StudyQueryResult'
@@ -14,9 +14,11 @@ interface Props {
   error?: unknown
 }
 
+/**
+ * A responsive grid of recommended studies. Every recommendation renders, wrapping onto further
+ * rows; there is no horizontal scrolling or next/previous affordance.
+ */
 const StudyRecommendationCarousel = ({ id, heading, recommendations = [], isPending, error }: Props) => {
-  const navigate = useNavigate()
-
   return (
     <StudyPageSection id={id} heading={heading}>
       <StudyQueryResult
@@ -30,7 +32,14 @@ const StudyRecommendationCarousel = ({ id, heading, recommendations = [], isPend
           {recommendations.map(study => (
             <Grid key={study.studyId} size={{ xs: 12, sm: 6, lg: 4 }}>
               <Card variant="outlined" sx={{ height: '100%' }}>
-                <CardActionArea sx={{ height: '100%' }} onClick={() => navigate(`/studies/${study.studyId}`)}>
+                {/* A link rather than a button that navigates imperatively, as study
+                    destinations are elsewhere: a button swallows open-in-new-tab, copy link
+                    address, and middle click. */}
+                <CardActionArea
+                  component={RouterLink}
+                  to={`/studies/${study.studyId}`}
+                  sx={{ height: '100%' }}
+                >
                   <CardContent>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{study.studyName}</Typography>
                     {study.studyDescription && (
