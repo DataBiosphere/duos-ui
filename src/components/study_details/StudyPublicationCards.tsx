@@ -19,7 +19,7 @@ const withKeys = (publications: PublicationAsset[]): Array<{ key: string, public
   return publications.map((publication) => {
     const identity = [publication.publicationId, publication.doi, publication.pubmedId, publication.url, publication.title]
       .map(value => value?.trim())
-      .find(value => value) ?? 'publication'
+      .find(Boolean) ?? 'publication'
     const seenBefore = seen.get(identity) ?? 0
     seen.set(identity, seenBefore + 1)
     return { key: seenBefore === 0 ? identity : `${identity}#${seenBefore}`, publication }
