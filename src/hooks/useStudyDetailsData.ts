@@ -152,8 +152,10 @@ export const useStudySelectableDatasetIds = (studyId: string, total: number, ena
     // index.max_result_window (10,000 by default), so this is bounded by how large a study can
     // get: the largest in production holds 67 datasets, three orders of magnitude below the
     // limit. If a study ever did exceed it the request fails rather than truncating, and the
-    // caller falls back to selecting the visible page - degraded, not silently wrong. Paging or
-    // a bulk-id endpoint is the fix if studies ever approach that size.
+    // caller then selects nothing at all and says so, rather than defaulting to the page in view
+    // - a partial default is the one outcome worse than none, since 'Apply for Access' would
+    // silently request a subset. Paging or a bulk-id endpoint is the fix if studies ever
+    // approach that size.
     // Same query the grid runs, so the two can't disagree about which datasets belong here.
     const response = await DataSet.searchDatasetIndexV2(buildStudyDatasetsQuery(studyId, pagination))
     const page = datasetAsset.transformResponse(response, pagination)
