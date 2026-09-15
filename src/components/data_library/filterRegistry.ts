@@ -4,6 +4,7 @@ import {
   AvailableFilters,
   AssetType,
   FilterKey,
+  FilterOption,
   FilterState,
   LibraryFilterSection,
   LibraryFilterSectionControl,
@@ -636,9 +637,32 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   },
 }
 
+/**
+ * A selected value can be missing from the corpus its options are derived from,
+ * because a filter owned by another tab excludes every study carrying it.
+ * Without re-adding it the checkbox vanishes while the filter stays active, and
+ * the external chips deliberately skip keys the current tab renders itself — so
+ * nothing is left to clear it with short of resetting every filter.
+ */
+const withSelectedValues = (
+  key: FilterKey,
+  options: FilterOption[] | undefined,
+  filters?: FilterState,
+): FilterOption[] | undefined => {
+  if (!options || !filters || FILTER_CONTROL_BY_KEY[key] !== 'checkbox') {
+    return options
+  }
+
+  const missing = (filters[key] as string[]).filter(value => !options.some(option => option.value === value))
+  return missing.length > 0
+    ? [...options, ...missing.map(value => ({ value, label: value }))]
+    : options
+}
+
 export const getFilterSectionsForAsset = (
   assetType: AssetType,
   availableFilters: AvailableFilters,
+  filters?: FilterState,
 ): LibraryFilterSection[] => {
   const config = assetFilterRegistry[assetType]
   return config.visibleFilters.map((key) => {
@@ -647,7 +671,7 @@ export const getFilterSectionsForAsset = (
       key,
       label: config.labels?.[key] ?? FILTER_DEFINITIONS[key].label,
       control,
-      options: getFilterOptions(key, availableFilters),
+      options: withSelectedValues(key, getFilterOptions(key, availableFilters), filters),
       range: getFilterRange(key, availableFilters),
     }
   })
