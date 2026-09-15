@@ -39,6 +39,15 @@ const EMPTY_PAGE = {
 
 type StudySortModel = Array<{ field: string, sort: SortOrder | null }>
 
+/**
+ * An index value only when it is actually populated. The index document can exist while carrying
+ * '' or [] for a field it never filled, and `??` alone falls through on null/undefined only - so
+ * the empty value won and suppressed exactly the relational value the fallback exists to supply.
+ * One length check covers both, which a bare `||` would not: an empty array is truthy.
+ */
+const populated = <T extends string | unknown[]>(value: T | undefined): T | undefined =>
+  value === undefined || value.length === 0 ? undefined : value
+
 const getErrorMessage = (error: unknown): string | undefined => {
   if (error instanceof Error) return error.message
   if (error) return 'Unknown error'
@@ -67,14 +76,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   // Dataset search is not a reliable source of study-level metadata: a valid study may have no
   // datasets (and therefore no matching index document). The relational response is already
   // loaded for PI details, so use it as the fallback for the fields both payloads carry.
-  // `||`, not `??`: the index document exists but carries '' for a field it never populated, and
-  // `??` only falls through on null/undefined, so the empty value won and suppressed exactly the
-  // relational field this fallback exists to supply. dataTypes needs the length check spelled out
-  // - an empty array is truthy, so `||` alone would keep it for the same reason.
-  const studyName = study?.studyName || piDetails?.name
-  const studyDescription = study?.description || piDetails?.description
-  const studyDataTypes = study?.dataTypes?.length ? study.dataTypes : piDetails?.dataTypes
-  const piName = study?.piName || piDetails?.piName
+  const studyName = populated(study?.studyName) ?? piDetails?.name
+  const studyDescription = populated(study?.description) ?? piDetails?.description
+  const studyDataTypes = populated(study?.dataTypes) ?? piDetails?.dataTypes
+  const piName = populated(study?.piName) ?? piDetails?.piName
   const similarStudies = useSimilarStudies(studyId)
   const frequentlyRequestedWith = useFrequentlyRequestedWithStudies(studyId)
   const selectedStudyIds = selectedDatasets.length > 0 && study

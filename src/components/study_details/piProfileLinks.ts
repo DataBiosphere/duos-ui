@@ -2,10 +2,19 @@ import { validateHttpUrl } from 'src/utils/UrlUtils'
 
 export type PiProfileLinkKind = 'orcid' | 'linkedin' | 'website'
 
+/** Which submitted field a link came from, as opposed to how it ends up being presented. */
+export type PiProfileLinkField = 'orcid' | 'linkedin' | 'website'
+
 export interface PiProfileLink {
   href: string
   label: string
   kind: PiProfileLinkKind
+  /**
+   * The field this came from. Each field yields at most one link, so this is unique within the
+   * list where neither href nor label is: the same URL can be typed into two fields, and two
+   * demoted links share the generic website label.
+   */
+  field: PiProfileLinkField
 }
 
 const WEBSITE_LABEL = 'PI website'
@@ -59,7 +68,10 @@ const profileLink = (
   if (!href) {
     return undefined
   }
-  return isServedBy(href, domain) ? { href, label, kind } : { href, label: WEBSITE_LABEL, kind: 'website' }
+  const field = kind as PiProfileLinkField
+  return isServedBy(href, domain)
+    ? { href, label, kind, field }
+    : { href, label: WEBSITE_LABEL, kind: 'website', field }
 }
 
 /**
@@ -73,7 +85,7 @@ export const getPiProfileLinks = ({ orcid, linkedinUrl, websiteUrl }: PiProfileF
   const candidates = [
     profileLink(orcid ? orcidHref(orcid) : undefined, 'orcid.org', 'ORCID profile', 'orcid'),
     profileLink(validateHttpUrl(linkedinUrl), 'linkedin.com', 'LinkedIn profile', 'linkedin'),
-    website ? { href: website, label: WEBSITE_LABEL, kind: 'website' as const } : undefined,
+    website ? { href: website, label: WEBSITE_LABEL, kind: 'website' as const, field: 'website' as const } : undefined,
   ]
 
   return candidates.filter(candidate => candidate !== undefined)
