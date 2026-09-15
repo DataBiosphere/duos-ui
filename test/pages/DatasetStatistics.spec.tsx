@@ -2,7 +2,8 @@ import '@testing-library/jest-dom/vitest'
 import React from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { MemoryRouter, Routes, Route } from 'react-router'
+import { MemoryRouter, Routes, Route, useNavigate } from 'react-router'
+import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DatasetStatistics from 'src/pages/DatasetStatistics'
 import { DataSet } from 'src/libs/ajax/DataSet'
@@ -141,16 +142,23 @@ describe('DatasetStatistics', () => {
     dars = mockDarsResponse,
     tdrResponse = mockEmptyTdrResponse,
     tdrError,
+    darsError,
     dacRules = [],
   }: {
     dataset?: DatasetTerm
     dars?: DatasetStatisticsDar[]
     tdrResponse?: ReturnType<typeof buildTdrResponse>
     tdrError?: Error
+    darsError?: unknown
     dacRules?: unknown[]
   } = {}) => {
     vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([dataset])
-    vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(dars)
+    if (darsError) {
+      vi.mocked(DatasetMetrics.getDatasetStats).mockRejectedValue(darsError)
+    }
+    else {
+      vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(dars)
+    }
     vi.mocked(DAC.fetchDACbotRules).mockResolvedValue(dacRules as never)
 
     if (tdrError) {
@@ -285,6 +293,86 @@ describe('DatasetStatistics', () => {
     expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeTruthy()
     expect(await screen.findByText('DAR-001')).toBeTruthy()
     expect(await screen.findByText('Test Project')).toBeTruthy()
+  })
+
+  /**
+   * consent gates GET /api/metrics/dar-summaries/{datasetId} on being able to read the dataset, so
+   * a dataset whose study is unpublished answers 403 to everyone but its owners. The dataset
+   * itself still loaded, so only this section is withheld - and saying so beats the generic
+   * "unable to retrieve" the failure would otherwise read as.
+   */
+  it('explains who can see the request history when the study is not published', async () => {
+    const forbidden = Object.assign(new Error('User does not have permission'), {
+      response: { status: 403 },
+    })
+    renderDatasetStatistics({ darsError: forbidden })
+
+    // Announced to assistive tech: <output> carries an implicit status role, so a revert to a
+    // plain div would fail here rather than silently stop announcing.
+    const notice = await screen.findByRole('status')
+    expect(notice.textContent).toMatch(/has not been published, so its data access request/)
+    // Distinct from a study that simply has no requests yet
+    expect(
+      screen.queryByText(/No Data Access Requests have been created for this dataset/),
+    ).not.toBeInTheDocument()
+    // The rest of the page is unaffected
+    expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeTruthy()
+  })
+
+  /**
+   * The page is not remounted between datasets: the route parameter changes and the effect
+   * re-runs against the same component state. Without a reset, the previous dataset's request
+   * history stayed on screen beside the restriction notice, and returning to a readable dataset
+   * kept the notice.
+   */
+  it('does not carry one dataset\'s history or restriction to the next', async () => {
+    const forbidden = Object.assign(new Error('User does not have permission'), {
+      response: { status: 403 },
+    })
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDatasetTerm])
+    vi.mocked(DAC.fetchDACbotRules).mockResolvedValue([] as never)
+    vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds)
+      .mockResolvedValue(mockEmptyTdrResponse as unknown as Awaited<ReturnType<typeof TerraDataRepo.listSnapshotsByDatasetIds>>)
+    // Readable first, then refused
+    vi.mocked(DatasetMetrics.getDatasetStats)
+      .mockResolvedValueOnce(mockDarsResponse)
+      .mockRejectedValue(forbidden)
+
+    // A real in-app navigation: MemoryRouter reads initialEntries only on mount, so changing
+    // the route has to go through the router for the component to stay mounted.
+    const GoToNextDataset = () => {
+      const navigate = useNavigate()
+      return <button onClick={() => navigate('/dataset/DUOS-000002')}>next dataset</button>
+    }
+    const user = userEvent.setup()
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/dataset/DUOS-000001']}>
+          <GoToNextDataset />
+          <Routes>
+            <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    expect(await screen.findByText('DAR-001')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'next dataset' }))
+
+    expect(await screen.findByRole('status')).toHaveTextContent('has not been published')
+    // The first dataset's history is gone rather than sitting beside the notice
+    expect(screen.queryByText('DAR-001')).not.toBeInTheDocument()
+  })
+
+  it('still reports a genuine server failure as an error', async () => {
+    const serverError = Object.assign(new Error('boom'), { response: { status: 500 } })
+    renderDatasetStatistics({ darsError: serverError })
+
+    expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeTruthy()
+    expect(
+      screen.queryByText(/has not been published, so its data access request/),
+    ).not.toBeInTheDocument()
   })
 
   it('displays empty message when no data access requests exist', async () => {

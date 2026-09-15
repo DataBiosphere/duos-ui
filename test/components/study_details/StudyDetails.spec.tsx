@@ -33,6 +33,14 @@ vi.mock('src/libs/ajax/DataSet', () => ({
   },
 }))
 
+vi.mock('src/libs/ajax/DatasetMetrics', () => ({
+  DatasetMetrics: {
+    getDatasetStats: vi.fn().mockResolvedValue([]),
+    getStudyStats: vi.fn().mockResolvedValue([]),
+    getResearchOutputs: vi.fn().mockResolvedValue({ presentations: [], publications: [], intellectualProperties: [] }),
+  },
+}))
+
 vi.mock('src/libs/ajax/StudyComments', () => ({
   COMMENTS_PAGE_SIZE: 25,
   MAX_COMMENT_LENGTH: 2000,
@@ -58,6 +66,7 @@ vi.mock('src/utils/accessUtils', () => ({
 
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Study } from 'src/libs/ajax/Study'
+import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 
 const datasets = [
   {
@@ -898,5 +907,47 @@ describe('Study details test', () => {
     expect(await screen.findByText('Active Researcher Status is required to comment or rate this study.'))
       .toBeInTheDocument()
     expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
+  })
+
+  it('shows granted DAR details and expands the research use statement', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([{
+      projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+      nonTechRus: 'Study cancer outcomes.', expired: false, piName: 'Dr Researcher',
+      institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+    }])
+    const user = userEvent.setup()
+    mountComponent()
+
+    expect(await screen.findByText('Cancer genomics')).toBeInTheDocument()
+    expect(screen.getByText('PI: Dr Researcher')).toBeInTheDocument()
+    expect(screen.getByText('Institution: Research University')).toBeInTheDocument()
+    expect(screen.getByText('Current')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Show research use statement' }))
+    expect(screen.getByText('Study cancer outcomes.')).toBeInTheDocument()
+  })
+
+  it('groups self-reported secondary research outputs by type', async () => {
+    vi.mocked(DatasetMetrics.getResearchOutputs).mockResolvedValueOnce({
+      presentations: [{ title: 'ASHG 2025 talk', url: 'https://example.org/talk' }],
+      publications: [{ title: 'Downstream findings' }, { title: 'Second downstream paper' }],
+      intellectualProperties: [{ title: 'Assay patent' }],
+    } as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    // Each type is its own group, labelled with its own count
+    expect(await screen.findByText('Presentations (1)')).toBeInTheDocument()
+    expect(screen.getByText('Publications (2)')).toBeInTheDocument()
+    expect(screen.getByText('Intellectual Property (1)')).toBeInTheDocument()
+
+    // The groups start collapsed, so their entries are only reachable once expanded
+    await user.click(screen.getByText('Presentations (1)'))
+    expect(await screen.findByRole('link', { name: 'ASHG 2025 talk' }))
+      .toHaveAttribute('href', 'https://example.org/talk')
+    await user.click(screen.getByText('Publications (2)'))
+    expect(await screen.findByText('Downstream findings')).toBeInTheDocument()
+    expect(screen.getByText('Second downstream paper')).toBeInTheDocument()
+    await user.click(screen.getByText('Intellectual Property (1)'))
+    expect(await screen.findByText('Assay patent')).toBeInTheDocument()
   })
 })
