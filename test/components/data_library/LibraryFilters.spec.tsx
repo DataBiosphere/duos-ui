@@ -51,14 +51,6 @@ const availableFilters: AvailableFilters = {
     { value: 'HOURS', label: 'HOURS' },
     { value: 'DAYS', label: 'DAYS' },
   ],
-  datasetsCited: [
-    { value: 'true', label: 'Yes' },
-    { value: 'false', label: 'No' },
-  ],
-  publicationsDatasetsCited: [
-    { value: 'true', label: 'Yes' },
-    { value: 'false', label: 'No' },
-  ],
   soApprovalModel: [
     { value: 'PER_REQUEST', label: 'Per-Request Approval' },
     { value: 'PRE_AUTHORIZED', label: 'Pre-Authorized Researchers' },
@@ -195,7 +187,9 @@ describe('LibraryFilters', () => {
     expect(screen.queryByText('Access Request Process')).not.toBeInTheDocument()
   })
 
-  it('renders only configured filters for presentations', () => {
+  // Datasets Cited is a grid column now, so Presentations configures no filters
+  // of its own and must not inherit another tab's.
+  it('renders no filter sections for presentations', () => {
     render(
       <LibraryFilters
         filters={EMPTY_FILTERS}
@@ -204,7 +198,7 @@ describe('LibraryFilters', () => {
         sections={getFilterSectionsForAsset(AssetType.PRESENTATIONS, availableFilters)}
       />,
     )
-    expect(screen.getByText('Datasets Cited (Presentations)?')).toBeInTheDocument()
+    expect(screen.queryByText('Datasets Cited (Presentations)?')).not.toBeInTheDocument()
     expect(screen.queryByText('Participants')).not.toBeInTheDocument()
     expect(screen.queryByText('Access Request Process')).not.toBeInTheDocument()
   })

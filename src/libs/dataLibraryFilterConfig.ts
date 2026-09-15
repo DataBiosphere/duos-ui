@@ -42,10 +42,10 @@ export const assetFilterRegistry: Record<AssetType, AssetFilterConfig> = {
     ],
   },
   [AssetType.PUBLICATIONS]: {
-    visibleFilters: ['publicationJournal', 'publicationAccess', 'publicationPublishedDate', 'publicationsDatasetsCited'],
+    visibleFilters: ['publicationJournal', 'publicationAccess', 'publicationPublishedDate'],
   },
   [AssetType.PRESENTATIONS]: {
-    visibleFilters: ['presentationEvent', 'presentationFormat', 'presentationAccess', 'presentationDate', 'datasetsCited'],
+    visibleFilters: ['presentationEvent', 'presentationFormat', 'presentationAccess', 'presentationDate'],
   },
   [AssetType.INTELLECTUAL_PROPERTY]: {
     visibleFilters: ['ipType', 'ipStatus', 'ipFiledDate'],

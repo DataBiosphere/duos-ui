@@ -24,10 +24,6 @@ const matchesPresentationFilters = (presentation: PresentationAsset, filters?: F
     return false
   }
 
-  if (filters.datasetsCited !== undefined && presentation.citation !== filters.datasetsCited) {
-    return false
-  }
-
   // Inverted bounds build no clause, so they must not narrow rows here either.
   if (!isFilterActive('presentationDate', filters)) {
     return true

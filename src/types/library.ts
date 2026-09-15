@@ -79,8 +79,6 @@ export interface FilterState {
   biospecimenDataUse: string[]
   biospecimenPostMortemIntervalUnit: string[]
   soApprovalModel: string[]
-  datasetsCited?: boolean
-  publicationsDatasetsCited?: boolean
   instantApproval?: boolean
   participantCount: {
     min?: number
@@ -164,8 +162,6 @@ export interface AvailableFilters {
   biospecimenDataUse: FilterOption[]
   biospecimenPostMortemIntervalUnit: FilterOption[]
   soApprovalModel: FilterOption[]
-  datasetsCited: FilterOption[]
-  publicationsDatasetsCited: FilterOption[]
   instantApproval: FilterOption[]
   biospecimenPostMortemIntervalRange: {
     min: number

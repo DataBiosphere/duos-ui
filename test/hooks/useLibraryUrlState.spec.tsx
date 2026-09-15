@@ -300,7 +300,7 @@ describe('useLibraryUrlState', () => {
   })
 })
 
-const BooleanFilterHarness = () => {
+const RetiredParamHarness = () => {
   const [state, updateState] = useLibraryUrlState()
   const location = useLocation()
   return (
@@ -308,81 +308,42 @@ const BooleanFilterHarness = () => {
       <div id="filters">{JSON.stringify(state.filters)}</div>
       <div id="search">{location.search}</div>
       <button
-        id="set-both"
-        onClick={() => updateState({
-          filters: { ...EMPTY_FILTERS, datasetsCited: true, publicationsDatasetsCited: false },
-        })}
-      >Set Both
-      </button>
-      <button
-        id="clear-both"
-        onClick={() => updateState({ filters: EMPTY_FILTERS })}
-      >Clear Both
+        id="set-query"
+        onClick={() => updateState({ query: 'brca' })}
+      >Set Query
       </button>
     </div>
   )
 }
 
-describe('useLibraryUrlState — datasets-cited boolean params', () => {
-  it('parses datasetsCited and publicationsDatasetsCited independently', () => {
-    render(
-      <MemoryRouter initialEntries={['/?datasetsCited=true&publicationsDatasetsCited=false']}>
-        <BooleanFilterHarness />
-      </MemoryRouter>,
-    )
-    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
-    expect(filters.datasetsCited).toBe(true)
-    expect(filters.publicationsDatasetsCited).toBe(false)
-  })
+describe('useLibraryUrlState — retired datasets-cited params', () => {
+  it.each(['datasetsCited', 'presentationsDatasetsCited', 'publicationsDatasetsCited'])(
+    'no longer parses %s into filter state',
+    (param) => {
+      render(
+        <MemoryRouter initialEntries={[`/?${param}=true`]}>
+          <RetiredParamHarness />
+        </MemoryRouter>,
+      )
+      const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+      expect(filters).not.toHaveProperty(param)
+    },
+  )
 
-  it('treats the legacy presentationsDatasetsCited param as datasetsCited', () => {
+  // updateState serializes over a copy of the current params, so without an
+  // explicit delete an old link's param rides along in the URL forever.
+  it('strips the retired params on the next URL write', () => {
     render(
-      <MemoryRouter initialEntries={['/?presentationsDatasetsCited=true']}>
-        <BooleanFilterHarness />
+      <MemoryRouter initialEntries={['/?datasetsCited=true&presentationsDatasetsCited=true&publicationsDatasetsCited=false']}>
+        <RetiredParamHarness />
       </MemoryRouter>,
     )
-    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
-    expect(filters.datasetsCited).toBe(true)
-    // The legacy param must NOT leak into the new, independent publications filter.
-    expect(filters.publicationsDatasetsCited).toBeUndefined()
-  })
-
-  it('leaves both undefined when neither param is present', () => {
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <BooleanFilterHarness />
-      </MemoryRouter>,
-    )
-    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
-    expect(filters.datasetsCited).toBeUndefined()
-    expect(filters.publicationsDatasetsCited).toBeUndefined()
-  })
-
-  it('serializes both citation filters to their own params and clears the legacy one', () => {
-    render(
-      <MemoryRouter initialEntries={['/?presentationsDatasetsCited=true']}>
-        <BooleanFilterHarness />
-      </MemoryRouter>,
-    )
-    fireEvent.click(document.getElementById('set-both')!)
+    fireEvent.click(document.getElementById('set-query')!)
 
     const search = document.getElementById('search')!.textContent!
-    expect(search).toContain('datasetsCited=true')
-    expect(search).toContain('publicationsDatasetsCited=false')
-    // The legacy alias is dropped once the canonical params are written.
-    expect(search).not.toContain('presentationsDatasetsCited')
-  })
-
-  it('removes the citation params from the URL when the filters are cleared', () => {
-    render(
-      <MemoryRouter initialEntries={['/?datasetsCited=true&publicationsDatasetsCited=false']}>
-        <BooleanFilterHarness />
-      </MemoryRouter>,
-    )
-    fireEvent.click(document.getElementById('clear-both')!)
-
-    const search = document.getElementById('search')!.textContent!
+    expect(search).toContain('query=brca')
     expect(search).not.toContain('datasetsCited')
+    expect(search).not.toContain('presentationsDatasetsCited')
     expect(search).not.toContain('publicationsDatasetsCited')
   })
 })

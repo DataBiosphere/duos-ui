@@ -131,6 +131,43 @@ describe('makePresentationColumns — Format column', () => {
   })
 })
 
+describe('makePresentationColumns — Access column', () => {
+  it('renders the access text', () => {
+    renderCell('access', 'open')
+    expect(screen.getByText('open')).toBeInTheDocument()
+  })
+
+  it('renders gracefully when access is empty', () => {
+    const { container } = renderCell('access', '')
+    expect(container.textContent?.trim()).toBe('')
+  })
+})
+
+describe('makePresentationColumns — Datasets Cited column', () => {
+  it('reads Yes when the asset cites datasets', () => {
+    renderCell('citation', true, { citation: true })
+    expect(screen.getByText('Yes')).toBeInTheDocument()
+  })
+
+  it('reads No when it does not', () => {
+    renderCell('citation', false, { citation: false })
+    expect(screen.getByText('No')).toBeInTheDocument()
+  })
+
+  // Both transforms default a missing field to false, so the column has to agree.
+  it('reads No when the row carries no citation text', () => {
+    renderCell('citation', false, { citation: false, datasetCitation: '' })
+    expect(screen.getByText('No')).toBeInTheDocument()
+  })
+
+  it('sorts and filters on the rendered Yes/No, not the raw boolean', () => {
+    const column = makePresentationColumns().find(c => c.field === 'citation')!
+    const valueGetter = column.valueGetter as unknown as (value: boolean) => string
+    expect(valueGetter(true)).toBe('Yes')
+    expect(valueGetter(false)).toBe('No')
+  })
+})
+
 describe('makePresentationColumns — Tags column', () => {
   it('renders nothing when tags array is empty', () => {
     const col = makePresentationColumns().find(c => c.field === 'tags')!
