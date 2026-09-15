@@ -1,7 +1,7 @@
 import React from 'react'
 import { Paper, Slide, Button, Typography, Tooltip } from '@mui/material'
 import { LibraryFooterProps } from 'src/types/library'
-import { useApplyForAccessEligibility } from 'src/hooks/useApplyForAccessEligibility'
+import { ACTIVE_RESEARCHER_STATUS_REQUIRED, useApplyForAccessEligibility } from 'src/hooks/useApplyForAccessEligibility'
 
 export const LibraryFooter: React.FC<LibraryFooterProps> = ({
   selectedDatasetIds,
@@ -36,7 +36,7 @@ export const LibraryFooter: React.FC<LibraryFooterProps> = ({
           {selectedStudyIds.length} {studyText}
         </Typography>
         <Tooltip
-          title={hasActiveResearcherStatus ? '' : 'Active Researcher Status is required to apply for data access'}
+          title={hasActiveResearcherStatus ? '' : ACTIVE_RESEARCHER_STATUS_REQUIRED}
           slotProps={{
             tooltip: {
               sx: {
