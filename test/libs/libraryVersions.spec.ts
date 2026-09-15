@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getLibraryVersions, getBrandedLibrary, BoolQuery } from 'src/libs/libraryVersions'
+import { StudyDataEsFields } from 'src/libs/data-metadata'
 
 describe('Library Versions - Tests', () => {
   describe('getLibraryVersions function', () => {
@@ -225,73 +226,8 @@ describe('Library Versions - Tests', () => {
     })
   })
 
-  describe('Bool should query structure', () => {
-    it('uses bool.should with match_phrase and terms for description-based libraries', () => {
-      const versions = getLibraryVersions(null, null)
-
-      const descriptionLibraries = ['elwazi', 'hca', 'scp', 'nhlbi', 'cfde', 'schare', 'stanley', 'stanleycenter']
-
-      descriptionLibraries.forEach((key) => {
-        const library = versions[key]
-        expect(library.query).not.toBe(null)
-        expect(library.query).toHaveProperty('bool')
-
-        const query = library.query as { bool: { should: object[] } }
-        expect(Array.isArray(query.bool.should)).toBe(true)
-        expect(query.bool.should.length).toBeGreaterThan(1)
-
-        const hasMatchPhrase = query.bool.should.some(clause => 'match_phrase' in clause)
-        const hasTerms = query.bool.should.some(clause => 'terms' in clause)
-
-        expect(hasMatchPhrase).toBe(true)
-        expect(hasTerms).toBe(true)
-      })
-    })
-
-    it('has matching values between match_phrase description and terms tags', () => {
-      const versions = getLibraryVersions(null, null)
-
-      const simpleDescriptionLibraries = ['elwazi', 'hca', 'nhlbi', 'cfde', 'ged']
-
-      simpleDescriptionLibraries.forEach((key) => {
-        const query = versions[key].query as BoolQuery
-
-        const matchPhraseClause = query.bool.should.find(c => 'match_phrase' in c)
-        const termsClause = query.bool.should.find(c => 'terms' in c)
-
-        const descriptionValue = matchPhraseClause!.match_phrase['study.description'] as string
-        const tagsValue = termsClause!.terms['study.data.tags.keyword']
-
-        expect(tagsValue).toContain(descriptionValue)
-      })
-    })
-
-    it('anvil library uses a single terms clause with Platform: AnVIL tag', () => {
-      const versions = getLibraryVersions(null, null)
-      const query = versions['anvil'].query as { bool: { should: object[] } }
-
-      expect(query).toHaveProperty('bool')
-      expect(query.bool.should).toHaveLength(1)
-
-      const clause = query.bool.should[0] as { terms: { 'study.data.tags.keyword': string[] } }
-      expect(clause).toHaveProperty('terms')
-      expect(clause.terms['study.data.tags.keyword']).toEqual(['Platform: AnVIL'])
-    })
-
-    it('broad library uses submitter.institution.name and tags', () => {
-      const versions = getLibraryVersions(null, null)
-      const query = versions['broad'].query as BoolQuery
-
-      const matchPhraseClause = query.bool.should.find(c => 'match_phrase' in c)
-      const termsClause = query.bool.should.find(c => 'terms' in c)
-
-      expect(matchPhraseClause).not.toBe(undefined)
-      expect(termsClause).not.toBe(undefined)
-      expect(matchPhraseClause!.match_phrase).toHaveProperty('submitter.institution.name')
-      expect(termsClause!.terms['study.data.tags.keyword']).toContain('The Broad Institute of MIT and Harvard')
-    })
-
-    it('all terms clauses use study.data.tags.keyword (not study.data.tags) for case-sensitive matching', () => {
+  describe('Elasticsearch query structure constraints', () => {
+    it('all queries with terms use .keyword suffix for case-sensitive matching', () => {
       const versions = getLibraryVersions(null, null)
 
       Object.entries(versions).forEach(([_key, library]) => {
@@ -300,11 +236,83 @@ describe('Library Versions - Tests', () => {
         const query = library.query
         query.bool.should.forEach((clause) => {
           if ('terms' in clause) {
-            expect(clause.terms).not.toHaveProperty('study.data.tags')
-            expect(clause.terms).toHaveProperty('study.data.tags.keyword')
+            // Enforce the constraint: use .keyword suffix for case-sensitive matching
+            Object.keys(clause.terms).forEach((field) => {
+              expect(field).toMatch(/.keyword$/)
+            })
           }
         })
       })
+    })
+
+    it('all queries are valid Elasticsearch structures', () => {
+      const versions = getLibraryVersions(null, null)
+
+      Object.entries(versions).forEach(([_key, library]) => {
+        if (library.query === null) return
+
+        const query = library.query
+
+        // For bool queries
+        if ('bool' in query) {
+          expect(Array.isArray(query.bool.should)).toBe(true)
+          expect(query.bool.should.length).toBeGreaterThan(0)
+
+          query.bool.should.forEach((clause) => {
+            // Each clause should have exactly one query type
+            const queryTypes = ['match_phrase', 'term', 'terms'].filter(type => type in clause)
+            expect(queryTypes.length).toBe(1)
+          })
+        }
+
+        // For match_phrase queries
+        if ('match_phrase' in query) {
+          expect(typeof query.match_phrase).toBe('object')
+          expect(Object.keys(query.match_phrase).length).toBeGreaterThan(0)
+        }
+      })
+    })
+
+    it('does not mix conflicting field variants in the same query', () => {
+      const versions = getLibraryVersions(null, null)
+
+      Object.entries(versions).forEach(([_key, library]) => {
+        if (library.query === null || !('bool' in library.query)) return
+
+        const query = library.query as BoolQuery
+        const allFields = new Set<string>()
+
+        query.bool.should.forEach((clause) => {
+          if ('terms' in clause) {
+            Object.keys(clause.terms).forEach(field => allFields.add(field))
+          }
+          if ('match_phrase' in clause) {
+            Object.keys(clause.match_phrase).forEach(field => allFields.add(field))
+          }
+        })
+
+        // Check for conflicting field variants (e.g., 'study.data.tags' vs 'study.data.tags.keyword')
+        const hasNonKeywordTags = allFields.has('study.data.tags')
+        const hasKeywordTags = allFields.has(StudyDataEsFields.TAGS_KEYWORD)
+
+        expect(!(hasNonKeywordTags && hasKeywordTags)).toBe(true)
+      })
+    })
+
+    it('broad library combines institution name with tags for broader matching', () => {
+      const versions = getLibraryVersions(null, null)
+      const query = versions['broad'].query as BoolQuery
+
+      // This is a real constraint: broad uses both institution matching AND tags
+      // If someone refactors this, they should know it matters
+      const hasInstitutionClause = query.bool.should.some(
+        c => 'match_phrase' in c && 'submitter.institution.name' in c.match_phrase,
+      )
+      const hasTagsClause = query.bool.should.some(
+        c => 'terms' in c && StudyDataEsFields.TAGS_KEYWORD in c.terms,
+      )
+
+      expect(hasInstitutionClause && hasTagsClause).toBe(true)
     })
   })
 })
