@@ -3,6 +3,7 @@ import '@testing-library/jest-dom/vitest'
 import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router'
+import { renderWithRouter } from '../test-utils'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { AssetType, FilterState } from 'src/types/library'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
@@ -320,11 +321,7 @@ describe('useLibraryUrlState — retired datasets-cited params', () => {
   it.each(['datasetsCited', 'presentationsDatasetsCited', 'publicationsDatasetsCited'])(
     'no longer parses %s into filter state',
     (param) => {
-      render(
-        <MemoryRouter initialEntries={[`/?${param}=true`]}>
-          <RetiredParamHarness />
-        </MemoryRouter>,
-      )
+      renderWithRouter(<RetiredParamHarness />, { route: `/?${param}=true` })
       const filters = JSON.parse(document.getElementById('filters')!.textContent!)
       expect(filters).not.toHaveProperty(param)
     },
@@ -333,11 +330,7 @@ describe('useLibraryUrlState — retired datasets-cited params', () => {
   // updateState serializes over a copy of the current params, so without an
   // explicit delete an old link's param rides along in the URL forever.
   it('strips the retired params on the next URL write', () => {
-    render(
-      <MemoryRouter initialEntries={['/?datasetsCited=true&presentationsDatasetsCited=true&publicationsDatasetsCited=false']}>
-        <RetiredParamHarness />
-      </MemoryRouter>,
-    )
+    renderWithRouter(<RetiredParamHarness />, { route: '/?datasetsCited=true&presentationsDatasetsCited=true&publicationsDatasetsCited=false' })
     fireEvent.click(document.getElementById('set-query')!)
 
     const search = document.getElementById('search')!.textContent!

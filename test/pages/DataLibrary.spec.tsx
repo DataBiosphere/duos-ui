@@ -467,10 +467,11 @@ describe('DataLibrary', () => {
     expect(screen.getByText('Nested Non-Match Presentation')).toBeInTheDocument()
 
     expect(screen.getByText('Datasets Cited')).toBeInTheDocument()
-    const citations = screen.getAllByRole('gridcell')
-      .filter(cell => cell.getAttribute('data-field') === 'citation')
-      .map(cell => cell.textContent)
-    expect(citations).toEqual(['Yes', 'No'])
+
+    const rowFor = (title: string) =>
+      screen.getAllByRole('row').find(row => row.textContent?.includes(title))!
+    expect(within(rowFor('Nested Match Presentation')).getByText('Yes')).toBeInTheDocument()
+    expect(within(rowFor('Nested Non-Match Presentation')).getByText('No')).toBeInTheDocument()
   })
 
   it('shows footer when a dataset is selected', async () => {
