@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Link, useParams, useNavigate } from 'react-router'
-import { Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Alert, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { Theme } from 'src/libs/theme'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
@@ -145,13 +145,17 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             />
           </StudyPageSection>
           <StudyPageSection id="datasets" heading="Datasets">
-            {errorMessage && <div role="alert">Unable to load datasets: {errorMessage}</div>}
             {studyWideIds.isError && (
-              <div role="alert">
-                Unable to select every controlled dataset automatically. Select datasets manually before applying for access.
-              </div>
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                Unable to select every controlled dataset automatically. Select datasets manually
+                before applying for access.
+              </Alert>
             )}
-            <div style={{ height: datasetGridHeight, marginTop: errorMessage ? 20 : 0 }}>
+            {/* Deliberately alongside the grid rather than in place of it: the grid renders its
+                own empty state, and a reader is better served seeing the table with a message
+                above it than a bare line of error text where the table was. */}
+            {errorMessage && <Alert severity="error" sx={{ mb: 2 }}>Unable to load datasets: {errorMessage}</Alert>}
+            <div style={{ height: datasetGridHeight }}>
               <LibraryDataGrid
                 assetType={AssetType.DATASETS}
                 data={datasets}
