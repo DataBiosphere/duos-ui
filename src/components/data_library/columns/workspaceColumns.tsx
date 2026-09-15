@@ -1,9 +1,10 @@
 import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
-import { Link, Chip, Box, Tooltip } from '@mui/material'
+import { Link, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router'
 import { WorkspaceAsset } from 'src/types/library'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
+import { chipListColumn, truncatedTextColumn } from 'src/components/data_library/columns/sharedColumns'
 
 /**
  * Column definitions for the Workspaces view
@@ -42,27 +43,7 @@ export const makeWorkspaceColumns = (): GridColDef<WorkspaceAsset>[] => [
       </Link>
     ),
   },
-  {
-    field: 'platform',
-    headerName: 'Platform',
-    width: 150,
-    renderCell: (params) => {
-      const text = params.value || ''
-      return (
-        <Tooltip title={text} placement="top">
-          <Box
-            sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {text}
-          </Box>
-        </Tooltip>
-      )
-    },
-  },
+  truncatedTextColumn<WorkspaceAsset>('platform', 'Platform', 150),
   {
     field: 'url',
     headerName: 'URL',
@@ -106,73 +87,7 @@ export const makeWorkspaceColumns = (): GridColDef<WorkspaceAsset>[] => [
       )
     },
   },
-  {
-    field: 'tools',
-    headerName: 'Tools',
-    flex: 1,
-    minWidth: 150,
-    sortable: false,
-    valueGetter: (_value, row) => (row.tools || []).join(', '),
-    renderCell: (params) => {
-      const tools = params.row.tools || []
-      if (tools.length === 0) return null
-      return (
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-          {tools.slice(0, 3).map((tool, i) => (
-            <Chip key={i} label={tool} size="small" variant="outlined" />
-          ))}
-          {tools.length > 3 && (
-            <Tooltip title={tools.slice(3).join(', ')}>
-              <Chip label={`+${tools.length - 3}`} size="small" variant="outlined" />
-            </Tooltip>
-          )}
-        </Box>
-      )
-    },
-  },
-  {
-    field: 'access',
-    headerName: 'Access',
-    width: 120,
-    renderCell: (params) => {
-      const text = params.value || ''
-      return (
-        <Tooltip title={text} placement="top">
-          <Box
-            sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {text}
-          </Box>
-        </Tooltip>
-      )
-    },
-  },
-  {
-    field: 'tags',
-    headerName: 'Tags',
-    flex: 1,
-    minWidth: 150,
-    sortable: false,
-    valueGetter: (_value, row) => (row.tags || []).join(', '),
-    renderCell: (params) => {
-      const tags = params.row.tags || []
-      if (tags.length === 0) return null
-      return (
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-          {tags.slice(0, 3).map((tag, i) => (
-            <Chip key={i} label={tag} size="small" variant="outlined" />
-          ))}
-          {tags.length > 3 && (
-            <Tooltip title={tags.slice(3).join(', ')}>
-              <Chip label={`+${tags.length - 3}`} size="small" variant="outlined" />
-            </Tooltip>
-          )}
-        </Box>
-      )
-    },
-  },
+  chipListColumn<WorkspaceAsset>('tools', 'Tools', row => row.tools || [], 150),
+  truncatedTextColumn<WorkspaceAsset>('access', 'Access', 120),
+  chipListColumn<WorkspaceAsset>('tags', 'Tags', row => row.tags || [], 150),
 ]

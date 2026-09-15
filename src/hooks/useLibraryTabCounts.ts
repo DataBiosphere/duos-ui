@@ -46,31 +46,35 @@ const buildTabCountsQuery = (
  * even while a refetch is in flight and this hook is serving the previous
  * response as placeholder data.
  */
+const tabCountsQueryOptions = (
+  libraryConfig: LibraryVersionNew,
+  filters: FilterState,
+  queryTerm: string,
+) => ({
+  queryKey: [
+    LIBRARY_TAB_COUNTS_QUERY_KEY,
+    libraryConfig.key,
+    filters,
+    queryTerm,
+  ],
+  queryFn: async (): Promise<ElasticsearchResponse> => {
+    const { queryChunks, filterQuery } = buildCommonQueryClauses(
+      libraryConfig,
+      filters,
+      queryTerm,
+      ALL_SEARCH_FIELDS,
+    )
+    const query = buildTabCountsQuery(queryChunks, filterQuery, libraryConfig.showAllControlled)
+    return DataSet.searchDatasetIndexV2(query)
+  },
+  staleTime: 5 * 60 * 1000, // 5 minutes
+  retry: 1,
+  // Keep the previous counts visible while a new query loads to avoid flicker.
+  placeholderData: (previousData?: ElasticsearchResponse) => previousData,
+})
+
 export const useLibraryTabCounts = (
   libraryConfig: LibraryVersionNew,
   filters: FilterState,
   queryTerm: string,
-) => {
-  return useQuery({
-    queryKey: [
-      LIBRARY_TAB_COUNTS_QUERY_KEY,
-      libraryConfig.key,
-      filters,
-      queryTerm,
-    ],
-    queryFn: async (): Promise<ElasticsearchResponse> => {
-      const { queryChunks, filterQuery } = buildCommonQueryClauses(
-        libraryConfig,
-        filters,
-        queryTerm,
-        ALL_SEARCH_FIELDS,
-      )
-      const query = buildTabCountsQuery(queryChunks, filterQuery, libraryConfig.showAllControlled)
-      return DataSet.searchDatasetIndexV2(query)
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1,
-    // Keep the previous counts visible while a new query loads to avoid flicker.
-    placeholderData: previousData => previousData,
-  })
-}
+) => useQuery(tabCountsQueryOptions(libraryConfig, filters, queryTerm))
