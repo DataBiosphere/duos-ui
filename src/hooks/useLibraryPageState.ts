@@ -208,7 +208,8 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
         : []) as T[]
     }
 
-    const workspaceItems = fullCorpusItems<{ tools?: string[], platform?: string }>(AssetType.WORKSPACES)
+    const modelItems = fullCorpusItems<{ format?: string, license?: string, cloud?: string[], tags?: string[] }>(AssetType.MODELS)
+    const workspaceItems = fullCorpusItems<{ tools?: string[], platform?: string, cloud?: string[], access?: string }>(AssetType.WORKSPACES)
     const clinicalTrialItems = fullCorpusItems<{ registry?: string }>(AssetType.CLINICAL_TRIALS)
     const biospecimenItems = fullCorpusItems<{ optionalDataUse?: string }>(AssetType.BIOSPECIMENS)
 
@@ -234,6 +235,12 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
         .sort((a, b) => a.label.localeCompare(b.label)),
       workspaceTools: uniqueValues(workspaceItems.flatMap(item => item.tools || [])),
       workspacePlatform: uniqueValues(workspaceItems.map(item => item.platform)),
+      workspaceCloud: uniqueValues(workspaceItems.flatMap(item => item.cloud || [])),
+      workspaceAccess: uniqueValues(workspaceItems.map(item => item.access)),
+      modelFormat: uniqueValues(modelItems.map(item => item.format)),
+      modelLicense: uniqueValues(modelItems.map(item => item.license)),
+      modelCloud: uniqueValues(modelItems.flatMap(item => item.cloud || [])),
+      modelTags: uniqueValues(modelItems.flatMap(item => item.tags || [])),
       clinicalTrialStatus: clinicalTrialStatusSelectOptions.map(o => ({ value: o.key, label: o.displayText })),
       clinicalTrialPhase: clinicalTrialPhaseSelectOptions.map(o => ({ value: o.key, label: o.displayText })),
       clinicalTrialInterventionType: clinicalTrialInterventionSelectOptions.map(o => ({ value: o.key, label: o.displayText })),

@@ -17,6 +17,12 @@ const availableFilters: AvailableFilters = {
   dac: [],
   workspaceTools: [],
   workspacePlatform: [],
+  modelFormat: [],
+  modelLicense: [],
+  modelCloud: [],
+  modelTags: [],
+  workspaceCloud: [],
+  workspaceAccess: [],
   clinicalTrialStatus: [],
   clinicalTrialPhase: [],
   clinicalTrialInterventionType: [],
@@ -46,9 +52,14 @@ describe('filterRegistry', () => {
     expect(publicationFilters.map(section => section.key)).toEqual(['publicationsDatasetsCited'])
   })
 
-  it('returns no visible filters for models', () => {
+  it('returns the model-specific filters', () => {
     const modelFilters = getFilterSectionsForAsset(AssetType.MODELS, availableFilters)
-    expect(modelFilters.map(section => section.key)).toEqual([])
+    expect(modelFilters.map(section => section.key)).toEqual(['modelFormat', 'modelLicense', 'modelCloud', 'modelTags'])
+  })
+
+  it('returns the workspace-specific filters', () => {
+    const workspaceFilters = getFilterSectionsForAsset(AssetType.WORKSPACES, availableFilters)
+    expect(workspaceFilters.map(section => section.key)).toEqual(['workspaceTools', 'workspacePlatform', 'workspaceCloud', 'workspaceAccess'])
   })
 
   it('returns presentation-specific datasets cited filter', () => {

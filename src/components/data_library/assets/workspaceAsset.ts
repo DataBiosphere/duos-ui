@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, WorkspaceStudyAggregationResponse, QueryClause } from 'src/types/elastic'
 import { FilterState, WorkspaceAsset, PaginationState, SortState } from 'src/types/library'
 import { makeWorkspaceColumns } from 'src/components/data_library/columns/workspaceColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, toStringArray } from 'src/components/data_library/assets/definition'
 
 const includesIgnoreCase = (source: string | undefined, values: string[]) => {
   if (values.length === 0) {
@@ -29,7 +29,15 @@ const matchesWorkspaceFilters = (workspace: WorkspaceAsset, filters?: FilterStat
     return false
   }
 
-  return includesIgnoreCase(workspace.platform, filters.workspacePlatform)
+  if (!includesIgnoreCase(workspace.platform, filters.workspacePlatform)) {
+    return false
+  }
+
+  if (filters.workspaceCloud.length > 0 && !(workspace.cloud || []).some(cloud => filters.workspaceCloud.includes(cloud))) {
+    return false
+  }
+
+  return filters.workspaceAccess.length === 0 || filters.workspaceAccess.includes(workspace.access || '')
 }
 
 export const workspaceAsset: AssetDefinition = {
@@ -89,9 +97,10 @@ export const workspaceAsset: AssetDefinition = {
           platform: workspace.platform || '',
           url: workspace.url || '',
           description: workspace.description || '',
-          tools: workspace.tools || [],
+          tools: toStringArray(workspace.tools),
+          cloud: toStringArray(workspace.cloud),
           access: workspace.access || '',
-          tags: workspace.tags || [],
+          tags: toStringArray(workspace.tags),
         }
 
         if (matchesWorkspaceFilters(row, filters)) {
