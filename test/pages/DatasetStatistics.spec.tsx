@@ -2,7 +2,8 @@ import '@testing-library/jest-dom/vitest'
 import React from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { MemoryRouter, Routes, Route } from 'react-router'
+import { MemoryRouter, Routes, Route, useNavigate } from 'react-router'
+import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DatasetStatistics from 'src/pages/DatasetStatistics'
 import { DataSet } from 'src/libs/ajax/DataSet'
@@ -315,6 +316,52 @@ describe('DatasetStatistics', () => {
     ).not.toBeInTheDocument()
     // The rest of the page is unaffected
     expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeTruthy()
+  })
+
+  /**
+   * The page is not remounted between datasets: the route parameter changes and the effect
+   * re-runs against the same component state. Without a reset, the previous dataset's request
+   * history stayed on screen beside the restriction notice, and returning to a readable dataset
+   * kept the notice.
+   */
+  it('does not carry one dataset\'s history or restriction to the next', async () => {
+    const forbidden = Object.assign(new Error('User does not have permission'), {
+      response: { status: 403 },
+    })
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDatasetTerm])
+    vi.mocked(DAC.fetchDACbotRules).mockResolvedValue([] as never)
+    vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds)
+      .mockResolvedValue(mockEmptyTdrResponse as unknown as Awaited<ReturnType<typeof TerraDataRepo.listSnapshotsByDatasetIds>>)
+    // Readable first, then refused
+    vi.mocked(DatasetMetrics.getDatasetStats)
+      .mockResolvedValueOnce(mockDarsResponse)
+      .mockRejectedValue(forbidden)
+
+    // A real in-app navigation: MemoryRouter reads initialEntries only on mount, so changing
+    // the route has to go through the router for the component to stay mounted.
+    const GoToNextDataset = () => {
+      const navigate = useNavigate()
+      return <button onClick={() => navigate('/dataset/DUOS-000002')}>next dataset</button>
+    }
+    const user = userEvent.setup()
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/dataset/DUOS-000001']}>
+          <GoToNextDataset />
+          <Routes>
+            <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    expect(await screen.findByText('DAR-001')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'next dataset' }))
+
+    expect(await screen.findByRole('status')).toHaveTextContent('has not been published')
+    // The first dataset's history is gone rather than sitting beside the notice
+    expect(screen.queryByText('DAR-001')).not.toBeInTheDocument()
   })
 
   it('still reports a genuine server failure as an error', async () => {
