@@ -40,13 +40,19 @@ const EMPTY_PAGE = {
 type StudySortModel = Array<{ field: string, sort: SortOrder | null }>
 
 /**
- * An index value only when it is actually populated. The index document can exist while carrying
- * '' or [] for a field it never filled, and `??` alone falls through on null/undefined only - so
- * the empty value won and suppressed exactly the relational value the fallback exists to supply.
- * One length check covers both, which a bare `||` would not: an empty array is truthy.
+ * A value only when it is actually populated, and undefined otherwise.
+ *
+ * These payloads are external data: their types assert string / string[], but a field the source
+ * never filled arrives as '', [] or null regardless. `??` alone falls through on null and
+ * undefined only, so '' and [] won and suppressed the very value the fallback exists to supply -
+ * while a bare `||` would not have helped either, an empty array being truthy. `== null` covers
+ * null and undefined together, and has to come first: reading .length off null throws.
+ *
+ * Applied to both sides of the fallback so the result is undefined rather than null when neither
+ * is populated, which matters for consumers whose `= []` default only fires on undefined.
  */
-const populated = <T extends string | unknown[]>(value: T | undefined): T | undefined =>
-  value === undefined || value.length === 0 ? undefined : value
+const populated = <T extends string | unknown[]>(value: T | null | undefined): T | undefined =>
+  value == null || value.length === 0 ? undefined : value
 
 const getErrorMessage = (error: unknown): string | undefined => {
   if (error instanceof Error) return error.message
@@ -76,10 +82,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   // Dataset search is not a reliable source of study-level metadata: a valid study may have no
   // datasets (and therefore no matching index document). The relational response is already
   // loaded for PI details, so use it as the fallback for the fields both payloads carry.
-  const studyName = populated(study?.studyName) ?? piDetails?.name
-  const studyDescription = populated(study?.description) ?? piDetails?.description
-  const studyDataTypes = populated(study?.dataTypes) ?? piDetails?.dataTypes
-  const piName = populated(study?.piName) ?? piDetails?.piName
+  const studyName = populated(study?.studyName) ?? populated(piDetails?.name)
+  const studyDescription = populated(study?.description) ?? populated(piDetails?.description)
+  const studyDataTypes = populated(study?.dataTypes) ?? populated(piDetails?.dataTypes)
+  const piName = populated(study?.piName) ?? populated(piDetails?.piName)
   const similarStudies = useSimilarStudies(studyId)
   const frequentlyRequestedWith = useFrequentlyRequestedWithStudies(studyId)
   const selectedStudyIds = selectedDatasets.length > 0 && study
