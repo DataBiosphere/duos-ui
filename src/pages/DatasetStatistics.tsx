@@ -7,7 +7,7 @@ import { formatDate, Notifications } from 'src/libs/utils'
 import { Styles, Theme } from 'src/libs/theme'
 import { ReadMore } from 'src/components/ReadMore'
 import { DatasetExportButton } from 'src/components/data_search/DatasetExportButton'
-import { Button } from '@mui/material'
+import { Button, Tooltip } from '@mui/material'
 import {
   DatasetStatisticsDar,
   DatasetTerm,
@@ -21,6 +21,9 @@ import { usePageTitle } from 'src/hooks/usePageTitle'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 import { intersection } from 'src/utils/NodashUtil'
 import InstantApprovalBadge from 'src/components/data_library/InstantApprovalBadge'
+import {
+  ACTIVE_RESEARCHER_STATUS_REQUIRED, hasActiveResearcherStatus,
+} from 'src/hooks/useApplyForAccessEligibility'
 
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />
 
@@ -161,6 +164,8 @@ export default function DatasetStatistics() {
     fetchExportableSnapshots()
   }, [datasetIdentifier])
 
+  const isActiveResearcher = hasActiveResearcherStatus()
+
   const accessInstructions = () => {
     const accessManagement = datasetTerm?.accessManagement as AccessManagement
     const locationUrl = datasetTerm?.url
@@ -168,9 +173,20 @@ export default function DatasetStatistics() {
     switch (accessManagement) {
       case AccessManagement.CONTROLLED:
         return (
-          <Button variant="contained" onClick={applyForAccess} style={{ fontSize: '12px' }}>
-            Apply for Access
-          </Button>
+          // Gated on the same predicate as every other apply-for-access entry point. This route
+          // is public, so it is reachable by a visitor who holds no card at all.
+          <Tooltip title={isActiveResearcher ? '' : ACTIVE_RESEARCHER_STATUS_REQUIRED}>
+            <span>
+              <Button
+                variant="contained"
+                onClick={applyForAccess}
+                style={{ fontSize: '12px' }}
+                disabled={!isActiveResearcher}
+              >
+                Apply for Access
+              </Button>
+            </span>
+          </Tooltip>
         )
       case AccessManagement.OPEN:
         return (
