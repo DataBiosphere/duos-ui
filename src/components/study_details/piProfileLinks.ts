@@ -17,14 +17,15 @@ interface PiProfileFields {
 // A bare identifier is expanded to its orcid.org URL; anything already absolute is validated
 // like every other study-submitted URL rather than trusted.
 const orcidHref = (orcid: string): string | undefined => {
-  // Trim before deciding which of the two this is. Checked untrimmed, a padded URL failed the
+  // Normalize before deciding which of the two this is. Checked raw, a padded URL failed the
   // startsWith test and was pasted onto the orcid.org base - a link to a nonsense path - and a
   // whitespace-only value became a link to the ORCID home page once validateHttpUrl trimmed it.
-  const trimmed = orcid.trim()
-  if (!trimmed) {
+  // Leading slashes go too, so "/0000-0002-..." does not yield a doubled path.
+  const normalized = orcid.trim().replace(/^\/+/, '')
+  if (!normalized) {
     return undefined
   }
-  return validateHttpUrl(trimmed.startsWith('http') ? trimmed : `https://orcid.org/${trimmed}`)
+  return validateHttpUrl(normalized.startsWith('http') ? normalized : `https://orcid.org/${normalized}`)
 }
 
 /**
