@@ -52,6 +52,9 @@ const updateUrlState = vi.fn()
 // The counts query and the visible tab's option corpus are the same query with
 // different filter sets, so the mock answers from one function of the filters.
 const mockCorpus = (responseFor: (filters: FilterState) => unknown) => {
+  // Cleared, not just re-stubbed: one test reads `mock.calls` to check which
+  // filter sets were queried, and calls accumulate across tests otherwise.
+  vi.mocked(useLibraryTabCounts).mockClear()
   vi.mocked(useLibraryTabCounts).mockImplementation((_config, filters: FilterState) => ({
     data: responseFor(filters),
     isFetching: false,
@@ -411,17 +414,26 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     expect(platform?.options?.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
   })
 
-  // Each filter set is a new query key that starts empty, so without holding the
-  // last answer the panel blanks on every filter edit.
-  it('keeps the previous options while the next corpus loads', () => {
-    setup(AssetType.WORKSPACES)
-    const { result, rerender } = renderHook(() => useLibraryPageState(libraryConfig))
-    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
-
-    // The corpus for the cleared set is still in flight; the counts query,
-    // keyed on the full filter set, already has its answer.
-    mockCorpus(filters => (filters.workspacePlatform.length === 0 ? undefined : responseWithBucket))
+  // The cleared-set corpus is a distinct query key, so it starts empty on the
+  // first render after a filter edit. Options fall back to the counts response
+  // until it lands, which is narrowed by that very filter — so the list is
+  // briefly short rather than blank, and widens once the corpus arrives.
+  it('falls back to the counts response until the cleared-set corpus arrives', () => {
+    const terraOnly = {
+      key: 1,
+      study_details: {
+        hits: { hits: [{ _source: { study: { studyId: 1, studyName: 'Study 1', assets: { workspaces: [{ workspaceId: 'w1', platform: 'Terra' }] } } } }] },
+      },
+    }
+    mockCorpus(filters => (filters.workspacePlatform.length === 0
+      ? undefined
+      : { aggregations: { total_studies: { value: 1 }, datasets_count: { doc_count: 0 }, studies: { buckets: [terraOnly] } } }))
     setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['Terra'] })
+    const { result, rerender } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['Terra'])
+
+    mockCorpus(() => responseWithBucket)
     rerender()
 
     expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
