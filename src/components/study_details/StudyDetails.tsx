@@ -10,9 +10,9 @@ import LibraryFooter from 'src/components/data_library/LibraryFooter'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { AssetType, SortOrder, SortState } from 'src/types/library'
 import {
+  usePiDetails,
   useStudyDatasets,
   useStudyExportableDatasets,
-  useStudyRecord,
   useStudySelectableDatasetIds,
 } from 'src/hooks/useStudyDetailsData'
 import { TocProvider, TableOfContents } from 'src/components/study_details/TableOfContents'
@@ -20,6 +20,8 @@ import StudyPageSection from 'src/components/study_details/StudyPageSection'
 import StudySidebar from 'src/components/study_details/StudySidebar'
 import StudyTitleBadges from 'src/components/study_details/StudyTitleBadges'
 import StudyInfoTable from 'src/components/study_details/StudyInfoTable'
+import PiExternalProfileIcons from 'src/components/study_details/PiExternalProfileIcons'
+import { getPiProfileLinks } from 'src/components/study_details/piProfileLinks'
 
 const INITIAL_PAGINATION = { page: 0, pageSize: 25 }
 const EMPTY_PAGE = {
@@ -30,6 +32,21 @@ const EMPTY_PAGE = {
 }
 
 type StudySortModel = Array<{ field: string, sort: SortOrder | null }>
+
+/**
+ * A value only when it is actually populated, and undefined otherwise.
+ *
+ * These payloads are external data: their types assert string / string[], but a field the source
+ * never filled arrives as '', [] or null regardless. `??` alone falls through on null and
+ * undefined only, so '' and [] won and suppressed the very value the fallback exists to supply -
+ * while a bare `||` would not have helped either, an empty array being truthy. `== null` covers
+ * null and undefined together, and has to come first: reading .length off null throws.
+ *
+ * Applied to both sides of the fallback so the result is undefined rather than null when neither
+ * is populated, which matters for consumers whose `= []` default only fires on undefined.
+ */
+const populated = <T extends string | unknown[]>(value: T | null | undefined): T | undefined =>
+  value == null || value.length === 0 ? undefined : value
 
 const getErrorMessage = (error: unknown): string | undefined => {
   if (error instanceof Error) return error.message
@@ -55,15 +72,23 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const study = data.study
   const participantCount = data.participantCount
   const { data: exportableDatasets } = useStudyExportableDatasets(studyId, datasets)
-  const { data: studyRecord } = useStudyRecord(studyId)
-  const studyName = study?.studyName ?? studyRecord?.name
-  const studyDescription = study?.description ?? studyRecord?.description
-  const studyDataTypes = study?.dataTypes ?? studyRecord?.dataTypes
-  const piName = study?.piName ?? studyRecord?.piName
+  const { data: piDetails } = usePiDetails(studyId)
+  // Dataset search is not a reliable source of study-level metadata: a valid study may have no
+  // datasets (and therefore no matching index document). The relational response is already
+  // loaded for PI details, so use it as the fallback for the fields both payloads carry.
+  const studyName = populated(study?.studyName) ?? populated(piDetails?.name)
+  const studyDescription = populated(study?.description) ?? populated(piDetails?.description)
+  const studyDataTypes = populated(study?.dataTypes) ?? populated(piDetails?.dataTypes)
+  const piName = populated(study?.piName) ?? populated(piDetails?.piName)
   const selectedStudyIds = selectedDatasets.length > 0 && study
     ? [study.studyId]
     : []
   const errorMessage = getErrorMessage(error)
+  const piProfileLinks = getPiProfileLinks({
+    orcid: piDetails?.piOrcid,
+    linkedinUrl: piDetails?.piLinkedinUrl,
+    websiteUrl: piDetails?.piWebsiteUrl,
+  })
   const theme = useTheme()
   const isNarrowViewport = useMediaQuery(theme.breakpoints.down('md'))
   // Header row + one row per dataset (up to a full page) + pagination footer, so a study with
@@ -139,7 +164,21 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
                 { label: 'Participants', value: participantCount },
                 { label: 'Phenotype', value: study?.phenotype },
                 { label: 'Species', value: study?.species },
-                { label: 'PI Name', value: piName },
+                {
+                  label: 'PI Name',
+                  // The profile links live in this row, and StudyInfoTable drops rows with a
+                  // falsy value, so the row's presence can't hinge on piName alone — the search
+                  // index sometimes has none for a study whose PI profile links are populated.
+                  value: (piName || piProfileLinks.length > 0)
+                    ? (
+                        <>
+                          {piName}
+                          <PiExternalProfileIcons links={piProfileLinks} />
+                        </>
+                      )
+                    : undefined,
+                },
+                { label: 'PI Institution', value: piDetails?.piInstitution?.name },
                 { label: 'Data Custodian', value: study?.dataCustodianEmail?.join(', ') },
               ]}
             />

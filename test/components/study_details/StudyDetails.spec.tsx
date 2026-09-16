@@ -29,7 +29,13 @@ vi.mock('src/libs/ajax/TerraDataRepo', () => ({
 vi.mock('src/libs/ajax/DataSet', () => ({
   DataSet: {
     searchDatasetIndexV2: vi.fn(),
-    getStudyById: vi.fn().mockResolvedValue({}),
+  },
+}))
+
+vi.mock('src/libs/ajax/Study', () => ({
+  Study: {
+    getStudyNames: vi.fn().mockResolvedValue([]),
+    getById: vi.fn().mockResolvedValue({}),
   },
 }))
 
@@ -38,6 +44,7 @@ vi.mock('src/utils/accessUtils', () => ({
 }))
 
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { Study } from 'src/libs/ajax/Study'
 
 const datasets = [
   {
@@ -317,7 +324,7 @@ describe('Study details test', () => {
 
   it('shows relational study metadata when the study has no dataset search documents', async () => {
     vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValueOnce(makeSearchResponse([]) as never)
-    vi.mocked(DataSet.getStudyById).mockResolvedValueOnce({
+    vi.mocked(Study.getById).mockResolvedValueOnce({
       studyId: 1,
       name: 'Study without datasets',
       description: 'Study metadata from the relational store',
@@ -611,5 +618,95 @@ describe('Study details test', () => {
     await screen.findByText(/1 dataset selected from 1 study/i)
 
     expect(screen.getByRole('button', { name: 'Request Now' })).not.toBeDisabled()
+  })
+  it('shows the PI profile links even when the search index has no PI name', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      piOrcid: '0000-0001-2345-6789',
+    } as never)
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
+      makeSearchResponse(datasets.map(dataset => ({ ...dataset, study: { ...dataset.study, piName: '' } }))) as never,
+    )
+    mountComponent()
+
+    expect(await screen.findByRole('link', { name: 'ORCID profile' })).toBeInTheDocument()
+    expect(screen.getByText('PI Name')).toBeInTheDocument()
+  })
+
+  /**
+   * The index document exists but carries '' / [] for fields it never populated. Under `??` those
+   * empty values won, so the relational payload - the whole reason the fallback is there - was
+   * suppressed exactly when it was needed.
+   */
+  it('falls back to the relational payload when the index carries empty values', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      piName: 'Ada Lovelace',
+      dataTypes: ['Genomic'],
+    } as never)
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
+      makeSearchResponse(datasets.map(dataset => ({
+        ...dataset,
+        study: { ...dataset.study, piName: '', dataTypes: [] },
+      }))) as never,
+    )
+    mountComponent()
+
+    expect(await screen.findByText('Ada Lovelace')).toBeInTheDocument()
+    expect(screen.getByText('Genomic')).toBeInTheDocument()
+  })
+
+  /**
+   * The index document is external data: its types assert string[] but a field it never filled
+   * can arrive as null. Anything that reads .length off it, or hands it to a `= []` default that
+   * only fires on undefined, blanks the whole page.
+   */
+  it('survives an index document whose fields are null', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({ piName: null, dataTypes: null } as never)
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
+      // Cast because the declared types forbid null - which is the point: the index supplies it
+      // anyway, and the types are an assertion about external data rather than a guarantee.
+      makeSearchResponse(datasets.map(dataset => ({
+        ...dataset,
+        study: { ...dataset.study, piName: null, dataTypes: null },
+      })) as never) as never,
+    )
+    mountComponent()
+
+    expect(await screen.findByText(datasets[0].datasetName)).toBeInTheDocument()
+  })
+
+  it('omits the PI row entirely when there is neither a name nor a profile link', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
+      makeSearchResponse(datasets.map(dataset => ({ ...dataset, study: { ...dataset.study, piName: '' } }))) as never,
+    )
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+
+    expect(screen.queryByText('PI Name')).not.toBeInTheDocument()
+  })
+
+  it('does not link a PI website that is not a plain http url', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      piInstitution: { id: 7, name: 'Broad Institute' },
+      piWebsiteUrl: 'javascript:alert(document.cookie)',
+    } as never)
+    mountComponent()
+
+    await screen.findByText('Broad Institute')
+    expect(screen.queryByRole('link', { name: 'PI website' })).not.toBeInTheDocument()
+  })
+
+  it('shows PI institution and external profile links', async () => {
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      piInstitution: { id: 7, name: 'Broad Institute' },
+      piOrcid: '0000-0001-2345-6789',
+      piLinkedinUrl: 'https://linkedin.com/in/example',
+      piWebsiteUrl: 'https://example.org',
+    } as never)
+    mountComponent()
+
+    expect(await screen.findByText('Broad Institute')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'ORCID profile' })).toHaveAttribute('href', 'https://orcid.org/0000-0001-2345-6789')
+    expect(screen.getByRole('link', { name: 'LinkedIn profile' })).toHaveAttribute('href', 'https://linkedin.com/in/example')
+    expect(screen.getByRole('link', { name: 'PI website' })).toHaveAttribute('href', 'https://example.org')
   })
 })
