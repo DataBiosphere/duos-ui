@@ -594,6 +594,29 @@ describe('Study details test', () => {
     expect(await screen.findAllByText('No study recommendations yet.')).toHaveLength(2)
   })
 
+  /**
+   * A refetch failing after a good load - the query going stale and being refreshed, say - used
+   * to replace cards that were on screen and correct with "Unable to load publications." The
+   * section reports a failure only when it has nothing else to show.
+   */
+  it('keeps publication cards up when a refetch fails', async () => {
+    vi.mocked(Study.getPublications)
+      .mockResolvedValueOnce([
+        { publicationId: 'pub-1', title: 'Genomic variation at scale', authorNames: [], journal: 'Nature', publishedDate: '2025-04-01' },
+      ] as never)
+      .mockRejectedValue(new Error('refresh failed'))
+    mountComponent()
+    await screen.findByText('Genomic variation at scale')
+
+    // A real refetch, not just the first render: invalidating is what a post-mutation refresh
+    // or a stale query does.
+    await queryClient.invalidateQueries()
+
+    await waitFor(() =>
+      expect(screen.getByText('Genomic variation at scale')).toBeInTheDocument())
+    expect(screen.queryByText('Unable to load publications.')).not.toBeInTheDocument()
+  })
+
   it('shows primary study publications as cards, linking only plain http urls', async () => {
     vi.mocked(Study.getPublications).mockResolvedValueOnce([
       {

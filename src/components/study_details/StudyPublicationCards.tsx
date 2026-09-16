@@ -34,7 +34,10 @@ const StudyPublicationCards = ({ studyId }: { studyId: string }) => {
     <StudyPageSection id="primary-study-publications" heading="Primary Study Publications">
       <StudyQueryResult
         isPending={isPending}
-        error={error}
+        // Only when there is nothing cached to keep showing, as StudyAssetTable does. Passed
+        // unconditionally, a failed background refetch replaced publication cards that had
+        // loaded fine with an error state.
+        error={data.length === 0 ? error : undefined}
         isEmpty={data.length === 0}
         emptyMessage="No primary study publications have been added yet."
         errorMessage="Unable to load publications."
