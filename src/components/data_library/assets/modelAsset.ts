@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, ModelStudyAggregationResponse, QueryClause } from 'src/types/elastic'
 import { FilterState, ModelAsset, PaginationState, SortState } from 'src/types/library'
 import { makeModelColumns } from 'src/components/data_library/columns/modelColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, toStringArray, trimmed } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, toStringArray } from 'src/components/data_library/assets/definition'
 
 // The Elasticsearch clauses for these filters only decide which *studies* enter
 // the shared aggregation; every model of a qualifying study comes back, so each
@@ -87,8 +87,8 @@ export const modelAsset: AssetDefinition = {
           name: model.name || '',
           description: model.description || '',
           url: model.url || '',
-          format: trimmed(model.format),
-          license: trimmed(model.license),
+          format: (model.format || '').trim(),
+          license: (model.license || '').trim(),
           cloud: toStringArray(model.cloud),
           trainedOnDatasets: toStringArray(model.trainedOnDatasets),
           maintainer: {
