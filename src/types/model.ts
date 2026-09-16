@@ -387,6 +387,33 @@ export interface Author extends Person {
 
 export type Maintainer = Contact
 
+export interface StudyComment {
+  studyCommentId: number
+  studyId: number
+  userId: number
+  rating: number
+  commentText?: string
+  createDate: string
+  updateDate: string
+  displayName: string
+  institutionName?: string
+}
+
+/** One page of a study's comments. `GET .../comments` is paged; see `StudyComments.listComments`. */
+export interface StudyCommentsSummary {
+  comments: StudyComment[]
+  /** Across every comment on the study, not just the returned page, so paging does not move it. */
+  averageRating?: number
+  /** How many comments the study has in total, so the caller can tell whether more pages remain. */
+  total: number
+  /**
+   * The signed-in user's own comment, or absent when they have none. Carried separately because
+   * paging puts it on an unpredictable page, and the composer needs it to know whether saving
+   * adds a comment or revises one.
+   */
+  yourComment?: StudyComment
+}
+
 export interface Study {
   studyId: number
   name: string

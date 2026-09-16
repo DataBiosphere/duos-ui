@@ -1,7 +1,8 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Study } from 'src/libs/ajax/Study'
+import { StudyComments } from 'src/libs/ajax/StudyComments'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'src/utils/NodashUtil'
 import { AggregationResult, ElasticsearchQuery } from 'src/types/elastic'
@@ -19,6 +20,39 @@ export const usePiDetails = (studyId: string) => useQuery({
   queryKey: [STUDY_ASSETS_QUERY_KEY, 'pi-details', studyId],
   enabled: studyId.length > 0,
   queryFn: () => Study.getById(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+/**
+ * Every page of one study's comments. The offset is deliberately absent: posting invalidates this
+ * prefix, so a revision refreshes whichever pages the reader has open rather than only the first.
+ */
+export const studyCommentsQueryKey = (studyId: string) => [STUDY_ASSETS_QUERY_KEY, 'comments', studyId]
+
+/**
+ * A study's comments, a page at a time.
+ *
+ * The endpoint is paged and its page size is capped, so 'show more' has to fetch the next page
+ * and append rather than ask for a bigger one. Every page repeats the study-wide `averageRating`,
+ * `total` and `yourComment`, so the first page is enough to read those from.
+ */
+export const useStudyComments = (studyId: string) => useInfiniteQuery({
+  queryKey: studyCommentsQueryKey(studyId),
+  enabled: studyId.length > 0,
+  initialPageParam: 0,
+  queryFn: ({ pageParam }) => StudyComments.listComments(studyId, pageParam),
+  getNextPageParam: (lastPage, allPages) => {
+    // Two different counts, deliberately. The next offset is how many rows the server has handed
+    // over, repeats included, since that is what its offset means. Whether there is more to ask
+    // for is judged on distinct ids, because the list de-duplicates: a boundary comment repeated
+    // when someone posts mid-paging would otherwise push the raw count to `total` and hide 'Show
+    // more' while fewer than `total` comments were actually on screen.
+    const fetched = allPages.reduce((count, page) => count + page.comments.length, 0)
+    const distinct = new Set(allPages.flatMap(page => page.comments.map(c => c.studyCommentId))).size
+    // A page shorter than requested also means the end, so a comment deleted mid-paging cannot
+    // leave this asking for an offset past the list forever.
+    return distinct < lastPage.total && lastPage.comments.length > 0 ? fetched : undefined
+  },
   staleTime: STUDY_STALE_TIME,
 })
 
