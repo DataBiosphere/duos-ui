@@ -102,11 +102,20 @@ export default function DatasetStatistics() {
   }
 
   useEffect(() => {
+    // Latched, because two quick navigations can resolve out of order and the older request's
+    // writes would land last - reintroducing exactly the cross-dataset bleed the resets below
+    // are here to prevent. Clearing state first does not help with that; only ignoring the
+    // answers to a question the page has stopped asking does.
+    let cancelled = false
     const init = async () => {
       // This page is not remounted between datasets - the route parameter changes and the effect
       // re-runs - so last dataset's answers have to be cleared before asking about the next one.
       // Left alone, a 403 on an unpublished study rendered the previous dataset's request history
       // beside the restriction notice, and returning to a readable dataset kept the notice.
+      // datasetTerm is cleared too: if the next lookup throws or matches no single dataset, both
+      // paths stop without setting it, so the previous dataset's page would otherwise still be on
+      // screen under the new URL - and Apply for Access would draft a DAR against it.
+      setDatasetTerm(undefined)
       setDars(undefined)
       setDarsRestricted(false)
       setIsLoading(true)
@@ -128,13 +137,16 @@ export default function DatasetStatistics() {
           },
         } as ElasticsearchQuery)
 
+        if (cancelled) return
         if (datasetTerms.length === 1) {
           setDatasetTerm(datasetTerms[0])
           try {
             const dars: Array<DatasetStatisticsDar> = await DatasetMetrics.getDatasetStats(datasetTerms[0].datasetId)
+            if (cancelled) return
             setDars(dars)
           }
           catch (error) {
+            if (cancelled) return
             // The dataset itself loaded, so a refusal here costs only this section. The endpoint
             // is gated on being able to read the dataset's study, and an unpublished study is
             // readable by its creator, its custodians, and admins alone - which is a different
@@ -155,11 +167,15 @@ export default function DatasetStatistics() {
         }
       }
       catch (error) {
+        if (cancelled) return
         showError('Unable to retrieve dataset statistics from server: ' + extractError(error))
         setIsLoading(false)
       }
     }
     init()
+    return () => {
+      cancelled = true
+    }
   }, [datasetIdentifier])
 
   useEffect(() => {
@@ -315,8 +331,9 @@ export default function DatasetStatistics() {
             // wearing role="status". It is inline by default, so the block display keeps the
             // spacing the surrounding notices have.
             <output style={{ display: 'block', paddingTop: '20px', fontStyle: 'italic' }}>
-              The study this dataset belongs to has not been published, so its data access request
-              history is available only to the study&apos;s creator, its custodians, and admins.
+              You do not have access to this dataset&apos;s data access request history. While a
+              study is unpublished its history is visible only to the study&apos;s creator, its
+              custodians, and admins.
             </output>
           )}
           {!darsRestricted && dars?.length === 0

@@ -696,6 +696,32 @@ describe('Study details test', () => {
     expect(await screen.findByText(datasets[0].datasetName)).toBeInTheDocument()
   })
 
+  /**
+   * The dataset page tells a refusal apart from a fault; this section did not, so one
+   * authorization decision was described two different ways depending on where you read it.
+   */
+  it('describes a refused study history as a refusal, not a failure', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(
+      Object.assign(new Error('User does not have permission'), { response: { status: 403 } }),
+    )
+    mountComponent()
+
+    expect(await screen.findByText(/do not have access to this study's data access request history/i))
+      .toBeInTheDocument()
+    expect(screen.queryByText('Unable to load data access requests.')).not.toBeInTheDocument()
+    expect(screen.queryByText('No granted data access requests yet.')).not.toBeInTheDocument()
+  })
+
+  it('still reports a genuine failure of the study history as an error', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(
+      Object.assign(new Error('boom'), { response: { status: 500 } }),
+    )
+    mountComponent()
+
+    expect(await screen.findByText('Unable to load data access requests.')).toBeInTheDocument()
+    expect(screen.queryByText(/do not have access to this study's/i)).not.toBeInTheDocument()
+  })
+
   it('omits the PI row entirely when there is neither a name nor a profile link', async () => {
     vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
       makeSearchResponse(datasets.map(dataset => ({ ...dataset, study: { ...dataset.study, piName: '' } }))) as never,

@@ -310,7 +310,10 @@ describe('DatasetStatistics', () => {
     // Announced to assistive tech: <output> carries an implicit status role, so a revert to a
     // plain div would fail here rather than silently stop announcing.
     const notice = await screen.findByRole('status')
-    expect(notice.textContent).toMatch(/has not been published, so its data access request/)
+    // Describes the refusal without asserting why: a 403 can also come from a disabled account
+    // or a proxy, and the page should not state a cause it does not know.
+    expect(notice.textContent).toMatch(/do not have access to this dataset's data access request history/)
+    expect(notice.textContent).toMatch(/While a study is unpublished/)
     // Distinct from a study that simply has no requests yet
     expect(
       screen.queryByText(/No Data Access Requests have been created for this dataset/),
@@ -360,9 +363,51 @@ describe('DatasetStatistics', () => {
 
     await user.click(screen.getByRole('button', { name: 'next dataset' }))
 
-    expect(await screen.findByRole('status')).toHaveTextContent('has not been published')
+    expect(await screen.findByRole('status')).toHaveTextContent('do not have access')
     // The first dataset's history is gone rather than sitting beside the notice
     expect(screen.queryByText('DAR-001')).not.toBeInTheDocument()
+  })
+
+  /**
+   * The reset cleared the history and the restriction but not the dataset itself. If the next
+   * lookup throws or matches no single dataset, both paths stop without setting one, so the
+   * previous dataset's page stayed on screen under the new URL - and Apply for Access would
+   * have drafted a request against that stale dataset.
+   */
+  it('does not leave the previous dataset on screen when the next lookup fails', async () => {
+    vi.mocked(DAC.fetchDACbotRules).mockResolvedValue([] as never)
+    vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds)
+      .mockResolvedValue(mockEmptyTdrResponse as unknown as Awaited<ReturnType<typeof TerraDataRepo.listSnapshotsByDatasetIds>>)
+    vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(mockDarsResponse)
+    vi.mocked(DataSet.searchDatasetIndex)
+      .mockResolvedValueOnce([mockDatasetTerm])
+      .mockRejectedValue(new Error('index lookup failed'))
+
+    const GoToNextDataset = () => {
+      const navigate = useNavigate()
+      return <button onClick={() => navigate('/dataset/DUOS-000002')}>next dataset</button>
+    }
+    const user = userEvent.setup()
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/dataset/DUOS-000001']}>
+          <GoToNextDataset />
+          <Routes>
+            <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    expect(await screen.findByText(new RegExp(mockDatasetTerm.datasetIdentifier))).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'next dataset' }))
+
+    // The first dataset's page is gone rather than sitting under the second dataset's URL, so
+    // Apply for Access cannot draft a request against it.
+    await waitFor(() =>
+      expect(screen.queryByText(new RegExp(mockDatasetTerm.datasetIdentifier))).not.toBeInTheDocument())
+    expect(screen.queryByRole('button', { name: 'Apply for Access' })).not.toBeInTheDocument()
   })
 
   it('still reports a genuine server failure as an error', async () => {
@@ -371,7 +416,7 @@ describe('DatasetStatistics', () => {
 
     expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeTruthy()
     expect(
-      screen.queryByText(/has not been published, so its data access request/),
+      screen.queryByText(/do not have access to this dataset's data access request history/),
     ).not.toBeInTheDocument()
   })
 
