@@ -6,9 +6,11 @@ import { Storage } from 'src/libs/storage'
 
 vi.mock('src/libs/config', () => ({
   Config: {
-    getEnv: vi.fn(),
+    getBannersUrl: vi.fn(),
   },
 }))
+
+const bannersUrl = 'https://storage.googleapis.com/duos-banners-dev/dev_notifications.json'
 
 vi.mock('src/libs/ajax/fetchAdapter', () => ({
   fetchGet: vi.fn(),
@@ -32,30 +34,24 @@ describe('NotificationService', () => {
   // ── getBanners ─────────────────────────────────────────────────────────────
 
   describe('getBanners', () => {
-    it('fetches from the dev bucket when env is local', async () => {
-      vi.mocked(Config.getEnv).mockResolvedValue('local')
+    it('fetches the feed config.json names for this environment', async () => {
+      vi.mocked(Config.getBannersUrl).mockResolvedValue(bannersUrl)
       vi.mocked(fetchGet).mockResolvedValue({ data: banners })
 
       await NotificationService.getBanners()
 
-      expect(fetchGet).toHaveBeenCalledWith(
-        'https://storage.googleapis.com/broad-duos-banners/dev_notifications.json',
-      )
+      expect(fetchGet).toHaveBeenCalledExactlyOnceWith(bannersUrl)
     })
 
-    it('fetches from the env-prefixed bucket for non-local envs', async () => {
-      vi.mocked(Config.getEnv).mockResolvedValue('prod')
-      vi.mocked(fetchGet).mockResolvedValue({ data: banners })
+    it('has no banners, and fetches nothing, when no feed is configured', async () => {
+      vi.mocked(Config.getBannersUrl).mockResolvedValue('')
 
-      await NotificationService.getBanners()
-
-      expect(fetchGet).toHaveBeenCalledWith(
-        'https://storage.googleapis.com/broad-duos-banners/prod_notifications.json',
-      )
+      expect(await NotificationService.getBanners()).toEqual([])
+      expect(fetchGet).not.toHaveBeenCalled()
     })
 
     it('returns the data array from the response', async () => {
-      vi.mocked(Config.getEnv).mockResolvedValue('dev')
+      vi.mocked(Config.getBannersUrl).mockResolvedValue(bannersUrl)
       vi.mocked(fetchGet).mockResolvedValue({ data: banners })
 
       const result = await NotificationService.getBanners()
@@ -68,7 +64,7 @@ describe('NotificationService', () => {
 
   describe('getActiveBanners', () => {
     it('returns only banners where active is true', async () => {
-      vi.mocked(Config.getEnv).mockResolvedValue('dev')
+      vi.mocked(Config.getBannersUrl).mockResolvedValue(bannersUrl)
       vi.mocked(fetchGet).mockResolvedValue({ data: banners })
 
       const result = await NotificationService.getActiveBanners()
@@ -78,7 +74,7 @@ describe('NotificationService', () => {
     })
 
     it('returns an empty array when the fetch throws', async () => {
-      vi.mocked(Config.getEnv).mockResolvedValue('dev')
+      vi.mocked(Config.getBannersUrl).mockResolvedValue(bannersUrl)
       vi.mocked(fetchGet).mockRejectedValue(new Error('network error'))
 
       const result = await NotificationService.getActiveBanners()
@@ -87,7 +83,7 @@ describe('NotificationService', () => {
     })
 
     it('returns an empty array when no banners are active', async () => {
-      vi.mocked(Config.getEnv).mockResolvedValue('dev')
+      vi.mocked(Config.getBannersUrl).mockResolvedValue(bannersUrl)
       vi.mocked(fetchGet).mockResolvedValue({
         data: [{ id: 'x', active: false }],
       })
@@ -102,7 +98,7 @@ describe('NotificationService', () => {
 
   describe('getBannerObjectById', () => {
     it('returns the matching active banner by id', async () => {
-      vi.mocked(Config.getEnv).mockResolvedValue('dev')
+      vi.mocked(Config.getBannersUrl).mockResolvedValue(bannersUrl)
       vi.mocked(fetchGet).mockResolvedValue({ data: banners })
 
       const result = await NotificationService.getBannerObjectById('banner-1')
@@ -111,7 +107,7 @@ describe('NotificationService', () => {
     })
 
     it('returns undefined when the id matches an inactive banner', async () => {
-      vi.mocked(Config.getEnv).mockResolvedValue('dev')
+      vi.mocked(Config.getBannersUrl).mockResolvedValue(bannersUrl)
       vi.mocked(fetchGet).mockResolvedValue({ data: banners })
 
       const result = await NotificationService.getBannerObjectById('banner-2')
@@ -120,7 +116,7 @@ describe('NotificationService', () => {
     })
 
     it('returns undefined when no banner matches the id', async () => {
-      vi.mocked(Config.getEnv).mockResolvedValue('dev')
+      vi.mocked(Config.getBannersUrl).mockResolvedValue(bannersUrl)
       vi.mocked(fetchGet).mockResolvedValue({ data: banners })
 
       const result = await NotificationService.getBannerObjectById('nonexistent')
@@ -129,7 +125,7 @@ describe('NotificationService', () => {
     })
 
     it('returns null when the fetch throws', async () => {
-      vi.mocked(Config.getEnv).mockResolvedValue('dev')
+      vi.mocked(Config.getBannersUrl).mockResolvedValue(bannersUrl)
       vi.mocked(fetchGet).mockRejectedValue(new Error('network error'))
 
       const result = await NotificationService.getBannerObjectById('banner-1')
@@ -138,7 +134,7 @@ describe('NotificationService', () => {
     })
 
     it('returns undefined early when banners list is empty', async () => {
-      vi.mocked(Config.getEnv).mockResolvedValue('dev')
+      vi.mocked(Config.getBannersUrl).mockResolvedValue(bannersUrl)
       vi.mocked(fetchGet).mockResolvedValue({ data: [] })
 
       const result = await NotificationService.getBannerObjectById('banner-1')
