@@ -101,6 +101,29 @@ export default function DatasetStatistics() {
     }
   }
 
+  /**
+   * The request history for one dataset. Separate from the effect below because a refusal here is
+   * its own outcome rather than a failure of the page: the endpoint is gated on being able to read
+   * the dataset's study, and an unpublished study is readable by its creator, its custodians and
+   * admins alone - which is a different thing to tell the reader than "the server failed".
+   */
+  const loadDarsFor = async (datasetId: number, isCancelled: () => boolean) => {
+    try {
+      const dars: Array<DatasetStatisticsDar> = await DatasetMetrics.getDatasetStats(datasetId)
+      if (isCancelled()) return
+      setDars(dars)
+    }
+    catch (error) {
+      if (isCancelled()) return
+      if (extractStatus(error) === 403) {
+        setDarsRestricted(true)
+      }
+      else {
+        showError('Unable to retrieve dataset statistics from server: ' + extractError(error))
+      }
+    }
+  }
+
   useEffect(() => {
     // Latched, because two quick navigations can resolve out of order and the older request's
     // writes would land last - reintroducing exactly the cross-dataset bleed the resets below
@@ -140,24 +163,8 @@ export default function DatasetStatistics() {
         if (cancelled) return
         if (datasetTerms.length === 1) {
           setDatasetTerm(datasetTerms[0])
-          try {
-            const dars: Array<DatasetStatisticsDar> = await DatasetMetrics.getDatasetStats(datasetTerms[0].datasetId)
-            if (cancelled) return
-            setDars(dars)
-          }
-          catch (error) {
-            if (cancelled) return
-            // The dataset itself loaded, so a refusal here costs only this section. The endpoint
-            // is gated on being able to read the dataset's study, and an unpublished study is
-            // readable by its creator, its custodians, and admins alone - which is a different
-            // thing to tell the reader than "the server failed".
-            if (extractStatus(error) === 403) {
-              setDarsRestricted(true)
-            }
-            else {
-              showError('Unable to retrieve dataset statistics from server: ' + extractError(error))
-            }
-          }
+          await loadDarsFor(datasetTerms[0].datasetId, () => cancelled)
+          if (cancelled) return
           setIsLoading(false)
         }
         else {
