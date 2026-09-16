@@ -1,7 +1,7 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { AssetType, FilterState } from 'src/types/library'
@@ -499,6 +499,90 @@ describe('useLibraryUrlState — presentation and publication params', () => {
     const search = document.getElementById('search')!.textContent!
     for (const gone of ['presentationEvent', 'publicationJournal', 'presentedAfter', 'publishedBefore']) {
       expect(search).not.toContain(gone)
+    }
+  })
+})
+
+const IpFundingHarness = ({ filters }: { filters: FilterState }) => {
+  const [, updateState] = useLibraryUrlState()
+  const location = useLocation()
+  return (
+    <div>
+      <div id="search">{location.search}</div>
+      <button id="write" onClick={() => updateState({ filters })}>Write</button>
+      <button id="clear" onClick={() => updateState({ filters: EMPTY_FILTERS })}>Clear</button>
+    </div>
+  )
+}
+
+// A typo in any `param` silently drops the filter on reload.
+describe('useLibraryUrlState — IP and funding params', () => {
+  const IP_FUNDING_PARAMS: Array<[string, string]> = [
+    ['ipType', 'Patent'],
+    ['ipStatus', 'Granted'],
+    ['fundingFunderName', 'NIH'],
+  ]
+
+  it.each(IP_FUNDING_PARAMS)('parses %s', (key, value) => {
+    render(
+      <MemoryRouter initialEntries={[`/?${key}=${encodeURIComponent(value)}`]}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters[key]).toEqual([value])
+  })
+
+  it.each(IP_FUNDING_PARAMS)('serializes %s', (key, value) => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <IpFundingHarness filters={{ ...EMPTY_FILTERS, [key]: [value] }} />
+      </MemoryRouter>,
+    )
+    fireEvent.click(document.getElementById('write')!)
+
+    expect(document.getElementById('search')!.textContent).toContain(`${key}=${value}`)
+  })
+
+  it.each(IP_FUNDING_PARAMS)('removes %s from the URL when cleared', (key, value) => {
+    render(
+      <MemoryRouter initialEntries={[`/?${key}=${value}`]}>
+        <IpFundingHarness filters={EMPTY_FILTERS} />
+      </MemoryRouter>,
+    )
+    fireEvent.click(document.getElementById('clear')!)
+
+    expect(document.getElementById('search')!.textContent).not.toContain(key)
+  })
+
+  // Only `key` is typed, so a duplicated or mistyped `param` type-checks and
+  // quietly clobbers a sibling on share or reload. Round-trip them together.
+  it('round-trips every array filter without one clobbering another', () => {
+    const arrayKeys = Object.entries(EMPTY_FILTERS)
+      .filter(([, value]) => Array.isArray(value))
+      .map(([key]) => key)
+    const filters = {
+      ...EMPTY_FILTERS,
+      ...Object.fromEntries(arrayKeys.map(key => [key, [`${key}-value`]])),
+    } as FilterState
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <IpFundingHarness filters={filters} />
+      </MemoryRouter>,
+    )
+    fireEvent.click(document.getElementById('write')!)
+    const search = document.getElementById('search')!.textContent!
+    cleanup()
+
+    render(
+      <MemoryRouter initialEntries={[`/${search}`]}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    const parsed = JSON.parse(document.getElementById('filters')!.textContent!)
+    for (const key of arrayKeys) {
+      expect(parsed[key]).toEqual([`${key}-value`])
     }
   })
 })
