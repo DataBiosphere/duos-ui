@@ -10,8 +10,8 @@ type CitedRow = { citation?: boolean, datasetCitation?: string }
 
 const column = citationColumn<CitedRow>(row => row.datasetCitation || '')
 
-const renderCitation = (row: CitedRow) => render(
-  <>{column.renderCell!({ row, value: row.citation } as GridRenderCellParams<CitedRow>)}</>,
+const renderCitation = (row: CitedRow, tabIndex: 0 | -1 = 0) => render(
+  <>{column.renderCell!({ row, value: row.citation, tabIndex } as GridRenderCellParams<CitedRow>)}</>,
 )
 
 // Shared by both grids, so covered once here; the grid specs assert wiring only.
@@ -39,9 +39,11 @@ describe('citationColumn', () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Smith et al. 2024, dbGaP phs000123')
   })
 
-  it('makes the cell focusable so the tooltip is not hover-only', () => {
-    renderCitation({ citation: true, datasetCitation: 'Smith et al. 2024' })
-    expect(screen.getByText('Yes')).toHaveAttribute('tabindex', '0')
+  // A hardcoded 0 would put every visible row in the page tab order and steal
+  // focus from the grid's own focused cell, so the tab stop follows the grid.
+  it.each([[0], [-1]] as const)('takes tabIndex %s from the grid, not a fixed stop', (tabIndex) => {
+    renderCitation({ citation: true, datasetCitation: 'Smith et al. 2024' }, tabIndex)
+    expect(screen.getByText('Yes')).toHaveAttribute('tabindex', String(tabIndex))
   })
 
   // describeChild, so the citation is the description and not the name.
@@ -55,6 +57,17 @@ describe('citationColumn', () => {
     renderCitation({ citation: false, datasetCitation: '' })
     await user.hover(screen.getByText('No'))
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
+  })
+
+  // datasetCitation is required on the publication form whatever the citation
+  // answer, so uncited rows routinely carry text a "No" cell must not describe.
+  it('renders no tooltip on an uncited row that still carries citation text', async () => {
+    const user = userEvent.setup()
+    renderCitation({ citation: false, datasetCitation: 'Smith et al. 2024' })
+    await user.hover(screen.getByText('No'))
+
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
+    expect(screen.getByText('No')).not.toHaveAccessibleDescription('Smith et al. 2024')
   })
 
   it('sorts and filters on the rendered Yes/No, not the raw boolean', () => {
