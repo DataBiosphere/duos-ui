@@ -75,7 +75,7 @@ const datasets = [
     datasetName: 'Some Dataset 1',
     participantCount: 1,
     dacId: 0,
-    dacApproval: false,
+    dacApproval: true,
     accessManagement: 'controlled',
     approvedUserIds: [],
     createUserId: 0,

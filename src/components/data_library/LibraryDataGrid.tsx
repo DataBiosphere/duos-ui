@@ -40,7 +40,10 @@ export const LibraryDataGrid: React.FC<LibraryDataGridExtendedProps> = ({
   onSortChange,
   selectedDatasetIds,
   onSelectionChange,
-  exportableDatasets = {},
+  // No `= {}` default: whether the caller supplies exports at all is the signal for emitting the
+  // Export column, and defaulting here erased it before makeColumns could see it. A fresh {} per
+  // render also gave the columns memo a new dependency every time.
+  exportableDatasets,
   radarEnabledDatasetIds = EMPTY_RADAR_IDS,
   soApprovalModelByDatasetId,
   extraColumns,
