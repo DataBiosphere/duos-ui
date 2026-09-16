@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, PresentationStudyAggregationResponse, QueryClause } from 'src/types/elastic'
 import { FilterState, PaginationState, PresentationAsset, SortState } from 'src/types/library'
 import { makePresentationColumns } from 'src/components/data_library/columns/presentationColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, trimmed } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
 // The Elasticsearch clauses for these filters only decide which *studies* enter
@@ -105,10 +105,10 @@ export const presentationAsset: AssetDefinition = {
           datasetCitation: pres.datasetCitation || '',
           citation: pres.citation ?? false,
           presenter: pres.presenter || undefined,
-          event: trimmed(pres.event),
+          event: (pres.event || '').trim(),
           location: pres.location || '',
-          format: trimmed(pres.format),
-          access: trimmed(pres.access),
+          format: (pres.format || '').trim(),
+          access: (pres.access || '').trim(),
           tags: pres.tags || [],
         }
 
