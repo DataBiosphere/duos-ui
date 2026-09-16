@@ -156,64 +156,64 @@ describe('useLibraryUrlState', () => {
     expect(document.getElementById('sortOrder')!.textContent).toBe('none')
   })
 
-const ModelWorkspaceHarness = ({ filters }: { filters: FilterState }) => {
-  const [state, updateState] = useLibraryUrlState()
-  const location = useLocation()
-  return (
-    <div>
-      <div id="filters">{JSON.stringify(state.filters)}</div>
-      <div id="search">{location.search}</div>
-      <button id="write" onClick={() => updateState({ filters })}>Write</button>
-      <button id="clear" onClick={() => updateState({ filters: EMPTY_FILTERS })}>Clear</button>
-    </div>
-  )
-}
-
-// A param name only wired on one side of the round trip loses the selection on
-// reload or when a link is shared, so both directions are asserted.
-const MODEL_WORKSPACE_PARAMS: Array<[string, string]> = [
-  ['modelFormat', 'ONNX'],
-  ['modelLicense', 'MIT'],
-  ['modelCloud', 'AWS'],
-  ['modelTags', 'vision'],
-  ['workspaceCloud', 'GCP'],
-  ['workspaceAccess', 'open'],
-]
-
-describe('useLibraryUrlState — model and workspace params', () => {
-  it.each(MODEL_WORKSPACE_PARAMS)('parses %s', (key, value) => {
-    render(
-      <MemoryRouter initialEntries={[`/?${key}=${value}`]}>
-        <TestComponent />
-      </MemoryRouter>,
+  const ModelWorkspaceHarness = ({ filters }: { filters: FilterState }) => {
+    const [state, updateState] = useLibraryUrlState()
+    const location = useLocation()
+    return (
+      <div>
+        <div id="filters">{JSON.stringify(state.filters)}</div>
+        <div id="search">{location.search}</div>
+        <button id="write" onClick={() => updateState({ filters })}>Write</button>
+        <button id="clear" onClick={() => updateState({ filters: EMPTY_FILTERS })}>Clear</button>
+      </div>
     )
+  }
 
-    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
-    expect(filters[key]).toEqual([value])
+  // A param name only wired on one side of the round trip loses the selection on
+  // reload or when a link is shared, so both directions are asserted.
+  const MODEL_WORKSPACE_PARAMS: Array<[string, string]> = [
+    ['modelFormat', 'ONNX'],
+    ['modelLicense', 'MIT'],
+    ['modelCloud', 'AWS'],
+    ['modelTags', 'vision'],
+    ['workspaceCloud', 'GCP'],
+    ['workspaceAccess', 'open'],
+  ]
+
+  describe('useLibraryUrlState — model and workspace params', () => {
+    it.each(MODEL_WORKSPACE_PARAMS)('parses %s', (key, value) => {
+      render(
+        <MemoryRouter initialEntries={[`/?${key}=${value}`]}>
+          <TestComponent />
+        </MemoryRouter>,
+      )
+
+      const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+      expect(filters[key]).toEqual([value])
+    })
+
+    it.each(MODEL_WORKSPACE_PARAMS)('serializes %s', (key, value) => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <ModelWorkspaceHarness filters={{ ...EMPTY_FILTERS, [key]: [value] }} />
+        </MemoryRouter>,
+      )
+      fireEvent.click(document.getElementById('write')!)
+
+      expect(document.getElementById('search')!.textContent).toContain(`${key}=${value}`)
+    })
+
+    it.each(MODEL_WORKSPACE_PARAMS)('removes %s from the URL when cleared', (key, value) => {
+      render(
+        <MemoryRouter initialEntries={[`/?${key}=${value}`]}>
+          <ModelWorkspaceHarness filters={EMPTY_FILTERS} />
+        </MemoryRouter>,
+      )
+      fireEvent.click(document.getElementById('clear')!)
+
+      expect(document.getElementById('search')!.textContent).not.toContain(key)
+    })
   })
-
-  it.each(MODEL_WORKSPACE_PARAMS)('serializes %s', (key, value) => {
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <ModelWorkspaceHarness filters={{ ...EMPTY_FILTERS, [key]: [value] }} />
-      </MemoryRouter>,
-    )
-    fireEvent.click(document.getElementById('write')!)
-
-    expect(document.getElementById('search')!.textContent).toContain(`${key}=${value}`)
-  })
-
-  it.each(MODEL_WORKSPACE_PARAMS)('removes %s from the URL when cleared', (key, value) => {
-    render(
-      <MemoryRouter initialEntries={[`/?${key}=${value}`]}>
-        <ModelWorkspaceHarness filters={EMPTY_FILTERS} />
-      </MemoryRouter>,
-    )
-    fireEvent.click(document.getElementById('clear')!)
-
-    expect(document.getElementById('search')!.textContent).not.toContain(key)
-  })
-})
 
   it('parses comma-containing array values as single filter values', () => {
     render(
