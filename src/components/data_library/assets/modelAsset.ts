@@ -4,6 +4,15 @@ import { FilterState, ModelAsset, PaginationState, SortState } from 'src/types/l
 import { makeModelColumns } from 'src/components/data_library/columns/modelColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, toStringArray } from 'src/components/data_library/assets/definition'
 
+const includesIgnoreCase = (source: string | undefined, values: string[]) => {
+  if (values.length === 0) {
+    return true
+  }
+
+  const normalizedSource = source?.toLowerCase() || ''
+  return values.some(value => normalizedSource.includes(value.toLowerCase()))
+}
+
 // The clauses only pick which studies are aggregated, so every model of a
 // qualifying study comes back and each row needs re-checking here.
 const matchesModelFilters = (model: ModelAsset, filters?: FilterState) => {
@@ -11,19 +20,19 @@ const matchesModelFilters = (model: ModelAsset, filters?: FilterState) => {
     return true
   }
 
-  if (filters.modelFormat.length > 0 && !filters.modelFormat.includes(model.format)) {
+  if (!includesIgnoreCase(model.format, filters.modelFormat)) {
     return false
   }
 
-  if (filters.modelLicense.length > 0 && !filters.modelLicense.includes(model.license)) {
+  if (!includesIgnoreCase(model.license, filters.modelLicense)) {
     return false
   }
 
-  if (filters.modelCloud.length > 0 && !(model.cloud || []).some(cloud => filters.modelCloud.includes(cloud))) {
+  if (filters.modelCloud.length > 0 && !(model.cloud || []).some(cloud => includesIgnoreCase(cloud, filters.modelCloud))) {
     return false
   }
 
-  return filters.modelTags.length === 0 || (model.tags || []).some(tag => filters.modelTags.includes(tag))
+  return filters.modelTags.length === 0 || (model.tags || []).some(tag => includesIgnoreCase(tag, filters.modelTags))
 }
 
 export const modelAsset: AssetDefinition = {

@@ -33,11 +33,11 @@ const matchesWorkspaceFilters = (workspace: WorkspaceAsset, filters?: FilterStat
     return false
   }
 
-  if (filters.workspaceCloud.length > 0 && !(workspace.cloud || []).some(cloud => filters.workspaceCloud.includes(cloud))) {
+  if (filters.workspaceCloud.length > 0 && !(workspace.cloud || []).some(cloud => includesIgnoreCase(cloud, filters.workspaceCloud))) {
     return false
   }
 
-  return filters.workspaceAccess.length === 0 || filters.workspaceAccess.includes(workspace.access || '')
+  return includesIgnoreCase(workspace.access, filters.workspaceAccess)
 }
 
 export const workspaceAsset: AssetDefinition = {

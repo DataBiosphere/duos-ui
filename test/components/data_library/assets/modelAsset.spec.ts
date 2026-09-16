@@ -323,6 +323,30 @@ describe('modelAsset — transformResponse', () => {
     expect((result.items[0] as ModelAsset).modelId).toBe('m2')
   })
 
+  // The four model fields are free text, so the corpus can carry either casing
+  // while the analyzed ES clause admits both; the row pass must agree.
+  it.each([
+    ['modelFormat', 'format'],
+    ['modelLicense', 'license'],
+  ])('matches %s regardless of the indexed casing', (key, field) => {
+    const response = makeResponse([makeBucket(1, [{ modelId: 'm1', [field]: 'PyTorch' }])])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, [key]: ['pytorch'] })
+
+    expect(result.total).toBe(1)
+  })
+
+  it.each([
+    ['modelCloud', 'cloud'],
+    ['modelTags', 'tags'],
+  ])('matches %s regardless of the indexed casing', (key, field) => {
+    const response = makeResponse([makeBucket(1, [{ modelId: 'm1', [field]: ['AWS'] }])])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, [key]: ['aws'] })
+
+    expect(result.total).toBe(1)
+  })
+
   it('combines multiple active model filters with AND', () => {
     const response = makeResponse([
       makeBucket(1, [

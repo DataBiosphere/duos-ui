@@ -280,6 +280,24 @@ describe('workspaceAsset — transformResponse', () => {
     expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w1')
   })
 
+  // `access` is a bare form field with no options or validator, and cloud is a
+  // creatable select, so both carry whatever casing the submitter typed.
+  it('matches the cloud filter regardless of the indexed casing', () => {
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: ['AWS'] }])])
+
+    const result = workspaceAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, workspaceCloud: ['aws'] })
+
+    expect(result.total).toBe(1)
+  })
+
+  it('matches the access filter regardless of the indexed casing', () => {
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', access: 'Open' }])])
+
+    const result = workspaceAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, workspaceAccess: ['open'] })
+
+    expect(result.total).toBe(1)
+  })
+
   it('maps the cloud field onto the row', () => {
     const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: ['AWS', 'Azure'] }])])
     const row = workspaceAsset.transformResponse(response, pagination).items[0] as WorkspaceAsset

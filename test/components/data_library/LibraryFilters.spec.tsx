@@ -649,7 +649,7 @@ describe('LibraryFilters — model and workspace sections render', () => {
         sections={getFilterSectionsForAsset(AssetType.MODELS, withOptions)}
       />,
     )
-    for (const label of ['Format', 'License', 'Cloud', 'Tags']) {
+    for (const label of ['Format', 'License', 'Cloud (AI Models)', 'Tags']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
     expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
@@ -664,7 +664,7 @@ describe('LibraryFilters — model and workspace sections render', () => {
         sections={getFilterSectionsForAsset(AssetType.WORKSPACES, withOptions)}
       />,
     )
-    for (const label of ['Tools', 'Platform', 'Cloud', 'Access']) {
+    for (const label of ['Tools', 'Platform', 'Cloud (Workspaces)', 'Access']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
   })

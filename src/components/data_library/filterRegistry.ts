@@ -531,7 +531,7 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         : undefined,
   },
   modelCloud: {
-    label: 'Cloud',
+    label: 'Cloud (AI Models)',
     buildClause: filters =>
       filters.modelCloud.length > 0
         ? matchAny('study.assets.models.cloud', filters.modelCloud)
@@ -545,7 +545,7 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         : undefined,
   },
   workspaceCloud: {
-    label: 'Cloud',
+    label: 'Cloud (Workspaces)',
     buildClause: filters =>
       filters.workspaceCloud.length > 0
         ? matchAny('study.assets.workspaces.cloud', filters.workspaceCloud)
