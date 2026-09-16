@@ -245,9 +245,7 @@ describe('workspaceAsset — transformResponse', () => {
     expect(result.total).toBe(0)
   })
 
-  // The ES clauses for these filters only decide which studies are aggregated;
-  // every workspace of a qualifying study comes back, so transformResponse must
-  // re-check each row or the grid and count badge include non-matching rows.
+  // Every workspace of a qualifying study comes back, so rows need re-checking.
   it('returns only workspaces matching the tools filter', () => {
     const response = makeResponse([
       makeBucket(1, [

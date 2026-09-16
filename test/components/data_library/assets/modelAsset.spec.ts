@@ -266,9 +266,7 @@ describe('modelAsset — transformResponse', () => {
     expect((result.items[0] as ModelAsset).modelId).toBe('m2')
   })
 
-  // The ES clauses for these filters only decide which studies are aggregated;
-  // every model of a qualifying study comes back, so transformResponse must
-  // re-check each row or the grid and count badge include non-matching rows.
+  // Every model of a qualifying study comes back, so rows need re-checking.
   it('returns only models matching the format filter', () => {
     const response = makeResponse([
       makeBucket(1, [

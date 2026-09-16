@@ -4,10 +4,8 @@ import { FilterState, ModelAsset, PaginationState, SortState } from 'src/types/l
 import { makeModelColumns } from 'src/components/data_library/columns/modelColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, toStringArray } from 'src/components/data_library/assets/definition'
 
-// The Elasticsearch clauses for these filters only decide which *studies* enter
-// the shared aggregation; every model of a qualifying study comes back, so each
-// row must be re-checked here or the grid (and the tab-count badge derived from
-// this same function) includes models that don't match the filter.
+// The clauses only pick which studies are aggregated, so every model of a
+// qualifying study comes back and each row needs re-checking here.
 const matchesModelFilters = (model: ModelAsset, filters?: FilterState) => {
   if (!filters) {
     return true
