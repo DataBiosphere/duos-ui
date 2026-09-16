@@ -386,3 +386,120 @@ describe('useLibraryUrlState — datasets-cited boolean params', () => {
     expect(search).not.toContain('publicationsDatasetsCited')
   })
 })
+
+const PresentationPublicationHarness = ({ filters }: { filters: FilterState }) => {
+  const [state, updateState] = useLibraryUrlState()
+  const location = useLocation()
+  return (
+    <div>
+      <div id="filters">{JSON.stringify(state.filters)}</div>
+      <div id="search">{location.search}</div>
+      <button id="write" onClick={() => updateState({ filters })}>Write</button>
+      <button id="clear" onClick={() => updateState({ filters: EMPTY_FILTERS })}>Clear</button>
+    </div>
+  )
+}
+
+// A typo in any `param` silently drops the filter when a URL is shared or
+// reloaded, and the generic implementation cannot catch that.
+describe('useLibraryUrlState — presentation and publication params', () => {
+  it.each([
+    ['presentationEvent', 'presentedAt'],
+    ['presentationFormat', 'Poster'],
+    ['presentationAccess', 'open'],
+    ['publicationJournal', 'Nature Genetics'],
+    ['publicationAccess', 'restricted'],
+  ])('parses %s', (key, value) => {
+    render(
+      <MemoryRouter initialEntries={[`/?${key}=${encodeURIComponent(value)}`]}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters[key]).toEqual([value])
+  })
+
+  it('parses repeated values for an array param without splitting on commas', () => {
+    render(
+      <MemoryRouter initialEntries={['/?presentationEvent=ASHG&presentationEvent=AGBT,%20Florida']}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters.presentationEvent).toEqual(['ASHG', 'AGBT, Florida'])
+  })
+
+  it.each([
+    ['presentationDate', 'presentedAfter', 'presentedBefore'],
+    ['publicationPublishedDate', 'publishedAfter', 'publishedBefore'],
+  ])('parses both bounds of %s', (key, afterParam, beforeParam) => {
+    render(
+      <MemoryRouter initialEntries={[`/?${afterParam}=2024-01-01&${beforeParam}=2024-12-31`]}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters[key]).toEqual({ after: '2024-01-01', before: '2024-12-31' })
+  })
+
+  it.each([
+    ['presentationDate', 'presentedAfter'],
+    ['publicationPublishedDate', 'publishedAfter'],
+  ])('parses a one-sided %s', (key, afterParam) => {
+    render(
+      <MemoryRouter initialEntries={[`/?${afterParam}=2024-06-01`]}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters[key]).toEqual({ after: '2024-06-01' })
+  })
+
+  it('serializes every new filter to its own param', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <PresentationPublicationHarness
+          filters={{
+            ...EMPTY_FILTERS,
+            presentationEvent: ['ASHG'],
+            presentationFormat: ['Poster'],
+            presentationAccess: ['open'],
+            publicationJournal: ['Nature'],
+            publicationAccess: ['restricted'],
+            presentationDate: { after: '2024-01-01', before: '2024-12-31' },
+            publicationPublishedDate: { after: '2023-01-01' },
+          }}
+        />
+      </MemoryRouter>,
+    )
+    fireEvent.click(document.getElementById('write')!)
+
+    const search = document.getElementById('search')!.textContent!
+    for (const expected of [
+      'presentationEvent=ASHG',
+      'presentationFormat=Poster',
+      'presentationAccess=open',
+      'publicationJournal=Nature',
+      'publicationAccess=restricted',
+      'presentedAfter=2024-01-01',
+      'presentedBefore=2024-12-31',
+      'publishedAfter=2023-01-01',
+    ]) {
+      expect(search).toContain(expected)
+    }
+  })
+
+  it('removes every new param when the filters are cleared', () => {
+    render(
+      <MemoryRouter initialEntries={['/?presentationEvent=ASHG&publicationJournal=Nature&presentedAfter=2024-01-01&publishedBefore=2024-12-31']}>
+        <PresentationPublicationHarness filters={EMPTY_FILTERS} />
+      </MemoryRouter>,
+    )
+    fireEvent.click(document.getElementById('clear')!)
+
+    const search = document.getElementById('search')!.textContent!
+    for (const gone of ['presentationEvent', 'publicationJournal', 'presentedAfter', 'publishedBefore']) {
+      expect(search).not.toContain(gone)
+    }
+  })
+})

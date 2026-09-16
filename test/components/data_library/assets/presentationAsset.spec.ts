@@ -438,3 +438,32 @@ describe('presentationAsset — makeColumns', () => {
     expect(a.map(c => c.field)).toEqual(b.map(c => c.field))
   })
 })
+
+// The Datasets Cited filter is still configured on this tab, and this transform
+// is what narrows the rows, so the predicate keeps its regression test until the
+// filter itself goes away.
+describe('presentationAsset — datasetsCited row filtering', () => {
+  const mixed = () => makeResponse([
+    makeBucket(1, [
+      { presentationId: 'PRES-CITED', citation: true },
+      { presentationId: 'PRES-NOT-CITED', citation: false },
+    ]),
+  ])
+
+  it('returns only cited rows when the filter is Yes', () => {
+    const result = presentationAsset.transformResponse(mixed(), pagination, { ...EMPTY_FILTERS, datasetsCited: true })
+    expect(result.items).toHaveLength(1)
+    expect((result.items[0] as PresentationAsset).presentationId).toBe('PRES-CITED')
+  })
+
+  it('returns only uncited rows when the filter is No', () => {
+    const result = presentationAsset.transformResponse(mixed(), pagination, { ...EMPTY_FILTERS, datasetsCited: false })
+    expect(result.items).toHaveLength(1)
+    expect((result.items[0] as PresentationAsset).presentationId).toBe('PRES-NOT-CITED')
+  })
+
+  it('returns both when the filter is unset', () => {
+    const result = presentationAsset.transformResponse(mixed(), pagination, EMPTY_FILTERS)
+    expect(result.items).toHaveLength(2)
+  })
+})
