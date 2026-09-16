@@ -119,7 +119,13 @@ export const datasetAsset: AssetDefinition = {
 
   isRowSelectable(row: LibraryRow): boolean {
     const dataset = row as DatasetTerm
-    return dataset.accessManagement !== 'open' && dataset.accessManagement !== 'external'
+    // Controlled and approved. The library never lists a controlled dataset the DAC has not
+    // approved, but the study page and submissions view ask for all of them, so without the
+    // approval test a pending dataset was pre-checked there and went into a request on one
+    // click - something the same user could not request from the library at all.
+    return dataset.accessManagement !== 'open'
+      && dataset.accessManagement !== 'external'
+      && dataset.dacApproval === true
   },
 
   computeRowSelection(_data: LibraryRow[], selectedDatasetIds: number[]): Set<string | number> {

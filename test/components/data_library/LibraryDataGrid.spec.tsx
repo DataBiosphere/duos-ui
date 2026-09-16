@@ -198,6 +198,20 @@ describe('LibraryDataGrid', () => {
       expect(screen.queryByRole('link', { name: /Export/ })).not.toBeInTheDocument()
     })
 
+    /**
+     * The column, not just the links. My Data Submissions supplies no exports and replaces the
+     * trailing column with its own 'actions' column, matched by field name - so once this one was
+     * renamed to 'export' it stopped being replaced and sat there permanently empty. Asserted
+     * through the grid rather than against makeDatasetColumns directly, because the grid used to
+     * default the prop to {} and erase the very distinction this relies on.
+     */
+    it('renders no Export column at all when exportableDatasets is not provided', () => {
+      mountGrid(
+        <LibraryDataGrid assetType={AssetType.DATASETS} data={[exportableDataset]} total={1} {...baseProps} />,
+      )
+      expect(screen.queryByRole('columnheader', { name: 'Export' })).not.toBeInTheDocument()
+    })
+
     it('does not render Export links for the Studies grid even if exportableDatasets is provided', () => {
       mountGrid(
         <LibraryDataGrid assetType={AssetType.STUDIES} data={studies} total={2} {...baseProps} exportableDatasets={exportableDatasets} />,
