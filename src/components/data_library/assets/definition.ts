@@ -55,6 +55,13 @@ export const STUDIES_AGG: AggregationDefinition = {
   },
 }
 
+/**
+ * Indexed values carry stray whitespace, and the option lists below are built
+ * from trimmed values — so a row compared untrimmed against a trimmed selection
+ * would be dropped by the very filter that offered it.
+ */
+export const trimmed = (value?: string): string => (value ?? '').trim()
+
 /** Union of every row type that can appear in the DataGrid */
 export type LibraryRow = DatasetTerm | StudyAggregation | ModelAsset | WorkspaceAsset | ClinicalTrialAsset | BiospecimenAsset | PublicationAsset | PresentationAsset | IntellectualPropertyAsset | FundingResourceAsset
 
