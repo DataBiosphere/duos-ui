@@ -416,3 +416,35 @@ describe('filterRegistry', () => {
     })
   })
 })
+
+// A wrong `study.assets.*` path type-checks and silently matches nothing, so
+// pin each one. The multi-value shape is a should-array of match_phrase.
+describe('filterRegistry — model and workspace query clauses', () => {
+  it.each([
+    ['modelFormat', 'study.assets.models.format'],
+    ['modelLicense', 'study.assets.models.license'],
+    ['modelCloud', 'study.assets.models.cloud'],
+    ['modelTags', 'study.assets.models.tags'],
+    ['workspaceCloud', 'study.assets.workspaces.cloud'],
+    ['workspaceAccess', 'study.assets.workspaces.access'],
+  ])('%s queries %s', (key, field) => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: ['x'] })
+    expect(clauses).toEqual([{ bool: { should: [{ match_phrase: { [field]: 'x' } }] } }])
+  })
+
+  it('ORs every selected value within one clause', () => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, modelCloud: ['AWS', 'GCP'] })
+    expect(clauses).toEqual([{
+      bool: {
+        should: [
+          { match_phrase: { 'study.assets.models.cloud': 'AWS' } },
+          { match_phrase: { 'study.assets.models.cloud': 'GCP' } },
+        ],
+      },
+    }])
+  })
+
+  it('builds no clause for an unselected filter', () => {
+    expect(buildActiveFilterClauses(EMPTY_FILTERS)).toEqual([])
+  })
+})

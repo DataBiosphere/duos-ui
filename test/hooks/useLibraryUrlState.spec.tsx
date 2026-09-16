@@ -156,6 +156,26 @@ describe('useLibraryUrlState', () => {
     expect(document.getElementById('sortOrder')!.textContent).toBe('none')
   })
 
+  // Registered in FilterState but absent from ARRAY_FILTER_PARAM_CONFIG, these
+  // parse to nothing and never serialize, so a selection dies on reload.
+  it.each([
+    ['modelFormat', 'ONNX'],
+    ['modelLicense', 'MIT'],
+    ['modelCloud', 'AWS'],
+    ['modelTags', 'vision'],
+    ['workspaceCloud', 'GCP'],
+    ['workspaceAccess', 'open'],
+  ])('round-trips %s through the URL', (key, value) => {
+    render(
+      <MemoryRouter initialEntries={[`/?${key}=${value}`]}>
+        <TestComponent />
+      </MemoryRouter>,
+    )
+
+    const filters = JSON.parse(document.getElementById('filters')!.textContent!)
+    expect(filters[key]).toEqual([value])
+  })
+
   it('parses comma-containing array values as single filter values', () => {
     render(
       <MemoryRouter initialEntries={['/?clinicalTrialStatus=Active,%20not%20recruiting']}>
