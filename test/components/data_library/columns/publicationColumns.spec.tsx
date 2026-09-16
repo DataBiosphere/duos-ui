@@ -188,6 +188,18 @@ describe('makePublicationColumns — Datasets Cited column', () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Smith et al. 2024, dbGaP phs000123')
   })
 
+  // Hover alone would leave the citation unreachable without a pointer.
+  it('makes the citation cell focusable so the tooltip is not hover-only', () => {
+    renderCell('citation', true, { citation: true, datasetCitation: 'Smith et al. 2024' })
+    expect(screen.getByText('Yes')).toHaveAttribute('tabindex', '0')
+  })
+
+  // describeChild, so the citation is the description and not the name.
+  it('keeps Yes/No as the accessible name', () => {
+    renderCell('citation', true, { citation: true, datasetCitation: 'Smith et al. 2024' })
+    expect(screen.getByText('Yes')).toHaveAccessibleDescription('Smith et al. 2024')
+  })
+
   it('renders no tooltip when the row carries no citation text', async () => {
     const user = userEvent.setup()
     renderCell('citation', false, { citation: false, datasetCitation: '' })

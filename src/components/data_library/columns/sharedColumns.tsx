@@ -77,6 +77,15 @@ export const citationColumn = <T extends GridValidRowModel>(
   renderCell: (params) => {
     const text = getCitationText(params.row)
     const label = params.row.citation ? 'Yes' : 'No'
-    return text ? <Tooltip title={text} placement="top"><Box>{label}</Box></Tooltip> : <Box>{label}</Box>
+    if (!text) {
+      return <Box>{label}</Box>
+    }
+    // describeChild keeps Yes/No as the accessible name; tabIndex makes the
+    // citation reachable by keyboard, not hover only.
+    return (
+      <Tooltip title={text} placement="top" describeChild>
+        <Box tabIndex={0}>{label}</Box>
+      </Tooltip>
+    )
   },
 })
