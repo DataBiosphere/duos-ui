@@ -19,7 +19,7 @@ const DarCard = ({ dar }: { dar: DatasetStatisticsDar }) => {
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {dar.projectTitle || 'Untitled project'}
           </Typography>
-          <Typography variant="body2">PI: {dar.piName || 'Not provided'}</Typography>
+          {/* Institution, not the requester's name: the section says where a grant went. */}
           <Typography variant="body2">Institution: {dar.institutionName || 'Not provided'}</Typography>
           <Typography variant="caption" color="text.secondary">Submitted {submissionDate}</Typography>
         </Box>
