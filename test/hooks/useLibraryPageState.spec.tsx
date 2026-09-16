@@ -5,7 +5,7 @@ import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import { AssetType, FilterState, LibraryVersionNew } from 'src/types/library'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
-import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
+import { useLibraryTabCounts, useOptionCorpus } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 
 vi.mock('src/hooks/useLibraryData')
@@ -49,21 +49,26 @@ const tabCountsResponse = {
 
 const updateUrlState = vi.fn()
 
-// The counts query and the visible tab's option corpus are the same query with
-// different filter sets, so the mock answers from one function of the filters.
+// Both observers answer from one function of the filters. Cleared, not just
+// re-stubbed, because tests read `mock.calls`.
 const mockCorpus = (
   responseFor: (filters: FilterState) => unknown,
   isPlaceholderFor: (filters: FilterState) => boolean = () => false,
 ) => {
-  // Cleared, not just re-stubbed: one test reads `mock.calls` to check which
-  // filter sets were queried, and calls accumulate across tests otherwise.
   vi.mocked(useLibraryTabCounts).mockClear()
+  vi.mocked(useOptionCorpus).mockClear()
   vi.mocked(useLibraryTabCounts).mockImplementation((_config, filters: FilterState) => ({
     data: responseFor(filters),
     isFetching: false,
     isPlaceholderData: isPlaceholderFor(filters),
     error: null,
   } as unknown as ReturnType<typeof useLibraryTabCounts>))
+  vi.mocked(useOptionCorpus).mockImplementation((_config, filters: FilterState, _term, enabled) => ({
+    data: enabled ? responseFor(filters) : undefined,
+    isFetching: false,
+    isPlaceholderData: enabled && isPlaceholderFor(filters),
+    error: null,
+  } as unknown as ReturnType<typeof useOptionCorpus>))
 }
 
 const setup = (tab: AssetType, filters: FilterState = EMPTY_FILTERS) => {
@@ -270,8 +275,7 @@ describe('useLibraryPageState — data use modifier options', () => {
 })
 
 describe('useLibraryPageState — full-corpus filter options', () => {
-  // One study carrying two workspaces, so an option list can be derived from
-  // the shared response for a tab that is not the one on screen.
+  // Two workspaces in one study, so options can be derived off-tab.
   const bucket = {
     key: 1,
     study_details: {
@@ -306,8 +310,7 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     mockCorpus(() => responseWithBucket)
   })
 
-  // Previously these lists were read off `data.items`, which is only populated
-  // for the tab being rendered, so they went empty the moment the user left it.
+  // These used to read `data.items`, so they emptied when the user left the tab.
   it('populates an option list even while a different tab is active', () => {
     setup(AssetType.STUDIES)
     const { result } = renderHook(() => useLibraryPageState(libraryConfig))
@@ -345,9 +348,7 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     expect(result.current.availableFilters.workspaceTools.map(o => o.value)).toEqual(['Jupyter', 'WDL'])
   })
 
-  // The filter clauses match whole studies, so a selection removes every study
-  // with no matching workspace from the response — a value living only in one of
-  // those studies cannot be recovered by ignoring the filter client-side.
+  // No client-side pass can recover a study the response never carried.
   it('offers a value whose only study the active filter removes from the response', () => {
     const oneWorkspaceStudy = (studyId: number, platform: string) => ({
       key: studyId,
@@ -373,24 +374,20 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     expect(result.current.data?.items).toHaveLength(1)
   })
 
-  // Only the asset's own keys are dropped. A filter owned by another tab still
-  // scopes the corpus, so the options cannot offer a value the grid excludes.
+  // Other tabs' filters still scope the corpus, so options match the grid.
   it('keeps filters owned by other tabs applied when deriving an asset\'s options', () => {
     setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['Terra'], accessManagement: ['controlled'] })
     renderHook(() => useLibraryPageState(libraryConfig))
 
-    // Two calls: the counts query with every filter, and the Workspaces corpus
-    // with only the Workspaces keys cleared.
-    const corpusFilters = vi.mocked(useLibraryTabCounts).mock.calls.map(call => call[1])
-    expect(corpusFilters).toContainEqual(expect.objectContaining({ workspacePlatform: [], accessManagement: ['controlled'] }))
-    expect(corpusFilters).toContainEqual(expect.objectContaining({ workspacePlatform: ['Terra'], accessManagement: ['controlled'] }))
+    // Counts keeps every filter; the corpus clears only the Workspaces keys.
+    expect(vi.mocked(useLibraryTabCounts).mock.calls.at(-1)?.[1])
+      .toEqual(expect.objectContaining({ workspacePlatform: ['Terra'], accessManagement: ['controlled'] }))
+    expect(vi.mocked(useOptionCorpus).mock.calls.at(-1)?.[1])
+      .toEqual(expect.objectContaining({ workspacePlatform: [], accessManagement: ['controlled'] }))
   })
 
-  // Self-exclusion cannot help here: the excluding filter belongs to another
-  // tab, so it stays applied to the option corpus too and the selected value is
-  // absent from every response. Without re-adding it the checkbox disappears
-  // while the filter stays active, and the external chips skip keys the current
-  // tab renders itself — leaving nothing to clear it with but a full reset.
+  // The excluding filter is another tab's, so it scopes the corpus too and
+  // self-exclusion cannot bring the value back.
   it('keeps a selected value listed when another tab\'s filter excludes every study carrying it', () => {
     const anvilOnly = {
       key: 2,
@@ -418,28 +415,22 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     expect(platform?.options?.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
   })
 
-  // A tab whose options come from a static enum consumes no corpus, so clearing
-  // its keys would mount a second full aggregation that nothing reads.
+  // A static-enum tab reads no corpus, so the extra request would be wasted.
   it('mounts no second aggregation for a tab with no corpus-derived options', () => {
     setup(AssetType.PRESENTATIONS, { ...EMPTY_FILTERS, datasetsCited: true })
     renderHook(() => useLibraryPageState(libraryConfig))
 
-    const filterSets = vi.mocked(useLibraryTabCounts).mock.calls.map(call => call[1])
-    // Both observers ask for the same filters, so they share one request.
-    expect(new Set(filterSets.map(f => JSON.stringify(f))).size).toBe(1)
+    expect(vi.mocked(useOptionCorpus).mock.calls.at(-1)?.[3]).toBe(false)
   })
 
   it('still mounts the cleared-keys aggregation for a corpus-derived tab', () => {
     setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['Terra'] })
     renderHook(() => useLibraryPageState(libraryConfig))
 
-    const filterSets = vi.mocked(useLibraryTabCounts).mock.calls.map(call => call[1])
-    expect(new Set(filterSets.map(f => JSON.stringify(f))).size).toBe(2)
+    expect(vi.mocked(useOptionCorpus).mock.calls.at(-1)?.[3]).toBe(true)
   })
 
-  // The corpus query keeps the previous answer as placeholder data, so on a tab
-  // switch it is still scoped by the *previous* tab's cleared keys. Trusting it
-  // would offer values from studies the current filters exclude.
+  // Placeholder data is still scoped by the previous tab's cleared keys.
   it('ignores a stale corpus and falls back to the counts response', () => {
     const anvilOnly = {
       key: 2,
@@ -448,8 +439,7 @@ describe('useLibraryPageState — full-corpus filter options', () => {
       },
     }
 
-    // The corpus (cleared set) still holds both platforms from before the
-    // switch; the counts response, keyed on the live filters, holds only AnVIL.
+    // The stale corpus holds both platforms; the live counts response holds AnVIL.
     mockCorpus(
       filters => (filters.workspacePlatform.length === 0
         ? responseWithBucket
@@ -462,10 +452,8 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['AnVIL'])
   })
 
-  // The cleared-set corpus is a distinct query key, so it starts empty on the
-  // first render after a filter edit. Options fall back to the counts response
-  // until it lands, which is narrowed by that very filter — so the list is
-  // briefly short rather than blank, and widens once the corpus arrives.
+  // Until the corpus lands, options fall back to the narrower counts response:
+  // briefly short rather than blank.
   it('falls back to the counts response until the cleared-set corpus arrives', () => {
     const terraOnly = {
       key: 1,

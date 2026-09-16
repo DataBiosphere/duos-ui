@@ -638,11 +638,9 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
 }
 
 /**
- * A selected value can be missing from the corpus its options are derived from,
- * because a filter owned by another tab excludes every study carrying it.
- * Without re-adding it the checkbox vanishes while the filter stays active, and
- * the external chips deliberately skip keys the current tab renders itself — so
- * nothing is left to clear it with short of resetting every filter.
+ * Another tab's filter can exclude every study carrying a selected value, and the
+ * external chips skip keys this tab owns — so without re-adding it there is no
+ * way to uncheck it.
  */
 const withSelectedValues = (
   key: FilterKey,

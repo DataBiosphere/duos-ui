@@ -78,3 +78,50 @@ export const useLibraryTabCounts = (
   filters: FilterState,
   queryTerm: string,
 ) => useQuery(tabCountsQueryOptions(libraryConfig, filters, queryTerm))
+
+export const LIBRARY_OPTION_CORPUS_QUERY_KEY = 'library-option-corpus'
+
+/**
+ * The corpus a tab's options come from, scoped by every filter but its own.
+ * Leaner than the counts query because options only read `study.assets.*` and
+ * never the badge aggregations. Disabled when the counts response already is it.
+ */
+export const useOptionCorpus = (
+  libraryConfig: LibraryVersionNew,
+  filters: FilterState,
+  queryTerm: string,
+  enabled: boolean,
+) => useQuery({
+  queryKey: [LIBRARY_OPTION_CORPUS_QUERY_KEY, libraryConfig.key, filters, queryTerm],
+  queryFn: async (): Promise<ElasticsearchResponse> => {
+    const { queryChunks, filterQuery } = buildCommonQueryClauses(
+      libraryConfig,
+      filters,
+      queryTerm,
+      ALL_SEARCH_FIELDS,
+    )
+    return DataSet.searchDatasetIndexV2({
+      size: 0,
+      query: {
+        bool: {
+          must: queryChunks,
+          ...(filterQuery.length > 0 && { filter: filterQuery }),
+        },
+      },
+      aggs: {
+        studies: {
+          terms: { field: 'study.studyId', size: 10000 },
+          aggs: {
+            study_details: {
+              top_hits: { size: 1, _source: ['study.studyId', 'study.assets.*'] },
+            },
+          },
+        },
+      },
+    })
+  },
+  enabled,
+  staleTime: 5 * 60 * 1000,
+  retry: 1,
+  placeholderData: (previousData?: ElasticsearchResponse) => previousData,
+})

@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
-import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
+import { useLibraryTabCounts, useOptionCorpus } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { computeTabCounts, STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
 import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, PaginationState, SortOrder } from 'src/types/library'
@@ -22,9 +22,8 @@ import {
 import { SecondaryDataUseTerms } from 'src/components/forms/SecondaryDataUseTerms'
 import { getFormattedName } from 'src/components/forms/SelectOptionInterface'
 
-// Assets whose filter options are read off the corpus rather than a static enum.
-// Membership is what earns the extra cleared-keys aggregation below, so an asset
-// joins in the same change that gives it a corpus-derived option.
+// Options read off the corpus rather than a static enum. Membership earns the
+// extra cleared-keys aggregation, so an asset joins when it gains such an option.
 const CORPUS_DERIVED_OPTION_ASSETS = new Set<AssetType>([
   AssetType.WORKSPACES,
   AssetType.CLINICAL_TRIALS,
@@ -120,22 +119,8 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     urlState.query ?? '',
   )
 
-  // Only these assets read their option lists off the corpus; the rest derive
-  // theirs from static enums or hold no checkbox filters at all, so clearing
-  // their keys would mount a second aggregation request that nothing consumes.
-  // An asset joins this set in the same change that gives it a derived option.
-  // The visible tab's option lists have to come from a corpus its *own* filters
-  // never narrowed. The filter clauses match whole studies, so selecting one
-  // value drops every study without it, and a sibling value living only in one
-  // of those studies could never be offered again — no client-side pass can
-  // recover a study the response never carried. Filters owned by other tabs
-  // stay applied, so the options stay scoped the way the grid is.
-  //
-  // Only the visible tab gets its own corpus. Every other asset reads the
-  // counts response, which is already loaded: their options are only used to
-  // label external chips, and those fall back to the raw value. Clearing the
-  // tab's own keys is a no-op unless it actually has one set, so this shares
-  // the counts query's key — and its request — until it does.
+  // Clauses match whole studies, so a tab's own filter would permanently hide
+  // sibling values. Other tabs' filters stay applied, matching the grid's scope.
   const optionCorpusFilters = useMemo(
     () => (CORPUS_DERIVED_OPTION_ASSETS.has(urlState.tab)
       ? assetFilterRegistry[urlState.tab].visibleFilters.reduce<FilterState>(
@@ -145,12 +130,18 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
       : urlState.filters),
     [urlState.tab, urlState.filters],
   )
-  const { data: visibleTabCorpus, isPlaceholderData: isCorpusStale } = useLibraryTabCounts(libraryConfig, optionCorpusFilters, urlState.query ?? '')
+  // Nothing to fetch unless clearing widened anything; the counts response is it.
+  const needsOwnCorpus = optionCorpusFilters !== urlState.filters
+    && JSON.stringify(optionCorpusFilters) !== JSON.stringify(urlState.filters)
+  const { data: visibleTabCorpus, isPlaceholderData: isCorpusStale } = useOptionCorpus(
+    libraryConfig,
+    optionCorpusFilters,
+    urlState.query ?? '',
+    needsOwnCorpus,
+  )
 
-  // While this query serves placeholder data it is still answering the *previous*
-  // filter set — on a tab switch, the previous tab's cleared keys. Using it then
-  // would offer values from studies the current filters exclude, so the counts
-  // response stands in: narrower for a moment, but scoped the way the grid is.
+  // Placeholder data still answers the previous filter set, so fall back to the
+  // counts response rather than offer values the current filters exclude.
   const optionCorpusByAsset = useMemo(
     () => new Map(STUDY_ASSET_TABS.map(assetType =>
       [assetType, assetType === urlState.tab && CORPUS_DERIVED_OPTION_ASSETS.has(assetType) && !isCorpusStale
@@ -207,22 +198,12 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
         .sort((a, b) => a.localeCompare(b))
         .map(value => ({ value, label: value }))
 
-    // Option lists are derived from every study the shared aggregation returns,
-    // not just the active tab's current page: re-running an asset's own
-    // `transformResponse` with an unbounded page size yields its full flattened
-    // item list whichever tab the user is viewing. This mirrors
-    // `libraryCounts.ts`, which already calls `transformResponse` a second time
-    // with different pagination purely to read `.total`. Without it an option
-    // list only reflects whichever page is on screen, and goes empty the moment
-    // the user switches tabs.
-    //
-    // STUDIES_AGG caps at 10,000 study buckets, so a value carried only by
-    // studies past that cap is not offered — the same cap the badge counts and
-    // these grids already live with, not a limit this introduces.
+    // An unbounded page size re-runs the asset's own transform over every study
+    // the aggregation returned, so options do not depend on the visible page.
+    // STUDIES_AGG caps at 10,000 buckets — the cap the badges already live with.
     const FULL_CORPUS_PAGINATION: PaginationState = { page: 0, pageSize: Number.MAX_SAFE_INTEGER }
 
-    // The asset's own keys are cleared in this corpus's filter set, so its
-    // transform does no row-level filtering of its own either.
+    // Keys are already cleared upstream, so the transform filters no rows here.
     const fullCorpusItems = <T>(assetType: AssetType): T[] => {
       const response = optionCorpusByAsset.get(assetType)
       return (response
