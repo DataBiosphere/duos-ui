@@ -717,9 +717,7 @@ describe('LibraryFilters — presentation and publication sections render', () =
   })
 })
 
-// A key registered as a checkbox in filterRegistry still renders nothing unless
-// LibraryFilters recognises it in CHECKBOX_FILTER_KEYS, so assert on the panel
-// rather than on getFilterSectionsForAsset's output.
+// A returned section is not a rendered one, so assert on the panel.
 describe('LibraryFilters — IP and funding sections render', () => {
   const withOptions: AvailableFilters = {
     ...availableFilters,
