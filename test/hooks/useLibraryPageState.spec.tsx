@@ -341,7 +341,7 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     expect(result.current.data?.items).toHaveLength(1)
   })
 
-  it('clears the whole asset\'s filters when deriving its options, so sibling lists stay complete', () => {
+  it('clears every corpus-derived key of the asset, so sibling lists stay complete', () => {
     setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['Terra'] })
     const { result } = renderHook(() => useLibraryPageState(libraryConfig))
 
@@ -415,6 +415,49 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     expect(platform?.options?.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
   })
 
+  // Otherwise a registry only a trial outside the window carries is offered,
+  // and checking it empties the grid.
+  it('keeps the asset\'s non-option filters applied when deriving its options', () => {
+    const trialStudy = {
+      key: 1,
+      study_details: {
+        hits: {
+          hits: [{
+            _source: {
+              study: {
+                studyId: 1,
+                studyName: 'Study 1',
+                assets: {
+                  clinicalTrials: [
+                    { clinicalTrialId: 't1', registry: 'ClinicalTrials.gov', startDate: '2024-01-01', endDate: '2024-06-01' },
+                    { clinicalTrialId: 't2', registry: 'EudraCT', startDate: '2019-01-01', endDate: '2019-06-01' },
+                  ],
+                },
+              },
+            },
+          }],
+        },
+      },
+    }
+    mockCorpus(() => ({
+      aggregations: { total_studies: { value: 1 }, datasets_count: { doc_count: 0 }, studies: { buckets: [trialStudy] } },
+    }))
+
+    setup(AssetType.CLINICAL_TRIALS, {
+      ...EMPTY_FILTERS,
+      clinicalTrialDates: { startDate: '2023-01-01', endDate: '2025-01-01' },
+    })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    // The 2019 trial is outside the window, so its registry is not offered.
+    expect(result.current.availableFilters.clinicalTrialRegistry.map(o => o.value)).toEqual(['ClinicalTrials.gov'])
+    expect(vi.mocked(useOptionCorpus).mock.calls.at(-1)?.[1])
+      .toEqual(expect.objectContaining({
+        clinicalTrialRegistry: [],
+        clinicalTrialDates: { startDate: '2023-01-01', endDate: '2025-01-01' },
+      }))
+  })
+
   // A static-enum tab reads no corpus, so the extra request would be wasted.
   it('mounts no second aggregation for a tab with no corpus-derived options', () => {
     setup(AssetType.PRESENTATIONS, { ...EMPTY_FILTERS, datasetsCited: true })
@@ -428,6 +471,17 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     renderHook(() => useLibraryPageState(libraryConfig))
 
     expect(vi.mocked(useOptionCorpus).mock.calls.at(-1)?.[3]).toBe(true)
+  })
+
+  // Only a corpus-derived key clears, so a date edit widens nothing to re-fetch.
+  it('mounts no second aggregation when only a non-option filter of the tab is set', () => {
+    setup(AssetType.CLINICAL_TRIALS, {
+      ...EMPTY_FILTERS,
+      clinicalTrialDates: { startDate: '2023-01-01', endDate: '2025-01-01' },
+    })
+    renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(vi.mocked(useOptionCorpus).mock.calls.at(-1)?.[3]).toBe(false)
   })
 
   // Placeholder data is still scoped by the previous tab's cleared keys.

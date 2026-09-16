@@ -3,9 +3,8 @@ import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
 import { useLibraryTabCounts, useOptionCorpus } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { computeTabCounts, STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
-import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, PaginationState, SortOrder } from 'src/types/library'
+import { ActiveFilterChip, AssetType, AvailableFilters, FilterKey, FilterState, LibraryVersionNew, PaginationState, SortOrder } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
-import { assetFilterRegistry } from 'src/libs/dataLibraryFilterConfig'
 import {
   EMPTY_FILTERS,
   getExternalActiveFilters,
@@ -22,13 +21,12 @@ import {
 import { SecondaryDataUseTerms } from 'src/components/forms/SecondaryDataUseTerms'
 import { getFormattedName } from 'src/components/forms/SelectOptionInterface'
 
-// Options read off the corpus rather than a static enum. Membership earns the
-// extra cleared-keys aggregation, so an asset joins when it gains such an option.
-const CORPUS_DERIVED_OPTION_ASSETS = new Set<AssetType>([
-  AssetType.WORKSPACES,
-  AssetType.CLINICAL_TRIALS,
-  AssetType.BIOSPECIMENS,
-])
+// Filters whose options are read off the corpus rather than a static enum.
+const CORPUS_DERIVED_OPTION_KEYS: Partial<Record<AssetType, FilterKey[]>> = {
+  [AssetType.WORKSPACES]: ['workspaceTools', 'workspacePlatform'],
+  [AssetType.CLINICAL_TRIALS]: ['clinicalTrialRegistry'],
+  [AssetType.BIOSPECIMENS]: ['biospecimenDataUse'],
+}
 
 /**
  * Panel wording for the secondary data use codes, keyed by the code the index stores.
@@ -119,20 +117,17 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     urlState.query ?? '',
   )
 
-  // Clauses match whole studies, so a tab's own filter would permanently hide
-  // sibling values. Other tabs' filters stay applied, matching the grid's scope.
+  // Clauses match whole studies, so a corpus-derived filter would permanently hide
+  // its own sibling values. Every other filter stays applied, matching the grid.
   const optionCorpusFilters = useMemo(
-    () => (CORPUS_DERIVED_OPTION_ASSETS.has(urlState.tab)
-      ? assetFilterRegistry[urlState.tab].visibleFilters.reduce<FilterState>(
-          (cleared, key) => ({ ...cleared, [key]: EMPTY_FILTERS[key] }),
-          urlState.filters,
-        )
-      : urlState.filters),
+    () => (CORPUS_DERIVED_OPTION_KEYS[urlState.tab] ?? []).reduce<FilterState>(
+      (cleared, key) => ({ ...cleared, [key]: EMPTY_FILTERS[key] }),
+      urlState.filters,
+    ),
     [urlState.tab, urlState.filters],
   )
   // Nothing to fetch unless clearing widened anything; the counts response is it.
-  const needsOwnCorpus = optionCorpusFilters !== urlState.filters
-    && JSON.stringify(optionCorpusFilters) !== JSON.stringify(urlState.filters)
+  const needsOwnCorpus = JSON.stringify(optionCorpusFilters) !== JSON.stringify(urlState.filters)
   const { data: visibleTabCorpus, isPlaceholderData: isCorpusStale } = useOptionCorpus(
     libraryConfig,
     optionCorpusFilters,
@@ -140,15 +135,17 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     needsOwnCorpus,
   )
 
-  // Placeholder data still answers the previous filter set, so fall back to the
-  // counts response rather than offer values the current filters exclude.
-  const optionCorpusByAsset = useMemo(
-    () => new Map(STUDY_ASSET_TABS.map(assetType =>
-      [assetType, assetType === urlState.tab && CORPUS_DERIVED_OPTION_ASSETS.has(assetType) && !isCorpusStale
-        ? (visibleTabCorpus ?? tabCountsResponse)
-        : tabCountsResponse])),
-    [urlState.tab, visibleTabCorpus, isCorpusStale, tabCountsResponse],
-  )
+  // Each response is paired with the filters it answers, so the transform can
+  // re-apply the client-side predicates. Placeholder data answers the previous set.
+  const optionCorpusByAsset = useMemo(() => {
+    const ownCorpus = !isCorpusStale && visibleTabCorpus
+    return new Map(STUDY_ASSET_TABS.map(assetType => [
+      assetType,
+      assetType === urlState.tab && ownCorpus
+        ? { response: ownCorpus, filters: optionCorpusFilters }
+        : { response: tabCountsResponse, filters: urlState.filters },
+    ]))
+  }, [urlState.tab, urlState.filters, optionCorpusFilters, visibleTabCorpus, isCorpusStale, tabCountsResponse])
 
   // Badge counts are derived at render time from the shared response with the
   // *current* filters — the same inputs the study-asset grids are derived from
@@ -203,11 +200,11 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     // STUDIES_AGG caps at 10,000 buckets — the cap the badges already live with.
     const FULL_CORPUS_PAGINATION: PaginationState = { page: 0, pageSize: Number.MAX_SAFE_INTEGER }
 
-    // Keys are already cleared upstream, so the transform filters no rows here.
+    // Corpus keys are cleared upstream; the rest still reject rows here.
     const fullCorpusItems = <T>(assetType: AssetType): T[] => {
-      const response = optionCorpusByAsset.get(assetType)
+      const { response, filters } = optionCorpusByAsset.get(assetType) ?? {}
       return (response
-        ? assetRegistry[assetType].transformResponse(response, FULL_CORPUS_PAGINATION, EMPTY_FILTERS).items
+        ? assetRegistry[assetType].transformResponse(response, FULL_CORPUS_PAGINATION, filters).items
         : []) as T[]
     }
 
