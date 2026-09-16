@@ -506,3 +506,15 @@ describe('filterRegistry — presentation and publication query clauses', () => 
     expect(buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: { after: '2024-12-31', before: '2024-01-01' } })).toEqual([])
   })
 })
+
+// A wrong `study.assets.*` path type-checks and silently matches nothing.
+describe('filterRegistry — IP and funding query clauses', () => {
+  it.each([
+    ['ipType', 'study.assets.intellectualProperties.type'],
+    ['ipStatus', 'study.assets.intellectualProperties.status'],
+    ['fundingFunderName', 'study.assets.funding.funderName'],
+  ])('%s queries %s', (key, field) => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: ['x'] })
+    expect(clauses).toEqual([{ bool: { should: [{ match_phrase: { [field]: 'x' } }] } }])
+  })
+})

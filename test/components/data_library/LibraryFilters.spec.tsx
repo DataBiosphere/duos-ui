@@ -716,3 +716,44 @@ describe('LibraryFilters — presentation and publication sections render', () =
     }
   })
 })
+
+// A key registered as a checkbox in filterRegistry still renders nothing unless
+// LibraryFilters recognises it in CHECKBOX_FILTER_KEYS, so assert on the panel
+// rather than on getFilterSectionsForAsset's output.
+describe('LibraryFilters — IP and funding sections render', () => {
+  const withOptions: AvailableFilters = {
+    ...availableFilters,
+    ipType: [{ value: 'Patent', label: 'Patent' }],
+    ipStatus: [{ value: 'Granted', label: 'Granted' }],
+    fundingFunderName: [{ value: 'NIH', label: 'NIH' }],
+  }
+
+  it('renders the Intellectual Property sections alongside the existing date range', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.INTELLECTUAL_PROPERTY, withOptions)}
+      />,
+    )
+    for (const label of ['Type', 'Status', 'Filed Date']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+    expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
+  })
+
+  it('renders the Funding Resources sections', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.FUNDING_RESOURCES, withOptions)}
+      />,
+    )
+    for (const label of ['Funder Name', 'Funding Dates']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+  })
+})
