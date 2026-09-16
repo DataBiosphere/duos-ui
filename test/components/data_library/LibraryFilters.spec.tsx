@@ -674,3 +674,46 @@ describe('LibraryFilters — model and workspace sections render', () => {
     }
   })
 })
+
+// A key registered as a checkbox in filterRegistry still renders nothing unless
+// LibraryFilters recognises it in CHECKBOX_FILTER_KEYS, so assert on the panel
+// rather than on getFilterSectionsForAsset's output.
+describe('LibraryFilters — presentation and publication sections render', () => {
+  const withOptions: AvailableFilters = {
+    ...availableFilters,
+    presentationEvent: [{ value: 'ASHG 2024', label: 'ASHG 2024' }],
+    presentationFormat: [{ value: 'Oral', label: 'Oral' }],
+    presentationAccess: [{ value: 'open', label: 'open' }],
+    publicationJournal: [{ value: 'Nature', label: 'Nature' }],
+    publicationAccess: [{ value: 'open', label: 'open' }],
+  }
+
+  it('renders every Presentations section, including the date range', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.PRESENTATIONS, withOptions)}
+      />,
+    )
+    for (const label of ['Event', 'Format', 'Access', 'Presentation Date']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+    expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
+  })
+
+  it('renders every Publications section, including the date range', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.PUBLICATIONS, withOptions)}
+      />,
+    )
+    for (const label of ['Journal', 'Access', 'Published Date']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+  })
+})

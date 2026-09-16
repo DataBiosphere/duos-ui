@@ -453,3 +453,30 @@ describe('filterRegistry — model and workspace query clauses', () => {
     expect(buildActiveFilterClauses(EMPTY_FILTERS)).toEqual([])
   })
 })
+
+// A wrong `study.assets.*` path type-checks and silently matches nothing.
+describe('filterRegistry — presentation and publication query clauses', () => {
+  it.each([
+    ['presentationEvent', 'study.assets.presentations.event'],
+    ['presentationFormat', 'study.assets.presentations.format'],
+    ['presentationAccess', 'study.assets.presentations.access'],
+    ['publicationJournal', 'study.assets.publications.journal'],
+    ['publicationAccess', 'study.assets.publications.access'],
+  ])('%s queries %s', (key, field) => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: ['x'] })
+    expect(clauses).toEqual([{ bool: { should: [{ match_phrase: { [field]: 'x' } }] } }])
+  })
+
+  it.each([
+    ['presentationDate', 'study.assets.presentations.date'],
+    ['publicationPublishedDate', 'study.assets.publications.publishedDate'],
+  ])('%s builds a range clause on %s', (key, field) => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: { after: '2024-01-01', before: '2024-12-31' } })
+    expect(clauses).toEqual([{ range: { [field]: { gte: '2024-01-01', lte: '2024-12-31' } } }])
+  })
+
+  // Inverted bounds must read as inactive everywhere, clause included.
+  it.each(['presentationDate', 'publicationPublishedDate'])('%s builds no clause for inverted bounds', (key) => {
+    expect(buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: { after: '2024-12-31', before: '2024-01-01' } })).toEqual([])
+  })
+})
