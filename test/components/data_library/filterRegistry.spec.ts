@@ -474,7 +474,10 @@ describe('filterRegistry — model and workspace query clauses', () => {
   })
 })
 
-// A wrong `study.assets.*` path type-checks and silently matches nothing.
+// A wrong `study.assets.*` path type-checks and silently matches nothing. These
+// match the exact indexed value, not the analyzed phrase: the option lists are
+// built from the corpus, and match_phrase would also admit 'Nature Genetics'
+// for 'Nature' — inflating every other tab's badge, which never re-checks rows.
 describe('filterRegistry — presentation and publication query clauses', () => {
   it.each([
     ['presentationEvent', 'study.assets.presentations.event'],
@@ -482,9 +485,9 @@ describe('filterRegistry — presentation and publication query clauses', () => 
     ['presentationAccess', 'study.assets.presentations.access'],
     ['publicationJournal', 'study.assets.publications.journal'],
     ['publicationAccess', 'study.assets.publications.access'],
-  ])('%s queries %s', (key, field) => {
+  ])('%s queries %s on its keyword subfield', (key, field) => {
     const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: ['x'] })
-    expect(clauses).toEqual([{ bool: { should: [{ match_phrase: { [field]: 'x' } }] } }])
+    expect(clauses).toEqual([{ bool: { should: [{ term: { [`${field}.keyword`]: 'x' } }] } }])
   })
 
   it.each([

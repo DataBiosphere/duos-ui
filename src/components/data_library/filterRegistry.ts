@@ -350,6 +350,18 @@ const matchAny = (field: string, terms: string[]): QueryClause => ({
   },
 })
 
+// The shared studies aggregation feeds every tab's badge, but only the owning
+// tab re-checks rows, so a clause looser than its predicate leaks studies into
+// tabs that never filter them out. `.keyword` is the dynamic-mapping subfield
+// `study.studyName.keyword` already relies on.
+const termAny = (field: string, terms: string[]): QueryClause => ({
+  bool: {
+    should: terms.map(term => ({
+      term: { [`${field}.keyword`]: term },
+    })),
+  },
+})
+
 const dateRangeClause = (field: string, range: { gte?: string, lte?: string }): QueryClause => ({
   range: {
     [field]: {
@@ -604,21 +616,21 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
     label: 'Event',
     buildClause: filters =>
       filters.presentationEvent.length > 0
-        ? matchAny('study.assets.presentations.event', filters.presentationEvent)
+        ? termAny('study.assets.presentations.event', filters.presentationEvent)
         : undefined,
   },
   presentationFormat: {
     label: 'Format (Presentations)',
     buildClause: filters =>
       filters.presentationFormat.length > 0
-        ? matchAny('study.assets.presentations.format', filters.presentationFormat)
+        ? termAny('study.assets.presentations.format', filters.presentationFormat)
         : undefined,
   },
   presentationAccess: {
     label: 'Access (Presentations)',
     buildClause: filters =>
       filters.presentationAccess.length > 0
-        ? matchAny('study.assets.presentations.access', filters.presentationAccess)
+        ? termAny('study.assets.presentations.access', filters.presentationAccess)
         : undefined,
   },
   presentationDate: {
@@ -635,14 +647,14 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
     label: 'Journal',
     buildClause: filters =>
       filters.publicationJournal.length > 0
-        ? matchAny('study.assets.publications.journal', filters.publicationJournal)
+        ? termAny('study.assets.publications.journal', filters.publicationJournal)
         : undefined,
   },
   publicationAccess: {
     label: 'Access (Publications)',
     buildClause: filters =>
       filters.publicationAccess.length > 0
-        ? matchAny('study.assets.publications.access', filters.publicationAccess)
+        ? termAny('study.assets.publications.access', filters.publicationAccess)
         : undefined,
   },
   publicationPublishedDate: {
