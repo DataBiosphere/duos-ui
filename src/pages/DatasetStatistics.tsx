@@ -372,6 +372,18 @@ export default function DatasetStatistics() {
                       </div>
                     </div>
                   </div>,
+                  <div key="requester" style={{ display: 'flex', backgroundColor: 'white' }}>
+                    <div style={{ display: 'flex', paddingRight: '2rem' }}>
+                      <div style={Styles.SMALL_BOLD}>PI:</div>
+                      <div style={{ fontSize: Theme.font.size.small }}>{dar.piName || 'Not provided'}</div>
+                    </div>
+                    <div style={{ display: 'flex', paddingRight: '2rem' }}>
+                      <div style={Styles.SMALL_BOLD}>Institution:</div>
+                      <div style={{ fontSize: Theme.font.size.small }}>
+                        {dar.institutionName || 'Not provided'}
+                      </div>
+                    </div>
+                  </div>,
                   <div key="summary" style={{ backgroundColor: 'white' }}>
                     <div style={Styles.SMALL_BOLD}>NonTechnical Summary:</div>
                     <div style={{ fontSize: Theme.font.size.small, padding: '0 1rem 1rem 1rem' }}>
