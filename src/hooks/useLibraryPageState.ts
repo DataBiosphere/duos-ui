@@ -132,12 +132,18 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
       : urlState.filters),
     [isStudyAssetTab, urlState.tab, urlState.filters],
   )
-  const { data: visibleTabCorpus } = useLibraryTabCounts(libraryConfig, optionCorpusFilters, urlState.query ?? '')
+  const { data: visibleTabCorpus, isPlaceholderData: isCorpusStale } = useLibraryTabCounts(libraryConfig, optionCorpusFilters, urlState.query ?? '')
 
+  // While this query serves placeholder data it is still answering the *previous*
+  // filter set — on a tab switch, the previous tab's cleared keys. Using it then
+  // would offer values from studies the current filters exclude, so the counts
+  // response stands in: narrower for a moment, but scoped the way the grid is.
   const optionCorpusByAsset = useMemo(
     () => new Map(STUDY_ASSET_TABS.map(assetType =>
-      [assetType, assetType === urlState.tab ? (visibleTabCorpus ?? tabCountsResponse) : tabCountsResponse])),
-    [urlState.tab, visibleTabCorpus, tabCountsResponse],
+      [assetType, assetType === urlState.tab && !isCorpusStale
+        ? (visibleTabCorpus ?? tabCountsResponse)
+        : tabCountsResponse])),
+    [urlState.tab, visibleTabCorpus, isCorpusStale, tabCountsResponse],
   )
 
   // Badge counts are derived at render time from the shared response with the

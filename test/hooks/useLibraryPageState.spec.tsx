@@ -51,13 +51,17 @@ const updateUrlState = vi.fn()
 
 // The counts query and the visible tab's option corpus are the same query with
 // different filter sets, so the mock answers from one function of the filters.
-const mockCorpus = (responseFor: (filters: FilterState) => unknown) => {
+const mockCorpus = (
+  responseFor: (filters: FilterState) => unknown,
+  isPlaceholderFor: (filters: FilterState) => boolean = () => false,
+) => {
   // Cleared, not just re-stubbed: one test reads `mock.calls` to check which
   // filter sets were queried, and calls accumulate across tests otherwise.
   vi.mocked(useLibraryTabCounts).mockClear()
   vi.mocked(useLibraryTabCounts).mockImplementation((_config, filters: FilterState) => ({
     data: responseFor(filters),
     isFetching: false,
+    isPlaceholderData: isPlaceholderFor(filters),
     error: null,
   } as unknown as ReturnType<typeof useLibraryTabCounts>))
 }
@@ -412,6 +416,31 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     // ...but the panel still lists Terra, so it can be unchecked.
     const platform = result.current.filterSections.find(section => section.key === 'workspacePlatform')
     expect(platform?.options?.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
+  })
+
+  // The corpus query keeps the previous answer as placeholder data, so on a tab
+  // switch it is still scoped by the *previous* tab's cleared keys. Trusting it
+  // would offer values from studies the current filters exclude.
+  it('ignores a stale corpus and falls back to the counts response', () => {
+    const anvilOnly = {
+      key: 2,
+      study_details: {
+        hits: { hits: [{ _source: { study: { studyId: 2, studyName: 'Study 2', assets: { workspaces: [{ workspaceId: 'w2', platform: 'AnVIL' }] } } } }] },
+      },
+    }
+
+    // The corpus (cleared set) still holds both platforms from before the
+    // switch; the counts response, keyed on the live filters, holds only AnVIL.
+    mockCorpus(
+      filters => (filters.workspacePlatform.length === 0
+        ? responseWithBucket
+        : { aggregations: { total_studies: { value: 1 }, datasets_count: { doc_count: 0 }, studies: { buckets: [anvilOnly] } } }),
+      filters => filters.workspacePlatform.length === 0,
+    )
+    setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['AnVIL'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['AnVIL'])
   })
 
   // The cleared-set corpus is a distinct query key, so it starts empty on the
