@@ -653,7 +653,7 @@ describe('LibraryFilters — model and workspace sections render', () => {
         sections={getFilterSectionsForAsset(AssetType.MODELS, withOptions)}
       />,
     )
-    for (const label of ['Format', 'License', 'Cloud (AI Models)', 'Tags']) {
+    for (const label of ['Format (AI Models)', 'License', 'Cloud (AI Models)', 'Tags']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
     expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
@@ -668,7 +668,7 @@ describe('LibraryFilters — model and workspace sections render', () => {
         sections={getFilterSectionsForAsset(AssetType.WORKSPACES, withOptions)}
       />,
     )
-    for (const label of ['Tools', 'Platform', 'Cloud (Workspaces)', 'Access']) {
+    for (const label of ['Tools', 'Platform', 'Cloud (Workspaces)', 'Access (Workspaces)']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
   })
@@ -693,7 +693,7 @@ describe('LibraryFilters — presentation and publication sections render', () =
         sections={getFilterSectionsForAsset(AssetType.PRESENTATIONS, withOptions)}
       />,
     )
-    for (const label of ['Event', 'Format', 'Access', 'Presentation Date']) {
+    for (const label of ['Event', 'Format (Presentations)', 'Access (Presentations)', 'Presentation Date']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
     expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
@@ -708,7 +708,7 @@ describe('LibraryFilters — presentation and publication sections render', () =
         sections={getFilterSectionsForAsset(AssetType.PUBLICATIONS, withOptions)}
       />,
     )
-    for (const label of ['Journal', 'Access', 'Published Date']) {
+    for (const label of ['Journal', 'Access (Publications)', 'Published Date']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
   })

@@ -559,7 +559,7 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         : undefined,
   },
   modelFormat: {
-    label: 'Format',
+    label: 'Format (AI Models)',
     buildClause: filters =>
       filters.modelFormat.length > 0
         ? matchAny('study.assets.models.format', filters.modelFormat)
@@ -594,7 +594,7 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         : undefined,
   },
   workspaceAccess: {
-    label: 'Access',
+    label: 'Access (Workspaces)',
     buildClause: filters =>
       filters.workspaceAccess.length > 0
         ? matchAny('study.assets.workspaces.access', filters.workspaceAccess)
@@ -608,14 +608,14 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         : undefined,
   },
   presentationFormat: {
-    label: 'Format',
+    label: 'Format (Presentations)',
     buildClause: filters =>
       filters.presentationFormat.length > 0
         ? matchAny('study.assets.presentations.format', filters.presentationFormat)
         : undefined,
   },
   presentationAccess: {
-    label: 'Access',
+    label: 'Access (Presentations)',
     buildClause: filters =>
       filters.presentationAccess.length > 0
         ? matchAny('study.assets.presentations.access', filters.presentationAccess)
@@ -639,7 +639,7 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         : undefined,
   },
   publicationAccess: {
-    label: 'Access',
+    label: 'Access (Publications)',
     buildClause: filters =>
       filters.publicationAccess.length > 0
         ? matchAny('study.assets.publications.access', filters.publicationAccess)

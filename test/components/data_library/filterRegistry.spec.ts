@@ -72,6 +72,26 @@ describe('filterRegistry', () => {
     expect(presentationFilters.map(section => section.key)).toEqual(['presentationEvent', 'presentationFormat', 'presentationAccess', 'presentationDate', 'datasetsCited'])
   })
 
+  // A filter set on one tab shows as a chip on every other, so two keys sharing
+  // a label render as the same control twice in one panel. 'Data Use' predates
+  // this work; anything new sharing a label is the bug this pins.
+  it('gives every filter a label no other filter shares', () => {
+    const labelsByKey = new Map<string, string>()
+    for (const tab of Object.values(AssetType)) {
+      for (const section of getFilterSectionsForAsset(tab, availableFilters)) {
+        labelsByKey.set(section.key, section.label)
+      }
+    }
+
+    const keysByLabel = new Map<string, string[]>()
+    for (const [key, label] of labelsByKey) {
+      keysByLabel.set(label, [...(keysByLabel.get(label) ?? []), key])
+    }
+
+    const collisions = [...keysByLabel.entries()].filter(([, keys]) => keys.length > 1)
+    expect(collisions).toEqual([['Data Use', ['dataUse', 'biospecimenDataUse']]])
+  })
+
   describe('re-adding a selected value the corpus no longer offers', () => {
     const options = (values: string[]) => values.map(value => ({ value, label: value }))
 
