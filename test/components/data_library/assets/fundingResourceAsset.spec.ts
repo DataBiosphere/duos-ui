@@ -418,8 +418,7 @@ describe('fundingResourceAsset — indexed values are normalized', () => {
   it('matches a row whose indexed funderName carries stray whitespace', () => {
     const response = makeResponse([makeBucket('1', [{ fundingId: 'a1', funderName: '  NIH ' }])])
 
-    // Options are built from trimmed values, so an untrimmed row would be
-    // dropped by the filter that offered it.
+    // Options are trimmed, so an untrimmed row is dropped by its own filter.
     const result = fundingResourceAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, fundingFunderName: ['NIH'] })
 
     expect(result.items).toHaveLength(1)

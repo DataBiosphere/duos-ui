@@ -251,8 +251,7 @@ describe('intellectualPropertyAsset — transformResponse', () => {
     expect((result.items[0] as IntellectualPropertyAsset).ipId).toBe('ip-in-range')
   })
 
-  // The ES range clause never matches a document missing the field, so a row
-  // with no filing date must not slip through a one-sided bound here either.
+  // A row with no filing date must not slip through a one-sided bound.
   it('excludes an asset with no filing date from either one-sided bound', () => {
     const response = makeResponse([
       makeBucket(1, [
@@ -408,8 +407,7 @@ describe('intellectualPropertyAsset — indexed values are normalized', () => {
   it('matches a row whose indexed type carries stray whitespace', () => {
     const response = makeResponse([makeBucket(1, [{ ipId: 'a1', type: '  Patent ' }])])
 
-    // Options are built from trimmed values, so an untrimmed row would be
-    // dropped by the filter that offered it.
+    // Options are trimmed, so an untrimmed row is dropped by its own filter.
     const result = intellectualPropertyAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, ipType: ['Patent'] })
 
     expect(result.items).toHaveLength(1)

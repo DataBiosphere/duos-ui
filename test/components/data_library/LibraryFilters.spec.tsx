@@ -717,7 +717,6 @@ describe('LibraryFilters — presentation and publication sections render', () =
   })
 })
 
-// A returned section is not a rendered one, so assert on the panel.
 describe('LibraryFilters — IP and funding sections render', () => {
   const withOptions: AvailableFilters = {
     ...availableFilters,
