@@ -5,9 +5,8 @@ import { Box, Chip, Tooltip } from '@mui/material'
 const MAX_VISIBLE_CHIPS = 3
 
 /**
- * A list of values as chips, collapsing everything past the third into a `+N`
- * chip whose tooltip carries the rest. `valueGetter` joins them so the grid's
- * own sorting and quick filter see the text, not the array.
+ * Chips capped at three, the rest behind a `+N` tooltip. `valueGetter` joins them
+ * so the quick filter matches text, not the array; the column stays unsortable.
  */
 export const chipListColumn = <T extends GridValidRowModel>(
   field: string,

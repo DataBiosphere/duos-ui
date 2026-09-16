@@ -26,10 +26,8 @@ import { COUNT_BADGE_COLOR, COUNT_BADGE_SX } from 'src/components/data_library/c
 import { isFilterActive, isInvertedDateRange } from 'src/components/data_library/filterRegistry'
 import { muiCheckboxFix, muiTextFieldFix } from 'src/libs/muiThemeFix'
 
-// Derived from FilterState so the panel cannot disagree with the registry about
-// which keys hold what, and dispatch below reads each section's own `control`
-// rather than repeating the key lists here — a new filter renders with no
-// change to this file.
+// Dispatch reads each section's own `control` instead of a key list here, so a
+// newly registered filter renders without touching this file.
 type KeysWithValue<V> = { [K in FilterKey]: FilterState[K] extends V ? K : never }[FilterKey]
 type CheckboxFilterKey = KeysWithValue<string[]>
 type BooleanFilterKey = KeysWithValue<boolean | undefined>
@@ -190,8 +188,7 @@ const isCheckboxSection = (section: LibraryFilterSection): section is LibraryFil
 const isBooleanSection = (section: LibraryFilterSection): section is LibraryFilterSection & { key: BooleanFilterKey } =>
   section.control === 'boolean'
 
-// A date filter with no DATE_SECTION_CONFIG entry has no field labels to render,
-// so it is skipped rather than throwing; the per-tab render tests catch it.
+// No DATE_SECTION_CONFIG entry means no field labels, so skip rather than throw.
 const isDateSection = (section: LibraryFilterSection): section is LibraryFilterSection & { key: DateFilterSectionKey } =>
   section.control === 'dateRange' && section.key in DATE_SECTION_CONFIG
 
