@@ -85,6 +85,8 @@ describe('modelAsset — searchFields', () => {
     expect(modelAsset.searchFields).toContain('study.assets.models.format')
     expect(modelAsset.searchFields).toContain('study.assets.models.license')
     expect(modelAsset.searchFields).toContain('study.assets.models.tags')
+    // Cloud is a displayed, filterable field, so free-text search must reach it.
+    expect(modelAsset.searchFields).toContain('study.assets.models.cloud')
   })
 
   it('includes study-level fields', () => {
@@ -447,5 +449,25 @@ describe('modelAsset — makeColumns', () => {
     const a = modelAsset.makeColumns()
     const b = modelAsset.makeColumns({})
     expect(a.map(c => c.field)).toEqual(b.map(c => c.field))
+  })
+})
+
+describe('modelAsset — indexed values are normalized', () => {
+  it('matches a row whose indexed format carries stray whitespace', () => {
+    const response = makeResponse([makeBucket(1, [{ modelId: 'w1', format: '  ONNX ' }])])
+
+    // The option list is built from trimmed values, so the row has to be
+    // trimmed too or the filter that offered 'ONNX' drops the only row.
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+
+    expect(result.items).toHaveLength(1)
+  })
+
+  it('trims list-shaped values and drops the empties', () => {
+    const response = makeResponse([makeBucket(1, [{ modelId: 'w1', cloud: ['  AWS ', '  ', 'GCP'] }])])
+
+    const result = modelAsset.transformResponse(response, pagination)
+
+    expect((result.items[0] as ModelAsset).cloud).toEqual(['AWS', 'GCP'])
   })
 })

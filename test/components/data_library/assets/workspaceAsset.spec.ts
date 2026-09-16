@@ -85,6 +85,8 @@ describe('workspaceAsset — searchFields', () => {
   it('includes workspace-specific fields', () => {
     expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.name')
     expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.platform')
+    // Cloud is a displayed, filterable field, so free-text search must reach it.
+    expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.cloud')
     expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.description')
     expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.tools')
     expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.tags')
@@ -437,5 +439,25 @@ describe('workspaceAsset — makeColumns', () => {
     const a = workspaceAsset.makeColumns()
     const b = workspaceAsset.makeColumns({})
     expect(a.map(c => c.field)).toEqual(b.map(c => c.field))
+  })
+})
+
+describe('workspaceAsset — indexed values are normalized', () => {
+  it('matches a row whose indexed access carries stray whitespace', () => {
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', access: '  open ' }])])
+
+    // The option list is built from trimmed values, so the row has to be
+    // trimmed too or the filter that offered 'open' drops the only row.
+    const result = workspaceAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, workspaceAccess: ['open'] })
+
+    expect(result.items).toHaveLength(1)
+  })
+
+  it('trims list-shaped values and drops the empties', () => {
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: ['  AWS ', '  ', 'GCP'] }])])
+
+    const result = workspaceAsset.transformResponse(response, pagination)
+
+    expect((result.items[0] as WorkspaceAsset).cloud).toEqual(['AWS', 'GCP'])
   })
 })

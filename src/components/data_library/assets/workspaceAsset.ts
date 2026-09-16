@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, WorkspaceStudyAggregationResponse, QueryClause } from 'src/types/elastic'
 import { FilterState, WorkspaceAsset, PaginationState, SortState } from 'src/types/library'
 import { makeWorkspaceColumns } from 'src/components/data_library/columns/workspaceColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, toStringArray } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, toStringArray, trimmed } from 'src/components/data_library/assets/definition'
 
 const includesIgnoreCase = (source: string | undefined, values: string[]) => {
   if (values.length === 0) {
@@ -51,6 +51,7 @@ export const workspaceAsset: AssetDefinition = {
     'study.assets.workspaces.platform',
     'study.assets.workspaces.description',
     'study.assets.workspaces.tools',
+    'study.assets.workspaces.cloud',
     'study.assets.workspaces.tags',
     'study.assets.workspaces.access',
     'study.assets.workspaces.url',
@@ -94,12 +95,12 @@ export const workspaceAsset: AssetDefinition = {
           studyId: bucket.key,
           studyName: studyData.studyName || '',
           name: workspace.name || '',
-          platform: workspace.platform || '',
+          platform: trimmed(workspace.platform),
           url: workspace.url || '',
           description: workspace.description || '',
           tools: toStringArray(workspace.tools),
           cloud: toStringArray(workspace.cloud),
-          access: workspace.access || '',
+          access: trimmed(workspace.access),
           tags: toStringArray(workspace.tags),
         }
 

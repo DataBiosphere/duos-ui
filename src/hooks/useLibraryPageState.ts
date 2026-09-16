@@ -23,7 +23,8 @@ import { getFormattedName } from 'src/components/forms/SelectOptionInterface'
 
 // Filters whose options are read off the corpus rather than a static enum.
 const CORPUS_DERIVED_OPTION_KEYS: Partial<Record<AssetType, FilterKey[]>> = {
-  [AssetType.WORKSPACES]: ['workspaceTools', 'workspacePlatform'],
+  [AssetType.MODELS]: ['modelFormat', 'modelLicense', 'modelCloud', 'modelTags'],
+  [AssetType.WORKSPACES]: ['workspaceTools', 'workspacePlatform', 'workspaceCloud', 'workspaceAccess'],
   [AssetType.CLINICAL_TRIALS]: ['clinicalTrialRegistry'],
   [AssetType.BIOSPECIMENS]: ['biospecimenDataUse'],
 }

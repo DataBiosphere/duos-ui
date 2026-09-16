@@ -627,9 +627,8 @@ describe('LibraryFilters — collapseable panel', () => {
   })
 })
 
-// A key registered as a checkbox in filterRegistry still renders nothing unless
-// LibraryFilters recognises it in CHECKBOX_FILTER_KEYS, so assert on the panel
-// rather than on getFilterSectionsForAsset's output.
+// getFilterSectionsForAsset returning a section is not the same as the panel
+// rendering it, so assert on the panel.
 describe('LibraryFilters — model and workspace sections render', () => {
   const withOptions: AvailableFilters = {
     ...availableFilters,
