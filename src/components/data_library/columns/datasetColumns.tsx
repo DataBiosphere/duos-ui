@@ -45,7 +45,7 @@ const makeSoApprovalColumn = (soApprovalModelByDatasetId: Map<number, SoApproval
  * Column definitions for dataset view
  */
 export const makeDatasetColumns = (
-  exportableDatasets: ExportableDatasets = {},
+  exportableDatasets?: ExportableDatasets,
   radarEnabledDatasetIds: Set<number> = new Set(),
   soApprovalModelByDatasetId?: Map<number, SoApprovalModel>,
   selectedDatasetIds: number[] = [],
@@ -167,19 +167,28 @@ export const makeDatasetColumns = (
     },
   },
   ...(soApprovalModelByDatasetId ? [makeSoApprovalColumn(soApprovalModelByDatasetId)] : []),
-  {
-    field: 'export',
-    headerName: 'Export',
-    width: 120,
-    sortable: false,
-    renderCell: (params) => {
-      const exportableSnapshots = exportableDatasets[params.row.datasetIdentifier] || []
-      if (exportableSnapshots.length === 0) return null
-      return (
-        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-          <DatasetExportButton snapshots={exportableSnapshots} />
-        </Box>
-      )
-    },
-  },
+  // Only for callers that actually supply exports. A page that never passes them - My Data
+  // Submissions - used to have this column replaced by its own 'actions' column; once this one
+  // was renamed to 'export' the field-based override in LibraryDataGrid stopped matching and
+  // both survived, leaving a permanently empty Export column there. Omitting it at the source
+  // is better than relying on a name collision to hide it.
+  ...(exportableDatasets
+    ? [makeExportColumn(exportableDatasets)]
+    : []),
 ]
+
+const makeExportColumn = (exportableDatasets: ExportableDatasets): GridColDef<DatasetTerm> => ({
+  field: 'export',
+  headerName: 'Export',
+  width: 120,
+  sortable: false,
+  renderCell: (params) => {
+    const exportableSnapshots = exportableDatasets[params.row.datasetIdentifier] || []
+    if (exportableSnapshots.length === 0) return null
+    return (
+      <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+        <DatasetExportButton snapshots={exportableSnapshots} />
+      </Box>
+    )
+  },
+})

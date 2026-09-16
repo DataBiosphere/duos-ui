@@ -44,10 +44,16 @@ export const useStudyComments = (studyId: string) => useInfiniteQuery({
   initialPageParam: 0,
   queryFn: ({ pageParam }) => StudyComments.listComments(studyId, pageParam),
   getNextPageParam: (lastPage, allPages) => {
-    const loaded = allPages.reduce((count, page) => count + page.comments.length, 0)
+    // Two different counts, deliberately. The next offset is how many rows the server has handed
+    // over, repeats included, since that is what its offset means. Whether there is more to ask
+    // for is judged on distinct ids, because the list de-duplicates: a boundary comment repeated
+    // when someone posts mid-paging would otherwise push the raw count to `total` and hide 'Show
+    // more' while fewer than `total` comments were actually on screen.
+    const fetched = allPages.reduce((count, page) => count + page.comments.length, 0)
+    const distinct = new Set(allPages.flatMap(page => page.comments.map(c => c.studyCommentId))).size
     // A page shorter than requested also means the end, so a comment deleted mid-paging cannot
     // leave this asking for an offset past the list forever.
-    return loaded < lastPage.total && lastPage.comments.length > 0 ? loaded : undefined
+    return distinct < lastPage.total && lastPage.comments.length > 0 ? fetched : undefined
   },
   staleTime: STUDY_STALE_TIME,
 })
@@ -182,8 +188,10 @@ export const useStudySelectableDatasetIds = (studyId: string, total: number, ena
     // index.max_result_window (10,000 by default), so this is bounded by how large a study can
     // get: the largest in production holds 67 datasets, three orders of magnitude below the
     // limit. If a study ever did exceed it the request fails rather than truncating, and the
-    // caller falls back to selecting the visible page - degraded, not silently wrong. Paging or
-    // a bulk-id endpoint is the fix if studies ever approach that size.
+    // caller then selects nothing at all and says so, rather than defaulting to the page in view
+    // - a partial default is the one outcome worse than none, since 'Apply for Access' would
+    // silently request a subset. Paging or a bulk-id endpoint is the fix if studies ever
+    // approach that size.
     // Same query the grid runs, so the two can't disagree about which datasets belong here.
     const response = await DataSet.searchDatasetIndexV2(buildStudyDatasetsQuery(studyId, pagination))
     const page = datasetAsset.transformResponse(response, pagination)
