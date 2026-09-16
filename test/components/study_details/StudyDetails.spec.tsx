@@ -1039,8 +1039,9 @@ describe('Study details test', () => {
     mountComponent()
 
     expect(await screen.findByText('Cancer genomics')).toBeInTheDocument()
-    expect(screen.getByText('PI: Dr Researcher')).toBeInTheDocument()
     expect(screen.getByText('Institution: Research University')).toBeInTheDocument()
+    // The section names the institution a grant went to, not the person who holds it
+    expect(screen.queryByText(/Dr Researcher/)).not.toBeInTheDocument()
     expect(screen.getByText('Current')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Show research use statement' }))
     expect(screen.getByText('Study cancer outcomes.')).toBeInTheDocument()
