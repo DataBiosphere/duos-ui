@@ -27,6 +27,8 @@ const CORPUS_DERIVED_OPTION_KEYS: Partial<Record<AssetType, FilterKey[]>> = {
   [AssetType.WORKSPACES]: ['workspaceTools', 'workspacePlatform', 'workspaceCloud', 'workspaceAccess'],
   [AssetType.PRESENTATIONS]: ['presentationEvent', 'presentationFormat', 'presentationAccess'],
   [AssetType.PUBLICATIONS]: ['publicationJournal', 'publicationAccess'],
+  [AssetType.INTELLECTUAL_PROPERTY]: ['ipType', 'ipStatus'],
+  [AssetType.FUNDING_RESOURCES]: ['fundingFunderName'],
   [AssetType.CLINICAL_TRIALS]: ['clinicalTrialRegistry'],
   [AssetType.BIOSPECIMENS]: ['biospecimenDataUse'],
 }

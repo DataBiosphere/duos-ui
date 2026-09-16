@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { FundingResourceStudyAggregationResponse, ElasticsearchQuery, ElasticsearchResponse, QueryClause } from 'src/types/elastic'
 import { FilterState, FundingResourceAsset, PaginationState, SortState } from 'src/types/library'
 import { makeFundingResourceColumns } from 'src/components/data_library/columns/fundingResourceColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, trimmed } from 'src/components/data_library/assets/definition'
 import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
 // The Elasticsearch clause for fundingDate only decides which *studies* enter
@@ -84,7 +84,7 @@ export const fundingResourceAsset: AssetDefinition = {
           fundingId: fundingResource.fundingId || `${bucket.key}-${fundingResourceIndex}`,
           studyId: bucket.key,
           studyName: studyData.studyName || '',
-          funderName: fundingResource.funderName || '',
+          funderName: trimmed(fundingResource.funderName),
           funderProgram: fundingResource.funderProgram || '',
           grantNumber: fundingResource.grantNumber || '',
           projectTitle: fundingResource.projectTitle || '',

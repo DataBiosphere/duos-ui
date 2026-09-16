@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, IntellectualPropertyStudyAggregationResponse, QueryClause } from 'src/types/elastic'
 import { FilterState, IntellectualPropertyAsset, PaginationState, SortState } from 'src/types/library'
 import { makeIntellectualPropertyColumns } from 'src/components/data_library/columns/intellectualPropertyColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, trimmed } from 'src/components/data_library/assets/definition'
 import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
 // The Elasticsearch clause for ipFiledDate only decides which *studies* enter
@@ -89,12 +89,12 @@ export const intellectualPropertyAsset: AssetDefinition = {
           ipId: ip.ipId || `${bucket.key}-${ipIndex}`,
           studyId: bucket.key,
           studyName: (studyData as { studyName?: string }).studyName || '',
-          type: ip.type || '',
+          type: trimmed(ip.type),
           title: ip.title || '',
           assignee: ip.assignee || '',
           patentNumber: ip.patentNumber || '',
           filingDate: ip.filingDate || '',
-          status: ip.status || '',
+          status: trimmed(ip.status),
           url: ip.url || '',
           contact: ip.contact || '',
           tags: ip.tags || [],

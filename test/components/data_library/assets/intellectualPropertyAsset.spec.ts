@@ -403,3 +403,15 @@ describe('intellectualPropertyAsset — makeColumns', () => {
     expect(fields).toContain('tags')
   })
 })
+
+describe('intellectualPropertyAsset — indexed values are normalized', () => {
+  it('matches a row whose indexed type carries stray whitespace', () => {
+    const response = makeResponse([makeBucket(1, [{ ipId: 'a1', type: '  Patent ' }])])
+
+    // Options are built from trimmed values, so an untrimmed row would be
+    // dropped by the filter that offered it.
+    const result = intellectualPropertyAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, ipType: ['Patent'] })
+
+    expect(result.items).toHaveLength(1)
+  })
+})
