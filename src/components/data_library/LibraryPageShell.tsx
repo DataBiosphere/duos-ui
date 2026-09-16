@@ -9,6 +9,12 @@ import SoApprovalReminderBanner from 'src/components/data_library/SoApprovalRemi
 import { ExportableDatasets, SoApprovalModel, TabConfig } from 'src/types/library'
 import { LibraryPageState } from 'src/hooks/useLibraryPageState'
 
+// Stable identities. Defaulting to a fresh [] / () => {} on every render gave LibraryDataGrid's
+// columns memo a new dependency each time, so every column definition was rebuilt and handed to
+// MUI DataGrid on any parent render - for exactly the consumers that omit these props.
+const NO_SELECTION: number[] = []
+const noop = () => {}
+
 interface GridExtras {
   selectedDatasetIds?: number[]
   onSelectionChange?: (ids: number[]) => void
@@ -67,8 +73,8 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
   } = pageState
 
   const {
-    selectedDatasetIds = [],
-    onSelectionChange = () => {},
+    selectedDatasetIds = NO_SELECTION,
+    onSelectionChange = noop,
     extraColumns,
     checkboxSelection = true,
     exportableDatasets,
