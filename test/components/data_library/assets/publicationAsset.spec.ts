@@ -310,8 +310,7 @@ describe('publicationAsset — transformResponse', () => {
     expect((result.items[0] as PublicationAsset).publicationId).toBe('p-in-range')
   })
 
-  // The ES range clause never matches a document missing the field, so a row
-  // with no date must not slip through a one-sided bound here either.
+  // A row with no date must not slip through a one-sided bound.
   it('excludes a publication with no published date from either one-sided bound', () => {
     const response = makeResponse([
       makeBucket(1, [
@@ -446,9 +445,7 @@ describe('publicationAsset — makeColumns', () => {
   })
 })
 
-// The Datasets Cited filter is still configured on this tab, and this transform
-// is what narrows the rows, so the predicate keeps its regression test until the
-// filter itself goes away.
+// Still configured on this tab, so the predicate keeps its test until it goes.
 describe('publicationAsset — datasetsCited row filtering', () => {
   const mixed = () => makeResponse([
     makeBucket(1, [
@@ -479,16 +476,14 @@ describe('publicationAsset — indexed values are normalized', () => {
   it('matches a row whose indexed journal carries stray whitespace', () => {
     const response = makeResponse([makeBucket(1, [{ publicationId: 'a1', journal: '  Nature ' }])])
 
-    // Options are built from trimmed values, so an untrimmed row would be
-    // dropped by the filter that offered it.
+    // Options are trimmed, so an untrimmed row is dropped by its own filter.
     const result = publicationAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, publicationJournal: ['Nature'] })
 
     expect(result.items).toHaveLength(1)
   })
 })
 
-// An inverted range builds no Elasticsearch clause, so the client-side pass must
-// not narrow either — otherwise the grid empties while the panel flags the range.
+// No clause is built, so the client-side pass must not narrow either.
 describe('publicationAsset — inverted publicationPublishedDate', () => {
   it('leaves rows visible when the bounds are crossed', () => {
     const response = makeResponse([

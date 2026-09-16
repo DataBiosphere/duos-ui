@@ -400,8 +400,7 @@ const PresentationPublicationHarness = ({ filters }: { filters: FilterState }) =
   )
 }
 
-// A typo in any `param` silently drops the filter when a URL is shared or
-// reloaded, and the generic implementation cannot catch that.
+// A typo in any `param` silently drops the filter on reload.
 describe('useLibraryUrlState — presentation and publication params', () => {
   it.each([
     ['presentationEvent', 'presentedAt'],

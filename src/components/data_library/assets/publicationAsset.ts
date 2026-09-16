@@ -5,10 +5,8 @@ import { makePublicationColumns } from 'src/components/data_library/columns/publ
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
-// The Elasticsearch clauses for these filters only decide which *studies* enter
-// the shared aggregation; every publication of a qualifying study comes back, so
-// each row must be re-checked here or the grid (and the tab-count badge derived
-// from this same function) includes publications that don't match.
+// The clauses only pick which studies are aggregated, so every publication of a
+// qualifying study comes back and each row needs re-checking here.
 const matchesPublicationFilters = (publication: PublicationAsset, filters?: FilterState) => {
   if (!filters) {
     return true
@@ -26,14 +24,12 @@ const matchesPublicationFilters = (publication: PublicationAsset, filters?: Filt
     return false
   }
 
-  // Inverted bounds build no ES clause, so they must not narrow rows here
-  // either — otherwise the grid empties while the panel flags the range.
+  // Inverted bounds build no clause, so they must not narrow rows here either.
   if (!isFilterActive('publicationPublishedDate', filters)) {
     return true
   }
 
-  // A missing date matches neither bound, as in the ES range clause, which
-  // never matches a document without the field.
+  // A missing date matches neither bound, as the ES range clause does.
   const { after, before } = filters.publicationPublishedDate
   if (after && (!publication.publishedDate || publication.publishedDate < after)) {
     return false

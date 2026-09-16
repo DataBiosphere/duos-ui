@@ -5,10 +5,8 @@ import { makePresentationColumns } from 'src/components/data_library/columns/pre
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
 import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
-// The Elasticsearch clauses for these filters only decide which *studies* enter
-// the shared aggregation; every presentation of a qualifying study comes back, so
-// each row must be re-checked here or the grid (and the tab-count badge derived
-// from this same function) includes presentations that don't match.
+// The clauses only pick which studies are aggregated, so every presentation of a
+// qualifying study comes back and each row needs re-checking here.
 const matchesPresentationFilters = (presentation: PresentationAsset, filters?: FilterState) => {
   if (!filters) {
     return true
@@ -30,14 +28,12 @@ const matchesPresentationFilters = (presentation: PresentationAsset, filters?: F
     return false
   }
 
-  // Inverted bounds build no ES clause, so they must not narrow rows here
-  // either — otherwise the grid empties while the panel flags the range.
+  // Inverted bounds build no clause, so they must not narrow rows here either.
   if (!isFilterActive('presentationDate', filters)) {
     return true
   }
 
-  // A missing date matches neither bound, as in the ES range clause, which
-  // never matches a document without the field.
+  // A missing date matches neither bound, as the ES range clause does.
   const { after, before } = filters.presentationDate
   if (after && (!presentation.date || presentation.date < after)) {
     return false

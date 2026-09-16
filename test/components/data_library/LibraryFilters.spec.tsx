@@ -632,8 +632,7 @@ describe('LibraryFilters — collapseable panel', () => {
   })
 })
 
-// getFilterSectionsForAsset returning a section is not the same as the panel
-// rendering it, so assert on the panel.
+// A returned section is not a rendered one, so assert on the panel.
 describe('LibraryFilters — model and workspace sections render', () => {
   const withOptions: AvailableFilters = {
     ...availableFilters,
