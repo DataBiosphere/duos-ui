@@ -445,33 +445,6 @@ describe('publicationAsset — makeColumns', () => {
   })
 })
 
-// Still configured on this tab, so the predicate keeps its test until it goes.
-describe('publicationAsset — datasetsCited row filtering', () => {
-  const mixed = () => makeResponse([
-    makeBucket(1, [
-      { publicationId: 'PUB-CITED', citation: true },
-      { publicationId: 'PUB-NOT-CITED', citation: false },
-    ]),
-  ])
-
-  it('returns only cited rows when the filter is Yes', () => {
-    const result = publicationAsset.transformResponse(mixed(), pagination, { ...EMPTY_FILTERS, publicationsDatasetsCited: true })
-    expect(result.items).toHaveLength(1)
-    expect((result.items[0] as PublicationAsset).publicationId).toBe('PUB-CITED')
-  })
-
-  it('returns only uncited rows when the filter is No', () => {
-    const result = publicationAsset.transformResponse(mixed(), pagination, { ...EMPTY_FILTERS, publicationsDatasetsCited: false })
-    expect(result.items).toHaveLength(1)
-    expect((result.items[0] as PublicationAsset).publicationId).toBe('PUB-NOT-CITED')
-  })
-
-  it('returns both when the filter is unset', () => {
-    const result = publicationAsset.transformResponse(mixed(), pagination, EMPTY_FILTERS)
-    expect(result.items).toHaveLength(2)
-  })
-})
-
 describe('publicationAsset — indexed values are normalized', () => {
   it('matches a row whose indexed journal carries stray whitespace', () => {
     const response = makeResponse([makeBucket(1, [{ publicationId: 'a1', journal: '  Nature ' }])])

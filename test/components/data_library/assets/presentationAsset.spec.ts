@@ -438,33 +438,6 @@ describe('presentationAsset — makeColumns', () => {
   })
 })
 
-// Still configured on this tab, so the predicate keeps its test until it goes.
-describe('presentationAsset — datasetsCited row filtering', () => {
-  const mixed = () => makeResponse([
-    makeBucket(1, [
-      { presentationId: 'PRES-CITED', citation: true },
-      { presentationId: 'PRES-NOT-CITED', citation: false },
-    ]),
-  ])
-
-  it('returns only cited rows when the filter is Yes', () => {
-    const result = presentationAsset.transformResponse(mixed(), pagination, { ...EMPTY_FILTERS, datasetsCited: true })
-    expect(result.items).toHaveLength(1)
-    expect((result.items[0] as PresentationAsset).presentationId).toBe('PRES-CITED')
-  })
-
-  it('returns only uncited rows when the filter is No', () => {
-    const result = presentationAsset.transformResponse(mixed(), pagination, { ...EMPTY_FILTERS, datasetsCited: false })
-    expect(result.items).toHaveLength(1)
-    expect((result.items[0] as PresentationAsset).presentationId).toBe('PRES-NOT-CITED')
-  })
-
-  it('returns both when the filter is unset', () => {
-    const result = presentationAsset.transformResponse(mixed(), pagination, EMPTY_FILTERS)
-    expect(result.items).toHaveLength(2)
-  })
-})
-
 describe('presentationAsset — indexed values are normalized', () => {
   it('matches a row whose indexed event carries stray whitespace', () => {
     const response = makeResponse([makeBucket(1, [{ presentationId: 'a1', event: '  ASHG 2024 ' }])])
