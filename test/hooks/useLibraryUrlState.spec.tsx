@@ -327,8 +327,7 @@ describe('useLibraryUrlState — retired datasets-cited params', () => {
     },
   )
 
-  // updateState serializes over a copy of the current params, so without an
-  // explicit delete an old link's param rides along in the URL forever.
+  // Without an explicit delete an old link's param persists forever.
   it('strips the retired params on the next URL write', () => {
     renderWithRouter(<RetiredParamHarness />, { route: '/?datasetsCited=true&presentationsDatasetsCited=true&publicationsDatasetsCited=false' })
     fireEvent.click(document.getElementById('set-query')!)

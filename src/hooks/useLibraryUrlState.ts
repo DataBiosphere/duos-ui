@@ -98,8 +98,7 @@ const RANGE_FILTER_PARAM_CONFIG: RangeFilterParamConfig[] = [
   },
 ]
 
-// Params from filters this app no longer offers (the presentation/publication
-// "Datasets Cited" booleans).
+// Params from the retired presentation/publication "Datasets Cited" booleans.
 const RETIRED_PARAMS = ['datasetsCited', 'presentationsDatasetsCited', 'publicationsDatasetsCited']
 
 const DATE_FILTER_PARAM_CONFIG: DateFilterParamConfig[] = [
@@ -414,10 +413,8 @@ export const useLibraryUrlState = (defaultTab: AssetType = AssetType.DATASETS) =
     applySortOrderUpdate(updates, newParams)
     applyHideFiltersUpdate(updates, newParams)
 
-    // updateState writes over a copy of the current params, so a param nothing
-    // serializes any more is never removed. These are no longer parsed or
-    // written, and would otherwise ride along in the URL forever once an old
-    // link introduced them — including for a user who never touches a filter.
+    // Writes go over a copy of the current params, so an unserialized param is
+    // never dropped — an old link's would otherwise persist forever.
     RETIRED_PARAMS.forEach(param => newParams.delete(param))
 
     if (updates.filters !== undefined) {

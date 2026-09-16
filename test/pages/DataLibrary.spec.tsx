@@ -461,8 +461,7 @@ describe('DataLibrary', () => {
 
     renderLibrary('/?tab=presentations')
 
-    // Both presentations of the shared study are listed; the column, not a
-    // filter, is what tells them apart now.
+    // Both are listed; the column, not a filter, tells them apart now.
     expect(await screen.findByText('Nested Match Presentation')).toBeInTheDocument()
     expect(screen.getByText('Nested Non-Match Presentation')).toBeInTheDocument()
 

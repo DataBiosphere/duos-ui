@@ -129,8 +129,7 @@ describe('filterRegistry', () => {
 
   it('builds clauses for every active filter regardless of tab so rules combine', () => {
     const clauses = buildActiveFilterClauses(filters)
-    // accessManagement, dataType, participantCount, instantApproval and
-    // biospecimenType are all set.
+    // Five filters are set.
     expect(clauses).toHaveLength(5)
     const serialized = JSON.stringify(clauses)
 
@@ -236,8 +235,7 @@ describe('filterRegistry', () => {
     })
 
     it('excludes filters that the current tab renders itself', () => {
-      // Datasets renders accessManagement, dataType, participantCount and
-      // instantApproval, so only biospecimenType remains external.
+      // Datasets renders all but biospecimenType, so only that is external.
       const chips = getExternalActiveFilters(AssetType.DATASETS, filters, labelledFilters)
       expect(chips.map(chip => chip.key)).toEqual(['biospecimenType'])
     })

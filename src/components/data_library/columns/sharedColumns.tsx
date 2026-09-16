@@ -63,9 +63,8 @@ export const truncatedTextColumn = <T extends GridValidRowModel>(
 })
 
 /**
- * Whether the asset cites datasets. A row indexed without the field reads as
- * "No", matching how both transforms default it (`citation ?? false`). The
- * citation text itself, where the index carries it, goes in the tooltip.
+ * Reads "No" for a row indexed without the field, matching how both transforms
+ * default it (`citation ?? false`). The citation text goes in the tooltip.
  */
 export const citationColumn = <T extends GridValidRowModel>(
   getCitationText: (row: T) => string,
@@ -80,8 +79,7 @@ export const citationColumn = <T extends GridValidRowModel>(
     if (!text) {
       return <Box>{label}</Box>
     }
-    // describeChild keeps Yes/No as the accessible name; tabIndex makes the
-    // citation reachable by keyboard, not hover only.
+    // describeChild keeps Yes/No as the name; tabIndex makes it keyboard-reachable.
     return (
       <Tooltip title={text} placement="top" describeChild>
         <Box tabIndex={0}>{label}</Box>

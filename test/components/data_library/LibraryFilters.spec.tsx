@@ -187,8 +187,7 @@ describe('LibraryFilters', () => {
     expect(screen.queryByText('Access Request Process')).not.toBeInTheDocument()
   })
 
-  // Datasets Cited is a grid column now, so Presentations configures no filters
-  // of its own and must not inherit another tab's.
+  // It is a column now; the tab's own filters are untouched by the swap.
   it('no longer offers Datasets Cited on presentations, and inherits no other tab\'s filters', () => {
     render(
       <LibraryFilters
@@ -199,7 +198,6 @@ describe('LibraryFilters', () => {
       />,
     )
     expect(screen.queryByText('Datasets Cited (Presentations)?')).not.toBeInTheDocument()
-    // The tab's own filters are unaffected by the swap.
     expect(screen.getByText('Event')).toBeInTheDocument()
     expect(screen.queryByText('Participants')).not.toBeInTheDocument()
     expect(screen.queryByText('Access Request Process')).not.toBeInTheDocument()
