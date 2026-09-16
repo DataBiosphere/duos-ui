@@ -72,11 +72,18 @@ const StudyCommentsSection = ({ studyId }: { studyId: string }) => {
   const hasCard = hasActiveResearcherStatus()
   const canComment = hasResearcherRole && hasCard
   const cannotCommentReason = commentGateReason(hasResearcherRole, hasCard)
-  // Just the next page. This used to refetch every loaded page first, to realign boundaries when
-  // someone posted while the reader was paging - but that costs a request per loaded page each
-  // time, so walking a 200-comment study ran ~44 GETs instead of 8, and every one of them was
-  // another chance to fail. The id-keyed dedupe below already absorbs a repeated boundary item,
-  // which is what the refetch was really protecting against.
+  // Just the next page. This used to refetch every loaded page first to keep the offsets aligned,
+  // but that cost a request per loaded page on every click: walking a 200-comment study ran ~44
+  // GETs instead of 8, each one another chance to fail.
+  //
+  // What that bought, and what it costs to drop it. Comments are newest-first over an offset, so
+  // a comment posted while the reader is paging shifts the window down and repeats a boundary
+  // item - which the id-keyed dedupe above absorbs. A comment deleted mid-paging shifts it the
+  // other way, and one comment slips past the next offset unseen until something refetches.
+  // Paging still terminates, since the distinct count stops short of `total` and the walk ends on
+  // the first empty page, and any invalidation restores the full list. A stable cursor on the
+  // endpoint is the real fix; realigning the entire prefix on every click was an expensive way to
+  // buy it, and it never covered a deletion in the page being fetched either.
   const showMoreComments = () => fetchNextPage()
 
   return (
