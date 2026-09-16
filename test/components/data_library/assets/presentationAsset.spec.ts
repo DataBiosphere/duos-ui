@@ -467,3 +467,35 @@ describe('presentationAsset — datasetsCited row filtering', () => {
     expect(result.items).toHaveLength(2)
   })
 })
+
+describe('presentationAsset — indexed values are normalized', () => {
+  it('matches a row whose indexed event carries stray whitespace', () => {
+    const response = makeResponse([makeBucket(1, [{ presentationId: 'a1', event: '  ASHG 2024 ' }])])
+
+    // Options are built from trimmed values, so an untrimmed row would be
+    // dropped by the filter that offered it.
+    const result = presentationAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, presentationEvent: ['ASHG 2024'] })
+
+    expect(result.items).toHaveLength(1)
+  })
+})
+
+// An inverted range builds no Elasticsearch clause, so the client-side pass must
+// not narrow either — otherwise the grid empties while the panel flags the range.
+describe('presentationAsset — inverted presentationDate', () => {
+  it('leaves rows visible when the bounds are crossed', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { presentationId: 'a1', date: '2024-06-01' },
+        { presentationId: 'a2', date: '2020-01-01' },
+      ]),
+    ])
+
+    const result = presentationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      presentationDate: { after: '2024-12-31', before: '2024-01-01' },
+    })
+
+    expect(result.items).toHaveLength(2)
+  })
+})

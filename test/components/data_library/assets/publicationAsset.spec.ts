@@ -474,3 +474,35 @@ describe('publicationAsset — datasetsCited row filtering', () => {
     expect(result.items).toHaveLength(2)
   })
 })
+
+describe('publicationAsset — indexed values are normalized', () => {
+  it('matches a row whose indexed journal carries stray whitespace', () => {
+    const response = makeResponse([makeBucket(1, [{ publicationId: 'a1', journal: '  Nature ' }])])
+
+    // Options are built from trimmed values, so an untrimmed row would be
+    // dropped by the filter that offered it.
+    const result = publicationAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, publicationJournal: ['Nature'] })
+
+    expect(result.items).toHaveLength(1)
+  })
+})
+
+// An inverted range builds no Elasticsearch clause, so the client-side pass must
+// not narrow either — otherwise the grid empties while the panel flags the range.
+describe('publicationAsset — inverted publicationPublishedDate', () => {
+  it('leaves rows visible when the bounds are crossed', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { publicationId: 'a1', publishedDate: '2024-06-01' },
+        { publicationId: 'a2', publishedDate: '2020-01-01' },
+      ]),
+    ])
+
+    const result = publicationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      publicationPublishedDate: { after: '2024-12-31', before: '2024-01-01' },
+    })
+
+    expect(result.items).toHaveLength(2)
+  })
+})
