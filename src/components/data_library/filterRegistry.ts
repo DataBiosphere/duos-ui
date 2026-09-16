@@ -693,7 +693,7 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         : undefined,
   },
   ipStatus: {
-    label: 'Status',
+    label: 'Status (Intellectual Property)',
     buildClause: filters =>
       filters.ipStatus.length > 0
         ? matchAny('study.assets.intellectualProperties.status', filters.ipStatus)
@@ -707,7 +707,7 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
         : undefined,
   },
   clinicalTrialStatus: {
-    label: 'Status',
+    label: 'Status (Clinical Trials)',
     buildClause: filters =>
       filters.clinicalTrialStatus.length > 0
         ? matchAny('study.assets.clinicalTrials.status', filters.clinicalTrialStatus)

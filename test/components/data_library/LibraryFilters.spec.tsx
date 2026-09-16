@@ -734,7 +734,7 @@ describe('LibraryFilters — IP and funding sections render', () => {
         sections={getFilterSectionsForAsset(AssetType.INTELLECTUAL_PROPERTY, withOptions)}
       />,
     )
-    for (const label of ['Type', 'Status', 'Filed Date']) {
+    for (const label of ['Type', 'Status (Intellectual Property)', 'Filed Date']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
     expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
