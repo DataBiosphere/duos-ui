@@ -4,6 +4,7 @@ import { screen } from '@testing-library/react'
 import { makeMockParams, makeRenderCellHelper } from './columnTestUtils'
 import { makePublicationColumns } from 'src/components/data_library/columns/publicationColumns'
 import { PublicationAsset } from 'src/types/library'
+import userEvent from '@testing-library/user-event'
 
 const makeRow = (overrides: Partial<PublicationAsset> = {}): PublicationAsset => ({
   publicationId: 'pub-001',
@@ -176,6 +177,22 @@ describe('makePublicationColumns — Datasets Cited column', () => {
   it('reads No when the row carries no citation text', () => {
     renderCell('citation', false, { citation: false, datasetCitation: '' })
     expect(screen.getByText('No')).toBeInTheDocument()
+  })
+
+  // The citation text is the only place the actual citation is surfaced now
+  // that the filter is gone, so it has to reach the tooltip.
+  it('surfaces the citation text on hover when the row carries one', async () => {
+    const user = userEvent.setup()
+    renderCell('citation', true, { citation: true, datasetCitation: 'Smith et al. 2024, dbGaP phs000123' })
+    await user.hover(screen.getByText('Yes'))
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Smith et al. 2024, dbGaP phs000123')
+  })
+
+  it('renders no tooltip when the row carries no citation text', async () => {
+    const user = userEvent.setup()
+    renderCell('citation', false, { citation: false, datasetCitation: '' })
+    await user.hover(screen.getByText('No'))
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
   })
 
   it('sorts and filters on the rendered Yes/No, not the raw boolean', () => {
