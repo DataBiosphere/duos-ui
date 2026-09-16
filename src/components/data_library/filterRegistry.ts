@@ -652,9 +652,14 @@ const withSelectedValues = (
   }
 
   const missing = (filters[key] as string[]).filter(value => !options.some(option => option.value === value))
-  return missing.length > 0
-    ? [...options, ...missing.map(value => ({ value, label: value }))]
-    : options
+  if (missing.length === 0) {
+    return options
+  }
+
+  const merged = [...options, ...missing.map(value => ({ value, label: value }))]
+  // Corpus lists are alphabetical and render unsorted; enum lists are deliberately ordered.
+  const isAlphabetical = options.every((option, i) => i === 0 || options[i - 1].label.localeCompare(option.label) <= 0)
+  return isAlphabetical ? merged.sort((a, b) => a.label.localeCompare(b.label)) : merged
 }
 
 export const getFilterSectionsForAsset = (
