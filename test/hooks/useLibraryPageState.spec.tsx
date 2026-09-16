@@ -418,6 +418,25 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     expect(platform?.options?.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
   })
 
+  // A tab whose options come from a static enum consumes no corpus, so clearing
+  // its keys would mount a second full aggregation that nothing reads.
+  it('mounts no second aggregation for a tab with no corpus-derived options', () => {
+    setup(AssetType.PRESENTATIONS, { ...EMPTY_FILTERS, datasetsCited: true })
+    renderHook(() => useLibraryPageState(libraryConfig))
+
+    const filterSets = vi.mocked(useLibraryTabCounts).mock.calls.map(call => call[1])
+    // Both observers ask for the same filters, so they share one request.
+    expect(new Set(filterSets.map(f => JSON.stringify(f))).size).toBe(1)
+  })
+
+  it('still mounts the cleared-keys aggregation for a corpus-derived tab', () => {
+    setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['Terra'] })
+    renderHook(() => useLibraryPageState(libraryConfig))
+
+    const filterSets = vi.mocked(useLibraryTabCounts).mock.calls.map(call => call[1])
+    expect(new Set(filterSets.map(f => JSON.stringify(f))).size).toBe(2)
+  })
+
   // The corpus query keeps the previous answer as placeholder data, so on a tab
   // switch it is still scoped by the *previous* tab's cleared keys. Trusting it
   // would offer values from studies the current filters exclude.

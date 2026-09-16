@@ -22,6 +22,15 @@ import {
 import { SecondaryDataUseTerms } from 'src/components/forms/SecondaryDataUseTerms'
 import { getFormattedName } from 'src/components/forms/SelectOptionInterface'
 
+// Assets whose filter options are read off the corpus rather than a static enum.
+// Membership is what earns the extra cleared-keys aggregation below, so an asset
+// joins in the same change that gives it a corpus-derived option.
+const CORPUS_DERIVED_OPTION_ASSETS = new Set<AssetType>([
+  AssetType.WORKSPACES,
+  AssetType.CLINICAL_TRIALS,
+  AssetType.BIOSPECIMENS,
+])
+
 /**
  * Panel wording for the secondary data use codes, keyed by the code the index stores.
  *
@@ -111,6 +120,10 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     urlState.query ?? '',
   )
 
+  // Only these assets read their option lists off the corpus; the rest derive
+  // theirs from static enums or hold no checkbox filters at all, so clearing
+  // their keys would mount a second aggregation request that nothing consumes.
+  // An asset joins this set in the same change that gives it a derived option.
   // The visible tab's option lists have to come from a corpus its *own* filters
   // never narrowed. The filter clauses match whole studies, so selecting one
   // value drops every study without it, and a sibling value living only in one
@@ -124,13 +137,13 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
   // tab's own keys is a no-op unless it actually has one set, so this shares
   // the counts query's key — and its request — until it does.
   const optionCorpusFilters = useMemo(
-    () => (isStudyAssetTab
+    () => (CORPUS_DERIVED_OPTION_ASSETS.has(urlState.tab)
       ? assetFilterRegistry[urlState.tab].visibleFilters.reduce<FilterState>(
           (cleared, key) => ({ ...cleared, [key]: EMPTY_FILTERS[key] }),
           urlState.filters,
         )
       : urlState.filters),
-    [isStudyAssetTab, urlState.tab, urlState.filters],
+    [urlState.tab, urlState.filters],
   )
   const { data: visibleTabCorpus, isPlaceholderData: isCorpusStale } = useLibraryTabCounts(libraryConfig, optionCorpusFilters, urlState.query ?? '')
 
@@ -140,7 +153,7 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
   // response stands in: narrower for a moment, but scoped the way the grid is.
   const optionCorpusByAsset = useMemo(
     () => new Map(STUDY_ASSET_TABS.map(assetType =>
-      [assetType, assetType === urlState.tab && !isCorpusStale
+      [assetType, assetType === urlState.tab && CORPUS_DERIVED_OPTION_ASSETS.has(assetType) && !isCorpusStale
         ? (visibleTabCorpus ?? tabCountsResponse)
         : tabCountsResponse])),
     [urlState.tab, visibleTabCorpus, isCorpusStale, tabCountsResponse],
@@ -194,15 +207,18 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
         .sort((a, b) => a.localeCompare(b))
         .map(value => ({ value, label: value }))
 
-    // Option lists are derived from the *entire* matching corpus, not just the
-    // active tab's current page: `tabCountsResponse` already carries every
-    // matching study (via STUDIES_AGG's `terms.size: 10000`), so re-running an
-    // asset's own `transformResponse` with an unbounded page size yields its
-    // full flattened item list whichever tab the user is viewing. This mirrors
+    // Option lists are derived from every study the shared aggregation returns,
+    // not just the active tab's current page: re-running an asset's own
+    // `transformResponse` with an unbounded page size yields its full flattened
+    // item list whichever tab the user is viewing. This mirrors
     // `libraryCounts.ts`, which already calls `transformResponse` a second time
     // with different pagination purely to read `.total`. Without it an option
     // list only reflects whichever page is on screen, and goes empty the moment
     // the user switches tabs.
+    //
+    // STUDIES_AGG caps at 10,000 study buckets, so a value carried only by
+    // studies past that cap is not offered — the same cap the badge counts and
+    // these grids already live with, not a limit this introduces.
     const FULL_CORPUS_PAGINATION: PaginationState = { page: 0, pageSize: Number.MAX_SAFE_INTEGER }
 
     // The asset's own keys are cleared in this corpus's filter set, so its
