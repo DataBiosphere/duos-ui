@@ -460,7 +460,7 @@ describe('useLibraryPageState — full-corpus filter options', () => {
 
   // A static-enum tab reads no corpus, so the extra request would be wasted.
   it('mounts no second aggregation for a tab with no corpus-derived options', () => {
-    setup(AssetType.PRESENTATIONS, { ...EMPTY_FILTERS, datasetsCited: true })
+    setup(AssetType.INTELLECTUAL_PROPERTY, { ...EMPTY_FILTERS, ipFiledDate: { after: '2024-01-01' } })
     renderHook(() => useLibraryPageState(libraryConfig))
 
     expect(vi.mocked(useOptionCorpus).mock.calls.at(-1)?.[3]).toBe(false)

@@ -106,6 +106,20 @@ const DATE_SECTION_CONFIG = {
     ],
     invertedMessage: 'Filed After cannot be later than Filed Before',
   },
+  presentationDate: {
+    fields: [
+      { stateKey: 'before', label: 'Presented Before' },
+      { stateKey: 'after', label: 'Presented After' },
+    ],
+    invertedMessage: 'Presented After cannot be later than Presented Before',
+  },
+  publicationPublishedDate: {
+    fields: [
+      { stateKey: 'before', label: 'Published Before' },
+      { stateKey: 'after', label: 'Published After' },
+    ],
+    invertedMessage: 'Published After cannot be later than Published Before',
+  },
   fundingDate: {
     fields: [
       { stateKey: 'startDate', label: 'Start Date' },

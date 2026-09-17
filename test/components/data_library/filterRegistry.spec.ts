@@ -23,6 +23,11 @@ const availableFilters: AvailableFilters = {
   modelTags: [],
   workspaceCloud: [],
   workspaceAccess: [],
+  presentationEvent: [],
+  presentationFormat: [],
+  presentationAccess: [],
+  publicationJournal: [],
+  publicationAccess: [],
   clinicalTrialStatus: [],
   clinicalTrialPhase: [],
   clinicalTrialInterventionType: [],
@@ -49,7 +54,7 @@ describe('filterRegistry', () => {
 
   it('returns asset-specific visible filters', () => {
     const publicationFilters = getFilterSectionsForAsset(AssetType.PUBLICATIONS, availableFilters)
-    expect(publicationFilters.map(section => section.key)).toEqual(['publicationsDatasetsCited'])
+    expect(publicationFilters.map(section => section.key)).toEqual(['publicationJournal', 'publicationAccess', 'publicationPublishedDate', 'publicationsDatasetsCited'])
   })
 
   it('returns the model-specific filters', () => {
@@ -62,9 +67,29 @@ describe('filterRegistry', () => {
     expect(workspaceFilters.map(section => section.key)).toEqual(['workspaceTools', 'workspacePlatform', 'workspaceCloud', 'workspaceAccess'])
   })
 
-  it('returns presentation-specific datasets cited filter', () => {
+  it('returns the presentation-specific filters', () => {
     const presentationFilters = getFilterSectionsForAsset(AssetType.PRESENTATIONS, availableFilters)
-    expect(presentationFilters.map(section => section.key)).toEqual(['datasetsCited'])
+    expect(presentationFilters.map(section => section.key)).toEqual(['presentationEvent', 'presentationFormat', 'presentationAccess', 'presentationDate', 'datasetsCited'])
+  })
+
+  // A filter set on one tab shows as a chip on every other, so two keys sharing
+  // a label render as the same control twice in one panel. 'Data Use' predates
+  // this work; anything new sharing a label is the bug this pins.
+  it('gives every filter a label no other filter shares', () => {
+    const labelsByKey = new Map<string, string>()
+    for (const tab of Object.values(AssetType)) {
+      for (const section of getFilterSectionsForAsset(tab, availableFilters)) {
+        labelsByKey.set(section.key, section.label)
+      }
+    }
+
+    const keysByLabel = new Map<string, string[]>()
+    for (const [key, label] of labelsByKey) {
+      keysByLabel.set(label, [...(keysByLabel.get(label) ?? []), key])
+    }
+
+    const collisions = [...keysByLabel.entries()].filter(([, keys]) => keys.length > 1)
+    expect(collisions).toEqual([['Data Use', ['dataUse', 'biospecimenDataUse']]])
   })
 
   describe('re-adding a selected value the corpus no longer offers', () => {
@@ -446,5 +471,35 @@ describe('filterRegistry — model and workspace query clauses', () => {
 
   it('builds no clause for an unselected filter', () => {
     expect(buildActiveFilterClauses(EMPTY_FILTERS)).toEqual([])
+  })
+})
+
+// A wrong `study.assets.*` path type-checks and silently matches nothing. These
+// match the exact indexed value, not the analyzed phrase: the option lists are
+// built from the corpus, and match_phrase would also admit 'Nature Genetics'
+// for 'Nature' — inflating every other tab's badge, which never re-checks rows.
+describe('filterRegistry — presentation and publication query clauses', () => {
+  it.each([
+    ['presentationEvent', 'study.assets.presentations.event'],
+    ['presentationFormat', 'study.assets.presentations.format'],
+    ['presentationAccess', 'study.assets.presentations.access'],
+    ['publicationJournal', 'study.assets.publications.journal'],
+    ['publicationAccess', 'study.assets.publications.access'],
+  ])('%s queries %s on its keyword subfield', (key, field) => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: ['x'] })
+    expect(clauses).toEqual([{ bool: { should: [{ term: { [`${field}.keyword`]: 'x' } }] } }])
+  })
+
+  it.each([
+    ['presentationDate', 'study.assets.presentations.date'],
+    ['publicationPublishedDate', 'study.assets.publications.publishedDate'],
+  ])('%s builds a range clause on %s', (key, field) => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: { after: '2024-01-01', before: '2024-12-31' } })
+    expect(clauses).toEqual([{ range: { [field]: { gte: '2024-01-01', lte: '2024-12-31' } } }])
+  })
+
+  // Inverted bounds must read as inactive everywhere, clause included.
+  it.each(['presentationDate', 'publicationPublishedDate'])('%s builds no clause for inverted bounds', (key) => {
+    expect(buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: { after: '2024-12-31', before: '2024-01-01' } })).toEqual([])
   })
 })

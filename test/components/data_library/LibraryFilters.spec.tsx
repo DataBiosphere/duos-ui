@@ -31,6 +31,11 @@ const availableFilters: AvailableFilters = {
   modelTags: [],
   workspaceCloud: [],
   workspaceAccess: [],
+  presentationEvent: [],
+  presentationFormat: [],
+  presentationAccess: [],
+  publicationJournal: [],
+  publicationAccess: [],
   workspaceTools: [],
   workspacePlatform: [],
   clinicalTrialStatus: [],
@@ -627,8 +632,7 @@ describe('LibraryFilters — collapseable panel', () => {
   })
 })
 
-// getFilterSectionsForAsset returning a section is not the same as the panel
-// rendering it, so assert on the panel.
+// A returned section is not a rendered one, so assert on the panel.
 describe('LibraryFilters — model and workspace sections render', () => {
   const withOptions: AvailableFilters = {
     ...availableFilters,
@@ -649,7 +653,7 @@ describe('LibraryFilters — model and workspace sections render', () => {
         sections={getFilterSectionsForAsset(AssetType.MODELS, withOptions)}
       />,
     )
-    for (const label of ['Format', 'License', 'Cloud (AI Models)', 'Tags']) {
+    for (const label of ['Format (AI Models)', 'License', 'Cloud (AI Models)', 'Tags']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
     expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
@@ -664,7 +668,47 @@ describe('LibraryFilters — model and workspace sections render', () => {
         sections={getFilterSectionsForAsset(AssetType.WORKSPACES, withOptions)}
       />,
     )
-    for (const label of ['Tools', 'Platform', 'Cloud (Workspaces)', 'Access']) {
+    for (const label of ['Tools', 'Platform', 'Cloud (Workspaces)', 'Access (Workspaces)']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+  })
+})
+
+describe('LibraryFilters — presentation and publication sections render', () => {
+  const withOptions: AvailableFilters = {
+    ...availableFilters,
+    presentationEvent: [{ value: 'ASHG 2024', label: 'ASHG 2024' }],
+    presentationFormat: [{ value: 'Oral', label: 'Oral' }],
+    presentationAccess: [{ value: 'open', label: 'open' }],
+    publicationJournal: [{ value: 'Nature', label: 'Nature' }],
+    publicationAccess: [{ value: 'open', label: 'open' }],
+  }
+
+  it('renders every Presentations section, including the date range', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.PRESENTATIONS, withOptions)}
+      />,
+    )
+    for (const label of ['Event', 'Format (Presentations)', 'Access (Presentations)', 'Presentation Date']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+    expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
+  })
+
+  it('renders every Publications section, including the date range', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.PUBLICATIONS, withOptions)}
+      />,
+    )
+    for (const label of ['Journal', 'Access (Publications)', 'Published Date']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
   })

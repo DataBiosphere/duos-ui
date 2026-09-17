@@ -3,17 +3,42 @@ import { ElasticsearchQuery, ElasticsearchResponse, PresentationStudyAggregation
 import { FilterState, PaginationState, PresentationAsset, SortState } from 'src/types/library'
 import { makePresentationColumns } from 'src/components/data_library/columns/presentationColumns'
 import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
+// The clauses only pick which studies are aggregated, so every presentation of a
+// qualifying study comes back and each row needs re-checking here.
 const matchesPresentationFilters = (presentation: PresentationAsset, filters?: FilterState) => {
   if (!filters) {
     return true
   }
 
-  if (filters.datasetsCited === undefined) {
+  if (filters.presentationEvent.length > 0 && !filters.presentationEvent.includes(presentation.event || '')) {
+    return false
+  }
+
+  if (filters.presentationFormat.length > 0 && !filters.presentationFormat.includes(presentation.format || '')) {
+    return false
+  }
+
+  if (filters.presentationAccess.length > 0 && !filters.presentationAccess.includes(presentation.access || '')) {
+    return false
+  }
+
+  if (filters.datasetsCited !== undefined && presentation.citation !== filters.datasetsCited) {
+    return false
+  }
+
+  // Inverted bounds build no clause, so they must not narrow rows here either.
+  if (!isFilterActive('presentationDate', filters)) {
     return true
   }
 
-  return presentation.citation === filters.datasetsCited
+  // A missing date matches neither bound, as the ES range clause does.
+  const { after, before } = filters.presentationDate
+  if (after && (!presentation.date || presentation.date < after)) {
+    return false
+  }
+  return !(before && (!presentation.date || presentation.date > before))
 }
 
 export const presentationAsset: AssetDefinition = {
@@ -76,10 +101,10 @@ export const presentationAsset: AssetDefinition = {
           datasetCitation: pres.datasetCitation || '',
           citation: pres.citation ?? false,
           presenter: pres.presenter || undefined,
-          event: pres.event || '',
+          event: (pres.event || '').trim(),
           location: pres.location || '',
-          format: pres.format || '',
-          access: pres.access || '',
+          format: (pres.format || '').trim(),
+          access: (pres.access || '').trim(),
           tags: pres.tags || [],
         }
 

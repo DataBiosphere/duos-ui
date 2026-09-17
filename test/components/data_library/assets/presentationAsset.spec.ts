@@ -262,29 +262,86 @@ describe('presentationAsset — transformResponse', () => {
     expect(result.total).toBe(0)
   })
 
-  it('returns only matching presentations when filtered within a shared study', () => {
+  it('returns only presentations matching the event filter', () => {
     const response = makeResponse([
       makeBucket(1, [
-        {
-          presentationId: 'PRES-CITED',
-          title: 'Cited',
-          citation: true,
-        },
-        {
-          presentationId: 'PRES-NOT-CITED',
-          title: 'Not Cited',
-          citation: false,
-        },
+        { presentationId: 'p1', event: 'ASHG 2024' },
+        { presentationId: 'p2', event: 'AGBT 2024' },
+      ]),
+    ])
+
+    const result = presentationAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, presentationEvent: ['ASHG 2024'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as PresentationAsset).presentationId).toBe('p1')
+  })
+
+  it('returns only presentations matching the format filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { presentationId: 'p1', format: 'Oral' },
+        { presentationId: 'p2', format: 'Poster' },
+      ]),
+    ])
+
+    const result = presentationAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, presentationFormat: ['Poster'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as PresentationAsset).presentationId).toBe('p2')
+  })
+
+  it('returns only presentations matching the access filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { presentationId: 'p1', access: 'open' },
+        { presentationId: 'p2', access: 'restricted' },
+      ]),
+    ])
+
+    const result = presentationAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, presentationAccess: ['open'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as PresentationAsset).presentationId).toBe('p1')
+  })
+
+  it('returns only presentations within the presentationDate range', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { presentationId: 'p-old', date: '2019-05-01' },
+        { presentationId: 'p-in-range', date: '2022-03-01' },
+        { presentationId: 'p-new', date: '2025-01-01' },
       ]),
     ])
 
     const result = presentationAsset.transformResponse(response, pagination, {
       ...EMPTY_FILTERS,
-      datasetsCited: true,
+      presentationDate: { after: '2020-01-01', before: '2023-12-31' },
     })
 
-    expect(result.items).toHaveLength(1)
-    expect((result.items[0] as PresentationAsset).presentationId).toBe('PRES-CITED')
+    expect(result.total).toBe(1)
+    expect((result.items[0] as PresentationAsset).presentationId).toBe('p-in-range')
+  })
+
+  // A row with no date must not slip through a one-sided bound.
+  it('excludes a presentation with no date from either one-sided bound', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { presentationId: 'p-dated', date: '2022-03-01' },
+        { presentationId: 'p-undated' },
+      ]),
+    ])
+
+    const before = presentationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      presentationDate: { before: '2023-12-31' },
+    })
+    expect(before.items.map(i => (i as PresentationAsset).presentationId)).toEqual(['p-dated'])
+
+    const after = presentationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      presentationDate: { after: '2020-01-01' },
+    })
+    expect(after.items.map(i => (i as PresentationAsset).presentationId)).toEqual(['p-dated'])
   })
 })
 
@@ -370,6 +427,7 @@ describe('presentationAsset — makeColumns', () => {
     expect(fields).toContain('location')
     expect(fields).toContain('presenter')
     expect(fields).toContain('format')
+    expect(fields).toContain('access')
     expect(fields).toContain('tags')
   })
 
@@ -377,5 +435,62 @@ describe('presentationAsset — makeColumns', () => {
     const a = presentationAsset.makeColumns()
     const b = presentationAsset.makeColumns({})
     expect(a.map(c => c.field)).toEqual(b.map(c => c.field))
+  })
+})
+
+// Still configured on this tab, so the predicate keeps its test until it goes.
+describe('presentationAsset — datasetsCited row filtering', () => {
+  const mixed = () => makeResponse([
+    makeBucket(1, [
+      { presentationId: 'PRES-CITED', citation: true },
+      { presentationId: 'PRES-NOT-CITED', citation: false },
+    ]),
+  ])
+
+  it('returns only cited rows when the filter is Yes', () => {
+    const result = presentationAsset.transformResponse(mixed(), pagination, { ...EMPTY_FILTERS, datasetsCited: true })
+    expect(result.items).toHaveLength(1)
+    expect((result.items[0] as PresentationAsset).presentationId).toBe('PRES-CITED')
+  })
+
+  it('returns only uncited rows when the filter is No', () => {
+    const result = presentationAsset.transformResponse(mixed(), pagination, { ...EMPTY_FILTERS, datasetsCited: false })
+    expect(result.items).toHaveLength(1)
+    expect((result.items[0] as PresentationAsset).presentationId).toBe('PRES-NOT-CITED')
+  })
+
+  it('returns both when the filter is unset', () => {
+    const result = presentationAsset.transformResponse(mixed(), pagination, EMPTY_FILTERS)
+    expect(result.items).toHaveLength(2)
+  })
+})
+
+describe('presentationAsset — indexed values are normalized', () => {
+  it('matches a row whose indexed event carries stray whitespace', () => {
+    const response = makeResponse([makeBucket(1, [{ presentationId: 'a1', event: '  ASHG 2024 ' }])])
+
+    // Options are trimmed, so an untrimmed row is dropped by its own filter.
+    const result = presentationAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, presentationEvent: ['ASHG 2024'] })
+
+    expect(result.items).toHaveLength(1)
+  })
+})
+
+// No clause is built, so the client-side pass must not narrow either.
+describe('presentationAsset — inverted presentationDate', () => {
+  it('leaves rows visible when the bounds are crossed', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { presentationId: 'a1', date: '2024-06-01' },
+        { presentationId: 'a2', date: '2020-01-01' },
+      ]),
+    ])
+
+    const result = presentationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      presentationDate: { after: '2024-12-31', before: '2024-01-01' },
+    })
+
+    expect(result.items).toHaveLength(2)
   })
 })

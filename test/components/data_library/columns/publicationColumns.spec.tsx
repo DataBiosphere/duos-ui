@@ -177,3 +177,15 @@ describe('makePublicationColumns — Tags column', () => {
     chips.forEach(chip => expect(chip.textContent).not.toMatch(/^\+\d+$/))
   })
 })
+
+describe('makePublicationColumns — Access column', () => {
+  it('renders the access text', () => {
+    renderCell('access', 'open')
+    expect(screen.getByText('open')).toBeInTheDocument()
+  })
+
+  it('renders gracefully when access is empty', () => {
+    const { container } = renderCell('access', '')
+    expect(container.textContent?.trim()).toBe('')
+  })
+})
