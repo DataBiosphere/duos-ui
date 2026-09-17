@@ -712,6 +712,64 @@ describe('Study details test', () => {
     expect(screen.queryByText('No granted data access requests yet.')).not.toBeInTheDocument()
   })
 
+  /**
+   * React Query keeps the last good data while reporting a failed background refetch. A transient
+   * failure is not a reason to take correct rows off the page - unlike a 403, which is.
+   */
+  it('keeps loaded request history when a background refetch fails', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats)
+      .mockResolvedValueOnce([{
+        projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+        nonTechRus: 'Study cancer outcomes.', expired: false,
+        institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+      }] as never)
+      .mockRejectedValue(Object.assign(new Error('boom'), { response: { status: 500 } }))
+    mountComponent()
+    await screen.findByText('Cancer genomics')
+
+    await queryClient.invalidateQueries()
+
+    await waitFor(() => expect(screen.getByText('Cancer genomics')).toBeInTheDocument())
+    expect(screen.queryByText('Unable to load data access requests.')).not.toBeInTheDocument()
+  })
+
+  /** A refusal is different: once the server says no, the cached history comes off the page. */
+  it('drops loaded request history when the server refuses on refetch', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats)
+      .mockResolvedValueOnce([{
+        projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+        nonTechRus: 'Study cancer outcomes.', expired: false,
+        institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+      }] as never)
+      .mockRejectedValue(Object.assign(new Error('nope'), { response: { status: 403 } }))
+    mountComponent()
+    await screen.findByText('Cancer genomics')
+
+    await queryClient.invalidateQueries()
+
+    await waitFor(() =>
+      expect(screen.queryByText('Cancer genomics')).not.toBeInTheDocument())
+    expect(await screen.findByText(/do not have access to this study's data access request history/i))
+      .toBeInTheDocument()
+  })
+
+  /** Same rule for the research outputs section. */
+  it('keeps loaded research outputs when a background refetch fails', async () => {
+    vi.mocked(DatasetMetrics.getResearchOutputs)
+      .mockResolvedValueOnce({
+        presentations: [{ title: 'ASHG 2025 talk' }], publications: [], intellectualProperties: [],
+      } as never)
+      .mockRejectedValue(new Error('boom'))
+    mountComponent()
+    // The group label, not an entry: the groups start collapsed
+    await screen.findByText('Presentations (1)')
+
+    await queryClient.invalidateQueries()
+
+    await waitFor(() => expect(screen.getByText('Presentations (1)')).toBeInTheDocument())
+    expect(screen.queryByText('Unable to load secondary research outputs.')).not.toBeInTheDocument()
+  })
+
   it('still reports a genuine failure of the study history as an error', async () => {
     vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(
       Object.assign(new Error('boom'), { response: { status: 500 } }),

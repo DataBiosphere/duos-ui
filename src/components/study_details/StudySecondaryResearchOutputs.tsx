@@ -45,7 +45,9 @@ const StudySecondaryResearchOutputs = ({ studyId }: { studyId: string }) => {
     <StudyPageSection id="secondary-research-outputs" heading="Secondary Research Outputs">
       <StudyQueryResult
         isPending={isPending}
-        error={error}
+        // Only when there is nothing cached to keep showing, as the other sections do. Passed
+        // unconditionally, a failed background refetch replaced outputs that had loaded fine.
+        error={data ? undefined : error}
         errorMessage="Unable to load secondary research outputs."
       >
         <Stack>
