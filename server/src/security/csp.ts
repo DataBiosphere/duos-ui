@@ -5,8 +5,9 @@ import { CSP_REPORT_GROUP, CSP_REPORT_PATH } from './cspReport.js'
 // Scope access to this bucket; the GCS origin is shared by public buckets.
 export const BANNER_SOURCE = 'https://storage.googleapis.com/broad-duos-banners/'
 
-// Feature flags and anonymous metrics remain direct in BFF mode.
-const BFF_CONNECT_FIELDS = ['apiUrl', 'bardApiUrl'] as const
+// Feature flags and metrics are same-origin in BFF mode.
+// The banner bucket remains an accepted exception tracked in DT-4063.
+const BFF_CONNECT_FIELDS: readonly string[] = []
 
 // Legacy mode calls all upstreams directly. B2C is navigated to, not fetched.
 const LEGACY_CONNECT_FIELDS = ['apiUrl', 'bardApiUrl', 'ecmApiUrl', 'tdrApiUrl'] as const
