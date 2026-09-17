@@ -20,10 +20,6 @@ const matchesPublicationFilters = (publication: PublicationAsset, filters?: Filt
     return false
   }
 
-  if (filters.publicationsDatasetsCited !== undefined && publication.citation !== filters.publicationsDatasetsCited) {
-    return false
-  }
-
   // Inverted bounds build no clause, so they must not narrow rows here either.
   if (!isFilterActive('publicationPublishedDate', filters)) {
     return true

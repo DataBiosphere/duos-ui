@@ -61,3 +61,31 @@ export const truncatedTextColumn = <T extends GridValidRowModel>(
     )
   },
 })
+
+/**
+ * Reads "No" for a row indexed without the field, matching how both transforms
+ * default it (`citation ?? false`). A cited row shows its citation in the
+ * tooltip; the form requires the text either way, so an uncited row has one too.
+ */
+export const citationColumn = <T extends GridValidRowModel>(
+  getCitationText: (row: T) => string,
+): GridColDef<T> => ({
+  field: 'citation',
+  headerName: 'Datasets Cited',
+  width: 130,
+  valueGetter: (value: boolean | undefined) => (value ? 'Yes' : 'No'),
+  renderCell: (params) => {
+    const text = getCitationText(params.row)
+    const label = params.row.citation ? 'Yes' : 'No'
+    if (!params.row.citation || !text) {
+      return <Box>{label}</Box>
+    }
+    // describeChild keeps Yes/No as the name; the cell's own tabIndex keeps this
+    // inside the grid's roving focus rather than adding a tab stop per row.
+    return (
+      <Tooltip title={text} placement="top" describeChild>
+        <Box tabIndex={params.tabIndex}>{label}</Box>
+      </Tooltip>
+    )
+  },
+})

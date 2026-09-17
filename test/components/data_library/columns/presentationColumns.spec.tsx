@@ -131,6 +131,29 @@ describe('makePresentationColumns — Format column', () => {
   })
 })
 
+describe('makePresentationColumns — Access column', () => {
+  it('renders the access text', () => {
+    renderCell('access', 'open')
+    expect(screen.getByText('open')).toBeInTheDocument()
+  })
+
+  it('renders gracefully when access is empty', () => {
+    const { container } = renderCell('access', '')
+    expect(container.textContent?.trim()).toBe('')
+  })
+})
+
+describe('makePresentationColumns — Datasets Cited column', () => {
+  // Behaviour lives in sharedColumns.spec; this is the wiring.
+  it('reads the citation flag and exposes the citation text', () => {
+    const column = makePresentationColumns().find(c => c.field === 'citation')!
+    expect(column.headerName).toBe('Datasets Cited')
+
+    renderCell('citation', true, { citation: true, datasetCitation: 'Smith et al. 2024' })
+    expect(screen.getByText('Yes')).toHaveAccessibleDescription('Smith et al. 2024')
+  })
+})
+
 describe('makePresentationColumns — Tags column', () => {
   it('renders nothing when tags array is empty', () => {
     const col = makePresentationColumns().find(c => c.field === 'tags')!

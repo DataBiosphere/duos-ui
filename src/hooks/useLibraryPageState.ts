@@ -269,14 +269,6 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
         { value: 'PER_REQUEST', label: 'Per-Request Approval' },
         { value: 'PRE_AUTHORIZED', label: 'Pre-Authorized Researchers' },
       ],
-      datasetsCited: [
-        { value: 'true', label: 'Yes' },
-        { value: 'false', label: 'No' },
-      ],
-      publicationsDatasetsCited: [
-        { value: 'true', label: 'Yes' },
-        { value: 'false', label: 'No' },
-      ],
       instantApproval: [
         { value: 'true', label: 'Yes' },
         { value: 'false', label: 'No' },

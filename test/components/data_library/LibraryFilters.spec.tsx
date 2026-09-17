@@ -51,14 +51,6 @@ const availableFilters: AvailableFilters = {
     { value: 'HOURS', label: 'HOURS' },
     { value: 'DAYS', label: 'DAYS' },
   ],
-  datasetsCited: [
-    { value: 'true', label: 'Yes' },
-    { value: 'false', label: 'No' },
-  ],
-  publicationsDatasetsCited: [
-    { value: 'true', label: 'Yes' },
-    { value: 'false', label: 'No' },
-  ],
   soApprovalModel: [
     { value: 'PER_REQUEST', label: 'Per-Request Approval' },
     { value: 'PRE_AUTHORIZED', label: 'Pre-Authorized Researchers' },
@@ -195,7 +187,8 @@ describe('LibraryFilters', () => {
     expect(screen.queryByText('Access Request Process')).not.toBeInTheDocument()
   })
 
-  it('renders only configured filters for presentations', () => {
+  // It is a column now; the tab's own filters are untouched by the swap.
+  it('no longer offers Datasets Cited on presentations, and inherits no other tab\'s filters', () => {
     render(
       <LibraryFilters
         filters={EMPTY_FILTERS}
@@ -204,7 +197,8 @@ describe('LibraryFilters', () => {
         sections={getFilterSectionsForAsset(AssetType.PRESENTATIONS, availableFilters)}
       />,
     )
-    expect(screen.getByText('Datasets Cited (Presentations)?')).toBeInTheDocument()
+    expect(screen.queryByText('Datasets Cited (Presentations)?')).not.toBeInTheDocument()
+    expect(screen.getByText('Event')).toBeInTheDocument()
     expect(screen.queryByText('Participants')).not.toBeInTheDocument()
     expect(screen.queryByText('Access Request Process')).not.toBeInTheDocument()
   })

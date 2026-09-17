@@ -4,7 +4,7 @@ import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router'
 import { PresentationAsset } from 'src/types/library'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
-import { truncatedTextColumn } from 'src/components/data_library/columns/sharedColumns'
+import { citationColumn, truncatedTextColumn } from 'src/components/data_library/columns/sharedColumns'
 
 /**
  * Column definitions for the Presentations view in the Data Library.
@@ -183,4 +183,5 @@ export const makePresentationColumns = (): GridColDef<PresentationAsset>[] => [
     },
   },
   truncatedTextColumn<PresentationAsset>('access', 'Access', 120),
+  citationColumn<PresentationAsset>(row => row.datasetCitation || ''),
 ]

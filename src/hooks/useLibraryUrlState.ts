@@ -98,6 +98,9 @@ const RANGE_FILTER_PARAM_CONFIG: RangeFilterParamConfig[] = [
   },
 ]
 
+// Params from the retired presentation/publication "Datasets Cited" booleans.
+const RETIRED_PARAMS = ['datasetsCited', 'presentationsDatasetsCited', 'publicationsDatasetsCited']
+
 const DATE_FILTER_PARAM_CONFIG: DateFilterParamConfig[] = [
   { key: 'clinicalTrialDates', startParam: 'clinicalTrialStartDate', endParam: 'clinicalTrialEndDate' },
   { key: 'biospecimenCollectionDate', startParam: 'biospecimenCollectedAfter', endParam: 'biospecimenCollectedBefore', startKey: 'after', endKey: 'before' },
@@ -281,8 +284,6 @@ const parseFiltersFromUrl = (searchParams: URLSearchParams): FilterState => {
     ...parseArrayFilters(searchParams),
     ...parseRangeFilters(searchParams),
     ...parseDateFilters(searchParams),
-    datasetsCited: parseBooleanParam(searchParams, ['datasetsCited', 'presentationsDatasetsCited']),
-    publicationsDatasetsCited: parseBooleanParam(searchParams, ['publicationsDatasetsCited']),
     instantApproval: parseBooleanParam(searchParams, ['instantApproval']),
   } as FilterState
 }
@@ -295,8 +296,6 @@ const serializeFiltersToUrl = (
   searchParams: URLSearchParams,
 ): void => {
   serializeArrayFiltersToUrl(filters, searchParams)
-  serializeBooleanFilterToUrl(filters.datasetsCited, 'datasetsCited', searchParams, ['presentationsDatasetsCited'])
-  serializeBooleanFilterToUrl(filters.publicationsDatasetsCited, 'publicationsDatasetsCited', searchParams)
   serializeBooleanFilterToUrl(filters.instantApproval, 'instantApproval', searchParams)
   serializeRangeFiltersToUrl(filters, searchParams)
   serializeDateFiltersToUrl(filters, searchParams)
@@ -413,6 +412,10 @@ export const useLibraryUrlState = (defaultTab: AssetType = AssetType.DATASETS) =
     applySortFieldUpdate(updates, newParams)
     applySortOrderUpdate(updates, newParams)
     applyHideFiltersUpdate(updates, newParams)
+
+    // Writes go over a copy of the current params, so an unserialized param is
+    // never dropped — an old link's would otherwise persist forever.
+    RETIRED_PARAMS.forEach(param => newParams.delete(param))
 
     if (updates.filters !== undefined) {
       serializeFiltersToUrl(updates.filters, newParams)
