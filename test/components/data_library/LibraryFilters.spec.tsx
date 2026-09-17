@@ -36,6 +36,9 @@ const availableFilters: AvailableFilters = {
   presentationAccess: [],
   publicationJournal: [],
   publicationAccess: [],
+  ipType: [],
+  ipStatus: [],
+  fundingFunderName: [],
   workspaceTools: [],
   workspacePlatform: [],
   clinicalTrialStatus: [],
@@ -709,6 +712,44 @@ describe('LibraryFilters — presentation and publication sections render', () =
       />,
     )
     for (const label of ['Journal', 'Access (Publications)', 'Published Date']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+  })
+})
+
+describe('LibraryFilters — IP and funding sections render', () => {
+  const withOptions: AvailableFilters = {
+    ...availableFilters,
+    ipType: [{ value: 'Patent', label: 'Patent' }],
+    ipStatus: [{ value: 'Granted', label: 'Granted' }],
+    fundingFunderName: [{ value: 'NIH', label: 'NIH' }],
+  }
+
+  it('renders the Intellectual Property sections alongside the existing date range', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.INTELLECTUAL_PROPERTY, withOptions)}
+      />,
+    )
+    for (const label of ['Type', 'Status (Intellectual Property)', 'Filed Date']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+    expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
+  })
+
+  it('renders the Funding Resources sections', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.FUNDING_RESOURCES, withOptions)}
+      />,
+    )
+    for (const label of ['Funder Name', 'Funding Dates']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
   })

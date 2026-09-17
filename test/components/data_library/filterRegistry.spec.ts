@@ -28,6 +28,9 @@ const availableFilters: AvailableFilters = {
   presentationAccess: [],
   publicationJournal: [],
   publicationAccess: [],
+  ipType: [],
+  ipStatus: [],
+  fundingFunderName: [],
   clinicalTrialStatus: [],
   clinicalTrialPhase: [],
   clinicalTrialInterventionType: [],
@@ -501,5 +504,21 @@ describe('filterRegistry — presentation and publication query clauses', () => 
   // Inverted bounds must read as inactive everywhere, clause included.
   it.each(['presentationDate', 'publicationPublishedDate'])('%s builds no clause for inverted bounds', (key) => {
     expect(buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: { after: '2024-12-31', before: '2024-01-01' } })).toEqual([])
+  })
+})
+
+// A wrong `study.assets.*` path type-checks and silently matches nothing. These
+// are controlled vocabularies matched against the exact indexed value: the
+// option lists are built from the corpus, and match_phrase would also admit
+// 'Provisional Patent Application' for 'Provisional Patent' — inflating every
+// other tab's badge, which never re-checks rows.
+describe('filterRegistry — IP and funding query clauses', () => {
+  it.each([
+    ['ipType', 'study.assets.intellectualProperties.type'],
+    ['ipStatus', 'study.assets.intellectualProperties.status'],
+    ['fundingFunderName', 'study.assets.funding.funderName'],
+  ])('%s queries %s on its keyword subfield', (key, field) => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: ['x'] })
+    expect(clauses).toEqual([{ bool: { should: [{ term: { [`${field}.keyword`]: 'x' } }] } }])
   })
 })

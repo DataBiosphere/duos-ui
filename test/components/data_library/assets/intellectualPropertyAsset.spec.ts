@@ -251,6 +251,56 @@ describe('intellectualPropertyAsset — transformResponse', () => {
     expect((result.items[0] as IntellectualPropertyAsset).ipId).toBe('ip-in-range')
   })
 
+  // A row with no filing date must not slip through a one-sided bound.
+  it('excludes an asset with no filing date from either one-sided bound', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { ipId: 'ip-dated', filingDate: '2022-03-01' },
+        { ipId: 'ip-undated' },
+      ]),
+    ])
+
+    const before = intellectualPropertyAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      ipFiledDate: { before: '2023-12-31' },
+    })
+    expect(before.items.map(i => (i as IntellectualPropertyAsset).ipId)).toEqual(['ip-dated'])
+
+    const after = intellectualPropertyAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      ipFiledDate: { after: '2020-01-01' },
+    })
+    expect(after.items.map(i => (i as IntellectualPropertyAsset).ipId)).toEqual(['ip-dated'])
+  })
+
+  it('returns only assets matching the type filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { ipId: 'ip-patent', type: 'Patent' },
+        { ipId: 'ip-copyright', type: 'Copyright' },
+      ]),
+    ])
+
+    const result = intellectualPropertyAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, ipType: ['Patent'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as IntellectualPropertyAsset).ipId).toBe('ip-patent')
+  })
+
+  it('returns only assets matching the status filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { ipId: 'ip-granted', status: 'Granted' },
+        { ipId: 'ip-pending', status: 'Pending' },
+      ]),
+    ])
+
+    const result = intellectualPropertyAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, ipStatus: ['Pending'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as IntellectualPropertyAsset).ipId).toBe('ip-pending')
+  })
+
   // An inverted range builds no ES clause, so it must not narrow rows here
   // either — otherwise the grid empties while the panel flags the range.
   it('ignores an inverted ipFiledDate range instead of filtering everything out', () => {
@@ -350,5 +400,16 @@ describe('intellectualPropertyAsset — makeColumns', () => {
     expect(fields).toContain('studyName')
     expect(fields).toContain('contact')
     expect(fields).toContain('tags')
+  })
+})
+
+describe('intellectualPropertyAsset — indexed values are normalized', () => {
+  it('matches a row whose indexed type carries stray whitespace', () => {
+    const response = makeResponse([makeBucket(1, [{ ipId: 'a1', type: '  Patent ' }])])
+
+    // Options are trimmed, so an untrimmed row is dropped by its own filter.
+    const result = intellectualPropertyAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, ipType: ['Patent'] })
+
+    expect(result.items).toHaveLength(1)
   })
 })
