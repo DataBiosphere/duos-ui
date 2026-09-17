@@ -33,6 +33,14 @@ vi.mock('src/libs/ajax/DataSet', () => ({
   },
 }))
 
+vi.mock('src/libs/ajax/DatasetMetrics', () => ({
+  DatasetMetrics: {
+    getDatasetStats: vi.fn().mockResolvedValue([]),
+    getStudyStats: vi.fn().mockResolvedValue([]),
+    getResearchOutputs: vi.fn().mockResolvedValue({ presentations: [], publications: [], intellectualProperties: [] }),
+  },
+}))
+
 vi.mock('src/libs/ajax/StudyComments', () => ({
   COMMENTS_PAGE_SIZE: 25,
   MAX_COMMENT_LENGTH: 2000,
@@ -58,6 +66,7 @@ vi.mock('src/utils/accessUtils', () => ({
 
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Study } from 'src/libs/ajax/Study'
+import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 
 const datasets = [
   {
@@ -687,6 +696,90 @@ describe('Study details test', () => {
     expect(await screen.findByText(datasets[0].datasetName)).toBeInTheDocument()
   })
 
+  /**
+   * The dataset page tells a refusal apart from a fault; this section did not, so one
+   * authorization decision was described two different ways depending on where you read it.
+   */
+  it('describes a refused study history as a refusal, not a failure', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(
+      Object.assign(new Error('User does not have permission'), { response: { status: 403 } }),
+    )
+    mountComponent()
+
+    expect(await screen.findByText(/do not have access to this study's data access request history/i))
+      .toBeInTheDocument()
+    expect(screen.queryByText('Unable to load data access requests.')).not.toBeInTheDocument()
+    expect(screen.queryByText('No granted data access requests yet.')).not.toBeInTheDocument()
+  })
+
+  /**
+   * React Query keeps the last good data while reporting a failed background refetch. A transient
+   * failure is not a reason to take correct rows off the page - unlike a 403, which is.
+   */
+  it('keeps loaded request history when a background refetch fails', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats)
+      .mockResolvedValueOnce([{
+        projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+        nonTechRus: 'Study cancer outcomes.', expired: false,
+        institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+      }] as never)
+      .mockRejectedValue(Object.assign(new Error('boom'), { response: { status: 500 } }))
+    mountComponent()
+    await screen.findByText('Cancer genomics')
+
+    await queryClient.invalidateQueries()
+
+    await waitFor(() => expect(screen.getByText('Cancer genomics')).toBeInTheDocument())
+    expect(screen.queryByText('Unable to load data access requests.')).not.toBeInTheDocument()
+  })
+
+  /** A refusal is different: once the server says no, the cached history comes off the page. */
+  it('drops loaded request history when the server refuses on refetch', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats)
+      .mockResolvedValueOnce([{
+        projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+        nonTechRus: 'Study cancer outcomes.', expired: false,
+        institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+      }] as never)
+      .mockRejectedValue(Object.assign(new Error('nope'), { response: { status: 403 } }))
+    mountComponent()
+    await screen.findByText('Cancer genomics')
+
+    await queryClient.invalidateQueries()
+
+    await waitFor(() =>
+      expect(screen.queryByText('Cancer genomics')).not.toBeInTheDocument())
+    expect(await screen.findByText(/do not have access to this study's data access request history/i))
+      .toBeInTheDocument()
+  })
+
+  /** Same rule for the research outputs section. */
+  it('keeps loaded research outputs when a background refetch fails', async () => {
+    vi.mocked(DatasetMetrics.getResearchOutputs)
+      .mockResolvedValueOnce({
+        presentations: [{ title: 'ASHG 2025 talk' }], publications: [], intellectualProperties: [],
+      } as never)
+      .mockRejectedValue(new Error('boom'))
+    mountComponent()
+    // The group label, not an entry: the groups start collapsed
+    await screen.findByText('Presentations (1)')
+
+    await queryClient.invalidateQueries()
+
+    await waitFor(() => expect(screen.getByText('Presentations (1)')).toBeInTheDocument())
+    expect(screen.queryByText('Unable to load secondary research outputs.')).not.toBeInTheDocument()
+  })
+
+  it('still reports a genuine failure of the study history as an error', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(
+      Object.assign(new Error('boom'), { response: { status: 500 } }),
+    )
+    mountComponent()
+
+    expect(await screen.findByText('Unable to load data access requests.')).toBeInTheDocument()
+    expect(screen.queryByText(/do not have access to this study's/i)).not.toBeInTheDocument()
+  })
+
   it('omits the PI row entirely when there is neither a name nor a profile link', async () => {
     vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
       makeSearchResponse(datasets.map(dataset => ({ ...dataset, study: { ...dataset.study, piName: '' } }))) as never,
@@ -973,5 +1066,48 @@ describe('Study details test', () => {
     expect(await screen.findByText('Active Researcher Status is required to comment or rate this study.'))
       .toBeInTheDocument()
     expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
+  })
+
+  it('shows granted DAR details and expands the research use statement', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([{
+      projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+      nonTechRus: 'Study cancer outcomes.', expired: false, piName: 'Dr Researcher',
+      institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+    }])
+    const user = userEvent.setup()
+    mountComponent()
+
+    expect(await screen.findByText('Cancer genomics')).toBeInTheDocument()
+    expect(screen.getByText('Institution: Research University')).toBeInTheDocument()
+    // The section names the institution a grant went to, not the person who holds it
+    expect(screen.queryByText(/Dr Researcher/)).not.toBeInTheDocument()
+    expect(screen.getByText('Current')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Show research use statement' }))
+    expect(screen.getByText('Study cancer outcomes.')).toBeInTheDocument()
+  })
+
+  it('groups self-reported secondary research outputs by type', async () => {
+    vi.mocked(DatasetMetrics.getResearchOutputs).mockResolvedValueOnce({
+      presentations: [{ title: 'ASHG 2025 talk', url: 'https://example.org/talk' }],
+      publications: [{ title: 'Downstream findings' }, { title: 'Second downstream paper' }],
+      intellectualProperties: [{ title: 'Assay patent' }],
+    } as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    // Each type is its own group, labelled with its own count
+    expect(await screen.findByText('Presentations (1)')).toBeInTheDocument()
+    expect(screen.getByText('Publications (2)')).toBeInTheDocument()
+    expect(screen.getByText('Intellectual Property (1)')).toBeInTheDocument()
+
+    // The groups start collapsed, so their entries are only reachable once expanded
+    await user.click(screen.getByText('Presentations (1)'))
+    expect(await screen.findByRole('link', { name: 'ASHG 2025 talk' }))
+      .toHaveAttribute('href', 'https://example.org/talk')
+    await user.click(screen.getByText('Publications (2)'))
+    expect(await screen.findByText('Downstream findings')).toBeInTheDocument()
+    expect(screen.getByText('Second downstream paper')).toBeInTheDocument()
+    await user.click(screen.getByText('Intellectual Property (1)'))
+    expect(await screen.findByText('Assay patent')).toBeInTheDocument()
   })
 })

@@ -1,6 +1,7 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { Study } from 'src/libs/ajax/Study'
 import { StudyComments } from 'src/libs/ajax/StudyComments'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
@@ -53,6 +54,20 @@ export const useStudyComments = (studyId: string) => useInfiniteQuery({
     // leave this asking for an offset past the list forever.
     return distinct < lastPage.total && lastPage.comments.length > 0 ? fetched : undefined
   },
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const useStudyDarHistory = (studyId: string) => useQuery({
+  queryKey: ['study-dar-history', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => DatasetMetrics.getStudyStats(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const useStudyResearchOutputs = (studyId: string) => useQuery({
+  queryKey: ['study-research-outputs', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => DatasetMetrics.getResearchOutputs(studyId),
   staleTime: STUDY_STALE_TIME,
 })
 

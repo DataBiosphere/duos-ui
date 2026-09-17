@@ -14,7 +14,7 @@ import {
 } from 'src/types/model'
 import { ElasticsearchQuery } from 'src/types/elastic'
 import { SnapshotSummaryModel, EnumerateSnapshotModel } from 'src/types/tdrModel'
-import { extractError } from 'src/utils/ErrorUtils'
+import { extractError, extractStatus } from 'src/utils/ErrorUtils'
 import { createDataUseDisplay } from 'src/utils/DataUseUtils'
 import { useParams, useNavigate } from 'react-router'
 import { usePageTitle } from 'src/hooks/usePageTitle'
@@ -53,6 +53,8 @@ export default function DatasetStatistics() {
   const datasetIdentifier = params.datasetIdentifier || ''
   const [datasetTerm, setDatasetTerm] = useState<DatasetTerm>()
   const [dars, setDars] = useState<Array<DatasetStatisticsDar>>()
+  // Set when the request history is withheld rather than absent, so the section can say which.
+  const [darsRestricted, setDarsRestricted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [exportableSnapshots, setExportableSnapshots] = useState<SnapshotSummaryModel[]>([])
 
@@ -99,8 +101,47 @@ export default function DatasetStatistics() {
     }
   }
 
+  /**
+   * The request history for one dataset. Separate from the effect below because a refusal here is
+   * its own outcome rather than a failure of the page: the endpoint is gated on being able to read
+   * the dataset's study, and an unpublished study is readable by its creator, its custodians and
+   * admins alone - which is a different thing to tell the reader than "the server failed".
+   */
+  const loadDarsFor = async (datasetId: number, isCancelled: () => boolean) => {
+    try {
+      const dars: Array<DatasetStatisticsDar> = await DatasetMetrics.getDatasetStats(datasetId)
+      if (isCancelled()) return
+      setDars(dars)
+    }
+    catch (error) {
+      if (isCancelled()) return
+      if (extractStatus(error) === 403) {
+        setDarsRestricted(true)
+      }
+      else {
+        showError('Unable to retrieve dataset statistics from server: ' + extractError(error))
+      }
+    }
+  }
+
   useEffect(() => {
+    // Latched, because two quick navigations can resolve out of order and the older request's
+    // writes would land last - reintroducing exactly the cross-dataset bleed the resets below
+    // are here to prevent. Clearing state first does not help with that; only ignoring the
+    // answers to a question the page has stopped asking does.
+    let cancelled = false
     const init = async () => {
+      // This page is not remounted between datasets - the route parameter changes and the effect
+      // re-runs - so last dataset's answers have to be cleared before asking about the next one.
+      // Left alone, a 403 on an unpublished study rendered the previous dataset's request history
+      // beside the restriction notice, and returning to a readable dataset kept the notice.
+      // datasetTerm is cleared too: if the next lookup throws or matches no single dataset, both
+      // paths stop without setting it, so the previous dataset's page would otherwise still be on
+      // screen under the new URL - and Apply for Access would draft a DAR against it.
+      setDatasetTerm(undefined)
+      setDars(undefined)
+      setDarsRestricted(false)
+      setIsLoading(true)
       try {
         const datasetTerms: DatasetTerm[] = await DataSet.searchDatasetIndex({
           query: {
@@ -119,10 +160,11 @@ export default function DatasetStatistics() {
           },
         } as ElasticsearchQuery)
 
+        if (cancelled) return
         if (datasetTerms.length === 1) {
           setDatasetTerm(datasetTerms[0])
-          const dars: Array<DatasetStatisticsDar> = await DatasetMetrics.getDatasetStats(datasetTerms[0].datasetId)
-          setDars(dars)
+          await loadDarsFor(datasetTerms[0].datasetId, () => cancelled)
+          if (cancelled) return
           setIsLoading(false)
         }
         else {
@@ -132,11 +174,15 @@ export default function DatasetStatistics() {
         }
       }
       catch (error) {
+        if (cancelled) return
         showError('Unable to retrieve dataset statistics from server: ' + extractError(error))
         setIsLoading(false)
       }
     }
     init()
+    return () => {
+      cancelled = true
+    }
   }, [datasetIdentifier])
 
   useEffect(() => {
@@ -287,7 +333,17 @@ export default function DatasetStatistics() {
           </div>
           <div style={{ paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%' }} />
           <div style={Styles.SUB_HEADER}>Data Access Requests for this dataset</div>
-          {dars?.length === 0
+          {darsRestricted && (
+            // <output> carries an implicit status role and is announced more reliably than a div
+            // wearing role="status". It is inline by default, so the block display keeps the
+            // spacing the surrounding notices have.
+            <output style={{ display: 'block', paddingTop: '20px', fontStyle: 'italic' }}>
+              You do not have access to this dataset&apos;s data access request history. While a
+              study is unpublished its history is visible only to the study&apos;s creator, its
+              custodians, and admins.
+            </output>
+          )}
+          {!darsRestricted && dars?.length === 0
             && (
               <div style={{ paddingTop: '20px', fontStyle: 'italic' }}>
                 No Data Access Requests have been created for this dataset.
