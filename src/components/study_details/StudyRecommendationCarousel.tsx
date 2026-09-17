@@ -23,7 +23,10 @@ const StudyRecommendationCarousel = ({ id, heading, recommendations = [], isPend
     <StudyPageSection id={id} heading={heading}>
       <StudyQueryResult
         isPending={isPending}
-        error={error}
+        // Only when there is nothing cached to keep showing, as the asset and publication
+        // sections do. Passed unconditionally it undid what isPending buys above: a failed
+        // background refetch replaced cards that had loaded fine.
+        error={recommendations.length === 0 ? error : undefined}
         isEmpty={recommendations.length === 0}
         emptyMessage="No study recommendations yet."
         errorMessage="Unable to load study recommendations."

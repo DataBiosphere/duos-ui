@@ -83,6 +83,19 @@ describe('StudyRecommendationCarousel', () => {
     expect(screen.queryByText('No study recommendations yet.')).not.toBeInTheDocument()
   })
 
+  /**
+   * React Query keeps the last good data while reporting a failed background refetch, so both
+   * arrive together. Passing the error through regardless discarded cards that were on screen and
+   * correct - and contradicted what isPending is documented to buy.
+   */
+  it('keeps cached cards when a background refetch fails', () => {
+    mount({ recommendations: [recommendation(7)], error: new Error('refresh failed') })
+
+    expect(screen.getByText('Study 7')).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.queryByText('Unable to load study recommendations.')).not.toBeInTheDocument()
+  })
+
   it('shows a spinner only until the first response lands', () => {
     const { container } = mount({ isPending: true })
 
