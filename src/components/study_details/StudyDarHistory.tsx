@@ -56,7 +56,10 @@ const StudyDarHistory = ({ studyId }: { studyId: string }) => {
     <StudyPageSection id="dar-history" heading="Data Access Requests for this Study">
       <StudyQueryResult
         isPending={isPending}
-        error={restricted ? undefined : error}
+        // A refusal still blocks: once the server says no, cached request history should come off
+        // the page rather than linger. Any other failure defers to what is already loaded, as the
+        // other sections do - a transient refetch error is not a reason to discard correct rows.
+        error={restricted || data.length > 0 ? undefined : error}
         isEmpty={!restricted && data.length === 0}
         emptyMessage="No granted data access requests yet."
         errorMessage="Unable to load data access requests."
