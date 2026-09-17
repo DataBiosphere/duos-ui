@@ -56,6 +56,39 @@ describe('filterRegistry', () => {
     expect(presentationFilters.map(section => section.key)).toEqual(['datasetsCited'])
   })
 
+  describe('re-adding a selected value the corpus no longer offers', () => {
+    const options = (values: string[]) => values.map(value => ({ value, label: value }))
+
+    // The lists render in array order, so appending buries the value at the end.
+    it('keeps an alphabetical list alphabetical', () => {
+      const sections = getFilterSectionsForAsset(
+        AssetType.WORKSPACES,
+        { ...availableFilters, workspacePlatform: options(['AnVIL', 'Terra']) },
+        { ...EMPTY_FILTERS, workspacePlatform: ['BioData Catalyst'] },
+      )
+
+      expect(sections.find(section => section.key === 'workspacePlatform')?.options?.map(o => o.value))
+        .toEqual(['AnVIL', 'BioData Catalyst', 'Terra'])
+    })
+
+    // Access management reads open, via DUOS, external — not alphabetically.
+    it('leaves a deliberately ordered enum list alone', () => {
+      const ordered = [
+        { value: 'open', label: 'Open Access' },
+        { value: 'controlled', label: 'via DUOS' },
+        { value: 'external', label: 'External to DUOS' },
+      ]
+      const sections = getFilterSectionsForAsset(
+        AssetType.STUDIES,
+        { ...availableFilters, accessManagement: ordered },
+        { ...EMPTY_FILTERS, accessManagement: ['legacy'] },
+      )
+
+      expect(sections.find(section => section.key === 'accessManagement')?.options?.map(o => o.value))
+        .toEqual(['open', 'controlled', 'external', 'legacy'])
+    })
+  })
+
   it('builds clauses for every active filter regardless of tab so rules combine', () => {
     const clauses = buildActiveFilterClauses(filters)
     // accessManagement, dataType, participantCount and datasetsCited are all set.

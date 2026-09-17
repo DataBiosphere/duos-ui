@@ -4,6 +4,7 @@ import {
   AvailableFilters,
   AssetType,
   FilterKey,
+  FilterOption,
   FilterState,
   LibraryFilterSection,
   LibraryFilterSectionControl,
@@ -636,9 +637,35 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
   },
 }
 
+/**
+ * Another tab's filter can exclude every study carrying a selected value, and the
+ * external chips skip keys this tab owns — so without re-adding it there is no
+ * way to uncheck it.
+ */
+const withSelectedValues = (
+  key: FilterKey,
+  options: FilterOption[] | undefined,
+  filters?: FilterState,
+): FilterOption[] | undefined => {
+  if (!options || !filters || FILTER_CONTROL_BY_KEY[key] !== 'checkbox') {
+    return options
+  }
+
+  const missing = (filters[key] as string[]).filter(value => !options.some(option => option.value === value))
+  if (missing.length === 0) {
+    return options
+  }
+
+  const merged = [...options, ...missing.map(value => ({ value, label: value }))]
+  // Corpus lists are alphabetical and render unsorted; enum lists are deliberately ordered.
+  const isAlphabetical = options.every((option, i) => i === 0 || options[i - 1].label.localeCompare(option.label) <= 0)
+  return isAlphabetical ? merged.sort((a, b) => a.label.localeCompare(b.label)) : merged
+}
+
 export const getFilterSectionsForAsset = (
   assetType: AssetType,
   availableFilters: AvailableFilters,
+  filters?: FilterState,
 ): LibraryFilterSection[] => {
   const config = assetFilterRegistry[assetType]
   return config.visibleFilters.map((key) => {
@@ -647,7 +674,7 @@ export const getFilterSectionsForAsset = (
       key,
       label: config.labels?.[key] ?? FILTER_DEFINITIONS[key].label,
       control,
-      options: getFilterOptions(key, availableFilters),
+      options: withSelectedValues(key, getFilterOptions(key, availableFilters), filters),
       range: getFilterRange(key, availableFilters),
     }
   })

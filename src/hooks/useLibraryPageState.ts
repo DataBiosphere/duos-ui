@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from 'react'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
-import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
+import { useLibraryTabCounts, useOptionCorpus } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 import { computeTabCounts, STUDY_ASSET_TABS } from 'src/hooks/libraryCounts'
-import { ActiveFilterChip, AssetType, AvailableFilters, FilterState, LibraryVersionNew, SortOrder } from 'src/types/library'
+import { ActiveFilterChip, AssetType, AvailableFilters, FilterKey, FilterState, LibraryVersionNew, PaginationState, SortOrder } from 'src/types/library'
 import { assetRegistry } from 'src/components/data_library/assets'
 import {
   EMPTY_FILTERS,
@@ -20,6 +20,13 @@ import {
 } from 'src/utils/ClinicalTrialEnumUtils'
 import { SecondaryDataUseTerms } from 'src/components/forms/SecondaryDataUseTerms'
 import { getFormattedName } from 'src/components/forms/SelectOptionInterface'
+
+// Filters whose options are read off the corpus rather than a static enum.
+const CORPUS_DERIVED_OPTION_KEYS: Partial<Record<AssetType, FilterKey[]>> = {
+  [AssetType.WORKSPACES]: ['workspaceTools', 'workspacePlatform'],
+  [AssetType.CLINICAL_TRIALS]: ['clinicalTrialRegistry'],
+  [AssetType.BIOSPECIMENS]: ['biospecimenDataUse'],
+}
 
 /**
  * Panel wording for the secondary data use codes, keyed by the code the index stores.
@@ -110,6 +117,36 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
     urlState.query ?? '',
   )
 
+  // Clauses match whole studies, so a corpus-derived filter would permanently hide
+  // its own sibling values. Every other filter stays applied, matching the grid.
+  const optionCorpusFilters = useMemo(
+    () => (CORPUS_DERIVED_OPTION_KEYS[urlState.tab] ?? []).reduce<FilterState>(
+      (cleared, key) => ({ ...cleared, [key]: EMPTY_FILTERS[key] }),
+      urlState.filters,
+    ),
+    [urlState.tab, urlState.filters],
+  )
+  // Nothing to fetch unless clearing widened anything; the counts response is it.
+  const needsOwnCorpus = JSON.stringify(optionCorpusFilters) !== JSON.stringify(urlState.filters)
+  const { data: visibleTabCorpus, isPlaceholderData: isCorpusStale } = useOptionCorpus(
+    libraryConfig,
+    optionCorpusFilters,
+    urlState.query ?? '',
+    needsOwnCorpus,
+  )
+
+  // Each response is paired with the filters it answers, so the transform can
+  // re-apply the client-side predicates. Placeholder data answers the previous set.
+  const optionCorpusByAsset = useMemo(() => {
+    const ownCorpus = !isCorpusStale && visibleTabCorpus
+    return new Map(STUDY_ASSET_TABS.map(assetType => [
+      assetType,
+      assetType === urlState.tab && ownCorpus
+        ? { response: ownCorpus, filters: optionCorpusFilters }
+        : { response: tabCountsResponse, filters: urlState.filters },
+    ]))
+  }, [urlState.tab, urlState.filters, optionCorpusFilters, visibleTabCorpus, isCorpusStale, tabCountsResponse])
+
   // Badge counts are derived at render time from the shared response with the
   // *current* filters — the same inputs the study-asset grids are derived from
   // below — so a badge and its grid always agree, even while a refetch for new
@@ -158,15 +195,22 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
         .sort((a, b) => a.localeCompare(b))
         .map(value => ({ value, label: value }))
 
-    const workspaceItems = urlState.tab === AssetType.WORKSPACES
-      ? data?.items as Array<{ tools?: string[], platform?: string }>
-      : []
-    const clinicalTrialItems = urlState.tab === AssetType.CLINICAL_TRIALS
-      ? data?.items as Array<{ registry?: string }>
-      : []
-    const biospecimenItems = urlState.tab === AssetType.BIOSPECIMENS
-      ? data?.items as Array<{ optionalDataUse?: string }>
-      : []
+    // An unbounded page size re-runs the asset's own transform over every study
+    // the aggregation returned, so options do not depend on the visible page.
+    // STUDIES_AGG caps at 10,000 buckets — the cap the badges already live with.
+    const FULL_CORPUS_PAGINATION: PaginationState = { page: 0, pageSize: Number.MAX_SAFE_INTEGER }
+
+    // Corpus keys are cleared upstream; the rest still reject rows here.
+    const fullCorpusItems = <T>(assetType: AssetType): T[] => {
+      const { response, filters } = optionCorpusByAsset.get(assetType) ?? {}
+      return (response
+        ? assetRegistry[assetType].transformResponse(response, FULL_CORPUS_PAGINATION, filters).items
+        : []) as T[]
+    }
+
+    const workspaceItems = fullCorpusItems<{ tools?: string[], platform?: string }>(AssetType.WORKSPACES)
+    const clinicalTrialItems = fullCorpusItems<{ registry?: string }>(AssetType.CLINICAL_TRIALS)
+    const biospecimenItems = fullCorpusItems<{ optionalDataUse?: string }>(AssetType.BIOSPECIMENS)
 
     return {
       accessManagement: [
@@ -216,11 +260,11 @@ export function useLibraryPageState(libraryConfig: LibraryVersionNew, defaultTab
       biospecimenPostMortemIntervalRange: { min: 0, max: 1000000 },
       participantCountRange: { min: 0, max: 100000 },
     }
-  }, [metadata, data?.items, urlState.tab])
+  }, [metadata, optionCorpusByAsset])
 
   const filterSections = useMemo(
-    () => getFilterSectionsForAsset(urlState.tab, availableFilters),
-    [urlState.tab, availableFilters],
+    () => getFilterSectionsForAsset(urlState.tab, availableFilters, urlState.filters),
+    [urlState.tab, availableFilters, urlState.filters],
   )
 
   // Filters set on other tabs are kept in state so they persist across tab
