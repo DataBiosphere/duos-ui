@@ -17,10 +17,10 @@ export const assetFilterRegistry: Record<AssetType, AssetFilterConfig> = {
     ],
   },
   [AssetType.MODELS]: {
-    visibleFilters: [],
+    visibleFilters: ['modelFormat', 'modelLicense', 'modelCloud', 'modelTags'],
   },
   [AssetType.WORKSPACES]: {
-    visibleFilters: ['workspaceTools', 'workspacePlatform'],
+    visibleFilters: ['workspaceTools', 'workspacePlatform', 'workspaceCloud', 'workspaceAccess'],
   },
   [AssetType.CLINICAL_TRIALS]: {
     visibleFilters: [

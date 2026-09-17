@@ -88,6 +88,7 @@ export const makeWorkspaceColumns = (): GridColDef<WorkspaceAsset>[] => [
     },
   },
   chipListColumn<WorkspaceAsset>('tools', 'Tools', row => row.tools || [], 150),
+  chipListColumn<WorkspaceAsset>('cloud', 'Cloud', row => row.cloud || [], 130),
   truncatedTextColumn<WorkspaceAsset>('access', 'Access', 120),
   chipListColumn<WorkspaceAsset>('tags', 'Tags', row => row.tags || [], 150),
 ]

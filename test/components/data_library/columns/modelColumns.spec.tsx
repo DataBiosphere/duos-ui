@@ -14,6 +14,7 @@ const makeRow = (overrides: Partial<ModelAsset> = {}): ModelAsset => ({
   url: 'https://example.com/model',
   format: 'ONNX',
   license: 'MIT',
+  cloud: ['AWS'],
   trainedOnDatasets: [],
   maintainer: { name: 'Jane Doe', email: 'jane@example.com' },
   tags: ['genomics', 'classification'],
@@ -70,6 +71,26 @@ describe('makeModelColumns — License column', () => {
   it('renders an empty cell when license is absent', () => {
     const { container } = renderCell('license', '')
     expect(container.textContent?.trim()).toBe('')
+  })
+})
+
+describe('makeModelColumns — Cloud column', () => {
+  it('renders nothing when cloud array is empty', () => {
+    const col = makeModelColumns().find(c => c.field === 'cloud')!
+    const result = col.renderCell!(mockParams(undefined, { cloud: [] }))
+    expect(result).toBeNull()
+  })
+
+  it('renders a chip per cloud provider', () => {
+    renderCell('cloud', undefined, { cloud: ['AWS', 'GCP'] })
+    expect(screen.getByText('AWS')).toBeInTheDocument()
+    expect(screen.getByText('GCP')).toBeInTheDocument()
+  })
+
+  it('shows "+N" overflow chip when there are more than 3 cloud providers', () => {
+    const { container } = renderCell('cloud', undefined, { cloud: ['AWS', 'GCP', 'Azure', 'OCI'] })
+    expect(container.querySelectorAll('.MuiChip-root')).toHaveLength(4)
+    expect(screen.getByText('+1')).toBeInTheDocument()
   })
 })
 
@@ -137,13 +158,13 @@ describe('makeModelColumns — Tags column', () => {
 })
 
 describe('makeModelColumns — column structure', () => {
-  it('returns 7 column definitions', () => {
-    expect(makeModelColumns()).toHaveLength(7)
+  it('returns 8 column definitions', () => {
+    expect(makeModelColumns()).toHaveLength(8)
   })
 
   it('defines expected fields', () => {
     const fields = makeModelColumns().map(c => c.field)
-    expect(fields).toEqual(['name', 'studyName', 'format', 'license', 'maintainer', 'url', 'tags'])
+    expect(fields).toEqual(['name', 'studyName', 'format', 'license', 'cloud', 'maintainer', 'url', 'tags'])
   })
 
   it('marks url and tags as non-sortable', () => {

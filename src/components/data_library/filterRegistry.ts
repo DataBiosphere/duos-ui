@@ -19,6 +19,12 @@ type ArrayFilterKey
     | 'dac'
     | 'workspaceTools'
     | 'workspacePlatform'
+    | 'modelFormat'
+    | 'modelLicense'
+    | 'modelCloud'
+    | 'modelTags'
+    | 'workspaceCloud'
+    | 'workspaceAccess'
     | 'clinicalTrialStatus'
     | 'clinicalTrialPhase'
     | 'clinicalTrialInterventionType'
@@ -36,6 +42,12 @@ const ARRAY_FILTER_KEYS: ArrayFilterKey[] = [
   'dac',
   'workspaceTools',
   'workspacePlatform',
+  'modelFormat',
+  'modelLicense',
+  'modelCloud',
+  'modelTags',
+  'workspaceCloud',
+  'workspaceAccess',
   'clinicalTrialStatus',
   'clinicalTrialPhase',
   'clinicalTrialInterventionType',
@@ -76,6 +88,12 @@ const FILTER_CONTROL_BY_KEY: Record<FilterKey, LibraryFilterSectionControl> = {
   dac: 'checkbox',
   workspaceTools: 'checkbox',
   workspacePlatform: 'checkbox',
+  modelFormat: 'checkbox',
+  modelLicense: 'checkbox',
+  modelCloud: 'checkbox',
+  modelTags: 'checkbox',
+  workspaceCloud: 'checkbox',
+  workspaceAccess: 'checkbox',
   clinicalTrialStatus: 'checkbox',
   clinicalTrialPhase: 'checkbox',
   clinicalTrialInterventionType: 'checkbox',
@@ -103,6 +121,12 @@ export const EMPTY_FILTERS: FilterState = {
   dac: [],
   workspaceTools: [],
   workspacePlatform: [],
+  modelFormat: [],
+  modelLicense: [],
+  modelCloud: [],
+  modelTags: [],
+  workspaceCloud: [],
+  workspaceAccess: [],
   clinicalTrialStatus: [],
   clinicalTrialPhase: [],
   clinicalTrialInterventionType: [],
@@ -177,6 +201,12 @@ export const isFilterActive = (key: FilterKey, filters: FilterState): boolean =>
     case 'dac':
     case 'workspaceTools':
     case 'workspacePlatform':
+    case 'modelFormat':
+    case 'modelLicense':
+    case 'modelCloud':
+    case 'modelTags':
+    case 'workspaceCloud':
+    case 'workspaceAccess':
     case 'clinicalTrialStatus':
     case 'clinicalTrialPhase':
     case 'clinicalTrialInterventionType':
@@ -231,6 +261,12 @@ const getFilterOptions = (key: FilterKey, availableFilters: AvailableFilters) =>
     case 'dac':
     case 'workspaceTools':
     case 'workspacePlatform':
+    case 'modelFormat':
+    case 'modelLicense':
+    case 'modelCloud':
+    case 'modelTags':
+    case 'workspaceCloud':
+    case 'workspaceAccess':
     case 'clinicalTrialStatus':
     case 'clinicalTrialPhase':
     case 'clinicalTrialInterventionType':
@@ -478,6 +514,48 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
     buildClause: filters =>
       filters.workspacePlatform.length > 0
         ? matchAny('study.assets.workspaces.platform', filters.workspacePlatform)
+        : undefined,
+  },
+  modelFormat: {
+    label: 'Format',
+    buildClause: filters =>
+      filters.modelFormat.length > 0
+        ? matchAny('study.assets.models.format', filters.modelFormat)
+        : undefined,
+  },
+  modelLicense: {
+    label: 'License',
+    buildClause: filters =>
+      filters.modelLicense.length > 0
+        ? matchAny('study.assets.models.license', filters.modelLicense)
+        : undefined,
+  },
+  modelCloud: {
+    label: 'Cloud (AI Models)',
+    buildClause: filters =>
+      filters.modelCloud.length > 0
+        ? matchAny('study.assets.models.cloud', filters.modelCloud)
+        : undefined,
+  },
+  modelTags: {
+    label: 'Tags',
+    buildClause: filters =>
+      filters.modelTags.length > 0
+        ? matchAny('study.assets.models.tags', filters.modelTags)
+        : undefined,
+  },
+  workspaceCloud: {
+    label: 'Cloud (Workspaces)',
+    buildClause: filters =>
+      filters.workspaceCloud.length > 0
+        ? matchAny('study.assets.workspaces.cloud', filters.workspaceCloud)
+        : undefined,
+  },
+  workspaceAccess: {
+    label: 'Access',
+    buildClause: filters =>
+      filters.workspaceAccess.length > 0
+        ? matchAny('study.assets.workspaces.access', filters.workspaceAccess)
         : undefined,
   },
   clinicalTrialStatus: {

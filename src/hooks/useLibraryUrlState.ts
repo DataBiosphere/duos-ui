@@ -13,6 +13,12 @@ type ArrayFilterParamConfig = {
     | 'dac'
     | 'workspaceTools'
     | 'workspacePlatform'
+    | 'modelFormat'
+    | 'modelLicense'
+    | 'modelCloud'
+    | 'modelTags'
+    | 'workspaceCloud'
+    | 'workspaceAccess'
     | 'clinicalTrialStatus'
     | 'clinicalTrialPhase'
     | 'clinicalTrialInterventionType'
@@ -49,6 +55,12 @@ const ARRAY_FILTER_PARAM_CONFIG: ArrayFilterParamConfig[] = [
   { key: 'dac', param: 'dac' },
   { key: 'workspaceTools', param: 'workspaceTools' },
   { key: 'workspacePlatform', param: 'workspacePlatform' },
+  { key: 'modelFormat', param: 'modelFormat' },
+  { key: 'modelLicense', param: 'modelLicense' },
+  { key: 'modelCloud', param: 'modelCloud' },
+  { key: 'modelTags', param: 'modelTags' },
+  { key: 'workspaceCloud', param: 'workspaceCloud' },
+  { key: 'workspaceAccess', param: 'workspaceAccess' },
   { key: 'clinicalTrialStatus', param: 'clinicalTrialStatus' },
   { key: 'clinicalTrialPhase', param: 'clinicalTrialPhase' },
   { key: 'clinicalTrialInterventionType', param: 'clinicalTrialInterventionType' },

@@ -45,6 +45,7 @@ export const makeModelColumns = (): GridColDef<ModelAsset>[] => [
   },
   truncatedTextColumn<ModelAsset>('format', 'Format', 150),
   truncatedTextColumn<ModelAsset>('license', 'License', 120),
+  chipListColumn<ModelAsset>('cloud', 'Cloud', row => row.cloud || [], 130),
   {
     field: 'maintainer',
     headerName: 'Maintainer',

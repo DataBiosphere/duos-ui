@@ -25,6 +25,12 @@ const availableFilters: AvailableFilters = {
     { value: 'Genomic', label: 'Genomic', count: 4 },
   ],
   dac: [],
+  modelFormat: [],
+  modelLicense: [],
+  modelCloud: [],
+  modelTags: [],
+  workspaceCloud: [],
+  workspaceAccess: [],
   workspaceTools: [],
   workspacePlatform: [],
   clinicalTrialStatus: [],
@@ -618,5 +624,48 @@ describe('LibraryFilters — collapseable panel', () => {
       />,
     )
     expect(screen.queryByText('Clear')).not.toBeInTheDocument()
+  })
+})
+
+// getFilterSectionsForAsset returning a section is not the same as the panel
+// rendering it, so assert on the panel.
+describe('LibraryFilters — model and workspace sections render', () => {
+  const withOptions: AvailableFilters = {
+    ...availableFilters,
+    modelFormat: [{ value: 'ONNX', label: 'ONNX' }],
+    modelLicense: [{ value: 'MIT', label: 'MIT' }],
+    modelCloud: [{ value: 'AWS', label: 'AWS' }],
+    modelTags: [{ value: 'vision', label: 'vision' }],
+    workspaceCloud: [{ value: 'GCP', label: 'GCP' }],
+    workspaceAccess: [{ value: 'open', label: 'open' }],
+  }
+
+  it('renders every Models section with its options', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.MODELS, withOptions)}
+      />,
+    )
+    for (const label of ['Format', 'License', 'Cloud (AI Models)', 'Tags']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+    expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
+  })
+
+  it('renders the new Workspaces sections alongside the existing ones', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.WORKSPACES, withOptions)}
+      />,
+    )
+    for (const label of ['Tools', 'Platform', 'Cloud (Workspaces)', 'Access']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
   })
 })
