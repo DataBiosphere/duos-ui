@@ -81,6 +81,7 @@ vi.mock('src/utils/accessUtils', () => ({
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Study } from 'src/libs/ajax/Study'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 
 const datasets = [
   {
@@ -851,6 +852,27 @@ describe('Study details test', () => {
   })
 
   /** Same rule for the research outputs section. */
+  /**
+   * The same rule for the recommendation sections, driven through a real failed refetch rather
+   * than by handing the component both props at once - the carousel is presentational, so this is
+   * what proves the wiring in StudyDetails hands it cached data alongside the error.
+   */
+  it('keeps loaded recommendations when a background refetch fails', async () => {
+    vi.mocked(StudyRecommendations.getSimilar)
+      .mockResolvedValueOnce([{
+        studyId: 7, studyName: 'Neighbouring study', studyDescription: 'About genes',
+        piName: 'Dr Adjacent', datasetCount: 2, datasetIds: [1, 2],
+      }] as never)
+      .mockRejectedValue(new Error('boom'))
+    mountComponent()
+    await screen.findByText('Neighbouring study')
+
+    await queryClient.invalidateQueries()
+
+    await waitFor(() => expect(screen.getByText('Neighbouring study')).toBeInTheDocument())
+    expect(screen.queryByText('Unable to load study recommendations.')).not.toBeInTheDocument()
+  })
+
   it('keeps loaded research outputs when a background refetch fails', async () => {
     vi.mocked(DatasetMetrics.getResearchOutputs)
       .mockResolvedValueOnce({
