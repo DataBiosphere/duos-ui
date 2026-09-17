@@ -507,14 +507,18 @@ describe('filterRegistry — presentation and publication query clauses', () => 
   })
 })
 
-// A wrong `study.assets.*` path type-checks and silently matches nothing.
+// A wrong `study.assets.*` path type-checks and silently matches nothing. These
+// are controlled vocabularies matched against the exact indexed value: the
+// option lists are built from the corpus, and match_phrase would also admit
+// 'Provisional Patent Application' for 'Provisional Patent' — inflating every
+// other tab's badge, which never re-checks rows.
 describe('filterRegistry — IP and funding query clauses', () => {
   it.each([
     ['ipType', 'study.assets.intellectualProperties.type'],
     ['ipStatus', 'study.assets.intellectualProperties.status'],
     ['fundingFunderName', 'study.assets.funding.funderName'],
-  ])('%s queries %s', (key, field) => {
+  ])('%s queries %s on its keyword subfield', (key, field) => {
     const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: ['x'] })
-    expect(clauses).toEqual([{ bool: { should: [{ match_phrase: { [field]: 'x' } }] } }])
+    expect(clauses).toEqual([{ bool: { should: [{ term: { [`${field}.keyword`]: 'x' } }] } }])
   })
 })

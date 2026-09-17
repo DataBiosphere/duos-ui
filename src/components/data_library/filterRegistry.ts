@@ -689,21 +689,21 @@ const FILTER_DEFINITIONS: Record<FilterKey, FilterDefinition> = {
     label: 'Type',
     buildClause: filters =>
       filters.ipType.length > 0
-        ? matchAny('study.assets.intellectualProperties.type', filters.ipType)
+        ? termAny('study.assets.intellectualProperties.type', filters.ipType)
         : undefined,
   },
   ipStatus: {
     label: 'Status (Intellectual Property)',
     buildClause: filters =>
       filters.ipStatus.length > 0
-        ? matchAny('study.assets.intellectualProperties.status', filters.ipStatus)
+        ? termAny('study.assets.intellectualProperties.status', filters.ipStatus)
         : undefined,
   },
   fundingFunderName: {
     label: 'Funder Name',
     buildClause: filters =>
       filters.fundingFunderName.length > 0
-        ? matchAny('study.assets.funding.funderName', filters.fundingFunderName)
+        ? termAny('study.assets.funding.funderName', filters.fundingFunderName)
         : undefined,
   },
   clinicalTrialStatus: {
