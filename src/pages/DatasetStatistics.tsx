@@ -380,10 +380,7 @@ export default function DatasetStatistics() {
                     </div>
                   </div>,
                   <div key="requester" style={{ display: 'flex', backgroundColor: 'white' }}>
-                    <div style={{ display: 'flex', paddingRight: '2rem' }}>
-                      <div style={Styles.SMALL_BOLD}>PI:</div>
-                      <div style={{ fontSize: Theme.font.size.small }}>{dar.piName || 'Not provided'}</div>
-                    </div>
+                    {/* Institution, not the requester's name, as on the study page's cards. */}
                     <div style={{ display: 'flex', paddingRight: '2rem' }}>
                       <div style={Styles.SMALL_BOLD}>Institution:</div>
                       <div style={{ fontSize: Theme.font.size.small }}>

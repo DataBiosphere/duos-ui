@@ -639,11 +639,11 @@ describe('DatasetStatistics', () => {
   })
 
   /**
-   * The requester, not the study's PI. The dataset page showed neither until the per-dataset
-   * summaries started carrying them; the study page's cards have named both all along, and the
-   * two surfaces should describe a granted request the same way.
+   * The requester's institution, not the study's PI shown elsewhere on this page. The dataset page
+   * carried neither until the per-dataset summaries started reporting it, and the study page's
+   * cards name the same thing, so the two surfaces describe a granted request the same way.
    */
-  it('names the requesting PI and institution on an expanded DAR', async () => {
+  it('names the requesting institution on an expanded DAR', async () => {
     const darsData: DatasetStatisticsDar[] = [{
       darCode: 'DAR-123',
       projectTitle: 'Test Project',
@@ -651,7 +651,6 @@ describe('DatasetStatistics', () => {
       nonTechRus: 'Test summary',
       expired: false,
       referenceId: 'abc',
-      piName: 'Dr. Ada Lovelace',
       institutionName: 'Broad Institute',
     }]
     vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDataset as never])
@@ -670,12 +669,11 @@ describe('DatasetStatistics', () => {
     await screen.findByText('DAR-123')
     await user.click(screen.getByText('Show More'))
 
-    expect(await screen.findByText('Dr. Ada Lovelace')).toBeInTheDocument()
-    expect(screen.getByText('Broad Institute')).toBeInTheDocument()
+    expect(await screen.findByText('Broad Institute')).toBeInTheDocument()
   })
 
-  /** Both fields are optional on the payload, so an absent one must not render an empty label. */
-  it('says so when a DAR carries no requester identity', async () => {
+  /** The field is optional on the payload, so an absent one must not render an empty label. */
+  it('says so when a DAR carries no requester institution', async () => {
     vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDataset as never])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(mockDarsResponse)
     vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
@@ -692,7 +690,7 @@ describe('DatasetStatistics', () => {
     await screen.findByText('DAR-001')
     await user.click(screen.getByText('Show More'))
 
-    expect(await screen.findAllByText('Not provided')).toHaveLength(2)
+    expect(await screen.findAllByText('Not provided')).toHaveLength(1)
   })
 
   it('Displays message when no DARs exist', async () => {
