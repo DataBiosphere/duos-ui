@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router'
 import { useCallback, useMemo } from 'react'
 import { AssetType, DEFAULT_PAGE_SIZE, FilterState, LibraryUrlState, PAGE_SIZE_OPTIONS, SortOrder } from 'src/types/library'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 type ArrayFilterParamConfig = {
   key: keyof Pick<
@@ -240,10 +241,13 @@ const serializeBooleanFilterToUrl = (
 }
 
 /**
- * Parse filters from URL search params
+ * Parse filters from URL search params. Seeded with EMPTY_FILTERS because the
+ * spreads below are `Record`s the cast cannot check: a key missing from every
+ * param config would arrive undefined and throw on `filters[key].length`.
  */
 const parseFiltersFromUrl = (searchParams: URLSearchParams): FilterState => {
   return {
+    ...EMPTY_FILTERS,
     ...parseArrayFilters(searchParams),
     ...parseRangeFilters(searchParams),
     ...parseDateFilters(searchParams),
