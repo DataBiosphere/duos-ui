@@ -15,6 +15,7 @@ import { MemoryRouter } from 'react-router'
 import { LibraryDataGrid } from 'src/components/data_library/LibraryDataGrid'
 import { AssetType, ExportableDatasets, SortOrder, StudyAggregation } from 'src/types/library'
 import { DatasetTerm, StudyTerm, UserTerm } from 'src/types/model'
+import { Storage } from 'src/libs/storage'
 
 beforeAll(() => {
   global.ResizeObserver = class {
@@ -156,6 +157,35 @@ describe('LibraryDataGrid', () => {
     const exportableDatasets: ExportableDatasets = {
       'DUOS-000201': [{ id: 'snap-001', name: 'Snapshot 001', duosId: 'DUOS-000201', cloudPlatform: 'gcp', resourceLocks: {} }],
     }
+
+    /**
+     * The wiring, not just the button: the Request Path column has to ask about DAC approval for
+     * the button ever to know. Selection already refuses these rows, so leaving this path open
+     * meant one click could still raise a DAR against an unapproved dataset.
+     */
+    it('disables Request Now for a controlled dataset awaiting DAC approval', () => {
+      // A card, so DAC approval is the only thing that can disable the button here. Without it
+      // the button is disabled for want of Active Researcher Status and this proves nothing.
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ libraryCard: {} } as never)
+      const pending = makeDatasetTerm({
+        datasetId: 203, datasetName: 'Pending Dataset', datasetIdentifier: 'DUOS-000203',
+        participantCount: 10, accessManagement: 'controlled', dacApproval: false,
+      })
+      mountGrid(
+        <LibraryDataGrid assetType={AssetType.DATASETS} data={[pending]} total={1} {...baseProps} />,
+      )
+      expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
+    })
+
+    it('leaves Request Now enabled for an approved controlled dataset', () => {
+      // A card, so the only thing under test here is DAC approval - without it the button is
+      // disabled for want of Active Researcher Status and the assertion proves nothing.
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ libraryCard: {} } as never)
+      mountGrid(
+        <LibraryDataGrid assetType={AssetType.DATASETS} data={[exportableDataset]} total={1} {...baseProps} />,
+      )
+      expect(screen.getByRole('button', { name: 'Request Now' })).not.toBeDisabled()
+    })
 
     it('renders an Export column header when exportableDatasets has entries', () => {
       mountGrid(

@@ -65,6 +65,30 @@ describe('RequestAccessButton', () => {
     expect(await screen.findByText('Active Researcher Status is required to apply for data access')).toBeInTheDocument()
   })
 
+  /**
+   * The checkbox stopped offering these rows once selection required DAC approval, but this
+   * button kept its own path to a DAR. An unapproved dataset has nothing to request yet.
+   */
+  it('disables the button for a dataset still awaiting DAC approval', () => {
+    getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
+
+    render(<RequestAccessButton datasetId={101} awaitingDacApproval />)
+
+    expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
+  })
+
+  /** Its own explanation, not the selection tooltip, which would say something untrue here. */
+  it('explains that the dataset is awaiting DAC approval', async () => {
+    getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
+
+    render(<RequestAccessButton datasetId={101} awaitingDacApproval disabledForSelection />)
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Request Now' }).parentElement as HTMLElement)
+
+    expect(await screen.findByText('This dataset is awaiting DAC approval')).toBeInTheDocument()
+    expect(screen.queryByText(/Apply for Access. below to request/)).not.toBeInTheDocument()
+  })
+
   it('creates a DAR draft for the dataset and navigates to the application on click', async () => {
     getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
     postDarDraftSpy.mockResolvedValue({ referenceId: 'REF-789' })
