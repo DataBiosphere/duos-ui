@@ -2,9 +2,6 @@ import { CSP_REPORT_GROUP, CSP_REPORT_PATH } from './cspReport.js'
 
 // CSP derived from the runtime config served to the client. See ADR-013.
 
-// Scope access to this bucket; the GCS origin is shared by public buckets.
-export const BANNER_SOURCE = 'https://storage.googleapis.com/broad-duos-banners/'
-
 // Feature flags and anonymous metrics remain direct in BFF mode.
 const BFF_CONNECT_FIELDS = ['apiUrl', 'bardApiUrl'] as const
 
@@ -29,6 +26,21 @@ function configuredOrigin(value: unknown): string | undefined {
   }
 }
 
+/**
+ * Return the banner feed's bucket as a path-scoped source. The GCS origin is
+ * shared by every public bucket, so the origin alone would allowlist all of them.
+ */
+export function bannerSource(bannersUrl: unknown): string | undefined {
+  if (typeof bannersUrl !== 'string' || bannersUrl.trim() === '') return undefined
+  try {
+    const bucket = new URL('.', bannersUrl)
+    return bucket.origin === 'null' ? undefined : bucket.href
+  }
+  catch {
+    return undefined
+  }
+}
+
 export function connectSources(config: Record<string, unknown>, env: CspEnvironment): string[] {
   const fields = config.bffEnabled === true ? BFF_CONNECT_FIELDS : LEGACY_CONNECT_FIELDS
   const sources = new Set<string>(['\'self\''])
@@ -36,7 +48,10 @@ export function connectSources(config: Record<string, unknown>, env: CspEnvironm
     const origin = configuredOrigin(config[field])
     if (origin) sources.add(origin)
   }
-  sources.add(BANNER_SOURCE)
+  const banner = bannerSource(config.bannersUrl)
+  if (banner) {
+    sources.add(banner)
+  }
   if (env.isDev) {
     // Explicit schemes cover Vite HMR across browsers.
     sources.add('ws:')

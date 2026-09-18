@@ -3,10 +3,6 @@ import { Config } from './config'
 import { fetchGet } from 'src/libs/ajax/fetchAdapter'
 import { Storage } from 'src/libs/storage'
 
-// https://storage.googleapis.com/broad-duos-banners/{{env}}_notifications.json
-const gcs = 'https://storage.googleapis.com/broad-duos-banners'
-const bannerFileName = 'notifications.json'
-
 export interface Banner {
   id: string
   active: boolean
@@ -55,14 +51,13 @@ export const visibleBanner = (banner: Banner | null | undefined): Banner | null 
 export const NotificationService = {
 
   /**
-   * Get the raw banner content from GCS
+   * Get the raw banner content from the environment's public GCS object, `bannersUrl` in
+   * config.json. An environment with no feed configured has no banners.
    * @returns {Promise<Banner[]>}
    */
   getBanners: async (): Promise<Banner[]> => {
-    const env = await Config.getEnv()
-    const url = env === 'local'
-      ? `${gcs}/dev_${bannerFileName}`
-      : `${gcs}/${env}_${bannerFileName}`
+    const url = await Config.getBannersUrl()
+    if (!url) return []
     const res = await fetchGet<Banner[]>(url)
     return res.data
   },
