@@ -41,7 +41,7 @@ describe('RequestAccessButton', () => {
   it('renders an enabled "Request Now" button when the user has Active Researcher Status', () => {
     getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
 
-    render(<RequestAccessButton datasetId={101} />)
+    render(<RequestAccessButton datasetId={101} dacApproval />)
 
     const button = screen.getByRole('button', { name: 'Request Now' })
     expect(button).not.toBeDisabled()
@@ -50,7 +50,7 @@ describe('RequestAccessButton', () => {
   it('renders a disabled button when the user does not have Active Researcher Status', () => {
     getCurrentUserSpy.mockReturnValue(buildUser(undefined))
 
-    render(<RequestAccessButton datasetId={101} />)
+    render(<RequestAccessButton datasetId={101} dacApproval />)
 
     expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
   })
@@ -58,7 +58,7 @@ describe('RequestAccessButton', () => {
   it('shows an Active Researcher Status tooltip when the user does not have it', async () => {
     getCurrentUserSpy.mockReturnValue(buildUser(undefined))
 
-    render(<RequestAccessButton datasetId={101} />)
+    render(<RequestAccessButton datasetId={101} dacApproval />)
 
     fireEvent.mouseOver(screen.getByRole('button', { name: 'Request Now' }).parentElement as HTMLElement)
 
@@ -67,13 +67,16 @@ describe('RequestAccessButton', () => {
 
   /**
    * The checkbox stopped offering these rows once selection required DAC approval, but this
-   * button kept its own path to a DAR. An unapproved dataset has nothing to request yet.
+   * button kept its own path to a DAR. An unapproved dataset has nothing to request yet -
+   * whether the DAC has not decided, or decided against.
    */
-  it('disables the button for a dataset still awaiting DAC approval', () => {
+  it('disables the button for a dataset the DAC has not approved', () => {
     getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
 
-    render(<RequestAccessButton datasetId={101} awaitingDacApproval />)
+    const { rerender } = render(<RequestAccessButton datasetId={101} />)
+    expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
 
+    rerender(<RequestAccessButton datasetId={101} dacApproval={false} />)
     expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
   })
 
@@ -81,7 +84,7 @@ describe('RequestAccessButton', () => {
   it('explains that the dataset is awaiting DAC approval', async () => {
     getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
 
-    render(<RequestAccessButton datasetId={101} awaitingDacApproval disabledForSelection />)
+    render(<RequestAccessButton datasetId={101} disabledForSelection />)
 
     fireEvent.mouseOver(screen.getByRole('button', { name: 'Request Now' }).parentElement as HTMLElement)
 
@@ -89,11 +92,26 @@ describe('RequestAccessButton', () => {
     expect(screen.queryByText(/Apply for Access. below to request/)).not.toBeInTheDocument()
   })
 
+  /**
+   * dacApproval false means the DAC decided against, which the submissions Status chip shows as
+   * 'Rejected'. Calling that 'awaiting approval' would have the two disagree on one row.
+   */
+  it('says rejected rather than pending when the DAC decided against', async () => {
+    getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
+
+    render(<RequestAccessButton datasetId={101} dacApproval={false} />)
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Request Now' }).parentElement as HTMLElement)
+
+    expect(await screen.findByText('The DAC has rejected this dataset')).toBeInTheDocument()
+    expect(screen.queryByText('This dataset is awaiting DAC approval')).not.toBeInTheDocument()
+  })
+
   it('creates a DAR draft for the dataset and navigates to the application on click', async () => {
     getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
     postDarDraftSpy.mockResolvedValue({ referenceId: 'REF-789' })
 
-    render(<RequestAccessButton datasetId={101} />)
+    render(<RequestAccessButton datasetId={101} dacApproval />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Request Now' }))
 
@@ -106,7 +124,7 @@ describe('RequestAccessButton', () => {
   it('is disabled with a selection tooltip when disabledForSelection is set, even with Active Researcher Status', async () => {
     getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
 
-    render(<RequestAccessButton datasetId={101} disabledForSelection />)
+    render(<RequestAccessButton datasetId={101} dacApproval disabledForSelection />)
 
     const button = screen.getByRole('button', { name: 'Request Now' })
     expect(button).toBeDisabled()
@@ -118,7 +136,7 @@ describe('RequestAccessButton', () => {
   it('does not create a draft when clicked while disabledForSelection', () => {
     getCurrentUserSpy.mockReturnValue(buildUser({} as LibraryCard))
 
-    render(<RequestAccessButton datasetId={101} disabledForSelection />)
+    render(<RequestAccessButton datasetId={101} dacApproval disabledForSelection />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Request Now' }))
 
@@ -129,7 +147,7 @@ describe('RequestAccessButton', () => {
   it('does not create a draft when the disabled button is clicked', () => {
     getCurrentUserSpy.mockReturnValue(buildUser(undefined))
 
-    render(<RequestAccessButton datasetId={101} />)
+    render(<RequestAccessButton datasetId={101} dacApproval />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Request Now' }))
 

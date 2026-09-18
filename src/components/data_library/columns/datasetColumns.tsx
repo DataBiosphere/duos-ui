@@ -127,7 +127,7 @@ export const makeDatasetColumns = (
           <RequestAccessButton
             datasetId={params.row.datasetId}
             disabledForSelection={otherDatasetsSelected}
-            awaitingDacApproval={params.row.dacApproval !== true}
+            dacApproval={params.row.dacApproval}
           />
         )
       }
