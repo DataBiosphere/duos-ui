@@ -121,7 +121,15 @@ export const makeDatasetColumns = (
         // Only a selection reaching beyond this row makes the single-dataset path misleading;
         // a row that is the whole selection requests exactly what 'Apply for Access' would.
         const otherDatasetsSelected = selectedDatasetIds.some(id => id !== params.row.datasetId)
-        return <RequestAccessButton datasetId={params.row.datasetId} disabledForSelection={otherDatasetsSelected} />
+        // Same question the checkbox asks. Without it the row stayed unselectable while its own
+        // Request Now button still offered to raise a DAR against an unapproved dataset.
+        return (
+          <RequestAccessButton
+            datasetId={params.row.datasetId}
+            disabledForSelection={otherDatasetsSelected}
+            dacApproval={params.row.dacApproval}
+          />
+        )
       }
       return params.value
         ? (
