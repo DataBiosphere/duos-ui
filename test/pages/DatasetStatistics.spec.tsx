@@ -638,6 +638,61 @@ describe('DatasetStatistics', () => {
     expect(await screen.findByText('Test Project')).toBeInTheDocument()
   })
 
+  /**
+   * The requester's institution, not the study's PI shown elsewhere on this page. The dataset page
+   * carried neither until the per-dataset summaries started reporting it, and the study page's
+   * cards name the same thing, so the two surfaces describe a granted request the same way.
+   */
+  it('names the requesting institution on an expanded DAR', async () => {
+    const darsData: DatasetStatisticsDar[] = [{
+      darCode: 'DAR-123',
+      projectTitle: 'Test Project',
+      updateDate: new Date('2023-01-01').getTime(),
+      nonTechRus: 'Test summary',
+      expired: false,
+      referenceId: 'abc',
+      institutionName: 'Broad Institute',
+    }]
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDataset as never])
+    vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(darsData)
+    vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
+    const user = userEvent.setup()
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={[`/dataset/${mockDataset.datasetIdentifier}`]}>
+          <Routes>
+            <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    await screen.findByText('DAR-123')
+    await user.click(screen.getByText('Show More'))
+
+    expect(await screen.findByText('Broad Institute')).toBeInTheDocument()
+  })
+
+  /** The field is optional on the payload, so an absent one must not render an empty label. */
+  it('says so when a DAR carries no requester institution', async () => {
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDataset as never])
+    vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(mockDarsResponse)
+    vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
+    const user = userEvent.setup()
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={[`/dataset/${mockDataset.datasetIdentifier}`]}>
+          <Routes>
+            <Route path="/dataset/:datasetIdentifier" element={<DatasetStatistics />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    await screen.findByText('DAR-001')
+    await user.click(screen.getByText('Show More'))
+
+    expect(await screen.findAllByText('Not provided')).toHaveLength(1)
+  })
+
   it('Displays message when no DARs exist', async () => {
     mount(mockDataset)
     expect(await screen.findByText(/No Data Access Requests have been created for this dataset/)).toBeInTheDocument()
