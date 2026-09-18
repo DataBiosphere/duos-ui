@@ -18,21 +18,22 @@ interface Props {
  * A responsive grid of recommended studies. Every recommendation renders, wrapping onto further
  * rows; there is no horizontal scrolling or next/previous affordance.
  */
-const StudyRecommendationCarousel = ({ id, heading, recommendations = [], isPending, error }: Props) => {
+const StudyRecommendationCarousel = ({ id, heading, recommendations, isPending, error }: Props) => {
   return (
     <StudyPageSection id={id} heading={heading}>
       <StudyQueryResult
         isPending={isPending}
-        // Only when there is nothing cached to keep showing, as the asset and publication
-        // sections do. Passed unconditionally it undid what isPending buys above: a failed
-        // background refetch replaced cards that had loaded fine.
-        error={recommendations.length === 0 ? error : undefined}
-        isEmpty={recommendations.length === 0}
+        // Keyed on whether anything has loaded, not on the list being empty. A study with no
+        // recommendations has loaded successfully; testing length alone flipped it from "none yet"
+        // to an error banner as soon as a background refetch failed. No `= []` default on the prop,
+        // because that would erase the distinction before it reaches here.
+        error={recommendations === undefined ? error : undefined}
+        isEmpty={recommendations?.length === 0}
         emptyMessage="No study recommendations yet."
         errorMessage="Unable to load study recommendations."
       >
         <Grid container spacing={2}>
-          {recommendations.map(study => (
+          {(recommendations ?? []).map(study => (
             <Grid key={study.studyId} size={{ xs: 12, sm: 6, lg: 4 }}>
               <Card variant="outlined" sx={{ height: '100%' }}>
                 {/* A link rather than a button that navigates imperatively, as study
