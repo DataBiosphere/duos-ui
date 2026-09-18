@@ -77,7 +77,8 @@ describe('StudyRecommendationCarousel', () => {
   })
 
   it('reports a failed fetch in place', () => {
-    mount({ recommendations: [], error: new Error('boom') })
+    // Nothing loaded at all - an absent list, not an empty one
+    mount({ error: new Error('boom') })
 
     expect(screen.getByRole('alert')).toHaveTextContent('Unable to load study recommendations.')
     expect(screen.queryByText('No study recommendations yet.')).not.toBeInTheDocument()
@@ -94,6 +95,18 @@ describe('StudyRecommendationCarousel', () => {
     expect(screen.getByText('Study 7')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     expect(screen.queryByText('Unable to load study recommendations.')).not.toBeInTheDocument()
+  })
+
+  /**
+   * A study with no recommendations has loaded successfully. Keying the error on list length
+   * conflated that with nothing having loaded, so a failed background refetch turned "none yet"
+   * into an error banner.
+   */
+  it('keeps the empty message when a refetch fails after loading nothing', () => {
+    mount({ recommendations: [], error: new Error('refresh failed') })
+
+    expect(screen.getByText('No study recommendations yet.')).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('shows a spinner only until the first response lands', () => {

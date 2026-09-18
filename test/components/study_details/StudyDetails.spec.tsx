@@ -5,6 +5,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
+import ScrollToTopOnNavigate from 'src/components/ScrollToTopOnNavigate'
 import { Storage } from 'src/libs/storage'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { DuosUser, LibraryCard } from 'src/types/model'
@@ -213,6 +214,8 @@ const mountComponent = (withStudySwitcher = false) =>
   render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={['/studies/1']}>
+        {/* The scroll reset lives at the router now, not in this page */}
+        <ScrollToTopOnNavigate />
         {withStudySwitcher && <StudySwitcher />}
         <Routes>
           <Route path="/studies/:studyId" element={<StudyDetails />} />
@@ -779,6 +782,22 @@ describe('Study details test', () => {
    * than by handing the component both props at once - the carousel is presentational, so this is
    * what proves the wiring in StudyDetails hands it cached data alongside the error.
    */
+  /**
+   * A similarity query matches the current study perfectly, so it can come back among its own
+   * results. That card would link to the page already open: the route never changes, so nothing
+   * happens and the click looks broken.
+   */
+  it('does not recommend the study being viewed', async () => {
+    vi.mocked(StudyRecommendations.getSimilar).mockResolvedValue([
+      { studyId: 1, studyName: 'This very study', studyDescription: '', piName: 'Dr Self', datasetCount: 1, datasetIds: [1] },
+      { studyId: 7, studyName: 'Neighbouring study', studyDescription: '', piName: 'Dr Other', datasetCount: 1, datasetIds: [2] },
+    ] as never)
+    mountComponent()
+
+    expect(await screen.findByText('Neighbouring study')).toBeInTheDocument()
+    expect(screen.queryByText('This very study')).not.toBeInTheDocument()
+  })
+
   it('keeps loaded recommendations when a background refetch fails', async () => {
     vi.mocked(StudyRecommendations.getSimilar)
       .mockResolvedValueOnce([{
