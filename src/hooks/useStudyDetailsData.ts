@@ -2,13 +2,14 @@ import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-qu
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 import { Study } from 'src/libs/ajax/Study'
 import { StudyComments } from 'src/libs/ajax/StudyComments'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'src/utils/NodashUtil'
 import { AggregationResult, ElasticsearchQuery } from 'src/types/elastic'
 import { ExportableDatasets, PaginationState, SortState } from 'src/types/library'
-import { DatasetTerm, StudyTerm } from 'src/types/model'
+import { DatasetTerm, StudyTerm, StudyRecommendation } from 'src/types/model'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 
 const STUDY_ASSETS_QUERY_KEY = 'study-assets'
@@ -68,6 +69,31 @@ export const useStudyResearchOutputs = (studyId: string) => useQuery({
   queryKey: ['study-research-outputs', studyId],
   enabled: studyId.length > 0,
   queryFn: () => DatasetMetrics.getResearchOutputs(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+/**
+ * A study is not a recommendation for itself. A similarity query matches it perfectly, so it can
+ * come back in its own results - and the card would link to the page already open, leaving the
+ * route unchanged and the click looking broken. Dropped here rather than in the carousel so both
+ * sections get it and neither has to know the current id.
+ */
+const withoutCurrentStudy = (studyId: string) => (recommendations: StudyRecommendation[]) =>
+  recommendations.filter(recommendation => String(recommendation.studyId) !== studyId)
+
+export const useSimilarStudies = (studyId: string) => useQuery({
+  queryKey: ['study-recommendations-similar', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => StudyRecommendations.getSimilar(studyId),
+  select: withoutCurrentStudy(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const useFrequentlyRequestedWithStudies = (studyId: string) => useQuery({
+  queryKey: ['study-recommendations-frequently-requested-with', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => StudyRecommendations.getFrequentlyRequestedWith(studyId),
+  select: withoutCurrentStudy(studyId),
   staleTime: STUDY_STALE_TIME,
 })
 

@@ -5,6 +5,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
+import ScrollToTopOnNavigate from 'src/components/ScrollToTopOnNavigate'
 import { Storage } from 'src/libs/storage'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { DuosUser, LibraryCard } from 'src/types/model'
@@ -41,6 +42,13 @@ vi.mock('src/libs/ajax/DatasetMetrics', () => ({
   },
 }))
 
+vi.mock('src/libs/ajax/StudyRecommendations', () => ({
+  StudyRecommendations: {
+    getSimilar: vi.fn().mockResolvedValue([]),
+    getFrequentlyRequestedWith: vi.fn().mockResolvedValue([]),
+  },
+}))
+
 vi.mock('src/libs/ajax/StudyComments', () => ({
   COMMENTS_PAGE_SIZE: 25,
   MAX_COMMENT_LENGTH: 2000,
@@ -67,6 +75,7 @@ vi.mock('src/utils/accessUtils', () => ({
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Study } from 'src/libs/ajax/Study'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 
 const datasets = [
   {
@@ -205,6 +214,8 @@ const mountComponent = (withStudySwitcher = false) =>
   render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={['/studies/1']}>
+        {/* The scroll reset lives at the router now, not in this page */}
+        <ScrollToTopOnNavigate />
         {withStudySwitcher && <StudySwitcher />}
         <Routes>
           <Route path="/studies/:studyId" element={<StudyDetails />} />
@@ -238,6 +249,7 @@ beforeEach(() => {
     userId: 42,
     libraryCard: {} as LibraryCard,
   } as DuosUser)
+  vi.spyOn(globalThis, 'scrollTo').mockImplementation(() => {})
 })
 
 afterEach(() => {
@@ -247,6 +259,17 @@ afterEach(() => {
 })
 
 describe('Study details test', () => {
+  it('scrolls to the overview when navigating directly between studies', async () => {
+    const user = userEvent.setup()
+    mountComponent(true)
+    await screen.findByText(datasets[0].datasetName)
+    vi.mocked(globalThis.scrollTo).mockClear()
+
+    await user.click(screen.getByRole('button', { name: 'View study 2' }))
+
+    await waitFor(() => expect(globalThis.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0 }))
+  })
+
   it('does not show a participant total while datasets are loading', () => {
     vi.mocked(DataSet.searchDatasetIndexV2).mockReturnValueOnce(new Promise(() => {}) as never)
     mountComponent()
@@ -754,6 +777,43 @@ describe('Study details test', () => {
   })
 
   /** Same rule for the research outputs section. */
+  /**
+   * The same rule for the recommendation sections, driven through a real failed refetch rather
+   * than by handing the component both props at once - the carousel is presentational, so this is
+   * what proves the wiring in StudyDetails hands it cached data alongside the error.
+   */
+  /**
+   * A similarity query matches the current study perfectly, so it can come back among its own
+   * results. That card would link to the page already open: the route never changes, so nothing
+   * happens and the click looks broken.
+   */
+  it('does not recommend the study being viewed', async () => {
+    vi.mocked(StudyRecommendations.getSimilar).mockResolvedValue([
+      { studyId: 1, studyName: 'This very study', studyDescription: '', piName: 'Dr Self', datasetCount: 1, datasetIds: [1] },
+      { studyId: 7, studyName: 'Neighbouring study', studyDescription: '', piName: 'Dr Other', datasetCount: 1, datasetIds: [2] },
+    ] as never)
+    mountComponent()
+
+    expect(await screen.findByText('Neighbouring study')).toBeInTheDocument()
+    expect(screen.queryByText('This very study')).not.toBeInTheDocument()
+  })
+
+  it('keeps loaded recommendations when a background refetch fails', async () => {
+    vi.mocked(StudyRecommendations.getSimilar)
+      .mockResolvedValueOnce([{
+        studyId: 7, studyName: 'Neighbouring study', studyDescription: 'About genes',
+        piName: 'Dr Adjacent', datasetCount: 2, datasetIds: [1, 2],
+      }] as never)
+      .mockRejectedValue(new Error('boom'))
+    mountComponent()
+    await screen.findByText('Neighbouring study')
+
+    await queryClient.invalidateQueries()
+
+    await waitFor(() => expect(screen.getByText('Neighbouring study')).toBeInTheDocument())
+    expect(screen.queryByText('Unable to load study recommendations.')).not.toBeInTheDocument()
+  })
+
   it('keeps loaded research outputs when a background refetch fails', async () => {
     vi.mocked(DatasetMetrics.getResearchOutputs)
       .mockResolvedValueOnce({

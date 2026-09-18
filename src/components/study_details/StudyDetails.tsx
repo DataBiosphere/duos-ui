@@ -10,7 +10,9 @@ import LibraryFooter from 'src/components/data_library/LibraryFooter'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { AssetType, SortOrder, SortState } from 'src/types/library'
 import {
+  useFrequentlyRequestedWithStudies,
   usePiDetails,
+  useSimilarStudies,
   useStudyDatasets,
   useStudyExportableDatasets,
   useStudySelectableDatasetIds,
@@ -21,6 +23,7 @@ import StudySidebar from 'src/components/study_details/StudySidebar'
 import StudyCommentsSection from 'src/components/study_details/StudyCommentsSection'
 import StudyDarHistory from 'src/components/study_details/StudyDarHistory'
 import StudySecondaryResearchOutputs from 'src/components/study_details/StudySecondaryResearchOutputs'
+import StudyRecommendationCarousel from 'src/components/study_details/StudyRecommendationCarousel'
 import StudyTitleBadges from 'src/components/study_details/StudyTitleBadges'
 import StudyInfoTable from 'src/components/study_details/StudyInfoTable'
 import PiExternalProfileIcons from 'src/components/study_details/PiExternalProfileIcons'
@@ -83,6 +86,8 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const studyDescription = populated(study?.description) ?? populated(piDetails?.description)
   const studyDataTypes = populated(study?.dataTypes) ?? populated(piDetails?.dataTypes)
   const piName = populated(study?.piName) ?? populated(piDetails?.piName)
+  const similarStudies = useSimilarStudies(studyId)
+  const frequentlyRequestedWith = useFrequentlyRequestedWithStudies(studyId)
   const selectedStudyIds = selectedDatasets.length > 0 && study
     ? [study.studyId]
     : []
@@ -215,6 +220,20 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
           </StudyPageSection>
           <StudyDarHistory studyId={studyId} />
           <StudySecondaryResearchOutputs studyId={studyId} />
+          <StudyRecommendationCarousel
+            id="frequently-requested-with"
+            heading="Studies often Requested with this Study"
+            recommendations={frequentlyRequestedWith.data}
+            isPending={frequentlyRequestedWith.isPending}
+            error={frequentlyRequestedWith.error}
+          />
+          <StudyRecommendationCarousel
+            id="similar-studies"
+            heading="Recommended Studies based on Data Type"
+            recommendations={similarStudies.data}
+            isPending={similarStudies.isPending}
+            error={similarStudies.error}
+          />
           <StudyPageSection id="comments" heading="Comments & Ratings">
             <StudyCommentsSection studyId={studyId} />
           </StudyPageSection>
