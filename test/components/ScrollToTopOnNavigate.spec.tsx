@@ -13,6 +13,8 @@ const Page = ({ label }: { label: string }) => {
       <span>{label}</span>
       <button onClick={() => navigate('/second')}>go forward</button>
       <button onClick={() => navigate(-1)}>go back</button>
+      <button onClick={() => navigate('?page=2')}>next page</button>
+      <button onClick={() => navigate('?page=3')}>page after that</button>
     </div>
   )
 }
@@ -59,6 +61,22 @@ describe('ScrollToTopOnNavigate', () => {
 
     expect(await screen.findByText('Second page')).toBeInTheDocument()
     expect(scrollTo).toHaveBeenCalledWith({ top: 0, left: 0 })
+  })
+
+  /**
+   * The library keeps filters, sort and paging in the query string, so those are navigations to
+   * the same page. Reacting to the location alone scrolled on the first one - navigationType
+   * flips from POP to PUSH once - and then never again, which is worse than either choice.
+   */
+  it('stays put when only the query string changes', async () => {
+    const user = userEvent.setup()
+    mount()
+
+    await user.click(screen.getByRole('button', { name: 'next page' }))
+    expect(scrollTo).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'page after that' }))
+    expect(scrollTo).not.toHaveBeenCalled()
   })
 
   /** Back is exactly when the reader wants their place back, so the browser keeps it. */
