@@ -208,10 +208,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             <StudyTitleBadges dataTypes={studyDataTypes} />
             <StudyAssetCountBadges
               counts={[
-                ['Datasets', data.total],
-                ['Models', models.data?.length ?? 0],
-                ['Workspaces', workspaces.data?.length ?? 0],
-                ['Publications', publications.data?.length ?? 0],
+                { singular: 'Dataset', plural: 'Datasets', count: data.total },
+                { singular: 'Model', plural: 'Models', count: models.data?.length ?? 0 },
+                { singular: 'Workspace', plural: 'Workspaces', count: workspaces.data?.length ?? 0 },
+                { singular: 'Publication', plural: 'Publications', count: publications.data?.length ?? 0 },
               ]}
             />
             <Typography variant="body1" sx={{ pt: 2.5 }}>
@@ -340,7 +340,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
           />
           <StudyRecommendationCarousel
             id="similar-studies"
-            heading="Recommended Studies based on Data Type"
+            heading="Recommended Studies by Data Type or PI"
             recommendations={similarStudies.data}
             isPending={similarStudies.isPending}
             error={similarStudies.error}
