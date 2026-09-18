@@ -17,6 +17,14 @@ server/node_modules
 *.models.json
 models.json
 
+# crash dumps
+# A core dump takes the whole memory of the process that crashed, so one landing in the repo
+# root can carry credentials that were only ever meant to live in that process.
+/core
+/core.[0-9]*
+hs_err_pid*
+*.hprof
+
 # testing
 /coverage
 /.vitest
