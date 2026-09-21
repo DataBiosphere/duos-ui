@@ -19,9 +19,17 @@ export default defineConfig({
       retries: process.env.CI ? 1 : 0,
     },
   ],
+  // The built Fastify server, not `vite preview`. The preview server sends none
+  // of the security headers, cookies or routes the real deployment sends, so a
+  // spec could pass against it and fail in production. `pnpm run serve` selects
+  // the static build, port 3000 and HTTPS; everything else the server needs —
+  // the database, the session secret and the upstream URL — comes from the
+  // environment (integration-tests.yml in CI, an exported environment locally).
   webServer: {
     command: 'pnpm run serve',
-    url: BASE_URL,
+    // The liveness route, so the wait ends when the server can answer, not when
+    // the port opens.
+    url: `${BASE_URL}/health`,
     ignoreHTTPSErrors: true,
     timeout: 120_000,
     reuseExistingServer: !process.env.CI,

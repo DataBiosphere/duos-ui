@@ -329,14 +329,20 @@ is a much larger piece of work than this story.
   `config-example.json`, for instance — therefore fails. This is the same
   caveat as the docker-compose one above, from the other side.
 - **No browser-level check ships with this story.** One was written and works
-  locally, but it cannot run in CI: `pnpm run serve` is `vite preview`, which
-  sends no headers, so the spec has to fulfil the document itself to attach the
-  policy — and Chrome then treats that document as coming from an unknown
-  address space, making every same-origin subresource a public-to-loopback
-  Private Network Access transition, blocked outside a secure context. The fix
-  is not a browser flag but serving the e2e run through the Fastify server,
-  which is harness work Epic 6 owns. Held back as story **6-K** rather than
-  merged skipped, since a spec that never runs is not coverage.
+  locally, but it could not run in CI: `pnpm run serve` was `vite preview`,
+  which sends no headers, so the spec had to fulfil the document itself to
+  attach the policy — and Chrome then treats that document as coming from an
+  unknown address space, making every same-origin subresource a
+  public-to-loopback Private Network Access transition, blocked outside a
+  secure context. The fix is not a browser flag but serving the e2e run through
+  the Fastify server, which is harness work Epic 6 owns. Held back as story
+  **6-K** rather than merged skipped, since a spec that never runs is not
+  coverage.
+
+  **Update — story 6-K1.** The harness half is done: `pnpm run serve` now
+  starts the Fastify server over HTTPS, and CI provisions the database, the
+  session secret and a certificate for it, so the run receives the real
+  headers and needs no interception. The spec itself lands with story 6-K2.
 - Enforcement is a per-environment decision recorded in deployment config, so
   a bad policy is one env var away from being backed out.
 - **The httpd sidecar replaces this policy in deployed environments, so

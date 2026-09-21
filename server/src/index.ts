@@ -34,7 +34,6 @@ import FastifyVite from '@fastify/vite'
 const PROJECT_ROOT = path.join(import.meta.dirname, '..', '..')
 const isDev = process.env.NODE_ENV !== 'production'
 const isCI = Boolean(process.env.CI)
-const useHttps = isDev && !isCI
 
 type AppInstance = FastifyInstance<http.Server | https.Server>
 
@@ -47,6 +46,27 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
   if (['true', '1', 'yes', 'on'].includes(v)) return true
   if (['false', '0', 'no', 'off'].includes(v)) return false
   return defaultValue
+}
+
+/**
+ * Whether to terminate TLS in this process.
+ *
+ * The default is the historical one: the local dev server reads the untracked
+ * `server.key`/`server.crt` pair, and every other environment takes plain HTTP
+ * behind the reverse proxy that terminates TLS for it.
+ *
+ * DUOS_SERVER_HTTPS overrides that default in one direction that the old
+ * inference could not express: a production-mode server that must speak HTTPS
+ * itself. The E2E harness is the caller — it serves the static build, and the
+ * session cookie is `Secure`, so plain HTTP would carry no session. The
+ * certificate files must exist wherever it is set.
+ */
+export function shouldUseHttps(
+  value = process.env.DUOS_SERVER_HTTPS,
+  dev = isDev,
+  ci = isCI,
+): boolean {
+  return envBool(value, dev && !ci)
 }
 
 /**
@@ -87,6 +107,7 @@ export async function buildApp(): Promise<AppInstance> {
   // @fastify/session silently refuses to persist sessions once cookie.secure
   // is true, since it never sees `request.protocol === 'https'`. See its
   // definition in config.ts for why it names peers instead of counting hops.
+  const useHttps = shouldUseHttps()
   const fastify = (useHttps
     ? Fastify<https.Server>({
         https: {
@@ -280,7 +301,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const fastify = await buildApp()
     await fastify.listen({ port: PORT, host: HOST })
     if (isDev && !isCI) {
-      const protocol = useHttps ? 'https' : 'http'
+      const protocol = shouldUseHttps() ? 'https' : 'http'
       await open(`${protocol}://local.dsde-dev.broadinstitute.org:${PORT}`)
     }
   }

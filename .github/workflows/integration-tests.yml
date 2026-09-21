@@ -3,10 +3,43 @@ name: Playwright integration tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+# The suite runs against the real Fastify server, not `vite preview`, so the job
+# has to supply what that server needs: a Postgres database holding the session
+# schema, a session secret, the BFF environment variables and a TLS certificate.
+# See TESTING.md, and BFF Epic 6 story 6-K1 (DT-4078).
+env:
+  DUOS_DB_HOST: localhost
+  DUOS_DB_PORT: '5432'
+  DUOS_DB_NAME: consent
+  DUOS_DB_USER: consent
+  # Local-only credential for the service container below. It is not a secret:
+  # the database exists for the length of one job and listens on the runner.
+  DUOS_DB_PASSWORD: consent
+  # The service container speaks plain TCP on the runner's loopback address and
+  # does not terminate TLS, so app-level TLS must be off or the pool is refused.
+  DUOS_DB_SSL: 'false'
+  # The same upstream `config/dev.json` names as `apiUrl`.
+  DUOS_API_URL: https://consent.dsde-dev.broadinstitute.org
+
 jobs:
   playwright-run:
     runs-on: ubuntu-latest
     if: github.actor != 'dependabot[bot]'
+    services:
+      postgres:
+        image: postgres:16.13-alpine
+        env:
+          POSTGRES_DB: consent
+          POSTGRES_USER: consent
+          POSTGRES_PASSWORD: consent
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U consent -d consent"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -26,10 +59,35 @@ jobs:
         run: pnpm ci
       - name: Install Playwright Chromium
         run: pnpm exec playwright install chromium --with-deps
+      # `config/dev.json` carries `bffEnabled: false`, so the suite still runs the
+      # legacy sign-in flow. The server registers its session infrastructure from
+      # DUOS_DB_HOST either way, which is what this job provisions. Story 6-D-pre
+      # replaces the dead `/backgroundsignin` mechanism; the switch to
+      # `bffEnabled: true` belongs to that story, not this one.
       - name: Copy Configs
         run: cp config/dev.json public/config.json
       - name: Map local dev hostname
         run: echo "127.0.0.1 local.dsde-dev.broadinstitute.org" | sudo tee -a /etc/hosts
+      # The session cookie is `Secure`, so a session cannot travel over plain
+      # HTTP. Playwright sets `ignoreHTTPSErrors`, so a self-signed pair for the
+      # mapped hostname is enough. The server reads both files from the project
+      # root (server/src/index.ts).
+      - name: Generate a TLS certificate for the server
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
+            -keyout server.key -out server.crt \
+            -subj "/CN=local.dsde-dev.broadinstitute.org" \
+            -addext "subjectAltName=DNS:local.dsde-dev.broadinstitute.org,DNS:localhost,IP:127.0.0.1"
+      # One value per run. The server refuses to start below 32 characters.
+      - name: Generate a session secret
+        run: echo "DUOS_SESSION_SECRET=$(openssl rand -base64 48)" >> $GITHUB_ENV
+      # Applied before the server starts: the session store expects the table to
+      # be there already, and a lazy pool hides the failure until the first
+      # session write.
+      - name: Apply the session schema
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f test/e2e/sql/user_sessions.sql
+        env:
+          DATABASE_URL: postgresql://consent:consent@localhost:5432/consent
       - name: Build app
         run: CI=false pnpm run build
       - name: Run Playwright integration tests
