@@ -757,14 +757,12 @@ describe('shouldUseHttps', () => {
   it('terminates TLS in local development only, when nothing overrides it', async () => {
     const { shouldUseHttps } = await import('../src/index.js')
     expect(shouldUseHttps(undefined, true, false)).toBe(true)
-    expect(shouldUseHttps(undefined, true, true)).toBe(false) // CI, before this switch existed
-    expect(shouldUseHttps(undefined, false, false)).toBe(false) // behind the TLS-terminating proxy
+    expect(shouldUseHttps(undefined, true, true)).toBe(false)
+    expect(shouldUseHttps(undefined, false, false)).toBe(false)
   })
 
   it('lets DUOS_SERVER_HTTPS select the transport in either direction', async () => {
     const { shouldUseHttps } = await import('../src/index.js')
-    // The E2E harness: a production-mode server that must speak HTTPS itself,
-    // because the session cookie is Secure.
     expect(shouldUseHttps('true', false, true)).toBe(true)
     expect(shouldUseHttps('false', true, false)).toBe(false)
   })

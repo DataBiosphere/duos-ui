@@ -48,19 +48,7 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
   return defaultValue
 }
 
-/**
- * Whether to terminate TLS in this process.
- *
- * The default is the historical one: the local dev server reads the untracked
- * `server.key`/`server.crt` pair, and every other environment takes plain HTTP
- * behind the reverse proxy that terminates TLS for it.
- *
- * DUOS_SERVER_HTTPS overrides that default in one direction that the old
- * inference could not express: a production-mode server that must speak HTTPS
- * itself. The E2E harness is the caller — it serves the static build, and the
- * session cookie is `Secure`, so plain HTTP would carry no session. The
- * certificate files must exist wherever it is set.
- */
+/** Explicit TLS override; defaults to HTTPS only in local development outside CI. */
 export function shouldUseHttps(
   value = process.env.DUOS_SERVER_HTTPS,
   dev = isDev,
