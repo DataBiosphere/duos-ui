@@ -195,11 +195,11 @@ to validate it, so its tests are the only proof it works, and no amount of
 exercising the app would reveal it broken.
 
 **BFF-mode `connect-src` did not reach `'self'` outright.** It is `'self'` plus
-the banner bucket. The bucket stays because a separate backlog item first
-rewrites `notificationService.ts` to read environment-specific buckets, and
-proxying GCS — the one endpoint of the three with no existing pattern to copy —
-is worth deciding once that lands rather than building against a URL shape about
-to change. Until then the banner fetch stays direct and the literal stays here.
+the banner bucket. DT-4063 has since repointed `notificationService.ts` at
+per-environment buckets, so the URL shape that argued for waiting is settled.
+What remains is that proxying GCS is the one endpoint of the three with no
+existing pattern to copy, and no ticket covers that work yet. Until one does,
+the banner fetch stays direct.
 
 `terraUrl` is never allowlisted: it is navigated to, not fetched. The
 development config also carries convenience origins the browser never
@@ -308,8 +308,9 @@ is a much larger piece of work than this story.
   adding `blob:` back to this directive.
 - BFF-mode `connect-src` is `'self'` plus the banner bucket. Story 5-F6 moved
   feature flags and anonymous metrics onto `/public/features/*` and
-  `/public/metrics/event`; `/public/notifications` waits on the backlog item
-  that repoints the notifications service at environment-specific buckets.
+  `/public/metrics/event`. `/public/notifications` is unwritten: DT-4063 has
+  settled the bucket URLs, but proxying a public GCS object has no pattern to
+  copy here, and no ticket covers it yet.
 - `img-src` carries `'self'` and `data:` only. `blob:` is deliberately absent:
   the audit found no `<img src="blob:">` in the tree — every object URL the app
   mints is a download, which needs no directive, or the dead preview branch in
