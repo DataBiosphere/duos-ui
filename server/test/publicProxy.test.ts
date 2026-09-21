@@ -340,6 +340,19 @@ describe('publicProxy', () => {
       expect(refused.body).toBe('')
     })
 
+    it('tells a refused client when to retry: Retry-After carries the window, so the bare body loses nothing a caller needs', async () => {
+      app = await buildPublicApp()
+      for (let i = 0; i < FEATURES_MAX_PER_WINDOW; i += 1) {
+        await app.inject({ method: 'GET', url: PUBLIC_FEATURES_PREFIX })
+      }
+
+      const refused = await app.inject({ method: 'GET', url: PUBLIC_FEATURES_PREFIX })
+
+      expect(refused.statusCode).toBe(429)
+      expect(Number(refused.headers['retry-after'])).toBeGreaterThan(0)
+      expect(Number(refused.headers['retry-after'])).toBeLessThanOrEqual(60)
+    })
+
     it('leaks no framework error code when a request is rejected before the handler', async () => {
       app = await buildPublicApp()
 
