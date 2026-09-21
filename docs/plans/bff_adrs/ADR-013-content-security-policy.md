@@ -133,19 +133,26 @@ app-level one after this plugin registers, so Fastify never resolves it here.
 
 `connectSources()` reads only **inventoried, active** fields of the same
 runtime config the client reads, reduces each to its origin, and drops blanks
-and unparseable values. Two literals remain: `'self'` and the banner bucket,
-which is a fixed public asset host rather than a deployment-configured upstream.
+and unparseable values. One literal remains: `'self'`.
 
-The bucket is the one source written to a **path**,
-`https://storage.googleapis.com/broad-duos-banners/`, rather than an origin.
+The banner bucket is the one source written to a **path** rather than an
+origin: `bannersUrl` with its object name removed, e.g.
+`https://storage.googleapis.com/duos-banners-prod/`.
 `storage.googleapis.com` is shared by every public bucket on GCS, so the bare
 origin would hand injected script a ready exfiltration target — the thing this
-policy exists to close. A trailing slash matches by prefix, which covers every
-`<env>_notifications.json` the service builds. The narrowing applies to the
-direct request only: a browser drops the path when matching a redirect target,
-and GCS answers object reads without redirecting. The configured upstreams stay
-at origin granularity, because each is a whole service the app talks to across
-many paths and none shares a host with anybody else.
+policy exists to close. A trailing slash matches by prefix. The narrowing
+applies to the direct request only: a browser drops the path when matching a
+redirect target, and GCS answers object reads without redirecting. The
+configured upstreams stay at origin granularity, because each is a whole
+service the app talks to across many paths and none shares a host with anybody
+else.
+
+Each environment has its own bucket in its Terra project (DT-4063), so the
+bucket is no longer a fixed literal. `readConfig()` fills `bannersUrl` from
+`env` when the deployed config leaves it unset, and both the client fetch and
+this policy read that one value, so the two cannot disagree. A config with
+neither `env` nor `bannersUrl` gets no banner source at all. See
+`docs/notification-banners.md`.
 
 The list is mode-specific:
 
@@ -160,7 +167,7 @@ oversights, and they are why BFF-mode `connect-src` is not `'self'` alone:
 
 | Connection | Where | Why it stays direct |
 |---|---|---|
-| Banner notifications, `storage.googleapis.com/broad-duos-banners` | `src/libs/notificationService.ts` | A public bucket; no session involved. |
+| Banner notifications, `storage.googleapis.com/duos-banners-<env>` | `src/libs/notificationService.ts` | A public bucket; no session involved. |
 | Feature flags, `/feature` and `/feature/:key` on Consent | `src/libs/ajax/FeatureFlag.ts` | Unauthenticated and read before login; the session-guarded proxy would 401 them. |
 | Anonymous Bard metrics | `src/libs/ajax/Metrics.ts` | Deliberately carries no credentials. Identified events go through `/bard-api`. |
 

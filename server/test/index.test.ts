@@ -353,7 +353,11 @@ describe('GET /config.json', () => {
 
     const res = await localApp.inject({ method: 'GET', url: '/config.json' })
     expect(res.statusCode).toBe(200)
-    expect(res.json()).toEqual({ apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443', env: 'dev' })
+    expect(res.json()).toEqual({
+      apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443',
+      env: 'dev',
+      bannersUrl: 'https://storage.googleapis.com/duos-banners-dev/dev_notifications.json',
+    })
 
     // HEAD must serve the same (overridden) resource, not fall through to the
     // static file — mismatched GET/HEAD Content-Length corrupts caches.

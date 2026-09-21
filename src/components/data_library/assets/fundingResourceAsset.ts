@@ -18,15 +18,17 @@ const matchesFundingResourceFilters = (funding: FundingResourceAsset, filters?: 
 
   // Inverted bounds build no ES clause, so they must not narrow rows here
   // either — otherwise the grid empties while the panel flags the range.
-  if (!isFilterActive('fundingDate', filters)) {
-    return true
+  if (isFilterActive('fundingDate', filters)) {
+    const { startDate, endDate } = filters.fundingDate
+    if (startDate && (!funding.startDate || funding.startDate < startDate)) {
+      return false
+    }
+    if (endDate && (!funding.endDate || funding.endDate > endDate)) {
+      return false
+    }
   }
 
-  const { startDate, endDate } = filters.fundingDate
-  if (startDate && (!funding.startDate || funding.startDate < startDate)) {
-    return false
-  }
-  return !(endDate && (!funding.endDate || funding.endDate > endDate))
+  return filters.fundingFunderName.length === 0 || filters.fundingFunderName.includes(funding.funderName)
 }
 
 export const fundingResourceAsset: AssetDefinition = {
@@ -82,7 +84,7 @@ export const fundingResourceAsset: AssetDefinition = {
           fundingId: fundingResource.fundingId || `${bucket.key}-${fundingResourceIndex}`,
           studyId: bucket.key,
           studyName: studyData.studyName || '',
-          funderName: fundingResource.funderName || '',
+          funderName: (fundingResource.funderName || '').trim(),
           funderProgram: fundingResource.funderProgram || '',
           grantNumber: fundingResource.grantNumber || '',
           projectTitle: fundingResource.projectTitle || '',

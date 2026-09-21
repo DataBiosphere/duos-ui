@@ -19,6 +19,7 @@ import {
   toLower,
 } from 'src/utils/NodashUtil'
 import { headerTabsConfig } from 'src/components/DuosHeader'
+import { VoteDecision } from 'src/utils/DarUtils'
 import { ToastNotifications } from 'src/libs/ToastNotifications'
 import {
   DuosUser,
@@ -311,7 +312,7 @@ export const processElectionStatus = (
   }
   else if (electionStatus === 'final' || electionStatus === 'closed') {
     const finalVote = find(votesArray, wasFinalVoteTrue)
-    output = finalVote ? 'Approved' : 'Denied'
+    output = finalVote ? VoteDecision.APPROVED : VoteDecision.DENIED
   }
   else {
     output = capitalize(electionStatus)

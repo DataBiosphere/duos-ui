@@ -1,5 +1,9 @@
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import { isNil, uniq } from 'src/utils/NodashUtil'
 import { DacObject, InstitutionInterface, LibraryCard, UserRole, UserRoleName } from 'src/types/model'
+
+dayjs.extend(utc)
 
 const STATUS_COLUMN_ROLES = new Set<UserRoleName>(['Researcher', 'DataSubmitter'])
 
@@ -43,3 +47,22 @@ export const userDacs = (roles: UserRole[] | undefined, dacNameById: Map<number,
 }
 
 export const formatUserDacs = (dacs: UserDac[]): string => dacs.map(dac => dac.name).join(', ') || 'None'
+
+// Read in UTC: dayjs parses in local time, which reports the previous day west of UTC.
+export const formatRegistrationDate = (createDate: Date | string | undefined): string => {
+  if (isNil(createDate)) {
+    return '- -'
+  }
+  const date = dayjs.utc(createDate)
+  return date.isValid() ? date.format('YYYY-MM-DD') : '- -'
+}
+
+/** Labels a user's pre-authorized DAAs, falling back to a stable token for a DAA missing from the lookup. */
+export const formatPreAuth = (
+  libraryCard: LibraryCard | undefined,
+  daaLabelsById: Map<number, string>,
+): string => {
+  const labels = (libraryCard?.daaDetails ?? [])
+    .map(({ daaId }) => daaLabelsById.get(daaId) ?? `DAA-${daaId}`)
+  return uniq(labels).join(', ') || 'None'
+}

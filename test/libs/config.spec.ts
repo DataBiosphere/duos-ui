@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
-import { Config, getEnv, getApiUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, getUpstreamApiUrl, isBffEnabled, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
+import { Config, getEnv, getApiUrl, getBannersUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, getUpstreamApiUrl, isBffEnabled, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 
 const mockConfig = {
   env: 'test',
   apiUrl: 'https://test.api.com',
+  bannersUrl: 'https://test.banners.com/test_notifications.json',
   bardApiUrl: 'https://test.bard.com',
   ecmApiUrl: 'https://test.ecm.com',
   hash: 'test-hash-123',
@@ -45,6 +46,7 @@ describe('Config', () => {
     it.each([
       ['getEnv', 'test'],
       ['getApiUrl', 'https://test.api.com'],
+      ['getBannersUrl', 'https://test.banners.com/test_notifications.json'],
       ['getBardApiUrl', 'https://test.bard.com'],
       ['getEcmApiUrl', 'https://test.ecm.com'],
       ['getECMUrl', 'https://test.ecm.com'],
@@ -66,6 +68,7 @@ describe('Config', () => {
     it.each([
       ['getEnv', getEnv, 'test'],
       ['getApiUrl', getApiUrl, 'https://test.api.com'],
+      ['getBannersUrl', getBannersUrl, 'https://test.banners.com/test_notifications.json'],
       ['getBardApiUrl', getBardApiUrl, 'https://test.bard.com'],
       ['getEcmApiUrl', getEcmApiUrl, 'https://test.ecm.com'],
       ['getECMUrl', getECMUrl, 'https://test.ecm.com'],
@@ -87,6 +90,16 @@ describe('Config', () => {
       stubConfigFetch({ ...mockConfig, bffEnabled: true })
       const freshConfig = await import('src/libs/config')
       expect(await freshConfig.isBffEnabled()).toBe(true)
+    })
+  })
+
+  describe('getBannersUrl', () => {
+    it('returns an empty string when config.json names no banner feed', async () => {
+      vi.resetModules()
+      const { bannersUrl: _omitted, ...withoutBanners } = mockConfig
+      stubConfigFetch(withoutBanners)
+      const freshConfig = await import('src/libs/config')
+      expect(await freshConfig.getBannersUrl()).toBe('')
     })
   })
 

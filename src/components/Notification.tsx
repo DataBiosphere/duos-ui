@@ -1,11 +1,6 @@
-import { isEmpty } from 'src/utils/NodashUtil'
 import React from 'react'
+import Alert, { AlertColor } from '@mui/material/Alert'
 import ReactMarkdown from 'react-markdown'
-import WarningIcon from '@mui/icons-material/Warning'
-import InfoIcon from '@mui/icons-material/Info'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import ReportIcon from '@mui/icons-material/Report'
-import style from 'src/components/Notification.module.css'
 
 export interface NotificationData {
   message: string
@@ -14,50 +9,42 @@ export interface NotificationData {
 
 interface NotificationProps {
   notificationData?: NotificationData | null
-  index?: number
-  customStyle?: React.CSSProperties
+  onDismiss?: () => void
 }
 
-const iconStyle: React.CSSProperties = {
-  marginRight: '1rem',
-  height: 30,
-  width: 30,
+// The feed is ops-authored JSON, so an unknown level reaches here untyped and falls back to info.
+const SEVERITY: Record<NonNullable<NotificationData['level']>, AlertColor> = {
+  info: 'info',
+  success: 'success',
+  warning: 'warning',
+  danger: 'error',
 }
 
-const getIcon = (level: NotificationData['level']): React.ReactElement => {
-  switch (level) {
-    case 'success':
-      return <CheckCircleIcon fill="#3c763d" style={iconStyle} />
-    case 'info':
-      return <InfoIcon fill="#31708f" style={iconStyle} />
-    case 'warning':
-      return <WarningIcon fill="#8a6d3b" style={iconStyle} />
-    case 'danger':
-      return <ReportIcon fill="#a94442" style={iconStyle} />
-    default:
-      return <InfoIcon fill="#3c763d" style={iconStyle} />
+// An own-property check, so a level like "toString" cannot reach MUI as an inherited value.
+const severityFor = (level: NotificationData['level']): AlertColor =>
+  level !== undefined && Object.hasOwn(SEVERITY, level) ? SEVERITY[level] : 'info'
+
+const BANNER_SX = {
+  'alignItems': 'center',
+  // Beats `a, input` and `a:hover` in index.css, both of which strip underlines with !important.
+  '& a, & a:hover': { textDecoration: 'underline !important' },
+  '& p:first-of-type': { marginTop: 0 },
+  '& p:last-of-type': { marginBottom: 0 },
+}
+
+export const Notification = ({ notificationData, onDismiss }: Readonly<NotificationProps>) => {
+  if (!notificationData?.message) {
+    return null
   }
-}
-
-export const Notification = (props: Readonly<NotificationProps>) => {
-  const { notificationData, index = 1, customStyle } = props
-
-  if (isEmpty(notificationData) || !notificationData) {
-    return <div key={index} style={{ display: 'none' }} />
-  }
-
-  const level = notificationData.level ?? 'info'
 
   return (
-    <div
-      key={index}
-      className={`row alert alert-${level}`}
-      style={{ margin: 0, padding: '1.5rem', alignItems: 'center', ...customStyle }}
+    <Alert
+      severity={severityFor(notificationData.level)}
+      onClose={onDismiss}
+      closeText="Dismiss notification"
+      sx={BANNER_SX}
     >
-      <div style={{ float: 'left' }}>{getIcon(level)}</div>
-      <div className={style['underlined']} style={{ margin: '0.5rem auto' }}>
-        <ReactMarkdown>{notificationData.message}</ReactMarkdown>
-      </div>
-    </div>
+      <ReactMarkdown>{notificationData.message}</ReactMarkdown>
+    </Alert>
   )
 }

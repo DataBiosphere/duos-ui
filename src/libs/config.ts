@@ -3,6 +3,7 @@ import { Storage } from 'src/libs/storage'
 interface ConfigType {
   env: string
   apiUrl: string
+  bannersUrl?: string
   bardApiUrl: string
   ecmApiUrl: string
   hash: string
@@ -36,6 +37,10 @@ class ConfigClass {
 
   async getUpstreamApiUrl(): Promise<string> {
     return getUpstreamApiUrl()
+  }
+
+  async getBannersUrl(): Promise<string> {
+    return getBannersUrl()
   }
 
   async getBardApiUrl(): Promise<string> {
@@ -127,6 +132,15 @@ export const getApiUrl = async (): Promise<string> => {
 export const getUpstreamApiUrl = async (): Promise<string> => {
   const config = await loadConfig()
   return config.apiUrl
+}
+
+/**
+ * The public GCS object holding this environment's notification banners, or ''
+ * when none is configured. See docs/notification-banners.md.
+ */
+export const getBannersUrl = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.bannersUrl ?? ''
 }
 
 export const getBardApiUrl = async (): Promise<string> => { // Mixpanel

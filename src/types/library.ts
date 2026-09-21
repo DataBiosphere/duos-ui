@@ -49,6 +49,28 @@ export interface FilterState {
   dac: string[]
   workspaceTools: string[]
   workspacePlatform: string[]
+  modelFormat: string[]
+  modelLicense: string[]
+  modelCloud: string[]
+  modelTags: string[]
+  workspaceCloud: string[]
+  workspaceAccess: string[]
+  presentationEvent: string[]
+  presentationFormat: string[]
+  presentationAccess: string[]
+  publicationJournal: string[]
+  publicationAccess: string[]
+  presentationDate: {
+    after?: string
+    before?: string
+  }
+  publicationPublishedDate: {
+    after?: string
+    before?: string
+  }
+  ipType: string[]
+  ipStatus: string[]
+  fundingFunderName: string[]
   clinicalTrialStatus: string[]
   clinicalTrialPhase: string[]
   clinicalTrialInterventionType: string[]
@@ -57,8 +79,6 @@ export interface FilterState {
   biospecimenDataUse: string[]
   biospecimenPostMortemIntervalUnit: string[]
   soApprovalModel: string[]
-  datasetsCited?: boolean
-  publicationsDatasetsCited?: boolean
   instantApproval?: boolean
   participantCount: {
     min?: number
@@ -120,6 +140,20 @@ export interface AvailableFilters {
   dac: FilterOption[]
   workspaceTools: FilterOption[]
   workspacePlatform: FilterOption[]
+  modelFormat: FilterOption[]
+  modelLicense: FilterOption[]
+  modelCloud: FilterOption[]
+  modelTags: FilterOption[]
+  workspaceCloud: FilterOption[]
+  workspaceAccess: FilterOption[]
+  presentationEvent: FilterOption[]
+  presentationFormat: FilterOption[]
+  presentationAccess: FilterOption[]
+  publicationJournal: FilterOption[]
+  publicationAccess: FilterOption[]
+  ipType: FilterOption[]
+  ipStatus: FilterOption[]
+  fundingFunderName: FilterOption[]
   clinicalTrialStatus: FilterOption[]
   clinicalTrialPhase: FilterOption[]
   clinicalTrialInterventionType: FilterOption[]
@@ -128,8 +162,6 @@ export interface AvailableFilters {
   biospecimenDataUse: FilterOption[]
   biospecimenPostMortemIntervalUnit: FilterOption[]
   soApprovalModel: FilterOption[]
-  datasetsCited: FilterOption[]
-  publicationsDatasetsCited: FilterOption[]
   instantApproval: FilterOption[]
   biospecimenPostMortemIntervalRange: {
     min: number

@@ -5,7 +5,7 @@ import { useLibraryPageState } from 'src/hooks/useLibraryPageState'
 import { AssetType, FilterState, LibraryVersionNew } from 'src/types/library'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 import { useLibraryData, useLibraryMetadata } from 'src/hooks/useLibraryData'
-import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
+import { useLibraryTabCounts, useOptionCorpus } from 'src/hooks/useLibraryTabCounts'
 import { useLibraryUrlState } from 'src/hooks/useLibraryUrlState'
 
 vi.mock('src/hooks/useLibraryData')
@@ -49,6 +49,28 @@ const tabCountsResponse = {
 
 const updateUrlState = vi.fn()
 
+// Both observers answer from one function of the filters. Cleared, not just
+// re-stubbed, because tests read `mock.calls`.
+const mockCorpus = (
+  responseFor: (filters: FilterState) => unknown,
+  isPlaceholderFor: (filters: FilterState) => boolean = () => false,
+) => {
+  vi.mocked(useLibraryTabCounts).mockClear()
+  vi.mocked(useOptionCorpus).mockClear()
+  vi.mocked(useLibraryTabCounts).mockImplementation((_config, filters: FilterState) => ({
+    data: responseFor(filters),
+    isFetching: false,
+    isPlaceholderData: isPlaceholderFor(filters),
+    error: null,
+  } as unknown as ReturnType<typeof useLibraryTabCounts>))
+  vi.mocked(useOptionCorpus).mockImplementation((_config, filters: FilterState, _term, enabled) => ({
+    data: enabled ? responseFor(filters) : undefined,
+    isFetching: false,
+    isPlaceholderData: enabled && isPlaceholderFor(filters),
+    error: null,
+  } as unknown as ReturnType<typeof useOptionCorpus>))
+}
+
 const setup = (tab: AssetType, filters: FilterState = EMPTY_FILTERS) => {
   vi.mocked(useLibraryUrlState).mockReturnValue([
     { library: 'duos', tab, filters, query: '', page: 0, pageSize: 25, hideFilters: false },
@@ -64,11 +86,7 @@ beforeEach(() => {
     isFetching: false,
     error: null,
   } as unknown as ReturnType<typeof useLibraryData>)
-  vi.mocked(useLibraryTabCounts).mockReturnValue({
-    data: tabCountsResponse,
-    isFetching: false,
-    error: null,
-  } as unknown as ReturnType<typeof useLibraryTabCounts>)
+  mockCorpus(() => tabCountsResponse)
 })
 
 describe('useLibraryPageState — tab-count wiring', () => {
@@ -253,5 +271,261 @@ describe('useLibraryPageState — data use modifier options', () => {
     setup(AssetType.DATASETS)
     const { result } = renderHook(() => useLibraryPageState(libraryConfig))
     expect(result.current.availableFilters.dataUseModifiers).toEqual([])
+  })
+})
+
+describe('useLibraryPageState — full-corpus filter options', () => {
+  // Two workspaces in one study, so options can be derived off-tab.
+  const bucket = {
+    key: 1,
+    study_details: {
+      hits: {
+        hits: [{
+          _source: {
+            study: {
+              studyId: 1,
+              studyName: 'Study 1',
+              assets: {
+                workspaces: [
+                  { workspaceId: 'w1', tools: ['Jupyter'], platform: 'Terra' },
+                  { workspaceId: 'w2', tools: ['WDL'], platform: 'AnVIL' },
+                ],
+              },
+            },
+          },
+        }],
+      },
+    },
+  }
+
+  const responseWithBucket = {
+    aggregations: {
+      total_studies: { value: 1 },
+      datasets_count: { doc_count: 0 },
+      studies: { buckets: [bucket] },
+    },
+  }
+
+  beforeEach(() => {
+    mockCorpus(() => responseWithBucket)
+  })
+
+  // These used to read `data.items`, so they emptied when the user left the tab.
+  it('populates an option list even while a different tab is active', () => {
+    setup(AssetType.STUDIES)
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
+    expect(result.current.availableFilters.workspaceTools.map(o => o.value)).toEqual(['Jupyter', 'WDL'])
+  })
+
+  it('derives options from the full corpus, not just the current page', () => {
+    vi.mocked(useLibraryUrlState).mockReturnValue([
+      { library: 'duos', tab: AssetType.WORKSPACES, filters: EMPTY_FILTERS, query: '', page: 0, pageSize: 1, hideFilters: false },
+      updateUrlState,
+    ] as unknown as ReturnType<typeof useLibraryUrlState>)
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    // The grid renders one workspace; both platforms are still offered.
+    expect(result.current.data?.items).toHaveLength(1)
+    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
+  })
+
+  // Otherwise a multi-select checkbox group can never hold more than one value.
+  it('keeps every value selectable once one of them is checked', () => {
+    setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['Terra'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
+    // The grid still honours the filter; only the option list ignores it.
+    expect(result.current.data?.items).toHaveLength(1)
+  })
+
+  it('clears every corpus-derived key of the asset, so sibling lists stay complete', () => {
+    setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['Terra'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.workspaceTools.map(o => o.value)).toEqual(['Jupyter', 'WDL'])
+  })
+
+  // No client-side pass can recover a study the response never carried.
+  it('offers a value whose only study the active filter removes from the response', () => {
+    const oneWorkspaceStudy = (studyId: number, platform: string) => ({
+      key: studyId,
+      study_details: {
+        hits: { hits: [{ _source: { study: { studyId, studyName: `Study ${studyId}`, assets: { workspaces: [{ workspaceId: `w${studyId}`, platform }] } } } }] },
+      },
+    })
+    const allStudies = [oneWorkspaceStudy(1, 'Terra'), oneWorkspaceStudy(2, 'AnVIL')]
+
+    mockCorpus((filters) => {
+      const selected = filters.workspacePlatform
+      const buckets = selected.length > 0
+        ? allStudies.filter(b => selected.includes(b.study_details.hits.hits[0]._source.study.assets.workspaces[0].platform))
+        : allStudies
+      return { aggregations: { total_studies: { value: buckets.length }, datasets_count: { doc_count: 0 }, studies: { buckets } } }
+    })
+
+    setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['Terra'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
+    // The grid still shows only the matching study's workspace.
+    expect(result.current.data?.items).toHaveLength(1)
+  })
+
+  // Other tabs' filters still scope the corpus, so options match the grid.
+  it('keeps filters owned by other tabs applied when deriving an asset\'s options', () => {
+    setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['Terra'], accessManagement: ['controlled'] })
+    renderHook(() => useLibraryPageState(libraryConfig))
+
+    // Counts keeps every filter; the corpus clears only the Workspaces keys.
+    expect(vi.mocked(useLibraryTabCounts).mock.calls.at(-1)?.[1])
+      .toEqual(expect.objectContaining({ workspacePlatform: ['Terra'], accessManagement: ['controlled'] }))
+    expect(vi.mocked(useOptionCorpus).mock.calls.at(-1)?.[1])
+      .toEqual(expect.objectContaining({ workspacePlatform: [], accessManagement: ['controlled'] }))
+  })
+
+  // The excluding filter is another tab's, so it scopes the corpus too and
+  // self-exclusion cannot bring the value back.
+  it('keeps a selected value listed when another tab\'s filter excludes every study carrying it', () => {
+    const anvilOnly = {
+      key: 2,
+      study_details: {
+        hits: { hits: [{ _source: { study: { studyId: 2, studyName: 'Study 2', assets: { workspaces: [{ workspaceId: 'w2', platform: 'AnVIL' }] } } } }] },
+      },
+    }
+
+    // Any response scoped by accessManagement drops the Terra study entirely.
+    mockCorpus(filters => ({
+      aggregations: {
+        total_studies: { value: 1 },
+        datasets_count: { doc_count: 0 },
+        studies: { buckets: filters.accessManagement.length > 0 ? [anvilOnly] : [bucket] },
+      },
+    }))
+
+    setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['Terra'], accessManagement: ['controlled'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    // The derived corpus offers only AnVIL...
+    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['AnVIL'])
+    // ...but the panel still lists Terra, so it can be unchecked.
+    const platform = result.current.filterSections.find(section => section.key === 'workspacePlatform')
+    expect(platform?.options?.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
+  })
+
+  // Otherwise a registry only a trial outside the window carries is offered,
+  // and checking it empties the grid.
+  it('keeps the asset\'s non-option filters applied when deriving its options', () => {
+    const trialStudy = {
+      key: 1,
+      study_details: {
+        hits: {
+          hits: [{
+            _source: {
+              study: {
+                studyId: 1,
+                studyName: 'Study 1',
+                assets: {
+                  clinicalTrials: [
+                    { clinicalTrialId: 't1', registry: 'ClinicalTrials.gov', startDate: '2024-01-01', endDate: '2024-06-01' },
+                    { clinicalTrialId: 't2', registry: 'EudraCT', startDate: '2019-01-01', endDate: '2019-06-01' },
+                  ],
+                },
+              },
+            },
+          }],
+        },
+      },
+    }
+    mockCorpus(() => ({
+      aggregations: { total_studies: { value: 1 }, datasets_count: { doc_count: 0 }, studies: { buckets: [trialStudy] } },
+    }))
+
+    setup(AssetType.CLINICAL_TRIALS, {
+      ...EMPTY_FILTERS,
+      clinicalTrialDates: { startDate: '2023-01-01', endDate: '2025-01-01' },
+    })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    // The 2019 trial is outside the window, so its registry is not offered.
+    expect(result.current.availableFilters.clinicalTrialRegistry.map(o => o.value)).toEqual(['ClinicalTrials.gov'])
+    expect(vi.mocked(useOptionCorpus).mock.calls.at(-1)?.[1])
+      .toEqual(expect.objectContaining({
+        clinicalTrialRegistry: [],
+        clinicalTrialDates: { startDate: '2023-01-01', endDate: '2025-01-01' },
+      }))
+  })
+
+  // A static-enum tab reads no corpus, so the extra request would be wasted.
+  it('mounts no second aggregation for a tab with no corpus-derived options', () => {
+    setup(AssetType.INTELLECTUAL_PROPERTY, { ...EMPTY_FILTERS, ipFiledDate: { after: '2024-01-01' } })
+    renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(vi.mocked(useOptionCorpus).mock.calls.at(-1)?.[3]).toBe(false)
+  })
+
+  it('still mounts the cleared-keys aggregation for a corpus-derived tab', () => {
+    setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['Terra'] })
+    renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(vi.mocked(useOptionCorpus).mock.calls.at(-1)?.[3]).toBe(true)
+  })
+
+  // Only a corpus-derived key clears, so a date edit widens nothing to re-fetch.
+  it('mounts no second aggregation when only a non-option filter of the tab is set', () => {
+    setup(AssetType.CLINICAL_TRIALS, {
+      ...EMPTY_FILTERS,
+      clinicalTrialDates: { startDate: '2023-01-01', endDate: '2025-01-01' },
+    })
+    renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(vi.mocked(useOptionCorpus).mock.calls.at(-1)?.[3]).toBe(false)
+  })
+
+  // Placeholder data is still scoped by the previous tab's cleared keys.
+  it('ignores a stale corpus and falls back to the counts response', () => {
+    const anvilOnly = {
+      key: 2,
+      study_details: {
+        hits: { hits: [{ _source: { study: { studyId: 2, studyName: 'Study 2', assets: { workspaces: [{ workspaceId: 'w2', platform: 'AnVIL' }] } } } }] },
+      },
+    }
+
+    // The stale corpus holds both platforms; the live counts response holds AnVIL.
+    mockCorpus(
+      filters => (filters.workspacePlatform.length === 0
+        ? responseWithBucket
+        : { aggregations: { total_studies: { value: 1 }, datasets_count: { doc_count: 0 }, studies: { buckets: [anvilOnly] } } }),
+      filters => filters.workspacePlatform.length === 0,
+    )
+    setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['AnVIL'] })
+    const { result } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['AnVIL'])
+  })
+
+  // Until the corpus lands, options fall back to the narrower counts response:
+  // briefly short rather than blank.
+  it('falls back to the counts response until the cleared-set corpus arrives', () => {
+    const terraOnly = {
+      key: 1,
+      study_details: {
+        hits: { hits: [{ _source: { study: { studyId: 1, studyName: 'Study 1', assets: { workspaces: [{ workspaceId: 'w1', platform: 'Terra' }] } } } }] },
+      },
+    }
+    mockCorpus(filters => (filters.workspacePlatform.length === 0
+      ? undefined
+      : { aggregations: { total_studies: { value: 1 }, datasets_count: { doc_count: 0 }, studies: { buckets: [terraOnly] } } }))
+    setup(AssetType.WORKSPACES, { ...EMPTY_FILTERS, workspacePlatform: ['Terra'] })
+    const { result, rerender } = renderHook(() => useLibraryPageState(libraryConfig))
+
+    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['Terra'])
+
+    mockCorpus(() => responseWithBucket)
+    rerender()
+
+    expect(result.current.availableFilters.workspacePlatform.map(o => o.value)).toEqual(['AnVIL', 'Terra'])
   })
 })
