@@ -185,9 +185,12 @@ See [TESTING.md](TESTING.md) for full testing instructions.
 
 ## E2E Tests (Playwright)
 
-Build the app and run e2e tests against the preview server:
+Build the app and run e2e tests against the Fastify server (`pnpm run serve`,
+which Playwright starts for you). See [TESTING.md](TESTING.md) for the config
+file it needs and for running against the session infrastructure:
 
 ```shell
+cp config/dev.json public/config.json
 CI=false pnpm run build
 pnpm run test:e2e
 ```

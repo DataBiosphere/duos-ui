@@ -54,9 +54,19 @@ same server on its own.
 
 The server registers its Postgres session layer when `DUOS_DB_HOST` is set, so
 a run with no `DUOS_*` variables exercises the legacy sign-in flow and needs no
-database. To run against the session infrastructure, export the database
-variables (see `.env.example`) and start Postgres — `docker compose up -d db`
-is enough — before `pnpm run test:e2e`.
+database. To run against the session infrastructure instead, do all three of
+these before `pnpm run test:e2e`:
+
+1. Start Postgres. `docker compose up -d db` is enough, and its
+   `config/consentdb.sql` dump already carries the `user_sessions` table. A
+   database from any other source needs the schema applied by hand:
+   `psql "$DATABASE_URL" -f test/e2e/sql/user_sessions.sql`.
+2. Export the database variables — `DUOS_DB_HOST`, `DUOS_DB_NAME`,
+   `DUOS_DB_USER`, `DUOS_DB_PASSWORD`, and `DUOS_DB_SSL=false` for a local
+   container. See `.env.example`.
+3. Export `DUOS_SESSION_SECRET`, at least 32 characters
+   (`openssl rand -base64 32`). The server refuses to start without it once
+   `DUOS_DB_HOST` is set, so Playwright reports a server that never came up.
 
 CI provisions the same thing per run: a Postgres service container, the session
 schema in `test/e2e/sql/user_sessions.sql`, a generated session secret and a
