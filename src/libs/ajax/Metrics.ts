@@ -5,8 +5,11 @@ import { BFF_BARD_PREFIX, Config, Token } from 'src/libs/config'
 import { MetricsEventName } from 'src/libs/events'
 import { retryFetchPost } from 'src/libs/ajax/fetchAdapter'
 
-// Set default timeout for all metrics calls to 30 seconds
-const defaultSignal: AbortSignal = AbortSignal.timeout(30000)
+// Default timeout for every metrics call. This must be a fresh signal per
+// call: AbortSignal.timeout fires once, so a single module-level signal would
+// be permanently aborted 30 s after page load and every later default-signal
+// call would abort immediately (silently, since callers swallow the error).
+const defaultSignal = (): AbortSignal => AbortSignal.timeout(30000)
 
 // BFF NOTE: identified Bard calls authenticate with the user's token, which
 // the browser no longer holds post-cutover — they go through the /bard-api
@@ -24,11 +27,11 @@ export const Metrics = {
     event: MetricsEventName,
     // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     details: Record<string, any> = {},
-    signal: AbortSignal = defaultSignal,
+    signal: AbortSignal = defaultSignal(),
   ) => captureEventFn(event, signal, details).catch(() => {
   }),
-  syncProfile: (signal: AbortSignal = defaultSignal) => syncProfile(signal),
-  identify: (anonId: string, signal: AbortSignal = defaultSignal) => identify(anonId, signal),
+  syncProfile: (signal: AbortSignal = defaultSignal()) => syncProfile(signal),
+  identify: (anonId: string, signal: AbortSignal = defaultSignal()) => identify(anonId, signal),
 }
 
 /**
