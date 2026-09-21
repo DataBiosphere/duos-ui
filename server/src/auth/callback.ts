@@ -95,7 +95,9 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
   if (subProvider === 'unknown') {
     // A missing dimension drops the sign-in from every provider-split
     // dashboard, so record it as unknown and say so rather than guessing.
-    request.log.warn({ idp: claims.idp }, '[auth] id_token idp claim is missing or unrecognised')
+    // `idp` stays canonical; the raw claim goes in its own field, with null so
+    // an absent claim is visible rather than dropped by the JSON serializer.
+    request.log.warn({ idp: subProvider, idpClaim: claims.idp ?? null }, '[auth] id_token idp claim is missing or unrecognised')
   }
 
   // regenerate() replaces the session with an empty one, so preserve returnTo

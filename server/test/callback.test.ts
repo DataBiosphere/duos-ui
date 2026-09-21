@@ -178,7 +178,9 @@ describe('handleCallback', () => {
       const request = await callbackWithClaims({})
 
       expect(request.session.idp).toBe('unknown')
-      expect(request.log.warn).toHaveBeenCalledWith({ idp: undefined }, expect.stringContaining('idp'))
+      // The `idp` dimension stays canonical (google | microsoft | unknown); the
+      // raw claim travels in its own field, and null keeps an absent claim visible.
+      expect(request.log.warn).toHaveBeenCalledWith({ idp: 'unknown', idpClaim: null }, expect.stringContaining('idp'))
     })
 
     it('does not read the claim under the policy-internal name identityProvider', async () => {
@@ -193,7 +195,7 @@ describe('handleCallback', () => {
       const request = await callbackWithClaims({ idp: 'facebook.com' })
 
       expect(request.session.idp).toBe('unknown')
-      expect(request.log.warn).toHaveBeenCalledWith({ idp: 'facebook.com' }, expect.stringContaining('idp'))
+      expect(request.log.warn).toHaveBeenCalledWith({ idp: 'unknown', idpClaim: 'facebook.com' }, expect.stringContaining('idp'))
     })
   })
 
