@@ -32,6 +32,22 @@ async function retirePreAuthSession(request: FastifyRequest, preAuthSid: string)
 }
 
 /**
+ * Maps the B2C `idp` claim to the sub-provider the user chose on the B2C
+ * login page. The claim name and values come from the B2C custom policy
+ * (terraform-ap-deployments/azure/b2c/policies, TrustFrameworkExtensionsDUOS):
+ * the `identityProvider` claim type goes on the wire under the OpenIdConnect
+ * partner name `idp`; the Google-OAUTH profile sets it to the literal
+ * `google.com`, and the AADCommon-OpenIdConnect profile copies the Entra
+ * token's `iss` (an https://login.microsoftonline.com/<tenant>/v2.0 URL).
+ * Anything else — including an absent claim — is `unknown`, never a guess.
+ */
+export function subProviderFromIdpClaim(idp: unknown): 'google' | 'microsoft' | 'unknown' {
+  if (idp === 'google.com') return 'google'
+  if (typeof idp === 'string' && idp.startsWith('https://login.microsoftonline.com/')) return 'microsoft'
+  return 'unknown'
+}
+
+/**
  * Exchanges the B2C authorization code for tokens, validates the `id_token`,
  * extracts the sub-provider from the B2C `idp` claim, and writes all tokens to
  * the session. The browser never sees a token — only the post-login redirect.
@@ -75,9 +91,12 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
     return
   }
 
-  // B2C sets idp='google.com' when auth was federated to Google.
-  // Verify the exact claim name ('idp' vs 'identityProvider') against the dev B2C tenant.
-  const subProvider: 'google' | 'microsoft' = claims.idp === 'google.com' ? 'google' : 'microsoft'
+  const subProvider = subProviderFromIdpClaim(claims.idp)
+  if (subProvider === 'unknown') {
+    // A missing dimension drops the sign-in from every provider-split
+    // dashboard, so record it as unknown and say so rather than guessing.
+    request.log.warn({ idp: claims.idp }, '[auth] id_token idp claim is missing or unrecognised')
+  }
 
   // regenerate() replaces the session with an empty one, so preserve returnTo
   // and write tokens only after rotating the pre-auth SID.

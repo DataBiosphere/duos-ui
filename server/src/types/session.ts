@@ -21,7 +21,8 @@ declare module 'fastify' {
     // Sub-provider the user chose on the B2C login page, derived from the B2C
     // id_token's `idp` claim at callback (Phase 2). All tokens are B2C-issued
     // regardless — this field exists for the audit trail and observability,
-    // not client selection.
-    idp?: 'google' | 'microsoft'
+    // not client selection. 'unknown' means the claim was absent or carried a
+    // value the callback does not recognise; it is recorded, never guessed.
+    idp?: 'google' | 'microsoft' | 'unknown'
   }
 }
