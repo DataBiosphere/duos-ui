@@ -1104,7 +1104,7 @@ describe('Study details test', () => {
   it('shows granted DAR details and expands the research use statement', async () => {
     vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([{
       projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
-      nonTechRus: 'Study cancer outcomes.', expired: false, piName: 'Dr Researcher',
+      nonTechRus: 'Study cancer outcomes.', expired: false,
       institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
     }])
     const user = userEvent.setup()
@@ -1112,8 +1112,9 @@ describe('Study details test', () => {
 
     expect(await screen.findByText('Cancer genomics')).toBeInTheDocument()
     expect(screen.getByText('Institution: Research University')).toBeInTheDocument()
-    // The section names the institution a grant went to, not the person who holds it
-    expect(screen.queryByText(/Dr Researcher/)).not.toBeInTheDocument()
+    // The card names the institution a grant went to. That it names no requester is enforced where
+    // it can actually fail - MetricsResourceTest pins the served field set - rather than here,
+    // where the type no longer has the field and any assertion would be restating the compiler.
     expect(screen.getByText('Current')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Show research use statement' }))
     expect(screen.getByText('Study cancer outcomes.')).toBeInTheDocument()
