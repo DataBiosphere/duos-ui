@@ -32,14 +32,7 @@ async function retirePreAuthSession(request: FastifyRequest, preAuthSid: string)
 }
 
 /**
- * Maps the B2C `idp` claim to the sub-provider the user chose on the B2C
- * login page. The claim name and values come from the B2C custom policy
- * (terraform-ap-deployments/azure/b2c/policies, TrustFrameworkExtensionsDUOS):
- * the `identityProvider` claim type goes on the wire under the OpenIdConnect
- * partner name `idp`; the Google-OAUTH profile sets it to the literal
- * `google.com`, and the AADCommon-OpenIdConnect profile copies the Entra
- * token's `iss` (an https://login.microsoftonline.com/<tenant>/v2.0 URL).
- * Anything else — including an absent claim — is `unknown`, never a guess.
+ * Maps the B2C `idp` claim to the sub-provider the user chose on the B2C login page.
  */
 export function subProviderFromIdpClaim(idp: unknown): 'google' | 'microsoft' | 'unknown' {
   if (idp === 'google.com') return 'google'
@@ -93,10 +86,6 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
 
   const subProvider = subProviderFromIdpClaim(claims.idp)
   if (subProvider === 'unknown') {
-    // A missing dimension drops the sign-in from every provider-split
-    // dashboard, so record it as unknown and say so rather than guessing.
-    // `idp` stays canonical; the raw claim goes in its own field, with null so
-    // an absent claim is visible rather than dropped by the JSON serializer.
     request.log.warn({ idp: subProvider, idpClaim: claims.idp ?? null }, '[auth] id_token idp claim is missing or unrecognised')
   }
 

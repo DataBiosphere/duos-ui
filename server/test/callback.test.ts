@@ -148,10 +148,7 @@ describe('handleCallback', () => {
 
   describe('sub-provider from the B2C `idp` claim', () => {
     // The claim name and values come from the B2C custom policy
-    // (terraform-ap-deployments/azure/b2c/policies): the `identityProvider`
-    // claim type is emitted under the OpenIdConnect partner name `idp`;
-    // Google-OAUTH sets it to the literal `google.com`, and
-    // AADCommon-OpenIdConnect copies the Entra token's `iss`.
+    // `identityProvider` claim type emitted under the OpenIdConnect `idp`
     async function callbackWithClaims(claims: Record<string, unknown>) {
       const oidc = await import('openid-client')
       vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue(makeTokens({ email: 'user@example.com', ...claims }))
@@ -178,8 +175,7 @@ describe('handleCallback', () => {
       const request = await callbackWithClaims({})
 
       expect(request.session.idp).toBe('unknown')
-      // The `idp` dimension stays canonical (google | microsoft | unknown); the
-      // raw claim travels in its own field, and null keeps an absent claim visible.
+      // The `idp` dimension stays canonical (google | microsoft | unknown);
       expect(request.log.warn).toHaveBeenCalledWith({ idp: 'unknown', idpClaim: null }, expect.stringContaining('idp'))
     })
 

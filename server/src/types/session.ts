@@ -19,10 +19,7 @@ declare module 'fastify' {
     pkceState?: string
     returnTo?: string // post-login redirect target, stored during OAuth initiation
     // Sub-provider the user chose on the B2C login page, derived from the B2C
-    // id_token's `idp` claim at callback (Phase 2). All tokens are B2C-issued
-    // regardless — this field exists for the audit trail and observability,
-    // not client selection. 'unknown' means the claim was absent or carried a
-    // value the callback does not recognise; it is recorded, never guessed.
+    // id_token's `idp` claim at callback.
     idp?: 'google' | 'microsoft' | 'unknown'
   }
 }
