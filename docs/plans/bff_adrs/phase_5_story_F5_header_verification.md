@@ -1,37 +1,79 @@
 # Story 5-F5 — verification runs (local, dev, staging, prod)
 
-**Ticket:** [DUOS-4021](https://broadworkbench.atlassian.net/browse/DT-4021)  
+**Tickets:** [DT-3610](https://broadworkbench.atlassian.net/browse/DT-3610), [DUOS-4021](https://broadworkbench.atlassian.net/browse/DT-4021)    
 **Records:** [ADR-013](ADR-013-content-security-policy.md)  
 **First run:** 2026-09-04  
 **Last updated:** 2026-09-22  
 **Run by:** Greg Rushton  
-**Stack:** `duos-ui` local Docker Compose (`app` + `duos-proxy` httpd sidecar + bundled Postgres)  
-**Server code:** `develop` @ `ce48888e` (5-F1, 5-F2, 5-F3 merged)  
-**Sidecar config:** local `site.conf`, carrying the story 5-F4 changes that
-terra-helmfile PR [#6497](https://github.com/broadinstitute/terra-helmfile/pull/6497) makes
 
-This run is the pre-check for the rollout, not the rollout. The local stack uses
-the same `httpd-terra-proxy` image and the same `site.conf` shape as the
-deployed environments, so it proves the policy composes and that the sidecar no
-longer overrides it. It does **not** close story 5-F5: real traffic on dev,
-then the flip per environment, still has to happen.
+This document records verification of DUOS's Content Security Policy (CSP) and
+related security headers, from local testing on September 4 through deployed
+environment checks on September 22. CSP tells the browser which scripts,
+connections, and other resources the application may use. **Report-only** mode
+records violations without blocking requests; **enforcement** blocks requests
+that violate the policy. **BFF** (backend for frontend) mode routes application
+requests through the DUOS server; legacy mode connects directly to upstream
+services.
 
-> **Read the dates.** Every measurement below records what the code sent on the
-> day of that run. Two later changes altered the derived policy — story 5-F6 and
-> the banner move. See **Code changes since the first run** before you reuse any
-> `connect-src` listed here.
+Each dated section records the configuration tested, checks performed, results,
+and limits of the evidence. Header examples are historical measurements, not
+configuration templates: public BFF endpoints (5-F6) and the banner bucket move
+changed the policy after the initial tests.
 
----
+## Latest recorded status — 2026-09-22
 
-## Result
+| Environment | Mode and latest check | Recorded result | Outstanding verification |
+|---|---|---|---|
+| Local | Legacy: report-only and enforced; BFF: enforced (2026-09-04) | Tested workflows passed; no application-triggered violations observed | Repeat BFF workflows against the updated policy; feature flags remain untested |
+| Dev | Legacy, enforced; workflows checked 2026-09-08, headers checked 2026-09-22 | Workflow checks passed; updated banner source present in header | Repeat banner workflow; record a deliberate browser blocking/reporting check |
+| Staging | Legacy, enforced; workflows and browser blocking checked 2026-09-08, headers checked 2026-09-22 | Workflow checks passed; browser blocked and reported a disallowed request | Repeat banner workflow |
+| Prod | Legacy, report-only as measured 2026-09-22; logs analysed 2026-09-21 | None of 249 reviewed reports attributed to application code | Verify enforcement after deployment, then workflows and browser blocking/reporting |
+
+The production enforcement configuration PR
+[terra-helmfile#6500](https://github.com/broadinstitute/terra-helmfile/pull/6500)
+is merged. That is distinct from verified deployment: the latest recorded prod
+header is still report-only. No later production enforcement result is recorded
+here. The [remaining checks](#remaining-verification-checklist) consolidate the
+work needed after these measurements.
+
+## What each check establishes
+
+- **Inspect response headers:** establishes which policy and security headers
+  reach the client through the Apache proxy. It does not demonstrate browser
+  enforcement.
+- **Exercise application workflows:** establishes whether the tested behavior
+  works with that configuration, while checking for violation reports. It does
+  not cover untested workflows or all real-user traffic.
+- **Trigger a disallowed request in the browser:** establishes that the browser
+  blocks the request under enforcement and sends a report that reaches logging.
+  A synthetic POST to `/csp-report` checks only the endpoint and logging; it does
+  not establish browser blocking or automatic report delivery.
+
+## Initial local verification — 2026-09-04
+
+**Stack:** `duos-ui` local Docker Compose (`app` + `duos-proxy` httpd sidecar + bundled Postgres)
+
+**Server code:** `develop` @ `ce48888e` (security headers, report endpoint, and CSP policy: 5-F1–5-F3)
+
+**Sidecar config:** local `site.conf`, carrying the proxy header fix (5-F4) from
+[terra-helmfile#6497](https://github.com/broadinstitute/terra-helmfile/pull/6497)
+
+This was the local pre-check before deployed-environment verification. It used
+the same `httpd-terra-proxy` image and `site.conf` structure as the deployed
+stack to check that the proxy preserved the application's policy. The run
+covered one developer's manual workflows, not representative real-user traffic.
+Later dev, staging, and production evidence is recorded separately below.
+
+### Results
 
 | Mode | Report-only | Enforced |
 |---|---|---|
-| Legacy (`bffEnabled: false`) | clean | **clean** |
-| BFF (`bffEnabled: true`) | — | **clean** |
+| Legacy (`bffEnabled: false`) | passed | passed |
+| BFF (`bffEnabled: true`) | not tested | passed |
 
-Zero violation reports across every pass. `docker logs duos | grep '\[csp\]'`
-returned nothing but the synthetic probe described below.
+No application-triggered violations were observed during the tested workflows.
+`docker logs duos | grep '\[csp\]'` returned only the synthetic probe described
+below. This result applies to this local run and its configuration.
 
 ### Flows driven
 
@@ -46,13 +88,13 @@ returned nothing but the synthetic probe described below.
 | ECM RAS account linking | — | pass | end to end via `/ecm-api` |
 | TDR data library | — | pass | via `/tdr-api` |
 | Sign-out | pass | pass | |
-| Feature flags | not driven | not driven | see "Known gaps" |
+| Feature flags | not driven | not driven | see remaining verification checklist |
 
 ---
 
-## Headers verified
+### Headers verified
 
-### Legacy mode, enforced
+#### Legacy mode, enforced
 
 ```
 Content-Security-Policy: default-src 'self';script-src 'self';script-src-attr 'none';
@@ -68,7 +110,7 @@ upgrade-insecure-requests
 
 Four upstream origins, per `LEGACY_CONNECT_FIELDS`.
 
-### BFF mode, enforced
+#### BFF mode, enforced
 
 Identical, except `connect-src` drops ECM and TDR:
 
@@ -79,9 +121,9 @@ connect-src 'self' https://local.dsde-dev.broadinstitute.org:27443
 ```
 
 Those two are same-origin through the proxies, per `BFF_CONNECT_FIELDS`.
-*(Story 5-F6 has since emptied that list; see the 2026-09-22 section.)*
+*(Public BFF endpoints (5-F6) have since emptied that list; see the 2026-09-22 section.)*
 
-### Companion headers, final state
+#### Companion headers after the local proxy fix
 
 ```
 X-Content-Type-Options: nosniff
@@ -97,7 +139,7 @@ replaced `X-Frame-Options` with `SAMEORIGIN` and HSTS with `max-age=86400`.
 
 ---
 
-## What story 5-F4 fixed, measured
+### Proxy header fix (5-F4): before and after
 
 | Header the app sends | Before | After |
 |---|---|---|
@@ -113,7 +155,7 @@ for HSTS.
 
 ---
 
-## Report sink proven
+### Report endpoint and logging check
 
 The report-only passes logged nothing, which alone does not prove the sink
 works. A synthetic report confirmed the path:
@@ -127,11 +169,12 @@ curl -sk -X POST https://local.dsde-dev.broadinstitute.org/csp-report \
 ```
 
 Returned 204, logged one `[csp] violation report` line, with the query string
-redacted to `?<redacted>` as `cspReport.ts` specifies.
+redacted to `?<redacted>` as `cspReport.ts` specifies. This verified the report
+endpoint and logging, not automatic browser report delivery.
 
 ---
 
-## One false negative worth remembering
+### Testing pitfall: a successful response without an upstream request
 
 The first BFF pass ran without `DUOS_BARD_URL`, `DUOS_ECM_URL` or
 `DUOS_TDR_URL` in `.env.local`. The BFF logs a warning and skips those proxy
@@ -146,28 +189,24 @@ parser rejects with `FST_ERR_CTP_EMPTY_JSON_BODY`. Inside a proxy scope
 `removeAllContentTypeParsers()` plus the `'*'` parser lets that body through, so
 the error only appears when the proxy is absent.
 
-**Lesson for the dev collection run:** a 200 does not prove a proxied call
+**Lesson for subsequent verification runs:** a 200 does not prove a proxied call
 reached its upstream. Confirm the three env vars are set, and check the boot log
 for `proxy is disabled` warnings before trusting a pass.
 
 ---
 
-## Known gaps
+### Limits of the local evidence
 
-1. **Feature flags not driven.** `src/libs/ajax/FeatureFlag.ts` has no callers
-   in `src`. Its host is `apiUrl`, allowlisted in both modes, so a future caller
-   is already covered. *(Closed by story 5-F6: the call is same-origin now.)*
-2. **Single-user traffic.** This run is one developer clicking through. Epic 6
-   story 6-K makes collection reliable; the dev report-only run still needs real
-   traffic.
-3. **`blob:` and other sources.** None were needed here. Add nothing until a
-   report-only run on real traffic proves the need.
+Feature flags were not exercised. At the time, `src/libs/ajax/FeatureFlag.ts`
+had no callers in `src`; its host was covered by the policy's `apiUrl` entry.
+The tested workflows required no additional sources such as `blob:`. These
+observations do not establish coverage for future callers or other user traffic.
 
 ---
 
 ## Dev report-only run — 2026-09-08
 
-Dev serves chart `duos-0.169.0`, so story 5-F4 has promoted. Headers measured
+Dev serves chart `duos-0.169.0`, so the proxy header fix (5-F4) has promoted. Headers measured
 at `https://duos-k8s.dsde-dev.broadinstitute.org/`:
 
 ```
@@ -188,7 +227,9 @@ report` entries in GCP logging across both pods.
 Collection was proven rather than assumed. A synthetic report posted to
 `/csp-report` returned 204 and logged one entry naming
 `https://example.com/probe.js`, from pod `duos-deployment-65465457fb-hsmfr`.
-An empty log therefore means no violations, not a broken sink.
+This confirms the endpoint and logging worked during the run. No violations
+were observed in the workflow checks; the synthetic POST alone does not prove
+automatic browser report delivery.
 
 **Enforcement PR:** [terra-helmfile#6498](https://github.com/broadinstitute/terra-helmfile/pull/6498),
 setting `DUOS_CSP_REPORT_ONLY=false` in `values/app/duos/live/dev.yaml`.
@@ -215,7 +256,7 @@ content-security-policy: default-src 'self';script-src 'self';
   report-to csp-endpoint;upgrade-insecure-requests
 ```
 
-All eight flows re-driven under enforcement: **all pass**. Dev is done.
+All eight flows re-driven under enforcement: **all pass** for the configuration tested on 2026-09-08.
 
 Reports still collect under enforcement, with `"disposition": "enforce"`. That
 log is the early warning for a flow this run did not cover.
@@ -224,10 +265,9 @@ log is the early warning for a flow this run did not cover.
 
 ## Staging enforced — 2026-09-08
 
-Staging collected report-only on **real traffic** from 2026-09-04, when story
-5-F3 released, until this deploy — a wider run than any set of driven flows.
+Staging collected report-only on **real traffic** from 2026-09-04, when the CSP policy (5-F3) released, until this deploy — a wider run than any set of driven flows.
 
-Chart `duos-0.169.0` (story 5-F4) and
+Chart `duos-0.169.0` (proxy header fix, 5-F4) and
 [terra-helmfile#6499](https://github.com/broadinstitute/terra-helmfile/pull/6499)
 landed together at 17:45 UTC, so the sidecar's override and the report-only
 window ended in the same deploy. Measured after it:
@@ -243,7 +283,7 @@ content-security-policy: default-src 'self';…;connect-src 'self'
     https://storage.googleapis.com/broad-duos-banners/;…
 ```
 
-All sixteen directives present, no report-only header left. All workflows pass
+All sixteen directives present, no report-only header left. The exercised workflows passed
 under enforcement. A browser-console `fetch()` to a disallowed origin confirmed
 the browser enforces the policy and posts the report — the one check curl
 cannot make, because curl applies no policy.
@@ -265,49 +305,57 @@ One trap worth recording. That variable belongs in `secrets.envSecrets`, not
 
 ## Prod report-only collection — analysed 2026-09-21
 
-The 5-F4 chart reached prod on 2026-09-09, so prod ran **report-only with no
+The proxy header fix (5-F4) reached prod on 2026-09-09, so prod ran **report-only with no
 enforced policy** from that date. The app has sent the report-only header since
-story 5-F3 released on 2026-09-04.
+the CSP policy (5-F3) released on 2026-09-04.
 
 **Export:** 249 reports, 2026-09-08 to 2026-09-21 — 13 days of real prod
 traffic. Every entry carries `"disposition": "report"`, from `broad-dsde-prod`
 / `terra-prod`.
 
-**Result: zero violations caused by the app.**
+**Result: no reports were attributed to application code in this review.**
+
+The classifications below are the reviewer's assessment. Extension URL schemes
+provide direct evidence of extension involvement; attribution of `blob:`,
+`inline`, `data`, and other reports without an identifiable source is inferred,
+not definitively established.
 
 | Count | Source | Judgement |
 |---:|---|---|
-| 160 | `chrome-extension`, `moz-extension`, `ms-browser-extension`, `sandbox eval code`, `blob` | browser extensions |
-| 47 | Fonts from `cdn.scite.ai` and `at.alicdn.com` | extension CDNs |
-| 32 | Fonts from `fonts.gstatic.com` (Mulish, Roboto, Material Icons) | not the app |
-| 10 | `inline` or `data`, no source file | not the app |
+| 160 | `chrome-extension`, `moz-extension`, `ms-browser-extension`, `sandbox eval code`, `blob` | Assessed as extension-related; some sources are inferred |
+| 47 | Fonts from `cdn.scite.ai` and `at.alicdn.com` | Assessed as extension-related |
+| 32 | Fonts from `fonts.gstatic.com` (Mulish, Roboto, Material Icons) | Not attributed to DUOS; inferred |
+| 10 | `inline` or `data`, no source file | Not attributed to DUOS; inferred |
 | **0** | **the app's own code** | — |
 
 Directives that fired: `script-src-elem` (122), `font-src` (102), `script-src`
-(18), `base-uri` (4), `worker-src` (3). **No `connect-src` violation at all** —
-the directive the app could realistically break.
+(18), `base-uri` (4), `worker-src` (3). **No `connect-src` violations were present in the reviewed export.** This
+supports the connection allowlist, but does not rule out application violations
+of other directives or failures outside the collection window.
 
-### How each group was excluded
+### Evidence used for attribution
 
 1. **Google Fonts.** `index.html` self-hosts Roboto and Montserrat; its comments
    record that they were downloaded from `fonts.googleapis.com`. Mulish appears
    nowhere in `src` or in the build output. Mulish is Terra's font, and one
    report carries `referrer: https://anvil.terra.bio/`.
 2. **`cdn.scite.ai` and `at.alicdn.com`.** Neither appears anywhere in the
-   repository. Nine reports name the app bundle as `sourceFile`, because the
-   Scite browser extension runs inside the page context. The app never requests
-   those fonts.
+   repository. Nine reports name the app bundle as `sourceFile`, which the review
+   attributed to the Scite extension running inside the page context. A bundle
+   reference alone does not establish that application code requested the fonts.
 3. **Inline script.** The built `index.html` is 39 lines and carries one
    external script tag, with zero inline blocks. The unattributed reports cite
-   line 367 and line 19, so they describe a document an extension changed.
+   line 367 and line 19, which is consistent with
+   a modified document. Extension involvement is an inference; the source of
+   these unattributed reports was not independently confirmed.
 
-### What this means after the flip
+### Expected behavior after enforcement
 
-1. The same reports continue, with `"disposition": "enforce"` — about 19 a day,
-   far below the 60-a-minute log budget, so real reports stay visible.
+1. Similar reports are expected to continue, with `"disposition": "enforce"` — the observed average was about 19 a day,
+   below the 60-a-minute log budget. That average does not rule out bursts.
 2. Extension features that inject fonts or scripts stop working on DUOS pages.
    That is the policy doing its job.
-3. **No policy change is needed.** Do not add `data:` to `font-src`, and do not
+3. **The reviewed evidence does not justify broadening the policy.** Do not add `data:` to `font-src`, and do not
    allow `fonts.gstatic.com`: the app uses neither.
 
 **Enforcement PR:** [terra-helmfile#6500](https://github.com/broadinstitute/terra-helmfile/pull/6500).
@@ -321,21 +369,22 @@ so one entry covers dev, staging and prod.
 Two merges changed what `connect-src` derives. Both landed after the local run
 and after the dev and staging flips.
 
-### 1. Story 5-F6 — public BFF endpoints ([#3914](https://github.com/DataBiosphere/duos-ui/pull/3914))
+### 1. Public BFF endpoints (5-F6) ([#3914](https://github.com/DataBiosphere/duos-ui/pull/3914))
 
 `BFF_CONNECT_FIELDS` is now **empty**. Feature flags go to
 `/public/features/*` and anonymous metrics to `/public/metrics/event`, both
 same-origin through `publicProxy`. Under `bffEnabled`, `connect-src` is
 `'self'` plus the banner bucket, and nothing else.
 
-| Mode | `connect-src` on 2026-09-04 | `connect-src` today |
+| Mode | `connect-src` on 2026-09-04 | `connect-src` on 2026-09-22 |
 |---|---|---|
 | Legacy | `'self'` + 4 upstreams + banner | unchanged |
 | BFF | `'self'` + Consent + Bard + banner | `'self'` + banner |
 
-This also closes the old "feature flags not driven" gap. `FeatureFlag.ts` now
-calls `BFF_PUBLIC_FEATURES_PREFIX`, a same-origin path that needs no
-allowlist entry.
+`FeatureFlag.ts` now calls `BFF_PUBLIC_FEATURES_PREFIX`, a same-origin path
+that needs no external allowlist entry. This removes the allowlist requirement;
+it does not close the workflow-testing gap. Feature flags remain untested in
+this verification record.
 
 ### 2. Banner move — DT-4063 ([#3942](https://github.com/DataBiosphere/duos-ui/pull/3942))
 
@@ -345,7 +394,7 @@ its own bucket, and `bannerSource()` derives the CSP entry from
 `config.bannersUrl` by removing the object name. An environment that sets no
 `bannersUrl` gets no banner source at all.
 
-### Measured today
+### Headers measured — 2026-09-22
 
 All three environments still run `bffEnabled: false`, so each shows four
 upstreams plus its own banner bucket.
@@ -359,42 +408,40 @@ upstreams plus its own banner bucket.
 Dev and staging already enforce the new derived policy, and neither has
 reported a banner violation.
 
-### What still needs a run
+## Remaining verification checklist
 
-1. **The banner flow, per environment.** The bucket changed, so the 2026-09-04
-   banner evidence no longer describes the request the browser makes.
-2. **BFF mode.** The local BFF pass predates 5-F6, so its `connect-src` is no
-   longer the one the code builds. Re-drive it before Epic 6 flips `bffEnabled`
-   anywhere. The new list is strictly narrower, so it cannot allow something the
-   old one blocked.
-3. **Prod.** The flag rolls out later on 2026-09-22.
+- [ ] **Verify production enforcement after deployment.** The merged
+  [configuration PR #6500](https://github.com/broadinstitute/terra-helmfile/pull/6500)
+  is not deployment evidence. Record the deployed header, repeat the eight
+  workflows listed in the dev run, and trigger a disallowed browser request to
+  confirm blocking and report delivery.
+- [ ] **Repeat the banner workflow in dev, staging, and prod.** The September 22
+  headers contain the new buckets, but the earlier workflow tests used the old
+  bucket. Record successful banner requests and check for associated violations.
+- [ ] **Repeat local BFF workflows against the updated policy.** Public BFF
+  endpoints (5-F6) narrowed `connect-src` after the September 4 run. Verify the
+  same-origin routes and banner request before enabling BFF in any environment
+  during Phase 6. A narrower policy can block requests the earlier policy allowed.
+- [ ] **Exercise feature flags explicitly.** Record the request and outcome for
+  the applicable mode. Same-origin routing removes the external allowlist
+  requirement but is not evidence that the workflow works.
+- [ ] **Complete browser enforcement evidence per environment.** Staging has a
+  recorded blocking/reporting check; record equivalent checks for dev and prod,
+  and for the updated local BFF configuration. Inspect headers as a separate
+  check, using the command below.
+- [ ] **Continue reviewing reports from real traffic after enforcement.** Manual
+  workflow passes do not cover every user scenario. Investigate reports before
+  adding sources such as `blob:`; distinguish application needs from extension
+  activity and leave uncertain attribution explicit.
 
----
-
-## Remaining for 5-F5
-
-1. ~~Land terra-helmfile PR [#6497](https://github.com/broadinstitute/terra-helmfile/pull/6497)~~
-   — merged, promoted to dev as chart `duos-0.169.0`.
-2. ~~Run report-only collection on dev~~ — clean, 2026-09-08.
-3. ~~Enforce on dev ([#6498](https://github.com/broadinstitute/terra-helmfile/pull/6498))
-   and re-drive the eight flows~~ — done, all pass, 2026-09-08.
-4. ~~Staging~~ — enforced 2026-09-08 via
-   [#6499](https://github.com/broadinstitute/terra-helmfile/pull/6499), after
-   four days of report-only collection on real traffic. BEEs enforced in the
-   same PR.
-5. ~~Read prod's collected reports~~ — 249 entries over 13 days, none caused
-   by the app, analysed 2026-09-21.
-6. Enforce prod
-   ([#6500](https://github.com/broadinstitute/terra-helmfile/pull/6500)), then
-   drive the eight flows and the console `fetch()` check. Include the banner
-   flow: DT-4063 changed the bucket.
-7. Re-drive BFF mode locally against the post-5-F6 policy, before Epic 6 flips
-   `bffEnabled` in any environment.
-8. Prove enforcement per environment:
+To inspect the deployed policy header:
 
 ```bash
 curl -sI https://<host>/ | grep -i content-security-policy
 ```
 
-The header name must be `Content-Security-Policy`, carrying `default-src 'self'`
-and `object-src 'none'`. `'unsafe-eval'` means 5-F4 has not landed there.
+For enforcement, expect `Content-Security-Policy`, including `default-src 'self'`
+and `object-src 'none'`. A report-only header alone does not enforce the policy.
+An unexpected `'unsafe-eval'` may indicate the old proxy policy is still being
+served and requires investigation. Record the environment, date, and observed
+header, then use a browser to verify blocking and report delivery separately.
