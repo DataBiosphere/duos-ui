@@ -64,7 +64,8 @@ Under `bffEnabled`, sign-in has no popup and no opener, so it keeps
 
 COEP demands a CORP or CORS header on every cross-origin subresource. The banner
 bucket and the two direct upstreams send neither, so enabling it would block
-them. It stays off until those become same-origin (5-F6).
+them. Two of the three became same-origin in 5-F6; COEP stays off while the
+banner bucket is still fetched directly.
 
 ### HSTS is production-only
 
@@ -134,19 +135,26 @@ app-level one after this plugin registers, so Fastify never resolves it here.
 
 `connectSources()` reads only **inventoried, active** fields of the same
 runtime config the client reads, reduces each to its origin, and drops blanks
-and unparseable values. Two literals remain: `'self'` and the banner bucket,
-which is a fixed public asset host rather than a deployment-configured upstream.
+and unparseable values. One literal remains: `'self'`.
 
-The bucket is the one source written to a **path**,
-`https://storage.googleapis.com/broad-duos-banners/`, rather than an origin.
+The banner bucket is the one source written to a **path** rather than an
+origin: `bannersUrl` with its object name removed, e.g.
+`https://storage.googleapis.com/duos-banners-prod/`.
 `storage.googleapis.com` is shared by every public bucket on GCS, so the bare
 origin would hand injected script a ready exfiltration target — the thing this
-policy exists to close. A trailing slash matches by prefix, which covers every
-`<env>_notifications.json` the service builds. The narrowing applies to the
-direct request only: a browser drops the path when matching a redirect target,
-and GCS answers object reads without redirecting. The configured upstreams stay
-at origin granularity, because each is a whole service the app talks to across
-many paths and none shares a host with anybody else.
+policy exists to close. A trailing slash matches by prefix. The narrowing
+applies to the direct request only: a browser drops the path when matching a
+redirect target, and GCS answers object reads without redirecting. The
+configured upstreams stay at origin granularity, because each is a whole
+service the app talks to across many paths and none shares a host with anybody
+else.
+
+Each environment has its own bucket in its Terra project (DT-4063), so the
+bucket is no longer a fixed literal. `readConfig()` fills `bannersUrl` from
+`env` when the deployed config leaves it unset, and both the client fetch and
+this policy read that one value, so the two cannot disagree. A config with
+neither `env` nor `bannersUrl` gets no banner source at all. See
+`docs/notification-banners.md`.
 
 The list is mode-specific:
 
@@ -161,7 +169,7 @@ oversights, and they are why BFF-mode `connect-src` is not `'self'` alone:
 
 | Connection | Where | Why it stays direct |
 |---|---|---|
-| Banner notifications, `storage.googleapis.com/broad-duos-banners` | `src/libs/notificationService.ts` | A public bucket; no session involved. |
+| Banner notifications, `storage.googleapis.com/duos-banners-<env>` | `src/libs/notificationService.ts` | A public bucket; no session involved. |
 | Feature flags, `/feature` and `/feature/:key` on Consent | `src/libs/ajax/FeatureFlag.ts` | Unauthenticated and read before login; the session-guarded proxy would 401 them. |
 | Anonymous Bard metrics | `src/libs/ajax/Metrics.ts` | Deliberately carries no credentials. Identified events go through `/bard-api`. |
 
@@ -174,30 +182,26 @@ exists — marking it unauthenticated would silently turn *identified* metrics
 anonymous. Dedicated `/public/*` endpoints are the answer, and they are story
 5-F6.
 
-One entry in that table describes an intention rather than the tree as it
-stands: `FeatureFlag.ts` has **no caller anywhere in `src/`** — only its own
-unit test — and nothing else calls `getUpstreamApiUrl` outside the legacy-only
-`oidcBroker.ts`. BFF-mode `connect-src` therefore allowlists `apiUrl` for a flow
-that does not run today.
+**Story 5-F6 has since closed two of those three**, and the field list is now
+empty under `bffEnabled`. Feature flags go to `/public/features/*` and anonymous
+metrics to `/public/metrics/event` — dedicated endpoints that inject no session
+token, structurally rather than by configuration (`server/src/proxy/publicProxy.ts`).
+`apiUrl` and `bardApiUrl` left the allowlist with them.
 
-**Settled 2026-09-04: the module stays**, against a future caller. Dropping the
-origin now would greet whoever wires it up with a blocked request and no obvious
-cause, and while the policy is report-only the entry costs nothing.
+One entry in that table always described an intention rather than the tree:
+`FeatureFlag.ts` has **no caller anywhere in `src/`**, only its own unit test.
+**Settled 2026-09-04: the module stays**, against a future caller, and 5-F6
+repointed it at the new prefix so whoever wires it up reaches the proxy rather
+than Consent. The consequence is narrow but real — the endpoint has no consumer
+to validate it, so its tests are the only proof it works, and no amount of
+exercising the app would reveal it broken.
 
-It does not hold `apiUrl` in the allowlist, though. Story 5-F6 points
-`FeatureFlag.ts` at `/public/features/*` under `bffEnabled` using the same
-prefix-and-flag pattern `Metrics.ts` already uses, so a future caller reaches
-the proxy rather than Consent directly. What the decision does mean is that the
-endpoint is built for a consumer that does not exist — so its tests are the only
-proof it works, and no amount of exercising the app will tell anyone if it is
-broken.
-
-**BFF-mode `connect-src` will not reach `'self'` in one step after all.** 5-F6
-drops `apiUrl` and `bardApiUrl`, leaving `'self'` and the banner bucket. The
-bucket stays: a separate backlog item rewrites `notificationService.ts` to read
-environment-specific buckets, and proxying GCS is worth deciding once that
-lands rather than building against a URL shape about to change. Until then the
-banner fetch stays direct and the literal stays in the policy.
+**BFF-mode `connect-src` did not reach `'self'` outright.** It is `'self'` plus
+the banner bucket. DT-4063 has since repointed `notificationService.ts` at
+per-environment buckets, so the URL shape that argued for waiting is settled.
+What remains is that proxying GCS is the one endpoint of the three with no
+existing pattern to copy, and no ticket covers that work yet. Until one does,
+the banner fetch stays direct.
 
 `terraUrl` is never allowlisted: it is navigated to, not fetched. The
 development config also carries convenience origins the browser never
@@ -311,10 +315,11 @@ is a much larger piece of work than this story.
   returns null for that by specification, so it always takes the download
   fallback and the iframe is never created. Repairing that preview means
   adding `blob:` back to this directive.
-- BFF-mode `connect-src` cannot reach `'self'` alone until the three direct
-  flows move to dedicated public BFF endpoints (`/public/notifications`,
-  `/public/features/*`, `/public/metrics/event`). That is the follow-up to this
-  story, and it is what will let this allowlist shrink.
+- BFF-mode `connect-src` is `'self'` plus the banner bucket. Story 5-F6 moved
+  feature flags and anonymous metrics onto `/public/features/*` and
+  `/public/metrics/event`. `/public/notifications` is unwritten: DT-4063 has
+  settled the bucket URLs, but proxying a public GCS object has no pattern to
+  copy here, and no ticket covers it yet.
 - `img-src` carries `'self'` and `data:` only. `blob:` is deliberately absent:
   the audit found no `<img src="blob:">` in the tree — every object URL the app
   mints is a download, which needs no directive, or the dead preview branch in

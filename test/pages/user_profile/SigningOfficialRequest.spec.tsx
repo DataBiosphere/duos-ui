@@ -58,8 +58,8 @@ describe('SigningOfficialRequest', () => {
     render(<SigningOfficialRequest user={user} />)
 
     const alert = screen.getByRole('alert')
-    expect(alert).toHaveTextContent(/cannot be both the requestor and the Signing Official/)
-    expect(alert).toHaveTextContent(/Contracts Office/)
+    expect(alert).toHaveTextContent('cannot be both the requestor and the Signing Official')
+    expect(alert).toHaveTextContent('Contracts Office')
   })
 
   it('does not show the request for an existing Signing Official', () => {

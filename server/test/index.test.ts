@@ -353,7 +353,11 @@ describe('GET /config.json', () => {
 
     const res = await localApp.inject({ method: 'GET', url: '/config.json' })
     expect(res.statusCode).toBe(200)
-    expect(res.json()).toEqual({ apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443', env: 'dev' })
+    expect(res.json()).toEqual({
+      apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443',
+      env: 'dev',
+      bannersUrl: 'https://storage.googleapis.com/duos-banners-dev/dev_notifications.json',
+    })
 
     // HEAD must serve the same (overridden) resource, not fall through to the
     // static file — mismatched GET/HEAD Content-Length corrupts caches.
@@ -660,6 +664,23 @@ describe('BFF auth route registration', () => {
 
     // Falls through to the SPA fallback instead of the proxy's 401.
     expect(res.statusCode).toBe(200)
+
+    await localApp.close()
+  })
+
+  it('answers the public metrics route with 503 rather than the SPA page when DUOS_BARD_URL is not set', async () => {
+    delete process.env.DUOS_BARD_URL
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({
+      method: 'POST',
+      url: '/public/metrics/event',
+      headers: { 'content-type': 'application/json' },
+      payload: '{"event":"duos:page_view"}',
+    })
+
+    expect(res.statusCode).toBe(503)
+    expect(res.headers['content-type']).toContain('application/json')
 
     await localApp.close()
   })
