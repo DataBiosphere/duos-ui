@@ -25,16 +25,16 @@ changed the policy after the initial tests.
 | Environment | Mode and latest check | Recorded result | Outstanding verification |
 |---|---|---|---|
 | Local | Legacy: report-only and enforced; BFF: enforced (2026-09-04) | Tested workflows passed; no application-triggered violations observed | Repeat BFF workflows against the updated policy; feature flags remain untested |
-| Dev | Legacy, enforced; workflows checked 2026-09-08, headers checked 2026-09-22 | Workflow checks passed; updated banner source present in header | Repeat banner workflow; record a deliberate browser blocking/reporting check |
-| Staging | Legacy, enforced; workflows and browser blocking checked 2026-09-08, headers checked 2026-09-22 | Workflow checks passed; browser blocked and reported a disallowed request | Repeat banner workflow |
-| Prod | Legacy, report-only as measured 2026-09-22; logs analysed 2026-09-21 | None of 249 reviewed reports attributed to application code | Verify enforcement after deployment, then workflows and browser blocking/reporting |
+| Dev | Legacy, enforced; workflows checked 2026-09-08, headers, banner workflow and browser check 2026-09-22 | Workflow checks passed, banner workflow passed against the new bucket; browser blocked a disallowed request and the report reached logging with `"disposition": "enforce"` | None |
+| Staging | Legacy, enforced; workflows and browser blocking checked 2026-09-08, headers and banner workflow 2026-09-22 | Workflow checks passed, banner workflow passed against the new bucket; browser blocked and reported a disallowed request | None |
+| Prod | Legacy, enforced; logs analysed 2026-09-21, header, workflows and browser check 2026-09-22 | Seven workflows passed; browser blocked a disallowed request and the report reached logging with `"disposition": "enforce"`; none of 249 reviewed reports attributed to application code | Test charts |
 
 The production enforcement configuration PR
 [terra-helmfile#6500](https://github.com/broadinstitute/terra-helmfile/pull/6500)
-is merged. That is distinct from verified deployment: the latest recorded prod
-header is still report-only. No later production enforcement result is recorded
-here. The [remaining checks](#remaining-verification-checklist) consolidate the
-work needed after these measurements.
+is merged and deployed. The deployed prod header was measured on 2026-09-22 and
+enforces the policy. One prod workflow remains untested. The
+[remaining checks](#remaining-verification-checklist) consolidate the work
+needed after these measurements.
 
 ## What each check establishes
 
@@ -261,6 +261,20 @@ All eight flows re-driven under enforcement: **all pass** for the configuration 
 Reports still collect under enforcement, with `"disposition": "enforce"`. That
 log is the early warning for a flow this run did not cover.
 
+**Browser blocking and reporting, recorded 2026-09-22.** A console
+`fetch('https://example.com/probe')` produced CSP errors in the console, and one
+matching entry reached logging from the dev pod on chart `duos-0.173.0`:
+
+```json
+{"effectiveDirective": "connect-src",
+ "blockedURL": "https://example.com/probe",
+ "documentURL": "https://duos-k8s.dsde-dev.broadinstitute.org/",
+ "disposition": "enforce",
+ "msg": "[csp] violation report"}
+```
+
+The same day, the banner workflow passed against `duos-banners-dev`.
+
 ---
 
 ## Staging enforced — 2026-09-08
@@ -295,6 +309,9 @@ each environment needs its own evidence.
 
 #6499 also enforces in BEEs, where an ephemeral test environment costs nothing
 if a policy entry is wrong.
+
+On 2026-09-22 the banner workflow was driven again on staging, against the new
+`duos-banners-staging` bucket, and passed.
 
 One trap worth recording. That variable belongs in `secrets.envSecrets`, not
 `secrets.additionalEnvSecrets`. The chart renders `envSecrets` values through
@@ -364,6 +381,74 @@ so one entry covers dev, staging and prod.
 
 ---
 
+## Prod enforced — 2026-09-22
+
+The configuration PR
+[terra-helmfile#6500](https://github.com/broadinstitute/terra-helmfile/pull/6500)
+deployed. The deployed header, measured after the rollout:
+
+```
+x-frame-options: DENY
+strict-transport-security: max-age=31536000; includeSubDomains
+content-security-policy: default-src 'self';script-src 'self';script-src-attr 'none';
+    style-src 'self' 'unsafe-inline';img-src 'self' data:;frame-src 'self';
+    connect-src 'self' https://consent.dsde-prod.broadinstitute.org
+      https://terra-bard-prod.appspot.com
+      https://externalcreds.dsde-prod.broadinstitute.org
+      https://data.terra.bio
+      https://storage.googleapis.com/duos-banners-prod/;
+    font-src 'self';object-src 'none';base-uri 'none';frame-ancestors 'none';
+    form-action 'self';manifest-src 'self';report-uri /csp-report;
+    report-to csp-endpoint;upgrade-insecure-requests
+```
+
+One policy header, no report-only header, all sixteen directives, and the
+`duos-banners-prod` bucket that DT-4063 introduced.
+
+### Workflows exercised
+
+| Workflow | Result | Evidence |
+|---|---|---|
+| Banners | passed | the new `duos-banners-prod` bucket |
+| Google sign-in | passed | |
+| Protected pages | passed | |
+| Metrics | passed | successful calls to `terra-bard-prod.appspot.com` |
+| Data library (TDR) | passed | successful calls to `https://data.terra.bio/api/repository/v1/snapshots` |
+| ECM RAS account linking | passed | |
+| Sign-out | passed | |
+| Charts | **not tested** | the tester's role cannot open the chart pages in prod; a Chairperson will check |
+
+### Browser blocking check
+
+A console `fetch('https://example.com/probe')` produced two console errors. The
+first quoted the `connect-src` directive and stated that the action was blocked;
+the second reported that the Fetch API refused to connect. This establishes that
+the browser enforces the policy on a disallowed connection.
+
+The report reached logging. One entry recorded the same event from the prod
+pod, on chart `duos-0.173.0`:
+
+```json
+{"effectiveDirective": "connect-src",
+ "blockedURL": "https://example.com/probe",
+ "documentURL": "https://duos.org/datalibrary",
+ "disposition": "enforce",
+ "msg": "[csp] violation report"}
+```
+
+`"disposition": "enforce"` is the field a synthetic POST cannot supply
+honestly. Blocking and report delivery are now both recorded for prod.
+
+### Limits of this evidence
+
+1. One user drove the workflows manually. This is not representative traffic.
+2. Charts carry no prod result. Every other workflow passed.
+3. Ambient reports from browser extensions continue, now with
+   `"disposition": "enforce"`. Read `sourceFile` and `blockedURL` before
+   treating one as an application problem.
+
+---
+
 ## Code changes since the first run — 2026-09-22
 
 Two merges changed what `connect-src` derives. Both landed after the local run
@@ -403,21 +488,21 @@ upstreams plus its own banner bucket.
 |---|---|---|
 | dev | `Content-Security-Policy` (enforced) | `https://storage.googleapis.com/duos-banners-dev/` |
 | staging | `Content-Security-Policy` (enforced) | `https://storage.googleapis.com/duos-banners-staging/` |
-| prod | `Content-Security-Policy-Report-Only` | `https://storage.googleapis.com/duos-banners-prod/` |
+| prod | `Content-Security-Policy` (enforced later the same day) | `https://storage.googleapis.com/duos-banners-prod/` |
 
-Dev and staging already enforce the new derived policy, and neither has
-reported a banner violation.
+The banner workflow was driven in all three environments on 2026-09-22 and
+passed against the new bucket in each. No banner violation was reported.
 
 ## Remaining verification checklist
 
-- [ ] **Verify production enforcement after deployment.** The merged
-  [configuration PR #6500](https://github.com/broadinstitute/terra-helmfile/pull/6500)
-  is not deployment evidence. Record the deployed header, repeat the eight
-  workflows listed in the dev run, and trigger a disallowed browser request to
-  confirm blocking and report delivery.
-- [ ] **Repeat the banner workflow in dev, staging, and prod.** The September 22
-  headers contain the new buckets, but the earlier workflow tests used the old
-  bucket. Record successful banner requests and check for associated violations.
+- [x] **Verify production enforcement after deployment.** Done 2026-09-22: the
+  deployed header enforces the policy, seven workflows passed, and a console
+  `fetch()` was blocked and reported with `"disposition": "enforce"`. One
+  follow-up remains, listed next.
+- [ ] **Test charts in prod.** The chart pages need a Chairperson role.
+- [x] **Repeat the banner workflow in every environment.** Done 2026-09-22. The
+  banner workflow passed against `duos-banners-dev`, `duos-banners-staging` and
+  `duos-banners-prod`, the buckets DT-4063 introduced.
 - [ ] **Repeat local BFF workflows against the updated policy.** Public BFF
   endpoints (5-F6) narrowed `connect-src` after the September 4 run. Verify the
   same-origin routes and banner request before enabling BFF in any environment
@@ -425,10 +510,9 @@ reported a banner violation.
 - [ ] **Exercise feature flags explicitly.** Record the request and outcome for
   the applicable mode. Same-origin routing removes the external allowlist
   requirement but is not evidence that the workflow works.
-- [ ] **Complete browser enforcement evidence per environment.** Staging has a
-  recorded blocking/reporting check; record equivalent checks for dev and prod,
-  and for the updated local BFF configuration. Inspect headers as a separate
-  check, using the command below.
+- [ ] **Record a browser blocking and reporting check for the updated local BFF
+  configuration.** Dev, staging and prod each have one, recorded on 2026-09-08
+  and 2026-09-22. Inspect headers as a separate check, using the command below.
 - [ ] **Continue reviewing reports from real traffic after enforcement.** Manual
   workflow passes do not cover every user scenario. Investigate reports before
   adding sources such as `blob:`; distinguish application needs from extension
