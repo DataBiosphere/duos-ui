@@ -26,8 +26,11 @@ export interface SessionInfo {
   authenticated: boolean
   /** The upstream DUOS user profile, forwarded by /auth/me when authenticated. */
   user?: DuosUser
-  /** The B2C sub-provider the user chose on the B2C login page. */
-  idp?: 'google' | 'microsoft'
+  /**
+   * The B2C sub-provider the user chose on the B2C login page. 'unknown'
+   * means the server could not read it from the id_token; show no label.
+   */
+  idp?: 'google' | 'microsoft' | 'unknown'
 }
 
 /**
