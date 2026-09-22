@@ -3,6 +3,8 @@
 # Certs are regenerated on a 3-month rotation so this script is optimized for that task.
 # You MUST be on the Non-Split Broad VPN to have a whitelisted Broad IP.
 # You MUST have jq, gcloud, kubectl and openssl installed to run this script.
+# --write_site_conf also needs the GitHub CLI (gh), authenticated with read
+# access to the private broadinstitute/terra-helmfile repo.
 # You MUST authenticate via gcloud
 #
 # See usage section below for more details. All arguments are optional.
@@ -26,6 +28,9 @@ Generate cert files for local development
                                     carried forward, and the old file is backed up to
                                     .env.local.bak. true|false. Defaults to false
   --write_config WRITE_CONFIG       Write a config.json file in public. true|false. Defaults to false
+  --write_site_conf WRITE_SITE_CONF Render site.conf in the project root from the terra-helmfile
+                                    duos chart template, so the local httpd proxy matches the
+                                    deployed one. Needs gh. true|false. Defaults to false
   --help                Display this help and exit
 EOF
     exit 0
@@ -40,8 +45,17 @@ error() {
 PROJECT="broad-dsde-dev"
 WRITE_ENV="false"
 WRITE_CONFIG="false"
+WRITE_SITE_CONF="false"
 
 ENV_FILE="../.env.local"
+SITE_CONF_FILE="../site.conf"
+
+# The deployed proxy config is a helm template in terra-helmfile. It is
+# rendered here instead of copied from a bucket, so local dev cannot drift from
+# the deployed security headers. The template's only helm value is
+# proxyLogLevel; everything else is ${VAR} syntax that httpd resolves at start.
+SITE_CONF_TEMPLATE_PATH="repos/broadinstitute/terra-helmfile/contents/charts/duos/templates/_site.conf.tpl?ref=master"
+PROXY_LOG_LEVEL="warn"
 
 # Dev-environment defaults for the BFF block written by --write_env. Only used
 # when the variable has no value in an existing .env.local — existing values
@@ -79,6 +93,10 @@ parse_cli_args() {
                 ;;
             --write_config)
                 WRITE_CONFIG=$2
+                shift 2
+                ;;
+            --write_site_conf)
+                WRITE_SITE_CONF=$2
                 shift 2
                 ;;
             --help)
@@ -215,6 +233,10 @@ DUOS_API_URL=${API_URL:-$API_URL_DEFAULT}
 DUOS_ECM_URL=${ECM_URL:-$ECM_URL_DEFAULT}
 DUOS_TDR_URL=${TDR_URL:-$TDR_URL_DEFAULT}
 DUOS_BARD_URL=${BARD_URL:-$BARD_URL_DEFAULT}
+
+# The server sends the Content Security Policy as report-only by default.
+# Uncomment to enforce it locally; see .env.example before doing so.
+# DUOS_CSP_REPORT_ONLY=false
 EOF
   } > "$ENV_FILE"
   chmod 600 "$ENV_FILE"
@@ -229,6 +251,25 @@ write_config() {
   jq '.hash = "dev"' ../public/config.json > /dev/null
 }
 
+write_site_conf() {
+  echo "Rendering site.conf from the terra-helmfile duos chart template"
+  command -v gh > /dev/null || error "--write_site_conf needs the GitHub CLI (gh). See https://cli.github.com"
+  local template
+  template=$(gh api -H "Accept: application/vnd.github.raw" "$SITE_CONF_TEMPLATE_PATH") \
+    || error "Could not read _site.conf.tpl from terra-helmfile. Run 'gh auth login' with an account that can read broadinstitute/terra-helmfile."
+  # Drop the define/end wrapper lines and fill in the one helm value.
+  local rendered
+  rendered=$(echo "$template" \
+    | grep -vE '^\{\{-? *(define|end)[ "-]' \
+    | sed "s/{{ *\.Values\.proxyLogLevel *}}/$PROXY_LOG_LEVEL/")
+  # Any helm syntax left over means the template gained a value this script
+  # does not know about. Fail rather than hand httpd a broken config.
+  if grep -q '{{' <<< "$rendered"; then
+    error "_site.conf.tpl has helm syntax that this script cannot render. Update write_site_conf in scripts/render-configs.sh."
+  fi
+  echo "$rendered" > "$SITE_CONF_FILE"
+}
+
 parse_cli_args "$@"
 auth_gcloud
 write_certs
@@ -239,4 +280,8 @@ fi
 if [[ "$WRITE_CONFIG" == "true" ]]
 then
   write_config
+fi
+if [[ "$WRITE_SITE_CONF" == "true" ]]
+then
+  write_site_conf
 fi

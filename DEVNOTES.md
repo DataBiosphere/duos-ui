@@ -25,7 +25,7 @@ pnpm install
 3. Ensure you are connected to the Broad VPN. Copy the configuration files and certificates locally by running the [render-configs.sh](scripts/render-configs.sh) script. By default, the DUOS UI points to the dev environment.
 
 ```sh
-./scripts/render-configs.sh --write_env true --write_config true
+./scripts/render-configs.sh --write_env true --write_config true --write_site_conf true
 ```
 
 ### Notes on `render-configs`:
@@ -58,7 +58,7 @@ will simulate it for local development.
 127.0.0.1	local.dsde-dev.broadinstitute.org
 ```
 
-5. Create a `site.conf` file in the project root directory using https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl as a model.
+5. Make sure that `site.conf` is in the project root. `docker compose` mounts it into the httpd proxy. The `--write_site_conf true` option in step 3 renders it from the [terra-helmfile duos chart template](https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl), so the local proxy sends the same security headers as the deployed one. The option needs the GitHub CLI (`gh`), with read access to `broadinstitute/terra-helmfile`. Re-run it when the template changes. Do not copy `site.conf` from a bucket or edit it by hand, because that copy drifts from the deployed config.
 
 6. Start the development server. There are two modes:
 
