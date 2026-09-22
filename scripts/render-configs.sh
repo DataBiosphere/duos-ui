@@ -71,6 +71,9 @@ API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
 ECM_URL_DEFAULT="https://externalcreds.dsde-dev.broadinstitute.org"
 TDR_URL_DEFAULT="https://jade.datarepo-dev.broadinstitute.org"
 BARD_URL_DEFAULT="https://terra-bard-dev.appspot.com"
+# Every deployed environment enforces the Content Security Policy
+# (terra-helmfile#6500), so local dev enforces it too.
+CSP_REPORT_ONLY_DEFAULT="false"
 
 parse_cli_args() {
     while [[ $# -gt 0 ]]; do
@@ -182,6 +185,7 @@ write_env() {
   ECM_URL=$(existing_env DUOS_ECM_URL)
   TDR_URL=$(existing_env DUOS_TDR_URL)
   BARD_URL=$(existing_env DUOS_BARD_URL)
+  CSP_REPORT_ONLY=$(existing_env DUOS_CSP_REPORT_ONLY)
 
   if [[ -f "$ENV_FILE" ]]; then
     echo "Backing up existing .env.local to .env.local.bak"
@@ -226,9 +230,9 @@ DUOS_ECM_URL=${ECM_URL:-$ECM_URL_DEFAULT}
 DUOS_TDR_URL=${TDR_URL:-$TDR_URL_DEFAULT}
 DUOS_BARD_URL=${BARD_URL:-$BARD_URL_DEFAULT}
 
-# The server sends the Content Security Policy as report-only by default.
-# Uncomment to enforce it locally; see .env.example before doing so.
-# DUOS_CSP_REPORT_ONLY=false
+# false enforces the Content Security Policy, as every deployed environment
+# does. Set true to only report violations while you debug the policy.
+DUOS_CSP_REPORT_ONLY=${CSP_REPORT_ONLY:-$CSP_REPORT_ONLY_DEFAULT}
 EOF
   } > "$ENV_FILE"
   chmod 600 "$ENV_FILE"
