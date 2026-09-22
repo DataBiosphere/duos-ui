@@ -12,6 +12,11 @@ jsconfig.json
 /.pnpm-store
 server/node_modules
 
+# The workspace keeps one authoritative lockfile at the root. Any pnpm command
+# run with server/ as the cwd writes a stray nested lock that must never be
+# committed: CI installs from the root lock only.
+server/pnpm-lock.yaml
+
 # IDE
 ./idea
 *.models.json
