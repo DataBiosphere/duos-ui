@@ -230,8 +230,7 @@ describe('useLibraryPageState — data use modifier options', () => {
   })
 
   it('words the modifiers the submission forms do not collect', () => {
-    // These live in `consentTranslations` and `AbstainDataUseCodes` rather than in
-    // SecondaryDataUseTerms, and are as real as any code the forms do collect.
+    // Codes the submission forms do not collect, and as real as any code they do.
     const options = withModifierFacet(['NCTRL', 'NAGR', 'NCU', 'RS-G', 'RS-PD', 'POP-M', 'POP-F', 'POP-PD'])
     expect(options).toContainEqual({ value: 'NCTRL', label: 'No Control Set Use (NCTRL)' })
     expect(options).toContainEqual({ value: 'NAGR', label: 'No Aggregate-Level Data Use (NAGR)' })
