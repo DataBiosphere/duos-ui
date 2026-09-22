@@ -27,7 +27,7 @@ models.json
 /.vitest
 /test-results
 /playwright-report
-/test/e2e/fixtures/duos-automation*.json
+/test/e2e/fixtures/duos-automation*
 
 # production
 /build

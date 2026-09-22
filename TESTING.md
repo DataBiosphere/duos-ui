@@ -29,28 +29,68 @@ The suite runs against the **Fastify server**, not `vite preview`. The preview
 server sends none of the security headers, cookies or routes the real
 deployment sends, so a spec could pass against it and still fail in production.
 
+### What each spec needs
+
+Read this table before you run anything. The suite is not uniform: four of the
+six spec files need nothing but a build, and two need live role credentials.
+
+| Spec | Needs |
+|---|---|
+| `about`, `home`, `status`, `liveness` | a build, and the certificate below |
+| `auth`, `studyTemplate` | the role service-account keys as well |
+
+Nothing in the suite needs a database yet. The session infrastructure is
+optional, and the last section covers it.
+
+### 1. Certificate
+
+The server terminates TLS itself, because the session cookie is `Secure`. Put
+`server.key` and `server.crt` in the project root. `./scripts/render-configs.sh`
+writes them from the dev cluster.
+
+### 2. Config file
+
 The server reads `config.json` from the build output and refuses to start
-without it, so copy an environment config in before you build:
+without it:
+
 ```
 cp config/dev.json public/config.json
 ```
 
-Build the client and the server:
+### 3. Build
+
 ```
 CI=false pnpm run build
 ```
 
-Then run the tests (Playwright starts the server for you):
+### 4. Run
+
+The four specs that need no credentials:
+
 ```
+pnpm exec playwright test about.spec.ts home.spec.ts status.spec.ts liveness.spec.ts
+```
+
+Playwright starts the server for you and waits on its `/health` route.
+`pnpm run serve` starts the same server on its own.
+
+### 5. Role credentials, for `auth` and `studyTemplate`
+
+These two specs sign in as each DUOS role, and the whole suite fails with
+`Missing service account key env var DUOS_AUTOMATION_ADMIN_SA` without them.
+Fetch the keys from Secret Manager (you need `gcloud` and `jq`), load them, then
+run everything:
+
+```
+./scripts/render-accounts.sh
+set -a; source test/e2e/fixtures/duos-automation.env; set +a
 pnpm run test:e2e
 ```
 
-The server runs at `https://local.dsde-dev.broadinstitute.org:3000`, and
-Playwright waits on its `/health` route. You need the local certificate pair
-(`server.key`, `server.crt`) in the project root; `pnpm run serve` starts the
-same server on its own.
+The rendered file holds live credentials. It is gitignored and written with
+owner-only permissions.
 
-### Session infrastructure
+### Session infrastructure (optional)
 
 The server registers its Postgres session layer when `DUOS_DB_HOST` is set, so
 a run with no `DUOS_*` variables exercises the legacy sign-in flow and needs no

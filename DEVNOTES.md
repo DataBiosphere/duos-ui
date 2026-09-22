@@ -185,14 +185,15 @@ See [TESTING.md](TESTING.md) for full testing instructions.
 
 ## E2E Tests (Playwright)
 
-Build the app and run e2e tests against the Fastify server (`pnpm run serve`,
-which Playwright starts for you). See [TESTING.md](TESTING.md) for the config
-file it needs and for running against the session infrastructure:
+The suite runs against the Fastify server (`pnpm run serve`, which Playwright
+starts for you). Two of the six spec files also need role service-account keys,
+so follow the numbered steps in [TESTING.md](TESTING.md) rather than this
+summary. The short path, for the specs that need no credentials:
 
 ```shell
 cp config/dev.json public/config.json
 CI=false pnpm run build
-pnpm run test:e2e
+pnpm exec playwright test about.spec.ts home.spec.ts status.spec.ts liveness.spec.ts
 ```
 
 ## Unit & Component Tests (Vitest)

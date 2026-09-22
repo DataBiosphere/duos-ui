@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 #
-# Pulls service account credentials for e2e tests. Requires gcloud and jq.
+# Pulls the role service-account keys the signed-in e2e specs need
+# (test/e2e/support/auth.ts) and writes them as an environment file.
+# Requires gcloud and jq.
 #
-# USAGE: ./scripts/render-accounts.sh
+# USAGE:
+#   ./scripts/render-accounts.sh
+#   set -a; source test/e2e/fixtures/duos-automation.env; set +a
+#   pnpm run test:e2e
+#
+# The file holds live credentials and is gitignored. It is written with
+# owner-only permissions.
 #
 
 set -eu
@@ -16,11 +24,22 @@ signing-official"
 
 PROJECT="broad-dsde-qa"
 OUTPUT_DIR="test/e2e/fixtures"
+OUTPUT_FILE="$OUTPUT_DIR/duos-automation.env"
 
 mkdir -p "$OUTPUT_DIR"
+umask 077
+: > "$OUTPUT_FILE"
 
 for ROLE in $LIST_OF_ROLES; do
-  FILE="$OUTPUT_DIR/duos-automation-$ROLE.json"
-  echo "Writing $ROLE secret to $FILE"
-  gcloud secrets versions access latest --project="$PROJECT" --secret="duos-automation-${ROLE}-sa" | jq . > "$FILE"
+  # The fixture reads one variable per role, upper-cased, with dashes as
+  # underscores: signing-official becomes DUOS_AUTOMATION_SIGNING_OFFICIAL_SA.
+  VAR="DUOS_AUTOMATION_$(echo "$ROLE" | tr 'a-z-' 'A-Z_')_SA"
+  echo "Writing $ROLE key to $OUTPUT_FILE as $VAR"
+  # Compact, so the value is one line a shell can source. Single quotes are
+  # safe: JSON escapes its own quotes and carries no apostrophes.
+  KEY=$(gcloud secrets versions access latest --project="$PROJECT" --secret="duos-automation-${ROLE}-sa" | jq -c .)
+  printf "%s='%s'\n" "$VAR" "$KEY" >> "$OUTPUT_FILE"
 done
+
+echo
+echo "Load them with: set -a; source $OUTPUT_FILE; set +a"
