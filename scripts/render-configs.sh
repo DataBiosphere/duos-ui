@@ -48,14 +48,6 @@ WRITE_CONFIG="false"
 WRITE_SITE_CONF="false"
 
 ENV_FILE="../.env.local"
-SITE_CONF_FILE="../site.conf"
-
-# The deployed proxy config is a helm template in terra-helmfile. It is
-# rendered here instead of copied from a bucket, so local dev cannot drift from
-# the deployed security headers. The template's only helm value is
-# proxyLogLevel; everything else is ${VAR} syntax that httpd resolves at start.
-SITE_CONF_TEMPLATE_PATH="repos/broadinstitute/terra-helmfile/contents/charts/duos/templates/_site.conf.tpl?ref=master"
-PROXY_LOG_LEVEL="warn"
 
 # Dev-environment defaults for the BFF block written by --write_env. Only used
 # when the variable has no value in an existing .env.local — existing values
@@ -251,23 +243,10 @@ write_config() {
   jq '.hash = "dev"' ../public/config.json > /dev/null
 }
 
+# render-site-conf.sh is also run by setup-devcontainer.sh, so the render
+# logic lives in one place.
 write_site_conf() {
-  echo "Rendering site.conf from the terra-helmfile duos chart template"
-  command -v gh > /dev/null || error "--write_site_conf needs the GitHub CLI (gh). See https://cli.github.com"
-  local template
-  template=$(gh api -H "Accept: application/vnd.github.raw" "$SITE_CONF_TEMPLATE_PATH") \
-    || error "Could not read _site.conf.tpl from terra-helmfile. Run 'gh auth login' with an account that can read broadinstitute/terra-helmfile."
-  # Drop the define/end wrapper lines and fill in the one helm value.
-  local rendered
-  rendered=$(echo "$template" \
-    | grep -vE '^\{\{-? *(define|end)[ "-]' \
-    | sed "s/{{ *\.Values\.proxyLogLevel *}}/$PROXY_LOG_LEVEL/")
-  # Any helm syntax left over means the template gained a value this script
-  # does not know about. Fail rather than hand httpd a broken config.
-  if grep -q '{{' <<< "$rendered"; then
-    error "_site.conf.tpl has helm syntax that this script cannot render. Update write_site_conf in scripts/render-configs.sh."
-  fi
-  echo "$rendered" > "$SITE_CONF_FILE"
+  ./render-site-conf.sh
 }
 
 parse_cli_args "$@"
