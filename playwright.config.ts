@@ -19,9 +19,10 @@ export default defineConfig({
       retries: process.env.CI ? 1 : 0,
     },
   ],
+  // Serve the production build through Fastify to exercise its headers and routes.
   webServer: {
     command: 'pnpm run serve',
-    url: BASE_URL,
+    url: `${BASE_URL}/health`,
     ignoreHTTPSErrors: true,
     timeout: 120_000,
     reuseExistingServer: !process.env.CI,

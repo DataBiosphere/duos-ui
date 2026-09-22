@@ -770,6 +770,21 @@ describe('envBool', () => {
   })
 })
 
+describe('shouldUseHttps', () => {
+  it('terminates TLS in local development only, when nothing overrides it', async () => {
+    const { shouldUseHttps } = await import('../src/index.js')
+    expect(shouldUseHttps(undefined, true, false)).toBe(true)
+    expect(shouldUseHttps(undefined, true, true)).toBe(false)
+    expect(shouldUseHttps(undefined, false, false)).toBe(false)
+  })
+
+  it('lets DUOS_SERVER_HTTPS select the transport in either direction', async () => {
+    const { shouldUseHttps } = await import('../src/index.js')
+    expect(shouldUseHttps('true', false, true)).toBe(true)
+    expect(shouldUseHttps('false', true, false)).toBe(false)
+  })
+})
+
 // ---------------------------------------------------------------------------
 // Rate limiting (stories 5-G2 and 5-G3)
 // ---------------------------------------------------------------------------

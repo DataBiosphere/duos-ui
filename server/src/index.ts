@@ -35,7 +35,6 @@ import FastifyVite from '@fastify/vite'
 const PROJECT_ROOT = path.join(import.meta.dirname, '..', '..')
 const isDev = process.env.NODE_ENV !== 'production'
 const isCI = Boolean(process.env.CI)
-const useHttps = isDev && !isCI
 
 type AppInstance = FastifyInstance<http.Server | https.Server>
 
@@ -48,6 +47,15 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
   if (['true', '1', 'yes', 'on'].includes(v)) return true
   if (['false', '0', 'no', 'off'].includes(v)) return false
   return defaultValue
+}
+
+/** Explicit TLS override; defaults to HTTPS only in local development outside CI. */
+export function shouldUseHttps(
+  value = process.env.DUOS_SERVER_HTTPS,
+  dev = isDev,
+  ci = isCI,
+): boolean {
+  return envBool(value, dev && !ci)
 }
 
 /**
@@ -88,6 +96,7 @@ export async function buildApp(): Promise<AppInstance> {
   // @fastify/session silently refuses to persist sessions once cookie.secure
   // is true, since it never sees `request.protocol === 'https'`. See its
   // definition in config.ts for why it names peers instead of counting hops.
+  const useHttps = shouldUseHttps()
   const fastify = (useHttps
     ? Fastify<https.Server>({
         https: {
@@ -113,7 +122,9 @@ export async function buildApp(): Promise<AppInstance> {
   // Register before routes so Helmet's hooks cover every response.
   const cspReportOnly = envBool(process.env.DUOS_CSP_REPORT_ONLY, true)
   fastify.log.info(`[server] Content Security Policy is ${cspReportOnly ? 'report-only (set DUOS_CSP_REPORT_ONLY=false to enforce)' : 'enforced'}`)
-  await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly }))
+  // On outside development unless a harness turns it off; see headers.ts.
+  const hsts = envBool(process.env.DUOS_HSTS, !isDev)
+  await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly, hsts }))
 
   // Resolves the policy's `report-to` group; `report-uri` remains the fallback.
   fastify.addHook('onRequest', async (_request, reply) => {
@@ -284,7 +295,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const fastify = await buildApp()
     await fastify.listen({ port: PORT, host: HOST })
     if (isDev && !isCI) {
-      const protocol = useHttps ? 'https' : 'http'
+      const protocol = shouldUseHttps() ? 'https' : 'http'
       await open(`${protocol}://local.dsde-dev.broadinstitute.org:${PORT}`)
     }
   }

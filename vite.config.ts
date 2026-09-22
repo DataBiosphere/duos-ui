@@ -5,10 +5,12 @@ import { aliases_from_tsconfig } from './aliases'
 
 const isCI = Boolean(process.env.CI)
 
-// Shared by `vite` (pnpm start) and `vite preview` (pnpm run serve).
+// Shared by `vite` (pnpm start) and `vite preview` (pnpm run preview).
 //
 // These options are fully applied when Vite owns its own socket — i.e. `pnpm start`
-// (standalone dev) and `pnpm run serve` (preview). When Vite runs in middlewareMode
+// (standalone dev) and `pnpm run preview`. `pnpm run serve` is no longer preview:
+// it starts the built Fastify server, which owns its own socket and TLS, and it is
+// what the E2E suite runs against. When Vite runs in middlewareMode
 // via @fastify/vite (`pnpm run start:server`), host/port/https/open are ignored
 // because Fastify owns the socket and handles TLS + browser-open itself (server/src/index.ts).
 // allowedHosts is the exception: Vite still enforces it in middleware mode to reject
