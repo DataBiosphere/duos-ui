@@ -168,6 +168,6 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
   reply.send({
     authenticated: true,
     user,
-    idp: request.session.idp, // 'google' | 'microsoft'
+    idp: request.session.idp, // 'google' | 'microsoft' | 'unknown'
   })
 }

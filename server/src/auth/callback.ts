@@ -32,6 +32,15 @@ async function retirePreAuthSession(request: FastifyRequest, preAuthSid: string)
 }
 
 /**
+ * Maps the B2C `idp` claim to the sub-provider the user chose on the B2C login page.
+ */
+export function subProviderFromIdpClaim(idp: unknown): 'google' | 'microsoft' | 'unknown' {
+  if (idp === 'google.com') return 'google'
+  if (typeof idp === 'string' && idp.startsWith('https://login.microsoftonline.com/')) return 'microsoft'
+  return 'unknown'
+}
+
+/**
  * Exchanges the B2C authorization code for tokens, validates the `id_token`,
  * extracts the sub-provider from the B2C `idp` claim, and writes all tokens to
  * the session. The browser never sees a token — only the post-login redirect.
@@ -75,9 +84,10 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
     return
   }
 
-  // B2C sets idp='google.com' when auth was federated to Google.
-  // Verify the exact claim name ('idp' vs 'identityProvider') against the dev B2C tenant.
-  const subProvider: 'google' | 'microsoft' = claims.idp === 'google.com' ? 'google' : 'microsoft'
+  const subProvider = subProviderFromIdpClaim(claims.idp)
+  if (subProvider === 'unknown') {
+    request.log.warn({ idp: subProvider, idpClaim: claims.idp ?? null }, '[auth] id_token idp claim is missing or unrecognised')
+  }
 
   // regenerate() replaces the session with an empty one, so preserve returnTo
   // and write tokens only after rotating the pre-auth SID.
