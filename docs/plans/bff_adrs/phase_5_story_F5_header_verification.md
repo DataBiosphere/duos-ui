@@ -24,7 +24,7 @@ changed the policy after the initial tests.
 
 | Environment | Mode and latest check | Recorded result | Outstanding verification |
 |---|---|---|---|
-| Local | Legacy: report-only and enforced; BFF: enforced (2026-09-04) | Tested workflows passed; no application-triggered violations observed | Repeat BFF workflows against the updated policy; feature flags remain untested |
+| Local | Legacy: report-only and enforced (2026-09-04); BFF: enforced, re-run against the post-5-F6 policy (2026-09-22) | Tested workflows passed, including anonymous metrics from the console; browser blocked a disallowed request and the report reached the log with `"disposition": "enforce"` | Feature flags remain untested (no callers) |
 | Dev | Legacy, enforced; workflows checked 2026-09-08, headers, banner workflow and browser check 2026-09-22 | Workflow checks passed, banner workflow passed against the new bucket; browser blocked a disallowed request and the report reached logging with `"disposition": "enforce"` | None |
 | Staging | Legacy, enforced; workflows and browser blocking checked 2026-09-08, headers and banner workflow 2026-09-22 | Workflow checks passed, banner workflow passed against the new bucket; browser blocked and reported a disallowed request | None |
 | Prod | Legacy, enforced; logs analysed 2026-09-21, header, workflows, charts and browser check 2026-09-22 | All eight workflows passed; browser blocked a disallowed request and the report reached logging with `"disposition": "enforce"`; none of 249 reviewed reports attributed to application code | None |
@@ -493,6 +493,93 @@ upstreams plus its own banner bucket.
 The banner workflow was driven in all three environments on 2026-09-22 and
 passed against the new bucket in each. No banner violation was reported.
 
+## Local BFF re-run — 2026-09-22
+
+This run repeats the BFF workflows against the policy as it stands after
+story 5-F6. It is the check that must pass before Phase 6 enables BFF in any
+environment.
+
+**Configuration:** local Docker Compose, `bffEnabled: true`,
+`DUOS_CSP_REPORT_ONLY=false`. The boot log showed
+`Content Security Policy is enforced` and no `proxy is disabled` warnings, so
+every proxied call reached its upstream. The measured header:
+
+```
+Content-Security-Policy: …;connect-src 'self' https://storage.googleapis.com/duos-banners-dev/;…
+```
+
+`'self'` plus the banner bucket, with no upstream origins. This is the narrowed
+list 5-F6 introduced.
+
+### Workflows exercised
+
+All workflows passed. The app log confirms that the proxied calls reached their
+upstreams:
+
+| Route | Status | Count |
+|---|---|---|
+| `POST /bard-api/api/event` (identified metrics) | 200 | 3 |
+| `GET /tdr-api/api/repository/v1/snapshots` (data library) | 200 | 2 |
+| `POST /ecm-api/api/oauth/v1/ras/authorization-url` | 200 | 1 |
+| `POST /ecm-api/api/oauth/v1/ras/oauthcode` | 200 | 1 |
+
+### Browser blocking check
+
+A console `fetch('https://example.com/probe')` was blocked, and one report
+reached the app log:
+
+```json
+{"effectiveDirective": "connect-src",
+ "blockedURL": "https://example.com/probe",
+ "documentURL": "https://local.dsde-dev.broadinstitute.org/researcher_console_dashboard",
+ "disposition": "enforce"}
+```
+
+The `originalPolicy` in that report carries the narrowed `connect-src`, so the
+browser enforced the post-5-F6 policy.
+
+### Environment fault found during the run
+
+The signing-official dashboard first returned 500. The cause was local, not a
+policy finding: the local Elasticsearch container had no `dataset` index, so
+Consent's `DashboardSearchService` search failed with `index_not_found_exception`
+and Consent returned 500. The BFF passed that status through unchanged. A reindex
+through Consent's `POST /api/dataset/index` fixed it. No `[csp]` report was
+involved, and the fault would occur in either mode.
+
+### Limits of this evidence
+
+1. **Anonymous metrics** (`/public/metrics/event`) did not appear during the
+   workflows, because the tester stayed signed in. A separate console check
+   closed this; see **Anonymous metrics check** below.
+2. **Feature flags** (`/public/features/*`) have no callers in the client, so no
+   request was made.
+3. One developer drove the workflows. This is not representative traffic.
+
+### Anonymous metrics check
+
+No signed-out page fires a metrics event on demand. `/datalibrary`, the one page
+that sends a page-view event, sits inside `<Authenticated />`. The remaining
+signed-out callers, `ErrorReporter` and the auto-logout on a 401, fire only on
+failure. So the route was exercised from the browser console, signed out, with
+a body in the shape `Metrics.ts` sends and the event name
+`test:csp-verification`.
+
+| Layer | Evidence |
+|---|---|
+| Browser | `fetch('/public/metrics/event', …)` returned 200, with no CSP error |
+| Proxy sidecar | `"POST /public/metrics/event HTTP/1.1" 200` |
+| App | `req-8d`: `url /public/metrics/event`, `fetching from remote server`, `response received`, status 200 |
+| CSP | no `[csp] violation report` in the app log afterwards |
+
+This establishes that the route, its upstream (`terra-bard-dev`) and the
+narrowed `connect-src 'self'` work together. The route strips `cookie`,
+`authorization` and `x-csrf-token` before it forwards the request, so the
+request stayed anonymous. A hand-built request does not exercise the client code
+in `Metrics.ts`; unit tests cover that code.
+
+---
+
 ## Remaining verification checklist
 
 - [x] **Verify production enforcement after deployment.** Done 2026-09-22: the
@@ -502,16 +589,17 @@ passed against the new bucket in each. No banner violation was reported.
 - [x] **Repeat the banner workflow in every environment.** Done 2026-09-22. The
   banner workflow passed against `duos-banners-dev`, `duos-banners-staging` and
   `duos-banners-prod`, the buckets DT-4063 introduced.
-- [ ] **Repeat local BFF workflows against the updated policy.** Public BFF
-  endpoints (5-F6) narrowed `connect-src` after the September 4 run. Verify the
-  same-origin routes and banner request before enabling BFF in any environment
-  during Phase 6. A narrower policy can block requests the earlier policy allowed.
-- [ ] **Exercise feature flags explicitly.** Record the request and outcome for
-  the applicable mode. Same-origin routing removes the external allowlist
-  requirement but is not evidence that the workflow works.
-- [ ] **Record a browser blocking and reporting check for the updated local BFF
-  configuration.** Dev, staging and prod each have one, recorded on 2026-09-08
-  and 2026-09-22. Inspect headers as a separate check, using the command below.
+- [x] **Repeat local BFF workflows against the updated policy.** Done 2026-09-22
+  against `connect-src 'self'` plus the banner bucket. All workflows passed, and
+  the proxied routes returned 200 from their upstreams. See **Local BFF re-run**.
+- [x] **Record anonymous metrics under BFF.** Done 2026-09-22 from the browser
+  console, signed out: `POST /public/metrics/event` returned 200 end to end,
+  with no CSP report. No signed-out page fires the event on demand.
+- [ ] **Exercise feature flags explicitly.** This feature cannot be tested.
+- [x] **Record a browser blocking and reporting check in every configuration.**
+  Dev, staging, prod and the updated local BFF configuration each have one,
+  recorded on 2026-09-08 and 2026-09-22. Inspect headers as a separate check,
+  using the command below.
 - [ ] **Continue reviewing reports from real traffic after enforcement.** Manual
   workflow passes do not cover every user scenario. Investigate reports before
   adding sources such as `blob:`; distinguish application needs from extension
