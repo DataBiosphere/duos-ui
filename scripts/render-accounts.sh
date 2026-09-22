@@ -44,7 +44,7 @@ for ROLE in $LIST_OF_ROLES; do
   # safe: JSON escapes its own quotes and carries no apostrophes.
   KEY=$(gcloud secrets versions access latest --project="$PROJECT" --secret="duos-automation-${ROLE}-sa" | jq -c .)
   # gcloud failing is caught by pipefail; an empty or null body is not.
-  if [ -z "$KEY" ] || [ "$KEY" = 'null' ]; then
+  if [[ -z "$KEY" || "$KEY" == 'null' ]]; then
     echo "No key returned for $ROLE — $OUTPUT_FILE is unchanged" >&2
     exit 1
   fi
