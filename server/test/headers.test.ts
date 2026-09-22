@@ -35,6 +35,16 @@ describe('helmetOptions', () => {
     })
   })
 
+  it('lets a harness override HSTS in either direction', () => {
+    // The E2E harness: production build, developer's hostname, no year-long pin.
+    expect(helmetOptions(config(true), { ...PROD, hsts: false }).strictTransportSecurity).toBe(false)
+    expect(helmetOptions(config(true), { ...DEV, hsts: true }).strictTransportSecurity).toEqual({
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: false,
+    })
+  })
+
   it('carries the policy through from csp.ts', () => {
     const csp = helmetOptions(config(true), PROD).contentSecurityPolicy
     expect(csp).toMatchObject({ useDefaults: false })

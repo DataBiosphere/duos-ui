@@ -14,6 +14,8 @@ env:
   # The local Postgres service does not support TLS.
   DUOS_DB_SSL: 'false'
   DUOS_API_URL: https://consent.dsde-dev.broadinstitute.org
+  # `pnpm run serve` defaults this off to spare a developer's browser; CI has none.
+  DUOS_HSTS: 'true'
 
 jobs:
   playwright-run:
@@ -64,9 +66,12 @@ jobs:
             -keyout server.key -out server.crt \
             -subj "/CN=local.dsde-dev.broadinstitute.org" \
             -addext "subjectAltName=DNS:local.dsde-dev.broadinstitute.org,DNS:localhost,IP:127.0.0.1"
-      # Session secrets must contain at least 32 characters.
+      # Session secrets must contain at least 32 characters. Masked because this repository is public.
       - name: Generate a session secret
-        run: echo "DUOS_SESSION_SECRET=$(openssl rand -base64 48)" >> $GITHUB_ENV
+        run: |
+          SECRET=$(openssl rand -base64 48)
+          echo "::add-mask::$SECRET"
+          echo "DUOS_SESSION_SECRET=$SECRET" >> $GITHUB_ENV
       # The session store requires this table before its first write.
       - name: Apply the session schema
         run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f test/e2e/sql/user_sessions.sql

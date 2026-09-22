@@ -122,7 +122,9 @@ export async function buildApp(): Promise<AppInstance> {
   // Register before routes so Helmet's hooks cover every response.
   const cspReportOnly = envBool(process.env.DUOS_CSP_REPORT_ONLY, true)
   fastify.log.info(`[server] Content Security Policy is ${cspReportOnly ? 'report-only (set DUOS_CSP_REPORT_ONLY=false to enforce)' : 'enforced'}`)
-  await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly }))
+  // On outside development unless a harness turns it off; see headers.ts.
+  const hsts = envBool(process.env.DUOS_HSTS, !isDev)
+  await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly, hsts }))
 
   // Resolves the policy's `report-to` group; `report-uri` remains the fallback.
   fastify.addHook('onRequest', async (_request, reply) => {

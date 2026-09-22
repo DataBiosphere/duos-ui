@@ -9,7 +9,7 @@
     "start:server": "tsx watch --env-file=.env.local server/src/index.ts",
     "build": "vite build && node scripts/write-vite-config-json.mjs && pnpm --filter duos-server build",
     "preview": "vite preview",
-    "serve": "NODE_ENV=production PORT=3000 DUOS_SERVER_HTTPS=true node server/dist/index.js",
+    "serve": "NODE_ENV=production PORT=3000 DUOS_SERVER_HTTPS=true DUOS_HSTS=${DUOS_HSTS:-false} node server/dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
