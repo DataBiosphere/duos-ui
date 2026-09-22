@@ -52,7 +52,7 @@ jobs:
         run: pnpm ci
       - name: Install Playwright Chromium
         run: pnpm exec playwright install chromium --with-deps
-      # Keep legacy auth until 6-D-pre adds the BFF sign-in fixture.
+      # Keep legacy auth until 6-D-pre (DT-4068) adds the BFF sign-in fixture.
       - name: Copy Configs
         run: cp config/dev.json public/config.json
       - name: Map local dev hostname

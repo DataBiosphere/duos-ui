@@ -333,11 +333,11 @@ is a much larger piece of work than this story.
   unknown address space, making every same-origin subresource a
   public-to-loopback Private Network Access transition, blocked outside a
   secure context. The fix is not a browser flag but serving the e2e run through
-  the Fastify server, which is harness work Epic 6 owns. Held back as story
-  **6-K** rather than merged skipped, since a spec that never runs is not
+  the Fastify server, which is harness work Phase 6 owns. Held back as story
+  **6-K (DT-4078)** rather than merged skipped, since a spec that never runs is not
   coverage.
 
-  **Update — story 6-K1.** The harness half is done: `pnpm run serve` now
+  **Update — story 6-K1 (DT-4078).** The harness half is done: `pnpm run serve` now
   starts the Fastify server over HTTPS, and CI provisions the database, the
   session secret and a certificate for it, so the run receives the real
   headers and needs no interception. The spec itself lands with story 6-K2.
