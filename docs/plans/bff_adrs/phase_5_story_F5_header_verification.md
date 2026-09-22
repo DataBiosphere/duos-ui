@@ -27,12 +27,12 @@ changed the policy after the initial tests.
 | Local | Legacy: report-only and enforced; BFF: enforced (2026-09-04) | Tested workflows passed; no application-triggered violations observed | Repeat BFF workflows against the updated policy; feature flags remain untested |
 | Dev | Legacy, enforced; workflows checked 2026-09-08, headers, banner workflow and browser check 2026-09-22 | Workflow checks passed, banner workflow passed against the new bucket; browser blocked a disallowed request and the report reached logging with `"disposition": "enforce"` | None |
 | Staging | Legacy, enforced; workflows and browser blocking checked 2026-09-08, headers and banner workflow 2026-09-22 | Workflow checks passed, banner workflow passed against the new bucket; browser blocked and reported a disallowed request | None |
-| Prod | Legacy, enforced; logs analysed 2026-09-21, header, workflows and browser check 2026-09-22 | Seven workflows passed; browser blocked a disallowed request and the report reached logging with `"disposition": "enforce"`; none of 249 reviewed reports attributed to application code | Test charts |
+| Prod | Legacy, enforced; logs analysed 2026-09-21, header, workflows, charts and browser check 2026-09-22 | All eight workflows passed; browser blocked a disallowed request and the report reached logging with `"disposition": "enforce"`; none of 249 reviewed reports attributed to application code | None |
 
 The production enforcement configuration PR
 [terra-helmfile#6500](https://github.com/broadinstitute/terra-helmfile/pull/6500)
 is merged and deployed. The deployed prod header was measured on 2026-09-22 and
-enforces the policy. One prod workflow remains untested. The
+enforces the policy, and all eight prod workflows pass. The
 [remaining checks](#remaining-verification-checklist) consolidate the work
 needed after these measurements.
 
@@ -416,7 +416,7 @@ One policy header, no report-only header, all sixteen directives, and the
 | Data library (TDR) | passed | successful calls to `https://data.terra.bio/api/repository/v1/snapshots` |
 | ECM RAS account linking | passed | |
 | Sign-out | passed | |
-| Charts | **not tested** | the tester's role cannot open the chart pages in prod; a Chairperson will check |
+| Charts | passed | voting pie charts on completed DARs, viewed with an admin role |
 
 ### Browser blocking check
 
@@ -442,7 +442,7 @@ honestly. Blocking and report delivery are now both recorded for prod.
 ### Limits of this evidence
 
 1. One user drove the workflows manually. This is not representative traffic.
-2. Charts carry no prod result. Every other workflow passed.
+2. Every listed workflow passed. The charts were checked with an admin role, which can see the voting pie charts for completed DARs.
 3. Ambient reports from browser extensions continue, now with
    `"disposition": "enforce"`. Read `sourceFile` and `blockedURL` before
    treating one as an application problem.
@@ -496,10 +496,9 @@ passed against the new bucket in each. No banner violation was reported.
 ## Remaining verification checklist
 
 - [x] **Verify production enforcement after deployment.** Done 2026-09-22: the
-  deployed header enforces the policy, seven workflows passed, and a console
-  `fetch()` was blocked and reported with `"disposition": "enforce"`. One
-  follow-up remains, listed next.
-- [ ] **Test charts in prod.** The chart pages need a Chairperson role.
+  deployed header enforces the policy, all eight workflows passed, and a console
+  `fetch()` was blocked and reported with `"disposition": "enforce"`. The charts
+  were checked with an admin role, on the voting pie charts for completed DARs.
 - [x] **Repeat the banner workflow in every environment.** Done 2026-09-22. The
   banner workflow passed against `duos-banners-dev`, `duos-banners-staging` and
   `duos-banners-prod`, the buckets DT-4063 introduced.
