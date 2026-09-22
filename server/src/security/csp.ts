@@ -2,8 +2,9 @@ import { CSP_REPORT_GROUP, CSP_REPORT_PATH } from './cspReport.js'
 
 // CSP derived from the runtime config served to the client. See ADR-013.
 
-// Feature flags and anonymous metrics remain direct in BFF mode.
-const BFF_CONNECT_FIELDS = ['apiUrl', 'bardApiUrl'] as const
+// Feature flags and metrics are same-origin in BFF mode. Only the banner
+// bucket named by bannersUrl stays direct; connectSources adds it below.
+const BFF_CONNECT_FIELDS: readonly string[] = []
 
 // Legacy mode calls all upstreams directly. B2C is navigated to, not fetched.
 const LEGACY_CONNECT_FIELDS = ['apiUrl', 'bardApiUrl', 'ecmApiUrl', 'tdrApiUrl'] as const
