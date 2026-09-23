@@ -1,12 +1,129 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { Study } from 'src/libs/ajax/Study'
+import { StudyComments } from 'src/libs/ajax/StudyComments'
+import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'src/utils/NodashUtil'
 import { AggregationResult, ElasticsearchQuery } from 'src/types/elastic'
 import { ExportableDatasets, PaginationState, SortState } from 'src/types/library'
-import { DatasetTerm, StudyTerm } from 'src/types/model'
+import { DatasetTerm, StudyTerm, StudyRecommendation } from 'src/types/model'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
+
+const STUDY_ASSETS_QUERY_KEY = 'study-assets'
+const STUDY_STALE_TIME = 5 * 60 * 1000
+
+const useStudyAsset = <T>(studyId: string, assetType: string, queryFn: () => Promise<T>) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, assetType, studyId],
+  enabled: studyId.length > 0,
+  queryFn,
+  staleTime: STUDY_STALE_TIME,
+})
+
+// The page's primary `study` object comes from the Elasticsearch-backed search index, which
+// cannot supply metadata when a study has no datasets and doesn't carry PI institution/external
+// profile fields. Fetch those from the relational store.
+export const usePiDetails = (studyId: string) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, 'pi-details', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => Study.getById(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const useStudyModels = (studyId: string) =>
+  useStudyAsset(studyId, 'models', () => Study.getModels(studyId))
+
+export const useStudyWorkspaces = (studyId: string) =>
+  useStudyAsset(studyId, 'workspaces', () => Study.getWorkspaces(studyId))
+
+export const useStudyPresentations = (studyId: string) =>
+  useStudyAsset(studyId, 'presentations', () => Study.getPresentations(studyId))
+
+export const useStudyPublications = (studyId: string) =>
+  useStudyAsset(studyId, 'publications', () => Study.getPublications(studyId))
+
+export const useStudyClinicalTrials = (studyId: string) =>
+  useStudyAsset(studyId, 'clinicalTrials', () => Study.getClinicalTrials(studyId))
+
+export const useStudyIntellectualProperty = (studyId: string) =>
+  useStudyAsset(studyId, 'intellectualProperty', () => Study.getIntellectualProperty(studyId))
+
+export const useStudyFundingResources = (studyId: string) =>
+  useStudyAsset(studyId, 'fundingResources', () => Study.getFundingResources(studyId))
+
+/**
+ * Every page of one study's comments. The offset is deliberately absent: posting invalidates this
+ * prefix, so a revision refreshes whichever pages the reader has open rather than only the first.
+ */
+export const studyCommentsQueryKey = (studyId: string) => [STUDY_ASSETS_QUERY_KEY, 'comments', studyId]
+
+/**
+ * A study's comments, a page at a time.
+ *
+ * The endpoint is paged and its page size is capped, so 'show more' has to fetch the next page
+ * and append rather than ask for a bigger one. Every page repeats the study-wide `averageRating`,
+ * `total` and `yourComment`, so the first page is enough to read those from.
+ */
+export const useStudyComments = (studyId: string) => useInfiniteQuery({
+  queryKey: studyCommentsQueryKey(studyId),
+  enabled: studyId.length > 0,
+  initialPageParam: 0,
+  queryFn: ({ pageParam }) => StudyComments.listComments(studyId, pageParam),
+  getNextPageParam: (lastPage, allPages) => {
+    // Two different counts, deliberately. The next offset is how many rows the server has handed
+    // over, repeats included, since that is what its offset means. Whether there is more to ask
+    // for is judged on distinct ids, because the list de-duplicates: a boundary comment repeated
+    // when someone posts mid-paging would otherwise push the raw count to `total` and hide 'Show
+    // more' while fewer than `total` comments were actually on screen.
+    const fetched = allPages.reduce((count, page) => count + page.comments.length, 0)
+    const distinct = new Set(allPages.flatMap(page => page.comments.map(c => c.studyCommentId))).size
+    // A page shorter than requested also means the end, so a comment deleted mid-paging cannot
+    // leave this asking for an offset past the list forever.
+    return distinct < lastPage.total && lastPage.comments.length > 0 ? fetched : undefined
+  },
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const useStudyDarHistory = (studyId: string) => useQuery({
+  queryKey: ['study-dar-history', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => DatasetMetrics.getStudyStats(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const useStudyResearchOutputs = (studyId: string) => useQuery({
+  queryKey: ['study-research-outputs', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => DatasetMetrics.getResearchOutputs(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+/**
+ * A study is not a recommendation for itself. A similarity query matches it perfectly, so it can
+ * come back in its own results - and the card would link to the page already open, leaving the
+ * route unchanged and the click looking broken. Dropped here rather than in the carousel so both
+ * sections get it and neither has to know the current id.
+ */
+const withoutCurrentStudy = (studyId: string) => (recommendations: StudyRecommendation[]) =>
+  recommendations.filter(recommendation => String(recommendation.studyId) !== studyId)
+
+export const useSimilarStudies = (studyId: string) => useQuery({
+  queryKey: ['study-recommendations-similar', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => StudyRecommendations.getSimilar(studyId),
+  select: withoutCurrentStudy(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const useFrequentlyRequestedWithStudies = (studyId: string) => useQuery({
+  queryKey: ['study-recommendations-frequently-requested-with', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => StudyRecommendations.getFrequentlyRequestedWith(studyId),
+  select: withoutCurrentStudy(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
 
 export const STUDY_DATASETS_QUERY_KEY = 'study-details-datasets'
 export const STUDY_EXPORTS_QUERY_KEY = 'study-details-exports'
@@ -87,7 +204,41 @@ export const useStudyDatasets = (
       participantCount: participantAggregation?.value,
     }
   },
-  staleTime: 5 * 60 * 1000,
+  // Hold the previous page's rows while the next one loads, so paging and sorting don't
+  // collapse the grid to its empty state and back.
+  placeholderData: keepPreviousData,
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const STUDY_SELECTABLE_IDS_QUERY_KEY = 'study-details-selectable-ids'
+
+/**
+ * Every selectable dataset id in the study, not just the ones on the visible grid page, so the
+ * default selection can't silently apply for a subset. `enabled` is the caller's job: the grid
+ * page already covers the whole study whenever `total` fits in one page, which is the common
+ * case, so this only costs a request for studies larger than the page size.
+ */
+export const useStudySelectableDatasetIds = (studyId: string, total: number, enabled: boolean) => useQuery({
+  queryKey: [STUDY_SELECTABLE_IDS_QUERY_KEY, studyId, total],
+  enabled: enabled && studyId.length > 0 && total > 0,
+  queryFn: async (): Promise<number[]> => {
+    const pagination = { page: 0, pageSize: total }
+    // Asks for the study's datasets in one request. Elasticsearch refuses a `size` beyond
+    // index.max_result_window (10,000 by default), so this is bounded by how large a study can
+    // get: the largest in production holds 67 datasets, three orders of magnitude below the
+    // limit. If a study ever did exceed it the request fails rather than truncating, and the
+    // caller then selects nothing at all and says so, rather than defaulting to the page in view
+    // - a partial default is the one outcome worse than none, since 'Apply for Access' would
+    // silently request a subset. Paging or a bulk-id endpoint is the fix if studies ever
+    // approach that size.
+    // Same query the grid runs, so the two can't disagree about which datasets belong here.
+    const response = await DataSet.searchDatasetIndexV2(buildStudyDatasetsQuery(studyId, pagination))
+    const page = datasetAsset.transformResponse(response, pagination)
+    return (page.items as DatasetTerm[])
+      .filter(dataset => datasetAsset.isRowSelectable(dataset))
+      .map(dataset => dataset.datasetId)
+  },
+  staleTime: STUDY_STALE_TIME,
 })
 
 export const useStudyExportableDatasets = (
@@ -114,6 +265,6 @@ export const useStudyExportableDatasets = (
         return EMPTY_EXPORTABLE_DATASETS
       }
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: STUDY_STALE_TIME,
   })
 }
