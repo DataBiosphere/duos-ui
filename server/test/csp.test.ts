@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import Fastify, { type FastifyInstance } from 'fastify'
 import fastifyHelmet from '@fastify/helmet'
 import {
-  BANNER_SOURCE,
   type CspEnvironment,
+  bannerSource,
   connectSources,
   contentSecurityPolicyOptions,
 } from '../src/security/csp.js'
@@ -23,6 +23,9 @@ const BARD = 'https://terra-bard-dev.appspot.com'
 const ECM = 'https://externalcreds.dsde-dev.broadinstitute.org'
 const TDR = 'https://jade.datarepo-dev.broadinstitute.org'
 const TERRA = 'https://bvdp-saturn-dev.appspot.com'
+// What readConfig() fills in for env dev; the policy admits the bucket, not the object.
+const BANNERS_URL = 'https://storage.googleapis.com/duos-banners-dev/dev_notifications.json'
+const BANNER_SOURCE = 'https://storage.googleapis.com/duos-banners-dev/'
 
 const fullConfig = (bffEnabled: boolean): Record<string, unknown> => ({
   env: 'dev',
@@ -32,6 +35,7 @@ const fullConfig = (bffEnabled: boolean): Record<string, unknown> => ({
   ecmApiUrl: ECM,
   tdrApiUrl: TDR,
   terraUrl: TERRA,
+  bannersUrl: BANNERS_URL,
   features: {},
 })
 
@@ -46,8 +50,20 @@ function parsePolicy(header: string): Map<string, string[]> {
 }
 
 describe('connectSources', () => {
-  it('allows only the two direct flows plus the banner bucket in BFF mode', () => {
-    expect(connectSources(fullConfig(true), PROD)).toEqual(['\'self\'', CONSENT, BARD, BANNER_SOURCE])
+  it('allows nothing but self and the banner bucket in BFF mode', () => {
+    expect(connectSources(fullConfig(true), PROD)).toEqual(['\'self\'', BANNER_SOURCE])
+  })
+
+  it('drops the Consent origin in BFF mode, where feature flags go through /public/features', () => {
+    expect(connectSources(fullConfig(true), PROD)).not.toContain(CONSENT)
+  })
+
+  it('drops the Bard origin in BFF mode, where anonymous events go through /public/metrics/event', () => {
+    expect(connectSources(fullConfig(true), PROD)).not.toContain(BARD)
+  })
+
+  it('keeps the banner bucket, the one flow with no BFF endpoint yet', () => {
+    expect(connectSources(fullConfig(true), PROD)).toContain(BANNER_SOURCE)
   })
 
   it('allows all four configured upstreams in legacy mode', () => {
@@ -64,8 +80,10 @@ describe('connectSources', () => {
     expect(connectSources(fullConfig(false), PROD)).not.toContain(TERRA)
   })
 
+  // Legacy mode from here on for the field-parsing cases: BFF mode reads no
+  // config field at all now, so it cannot exercise them.
   it('reduces a configured URL to its origin', () => {
-    const sources = connectSources({ bffEnabled: true, apiUrl: `${CONSENT}/api/v1/`, bardApiUrl: '' }, PROD)
+    const sources = connectSources({ bffEnabled: false, apiUrl: `${CONSENT}/api/v1/`, bardApiUrl: '' }, PROD)
     expect(sources).toContain(CONSENT)
     expect(sources).not.toContain(`${CONSENT}/api/v1/`)
   })
@@ -76,7 +94,7 @@ describe('connectSources', () => {
     ['a value that is not an absolute URL', '/duos-api'],
     ['a non-string', 42],
   ])('drops %s rather than emitting it as a source', (_label, apiUrl) => {
-    expect(connectSources({ bffEnabled: true, apiUrl }, PROD)).toEqual(['\'self\'', BANNER_SOURCE])
+    expect(connectSources({ bffEnabled: false, apiUrl, bannersUrl: BANNERS_URL }, PROD)).toEqual(['\'self\'', BANNER_SOURCE])
   })
 
   it('adds the websocket schemes for Vite HMR in dev only', () => {
@@ -86,13 +104,46 @@ describe('connectSources', () => {
 
   it('scopes the banner bucket to its path, not the whole shared GCS origin', () => {
     const sources = connectSources(fullConfig(true), PROD)
-    expect(sources).toContain('https://storage.googleapis.com/broad-duos-banners/')
+    expect(sources).toContain(BANNER_SOURCE)
     expect(sources).not.toContain('https://storage.googleapis.com')
+    expect(sources).not.toContain(BANNERS_URL)
+  })
+
+  it('follows bannersUrl to whichever bucket config.json names', () => {
+    const config = { ...fullConfig(true), bannersUrl: 'https://storage.googleapis.com/duos-banners-prod/prod_notifications.json' }
+    expect(connectSources(config, PROD)).toContain('https://storage.googleapis.com/duos-banners-prod/')
+    expect(connectSources(config, PROD)).not.toContain(BANNER_SOURCE)
+  })
+
+  it('emits no banner source when config.json has no bannersUrl', () => {
+    const config = fullConfig(true)
+    delete config.bannersUrl
+    expect(connectSources(config, PROD)).toEqual(['\'self\''])
   })
 
   it('emits each origin once when two fields share it', () => {
     const sources = connectSources({ bffEnabled: false, apiUrl: CONSENT, ecmApiUrl: `${CONSENT}/ecm` }, PROD)
     expect(sources.filter(source => source === CONSENT)).toHaveLength(1)
+  })
+})
+
+describe('bannerSource', () => {
+  it('reduces the object URL to its bucket directory, with the trailing slash CSP needs for a prefix match', () => {
+    expect(bannerSource(BANNERS_URL)).toBe(BANNER_SOURCE)
+  })
+
+  it('drops a query string and fragment along with the object name', () => {
+    expect(bannerSource(`${BANNERS_URL}?v=2#top`)).toBe(BANNER_SOURCE)
+  })
+
+  it.each([
+    ['a blank value, as base_config.json ships', ''],
+    ['whitespace', '   '],
+    ['a relative path', '/banners/dev_notifications.json'],
+    ['a non-string', 42],
+    ['an unset value', undefined],
+  ])('returns undefined for %s', (_label, value) => {
+    expect(bannerSource(value)).toBeUndefined()
   })
 })
 
@@ -182,7 +233,7 @@ describe('the policy as helmet serialises it', () => {
     const res = await app.inject({ method: 'GET', url: '/page' })
     const policy = parsePolicy(String(res.headers['content-security-policy']))
 
-    expect(policy.get('connect-src')).toEqual(['\'self\'', CONSENT, BARD, BANNER_SOURCE])
+    expect(policy.get('connect-src')).toEqual(['\'self\'', BANNER_SOURCE])
     expect(policy.get('script-src')).toEqual(['\'self\''])
     expect(policy.get('frame-ancestors')).toEqual(['\'none\''])
     expect(policy.get('report-uri')).toEqual([CSP_REPORT_PATH])

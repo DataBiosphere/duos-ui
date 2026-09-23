@@ -146,22 +146,53 @@ describe('handleCallback', () => {
     expect(request.session.tokenExpiry).toBeLessThanOrEqual(before + 5)
   })
 
-  it('derives idp=\'google\' when the B2C idp claim is google.com', async () => {
-    const oidc = await import('openid-client')
-    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue(makeTokens({ email: 'user@example.com', idp: 'google.com' }))
-    const request = makeRequest()
+  describe('sub-provider from the B2C `idp` claim', () => {
+    // The claim name and values come from the B2C custom policy
+    // `identityProvider` claim type emitted under the OpenIdConnect `idp`
+    async function callbackWithClaims(claims: Record<string, unknown>) {
+      const oidc = await import('openid-client')
+      vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue(makeTokens({ email: 'user@example.com', ...claims }))
+      const request = makeRequest()
+      await handleCallback(request, makeReply())
+      return request
+    }
 
-    await handleCallback(request, makeReply())
+    it('derives idp=\'google\' when the idp claim is google.com', async () => {
+      const request = await callbackWithClaims({ idp: 'google.com' })
 
-    expect(request.session.idp).toBe('google')
-  })
+      expect(request.session.idp).toBe('google')
+      expect(request.log.warn).not.toHaveBeenCalled()
+    })
 
-  it('derives idp=\'microsoft\' when the idp claim is absent', async () => {
-    const request = makeRequest()
+    it('derives idp=\'microsoft\' when the idp claim is an Entra issuer URL', async () => {
+      const request = await callbackWithClaims({ idp: 'https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0' })
 
-    await handleCallback(request, makeReply())
+      expect(request.session.idp).toBe('microsoft')
+      expect(request.log.warn).not.toHaveBeenCalled()
+    })
 
-    expect(request.session.idp).toBe('microsoft')
+    it('derives idp=\'unknown\' and warns when the idp claim is absent', async () => {
+      const request = await callbackWithClaims({})
+
+      expect(request.session.idp).toBe('unknown')
+      // The `idp` dimension stays canonical (google | microsoft | unknown);
+      expect(request.log.warn).toHaveBeenCalledWith({ idp: 'unknown', idpClaim: null }, expect.stringContaining('idp'))
+    })
+
+    it('does not read the claim under the policy-internal name identityProvider', async () => {
+      // Pins the claim NAME: B2C maps the identityProvider claim type to `idp`
+      // on the wire, so a token carrying only identityProvider is unrecognised.
+      const request = await callbackWithClaims({ identityProvider: 'google.com' })
+
+      expect(request.session.idp).toBe('unknown')
+    })
+
+    it('derives idp=\'unknown\' and warns on an unrecognised idp value instead of defaulting to microsoft', async () => {
+      const request = await callbackWithClaims({ idp: 'facebook.com' })
+
+      expect(request.session.idp).toBe('unknown')
+      expect(request.log.warn).toHaveBeenCalledWith({ idp: 'unknown', idpClaim: 'facebook.com' }, expect.stringContaining('idp'))
+    })
   })
 
   it('responds 400 token_missing_email_claim when the id_token has no email claim', async () => {

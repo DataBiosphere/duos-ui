@@ -414,7 +414,7 @@ describe('DataLibrary', () => {
     expect(locationSearch).toContain('minParticipants=')
   })
 
-  it('applies row-level filtering for nested presentation rows when Datasets Cited is selected', async () => {
+  it('reports each nested presentation\'s citation state in the Datasets Cited column', async () => {
     const nestedPresentationResponse = {
       aggregations: {
         studies: {
@@ -464,18 +464,16 @@ describe('DataLibrary', () => {
 
     renderLibrary('/?tab=presentations')
 
+    // Both are listed; the column, not a filter, tells them apart now.
     expect(await screen.findByText('Nested Match Presentation')).toBeInTheDocument()
     expect(screen.getByText('Nested Non-Match Presentation')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByText('Datasets Cited (Presentations)?'))
-    await screen.findByText('Yes')
+    expect(screen.getByText('Datasets Cited')).toBeInTheDocument()
 
-    fireEvent.click(getLabelControl<HTMLInputElement>('Yes', 'radio'))
-
-    await waitFor(() => {
-      expect(screen.queryByText('Nested Non-Match Presentation')).not.toBeInTheDocument()
-    })
-    expect(screen.getByText('Nested Match Presentation')).toBeInTheDocument()
+    const rowFor = (title: string) =>
+      screen.getAllByRole('row').find(row => row.textContent?.includes(title))!
+    expect(within(rowFor('Nested Match Presentation')).getByText('Yes')).toBeInTheDocument()
+    expect(within(rowFor('Nested Non-Match Presentation')).getByText('No')).toBeInTheDocument()
   })
 
   it('shows footer when a dataset is selected', async () => {

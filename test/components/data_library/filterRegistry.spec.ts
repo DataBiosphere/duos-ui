@@ -17,6 +17,20 @@ const availableFilters: AvailableFilters = {
   dac: [],
   workspaceTools: [],
   workspacePlatform: [],
+  modelFormat: [],
+  modelLicense: [],
+  modelCloud: [],
+  modelTags: [],
+  workspaceCloud: [],
+  workspaceAccess: [],
+  presentationEvent: [],
+  presentationFormat: [],
+  presentationAccess: [],
+  publicationJournal: [],
+  publicationAccess: [],
+  ipType: [],
+  ipStatus: [],
+  fundingFunderName: [],
   clinicalTrialStatus: [],
   clinicalTrialPhase: [],
   clinicalTrialInterventionType: [],
@@ -25,8 +39,6 @@ const availableFilters: AvailableFilters = {
   biospecimenDataUse: [],
   biospecimenPostMortemIntervalUnit: [],
   soApprovalModel: [],
-  datasetsCited: [],
-  publicationsDatasetsCited: [],
   instantApproval: [],
   biospecimenPostMortemIntervalRange: { min: 0, max: 10 },
   participantCountRange: { min: 0, max: 10 },
@@ -38,34 +50,94 @@ describe('filterRegistry', () => {
     accessManagement: ['controlled'],
     dataType: ['Genomic'],
     participantCount: { min: 10, max: 100 },
-    datasetsCited: true,
+    instantApproval: true,
+    biospecimenType: ['Blood'],
   }
 
   it('returns asset-specific visible filters', () => {
     const publicationFilters = getFilterSectionsForAsset(AssetType.PUBLICATIONS, availableFilters)
-    expect(publicationFilters.map(section => section.key)).toEqual(['publicationsDatasetsCited'])
+    expect(publicationFilters.map(section => section.key)).toEqual(['publicationJournal', 'publicationAccess', 'publicationPublishedDate'])
   })
 
-  it('returns no visible filters for models', () => {
+  it('returns the model-specific filters', () => {
     const modelFilters = getFilterSectionsForAsset(AssetType.MODELS, availableFilters)
-    expect(modelFilters.map(section => section.key)).toEqual([])
+    expect(modelFilters.map(section => section.key)).toEqual(['modelFormat', 'modelLicense', 'modelCloud', 'modelTags'])
   })
 
-  it('returns presentation-specific datasets cited filter', () => {
+  it('returns the workspace-specific filters', () => {
+    const workspaceFilters = getFilterSectionsForAsset(AssetType.WORKSPACES, availableFilters)
+    expect(workspaceFilters.map(section => section.key)).toEqual(['workspaceTools', 'workspacePlatform', 'workspaceCloud', 'workspaceAccess'])
+  })
+
+  it('returns the presentation-specific filters', () => {
     const presentationFilters = getFilterSectionsForAsset(AssetType.PRESENTATIONS, availableFilters)
-    expect(presentationFilters.map(section => section.key)).toEqual(['datasetsCited'])
+    expect(presentationFilters.map(section => section.key)).toEqual(['presentationEvent', 'presentationFormat', 'presentationAccess', 'presentationDate'])
+  })
+
+  // A filter set on one tab shows as a chip on every other, so two keys sharing
+  // a label render as the same control twice in one panel. 'Data Use' predates
+  // this work; anything new sharing a label is the bug this pins.
+  it('gives every filter a label no other filter shares', () => {
+    const labelsByKey = new Map<string, string>()
+    for (const tab of Object.values(AssetType)) {
+      for (const section of getFilterSectionsForAsset(tab, availableFilters)) {
+        labelsByKey.set(section.key, section.label)
+      }
+    }
+
+    const keysByLabel = new Map<string, string[]>()
+    for (const [key, label] of labelsByKey) {
+      keysByLabel.set(label, [...(keysByLabel.get(label) ?? []), key])
+    }
+
+    const collisions = [...keysByLabel.entries()].filter(([, keys]) => keys.length > 1)
+    expect(collisions).toEqual([['Data Use', ['dataUse', 'biospecimenDataUse']]])
+  })
+
+  describe('re-adding a selected value the corpus no longer offers', () => {
+    const options = (values: string[]) => values.map(value => ({ value, label: value }))
+
+    // The lists render in array order, so appending buries the value at the end.
+    it('keeps an alphabetical list alphabetical', () => {
+      const sections = getFilterSectionsForAsset(
+        AssetType.WORKSPACES,
+        { ...availableFilters, workspacePlatform: options(['AnVIL', 'Terra']) },
+        { ...EMPTY_FILTERS, workspacePlatform: ['BioData Catalyst'] },
+      )
+
+      expect(sections.find(section => section.key === 'workspacePlatform')?.options?.map(o => o.value))
+        .toEqual(['AnVIL', 'BioData Catalyst', 'Terra'])
+    })
+
+    // Access management reads open, via DUOS, external — not alphabetically.
+    it('leaves a deliberately ordered enum list alone', () => {
+      const ordered = [
+        { value: 'open', label: 'Open Access' },
+        { value: 'controlled', label: 'via DUOS' },
+        { value: 'external', label: 'External to DUOS' },
+      ]
+      const sections = getFilterSectionsForAsset(
+        AssetType.STUDIES,
+        { ...availableFilters, accessManagement: ordered },
+        { ...EMPTY_FILTERS, accessManagement: ['legacy'] },
+      )
+
+      expect(sections.find(section => section.key === 'accessManagement')?.options?.map(o => o.value))
+        .toEqual(['open', 'controlled', 'external', 'legacy'])
+    })
   })
 
   it('builds clauses for every active filter regardless of tab so rules combine', () => {
     const clauses = buildActiveFilterClauses(filters)
-    // accessManagement, dataType, participantCount and datasetsCited are all set.
-    expect(clauses).toHaveLength(4)
+    // Five filters are set.
+    expect(clauses).toHaveLength(5)
     const serialized = JSON.stringify(clauses)
 
     expect(serialized).toContain('accessManagement.keyword')
     expect(serialized).toContain('study.dataTypes')
     expect(serialized).toContain('participantCount')
-    expect(serialized).toContain('study.assets.presentations.citation')
+    expect(serialized).toContain('instantApprovalEligible')
+    expect(serialized).toContain('study.assets.biospecimens')
   })
 
   describe('data use modifiers', () => {
@@ -151,7 +223,7 @@ describe('filterRegistry', () => {
       expect(keys).toContain('accessManagement')
       expect(keys).toContain('dataType')
       expect(keys).toContain('participantCount')
-      expect(keys).toContain('datasetsCited')
+      expect(keys).toContain('instantApproval')
     })
 
     it('resolves value labels from available filters and formats ranges/booleans', () => {
@@ -159,14 +231,13 @@ describe('filterRegistry', () => {
 
       expect(chips).toContainEqual({ key: 'accessManagement', sectionLabel: 'Access Request Process', valueLabel: 'via DUOS', value: 'controlled' })
       expect(chips).toContainEqual({ key: 'participantCount', sectionLabel: 'Participants', valueLabel: '10 – 100' })
-      expect(chips).toContainEqual({ key: 'datasetsCited', sectionLabel: 'Datasets Cited (Presentations)?', valueLabel: 'Yes' })
+      expect(chips).toContainEqual({ key: 'instantApproval', sectionLabel: 'Instant Approval Available?', valueLabel: 'Yes' })
     })
 
     it('excludes filters that the current tab renders itself', () => {
-      // Datasets renders accessManagement, dataType and participantCount, so only
-      // datasetsCited (not a datasets filter) remains external.
+      // Datasets renders all but biospecimenType, so only that is external.
       const chips = getExternalActiveFilters(AssetType.DATASETS, filters, labelledFilters)
-      expect(chips.map(chip => chip.key)).toEqual(['datasetsCited'])
+      expect(chips.map(chip => chip.key)).toEqual(['biospecimenType'])
     })
 
     it('falls back to the raw value when no label is available', () => {
@@ -280,81 +351,6 @@ describe('filterRegistry', () => {
     })
   })
 
-  describe('publicationsDatasetsCited (its own filter)', () => {
-    it('builds a server clause on the publications citation field', () => {
-      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, publicationsDatasetsCited: true })
-      expect(JSON.stringify(clauses)).toContain('study.assets.publications.citation')
-      expect(JSON.stringify(clauses)).not.toContain('study.assets.presentations.citation')
-    })
-
-    it('matches an explicit true with a bare term when "Yes" is selected', () => {
-      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, publicationsDatasetsCited: true })
-      expect(clauses).toContainEqual({ term: { 'study.assets.publications.citation': true } })
-    })
-
-    it('treats a missing citation field as "No" so legacy documents are not excluded', () => {
-      // The grid renders a missing citation as false (`citation ?? false`), so
-      // "No" must match an explicit false OR the absence of the field rather than
-      // a bare `term: { citation: false }` that would drop legacy documents.
-      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, publicationsDatasetsCited: false })
-      expect(clauses).toContainEqual({
-        bool: {
-          should: [
-            { term: { 'study.assets.publications.citation': false } },
-            { bool: { must_not: [{ exists: { field: 'study.assets.publications.citation' } }] } },
-          ],
-          minimum_should_match: 1,
-        },
-      })
-    })
-
-    it('applies the same missing-field handling to the presentations citation filter', () => {
-      const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, datasetsCited: false })
-      expect(clauses).toContainEqual({
-        bool: {
-          should: [
-            { term: { 'study.assets.presentations.citation': false } },
-            { bool: { must_not: [{ exists: { field: 'study.assets.presentations.citation' } }] } },
-          ],
-          minimum_should_match: 1,
-        },
-      })
-    })
-
-    it('is a visible filter on the Publications tab (not an external chip there)', () => {
-      const sections = getFilterSectionsForAsset(AssetType.PUBLICATIONS, availableFilters)
-      expect(sections.map(s => s.key)).toContain('publicationsDatasetsCited')
-
-      const chips = getExternalActiveFilters(
-        AssetType.PUBLICATIONS,
-        { ...EMPTY_FILTERS, publicationsDatasetsCited: true },
-        availableFilters,
-      )
-      expect(chips.map(chip => chip.key)).not.toContain('publicationsDatasetsCited')
-    })
-
-    it('appears as a removable external chip on tabs that do not own it', () => {
-      const chips = getExternalActiveFilters(
-        AssetType.STUDIES,
-        { ...EMPTY_FILTERS, publicationsDatasetsCited: true },
-        availableFilters,
-      )
-      expect(chips).toContainEqual({ key: 'publicationsDatasetsCited', sectionLabel: 'Datasets Cited (Publications)?', valueLabel: 'Yes' })
-    })
-
-    it('gives the two citation filters distinct chip labels so they are not confused', () => {
-      const chips = getExternalActiveFilters(
-        AssetType.STUDIES,
-        { ...EMPTY_FILTERS, datasetsCited: true, publicationsDatasetsCited: false },
-        availableFilters,
-      )
-      const labels = chips
-        .filter(chip => chip.key === 'datasetsCited' || chip.key === 'publicationsDatasetsCited')
-        .map(chip => chip.sectionLabel)
-      expect(new Set(labels).size).toEqual(2)
-    })
-  })
-
   describe('removeFilterValue', () => {
     it('removes a single value from an array filter', () => {
       const next = removeFilterValue({ ...filters, accessManagement: ['controlled', 'open'] }, 'accessManagement', 'controlled')
@@ -367,8 +363,86 @@ describe('filterRegistry', () => {
     })
 
     it('resets a boolean filter to undefined', () => {
-      const next = removeFilterValue(filters, 'datasetsCited')
-      expect(next.datasetsCited).toBeUndefined()
+      const next = removeFilterValue(filters, 'instantApproval')
+      expect(next.instantApproval).toBeUndefined()
     })
+  })
+})
+
+// A wrong `study.assets.*` path type-checks and silently matches nothing, so
+// pin each one. The multi-value shape is a should-array of match_phrase.
+describe('filterRegistry — model and workspace query clauses', () => {
+  it.each([
+    ['modelFormat', 'study.assets.models.format'],
+    ['modelLicense', 'study.assets.models.license'],
+    ['modelCloud', 'study.assets.models.cloud'],
+    ['modelTags', 'study.assets.models.tags'],
+    ['workspaceCloud', 'study.assets.workspaces.cloud'],
+    ['workspaceAccess', 'study.assets.workspaces.access'],
+  ])('%s queries %s', (key, field) => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: ['x'] })
+    expect(clauses).toEqual([{ bool: { should: [{ match_phrase: { [field]: 'x' } }] } }])
+  })
+
+  it('ORs every selected value within one clause', () => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, modelCloud: ['AWS', 'GCP'] })
+    expect(clauses).toEqual([{
+      bool: {
+        should: [
+          { match_phrase: { 'study.assets.models.cloud': 'AWS' } },
+          { match_phrase: { 'study.assets.models.cloud': 'GCP' } },
+        ],
+      },
+    }])
+  })
+
+  it('builds no clause for an unselected filter', () => {
+    expect(buildActiveFilterClauses(EMPTY_FILTERS)).toEqual([])
+  })
+})
+
+// A wrong `study.assets.*` path type-checks and silently matches nothing. These
+// match the exact indexed value, not the analyzed phrase: the option lists are
+// built from the corpus, and match_phrase would also admit 'Nature Genetics'
+// for 'Nature' — inflating every other tab's badge, which never re-checks rows.
+describe('filterRegistry — presentation and publication query clauses', () => {
+  it.each([
+    ['presentationEvent', 'study.assets.presentations.event'],
+    ['presentationFormat', 'study.assets.presentations.format'],
+    ['presentationAccess', 'study.assets.presentations.access'],
+    ['publicationJournal', 'study.assets.publications.journal'],
+    ['publicationAccess', 'study.assets.publications.access'],
+  ])('%s queries %s on its keyword subfield', (key, field) => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: ['x'] })
+    expect(clauses).toEqual([{ bool: { should: [{ term: { [`${field}.keyword`]: 'x' } }] } }])
+  })
+
+  it.each([
+    ['presentationDate', 'study.assets.presentations.date'],
+    ['publicationPublishedDate', 'study.assets.publications.publishedDate'],
+  ])('%s builds a range clause on %s', (key, field) => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: { after: '2024-01-01', before: '2024-12-31' } })
+    expect(clauses).toEqual([{ range: { [field]: { gte: '2024-01-01', lte: '2024-12-31' } } }])
+  })
+
+  // Inverted bounds must read as inactive everywhere, clause included.
+  it.each(['presentationDate', 'publicationPublishedDate'])('%s builds no clause for inverted bounds', (key) => {
+    expect(buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: { after: '2024-12-31', before: '2024-01-01' } })).toEqual([])
+  })
+})
+
+// A wrong `study.assets.*` path type-checks and silently matches nothing. These
+// are controlled vocabularies matched against the exact indexed value: the
+// option lists are built from the corpus, and match_phrase would also admit
+// 'Provisional Patent Application' for 'Provisional Patent' — inflating every
+// other tab's badge, which never re-checks rows.
+describe('filterRegistry — IP and funding query clauses', () => {
+  it.each([
+    ['ipType', 'study.assets.intellectualProperties.type'],
+    ['ipStatus', 'study.assets.intellectualProperties.status'],
+    ['fundingFunderName', 'study.assets.funding.funderName'],
+  ])('%s queries %s on its keyword subfield', (key, field) => {
+    const clauses = buildActiveFilterClauses({ ...EMPTY_FILTERS, [key]: ['x'] })
+    expect(clauses).toEqual([{ bool: { should: [{ term: { [`${field}.keyword`]: 'x' } }] } }])
   })
 })

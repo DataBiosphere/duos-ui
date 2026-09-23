@@ -1,20 +1,21 @@
 import { getDefaultProperties } from '@databiosphere/bard-client'
 
 import { Storage } from 'src/libs/storage'
-import { BFF_BARD_PREFIX, Config, Token } from 'src/libs/config'
+import { BFF_BARD_PREFIX, BFF_PUBLIC_METRICS_PREFIX, Config, Token } from 'src/libs/config'
 import { MetricsEventName } from 'src/libs/events'
 import { retryFetchPost } from 'src/libs/ajax/fetchAdapter'
 
-// Set default timeout for all metrics calls to 30 seconds
-const defaultSignal: AbortSignal = AbortSignal.timeout(30000)
+// Default timeout for every metrics call. This must be a fresh signal per
+// call: AbortSignal.timeout fires once, so a single module-level signal would
+// be permanently aborted 30 s after page load and every later default-signal
+// call would abort immediately (silently, since callers swallow the error).
+const defaultSignal = (): AbortSignal => AbortSignal.timeout(30000)
 
-// BFF NOTE: identified Bard calls authenticate with the user's token, which
-// the browser no longer holds post-cutover — they go through the /bard-api
-// proxy, where the session's token is attached server-side (Epic 3, story
-// 3-K). Anonymous events carry no credentials and stay on the direct Bard URL.
+// Only captureEvent uses the anonymous branch, always with /api/event.
+// Identify and syncProfile continue through the authenticated Bard proxy.
 const bardUrl = async (identified: boolean, path: string): Promise<string> => {
-  if (identified && await Config.isBffEnabled()) {
-    return `${BFF_BARD_PREFIX}${path}`
+  if (await Config.isBffEnabled()) {
+    return identified ? `${BFF_BARD_PREFIX}${path}` : `${BFF_PUBLIC_METRICS_PREFIX}/event`
   }
   return `${await Config.getBardApiUrl()}${path}`
 }
@@ -24,11 +25,11 @@ export const Metrics = {
     event: MetricsEventName,
     // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     details: Record<string, any> = {},
-    signal: AbortSignal = defaultSignal,
+    signal: AbortSignal = defaultSignal(),
   ) => captureEventFn(event, signal, details).catch(() => {
   }),
-  syncProfile: (signal: AbortSignal = defaultSignal) => syncProfile(signal),
-  identify: (anonId: string, signal: AbortSignal = defaultSignal) => identify(anonId, signal),
+  syncProfile: (signal: AbortSignal = defaultSignal()) => syncProfile(signal),
+  identify: (anonId: string, signal: AbortSignal = defaultSignal()) => identify(anonId, signal),
 }
 
 /**

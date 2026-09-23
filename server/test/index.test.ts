@@ -353,7 +353,11 @@ describe('GET /config.json', () => {
 
     const res = await localApp.inject({ method: 'GET', url: '/config.json' })
     expect(res.statusCode).toBe(200)
-    expect(res.json()).toEqual({ apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443', env: 'dev' })
+    expect(res.json()).toEqual({
+      apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443',
+      env: 'dev',
+      bannersUrl: 'https://storage.googleapis.com/duos-banners-dev/dev_notifications.json',
+    })
 
     // HEAD must serve the same (overridden) resource, not fall through to the
     // static file — mismatched GET/HEAD Content-Length corrupts caches.
@@ -664,6 +668,23 @@ describe('BFF auth route registration', () => {
     await localApp.close()
   })
 
+  it('answers the public metrics route with 503 rather than the SPA page when DUOS_BARD_URL is not set', async () => {
+    delete process.env.DUOS_BARD_URL
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({
+      method: 'POST',
+      url: '/public/metrics/event',
+      headers: { 'content-type': 'application/json' },
+      payload: '{"event":"duos:page_view"}',
+    })
+
+    expect(res.statusCode).toBe(503)
+    expect(res.headers['content-type']).toContain('application/json')
+
+    await localApp.close()
+  })
+
   it('does not register the /bard-api proxy route when bffEnabled is false, even with DUOS_BARD_URL set', async () => {
     process.env.DUOS_BARD_URL = 'https://terra-bard-dev.appspot.com'
     const localApp = await buildAppWithConfig({ bffEnabled: false })
@@ -746,6 +767,21 @@ describe('envBool', () => {
     const { envBool } = await import('../src/index.js')
     for (const v of ['false', 'FALSE', '0', 'no', 'off']) expect(envBool(v, true)).toBe(false)
     for (const v of ['true', 'True', '1', 'yes', 'on']) expect(envBool(v, false)).toBe(true)
+  })
+})
+
+describe('shouldUseHttps', () => {
+  it('terminates TLS in local development only, when nothing overrides it', async () => {
+    const { shouldUseHttps } = await import('../src/index.js')
+    expect(shouldUseHttps(undefined, true, false)).toBe(true)
+    expect(shouldUseHttps(undefined, true, true)).toBe(false)
+    expect(shouldUseHttps(undefined, false, false)).toBe(false)
+  })
+
+  it('lets DUOS_SERVER_HTTPS select the transport in either direction', async () => {
+    const { shouldUseHttps } = await import('../src/index.js')
+    expect(shouldUseHttps('true', false, true)).toBe(true)
+    expect(shouldUseHttps('false', true, false)).toBe(false)
   })
 })
 

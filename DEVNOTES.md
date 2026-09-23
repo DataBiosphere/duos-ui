@@ -185,12 +185,20 @@ See [TESTING.md](TESTING.md) for full testing instructions.
 
 ## E2E Tests (Playwright)
 
-Build the app and run e2e tests against the preview server:
+The suite runs against the Fastify server (`pnpm run serve`, which Playwright
+starts for you). Two of the six spec files also need role service-account keys,
+so follow the numbered steps in [TESTING.md](TESTING.md) rather than this
+summary. The short path, for the specs that need no credentials:
 
 ```shell
+./scripts/render-configs.sh          # once, for server.key and server.crt
+cp config/dev.json public/config.json
 CI=false pnpm run build
-pnpm run test:e2e
+pnpm exec playwright test about.spec.ts home.spec.ts status.spec.ts liveness.spec.ts
 ```
+
+The server terminates TLS itself, so without that pair it exits at once with
+`ENOENT ... server.key` and Playwright reports a web server that never started.
 
 ## Unit & Component Tests (Vitest)
 

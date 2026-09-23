@@ -55,6 +55,15 @@ export const STUDIES_AGG: AggregationDefinition = {
   },
 }
 
+/** Documents indexed before these fields became multi-selects still hold a bare string. */
+export const toStringArray = (value: unknown): string[] => {
+  const entries: unknown[] = Array.isArray(value) ? value : [value]
+  return entries
+    .filter((entry): entry is string => typeof entry === 'string')
+    .map(entry => entry.trim())
+    .filter(Boolean)
+}
+
 /** Union of every row type that can appear in the DataGrid */
 export type LibraryRow = DatasetTerm | StudyAggregation | ModelAsset | WorkspaceAsset | ClinicalTrialAsset | BiospecimenAsset | PublicationAsset | PresentationAsset | IntellectualPropertyAsset | FundingResourceAsset
 
