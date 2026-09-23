@@ -3,7 +3,7 @@
 **Tickets:** [DT-3610](https://broadworkbench.atlassian.net/browse/DT-3610), [DUOS-4021](https://broadworkbench.atlassian.net/browse/DT-4021)    
 **Records:** [ADR-013](ADR-013-content-security-policy.md)  
 **First run:** 2026-09-04  
-**Last updated:** 2026-09-22  
+**Last updated:** 2026-09-23  
 **Run by:** Greg Rushton  
 
 This document records verification of DUOS's Content Security Policy (CSP) and
@@ -20,11 +20,11 @@ and limits of the evidence. Header examples are historical measurements, not
 configuration templates: public BFF endpoints (5-F6) and the banner bucket move
 changed the policy after the initial tests.
 
-## Latest recorded status — 2026-09-22
+## Latest recorded status — 2026-09-23
 
 | Environment | Mode and latest check | Recorded result | Outstanding verification |
 |---|---|---|---|
-| Local | Legacy: report-only and enforced (2026-09-04); BFF: enforced, re-run against the post-5-F6 policy (2026-09-22) | Tested workflows passed, including anonymous metrics from the console; browser blocked a disallowed request and the report reached the log with `"disposition": "enforce"` | Feature flags remain untested (no callers) |
+| Local | Legacy: report-only and enforced (2026-09-04); BFF: enforced, re-run against the post-5-F6 policy (2026-09-22) | Tested workflows passed, including anonymous metrics from the console; browser blocked a disallowed request and the report reached the log with `"disposition": "enforce"` | None |
 | Dev | Legacy, enforced; workflows checked 2026-09-08, headers, banner workflow and browser check 2026-09-22 | Workflow checks passed, banner workflow passed against the new bucket; browser blocked a disallowed request and the report reached logging with `"disposition": "enforce"` | None |
 | Staging | Legacy, enforced; workflows and browser blocking checked 2026-09-08, headers and banner workflow 2026-09-22 | Workflow checks passed, banner workflow passed against the new bucket; browser blocked and reported a disallowed request | None |
 | Prod | Legacy, enforced; logs analysed 2026-09-21, header, workflows, charts and browser check 2026-09-22 | All eight workflows passed; browser blocked a disallowed request and the report reached logging with `"disposition": "enforce"`; none of 249 reviewed reports attributed to application code | None |
@@ -180,7 +180,7 @@ The first BFF pass ran without `DUOS_BARD_URL`, `DUOS_ECM_URL` or
 `DUOS_TDR_URL` in `.env.local`. The BFF logs a warning and skips those proxy
 registrations. The unmatched `POST /bard-api/...` requests then fell to
 `setNotFoundHandler`, which serves `index.html` with **status 200**
-(`server/src/index.ts:270`). `identify` and `event` looked successful in the
+(in `server/src/index.ts`). `identify` and `event` looked successful in the
 browser and reached nothing.
 
 Only `syncProfile` failed visibly, and for an unrelated reason: it posts
@@ -313,7 +313,7 @@ if a policy entry is wrong.
 On 2026-09-22 the banner workflow was driven again on staging, against the new
 `duos-banners-staging` bucket, and passed.
 
-One trap worth recording. That variable belongs in `secrets.envSecrets`, not
+One trap worth recording. `DUOS_CSP_REPORT_ONLY` belongs in `secrets.envSecrets`, not
 `secrets.additionalEnvSecrets`. The chart renders `envSecrets` values through
 `| quote`; `additionalEnvSecrets` is emitted by `toYaml` as-is, so an unquoted
 `false` there reaches Kubernetes as a boolean and the deployment fails to apply.
@@ -468,8 +468,8 @@ same-origin through `publicProxy`. Under `bffEnabled`, `connect-src` is
 
 `FeatureFlag.ts` now calls `BFF_PUBLIC_FEATURES_PREFIX`, a same-origin path
 that needs no external allowlist entry. This removes the allowlist requirement;
-it does not close the workflow-testing gap. Feature flags remain untested in
-this verification record.
+it does not close the workflow-testing gap. The route was tested separately on
+2026-09-23; see **Feature flags check**.
 
 ### 2. Banner move — DT-4063 ([#3942](https://github.com/DataBiosphere/duos-ui/pull/3942))
 
@@ -580,6 +580,80 @@ in `Metrics.ts`; unit tests cover that code.
 
 ---
 
+## Feature flags check — 2026-09-23
+
+No page in the client calls `FeatureFlag.ts`, so the route was exercised from the
+browser console on each deployed host:
+
+```javascript
+const r = await fetch('/public/features'); console.log(r.status, await r.json())
+```
+
+`publicProxy` is registered in every mode — "Public routes must not depend on
+session infrastructure or the BFF cutover" — so the route answers even where
+`bffEnabled` is false.
+
+| Environment | Build | Result |
+|---|---|---|
+| dev | `032c4289` | 200, JSON: `BFF_ENABLED` and `NHGRI_RESTRICTED_DAC` |
+| staging | `032c4289` | 200, JSON: `[]` |
+| prod, before its release | `d9fe2685` | **route absent**: `SyntaxError`, the body was `index.html` |
+| prod, after its release | `032c4289` | 200, JSON: one flag |
+
+The keyed route, `GET /public/features/NHGRI_RESTRICTED_DAC`, on the same builds:
+
+| Environment | Result |
+|---|---|
+| dev | 200, `{"id": "NHGRI_RESTRICTED_DAC", "value": "107"}` |
+| staging | 404, `{"message": "Feature flag with id 'NHGRI_RESTRICTED_DAC' not found", "code": 404}` |
+| prod | 200, `{"id": "NHGRI_RESTRICTED_DAC", "value": "2"}` |
+
+Staging's 404 is a correct result, not a failure. Staging defines no flags, so
+Consent answered "not found", and the route passed Consent's JSON error body
+through. That shows the keyed route reaches its upstream.
+
+On every environment the call returned JSON from Consent's `/feature`, and the
+enforced policy raised no CSP error, so `'self'` allows the route.
+
+**The first prod result was not a failure.** Prod then ran `d9fe2685` (#3944),
+the commit before 5-F6 (#3914), so no `/public/*` route existed there. The unmatched request fell to
+`setNotFoundHandler`, which serves `index.html` with status 200 — the same
+pitfall recorded in the local run. `r.status` alone would have reported success;
+`r.json()` exposed it. Prod's legacy clients call Consent and Bard directly, so
+nothing in prod used these routes. The check passed after prod's release on
+2026-09-23 moved it to `032c4289`.
+
+### Anonymous metrics on prod
+
+After the release, a signed-out console `POST /public/metrics/event` on prod,
+with the event name `test:csp-verification`, returned **200** with
+`content-type: text/html; charset=UTF-8`, and raised no CSP error.
+
+**Status and content type cannot tell Bard apart from the SPA fallback.** Bard's
+own success response is `text/html`. Measured on dev with one valid event:
+
+| Signal | Bard through the proxy | SPA fallback (`setNotFoundHandler`) |
+|---|---|---|
+| Status | 200 | 200 |
+| `content-type` | `text/html; charset=UTF-8` | `text/html; charset=UTF-8` |
+| Body | 0 bytes | the ~1.5 KB `index.html` |
+| `content-security-policy` | `sandbox`, added by `publicProxy` | the full page policy |
+| `x-powered-by` | `Express`, from Bard | absent |
+
+Use the body length or either header to tell them apart. (Bard also validates
+`properties.distinct_id` as a GUID, and answers 400 when it is not one.)
+
+**The route is registered on prod.** Six `POST`s with a body that is not valid
+JSON all returned 400 with an empty body. `publicProxy`'s own JSON parser gives
+that answer before any request reaches Bard. The SPA fallback would have
+returned a 200 page. Prod also served `032c4289`, confirmed twice through
+`config.json`. So the 200 came from `terra-bard-prod`.
+
+The event reached prod analytics under the name `test:csp-verification`, so it
+can be filtered out.
+
+---
+
 ## Remaining verification checklist
 
 - [x] **Verify production enforcement after deployment.** Done 2026-09-22: the
@@ -595,7 +669,10 @@ in `Metrics.ts`; unit tests cover that code.
 - [x] **Record anonymous metrics under BFF.** Done 2026-09-22 from the browser
   console, signed out: `POST /public/metrics/event` returned 200 end to end,
   with no CSP report. No signed-out page fires the event on demand.
-- [ ] **Exercise feature flags explicitly.** This feature cannot be tested.
+- [x] **Exercise feature flags explicitly.** Done 2026-09-23 on dev, staging and
+  prod, for both the list route and the keyed route; see **Feature flags check**.
+- [x] **Record anonymous metrics on prod.** Done 2026-09-23 after prod's release;
+  see **Anonymous metrics on prod**.
 - [x] **Record a browser blocking and reporting check in every configuration.**
   Dev, staging, prod and the updated local BFF configuration each have one,
   recorded on 2026-09-08 and 2026-09-22. Inspect headers as a separate check,
