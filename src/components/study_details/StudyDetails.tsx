@@ -20,9 +20,7 @@ import {
   WorkspaceAsset,
 } from 'src/types/library'
 import {
-  useFrequentlyRequestedWithStudies,
   usePiDetails,
-  useSimilarStudies,
   useStudyClinicalTrials,
   useStudyDatasets,
   useStudyExportableDatasets,
@@ -39,11 +37,12 @@ import StudyPageSection from 'src/components/study_details/StudyPageSection'
 import StudySidebar from 'src/components/study_details/StudySidebar'
 import StudyCommentsSection from 'src/components/study_details/StudyCommentsSection'
 import StudyAssetCountBadges from 'src/components/study_details/StudyAssetCountBadges'
+import SimilarStudiesSection from 'src/components/study_details/SimilarStudiesSection'
+import FrequentlyRequestedWithSection from 'src/components/study_details/FrequentlyRequestedWithSection'
 import StudyTitleBadges from 'src/components/study_details/StudyTitleBadges'
 import StudyInfoTable from 'src/components/study_details/StudyInfoTable'
 import PiExternalProfileIcons from 'src/components/study_details/PiExternalProfileIcons'
 import { getPiProfileLinks } from 'src/components/study_details/piProfileLinks'
-import StudyRecommendationCarousel from 'src/components/study_details/StudyRecommendationCarousel'
 import StudyDarHistory from 'src/components/study_details/StudyDarHistory'
 import StudySecondaryResearchOutputs from 'src/components/study_details/StudySecondaryResearchOutputs'
 import StudyPublicationCards from 'src/components/study_details/StudyPublicationCards'
@@ -128,8 +127,6 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const studyDescription = populated(study?.description) ?? populated(piDetails?.description)
   const studyDataTypes = populated(study?.dataTypes) ?? populated(piDetails?.dataTypes)
   const piName = populated(study?.piName) ?? populated(piDetails?.piName)
-  const similarStudies = useSimilarStudies(studyId)
-  const frequentlyRequestedWith = useFrequentlyRequestedWithStudies(studyId)
   const selectedStudyIds = selectedDatasets.length > 0 && study
     ? [study.studyId]
     : []
@@ -208,10 +205,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             <StudyTitleBadges dataTypes={studyDataTypes} />
             <StudyAssetCountBadges
               counts={[
-                ['Datasets', data.total],
-                ['Models', models.data?.length ?? 0],
-                ['Workspaces', workspaces.data?.length ?? 0],
-                ['Publications', publications.data?.length ?? 0],
+                { singular: 'Dataset', plural: 'Datasets', count: data.total },
+                { singular: 'Model', plural: 'Models', count: models.data?.length ?? 0 },
+                { singular: 'Workspace', plural: 'Workspaces', count: workspaces.data?.length ?? 0 },
+                { singular: 'Publication', plural: 'Publications', count: publications.data?.length ?? 0 },
               ]}
             />
             <Typography variant="body1" sx={{ pt: 2.5 }}>
@@ -331,20 +328,8 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             columns={FUNDING_RESOURCE_COLUMNS}
           />
           <StudySecondaryResearchOutputs studyId={studyId} />
-          <StudyRecommendationCarousel
-            id="frequently-requested-with"
-            heading="Studies often Requested with this Study"
-            recommendations={frequentlyRequestedWith.data}
-            isPending={frequentlyRequestedWith.isPending}
-            error={frequentlyRequestedWith.error}
-          />
-          <StudyRecommendationCarousel
-            id="similar-studies"
-            heading="Recommended Studies based on Data Type"
-            recommendations={similarStudies.data}
-            isPending={similarStudies.isPending}
-            error={similarStudies.error}
-          />
+          <FrequentlyRequestedWithSection studyId={studyId} />
+          <SimilarStudiesSection studyId={studyId} />
           <StudyPageSection id="comments" heading="Comments & Ratings">
             <StudyCommentsSection studyId={studyId} />
           </StudyPageSection>

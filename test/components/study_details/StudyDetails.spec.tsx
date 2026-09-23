@@ -594,7 +594,7 @@ describe('Study details test', () => {
     expect(screen.getByRole('heading', { name: 'Primary Study Publications' })).toBeInTheDocument()
     expect(screen.getByText('No primary study publications have been added yet.')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Studies often Requested with this Study' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Recommended Studies based on Data Type' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Recommended Studies by Data Type or PI' })).toBeInTheDocument()
     expect(await screen.findAllByText('No study recommendations yet.')).toHaveLength(2)
   })
 
