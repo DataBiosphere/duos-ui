@@ -14,7 +14,11 @@ import { StudyComments } from 'src/libs/ajax/StudyComments'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ElasticsearchQuery } from 'src/types/elastic'
 
-vi.mock('src/libs/config', () => ({
+// Spread the real module so the mock only overrides what these tests control. A hand-listed mock
+// breaks whenever anything this page imports reads a config export at load time - fetchAdapter
+// does, and that is how this spec stopped importing once the page reached it.
+vi.mock('src/libs/config', async importOriginal => ({
+  ...(await importOriginal<typeof import('src/libs/config')>()),
   Config: {
     getApiUrl: vi.fn().mockResolvedValue('http://localhost'),
     getTerraUrl: vi.fn().mockResolvedValue('http://terra.localhost'),
