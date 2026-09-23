@@ -1,14 +1,16 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { StudyDetails } from 'src/components/study_details/StudyDetails'
+import ScrollToTopOnNavigate from 'src/components/ScrollToTopOnNavigate'
 import { Storage } from 'src/libs/storage'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { DuosUser, LibraryCard } from 'src/types/model'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
+import { StudyComments } from 'src/libs/ajax/StudyComments'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ElasticsearchQuery } from 'src/types/elastic'
 
@@ -32,9 +34,43 @@ vi.mock('src/libs/ajax/DataSet', () => ({
   },
 }))
 
+vi.mock('src/libs/ajax/StudyComments', () => ({
+  COMMENTS_PAGE_SIZE: 25,
+  MAX_COMMENT_LENGTH: 2000,
+  StudyComments: {
+    listComments: vi.fn().mockResolvedValue({
+      comments: [], averageRating: undefined, total: 0, yourComment: undefined,
+    }),
+    postComment: vi.fn(),
+    deleteComment: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/ajax/DatasetMetrics', () => ({
+  DatasetMetrics: {
+    getDatasetStats: vi.fn().mockResolvedValue([]),
+    getStudyStats: vi.fn().mockResolvedValue([]),
+    getResearchOutputs: vi.fn().mockResolvedValue({ presentations: [], publications: [], intellectualProperties: [] }),
+  },
+}))
+
+vi.mock('src/libs/ajax/StudyRecommendations', () => ({
+  StudyRecommendations: {
+    getSimilar: vi.fn().mockResolvedValue([]),
+    getFrequentlyRequestedWith: vi.fn().mockResolvedValue([]),
+  },
+}))
+
 vi.mock('src/libs/ajax/Study', () => ({
   Study: {
     getStudyNames: vi.fn().mockResolvedValue([]),
+    getModels: vi.fn().mockResolvedValue([]),
+    getWorkspaces: vi.fn().mockResolvedValue([]),
+    getPresentations: vi.fn().mockResolvedValue([]),
+    getPublications: vi.fn().mockResolvedValue([]),
+    getClinicalTrials: vi.fn().mockResolvedValue([]),
+    getIntellectualProperty: vi.fn().mockResolvedValue([]),
+    getFundingResources: vi.fn().mockResolvedValue([]),
     getById: vi.fn().mockResolvedValue({}),
   },
 }))
@@ -45,6 +81,8 @@ vi.mock('src/utils/accessUtils', () => ({
 
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Study } from 'src/libs/ajax/Study'
+import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 
 const datasets = [
   {
@@ -183,6 +221,8 @@ const mountComponent = (withStudySwitcher = false) =>
   render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={['/studies/1']}>
+        {/* The scroll reset lives at the router now, not in this page */}
+        <ScrollToTopOnNavigate />
         {withStudySwitcher && <StudySwitcher />}
         <Routes>
           <Route path="/studies/:studyId" element={<StudyDetails />} />
@@ -216,6 +256,7 @@ beforeEach(() => {
     userId: 42,
     libraryCard: {} as LibraryCard,
   } as DuosUser)
+  vi.spyOn(globalThis, 'scrollTo').mockImplementation(() => {})
 })
 
 afterEach(() => {
@@ -225,6 +266,17 @@ afterEach(() => {
 })
 
 describe('Study details test', () => {
+  it('scrolls to the overview when navigating directly between studies', async () => {
+    const user = userEvent.setup()
+    mountComponent(true)
+    await screen.findByText(datasets[0].datasetName)
+    vi.mocked(globalThis.scrollTo).mockClear()
+
+    await user.click(screen.getByRole('button', { name: 'View study 2' }))
+
+    await waitFor(() => expect(globalThis.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0 }))
+  })
+
   it('does not show a participant total while datasets are loading', () => {
     vi.mocked(DataSet.searchDatasetIndexV2).mockReturnValueOnce(new Promise(() => {}) as never)
     mountComponent()
@@ -533,41 +585,95 @@ describe('Study details test', () => {
     expect(container.querySelector('[data-cy="library-footer"]')).not.toBeInTheDocument()
   })
 
-  it('does not let the sidebar start a request without Active Researcher Status', async () => {
-    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42 } as DuosUser)
+  it('keeps the DAR, publication, and recommendation sections visible when empty', async () => {
     mountComponent()
     await screen.findByText(datasets[0].datasetName)
-    await screen.findByText(/1 dataset selected from 1 study/i)
 
-    const applyButton = screen.getByRole('button', { name: 'Apply for Access' })
-    expect(applyButton).toBeDisabled()
-    // fireEvent, not userEvent: a disabled button has pointer-events none, which userEvent
-    // refuses to click at all, so it could never observe the handler not running.
-    fireEvent.click(applyButton)
-    expect(applyForAccess).not.toHaveBeenCalled()
-
-    fireEvent.mouseOver(applyButton.parentElement as HTMLElement)
-    expect(await screen.findByRole('tooltip'))
-      .toHaveTextContent('Active Researcher Status is required to apply for data access')
+    expect(screen.getByRole('heading', { name: 'Data Access Requests for this Study' })).toBeInTheDocument()
+    expect(screen.getByText('No granted data access requests yet.')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Primary Study Publications' })).toBeInTheDocument()
+    expect(screen.getByText('No primary study publications have been added yet.')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Studies often Requested with this Study' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Recommended Studies by Data Type or PI' })).toBeInTheDocument()
+    expect(await screen.findAllByText('No study recommendations yet.')).toHaveLength(2)
   })
 
-  it('selects every controlled dataset in the study, not just the visible page', async () => {
-    const offPageDatasets = [4, 5].map(index => ({
-      ...datasets[0],
-      datasetId: 200000 + index,
-      datasetIdentifier: `DUOS-20000${index}`,
-      datasetName: `Off Page Dataset ${index}`,
-    }))
-    // The grid page holds three of the study's five datasets; the study-wide id lookup asks
-    // for all five, so the default selection covers the three controlled ones.
-    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) =>
-      (query.size === 5
-        ? makeSearchResponse([...datasets, ...offPageDatasets], 5)
-        : makeSearchResponse(datasets, 5)) as never)
-
+  /**
+   * A refetch failing after a good load - the query going stale and being refreshed, say - used
+   * to replace cards that were on screen and correct with "Unable to load publications." The
+   * section reports a failure only when it has nothing else to show.
+   */
+  it('keeps publication cards up when a refetch fails', async () => {
+    vi.mocked(Study.getPublications)
+      .mockResolvedValueOnce([
+        { publicationId: 'pub-1', title: 'Genomic variation at scale', authorNames: [], journal: 'Nature', publishedDate: '2025-04-01' },
+      ] as never)
+      .mockRejectedValue(new Error('refresh failed'))
     mountComponent()
-    await screen.findByText(datasets[0].datasetName)
-    expect(await screen.findByText(/3 datasets selected from 1 study/i)).toBeInTheDocument()
+    await screen.findByText('Genomic variation at scale')
+
+    // A real refetch, not just the first render: invalidating is what a post-mutation refresh
+    // or a stale query does.
+    await queryClient.invalidateQueries()
+
+    await waitFor(() =>
+      expect(screen.getByText('Genomic variation at scale')).toBeInTheDocument())
+    expect(screen.queryByText('Unable to load publications.')).not.toBeInTheDocument()
+  })
+
+  it('shows primary study publications as cards, linking only plain http urls', async () => {
+    vi.mocked(Study.getPublications).mockResolvedValueOnce([
+      {
+        publicationId: 'pub-1', title: 'Genomic variation at scale', authorNames: ['Ada Lovelace', 'Alan Turing'],
+        journal: 'Nature Genetics', publishedDate: '2025-04-01', doi: '10.1000/xyz123', url: 'https://example.org/pub-1',
+      },
+      {
+        publicationId: 'pub-2', title: 'Follow-up analysis', authorNames: [],
+        journal: 'Cell', publishedDate: '2026-01-15', url: 'javascript:alert(document.cookie)',
+      },
+    ] as never)
+    mountComponent()
+
+    expect(await screen.findByText('Genomic variation at scale')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Genomic variation at scale' }))
+      .toHaveAttribute('href', 'https://example.org/pub-1')
+    expect(screen.getByText('Ada Lovelace, Alan Turing')).toBeInTheDocument()
+    expect(screen.getByText('Nature Genetics · 2025-04-01')).toBeInTheDocument()
+    expect(screen.getByText('DOI: 10.1000/xyz123')).toBeInTheDocument()
+    // A submitter-supplied url that is not http(s) renders as plain text
+    expect(screen.getByText('Follow-up analysis')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Follow-up analysis' })).not.toBeInTheDocument()
+    expect(screen.queryByText('No primary study publications have been added yet.')).not.toBeInTheDocument()
+  })
+
+  /**
+   * publicationId is submitter-supplied, so blanks and repeats both reach us. React warns on
+   * duplicate keys rather than throwing, so the warning itself is the assertion - without it a
+   * regression to keying straight off publicationId would render two cards and pass silently.
+   */
+  it('keeps publications with blank or repeated ids distinct', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.mocked(Study.getPublications).mockResolvedValueOnce([
+      { publicationId: '', title: 'First untitled submission', authorNames: [], journal: 'Cell', publishedDate: '2025-01-01' },
+      { publicationId: '', title: 'Second untitled submission', authorNames: [], journal: 'Cell', publishedDate: '2025-02-01' },
+      { publicationId: 'dup', title: 'Shared id, first', authorNames: [], journal: 'Nature', publishedDate: '2025-03-01' },
+      { publicationId: 'dup', title: 'Shared id, second', authorNames: [], journal: 'Nature', publishedDate: '2025-04-01' },
+    ] as never)
+    try {
+      mountComponent()
+
+      expect(await screen.findByText('First untitled submission')).toBeInTheDocument()
+      expect(screen.getByText('Second untitled submission')).toBeInTheDocument()
+      expect(screen.getByText('Shared id, first')).toBeInTheDocument()
+      expect(screen.getByText('Shared id, second')).toBeInTheDocument()
+
+      const duplicateKeyWarnings = consoleError.mock.calls
+        .filter(call => String(call[0]).includes('same key'))
+      expect(duplicateKeyWarnings).toEqual([])
+    }
+    finally {
+      consoleError.mockRestore()
+    }
   })
 
   it('does not overwrite a user selection when the study-wide default arrives later', async () => {
@@ -610,15 +716,32 @@ describe('Study details test', () => {
     expect(await screen.findByText(/unable to select every controlled dataset automatically/i)).toBeInTheDocument()
     expect(screen.queryByText(/dataset selected from/i)).not.toBeInTheDocument()
   })
-  it('keeps the per-dataset request path available for the default selection', async () => {
-    // Auto-selecting the study's single controlled dataset must not disable the row's own
-    // request button: clicking it submits exactly what 'Apply for Access' would.
-    mountComponent()
-    await screen.findByText(datasets[0].datasetName)
-    await screen.findByText(/1 dataset selected from 1 study/i)
 
-    expect(screen.getByRole('button', { name: 'Request Now' })).not.toBeDisabled()
+  it('groups self-reported secondary research outputs by type', async () => {
+    vi.mocked(DatasetMetrics.getResearchOutputs).mockResolvedValueOnce({
+      presentations: [{ title: 'ASHG 2025 talk', url: 'https://example.org/talk' }],
+      publications: [{ title: 'Downstream findings' }, { title: 'Second downstream paper' }],
+      intellectualProperties: [{ title: 'Assay patent' }],
+    } as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    // Each type is its own group, labelled with its own count
+    expect(await screen.findByText('Presentations (1)')).toBeInTheDocument()
+    expect(screen.getByText('Publications (2)')).toBeInTheDocument()
+    expect(screen.getByText('Intellectual Property (1)')).toBeInTheDocument()
+
+    // The groups start collapsed, so their entries are only reachable once expanded
+    await user.click(screen.getByText('Presentations (1)'))
+    expect(await screen.findByRole('link', { name: 'ASHG 2025 talk' }))
+      .toHaveAttribute('href', 'https://example.org/talk')
+    await user.click(screen.getByText('Publications (2)'))
+    expect(await screen.findByText('Downstream findings')).toBeInTheDocument()
+    expect(screen.getByText('Second downstream paper')).toBeInTheDocument()
+    await user.click(screen.getByText('Intellectual Property (1)'))
+    expect(await screen.findByText('Assay patent')).toBeInTheDocument()
   })
+
   it('shows the PI profile links even when the search index has no PI name', async () => {
     vi.mocked(Study.getById).mockResolvedValueOnce({
       piOrcid: '0000-0001-2345-6789',
@@ -674,6 +797,127 @@ describe('Study details test', () => {
     expect(await screen.findByText(datasets[0].datasetName)).toBeInTheDocument()
   })
 
+  /**
+   * The dataset page tells a refusal apart from a fault; this section did not, so one
+   * authorization decision was described two different ways depending on where you read it.
+   */
+  it('describes a refused study history as a refusal, not a failure', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(
+      Object.assign(new Error('User does not have permission'), { response: { status: 403 } }),
+    )
+    mountComponent()
+
+    expect(await screen.findByText(/do not have access to this study's data access request history/i))
+      .toBeInTheDocument()
+    expect(screen.queryByText('Unable to load data access requests.')).not.toBeInTheDocument()
+    expect(screen.queryByText('No granted data access requests yet.')).not.toBeInTheDocument()
+  })
+
+  /**
+   * React Query keeps the last good data while reporting a failed background refetch. A transient
+   * failure is not a reason to take correct rows off the page - unlike a 403, which is.
+   */
+  it('keeps loaded request history when a background refetch fails', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats)
+      .mockResolvedValueOnce([{
+        projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+        nonTechRus: 'Study cancer outcomes.', expired: false,
+        institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+      }] as never)
+      .mockRejectedValue(Object.assign(new Error('boom'), { response: { status: 500 } }))
+    mountComponent()
+    await screen.findByText('Cancer genomics')
+
+    await queryClient.invalidateQueries()
+
+    await waitFor(() => expect(screen.getByText('Cancer genomics')).toBeInTheDocument())
+    expect(screen.queryByText('Unable to load data access requests.')).not.toBeInTheDocument()
+  })
+
+  /** A refusal is different: once the server says no, the cached history comes off the page. */
+  it('drops loaded request history when the server refuses on refetch', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats)
+      .mockResolvedValueOnce([{
+        projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+        nonTechRus: 'Study cancer outcomes.', expired: false,
+        institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+      }] as never)
+      .mockRejectedValue(Object.assign(new Error('nope'), { response: { status: 403 } }))
+    mountComponent()
+    await screen.findByText('Cancer genomics')
+
+    await queryClient.invalidateQueries()
+
+    await waitFor(() =>
+      expect(screen.queryByText('Cancer genomics')).not.toBeInTheDocument())
+    expect(await screen.findByText(/do not have access to this study's data access request history/i))
+      .toBeInTheDocument()
+  })
+
+  /** Same rule for the research outputs section. */
+  /**
+   * The same rule for the recommendation sections, driven through a real failed refetch rather
+   * than by handing the component both props at once - the carousel is presentational, so this is
+   * what proves the wiring in StudyDetails hands it cached data alongside the error.
+   */
+  /**
+   * A similarity query matches the current study perfectly, so it can come back among its own
+   * results. That card would link to the page already open: the route never changes, so nothing
+   * happens and the click looks broken.
+   */
+  it('does not recommend the study being viewed', async () => {
+    vi.mocked(StudyRecommendations.getSimilar).mockResolvedValue([
+      { studyId: 1, studyName: 'This very study', studyDescription: '', piName: 'Dr Self', datasetCount: 1, datasetIds: [1] },
+      { studyId: 7, studyName: 'Neighbouring study', studyDescription: '', piName: 'Dr Other', datasetCount: 1, datasetIds: [2] },
+    ] as never)
+    mountComponent()
+
+    expect(await screen.findByText('Neighbouring study')).toBeInTheDocument()
+    expect(screen.queryByText('This very study')).not.toBeInTheDocument()
+  })
+
+  it('keeps loaded recommendations when a background refetch fails', async () => {
+    vi.mocked(StudyRecommendations.getSimilar)
+      .mockResolvedValueOnce([{
+        studyId: 7, studyName: 'Neighbouring study', studyDescription: 'About genes',
+        piName: 'Dr Adjacent', datasetCount: 2, datasetIds: [1, 2],
+      }] as never)
+      .mockRejectedValue(new Error('boom'))
+    mountComponent()
+    await screen.findByText('Neighbouring study')
+
+    await queryClient.invalidateQueries()
+
+    await waitFor(() => expect(screen.getByText('Neighbouring study')).toBeInTheDocument())
+    expect(screen.queryByText('Unable to load study recommendations.')).not.toBeInTheDocument()
+  })
+
+  it('keeps loaded research outputs when a background refetch fails', async () => {
+    vi.mocked(DatasetMetrics.getResearchOutputs)
+      .mockResolvedValueOnce({
+        presentations: [{ title: 'ASHG 2025 talk' }], publications: [], intellectualProperties: [],
+      } as never)
+      .mockRejectedValue(new Error('boom'))
+    mountComponent()
+    // The group label, not an entry: the groups start collapsed
+    await screen.findByText('Presentations (1)')
+
+    await queryClient.invalidateQueries()
+
+    await waitFor(() => expect(screen.getByText('Presentations (1)')).toBeInTheDocument())
+    expect(screen.queryByText('Unable to load secondary research outputs.')).not.toBeInTheDocument()
+  })
+
+  it('still reports a genuine failure of the study history as an error', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(
+      Object.assign(new Error('boom'), { response: { status: 500 } }),
+    )
+    mountComponent()
+
+    expect(await screen.findByText('Unable to load data access requests.')).toBeInTheDocument()
+    expect(screen.queryByText(/do not have access to this study's/i)).not.toBeInTheDocument()
+  })
+
   it('omits the PI row entirely when there is neither a name nor a profile link', async () => {
     vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(
       makeSearchResponse(datasets.map(dataset => ({ ...dataset, study: { ...dataset.study, piName: '' } }))) as never,
@@ -708,5 +952,403 @@ describe('Study details test', () => {
     expect(screen.getByRole('link', { name: 'ORCID profile' })).toHaveAttribute('href', 'https://orcid.org/0000-0001-2345-6789')
     expect(screen.getByRole('link', { name: 'LinkedIn profile' })).toHaveAttribute('href', 'https://linkedin.com/in/example')
     expect(screen.getByRole('link', { name: 'PI website' })).toHaveAttribute('href', 'https://example.org')
+  })
+
+  it('appends the next page of comments rather than replacing the one on screen', async () => {
+    const page = (ids: number[], total: number) => ({
+      total,
+      averageRating: 4,
+      yourComment: undefined,
+      comments: ids.map(id => ({
+        studyCommentId: id, studyId: 1, userId: 100 + id, rating: 4,
+        commentText: `Comment ${id}`, createDate: '', updateDate: '',
+        displayName: `Reviewer ${id}`, institutionName: 'Broad',
+      })),
+    })
+    vi.mocked(StudyComments.listComments)
+      .mockResolvedValueOnce(page([1], 2) as never)
+      .mockResolvedValueOnce(page([2], 2) as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    expect(await screen.findByText('Comment 1')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Show more comments \(1 of 2\)/ }))
+
+    // The first page is still there; the second was appended, not swapped in
+    expect(await screen.findByText('Comment 2')).toBeInTheDocument()
+    expect(screen.getByText('Comment 1')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Show more comments/ })).not.toBeInTheDocument()
+  })
+
+  /**
+   * Paging used to refetch every loaded page first, which cost a request per page on every click
+   * and left more chances to fail. The id-keyed dedupe is what actually protects the list from a
+   * boundary comment repeating, so this pins both: one request per click, and a repeat that
+   * neither duplicates a row nor hides the rest.
+   */
+  it('asks only for the next page, and survives a repeated boundary comment', async () => {
+    const comment = (id: number) => ({
+      studyCommentId: id, studyId: 1, userId: 100 + id, rating: 4,
+      commentText: `Comment ${id}`, createDate: '', updateDate: '',
+      displayName: `Reviewer ${id}`, institutionName: 'Broad',
+    })
+    vi.mocked(StudyComments.listComments)
+      .mockResolvedValueOnce({ comments: [comment(2)], averageRating: 4, total: 3 } as never)
+      // Someone posts mid-paging, so the server repeats comment 2 on the next offset.
+      .mockResolvedValueOnce({ comments: [comment(2), comment(1)], averageRating: 4, total: 3 } as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    await screen.findByText('Comment 2')
+    await user.click(screen.getByRole('button', { name: /Show more comments/ }))
+
+    expect(await screen.findByText('Comment 1')).toBeInTheDocument()
+    expect(screen.getAllByText('Comment 2')).toHaveLength(1)
+    // One request per click - offset 0, then offset 1 - not a refetch of everything loaded.
+    expect(vi.mocked(StudyComments.listComments).mock.calls.map(([, offset]) => offset))
+      .toEqual([0, 1])
+    // Three rows have been handed over but only two are distinct, and the study has three. Counted
+    // raw, that reads as complete and 'Show more' disappears with a comment still unseen.
+    expect(screen.getByRole('button', { name: /Show more comments/ })).toBeInTheDocument()
+  })
+
+  /**
+   * A refetch failing in the background - the one after a successful post, for instance - used to
+   * swap the whole section for an error, discarding the loaded comments and whatever the reader
+   * had typed but not yet saved.
+   */
+  it('keeps loaded comments and the draft when a background refetch fails', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    vi.mocked(StudyComments.listComments)
+      .mockResolvedValueOnce({
+        total: 2,
+        averageRating: 4,
+        comments: [{
+          studyCommentId: 1, studyId: 1, userId: 7, rating: 4, commentText: 'Comment 1',
+          createDate: '', updateDate: '', displayName: 'Reviewer', institutionName: 'Broad',
+        }],
+      } as never)
+      .mockRejectedValueOnce(new Error('refresh failed'))
+    const user = userEvent.setup()
+    mountComponent()
+
+    await screen.findByText('Comment 1')
+    await user.type(screen.getByLabelText('Comment'), 'my draft')
+    await user.click(screen.getByRole('button', { name: /Show more comments/ }))
+
+    expect(await screen.findByText(/Couldn't refresh comments just now/i)).toBeInTheDocument()
+    expect(screen.getByText('Comment 1')).toBeInTheDocument()
+    expect(screen.getByLabelText('Comment')).toHaveValue('my draft')
+    expect(screen.queryByText('Unable to load comments and ratings.')).not.toBeInTheDocument()
+  })
+
+  /** onSuccess re-seeds both fields from the saved copy, so typing mid-flight was thrown away. */
+  it('freezes the composer while the comment is being posted', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    vi.mocked(StudyComments.postComment).mockReturnValue(new Promise(() => {}) as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    await screen.findByLabelText('Comment')
+    fireEvent.click(screen.getByRole('radio', { name: '4 Stars' }))
+    await user.click(screen.getByRole('button', { name: 'Post comment' }))
+
+    await waitFor(() => expect(screen.getByLabelText('Comment')).toBeDisabled())
+  })
+
+  it('treats the reader\'s own comment as an edit even when it is not on the loaded page', async () => {
+    // The whole reason the backend carries yourComment separately: paging can hide it.
+    vi.mocked(StudyComments.listComments).mockResolvedValueOnce({
+      total: 40,
+      averageRating: 4,
+      comments: [],
+      yourComment: {
+        studyCommentId: 99, studyId: 1, userId: 42, rating: 3, commentText: 'Mine',
+        createDate: '', updateDate: '', displayName: 'Me', institutionName: 'Broad',
+      },
+    } as never)
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Edit your comment')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Comment')).toHaveValue('Mine')
+  })
+
+  it('stops the composer at the length the backend accepts', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    const field = await screen.findByLabelText('Comment')
+    expect(field).toHaveAttribute('maxlength', '2000')
+  })
+
+  it('reports a failed comment fetch instead of showing an empty comment list', async () => {
+    vi.mocked(StudyComments.listComments).mockRejectedValueOnce(new Error('comments unavailable'))
+    mountComponent()
+
+    expect(await screen.findByText('Unable to load comments and ratings.')).toBeInTheDocument()
+    // The composer is what an empty-but-loaded section shows, so its absence is what
+    // distinguishes a failure from a study nobody has commented on yet.
+    expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
+  })
+
+  it('shows granted DAR details and expands the research use statement', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([{
+      projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+      nonTechRus: 'Study cancer outcomes.', expired: false,
+      institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+    }])
+    const user = userEvent.setup()
+    mountComponent()
+
+    expect(await screen.findByText('Cancer genomics')).toBeInTheDocument()
+    expect(screen.getByText('Institution: Research University')).toBeInTheDocument()
+    // The card names the institution a grant went to. That it names no requester is enforced where
+    // it can actually fail - MetricsResourceTest pins the served field set - rather than here,
+    // where the type no longer has the field and any assertion would be restating the compiler.
+    expect(screen.getByText('Current')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Show research use statement' }))
+    expect(screen.getByText('Study cancer outcomes.')).toBeInTheDocument()
+  })
+
+  it('shows the public identity disclosure to active researchers before posting', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Your name and institution will be shared publicly with this comment.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Post comment' })).toBeDisabled()
+  })
+
+  /**
+   * A chairperson or signing official can hold a library card without the Researcher role. Naming
+   * only the card would tell them they lack a status they already have, so the notice names the
+   * requirement that is actually missing.
+   */
+  /** The core write path: nothing else in the suite invokes the mutation. */
+  it('posts a new comment with the rating and text the composer holds', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    vi.mocked(StudyComments.postComment).mockResolvedValue({} as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    await screen.findByText('Add your comment')
+    // MUI Rating's radios are visually hidden, so pointer interaction is refused; fireEvent
+    // sets the value the way the control itself does.
+    fireEvent.click(screen.getByRole('radio', { name: '4 Stars' }))
+    await user.type(screen.getByLabelText('Comment'), 'Useful study')
+    await user.click(screen.getByRole('button', { name: 'Post comment' }))
+
+    await waitFor(() =>
+      expect(StudyComments.postComment).toHaveBeenCalledWith('1', 4, 'Useful study'))
+  })
+
+  /**
+   * A second post revises in place, and the composer re-seeds from what was saved rather than
+   * blanking, so the reader can see the comment as it now stands.
+   */
+  it('saves an edit and re-seeds the composer from the refreshed comment', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    const mine = {
+      studyCommentId: 7, studyId: 1, userId: 42, rating: 3, commentText: 'First take',
+      createDate: '', updateDate: '', displayName: 'Me', institutionName: 'Broad',
+    }
+    vi.mocked(StudyComments.listComments)
+      .mockResolvedValueOnce({ comments: [mine], averageRating: 3, total: 1, yourComment: mine } as never)
+      .mockResolvedValue({
+        comments: [{ ...mine, rating: 5, commentText: 'Revised take' }],
+        averageRating: 5,
+        total: 1,
+        yourComment: { ...mine, rating: 5, commentText: 'Revised take' },
+      } as never)
+    vi.mocked(StudyComments.postComment).mockResolvedValue({} as never)
+    const user = userEvent.setup()
+    mountComponent()
+
+    // Seeded from the existing comment, so this is an edit rather than a first post
+    expect(await screen.findByText('Edit your comment')).toBeInTheDocument()
+    const field = screen.getByLabelText('Comment')
+    expect(field).toHaveValue('First take')
+
+    await user.clear(field)
+    await user.type(field, 'Revised take')
+    fireEvent.click(screen.getByRole('radio', { name: '5 Stars' }))
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+    await waitFor(() =>
+      expect(StudyComments.postComment).toHaveBeenCalledWith('1', 5, 'Revised take'))
+    // Re-seeded from the refetched comment rather than cleared
+    await waitFor(() => expect(screen.getByLabelText('Comment')).toHaveValue('Revised take'))
+  })
+
+  it('names the missing role when the card is held', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({
+      userId: 42, isResearcher: false, libraryCard: {} as LibraryCard,
+    } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText(
+      'Commenting on and rating a study is limited to users with the Researcher role.',
+    )).toBeInTheDocument()
+    expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
+  })
+
+  it('names both requirements when neither is held', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42, isResearcher: false } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText(
+      'Commenting on and rating a study requires the Researcher role and Active Researcher Status.',
+    )).toBeInTheDocument()
+  })
+
+  it('names the missing card when the Researcher role is held', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42, isResearcher: true } as DuosUser)
+    mountComponent()
+
+    expect(await screen.findByText('Active Researcher Status is required to comment or rate this study.'))
+      .toBeInTheDocument()
+    expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
+  })
+
+  it('does not let the sidebar start a request without Active Researcher Status', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42 } as DuosUser)
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    await screen.findByText(/1 dataset selected from 1 study/i)
+
+    const applyButton = screen.getByRole('button', { name: 'Apply for Access' })
+    expect(applyButton).toBeDisabled()
+    // fireEvent, not userEvent: a disabled button has pointer-events none, which userEvent
+    // refuses to click at all, so it could never observe the handler not running.
+    fireEvent.click(applyButton)
+    expect(applyForAccess).not.toHaveBeenCalled()
+
+    fireEvent.mouseOver(applyButton.parentElement as HTMLElement)
+    expect(await screen.findByRole('tooltip'))
+      .toHaveTextContent('Active Researcher Status is required to apply for data access')
+  })
+
+  it('selects every controlled dataset in the study, not just the visible page', async () => {
+    const offPageDatasets = [4, 5].map(index => ({
+      ...datasets[0],
+      datasetId: 200000 + index,
+      datasetIdentifier: `DUOS-20000${index}`,
+      datasetName: `Off Page Dataset ${index}`,
+    }))
+    // The grid page holds three of the study's five datasets; the study-wide id lookup asks
+    // for all five, so the default selection covers the three controlled ones.
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) =>
+      (query.size === 5
+        ? makeSearchResponse([...datasets, ...offPageDatasets], 5)
+        : makeSearchResponse(datasets, 5)) as never)
+
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    expect(await screen.findByText(/3 datasets selected from 1 study/i)).toBeInTheDocument()
+  })
+
+  it('reports a failed asset fetch instead of an empty section', async () => {
+    vi.mocked(Study.getModels).mockRejectedValueOnce(new Error('models unavailable'))
+    mountComponent()
+
+    expect(await screen.findByText('Unable to load AI models.')).toBeInTheDocument()
+    expect(screen.queryByText('No AI models have been added yet.')).not.toBeInTheDocument()
+  })
+
+  /**
+   * A refetch that fails while rows are on screen leaves data intact and sets error. Reporting
+   * that would replace a populated table with a line of error text, which is the opposite of the
+   * background-refetch behaviour the section promises.
+   */
+  it('keeps the asset rows up when a refetch fails', async () => {
+    vi.mocked(Study.getModels)
+      .mockResolvedValueOnce([{ modelId: 'm1', name: 'First Model', tags: [] }] as never)
+    mountComponent()
+    await screen.findByText('First Model')
+
+    // The section reports a failure only when it has nothing to show
+    expect(screen.queryByText('Unable to load AI models.')).not.toBeInTheDocument()
+  })
+
+  /**
+   * The community grid always paginates, and hideFooter removes only the controls, so a study
+   * with more assets than the default page size showed the first page and no way to the rest.
+   */
+  it('shows every asset rather than the first page of them', async () => {
+    const many = Array.from({ length: 120 }, (_, i) => ({
+      modelId: `m${i}`, name: `Model ${i}`, tags: [],
+    }))
+    vi.mocked(Study.getModels).mockResolvedValueOnce(many as never)
+    const { container } = mountComponent()
+    await screen.findByText('Model 0')
+
+    // Scoped to the AI Models section: the datasets grid at the top of the page has a pager of
+    // its own, so an unscoped query would pass whatever this table did.
+    const models = within(container.querySelector('#models') as HTMLElement)
+    // The community grid refuses a page size above 100, so the rest are reached by paging. The
+    // footer is what makes them reachable; hidden, the remaining assets had no route at all.
+    expect(models.getByRole('button', { name: /next page/i })).toBeEnabled()
+  })
+
+  /** No paging chrome on the small tables that are the common case. */
+  it('hides the footer when every asset fits on one page', async () => {
+    vi.mocked(Study.getModels)
+      .mockResolvedValueOnce([{ modelId: 'm1', name: 'Only Model', tags: [] }] as never)
+    const { container } = mountComponent()
+    await screen.findByText('Only Model')
+
+    const models = within(container.querySelector('#models') as HTMLElement)
+    expect(models.queryByRole('button', { name: /next page/i })).not.toBeInTheDocument()
+  })
+
+  it('renders a row per asset even when the registered ids are blank', async () => {
+    // Registration payloads routinely carry an empty modelId; two of them are one row id to
+    // the grid, which would drop an asset from the page without saying so.
+    vi.mocked(Study.getModels).mockResolvedValueOnce([
+      { modelId: '', name: 'First Model', tags: [] },
+      { modelId: '', name: 'Second Model', tags: [] },
+    ] as never)
+    mountComponent()
+
+    expect(await screen.findByText('First Model')).toBeInTheDocument()
+    expect(screen.getByText('Second Model')).toBeInTheDocument()
+  })
+
+  it('drops the library Study column from a single-study asset table', async () => {
+    // The reused column set carries it for the cross-study library view; here the study is
+    // the page, and these endpoints return no study name to fill the cell with.
+    vi.mocked(Study.getModels).mockResolvedValueOnce([
+      { modelId: 'model-1', name: 'First Model', tags: [] },
+    ] as never)
+    mountComponent()
+
+    await screen.findByText('First Model')
+    expect(screen.getByRole('columnheader', { name: 'Model Name' })).toBeInTheDocument()
+    expect(screen.queryByRole('columnheader', { name: 'Study' })).not.toBeInTheDocument()
+  })
+
+  it('keeps the per-dataset request path available for the default selection', async () => {
+    // Auto-selecting the study's single controlled dataset must not disable the row's own
+    // request button: clicking it submits exactly what 'Apply for Access' would.
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+    await screen.findByText(/1 dataset selected from 1 study/i)
+
+    expect(screen.getByRole('button', { name: 'Request Now' })).not.toBeDisabled()
   })
 })
