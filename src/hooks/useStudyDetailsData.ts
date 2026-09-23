@@ -1,17 +1,26 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { Study } from 'src/libs/ajax/Study'
 import { StudyComments } from 'src/libs/ajax/StudyComments'
+import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'src/utils/NodashUtil'
 import { AggregationResult, ElasticsearchQuery } from 'src/types/elastic'
 import { ExportableDatasets, PaginationState, SortState } from 'src/types/library'
-import { DatasetTerm, StudyTerm } from 'src/types/model'
+import { DatasetTerm, StudyTerm, StudyRecommendation } from 'src/types/model'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 
 const STUDY_ASSETS_QUERY_KEY = 'study-assets'
 const STUDY_STALE_TIME = 5 * 60 * 1000
+
+const useStudyAsset = <T>(studyId: string, assetType: string, queryFn: () => Promise<T>) => useQuery({
+  queryKey: [STUDY_ASSETS_QUERY_KEY, assetType, studyId],
+  enabled: studyId.length > 0,
+  queryFn,
+  staleTime: STUDY_STALE_TIME,
+})
 
 // The page's primary `study` object comes from the Elasticsearch-backed search index, which
 // cannot supply metadata when a study has no datasets and doesn't carry PI institution/external
@@ -22,6 +31,27 @@ export const usePiDetails = (studyId: string) => useQuery({
   queryFn: () => Study.getById(studyId),
   staleTime: STUDY_STALE_TIME,
 })
+
+export const useStudyModels = (studyId: string) =>
+  useStudyAsset(studyId, 'models', () => Study.getModels(studyId))
+
+export const useStudyWorkspaces = (studyId: string) =>
+  useStudyAsset(studyId, 'workspaces', () => Study.getWorkspaces(studyId))
+
+export const useStudyPresentations = (studyId: string) =>
+  useStudyAsset(studyId, 'presentations', () => Study.getPresentations(studyId))
+
+export const useStudyPublications = (studyId: string) =>
+  useStudyAsset(studyId, 'publications', () => Study.getPublications(studyId))
+
+export const useStudyClinicalTrials = (studyId: string) =>
+  useStudyAsset(studyId, 'clinicalTrials', () => Study.getClinicalTrials(studyId))
+
+export const useStudyIntellectualProperty = (studyId: string) =>
+  useStudyAsset(studyId, 'intellectualProperty', () => Study.getIntellectualProperty(studyId))
+
+export const useStudyFundingResources = (studyId: string) =>
+  useStudyAsset(studyId, 'fundingResources', () => Study.getFundingResources(studyId))
 
 /**
  * Every page of one study's comments. The offset is deliberately absent: posting invalidates this
@@ -53,6 +83,45 @@ export const useStudyComments = (studyId: string) => useInfiniteQuery({
     // leave this asking for an offset past the list forever.
     return distinct < lastPage.total && lastPage.comments.length > 0 ? fetched : undefined
   },
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const useStudyDarHistory = (studyId: string) => useQuery({
+  queryKey: ['study-dar-history', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => DatasetMetrics.getStudyStats(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const useStudyResearchOutputs = (studyId: string) => useQuery({
+  queryKey: ['study-research-outputs', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => DatasetMetrics.getResearchOutputs(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+/**
+ * A study is not a recommendation for itself. A similarity query matches it perfectly, so it can
+ * come back in its own results - and the card would link to the page already open, leaving the
+ * route unchanged and the click looking broken. Dropped here rather than in the carousel so both
+ * sections get it and neither has to know the current id.
+ */
+const withoutCurrentStudy = (studyId: string) => (recommendations: StudyRecommendation[]) =>
+  recommendations.filter(recommendation => String(recommendation.studyId) !== studyId)
+
+export const useSimilarStudies = (studyId: string) => useQuery({
+  queryKey: ['study-recommendations-similar', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => StudyRecommendations.getSimilar(studyId),
+  select: withoutCurrentStudy(studyId),
+  staleTime: STUDY_STALE_TIME,
+})
+
+export const useFrequentlyRequestedWithStudies = (studyId: string) => useQuery({
+  queryKey: ['study-recommendations-frequently-requested-with', studyId],
+  enabled: studyId.length > 0,
+  queryFn: () => StudyRecommendations.getFrequentlyRequestedWith(studyId),
+  select: withoutCurrentStudy(studyId),
   staleTime: STUDY_STALE_TIME,
 })
 
