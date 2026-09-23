@@ -6,6 +6,13 @@ import { extractStatus } from 'src/utils/ErrorUtils'
 import StudyPageSection from './StudyPageSection'
 import StudyQueryResult from './StudyQueryResult'
 
+const DarText = ({ label, text }: { label: string, text: string }) => (
+  <Box>
+    <Typography variant="body2" sx={{ fontWeight: 600 }}>{label}</Typography>
+    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{text}</Typography>
+  </Box>
+)
+
 const DarCard = ({ dar }: { dar: DatasetStatisticsDar }) => {
   const [expanded, setExpanded] = useState(false)
   const submissionDate = dar.submissionDate
@@ -29,7 +36,7 @@ const DarCard = ({ dar }: { dar: DatasetStatisticsDar }) => {
           label={dar.expired ? 'Expired' : 'Current'}
         />
       </Stack>
-      {dar.nonTechRus && (
+      {(dar.rus || dar.nonTechRus) && (
         <>
           <Button
             size="small"
@@ -37,9 +44,14 @@ const DarCard = ({ dar }: { dar: DatasetStatisticsDar }) => {
             onClick={() => setExpanded(value => !value)}
             aria-expanded={expanded}
           >
-            {expanded ? 'Hide research use statement' : 'Show research use statement'}
+            {expanded ? 'Hide research use statement and summary' : 'Show research use statement and summary'}
           </Button>
-          {expanded && <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{dar.nonTechRus}</Typography>}
+          {expanded && (
+            <Stack spacing={1}>
+              {dar.rus && <DarText label="Research Use Statement" text={dar.rus} />}
+              {dar.nonTechRus && <DarText label="Non-Technical Summary" text={dar.nonTechRus} />}
+            </Stack>
+          )}
         </>
       )}
     </Paper>

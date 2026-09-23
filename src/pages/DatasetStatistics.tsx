@@ -388,6 +388,16 @@ export default function DatasetStatistics() {
                       </div>
                     </div>
                   </div>,
+                  ...(dar.rus
+                    ? [
+                        <div key="rus" style={{ backgroundColor: 'white' }}>
+                          <div style={Styles.SMALL_BOLD}>Research Use Statement:</div>
+                          <div style={{ fontSize: Theme.font.size.small, padding: '0 1rem 1rem 1rem' }}>
+                            {dar.rus}
+                          </div>
+                        </div>,
+                      ]
+                    : []),
                   <div key="summary" style={{ backgroundColor: 'white' }}>
                     <div style={Styles.SMALL_BOLD}>NonTechnical Summary:</div>
                     <div style={{ fontSize: Theme.font.size.small, padding: '0 1rem 1rem 1rem' }}>

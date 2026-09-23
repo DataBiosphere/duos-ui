@@ -709,6 +709,7 @@ describe('DatasetStatistics', () => {
       darCode: 'DAR-123',
       projectTitle: 'Test Project',
       updateDate: dateTime,
+      rus: 'Test research use statement',
       nonTechRus: 'Test summary',
       expired: true,
       referenceId: 'abc',
@@ -736,5 +737,7 @@ describe('DatasetStatistics', () => {
     expect(await screen.findByText(/Expired/)).toBeInTheDocument()
     expect(await screen.findByText(new RegExp(expectedDateString))).toBeInTheDocument()
     expect(await screen.findByText(darsData[0].nonTechRus)).toBeInTheDocument()
+    expect(screen.getByText('Research Use Statement:')).toBeInTheDocument()
+    expect(screen.getByText('Test research use statement')).toBeInTheDocument()
   })
 })
