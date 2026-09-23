@@ -682,7 +682,7 @@ export interface DatasetStatisticsDar {
   nonTechRus: string
   referenceId: string
   expired: boolean
-  piName?: string
+  /** Absent when the dataset has no study: see DarMetric.yaml. The requester's name is never sent. */
   institutionName?: string
   submissionDate?: number
 }
