@@ -2,9 +2,17 @@
 
 ## Dev Container
 
-If you are using Visual Studio Code (VSCode) and Docker, consider using the Dev Container configuration. This will automatically setup and configure DUOS on your behalf. When opening the project in VSCode, a notification will appear in the bottom right corner to use the Dev Container. Click "Reopen in container".
+If you use Visual Studio Code (VSCode) and Docker, you can use the Dev Container configuration. The container does not make the local config files. You make them on the host first, and the workspace bind mount makes them available in the container.
 
-Next, the terminal will install the dependencies. Once installed, the terminal will prompt to authenticate with Google Cloud. Do this by following the link and signing in with your `broadinstitute.org` account. Copy and paste the auth code in the terminal and press enter to complete setup.
+1. On the host, on the non-split Broad VPN, run the command below. For what it needs and what it writes, see step 3 of [Local Setup](#local-setup).
+
+   ```sh
+   ./scripts/render-configs.sh --write_env true --write_config true --write_site_conf true
+   ```
+
+2. Open the project in VSCode. When the notification in the bottom right corner asks about the Dev Container, click "Reopen in container".
+
+When the container starts, `scripts/setup-devcontainer.sh` checks for the config files. If a file is missing, the script names it and prints the command in step 1.
 
 ## Local Setup
 
