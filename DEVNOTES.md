@@ -58,7 +58,7 @@ will simulate it for local development.
 127.0.0.1	local.dsde-dev.broadinstitute.org
 ```
 
-5. Make sure that `site.conf` is in the project root. `docker compose` mounts it into the httpd proxy. The `--write_site_conf true` option in step 3 renders it from the [terra-helmfile duos chart template](https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl), so the local proxy sends the same security headers as the deployed one. The option needs the GitHub CLI (`gh`), with read access to `broadinstitute/terra-helmfile`. When the template changes, run `./scripts/render-site-conf.sh` to render `site.conf` again. The dev container setup script also runs it. Do not copy `site.conf` from a bucket or edit it by hand, because that copy drifts from the deployed config.
+5. Make sure that `site.conf` is in the project root. `docker compose` mounts it into the httpd proxy. The `--write_site_conf true` option in step 3 renders it from the [terra-helmfile duos chart template](https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl), so the local proxy sends the same security headers as the deployed one. The option needs the GitHub CLI (`gh`), with read access to `broadinstitute/terra-helmfile`. When the template changes, run `./scripts/render-site-conf.sh` to render `site.conf` again. This script does not need the VPN. Do not copy `site.conf` from a bucket or edit it by hand, because that copy drifts from the deployed config.
 
 6. Start the development server. There are two modes:
 

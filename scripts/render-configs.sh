@@ -247,8 +247,8 @@ write_config() {
   jq '.hash = "dev"' ../public/config.json > /dev/null
 }
 
-# render-site-conf.sh is also run by setup-devcontainer.sh, so the render
-# logic lives in one place.
+# render-site-conf.sh also runs on its own, to render site.conf again without
+# the VPN.
 write_site_conf() {
   ./render-site-conf.sh
 }

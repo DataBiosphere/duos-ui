@@ -7,7 +7,6 @@
         "source=${localWorkspaceFolder}/../consent,target=/workspaces/consent,type=bind,consistency=cached"
     ],
     "features": {
-        "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers/features/java:1": {
             "version": "25",
             "jdkDistro": "tem",

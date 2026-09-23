@@ -12,9 +12,9 @@ install_gcloud_cli() {
   sudo apt install -y google-cloud-cli
 }
 
-# Only the certs come from the bucket. site.conf is rendered from terra-helmfile
-# (see render_site_conf), and .env.local comes from render-configs.sh, so
-# neither can drift from what the app needs.
+# Only the certs and config.json come from the bucket. render-configs.sh makes
+# .env.local and site.conf on the host (see host_config_reminder), so neither
+# can drift from what the app needs.
 install_duos_config() {
   printf "\n"
   gcloud auth login
@@ -29,17 +29,12 @@ install_duos_config() {
     /workspaces/duos-ui/public
 }
 
-# gh comes from the github-cli feature in devcontainer.json.
-render_site_conf() {
+# The workspace is a bind mount, so files that the host writes show up here.
+host_config_reminder() {
   printf "\n"
-  gh auth status > /dev/null 2>&1 || gh auth login
-  /workspaces/duos-ui/scripts/render-site-conf.sh
-}
-
-env_local_reminder() {
-  printf "\n"
-  echo "This script does not write .env.local. On the non-split Broad VPN, run:"
-  echo "  ./scripts/render-configs.sh --write_env true"
+  echo "This script does not write .env.local or site.conf. On the host, on the"
+  echo "non-split Broad VPN, run:"
+  echo "  ./scripts/render-configs.sh --write_env true --write_config true --write_site_conf true"
   echo "See DEVNOTES.md for details."
 }
 
@@ -47,8 +42,7 @@ dev_container() {
   gcloud_cli_requirements
   install_gcloud_cli
   install_duos_config
-  render_site_conf
-  env_local_reminder
+  host_config_reminder
 }
 
 dev_container
