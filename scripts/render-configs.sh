@@ -3,6 +3,8 @@
 # Certs are regenerated on a 3-month rotation so this script is optimized for that task.
 # You MUST be on the Non-Split Broad VPN to have a whitelisted Broad IP.
 # You MUST have jq, gcloud, kubectl and openssl installed to run this script.
+# --write_site_conf also needs the GitHub CLI (gh), authenticated with read
+# access to the private broadinstitute/terra-helmfile repo.
 # You MUST authenticate via gcloud
 #
 # See usage section below for more details. All arguments are optional.
@@ -26,6 +28,9 @@ Generate cert files for local development
                                     carried forward, and the old file is backed up to
                                     .env.local.bak. true|false. Defaults to false
   --write_config WRITE_CONFIG       Write a config.json file in public. true|false. Defaults to false
+  --write_site_conf WRITE_SITE_CONF Render site.conf in the project root from the terra-helmfile
+                                    duos chart template, so the local httpd proxy matches the
+                                    deployed one. Needs gh. true|false. Defaults to false
   --help                Display this help and exit
 EOF
     exit 0
@@ -40,6 +45,7 @@ error() {
 PROJECT="broad-dsde-dev"
 WRITE_ENV="false"
 WRITE_CONFIG="false"
+WRITE_SITE_CONF="false"
 
 ENV_FILE="../.env.local"
 
@@ -65,6 +71,9 @@ API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
 ECM_URL_DEFAULT="https://externalcreds.dsde-dev.broadinstitute.org"
 TDR_URL_DEFAULT="https://jade.datarepo-dev.broadinstitute.org"
 BARD_URL_DEFAULT="https://terra-bard-dev.appspot.com"
+# Every deployed environment enforces the Content Security Policy
+# (terra-helmfile#6500), so local dev enforces it too.
+CSP_REPORT_ONLY_DEFAULT="false"
 
 parse_cli_args() {
     while [[ $# -gt 0 ]]; do
@@ -79,6 +88,10 @@ parse_cli_args() {
                 ;;
             --write_config)
                 WRITE_CONFIG=$2
+                shift 2
+                ;;
+            --write_site_conf)
+                WRITE_SITE_CONF=$2
                 shift 2
                 ;;
             --help)
@@ -172,6 +185,7 @@ write_env() {
   ECM_URL=$(existing_env DUOS_ECM_URL)
   TDR_URL=$(existing_env DUOS_TDR_URL)
   BARD_URL=$(existing_env DUOS_BARD_URL)
+  CSP_REPORT_ONLY=$(existing_env DUOS_CSP_REPORT_ONLY)
 
   if [[ -f "$ENV_FILE" ]]; then
     echo "Backing up existing .env.local to .env.local.bak"
@@ -215,6 +229,10 @@ DUOS_API_URL=${API_URL:-$API_URL_DEFAULT}
 DUOS_ECM_URL=${ECM_URL:-$ECM_URL_DEFAULT}
 DUOS_TDR_URL=${TDR_URL:-$TDR_URL_DEFAULT}
 DUOS_BARD_URL=${BARD_URL:-$BARD_URL_DEFAULT}
+
+# false enforces the Content Security Policy, as every deployed environment
+# does. Set true to only report violations while you debug the policy.
+DUOS_CSP_REPORT_ONLY=${CSP_REPORT_ONLY:-$CSP_REPORT_ONLY_DEFAULT}
 EOF
   } > "$ENV_FILE"
   chmod 600 "$ENV_FILE"
@@ -229,6 +247,12 @@ write_config() {
   jq '.hash = "dev"' ../public/config.json > /dev/null
 }
 
+# render-site-conf.sh also runs on its own, to render site.conf again without
+# the VPN.
+write_site_conf() {
+  ./render-site-conf.sh
+}
+
 parse_cli_args "$@"
 auth_gcloud
 write_certs
@@ -239,4 +263,8 @@ fi
 if [[ "$WRITE_CONFIG" == "true" ]]
 then
   write_config
+fi
+if [[ "$WRITE_SITE_CONF" == "true" ]]
+then
+  write_site_conf
 fi

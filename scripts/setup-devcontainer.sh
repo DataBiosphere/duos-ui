@@ -2,36 +2,24 @@
 
 set -eu
 
-gcloud_cli_requirements() {
-  curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
-  echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-}
+# The dev container makes no local config. render-configs.sh makes all of it on
+# the host (certs from the dev cluster, .env.local, config.json, site.conf),
+# and the workspace bind mount carries those files into the container.
+WORKSPACE=/workspaces/duos-ui
+CONFIG_FILES="server.crt server.key ca-bundle.crt .env.local public/config.json site.conf"
 
-install_gcloud_cli() {
-  sudo apt update
-  sudo apt install -y google-cloud-cli
-}
+missing=""
+for file in $CONFIG_FILES; do
+  [ -f "$WORKSPACE/$file" ] || missing="$missing $file"
+done
 
-install_duos_config() {
-  printf "\n"
-  gcloud auth login
-  gcloud config set project broad-duos-dev
-  gsutil -m cp \
-    "gs://consent-confgis/duos/.env.local" \
-    "gs://consent-confgis/duos/site.conf" \
-    "gs://consent-confgis/ca-bundle.crt" \
-    "gs://consent-confgis/server.crt" \
-    "gs://consent-confgis/server.key" \
-    /workspaces/duos-ui
-  gsutil -m cp \
-    "gs://consent-confgis/duos/config.json" \
-    /workspaces/duos-ui/public
-}
+if [ -z "$missing" ]; then
+  echo "All local config files are present."
+  exit 0
+fi
 
-dev_container() {
-  gcloud_cli_requirements
-  install_gcloud_cli
-  install_duos_config
-}
-
-dev_container
+printf "\n"
+echo "Missing local config files:$missing"
+echo "On the host, on the non-split Broad VPN, run:"
+echo "  ./scripts/render-configs.sh --write_env true --write_config true --write_site_conf true"
+echo "See DEVNOTES.md for details."
