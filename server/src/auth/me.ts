@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { requireEnv } from './oidcClient.js'
-import { REFRESH_WINDOW_SECONDS, RefreshFailedError, refreshAccessToken } from './refresh.js'
+import { RefreshFailedError, refreshAccessToken, tokenDisposition } from './refresh.js'
 import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
 const UPSTREAM_TIMEOUT_MS = 5000
@@ -35,8 +35,7 @@ async function destroySession(request: FastifyRequest, reply: FastifyReply): Pro
  * Returns false when the refresh failed and the reply has already gone out.
  */
 async function refreshedIfExpiring(request: FastifyRequest, reply: FastifyReply): Promise<boolean> {
-  const secondsRemaining = (request.session.tokenExpiry ?? 0) - Math.floor(Date.now() / 1000)
-  if (secondsRemaining >= REFRESH_WINDOW_SECONDS) return true
+  if (tokenDisposition(request.session) !== 'refresh') return true
   try {
     await refreshAccessToken(request)
     return true
@@ -92,7 +91,7 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
   reply.header('cache-control', 'no-store')
   reply.header('vary', 'Cookie')
 
-  if (!request.session.accessToken) {
+  if (!request.session.accessToken || tokenDisposition(request.session) === 'expired') {
     reply.status(401).send({ authenticated: false })
     return
   }

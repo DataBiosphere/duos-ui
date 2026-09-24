@@ -60,6 +60,23 @@ describe('apiProxy', () => {
     tokenExpiry: nowSeconds() + 3600,
   })
 
+  it.each([30, 0])('fixture with %s seconds remaining skips refresh and expires locally', async (remaining) => {
+    const { refreshAccessToken } = await import('../src/auth/refresh.js')
+    app = await buildAppShell()
+    seedSession(app, { accessToken: 'sa-token', testFixture: true, tokenExpiry: nowSeconds() + remaining })
+    const destroy = vi.fn()
+    app.addHook('onRequest', async (request) => {
+      request.session.destroy = destroy
+    })
+    await app.register(apiProxy)
+    const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+    expect(res.statusCode).toBe(remaining > 0 ? 200 : 401)
+    if (remaining <= 0) expect(res.payload).toBe('')
+    expect(upstream.received).toHaveLength(remaining > 0 ? 1 : 0)
+    expect(refreshAccessToken).not.toHaveBeenCalled()
+    expect(destroy).not.toHaveBeenCalled()
+  })
+
   describe('upstreamPath', () => {
     it.each([
       [`${PROXY_PREFIX}/api/dataset/1`, '/api/dataset/1'],

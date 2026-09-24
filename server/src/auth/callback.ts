@@ -1,35 +1,7 @@
 import * as oidc from 'openid-client'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { getOidcConfig, requireEnv } from './oidcClient.js'
-
-/** Best-effort audit and cleanup after a successful session rotation. */
-async function retirePreAuthSession(request: FastifyRequest, preAuthSid: string): Promise<void> {
-  // Consent's delete trigger otherwise records the pre-auth session as expired.
-  try {
-    await request.server.pg.query(
-      `UPDATE user_session_audit
-          SET end_reason = 'rotated'
-        WHERE sid_hash = encode(sha256($1::bytea), 'hex') AND ended_at IS NULL`,
-      [preAuthSid],
-    )
-  }
-  catch (err: unknown) {
-    request.log.error({ err }, '[auth] failed to stamp the pre-auth audit row as rotated')
-  }
-
-  // request.session now points at the new session; delete the old SID via the store.
-  try {
-    await new Promise<void>((resolve) => {
-      request.sessionStore.destroy(preAuthSid, (err) => {
-        if (err) request.log.error({ err }, '[auth] failed to destroy pre-auth session row after rotation')
-        resolve()
-      })
-    })
-  }
-  catch (err: unknown) {
-    request.log.error({ err }, '[auth] failed to destroy pre-auth session row after rotation')
-  }
-}
+import { establishSession } from '../session/rotation.js'
 
 /**
  * Maps the B2C `idp` claim to the sub-provider the user chose on the B2C login page.
@@ -89,26 +61,19 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
     request.log.warn({ idp: subProvider, idpClaim: claims.idp ?? null }, '[auth] id_token idp claim is missing or unrecognised')
   }
 
-  // regenerate() replaces the session with an empty one, so preserve returnTo
-  // and write tokens only after rotating the pre-auth SID.
-  const preAuthSid = request.session.sessionId
+  // regenerate() empties the session, so read returnTo first.
   const returnTo = request.session.returnTo ?? '/'
 
-  await request.session.regenerate()
-
-  request.session.accessToken = tokens.access_token
-  request.session.refreshToken = tokens.refresh_token
-  request.session.idToken = tokens.id_token
-  // v6 exposes expires_in (seconds from now) via the expiresIn() helper —
-  // there is no expires_at on the token response.
-  request.session.tokenExpiry = Math.floor(Date.now() / 1000) + (tokens.expiresIn() ?? 0)
-  request.session.userId = claims.email
-  request.session.idp = subProvider
-
-  // Avoid an async onSend save racing Fastify's reply lifecycle.
-  await request.session.save()
-
-  await retirePreAuthSession(request, preAuthSid)
+  await establishSession(request, {
+    accessToken: tokens.access_token,
+    refreshToken: tokens.refresh_token,
+    idToken: tokens.id_token,
+    // v6 exposes expires_in (seconds from now) via the expiresIn() helper —
+    // there is no expires_at on the token response.
+    tokenExpiry: Math.floor(Date.now() / 1000) + (tokens.expiresIn() ?? 0),
+    userId: claims.email,
+    idp: subProvider,
+  })
 
   reply.redirect(returnTo)
 }

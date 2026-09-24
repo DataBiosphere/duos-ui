@@ -11,7 +11,7 @@ import type {
 } from 'fastify'
 import fastifyReplyFrom from '@fastify/reply-from'
 import { requireEnv } from '../auth/oidcClient.js'
-import { REFRESH_WINDOW_SECONDS, RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
+import { RefreshFailedError, refreshAccessToken, tokenDisposition } from '../auth/refresh.js'
 import { fetchMetadataGuard } from '../security/fetchMetadata.js'
 import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
@@ -269,8 +269,11 @@ export async function registerUpstreamProxy(
 
     // A missing tokenExpiry reads as already expired, which refreshes rather than
     // forwarding a token of unknown age upstream.
-    const secondsRemaining = (request.session.tokenExpiry ?? 0) - Math.floor(Date.now() / 1000)
-    if (secondsRemaining >= REFRESH_WINDOW_SECONDS) {
+    const disposition = tokenDisposition(request.session)
+    if (disposition === 'expired') {
+      return reply.status(401).send()
+    }
+    if (disposition === 'forward') {
       return undefined
     }
 

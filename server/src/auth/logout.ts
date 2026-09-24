@@ -69,7 +69,8 @@ export async function handleLogout(request: FastifyRequest, reply: FastifyReply)
 
   const endSessionUrl = await buildEndSessionUrl(request, idTokenHint)
 
-  await revokeTokens(request)
+  // Fixture credentials belong to Google, not the configured B2C issuer.
+  if (!request.session.testFixture) await revokeTokens(request)
   await stampAuditRecord(request)
 
   await request.session.destroy()

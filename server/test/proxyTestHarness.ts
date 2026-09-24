@@ -86,6 +86,7 @@ export async function startUpstream(): Promise<Upstream> {
 }
 
 export interface SessionSeed {
+  testFixture?: boolean
   accessToken?: string
   tokenExpiry?: number
 }

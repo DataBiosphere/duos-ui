@@ -16,11 +16,12 @@ const ENV = { DUOS_API_URL: 'https://consent.dsde-dev.broadinstitute.org' }
 // tests exercise the forward path untouched.
 const FRESH_EXPIRY = () => Math.floor(Date.now() / 1000) + 3600
 
-function makeRequest(overrides: { accessToken?: string, idp?: 'google' | 'microsoft', tokenExpiry?: number } = {}) {
+function makeRequest(overrides: { accessToken?: string, testFixture?: boolean, idp?: 'google' | 'microsoft', tokenExpiry?: number } = {}) {
   const destroy = vi.fn().mockResolvedValue(undefined)
   const request = {
     session: {
       accessToken: overrides.accessToken,
+      testFixture: overrides.testFixture,
       idp: overrides.idp,
       tokenExpiry: overrides.tokenExpiry ?? FRESH_EXPIRY(),
       destroy,
@@ -57,6 +58,21 @@ describe('getMe', () => {
   afterEach(() => {
     for (const key of Object.keys(ENV)) delete process.env[key]
     vi.unstubAllGlobals()
+  })
+
+  it.each([30, 0])('fixture with %s seconds remaining skips refresh and expires locally', async (remaining) => {
+    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(200, { email: 'role@example.com' }) as never)
+    const { request, destroy } = makeRequest({ accessToken: 'sa-token', testFixture: true, tokenExpiry: Math.floor(Date.now() / 1000) + remaining })
+    const reply = makeReply()
+    await getMe(request, reply)
+    expect(refreshAccessToken).not.toHaveBeenCalled()
+    expect(destroy).not.toHaveBeenCalled()
+    if (remaining > 0) expect(fetch).toHaveBeenCalledOnce()
+    else {
+      expect(fetch).not.toHaveBeenCalled()
+      expect(reply.status).toHaveBeenCalledWith(401)
+      expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+    }
   })
 
   it('returns 401 without calling the upstream API when there is no access token', async () => {
