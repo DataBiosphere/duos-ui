@@ -70,6 +70,10 @@ const mockUser = {
   isDataSubmitter: false,
 }
 
+/** The shape fetchAdapter throws for a non-ok response: the status lives under `response`. */
+const adapterError = (status: number) =>
+  Object.assign(new Error(`Request failed with status ${status}`), { response: { status, data: {} } })
+
 const renderComponent = (props = {}, route = '/backgroundsignin') =>
   render(
     <MemoryRouter initialEntries={[route]}>
@@ -151,13 +155,13 @@ describe('BackgroundSignIn', () => {
   })
 
   it('shows the invalid token message on 401 error', async () => {
-    vi.mocked(User.getMe).mockRejectedValue({ status: 401 })
+    vi.mocked(User.getMe).mockRejectedValue(adapterError(401))
     await act(async () => renderComponent({ bearerToken: 'bad-token' }))
     expect(screen.getByText('The provided token is invalid.')).toBeInTheDocument()
   })
 
   it('reports a server failure without labeling the token invalid', async () => {
-    vi.mocked(User.getMe).mockRejectedValue({ status: 500 })
+    vi.mocked(User.getMe).mockRejectedValue(adapterError(500))
     await act(async () => renderComponent({ bearerToken: 'server-error-token' }))
     expect(screen.getByText('Sign-in failed (HTTP 500). The server or one of its upstream services is unavailable.')).toBeInTheDocument()
     expect(screen.queryByText('The provided token is invalid.')).not.toBeInTheDocument()
@@ -170,17 +174,17 @@ describe('BackgroundSignIn', () => {
   })
 
   it('calls onError and hides spinner on 400 error', async () => {
-    vi.mocked(User.getMe).mockRejectedValue({ status: 400 })
+    vi.mocked(User.getMe).mockRejectedValue(adapterError(400))
     const onError = vi.fn()
     await act(async () => renderComponent({ bearerToken: 'bad-token', onError }))
-    expect(onError).toHaveBeenCalledWith({ status: 400 })
+    expect(onError).toHaveBeenCalledWith(adapterError(400))
     expect(screen.queryByTestId('spinner')).not.toBeInTheDocument()
     expect(screen.getByRole('textbox')).toBeInTheDocument()
   })
 
   it('on 409 error re-fetches user and redirects', async () => {
     vi.mocked(User.getMe)
-      .mockRejectedValueOnce({ status: 409 })
+      .mockRejectedValueOnce(adapterError(409))
       .mockResolvedValue(mockUser as never)
     await act(async () => renderComponent({ bearerToken: 'conflict-token' }))
     expect(User.getMe).toHaveBeenCalledTimes(2)
@@ -189,7 +193,7 @@ describe('BackgroundSignIn', () => {
 
   it('clears storage on 409 when second getMe fails', async () => {
     vi.mocked(User.getMe)
-      .mockRejectedValueOnce({ status: 409 })
+      .mockRejectedValueOnce(adapterError(409))
       .mockRejectedValue(new Error('network error'))
     await act(async () => renderComponent({ bearerToken: 'conflict-token' }))
     expect(Storage.clearStorage).toHaveBeenCalledTimes(1)

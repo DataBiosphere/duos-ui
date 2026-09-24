@@ -10,6 +10,7 @@ import loadingImage from 'src/images/loading-indicator.svg'
 import { resetSessionCache } from 'src/libs/auth/session'
 import { resetCsrfToken } from 'src/libs/ajax/csrf'
 import { DuosUser } from 'src/types/model'
+import { extractStatus } from 'src/utils/ErrorUtils'
 
 export interface BackgroundSignInProps {
   onSignIn?: () => void
@@ -85,7 +86,8 @@ export default function BackgroundSignIn({ onSignIn, onError, bearerToken }: Rea
           redirect(enriched)
         },
         (error: { status?: number }) => {
-          const status = error.status
+          // The fetch adapter throws `response.status`; the test-signin POST above throws `status`.
+          const status = extractStatus(error) ?? error.status
           switch (status) {
             case 400:
               if (onError)
