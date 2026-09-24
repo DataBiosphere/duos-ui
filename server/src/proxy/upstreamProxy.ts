@@ -11,7 +11,7 @@ import type {
 } from 'fastify'
 import fastifyReplyFrom from '@fastify/reply-from'
 import { requireEnv } from '../auth/oidcClient.js'
-import { REFRESH_WINDOW_SECONDS, RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
+import { RefreshFailedError, refreshAccessToken, tokenDisposition } from '../auth/refresh.js'
 import { fetchMetadataGuard } from '../security/fetchMetadata.js'
 import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
@@ -269,8 +269,14 @@ export async function registerUpstreamProxy(
 
     // A missing tokenExpiry reads as already expired, which refreshes rather than
     // forwarding a token of unknown age upstream.
-    const secondsRemaining = (request.session.tokenExpiry ?? 0) - Math.floor(Date.now() / 1000)
-    if (secondsRemaining >= REFRESH_WINDOW_SECONDS) {
+    const disposition = tokenDisposition(request.session)
+    if (disposition === 'expired') {
+      // A fixture token cannot renew: end the session now, exactly as an
+      // upstream 401 would after the token expired in flight.
+      await endRejectedSession(request, reply, logTag, 'the test-fixture access token has expired')
+      return reply
+    }
+    if (disposition === 'forward') {
       return undefined
     }
 
@@ -359,7 +365,7 @@ export async function registerUpstreamProxy(
     }
 
     // reply-from's onResponse callback is synchronous.
-    void endRejectedSession(request, reply, logTag)
+    void endRejectedSession(request, reply, logTag, 'upstream rejected the session access token')
   }
 
   app.addHook('onSend', (_request, reply, _payload, done) => {
@@ -540,13 +546,14 @@ function rewriteHeaders(headers: IncomingHttpHeaders): IncomingHttpHeaders {
   )
 }
 
-async function endRejectedSession(request: ProxyRequest, reply: ProxyReply, logTag: string): Promise<void> {
+/** Ends a session whose token is finished, for the `reason` the log records. */
+async function endRejectedSession(request: ProxyRequest, reply: ProxyReply, logTag: string, reason: string): Promise<void> {
   try {
     await request.session.destroy()
-    request.log.info(`[${logTag}] upstream rejected the session access token — session destroyed, returning 401`)
+    request.log.info(`[${logTag}] ${reason} — session destroyed, returning 401`)
   }
   catch (err: unknown) {
-    request.log.error({ err }, `[${logTag}] upstream rejected the session access token but the session could not be destroyed — returning 401 anyway`)
+    request.log.error({ err }, `[${logTag}] ${reason} but the session could not be destroyed — returning 401 anyway`)
   }
   reply.clearCookie(SESSION_COOKIE_NAME).status(401).send({ error: 'session_expired' })
 }

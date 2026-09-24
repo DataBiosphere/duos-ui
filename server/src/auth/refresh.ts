@@ -5,7 +5,7 @@ import { getOidcConfig } from './oidcClient.js'
 /**
  * Proactive B2C access-token refresh for the API proxy (Phase 3, story 3-B).
  *
- * The proxy calls this when the session's access token expires within 60
+ * The proxy and /auth/me call this when the session's access token expires within 60
  * seconds, so a browser never sees a 401 caused by ordinary token expiry. The
  * refresh token never leaves the server.
  *
@@ -55,6 +55,24 @@ interface RefreshedTokens {
  */
 export const REFRESH_WINDOW_SECONDS = 60
 
+/**
+ * What a refresh-before-forward path does with the session's token. The one
+ * decision every caller shares, so a new caller cannot take the refresh
+ * exemption without the expiry check. A missing tokenExpiry reads as expired.
+ *
+ * - `forward`: use the token as it is.
+ * - `refresh`: it expires within the window; call refreshAccessToken first.
+ * - `expired`: a test-fixture token (DT-4068) at its real expiry. It cannot
+ *   renew, so the caller destroys the session, clears the cookie and answers
+ *   401 — the same end an unrefreshable session meets in refreshAccessToken,
+ *   and the same end Consent's 401 would force if the token expired in flight.
+ */
+export function tokenDisposition(session: Session): 'forward' | 'refresh' | 'expired' {
+  const secondsRemaining = (session.tokenExpiry ?? 0) - Math.floor(Date.now() / 1000)
+  if (session.testFixture === true) return secondsRemaining > 0 ? 'forward' : 'expired'
+  return secondsRemaining < REFRESH_WINDOW_SECONDS ? 'refresh' : 'forward'
+}
+
 const inFlight = new Map<string, Promise<RefreshedTokens>>()
 
 /**
@@ -63,7 +81,7 @@ const inFlight = new Map<string, Promise<RefreshedTokens>>()
  * share one token-endpoint round-trip.
  *
  * Precondition: `request.session` exists and carries a refresh token — the
- * caller (`apiProxy`) has already established that there is a session.
+ * callers (the upstream proxies and /auth/me) have established there is a session.
  */
 export async function refreshAccessToken(request: FastifyRequest): Promise<void> {
   const sid = request.session.sessionId

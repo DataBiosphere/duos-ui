@@ -23,12 +23,19 @@ async function buildEndSessionUrl(request: FastifyRequest, idTokenHint: string |
   }
 }
 
-// One revocation endpoint, because there is one issuer: every session token
-// comes from the single B2C token exchange in callback.ts. The session's `idp`
-// records which sub-provider the user picked AT B2C — DUOS never holds a
-// Google or Microsoft token — so there is no per-provider endpoint to look up
-// and no upstream credential to revoke. B2C attempts federated sign-out
-// itself; `prompt: 'login'` in login.ts is what guarantees a login screen.
+// One revocation endpoint, because a B2C session has one issuer: its tokens
+// come from the single B2C token exchange in callback.ts. The session's `idp`
+// records which sub-provider the user picked AT B2C — a B2C session never
+// holds a Google or Microsoft token — so there is no per-provider endpoint to
+// look up and no upstream credential to revoke. B2C attempts federated
+// sign-out itself; `prompt: 'login'` in login.ts is what guarantees a login
+// screen.
+//
+// The exception is a test-fixture session (DT-4068): its access token is a
+// Google service-account token that never passed through B2C, so B2C cannot
+// revoke it, has no id_token for end-session, and must not be sent it. The
+// caller skips this function for those sessions; the same issuer constraint
+// applies to every other B2C operation on a session.
 async function revokeTokens(request: FastifyRequest): Promise<void> {
   try {
     const config = await getOidcConfig()
@@ -69,7 +76,8 @@ export async function handleLogout(request: FastifyRequest, reply: FastifyReply)
 
   const endSessionUrl = await buildEndSessionUrl(request, idTokenHint)
 
-  await revokeTokens(request)
+  // Fixture credentials belong to Google, not the configured B2C issuer.
+  if (!request.session.testFixture) await revokeTokens(request)
   await stampAuditRecord(request)
 
   await request.session.destroy()

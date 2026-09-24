@@ -18,6 +18,7 @@ function makeConfig(revocationEndpoint?: string): Configuration {
 }
 
 function makeRequest(overrides: {
+  testFixture?: boolean
   accessToken?: string
   refreshToken?: string
   sessionId?: string
@@ -28,6 +29,7 @@ function makeRequest(overrides: {
   const logError = vi.fn()
   const request = {
     session: {
+      testFixture: overrides.testFixture,
       accessToken: overrides.accessToken,
       refreshToken: overrides.refreshToken,
       idToken: overrides.idToken,
@@ -70,6 +72,16 @@ afterEach(() => {
 })
 
 describe('handleLogout', () => {
+  it('logs a fixture out locally without sending its Google token to B2C', async () => {
+    const { request, destroy } = makeRequest({ accessToken: 'google-token', testFixture: true })
+    const reply = makeReply()
+    await handleLogout(request, reply)
+    const { getOidcConfig } = await import('../src/auth/oidcClient.js')
+    expect(getOidcConfig).not.toHaveBeenCalled()
+    expect(destroy).toHaveBeenCalledOnce()
+    expect(reply.status).toHaveBeenCalledWith(204)
+  })
+
   it('stamps the audit record for the session sid, destroys the session, and clears the cookie', async () => {
     const { request, query, destroy } = makeRequest({ sessionId: 'the-sid' })
     const reply = makeReply()

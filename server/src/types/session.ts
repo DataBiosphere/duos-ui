@@ -10,6 +10,7 @@ import 'fastify'
  */
 declare module 'fastify' {
   interface Session {
+    testFixture?: boolean // SA role fixture: cannot refresh; reject at real token expiry
     userId?: string
     accessToken?: string
     idToken?: string

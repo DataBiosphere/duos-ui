@@ -60,6 +60,29 @@ describe('apiProxy', () => {
     tokenExpiry: nowSeconds() + 3600,
   })
 
+  it.each([30, 0])('fixture with %s seconds remaining skips refresh; at expiry the session ends', async (remaining) => {
+    const { refreshAccessToken } = await import('../src/auth/refresh.js')
+    app = await buildAppShell()
+    seedSession(app, { accessToken: 'sa-token', testFixture: true, tokenExpiry: nowSeconds() + remaining })
+    const destroy = vi.fn()
+    app.addHook('onRequest', async (request) => {
+      request.session.destroy = destroy
+    })
+    await app.register(apiProxy)
+    const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+    expect(res.statusCode).toBe(remaining > 0 ? 200 : 401)
+    expect(upstream.received).toHaveLength(remaining > 0 ? 1 : 0)
+    expect(refreshAccessToken).not.toHaveBeenCalled()
+    if (remaining > 0) {
+      expect(destroy).not.toHaveBeenCalled()
+    }
+    else {
+      expect(res.json()).toEqual({ error: 'session_expired' })
+      expect(destroy).toHaveBeenCalledOnce()
+      expect([res.headers['set-cookie']].flat().join(';')).toMatch(/^sessionId=;/)
+    }
+  })
+
   describe('upstreamPath', () => {
     it.each([
       [`${PROXY_PREFIX}/api/dataset/1`, '/api/dataset/1'],
