@@ -143,15 +143,6 @@ export const Styles = {
     overflowX: 'hidden',
     overflowY: 'scroll',
   },
-  READ_MORE: {
-    border: '1px solid #BABEC1',
-    alignContent: 'center',
-    borderRadius: 9,
-    backgroundColor: Theme.palette.background.secondary,
-    margin: '1rem 1rem 1rem 0',
-    overflowX: 'hidden',
-    overflowY: 'scroll',
-  },
   HEADER_IMG: {
     width: '60px',
     height: '60px',
