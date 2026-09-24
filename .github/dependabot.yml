@@ -33,6 +33,9 @@ updates:
       - "pnpm"
     commit-message:
       prefix: "[DT-400-pnpm]"
+    ignore:
+      # 30.1.0 breaks MUI FocusTrap focus restore and URL.createObjectURL in Vitest
+      - dependency-name: "jsdom"
     groups:
       pnpm-major:
         patterns:
