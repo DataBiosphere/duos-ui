@@ -126,7 +126,7 @@ it('accepts boolean verification, scope aliases and the five-minute boundary', a
   }
   finally { vi.useRealTimers() }
 })
-it.each([400, 401, 403, 302])('rejects tokeninfo status %s without retrying', async (status) => {
+it.each([400, 401, 403, 429, 302])('rejects tokeninfo status %s without retrying', async (status) => {
   vi.mocked(fetch).mockImplementation(async () => response({}, status))
   expect((await signIn()).statusCode).toBe(401)
   expect(fetch).toHaveBeenCalledTimes(1)

@@ -42,8 +42,10 @@ async function tokenInfo(accessToken: string, request: FastifyRequest): Promise<
       })
       if (response.status !== 200) {
         request.log.warn({ reason: 'tokeninfo_status', status: response.status, attempt }, '[test-signin] rejected')
-        // Retry transient provider failures once; invalid credentials cannot heal.
-        if (response.status >= 500 || response.status === 429) continue
+        // Retry a provider 5xx once. Every 4xx is final: invalid credentials
+        // cannot heal, and an immediate retry of a 429 only adds to the load
+        // Google is already shedding.
+        if (response.status >= 500) continue
         return undefined
       }
       // A body of the wrong shape fails the claim checks in the handler.
