@@ -157,9 +157,9 @@ For deployed dev or BEE environments, see
   has a three-second timeout, with one retry for a transient failure.
 - A token must belong to an allowlisted identity, carry a verified email and
   both the email and profile scopes, and have at least five minutes left.
-- A fixture session cannot refresh. `/auth/me` and the proxies answer 401 at the
-  token's real expiry, about one hour after Google issued it. Sign in again for
-  a longer run.
+- A fixture session cannot refresh. At the token's real expiry, about one hour
+  after Google issued it, `/auth/me` and the proxies end the session, clear the
+  cookie and answer 401. Sign in again for a longer run.
 - Sign-out destroys the local session only. The Google token is never sent to
   B2C.
 
