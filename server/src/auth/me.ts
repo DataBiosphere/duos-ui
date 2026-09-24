@@ -91,7 +91,15 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
   reply.header('cache-control', 'no-store')
   reply.header('vary', 'Cookie')
 
-  if (!request.session.accessToken || tokenDisposition(request.session) === 'expired') {
+  if (!request.session.accessToken) {
+    reply.status(401).send({ authenticated: false })
+    return
+  }
+
+  if (tokenDisposition(request.session) === 'expired') {
+    // A fixture token cannot renew: end the session now, exactly as an
+    // upstream 401 would after the token expired in flight.
+    await destroySession(request, reply)
     reply.status(401).send({ authenticated: false })
     return
   }

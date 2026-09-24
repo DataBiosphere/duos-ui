@@ -63,7 +63,9 @@ export const REFRESH_WINDOW_SECONDS = 60
  * - `forward`: use the token as it is.
  * - `refresh`: it expires within the window; call refreshAccessToken first.
  * - `expired`: a test-fixture token (DT-4068) at its real expiry. It cannot
- *   renew, so the caller answers 401 and leaves the session in place.
+ *   renew, so the caller destroys the session, clears the cookie and answers
+ *   401 — the same end an unrefreshable session meets in refreshAccessToken,
+ *   and the same end Consent's 401 would force if the token expired in flight.
  */
 export function tokenDisposition(session: Session): 'forward' | 'refresh' | 'expired' {
   const secondsRemaining = (session.tokenExpiry ?? 0) - Math.floor(Date.now() / 1000)

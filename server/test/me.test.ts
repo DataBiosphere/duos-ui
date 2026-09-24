@@ -60,16 +60,20 @@ describe('getMe', () => {
     vi.unstubAllGlobals()
   })
 
-  it.each([30, 0])('fixture with %s seconds remaining skips refresh and expires locally', async (remaining) => {
+  it.each([30, 0])('fixture with %s seconds remaining skips refresh; at expiry the session ends', async (remaining) => {
     vi.mocked(fetch).mockResolvedValue(makeFetchResponse(200, { email: 'role@example.com' }) as never)
     const { request, destroy } = makeRequest({ accessToken: 'sa-token', testFixture: true, tokenExpiry: Math.floor(Date.now() / 1000) + remaining })
     const reply = makeReply()
     await getMe(request, reply)
     expect(refreshAccessToken).not.toHaveBeenCalled()
-    expect(destroy).not.toHaveBeenCalled()
-    if (remaining > 0) expect(fetch).toHaveBeenCalledOnce()
+    if (remaining > 0) {
+      expect(fetch).toHaveBeenCalledOnce()
+      expect(destroy).not.toHaveBeenCalled()
+    }
     else {
       expect(fetch).not.toHaveBeenCalled()
+      expect(destroy).toHaveBeenCalledOnce()
+      expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
       expect(reply.status).toHaveBeenCalledWith(401)
       expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
     }
