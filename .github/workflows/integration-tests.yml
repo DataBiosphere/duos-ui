@@ -16,6 +16,7 @@ env:
   DUOS_API_URL: https://consent.dsde-dev.broadinstitute.org
   # `pnpm run serve` defaults this off to spare a developer's browser; CI has none.
   DUOS_HSTS: 'true'
+  DUOS_TEST_SIGNIN_ENABLED: 'true'
 
 jobs:
   playwright-run:
@@ -54,9 +55,8 @@ jobs:
         run: pnpm ci
       - name: Install Playwright Chromium
         run: pnpm exec playwright install chromium --with-deps
-      # Keep legacy auth until 6-D-pre (DT-4068) adds the BFF sign-in fixture.
       - name: Copy Configs
-        run: cp config/dev.json public/config.json
+        run: jq '.bffEnabled = true' config/dev.json > public/config.json
       - name: Map local dev hostname
         run: echo "127.0.0.1 local.dsde-dev.broadinstitute.org" | sudo tee -a /etc/hosts
       # Secure session cookies require HTTPS; Playwright accepts this self-signed certificate.
@@ -80,7 +80,10 @@ jobs:
       - name: Build app
         run: CI=false pnpm run build
       - name: Run Playwright integration tests
-        run: pnpm run test:e2e
+        run: |
+          DUOS_TEST_SIGNIN_EMAILS=$(node scripts/e2e-fixture-emails.mjs)
+          export DUOS_TEST_SIGNIN_EMAILS
+          pnpm run test:e2e
         env:
           DUOS_AUTOMATION_ADMIN_SA: ${{ secrets.DUOS_AUTOMATION_ADMIN_SA }}
           DUOS_AUTOMATION_CHAIR_SA: ${{ secrets.DUOS_AUTOMATION_CHAIR_SA }}

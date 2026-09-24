@@ -17,8 +17,9 @@ import { cspReportRoute, REPORTING_ENDPOINTS_HEADER } from './security/cspReport
 import { sessionPluginOptions } from './session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
 import { fetchMetadataGuard } from './security/fetchMetadata.js'
-import { callbackRateLimit, isRateLimitError, loginRateLimit, RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } from './security/rateLimit.js'
+import { callbackRateLimit, testSigninRateLimit, isRateLimitError, loginRateLimit, RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } from './security/rateLimit.js'
 import { getOidcConfig } from './auth/oidcClient.js'
+import { testSigninEmails, createTestSigninHandler } from './auth/testSignin.js'
 import { handleLogin } from './auth/login.js'
 import { handleCallback } from './auth/callback.js'
 import { handleLogout } from './auth/logout.js'
@@ -118,6 +119,8 @@ export async function buildApp(): Promise<AppInstance> {
   // Use the same memoized config for headers, route gating, and /config.json.
   const configJsonPath = configPath(PROJECT_ROOT, isDev)
   const clientConfig = await readConfig(configJsonPath, fastify.log)
+
+  const fixtureEmails = testSigninEmails(clientConfig)
 
   // Register before routes so Helmet's hooks cover every response.
   const cspReportOnly = envBool(process.env.DUOS_CSP_REPORT_ONLY, true)
@@ -227,7 +230,15 @@ export async function buildApp(): Promise<AppInstance> {
     // rather than on the first request.
     const loginLimit = loginRateLimit()
     const callbackLimit = callbackRateLimit()
-    fastify.log.info({ login: loginLimit.max, callback: callbackLimit.max }, '[server] auth rate limits, in requests per minute per client IP')
+    const fixtureLimit = fixtureEmails && testSigninRateLimit()
+    fastify.log.info({ login: loginLimit.max, callback: callbackLimit.max, testSignin: fixtureLimit?.max }, '[server] auth rate limits, in requests per minute per client IP')
+
+    if (fixtureEmails) {
+      fastify.post('/auth/test-signin', {
+        onRequest: fetchMetadataGuard,
+        config: { rateLimit: fixtureLimit },
+      }, createTestSigninHandler(fixtureEmails))
+    }
 
     fastify.post('/auth/login', { config: { rateLimit: loginLimit } }, handleLogin)
     fastify.get('/auth/callback', { config: { rateLimit: callbackLimit }, errorHandler: handleCallbackError }, handleCallback)

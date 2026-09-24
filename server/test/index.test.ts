@@ -424,6 +424,8 @@ describe('BFF auth route registration', () => {
   let dir: string
 
   afterEach(async () => {
+    delete process.env.DUOS_TEST_SIGNIN_ENABLED
+    delete process.env.DUOS_TEST_SIGNIN_EMAILS
     delete process.env.CONFIG_PATH
     delete process.env.DUOS_ECM_URL
     delete process.env.DUOS_TDR_URL
@@ -452,6 +454,26 @@ describe('BFF auth route registration', () => {
     const { buildApp } = await import('../src/index.js')
     return buildApp()
   }
+
+  it.each(['staging', 'prod', undefined])('refuses to boot with test sign-in enabled in %s, even before cutover', async (env) => {
+    process.env.DUOS_TEST_SIGNIN_ENABLED = 'true'
+    await expect(buildAppWithConfig({ env, bffEnabled: false })).rejects.toThrow('dev or BEE only')
+  })
+
+  it('registers the fixture route only when explicitly enabled in dev', async () => {
+    process.env.DUOS_TEST_SIGNIN_ENABLED = 'true'
+    process.env.DUOS_TEST_SIGNIN_EMAILS = ['admin', 'chair', 'member', 'researcher', 'so']
+      .map(role => `${role}@automation.iam.gserviceaccount.com`).join(',')
+    const enabled = await buildAppWithConfig({ env: 'dev', bffEnabled: true })
+    expect(enabled.hasRoute({ method: 'POST', url: '/auth/test-signin' })).toBe(true)
+    // Invalid input fails before accessing the mocked session infrastructure.
+    expect((await enabled.inject({ method: 'POST', url: '/auth/test-signin', payload: {} })).statusCode).toBe(401)
+    await enabled.close()
+    delete process.env.DUOS_TEST_SIGNIN_ENABLED
+    const disabled = await buildAppWithConfig({ env: 'dev', bffEnabled: true })
+    expect(disabled.hasRoute({ method: 'POST', url: '/auth/test-signin' })).toBe(false)
+    await disabled.close()
+  })
 
   it('registers all four /auth/* routes when bffEnabled is true', async () => {
     const localApp = await buildAppWithConfig({ bffEnabled: true })
