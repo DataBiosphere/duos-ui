@@ -228,6 +228,14 @@ describe('BackgroundSignIn', () => {
     expect(User.getMe).not.toHaveBeenCalled()
   })
 
+  it('tells an unregistered account apart from a disabled fixture', async () => {
+    vi.mocked(User.getMe).mockRejectedValue(adapterError(404))
+    await act(async () => renderComponent({ bearerToken: 'unregistered-account-token' }))
+    expect(screen.getByText('The account behind this token is not registered in DUOS.')).toBeInTheDocument()
+    expect(screen.queryByText(/Background sign-in is not enabled/)).not.toBeInTheDocument()
+    expect(Navigation.console).not.toHaveBeenCalled()
+  })
+
   it('does not fetch a user or navigate when fixture sign-in is rejected', async () => {
     vi.mocked(fetch).mockResolvedValue({ status: 401 } as Response)
     await act(async () => renderComponent({ bearerToken: 'rejected-token' }))
