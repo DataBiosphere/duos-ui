@@ -158,6 +158,9 @@ const mockDatasetsResponse = {
           datasetName: 'Dataset One',
           datasetIdentifier: 'DUOS-000001',
           accessManagement: 'controlled',
+          // The library query filters controlled datasets on dacApproval, so anything it can
+          // return is approved. Selection asks the same question.
+          dacApproval: true,
           study: {
             studyId: 101,
             studyName: 'Study One',

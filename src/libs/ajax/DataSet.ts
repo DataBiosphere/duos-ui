@@ -3,6 +3,7 @@ import { fileDownload } from 'src/utils/FileDownload'
 import { fetchDelete, fetchGet, fetchMultipart, fetchPost } from 'src/libs/ajax/fetchAdapter'
 import { Dataset, DatasetTerm } from 'src/types/model'
 import { Study } from 'src/pages/data_submission/v2/v2-models'
+import { Study as StudyApi } from 'src/libs/ajax/Study'
 import { ElasticsearchQuery, ElasticsearchResponse } from 'src/types/elastic'
 
 export const DataSet = {
@@ -97,15 +98,11 @@ export const DataSet = {
   },
 
   /**
-   * Fetch a study by its ID.
+   * Fetch a study by its ID, as the data-submission form's editable `Study` shape.
    * @param studyId The study ID
    * @returns Promise resolving to the Study
    */
-  getStudyById: async (studyId: number | string): Promise<Study> => {
-    const url = `${await Config.getApiUrl()}/api/dataset/study/${studyId}`
-    const res = await fetchGet<Study>(url, Config.authOpts())
-    return res.data
-  },
+  getStudyById: async (studyId: number | string): Promise<Study> => StudyApi.getById<Study>(studyId),
 
   /**
    * Update a study using multipart form data with a PUT request.
