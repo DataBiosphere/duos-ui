@@ -1105,9 +1105,10 @@ describe('Study details test', () => {
     expect(screen.queryByText('Add your comment')).not.toBeInTheDocument()
   })
 
-  it('shows granted DAR details and expands the research use statement', async () => {
+  it('shows granted DAR details and expands the research use statement and summary', async () => {
     vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([{
       projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+      rus: 'Whole-genome association analysis of tumour samples.',
       nonTechRus: 'Study cancer outcomes.', expired: false,
       institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
     }])
@@ -1120,8 +1121,28 @@ describe('Study details test', () => {
     // it can actually fail - MetricsResourceTest pins the served field set - rather than here,
     // where the type no longer has the field and any assertion would be restating the compiler.
     expect(screen.getByText('Current')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Show research use statement' }))
+    // Both stay hidden until asked for, then each appears under its own label
+    expect(screen.queryByText('Whole-genome association analysis of tumour samples.')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Show research use statement and summary' }))
+    expect(screen.getByText('Research Use Statement')).toBeInTheDocument()
+    expect(screen.getByText('Whole-genome association analysis of tumour samples.')).toBeInTheDocument()
+    expect(screen.getByText('Non-Technical Summary')).toBeInTheDocument()
     expect(screen.getByText('Study cancer outcomes.')).toBeInTheDocument()
+  })
+
+  it('offers the research use statement when a grant has no non-technical summary', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([{
+      projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+      rus: 'Whole-genome association analysis of tumour samples.',
+      nonTechRus: '', expired: false,
+      institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+    }])
+    const user = userEvent.setup()
+    mountComponent()
+
+    await user.click(await screen.findByRole('button', { name: 'Show research use statement and summary' }))
+    expect(screen.getByText('Whole-genome association analysis of tumour samples.')).toBeInTheDocument()
+    expect(screen.queryByText('Non-Technical Summary')).not.toBeInTheDocument()
   })
 
   it('shows the public identity disclosure to active researchers before posting', async () => {

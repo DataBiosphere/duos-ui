@@ -664,6 +664,7 @@ export interface DatasetStatisticsDar {
   projectTitle: string
   darCode: string
   nonTechRus: string
+  rus?: string
   referenceId: string
   expired: boolean
   /** Absent when the dataset has no study: see DarMetric.yaml. The requester's name is never sent. */
