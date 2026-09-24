@@ -1,6 +1,4 @@
-// Prints the automation service-account emails for DUOS_TEST_SIGNIN_EMAILS.
-// Only public identity names go to the BFF allowlist, never the keys. The server
-// validates the list at boot (server/src/auth/testSignin.ts).
+// Print public client_email values for DUOS_TEST_SIGNIN_EMAILS, never keys.
 const roles = ['ADMIN', 'CHAIR', 'MEMBER', 'RESEARCHER', 'SIGNING_OFFICIAL']
 const emails = roles.map((role) => {
   const name = `DUOS_AUTOMATION_${role}_SA`

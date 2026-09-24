@@ -20,7 +20,6 @@ export interface BackgroundSignInProps {
   env?: string
 }
 
-/** A non-204 answer from POST /auth/test-signin, kept apart from a profile-lookup failure. */
 class TestSigninError extends Error {
   constructor(readonly status: number) {
     super('Background sign-in failed')
@@ -30,15 +29,12 @@ class TestSigninError extends Error {
 const unavailableMessage = (status?: number): string =>
   'Sign-in failed' + (status ? ' (HTTP ' + status + ')' : '') + '. The server or one of its upstream services is unavailable.'
 
-/**
- * What a failed fixture POST means. The route itself answers only 204, 401 or
- * 429; a 200 (or 404) is the SPA not-found fallback serving index.html because
- * the route is unregistered (DT-4068), so the configuration hint belongs here alone.
- */
+/** Only fixture POST failures: profile lookups have different 404 semantics. */
 const testSigninMessage = (status: number): string => {
   switch (status) {
     case 200:
     case 404:
+      // The SPA fallback returns 200 when the fixture route is absent.
       return 'Background sign-in is not enabled on this server. Set DUOS_TEST_SIGNIN_ENABLED and DUOS_TEST_SIGNIN_EMAILS, then restart it.'
     case 429:
       return 'Too many sign-in attempts. Please wait a minute and try again.'
@@ -100,8 +96,7 @@ export default function BackgroundSignIn({ onSignIn, onError, bearerToken }: Rea
           resetCsrfToken()
         }
         else {
-          // Preserve the legacy harness until BFF cutover. The opaque Google
-          // token has no readable expiry; retain the existing one-hour estimate.
+          // Opaque tokens require an estimated expiry in legacy mode.
           const oneHourFromNow = Math.floor(Date.now() / 1000) + 3600
           Storage.setOidcUser({ id_token: accessToken, profile: { exp: oneHourFromNow } } as unknown as OidcUser)
         }
@@ -120,7 +115,6 @@ export default function BackgroundSignIn({ onSignIn, onError, bearerToken }: Rea
             setLoading(false)
             return
           }
-          // A profile-lookup failure: the fetch adapter carries the status under response.status.
           switch (extractStatus(error)) {
             case 400:
               if (onError)
@@ -139,7 +133,6 @@ export default function BackgroundSignIn({ onSignIn, onError, bearerToken }: Rea
               setLoading(false)
               break
             default:
-              // A 5xx or network failure is the server or an upstream, not the token.
               setSignInError(unavailableMessage(extractStatus(error)))
               setLoading(false)
               break

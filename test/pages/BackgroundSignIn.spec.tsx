@@ -70,7 +70,7 @@ const mockUser = {
   isDataSubmitter: false,
 }
 
-/** The shape fetchAdapter throws for a non-ok response: the status lives under `response`. */
+/** Match fetchAdapter's error shape. */
 const adapterError = (status: number) =>
   Object.assign(new Error(`Request failed with status ${status}`), { response: { status, data: {} } })
 
@@ -219,7 +219,7 @@ describe('BackgroundSignIn', () => {
     expect(Storage.setOidcUser).not.toHaveBeenCalled()
   })
 
-  // The Fastify SPA fallback answers an unregistered route with the index page and a 200.
+  // The SPA fallback returns 200 for an absent route.
   it.each([200, 404])('names the missing fixture configuration when the route is not registered (HTTP %s)', async (status) => {
     vi.mocked(fetch).mockResolvedValue({ status } as Response)
     await act(async () => renderComponent({ bearerToken: 'unregistered-route-token' }))

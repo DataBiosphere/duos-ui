@@ -137,7 +137,6 @@ export function callbackRateLimit(): RateLimitOptions {
   return { max: maxFromEnv(CALLBACK_MAX_ENV_VAR, DEFAULT_CALLBACK_MAX), timeWindow: TIME_WINDOW }
 }
 
-/** Generous enough for the parallel five-role application suite. */
 export function testSigninRateLimit(): RateLimitOptions {
   return { max: maxFromEnv(TEST_SIGNIN_MAX_ENV_VAR, DEFAULT_TEST_SIGNIN_MAX), timeWindow: TIME_WINDOW }
 }

@@ -193,16 +193,7 @@ See [TESTING.md](TESTING.md) for full testing instructions.
 
 ## E2E Tests (Playwright)
 
-The suite runs against the Fastify server, which Playwright starts for you.
-[TESTING.md](TESTING.md#e2e-tests-playwright) has the two setup paths:
-
-- **Path A, public specs.** A build and the TLS certificate. Nothing else.
-- **Path B, full suite.** A BFF-enabled build, a session database, the role
-  service-account keys, and the test-sign-in fixture.
-
-Without `server.key` and `server.crt` in the project root, the server exits at
-once with `ENOENT ... server.key` and Playwright reports a web server that never
-started.
+See [TESTING.md](TESTING.md#e2e-tests-playwright) for public-spec and full-suite setup.
 
 ## Unit & Component Tests (Vitest)
 

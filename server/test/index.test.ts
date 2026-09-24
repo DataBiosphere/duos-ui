@@ -466,7 +466,7 @@ describe('BFF auth route registration', () => {
       .map(role => `${role}@automation.iam.gserviceaccount.com`).join(',')
     const enabled = await buildAppWithConfig({ env: 'dev', bffEnabled: true })
     expect(enabled.hasRoute({ method: 'POST', url: '/auth/test-signin' })).toBe(true)
-    // Invalid input fails before accessing the mocked session infrastructure.
+    // Avoid the mocked session store.
     expect((await enabled.inject({ method: 'POST', url: '/auth/test-signin', payload: {} })).statusCode).toBe(401)
     await enabled.close()
     delete process.env.DUOS_TEST_SIGNIN_ENABLED

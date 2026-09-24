@@ -1,14 +1,12 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { establishSession } from '../session/rotation.js'
 
-/** BEEs also render env=dev. Never use NODE_ENV: deployed dev runs production builds. */
+/** Dev and BEEs use env=dev, even with NODE_ENV=production. */
 export function testSigninEmails(config: Record<string, unknown>): ReadonlySet<string> | undefined {
   if (process.env.DUOS_TEST_SIGNIN_ENABLED !== 'true') return undefined
   if (config.env !== 'dev') {
     throw new Error('DUOS_TEST_SIGNIN_ENABLED requires config.json env=dev (dev or BEE only)')
   }
-  // The route registers only in BFF mode, so fail loudly rather than ignore the flag.
-  // index.ts already requires DUOS_DB_HOST whenever bffEnabled is true.
   if (config.bffEnabled !== true) {
     throw new Error('DUOS_TEST_SIGNIN_ENABLED requires bffEnabled')
   }
@@ -23,12 +21,8 @@ const TOKENINFO_URL = 'https://oauth2.googleapis.com/tokeninfo'
 const TIMEOUT_MS = 3000
 
 /**
- * Google's tokeninfo endpoint accepts the access token by GET query string or by
- * form-encoded POST body; the body keeps the token out of URLs and proxy logs.
- * For an access token it answers with `email`, `email_verified` (the string
- * "true"), `scope` and `expires_in` (a string of seconds) — the shape the CI
- * Playwright job exercises against real service-account tokens.
- * Credentials are sent only in the POST body; never log the token or provider body/errors.
+ * POST keeps tokens out of URLs. Never log tokens or provider bodies/errors.
+ * Google returns email_verified and expires_in as strings.
  */
 async function tokenInfo(accessToken: string, request: FastifyRequest): Promise<Record<string, unknown> | undefined> {
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -42,13 +36,10 @@ async function tokenInfo(accessToken: string, request: FastifyRequest): Promise<
       })
       if (response.status !== 200) {
         request.log.warn({ reason: 'tokeninfo_status', status: response.status, attempt }, '[test-signin] rejected')
-        // Retry a provider 5xx once. Every 4xx is final: invalid credentials
-        // cannot heal, and an immediate retry of a 429 only adds to the load
-        // Google is already shedding.
+        // Do not retry 429 immediately; it adds load while Google is throttling.
         if (response.status >= 500) continue
         return undefined
       }
-      // A body of the wrong shape fails the claim checks in the handler.
       return await response.json() as Record<string, unknown> | undefined
     }
     catch {
@@ -58,18 +49,13 @@ async function tokenInfo(accessToken: string, request: FastifyRequest): Promise<
   return undefined
 }
 
-/** A token must have at least this long left, so a run never starts on a token about to expire. */
 const MIN_EXPIRES_IN_SECONDS = 300
 
 export type ClaimCheck
   = { ok: true, email: string, expiresIn: number }
     | { ok: false, claim: string }
 
-/**
- * Checks the tokeninfo claims in order and names the first one that fails, so
- * the server log says which check rejected a token without echoing any value.
- * Tokeninfo sends expires_in as a string; anything that is not a whole number fails.
- */
+/** Return the failing claim's name for logging, never its value. */
 export function checkClaims(info: Record<string, unknown> | undefined, emails: ReadonlySet<string>): ClaimCheck {
   if (!info) return { ok: false, claim: 'tokeninfo_unavailable' }
   if (typeof info.email !== 'string' || !emails.has(info.email)) return { ok: false, claim: 'email_not_allowlisted' }
@@ -91,7 +77,7 @@ export function createTestSigninHandler(emails: ReadonlySet<string>) {
       reply.status(401).send()
       return
     }
-    // Anchor expiry before the network call so latency never extends a token's lifetime.
+    // Network latency must not extend token expiry.
     const startedAt = Math.floor(Date.now() / 1000)
     const info = await tokenInfo(accessToken, request)
     const checked = checkClaims(info, emails)
