@@ -3,11 +3,11 @@ import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DAR } from 'src/libs/ajax/DAR'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
-import { formatDate, Notifications } from 'src/libs/utils'
+import { Notifications } from 'src/libs/utils'
 import { Styles, Theme } from 'src/libs/theme'
-import { ReadMore } from 'src/components/ReadMore'
+import DarSummaryCard from 'src/components/DarSummaryCard'
 import { DatasetExportButton } from 'src/components/data_search/DatasetExportButton'
-import { Button, Tooltip } from '@mui/material'
+import { Button, Stack, Tooltip } from '@mui/material'
 import {
   DatasetStatisticsDar,
   DatasetTerm,
@@ -24,8 +24,6 @@ import InstantApprovalBadge from 'src/components/data_library/InstantApprovalBad
 import {
   ACTIVE_RESEARCHER_STATUS_REQUIRED, hasActiveResearcherStatus,
 } from 'src/hooks/useApplyForAccessEligibility'
-
-const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />
 
 enum AccessManagement {
   OPEN = 'open',
@@ -349,66 +347,11 @@ export default function DatasetStatistics() {
                 No Data Access Requests have been created for this dataset.
               </div>
             )}
-          {dars?.map((dar: DatasetStatisticsDar) => (
-            <div
-              style={Styles.READ_MORE as React.CSSProperties}
-              id={`${dar.darCode}`}
-              key={`${dar.darCode}`}
-            >
-              <ReadMore
-                readLessText="Show less"
-                readMoreText="Show More"
-                readStyle={{ fontWeight: 500, margin: '20px', height: 0 }}
-                content={[
-                  <div key="dar" style={{ display: 'flex' }}>
-                    <div
-                      style={{ ...Styles.MEDIUM, width: '12%', margin: '15px' }}
-                    >{dar.darCode}
-                    </div>
-                    <div style={{ ...Styles.MEDIUM, margin: '15px' }}>{dar.projectTitle}</div>
-                  </div>,
-                  React.cloneElement(LINE, { key: 'line-header' }),
-                ]}
-                moreContent={[
-                  <div key="updated" style={{ display: 'flex', backgroundColor: 'white' }}>
-                    <div style={{ display: 'flex', paddingRight: '2rem' }}>
-                      <div style={Styles.SMALL_BOLD}>Last Updated:</div>
-                      <div style={{ ...Styles.SMALL_BOLD, color: `${dar.expired ? 'red' : 'rgb(31, 59, 80)'}` }}>
-                        {formatDate(dar.updateDate)}
-                        {dar.expired && ' (Expired)'}
-                      </div>
-                    </div>
-                  </div>,
-                  <div key="requester" style={{ display: 'flex', backgroundColor: 'white' }}>
-                    {/* Institution, not the requester's name, as on the study page's cards. */}
-                    <div style={{ display: 'flex', paddingRight: '2rem' }}>
-                      <div style={Styles.SMALL_BOLD}>Institution:</div>
-                      <div style={{ fontSize: Theme.font.size.small }}>
-                        {dar.institutionName || 'Not provided'}
-                      </div>
-                    </div>
-                  </div>,
-                  ...(dar.rus
-                    ? [
-                        <div key="rus" style={{ backgroundColor: 'white' }}>
-                          <div style={Styles.SMALL_BOLD}>Research Use Statement:</div>
-                          <div style={{ fontSize: Theme.font.size.small, padding: '0 1rem 1rem 1rem' }}>
-                            {dar.rus}
-                          </div>
-                        </div>,
-                      ]
-                    : []),
-                  <div key="summary" style={{ backgroundColor: 'white' }}>
-                    <div style={Styles.SMALL_BOLD}>NonTechnical Summary:</div>
-                    <div style={{ fontSize: Theme.font.size.small, padding: '0 1rem 1rem 1rem' }}>
-                      {dar.nonTechRus}
-                    </div>
-                  </div>,
-                  React.cloneElement(LINE, { key: 'line-footer' }),
-                ]}
-              />
-            </div>
-          ))}
+          {!darsRestricted && dars && dars.length > 0 && (
+            <Stack spacing={2} sx={{ pt: '20px' }}>
+              {dars.map((dar: DatasetStatisticsDar) => <DarSummaryCard key={dar.referenceId} dar={dar} />)}
+            </Stack>
+          )}
         </div>
       </div>
     )

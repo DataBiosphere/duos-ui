@@ -291,8 +291,8 @@ describe('DatasetStatistics', () => {
     renderDatasetStatistics()
 
     expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeTruthy()
-    expect(await screen.findByText('DAR-001')).toBeTruthy()
     expect(await screen.findByText('Test Project')).toBeTruthy()
+    expect(screen.getByText('Current')).toBeTruthy()
   })
 
   /**
@@ -359,13 +359,13 @@ describe('DatasetStatistics', () => {
       </QueryClientProvider>,
     )
 
-    expect(await screen.findByText('DAR-001')).toBeInTheDocument()
+    expect(await screen.findByText('Test Project')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'next dataset' }))
 
     expect(await screen.findByRole('status')).toHaveTextContent('do not have access')
     // The first dataset's history is gone rather than sitting beside the notice
-    expect(screen.queryByText('DAR-001')).not.toBeInTheDocument()
+    expect(screen.queryByText('Test Project')).not.toBeInTheDocument()
   })
 
   /**
@@ -634,7 +634,6 @@ describe('DatasetStatistics', () => {
       </QueryClientProvider>,
     )
     expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeInTheDocument()
-    expect(await screen.findByText('DAR-123')).toBeInTheDocument()
     expect(await screen.findByText('Test Project')).toBeInTheDocument()
   })
 
@@ -643,7 +642,7 @@ describe('DatasetStatistics', () => {
    * carried neither until the per-dataset summaries started reporting it, and the study page's
    * cards name the same thing, so the two surfaces describe a granted request the same way.
    */
-  it('names the requesting institution on an expanded DAR', async () => {
+  it('names the requesting institution on each DAR', async () => {
     const darsData: DatasetStatisticsDar[] = [{
       darCode: 'DAR-123',
       projectTitle: 'Test Project',
@@ -656,7 +655,6 @@ describe('DatasetStatistics', () => {
     vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDataset as never])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(darsData)
     vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
-    const user = userEvent.setup()
     render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={[`/dataset/${mockDataset.datasetIdentifier}`]}>
@@ -666,10 +664,8 @@ describe('DatasetStatistics', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    await screen.findByText('DAR-123')
-    await user.click(screen.getByText('Show More'))
 
-    expect(await screen.findByText('Broad Institute')).toBeInTheDocument()
+    expect(await screen.findByText('Institution: Broad Institute')).toBeInTheDocument()
   })
 
   /** The field is optional on the payload, so an absent one must not render an empty label. */
@@ -677,7 +673,6 @@ describe('DatasetStatistics', () => {
     vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([mockDataset as never])
     vi.mocked(DatasetMetrics.getDatasetStats).mockResolvedValue(mockDarsResponse)
     vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue(mockEmptyTdrResponse as never)
-    const user = userEvent.setup()
     render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={[`/dataset/${mockDataset.datasetIdentifier}`]}>
@@ -687,10 +682,8 @@ describe('DatasetStatistics', () => {
         </MemoryRouter>
       </QueryClientProvider>,
     )
-    await screen.findByText('DAR-001')
-    await user.click(screen.getByText('Show More'))
 
-    expect(await screen.findAllByText('Not provided')).toHaveLength(1)
+    expect(await screen.findByText('Institution: Not provided')).toBeInTheDocument()
   })
 
   it('Displays message when no DARs exist', async () => {
@@ -702,13 +695,12 @@ describe('DatasetStatistics', () => {
     const expired = new Date()
     expired.setFullYear(expired.getFullYear() - 2)
     const dateTime = expired.getTime()
-    const pad = (n: number) => ('0' + n).slice(-2)
-    const expectedDateString = `${expired.getFullYear()}-${pad(expired.getMonth() + 1)}-${pad(expired.getDate())}`
 
     const darsData: DatasetStatisticsDar[] = [{
       darCode: 'DAR-123',
       projectTitle: 'Test Project',
       updateDate: dateTime,
+      submissionDate: dateTime,
       rus: 'Test research use statement',
       nonTechRus: 'Test summary',
       expired: true,
@@ -730,14 +722,15 @@ describe('DatasetStatistics', () => {
     )
 
     expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeInTheDocument()
-    expect(await screen.findByText('DAR-123')).toBeInTheDocument()
     expect(await screen.findByText('Test Project')).toBeInTheDocument()
-    const showMoreButton = await screen.findByText('Show More')
-    fireEvent.click(showMoreButton)
-    expect(await screen.findByText(/Expired/)).toBeInTheDocument()
-    expect(await screen.findByText(new RegExp(expectedDateString))).toBeInTheDocument()
-    expect(await screen.findByText(darsData[0].nonTechRus)).toBeInTheDocument()
-    expect(screen.getByText('Research Use Statement:')).toBeInTheDocument()
+    expect(screen.getByText('Expired')).toBeInTheDocument()
+    expect(screen.getByText(`Submitted ${expired.toLocaleDateString()}`)).toBeInTheDocument()
+    // Hidden until asked for, as on the study page, then each under its own label
+    expect(screen.queryByText('Test research use statement')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Show research use statement and summary' }))
+    expect(screen.getByText('Research Use Statement')).toBeInTheDocument()
     expect(screen.getByText('Test research use statement')).toBeInTheDocument()
+    expect(screen.getByText('Non-Technical Summary')).toBeInTheDocument()
+    expect(screen.getByText(darsData[0].nonTechRus)).toBeInTheDocument()
   })
 })
