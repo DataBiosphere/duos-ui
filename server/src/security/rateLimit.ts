@@ -91,9 +91,11 @@ const RATE_LIMIT_ERROR_MARKER = 'DUOS_RATE_LIMITED'
 /** Names the tuning knobs so tests and docs cannot drift from the reads below. */
 export const LOGIN_MAX_ENV_VAR = 'DUOS_RATE_LIMIT_LOGIN_MAX'
 export const CALLBACK_MAX_ENV_VAR = 'DUOS_RATE_LIMIT_CALLBACK_MAX'
+export const TEST_SIGNIN_MAX_ENV_VAR = 'DUOS_RATE_LIMIT_TEST_SIGNIN_MAX'
 
 const DEFAULT_LOGIN_MAX = 30
 const DEFAULT_CALLBACK_MAX = 60
+const DEFAULT_TEST_SIGNIN_MAX = 300
 const TIME_WINDOW = '1 minute'
 
 /**
@@ -133,4 +135,8 @@ export function loginRateLimit(): RateLimitOptions {
 /** Route `config.rateLimit` for `GET /auth/callback`. */
 export function callbackRateLimit(): RateLimitOptions {
   return { max: maxFromEnv(CALLBACK_MAX_ENV_VAR, DEFAULT_CALLBACK_MAX), timeWindow: TIME_WINDOW }
+}
+
+export function testSigninRateLimit(): RateLimitOptions {
+  return { max: maxFromEnv(TEST_SIGNIN_MAX_ENV_VAR, DEFAULT_TEST_SIGNIN_MAX), timeWindow: TIME_WINDOW }
 }

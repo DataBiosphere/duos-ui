@@ -2,124 +2,122 @@
 
 ## Unit & Component Tests (Vitest + RTL)
 
-Run all tests:
-```
-pnpm test
-```
-
-Run in watch mode:
-```
-pnpm test:watch
-```
-
-Run with coverage:
-```
-pnpm test:coverage
-```
+| Suite | Command |
+|---|---|
+| Client | `pnpm test` |
+| Server | `pnpm --filter duos-server test` |
+| Client watch | `pnpm test:watch` |
+| Client coverage | `pnpm test:coverage` |
 
 ## Browser Component Tests (Vitest + Playwright)
 
-```
+```sh
 pnpm test:browser
 ```
 
 ## E2E Tests (Playwright)
 
-The suite runs against the **Fastify server**, not `vite preview`. The preview
-server sends none of the security headers, cookies or routes the real
-deployment sends, so a spec could pass against it and still fail in production.
+Playwright starts Fastify with `pnpm run serve` and waits for `/health`.
+The server uses the process environment and built `config.json`; export
+`.env.local` variables before running. `vite preview` lacks the BFF routes and security controls.
 
-### What each spec needs
+Prerequisites:
 
-Read this table before you run anything. The suite is not uniform: four of the
-six spec files need nothing but a build, and two need live role credentials.
+- `server.key` and `server.crt` in the project root: run `./scripts/render-configs.sh`.
+- `local.dsde-dev.broadinstitute.org` resolving to `127.0.0.1` (use `/etc/hosts`).
 
-| Spec | Needs |
-|---|---|
-| `about`, `home`, `status`, `liveness` | a build, and the certificate below |
-| `auth`, `studyTemplate` | the role service-account keys as well |
+### Path A: public specs
 
-Nothing in the suite needs a database yet. The session infrastructure is
-optional, and the last section covers it.
+No database or credentials required. Use a fresh shell without `DUOS_TEST_SIGNIN_ENABLED=true`.
 
-### 1. Certificate
-
-The server terminates TLS itself, because the session cookie is `Secure`. Put
-`server.key` and `server.crt` in the project root. `./scripts/render-configs.sh`
-writes them from the dev cluster.
-
-### 2. Config file
-
-The server reads `config.json` from the build output and refuses to start
-without it:
-
-```
+```sh
 cp config/dev.json public/config.json
-```
-
-### 3. Build
-
-```
 CI=false pnpm run build
-```
-
-### 4. Run
-
-The four specs that need no credentials:
-
-```
 pnpm exec playwright test about.spec.ts home.spec.ts status.spec.ts liveness.spec.ts
 ```
 
-Playwright starts the server for you and waits on its `/health` route.
-`pnpm run serve` starts the same server on its own.
+### Path B: full suite
 
-### 5. Role credentials, for `auth` and `studyTemplate`
+`role-access` and `studyTemplate` use Google service-account tokens through
+`/backgroundsignin` → `POST /auth/test-signin`. This tests role access, not B2C login.
 
-These two specs sign in as each DUOS role, and the whole suite fails with
-`Missing service account key env var DUOS_AUTOMATION_ADMIN_SA` without them.
-Fetch the keys from Secret Manager (you need `gcloud` and `jq`), load them, then
-run everything:
+#### 1. Server environment
 
-```
+Set these in `.env.local` (see [.env.example](.env.example)):
+
+| Variable | Value |
+|---|---|
+| `DUOS_DB_HOST`, `DUOS_DB_PORT` | Host-reachable address (usually `localhost`) and published port; Docker's `db` hostname won't resolve |
+| `DUOS_DB_NAME`, `DUOS_DB_USER`, `DUOS_DB_PASSWORD` | Database credentials |
+| `DUOS_DB_SSL` | `false` for local Postgres without TLS |
+| `DUOS_SESSION_SECRET` | 32+ characters: `openssl rand -base64 32` |
+| `DUOS_API_URL` | Consent URL, e.g. `https://consent.dsde-dev.broadinstitute.org` |
+| `DUOS_TEST_SIGNIN_ENABLED` | `true` |
+| `DUOS_TEST_SIGNIN_EMAILS` | Automation emails, derived in step 3 |
+
+`./scripts/render-configs.sh --write_env true` fills database and API values from dev.
+
+#### 2. Session database
+
+Use either:
+
+- Bundled Postgres: follow [DEVNOTES.md](DEVNOTES.md), then run
+  `docker compose --env-file .env.local up -d db`. The dump includes the schema.
+- Another database: apply the session and audit schema using the server's database and user:
+
+  ```sh
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f test/e2e/sql/user_sessions.sql
+  ```
+
+Keep [the schema copy](test/e2e/sql/user_sessions.sql) aligned with the Consent changesets it lists.
+If variables are already exported, omit Compose's `--env-file .env.local`.
+
+#### 3. Role credentials
+
+Fetch the five service-account keys from Secret Manager (`gcloud` and `jq` required).
+The generated credentials file is gitignored and owner-readable only; the email helper prints no keys.
+
+```sh
 ./scripts/render-accounts.sh
-set -a; source test/e2e/fixtures/duos-automation.env; set +a
+set -a
+source test/e2e/fixtures/duos-automation.env
+source .env.local   # skip if server variables are already exported
+set +a
+export DUOS_TEST_SIGNIN_ENABLED=true
+DUOS_TEST_SIGNIN_EMAILS=$(node scripts/e2e-fixture-emails.mjs)
+export DUOS_TEST_SIGNIN_EMAILS
+```
+
+#### 4. Build and run
+
+```sh
+jq '.bffEnabled = true' config/dev.json > public/config.json
+CI=false pnpm run build
 pnpm run test:e2e
 ```
 
-The rendered file holds live credentials. It is gitignored and written with
-owner-only permissions.
+See the [CI workflow](.github/workflows/integration-tests.yml) and
+[dev/BEE deployment settings](docs/testing/e2e-role-fixture.md).
 
-### Session infrastructure (optional)
+#### Fixture rules
 
-The server registers its Postgres session layer when `DUOS_DB_HOST` is set, so
-a run with no `DUOS_*` variables exercises the legacy sign-in flow and needs no
-database. To run against the session infrastructure instead, do all three of
-these before `pnpm run test:e2e`:
+- Enabling the fixture requires `env: "dev"`, `bffEnabled: true` and a session DB; otherwise startup fails.
+- `https://oauth2.googleapis.com/tokeninfo` must be reachable. Attempts time out after 3 seconds; 5xx, network and JSON failures retry once.
+- Tokens need an allowlisted, verified email, email/profile scopes and at least 5 minutes remaining.
+- Tokens stay server-side. Sessions end at token expiry without refresh; sign-out is local only.
 
-1. Start Postgres. `docker compose up -d db` is enough, and its
-   `config/consentdb.sql` dump already carries the `user_sessions` table. A
-   database from any other source needs the schema applied by hand:
-   `psql "$DATABASE_URL" -f test/e2e/sql/user_sessions.sql`.
-2. Export the database variables — `DUOS_DB_HOST`, `DUOS_DB_NAME`,
-   `DUOS_DB_USER`, `DUOS_DB_PASSWORD`, and `DUOS_DB_SSL=false` for a local
-   container. See `.env.example`.
-3. Export `DUOS_SESSION_SECRET`, at least 32 characters
-   (`openssl rand -base64 32`). The server refuses to start without it once
-   `DUOS_DB_HOST` is set, so Playwright reports a server that never came up.
+#### Troubleshooting
 
-CI provisions the same thing per run: a Postgres service container, the session
-schema in `test/e2e/sql/user_sessions.sql`, a generated session secret and a
-self-signed certificate. See `.github/workflows/integration-tests.yml`.
+| Symptom | Check |
+|---|---|
+| Server won't start | Server log: missing TLS files or invalid fixture/database configuration |
+| Sign-in not enabled | Set `DUOS_TEST_SIGNIN_ENABLED` and `DUOS_TEST_SIGNIN_EMAILS`; restart |
+| Sign-in 401 | Server log: failing claim or tokeninfo failure |
+| Sign-in 429 | Wait a minute; default limit is 300/min/IP (`DUOS_RATE_LIMIT_TEST_SIGNIN_MAX`) |
+| Configuration ignored | Rebuild after config.json changes; restart after environment changes. Playwright reuses running servers outside CI. |
 
-`test/e2e/sql/user_sessions.sql` is a copy of Consent's Liquibase changeset
-`changelog-consent-2026-06-16-bff-01-user-sessions.xml`, because this
-repository has no migration path of its own. Keep the two in step.
+### Session cleanup
 
-### Cleaning up sessions a spec creates
-
-Delete by identity, never truncate. Playwright runs spec **files**
-concurrently, so a blanket wipe of `user_sessions` between files would delete
-another file's live session and fail the suite at random. A spec records the
-`sessionId` it was issued and removes only those rows. Leaked rows from an
-earlier run expire on their own, through the `maxAge` the store already applies.
+Role-access tests sign out; other sessions remain stored after expiry. The E2E
+schema has no scheduled cleanup. Delete only each test's recorded session IDs;
+truncating `user_sessions` breaks parallel tests.
