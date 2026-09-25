@@ -4,7 +4,7 @@ import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import StudyRecommendationCarousel from 'src/components/study_details/StudyRecommendationCarousel'
-import { StudyRecommendation } from 'src/types/model'
+import { StudyAggregation } from 'src/types/library'
 
 vi.mock('src/components/study_details/StudyPageSection', () => ({
   default: ({ heading, children }: { heading: string, children: React.ReactNode }) => (
@@ -12,13 +12,22 @@ vi.mock('src/components/study_details/StudyPageSection', () => ({
   ),
 }))
 
-const recommendation = (studyId: number, overrides: Partial<StudyRecommendation> = {}): StudyRecommendation => ({
+const recommendation = (studyId: number, overrides: Partial<StudyAggregation> = {}): StudyAggregation => ({
   studyId,
   studyName: `Study ${studyId}`,
   studyDescription: `Description ${studyId}`,
   piName: `PI ${studyId}`,
+  species: 'Human',
+  phenotype: `Phenotype ${studyId}`,
+  dataCustodianEmail: [],
+  dataTypes: ['RNA-Seq'],
+  dataUseCodes: ['HMB'],
+  accessTypes: ['controlled'],
   datasetCount: 2,
-  datasetIds: [studyId * 10],
+  totalParticipants: 1200,
+  datasetIds: [101, 102],
+  modelCount: 0,
+  workspaceCount: 0,
   ...overrides,
 })
 
@@ -35,13 +44,28 @@ const mount = (props: Partial<React.ComponentProps<typeof StudyRecommendationCar
   )
 
 describe('StudyRecommendationCarousel', () => {
-  it('renders a card per recommendation with its name, description and PI', () => {
-    mount({ recommendations: [recommendation(1), recommendation(2)] })
+  it('renders a Studies-tab card per recommendation', () => {
+    const { container } = mount({ studies: [recommendation(1), recommendation(2)] })
 
+    expect(container.querySelectorAll('[data-cy="study-card"]')).toHaveLength(2)
     expect(screen.getByText('Study 1')).toBeInTheDocument()
-    expect(screen.getByText('Description 1')).toBeInTheDocument()
     expect(screen.getByText('PI: PI 1')).toBeInTheDocument()
+    expect(screen.getByText('Phenotype: Phenotype 1')).toBeInTheDocument()
+    expect(screen.getAllByText('1,200')).toHaveLength(2)
     expect(screen.getByText('Study 2')).toBeInTheDocument()
+  })
+
+  /** The study page has no selection a recommended study's datasets could join. */
+  it('renders the cards without a selection checkbox', () => {
+    mount({ studies: [recommendation(1)] })
+
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+  })
+
+  it('keeps the order it is given', () => {
+    mount({ studies: [recommendation(9), recommendation(3)] })
+
+    expect(screen.getAllByRole('link').map(link => link.textContent)).toEqual(['Study 9', 'Study 3'])
   })
 
   /**
@@ -49,28 +73,15 @@ describe('StudyRecommendationCarousel', () => {
    * address and middle click all work. Asserting the href is what pins that.
    */
   it('links each card to its study', () => {
-    mount({ recommendations: [recommendation(7)] })
+    mount({ studies: [recommendation(7)] })
 
     const link = screen.getByRole('link', { name: /Study 7/ })
     expect(link).toHaveAttribute('href', '/studies/7')
   })
 
-  it('says so when a PI is not recorded rather than leaving the line blank', () => {
-    mount({ recommendations: [recommendation(1, { piName: undefined })] })
-
-    expect(screen.getByText('PI: Not provided')).toBeInTheDocument()
-  })
-
-  it('omits the description line when there is none', () => {
-    mount({ recommendations: [recommendation(1, { studyDescription: undefined })] })
-
-    expect(screen.getByText('Study 1')).toBeInTheDocument()
-    expect(screen.queryByText('Description 1')).not.toBeInTheDocument()
-  })
-
   /** An absent section on a study page reads as a failure to load, so it stays and says so. */
   it('stays on the page when there is nothing to recommend', () => {
-    mount({ recommendations: [] })
+    mount({ studies: [] })
 
     expect(screen.getByText('Recommended Studies')).toBeInTheDocument()
     expect(screen.getByText('No study recommendations yet.')).toBeInTheDocument()
@@ -90,7 +101,7 @@ describe('StudyRecommendationCarousel', () => {
    * correct - and contradicted what isPending is documented to buy.
    */
   it('keeps cached cards when a background refetch fails', () => {
-    mount({ recommendations: [recommendation(7)], error: new Error('refresh failed') })
+    mount({ studies: [recommendation(7)], error: new Error('refresh failed') })
 
     expect(screen.getByText('Study 7')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
@@ -103,7 +114,7 @@ describe('StudyRecommendationCarousel', () => {
    * into an error banner.
    */
   it('keeps the empty message when a refetch fails after loading nothing', () => {
-    mount({ recommendations: [], error: new Error('refresh failed') })
+    mount({ studies: [], error: new Error('refresh failed') })
 
     expect(screen.getByText('No study recommendations yet.')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()

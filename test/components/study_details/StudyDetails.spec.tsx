@@ -8,7 +8,7 @@ import { StudyDetails } from 'src/components/study_details/StudyDetails'
 import ScrollToTopOnNavigate from 'src/components/ScrollToTopOnNavigate'
 import { Storage } from 'src/libs/storage'
 import { applyForAccess } from 'src/utils/accessUtils'
-import { DuosUser, LibraryCard } from 'src/types/model'
+import { DuosUser, LibraryCard, StudyRecommendation } from 'src/types/model'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { StudyComments } from 'src/libs/ajax/StudyComments'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -212,6 +212,24 @@ const makeSearchResponse = (
     },
     total_participants: { value: participantCount },
   },
+})
+
+const recommendation = (overrides: Partial<StudyRecommendation>): StudyRecommendation => ({
+  studyId: 7,
+  studyName: 'Neighbouring study',
+  studyDescription: '',
+  piName: 'Dr Other',
+  species: 'Human',
+  phenotype: '',
+  dataTypes: [],
+  dataUseCodes: [],
+  accessTypes: [],
+  datasetCount: 1,
+  totalParticipants: 10,
+  datasetIds: [2],
+  modelCount: 0,
+  workspaceCount: 0,
+  ...overrides,
 })
 
 const StudySwitcher = () => {
@@ -871,9 +889,9 @@ describe('Study details test', () => {
    */
   it('does not recommend the study being viewed', async () => {
     vi.mocked(StudyRecommendations.getSimilar).mockResolvedValue([
-      { studyId: 1, studyName: 'This very study', studyDescription: '', piName: 'Dr Self', datasetCount: 1, datasetIds: [1] },
-      { studyId: 7, studyName: 'Neighbouring study', studyDescription: '', piName: 'Dr Other', datasetCount: 1, datasetIds: [2] },
-    ] as never)
+      recommendation({ studyId: 1, studyName: 'This very study', piName: 'Dr Self', datasetIds: [1] }),
+      recommendation({ studyId: 7, studyName: 'Neighbouring study', datasetIds: [2] }),
+    ])
     mountComponent()
 
     expect(await screen.findByText('Neighbouring study')).toBeInTheDocument()
@@ -882,10 +900,9 @@ describe('Study details test', () => {
 
   it('keeps loaded recommendations when a background refetch fails', async () => {
     vi.mocked(StudyRecommendations.getSimilar)
-      .mockResolvedValueOnce([{
-        studyId: 7, studyName: 'Neighbouring study', studyDescription: 'About genes',
-        piName: 'Dr Adjacent', datasetCount: 2, datasetIds: [1, 2],
-      }] as never)
+      .mockResolvedValueOnce([recommendation({
+        studyDescription: 'About genes', piName: 'Dr Adjacent', datasetCount: 2, datasetIds: [1, 2],
+      })])
       .mockRejectedValue(new Error('boom'))
     mountComponent()
     await screen.findByText('Neighbouring study')

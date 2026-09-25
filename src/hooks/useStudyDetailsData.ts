@@ -8,7 +8,7 @@ import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { chain, intersection } from 'src/utils/NodashUtil'
 import { AggregationResult, ElasticsearchQuery } from 'src/types/elastic'
-import { ExportableDatasets, PaginationState, SortState } from 'src/types/library'
+import { ExportableDatasets, PaginationState, SortState, StudyCardData } from 'src/types/library'
 import { DatasetTerm, StudyTerm, StudyRecommendation } from 'src/types/model'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 
@@ -109,11 +109,43 @@ export const useStudyResearchOutputs = (studyId: string) => useQuery({
 const withoutCurrentStudy = (studyId: string) => (recommendations: StudyRecommendation[]) =>
   recommendations.filter(recommendation => String(recommendation.studyId) !== studyId)
 
+/**
+ * The endpoints return what the Data Library's Studies tab card shows, so a recommendation maps
+ * straight onto one. Custodian emails are the one field a card does not show and none is sent.
+ *
+ * The card fields are defaulted, as a Consent build older than the one adding them omits them and
+ * StudyCard reads the arrays unguarded: an absent one would take the study page down with it. The
+ * dataset count and ids predate them. Zero model and workspace counts hide those stats, as a
+ * missing participant count does.
+ */
+const toStudyCard = (recommendation: StudyRecommendation): StudyCardData => ({
+  studyId: recommendation.studyId,
+  studyName: recommendation.studyName,
+  studyDescription: recommendation.studyDescription,
+  piName: recommendation.piName ?? '',
+  species: recommendation.species ?? '',
+  phenotype: recommendation.phenotype ?? '',
+  dataCustodianEmail: [],
+  dataTypes: recommendation.dataTypes ?? [],
+  dataUseCodes: recommendation.dataUseCodes ?? [],
+  accessTypes: recommendation.accessTypes ?? [],
+  datasetCount: recommendation.datasetCount,
+  // Left absent rather than zeroed, so the card hides the stat instead of claiming a count
+  totalParticipants: recommendation.totalParticipants,
+  datasetIds: recommendation.datasetIds,
+  modelCount: recommendation.modelCount ?? 0,
+  workspaceCount: recommendation.workspaceCount ?? 0,
+})
+
+/** Ranked lists, so the order the endpoint returns is the order the cards keep. */
+const toStudyCards = (studyId: string) => (recommendations: StudyRecommendation[]) =>
+  withoutCurrentStudy(studyId)(recommendations).map(toStudyCard)
+
 export const useSimilarStudies = (studyId: string) => useQuery({
   queryKey: ['study-recommendations-similar', studyId],
   enabled: studyId.length > 0,
   queryFn: () => StudyRecommendations.getSimilar(studyId),
-  select: withoutCurrentStudy(studyId),
+  select: toStudyCards(studyId),
   staleTime: STUDY_STALE_TIME,
 })
 
@@ -121,7 +153,7 @@ export const useFrequentlyRequestedWithStudies = (studyId: string) => useQuery({
   queryKey: ['study-recommendations-frequently-requested-with', studyId],
   enabled: studyId.length > 0,
   queryFn: () => StudyRecommendations.getFrequentlyRequestedWith(studyId),
-  select: withoutCurrentStudy(studyId),
+  select: toStudyCards(studyId),
   staleTime: STUDY_STALE_TIME,
 })
 

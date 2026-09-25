@@ -10,7 +10,7 @@ const FrequentlyRequestedWithSection = ({ studyId }: { studyId: string }) => {
     <StudyRecommendationCarousel
       id="frequently-requested-with"
       heading="Studies often Requested with this Study"
-      recommendations={frequentlyRequestedWith.data}
+      studies={frequentlyRequestedWith.data}
       isPending={frequentlyRequestedWith.isPending}
       error={frequentlyRequestedWith.error}
     />
