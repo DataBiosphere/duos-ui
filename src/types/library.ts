@@ -277,6 +277,12 @@ export interface StudyAggregation {
   workspaceCount: number
 }
 
+/**
+ * What a study card renders. The participant count is optional: a recommendation from a Consent
+ * build that predates it has none, and a zero would read as a known count.
+ */
+export type StudyCardData = Omit<StudyAggregation, 'totalParticipants'> & { totalParticipants?: number }
+
 export interface PaginationState {
   page: number
   pageSize: number

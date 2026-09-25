@@ -36,6 +36,24 @@ describe('StudyCard', () => {
     expect(screen.getByRole('link', { name: 'Synthetic Minimal Study' })).toHaveAttribute('href', '/studies/1')
   })
 
+  it('renders without a checkbox where there is nothing to select into', () => {
+    renderWithRouter(<StudyCard study={buildStudy()} />)
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Synthetic Minimal Study' })).toBeInTheDocument()
+  })
+
+  it('leaves out the participant stat when the count is unknown', () => {
+    renderWithRouter(<StudyCard study={{ ...buildStudy(), totalParticipants: undefined }} />)
+    expect(screen.queryByText('Participants')).not.toBeInTheDocument()
+    expect(screen.getByText('Datasets')).toBeInTheDocument()
+  })
+
+  /** A known zero is still a count, unlike a missing one. */
+  it('shows a zero participant count', () => {
+    renderWithRouter(<StudyCard study={buildStudy({ totalParticipants: 0 })} />)
+    expect(screen.getByText('Participants')).toBeInTheDocument()
+  })
+
   it('renders the metadata a researcher scans for', () => {
     renderCard(buildStudy())
     expect(screen.getByText(/Dr. Example/)).toBeInTheDocument()

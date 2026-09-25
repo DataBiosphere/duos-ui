@@ -384,20 +384,27 @@ export interface StudyComment {
 }
 
 /**
- * One recommended study, as `/api/metrics/study-recommendations/{studyId}/*` returns it.
- *
- * Deliberately not `StudyAggregation`: that type describes a study as the Elasticsearch
- * index carries it, with data types, data use codes and participant totals the
- * recommendation endpoints do not compute. Typing this payload as the richer shape would
- * let a reader of `study.dataTypes` compile and then fail at runtime.
+ * One recommended study, as `/api/metrics/study-recommendations/{studyId}/*` returns it: what a
+ * study card shows, so the recommendation sections need no index lookup of their own. The card
+ * fields are optional because a Consent build older than the one adding them omits them.
  */
 export interface StudyRecommendation {
   studyId: number
   studyName: string
   studyDescription?: string
   piName?: string
+  species?: string
+  phenotype?: string
+  dataTypes?: string[]
+  /** Distinct DUO data use codes (e.g. `HMB`, `GRU`) across the study's datasets */
+  dataUseCodes?: string[]
+  /** Distinct `accessManagement` values (e.g. `open`, `controlled`, `external`) across the study's datasets */
+  accessTypes?: string[]
   datasetCount: number
+  totalParticipants?: number
   datasetIds: number[]
+  modelCount?: number
+  workspaceCount?: number
 }
 
 /** One page of a study's comments. `GET .../comments` is paged; see `StudyComments.listComments`. */

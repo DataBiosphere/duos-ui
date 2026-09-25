@@ -13,7 +13,7 @@ const SimilarStudiesSection = ({ studyId }: { studyId: string }) => {
     <StudyRecommendationCarousel
       id="similar-studies"
       heading="Recommended Studies by Data Type or PI"
-      recommendations={similarStudies.data}
+      studies={similarStudies.data}
       isPending={similarStudies.isPending}
       error={similarStudies.error}
     />

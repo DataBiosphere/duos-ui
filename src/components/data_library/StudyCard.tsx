@@ -10,20 +10,24 @@ import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined'
 import ModelTrainingOutlinedIcon from '@mui/icons-material/ModelTrainingOutlined'
 import WorkspacesOutlinedIcon from '@mui/icons-material/WorkspacesOutlined'
 import PolicyOutlinedIcon from '@mui/icons-material/PolicyOutlined'
-import { StudyAggregation } from 'src/types/library'
+import { StudyCardData } from 'src/types/library'
 import { getAccessManagementColor, getAccessManagementLabel } from 'src/components/data_library/accessManagementDisplay'
 
 /** Beyond this the pills wrap past the card's metadata block, so the rest collapse into a count. */
 const MAX_VISIBLE_DATA_TYPES = 3
 
-interface StudyCardProps {
-  study: StudyAggregation
-  /** True only when every one of the study's datasets is selected. */
-  selected: boolean
-  /** Some but not all of the study's datasets are selected. */
-  indeterminate?: boolean
-  onToggle: (studyId: number) => void
-}
+/** Omit both where there is nothing to select into, and the card renders without its checkbox. */
+type SelectionProps
+  = | {
+    /** True only when every one of the study's datasets is selected. */
+    selected: boolean
+    /** Some but not all of the study's datasets are selected. */
+    indeterminate?: boolean
+    onToggle: (studyId: number) => void
+  }
+  | { selected?: never, indeterminate?: never, onToggle?: never }
+
+type StudyCardProps = { study: StudyCardData } & SelectionProps
 
 const MetaRow = ({ icon, children }: { icon: React.ReactNode, children: React.ReactNode }) => (
   <Stack direction="row" spacing={1} sx={{ minWidth: 0, alignItems: 'flex-start' }}>
@@ -48,7 +52,7 @@ const Stat = ({ icon, value, label }: { icon: React.ReactNode, value: number, la
 
 const outlinedPill = { 'height': 22, 'fontSize': '1.1rem', '& .MuiChip-label': { px: 1 } }
 
-export const StudyCard: React.FC<StudyCardProps> = ({ study, selected, indeterminate, onToggle }) => {
+export const StudyCard: React.FC<StudyCardProps> = ({ study, selected = false, indeterminate, onToggle }) => {
   const visibleDataTypes = study.dataTypes.slice(0, MAX_VISIBLE_DATA_TYPES)
   const hiddenDataTypeCount = study.dataTypes.length - visibleDataTypes.length
 
@@ -60,14 +64,16 @@ export const StudyCard: React.FC<StudyCardProps> = ({ study, selected, indetermi
     >
       <CardContent sx={{ display: 'flex', flexDirection: 'column', flex: 1, gap: 1.5 }}>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start' }}>
-          <Checkbox
-            size="small"
-            checked={selected}
-            indeterminate={!selected && indeterminate}
-            onChange={() => onToggle(study.studyId)}
-            slotProps={{ input: { 'aria-label': `Select ${study.studyName}` } }}
-            sx={{ p: 0, mt: '2px' }}
-          />
+          {onToggle && (
+            <Checkbox
+              size="small"
+              checked={selected}
+              indeterminate={!selected && indeterminate}
+              onChange={() => onToggle(study.studyId)}
+              slotProps={{ input: { 'aria-label': `Select ${study.studyName}` } }}
+              sx={{ p: 0, mt: '2px' }}
+            />
+          )}
           <Tooltip title={study.studyName}>
             <Link
               component={RouterLink}
@@ -130,7 +136,9 @@ export const StudyCard: React.FC<StudyCardProps> = ({ study, selected, indetermi
         <Divider />
 
         <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap', gap: 1.5, alignItems: 'center' }}>
-          <Stat icon={<PeopleOutlineIcon />} value={study.totalParticipants} label="Participants" />
+          {study.totalParticipants !== undefined && (
+            <Stat icon={<PeopleOutlineIcon />} value={study.totalParticipants} label="Participants" />
+          )}
           <Stat
             icon={<StorageOutlinedIcon />}
             value={study.datasetCount}
