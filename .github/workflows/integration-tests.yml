@@ -79,12 +79,16 @@ jobs:
           DATABASE_URL: postgresql://consent:consent@localhost:5432/consent
       - name: Build app
         run: CI=false pnpm run build
+      # playwright.config.ts starts the mock OIDC provider and Consent upstream
+      # beside two servers: one on dev Consent, one on the mock (DT-4069).
       - name: Run Playwright integration tests
         run: |
           DUOS_TEST_SIGNIN_EMAILS=$(node scripts/e2e-fixture-emails.mjs)
           export DUOS_TEST_SIGNIN_EMAILS
           pnpm run test:e2e
         env:
+          # The servers reach the mock provider over HTTPS, and this certificate is self-signed.
+          NODE_EXTRA_CA_CERTS: ${{ github.workspace }}/server.crt
           DUOS_AUTOMATION_ADMIN_SA: ${{ secrets.DUOS_AUTOMATION_ADMIN_SA }}
           DUOS_AUTOMATION_CHAIR_SA: ${{ secrets.DUOS_AUTOMATION_CHAIR_SA }}
           DUOS_AUTOMATION_MEMBER_SA: ${{ secrets.DUOS_AUTOMATION_MEMBER_SA }}
