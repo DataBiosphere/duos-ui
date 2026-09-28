@@ -34,11 +34,12 @@ No database or credentials required. Use a fresh shell without `DUOS_TEST_SIGNIN
 cp config/dev.json public/config.json
 CI=false pnpm run build
 pnpm exec playwright test about.spec.ts home.spec.ts status.spec.ts liveness.spec.ts
+pnpm exec playwright test csp.spec.ts --grep-invert signed-in
 ```
 
 ### Path B: full suite
 
-`role-access` and `studyTemplate` use Google service-account tokens through
+`role-access`, `studyTemplate` and the signed-in `csp` case use Google service-account tokens through
 `/backgroundsignin` → `POST /auth/test-signin`. This tests role access, not B2C login.
 
 #### 1. Server environment
@@ -116,8 +117,22 @@ See the [CI workflow](.github/workflows/integration-tests.yml) and
 | Sign-in 429 | Wait a minute; default limit is 300/min/IP (`DUOS_RATE_LIMIT_TEST_SIGNIN_MAX`) |
 | Configuration ignored | Rebuild after config.json changes; restart after environment changes. Playwright reuses running servers outside CI. |
 
+### CSP check
+
+`csp.spec.ts` collects browser `securitypolicyviolation` events under the policy
+served by Fastify; it does not inject or rewrite the policy. The public flow
+covers home and status. The authenticated flow uses the researcher fixture and
+covers the console through sign-out. Both expect no collected violations after
+their response and UI checkpoints. 
+
+A separate harness case requests https://csp-probe.invalid/probe.png and expects
+an img-src violation, verifying that violation collection works. CI uses report-only
+mode by default; the test observes violations rather than proving requests are
+blocked. If the harness fails, inspect page startup, the CSP header, the probe
+assertion, and the collector.
+
 ### Session cleanup
 
-Role-access tests sign out; other sessions remain stored after expiry. The E2E
+Role-access and CSP tests sign out; other sessions remain stored after expiry. The E2E
 schema has no scheduled cleanup. Delete only each test's recorded session IDs;
 truncating `user_sessions` breaks parallel tests.

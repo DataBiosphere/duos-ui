@@ -350,6 +350,12 @@ is a much larger piece of work than this story.
   starts the Fastify server over HTTPS, and CI provisions the database, the
   session secret and a certificate for it, so the run receives the real
   headers and needs no interception. The spec itself lands with story 6-K2.
+
+  **Update — story 6-K2 (DT-4078).** `test/e2e/csp.spec.ts` runs in CI against
+  the header the server sends. It drives the public pages and a signed-in
+  researcher console, and asserts that the browser reported no violation. A
+  harness case loads an image the policy forbids and asserts that the collector
+  sees it, so a missing header or a broken collector cannot pass as clean.
 - Enforcement is a per-environment decision recorded in deployment config, so
   a bad policy is one env var away from being backed out.
 - **The httpd sidecar replaces this policy in deployed environments, so
