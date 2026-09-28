@@ -9,8 +9,13 @@ import { collectViolations, drainViolations, expectServerPolicy } from './suppor
  */
 
 const CONFIG_JSON = /\/config\.json$/
-// Consent's endpoint, not the client-side /status route.
-const CONSENT_STATUS = /\/status$/
+/**
+ * Consent's status fetch, at `/duos-api/status` or `${apiUrl}/status`. The
+ * footer link is a full navigation, so the /status document also ends in
+ * `/status`; only a fetch counts.
+ */
+const consentStatusFetched = (response: Response): boolean =>
+  response.request().resourceType() === 'fetch' && new URL(response.url()).pathname.endsWith('/status')
 const DASHBOARD_SUMMARY = /\/api\/researcher\/dashboard-summary$/
 // img-src allows only 'self' and data:, and .invalid never resolves.
 const DISALLOWED_IMAGE = 'https://csp-probe.invalid/probe.png'
@@ -54,7 +59,7 @@ test.describe('Content Security Policy', () => {
     await expect(page.getByText('DUOS').first()).toBeVisible()
     await Promise.all([configLoaded, bannersLoaded])
 
-    const statusLoaded = page.waitForResponse(CONSENT_STATUS)
+    const statusLoaded = page.waitForResponse(consentStatusFetched)
     await page.getByText('Status').click()
     await expect(page).toHaveURL(/status/)
     await expect(page.locator('#consent')).toBeVisible()
