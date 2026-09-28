@@ -13,7 +13,6 @@ import {
   ScenarioError,
   scenarioKeyFromToken,
   type ScenarioStore,
-  type ScenarioUpdate,
 } from './scenarios'
 import { MOCK_CONTROL_PATH } from './settings'
 
@@ -138,7 +137,11 @@ export function createOidcProvider(options: ProviderOptions) {
       id_token: idToken(key),
       scope,
     }
-    if (scopes.has(clientId)) body.access_token = mintToken(ACCESS_TOKEN_PREFIX, key, randomToken())
+    if (scopes.has(clientId)) {
+      const accessToken = mintToken(ACCESS_TOKEN_PREFIX, key, randomToken())
+      store.recordAccessToken(key, accessToken)
+      body.access_token = accessToken
+    }
     if (scopes.has('offline_access') && provider.issueRefreshToken) {
       const refreshToken = mintToken(REFRESH_TOKEN_PREFIX, key, randomToken())
       refreshTokens.set(refreshToken, scope)
@@ -262,7 +265,7 @@ export function createOidcProvider(options: ProviderOptions) {
   async function handleControl(request: IncomingMessage, response: ServerResponse, key: string): Promise<void> {
     if (request.method === 'PUT') {
       try {
-        const update = JSON.parse(await readBody(request) || '{}') as ScenarioUpdate
+        const update: unknown = JSON.parse(await readBody(request) || '{}')
         sendJson(response, 200, { scenario: store.update(key, update) })
       }
       catch (err) {

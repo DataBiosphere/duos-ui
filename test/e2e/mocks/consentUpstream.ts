@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { bearerToken, requestUrl, sendJson } from './http'
-import { ACCESS_TOKEN_PREFIX, defaultProfile, scenarioKeyFromToken, type ScenarioStore } from './scenarios'
+import { defaultProfile, type ScenarioStore } from './scenarios'
 import { MOCK_ECHO_PATH } from './settings'
 
 /**
@@ -8,10 +8,10 @@ import { MOCK_ECHO_PATH } from './settings'
  * provider (DT-4069). Real Consent rejects the mock's tokens, and `/auth/me`
  * forwards to Consent, so those specs need an upstream that accepts them.
  *
- * It is not an authorization check: it accepts any token the mock provider
- * minted and reads the scenario out of it. A token in any other shape gets a
- * 401, so a client-supplied `Authorization` header that leaked through the
- * proxy would show up as a failure.
+ * It is not an authorization check: it accepts any access token that the mock
+ * provider issued, and reads the scenario out of it. Any other token gets a 401,
+ * even one in the mock's shape, so a client-supplied `Authorization` header that
+ * leaked through the proxy shows up as a failure.
  */
 
 /** Keeps a long spec from growing the log without bound. */
@@ -62,7 +62,7 @@ export function createConsentUpstream(options: { origin: string, store: Scenario
     const url = requestUrl(request, origin)
     if (servePublicPath(request, response, url)) return
     const token = bearerToken(request)
-    const key = token === undefined ? undefined : scenarioKeyFromToken(token, ACCESS_TOKEN_PREFIX)
+    const key = token === undefined ? undefined : store.scenarioForAccessToken(token)
     const stats = key === undefined ? undefined : store.stats(key)
     if (key === undefined || stats === undefined) {
       sendJson(response, 401, { message: 'The token was not minted by the mock provider, or its scenario is gone (mock Consent upstream)' })
