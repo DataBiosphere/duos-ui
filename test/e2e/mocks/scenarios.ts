@@ -136,6 +136,23 @@ const check = (valid: boolean, message: string): void => {
   if (!valid) throw new ScenarioError(message)
 }
 
+/** A JSON object: not null and not an array, which `typeof` alone lets through. */
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
+const UPDATE_SECTIONS = ['provider', 'consent'] as const
+
+/** Rejects a misspelled or non-object section, which would otherwise leave the defaults in force. */
+function validateSections(patch: unknown): asserts patch is ScenarioUpdate {
+  if (!isPlainObject(patch)) throw new ScenarioError('a scenario update must be a JSON object')
+  for (const key of Object.keys(patch)) {
+    check((UPDATE_SECTIONS as readonly string[]).includes(key), `unknown scenario section '${key}'; use ${UPDATE_SECTIONS.join(' or ')}`)
+  }
+  for (const section of UPDATE_SECTIONS) {
+    if (section in patch) check(isPlainObject(patch[section]), `${section} must be an object`)
+  }
+}
+
 /** Rejects a misspelled or mistyped control, so a spec cannot pass by testing the defaults. */
 function validateProvider(patch: Partial<ProviderSettings>): void {
   for (const key of Object.keys(patch)) {
@@ -159,13 +176,20 @@ function validateConsent(patch: Partial<ConsentSettings>): void {
     check(key in CONSENT_DEFAULTS, `unknown consent setting '${key}'`)
   }
   if ('userMe' in patch) oneOf(USER_ME_STATUSES, patch.userMe, 'consent.userMe')
-  if ('profile' in patch) check(typeof patch.profile === 'object', 'consent.profile must be an object or null')
+  if ('profile' in patch) check(patch.profile === null || isPlainObject(patch.profile), 'consent.profile must be an object or null')
 }
 
+interface ScenarioEntry {
+  scenario: Scenario
+  stats: ScenarioStats
+  /** Every access token the provider minted for the scenario. */
+  accessTokens: Set<string>
+}
+
+const newEntry = (): ScenarioEntry => ({ scenario: defaultScenario(), stats: emptyStats(), accessTokens: new Set() })
+
 export class ScenarioStore {
-  private readonly scenarios = new Map<string, { scenario: Scenario, stats: ScenarioStats }>([
-    [DEFAULT_SCENARIO_KEY, { scenario: defaultScenario(), stats: emptyStats() }],
-  ])
+  private readonly scenarios = new Map<string, ScenarioEntry>([[DEFAULT_SCENARIO_KEY, newEntry()]])
 
   has(key: string): boolean {
     return this.scenarios.has(key)
@@ -184,15 +208,16 @@ export class ScenarioStore {
    * A spec can change a scenario during its test, e.g. to let the provider
    * recover after a failed refresh. Stats are kept across updates.
    */
-  update(key: string, patch: ScenarioUpdate): Scenario {
+  update(key: string, patch: unknown): Scenario {
     check(key !== DEFAULT_SCENARIO_KEY, `the '${DEFAULT_SCENARIO_KEY}' scenario is shared and read-only; register a key of your own`)
     check(isScenarioKey(key), 'a scenario key must be 1-64 letters, digits, _ or -')
+    validateSections(patch)
     const provider = patch.provider ?? {}
     const consent = patch.consent ?? {}
     validateProvider(provider)
     validateConsent(consent)
 
-    const entry = this.scenarios.get(key) ?? { scenario: defaultScenario(), stats: emptyStats() }
+    const entry = this.scenarios.get(key) ?? newEntry()
     entry.scenario = {
       provider: { ...entry.scenario.provider, ...provider },
       consent: { ...entry.scenario.consent, ...consent },
@@ -203,6 +228,21 @@ export class ScenarioStore {
 
   delete(key: string): boolean {
     return key !== DEFAULT_SCENARIO_KEY && this.scenarios.delete(key)
+  }
+
+  /** Called by the provider for each access token that it mints. */
+  recordAccessToken(key: string, token: string): void {
+    this.scenarios.get(key)?.accessTokens.add(token)
+  }
+
+  /**
+   * The scenario of an access token the provider actually issued, or undefined.
+   * The shape alone is not enough: `mock.<key>.<anything>` from a browser must
+   * fail, or a forwarded client header could pass as the session's token.
+   */
+  scenarioForAccessToken(token: string): string | undefined {
+    const key = scenarioKeyFromToken(token, ACCESS_TOKEN_PREFIX)
+    return key !== undefined && this.scenarios.get(key)?.accessTokens.has(token) ? key : undefined
   }
 }
 
