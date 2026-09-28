@@ -22,7 +22,7 @@ export const MOCK_CONSENT_URL = `http://127.0.0.1:${MOCK_CONSENT_PORT}`
 export const MOCK_CLIENT_ID = 'duos-e2e-mock-client'
 export const MOCK_CLIENT_SECRET = 'duos-e2e-mock-secret'
 
-/** The mock's control API: PUT, GET and DELETE `<path>/<key>`. */
+/** The mock's control API. Specs reach it through `test/e2e/support/mockProvider.ts`. */
 export const MOCK_CONTROL_PATH = '/__mock/scenarios'
 
 /** The one protected Consent path the mock serves besides `/api/user/me`. */
