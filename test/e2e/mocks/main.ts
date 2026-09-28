@@ -7,12 +7,15 @@ import { createOidcProvider } from './oidcProvider'
 import { createConsentUpstream } from './consentUpstream'
 import { ScenarioStore } from './scenarios'
 import {
+  callbackUri,
   MOCK_CLIENT_ID,
   MOCK_CLIENT_SECRET,
   MOCK_CONSENT_PORT,
   MOCK_CONSENT_URL,
   MOCK_OIDC_ORIGIN,
   MOCK_OIDC_PORT,
+  MOCK_SERVER_BASE_URLS,
+  postLogoutUri,
 } from './settings'
 
 /**
@@ -29,6 +32,8 @@ const provider = createOidcProvider({
   origin: MOCK_OIDC_ORIGIN,
   clientId: MOCK_CLIENT_ID,
   clientSecret: MOCK_CLIENT_SECRET,
+  redirectUris: MOCK_SERVER_BASE_URLS.map(callbackUri),
+  postLogoutRedirectUris: MOCK_SERVER_BASE_URLS.map(postLogoutUri),
   store,
   signingKey: createSigningKey(),
 })
