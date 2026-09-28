@@ -119,11 +119,17 @@ See the [CI workflow](.github/workflows/integration-tests.yml) and
 
 ### CSP check
 
-`csp.spec.ts` reads the policy that the server sends; it does not attach one.
-Each case waits on the last response of its flow, then asserts that the browser
-raised no `securitypolicyviolation` event. The harness case loads an image from
-`https://csp-probe.invalid`, which `img-src` blocks.
-If that case fails, the header or the collector is broken, not the app.
+`csp.spec.ts` collects browser `securitypolicyviolation` events under the policy
+served by Fastify; it does not inject or rewrite the policy. The public flow
+covers home and status. The authenticated flow uses the researcher fixture and
+covers the console through sign-out. Both expect no collected violations after
+their response and UI checkpoints. 
+
+A separate harness case requests https://csp-probe.invalid/probe.png and expects
+an img-src violation, verifying that violation collection works. CI uses report-only
+mode by default; the test observes violations rather than proving requests are
+blocked. If the harness fails, inspect page startup, the CSP header, the probe
+assertion, and the collector.
 
 ### Session cleanup
 
