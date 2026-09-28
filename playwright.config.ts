@@ -1,10 +1,12 @@
 import { defineConfig, devices } from '@playwright/test'
 import { BASE_URL, MOCK_BASE_URL } from './test/e2e/support/baseUrl'
 import {
+  callbackUri,
   MOCK_CLIENT_ID,
   MOCK_CLIENT_SECRET,
   MOCK_CONSENT_URL,
   MOCK_OIDC_DISCOVERY_URL,
+  postLogoutUri,
 } from './test/e2e/mocks/settings'
 
 // Specs that sign in through the mock OIDC provider (DT-4069). Real Consent
@@ -12,13 +14,14 @@ import {
 const MOCK_SPECS = ['auth.spec.ts', 'session.spec.ts', 'mockHarness.spec.ts']
 
 // Both servers use the mock provider as their issuer. The role specs never run a
-// callback, so a real B2C issuer would only add a discovery call at boot.
+// callback, so a real B2C issuer would only add a discovery call at boot. The
+// mock redirects only to the URIs it registers for each base URL.
 const oidcEnv = (baseUrl: string): Record<string, string> => ({
   DUOS_AZURE_ISSUER_URL: MOCK_OIDC_DISCOVERY_URL,
   DUOS_AZURE_CLIENT_ID: MOCK_CLIENT_ID,
   DUOS_AZURE_CLIENT_SECRET: MOCK_CLIENT_SECRET,
-  DUOS_OAUTH_REDIRECT_URI: `${baseUrl}/auth/callback`,
-  DUOS_POST_LOGOUT_REDIRECT_URI: `${baseUrl}/post-logout`,
+  DUOS_OAUTH_REDIRECT_URI: callbackUri(baseUrl),
+  DUOS_POST_LOGOUT_REDIRECT_URI: postLogoutUri(baseUrl),
 })
 
 const serverDefaults = {

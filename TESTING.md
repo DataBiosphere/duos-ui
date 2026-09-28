@@ -187,7 +187,8 @@ that the upstream received. The mock Consent upstream also serves `/status` and
 
 The provider keeps two B2C behaviors: without the client ID in `scope` the token
 response has no access token, and without `offline_access` it has no refresh
-token. It also checks the client secret, PKCE and `redirect_uri`.
+token. It checks the client secret and PKCE, and redirects only to the registered
+`/auth/callback` and `/post-logout` URIs of the two servers.
 
 A spec that needs global mock state must run in its own project that depends
 on both `chromium` and `mock`, with one worker. No spec needs this today.

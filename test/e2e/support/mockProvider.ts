@@ -91,20 +91,28 @@ export async function signInThroughMock(page: Page, returnTo = '/'): Promise<voi
   expect(new URL(landing!.url()).pathname).toBe(new URL(returnTo, MOCK_OIDC_ORIGIN).pathname)
 }
 
+const CSRF_REJECTED = 403
+
 /**
  * Signs out through `POST /auth/logout` and follows the end-session redirect,
  * which also deletes the session row the test created. Returns the landing URL.
  *
- * It leaves the SPA first. Otherwise the SPA's own CSRF fetch can replace the
- * session's CSRF secret between the two calls here, and its reaction to the
- * ended session can abort the navigation. auth.spec.ts covers the UI sign-out.
+ * It leaves the SPA first, so the SPA cannot start new requests or abort the
+ * navigation. A request already in flight can still save an older copy of the
+ * session and drop the CSRF secret (see applyTokens in server/src/auth/refresh.ts),
+ * so a rejected token is fetched again once, as the client's own sign-out does
+ * (src/libs/auth/auth.ts). auth.spec.ts covers the UI sign-out.
  */
 export async function signOutThroughMock(page: Page): Promise<string | undefined> {
   await page.goto('about:blank')
-  const csrf = await page.request.get('/auth/csrf-token')
-  expect(csrf.status()).toBe(200)
-  const { token } = await csrf.json() as { token: string }
-  const logout = await page.request.post('/auth/logout', { headers: { 'X-CSRF-Token': token } })
+  const postLogout = async () => {
+    const csrf = await page.request.get('/auth/csrf-token')
+    expect(csrf.status()).toBe(200)
+    const { token } = await csrf.json() as { token: string }
+    return page.request.post('/auth/logout', { headers: { 'X-CSRF-Token': token } })
+  }
+  let logout = await postLogout()
+  if (logout.status() === CSRF_REJECTED) logout = await postLogout()
   expect(logout.status(), await logout.text()).toBe(200)
   const { redirectUrl } = await logout.json() as { redirectUrl: string }
   expect(redirectUrl.startsWith(`${MOCK_OIDC_ORIGIN}/logout?`)).toBe(true)
