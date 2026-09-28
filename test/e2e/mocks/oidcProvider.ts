@@ -37,6 +37,10 @@ export interface ProviderOptions {
   origin: string
   clientId: string
   clientSecret: string
+  /** The exact `redirect_uri` values the client registered. */
+  redirectUris: readonly string[]
+  /** The exact `post_logout_redirect_uri` values the client registered. */
+  postLogoutRedirectUris: readonly string[]
   store: ScenarioStore
   signingKey: SigningKey
 }
@@ -63,18 +67,17 @@ const safeEqual = (a: string, b: string): boolean => {
   return left.length === right.length && timingSafeEqual(left, right)
 }
 
-const isHttpsUrl = (value: string | null): value is string => {
-  try {
-    return value !== null && new URL(value).protocol === 'https:'
-  }
-  catch {
-    return false
-  }
-}
+/**
+ * Registered URIs, keyed by themselves. A redirect uses the stored value, never
+ * the request's copy, so no request can choose where the provider sends a browser.
+ */
+const registry = (uris: readonly string[]): ReadonlyMap<string, string> => new Map(uris.map(uri => [uri, uri]))
 
 export function createOidcProvider(options: ProviderOptions) {
   const { origin, clientId, clientSecret, store, signingKey } = options
   const issuer = `${origin}/`
+  const redirectUris = registry(options.redirectUris)
+  const postLogoutRedirectUris = registry(options.postLogoutRedirectUris)
   const codes = new Map<string, PendingCode>()
   // The refresh tokens this process issued, with the scope each one carries.
   const refreshTokens = new Map<string, string>()
@@ -148,7 +151,7 @@ export function createOidcProvider(options: ProviderOptions) {
   function authorizeRequestError(params: URLSearchParams): string | undefined {
     if (params.get('response_type') !== 'code') return 'response_type must be code'
     if (params.get('client_id') !== clientId) return 'unknown client_id'
-    if (!isHttpsUrl(params.get('redirect_uri'))) return 'redirect_uri must be an https URL'
+    if (!redirectUris.has(params.get('redirect_uri') ?? '')) return 'redirect_uri is not registered'
     if (!params.get('scope')?.split(' ').includes('openid')) return 'scope must include openid'
     if (params.get('code_challenge_method') !== 'S256' || !params.get('code_challenge')) return 'PKCE S256 is required'
     const key = params.get('scenario') ?? DEFAULT_SCENARIO_KEY
@@ -165,7 +168,8 @@ export function createOidcProvider(options: ProviderOptions) {
     }
     const key = params.get('scenario') ?? DEFAULT_SCENARIO_KEY
     store.stats(key)!.authorizations++
-    const target = new URL(params.get('redirect_uri')!)
+    const redirectUri = redirectUris.get(params.get('redirect_uri')!)!
+    const target = new URL(redirectUri)
     const state = params.get('state')
     if (state !== null) target.searchParams.set('state', state)
 
@@ -179,7 +183,7 @@ export function createOidcProvider(options: ProviderOptions) {
     const code = randomToken()
     codes.set(code, {
       key,
-      redirectUri: params.get('redirect_uri')!,
+      redirectUri,
       codeChallenge: params.get('code_challenge')!,
       scope: params.get('scope')!,
       expiresAt: Date.now() + CODE_LIFETIME_MS,
@@ -242,9 +246,9 @@ export function createOidcProvider(options: ProviderOptions) {
   }
 
   function handleEndSession(url: URL, response: ServerResponse): void {
-    const target = url.searchParams.get('post_logout_redirect_uri')
-    if (!isHttpsUrl(target)) {
-      oauthError(response, 400, 'invalid_request', 'post_logout_redirect_uri must be an https URL')
+    const target = postLogoutRedirectUris.get(url.searchParams.get('post_logout_redirect_uri') ?? '')
+    if (target === undefined) {
+      oauthError(response, 400, 'invalid_request', 'post_logout_redirect_uri is not registered')
       return
     }
     const key = decodeJwtPayload(url.searchParams.get('id_token_hint') ?? '')?.mock_scenario
