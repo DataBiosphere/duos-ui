@@ -4,6 +4,7 @@ import {
   upstreamPath as stripPrefix,
   type UpstreamProxyOptions,
 } from './upstreamProxy.js'
+import { UNAUTHENTICATED_PATHS } from './unauthenticatedPaths.js'
 
 /**
  * The DUOS API proxy (Phase 3).
@@ -34,27 +35,9 @@ export type ApiProxyOptions = UpstreamProxyOptions
  */
 export const PROXY_PREFIX = '/duos-api'
 
-/**
- * Paths the client calls today with no `Authorization` header, verified against
- * the call sites rather than assumed: `/status` (ServiceStatus.ts),
- * `/oauth2/configuration` (OAuth2.ts), `/tos/text/duos` (ToS.ts, `textPlain()`),
- * `/support/request` and `/support/upload` (Support.ts).
- *
- * They proxy through without a session, and without a token even when there IS
- * a session — matching current client behavior exactly is the point, so
- * cutover cannot change what the upstream sees. Without this allowlist the
- * signed-out status page and the Contact Us form would start returning 401.
- *
- * Matched exactly, not by prefix: a `/status` prefix would also swallow a
- * future `/statuses`, and every entry here is a fixed path.
- */
-export const UNAUTHENTICATED_PATHS: ReadonlySet<string> = new Set([
-  '/status',
-  '/oauth2/configuration',
-  '/tos/text/duos',
-  '/support/request',
-  '/support/upload',
-])
+// Its own module so the E2E mock Consent upstream (test/e2e/mocks) can serve the
+// same list without importing the proxy's Fastify dependencies.
+export { UNAUTHENTICATED_PATHS }
 
 /**
  * The only *unsafe* requests exempt from CSRF: the signed-out Contact Us form.
