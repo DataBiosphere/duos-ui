@@ -30,6 +30,7 @@ fix_volume_owner() {
       sudo -n chown "$(id -u):$(id -g)" "$dir" || true
     fi
   done
+  return 0
 }
 
 missing_files() {
@@ -40,26 +41,44 @@ missing_files() {
       echo "$f"
     fi
   done
+  return 0
 }
 
-# Print the login commands that are needed. Return 1 if any login is missing.
+# Print the tools that are not installed, joined with ", ".
+missing_tools() {
+  local tool list=""
+  for tool in gcloud kubectl gh; do
+    if ! command -v "$tool" > /dev/null; then
+      list="${list:+$list, }$tool"
+    fi
+  done
+  echo "$list"
+  return 0
+}
+
+# Print what is wrong. Return 1 if a tool or a login is missing.
+# A login hint is printed only for an installed tool. The gcloud login check
+# also needs kubectl, so it is skipped when either one is missing.
 check_logins() {
-  local ok=0
-  if ! command -v gcloud > /dev/null || ! command -v kubectl > /dev/null; then
-    echo "gcloud and kubectl are not installed. Rebuild the container."
-    ok=1
-  elif [[ -z "$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2> /dev/null)" ]]; then
-    echo "Google Cloud is not ready. Connect the host to the non-split Broad VPN. Then run:"
-    echo "  gcloud auth login --no-launch-browser"
+  local ok=0 absent
+  absent=$(missing_tools)
+  if [[ -n "$absent" ]]; then
+    echo "Missing tools: $absent. Rebuild the container."
     ok=1
   fi
-  if ! command -v gh > /dev/null; then
-    echo "gh is not installed. Rebuild the container."
-    ok=1
-  elif ! gh auth status > /dev/null 2>&1; then
-    echo "GitHub is not ready. Use an account that can read broadinstitute/terra-helmfile. Run:"
-    echo "  gh auth login"
-    ok=1
+  if command -v gcloud > /dev/null && command -v kubectl > /dev/null; then
+    if [[ -z "$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2> /dev/null)" ]]; then
+      echo "Google Cloud is not ready. Connect the host to the non-split Broad VPN. Then run:"
+      echo "  gcloud auth login --no-launch-browser"
+      ok=1
+    fi
+  fi
+  if command -v gh > /dev/null; then
+    if ! gh auth status > /dev/null 2>&1; then
+      echo "GitHub is not ready. Use an account that can read broadinstitute/terra-helmfile. Run:"
+      echo "  gh auth login"
+      ok=1
+    fi
   fi
   return "$ok"
 }
