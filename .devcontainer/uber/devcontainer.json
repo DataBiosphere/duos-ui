@@ -1,6 +1,9 @@
 {
     "name": "Combined DUOS",
-    "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:26-trixie",
+    "build": {
+        "dockerfile": "../Dockerfile",
+        "context": ".."
+    },
     "workspaceFolder": "/workspaces",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/duos-ui,type=bind,consistency=cached",
     "mounts": [
@@ -22,8 +25,7 @@
         "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
             "helm": "none",
             "minikube": "none"
-        },
-        "ghcr.io/joshuanianji/devcontainer-features/google-cloud-cli:1": {}
+        }
     },
     "customizations": {
         "vscode": {
@@ -38,6 +40,5 @@
         }
     },
     "postCreateCommand": "cd /workspaces/duos-ui && ./scripts/setup-devcontainer.sh",
-    "onCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends google-cloud-cli-gke-gcloud-auth-plugin && sudo rm -rf /var/lib/apt/lists/*",
     "remoteUser": "node"
 }

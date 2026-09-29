@@ -1,7 +1,8 @@
 {
     "name": "Node.js",
-    "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:26-trixie",
-    "onCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends google-cloud-cli-gke-gcloud-auth-plugin && sudo rm -rf /var/lib/apt/lists/*",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
     "postCreateCommand": "./scripts/setup-devcontainer.sh",
     "remoteUser": "node",
     "mounts": [
@@ -29,7 +30,6 @@
         "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
             "helm": "none",
             "minikube": "none"
-        },
-        "ghcr.io/joshuanianji/devcontainer-features/google-cloud-cli:1": {}
+        }
     }
 }
