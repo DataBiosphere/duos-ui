@@ -2,7 +2,7 @@
 
 ## Dev Container
 
-If you use Visual Studio Code (VSCode) and Docker, you can use the Dev Container configuration. The container makes the local config files for you. On start, it runs `scripts/setup-devcontainer.sh`, which runs [render-configs.sh](scripts/render-configs.sh) with all write options.
+If you use Visual Studio Code (VSCode) and Docker, you can use the Dev Container configuration. The container makes the local config files for you. When the container is created, it runs `scripts/setup-devcontainer.sh`, which runs [render-configs.sh](scripts/render-configs.sh) with all write options.
 
 1. Connect the host to the non-split Broad VPN.
 
