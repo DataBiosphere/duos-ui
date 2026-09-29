@@ -38,7 +38,7 @@
 | `render-configs.sh` `auth_gcloud` | Needs `gcloud`, `kubectl`, and a `gcloud` login. A GKE cluster also needs `gke-gcloud-auth-plugin`. | Add these to the image. |
 | `render-configs.sh` header | Needs `jq`, `openssl`, `curl`, and `gh` (for `site.conf`). | Confirm all are in the image (Task 1). |
 | `setup-devcontainer.sh` | It only checks files. It hard-codes `/workspaces/duos-ui`. | Rewrite it. Add an env override for tests. |
-| Both `.devcontainer` files | The image has Java and Node. It has no `gh`, `gcloud`, or `kubectl`. | Add features and volumes. |
+| Both `.devcontainer` files | The image has Java and Node. It has no `gh`, `gcloud`, or `kubectl`. | Add a Dockerfile, features, and volumes. |
 | Repo | No shell test harness exists. | Add one plain-Bash test with stub programs. |
 
 Out of scope: `write_config` in `render-configs.sh` (lines 245-247) sends the `jq` output to `/dev/null`. It never sets `env`, `tag`, or `hash` in `config.json`. File a separate ticket.
@@ -49,8 +49,11 @@ Out of scope: `write_config` in `render-configs.sh` (lines 245-247) sends the `j
 |---|---|---|
 | `scripts/setup-devcontainer.sh` | Rewrite | Find missing files. Check logins. Call `render-configs.sh`. Print next steps. |
 | `scripts/test/setup-devcontainer.test.sh` | Create | Test the setup script with stub programs. |
-| `.devcontainer/devcontainer.json` | Modify | Add features and login volumes. |
+| `.devcontainer/Dockerfile` | Create | Shared image. Installs `gcloud` and the GKE auth plugin from Google's apt repo. |
+| `.devcontainer/devcontainer.json` | Modify | Build from the Dockerfile. Add features and login volumes. |
 | `.devcontainer/uber/devcontainer.json` | Modify | Same as above. |
+| `.devcontainer/devcontainer-lock.json` | Regenerate | Lock the features. |
+| `.devcontainer/uber/devcontainer-lock.json` | Regenerate | Lock the features. |
 | `DEVNOTES.md` | Modify | Rewrite the "Dev Container" section. |
 
 ---
@@ -85,12 +88,11 @@ npx @devcontainers/cli exec --workspace-folder /Users/grushton/develop/duos-ui c
 
 Expected: `200`. If it fails, stop and report to Greg. The rest of the plan needs a route through the VPN.
 
-- [ ] **Step 4: Pick the feature names**
+- [ ] **Step 4: Pick the install method**
 
-Find a `gcloud` feature that can install `gke-gcloud-auth-plugin`. Record the exact feature IDs and option names for Task 3. Candidates:
+Decide how to install `gcloud` and `gke-gcloud-auth-plugin`. A community feature was tried first. Google's own apt repo in a shared Dockerfile replaced it (see Task 3). `gh` and `kubectl` come from first-party features:
 `ghcr.io/devcontainers/features/github-cli:1`,
-`ghcr.io/devcontainers/features/kubectl-helm-minikube:1` (set `helm` and `minikube` to `"none"`),
-`ghcr.io/dhoeric/features/google-cloud-cli:1`.
+`ghcr.io/devcontainers/features/kubectl-helm-minikube:1` (set `helm` and `minikube` to `"none"`).
 
 ---
 
@@ -102,102 +104,11 @@ Find a `gcloud` feature that can install `gke-gcloud-auth-plugin`. Record the ex
 
 **Interfaces:**
 - Consumes: `scripts/render-configs.sh --write_env true --write_config true --write_site_conf true`.
-- Produces: `scripts/setup-devcontainer.sh [--refresh]`. Env `DUOS_WORKSPACE` sets the workspace (default `/workspaces/duos-ui`). It always exits 0.
+- Produces: `scripts/setup-devcontainer.sh [--refresh]`. Env `DUOS_WORKSPACE` sets the workspace. The default is the repo root that holds the script, because the main config has no `workspaceFolder`. An empty file counts as missing. A missing binary gets an "install" message, not a login hint. It always exits 0.
 
 - [ ] **Step 1: Write the failing test**
 
-Create `scripts/test/setup-devcontainer.test.sh` and run `chmod +x` on it:
-
-```bash
-#!/bin/bash
-# Tests scripts/setup-devcontainer.sh with stub programs. No network, no login.
-set -u
-
-REPO=$(cd "$(dirname "$0")/../.." && pwd)
-SETUP=$REPO/scripts/setup-devcontainer.sh
-ALL_FLAGS="--write_env true --write_config true --write_site_conf true"
-FAILS=0
-
-new_workspace() {
-  WS=$(mktemp -d)
-  mkdir -p "$WS/scripts" "$WS/public" "$WS/bin" "$WS/home"
-  export LOG=$WS/calls.log
-  : > "$LOG"
-  cat > "$WS/scripts/render-configs.sh" <<'EOF'
-#!/bin/bash
-echo "render-configs $*" >> "$LOG"
-[ "${STUB_RENDER_FAIL:-0}" = 1 ] && exit 1
-ws=$(dirname "$0")/..
-touch "$ws/server.crt" "$ws/server.key" "$ws/ca-bundle.crt" \
-  "$ws/.env.local" "$ws/public/config.json" "$ws/site.conf"
-EOF
-  cat > "$WS/bin/gh" <<'EOF'
-#!/bin/bash
-[ "${STUB_GH_OK:-1}" = 1 ]
-EOF
-  cat > "$WS/bin/gcloud" <<'EOF'
-#!/bin/bash
-[ "${STUB_GCLOUD_OK:-1}" = 1 ] && echo "user@example.org"
-exit 0
-EOF
-  printf '#!/bin/bash\nexit 0\n' > "$WS/bin/kubectl"
-  chmod +x "$WS"/scripts/*.sh "$WS"/bin/*
-}
-
-all_files() {
-  touch "$WS/server.crt" "$WS/server.key" "$WS/ca-bundle.crt" \
-    "$WS/.env.local" "$WS/public/config.json" "$WS/site.conf"
-}
-
-run_setup() {
-  OUT=$(PATH="$WS/bin:$PATH" HOME="$WS/home" DUOS_WORKSPACE="$WS" bash "$SETUP" "$@" 2>&1)
-  CODE=$?
-}
-
-expect() {
-  if [ "$2" = 0 ]; then echo "PASS: $1"; else echo "FAIL: $1"; FAILS=$((FAILS + 1)); fi
-}
-
-# 1. All files present: call nothing.
-new_workspace; all_files; run_setup
-expect "all present: exit 0" "$CODE"
-[ ! -s "$LOG" ]; expect "all present: no render call" $?
-
-# 2. One file missing, logged in: one call with all three write options.
-new_workspace; all_files; rm "$WS/site.conf"; run_setup
-expect "one missing: exit 0" "$CODE"
-grep -qx "render-configs $ALL_FLAGS" "$LOG"; expect "one missing: one call, all flags" $?
-[ "$(wc -l < "$LOG")" = 1 ]; expect "one missing: exactly one call" $?
-grep -q "All local config files are present." <<< "$OUT"; expect "one missing: reports success" $?
-
-# 3. No config files at all, logged in: same single call.
-new_workspace; run_setup
-grep -qx "render-configs $ALL_FLAGS" "$LOG"; expect "none present: one call, all flags" $?
-
-# 4. gcloud not logged in: skip the call, print the command, exit 0.
-new_workspace; STUB_GCLOUD_OK=0 run_setup
-expect "no gcloud login: exit 0" "$CODE"
-[ ! -s "$LOG" ]; expect "no gcloud login: no render call" $?
-grep -q "gcloud auth login --no-launch-browser" <<< "$OUT"; expect "no gcloud login: prints command" $?
-
-# 5. gh not logged in: skip the call, print the command, exit 0.
-new_workspace; STUB_GH_OK=0 run_setup
-expect "no gh login: exit 0" "$CODE"
-[ ! -s "$LOG" ]; expect "no gh login: no render call" $?
-grep -q "gh auth login" <<< "$OUT"; expect "no gh login: prints command" $?
-
-# 6. --refresh: call even when all files exist.
-new_workspace; all_files; run_setup --refresh
-grep -qx "render-configs $ALL_FLAGS" "$LOG"; expect "refresh: one call, all flags" $?
-
-# 7. render-configs.sh fails: warn and exit 0.
-new_workspace; STUB_RENDER_FAIL=1 run_setup
-expect "render fails: exit 0" "$CODE"
-grep -q "WARNING" <<< "$OUT"; expect "render fails: prints warning" $?
-
-[ "$FAILS" = 0 ] && echo "All tests passed." || echo "$FAILS test(s) failed."
-exit "$FAILS"
-```
+Create `scripts/test/setup-devcontainer.test.sh` and run `chmod +x` on it. The code now lives in the repo. It uses stub programs and a temp workspace per case. It covers: all files present, one file missing, no files, no `gcloud` login, no `gh` login, `--refresh`, a failed render (plain and `--refresh` hints), the default workspace, an empty file, and each missing binary. A `trap` removes the temp workspaces.
 
 - [ ] **Step 2: Run the test to verify it fails**
 
@@ -209,97 +120,7 @@ Expected: FAIL lines. The old script calls no render script.
 
 - [ ] **Step 3: Write the implementation**
 
-Replace `scripts/setup-devcontainer.sh` with:
-
-```bash
-#!/bin/bash
-# Runs after the dev container is created. Makes the local config files by
-# calling render-configs.sh with every write option, from inside the container.
-#
-#   scripts/setup-devcontainer.sh            run only when a config file is missing
-#   scripts/setup-devcontainer.sh --refresh  run always (for cert rotation)
-#
-# The script always exits 0. A missing login is not a container error.
-# It prints the command that fixes the problem. Run this script again after.
-#
-# Developers who do not use the dev container run render-configs.sh directly.
-
-set -eu
-
-WORKSPACE=${DUOS_WORKSPACE:-/workspaces/duos-ui}
-CONFIG_FILES=(server.crt server.key ca-bundle.crt .env.local public/config.json site.conf)
-REFRESH=false
-if [[ "${1:-}" == "--refresh" ]]; then
-  REFRESH=true
-fi
-
-# Docker makes named volumes owned by root. Give them to this user.
-fix_volume_owner() {
-  local dir
-  for dir in "$HOME/.config" "$HOME/.config/gcloud" "$HOME/.config/gh"; do
-    if [[ -d "$dir" && ! -w "$dir" ]]; then
-      sudo chown "$(id -u):$(id -g)" "$dir" || true
-    fi
-  done
-}
-
-missing_files() {
-  local f
-  for f in "${CONFIG_FILES[@]}"; do
-    if [[ ! -f "$WORKSPACE/$f" ]]; then
-      echo "$f"
-    fi
-  done
-}
-
-# Print the login commands that are needed. Return 1 if any login is missing.
-check_logins() {
-  local ok=0
-  if ! command -v gcloud > /dev/null || ! command -v kubectl > /dev/null \
-    || [[ -z "$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2> /dev/null)" ]]; then
-    echo "Google Cloud is not ready. Connect the host to the non-split Broad VPN. Then run:"
-    echo "  gcloud auth login --no-launch-browser"
-    ok=1
-  fi
-  if ! command -v gh > /dev/null || ! gh auth status > /dev/null 2>&1; then
-    echo "GitHub is not ready. Use an account that can read broadinstitute/terra-helmfile. Run:"
-    echo "  gh auth login"
-    ok=1
-  fi
-  return "$ok"
-}
-
-fix_volume_owner
-
-missing=$(missing_files | tr '\n' ' ')
-if [[ -z "$missing" && "$REFRESH" == "false" ]]; then
-  echo "All local config files are present."
-  exit 0
-fi
-
-if [[ -n "$missing" ]]; then
-  echo "Missing local config files: $missing"
-fi
-
-if ! check_logins; then
-  echo
-  echo "After you log in, run: ./scripts/setup-devcontainer.sh"
-  echo "See DEVNOTES.md for details."
-  exit 0
-fi
-
-if ! "$WORKSPACE/scripts/render-configs.sh" --write_env true --write_config true --write_site_conf true; then
-  echo "WARNING: render-configs.sh failed. Fix the cause above and run ./scripts/setup-devcontainer.sh again."
-  exit 0
-fi
-
-missing=$(missing_files | tr '\n' ' ')
-if [[ -z "$missing" ]]; then
-  echo "All local config files are present."
-else
-  echo "Still missing: $missing"
-fi
-```
+Replace `scripts/setup-devcontainer.sh`. The code now lives in the repo. It checks files with `-s`, checks binaries and logins as separate cases, calls `render-configs.sh` once as a child process, and uses `sudo -n chown` for the volumes. After a failure it prints the same command the user ran, with `--refresh` when they used it.
 
 - [ ] **Step 4: Run the test to verify it passes**
 
@@ -331,16 +152,22 @@ Replace `DT-XXXX` with the real ticket number.
 ### Task 3: Add tools and login volumes to both containers
 
 **Files:**
+- Create: `.devcontainer/Dockerfile`
 - Modify: `.devcontainer/devcontainer.json`
 - Modify: `.devcontainer/uber/devcontainer.json`
+- Regenerate: `.devcontainer/devcontainer-lock.json` and `.devcontainer/uber/devcontainer-lock.json`
 
 **Interfaces:**
-- Consumes: the feature IDs from Task 1 Step 4.
+- Consumes: the base image `mcr.microsoft.com/vscode/devcontainers/javascript-node:26-trixie` and the first-party features `github-cli` and `kubectl-helm-minikube`.
 - Produces: `gh`, `gcloud`, `gke-gcloud-auth-plugin`, `kubectl`, and `jq` on the `PATH`. Volumes at `/home/node/.config/gcloud` and `/home/node/.config/gh`.
 
-- [ ] **Step 1: Edit `.devcontainer/devcontainer.json`**
+- [ ] **Step 1: Create `.devcontainer/Dockerfile`**
 
-Add this key:
+Both containers share it. It starts from the base image. It adds Google's apt repo (signed key in `/usr/share/keyrings/cloud.google.gpg`). It installs `google-cloud-cli` and `google-cloud-cli-gke-gcloud-auth-plugin` with `--no-install-recommends`, then removes the apt lists.
+
+- [ ] **Step 2: Edit `.devcontainer/devcontainer.json`**
+
+Replace the `image` key with `"build": {"dockerfile": "Dockerfile"}`. Add a `mounts` array with the two volumes:
 
 ```json
     "mounts": [
@@ -349,24 +176,25 @@ Add this key:
     ],
 ```
 
-Add to `features` (use the IDs and options from Task 1):
+Add these features next to `java`:
 
 ```json
         "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
             "helm": "none",
             "minikube": "none"
-        },
-        "ghcr.io/dhoeric/features/google-cloud-cli:1": {}
+        }
 ```
 
-If Task 1 shows that `jq` is missing, add a feature that installs it. If the `gcloud` feature lacks `gke-gcloud-auth-plugin`, add the option or feature that installs it.
+- [ ] **Step 3: Edit `.devcontainer/uber/devcontainer.json`**
 
-- [ ] **Step 2: Edit `.devcontainer/uber/devcontainer.json`**
+Point `build.dockerfile` at `../Dockerfile` with `"context": ".."`. Add the same two features. Add the two volume strings to its existing `mounts` array. Keep the `consent` bind mount.
 
-Add the same three features. Add the two volume strings to its existing `mounts` array. Keep the `consent` bind mount.
+- [ ] **Step 4: Regenerate the lock files**
 
-- [ ] **Step 3: Rebuild and check the tools**
+Regenerate `devcontainer-lock.json` in both folders so they list the new features. Check `jq` is in the image (Task 1 Step 2). If it is missing, add it to the Dockerfile.
+
+- [ ] **Step 5: Rebuild and check the tools**
 
 ```bash
 npx @devcontainers/cli up --workspace-folder /Users/grushton/develop/duos-ui --remove-existing-container
@@ -375,10 +203,10 @@ npx @devcontainers/cli exec --workspace-folder /Users/grushton/develop/duos-ui b
 
 Expected: a version line for each tool.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add .devcontainer/devcontainer.json .devcontainer/uber/devcontainer.json
+git add .devcontainer
 git commit -m "[DT-XXXX] Add gh, gcloud, and kubectl to the dev containers"
 ```
 
@@ -465,7 +293,7 @@ Use the PR description format from the constraints. Add the results of Steps 1-4
 | Risk | Effect | Mitigation |
 |---|---|---|
 | The container has no route to the VPN | Certs and secrets cannot be fetched | Task 1 Step 3 checks this first. Stop if it fails. |
-| A community `gcloud` feature lacks the GKE auth plugin | `get-credentials` fails | Task 1 Step 4 and Task 3 Step 3 check it. |
+| The Dockerfile build changes over time | The image rebuilds when the base tag moves. The apt packages are not pinned, so `gcloud` versions can change. | Task 3 Step 5 checks every tool after a rebuild. Pin versions if a change breaks `render-configs.sh`. |
 | Volume ownership is root | `gcloud auth login` cannot write | `fix_volume_owner` runs `sudo chown`. Task 5 Step 2 checks it. |
 | `postCreateCommand` has no terminal | The first start makes no file | The script prints the commands. Greg runs it a second time. |
 | A run with one missing file re-runs everything | `.env.local` is rewritten | `render-configs.sh` keeps old values and backs up the file. |
