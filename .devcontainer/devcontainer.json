@@ -1,8 +1,13 @@
 {
     "name": "Node.js",
     "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:26-trixie",
+    "onCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends google-cloud-cli-gke-gcloud-auth-plugin && sudo rm -rf /var/lib/apt/lists/*",
     "postCreateCommand": "./scripts/setup-devcontainer.sh",
     "remoteUser": "node",
+    "mounts": [
+        "source=duos-gcloud-config,target=/home/node/.config/gcloud,type=volume",
+        "source=duos-gh-config,target=/home/node/.config/gh,type=volume"
+    ],
     "customizations": {
         "vscode": {
             "extensions": [
@@ -19,6 +24,12 @@
         "ghcr.io/devcontainers/features/java:1": {
             "version": "25",
             "jdkDistro": "tem"
-        }
+        },
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+            "helm": "none",
+            "minikube": "none"
+        },
+        "ghcr.io/joshuanianji/devcontainer-features/google-cloud-cli:1": {}
     }
 }

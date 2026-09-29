@@ -4,7 +4,9 @@
     "workspaceFolder": "/workspaces",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/duos-ui,type=bind,consistency=cached",
     "mounts": [
-        "source=${localWorkspaceFolder}/../consent,target=/workspaces/consent,type=bind,consistency=cached"
+        "source=${localWorkspaceFolder}/../consent,target=/workspaces/consent,type=bind,consistency=cached",
+        "source=duos-gcloud-config,target=/home/node/.config/gcloud,type=volume",
+        "source=duos-gh-config,target=/home/node/.config/gh,type=volume"
     ],
     "features": {
         "ghcr.io/devcontainers/features/java:1": {
@@ -15,7 +17,13 @@
         },
         "ghcr.io/devcontainers/features/docker-in-docker:2": {
             "moby": false
-        }
+        },
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+            "helm": "none",
+            "minikube": "none"
+        },
+        "ghcr.io/joshuanianji/devcontainer-features/google-cloud-cli:1": {}
     },
     "customizations": {
         "vscode": {
@@ -30,5 +38,6 @@
         }
     },
     "postCreateCommand": "cd /workspaces/duos-ui && ./scripts/setup-devcontainer.sh",
+    "onCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends google-cloud-cli-gke-gcloud-auth-plugin && sudo rm -rf /var/lib/apt/lists/*",
     "remoteUser": "node"
 }
