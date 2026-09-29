@@ -1,3 +1,6 @@
+import { createHash } from 'node:crypto'
+import { randomToken } from './jwt'
+
 /**
  * Per-test scenarios for the mock OIDC provider and the mock Consent upstream
  * (DT-4069, BFF Epic 6 story 6-D-mock).
@@ -8,11 +11,14 @@
  *
  *   1. The spec intercepts the browser's navigation to `/authorize` and appends
  *      `scenario=<key>`. The BFF's own parameters stay untouched.
- *   2. The provider binds the key to the authorization code, and then embeds it
- *      in the access and refresh tokens that it mints at `/token`.
- *   3. Refresh calls come from the BFF, not the browser, so the provider reads
- *      the key back out of the refresh token.
- *   4. The Consent upstream reads the key out of the Bearer token it receives.
+ *   2. The provider binds the key to the authorization code, and then to the
+ *      access and refresh tokens that it mints at `/token`.
+ *   3. Refresh calls come from the BFF, not the browser, so the provider looks
+ *      the scenario up from the refresh token.
+ *   4. The Consent upstream looks the scenario up from the Bearer token it receives.
+ *
+ * The store records every token it issues, so a token is valid only while it is
+ * unexpired, unrevoked, and its scenario exists — never because of its shape.
  *
  * The `default` scenario serves a flow that carries no key. It is read-only, so
  * no spec can change what another spec sees.
@@ -88,7 +94,15 @@ export interface ScenarioStats {
 
 export const DEFAULT_EMAIL = 'mock-researcher@example.org'
 
-/** A registered researcher, so a signed-in spec lands in the Researcher Console. */
+/** The `sub` claim for an email. The provider fixes it at sign-in, as B2C does. */
+export const subjectFor = (email: string | null): string =>
+  createHash('sha256').update(email ?? DEFAULT_EMAIL).digest('hex').slice(0, 32)
+
+/**
+ * A registered researcher who accepted the terms of service, so a signed-in spec
+ * lands in the Researcher Console. Real Consent always sends `userStatusInfo`,
+ * and without `tosAccepted` the client sends the user to /tos_acceptance.
+ */
 export const defaultProfile = (email: string | null): Record<string, unknown> => ({
   userId: 900001,
   displayName: 'Mock Researcher',
@@ -96,6 +110,13 @@ export const defaultProfile = (email: string | null): Record<string, unknown> =>
   emailPreference: false,
   createDate: '2026-01-01T00:00:00.000Z',
   roles: [{ roleId: 5, name: 'Researcher', userId: 900001 }],
+  userStatusInfo: {
+    userEmail: email ?? DEFAULT_EMAIL,
+    userSubjectId: subjectFor(email),
+    enabled: true,
+    adminEnabled: true,
+    tosAccepted: true,
+  },
 })
 
 const PROVIDER_DEFAULTS: Readonly<ProviderSettings> = {
@@ -149,14 +170,15 @@ function validateSections(patch: unknown): asserts patch is ScenarioUpdate {
     check((UPDATE_SECTIONS as readonly string[]).includes(key), `unknown scenario section '${key}'; use ${UPDATE_SECTIONS.join(' or ')}`)
   }
   for (const section of UPDATE_SECTIONS) {
-    if (section in patch) check(isPlainObject(patch[section]), `${section} must be an object`)
+    if (Object.hasOwn(patch, section)) check(isPlainObject(patch[section]), `${section} must be an object`)
   }
 }
 
 /** Rejects a misspelled or mistyped control, so a spec cannot pass by testing the defaults. */
 function validateProvider(patch: Partial<ProviderSettings>): void {
   for (const key of Object.keys(patch)) {
-    check(key in PROVIDER_DEFAULTS, `unknown provider setting '${key}'`)
+    // Own properties only: `in` would also accept toString, constructor and __proto__.
+    check(Object.hasOwn(PROVIDER_DEFAULTS, key), `unknown provider setting '${key}'`)
   }
   if ('idp' in patch) oneOf(IDP_CHOICES, patch.idp, 'provider.idp')
   if ('refresh' in patch) oneOf(REFRESH_BEHAVIORS, patch.refresh, 'provider.refresh')
@@ -173,7 +195,7 @@ function validateProvider(patch: Partial<ProviderSettings>): void {
 
 function validateConsent(patch: Partial<ConsentSettings>): void {
   for (const key of Object.keys(patch)) {
-    check(key in CONSENT_DEFAULTS, `unknown consent setting '${key}'`)
+    check(Object.hasOwn(CONSENT_DEFAULTS, key), `unknown consent setting '${key}'`)
   }
   if ('userMe' in patch) oneOf(USER_ME_STATUSES, patch.userMe, 'consent.userMe')
   if ('profile' in patch) check(patch.profile === null || isPlainObject(patch.profile), 'consent.profile must be an object or null')
@@ -182,14 +204,33 @@ function validateConsent(patch: Partial<ConsentSettings>): void {
 interface ScenarioEntry {
   scenario: Scenario
   stats: ScenarioStats
-  /** Every access token the provider minted for the scenario. */
-  accessTokens: Set<string>
 }
 
-const newEntry = (): ScenarioEntry => ({ scenario: defaultScenario(), stats: emptyStats(), accessTokens: new Set() })
+const newEntry = (): ScenarioEntry => ({ scenario: defaultScenario(), stats: emptyStats() })
+
+/**
+ * Token formats. The key is the second part only so that a token is easy to read
+ * in a log or an assertion; the store, not the shape, decides whether it is valid.
+ */
+export const ACCESS_TOKEN_PREFIX = 'mock'
+export const REFRESH_TOKEN_PREFIX = 'mockrt'
+
+export type TokenKind = 'access' | 'refresh'
+
+export interface IssuedToken {
+  kind: TokenKind
+  key: string
+  /** The scope granted at sign-in, carried through every refresh. */
+  scope: string
+  /** Fixed at sign-in: a later change to the scenario's email does not alter it. */
+  subject: string
+  /** Epoch milliseconds. Refresh tokens do not expire within a run. */
+  expiresAt: number
+}
 
 export class ScenarioStore {
   private readonly scenarios = new Map<string, ScenarioEntry>([[DEFAULT_SCENARIO_KEY, newEntry()]])
+  private readonly tokens = new Map<string, IssuedToken>()
 
   has(key: string): boolean {
     return this.scenarios.has(key)
@@ -226,37 +267,52 @@ export class ScenarioStore {
     return entry.scenario
   }
 
+  /**
+   * Removes the scenario and revokes its tokens, so a key registered again later
+   * starts clean. False when the key is unknown.
+   */
   delete(key: string): boolean {
-    return key !== DEFAULT_SCENARIO_KEY && this.scenarios.delete(key)
+    check(key !== DEFAULT_SCENARIO_KEY, `the '${DEFAULT_SCENARIO_KEY}' scenario is shared and cannot be deleted`)
+    if (!this.scenarios.delete(key)) return false
+    for (const [token, record] of this.tokens) {
+      if (record.key === key) this.tokens.delete(token)
+    }
+    return true
   }
 
-  /** Called by the provider for each access token that it mints. */
-  recordAccessToken(key: string, token: string): void {
-    this.scenarios.get(key)?.accessTokens.add(token)
+  /** Mints and records a token. Expired tokens are pruned first, so the map stays small. */
+  issueToken(kind: TokenKind, record: Omit<IssuedToken, 'kind'>): string {
+    this.pruneExpiredTokens()
+    const token = mintToken(kind === 'access' ? ACCESS_TOKEN_PREFIX : REFRESH_TOKEN_PREFIX, record.key, randomToken())
+    this.tokens.set(token, { kind, ...record })
+    return token
   }
 
   /**
-   * The scenario of an access token the provider actually issued, or undefined.
-   * The shape alone is not enough: `mock.<key>.<anything>` from a browser must
-   * fail, or a forwarded client header could pass as the session's token.
+   * The record of a live token of this kind, or undefined when the store never
+   * issued it, revoked it, it expired, or its scenario is gone. `mock.<key>.x`
+   * from a browser is therefore rejected, as real Consent rejects a forged token.
    */
-  scenarioForAccessToken(token: string): string | undefined {
-    const key = scenarioKeyFromToken(token, ACCESS_TOKEN_PREFIX)
-    return key !== undefined && this.scenarios.get(key)?.accessTokens.has(token) ? key : undefined
+  lookupToken(token: string, kind: TokenKind): IssuedToken | undefined {
+    const record = this.tokens.get(token)
+    if (record?.kind !== kind || !this.scenarios.has(record.key)) return undefined
+    if (record.expiresAt <= Date.now()) {
+      this.tokens.delete(token)
+      return undefined
+    }
+    return record
+  }
+
+  revokeToken(token: string): void {
+    this.tokens.delete(token)
+  }
+
+  private pruneExpiredTokens(): void {
+    const now = Date.now()
+    for (const [token, record] of this.tokens) {
+      if (record.expiresAt <= now) this.tokens.delete(token)
+    }
   }
 }
 
-/**
- * Token formats. The key is the second part, so each mock reads the scenario
- * back out of a token without shared state beyond the store.
- */
-export const ACCESS_TOKEN_PREFIX = 'mock'
-export const REFRESH_TOKEN_PREFIX = 'mockrt'
-
-export const mintToken = (prefix: string, key: string, random: string): string => `${prefix}.${key}.${random}`
-
-export function scenarioKeyFromToken(token: string, prefix: string): string | undefined {
-  const [tokenPrefix, key, random, ...rest] = token.split('.')
-  if (tokenPrefix !== prefix || !isScenarioKey(key) || !random || rest.length > 0) return undefined
-  return key
-}
+const mintToken = (prefix: string, key: string, random: string): string => `${prefix}.${key}.${random}`

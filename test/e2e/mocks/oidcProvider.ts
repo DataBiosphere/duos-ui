@@ -1,17 +1,14 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { createHash, timingSafeEqual } from 'node:crypto'
+import { timingSafeEqual } from 'node:crypto'
 import { decodeJwtPayload, randomToken, s256, signJwt, type SigningKey } from './jwt'
-import { readBody, redirect, requestUrl, sendJson } from './http'
+import { HttpError, readBody, redirect, requestUrl, sendJson } from './http'
 import {
-  ACCESS_TOKEN_PREFIX,
   DEFAULT_SCENARIO_KEY,
   GOOGLE_IDP_CLAIM,
   isScenarioKey,
   MICROSOFT_IDP_CLAIM,
-  mintToken,
-  REFRESH_TOKEN_PREFIX,
   ScenarioError,
-  scenarioKeyFromToken,
+  subjectFor,
   type ScenarioStore,
 } from './scenarios'
 import { MOCK_CONTROL_PATH } from './settings'
@@ -27,7 +24,9 @@ import { MOCK_CONTROL_PATH } from './settings'
  *
  * It keeps two B2C behaviors on purpose, because the BFF depends on both:
  * without the client ID in `scope` the token response has no access token, and
- * without `offline_access` it has no refresh token.
+ * without `offline_access` it has no refresh token. Refresh tokens rotate: a
+ * redeemed one is revoked, so a reused token gets `invalid_grant`, which is what
+ * the single-flight guard in server/src/auth/refresh.ts exists to prevent.
  *
  * Every behavior a spec can change is in `scenarios.ts`, keyed per test.
  */
@@ -78,8 +77,6 @@ export function createOidcProvider(options: ProviderOptions) {
   const redirectUris = registry(options.redirectUris)
   const postLogoutRedirectUris = registry(options.postLogoutRedirectUris)
   const codes = new Map<string, PendingCode>()
-  // The refresh tokens this process issued, with the scope each one carries.
-  const refreshTokens = new Map<string, string>()
 
   const discovery = {
     issuer,
@@ -100,21 +97,25 @@ export function createOidcProvider(options: ProviderOptions) {
 
   function authenticateClient(request: IncomingMessage, form: URLSearchParams): boolean {
     const basic = /^Basic (\S+)$/.exec(request.headers.authorization ?? '')
-    if (basic) {
+    if (!basic) return form.get('client_id') === clientId && safeEqual(form.get('client_secret') ?? '', clientSecret)
+    try {
       const [id, secret] = Buffer.from(basic[1], 'base64').toString('utf8').split(':').map(decodeURIComponent)
       return id === clientId && safeEqual(secret ?? '', clientSecret)
     }
-    return form.get('client_id') === clientId && safeEqual(form.get('client_secret') ?? '', clientSecret)
+    catch {
+      // A malformed percent-encoding is a failed authentication, not a server error.
+      return false
+    }
   }
 
   /** Mirrors the id_token claims that `callback.ts` reads from B2C. */
-  function idToken(key: string): string {
+  function idToken(key: string, subject: string): string {
     const { provider } = store.get(key)!
     const iat = nowSeconds()
     const claims: Record<string, unknown> = {
       iss: issuer,
       aud: clientId,
-      sub: createHash('sha256').update(provider.email ?? key).digest('hex').slice(0, 32),
+      sub: subject,
       iat,
       nbf: iat,
       exp: iat + ID_TOKEN_LIFETIME_SECONDS,
@@ -128,26 +129,31 @@ export function createOidcProvider(options: ProviderOptions) {
     return signJwt(signingKey, claims)
   }
 
-  function sendTokens(response: ServerResponse, key: string, scope: string): void {
+  function sendTokens(response: ServerResponse, key: string, scope: string, subject: string): void {
     const { provider } = store.get(key)!
     const scopes = new Set(scope.split(' '))
+    const lifetime = provider.accessTokenLifetimeSeconds
     const body: Record<string, unknown> = {
       token_type: 'Bearer',
-      expires_in: provider.accessTokenLifetimeSeconds,
-      id_token: idToken(key),
+      expires_in: lifetime,
+      id_token: idToken(key, subject),
       scope,
     }
     if (scopes.has(clientId)) {
-      const accessToken = mintToken(ACCESS_TOKEN_PREFIX, key, randomToken())
-      store.recordAccessToken(key, accessToken)
-      body.access_token = accessToken
+      // The Consent upstream rejects the token after this, as real Consent would.
+      body.access_token = store.issueToken('access', { key, scope, subject, expiresAt: Date.now() + lifetime * 1000 })
     }
     if (scopes.has('offline_access') && provider.issueRefreshToken) {
-      const refreshToken = mintToken(REFRESH_TOKEN_PREFIX, key, randomToken())
-      refreshTokens.set(refreshToken, scope)
-      body.refresh_token = refreshToken
+      body.refresh_token = store.issueToken('refresh', { key, scope, subject, expiresAt: Number.POSITIVE_INFINITY })
     }
     sendJson(response, 200, body)
+  }
+
+  function pruneExpiredCodes(): void {
+    const now = Date.now()
+    for (const [code, pending] of codes) {
+      if (pending.expiresAt <= now) codes.delete(code)
+    }
   }
 
   /** Answers a bad authorization request directly: redirecting could send it to an unchecked URI. */
@@ -183,6 +189,7 @@ export function createOidcProvider(options: ProviderOptions) {
       redirect(response, target.href)
       return
     }
+    pruneExpiredCodes()
     const code = randomToken()
     codes.set(code, {
       key,
@@ -209,17 +216,18 @@ export function createOidcProvider(options: ProviderOptions) {
       return
     }
     store.stats(pending.key)!.codeGrants++
-    sendTokens(response, pending.key, pending.scope)
+    // `sub` is fixed here, at sign-in, and every refresh reuses it.
+    sendTokens(response, pending.key, pending.scope, subjectFor(store.get(pending.key)!.provider.email))
   }
 
   function handleRefreshGrant(form: URLSearchParams, response: ServerResponse): void {
     const refreshToken = form.get('refresh_token') ?? ''
-    const key = scenarioKeyFromToken(refreshToken, REFRESH_TOKEN_PREFIX)
-    const scope = refreshTokens.get(refreshToken)
-    if (key === undefined || scope === undefined || !store.has(key)) {
-      oauthError(response, 400, 'invalid_grant', 'the refresh token is unknown')
+    const record = store.lookupToken(refreshToken, 'refresh')
+    if (record === undefined) {
+      oauthError(response, 400, 'invalid_grant', 'the refresh token is unknown, already redeemed, or revoked')
       return
     }
+    const { key, scope, subject } = record
     store.stats(key)!.refreshGrants++
     switch (store.get(key)!.provider.refresh) {
       case 'invalid_grant':
@@ -229,10 +237,15 @@ export function createOidcProvider(options: ProviderOptions) {
         oauthError(response, 503, 'server_error', 'the mock provider is unavailable')
         return
       case 'hang':
-        // No answer. The BFF's own timeout ends the request; the socket closes with the server.
+        // No answer. The BFF gives up only at openid-client's 30-second default
+        // timeout, which equals Playwright's default test timeout, so a spec that
+        // uses `hang` must raise its own. The socket closes with the server.
         return
       default:
-        sendTokens(response, key, scope)
+        // Rotation: the redeemed token is revoked. A failed refresh keeps it, so
+        // a retry after a transient error can still succeed.
+        store.revokeToken(refreshToken)
+        sendTokens(response, key, scope, subject)
     }
   }
 
@@ -262,20 +275,36 @@ export function createOidcProvider(options: ProviderOptions) {
     redirect(response, target)
   }
 
+  async function updateScenario(request: IncomingMessage, response: ServerResponse, key: string): Promise<void> {
+    const body = await readBody(request)
+    try {
+      sendJson(response, 200, { scenario: store.update(key, JSON.parse(body || '{}')) })
+    }
+    catch (err) {
+      if (!(err instanceof ScenarioError || err instanceof SyntaxError)) throw err
+      sendJson(response, 400, { error: err.message })
+    }
+  }
+
+  function deleteScenario(response: ServerResponse, key: string): void {
+    try {
+      if (store.delete(key)) response.writeHead(204).end()
+      else sendJson(response, 404, { error: `unknown scenario '${key}'` })
+    }
+    catch (err) {
+      if (!(err instanceof ScenarioError)) throw err
+      sendJson(response, 400, { error: err.message })
+    }
+  }
+
   async function handleControl(request: IncomingMessage, response: ServerResponse, key: string): Promise<void> {
+    if (!isScenarioKey(key)) throw new HttpError(400, 'a scenario key must be 1-64 letters, digits, _ or -')
     if (request.method === 'PUT') {
-      try {
-        const update: unknown = JSON.parse(await readBody(request) || '{}')
-        sendJson(response, 200, { scenario: store.update(key, update) })
-      }
-      catch (err) {
-        sendJson(response, 400, { error: err instanceof ScenarioError || err instanceof SyntaxError ? err.message : 'bad control request' })
-      }
+      await updateScenario(request, response, key)
       return
     }
     if (request.method === 'DELETE') {
-      store.delete(key)
-      response.writeHead(204).end()
+      deleteScenario(response, key)
       return
     }
     if (request.method !== 'GET') {
@@ -291,7 +320,8 @@ export function createOidcProvider(options: ProviderOptions) {
     const url = requestUrl(request, origin)
     const route = `${request.method} ${url.pathname}`
     if (url.pathname.startsWith(`${MOCK_CONTROL_PATH}/`)) {
-      await handleControl(request, response, decodeURIComponent(url.pathname.slice(MOCK_CONTROL_PATH.length + 1)))
+      // Not decoded: a valid key needs no percent-encoding, so an encoded one is a 400.
+      await handleControl(request, response, url.pathname.slice(MOCK_CONTROL_PATH.length + 1))
       return
     }
     switch (route) {
