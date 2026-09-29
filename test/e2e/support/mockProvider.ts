@@ -101,7 +101,7 @@ const CSRF_REJECTED = 403
  * navigation. A request already in flight can still save an older copy of the
  * session and drop the CSRF secret (see applyTokens in server/src/auth/refresh.ts),
  * so a rejected token is fetched again once, as the client's own sign-out does
- * (src/libs/auth/auth.ts). auth.spec.ts covers the UI sign-out.
+ * (src/libs/auth/auth.ts). Story 6-D's specs cover the UI sign-out.
  */
 export async function signOutThroughMock(page: Page): Promise<string | undefined> {
   await page.goto('about:blank')

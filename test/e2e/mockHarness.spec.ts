@@ -6,7 +6,7 @@ import { MOCK_BASE_URL } from './support/baseUrl'
 // Proves the mock harness itself (DT-4069): the BFF runs the code, refresh and
 // end-session legs against the mock provider, and forwards the session's token
 // to the mock Consent upstream. The flow and lifecycle assertions belong to
-// auth.spec.ts and session.spec.ts.
+// stories 6-D and 6-E.
 
 interface Me {
   authenticated: boolean
@@ -21,7 +21,8 @@ test('signs in through the mock provider and forwards the session token upstream
   await mockScenario.configure({ provider: { idp: 'microsoft', email: 'harness@example.org' } })
   await signInThroughMock(page, '/')
   // The default profile has accepted the terms of service, so the SPA routes to
-  // the console, not to /tos_acceptance. The header names the console on both.
+  // the console, not to /tos_acceptance. Check the URL: the header shows
+  // "Researcher Console" on /tos_acceptance too, so its text proves nothing.
   await expect(page).toHaveURL(/\/researcher_console_dashboard$/)
 
   expect(await getMe(page)).toMatchObject({ authenticated: true, idp: 'microsoft', user: { email: 'harness@example.org' } })

@@ -11,6 +11,9 @@ import {
 
 // Specs that sign in through the mock OIDC provider (DT-4069). Real Consent
 // rejects the mock's tokens, so they run against the mock Consent upstream.
+// auth.spec.ts (story 6-D) and session.spec.ts (6-E) do not exist yet. They are
+// named now so that they land in this project, not in `chromium`, where real
+// Consent would reject every mock token.
 const MOCK_SPECS = ['auth.spec.ts', 'session.spec.ts', 'mockHarness.spec.ts']
 
 // Both servers use the mock provider as their issuer. The role specs never run a

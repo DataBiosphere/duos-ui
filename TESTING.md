@@ -127,7 +127,7 @@ See the [CI workflow](.github/workflows/integration-tests.yml) and
 | Sign-in not enabled | Set `DUOS_TEST_SIGNIN_ENABLED` and `DUOS_TEST_SIGNIN_EMAILS`; restart |
 | Sign-in 401 | Server log: failing claim or tokeninfo failure |
 | Sign-in 429 | Wait a minute; default limit is 300/min/IP (`DUOS_RATE_LIMIT_TEST_SIGNIN_MAX`) |
-| Configuration ignored | Rebuild after config.json changes; restart after environment changes. Playwright reuses running servers outside CI. |
+| Configuration ignored | Rebuild after config.json changes; restart after environment changes. Playwright reuses running servers outside CI, and a reused server keeps its own environment, not the `playwright.config.ts` values (for example the issuer). Stop anything on ports 3000, 3001, 3100 and 3200 first. |
 
 ### CSP check
 
@@ -145,11 +145,17 @@ assertion, and the collector.
 
 ### Mock provider specs
 
-`auth.spec.ts`, `session.spec.ts` and `mockHarness.spec.ts` run in the `mock`
-project. They sign in through the BFF's real OAuth flow against a mock of the
-B2C tenant, so they need no credentials. Real Consent rejects the mock's
-tokens, so their server forwards to the mock Consent upstream instead. The
-mocks are in `test/e2e/mocks/`; `mockHarness.spec.ts` proves that the harness works.
+`mockHarness.spec.ts` runs in the `mock` project, and proves that the harness
+works. The project also matches `auth.spec.ts` (story 6-D) and `session.spec.ts`
+(6-E), which do not exist yet. These specs sign in through the BFF's real OAuth
+flow against a mock of the B2C tenant, so they need no credentials. Real
+Consent rejects the mock's tokens, so their server forwards to the mock Consent
+upstream instead. The mocks are in `test/e2e/mocks/`.
+
+Both servers use the host `local.dsde-dev.broadinstitute.org`, and cookies
+ignore ports, so both set the same `sessionId` cookie. Keep each browser
+context on one server; a context that visits both overwrites one session with
+the other.
 
 ```sh
 pnpm exec playwright test --project=mock
@@ -213,6 +219,7 @@ on both `chromium` and `mock`, with one worker. No spec needs this today.
 
 ### Session cleanup
 
-Role-access, CSP and mock harness tests sign out; other sessions remain stored after expiry. The E2E
+Role-access, CSP and mock harness tests sign out; other sessions remain stored after expiry. A new
+mock spec must sign out too, with `signOutThroughMock` or the UI, or it leaves its session row. The E2E
 schema has no scheduled cleanup. Delete only each test's recorded session IDs;
 truncating `user_sessions` breaks parallel tests.
