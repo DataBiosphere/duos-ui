@@ -2,17 +2,25 @@
 
 ## Dev Container
 
-If you use Visual Studio Code (VSCode) and Docker, you can use the Dev Container configuration. The container does not make the local config files. You make them on the host first, and the workspace bind mount makes them available in the container.
+If you use Visual Studio Code (VSCode) and Docker, you can use the Dev Container configuration. The container makes the local config files for you. On start, it runs `scripts/setup-devcontainer.sh`, which runs [render-configs.sh](scripts/render-configs.sh) with all write options.
 
-1. On the host, on the non-split Broad VPN, run the command below. For what it needs and what it writes, see step 3 of [Local Setup](#local-setup).
-
-   ```sh
-   ./scripts/render-configs.sh --write_env true --write_config true --write_site_conf true
-   ```
+1. Connect the host to the non-split Broad VPN.
 
 2. Open the project in VSCode. When the notification in the bottom right corner asks about the Dev Container, click "Reopen in container".
 
-When the container starts, `scripts/setup-devcontainer.sh` checks for the config files. If a file is missing, the script names it and prints the command in step 1.
+3. On the first start, the script asks for two logins. Run the commands it prints in the container terminal, then run the script again:
+
+   ```sh
+   gcloud auth login --no-launch-browser
+   gh auth login
+   ./scripts/setup-devcontainer.sh
+   ```
+
+   Your logins stay in Docker volumes, so a rebuild does not ask again.
+
+4. Every 3 months the certs rotate. Run `./scripts/setup-devcontainer.sh --refresh` to make all files again.
+
+If you do not use the Dev Container, follow [Local Setup](#local-setup) and run `render-configs.sh` yourself.
 
 ## Local Setup
 
