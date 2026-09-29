@@ -20,6 +20,9 @@ const getMe = (page: Page): Promise<Me> =>
 test('signs in through the mock provider and forwards the session token upstream', async ({ page, mockScenario }) => {
   await mockScenario.configure({ provider: { idp: 'microsoft', email: 'harness@example.org' } })
   await signInThroughMock(page, '/')
+  // The default profile has accepted the terms of service, so the SPA routes to
+  // the console, not to /tos_acceptance. The header names the console on both.
+  await expect(page).toHaveURL(/\/researcher_console_dashboard$/)
 
   expect(await getMe(page)).toMatchObject({ authenticated: true, idp: 'microsoft', user: { email: 'harness@example.org' } })
 

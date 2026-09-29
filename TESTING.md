@@ -174,16 +174,32 @@ expect((await mockScenario.stats()).refreshGrants).toBe(1)
 | `provider.email` | any string, or `null` (no `email` claim) | `mock-researcher@example.org` |
 | `provider.accessTokenLifetimeSeconds` | positive integer | `3600` |
 | `provider.issueRefreshToken` | `true`, `false` | `true` |
-| `provider.refresh` | `ok`, `invalid_grant`, `server_error` (503), `hang` | `ok` |
+| `provider.refresh` | `ok`, `invalid_grant`, `server_error` (503), `hang` (see below) | `ok` |
 | `provider.authorizeError` | an OAuth error code, e.g. `access_denied`, or `null` | `null` |
 | `consent.userMe` | `200`, `401`, `404`, `409` | `200` |
-| `consent.profile` | the 200 body, or `null` for a researcher with the `email` claim | `null` |
+| `consent.profile` | the 200 body, or `null` for a researcher with the `email` claim who accepted the terms of service | `null` |
 
 `stats()` returns the scenario's authorization, code-grant, refresh-grant and
 end-session counts, and every request the mock Consent upstream received, with
 its `Authorization` header. `GET /duos-api/api/mock/echo` returns the header
-that the upstream received. The mock Consent upstream also serves `/status` and
-`/tos/text/duos` without a token, as real Consent does; every other path is 404.
+that the upstream received; more than one `Authorization` header is a 400. The
+mock Consent upstream also serves, without a token, every path in
+`server/src/proxy/unauthenticatedPaths.ts`, as real Consent does; every other
+path is 404.
+
+Tokens behave as B2C's do:
+
+- An access token expires after `accessTokenLifetimeSeconds`, and the mock
+  Consent upstream then answers 401.
+- A redeemed refresh token is revoked, so reusing it gets `invalid_grant`. A
+  failed refresh keeps it, so a retry after `server_error` can succeed.
+- `sub` is fixed at sign-in. Changing `email` mid-test changes only the `email`
+  claim of later tokens.
+- Deleting a scenario revokes its tokens.
+
+With `hang`, the BFF gives up only at `openid-client`'s 30-second timeout,
+which equals Playwright's default test timeout. A spec that uses it must call
+`test.setTimeout()` with a longer limit.
 
 The provider keeps two B2C behaviors: without the client ID in `scope` the token
 response has no access token, and without `offline_access` it has no refresh
