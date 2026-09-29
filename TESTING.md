@@ -191,8 +191,10 @@ Tokens behave as B2C's do:
 
 - An access token expires after `accessTokenLifetimeSeconds`, and the mock
   Consent upstream then answers 401.
-- A redeemed refresh token is revoked, so reusing it gets `invalid_grant`. A
-  failed refresh keeps it, so a retry after `server_error` can succeed.
+- A refresh that issues a new refresh token revokes the one it redeemed, so
+  reusing that gets `invalid_grant`. With `issueRefreshToken: false` the
+  redeemed token stays valid, as the BFF keeps using it. A failed refresh keeps
+  it too, so a retry after `server_error` can succeed.
 - `sub` is fixed at sign-in. Changing `email` mid-test changes only the `email`
   claim of later tokens.
 - Deleting a scenario revokes its tokens.
