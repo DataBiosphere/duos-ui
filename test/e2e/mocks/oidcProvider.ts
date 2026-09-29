@@ -24,9 +24,10 @@ import { MOCK_CONTROL_PATH } from './settings'
  *
  * It keeps two B2C behaviors on purpose, because the BFF depends on both:
  * without the client ID in `scope` the token response has no access token, and
- * without `offline_access` it has no refresh token. Refresh tokens rotate: a
- * redeemed one is revoked, so a reused token gets `invalid_grant`, which is what
- * the single-flight guard in server/src/auth/refresh.ts exists to prevent.
+ * without `offline_access` it has no refresh token. Refresh tokens rotate: when
+ * a refresh issues a replacement, the redeemed one is revoked, so a reused token
+ * gets `invalid_grant`, which is what the single-flight guard in
+ * server/src/auth/refresh.ts exists to prevent.
  *
  * Every behavior a spec can change is in `scenarios.ts`, keyed per test.
  */
@@ -129,7 +130,12 @@ export function createOidcProvider(options: ProviderOptions) {
     return signJwt(signingKey, claims)
   }
 
-  function sendTokens(response: ServerResponse, key: string, scope: string, subject: string): void {
+  /**
+   * `redeemed` is the refresh token a refresh grant spent. It is revoked only
+   * when a replacement is issued: with none, the BFF keeps using it
+   * (server/src/auth/refresh.ts), so revoking it would end a healthy session.
+   */
+  function sendTokens(response: ServerResponse, key: string, scope: string, subject: string, redeemed?: string): void {
     const { provider } = store.get(key)!
     const scopes = new Set(scope.split(' '))
     const lifetime = provider.accessTokenLifetimeSeconds
@@ -145,6 +151,7 @@ export function createOidcProvider(options: ProviderOptions) {
     }
     if (scopes.has('offline_access') && provider.issueRefreshToken) {
       body.refresh_token = store.issueToken('refresh', { key, scope, subject, expiresAt: Number.POSITIVE_INFINITY })
+      if (redeemed !== undefined) store.revokeToken(redeemed)
     }
     sendJson(response, 200, body)
   }
@@ -242,10 +249,9 @@ export function createOidcProvider(options: ProviderOptions) {
         // uses `hang` must raise its own. The socket closes with the server.
         return
       default:
-        // Rotation: the redeemed token is revoked. A failed refresh keeps it, so
-        // a retry after a transient error can still succeed.
-        store.revokeToken(refreshToken)
-        sendTokens(response, key, scope, subject)
+        // Rotation: a replacement revokes the redeemed token. A failed refresh
+        // keeps it, so a retry after a transient error can still succeed.
+        sendTokens(response, key, scope, subject, refreshToken)
     }
   }
 
