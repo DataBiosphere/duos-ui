@@ -12,11 +12,14 @@
 
 set -eu
 
-WORKSPACE=${DUOS_WORKSPACE:-/workspaces/duos-ui}
+# The main config sets no workspaceFolder, so the path depends on the folder name.
+WORKSPACE=${DUOS_WORKSPACE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
 CONFIG_FILES=(server.crt server.key ca-bundle.crt .env.local public/config.json site.conf)
 REFRESH=false
+RERUN="./scripts/setup-devcontainer.sh"
 if [[ "${1:-}" == "--refresh" ]]; then
   REFRESH=true
+  RERUN="./scripts/setup-devcontainer.sh --refresh"
 fi
 
 # Docker makes named volumes owned by root. Give them to this user.
@@ -24,7 +27,7 @@ fix_volume_owner() {
   local dir
   for dir in "$HOME/.config" "$HOME/.config/gcloud" "$HOME/.config/gh"; do
     if [[ -d "$dir" && ! -w "$dir" ]]; then
-      sudo chown "$(id -u):$(id -g)" "$dir" || true
+      sudo -n chown "$(id -u):$(id -g)" "$dir" || true
     fi
   done
 }
@@ -32,7 +35,8 @@ fix_volume_owner() {
 missing_files() {
   local f
   for f in "${CONFIG_FILES[@]}"; do
-    if [[ ! -f "$WORKSPACE/$f" ]]; then
+    # -s: an empty file (a failed render) counts as missing.
+    if [[ ! -s "$WORKSPACE/$f" ]]; then
       echo "$f"
     fi
   done
@@ -41,13 +45,18 @@ missing_files() {
 # Print the login commands that are needed. Return 1 if any login is missing.
 check_logins() {
   local ok=0
-  if ! command -v gcloud > /dev/null || ! command -v kubectl > /dev/null \
-    || [[ -z "$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2> /dev/null)" ]]; then
+  if ! command -v gcloud > /dev/null || ! command -v kubectl > /dev/null; then
+    echo "gcloud and kubectl are not installed. Rebuild the container."
+    ok=1
+  elif [[ -z "$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2> /dev/null)" ]]; then
     echo "Google Cloud is not ready. Connect the host to the non-split Broad VPN. Then run:"
     echo "  gcloud auth login --no-launch-browser"
     ok=1
   fi
-  if ! command -v gh > /dev/null || ! gh auth status > /dev/null 2>&1; then
+  if ! command -v gh > /dev/null; then
+    echo "gh is not installed. Rebuild the container."
+    ok=1
+  elif ! gh auth status > /dev/null 2>&1; then
     echo "GitHub is not ready. Use an account that can read broadinstitute/terra-helmfile. Run:"
     echo "  gh auth login"
     ok=1
@@ -69,13 +78,13 @@ fi
 
 if ! check_logins; then
   echo
-  echo "After you log in, run: ./scripts/setup-devcontainer.sh"
+  echo "After you fix this, run: $RERUN"
   echo "See DEVNOTES.md for details."
   exit 0
 fi
 
 if ! "$WORKSPACE/scripts/render-configs.sh" --write_env true --write_config true --write_site_conf true; then
-  echo "WARNING: render-configs.sh failed. Fix the cause above and run ./scripts/setup-devcontainer.sh again."
+  echo "WARNING: render-configs.sh failed. Fix the cause above and run $RERUN again."
   exit 0
 fi
 

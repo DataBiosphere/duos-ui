@@ -6,9 +6,19 @@ REPO=$(cd "$(dirname "$0")/../.." && pwd)
 SETUP=$REPO/scripts/setup-devcontainer.sh
 ALL_FLAGS="--write_env true --write_config true --write_site_conf true"
 FAILS=0
+WORKSPACES=()
+
+cleanup() {
+  local d
+  for d in "${WORKSPACES[@]}"; do
+    rm -rf "$d"
+  done
+}
+trap cleanup EXIT
 
 new_workspace() {
   WS=$(mktemp -d)
+  WORKSPACES+=("$WS")
   mkdir -p "$WS/scripts" "$WS/public" "$WS/bin" "$WS/home"
   export LOG=$WS/calls.log
   : > "$LOG"
@@ -17,8 +27,9 @@ new_workspace() {
 echo "render-configs $*" >> "$LOG"
 [ "${STUB_RENDER_FAIL:-0}" = 1 ] && exit 1
 ws=$(dirname "$0")/..
-touch "$ws/server.crt" "$ws/server.key" "$ws/ca-bundle.crt" \
-  "$ws/.env.local" "$ws/public/config.json" "$ws/site.conf"
+for f in server.crt server.key ca-bundle.crt .env.local public/config.json site.conf; do
+  echo x > "$ws/$f"
+done
 EOF
   cat > "$WS/bin/gh" <<'EOF'
 #!/bin/bash
@@ -33,13 +44,17 @@ EOF
   chmod +x "$WS"/scripts/*.sh "$WS"/bin/*
 }
 
+# Present files have content. An empty file counts as missing.
 all_files() {
-  touch "$WS/server.crt" "$WS/server.key" "$WS/ca-bundle.crt" \
-    "$WS/.env.local" "$WS/public/config.json" "$WS/site.conf"
+  local f
+  for f in server.crt server.key ca-bundle.crt .env.local public/config.json site.conf; do
+    echo x > "$WS/$f"
+  done
 }
 
+# Set TEST_PATH to change PATH, for example to leave the stub programs out.
 run_setup() {
-  OUT=$(PATH="$WS/bin:$PATH" HOME="$WS/home" DUOS_WORKSPACE="$WS" bash "$SETUP" "$@" 2>&1)
+  OUT=$(PATH="${TEST_PATH:-$WS/bin:$PATH}" HOME="$WS/home" DUOS_WORKSPACE="$WS" bash "$SETUP" "$@" 2>&1)
   CODE=$?
 }
 
@@ -61,6 +76,7 @@ grep -q "All local config files are present." <<< "$OUT"; expect "one missing: r
 
 # 3. No config files at all, logged in: same single call.
 new_workspace; run_setup
+expect "none present: exit 0" "$CODE"
 grep -qx "render-configs $ALL_FLAGS" "$LOG"; expect "none present: one call, all flags" $?
 
 # 4. gcloud not logged in: skip the call, print the command, exit 0.
@@ -68,12 +84,14 @@ new_workspace; STUB_GCLOUD_OK=0 run_setup
 expect "no gcloud login: exit 0" "$CODE"
 [ ! -s "$LOG" ]; expect "no gcloud login: no render call" $?
 grep -q "gcloud auth login --no-launch-browser" <<< "$OUT"; expect "no gcloud login: prints command" $?
+! grep -q "gh auth login" <<< "$OUT"; expect "no gcloud login: no gh message" $?
 
 # 5. gh not logged in: skip the call, print the command, exit 0.
 new_workspace; STUB_GH_OK=0 run_setup
 expect "no gh login: exit 0" "$CODE"
 [ ! -s "$LOG" ]; expect "no gh login: no render call" $?
 grep -q "gh auth login" <<< "$OUT"; expect "no gh login: prints command" $?
+! grep -q "gcloud auth login" <<< "$OUT"; expect "no gh login: no gcloud message" $?
 
 # 6. --refresh: call even when all files exist.
 new_workspace; all_files; run_setup --refresh
@@ -83,6 +101,42 @@ grep -qx "render-configs $ALL_FLAGS" "$LOG"; expect "refresh: one call, all flag
 new_workspace; STUB_RENDER_FAIL=1 run_setup
 expect "render fails: exit 0" "$CODE"
 grep -q "WARNING" <<< "$OUT"; expect "render fails: prints warning" $?
+! grep -q -- "--refresh" <<< "$OUT"; expect "render fails: plain hint without --refresh" $?
+
+# 8. Workspace default: the script's own repo root.
+new_workspace; all_files; rm "$WS/site.conf"
+cp "$SETUP" "$WS/scripts/setup-devcontainer.sh"
+OUT=$(env -u DUOS_WORKSPACE PATH="$WS/bin:$PATH" HOME="$WS/home" bash "$WS/scripts/setup-devcontainer.sh" 2>&1)
+CODE=$?
+expect "default workspace: exit 0" "$CODE"
+grep -qx "render-configs $ALL_FLAGS" "$LOG"; expect "default workspace: calls the render script beside it" $?
+
+# 9. An empty file counts as missing.
+new_workspace; all_files; : > "$WS/server.crt"; run_setup
+grep -q "Missing local config files: server.crt" <<< "$OUT"; expect "empty file: reported missing" $?
+grep -qx "render-configs $ALL_FLAGS" "$LOG"; expect "empty file: render call" $?
+
+# 10. Failed --refresh: the hint says to rerun with --refresh.
+new_workspace; all_files; STUB_RENDER_FAIL=1 run_setup --refresh
+expect "refresh fails: exit 0" "$CODE"
+grep -q "run ./scripts/setup-devcontainer.sh --refresh" <<< "$OUT"; expect "refresh fails: hint has --refresh" $?
+
+# 11. Missing binaries: say so, do not print the login hint.
+new_workspace; rm "$WS/bin/gcloud"; TEST_PATH="$WS/bin:/usr/bin:/bin" run_setup
+expect "no gcloud binary: exit 0" "$CODE"
+[ ! -s "$LOG" ]; expect "no gcloud binary: no render call" $?
+grep -q "gcloud and kubectl are not installed" <<< "$OUT"; expect "no gcloud binary: install message" $?
+! grep -q "gcloud auth login" <<< "$OUT"; expect "no gcloud binary: no login hint" $?
+
+new_workspace; rm "$WS/bin/kubectl"; TEST_PATH="$WS/bin:/usr/bin:/bin" run_setup
+grep -q "gcloud and kubectl are not installed" <<< "$OUT"; expect "no kubectl binary: install message" $?
+! grep -q "gcloud auth login" <<< "$OUT"; expect "no kubectl binary: no login hint" $?
+
+new_workspace; rm "$WS/bin/gh"; TEST_PATH="$WS/bin:/usr/bin:/bin" run_setup
+expect "no gh binary: exit 0" "$CODE"
+[ ! -s "$LOG" ]; expect "no gh binary: no render call" $?
+grep -q "gh is not installed" <<< "$OUT"; expect "no gh binary: install message" $?
+! grep -q "gh auth login" <<< "$OUT"; expect "no gh binary: no login hint" $?
 
 [ "$FAILS" = 0 ] && echo "All tests passed." || echo "$FAILS test(s) failed."
 exit "$FAILS"
