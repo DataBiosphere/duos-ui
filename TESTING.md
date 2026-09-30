@@ -17,13 +17,14 @@ pnpm test:browser
 
 ## E2E Tests (Playwright)
 
-Playwright starts three processes and waits for each one:
+Playwright starts four processes and waits for each one:
 
 | Process | Port | Consent upstream | Project |
 |---|---|---|---|
 | Mock OIDC provider and mock Consent upstream | 3100 (HTTPS), 3200 | — | — |
 | Fastify, `pnpm run serve` | 3000 | `DUOS_API_URL` (dev Consent) | `chromium` |
 | Fastify, `pnpm run serve` | 3001 | the mock | `mock` |
+| Fastify, `pnpm run serve`, one callback a minute | 3002 | the mock | `mock-throttle` |
 
 Both servers use the mock provider as their issuer; `playwright.config.ts` sets
 the `DUOS_AZURE_*` and redirect variables for each one. The servers use the
@@ -36,7 +37,7 @@ Prerequisites:
   The mock provider serves HTTPS with the same pair. If Node does not trust the
   certificate (CI's is self-signed), set `NODE_EXTRA_CA_CERTS=$PWD/server.crt`.
 - `local.dsde-dev.broadinstitute.org` resolving to `127.0.0.1` (use `/etc/hosts`).
-- Ports 3000, 3001, 3100 and 3200 free.
+- Ports 3000, 3001, 3002, 3100 and 3200 free.
 
 ### Path A: public specs
 
@@ -127,7 +128,7 @@ See the [CI workflow](.github/workflows/integration-tests.yml) and
 | Sign-in not enabled | Set `DUOS_TEST_SIGNIN_ENABLED` and `DUOS_TEST_SIGNIN_EMAILS`; restart |
 | Sign-in 401 | Server log: failing claim or tokeninfo failure |
 | Sign-in 429 | Wait a minute; default limit is 300/min/IP (`DUOS_RATE_LIMIT_TEST_SIGNIN_MAX`) |
-| Configuration ignored | Rebuild after config.json changes; restart after environment changes. Playwright reuses running servers outside CI, and a reused server keeps its own environment, not the `playwright.config.ts` values (for example the issuer). Stop anything on ports 3000, 3001, 3100 and 3200 first. |
+| Configuration ignored | Rebuild after config.json changes; restart after environment changes. Playwright reuses running servers outside CI, and a reused server keeps its own environment, not the `playwright.config.ts` values (for example the issuer). Stop anything on ports 3000, 3001, 3002, 3100 and 3200 first. |
 
 ### CSP check
 
@@ -146,8 +147,10 @@ assertion, and the collector.
 ### Mock provider specs
 
 `mockHarness.spec.ts` runs in the `mock` project, and proves that the harness
-works. The project also matches `auth.spec.ts` (story 6-D) and `session.spec.ts`
-(6-E), which do not exist yet. These specs sign in through the BFF's real OAuth
+works. `auth.spec.ts` covers the sign-in and sign-out flow and the callback
+errors. The project also matches `session.spec.ts` (story 6-E), which does not
+exist yet. `authThrottle.spec.ts` runs in `mock-throttle`, on a server that
+allows one callback a minute. These specs sign in through the BFF's real OAuth
 flow against a mock of the B2C tenant, so they need no credentials. Real
 Consent rejects the mock's tokens, so their server forwards to the mock Consent
 upstream instead. The mocks are in `test/e2e/mocks/`.
