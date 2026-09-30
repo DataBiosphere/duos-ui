@@ -33,7 +33,7 @@ export const MOCK_SERVER_BASE_URLS: readonly string[] = [BASE_URL, MOCK_BASE_URL
 export const MOCK_CLIENT_ID = 'duos-e2e-mock-client'
 export const MOCK_CLIENT_SECRET = 'duos-e2e-mock-secret'
 
-/** The mock's control API: PUT, GET and DELETE `<path>/<key>`. */
+/** The mock's control API. Specs reach it through `test/e2e/support/mockProvider.ts`. */
 export const MOCK_CONTROL_PATH = '/__mock/scenarios'
 
 /** The one protected Consent path the mock serves besides `/api/user/me`. */

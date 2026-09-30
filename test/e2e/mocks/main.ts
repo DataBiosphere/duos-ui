@@ -21,8 +21,8 @@ import {
 
 /**
  * Starts the mock OIDC provider and the mock Consent upstream in one process,
- * so they share one scenario store. Start it with
- * `pnpm exec tsx test/e2e/mocks/main.ts`.
+ * so they share one scenario store. Playwright's `webServer` runs this; see
+ * playwright.config.ts.
  */
 
 const PROJECT_ROOT = path.join(import.meta.dirname, '..', '..', '..')

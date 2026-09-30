@@ -17,14 +17,26 @@ pnpm test:browser
 
 ## E2E Tests (Playwright)
 
-Playwright starts Fastify with `pnpm run serve` and waits for `/health`.
-The server uses the process environment and built `config.json`; export
-`.env.local` variables before running. `vite preview` lacks the BFF routes and security controls.
+Playwright starts three processes and waits for each one:
+
+| Process | Port | Consent upstream | Project |
+|---|---|---|---|
+| Mock OIDC provider and mock Consent upstream | 3100 (HTTPS), 3200 | — | — |
+| Fastify, `pnpm run serve` | 3000 | `DUOS_API_URL` (dev Consent) | `chromium` |
+| Fastify, `pnpm run serve` | 3001 | the mock | `mock` |
+
+Both servers use the mock provider as their issuer; `playwright.config.ts` sets
+the `DUOS_AZURE_*` and redirect variables for each one. The servers use the
+process environment and built `config.json`; export `.env.local` variables
+before running. `vite preview` lacks the BFF routes and security controls.
 
 Prerequisites:
 
 - `server.key` and `server.crt` in the project root: run `./scripts/render-configs.sh`.
+  The mock provider serves HTTPS with the same pair. If Node does not trust the
+  certificate (CI's is self-signed), set `NODE_EXTRA_CA_CERTS=$PWD/server.crt`.
 - `local.dsde-dev.broadinstitute.org` resolving to `127.0.0.1` (use `/etc/hosts`).
+- Ports 3000, 3001, 3100 and 3200 free.
 
 ### Path A: public specs
 
@@ -115,7 +127,7 @@ See the [CI workflow](.github/workflows/integration-tests.yml) and
 | Sign-in not enabled | Set `DUOS_TEST_SIGNIN_ENABLED` and `DUOS_TEST_SIGNIN_EMAILS`; restart |
 | Sign-in 401 | Server log: failing claim or tokeninfo failure |
 | Sign-in 429 | Wait a minute; default limit is 300/min/IP (`DUOS_RATE_LIMIT_TEST_SIGNIN_MAX`) |
-| Configuration ignored | Rebuild after config.json changes; restart after environment changes. Playwright reuses running servers outside CI. |
+| Configuration ignored | Rebuild after config.json changes; restart after environment changes. Playwright reuses running servers outside CI, and a reused server keeps its own environment, not the `playwright.config.ts` values (for example the issuer). Stop anything on ports 3000, 3001, 3100 and 3200 first. |
 
 ### CSP check
 
@@ -131,8 +143,83 @@ mode by default; the test observes violations rather than proving requests are
 blocked. If the harness fails, inspect page startup, the CSP header, the probe
 assertion, and the collector.
 
+### Mock provider specs
+
+`mockHarness.spec.ts` runs in the `mock` project, and proves that the harness
+works. The project also matches `auth.spec.ts` (story 6-D) and `session.spec.ts`
+(6-E), which do not exist yet. These specs sign in through the BFF's real OAuth
+flow against a mock of the B2C tenant, so they need no credentials. Real
+Consent rejects the mock's tokens, so their server forwards to the mock Consent
+upstream instead. The mocks are in `test/e2e/mocks/`.
+
+Both servers use the host `local.dsde-dev.broadinstitute.org`, and cookies
+ignore ports, so both set the same `sessionId` cookie. Keep each browser
+context on one server; a context that visits both overwrites one session with
+the other.
+
+```sh
+pnpm exec playwright test --project=mock
+```
+
+Use the `mockScenario` fixture from `test/e2e/support/mockProvider.ts`. It
+registers a scenario for the test and deletes it afterwards. It adds
+`scenario=<key>` to the browser's `/authorize` navigation, and the provider
+puts the key into the tokens that it mints. Controls never apply globally, so
+parallel workers do not affect each other.
+
+```ts
+await mockScenario.configure({ provider: { idp: 'microsoft', accessTokenLifetimeSeconds: 90 } })
+await signInThroughMock(page, '/')
+await mockScenario.configure({ provider: { refresh: 'server_error' } }) // change it mid-test
+expect((await mockScenario.stats()).refreshGrants).toBe(1)
+```
+
+| Control | Values | Default |
+|---|---|---|
+| `provider.idp` | `google`, `microsoft`, `omit` (no `idp` claim) | `google` |
+| `provider.email` | any string, or `null` (no `email` claim) | `mock-researcher@example.org` |
+| `provider.accessTokenLifetimeSeconds` | positive integer | `3600` |
+| `provider.issueRefreshToken` | `true`, `false` | `true` |
+| `provider.refresh` | `ok`, `invalid_grant`, `server_error` (503), `hang` (see below) | `ok` |
+| `provider.authorizeError` | an OAuth error code, e.g. `access_denied`, or `null` | `null` |
+| `consent.userMe` | `200`, `401`, `404`, `409` | `200` |
+| `consent.profile` | the 200 body, or `null` for a researcher with the `email` claim who accepted the terms of service | `null` |
+
+`stats()` returns the scenario's authorization, code-grant, refresh-grant and
+end-session counts, and every request the mock Consent upstream received, with
+its `Authorization` header. `GET /duos-api/api/mock/echo` returns the header
+that the upstream received; more than one `Authorization` header is a 400. The
+mock Consent upstream also serves, without a token, every path in
+`server/src/proxy/unauthenticatedPaths.ts`, as real Consent does; every other
+path is 404.
+
+Tokens behave as B2C's do:
+
+- An access token expires after `accessTokenLifetimeSeconds`, and the mock
+  Consent upstream then answers 401.
+- A refresh that issues a new refresh token revokes the one it redeemed, so
+  reusing that gets `invalid_grant`. With `issueRefreshToken: false` the
+  redeemed token stays valid, as the BFF keeps using it. A failed refresh keeps
+  it too, so a retry after `server_error` can succeed.
+- `sub` is fixed at sign-in. Changing `email` mid-test changes only the `email`
+  claim of later tokens.
+- Deleting a scenario revokes its tokens.
+
+With `hang`, the BFF gives up only at `openid-client`'s 30-second timeout,
+which equals Playwright's default test timeout. A spec that uses it must call
+`test.setTimeout()` with a longer limit.
+
+The provider keeps two B2C behaviors: without the client ID in `scope` the token
+response has no access token, and without `offline_access` it has no refresh
+token. It checks the client secret and PKCE, and redirects only to the registered
+`/auth/callback` and `/post-logout` URIs of the two servers.
+
+A spec that needs global mock state must run in its own project that depends
+on both `chromium` and `mock`, with one worker. No spec needs this today.
+
 ### Session cleanup
 
-Role-access and CSP tests sign out; other sessions remain stored after expiry. The E2E
+Role-access, CSP and mock harness tests sign out; other sessions remain stored after expiry. A new
+mock spec must sign out too, with `signOutThroughMock` or the UI, or it leaves its session row. The E2E
 schema has no scheduled cleanup. Delete only each test's recorded session IDs;
 truncating `user_sessions` breaks parallel tests.
