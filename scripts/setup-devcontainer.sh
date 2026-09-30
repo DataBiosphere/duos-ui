@@ -129,12 +129,37 @@ if ! check_logins; then
   exit 0
 fi
 
+# Runs on every exit, including Ctrl-C and SIGTERM. Stop the renderer, put the
+# files back unless the render succeeded, and remove the copies.
+cleanup() {
+  if [[ -n "$RENDER_PID" ]] && kill -0 "$RENDER_PID" 2> /dev/null; then
+    # Stop its child commands (kubectl) first, so none writes after the restore.
+    pkill -P "$RENDER_PID" 2> /dev/null || true
+    kill "$RENDER_PID" 2> /dev/null || true
+    wait "$RENDER_PID" 2> /dev/null || true
+  fi
+  if [[ "$RENDER_OK" == "false" ]]; then
+    restore_configs
+    echo "WARNING: render-configs.sh did not finish. Your earlier files are back. Fix the cause above and run $RERUN again."
+  fi
+  rm -rf "$BACKUP"
+  return 0
+}
+
 BACKUP=$(mktemp -d)
-trap 'rm -rf "$BACKUP"' EXIT
+RENDER_OK=false
+RENDER_PID=""
+# A trapped signal waits for a foreground command. Run the renderer in the
+# background and wait for it, so the trap runs at once.
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 backup_configs
-if ! "$WORKSPACE/scripts/render-configs.sh" --write_env true --write_config true --write_site_conf true; then
-  restore_configs
-  echo "WARNING: render-configs.sh failed. Your earlier files are back. Fix the cause above and run $RERUN again."
+"$WORKSPACE/scripts/render-configs.sh" --write_env true --write_config true --write_site_conf true &
+RENDER_PID=$!
+if wait "$RENDER_PID"; then
+  RENDER_OK=true
+else
   exit 0
 fi
 
