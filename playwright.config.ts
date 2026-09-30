@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
-import { BASE_URL, MOCK_BASE_URL } from './test/e2e/support/baseUrl'
+import { BASE_URL, MOCK_BASE_URL, SHORT_SESSION_BASE_URL, SHORT_SESSION_MAX_AGE_MS } from './test/e2e/support/baseUrl'
 import {
   callbackUri,
   MOCK_CLIENT_ID,
@@ -11,10 +11,12 @@ import {
 
 // Specs that sign in through the mock OIDC provider (DT-4069). Real Consent
 // rejects the mock's tokens, so they run against the mock Consent upstream.
-// auth.spec.ts (story 6-D) and session.spec.ts (6-E) do not exist yet. They are
-// named now so that they land in this project, not in `chromium`, where real
-// Consent would reject every mock token.
+// auth.spec.ts (story 6-D) does not exist yet. It is named now so that it lands
+// in this project, not in `chromium`, where real Consent would reject every
+// mock token.
 const MOCK_SPECS = ['auth.spec.ts', 'session.spec.ts', 'mockHarness.spec.ts']
+// Specs that need a server of their own, because they change its session lifetime.
+const SHORT_SESSION_SPECS = ['sessionExpiry.spec.ts']
 
 // Both servers use the mock provider as their issuer. The role specs never run a
 // callback, so a real B2C issuer would only add a discovery call at boot. The
@@ -49,7 +51,7 @@ export default defineConfig({
     {
       // Role fixture specs, against real dev Consent.
       name: 'chromium',
-      testIgnore: MOCK_SPECS,
+      testIgnore: [...MOCK_SPECS, ...SHORT_SESSION_SPECS],
       use: { ...devices['Desktop Chrome'] },
       retries: process.env.CI ? 1 : 0,
     },
@@ -58,6 +60,13 @@ export default defineConfig({
       name: 'mock',
       testMatch: MOCK_SPECS,
       use: { ...devices['Desktop Chrome'], baseURL: MOCK_BASE_URL },
+      retries: process.env.CI ? 1 : 0,
+    },
+    {
+      // Session expiry, on a server whose sessions last 10 seconds.
+      name: 'mock-short-session',
+      testMatch: SHORT_SESSION_SPECS,
+      use: { ...devices['Desktop Chrome'], baseURL: SHORT_SESSION_BASE_URL },
       retries: process.env.CI ? 1 : 0,
     },
   ],
@@ -89,6 +98,19 @@ export default defineConfig({
         DUOS_TEST_SIGNIN_ENABLED: 'false',
         // Every mock spec signs in from one IP. Raise the limits so that
         // parallel workers do not throttle each other.
+        DUOS_RATE_LIMIT_LOGIN_MAX: '600',
+        DUOS_RATE_LIMIT_CALLBACK_MAX: '600',
+      },
+    },
+    {
+      ...serverDefaults,
+      url: `${SHORT_SESSION_BASE_URL}/health`,
+      env: {
+        PORT: '3003',
+        ...oidcEnv(SHORT_SESSION_BASE_URL),
+        DUOS_API_URL: MOCK_CONSENT_URL,
+        DUOS_TEST_SIGNIN_ENABLED: 'false',
+        DUOS_SESSION_MAX_AGE_MS: String(SHORT_SESSION_MAX_AGE_MS),
         DUOS_RATE_LIMIT_LOGIN_MAX: '600',
         DUOS_RATE_LIMIT_CALLBACK_MAX: '600',
       },
