@@ -1,0 +1,17 @@
+on:
+  pull_request:
+    paths:
+      - scripts/setup-devcontainer.sh
+      - scripts/test/setup-devcontainer.test.sh
+      - .github/workflows/devcontainer-script-tests.yml
+name: dev container script tests
+jobs:
+  test:
+    name: dev container script tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run the setup script tests
+        run: bash scripts/test/setup-devcontainer.test.sh

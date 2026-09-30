@@ -40,7 +40,11 @@ echo "render-configs $*" >> "$LOG"
 ws=$(dirname "$0")/..
 if [[ "${STUB_RENDER_FAIL:-0}" == 1 ]]; then
   # Like the real script: truncate a file, then fail.
-  [[ "${STUB_RENDER_TRUNCATE:-0}" == 1 ]] && : > "$ws/server.crt" && : > "$ws/site.conf"
+  if [[ "${STUB_RENDER_TRUNCATE:-0}" == 1 ]]; then
+    : > "$ws/server.crt"
+    : > "$ws/site.conf"
+    echo new > "$ws/.env.local.bak"
+  fi
   exit 1
 fi
 for f in server.crt server.key ca-bundle.crt .env.local public/config.json site.conf; do
@@ -167,11 +171,12 @@ expect "refresh fails: exit 0" "$CODE"
 grep -q "run ./scripts/setup-devcontainer.sh --refresh" <<< "$OUT"; expect "refresh fails: hint has --refresh" $?
 
 # 11. A failed render puts back the files that were there and removes new ones.
-new_workspace; all_files; echo keep > "$WS/server.crt"; rm "$WS/site.conf"
+new_workspace; all_files; echo keep > "$WS/server.crt"; rm "$WS/site.conf"; echo oldbak > "$WS/.env.local.bak"
 STUB_RENDER_FAIL=1 STUB_RENDER_TRUNCATE=1 run_setup
 expect "failed render: exit 0" "$CODE"
 [[ "$(cat "$WS/server.crt")" == keep ]]; expect "failed render: valid file kept" $?
 [[ ! -e "$WS/site.conf" ]]; expect "failed render: new partial file removed" $?
+[[ "$(cat "$WS/.env.local.bak")" == oldbak ]]; expect "failed render: earlier .env.local.bak kept" $?
 grep -q "earlier files are back" <<< "$OUT"; expect "failed render: says files are back" $?
 
 # 12. Missing binaries: name only the missing tools, do not print its login hint.

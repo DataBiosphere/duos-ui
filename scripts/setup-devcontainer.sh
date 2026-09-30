@@ -15,6 +15,9 @@ set -eu
 # The main config sets no workspaceFolder, so the path depends on the folder name.
 WORKSPACE=${DUOS_WORKSPACE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
 CONFIG_FILES=(server.crt server.key ca-bundle.crt .env.local public/config.json site.conf)
+# render-configs.sh also copies .env.local to .env.local.bak. The rollback
+# keeps that copy too, but a missing .bak does not count as a missing config.
+SAVED_FILES=("${CONFIG_FILES[@]}" .env.local.bak)
 REFRESH=false
 RERUN="./scripts/setup-devcontainer.sh"
 if [[ "${1:-}" == "--refresh" ]]; then
@@ -82,10 +85,10 @@ check_logins() {
 
 # render-configs.sh truncates each file before it fills it. A failed run
 # (for example, no VPN) would leave a valid file empty. Keep a copy of every
-# existing file and put it back if the run fails.
+# existing file (SAVED_FILES) and put it back if the run fails.
 backup_configs() {
   local f
-  for f in "${CONFIG_FILES[@]}"; do
+  for f in "${SAVED_FILES[@]}"; do
     if [[ -e "$WORKSPACE/$f" ]]; then
       mkdir -p "$BACKUP/$(dirname "$f")"
       cp -p "$WORKSPACE/$f" "$BACKUP/$f"
@@ -97,7 +100,7 @@ backup_configs() {
 # Put back the saved files. Remove a file that did not exist before the run.
 restore_configs() {
   local f
-  for f in "${CONFIG_FILES[@]}"; do
+  for f in "${SAVED_FILES[@]}"; do
     if [[ -e "$BACKUP/$f" ]]; then
       cp -p "$BACKUP/$f" "$WORKSPACE/$f"
     else
