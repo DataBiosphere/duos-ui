@@ -39,19 +39,31 @@ test('signs in through the mock provider and forwards the session token upstream
   expect(await mockScenario.stats()).toMatchObject({ authorizations: 1, codeGrants: 1, refreshGrants: 0, endSessions: 1 })
 })
 
-test('renews a short-lived access token through the mock refresh grant', async ({ page, mockScenario }) => {
-  // Inside the BFF's 60-second refresh window from the moment it is issued.
+/** The Authorization header the mock upstream received, through the BFF proxy. */
+async function echoedAuthorization(page: Page): Promise<string> {
+  const response = await page.request.get(`/duos-api${MOCK_ECHO_PATH}`)
+  expect(response.status()).toBe(200)
+  return (await response.json() as { authorization: string }).authorization
+}
+
+test('forwards the refreshed access token, not the one it replaced', async ({ page, mockScenario }) => {
+  // 30 s is inside the BFF's 60-second refresh window, so every forward refreshes first.
   await mockScenario.configure({ provider: { accessTokenLifetimeSeconds: 30 } })
   await signInThroughMock(page, '/')
-
   expect(await getMe(page)).toMatchObject({ authenticated: true, idp: 'google' })
 
-  const stats = await mockScenario.stats()
-  expect(stats.refreshGrants).toBeGreaterThanOrEqual(1)
-  // Every upstream call carried a token from this scenario, refreshed or not.
-  expect(stats.upstreamRequests.length).toBeGreaterThan(0)
-  for (const request of stats.upstreamRequests) {
-    expect(request.authorization?.startsWith(`Bearer ${mockScenario.accessTokenPrefix}`)).toBe(true)
+  // Leave the SPA, so no request of its own refreshes between the two calls below.
+  await page.goto('about:blank')
+  const first = await echoedAuthorization(page)
+  const refreshesBefore = (await mockScenario.stats()).refreshGrants
+  const second = await echoedAuthorization(page)
+
+  // The replaced token stays valid until it expires, so the mock upstream would
+  // accept it too. Only a changed token proves the BFF forwards the new one.
+  expect((await mockScenario.stats()).refreshGrants).toBe(refreshesBefore + 1)
+  expect(second).not.toBe(first)
+  for (const authorization of [first, second]) {
+    expect(authorization.startsWith(`Bearer ${mockScenario.accessTokenPrefix}`)).toBe(true)
   }
 
   await signOutThroughMock(page)
