@@ -34,12 +34,15 @@ vi.mock('src/libs/ajax/DataSet', () => ({
     registerDataset: vi.fn(),
     updateStudy: vi.fn(),
     getStudyById: vi.fn(),
+    getStudyDatasets: vi.fn(async () => []),
   },
 }))
 
 vi.mock('src/pages/data_submission/v2/v2-common-functions', () => ({
   studyToDatasetSchemaSubmission: (study: Study) => study,
-  buildConsentGroupsFromStudy: (study: Study) => study.assets?.consentGroups ?? [],
+  // Stands the fetched datasets in for their consent groups, so a test can seed the groups the form
+  // loads through the datasets read.
+  buildConsentGroupsFromDatasets: (datasets: unknown[]) => datasets,
   getStudyPropertyValueByKey: () => ({}),
 }))
 
@@ -129,8 +132,8 @@ describe('DataSubmissionFormV2 Data Use validation errors', () => {
     vi.mocked(DataSet.getStudyById).mockResolvedValue({
       data: {},
       alternativeDataSharingPlanFile: plan,
-      assets: { consentGroups: [{ addedNIHInstitutionalCertificationFile: certification }] },
     } as unknown as Study)
+    vi.mocked(DataSet.getStudyDatasets).mockResolvedValueOnce([{ addedNIHInstitutionalCertificationFile: certification }] as never)
     vi.mocked(DataSet.updateStudy).mockRejectedValueOnce(validationRejection()).mockResolvedValueOnce({} as Study)
 
     renderForm()

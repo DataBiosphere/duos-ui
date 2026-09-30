@@ -9,7 +9,7 @@ import {
   PublicationAsset,
   WorkspaceAsset,
 } from 'src/types/library'
-import { Study as StudyModel } from 'src/types/model'
+import { Dataset, Study as StudyModel } from 'src/types/model'
 
 const assetsUrl = async (studyId: number | string, path: string): Promise<string> =>
   `${await Config.getApiUrl()}/api/dataset/study/${studyId}/assets/${path}`
@@ -39,6 +39,16 @@ export const Study = {
   getById: async <T = StudyModel>(studyId: number | string): Promise<T> => {
     const url = `${await Config.getApiUrl()}/api/dataset/study/${studyId}`
     const res = await fetchGet<T>(url, Config.authOpts())
+    return res.data
+  },
+
+  /**
+   * Fetches the datasets of a study that the caller may read. A study no longer carries its
+   * datasets: its payload lists only their ids, and the datasets themselves come from here.
+   */
+  getDatasets: async (studyId: number | string): Promise<Dataset[]> => {
+    const url = `${await Config.getApiUrl()}/api/dataset/study/${studyId}/datasets`
+    const res = await fetchGet<Dataset[]>(url, Config.authOpts())
     return res.data
   },
 

@@ -16,7 +16,7 @@ import { renderWithRouter } from '../../../test-utils'
 
 vi.mock('src/libs/ajax/Draft', () => ({ Draft: { getDraft: vi.fn(), deleteDraft: vi.fn() } }))
 vi.mock('src/libs/ErrorReporter', () => ({ ErrorReporter: { report: vi.fn() } }))
-vi.mock('src/libs/ajax/DataSet', () => ({ DataSet: { getStudyById: vi.fn(), registerDataset: vi.fn(), updateStudy: vi.fn() } }))
+vi.mock('src/libs/ajax/DataSet', () => ({ DataSet: { getStudyById: vi.fn(), getStudyDatasets: vi.fn(async () => []), registerDataset: vi.fn(), updateStudy: vi.fn() } }))
 vi.mock('src/libs/utils', async () => {
   const actual = await vi.importActual<typeof import('src/libs/utils')>('src/libs/utils')
   return { ...actual, Notifications: { showNotification: vi.fn(), showError: vi.fn() } }
@@ -170,7 +170,6 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
   const persistedStudy = () => ({
     studyId: 1,
     name: 'Persisted Study',
-    datasets: [],
     properties: [],
     data: {},
   } as unknown as Study)
@@ -191,6 +190,8 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
 
     expect(await screen.findByTestId('study-name')).toHaveTextContent('Persisted Study')
     expect(DataSet.getStudyById).toHaveBeenCalledWith(STUDY_ID)
+    // The study payload lists only dataset ids, so the consent groups need the datasets' own read.
+    expect(DataSet.getStudyDatasets).toHaveBeenCalledWith(STUDY_ID)
     expect(Draft.getDraft).not.toHaveBeenCalled()
     expect(screen.getByText('Study Registration Form')).toBeInTheDocument()
   })
