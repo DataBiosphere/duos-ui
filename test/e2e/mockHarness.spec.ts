@@ -52,19 +52,29 @@ test('forwards the refreshed access token, not the one it replaced', async ({ pa
   await signInThroughMock(page, '/')
   expect(await getMe(page)).toMatchObject({ authenticated: true, idp: 'google' })
 
-  // Leave the SPA, so no request of its own refreshes between the two calls below.
+  // Let the SPA's requests finish, then leave it, so no refresh of its own can
+  // land between the count below and the calls.
+  await page.waitForLoadState('networkidle')
   await page.goto('about:blank')
-  const first = await echoedAuthorization(page)
+
+  // Still 30 s tokens: this forward refreshes, and its token is the baseline.
+  const before = await echoedAuthorization(page)
+  // The next forward refreshes once more, to a long-lived token that needs no
+  // further refresh.
+  await mockScenario.configure({ provider: { accessTokenLifetimeSeconds: 3600 } })
   const refreshesBefore = (await mockScenario.stats()).refreshGrants
+  const first = await echoedAuthorization(page)
   const second = await echoedAuthorization(page)
 
-  // The replaced token stays valid until it expires, so the mock upstream would
-  // accept it too. Only a changed token proves the BFF forwards the new one.
+  // The replaced token stays valid until it expires, so the mock upstream accepts
+  // it; only these comparisons catch a BFF that forwards it. One refresh and the
+  // same token twice: a BFF that forwarded the replaced token would send the old
+  // token first and the new one second. A changed token: a BFF that never stored
+  // the refreshed token would send the baseline every time.
   expect((await mockScenario.stats()).refreshGrants).toBe(refreshesBefore + 1)
-  expect(second).not.toBe(first)
-  for (const authorization of [first, second]) {
-    expect(authorization.startsWith(`Bearer ${mockScenario.accessTokenPrefix}`)).toBe(true)
-  }
+  expect(second).toBe(first)
+  expect(first).not.toBe(before)
+  expect(first.startsWith(`Bearer ${mockScenario.accessTokenPrefix}`)).toBe(true)
 
   await signOutThroughMock(page)
 })
