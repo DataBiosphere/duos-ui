@@ -13,7 +13,7 @@ CHECKS=0
 # The missing-binary tests give the script only these and the stubs.
 BASH_BIN=$(command -v bash)
 NEEDED_TOOLS=()
-for tool in tr dirname id sudo; do
+for tool in tr dirname id sudo mktemp mkdir cp rm; do
   if command -v "$tool" > /dev/null; then
     NEEDED_TOOLS+=("$tool")
   fi
@@ -37,8 +37,12 @@ new_workspace() {
   cat > "$WS/scripts/render-configs.sh" <<'EOF'
 #!/bin/bash
 echo "render-configs $*" >> "$LOG"
-[[ "${STUB_RENDER_FAIL:-0}" == 1 ]] && exit 1
 ws=$(dirname "$0")/..
+if [[ "${STUB_RENDER_FAIL:-0}" == 1 ]]; then
+  # Like the real script: truncate a file, then fail.
+  [[ "${STUB_RENDER_TRUNCATE:-0}" == 1 ]] && : > "$ws/server.crt" && : > "$ws/site.conf"
+  exit 1
+fi
 for f in server.crt server.key ca-bundle.crt .env.local public/config.json site.conf; do
   echo x > "$ws/$f"
 done
@@ -162,7 +166,15 @@ new_workspace; all_files; STUB_RENDER_FAIL=1 run_setup --refresh
 expect "refresh fails: exit 0" "$CODE"
 grep -q "run ./scripts/setup-devcontainer.sh --refresh" <<< "$OUT"; expect "refresh fails: hint has --refresh" $?
 
-# 11. Missing binaries: name only the missing tools, do not print its login hint.
+# 11. A failed render puts back the files that were there and removes new ones.
+new_workspace; all_files; echo keep > "$WS/server.crt"; rm "$WS/site.conf"
+STUB_RENDER_FAIL=1 STUB_RENDER_TRUNCATE=1 run_setup
+expect "failed render: exit 0" "$CODE"
+[[ "$(cat "$WS/server.crt")" == keep ]]; expect "failed render: valid file kept" $?
+[[ ! -e "$WS/site.conf" ]]; expect "failed render: new partial file removed" $?
+grep -q "earlier files are back" <<< "$OUT"; expect "failed render: says files are back" $?
+
+# 12. Missing binaries: name only the missing tools, do not print its login hint.
 # TEST_PATH is an isolated dir, so a real gh or gcloud on the host is not seen.
 new_workspace; isolate_without gcloud; TEST_PATH="$WS/iso" run_setup
 expect "no gcloud binary: exit 0" "$CODE"
@@ -188,7 +200,7 @@ new_workspace; isolate_without gcloud gh; TEST_PATH="$WS/iso" run_setup
 expect "two binaries missing: exit 0" "$CODE"
 grep -q "Missing tools: gcloud, gh\. " <<< "$OUT"; expect "two binaries missing: names both" $?
 
-# 12. Every tool installed and logged in: no tool is named as missing.
+# 13. Every tool installed and logged in: no tool is named as missing.
 new_workspace; isolate_without; TEST_PATH="$WS/iso" run_setup
 expect "nothing wrong: exit 0" "$CODE"
 ! grep -q "Missing tools" <<< "$OUT"; expect "nothing wrong: names no tool" $?

@@ -10,3 +10,5 @@ RUN apt-get update \
     && apt-get update \
     && apt-get install -y --no-install-recommends google-cloud-cli google-cloud-cli-gke-gcloud-auth-plugin \
     && rm -rf /var/lib/apt/lists/*
+
+USER node

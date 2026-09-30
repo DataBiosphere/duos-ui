@@ -66,21 +66,45 @@ check_logins() {
     echo "Missing tools: $absent. Rebuild the container."
     ok=1
   fi
-  if command -v gcloud > /dev/null && command -v kubectl > /dev/null; then
-    if [[ -z "$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2> /dev/null)" ]]; then
-      echo "Google Cloud is not ready. Connect the host to the non-split Broad VPN. Then run:"
-      echo "  gcloud auth login --no-launch-browser"
-      ok=1
-    fi
+  if command -v gcloud > /dev/null && command -v kubectl > /dev/null \
+    && [[ -z "$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2> /dev/null)" ]]; then
+    echo "Google Cloud is not ready. Connect the host to the non-split Broad VPN. Then run:"
+    echo "  gcloud auth login --no-launch-browser"
+    ok=1
   fi
-  if command -v gh > /dev/null; then
-    if ! gh auth status > /dev/null 2>&1; then
-      echo "GitHub is not ready. Use an account that can read broadinstitute/terra-helmfile. Run:"
-      echo "  gh auth login"
-      ok=1
-    fi
+  if command -v gh > /dev/null && ! gh auth status > /dev/null 2>&1; then
+    echo "GitHub is not ready. Use an account that can read broadinstitute/terra-helmfile. Run:"
+    echo "  gh auth login"
+    ok=1
   fi
   return "$ok"
+}
+
+# render-configs.sh truncates each file before it fills it. A failed run
+# (for example, no VPN) would leave a valid file empty. Keep a copy of every
+# existing file and put it back if the run fails.
+backup_configs() {
+  local f
+  for f in "${CONFIG_FILES[@]}"; do
+    if [[ -e "$WORKSPACE/$f" ]]; then
+      mkdir -p "$BACKUP/$(dirname "$f")"
+      cp -p "$WORKSPACE/$f" "$BACKUP/$f"
+    fi
+  done
+  return 0
+}
+
+# Put back the saved files. Remove a file that did not exist before the run.
+restore_configs() {
+  local f
+  for f in "${CONFIG_FILES[@]}"; do
+    if [[ -e "$BACKUP/$f" ]]; then
+      cp -p "$BACKUP/$f" "$WORKSPACE/$f"
+    else
+      rm -f "$WORKSPACE/$f"
+    fi
+  done
+  return 0
 }
 
 fix_volume_owner
@@ -102,8 +126,12 @@ if ! check_logins; then
   exit 0
 fi
 
+BACKUP=$(mktemp -d)
+trap 'rm -rf "$BACKUP"' EXIT
+backup_configs
 if ! "$WORKSPACE/scripts/render-configs.sh" --write_env true --write_config true --write_site_conf true; then
-  echo "WARNING: render-configs.sh failed. Fix the cause above and run $RERUN again."
+  restore_configs
+  echo "WARNING: render-configs.sh failed. Your earlier files are back. Fix the cause above and run $RERUN again."
   exit 0
 fi
 
