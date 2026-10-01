@@ -131,6 +131,18 @@ describe('handleLogin', () => {
     )
   })
 
+  it('reports idp unknown for a new login even when the user is already signed in', async () => {
+    const request = makeRequest()
+    ;(request.session as { idp?: string }).idp = 'microsoft'
+
+    await handleLogin(request, makeReply())
+
+    expect(request.log.info).toHaveBeenCalledWith(
+      { event: 'auth.login.completed', outcome: 'ok', idp: 'unknown' },
+      'auth.login.completed',
+    )
+  })
+
   it('persists the session before responding (guards the double-send race that made login flaky)', async () => {
     const request = makeRequest()
     const reply = makeReply()

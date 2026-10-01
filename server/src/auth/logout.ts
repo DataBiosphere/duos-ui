@@ -1,6 +1,6 @@
 import * as oidc from 'openid-client'
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { endSession, logAuthEvent } from './authEvents.js'
+import { endSession, logAuthEvent, sessionIdp } from './authEvents.js'
 import { getOidcConfig, requireEnv } from './oidcClient.js'
 import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
@@ -81,7 +81,7 @@ export async function handleLogout(request: FastifyRequest, reply: FastifyReply)
   if (!request.session.testFixture) await revokeTokens(request)
   await stampAuditRecord(request)
 
-  const idp = request.session.idp ?? 'unknown'
+  const idp = sessionIdp(request)
   await endSession(request, 'logout')
   reply.clearCookie(SESSION_COOKIE_NAME)
 
