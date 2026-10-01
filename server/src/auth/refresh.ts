@@ -1,5 +1,6 @@
 import * as oidc from 'openid-client'
 import type { FastifyRequest, Session } from 'fastify'
+import { hashValue } from '../logging.js'
 import { getOidcConfig } from './oidcClient.js'
 
 /**
@@ -184,11 +185,11 @@ async function doRefresh(
         // indistinguishable from a store that confirmed this token is current,
         // and it is the difference between "the user's session ended" and "the
         // database was unreachable".
-        request.log.warn({ sid, err }, '[auth] session store unreadable while checking for a cross-pod refresh winner')
+        request.log.warn({ sidHash: hashValue(sid), err }, '[auth] session store unreadable while checking for a cross-pod refresh winner')
         return null
       })
       if (stored?.refreshToken && stored.refreshToken !== usedRefreshToken && stored.accessToken) {
-        request.log.info({ sid }, '[auth] refresh lost a cross-pod race — adopting the stored tokens')
+        request.log.info({ sidHash: hashValue(sid) }, '[auth] refresh lost a cross-pod race — adopting the stored tokens')
         return {
           accessToken: stored.accessToken,
           refreshToken: stored.refreshToken,
@@ -206,7 +207,7 @@ async function doRefresh(
       // DELETE ends the session for all of them, and they each see this
       // rejection and return 401. Their own session objects stay in memory but
       // unmodified, so nothing writes the row back.
-      request.log.warn({ sid }, '[auth] B2C rejected the refresh token — destroying the session')
+      request.log.warn({ sidHash: hashValue(sid) }, '[auth] B2C rejected the refresh token — destroying the session')
       await request.session.destroy()
       throw new RefreshFailedError('refresh_failed')
     }
