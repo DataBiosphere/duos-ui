@@ -17,16 +17,17 @@ pnpm test:browser
 
 ## E2E Tests (Playwright)
 
-Playwright starts four processes and waits for each one:
+Playwright starts five processes and waits for each one:
 
 | Process | Port | Consent upstream | Project |
 |---|---|---|---|
 | Mock OIDC provider and mock Consent upstream | 3100 (HTTPS), 3200 | — | — |
 | Fastify, `pnpm run serve` | 3000 | `DUOS_API_URL` (dev Consent) | `chromium` |
 | Fastify, `pnpm run serve` | 3001 | the mock | `mock` |
-| Fastify, `pnpm run serve` | 3003 | the mock; sessions last 10 s | `mock-short-session` |
+| Fastify, `pnpm run serve`, one callback a minute | 3002 | the mock | `mock-throttle` |
+| Fastify, `pnpm run serve`, sessions last 10 s | 3003 | the mock | `mock-short-session` |
 
-All servers use the mock provider as their issuer; `playwright.config.ts` sets
+All four servers use the mock provider as their issuer; `playwright.config.ts` sets
 the `DUOS_AZURE_*` and redirect variables for each one. The servers use the
 process environment and built `config.json`; export `.env.local` variables
 before running. `vite preview` lacks the BFF routes and security controls.
@@ -37,7 +38,7 @@ Prerequisites:
   The mock provider serves HTTPS with the same pair. If Node does not trust the
   certificate (CI's is self-signed), set `NODE_EXTRA_CA_CERTS=$PWD/server.crt`.
 - `local.dsde-dev.broadinstitute.org` resolving to `127.0.0.1` (use `/etc/hosts`).
-- Ports 3000, 3001, 3003, 3100 and 3200 free.
+- Ports 3000, 3001, 3002, 3003, 3100 and 3200 free.
 
 ### Path A: public specs
 
@@ -128,7 +129,7 @@ See the [CI workflow](.github/workflows/integration-tests.yml) and
 | Sign-in not enabled | Set `DUOS_TEST_SIGNIN_ENABLED` and `DUOS_TEST_SIGNIN_EMAILS`; restart |
 | Sign-in 401 | Server log: failing claim or tokeninfo failure |
 | Sign-in 429 | Wait a minute; default limit is 300/min/IP (`DUOS_RATE_LIMIT_TEST_SIGNIN_MAX`) |
-| Configuration ignored | Rebuild after config.json changes; restart after environment changes. Playwright reuses running servers outside CI, and a reused server keeps its own environment, not the `playwright.config.ts` values (for example the issuer). Stop anything on ports 3000, 3001, 3003, 3100 and 3200 first. |
+| Configuration ignored | Rebuild after config.json changes; restart after environment changes. Playwright reuses running servers outside CI, and a reused server keeps its own environment, not the `playwright.config.ts` values (for example the issuer). Stop anything on ports 3000, 3001, 3002, 3003, 3100 and 3200 first. |
 
 ### CSP check
 
@@ -147,24 +148,24 @@ assertion, and the collector.
 ### Mock provider specs
 
 `mockHarness.spec.ts` runs in the `mock` project, and proves that the harness
-works. `session.spec.ts` (story 6-E) covers access-token refresh: success, a
-terminal `invalid_grant`, and a transient 503 that keeps the session. The
-project also matches `auth.spec.ts` (story 6-D), which does not exist yet. These specs sign in through the BFF's real OAuth
+works. `auth.spec.ts` covers the sign-in and sign-out flow and the callback
+errors. `session.spec.ts` (story 6-E) covers access-token refresh: success, a terminal
+`invalid_grant`, and a transient 503 that keeps the session.
+`authThrottle.spec.ts` runs in `mock-throttle`, on a server that allows one
+callback a minute. `sessionExpiry.spec.ts` runs in `mock-short-session`: session
+expiry is a different clock from the access token, and
+`DUOS_SESSION_MAX_AGE_MS` is read once per process. These specs sign in through the BFF's real OAuth
 flow against a mock of the B2C tenant, so they need no credentials. Real
 Consent rejects the mock's tokens, so their server forwards to the mock Consent
 upstream instead. The mocks are in `test/e2e/mocks/`.
 
-Both servers use the host `local.dsde-dev.broadinstitute.org`, and cookies
-ignore ports, so both set the same `sessionId` cookie. Keep each browser
-context on one server; a context that visits both overwrites one session with
+All four servers use the host `local.dsde-dev.broadinstitute.org`, and cookies
+ignore ports, so all four set the same `sessionId` cookie. Keep each browser
+context on one server; a context that visits two overwrites one session with
 the other.
 
-`sessionExpiry.spec.ts` runs in `mock-short-session`. Session expiry is a
-different clock from the access token, and `DUOS_SESSION_MAX_AGE_MS` is read
-once per process, so it needs a server of its own.
-
 ```sh
-pnpm exec playwright test --project=mock --project=mock-short-session
+pnpm exec playwright test --project=mock --project=mock-throttle --project=mock-short-session
 ```
 
 Use the `mockScenario` fixture from `test/e2e/support/mockProvider.ts`. It
@@ -218,10 +219,10 @@ which equals Playwright's default test timeout. A spec that uses it must call
 The provider keeps two B2C behaviors: without the client ID in `scope` the token
 response has no access token, and without `offline_access` it has no refresh
 token. It checks the client secret and PKCE, and redirects only to the registered
-`/auth/callback` and `/post-logout` URIs of the two servers.
+`/auth/callback` and `/post-logout` URIs of the four servers.
 
 A spec that needs global mock state must run in its own project that depends
-on both `chromium` and `mock`, with one worker. No spec needs this today.
+on `chromium`, `mock`, `mock-throttle` and `mock-short-session`, with one worker. No spec needs this today.
 
 ### Session cleanup
 
