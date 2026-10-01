@@ -13,13 +13,9 @@ import { resetSessionCache } from './session'
 import { getCsrfToken, isCsrfRejection, resetCsrfToken } from './../ajax/csrf'
 import { POST_LOGOUT_PATH, clearPostLogoutTarget, safeLocalPath, storePostLogoutTarget } from './postLogout'
 import { showUnconfirmedSignOutNotice } from './signOutNotice'
+import { purgeLegacyOidcKeys, reportLegacyOidcKeys } from './legacyOidcKeys'
 import { UserManager } from 'oidc-client-ts'
 
-const purgeLegacyOidcKeys = (): void => {
-  Object.keys(localStorage)
-    .filter(key => key.startsWith('OidcUser') || key.startsWith('oidc.'))
-    .forEach(key => localStorage.removeItem(key))
-}
 
 // Full-page navigations go through this Redirect
 export const Redirect = {
@@ -173,6 +169,7 @@ export const Auth = {
   },
   initialize: async (): Promise<void> => {
     if (await Config.isBffEnabled()) {
+      reportLegacyOidcKeys('residue')
       purgeLegacyOidcKeys()
       return
     }
