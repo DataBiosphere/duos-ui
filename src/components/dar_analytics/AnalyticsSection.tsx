@@ -8,6 +8,8 @@ interface AnalyticsSectionProps {
   description?: React.ReactNode
   /** Shown beside the figures they qualify, whatever state the section is in. */
   caveats?: React.ReactNode[]
+  /** Controls that change what the section reports, kept usable when it's empty or failed. */
+  actions?: React.ReactNode
   isLoading: boolean
   /** Showing the previous range's figures while the new one loads. */
   isRefreshing?: boolean
@@ -18,7 +20,7 @@ interface AnalyticsSectionProps {
 }
 
 export const AnalyticsSection = ({
-  title, description, caveats = [], isLoading, isRefreshing = false, error, isEmpty, emptyText, children,
+  title, description, caveats = [], actions, isLoading, isRefreshing = false, error, isEmpty, emptyText, children,
 }: AnalyticsSectionProps) => {
   const headingId = `${title.toLowerCase().replaceAll(/\W+/g, '-')}-heading`
 
@@ -42,6 +44,7 @@ export const AnalyticsSection = ({
       {caveats.map((caveat, index) => (
         <Alert key={index} severity="info" sx={{ mb: '1rem' }}>{caveat}</Alert>
       ))}
+      {actions}
       {body()}
     </Box>
   )

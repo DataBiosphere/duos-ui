@@ -58,29 +58,33 @@ export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
   return (
     <AnalyticsSection
       title="DAC turnaround"
-      description={'Days from submission to the DAC decision, for DARs submitted in the range. A DAR '
-        + 'counts once every dataset on it is decided, measured to the last decision.'}
-      caveats={[
-        'Decisions with no usable vote date (votes cast before March 2021, or dated before a backfilled '
-        + `submission) are left out of these figures: ${data?.unmeasured ?? 0} in this range.`,
-      ]}
+      description={level === 'dar'
+        ? 'Days from submission to the DAC decision, for DARs submitted in the range. A DAR counts once '
+        + 'every dataset on it is decided, measured to the last decision.'
+        : 'Days from submission to the DAC decision on each dataset, for DARs submitted in the range.'}
+      caveats={data
+        ? ['Decisions with no usable vote date (votes cast before March 2021, or dated before a backfilled '
+          + `submission) are left out of these figures: ${data.unmeasured} in this range.`]
+        : []}
+      actions={(
+        <ToggleButtonGroup
+          aria-label="Measure turnaround per"
+          size="small"
+          exclusive
+          value={level}
+          onChange={(_e, next: Level | null) => next && setLevel(next)}
+          sx={{ mb: '1rem' }}
+        >
+          <ToggleButton value="dar">Per DAR</ToggleButton>
+          <ToggleButton value="dataset">Per dataset</ToggleButton>
+        </ToggleButtonGroup>
+      )}
       isLoading={report.isLoading}
       isRefreshing={report.isPlaceholderData}
       error={report.error}
       isEmpty={(data?.total ?? 0) === 0}
       emptyText="No DARs submitted in this range have been decided."
     >
-      <ToggleButtonGroup
-        aria-label="Measure turnaround per"
-        size="small"
-        exclusive
-        value={level}
-        onChange={(_e, next: Level | null) => next && setLevel(next)}
-        sx={{ mb: '1rem' }}
-      >
-        <ToggleButton value="dar">Per DAR</ToggleButton>
-        <ToggleButton value="dataset">Per dataset</ToggleButton>
-      </ToggleButtonGroup>
       <HeadlineFigures
         figures={[
           { label: 'Decided', value: data?.total ?? 0 },

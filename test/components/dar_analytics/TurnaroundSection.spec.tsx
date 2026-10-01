@@ -84,4 +84,26 @@ describe('TurnaroundSection', () => {
     expect(await screen.findByText('No DARs submitted in this range have been decided.')).toBeInTheDocument()
     expect(screen.getByText(/left out of these figures: 2 in this range/)).toBeInTheDocument()
   })
+
+  it('keeps the level toggle when the per-DAR report is empty, so per-dataset figures stay reachable', async () => {
+    vi.mocked(DarMetrics.getDecisionTurnaround).mockResolvedValue(buildReport([]))
+    vi.mocked(DarMetrics.getDatasetDecisionTurnaround).mockResolvedValue(buildReport([
+      { bucketStart: Q1, count: 6, unmeasured: 0, meanDays: 3, medianDays: 3, modeDays: 3 },
+    ]))
+
+    renderSection()
+    await screen.findByText('No DARs submitted in this range have been decided.')
+    fireEvent.click(screen.getByRole('button', { name: 'Per dataset' }))
+
+    expect(await screen.findByText('6', { selector: '[role="gridcell"]' })).toBeInTheDocument()
+    expect(screen.getByText(/on each dataset/)).toBeInTheDocument()
+  })
+
+  it('leaves out the unmeasured caveat until the report arrives', () => {
+    vi.mocked(DarMetrics.getDecisionTurnaround).mockReturnValue(new Promise(() => {}))
+
+    renderSection()
+
+    expect(screen.queryByText(/left out of these figures/)).not.toBeInTheDocument()
+  })
 })
