@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { Configuration } from 'openid-client'
+import { AuthorizationResponseError } from 'openid-client'
 import { handleCallback } from '../src/auth/callback.js'
 
 // Mock getOidcConfig() (network) but keep the real requireEnv() so its
@@ -359,5 +360,90 @@ describe('handleCallback', () => {
     delete process.env.DUOS_OAUTH_REDIRECT_URI
 
     await expect(handleCallback(makeRequest(), makeReply())).rejects.toThrow('DUOS_OAUTH_REDIRECT_URI')
+  })
+})
+
+describe('handleCallback — auth.callback.completed', () => {
+  beforeEach(async () => {
+    Object.assign(process.env, AZURE_ENV)
+    const oidcClient = await import('../src/auth/oidcClient.js')
+    vi.mocked(oidcClient.getOidcConfig).mockReset().mockResolvedValue({} as Configuration)
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.authorizationCodeGrant).mockReset().mockResolvedValue(makeTokens({ email: 'user@example.com', idp: 'google.com' }))
+  })
+
+  afterEach(() => {
+    for (const key of Object.keys(AZURE_ENV)) delete process.env[key]
+  })
+
+  async function rejectGrantWith(err: unknown) {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.authorizationCodeGrant).mockRejectedValue(err)
+  }
+
+  function authorizationError(error: string) {
+    return new AuthorizationResponseError('authorization response error', { cause: new URLSearchParams({ error }) })
+  }
+
+  it('logs a succeeded event at info carrying the idp', async () => {
+    const request = makeRequest()
+
+    await handleCallback(request, makeReply())
+
+    expect(request.log.info).toHaveBeenCalledWith(
+      { event: 'auth.callback.completed', outcome: 'succeeded', idp: 'google' },
+      'auth.callback.completed',
+    )
+  })
+
+  it('logs a cancellation at info, so it counts in the denominator but not as an error', async () => {
+    await rejectGrantWith(authorizationError('access_denied'))
+    const request = makeRequest()
+
+    await handleCallback(request, makeReply())
+
+    expect(request.log.info).toHaveBeenCalledWith(
+      { event: 'auth.callback.completed', outcome: 'cancelled', idp: 'unknown' },
+      'auth.callback.completed',
+    )
+    expect(request.log.warn).not.toHaveBeenCalled()
+  })
+
+  it('logs a provider error at warn with the OAuth error type', async () => {
+    await rejectGrantWith(authorizationError('server_error'))
+    const request = makeRequest()
+
+    await handleCallback(request, makeReply())
+
+    expect(request.log.warn).toHaveBeenCalledWith(
+      { event: 'auth.callback.completed', outcome: 'failed', errorType: 'server_error', idp: 'unknown' },
+      'auth.callback.completed',
+    )
+  })
+
+  it('logs a failed event for a missing email claim', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue(makeTokens({ sub: 'abc123' }))
+    const request = makeRequest()
+
+    await handleCallback(request, makeReply())
+
+    expect(request.log.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'failed', errorType: 'token_missing_email_claim' }),
+      'auth.callback.completed',
+    )
+  })
+
+  it('logs the error name, never its message, and rethrows when the code exchange throws', async () => {
+    const thrown = new TypeError('fetch failed for https://b2c.example/token?code=SECRET')
+    await rejectGrantWith(thrown)
+    const request = makeRequest()
+
+    await expect(handleCallback(request, makeReply())).rejects.toBe(thrown)
+
+    expect(request.log.warn).toHaveBeenCalledWith(
+      { event: 'auth.callback.completed', outcome: 'failed', errorType: 'TypeError', idp: 'unknown' },
+      'auth.callback.completed',
+    )
   })
 })

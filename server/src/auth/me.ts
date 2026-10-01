@@ -1,4 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import { endSession } from './authEvents.js'
 import { requireEnv } from './oidcClient.js'
 import { RefreshFailedError, refreshAccessToken, tokenDisposition } from './refresh.js'
 import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
@@ -17,7 +18,7 @@ const PROVIDER_CONFLICT_FALLBACK_MESSAGE
  */
 async function destroySession(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   try {
-    await request.session.destroy()
+    await endSession(request, 'upstream_401')
   }
   catch (err: unknown) {
     request.log.error({ err }, '[auth] upstream rejected the session but it could not be destroyed — answering as signed out anyway')

@@ -48,7 +48,7 @@ describe('handleLogin', () => {
   }
 
   function makeRequest(query: Record<string, unknown> = {}): FastifyRequest {
-    return { session: { save: vi.fn().mockResolvedValue(undefined) }, query } as unknown as FastifyRequest
+    return { session: { save: vi.fn().mockResolvedValue(undefined) }, query, log: { info: vi.fn() } } as unknown as FastifyRequest
   }
 
   function makeReply(): FastifyReply & { send: ReturnType<typeof vi.fn> } {
@@ -117,6 +117,18 @@ describe('handleLogin', () => {
     await handleLogin(makeRequest(), reply)
 
     expect(reply.send).toHaveBeenCalledWith({ redirectUrl: 'https://duosdev.b2clogin.com/authorize?foo=bar' })
+  })
+
+  it('emits one auth.login.completed event after responding', async () => {
+    const request = makeRequest()
+
+    await handleLogin(request, makeReply())
+
+    expect(request.log.info).toHaveBeenCalledOnce()
+    expect(request.log.info).toHaveBeenCalledWith(
+      { event: 'auth.login.completed', outcome: 'ok', idp: 'unknown' },
+      'auth.login.completed',
+    )
   })
 
   it('persists the session before responding (guards the double-send race that made login flaky)', async () => {

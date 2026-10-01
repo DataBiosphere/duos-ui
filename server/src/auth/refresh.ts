@@ -1,6 +1,7 @@
 import * as oidc from 'openid-client'
 import type { FastifyRequest, Session } from 'fastify'
 import { hashValue } from '../logging.js'
+import { endSession, logAuthEvent } from './authEvents.js'
 import { getOidcConfig } from './oidcClient.js'
 
 /**
@@ -93,7 +94,8 @@ export async function refreshAccessToken(request: FastifyRequest): Promise<void>
     // its access token (B2C omits one when `offline_access` was not granted), so
     // it is only ever seconds away from being useless. Destroy it now and make
     // the user re-authenticate rather than serve 401s until the token expires.
-    await request.session.destroy()
+    logAuthEvent(request, 'auth.refresh.unrefreshable', {}, 'warn')
+    await endSession(request, 'refresh_terminal')
     throw new RefreshFailedError('no_refresh_token')
   }
 
@@ -190,6 +192,7 @@ async function doRefresh(
       })
       if (stored?.refreshToken && stored.refreshToken !== usedRefreshToken && stored.accessToken) {
         request.log.info({ sidHash: hashValue(sid) }, '[auth] refresh lost a cross-pod race — adopting the stored tokens')
+        logAuthEvent(request, 'auth.refresh.completed', { outcome: 'race_adopted' })
         return {
           accessToken: stored.accessToken,
           refreshToken: stored.refreshToken,
@@ -208,11 +211,15 @@ async function doRefresh(
       // rejection and return 401. Their own session objects stay in memory but
       // unmodified, so nothing writes the row back.
       request.log.warn({ sidHash: hashValue(sid) }, '[auth] B2C rejected the refresh token — destroying the session')
-      await request.session.destroy()
+      logAuthEvent(request, 'auth.refresh.completed', { outcome: 'terminal', reason: 'refresh_failed' }, 'warn')
+      await endSession(request, 'refresh_terminal')
       throw new RefreshFailedError('refresh_failed')
     }
+    logAuthEvent(request, 'auth.refresh.completed', { outcome: 'transient', err }, 'warn')
     throw err
   }
+
+  logAuthEvent(request, 'auth.refresh.completed', { outcome: 'succeeded' })
 
   return {
     accessToken: refreshed.access_token,

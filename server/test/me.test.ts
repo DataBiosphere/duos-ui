@@ -136,7 +136,10 @@ describe('getMe', () => {
     expect(destroy).toHaveBeenCalledOnce()
     expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
     expect(reply.status).toHaveBeenCalledWith(401)
-    expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+    expect(reply.send).toHaveBeenCalledWith({ authenticated: false })    expect(request.log.info).toHaveBeenCalledWith(
+      { event: 'auth.session.destroyed', reason: 'upstream_401', idp: 'google' },
+      'auth.session.destroyed',
+    )
   })
 
   it('still answers 401 when the rejected session cannot be destroyed', async () => {

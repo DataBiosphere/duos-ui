@@ -1,5 +1,6 @@
 import * as oidc from 'openid-client'
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import { logAuthEvent } from './authEvents.js'
 import { getOidcConfig, requireEnv } from './oidcClient.js'
 import { establishSession } from '../session/rotation.js'
 
@@ -12,12 +13,32 @@ export function subProviderFromIdpClaim(idp: unknown): 'google' | 'microsoft' | 
   return 'unknown'
 }
 
+type CallbackResult
+  = { outcome: 'succeeded' | 'cancelled' }
+    | { outcome: 'failed', errorType: string }
+
+/**
+ * Runs the callback and emits one `auth.callback.completed` event per entry.
+ * Cancellations count in the denominator and stay out of the failure numerator.
+ */
+export async function handleCallback(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  let result: CallbackResult
+  try {
+    result = await processCallback(request, reply)
+  }
+  catch (err: unknown) {
+    logAuthEvent(request, 'auth.callback.completed', { outcome: 'failed', errorType: err instanceof Error ? err.name : 'unknown' }, 'warn')
+    throw err
+  }
+  logAuthEvent(request, 'auth.callback.completed', result, result.outcome === 'failed' ? 'warn' : 'info')
+}
+
 /**
  * Exchanges the B2C authorization code for tokens, validates the `id_token`,
  * extracts the sub-provider from the B2C `idp` claim, and writes all tokens to
  * the session. The browser never sees a token — only the post-login redirect.
  */
-export async function handleCallback(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+async function processCallback(request: FastifyRequest, reply: FastifyReply): Promise<CallbackResult> {
   const config = await getOidcConfig()
 
   // v6: authorizationCodeGrant() takes the full callback URL and performs the
@@ -39,12 +60,12 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
       // B2C answered the authorization request with an error instead of a
       // code — the user canceled on the B2C page (access_denied), or B2C
       // itself failed. Land back in the SPA instead; a cancel is the user's
-      // own action and stays silent. A cancel is also routine — info keeps
-      // it out of warn-based alerting; real provider errors stay at warn.
+      // own action and stays silent. A cancel is also routine — the event is
+      // info for it, which keeps it out of warn-based alerting; real provider
+      // errors are `failed` and log at warn.
       const cancelled = err.error === 'access_denied'
-      request.log[cancelled ? 'info' : 'warn']({ error: err.error, description: err.error_description }, '[auth] B2C authorization response is an error')
       reply.redirect(cancelled ? '/' : '/?signInError=provider')
-      return
+      return cancelled ? { outcome: 'cancelled' } : { outcome: 'failed', errorType: err.error }
     }
     throw err
   }
@@ -53,7 +74,7 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
 
   if (typeof claims?.email !== 'string' || !claims.email) {
     reply.status(400).send({ error: 'token_missing_email_claim' })
-    return
+    return { outcome: 'failed', errorType: 'token_missing_email_claim' }
   }
 
   const subProvider = subProviderFromIdpClaim(claims.idp)
@@ -76,4 +97,5 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
   })
 
   reply.redirect(returnTo)
+  return { outcome: 'succeeded' }
 }
