@@ -165,7 +165,7 @@ test.describe('callback errors', () => {
     await signOutThroughMock(page)
   }
 
-  /** Runs the login leg and returns the authorize URL and the callback's final response. */
+  /** Runs the login leg and returns the provider's authorize URL. */
   async function startSignIn(page: Page) {
     const login = await page.request.post('/auth/login')
     return (await login.json() as { redirectUrl: string }).redirectUrl

@@ -18,7 +18,7 @@ const MOCK_SPECS = ['auth.spec.ts', 'session.spec.ts', 'mockHarness.spec.ts']
 // Specs that need a server of their own, because they change its rate limits.
 const THROTTLE_SPECS = ['authThrottle.spec.ts']
 
-// Both servers use the mock provider as their issuer. The role specs never run a
+// All three servers use the mock provider as their issuer. The role specs never run a
 // callback, so a real B2C issuer would only add a discovery call at boot. The
 // mock redirects only to the URIs it registers for each base URL.
 const oidcEnv = (baseUrl: string): Record<string, string> => ({
