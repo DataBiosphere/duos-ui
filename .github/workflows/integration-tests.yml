@@ -81,6 +81,10 @@ jobs:
         run: CI=false pnpm run build
       # playwright.config.ts starts the mock OIDC provider and Consent upstream
       # beside two servers: one on dev Consent, one on the mock (DT-4069).
+      - name: Probe dev Consent latency in the background (diagnostic)
+        run: nohup node scripts/diag-consent-latency.mjs > consent-probe.log 2>&1 &
+        env:
+          DUOS_AUTOMATION_ADMIN_SA: ${{ secrets.DUOS_AUTOMATION_ADMIN_SA }}
       - name: Run Playwright integration tests
         run: |
           DUOS_TEST_SIGNIN_EMAILS=$(node scripts/e2e-fixture-emails.mjs)
@@ -94,6 +98,9 @@ jobs:
           DUOS_AUTOMATION_MEMBER_SA: ${{ secrets.DUOS_AUTOMATION_MEMBER_SA }}
           DUOS_AUTOMATION_RESEARCHER_SA: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
           DUOS_AUTOMATION_SIGNING_OFFICIAL_SA: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
+      - name: Show the Consent probe (diagnostic)
+        if: always()
+        run: cat consent-probe.log || true
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: failure()
         with:
