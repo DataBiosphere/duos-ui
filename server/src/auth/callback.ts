@@ -7,7 +7,9 @@ import { establishSession } from '../session/rotation.js'
 /**
  * Maps the B2C `idp` claim to the sub-provider the user chose on the B2C login page.
  */
-export function subProviderFromIdpClaim(idp: unknown): 'google' | 'microsoft' | 'unknown' {
+export type SubProvider = 'google' | 'microsoft' | 'unknown'
+
+export function subProviderFromIdpClaim(idp: unknown): SubProvider {
   if (idp === 'google.com') return 'google'
   if (typeof idp === 'string' && idp.startsWith('https://login.microsoftonline.com/')) return 'microsoft'
   return 'unknown'
@@ -15,7 +17,7 @@ export function subProviderFromIdpClaim(idp: unknown): 'google' | 'microsoft' | 
 
 type CallbackResult
   = { outcome: 'succeeded' | 'cancelled' }
-    | { outcome: 'failed', errorType: string }
+    | { outcome: 'failed', errorType: string, idp?: SubProvider }
 
 /**
  * Runs the callback and emits one `auth.callback.completed` event per entry.
@@ -72,12 +74,15 @@ async function processCallback(request: FastifyRequest, reply: FastifyReply): Pr
 
   const claims = tokens.claims() // undefined when no id_token is present
 
+  // The id_token has been validated by now, so its provider is known even when
+  // the email is missing; the failed event keeps it for provider-split views.
+  const subProvider = subProviderFromIdpClaim(claims?.idp)
+
   if (typeof claims?.email !== 'string' || !claims.email) {
     reply.status(400).send({ error: 'token_missing_email_claim' })
-    return { outcome: 'failed', errorType: 'token_missing_email_claim' }
+    return { outcome: 'failed', errorType: 'token_missing_email_claim', idp: subProvider }
   }
 
-  const subProvider = subProviderFromIdpClaim(claims.idp)
   if (subProvider === 'unknown') {
     request.log.warn({ idp: subProvider, idpClaim: claims.idp ?? null }, '[auth] id_token idp claim is missing or unrecognised')
   }
