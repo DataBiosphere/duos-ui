@@ -132,6 +132,56 @@ describe('sanitizeError', () => {
   })
 })
 
+describe('sanitizeError — cause chain', () => {
+  it('keeps the reason a wrapped failure carries in its Error cause', () => {
+    const root = Object.assign(new TypeError('fetch failed'), { cause: Object.assign(new Error('getaddrinfo ENOTFOUND b2c.example'), { code: 'ENOTFOUND' }) })
+
+    const out = sanitizeError(root) as { cause: Record<string, unknown> }
+
+    expect(out.cause).toMatchObject({ type: 'Error', message: 'getaddrinfo ENOTFOUND b2c.example', code: 'ENOTFOUND' })
+  })
+
+  it('scrubs a secret in a cause message', () => {
+    const root = new Error('wrapped', { cause: new Error('GET https://b2c.example/token?code=SECRET failed') })
+
+    expect(JSON.stringify(sanitizeError(root))).not.toContain('SECRET')
+  })
+
+  it('drops a cause that is not an Error, as with the body of a token-endpoint error', () => {
+    const out = sanitizeError(new FakeResponseBodyError('rejected'))
+
+    expect(out).not.toHaveProperty('cause')
+    expect(JSON.stringify(out)).not.toContain('SECRET')
+  })
+
+  it('drops a Response cause', () => {
+    const out = sanitizeError(new Error('invalid Retry-After', { cause: new Response('SECRET-BODY') }))
+
+    expect(out).not.toHaveProperty('cause')
+  })
+
+  it('stops at three levels and survives a cycle', () => {
+    const a = new Error('a')
+    const b = new Error('b', { cause: a })
+    ;(a as { cause?: unknown }).cause = b
+
+    let depth = 0
+    for (let node = sanitizeError(a) as { cause?: Record<string, unknown> }; node.cause; node = node.cause as typeof node) depth++
+
+    expect(depth).toBe(3)
+  })
+
+  it('keeps a numeric status and a scrubbed, capped error_description', () => {
+    const err = Object.assign(new Error('x'), { status: 400, error_description: `AADB2C90091 code=SECRET ${'y'.repeat(500)}` })
+
+    const out = sanitizeError(err) as { status: number, error_description: string }
+
+    expect(out.status).toBe(400)
+    expect(out.error_description).not.toContain('SECRET')
+    expect(out.error_description.length).toBeLessThanOrEqual(300)
+  })
+})
+
 describe('scrubSecrets', () => {
   it('leaves unrelated query values alone', () => {
     expect(scrubSecrets('GET /api/dataset?page=2&limit=10')).toBe('GET /api/dataset?page=2&limit=10')

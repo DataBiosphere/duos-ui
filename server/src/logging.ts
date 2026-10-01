@@ -27,6 +27,9 @@ export const REDACT_PATHS = [
 
 const SEVERITY: Record<string, string> = { trace: 'DEBUG', debug: 'DEBUG', info: 'INFO', warn: 'WARNING', error: 'ERROR', fatal: 'CRITICAL' }
 
+const MAX_CAUSE_DEPTH = 3
+const MAX_DESCRIPTION_LENGTH = 300
+
 const BEARER_PATTERN = /\b(Bearer)\s+[\w.~+/=-]+/gi
 const QUERY_SECRET_PATTERN = /\b(code|token|access_token|refresh_token|id_token|client_secret|state)=[^&\s"']+/gi
 
@@ -52,19 +55,27 @@ export function sanitizeRequest(request: FastifyRequest): Record<string, unknown
 
 /**
  * Keeps what an operator needs to classify a failure (`name`, `message`,
- * `code`, the OAuth `error`, and a scrubbed `stack`) and drops what can carry a credential: `cause`
- * (openid-client's ResponseBodyError holds the token endpoint's body there) and
- * `response`.
+ * `code`, the OAuth `error`, `status`, a scrubbed `error_description` and a
+ * scrubbed `stack`), and follows an `Error` cause chain to a depth of three,
+ * because the real reason for a wrapped failure lives there. It drops what can
+ * carry a credential: a non-Error `cause` (openid-client's ResponseBodyError
+ * holds the token endpoint's body there) and `response`.
  */
-export function sanitizeError(err: unknown): Record<string, unknown> {
+export function sanitizeError(err: unknown, depth = 0): Record<string, unknown> {
   if (!(err instanceof Error)) return { type: 'NonError', message: scrubSecrets(String(err)) }
-  const { code, error } = err as Error & { code?: unknown, error?: unknown }
+  const { code, error, status, error_description: description, cause } = err as Error & Record<string, unknown>
   return {
     type: err.name,
     message: scrubSecrets(err.message),
     ...(typeof err.stack === 'string' ? { stack: scrubSecrets(err.stack) } : {}),
     ...(typeof code === 'string' ? { code } : {}),
     ...(typeof error === 'string' ? { error } : {}),
+    ...(typeof status === 'number' ? { status } : {}),
+    ...(typeof description === 'string' ? { error_description: scrubSecrets(description).slice(0, MAX_DESCRIPTION_LENGTH) } : {}),
+    // Only an Error cause is followed. A ResponseBodyError's cause is the token
+    // endpoint's body (a plain object) and a processing error's is a Response;
+    // neither is an Error, so neither is logged.
+    ...(cause instanceof Error && depth < MAX_CAUSE_DEPTH ? { cause: sanitizeError(cause, depth + 1) } : {}),
   }
 }
 
