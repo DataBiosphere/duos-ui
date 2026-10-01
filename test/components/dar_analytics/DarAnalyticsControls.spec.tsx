@@ -22,22 +22,13 @@ describe('DarAnalyticsControls', () => {
   const typeDate = (label: string, value: string) =>
     fireEvent.change(screen.getByLabelText(label), { target: { value } })
 
-  it('reports a valid date change once typing settles', () => {
-    render(<DarAnalyticsControls range={range} onChange={onChange} />)
-
-    typeDate('From', '2025-10-01')
-    expect(onChange).not.toHaveBeenCalled()
-
-    act(() => vi.runAllTimers())
-    expect(onChange).toHaveBeenCalledExactlyOnceWith({ from: '2025-10-01', to: '2026-06-30' })
-  })
-
   it('reports only the date typing settled on, not the years passed through', () => {
     render(<DarAnalyticsControls range={range} onChange={onChange} />)
 
     typeDate('From', '0002-10-01')
     typeDate('From', '0020-10-01')
     typeDate('From', '2025-10-01')
+    expect(onChange).not.toHaveBeenCalled()
     act(() => vi.runAllTimers())
 
     expect(onChange).toHaveBeenCalledExactlyOnceWith({ from: '2025-10-01', to: '2026-06-30' })
@@ -79,5 +70,13 @@ describe('DarAnalyticsControls', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Quarter' }))
 
     expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('shows the range it is given after the URL changes it', () => {
+    const { rerender } = render(<DarAnalyticsControls range={range} onChange={onChange} />)
+
+    rerender(<DarAnalyticsControls range={{ ...range, from: '2025-04-01' }} onChange={onChange} />)
+
+    expect(screen.getByLabelText('From')).toHaveValue('2025-04-01')
   })
 })
