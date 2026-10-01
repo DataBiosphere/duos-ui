@@ -270,6 +270,18 @@ export async function publicProxy(app: FastifyInstance): Promise<void> {
     done()
   })
 
+  // `public.completed`: one info line per public request, unsampled, so 6-G can
+  // divide failures by it. Labels are an allowlist: no URL, no key, no body.
+  // These routes carry no session, so there is no `idp`.
+  app.addHook('onResponse', (request, reply, done) => {
+    const url = request.routeOptions?.url
+    if (url) {
+      const route = url.startsWith(PUBLIC_FEATURES_PREFIX) ? 'features' : 'metrics_event'
+      request.log.info({ event: 'public.completed', route, status: reply.statusCode }, 'public.completed')
+    }
+    done()
+  })
+
   if (process.env.DUOS_API_URL) {
     await app.register(featureFlagRoutes)
   }
