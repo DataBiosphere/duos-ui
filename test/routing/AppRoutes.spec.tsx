@@ -36,6 +36,10 @@ vi.mock('src/pages/manage_dac/ManageDac', () => ({
   default: () => <div>Manage DACs</div>,
 }))
 
+vi.mock('src/pages/admin_console/AdminMetrics', () => ({
+  default: () => <div>Admin Metrics</div>,
+}))
+
 vi.mock('src/pages/data_submission/StudyTemplateUpload', () => ({
   StudyTemplateUpload: () => <div>Upload Study Template</div>,
 }))
@@ -78,6 +82,7 @@ const roleBACRoutes: string[] = [
   '/manage_dac',
   '/manage_dac/1',
   '/manage_radar/1',
+  '/admin_console/metrics',
   '/admin_review_collection/1',
   '/admin_manage_users',
   '/admin_edit_user/1',
@@ -263,5 +268,46 @@ describe('AppRoutes — /backgroundsignin is gated to DEV environments', () => {
     )
     expect(container.querySelector('[data-cy="not-found"]')).toBeInTheDocument()
     expect(queryByText('Access Token')).not.toBeInTheDocument()
+  })
+})
+
+describe('AppRoutes — Admin Console metrics', () => {
+  const userWithRole = (roleName: string): DuosUser => ({
+    roles: [{ name: roleName }],
+  } as DuosUser)
+
+  beforeEach(() => {
+    vi.mocked(useUserIsLogged).mockReturnValue(true)
+  })
+
+  afterEach(() => vi.restoreAllMocks())
+
+  it('renders the metrics page for an admin', () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(USER_ROLES.admin))
+
+    const { getByText } = render(
+      <MemoryRouter initialEntries={['/admin_console/metrics']}>
+        <AppRoutes isLogged={true} env="dev" />
+      </MemoryRouter>,
+    )
+
+    expect(getByText('Admin Metrics')).toBeInTheDocument()
+  })
+
+  it.each([
+    USER_ROLES.researcher,
+    USER_ROLES.chairperson,
+    USER_ROLES.signingOfficial,
+  ])('does not let a %s through', (roleName) => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(roleName))
+
+    const { container, queryByText } = render(
+      <MemoryRouter initialEntries={['/admin_console/metrics']}>
+        <AppRoutes isLogged={true} env="dev" />
+      </MemoryRouter>,
+    )
+
+    expect(container.querySelector('[data-cy="not-found"]')).toBeInTheDocument()
+    expect(queryByText('Admin Metrics')).not.toBeInTheDocument()
   })
 })
