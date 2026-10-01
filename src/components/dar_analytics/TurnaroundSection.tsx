@@ -1,0 +1,113 @@
+import React, { useState } from 'react'
+import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material'
+import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { LineChart } from '@mui/x-charts/LineChart'
+import { DarMetrics } from 'src/libs/ajax/DarMetrics'
+import { MetricsBucket, TurnaroundBucket } from 'src/types/darMetrics'
+import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
+import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
+import { bucketStartsInRange, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
+import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
+import { useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
+
+type Level = 'dar' | 'dataset'
+
+const layoutStyle = {
+  display: 'grid',
+  gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 3fr) minmax(0, 2fr)' },
+  gap: '2rem',
+  alignItems: 'start',
+}
+
+const days = (value?: number | null) => (value == null ? '–' : value.toFixed(1))
+
+interface TurnaroundRow extends TurnaroundBucket {
+  id: number
+  label: string
+}
+
+const COLUMNS: GridColDef<TurnaroundRow>[] = [
+  { field: 'label', headerName: 'Submitted', flex: 1.4, sortable: false },
+  { field: 'count', headerName: 'Decided', type: 'number', flex: 1, sortable: false },
+  { field: 'meanDays', headerName: 'Mean', flex: 1, align: 'right', headerAlign: 'right', sortable: false, valueFormatter: days },
+  { field: 'medianDays', headerName: 'Median', flex: 1, align: 'right', headerAlign: 'right', sortable: false, valueFormatter: days },
+  { field: 'modeDays', headerName: 'Mode', flex: 1, align: 'right', headerAlign: 'right', sortable: false, valueFormatter: (value?: number | null) => value ?? '–' },
+]
+
+export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
+  const [level, setLevel] = useState<Level>('dar')
+  const report = useDarMetricsReport(
+    `${level}-turnaround`,
+    level === 'dar' ? DarMetrics.getDecisionTurnaround : DarMetrics.getDatasetDecisionTurnaround,
+    range,
+    { limit: 1 },
+  )
+  const data = report.data
+  const shown: DarAnalyticsRange = data
+    ? { from: data.from, to: data.to, bucket: data.bucket.toLowerCase() as MetricsBucket }
+    : range
+  const byStart = new Map((data?.buckets ?? []).map(bucket => [bucket.bucketStart, bucket]))
+  const starts = bucketStartsInRange(shown)
+  const stat = (key: 'meanDays' | 'medianDays') => starts.map(start => byStart.get(start)?.[key] ?? null)
+  const rows: TurnaroundRow[] = (data?.buckets ?? []).map(bucket => ({
+    ...bucket,
+    id: bucket.bucketStart,
+    label: formatBucketStart(bucket.bucketStart, shown.bucket),
+  }))
+
+  return (
+    <AnalyticsSection
+      title="DAC turnaround"
+      description={'Days from submission to the DAC decision, for DARs submitted in the range. A DAR '
+        + 'counts once every dataset on it is decided, measured to the last decision.'}
+      caveats={[
+        `${data?.unmeasured ?? 0} decisions in this range have no usable vote date (votes cast before `
+        + 'March 2021, or dated before a backfilled submission) and are left out of these figures.',
+      ]}
+      isLoading={report.isLoading}
+      isRefreshing={report.isPlaceholderData}
+      error={report.error}
+      isEmpty={(data?.total ?? 0) === 0}
+      emptyText="No DARs submitted in this range have been decided."
+    >
+      <ToggleButtonGroup
+        aria-label="Measure turnaround per"
+        size="small"
+        exclusive
+        value={level}
+        onChange={(_e, next: Level | null) => next && setLevel(next)}
+        sx={{ mb: '1rem' }}
+      >
+        <ToggleButton value="dar">Per DAR</ToggleButton>
+        <ToggleButton value="dataset">Per dataset</ToggleButton>
+      </ToggleButtonGroup>
+      <HeadlineFigures
+        figures={[
+          { label: 'Decided', value: data?.total ?? 0 },
+          { label: 'Unmeasured', value: data?.unmeasured ?? 0 },
+        ]}
+      />
+      <Box sx={layoutStyle}>
+        <LineChart
+          height={320}
+          xAxis={[{ scaleType: 'point', data: starts.map(start => formatBucketStart(start, shown.bucket)) }]}
+          yAxis={[{ label: 'Days' }]}
+          series={[
+            { label: 'Median', data: stat('medianDays') },
+            { label: 'Mean', data: stat('meanDays') },
+          ]}
+        />
+        <DataGrid
+          aria-label="Turnaround per bucket"
+          rows={rows}
+          columns={COLUMNS}
+          autoHeight
+          hideFooter
+          disableColumnMenu
+          disableRowSelectionOnClick
+          disableVirtualization
+        />
+      </Box>
+    </AnalyticsSection>
+  )
+}
