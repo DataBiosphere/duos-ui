@@ -90,13 +90,13 @@ export const DecisionFunnelSection = ({ range }: DecisionFunnelSectionProps) => 
     ? { from: dars.data.from, to: dars.data.to, bucket: dars.data.bucket.toLowerCase() as MetricsBucket }
     : range
   const bucketStarts = bucketStartsInRange(shown)
+  const key = (start: number, state: DecisionState) => `${start}|${state}`
+  const countAt = darBuckets.reduce((m, b) => m.set(key(b.bucketStart, b.state), (m.get(key(b.bucketStart, b.state)) ?? 0) + b.count), new Map<string, number>())
   const series = DAR_STATES.map(({ state, label, color }) => ({
     label,
     color,
     stack: 'state',
-    data: bucketStarts.map(start => darBuckets
-      .filter(b => b.bucketStart === start && b.state === state)
-      .reduce((sum, b) => sum + b.count, 0)),
+    data: bucketStarts.map(start => countAt.get(key(start, state)) ?? 0),
   }))
 
   return (
@@ -105,7 +105,8 @@ export const DecisionFunnelSection = ({ range }: DecisionFunnelSectionProps) => 
       description={'DARs submitted in the range, by their DAC decision. A DAR is decided once every '
         + 'dataset on it is decided or canceled, and a reopened decision counts as pending until the '
         + 'DAC decides again.'}
-      isLoading={dars.isLoading || datasets.isLoading}
+      // One report on the new range and one on the old would mix ranges across columns.
+      isLoading={dars.isLoading || datasets.isLoading || dars.isPlaceholderData !== datasets.isPlaceholderData}
       isRefreshing={dars.isPlaceholderData || datasets.isPlaceholderData}
       error={dars.error ?? datasets.error}
       isEmpty={(dars.data?.total ?? 0) === 0 && (datasets.data?.total ?? 0) === 0}

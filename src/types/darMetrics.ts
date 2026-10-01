@@ -64,16 +64,17 @@ export interface DarVolumeReport extends DarMetricsReport<VolumeBucketCount, Dar
   researchers: ResearcherDarCount[]
 }
 
-/** Dataset rows never report MIXED; DAR rows never report NO_ELECTION. */
 export type DecisionState = 'APPROVED' | 'DENIED' | 'MIXED' | 'PENDING' | 'CANCELED' | 'NO_ELECTION'
+export type DarDecisionState = Exclude<DecisionState, 'NO_ELECTION'>
+export type DatasetDecisionState = Exclude<DecisionState, 'MIXED'>
 
-/** MIXED only at DAR level. */
 export type DecidedVia = 'MANUAL' | 'RADAR' | 'MIXED'
+export type DatasetDecidedVia = Exclude<DecidedVia, 'MIXED'>
 
-export interface DecisionBucketCount {
+export interface DecisionBucketCount<S extends DecisionState = DecisionState, V extends DecidedVia = DecidedVia> {
   bucketStart: number
-  state: DecisionState
-  decidedVia?: DecidedVia | null
+  state: S
+  decidedVia?: V | null
   count: number
 }
 
@@ -82,7 +83,7 @@ export interface DarDecision {
   collectionId: number
   submissionDate: number
   datasetCount: number
-  state: DecisionState
+  state: DarDecisionState
   decidedVia?: DecidedVia | null
   decisionDate?: number | null
 }
@@ -92,13 +93,14 @@ export interface DarDatasetDecision {
   collectionId: number
   submissionDate: number
   datasetId: number
-  state: DecisionState
-  decidedVia?: DecidedVia | null
+  state: DatasetDecisionState
+  decidedVia?: DatasetDecidedVia | null
   decisionDate?: number | null
 }
 
-export type DarDecisionReport = DarMetricsReport<DecisionBucketCount, DarDecision>
-export type DarDatasetDecisionReport = DarMetricsReport<DecisionBucketCount, DarDatasetDecision>
+export type DarDecisionReport = DarMetricsReport<DecisionBucketCount<DarDecisionState>, DarDecision>
+type DatasetDecisionBucketCount = DecisionBucketCount<DatasetDecisionState, DatasetDecidedVia>
+export type DarDatasetDecisionReport = DarMetricsReport<DatasetDecisionBucketCount, DarDatasetDecision>
 
 export interface TurnaroundBucket {
   bucketStart: number
@@ -119,12 +121,13 @@ export interface DarTurnaround {
   elapsedDays: number
 }
 
-export interface DarDatasetTurnaround extends DarTurnaround {
+export interface DarDatasetTurnaround extends Omit<DarTurnaround, 'decidedVia'> {
   datasetId: number
+  decidedVia: DatasetDecidedVia
 }
 
 export interface TurnaroundReport<R> extends DarMetricsReport<TurnaroundBucket, R> {
-  /** Decisions with no usable vote date, left out of `total` and the statistics. */
+  /** Decisions with no usable elapsed time (no vote date, or one before submission), left out of `total` and the statistics. */
   unmeasured: number
 }
 
@@ -186,7 +189,7 @@ export interface Renewal {
   collectionId: number
   datasetId: number
   submissionDate: number
-  decidedVia: Exclude<DecidedVia, 'MIXED'>
+  decidedVia: DatasetDecidedVia
   approvalDate?: number | null
 }
 
