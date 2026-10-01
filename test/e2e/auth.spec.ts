@@ -129,6 +129,7 @@ test.describe('sign out', () => {
 
   test('shows a persistent notice with Retry when sign-out is unconfirmed', async ({ page, mockScenario }) => {
     await page.route('**/auth/logout', route => route.abort())
+    await page.clock.install()
     await openUserMenu(page, 'Sign out')
 
     const notice = page.locator('[data-cy="unconfirmed-sign-out-notice"]')
@@ -137,8 +138,8 @@ test.describe('sign out', () => {
     await expect(page).toHaveURL(CONSOLE_URL)
     expect((await getMe(page)).status()).toBe(200)
     expect((await mockScenario.stats()).endSessions).toBe(0)
-    // The notice has no timeout, so it outlasts the default toast.
-    await page.waitForTimeout(6_000)
+    // The notice has no timeout: it outlasts a minute on the page clock.
+    await page.clock.fastForward(60_000)
     await expect(notice).toBeVisible()
 
     await page.unroute('**/auth/logout')
