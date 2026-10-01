@@ -6,6 +6,7 @@ const eventList = {
   userRegister: 'user:register',
   userSignIn: 'user:signin',
   userAutoLogout401: 'user:autoLogout401',
+  legacyOidcKeySeen: 'legacy_oidc_key_seen',
 
   errorReport: 'error:report',
 
