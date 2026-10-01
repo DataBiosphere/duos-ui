@@ -224,6 +224,20 @@ describe('DuosHeader', () => {
       expect(daaAssociations?.link).toEqual('/admin_daa_associations')
     })
 
+    it('lands the Admin Console tab on its Dashboard, which hides the sub-tab bar', () => {
+      const adminConsole = headerTabsConfig.find(tab => tab.label === 'Admin Console')
+
+      expect(adminConsole?.link).toEqual('/admin_console/dashboard')
+      expect(adminConsole?.children?.[0]).toEqual({
+        label: 'Dashboard', link: '/admin_console/dashboard', hideSubTabBar: true,
+      })
+    })
+
+    it('highlights Admin Console on its Dashboard', async () => {
+      await mountHeader('/admin_console/dashboard', { ...mockUser, isAdmin: true, isResearcher: false })
+      expect(screen.getByRole('tab', { name: 'Admin Console' })).toHaveClass('Mui-selected')
+    })
+
     it('lists Metrics under the Admin Console and highlights it there', async () => {
       await mountHeader('/admin_console/metrics', { ...mockUser, isAdmin: true, isResearcher: false })
       expect(screen.getByRole('tab', { name: 'Admin Console' })).toHaveClass('Mui-selected')

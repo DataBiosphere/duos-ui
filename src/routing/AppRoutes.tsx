@@ -34,6 +34,7 @@ import AdminManageLC from 'src/pages/AdminManageLC'
 import AdminDaaAssociations from 'src/pages/AdminDaaAssociations'
 import AdminManageDarCollections from 'src/pages/AdminManageDarCollections'
 import AdminMetrics from 'src/pages/admin_console/AdminMetrics'
+import AdminDashboard from 'src/pages/admin_console/AdminDashboard'
 import ManageDac from 'src/pages/manage_dac/ManageDac'
 import ManageRadar from 'src/pages/manage_dac/ManageRadar'
 import EditDac from 'src/pages/manage_dac/EditDac'
@@ -138,6 +139,7 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.admin]} />}>
+          <Route path="/admin_console/dashboard" element={<AdminDashboard />} />
           <Route path="/admin_console/metrics" element={<AdminMetrics />} />
           <Route path="/admin_review_collection/:collectionId" element={<DarCollectionReview adminPage={true} />} />
           <Route path="/admin_manage_users" element={<AdminManageUsers />} />

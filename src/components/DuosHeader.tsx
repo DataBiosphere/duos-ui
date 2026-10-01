@@ -21,7 +21,7 @@ import { useNavigationState } from 'src/contexts/NavigationStateContext'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUserIsLogged } from 'src/hooks/useSession'
 import { MY_INSTITUTION_LIBRARY_ROUTE, SO_CONSOLE_SECTIONS, SO_DASHBOARD_ROUTE } from 'src/pages/signing_official_console/signingOfficialConsoleRoutes'
-import { ADMIN_METRICS_ROUTE } from 'src/pages/admin_console/adminConsoleRoutes'
+import { ADMIN_CONSOLE_SECTIONS, ADMIN_DASHBOARD_ROUTE, ADMIN_METRICS_ROUTE } from 'src/pages/admin_console/adminConsoleRoutes'
 import { RESEARCHER_CONSOLE_SECTIONS, RESEARCHER_DASHBOARD_ROUTE, RESEARCHER_DETAIL_ROUTES } from 'src/pages/researcher_console/researcherConsoleRoutes'
 
 export type { SubTab }
@@ -92,14 +92,10 @@ export const headerTabsConfig: Tab[] = [
   },
   {
     label: 'Admin Console',
-    link: '/admin_manage_dar_collections',
+    link: ADMIN_DASHBOARD_ROUTE,
     children: [
-      { label: 'Data Access Requests', link: '/admin_manage_dar_collections' },
-      { label: 'DACs', link: '/manage_dac' },
-      { label: 'Users', link: '/admin_manage_users' },
-      { label: 'Institutions', link: '/admin_manage_institutions' },
-      { label: 'Library Cards', link: '/admin_manage_lc' },
-      { label: 'DAA Associations', link: '/admin_daa_associations' },
+      { label: 'Dashboard', link: ADMIN_DASHBOARD_ROUTE, hideSubTabBar: true },
+      ...ADMIN_CONSOLE_SECTIONS,
       { label: 'Metrics', link: ADMIN_METRICS_ROUTE },
     ],
     isRendered: user => user.isAdmin,

@@ -36,6 +36,10 @@ vi.mock('src/pages/manage_dac/ManageDac', () => ({
   default: () => <div>Manage DACs</div>,
 }))
 
+vi.mock('src/pages/admin_console/AdminDashboard', () => ({
+  default: () => <div>Admin Dashboard</div>,
+}))
+
 vi.mock('src/pages/admin_console/AdminMetrics', () => ({
   default: () => <div>Admin Metrics</div>,
 }))
@@ -82,6 +86,7 @@ const roleBACRoutes: string[] = [
   '/manage_dac',
   '/manage_dac/1',
   '/manage_radar/1',
+  '/admin_console/dashboard',
   '/admin_console/metrics',
   '/admin_review_collection/1',
   '/admin_manage_users',
@@ -271,7 +276,7 @@ describe('AppRoutes — /backgroundsignin is gated to DEV environments', () => {
   })
 })
 
-describe('AppRoutes — Admin Console metrics', () => {
+describe('AppRoutes — Admin Console dashboard and metrics', () => {
   const userWithRole = (roleName: string): DuosUser => ({
     roles: [{ name: roleName }],
   } as DuosUser)
@@ -281,6 +286,18 @@ describe('AppRoutes — Admin Console metrics', () => {
   })
 
   afterEach(() => vi.restoreAllMocks())
+
+  it('renders the dashboard for an admin', () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(USER_ROLES.admin))
+
+    const { getByText } = render(
+      <MemoryRouter initialEntries={['/admin_console/dashboard']}>
+        <AppRoutes isLogged={true} env="dev" />
+      </MemoryRouter>,
+    )
+
+    expect(getByText('Admin Dashboard')).toBeInTheDocument()
+  })
 
   it('renders the metrics page for an admin', () => {
     vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(USER_ROLES.admin))
@@ -298,16 +315,18 @@ describe('AppRoutes — Admin Console metrics', () => {
     USER_ROLES.researcher,
     USER_ROLES.chairperson,
     USER_ROLES.signingOfficial,
-  ])('does not let a %s through', (roleName) => {
+  ])('does not let a %s through to either page', (roleName) => {
     vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(roleName))
 
-    const { container, queryByText } = render(
-      <MemoryRouter initialEntries={['/admin_console/metrics']}>
-        <AppRoutes isLogged={true} env="dev" />
-      </MemoryRouter>,
-    )
+    for (const route of ['/admin_console/dashboard', '/admin_console/metrics']) {
+      const { container, unmount } = render(
+        <MemoryRouter initialEntries={[route]}>
+          <AppRoutes isLogged={true} env="dev" />
+        </MemoryRouter>,
+      )
 
-    expect(container.querySelector('[data-cy="not-found"]')).toBeInTheDocument()
-    expect(queryByText('Admin Metrics')).not.toBeInTheDocument()
+      expect(container.querySelector('[data-cy="not-found"]')).toBeInTheDocument()
+      unmount()
+    }
   })
 })
