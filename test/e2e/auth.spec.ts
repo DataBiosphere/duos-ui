@@ -1,5 +1,6 @@
 import type { Page, Request } from '@playwright/test'
 import { test, expect, signInThroughMock, signOutThroughMock } from './support/mockProvider'
+import type { MockScenario } from './support/mockProvider'
 import { MOCK_ECHO_PATH, MOCK_OIDC_ORIGIN } from './mocks/settings'
 import { MOCK_BASE_URL } from './support/baseUrl'
 
@@ -152,6 +153,18 @@ test.describe('sign out', () => {
 })
 
 test.describe('callback errors', () => {
+  /**
+   * A failed callback leaves the session that `POST /auth/login` made for the PKCE
+   * state, and `/auth/csrf-token` refuses a session with no user, so it cannot log
+   * out. Sign in on the same cookie: the callback retires that session, and the
+   * sign-out deletes the new one.
+   */
+  async function discardPreAuthSession(page: Page, mockScenario: MockScenario) {
+    await mockScenario.configure({ provider: { email: 'cleanup@example.org' } })
+    await signInThroughMock(page, '/')
+    await signOutThroughMock(page)
+  }
+
   /** Runs the login leg and returns the authorize URL and the callback's final response. */
   async function startSignIn(page: Page) {
     const login = await page.request.post('/auth/login')
@@ -165,6 +178,7 @@ test.describe('callback errors', () => {
     expect(landing!.status()).toBe(400)
     expect(await landing!.json()).toEqual({ error: 'token_missing_email_claim' })
     expect((await getMe(page)).status()).toBe(401)
+    await discardPreAuthSession(page, mockScenario)
   })
 
   test('rejects a callback whose state does not match and starts no session', async ({ page, mockScenario }) => {
@@ -176,5 +190,6 @@ test.describe('callback errors', () => {
     expect(new URL(landing!.url()).pathname).toBe('/auth/callback')
     expect((await getMe(page)).status()).toBe(401)
     expect((await mockScenario.stats()).codeGrants).toBe(0)
+    await discardPreAuthSession(page, mockScenario)
   })
 })
