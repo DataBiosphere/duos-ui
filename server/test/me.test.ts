@@ -76,6 +76,10 @@ describe('getMe', () => {
       expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
       expect(reply.status).toHaveBeenCalledWith(401)
       expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+      expect(request.log.info).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'auth.session.destroyed', reason: 'expired' }),
+        'auth.session.destroyed',
+      )
     }
   })
 
@@ -188,6 +192,10 @@ describe('getMe', () => {
     expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
     expect(reply.status).toHaveBeenCalledWith(409)
     expect(reply.send).toHaveBeenCalledWith({ authenticated: false, error: 'provider_conflict', message })
+    expect(request.log.info).toHaveBeenCalledWith(
+      { event: 'auth.session.destroyed', reason: 'provider_conflict', idp: 'microsoft' },
+      'auth.session.destroyed',
+    )
   })
 
   it('answers the 409 with a fallback message when the upstream body is unusable', async () => {

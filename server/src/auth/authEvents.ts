@@ -13,7 +13,7 @@ type EventRequest = Pick<FastifyRequest, 'log' | 'session'>
 type Idp = 'google' | 'microsoft' | 'unknown'
 type EventFields = Record<string, unknown> & { idp?: Idp }
 
-export type SessionDestroyReason = 'logout' | 'upstream_401' | 'refresh_terminal' | 'expired'
+export type SessionDestroyReason = 'logout' | 'upstream_401' | 'refresh_terminal' | 'expired' | 'provider_conflict'
 
 export function logAuthEvent(
   request: EventRequest,
