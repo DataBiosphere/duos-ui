@@ -158,6 +158,8 @@ describe('getMe', () => {
     expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
     expect(reply.status).toHaveBeenCalledWith(401)
     expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+    // A destroy that failed is not a session that ended, so it must not be counted as one.
+    expect(request.log.info).not.toHaveBeenCalledWith(expect.objectContaining({ event: 'auth.session.destroyed' }), expect.anything())
   })
 
   it('marks every answer uncacheable — the profile must never be replayed across sessions', async () => {
