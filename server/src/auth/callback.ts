@@ -28,12 +28,15 @@ type CallbackResult
  * Cancellations count in the denominator and stay out of the failure numerator.
  */
 export async function handleCallback(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  // processCallback records the provider here as soon as the id_token is
+  // validated, so a failure after that point (the session write, for one) keeps it.
+  const attempt: { idp: SubProvider } = { idp: 'unknown' }
   let result: CallbackResult
   try {
-    result = await processCallback(request, reply)
+    result = await processCallback(request, reply, attempt)
   }
   catch (err: unknown) {
-    logAuthEvent(request, 'auth.callback.completed', { outcome: 'failed', errorType: err instanceof Error ? err.name : 'unknown', idp: 'unknown' }, 'warn')
+    logAuthEvent(request, 'auth.callback.completed', { outcome: 'failed', errorType: err instanceof Error ? err.name : 'unknown', idp: attempt.idp }, 'warn')
     throw err
   }
   logAuthEvent(request, 'auth.callback.completed', result, result.outcome === 'failed' ? 'warn' : 'info')
@@ -44,7 +47,7 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
  * extracts the sub-provider from the B2C `idp` claim, and writes all tokens to
  * the session. The browser never sees a token — only the post-login redirect.
  */
-async function processCallback(request: FastifyRequest, reply: FastifyReply): Promise<CallbackResult> {
+async function processCallback(request: FastifyRequest, reply: FastifyReply, attempt: { idp: SubProvider }): Promise<CallbackResult> {
   const config = await getOidcConfig()
 
   // v6: authorizationCodeGrant() takes the full callback URL and performs the
@@ -81,6 +84,7 @@ async function processCallback(request: FastifyRequest, reply: FastifyReply): Pr
   // The id_token has been validated by now, so its provider is known even when
   // the email is missing; the failed event keeps it for provider-split views.
   const subProvider = subProviderFromIdpClaim(claims?.idp)
+  attempt.idp = subProvider
 
   if (typeof claims?.email !== 'string' || !claims.email) {
     reply.status(400).send({ error: 'token_missing_email_claim' })

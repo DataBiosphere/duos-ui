@@ -454,6 +454,20 @@ describe('handleCallback — auth.callback.completed', () => {
     )
   })
 
+  it('keeps the provider when the session cannot be written after the token validated', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue(makeTokens({ email: 'user@example.com', idp: 'google.com' }))
+    const failure = new Error('store unavailable')
+    const request = makeRequest({ regenerateError: failure })
+
+    await expect(handleCallback(request, makeReply())).rejects.toBe(failure)
+
+    expect(request.log.warn).toHaveBeenCalledWith(
+      { event: 'auth.callback.completed', outcome: 'failed', errorType: 'Error', idp: 'google' },
+      'auth.callback.completed',
+    )
+  })
+
   it('logs a failed event for a missing email claim', async () => {
     const oidc = await import('openid-client')
     vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue(makeTokens({ sub: 'abc123' }))
