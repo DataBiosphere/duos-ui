@@ -1,4 +1,4 @@
-import { BASE_URL, MOCK_BASE_URL } from '../support/baseUrl'
+import { BASE_URL, MOCK_BASE_URL, THROTTLE_BASE_URL } from '../support/baseUrl'
 
 /**
  * Addresses and client credentials shared by the mocks, the Playwright config
@@ -28,7 +28,7 @@ export const MOCK_CONSENT_URL = `http://127.0.0.1:${MOCK_CONSENT_PORT}`
  */
 export const callbackUri = (baseUrl: string): string => `${baseUrl}/auth/callback`
 export const postLogoutUri = (baseUrl: string): string => `${baseUrl}/post-logout`
-export const MOCK_SERVER_BASE_URLS: readonly string[] = [BASE_URL, MOCK_BASE_URL]
+export const MOCK_SERVER_BASE_URLS: readonly string[] = [BASE_URL, MOCK_BASE_URL, THROTTLE_BASE_URL]
 
 export const MOCK_CLIENT_ID = 'duos-e2e-mock-client'
 export const MOCK_CLIENT_SECRET = 'duos-e2e-mock-secret'
