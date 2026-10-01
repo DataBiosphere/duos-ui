@@ -26,7 +26,7 @@ Playwright starts four processes and waits for each one:
 | Fastify, `pnpm run serve` | 3001 | the mock | `mock` |
 | Fastify, `pnpm run serve`, one callback a minute | 3002 | the mock | `mock-throttle` |
 
-Both servers use the mock provider as their issuer; `playwright.config.ts` sets
+All three servers use the mock provider as their issuer; `playwright.config.ts` sets
 the `DUOS_AZURE_*` and redirect variables for each one. The servers use the
 process environment and built `config.json`; export `.env.local` variables
 before running. `vite preview` lacks the BFF routes and security controls.
@@ -155,13 +155,13 @@ flow against a mock of the B2C tenant, so they need no credentials. Real
 Consent rejects the mock's tokens, so their server forwards to the mock Consent
 upstream instead. The mocks are in `test/e2e/mocks/`.
 
-Both servers use the host `local.dsde-dev.broadinstitute.org`, and cookies
-ignore ports, so both set the same `sessionId` cookie. Keep each browser
-context on one server; a context that visits both overwrites one session with
+All three servers use the host `local.dsde-dev.broadinstitute.org`, and cookies
+ignore ports, so all three set the same `sessionId` cookie. Keep each browser
+context on one server; a context that visits two overwrites one session with
 the other.
 
 ```sh
-pnpm exec playwright test --project=mock
+pnpm exec playwright test --project=mock --project=mock-throttle
 ```
 
 Use the `mockScenario` fixture from `test/e2e/support/mockProvider.ts`. It
@@ -215,10 +215,10 @@ which equals Playwright's default test timeout. A spec that uses it must call
 The provider keeps two B2C behaviors: without the client ID in `scope` the token
 response has no access token, and without `offline_access` it has no refresh
 token. It checks the client secret and PKCE, and redirects only to the registered
-`/auth/callback` and `/post-logout` URIs of the two servers.
+`/auth/callback` and `/post-logout` URIs of the three servers.
 
 A spec that needs global mock state must run in its own project that depends
-on both `chromium` and `mock`, with one worker. No spec needs this today.
+on `chromium`, `mock` and `mock-throttle`, with one worker. No spec needs this today.
 
 ### Session cleanup
 
