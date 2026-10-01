@@ -24,9 +24,18 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
   const [from, setFrom] = useState(range.from)
   const [to, setTo] = useState(range.to)
   const settle = useRef<ReturnType<typeof setTimeout>>(undefined)
-  const valid = isValidRange(from, to)
 
+  // Back and Forward change the range without remounting; show the dates the reports now use.
+  const [shownRange, setShownRange] = useState(`${range.from}|${range.to}`)
+  if (shownRange !== `${range.from}|${range.to}`) {
+    setShownRange(`${range.from}|${range.to}`)
+    setFrom(range.from)
+    setTo(range.to)
+  }
+  useEffect(() => clearTimeout(settle.current), [range.from, range.to])
   useEffect(() => () => clearTimeout(settle.current), [])
+
+  const valid = isValidRange(from, to)
 
   const updateDates = (nextFrom: string, nextTo: string) => {
     setFrom(nextFrom)

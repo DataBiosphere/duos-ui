@@ -294,11 +294,7 @@ describe('AppRoutes — Admin Console metrics', () => {
     expect(getByText('Admin Metrics')).toBeInTheDocument()
   })
 
-  it.each([
-    USER_ROLES.researcher,
-    USER_ROLES.chairperson,
-    USER_ROLES.signingOfficial,
-  ])('does not let a %s through', (roleName) => {
+  it.each([USER_ROLES.researcher, USER_ROLES.chairperson, USER_ROLES.signingOfficial])('does not let a %s through', (roleName) => {
     vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(roleName))
 
     const { container, queryByText } = render(
