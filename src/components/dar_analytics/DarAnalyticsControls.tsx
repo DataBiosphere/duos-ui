@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Box, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material'
 import { MetricsBucket } from 'src/types/darMetrics'
-import { BUCKETS, DarAnalyticsRange, isValidRange } from 'src/components/dar_analytics/darAnalyticsRange'
+import { BUCKETS, DarAnalyticsRange, isChartable, isValidRange } from 'src/components/dar_analytics/darAnalyticsRange'
 
 interface DarAnalyticsControlsProps {
   range: DarAnalyticsRange
@@ -36,12 +36,20 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
   useEffect(() => () => clearTimeout(settle.current), [])
 
   const valid = isValidRange(from, to)
+  const chartable = valid && isChartable({ from, to, bucket: range.bucket })
+  let helperText: string | undefined
+  if (!valid) {
+    helperText = 'Enter dates from 1900 on, with To on or after From'
+  }
+  else if (!chartable) {
+    helperText = `Too long to group by ${range.bucket}; shorten the range or group by a longer period`
+  }
 
   const updateDates = (nextFrom: string, nextTo: string) => {
     setFrom(nextFrom)
     setTo(nextTo)
     clearTimeout(settle.current)
-    if (isValidRange(nextFrom, nextTo)) {
+    if (isValidRange(nextFrom, nextTo) && isChartable({ from: nextFrom, to: nextTo, bucket: range.bucket })) {
       settle.current = setTimeout(() => onChange({ from: nextFrom, to: nextTo }), DATE_SETTLE_MS)
     }
   }
@@ -62,8 +70,8 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
         size="small"
         value={to}
         onChange={e => updateDates(from, e.target.value)}
-        error={!valid}
-        helperText={valid ? undefined : 'Enter dates from 1900 on, with To on or after From'}
+        error={!chartable}
+        helperText={helperText}
         slotProps={{ inputLabel: { shrink: true } }}
       />
       <ToggleButtonGroup
@@ -74,7 +82,9 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
         onChange={(_e, bucket: MetricsBucket | null) => bucket && onChange({ bucket })}
       >
         {BUCKETS.map(({ value, label }) => (
-          <ToggleButton key={value} value={value}>{label}</ToggleButton>
+          <ToggleButton key={value} value={value} disabled={!isChartable({ ...range, bucket: value })}>
+            {label}
+          </ToggleButton>
         ))}
       </ToggleButtonGroup>
     </Box>

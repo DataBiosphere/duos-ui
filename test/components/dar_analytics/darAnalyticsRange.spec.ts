@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import dayjs from 'dayjs'
-import { defaultRange, isValidRange } from 'src/components/dar_analytics/darAnalyticsRange'
+import { defaultRange, isChartable, isValidRange } from 'src/components/dar_analytics/darAnalyticsRange'
 
 describe('defaultRange', () => {
   it('starts two years back on the first day of that quarter and groups by quarter', () => {
@@ -28,5 +28,17 @@ describe('isValidRange', () => {
     ['2026-02-31', '2026-03-31', false],
   ])('from %s to %s is %s', (from, to, expected) => {
     expect(isValidRange(from, to)).toBe(expected)
+  })
+})
+
+describe('isChartable', () => {
+  it.each([
+    ['2024-10-01', '2026-10-01', 'day', true],
+    ['2016-01-01', '2026-10-01', 'day', false],
+    ['2010-01-01', '2026-10-01', 'week', true],
+    ['1900-01-01', '2026-10-01', 'week', false],
+    ['1900-01-01', '2026-10-01', 'quarter', true],
+  ] as const)('%s to %s by %s is %s', (from, to, bucket, expected) => {
+    expect(isChartable({ from, to, bucket })).toBe(expected)
   })
 })

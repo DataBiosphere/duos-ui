@@ -79,4 +79,22 @@ describe('DarAnalyticsControls', () => {
 
     expect(screen.getByLabelText('From')).toHaveValue('2025-04-01')
   })
+
+  it('disables a grouping that would make too many buckets', () => {
+    render(<DarAnalyticsControls range={{ from: '1900-01-01', to: '2026-06-30', bucket: 'quarter' }} onChange={onChange} />)
+
+    expect(screen.getByRole('button', { name: 'Day' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Month' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Quarter' })).toBeEnabled()
+  })
+
+  it('holds back dates too far apart for the grouping and says why', () => {
+    render(<DarAnalyticsControls range={{ ...range, bucket: 'day' }} onChange={onChange} />)
+
+    typeDate('From', '2010-01-01')
+    act(() => vi.runAllTimers())
+
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByText(/Too long to group by day/)).toBeInTheDocument()
+  })
 })
