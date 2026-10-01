@@ -15,9 +15,6 @@ set -eu
 # The main config sets no workspaceFolder, so the path depends on the folder name.
 WORKSPACE=${DUOS_WORKSPACE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
 CONFIG_FILES=(server.crt server.key ca-bundle.crt .env.local public/config.json site.conf)
-# render-configs.sh also copies .env.local to .env.local.bak. The rollback
-# keeps that copy too, but a missing .bak does not count as a missing config.
-SAVED_FILES=("${CONFIG_FILES[@]}" .env.local.bak)
 REFRESH=false
 RERUN="./scripts/setup-devcontainer.sh"
 if [[ "${1:-}" == "--refresh" ]]; then
@@ -83,33 +80,6 @@ check_logins() {
   return "$ok"
 }
 
-# render-configs.sh truncates each file before it fills it. A failed run
-# (for example, no VPN) would leave a valid file empty. Keep a copy of every
-# existing file (SAVED_FILES) and put it back if the run fails.
-backup_configs() {
-  local f
-  for f in "${SAVED_FILES[@]}"; do
-    if [[ -e "$WORKSPACE/$f" ]]; then
-      mkdir -p "$BACKUP/$(dirname "$f")"
-      cp -p "$WORKSPACE/$f" "$BACKUP/$f"
-    fi
-  done
-  return 0
-}
-
-# Put back the saved files. Remove a file that did not exist before the run.
-restore_configs() {
-  local f
-  for f in "${SAVED_FILES[@]}"; do
-    if [[ -e "$BACKUP/$f" ]]; then
-      cp -p "$BACKUP/$f" "$WORKSPACE/$f"
-    else
-      rm -f "$WORKSPACE/$f"
-    fi
-  done
-  return 0
-}
-
 fix_volume_owner
 
 missing=$(missing_files | tr '\n' ' ')
@@ -129,37 +99,10 @@ if ! check_logins; then
   exit 0
 fi
 
-# Runs on every exit, including Ctrl-C and SIGTERM. Stop the renderer, put the
-# files back unless the render succeeded, and remove the copies.
-cleanup() {
-  if [[ -n "$RENDER_PID" ]] && kill -0 "$RENDER_PID" 2> /dev/null; then
-    # Stop its child commands (kubectl) first, so none writes after the restore.
-    pkill -P "$RENDER_PID" 2> /dev/null || true
-    kill "$RENDER_PID" 2> /dev/null || true
-    wait "$RENDER_PID" 2> /dev/null || true
-  fi
-  if [[ "$RENDER_OK" == "false" ]]; then
-    restore_configs
-    echo "WARNING: render-configs.sh did not finish. Your earlier files are back. Fix the cause above and run $RERUN again."
-  fi
-  rm -rf "$BACKUP"
-  return 0
-}
-
-BACKUP=$(mktemp -d)
-RENDER_OK=false
-RENDER_PID=""
-# A trapped signal waits for a foreground command. Run the renderer in the
-# background and wait for it, so the trap runs at once.
-trap cleanup EXIT
-trap 'exit 130' INT
-trap 'exit 143' TERM
-backup_configs
-"$WORKSPACE/scripts/render-configs.sh" --write_env true --write_config true --write_site_conf true &
-RENDER_PID=$!
-if wait "$RENDER_PID"; then
-  RENDER_OK=true
-else
+# render-configs.sh replaces the cert files only after every kubectl call
+# succeeds, so a failed run (for example, no VPN) leaves the old files as they were.
+if ! "$WORKSPACE/scripts/render-configs.sh" --write_env true --write_config true --write_site_conf true; then
+  echo "WARNING: render-configs.sh failed. Fix the cause above and run $RERUN again."
   exit 0
 fi
 

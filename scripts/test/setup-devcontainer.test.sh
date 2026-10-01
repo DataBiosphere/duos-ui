@@ -13,7 +13,7 @@ CHECKS=0
 # The missing-binary tests give the script only these and the stubs.
 BASH_BIN=$(command -v bash)
 NEEDED_TOOLS=()
-for tool in tr dirname id sudo mktemp mkdir cp rm pkill; do
+for tool in tr dirname id sudo; do
   if command -v "$tool" > /dev/null; then
     NEEDED_TOOLS+=("$tool")
   fi
@@ -38,19 +38,7 @@ new_workspace() {
 #!/bin/bash
 echo "render-configs $*" >> "$LOG"
 ws=$(dirname "$0")/..
-# Like a stalled network call: truncate a file, then wait.
-if [[ -n "${STUB_RENDER_HANG:-}" ]]; then
-  : > "$ws/server.crt"
-  echo ready > "$STUB_RENDER_HANG"
-  sleep 30
-fi
 if [[ "${STUB_RENDER_FAIL:-0}" == 1 ]]; then
-  # Like the real script: truncate a file, then fail.
-  if [[ "${STUB_RENDER_TRUNCATE:-0}" == 1 ]]; then
-    : > "$ws/server.crt"
-    : > "$ws/site.conf"
-    echo new > "$ws/.env.local.bak"
-  fi
   exit 1
 fi
 for f in server.crt server.key ca-bundle.crt .env.local public/config.json site.conf; do
@@ -176,34 +164,7 @@ new_workspace; all_files; STUB_RENDER_FAIL=1 run_setup --refresh
 expect "refresh fails: exit 0" "$CODE"
 grep -q "run ./scripts/setup-devcontainer.sh --refresh" <<< "$OUT"; expect "refresh fails: hint has --refresh" $?
 
-# 11. A failed render puts back the files that were there and removes new ones.
-new_workspace; all_files; echo keep > "$WS/server.crt"; rm "$WS/site.conf"; echo oldbak > "$WS/.env.local.bak"
-STUB_RENDER_FAIL=1 STUB_RENDER_TRUNCATE=1 run_setup
-expect "failed render: exit 0" "$CODE"
-[[ "$(cat "$WS/server.crt")" == keep ]]; expect "failed render: valid file kept" $?
-[[ ! -e "$WS/site.conf" ]]; expect "failed render: new partial file removed" $?
-[[ "$(cat "$WS/.env.local.bak")" == oldbak ]]; expect "failed render: earlier .env.local.bak kept" $?
-grep -q "earlier files are back" <<< "$OUT"; expect "failed render: says files are back" $?
-
-# 12. An interrupted render puts back the files and leaves no copies behind.
-for sig in TERM INT; do
-  new_workspace; all_files; echo keep > "$WS/server.crt"; echo oldbak > "$WS/.env.local.bak"
-  READY=$WS/ready
-  # A background job ignores SIGINT. perl sets it back to the default, as in a terminal.
-  env PATH="$WS/bin:$PATH" HOME="$WS/home" DUOS_WORKSPACE="$WS" STUB_RENDER_HANG="$READY" \
-    perl -e '$SIG{INT} = "DEFAULT"; exec @ARGV' "$BASH_BIN" "$SETUP" --refresh > "$WS/out.txt" 2>&1 &
-  SETUP_PID=$!
-  for _ in $(seq 100); do [[ -e "$READY" ]] && break; sleep 0.1; done
-  # The stub truncated server.crt. Signal the script, as Ctrl-C or a kill would.
-  kill -"$sig" "$SETUP_PID"
-  wait "$SETUP_PID" 2> /dev/null
-  ! pgrep -f "sleep 30" > /dev/null; expect "$sig: renderer child stopped" $?
-  [[ "$(cat "$WS/server.crt")" == keep ]]; expect "$sig: valid file kept" $?
-  [[ "$(cat "$WS/.env.local.bak")" == oldbak ]]; expect "$sig: earlier .env.local.bak kept" $?
-  grep -q "earlier files are back" "$WS/out.txt"; expect "$sig: says files are back" $?
-done
-
-# 13. Missing binaries: name only the missing tools, do not print its login hint.
+# 11. Missing binaries: name only the missing tools, do not print its login hint.
 # TEST_PATH is an isolated dir, so a real gh or gcloud on the host is not seen.
 new_workspace; isolate_without gcloud; TEST_PATH="$WS/iso" run_setup
 expect "no gcloud binary: exit 0" "$CODE"
@@ -229,7 +190,7 @@ new_workspace; isolate_without gcloud gh; TEST_PATH="$WS/iso" run_setup
 expect "two binaries missing: exit 0" "$CODE"
 grep -q "Missing tools: gcloud, gh\. " <<< "$OUT"; expect "two binaries missing: names both" $?
 
-# 14. Every tool installed and logged in: no tool is named as missing.
+# 12. Every tool installed and logged in: no tool is named as missing.
 new_workspace; isolate_without; TEST_PATH="$WS/iso" run_setup
 expect "nothing wrong: exit 0" "$CODE"
 ! grep -q "Missing tools" <<< "$OUT"; expect "nothing wrong: names no tool" $?
