@@ -15,9 +15,13 @@ export function subProviderFromIdpClaim(idp: unknown): SubProvider {
   return 'unknown'
 }
 
+// `idp` is the provider of THIS attempt, from its validated id_token, and
+// `unknown` before there is one. It is never read from the request's session,
+// which can still be a signed-in user's previous one until the session is
+// replaced on success.
 type CallbackResult
-  = { outcome: 'succeeded' | 'cancelled' }
-    | { outcome: 'failed', errorType: string, idp?: SubProvider }
+  = { outcome: 'succeeded' | 'cancelled', idp: SubProvider }
+    | { outcome: 'failed', errorType: string, idp: SubProvider }
 
 /**
  * Runs the callback and emits one `auth.callback.completed` event per entry.
@@ -29,7 +33,7 @@ export async function handleCallback(request: FastifyRequest, reply: FastifyRepl
     result = await processCallback(request, reply)
   }
   catch (err: unknown) {
-    logAuthEvent(request, 'auth.callback.completed', { outcome: 'failed', errorType: err instanceof Error ? err.name : 'unknown' }, 'warn')
+    logAuthEvent(request, 'auth.callback.completed', { outcome: 'failed', errorType: err instanceof Error ? err.name : 'unknown', idp: 'unknown' }, 'warn')
     throw err
   }
   logAuthEvent(request, 'auth.callback.completed', result, result.outcome === 'failed' ? 'warn' : 'info')
@@ -67,7 +71,7 @@ async function processCallback(request: FastifyRequest, reply: FastifyReply): Pr
       // errors are `failed` and log at warn.
       const cancelled = err.error === 'access_denied'
       reply.redirect(cancelled ? '/' : '/?signInError=provider')
-      return cancelled ? { outcome: 'cancelled' } : { outcome: 'failed', errorType: err.error }
+      return cancelled ? { outcome: 'cancelled', idp: 'unknown' } : { outcome: 'failed', errorType: err.error, idp: 'unknown' }
     }
     throw err
   }
@@ -102,5 +106,5 @@ async function processCallback(request: FastifyRequest, reply: FastifyReply): Pr
   })
 
   reply.redirect(returnTo)
-  return { outcome: 'succeeded' }
+  return { outcome: 'succeeded', idp: subProvider }
 }

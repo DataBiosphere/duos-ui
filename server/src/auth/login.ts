@@ -64,5 +64,5 @@ export async function handleLogin(request: FastifyRequest, reply: FastifyReply):
   await request.session.save()
 
   reply.send({ redirectUrl: redirectUrl.href }) // buildAuthorizationUrl returns a URL
-  logAuthEvent(request, 'auth.login.completed', { outcome: 'ok' })
+  logAuthEvent(request, 'auth.login.completed', { outcome: 'ok', idp: 'unknown' })
 }

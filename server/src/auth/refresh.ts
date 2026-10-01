@@ -1,7 +1,7 @@
 import * as oidc from 'openid-client'
 import type { FastifyRequest, Session } from 'fastify'
 import { hashValue } from '../logging.js'
-import { endSession, logAuthEvent } from './authEvents.js'
+import { endSession, logAuthEvent, sessionIdp } from './authEvents.js'
 import { getOidcConfig } from './oidcClient.js'
 
 /**
@@ -100,7 +100,7 @@ export async function refreshAccessToken(request: FastifyRequest): Promise<void>
     // hydrate the same session before the first destroy lands each log here and
     // each emit `auth.session.destroyed`, so both are upper bounds. Exact
     // session counts come from `user_session_audit`, not from these lines.
-    logAuthEvent(request, 'auth.refresh.unrefreshable', {}, 'warn')
+    logAuthEvent(request, 'auth.refresh.unrefreshable', { idp: sessionIdp(request) }, 'warn')
     await endSession(request, 'refresh_terminal')
     throw new RefreshFailedError('no_refresh_token')
   }
@@ -140,7 +140,7 @@ export async function refreshAccessToken(request: FastifyRequest): Promise<void>
   // so a failed exchange, a failed config lookup and a failed save each count as
   // one event, and `succeeded` is never logged for a refresh the caller sees fail.
   // The idp is read up front because a terminal failure destroys the session.
-  const idp = request.session.idp ?? 'unknown'
+  const idp = sessionIdp(request)
   const flight = (async (): Promise<RefreshedTokens> => {
     let result: Awaited<ReturnType<typeof doRefresh>>
     try {
