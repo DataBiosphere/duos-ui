@@ -48,6 +48,11 @@ consent DB user/password are fetched from the dev cluster's `consent-secrets` se
 `databaseUser`/`databasePassword`) when not already set, and `DUOS_DB_NAME` defaults to `consent`
 (its name in every environment) — a fresh run produces a fully populated `.env.local` with nothing
 left to fill in by hand. See [.env.example](.env.example) for what each variable means.
+* **Docker Compose**: the script writes redirect URIs for the `pnpm` dev server (`http`, port 3000). If you use `docker compose`, add `--compose true`. The script then writes the portless `https` form and replaces any redirect URIs that an earlier run left in `.env.local`. Compose reads `.env.local` only when it creates the container, so run `docker compose up -d --force-recreate duos` after you change the file. A wrong redirect URI does not fail early: sign-in sends you to the wrong site.
+
+```sh
+./scripts/render-configs.sh --write_env true --compose true
+```
 * **Development against other envs**: If you want to point to other envs, you can populate public/config.json with the values from any
 environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where
 {%ENV%} is any of `dev`, `staging`, `alpha`, or `prod`. Remember to set the `env` value appropriately, for example,
@@ -146,7 +151,7 @@ Visit https://local.dsde-dev.broadinstitute.org/ to see the instance running und
 
 ### Environment variables
 
-The server reads sensitive configuration from `.env.local` in the project root (gitignored). Create this file before running `docker compose up` — `./scripts/render-configs.sh --write_env true` generates it fully populated, including the Azure B2C client secret and consent DB credentials fetched from the dev cluster (see the render-configs notes above). Under docker compose, also change `DUOS_OAUTH_REDIRECT_URI` to the portless variant (`https://local.dsde-dev.broadinstitute.org/auth/callback`) — both variants are registered in B2C, but the script's default (with `:3000`) targets the pnpm dev server. `DUOS_POST_LOGOUT_REDIRECT_URI` (the B2C front-channel logout return URI, `.../post-logout`) follows the same port rule, and B2C requires an exact match against a URI registered on the app registration. The required variables are:
+The server reads sensitive configuration from `.env.local` in the project root (gitignored). Create this file before running `docker compose up` — `./scripts/render-configs.sh --write_env true` generates it fully populated, including the Azure B2C client secret and consent DB credentials fetched from the dev cluster (see the render-configs notes above). Under docker compose, run the script with `--compose true`, or change `DUOS_OAUTH_REDIRECT_URI` to the portless variant (`https://local.dsde-dev.broadinstitute.org/auth/callback`) by hand, then recreate the `duos` container — both variants are registered in B2C, but the script's default (with `:3000`) targets the pnpm dev server. `DUOS_POST_LOGOUT_REDIRECT_URI` (the B2C front-channel logout return URI, `.../post-logout`) follows the same port rule, and B2C requires an exact match against a URI registered on the app registration. The required variables are:
 
 ```properties
 # Fastify session

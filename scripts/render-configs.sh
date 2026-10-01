@@ -27,6 +27,11 @@ Generate cert files for local development
                                     secret). Values already set in an existing .env.local are
                                     carried forward, and the old file is backed up to
                                     .env.local.bak. true|false. Defaults to false
+  --compose COMPOSE                 Write the redirect URIs for docker compose (portless
+                                    https://local.dsde-dev.broadinstitute.org/...) instead of the
+                                    pnpm dev server form (http, :3000). Replaces any redirect URI
+                                    carried forward from an existing .env.local. Use with
+                                    --write_env true. true|false. Defaults to false
   --write_config WRITE_CONFIG       Write a config.json file in public. true|false. Defaults to false
   --write_site_conf WRITE_SITE_CONF Render site.conf in the project root from the terra-helmfile
                                     duos chart template, so the local httpd proxy matches the
@@ -44,6 +49,7 @@ error() {
 # default values that may be overridden by command line arguments
 PROJECT="broad-dsde-dev"
 WRITE_ENV="false"
+COMPOSE="false"
 WRITE_CONFIG="false"
 WRITE_SITE_CONF="false"
 
@@ -59,10 +65,13 @@ AZURE_CLIENT_ID_DEFAULT="a0e99acd-7b8d-400d-a1d3-60e497495806"
 # The consent database is named `consent` in every environment.
 DB_NAME_DEFAULT="consent"
 AZURE_ISSUER_URL_DEFAULT="https://terradevb2c.b2clogin.com/terradevb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=b2c_1a_signup_signin_duos_dev"
-# Both redirect URIs are registered in B2C: this one (with :3000) matches the
-# pnpm-start dev server; drop the port when running under docker compose.
+# Both redirect URI forms are registered in B2C. The defaults (with :3000) match
+# the pnpm-start dev server. Docker compose serves https on port 443, so
+# --compose true uses the portless https form instead.
 OAUTH_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/auth/callback"
 POST_LOGOUT_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/post-logout"
+COMPOSE_OAUTH_REDIRECT_URI="https://local.dsde-dev.broadinstitute.org/auth/callback"
+COMPOSE_POST_LOGOUT_REDIRECT_URI="https://local.dsde-dev.broadinstitute.org/post-logout"
 API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
 # The single-feature proxy upstreams (ECM, TDR, Bard). Optional server-side —
 # the BFF boots without them and leaves each route dark — but written here so
@@ -84,6 +93,10 @@ parse_cli_args() {
                 ;;
             --write_env)
                 WRITE_ENV=$2
+                shift 2
+                ;;
+            --compose)
+                COMPOSE=$2
                 shift 2
                 ;;
             --write_config)
@@ -181,6 +194,11 @@ write_env() {
   ISSUER_URL=$(existing_env DUOS_AZURE_ISSUER_URL)
   REDIRECT_URI=$(existing_env DUOS_OAUTH_REDIRECT_URI)
   POST_LOGOUT_REDIRECT_URI=$(existing_env DUOS_POST_LOGOUT_REDIRECT_URI)
+  if [[ "$COMPOSE" == "true" ]]; then
+    # An explicit flag beats a value carried forward from an earlier run.
+    REDIRECT_URI=$COMPOSE_OAUTH_REDIRECT_URI
+    POST_LOGOUT_REDIRECT_URI=$COMPOSE_POST_LOGOUT_REDIRECT_URI
+  fi
   API_URL=$(existing_env DUOS_API_URL)
   ECM_URL=$(existing_env DUOS_ECM_URL)
   TDR_URL=$(existing_env DUOS_TDR_URL)
@@ -236,6 +254,9 @@ DUOS_CSP_REPORT_ONLY=${CSP_REPORT_ONLY:-$CSP_REPORT_ONLY_DEFAULT}
 EOF
   } > "$ENV_FILE"
   chmod 600 "$ENV_FILE"
+  if [[ "$COMPOSE" == "true" ]]; then
+    echo "Wrote the docker compose redirect URIs. Run: docker compose up -d --force-recreate duos"
+  fi
 }
 
 write_config() {
