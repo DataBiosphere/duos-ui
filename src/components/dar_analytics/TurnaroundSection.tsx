@@ -61,8 +61,8 @@ export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
       description={'Days from submission to the DAC decision, for DARs submitted in the range. A DAR '
         + 'counts once every dataset on it is decided, measured to the last decision.'}
       caveats={[
-        `${data?.unmeasured ?? 0} decisions in this range have no usable vote date (votes cast before `
-        + 'March 2021, or dated before a backfilled submission) and are left out of these figures.',
+        'Decisions with no usable vote date (votes cast before March 2021, or dated before a backfilled '
+        + `submission) are left out of these figures: ${data?.unmeasured ?? 0} in this range.`,
       ]}
       isLoading={report.isLoading}
       isRefreshing={report.isPlaceholderData}
@@ -93,8 +93,8 @@ export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
           xAxis={[{ scaleType: 'point', data: starts.map(start => formatBucketStart(start, shown.bucket)) }]}
           yAxis={[{ label: 'Days' }]}
           series={[
-            { label: 'Median', data: stat('medianDays') },
-            { label: 'Mean', data: stat('meanDays') },
+            { label: 'Median', data: stat('medianDays'), curve: 'linear' },
+            { label: 'Mean', data: stat('meanDays'), curve: 'linear' },
           ]}
         />
         <DataGrid

@@ -56,7 +56,7 @@ describe('TurnaroundSection', () => {
     expect(await screen.findByRole('grid', { name: 'Turnaround per bucket' })).toBeInTheDocument()
     expect(cellsFor('2026 Q1')).toEqual(['2026 Q1', '4', '12.3', '10.0', '9'])
     expect(cellsFor('2026 Q2')).toEqual(['2026 Q2', '1', '–', '–', '–'])
-    expect(screen.getByText(/1 decisions in this range have no usable vote date/)).toBeInTheDocument()
+    expect(screen.getByText(/left out of these figures: 1 in this range/)).toBeInTheDocument()
     expect(DarMetrics.getDecisionTurnaround).toHaveBeenCalledWith({ ...range, limit: 1 })
   })
 
@@ -82,6 +82,6 @@ describe('TurnaroundSection', () => {
     renderSection()
 
     expect(await screen.findByText('No DARs submitted in this range have been decided.')).toBeInTheDocument()
-    expect(screen.getByText(/2 decisions in this range have no usable vote date/)).toBeInTheDocument()
+    expect(screen.getByText(/left out of these figures: 2 in this range/)).toBeInTheDocument()
   })
 })
