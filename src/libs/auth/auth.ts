@@ -16,7 +16,6 @@ import { showUnconfirmedSignOutNotice } from './signOutNotice'
 import { purgeLegacyOidcKeys, reportLegacyOidcKeys } from './legacyOidcKeys'
 import { UserManager } from 'oidc-client-ts'
 
-
 // Full-page navigations go through this Redirect
 export const Redirect = {
   to: (url: string): void => {
