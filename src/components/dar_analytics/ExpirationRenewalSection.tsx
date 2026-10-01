@@ -43,12 +43,13 @@ export const ExpirationRenewalSection = ({ range }: { range: DarAnalyticsRange }
   const shown: DarAnalyticsRange = data
     ? { from: data.from, to: data.to, bucket: data.bucket.toLowerCase() as MetricsBucket }
     : range
-  const ended = (start: number, reason: AccessEndReason) => (data?.buckets ?? [])
-    .filter(bucket => bucket.bucketStart === start && bucket.reason === reason)
-    .reduce((sum, bucket) => sum + bucket.count, 0)
-  const renewed = (start: number) => (renewals.data?.buckets ?? [])
-    .filter(bucket => bucket.bucketStart === start)
-    .reduce((sum, bucket) => sum + bucket.renewalCount, 0)
+  const endedAt = (data?.buckets ?? []).reduce(
+    (m, b) => m.set(`${b.bucketStart}|${b.reason}`, (m.get(`${b.bucketStart}|${b.reason}`) ?? 0) + b.count),
+    new Map<string, number>(),
+  )
+  const renewedAt = new Map((renewals.data?.buckets ?? []).map(b => [b.bucketStart, b.renewalCount]))
+  const ended = (start: number, reason: AccessEndReason) => endedAt.get(`${start}|${reason}`) ?? 0
+  const renewed = (start: number) => renewedAt.get(start) ?? 0
   const rows: PeriodRow[] = bucketStartsInRange(shown).map(start => ({
     id: start,
     label: formatBucketStart(start, shown.bucket),
@@ -64,7 +65,8 @@ export const ExpirationRenewalSection = ({ range }: { range: DarAnalyticsRange }
       description={'DAR collections whose access ended in the range, dated by when it ended, and datasets '
         + 'renewed by approved progress reports submitted in the range. Access runs 365 days from the '
         + 'newest approval on a dataset; a closeout ends it early.'}
-      isLoading={expirations.isLoading || renewals.isLoading}
+      // One report on the new range and one on the old would put renewals under the wrong periods.
+      isLoading={expirations.isLoading || renewals.isLoading || expirations.isPlaceholderData !== renewals.isPlaceholderData}
       isRefreshing={expirations.isPlaceholderData || renewals.isPlaceholderData}
       error={expirations.error ?? renewals.error}
       isEmpty={(data?.total ?? 0) === 0 && (renewals.data?.total ?? 0) === 0}

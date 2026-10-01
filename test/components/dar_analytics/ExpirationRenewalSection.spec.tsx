@@ -22,11 +22,10 @@ const expirations = (buckets: ExpirationBucket[]): DarExpirationReport =>
 const renewals = (buckets: RenewalBucket[]): DarRenewalReport =>
   ({ ...base, total: buckets.reduce((sum, b) => sum + b.renewalCount, 0), buckets })
 
-const renderSection = () => render(
-  <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-    <ExpirationRenewalSection range={range} />
-  </QueryClientProvider>,
+const section = (queryClient: QueryClient, shown = range) => (
+  <QueryClientProvider client={queryClient}><ExpirationRenewalSection range={shown} /></QueryClientProvider>
 )
+const renderSection = () => render(section(new QueryClient({ defaultOptions: { queries: { retry: false } } })))
 
 const cellsFor = (label: string) =>
   within(screen.getByRole('gridcell', { name: label }).closest<HTMLElement>('[role="row"]')!)
@@ -64,5 +63,18 @@ describe('ExpirationRenewalSection', () => {
     renderSection()
 
     expect(await screen.findByText('No access ended and nothing was renewed in this range.')).toBeInTheDocument()
+  })
+
+  it('waits for both reports on a new range rather than lining renewals up with old periods', async () => {
+    vi.mocked(DarMetrics.getExpirations).mockResolvedValue(expirations([{ bucketStart: Q1, reason: 'EXPIRED', count: 2 }]))
+    vi.mocked(DarMetrics.getRenewals).mockResolvedValueOnce(renewals([{ bucketStart: Q1, renewalCount: 1, collectionCount: 1 }]))
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const { rerender } = render(section(queryClient))
+    await screen.findByRole('grid')
+    vi.mocked(DarMetrics.getRenewals).mockReturnValueOnce(new Promise(() => {}))
+
+    rerender(section(queryClient, { ...range, bucket: 'month' }))
+
+    expect(await screen.findByLabelText('Loading Expiration and renewal')).toBeInTheDocument()
   })
 })
