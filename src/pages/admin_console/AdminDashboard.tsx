@@ -15,6 +15,7 @@ import { COMMON_CONSOLE_RESOURCES } from 'src/components/dashboard/dashboardReso
 import { ConsoleDashboardTileMeta } from 'src/components/dashboard/useConsoleDashboardSummary'
 import { Admin, AdminDashboardSummary } from 'src/libs/ajax/Admin'
 import { ADMIN_CONSOLE_SECTIONS, ADMIN_METRICS_ROUTE } from './adminConsoleRoutes'
+import { METRICS_TABS } from './metricsTabs'
 
 type Tile = ConsoleDashboardTileMeta<AdminDashboardSummary>
 
@@ -70,13 +71,12 @@ const sectionTiles: Tile[] = [
   },
 ]
 
-const metricTile = (tab: string, tile: Omit<Tile, 'link'>): Tile => ({
-  ...tile,
-  link: `${ADMIN_METRICS_ROUTE}?tab=${tab}`,
-})
+// A tile for a tab the Metrics page doesn't have yet would quietly open the first tab instead.
+const metricTile = (tab: string, tile: Omit<Tile, 'link'>): Tile[] =>
+  METRICS_TABS.some(({ key }) => key === tab) ? [{ ...tile, link: `${ADMIN_METRICS_ROUTE}?tab=${tab}` }] : []
 
 const metricTiles: Tile[] = [
-  metricTile('decisions', {
+  ...metricTile('decisions', {
     label: 'Decisions',
     icon: FactCheckOutlinedIcon,
     description: 'DAC decisions on DARs submitted in the last 90 days.',
@@ -87,7 +87,7 @@ const metricTiles: Tile[] = [
       { label: 'Pending', value: s => s.metrics?.decisions.pending },
     ],
   }),
-  metricTile('turnaround', {
+  ...metricTile('turnaround', {
     label: 'DAC Turnaround',
     icon: TimerOutlinedIcon,
     description: 'Days from submission to DAC decision, last 90 days.',
@@ -97,7 +97,7 @@ const metricTiles: Tile[] = [
       { label: 'Decided', value: s => s.metrics?.turnaround.decided },
     ],
   }),
-  metricTile('so-approvals', {
+  ...metricTile('so-approvals', {
     label: 'SO Approvals',
     icon: VerifiedUserOutlinedIcon,
     description: 'Where submissions from the last 90 days stand with their Signing Official.',
@@ -107,7 +107,7 @@ const metricTiles: Tile[] = [
       { label: 'Skipped', value: s => s.metrics?.soApprovals.skipped },
     ],
   }),
-  metricTile('volume', {
+  ...metricTile('volume', {
     label: 'Volume',
     icon: BarChartOutlinedIcon,
     description: 'DARs submitted in the last 90 days, and by whom.',
@@ -117,7 +117,7 @@ const metricTiles: Tile[] = [
       { label: 'Institutions', value: s => s.metrics?.volume.institutions },
     ],
   }),
-  metricTile('expiration', {
+  ...metricTile('expiration', {
     label: 'Expiration & Renewal',
     icon: EventBusyOutlinedIcon,
     description: 'Access that ended, and datasets renewed, in the last 90 days.',

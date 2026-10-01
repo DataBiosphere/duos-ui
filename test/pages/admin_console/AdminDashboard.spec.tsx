@@ -12,6 +12,10 @@ vi.mock('src/libs/ajax/Admin', () => ({
   Admin: { getDashboardSummary: vi.fn() },
 }))
 
+vi.mock('src/pages/admin_console/metricsTabs', () => ({
+  METRICS_TABS: ['decisions', 'turnaround', 'so-approvals', 'volume', 'expiration'].map(key => ({ key })),
+}))
+
 vi.mock('src/contexts/NavigationStateContext', () => ({
   useNavigationState: () => ({ activeTab: 1 }),
 }))
@@ -98,5 +102,20 @@ describe('AdminDashboard', () => {
 
     expect(screen.getByText('Admin Console')).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Get more out of DUOS' })).not.toBeInTheDocument()
+  })
+
+  it('leaves out a metric tile whose Metrics tab does not exist yet', async () => {
+    vi.resetModules()
+    vi.doMock('src/pages/admin_console/metricsTabs', () => ({ METRICS_TABS: [{ key: 'decisions' }] }))
+    const { default: Dashboard } = await import('src/pages/admin_console/AdminDashboard')
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter><Dashboard /></MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    expect(tile('Decisions')).toHaveAttribute('href', '/admin_console/metrics?tab=decisions')
+    expect(screen.queryByRole('link', { name: /^Volume/ })).not.toBeInTheDocument()
   })
 })
