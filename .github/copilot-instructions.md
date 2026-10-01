@@ -178,7 +178,7 @@ Before raising a pull request, ensure:
 
 ## Server Logging (`server/`)
 
-- Log a named event with a stable `event` name and only the labels you name, through `logAuthEvent` in `server/src/auth/authEvents.ts`.
+- Log a named event with a stable `event` name and only the labels you name, through `logAuthEvent` in `server/src/auth/authEvents.ts`. The one exception is code that has no request. `session_store.completed` in `server/src/session/pgStore.ts` logs the same event shape directly, with `idp: 'unknown'`.
 - **Never pass `request.session`, `session`, `tokens`, `claims` or a raw upstream response body to a logger.** `session.userId` holds the email, and an openid-client `ResponseBodyError` carries the token endpoint's body in its `cause`.
 - Log a session ID only through `hashValue` from `server/src/logging.ts`, as `sidHash`. Never log a raw `sid`.
 - Pass an error as `err`, so the sanitizing serializer in `server/src/logging.ts` runs. The `redact` list is a backstop, and its `*` matches only one nesting level.

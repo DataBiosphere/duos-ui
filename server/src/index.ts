@@ -30,6 +30,7 @@ import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
 import { publicProxy } from './proxy/publicProxy.js'
 import { configPath, readConfig, TRUST_PROXY } from './config.js'
+import { logAuthEvent } from './auth/authEvents.js'
 import { buildLoggerOptions } from './logging.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -66,7 +67,7 @@ export function shouldUseHttps(
  */
 export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
-    request.log.warn({ event: 'auth.rate_limited', route: request.routeOptions?.url ?? 'unknown', ip: request.ip }, 'auth.rate_limited')
+    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: request.ip }, 'warn')
     return reply.status(err.statusCode ?? 429).send({ error: RATE_LIMIT_ERROR_CODE })
   }
   request.log.error({ err }, '[server] Unhandled error:')
@@ -83,7 +84,7 @@ export function handleServerError(err: FastifyError, request: FastifyRequest, re
  */
 export function handleCallbackError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
-    request.log.warn({ event: 'auth.rate_limited', route: 'callback', ip: request.ip }, 'auth.rate_limited')
+    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: request.ip }, 'warn')
     return reply.redirect(`/?signInError=${RATE_LIMIT_ERROR_CODE}`)
   }
   return handleServerError(err, request, reply)
