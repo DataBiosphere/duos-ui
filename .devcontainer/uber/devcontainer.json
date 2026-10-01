@@ -7,9 +7,7 @@
     "workspaceFolder": "/workspaces",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/duos-ui,type=bind,consistency=cached",
     "mounts": [
-        "source=${localWorkspaceFolder}/../consent,target=/workspaces/consent,type=bind,consistency=cached",
-        "source=duos-gcloud-config,target=/home/node/.config/gcloud,type=volume",
-        "source=duos-gh-config,target=/home/node/.config/gh,type=volume"
+        "source=${localWorkspaceFolder}/../consent,target=/workspaces/consent,type=bind,consistency=cached"
     ],
     "features": {
         "ghcr.io/devcontainers/features/java:1": {

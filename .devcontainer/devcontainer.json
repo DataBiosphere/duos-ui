@@ -5,10 +5,6 @@
     },
     "postCreateCommand": "./scripts/setup-devcontainer.sh",
     "remoteUser": "node",
-    "mounts": [
-        "source=duos-gcloud-config,target=/home/node/.config/gcloud,type=volume",
-        "source=duos-gh-config,target=/home/node/.config/gh,type=volume"
-    ],
     "customizations": {
         "vscode": {
             "extensions": [

@@ -8,15 +8,13 @@ If you use Visual Studio Code (VSCode) and Docker, you can use the Dev Container
 
 2. Open the project in VSCode. When the notification in the bottom right corner asks about the Dev Container, click "Reopen in container".
 
-3. On the first start, the script asks for two logins. Run the commands it prints in the container terminal, then run the script again:
+3. On each new container, the script asks for two logins. Run the commands it prints in the container terminal, then run the script again:
 
    ```sh
    gcloud auth login --no-launch-browser
    gh auth login
    ./scripts/setup-devcontainer.sh
    ```
-
-   Your logins stay in Docker volumes, so a rebuild does not ask again.
 
 4. Every 3 months the certs rotate. Run `./scripts/setup-devcontainer.sh --refresh` to make all files again.
 

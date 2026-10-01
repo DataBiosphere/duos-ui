@@ -13,7 +13,7 @@
 set -eu
 
 # The main config sets no workspaceFolder, so the path depends on the folder name.
-WORKSPACE=${DUOS_WORKSPACE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
+WORKSPACE=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 CONFIG_FILES=(server.crt server.key ca-bundle.crt .env.local public/config.json site.conf)
 REFRESH=false
 RERUN="./scripts/setup-devcontainer.sh"
@@ -21,17 +21,6 @@ if [[ "${1:-}" == "--refresh" ]]; then
   REFRESH=true
   RERUN="./scripts/setup-devcontainer.sh --refresh"
 fi
-
-# Docker makes named volumes owned by root. Give them to this user.
-fix_volume_owner() {
-  local dir
-  for dir in "$HOME/.config" "$HOME/.config/gcloud" "$HOME/.config/gh"; do
-    if [[ -d "$dir" && ! -w "$dir" ]]; then
-      sudo -n chown "$(id -u):$(id -g)" "$dir" || true
-    fi
-  done
-  return 0
-}
 
 missing_files() {
   local f
@@ -79,8 +68,6 @@ check_logins() {
   fi
   return "$ok"
 }
-
-fix_volume_owner
 
 missing=$(missing_files | tr '\n' ' ')
 if [[ -z "$missing" && "$REFRESH" == "false" ]]; then
