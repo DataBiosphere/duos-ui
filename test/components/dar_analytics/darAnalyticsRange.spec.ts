@@ -25,6 +25,7 @@ describe('isValidRange', () => {
     ['2026-01-01', '2026-3-31', false],
     ['0002-01-01', '2026-03-31', false],
     ['1900-01-01', '2026-03-31', true],
+    ['2026-02-31', '2026-03-31', false],
   ])('from %s to %s is %s', (from, to, expected) => {
     expect(isValidRange(from, to)).toBe(expected)
   })

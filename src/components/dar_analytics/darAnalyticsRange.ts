@@ -29,9 +29,9 @@ export const defaultRange = (today: Dayjs): DarAnalyticsRange => {
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 
-// Consent rejects years outside 1900 to 9999.
+// Consent rejects years outside 1900 to 9999, and Day.js would roll 2026-02-31 into March.
 const isValidDate = (date: string): boolean =>
-  ISO_DATE.test(date) && dayjs(date).isValid() && Number(date.slice(0, 4)) >= 1900
+  ISO_DATE.test(date) && dayjs(date).format(DATE_FORMAT) === date && Number(date.slice(0, 4)) >= 1900
 
 export const isValidRange = (from: string, to: string): boolean =>
   isValidDate(from) && isValidDate(to) && !dayjs(to).isBefore(dayjs(from))
