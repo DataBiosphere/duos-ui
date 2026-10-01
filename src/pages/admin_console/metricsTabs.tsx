@@ -1,6 +1,7 @@
 import React from 'react'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
 import { DecisionFunnelSection } from 'src/components/dar_analytics/DecisionFunnelSection'
+import { SoApprovalsSection } from 'src/components/dar_analytics/SoApprovalsSection'
 
 export interface MetricsTab {
   /** The `tab` query param, so a tab can be linked to. */
@@ -11,4 +12,5 @@ export interface MetricsTab {
 
 export const METRICS_TABS: MetricsTab[] = [
   { key: 'decisions', label: 'Decisions', render: range => <DecisionFunnelSection range={range} /> },
+  { key: 'so-approvals', label: 'SO Approvals', render: range => <SoApprovalsSection range={range} /> },
 ]
