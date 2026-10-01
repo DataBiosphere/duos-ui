@@ -2,6 +2,7 @@ import React from 'react'
 import { Box } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { BarChart } from '@mui/x-charts/BarChart'
+import { Theme } from 'src/libs/theme'
 import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { AccessEndReason, MetricsBucket } from 'src/types/darMetrics'
 import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
@@ -9,6 +10,9 @@ import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRang
 import { bucketStartsInRange, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
 import { useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
+
+// Access ending is neutral, renewal is the good outcome.
+const ENDED_GREY = '#7a8691'
 
 const layoutStyle = {
   display: 'grid',
@@ -78,9 +82,9 @@ export const ExpirationRenewalSection = ({ range }: { range: DarAnalyticsRange }
           height={320}
           xAxis={[{ scaleType: 'band', data: rows.map(row => row.label) }]}
           series={[
-            { label: 'Expired', data: rows.map(row => row.expired) },
-            { label: 'Closed out', data: rows.map(row => row.closedOut) },
-            { label: 'Renewals', data: rows.map(row => row.renewals) },
+            { label: 'Expired', data: rows.map(row => row.expired), color: ENDED_GREY },
+            { label: 'Closed out', data: rows.map(row => row.closedOut), color: Theme.palette.highlighted },
+            { label: 'Renewals', data: rows.map(row => row.renewals), color: Theme.palette.success },
           ]}
         />
         <DataGrid
