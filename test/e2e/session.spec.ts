@@ -26,11 +26,15 @@ test('refreshes the access token mid-session and keeps the session', async ({ pa
   expect(before.status).toBe(200)
   expect((await mockScenario.stats()).refreshGrants, 'the token is outside the window').toBe(0)
 
-  await page.waitForTimeout(PAST_THE_WINDOW_MS)
+  // A call outside the window forwards the token as it is, and the first call
+  // inside the window refreshes it. Poll until the token changes.
+  await expect.poll(async () => (await callUpstream(page)).body.authorization, {
+    intervals: [2_000],
+    timeout: PAST_THE_WINDOW_MS + 15_000,
+  }).not.toBe(before.body.authorization)
 
   const after = await callUpstream(page)
   expect(after.status).toBe(200)
-  expect(after.body.authorization).not.toBe(before.body.authorization)
   expect(after.body.authorization.startsWith(`Bearer ${mockScenario.accessTokenPrefix}`)).toBe(true)
   expect((await mockScenario.stats()).refreshGrants).toBe(1)
   expect((await sessionCookie(page))?.value, 'a refresh does not rotate the session ID').toBe(sessionId)

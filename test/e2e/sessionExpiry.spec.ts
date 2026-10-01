@@ -7,6 +7,8 @@ import { SHORT_SESSION_MAX_AGE_MS } from './support/baseUrl'
 // left to refresh. `maxAge` is set per server process, so these specs run on a
 // server of their own, whose sessions last SHORT_SESSION_MAX_AGE_MS.
 
+// How long after the cookie is gone the server can still hold the row.
+const SERVER_EXPIRY_MARGIN_MS = 5_000
 const CONSOLE_PATH = '/researcher_console_dashboard'
 
 test('rejects calls after the session expires and sends the user to sign-in', async ({ page, mockScenario: _mockScenario }) => {
@@ -20,8 +22,11 @@ test('rejects calls after the session expires and sends the user to sign-in', as
   expect((await callUpstream(page)).status).toBe(401)
 
   // The expiry is also the server's: a browser that still sent the cookie is refused.
+  // The browser drops the cookie at Max-Age from the response, and the store row
+  // expires at its own save time plus maxAge, so the row can outlive the cookie
+  // by a moment. Poll until the server refuses the cookie.
   await page.context().addCookies([{ ...cookie, expires: -1 }])
-  expect(await meStatus(page)).toBe(401)
+  await expect.poll(() => meStatus(page), { timeout: SERVER_EXPIRY_MARGIN_MS }).toBe(401)
   expect((await callUpstream(page)).status).toBe(401)
   await page.context().clearCookies()
 
