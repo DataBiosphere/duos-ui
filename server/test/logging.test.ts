@@ -53,7 +53,7 @@ describe('logger output', () => {
     const capture = captureLogger()
     app = capture.app
     app.log.info({
-      session: { sid: 'SECRET-SID', userId: 'person@example.org', email: 'person@example.org', accessToken: 'SECRET-ACCESS-TOKEN', refreshToken: 'SECRET-REFRESH-TOKEN', idToken: 'SECRET-ID-TOKEN' },
+      session: { sessionId: 'SECRET-SESSION-ID', sid: 'SECRET-SID', userId: 'person@example.org', email: 'person@example.org', accessToken: 'SECRET-ACCESS-TOKEN', refreshToken: 'SECRET-REFRESH-TOKEN', idToken: 'SECRET-ID-TOKEN' },
     }, 'session')
     expect(capture.lines[0]).not.toMatch(/SECRET|person@example\.org/)
   })
@@ -70,7 +70,7 @@ describe('logger output', () => {
     app = capture.app
     app.log.warn({ err: new FakeResponseBodyError('server rejected the grant') }, 'refresh failed')
     expect(capture.lines[0]).not.toMatch(/SECRET/)
-    expect(capture.entries()[0].err).toEqual({ type: 'ResponseBodyError', message: 'server rejected the grant', error: 'invalid_grant' })
+    expect(capture.entries()[0].err).toEqual({ type: 'ResponseBodyError', message: 'server rejected the grant', error: 'invalid_grant', stack: expect.stringContaining('server rejected the grant') })
   })
 
   it('strips a bearer string and a callback `code=` value from an error message', async () => {
@@ -83,10 +83,48 @@ describe('logger output', () => {
   })
 })
 
+describe('request logging', () => {
+  let app: ReturnType<typeof captureLogger>['app'] | undefined
+  afterEach(async () => {
+    await app?.close()
+  })
+
+  it('scrubs the code and state from the automatic request lines of an injected callback', async () => {
+    const capture = captureLogger()
+    app = capture.app
+    app.get('/auth/callback', async () => ({ ok: true }))
+
+    await app.inject({ method: 'GET', url: '/auth/callback?code=SECRET-AUTH-CODE&state=SECRET-STATE&page=2' })
+
+    const requestLines = capture.lines.filter(line => line.includes('/auth/callback'))
+    expect(requestLines.length).toBeGreaterThan(0)
+    expect(capture.lines.join('\n')).not.toMatch(/SECRET/)
+    expect(requestLines[0]).toContain('code=[REDACTED]&state=[REDACTED]&page=2')
+  })
+
+  it('scrubs a top-level url field a handler logs itself', async () => {
+    const capture = captureLogger()
+    app = capture.app
+
+    app.log.info({ url: '/api?token=SECRET-TOKEN' }, 'blocked')
+
+    expect(capture.lines[0]).not.toMatch(/SECRET/)
+  })
+})
+
 describe('sanitizeError', () => {
   it('keeps name, message, code and the OAuth error field', () => {
     const err = Object.assign(new Error('connect ECONNREFUSED'), { code: 'ECONNREFUSED' })
-    expect(sanitizeError(err)).toEqual({ type: 'Error', message: 'connect ECONNREFUSED', code: 'ECONNREFUSED' })
+    expect(sanitizeError(err)).toEqual({ type: 'Error', message: 'connect ECONNREFUSED', code: 'ECONNREFUSED', stack: expect.stringContaining('logging.test') })
+  })
+
+  it('keeps the stack frames but scrubs a secret in the message the stack repeats', () => {
+    const err = new Error('fetch failed for https://b2c.example/token?code=SECRET')
+
+    const { stack } = sanitizeError(err) as { stack: string }
+
+    expect(stack).toContain('logging.test')
+    expect(stack).not.toContain('SECRET')
   })
 
   it('wraps a thrown non-Error and scrubs it', () => {

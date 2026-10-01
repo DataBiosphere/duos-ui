@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import type { FastifyServerOptions } from 'fastify'
+import type { FastifyRequest, FastifyServerOptions } from 'fastify'
 
 /**
  * Logger configuration for Cloud Logging, which reads stdout as JSON.
@@ -15,7 +15,8 @@ export function hashValue(value: string): string {
   return createHash('sha256').update(value).digest('hex')
 }
 
-const REDACT_FIELDS = ['accessToken', 'refreshToken', 'idToken', 'sid', 'userId', 'email']
+// `sessionId` is the name @fastify/session gives the raw identifier; `sid` is the store's column name.
+const REDACT_FIELDS = ['accessToken', 'refreshToken', 'idToken', 'sid', 'sessionId', 'userId', 'email']
 
 export const REDACT_PATHS = [
   'req.headers.authorization',
@@ -34,8 +35,24 @@ export function scrubSecrets(text: string): string {
 }
 
 /**
+ * Replaces Fastify's default `req` serializer, which writes `req.url` verbatim.
+ * `/auth/callback?code=…&state=…` would otherwise reach stdout on every
+ * automatic `incoming request` line. Same fields as the default, URL scrubbed.
+ */
+export function sanitizeRequest(request: FastifyRequest): Record<string, unknown> {
+  return {
+    method: request.method,
+    url: typeof request.url === 'string' ? scrubSecrets(request.url) : undefined,
+    version: request.headers?.['accept-version'],
+    host: request.host,
+    remoteAddress: request.ip,
+    remotePort: request.socket?.remotePort,
+  }
+}
+
+/**
  * Keeps what an operator needs to classify a failure (`name`, `message`,
- * `code`, the OAuth `error`) and drops what can carry a credential: `cause`
+ * `code`, the OAuth `error`, and a scrubbed `stack`) and drops what can carry a credential: `cause`
  * (openid-client's ResponseBodyError holds the token endpoint's body there) and
  * `response`.
  */
@@ -45,6 +62,7 @@ export function sanitizeError(err: unknown): Record<string, unknown> {
   return {
     type: err.name,
     message: scrubSecrets(err.message),
+    ...(typeof err.stack === 'string' ? { stack: scrubSecrets(err.stack) } : {}),
     ...(typeof code === 'string' ? { code } : {}),
     ...(typeof error === 'string' ? { error } : {}),
   }
@@ -57,7 +75,12 @@ export function buildLoggerOptions(): NonNullable<FastifyServerOptions['logger']
     formatters: {
       level: label => ({ severity: SEVERITY[label] ?? 'DEFAULT' }),
     },
-    serializers: { err: sanitizeError as (err: unknown) => never },
+    serializers: {
+      err: sanitizeError as (err: unknown) => never,
+      req: sanitizeRequest,
+      // Handlers that log a top-level `url` field (e.g. the Fetch Metadata guard).
+      url: (url: unknown) => typeof url === 'string' ? scrubSecrets(url) : url,
+    },
     redact: REDACT_PATHS,
   }
 }
