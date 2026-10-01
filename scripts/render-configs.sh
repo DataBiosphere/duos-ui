@@ -29,7 +29,7 @@ Generate cert files for local development
                                     .env.local.bak. true|false. Defaults to false
   --compose COMPOSE                 Write the redirect URIs for docker compose (portless
                                     https://local.dsde-dev.broadinstitute.org/...) instead of the
-                                    pnpm dev server form (http, :3000). Replaces any redirect URI
+                                    `pnpm run start:server` form (port 3000). Replaces any redirect URI
                                     carried forward from an existing .env.local. Use with
                                     --write_env true. true|false. Defaults to false
   --write_config WRITE_CONFIG       Write a config.json file in public. true|false. Defaults to false
@@ -66,7 +66,8 @@ AZURE_CLIENT_ID_DEFAULT="a0e99acd-7b8d-400d-a1d3-60e497495806"
 DB_NAME_DEFAULT="consent"
 AZURE_ISSUER_URL_DEFAULT="https://terradevb2c.b2clogin.com/terradevb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=b2c_1a_signup_signin_duos_dev"
 # Both redirect URI forms are registered in B2C. The defaults (with :3000) match
-# the pnpm-start dev server. Docker compose serves https on port 443, so
+# `pnpm run start:server`, the full-stack dev server (plain `pnpm start` runs
+# only Vite and never reads these variables). Docker compose serves https on port 443, so
 # --compose true uses the portless https form instead.
 OAUTH_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/auth/callback"
 POST_LOGOUT_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/post-logout"
