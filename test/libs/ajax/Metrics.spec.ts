@@ -126,6 +126,24 @@ describe('Metrics Tests', () => {
       expect(Object.keys(headers).map(key => key.toLowerCase())).not.toContain('authorization')
     })
 
+    it('posts an explicitly anonymous event to the public endpoint even when a registered profile is stored', async () => {
+      // The residue check runs before the purge, while stale legacy storage
+      // makes the signed-in inference true. The event has no BFF session to
+      // authenticate with, so it must not be routed through the proxy.
+      vi.spyOn(Storage, 'userIsLogged').mockReturnValue(true)
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ userId: 7 } as ReturnType<typeof Storage.getCurrentUser>)
+
+      await Metrics.captureEvent(Object.keys(eventList)[0] as MetricsEventName, {}, undefined, { anonymous: true })
+
+      const [url, body, options] = vi.mocked(retryFetchPost).mock.calls[0]
+      expect(url).toBe('/public/metrics/event')
+      expect(body).toEqual(expect.objectContaining({
+        properties: expect.objectContaining({ distinct_id: 'anon-id' }),
+      }))
+      const headers = (options as { headers?: Record<string, string> } | undefined)?.headers ?? {}
+      expect(Object.keys(headers).map(key => key.toLowerCase())).not.toContain('authorization')
+    })
+
     it('keeps identify and syncProfile off the public endpoint, which exposes only the event path', async () => {
       await Metrics.identify('anonymousId')
       await Metrics.syncProfile()

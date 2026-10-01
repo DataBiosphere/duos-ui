@@ -8,6 +8,8 @@ import { resetSignOutNoticeState } from 'src/libs/auth/signOutNotice'
 import { ToastNotifications } from 'src/libs/ToastNotifications'
 import { Storage } from 'src/libs/storage'
 import { Config } from 'src/libs/config'
+import { Metrics } from 'src/libs/ajax/Metrics'
+import { resetLegacyKeyReports } from 'src/libs/auth/legacyOidcKeys'
 import { v4 as uuid } from 'uuid'
 import type { UserManager } from 'oidc-client-ts'
 
@@ -120,6 +122,9 @@ describe('Auth Success', () => {
 describe('Auth (BFF mode)', () => {
   beforeEach(() => {
     vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(true)
+    // initialize reports stale legacy keys; never let a test post a real event.
+    resetLegacyKeyReports()
+    vi.spyOn(Metrics, 'captureEvent').mockResolvedValue(undefined)
   })
 
   afterEach(() => {
@@ -142,6 +147,48 @@ describe('Auth (BFF mode)', () => {
     expect(localStorage.getItem('oidc.abc123')).toBeNull()
     expect(localStorage.getItem('CurrentUser')).not.toBeNull()
     expect(brokerInit).not.toHaveBeenCalled()
+  })
+
+  it('initialize reports residue before the purge, with the count of keys it found', async () => {
+    localStorage.setItem('OidcUser', 'stale')
+    localStorage.setItem('oidc.abc123', 'stale-state')
+    localStorage.setItem('CurrentUser', JSON.stringify({ userId: 1 }))
+    const keysAtSend: string[][] = []
+    const capture = vi.mocked(Metrics.captureEvent).mockImplementation(async () => {
+      keysAtSend.push(Object.keys(localStorage))
+    })
+
+    await Auth.initialize()
+
+    expect(capture).toHaveBeenCalledExactlyOnceWith(
+      'legacy_oidc_key_seen',
+      { phase: 'residue', keyCount: 2 },
+      undefined,
+      { anonymous: true },
+    )
+    expect(keysAtSend[0]).toContain('OidcUser')
+  })
+
+  it('initialize reports nothing for a browser that holds no legacy keys', async () => {
+    const capture = vi.mocked(Metrics.captureEvent)
+
+    await Auth.initialize()
+
+    expect(capture).not.toHaveBeenCalled()
+  })
+
+  it('initialize does not report in legacy mode, where the keys belong', async () => {
+    vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(false)
+    vi.spyOn(OidcBroker, 'initialize').mockResolvedValue(undefined as never)
+    vi.spyOn(OidcBroker, 'getUserManager').mockReturnValue({
+      events: { addUserLoaded: vi.fn(), addAccessTokenExpiring: vi.fn(), addAccessTokenExpired: vi.fn() },
+    } as unknown as UserManager)
+    localStorage.setItem('OidcUser', 'valid')
+    const capture = vi.mocked(Metrics.captureEvent)
+
+    await Auth.initialize()
+
+    expect(capture).not.toHaveBeenCalled()
   })
 
   it('signIn POSTs /auth/login and redirects to the returned URL', async () => {

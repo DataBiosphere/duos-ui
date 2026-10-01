@@ -20,13 +20,23 @@ const bardUrl = async (identified: boolean, path: string): Promise<string> => {
   return `${await Config.getBardApiUrl()}${path}`
 }
 
+export interface CaptureOptions {
+  /**
+   * Post as an anonymous event whatever browser storage says. For callers that
+   * run when stale storage would otherwise make the helper infer a signed-in
+   * user with no session to authenticate it (the legacy key residue check).
+   */
+  anonymous?: boolean
+}
+
 export const Metrics = {
   captureEvent: (
     event: MetricsEventName,
     // oxlint-disable-next-line @typescript-eslint/no-explicit-any
     details: Record<string, any> = {},
     signal: AbortSignal = defaultSignal(),
-  ) => captureEventFn(event, signal, details).catch(() => {
+    options: CaptureOptions = {},
+  ) => captureEventFn(event, signal, details, options).catch(() => {
   }),
   syncProfile: (signal: AbortSignal = defaultSignal()) => syncProfile(signal),
   identify: (anonId: string, signal: AbortSignal = defaultSignal()) => identify(anonId, signal),
@@ -38,17 +48,24 @@ export const Metrics = {
  * @param {string} event - The event name.
  * @param {AbortSignal} [signal] - The abort signal.
  * @param {Object} [details={}] - The event details.
+ * @param {CaptureOptions} [options] - Set `anonymous` to skip the signed-in inference.
  * @returns {Promise} - A Promise that resolves when the event is captured.
  */
 // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-const captureEventFn = async (event: MetricsEventName, signal: AbortSignal, details: object = {}): Promise<any> => {
+const captureEventFn = async (
+  event: MetricsEventName,
+  signal: AbortSignal,
+  details: object = {},
+  { anonymous = false }: CaptureOptions = {},
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> => {
   // Legacy: the synchronous oidc-client-ts token check. BFF: the browser
   // holds no token (the legacy keys are purged), so a persisted registered
   // profile is what "signed in" looks like — without this every BFF event
   // posted anonymously, while identify/syncProfile in the same sign-in flow
   // posted identified, and Bard saw two disagreeing users.
-  const isSignedIn = Storage.userIsLogged()
-    || (await Config.isBffEnabled() && Storage.getCurrentUser().userId !== 0)
+  const isSignedIn = !anonymous && (Storage.userIsLogged()
+    || (await Config.isBffEnabled() && Storage.getCurrentUser().userId !== 0))
   const isRegistered = isSignedIn && Storage.getCurrentUser()
 
   if (!isRegistered && !Storage.getAnonymousId()) {

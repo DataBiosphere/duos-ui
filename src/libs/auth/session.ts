@@ -1,6 +1,7 @@
 import { Config } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 import { ToastNotifications } from 'src/libs/ToastNotifications'
+import { reportLegacyOidcKeys } from 'src/libs/auth/legacyOidcKeys'
 import { DuosUser } from 'src/types/model'
 
 /**
@@ -97,6 +98,9 @@ const probeBffSession = async (): Promise<SessionInfo> => {
     }
     const info = await res.json() as SessionInfo
     lastAuthoritativeAnswer = info
+    // Every confirmed BFF session passes through here — the first probe and
+    // each focus/TTL revalidation — the moments a legacy write would show up.
+    if (info.authenticated) reportLegacyOidcKeys('regression')
     return info
   }
   catch {
