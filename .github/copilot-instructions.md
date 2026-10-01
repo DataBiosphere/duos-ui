@@ -176,6 +176,13 @@ Before raising a pull request, ensure:
 | `Property X does not exist on type` for dynamic records | Cast the sub-object to a typed record (`as SomeRecordType`) before accessing properties |
 | Passing props that don't exist in a component's `Props` interface | Remove the extra props; do not add them to the interface unless the component actively uses them |
 
+## Server Logging (`server/`)
+
+- Log a named event with a stable `event` name and only the labels you name, through `logAuthEvent` in `server/src/auth/authEvents.ts`.
+- **Never pass `request.session`, `session`, `tokens`, `claims` or a raw upstream response body to a logger.** `session.userId` holds the email, and an openid-client `ResponseBodyError` carries the token endpoint's body in its `cause`.
+- Log a session ID only through `hashValue` from `server/src/logging.ts`, as `sidHash`. Never log a raw `sid`.
+- Pass an error as `err`, so the sanitizing serializer in `server/src/logging.ts` runs. The `redact` list is a backstop, and its `*` matches only one nesting level.
+
 ## Styling Conventions
 
 - Use `className="button button-blue"` for primary CTA buttons.

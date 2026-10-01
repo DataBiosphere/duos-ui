@@ -120,7 +120,7 @@ async function buildAuthApp(pg: PostgresDb, options: AuthAppOptions = {}): Promi
   await app.register(fastifyCookie)
   await app.register(fastifySession, sessionPluginOptions({
     secret: SECRET,
-    store: createPgSessionStore(pg),
+    store: createPgSessionStore(pg, app.log),
     sameSiteOverride: options.sameSiteOverride,
   }))
   // Real CSRF plugin, registered with index.ts's own options — after

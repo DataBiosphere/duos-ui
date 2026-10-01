@@ -79,6 +79,7 @@ export async function apiProxy(app: FastifyInstance, options: ApiProxyOptions = 
     prefix: PROXY_PREFIX,
     upstreamEnvVar: 'DUOS_API_URL',
     logTag: 'proxy',
+    upstream: 'duos',
     unauthenticatedPaths: UNAUTHENTICATED_PATHS,
     csrfExemptUnsafeRequests: CSRF_EXEMPT_UNSAFE_REQUESTS,
     // The DUOS API validates the same B2C access token the BFF refreshes, so

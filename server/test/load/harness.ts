@@ -83,7 +83,7 @@ export async function startLoadTarget(options: LoadTargetOptions): Promise<LoadT
       max: options.pgPoolMax,
     })
     await verifyDatabase(app, `${host}:${port}`)
-    store = createPgSessionStore(app.pg)
+    store = createPgSessionStore(app.pg, app.log)
     poolSnapshot = () => ({
       total: app.pg.pool.totalCount,
       idle: app.pg.pool.idleCount,

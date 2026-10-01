@@ -1,6 +1,7 @@
 import type { SessionStore } from '@fastify/session'
 import type { Session } from 'fastify'
 import type { PostgresDb } from '@fastify/postgres'
+import type { FastifyBaseLogger } from 'fastify'
 
 const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000
 
@@ -15,7 +16,7 @@ const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000
  * Correctness never depends on the `pg_cron` cleanup job: `get` filters on
  * `expire > NOW()`, so expired rows are invisible even before they are purged.
  */
-export function createPgSessionStore(pg: PostgresDb): SessionStore {
+export function createPgSessionStore(pg: PostgresDb, log: Pick<FastifyBaseLogger, 'info' | 'error'>): SessionStore {
   // Expiry is computed in SQL from the same clock `get` filters with
   // (`expire > NOW()`), so drift between the Node container's clock and
   // Postgres's cannot shorten or extend sessions. `@fastify/session` types
@@ -28,12 +29,24 @@ export function createPgSessionStore(pg: PostgresDb): SessionStore {
 
   // Uniform bridge from promise-returning work to the store's callback
   // contract, so error handling is identical across methods by construction.
-  const run = <T>(callback: (err?: unknown, result?: T) => void, work: () => Promise<T>): void => {
-    work().then(result => callback(null, result), err => callback(err))
+  // It is also where `session_store.completed` is emitted, one event per
+  // operation, so all three methods are covered by construction too. The store
+  // has no request, so `idp` is always `unknown`.
+  const run = <T>(op: 'get' | 'set' | 'destroy', callback: (err?: unknown, result?: T) => void, work: () => Promise<T>): void => {
+    work().then(
+      (result) => {
+        log.info({ event: 'session_store.completed', op, outcome: 'ok', idp: 'unknown' }, 'session_store.completed')
+        callback(null, result)
+      },
+      (err: unknown) => {
+        log.error({ event: 'session_store.completed', op, outcome: 'failed', idp: 'unknown', err }, 'session_store.completed')
+        callback(err)
+      },
+    )
   }
 
   return {
-    get: (sid, callback) => run(callback, async () => {
+    get: (sid, callback) => run('get', callback, async () => {
       const { rows } = await pg.query(
         'SELECT sess FROM user_sessions WHERE sid = $1 AND expire > NOW()',
         [sid],
@@ -41,7 +54,7 @@ export function createPgSessionStore(pg: PostgresDb): SessionStore {
       return rows[0]?.sess ?? null
     }),
 
-    set: (sid, session, callback) => run(callback, async () => {
+    set: (sid, session, callback) => run('set', callback, async () => {
       await pg.query(
         `INSERT INTO user_sessions (sid, sess, expire)
          VALUES ($1, $2, NOW() + $3 * interval '1 millisecond')
@@ -50,7 +63,7 @@ export function createPgSessionStore(pg: PostgresDb): SessionStore {
       )
     }),
 
-    destroy: (sid, callback) => run(callback, async () => {
+    destroy: (sid, callback) => run('destroy', callback, async () => {
       await pg.query('DELETE FROM user_sessions WHERE sid = $1', [sid])
     }),
   } satisfies SessionStore

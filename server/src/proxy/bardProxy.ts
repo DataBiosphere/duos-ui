@@ -46,6 +46,7 @@ export async function bardProxy(app: FastifyInstance, options: UpstreamProxyOpti
     prefix: BARD_PROXY_PREFIX,
     upstreamEnvVar: 'DUOS_BARD_URL',
     logTag: 'bard-proxy',
+    upstream: 'bard',
     unauthenticatedPaths: NO_PATHS,
     csrfExemptUnsafeRequests: NO_PATHS,
     destroySessionOnUpstream401: false,

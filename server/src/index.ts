@@ -66,7 +66,7 @@ export function shouldUseHttps(
  */
 export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
-    request.log.warn({ ip: request.ip, url: request.url }, '[server] rate limit exceeded')
+    request.log.warn({ event: 'auth.rate_limited', route: request.routeOptions?.url ?? 'unknown', ip: request.ip }, 'auth.rate_limited')
     return reply.status(err.statusCode ?? 429).send({ error: RATE_LIMIT_ERROR_CODE })
   }
   request.log.error({ err }, '[server] Unhandled error:')
@@ -83,7 +83,7 @@ export function handleServerError(err: FastifyError, request: FastifyRequest, re
  */
 export function handleCallbackError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
-    request.log.warn({ ip: request.ip }, '[server] rate limit exceeded on the OAuth callback')
+    request.log.warn({ event: 'auth.rate_limited', route: 'callback', ip: request.ip }, 'auth.rate_limited')
     return reply.redirect(`/?signInError=${RATE_LIMIT_ERROR_CODE}`)
   }
   return handleServerError(err, request, reply)
@@ -192,7 +192,7 @@ export async function buildApp(): Promise<AppInstance> {
     await fastify.register(fastifyCookie)
     await fastify.register(fastifySession, sessionPluginOptions({
       secret: sessionSecret,
-      store: createPgSessionStore(fastify.pg),
+      store: createPgSessionStore(fastify.pg, fastify.log),
     }))
 
     // CSRF protection for cookie-authenticated, state-changing auth routes
