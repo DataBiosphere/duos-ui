@@ -67,7 +67,7 @@ export function shouldUseHttps(
  */
 export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
-    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: request.ip }, 'warn')
+    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: request.ip, idp: 'unknown' }, 'warn')
     return reply.status(err.statusCode ?? 429).send({ error: RATE_LIMIT_ERROR_CODE })
   }
   request.log.error({ err }, '[server] Unhandled error:')
@@ -84,7 +84,7 @@ export function handleServerError(err: FastifyError, request: FastifyRequest, re
  */
 export function handleCallbackError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
-    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: request.ip }, 'warn')
+    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: request.ip, idp: 'unknown' }, 'warn')
     return reply.redirect(`/?signInError=${RATE_LIMIT_ERROR_CODE}`)
   }
   return handleServerError(err, request, reply)

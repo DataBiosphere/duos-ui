@@ -10,7 +10,7 @@ import type {
   RouteGenericInterface,
 } from 'fastify'
 import fastifyReplyFrom from '@fastify/reply-from'
-import { endSession, logAuthEvent } from '../auth/authEvents.js'
+import { endSession, logAuthEvent, sessionIdp } from '../auth/authEvents.js'
 import type { SessionDestroyReason } from '../auth/authEvents.js'
 import { requireEnv } from '../auth/oidcClient.js'
 import { RefreshFailedError, refreshAccessToken, tokenDisposition } from '../auth/refresh.js'
@@ -218,7 +218,7 @@ export async function registerUpstreamProxy(
   app.setErrorHandler((err: FastifyError, request, reply) => {
     const reason = err.code === undefined ? undefined : CSRF_REJECTION_REASONS.get(err.code)
     if (reason !== undefined) {
-      logAuthEvent(request, 'proxy.csrf.rejected', { reason })
+      logAuthEvent(request, 'proxy.csrf.rejected', { reason, idp: sessionIdp(request) })
       recordBffError(request, CSRF_ERROR_CODE)
       return reply.status(403).send({ error: CSRF_ERROR_CODE, reason })
     }
