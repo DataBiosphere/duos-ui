@@ -69,8 +69,8 @@ AZURE_ISSUER_URL_DEFAULT="https://terradevb2c.b2clogin.com/terradevb2c.onmicroso
 # `pnpm run start:server`, the full-stack dev server (plain `pnpm start` runs
 # only Vite and never reads these variables). Docker compose serves https on port 443, so
 # --compose true uses the portless https form instead.
-OAUTH_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/auth/callback"
-POST_LOGOUT_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/post-logout"
+OAUTH_REDIRECT_URI_DEFAULT="https://local.dsde-dev.broadinstitute.org:3000/auth/callback"
+POST_LOGOUT_REDIRECT_URI_DEFAULT="https://local.dsde-dev.broadinstitute.org:3000/post-logout"
 COMPOSE_OAUTH_REDIRECT_URI="https://local.dsde-dev.broadinstitute.org/auth/callback"
 COMPOSE_POST_LOGOUT_REDIRECT_URI="https://local.dsde-dev.broadinstitute.org/post-logout"
 API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
