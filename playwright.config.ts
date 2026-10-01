@@ -35,6 +35,10 @@ const serverDefaults = {
   ignoreHTTPSErrors: true,
   timeout: 120_000,
   reuseExistingServer: !process.env.CI,
+  // DIAGNOSTIC: print each server's output in the job log. Playwright discards it
+  // by default, which hides the `[test-signin] rejected` reason on a failed sign-in.
+  stdout: 'pipe' as const,
+  stderr: 'pipe' as const,
 }
 
 export default defineConfig({
@@ -43,10 +47,13 @@ export default defineConfig({
   expect: {
     timeout: 10_000,
   },
+  // DIAGNOSTIC: the workflow uploads playwright-report/ on failure, but no reporter wrote one.
+  reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: BASE_URL,
     ignoreHTTPSErrors: true,
     navigationTimeout: 30_000,
+    trace: 'retain-on-failure',
   },
   projects: [
     {
