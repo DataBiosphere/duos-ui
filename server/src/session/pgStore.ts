@@ -1,7 +1,6 @@
 import type { SessionStore } from '@fastify/session'
-import type { Session } from 'fastify'
+import type { FastifyBaseLogger, Session } from 'fastify'
 import type { PostgresDb } from '@fastify/postgres'
-import type { FastifyBaseLogger } from 'fastify'
 
 const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000
 
