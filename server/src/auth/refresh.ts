@@ -94,6 +94,12 @@ export async function refreshAccessToken(request: FastifyRequest): Promise<void>
     // its access token (B2C omits one when `offline_access` was not granted), so
     // it is only ever seconds away from being useless. Destroy it now and make
     // the user re-authenticate rather than serve 401s until the token expires.
+    // Per caller, outside the flight, by design (Epic 6, story 6-F): this check
+    // runs before the `inFlight` lookup, so it is not deduplicated and cannot
+    // share `auth.refresh.completed`'s denominator. Concurrent requests that
+    // hydrate the same session before the first destroy lands each log here and
+    // each emit `auth.session.destroyed`, so both are upper bounds. Exact
+    // session counts come from `user_session_audit`, not from these lines.
     logAuthEvent(request, 'auth.refresh.unrefreshable', {}, 'warn')
     await endSession(request, 'refresh_terminal')
     throw new RefreshFailedError('no_refresh_token')
