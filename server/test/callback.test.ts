@@ -434,6 +434,19 @@ describe('handleCallback — auth.callback.completed', () => {
     )
   })
 
+  it('keeps the provider on a missing-email failure when the id_token names one', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue(makeTokens({ sub: 'abc123', idp: 'google.com' }))
+    const request = makeRequest()
+
+    await handleCallback(request, makeReply())
+
+    expect(request.log.warn).toHaveBeenCalledWith(
+      { event: 'auth.callback.completed', outcome: 'failed', errorType: 'token_missing_email_claim', idp: 'google' },
+      'auth.callback.completed',
+    )
+  })
+
   it('logs the error name, never its message, and rethrows when the code exchange throws', async () => {
     const thrown = new TypeError('fetch failed for https://b2c.example/token?code=SECRET')
     await rejectGrantWith(thrown)
