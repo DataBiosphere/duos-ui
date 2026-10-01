@@ -311,11 +311,7 @@ describe('AppRoutes — Admin Console dashboard and metrics', () => {
     expect(getByText('Admin Metrics')).toBeInTheDocument()
   })
 
-  it.each([
-    USER_ROLES.researcher,
-    USER_ROLES.chairperson,
-    USER_ROLES.signingOfficial,
-  ])('does not let a %s through to either page', (roleName) => {
+  it.each([USER_ROLES.researcher, USER_ROLES.chairperson, USER_ROLES.signingOfficial])('does not let a %s through to either page', (roleName) => {
     vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(roleName))
 
     for (const route of ['/admin_console/dashboard', '/admin_console/metrics']) {
