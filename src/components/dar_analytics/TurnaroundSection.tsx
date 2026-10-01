@@ -93,8 +93,8 @@ export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
           xAxis={[{ scaleType: 'point', data: starts.map(start => formatBucketStart(start, shown.bucket)) }]}
           yAxis={[{ label: 'Days' }]}
           series={[
-            { label: 'Median', data: stat('medianDays'), curve: 'linear' },
-            { label: 'Mean', data: stat('meanDays'), curve: 'linear' },
+            { label: 'Median', data: stat('medianDays'), curve: 'linear', showMark: true },
+            { label: 'Mean', data: stat('meanDays'), curve: 'linear', showMark: true },
           ]}
         />
         <DataGrid
