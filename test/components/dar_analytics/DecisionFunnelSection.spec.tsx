@@ -19,7 +19,7 @@ const range: DarAnalyticsRange = { from: '2026-01-01', to: '2026-06-30', bucket:
 const Q1 = Date.parse('2026-01-01T00:00:00Z')
 const Q2 = Date.parse('2026-04-01T00:00:00Z')
 
-const buildReport = (buckets: DecisionBucketCount[]): DarMetricsReport<DecisionBucketCount, never> => ({
+const buildReport = <B extends DecisionBucketCount = never>(buckets: B[]): DarMetricsReport<B, never> => ({
   from: range.from,
   to: range.to,
   bucket: 'QUARTER',
@@ -28,11 +28,11 @@ const buildReport = (buckets: DecisionBucketCount[]): DarMetricsReport<DecisionB
   rows: [],
 })
 
-const renderSection = () => render(
-  <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-    <DecisionFunnelSection range={range} />
-  </QueryClientProvider>,
+const client = () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
+const section = (queryClient: QueryClient, shown = range) => (
+  <QueryClientProvider client={queryClient}><DecisionFunnelSection range={shown} /></QueryClientProvider>
 )
+const renderSection = () => render(section(client()))
 
 const countsFor = (label: string) =>
   within(screen.getByRole('gridcell', { name: label }).closest<HTMLElement>('[role="row"]')!)
@@ -90,5 +90,18 @@ describe('DecisionFunnelSection', () => {
     renderSection()
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Forbidden')
+  })
+
+  it('waits for both reports on a new range rather than mixing ranges', async () => {
+    vi.mocked(DarMetrics.getDecisions).mockResolvedValue(buildReport([{ bucketStart: Q1, state: 'APPROVED', count: 1 }]))
+    vi.mocked(DarMetrics.getDatasetDecisions).mockResolvedValueOnce(buildReport([{ bucketStart: Q1, state: 'APPROVED', count: 1 }]))
+    const queryClient = client()
+    const { rerender } = render(section(queryClient))
+    await screen.findByRole('grid')
+    vi.mocked(DarMetrics.getDatasetDecisions).mockReturnValueOnce(new Promise(() => {}))
+
+    rerender(section(queryClient, { ...range, bucket: 'month' }))
+
+    expect(await screen.findByLabelText('Loading Decision funnel')).toBeInTheDocument()
   })
 })

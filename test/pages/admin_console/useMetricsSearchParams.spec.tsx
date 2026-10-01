@@ -63,4 +63,14 @@ describe('useMetricsSearchParams', () => {
     expect(result.current.params.tab).toBe('turnaround')
     expect(result.current.params.range).toEqual({ from: '2024-07-01', to: '2026-08-14', bucket: 'week' })
   })
+
+  it('keeps a newer bucket when an older date change applies after it', () => {
+    const { result } = setup('?from=2025-01-01&to=2025-06-30&bucket=quarter')
+    const staleSetRange = result.current.params.setRange
+
+    act(() => result.current.params.setRange({ bucket: 'month' }))
+    act(() => staleSetRange({ from: '2025-02-01', to: '2025-06-30' }))
+
+    expect(result.current.params.range).toEqual({ from: '2025-02-01', to: '2025-06-30', bucket: 'month' })
+  })
 })
