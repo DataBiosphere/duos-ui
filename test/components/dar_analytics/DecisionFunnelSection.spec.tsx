@@ -85,8 +85,8 @@ describe('DecisionFunnelSection', () => {
     expect(DarMetrics.getDatasetDecisions).toHaveBeenCalledWith({ ...range, limit: 1 })
   })
 
-  it('shows the error when either report fails', async () => {
-    vi.mocked(DarMetrics.getDecisions).mockResolvedValue(buildReport([]))
+  it('shows a failed report at once, without waiting for the other', async () => {
+    vi.mocked(DarMetrics.getDecisions).mockReturnValue(new Promise(() => {}))
     vi.mocked(DarMetrics.getDatasetDecisions).mockRejectedValue({ message: 'Forbidden', code: 403 })
 
     renderSection()
