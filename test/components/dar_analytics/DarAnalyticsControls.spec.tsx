@@ -97,7 +97,16 @@ describe('DarAnalyticsControls', () => {
     act(() => vi.runAllTimers())
 
     expect(onChange).not.toHaveBeenCalled()
-    expect(screen.getByText(/Too long to group by day/)).toBeInTheDocument()
+    expect(screen.getByText('Too long to group by day; shorten the range or group by a longer period')).toBeInTheDocument()
+  })
+
+  it('applies only the grouping when the typed dates are invalid', () => {
+    render(<DarAnalyticsControls range={range} onChange={onChange} />)
+
+    typeDate('To', '2025-12-31')
+    fireEvent.click(screen.getByRole('button', { name: 'Month' }))
+
+    expect(onChange).toHaveBeenCalledExactlyOnceWith({ bucket: 'month' })
   })
 
   it('applies held-back dates with the longer grouping chosen for them', () => {
