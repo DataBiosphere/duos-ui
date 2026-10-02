@@ -139,6 +139,7 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.admin]} />}>
+          <Route path="/admin_console" element={<Navigate to="/admin_console/dashboard" replace />} />
           <Route path="/admin_console/dashboard" element={<AdminDashboard />} />
           <Route path="/admin_console/metrics" element={<AdminMetrics />} />
           <Route path="/admin_review_collection/:collectionId" element={<DarCollectionReview adminPage={true} />} />

@@ -1,9 +1,9 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, within } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { screen, within } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { renderWithRouter } from '../../test-utils'
 import AdminDashboard from 'src/pages/admin_console/AdminDashboard'
 import { Admin, AdminDashboardSummary } from 'src/libs/ajax/Admin'
 import { ADMIN_CONSOLE_SECTIONS } from 'src/pages/admin_console/adminConsoleRoutes'
@@ -12,9 +12,9 @@ vi.mock('src/libs/ajax/Admin', () => ({
   Admin: { getDashboardSummary: vi.fn() },
 }))
 
-vi.mock('src/pages/admin_console/metricsTabs', () => ({
-  METRICS_TABS: ['decisions', 'turnaround', 'so-approvals', 'volume', 'expiration'].map(key => ({ key })),
-}))
+const ALL_TABS = ['decisions', 'turnaround', 'so-approvals', 'volume', 'expiration'].map(key => ({ key }))
+const tabs = vi.hoisted(() => ({ METRICS_TABS: [] as { key: string }[] }))
+vi.mock('src/pages/admin_console/metricsTabs', () => tabs)
 
 vi.mock('src/contexts/NavigationStateContext', () => ({
   useNavigationState: () => ({ activeTab: 1 }),
@@ -30,7 +30,7 @@ const summary: AdminDashboardSummary = {
   metrics: {
     from: '2026-07-04',
     to: '2026-10-01',
-    decisions: { submitted: 24, pending: 9, approved: 12, denied: 3 },
+    decisions: { submitted: 24, pending: 9, approved: 12, denied: 3, mixed: 0, canceled: 0 },
     turnaround: { decided: 15, unmeasured: 0, medianDays: 12.46, modeDays: 9 },
     soApprovals: { approved: 5, pending: 2, skipped: 7 },
     volume: { dars: 24, researchers: 19, institutions: 11 },
@@ -38,11 +38,9 @@ const summary: AdminDashboardSummary = {
   },
 }
 
-const renderDashboard = () => render(
+const renderDashboard = () => renderWithRouter(
   <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-    <MemoryRouter>
-      <AdminDashboard />
-    </MemoryRouter>
+    <AdminDashboard />
   </QueryClientProvider>,
 )
 
@@ -51,7 +49,14 @@ const tile = (name: string) => screen.getByRole('link', { name: new RegExp(`^${n
 describe('AdminDashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-10-01T12:00:00'))
+    tabs.METRICS_TABS = ALL_TABS
     vi.mocked(Admin.getDashboardSummary).mockResolvedValue(summary)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it.each(ADMIN_CONSOLE_SECTIONS.map(section => [section.label, section.link]))(
@@ -69,10 +74,10 @@ describe('AdminDashboard', () => {
     ['SO Approvals', 'so-approvals'],
     ['Volume', 'volume'],
     ['Expiration & Renewal', 'expiration'],
-  ])('opens the %s tile on its Metrics tab', (label, tab) => {
+  ])('opens the %s tile on its Metrics tab, over the same 90 days', (label, tab) => {
     renderDashboard()
 
-    expect(tile(label)).toHaveAttribute('href', `/admin_console/metrics?tab=${tab}`)
+    expect(tile(label)).toHaveAttribute('href', `/admin_console/metrics?tab=${tab}&from=2026-07-04&to=2026-10-01&bucket=week`)
   })
 
   it('shows section counts and the 90-day metrics from one summary request', async () => {
@@ -104,18 +109,12 @@ describe('AdminDashboard', () => {
     expect(screen.queryByRole('heading', { name: 'Get more out of DUOS' })).not.toBeInTheDocument()
   })
 
-  it('leaves out a metric tile whose Metrics tab does not exist yet', async () => {
-    vi.resetModules()
-    vi.doMock('src/pages/admin_console/metricsTabs', () => ({ METRICS_TABS: [{ key: 'decisions' }] }))
-    const { default: Dashboard } = await import('src/pages/admin_console/AdminDashboard')
+  it('leaves out a metric tile whose Metrics tab does not exist yet', () => {
+    tabs.METRICS_TABS = [{ key: 'decisions' }]
 
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <MemoryRouter><Dashboard /></MemoryRouter>
-      </QueryClientProvider>,
-    )
+    renderDashboard()
 
-    expect(tile('Decisions')).toHaveAttribute('href', '/admin_console/metrics?tab=decisions')
+    expect(tile('Decisions')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /^Volume/ })).not.toBeInTheDocument()
   })
 })

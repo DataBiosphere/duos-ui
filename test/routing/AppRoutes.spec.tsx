@@ -86,6 +86,7 @@ const roleBACRoutes: string[] = [
   '/manage_dac',
   '/manage_dac/1',
   '/manage_radar/1',
+  '/admin_console',
   '/admin_console/dashboard',
   '/admin_console/metrics',
   '/admin_review_collection/1',
@@ -286,6 +287,14 @@ describe('AppRoutes — Admin Console dashboard and metrics', () => {
   })
 
   afterEach(() => vi.restoreAllMocks())
+
+  it('sends an admin at /admin_console to the dashboard', () => {
+    vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(USER_ROLES.admin))
+
+    const { getByText } = render(<MemoryRouter initialEntries={['/admin_console']}><AppRoutes isLogged={true} env="dev" /></MemoryRouter>)
+
+    expect(getByText('Admin Dashboard')).toBeInTheDocument()
+  })
 
   it('renders the dashboard for an admin', () => {
     vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(userWithRole(USER_ROLES.admin))

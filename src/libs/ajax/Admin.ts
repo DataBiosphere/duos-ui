@@ -11,7 +11,7 @@ export interface AdminDashboardSummary {
   metrics: {
     from: string
     to: string
-    decisions: { submitted: number, pending: number, approved: number, denied: number }
+    decisions: { submitted: number, pending: number, approved: number, denied: number, mixed: number, canceled: number }
     /** Consent omits the statistics when nothing in the window was measured. */
     turnaround: { decided: number, unmeasured: number, medianDays?: number | null, modeDays?: number | null }
     soApprovals: { approved: number, pending: number, skipped: number }
