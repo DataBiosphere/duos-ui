@@ -6,7 +6,7 @@ import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { InstitutionDarCount, MetricsBucket } from 'src/types/darMetrics'
 import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
-import { bucketStartsInRange, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
+import { bucketStartsInRange, describePeriods, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
 import { useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
 
@@ -41,6 +41,9 @@ export const VolumeSection = ({ range }: { range: DarAnalyticsRange }) => {
     id: `${institution.institutionId ?? 'none'}-${institution.institutionName ?? ''}-${index}`,
   }))
 
+  const labels = starts.map(start => formatBucketStart(start, shown.bucket))
+  const series = [{ label: 'DARs submitted', data: starts.map(start => byStart.get(start)?.darCount ?? 0) }]
+
   return (
     <AnalyticsSection
       title="Volume"
@@ -70,9 +73,11 @@ export const VolumeSection = ({ range }: { range: DarAnalyticsRange }) => {
       />
       <Box sx={layoutStyle}>
         <BarChart
+          title="DARs submitted per period"
+          desc={describePeriods(labels, series)}
           height={320}
-          xAxis={[{ scaleType: 'band', data: starts.map(start => formatBucketStart(start, shown.bucket)) }]}
-          series={[{ label: 'DARs submitted', data: starts.map(start => byStart.get(start)?.darCount ?? 0) }]}
+          xAxis={[{ scaleType: 'band', data: labels }]}
+          series={series}
         />
         <DataGrid
           aria-label="DARs by institution"

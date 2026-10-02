@@ -64,6 +64,8 @@ describe('VolumeSection', () => {
     expect(figure('Datasets requested')).toHaveTextContent('7')
     expect(within(grid).getByRole('gridcell', { name: 'Broad Institute' })).toBeInTheDocument()
     expect(within(grid).getByRole('gridcell', { name: 'No institution' })).toBeInTheDocument()
+    expect(document.querySelector('[aria-label="DARs submitted per period"]'))
+      .toHaveAccessibleDescription('2026 Q1: DARs submitted 3; 2026 Q2: DARs submitted 2')
     expect(DarMetrics.getVolume).toHaveBeenCalledWith({ ...range, limit: 1 })
   })
 
