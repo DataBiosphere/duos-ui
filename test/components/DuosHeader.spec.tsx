@@ -238,7 +238,7 @@ describe('DuosHeader', () => {
       expect(screen.getByRole('tab', { name: 'Admin Console' })).toHaveClass('Mui-selected')
     })
 
-    it('lists Metrics under the Admin Console and highlights it there', async () => {
+    it('lists Metrics under the Admin Console and highlights the console there', async () => {
       await mountHeader('/admin_console/metrics', { ...mockUser, isAdmin: true, isResearcher: false })
       expect(screen.getByRole('tab', { name: 'Admin Console' })).toHaveClass('Mui-selected')
       expect(screen.getByRole('tab', { name: 'Metrics' })).toBeInTheDocument()
