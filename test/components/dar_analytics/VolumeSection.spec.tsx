@@ -1,7 +1,7 @@
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { VolumeSection } from 'src/components/dar_analytics/VolumeSection'
@@ -67,6 +67,61 @@ describe('VolumeSection', () => {
     expect(document.querySelector('[aria-label="DARs submitted per period"]'))
       .toHaveAccessibleDescription('2026 Q1: DARs submitted 3; 2026 Q2: DARs submitted 2')
     expect(DarMetrics.getVolume).toHaveBeenCalledWith({ ...range, limit: 1 })
+  })
+
+  it('counts an institution once by id, even when its DARs recorded different names', async () => {
+    vi.mocked(DarMetrics.getVolume).mockResolvedValue(report({
+      total: 3,
+      institutions: [
+        { institutionId: 7, institutionName: 'Broad Institute', darCount: 1, researcherCount: 1 },
+        { institutionId: 7, institutionName: 'The Broad Institute', darCount: 1, researcherCount: 1 },
+        { darCount: 1, researcherCount: 1 },
+      ],
+    }))
+
+    renderSection()
+
+    await screen.findByRole('grid', { name: 'DARs by institution' })
+    expect(figure('Institutions')).toHaveTextContent('1')
+  })
+
+  it('charts a period with no DARs as zero', async () => {
+    vi.mocked(DarMetrics.getVolume).mockResolvedValue(report({
+      total: 2,
+      buckets: [{ bucketStart: Q2, darCount: 2, researcherCount: 1, institutionCount: 1, datasetCount: 2 }],
+    }))
+
+    renderSection()
+
+    await screen.findByRole('grid', { name: 'DARs by institution' })
+    expect(document.querySelector('[aria-label="DARs submitted per period"]'))
+      .toHaveAccessibleDescription('2026 Q1: DARs submitted 0; 2026 Q2: DARs submitted 2')
+  })
+
+  it('pages the institution list ten at a time', async () => {
+    vi.mocked(DarMetrics.getVolume).mockResolvedValue(report({
+      total: 12,
+      institutions: Array.from({ length: 12 }, (_, i) => ({
+        institutionId: i, institutionName: `Institution ${i + 1}`, darCount: 1, researcherCount: 1,
+      })),
+    }))
+
+    renderSection()
+
+    const grid = await screen.findByRole('grid', { name: 'DARs by institution' })
+    expect(within(grid).queryByRole('gridcell', { name: 'Institution 11' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Go to next page' }))
+    expect(await within(grid).findByRole('gridcell', { name: 'Institution 11' })).toBeInTheDocument()
+    expect(within(grid).queryByRole('gridcell', { name: 'Institution 1' })).not.toBeInTheDocument()
+  })
+
+  it('shows a failed report as an error', async () => {
+    vi.mocked(DarMetrics.getVolume).mockRejectedValue({ message: 'Forbidden', code: 403 })
+
+    renderSection()
+
+    expect(await screen.findByText('Unable to load Volume: Forbidden')).toBeInTheDocument()
+    expect(screen.queryByRole('grid')).not.toBeInTheDocument()
   })
 
   it('shows the empty state with the institution caveat', async () => {
