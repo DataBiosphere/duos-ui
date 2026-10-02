@@ -93,7 +93,8 @@ describe('DecisionFunnelSection', () => {
   })
 
   it('waits for both reports on a new range rather than mixing ranges', async () => {
-    vi.mocked(DarMetrics.getDecisions).mockResolvedValue(buildReport([{ bucketStart: Q1, state: 'APPROVED', count: 1 }]))
+    const approved = buildReport([{ bucketStart: Q1, state: 'APPROVED', count: 1 }])
+    vi.mocked(DarMetrics.getDecisions).mockResolvedValueOnce(approved).mockResolvedValueOnce({ ...approved, bucket: 'MONTH' })
     vi.mocked(DarMetrics.getDatasetDecisions).mockResolvedValueOnce(buildReport([{ bucketStart: Q1, state: 'APPROVED', count: 1 }]))
     const queryClient = client()
     const { rerender } = render(section(queryClient))
