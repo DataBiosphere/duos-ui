@@ -20,6 +20,7 @@ const layoutStyle = {
 }
 
 const days = (value?: number | null) => (value == null ? '–' : value.toFixed(1))
+const oneDecimal = (value?: number | null) => (value == null ? null : Math.round(value * 10) / 10)
 
 interface TurnaroundRow extends TurnaroundBucket {
   id: number
@@ -48,7 +49,7 @@ export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
     : range
   const byStart = new Map((data?.buckets ?? []).map(bucket => [bucket.bucketStart, bucket]))
   const starts = bucketStartsInRange(shown)
-  const stat = (key: 'meanDays' | 'medianDays') => starts.map(start => byStart.get(start)?.[key] ?? null)
+  const stat = (key: 'meanDays' | 'medianDays') => starts.map(start => oneDecimal(byStart.get(start)?.[key]))
   const rows: TurnaroundRow[] = (data?.buckets ?? []).map(bucket => ({
     ...bucket,
     id: bucket.bucketStart,
