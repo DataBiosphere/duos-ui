@@ -53,3 +53,7 @@ export const formatBucketStart = (bucketStart: number, bucket: MetricsBucket): s
       return start.format('MMM D, YYYY')
   }
 }
+
+/** A per-period chart as text, for assistive technology: `Q1: Approved 4, Denied 1; Q2: …`. */
+export const describePeriods = (labels: string[], series: { label: string, data: (number | null)[] }[]) =>
+  labels.map((label, i) => `${label}: ${series.map(s => `${s.label} ${s.data[i] ?? 'none'}`).join(', ')}`).join('; ')
