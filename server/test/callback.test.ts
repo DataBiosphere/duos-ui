@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { Configuration } from 'openid-client'
+import { AuthorizationResponseError } from 'openid-client'
 import { handleCallback } from '../src/auth/callback.js'
 
 // Mock getOidcConfig() (network) but keep the real requireEnv() so its
@@ -39,6 +40,8 @@ function makeRequest(overrides: {
   destroyThrows?: boolean
   regenerateError?: Error
   auditError?: Error
+  /** The provider of a session that is already signed in when this callback arrives. */
+  previousIdp?: 'google' | 'microsoft'
 } = {}): FastifyRequest {
   // Match @fastify/session: regenerate() replaces the session with an empty one.
   const newSession = (sessionId: string): Record<string, unknown> => ({
@@ -57,6 +60,7 @@ function makeRequest(overrides: {
       pkceVerifier: 'pkceVerifier' in overrides ? overrides.pkceVerifier : 'test-verifier',
       pkceState: 'pkceState' in overrides ? overrides.pkceState : 'test-state',
       returnTo: overrides.returnTo,
+      idp: overrides.previousIdp,
     },
     server: {
       pg: {
@@ -359,5 +363,147 @@ describe('handleCallback', () => {
     delete process.env.DUOS_OAUTH_REDIRECT_URI
 
     await expect(handleCallback(makeRequest(), makeReply())).rejects.toThrow('DUOS_OAUTH_REDIRECT_URI')
+  })
+})
+
+describe('handleCallback — auth.callback.completed', () => {
+  beforeEach(async () => {
+    Object.assign(process.env, AZURE_ENV)
+    const oidcClient = await import('../src/auth/oidcClient.js')
+    vi.mocked(oidcClient.getOidcConfig).mockReset().mockResolvedValue({} as Configuration)
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.authorizationCodeGrant).mockReset().mockResolvedValue(makeTokens({ email: 'user@example.com', idp: 'google.com' }))
+  })
+
+  afterEach(() => {
+    for (const key of Object.keys(AZURE_ENV)) delete process.env[key]
+  })
+
+  async function rejectGrantWith(err: unknown) {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.authorizationCodeGrant).mockRejectedValue(err)
+  }
+
+  function authorizationError(error: string) {
+    return new AuthorizationResponseError('authorization response error', { cause: new URLSearchParams({ error }) })
+  }
+
+  describe('when a signed-in user starts a new login', () => {
+    // The old session survives until the callback replaces it, so an event about
+    // the new attempt must not take its provider from that session.
+    it.each([
+      ['a cancellation', () => rejectGrantWith(authorizationError('access_denied'))],
+      ['a provider error', () => rejectGrantWith(authorizationError('server_error'))],
+      ['a thrown exchange error', () => rejectGrantWith(new TypeError('fetch failed'))],
+    ])('reports idp unknown for %s, not the previous provider', async (_name, arrange) => {
+      await arrange()
+      const request = makeRequest({ previousIdp: 'google' })
+
+      await handleCallback(request, makeReply()).catch(() => {})
+
+      const logged = [...vi.mocked(request.log.info).mock.calls, ...vi.mocked(request.log.warn).mock.calls]
+        .map(([fields]) => fields as { event?: string, idp?: string })
+        .filter(fields => fields.event === 'auth.callback.completed')
+      expect(logged).toEqual([expect.objectContaining({ idp: 'unknown' })])
+    })
+
+    it('reports the NEW provider on success, not the previous one', async () => {
+      const oidc = await import('openid-client')
+      vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue(makeTokens({ email: 'user@example.com', idp: 'https://login.microsoftonline.com/tenant/v2.0' }))
+      const request = makeRequest({ previousIdp: 'google' })
+
+      await handleCallback(request, makeReply())
+
+      expect(request.log.info).toHaveBeenCalledWith(expect.objectContaining({ event: 'auth.callback.completed', outcome: 'succeeded', idp: 'microsoft' }), 'auth.callback.completed')
+    })
+  })
+
+  it('logs a succeeded event at info carrying the idp', async () => {
+    const request = makeRequest()
+
+    await handleCallback(request, makeReply())
+
+    expect(request.log.info).toHaveBeenCalledWith(
+      { event: 'auth.callback.completed', outcome: 'succeeded', idp: 'google' },
+      'auth.callback.completed',
+    )
+  })
+
+  it('logs a cancellation at info, so it counts in the denominator but not as an error', async () => {
+    await rejectGrantWith(authorizationError('access_denied'))
+    const request = makeRequest()
+
+    await handleCallback(request, makeReply())
+
+    expect(request.log.info).toHaveBeenCalledWith(
+      { event: 'auth.callback.completed', outcome: 'cancelled', idp: 'unknown' },
+      'auth.callback.completed',
+    )
+    expect(request.log.warn).not.toHaveBeenCalled()
+  })
+
+  it('logs a provider error at warn with the OAuth error type', async () => {
+    await rejectGrantWith(authorizationError('server_error'))
+    const request = makeRequest()
+
+    await handleCallback(request, makeReply())
+
+    expect(request.log.warn).toHaveBeenCalledWith(
+      { event: 'auth.callback.completed', outcome: 'failed', errorType: 'server_error', idp: 'unknown' },
+      'auth.callback.completed',
+    )
+  })
+
+  it('keeps the provider when the session cannot be written after the token validated', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue(makeTokens({ email: 'user@example.com', idp: 'google.com' }))
+    const failure = new Error('store unavailable')
+    const request = makeRequest({ regenerateError: failure })
+
+    await expect(handleCallback(request, makeReply())).rejects.toBe(failure)
+
+    expect(request.log.warn).toHaveBeenCalledWith(
+      { event: 'auth.callback.completed', outcome: 'failed', errorType: 'Error', idp: 'google' },
+      'auth.callback.completed',
+    )
+  })
+
+  it('logs a failed event for a missing email claim', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue(makeTokens({ sub: 'abc123' }))
+    const request = makeRequest()
+
+    await handleCallback(request, makeReply())
+
+    expect(request.log.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'failed', errorType: 'token_missing_email_claim' }),
+      'auth.callback.completed',
+    )
+  })
+
+  it('keeps the provider on a missing-email failure when the id_token names one', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue(makeTokens({ sub: 'abc123', idp: 'google.com' }))
+    const request = makeRequest()
+
+    await handleCallback(request, makeReply())
+
+    expect(request.log.warn).toHaveBeenCalledWith(
+      { event: 'auth.callback.completed', outcome: 'failed', errorType: 'token_missing_email_claim', idp: 'google' },
+      'auth.callback.completed',
+    )
+  })
+
+  it('logs the error name, never its message, and rethrows when the code exchange throws', async () => {
+    const thrown = new TypeError('fetch failed for https://b2c.example/token?code=SECRET')
+    await rejectGrantWith(thrown)
+    const request = makeRequest()
+
+    await expect(handleCallback(request, makeReply())).rejects.toBe(thrown)
+
+    expect(request.log.warn).toHaveBeenCalledWith(
+      { event: 'auth.callback.completed', outcome: 'failed', errorType: 'TypeError', idp: 'unknown' },
+      'auth.callback.completed',
+    )
   })
 })

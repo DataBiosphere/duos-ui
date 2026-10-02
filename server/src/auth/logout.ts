@@ -1,5 +1,6 @@
 import * as oidc from 'openid-client'
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import { endSession, logAuthEvent, sessionIdp } from './authEvents.js'
 import { getOidcConfig, requireEnv } from './oidcClient.js'
 import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
@@ -80,9 +81,11 @@ export async function handleLogout(request: FastifyRequest, reply: FastifyReply)
   if (!request.session.testFixture) await revokeTokens(request)
   await stampAuditRecord(request)
 
-  await request.session.destroy()
+  const idp = sessionIdp(request)
+  await endSession(request, 'logout')
   reply.clearCookie(SESSION_COOKIE_NAME)
 
+  logAuthEvent(request, 'auth.logout.completed', { outcome: endSessionUrl ? 'end_session' : 'local', idp })
   if (endSessionUrl) {
     reply.status(200).send({ redirectUrl: endSessionUrl })
     return

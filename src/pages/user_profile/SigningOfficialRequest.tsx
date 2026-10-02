@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import Alert from '@mui/material/Alert'
+import React, { useEffect, useState } from 'react'
+import { Alert, Checkbox, FormControlLabel, Link, Stack } from '@mui/material'
 import { Support } from 'src/libs/ajax/Support'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
@@ -7,15 +7,85 @@ import { DuosUser, ResponseError } from 'src/types/model'
 import { getExternalProfileLinks } from './externalProfileUtils'
 import './SigningOfficialRequest.css'
 
-interface SigningOfficialRequestProps {
-  readonly user: DuosUser
+export const SO_ATTESTATION_ACK_KEY = 'Signing_Official_Status_Attestation'
+
+const toggleSx = { font: 'inherit', verticalAlign: 'baseline' }
+const attestationSx = {
+  'alignItems': 'flex-start',
+  'mb': 1.5,
+  'fontWeight': 'normal',
+  '& .MuiCheckbox-root': { pt: 0 },
+  '& .MuiFormControlLabel-label': { font: 'inherit', lineHeight: 1.45 },
 }
 
-export default function SigningOfficialRequest({ user }: SigningOfficialRequestProps): React.JSX.Element | null {
-  const [isSubmitting, setIsSubmitting] = useState(false)
+const formatDate = (epochMillis: number) => new Date(epochMillis).toLocaleDateString()
 
-  if (user.isSigningOfficial) {
+interface SigningOfficialRequestProps {
+  readonly user: DuosUser
+  readonly institutionHasSigningOfficials?: boolean
+}
+
+export default function SigningOfficialRequest({ user, institutionHasSigningOfficials = false }: SigningOfficialRequestProps): React.JSX.Element | null {
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [hasAttested, setHasAttested] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [requestedAt, setRequestedAt] = useState<number>()
+
+  useEffect(() => {
+    if (user.isSigningOfficial) {
+      return
+    }
+    User.getAcknowledgements()
+      .then(acknowledgements => setRequestedAt(acknowledgements[SO_ATTESTATION_ACK_KEY]?.lastAcknowledged))
+      .catch(() => setRequestedAt(undefined))
+      .finally(() => setIsLoaded(true))
+  }, [user.isSigningOfficial])
+
+  if (user.isSigningOfficial || !isLoaded) {
     return null
+  }
+
+  const collapse = () => {
+    setIsExpanded(false)
+    setHasAttested(false)
+  }
+
+  if (!isExpanded && requestedAt) {
+    return (
+      <section className="signing-official-request" aria-labelledby="signing-official-request-title">
+        <h2 id="signing-official-request-title">Signing Official Status Requested</h2>
+        <p>
+          You requested Signing Official status on {formatDate(requestedAt)}.
+          {' '}DUOS support will follow up by email.
+          {' '}
+          <Link component="button" type="button" onClick={() => setIsExpanded(true)} sx={toggleSx}>
+            Request again
+          </Link>
+        </p>
+      </section>
+    )
+  }
+
+  if (!isExpanded) {
+    return (
+      <section className="signing-official-request">
+        <Link component="button" type="button" onClick={() => setIsExpanded(true)} sx={toggleSx}>
+          Are you your institution&apos;s Signing Official? Request Signing Official status
+        </Link>
+      </section>
+    )
+  }
+
+  // The ticket is already filed, so a failed record must not surface as a failed request.
+  const recordAttestation = async (): Promise<number> => {
+    try {
+      const acknowledgements = await User.acceptAcknowledgments(SO_ATTESTATION_ACK_KEY)
+      return acknowledgements[SO_ATTESTATION_ACK_KEY]?.lastAcknowledged ?? Date.now()
+    }
+    catch {
+      return Date.now()
+    }
   }
 
   const submitRequest = async () => {
@@ -33,6 +103,7 @@ export default function SigningOfficialRequest({ user }: SigningOfficialRequestP
 
       const description = `User (${user.userId}, ${user.email}) has attested that they are a Signing Official for their institution and have the authority to engage their institution in contracts related to data access and submission.\n\nExternal profile URLs:\n`
         + externalProfileLinks.map(({ label, url }) => `- ${label}: ${url}`).join('\n')
+        + (requestedAt ? `\n\nPreviously requested on ${formatDate(requestedAt)}.` : '')
       const ticket = Support.createTicket(
         user.displayName,
         'task',
@@ -44,6 +115,8 @@ export default function SigningOfficialRequest({ user }: SigningOfficialRequestP
       )
 
       await Support.createSupportRequest(ticket)
+      setRequestedAt(await recordAttestation())
+      collapse()
       Notifications.showSuccess({
         text: 'Signing Official status request submitted successfully.',
         timeout: 1500,
@@ -70,20 +143,33 @@ export default function SigningOfficialRequest({ user }: SigningOfficialRequestP
         of Sponsored Programs, or Legal/General Counsel &mdash; not the researcher submitting the request.
         Only request this status if that describes your role.
       </Alert>
-      <p>
-        I legally attest that I am a Signing Official for the above listed institution, and have the authority to engage my institution in contracts related to data access and submission.
-      </p>
+      {institutionHasSigningOfficials && (
+        <p>
+          Your institution already has Signing Officials, listed below. If you need a Library Card or
+          approval for a Data Access Request, contact one of them instead.
+        </p>
+      )}
+      <FormControlLabel
+        control={<Checkbox checked={hasAttested} onChange={event => setHasAttested(event.target.checked)} />}
+        label="I legally attest that I am a Signing Official for the above listed institution, and have the authority to engage my institution in contracts related to data access and submission."
+        sx={attestationSx}
+      />
       <p className="signing-official-request-requirement">
         Signing Officials are required to provide two External Profiles above to assist with validating their identity.
       </p>
-      <button
-        type="button"
-        className="btn-primary common-background signing-official-request-button"
-        onClick={submitRequest}
-        disabled={isSubmitting}
-      >
-        Attest & Request
-      </button>
+      <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+        <button
+          type="button"
+          className="button button-white"
+          onClick={submitRequest}
+          disabled={!hasAttested || isSubmitting}
+        >
+          Request Signing Official Status
+        </button>
+        <Link component="button" type="button" onClick={collapse} sx={toggleSx}>
+          Cancel
+        </Link>
+      </Stack>
     </section>
   )
 }
