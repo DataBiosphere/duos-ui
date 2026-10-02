@@ -51,7 +51,7 @@ export const VolumeSection = ({ range }: { range: DarAnalyticsRange }) => {
         + 'one show the researcher\'s current institution instead, so a researcher who has moved takes '
         + 'those DARs with them.',
       ]}
-      isLoading={report.isLoading}
+      isLoading={report.isPending}
       isRefreshing={report.isPlaceholderData}
       error={report.error}
       isEmpty={(data?.total ?? 0) === 0}
