@@ -21,7 +21,7 @@ describe('LibraryTabs', () => {
   it('highlights the active tab with bold font weight', () => {
     render(<LibraryTabs value={AssetType.DATASETS} onChange={() => {}} tabs={tabs} />)
     expect(screen.getByRole('tab', { name: 'Datasets' })).toHaveStyle({ fontWeight: '700' })
-    expect(screen.getByRole('tab', { name: 'Studies' })).toHaveStyle({ fontWeight: 'normal' })
+    expect(screen.getByRole('tab', { name: 'Studies' })).toHaveStyle({ fontWeight: '400' })
   })
 
   it('renders scroll navigation buttons when tabs overflow', async () => {
