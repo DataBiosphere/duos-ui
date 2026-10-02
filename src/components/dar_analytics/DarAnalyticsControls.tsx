@@ -36,6 +36,12 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
   useEffect(() => () => clearTimeout(settle.current), [])
 
   const valid = isValidRange(from, to)
+  // Groupings are judged against the dates shown, and choosing one applies those dates with it.
+  const shownDates = valid ? { from, to } : { from: range.from, to: range.to }
+  const chooseBucket = (bucket: MetricsBucket) => {
+    clearTimeout(settle.current)
+    onChange(valid ? { ...shownDates, bucket } : { bucket })
+  }
   const chartable = valid && isChartable({ from, to, bucket: range.bucket })
   let helperText: string | undefined
   if (!valid) {
@@ -79,10 +85,10 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
         size="small"
         exclusive
         value={range.bucket}
-        onChange={(_e, bucket: MetricsBucket | null) => bucket && onChange({ bucket })}
+        onChange={(_e, bucket: MetricsBucket | null) => bucket && chooseBucket(bucket)}
       >
         {BUCKETS.map(({ value, label }) => (
-          <ToggleButton key={value} value={value} disabled={!isChartable({ ...range, bucket: value })}>
+          <ToggleButton key={value} value={value} disabled={!isChartable({ ...shownDates, bucket: value })}>
             {label}
           </ToggleButton>
         ))}

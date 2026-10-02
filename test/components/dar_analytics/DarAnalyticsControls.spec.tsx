@@ -61,7 +61,7 @@ describe('DarAnalyticsControls', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Month' }))
 
-    expect(onChange).toHaveBeenCalledWith({ bucket: 'month' })
+    expect(onChange).toHaveBeenCalledWith({ from: range.from, to: range.to, bucket: 'month' })
   })
 
   it('ignores a click that would clear the bucket', () => {
@@ -96,5 +96,15 @@ describe('DarAnalyticsControls', () => {
 
     expect(onChange).not.toHaveBeenCalled()
     expect(screen.getByText(/Too long to group by day/)).toBeInTheDocument()
+  })
+
+  it('applies held-back dates with the longer grouping chosen for them', () => {
+    render(<DarAnalyticsControls range={{ ...range, bucket: 'day' }} onChange={onChange} />)
+
+    typeDate('From', '2010-01-01')
+    expect(screen.getByRole('button', { name: 'Day' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Month' }))
+
+    expect(onChange).toHaveBeenCalledExactlyOnceWith({ from: '2010-01-01', to: range.to, bucket: 'month' })
   })
 })

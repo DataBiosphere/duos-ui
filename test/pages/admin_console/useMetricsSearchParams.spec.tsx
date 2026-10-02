@@ -79,4 +79,12 @@ describe('useMetricsSearchParams', () => {
 
     expect(result.current.params.range).toEqual({ from: '2024-07-01', to: '2026-08-14', bucket: 'quarter' })
   })
+
+  it('writes the range in use, not the rejected one, on the next change after a fallback', () => {
+    const { result } = setup('?from=1900-01-01&to=2026-06-30&bucket=day')
+
+    act(() => result.current.params.setRange({ bucket: 'month' }))
+
+    expect(result.current.params.range).toEqual({ from: '2024-07-01', to: '2026-08-14', bucket: 'month' })
+  })
 })
