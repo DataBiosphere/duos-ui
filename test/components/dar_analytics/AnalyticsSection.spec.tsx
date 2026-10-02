@@ -1,7 +1,7 @@
 import React from 'react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
 
 const baseProps = {
@@ -31,5 +31,15 @@ describe('AnalyticsSection', () => {
     render(<AnalyticsSection {...baseProps} error={{ message: 'to must not be before from', code: 400 }}><p>Figures</p></AnalyticsSection>)
 
     expect(screen.getByRole('alert')).toHaveTextContent('to must not be before from')
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument()
+  })
+
+  it('offers a retry beside the error when given one', () => {
+    const onRetry = vi.fn()
+    render(<AnalyticsSection {...baseProps} error={{ message: 'Bad gateway', code: 502 }} onRetry={onRetry}><p>Figures</p></AnalyticsSection>)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+
+    expect(onRetry).toHaveBeenCalledOnce()
   })
 })
