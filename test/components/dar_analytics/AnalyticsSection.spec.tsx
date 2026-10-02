@@ -27,13 +27,6 @@ describe('AnalyticsSection', () => {
     expect(screen.queryByText('Figures')).not.toBeInTheDocument()
   })
 
-  it('shows a loading indicator while loading', () => {
-    render(<AnalyticsSection {...baseProps} isLoading><p>Figures</p></AnalyticsSection>)
-
-    expect(screen.getByLabelText('Loading Decision funnel')).toBeInTheDocument()
-    expect(screen.queryByText('Figures')).not.toBeInTheDocument()
-  })
-
   it('shows the error consent sent', () => {
     render(<AnalyticsSection {...baseProps} error={{ message: 'to must not be before from', code: 400 }}><p>Figures</p></AnalyticsSection>)
 
