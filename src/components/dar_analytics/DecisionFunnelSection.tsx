@@ -20,15 +20,13 @@ interface StateRow {
   dataset: boolean
 }
 
-const CANCELED_GREY = '#7a8691'
-
 const STATES: StateRow[] = [
   { state: 'PENDING', label: 'Pending', color: Theme.palette.secondary, dar: true, dataset: true },
   { state: 'NO_ELECTION', label: 'No election yet', color: Theme.palette.link, dar: false, dataset: true },
   { state: 'APPROVED', label: 'Approved', color: Theme.palette.success, dar: true, dataset: true },
   { state: 'DENIED', label: 'Denied', color: Theme.palette.error, dar: true, dataset: true },
   { state: 'MIXED', label: 'Mixed', color: Theme.palette.highlighted, dar: true, dataset: false },
-  { state: 'CANCELED', label: 'Canceled', color: CANCELED_GREY, dar: true, dataset: true },
+  { state: 'CANCELED', label: 'Canceled', color: Theme.palette.neutral, dar: true, dataset: true },
 ]
 
 const DAR_STATES = STATES.filter(row => row.dar)
