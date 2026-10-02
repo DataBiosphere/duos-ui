@@ -57,6 +57,7 @@ describe('TurnaroundSection', () => {
     expect(cellsFor('2026 Q1')).toEqual(['2026 Q1', '4', '12.3', '10.0', '9'])
     expect(cellsFor('2026 Q2')).toEqual(['2026 Q2', '1', '–', '–', '–'])
     expect(screen.getByText(/left out of these figures: 1 in this range/)).toBeInTheDocument()
+    expect(screen.getByText('Decided', { selector: 'dt' }).nextSibling).toHaveTextContent('6')
     expect(DarMetrics.getDecisionTurnaround).toHaveBeenCalledWith({ ...range, limit: 1 })
   })
 

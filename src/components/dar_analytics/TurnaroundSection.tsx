@@ -28,7 +28,7 @@ interface TurnaroundRow extends TurnaroundBucket {
 
 const COLUMNS: GridColDef<TurnaroundRow>[] = [
   { field: 'label', headerName: 'Submitted', flex: 1.4, sortable: false },
-  { field: 'count', headerName: 'Decided', type: 'number', flex: 1, sortable: false },
+  { field: 'count', headerName: 'Measured', type: 'number', flex: 1, sortable: false },
   { field: 'meanDays', headerName: 'Mean', flex: 1, align: 'right', headerAlign: 'right', sortable: false, valueFormatter: days },
   { field: 'medianDays', headerName: 'Median', flex: 1, align: 'right', headerAlign: 'right', sortable: false, valueFormatter: days },
   { field: 'modeDays', headerName: 'Mode', flex: 1, align: 'right', headerAlign: 'right', sortable: false, valueFormatter: (value?: number | null) => value ?? '–' },
@@ -62,7 +62,8 @@ export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
         ? 'Days from submission to the DAC decision, for DARs submitted in the range. A DAR counts once '
         + 'every dataset on it is decided, measured to the last decision.'
         : 'Days from submission to the DAC decision on each dataset, for DARs submitted in the range.'}
-      caveats={data
+      // Until the new level arrives, the report on screen is the other level's.
+      caveats={data && !report.isPlaceholderData
         ? ['Decisions with no usable vote date (votes cast before March 2021, or dated before a backfilled '
           + `submission) are left out of these figures: ${data.unmeasured} in this range.`]
         : []}
@@ -87,7 +88,7 @@ export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
     >
       <HeadlineFigures
         figures={[
-          { label: 'Decided', value: data?.total ?? 0 },
+          { label: 'Decided', value: (data?.total ?? 0) + (data?.unmeasured ?? 0) },
           { label: 'Unmeasured', value: data?.unmeasured ?? 0 },
         ]}
       />
