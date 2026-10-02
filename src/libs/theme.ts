@@ -7,6 +7,7 @@ export const Theme = {
     error: '#DB3214',
     success: '#00928A',
     disabled: '#cccccc',
+    neutral: '#7a8691',
     white: '#ffffff',
     background: {
       secondary: 'rgba(0, 96, 159, 0.1)',
