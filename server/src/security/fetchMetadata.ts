@@ -1,4 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import { recordBffError } from '../proxy/proxyEvents.js'
 
 /**
  * Fetch Metadata enforcement (Phase 5, story 5-B) — closes the ADR-009 residual.
@@ -83,5 +84,6 @@ export async function fetchMetadataGuard(
     { url: request.url, method: request.method, secFetchSite: site, secFetchMode: mode },
     '[fetch-metadata] blocked a request whose Fetch Metadata is not same-origin cors/same-origin',
   )
+  recordBffError(request, FETCH_METADATA_ERROR_CODE)
   return reply.status(403).send({ error: FETCH_METADATA_ERROR_CODE })
 }

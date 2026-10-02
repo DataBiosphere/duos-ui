@@ -40,6 +40,7 @@ export async function tdrProxy(app: FastifyInstance, options: UpstreamProxyOptio
     prefix: TDR_PROXY_PREFIX,
     upstreamEnvVar: 'DUOS_TDR_URL',
     logTag: 'tdr-proxy',
+    upstream: 'tdr',
     unauthenticatedPaths: NO_PATHS,
     csrfExemptUnsafeRequests: NO_PATHS,
     destroySessionOnUpstream401: false,

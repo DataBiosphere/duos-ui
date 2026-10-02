@@ -168,7 +168,7 @@ describe('handleServerError', () => {
   // the child-logger factory a route uses is fixed when that route registers,
   // so a built app's request.log cannot be stubbed afterwards.
   function fakeRequest() {
-    return { ip: '203.0.113.1', url: '/auth/login', log: { warn: vi.fn(), error: vi.fn() } }
+    return { ip: '203.0.113.1', url: '/auth/login?code=SECRET', routeOptions: { url: '/auth/login' }, log: { warn: vi.fn(), error: vi.fn() } }
   }
 
   function fakeReply() {
@@ -241,7 +241,10 @@ describe('handleServerError', () => {
 
     const { request, reply } = await run(err as unknown as Error)
 
-    expect(request.log.warn).toHaveBeenCalled()
+    expect(request.log.warn).toHaveBeenCalledWith(
+      { event: 'auth.rate_limited', route: '/auth/login', ip: '203.0.113.1', idp: 'unknown' },
+      'auth.rate_limited',
+    )
     expect(request.log.error).not.toHaveBeenCalled()
     expect(reply.sentStatus).toBe(429)
     expect(reply.sentBody).toEqual({ error: RATE_LIMIT_ERROR_CODE })
@@ -260,6 +263,29 @@ describe('handleServerError', () => {
     expect(request.log.warn).not.toHaveBeenCalled()
     expect(reply.status).toHaveBeenCalledWith(502)
     expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
+  })
+})
+
+describe('handleCallbackError', () => {
+  it('logs a throttled callback as auth.rate_limited with the route pattern, and never the query string', async () => {
+    const { handleCallbackError } = await import('../src/index.js')
+    const { rateLimitPluginOptions } = await import('../src/security/rateLimit.js')
+    const err = rateLimitPluginOptions.errorResponseBuilder!(
+      {} as FastifyRequest,
+      { statusCode: 429, ban: false, after: '1 minute', max: 60, ttl: 60_000 },
+    )
+    const request = { ip: '203.0.113.2', url: '/auth/callback?code=SECRET&state=SECRET', routeOptions: { url: '/auth/callback' }, log: { warn: vi.fn(), error: vi.fn() } }
+    const reply = { redirect: vi.fn() }
+
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    handleCallbackError(err as any, request as any, reply as any)
+
+    expect(request.log.warn).toHaveBeenCalledWith(
+      { event: 'auth.rate_limited', route: '/auth/callback', ip: '203.0.113.2', idp: 'unknown' },
+      'auth.rate_limited',
+    )
+    expect(JSON.stringify(request.log.warn.mock.calls)).not.toContain('SECRET')
+    expect(reply.redirect).toHaveBeenCalledWith('/?signInError=rate_limited')
   })
 })
 
