@@ -39,6 +39,15 @@ const openStatusFromHome = async (page: Page) => {
   await expect(page.locator('#consent')).toBeVisible()
 }
 
+/**
+ * The page shows every service as unhealthy until Consent's answer arrives, and keeps
+ * doing so if the fetch fails. A check of the indicators means nothing until the raw
+ * response under the Consent heading has the `ok` field.
+ */
+const expectStatusLoaded = async (page: Page) => {
+  await expect(page.locator('h2#consent + pre')).toContainText('"ok"', { timeout: 15000 })
+}
+
 const indicator = (page: Page, href: string, state: string) =>
   page.locator(`a[href="${href}"]`).locator('xpath=..').locator(`[data-testid${state}]`)
 
@@ -50,14 +59,17 @@ test('Status page loads from home', async ({ page }) => {
 
 test('Status page renders an indicator for each service', async ({ page }) => {
   await openStatusFromHome(page)
+  await expectStatusLoaded(page)
+
   for (const href of ['#consent', '#ecm', '#sam']) {
-    await expect(indicator(page, href, '^="status-"')).toBeVisible({ timeout: 15000 })
+    await expect(indicator(page, href, '^="status-"')).toBeVisible()
   }
 })
 
 test('Status page renders healthy services as healthy', async ({ page }) => {
   await stubConsentStatus(page, consentStatus({ sam: true }))
   await openStatusFromHome(page)
+  await expectStatusLoaded(page)
 
   for (const href of ['#consent', '#ecm', '#sam']) {
     await expect(indicator(page, href, '="status-healthy"')).toBeVisible()
@@ -67,6 +79,7 @@ test('Status page renders healthy services as healthy', async ({ page }) => {
 test('Status page renders an unhealthy service as unhealthy', async ({ page }) => {
   await stubConsentStatus(page, consentStatus({ sam: false }))
   await openStatusFromHome(page)
+  await expectStatusLoaded(page)
 
   await expect(indicator(page, '#sam', '="status-unhealthy"')).toBeVisible()
   await expect(indicator(page, '#consent', '="status-unhealthy"')).toBeVisible()
