@@ -14,7 +14,7 @@ import {
 
 const getReport = async <T>(path: string, query: DarMetricsQuery): Promise<T> => {
   const params = Object.fromEntries(
-    Object.entries(query).filter(([, value]) => value !== undefined),
+    Object.entries(query).filter(([, value]) => value !== undefined && value !== null),
   ) as Params
   const url = `${await Config.getApiUrl()}/api/metrics/${path}`
   const res = await fetchGet<T>(url, { ...Config.authOpts(), params })
