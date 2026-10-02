@@ -1,7 +1,7 @@
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { TurnaroundSection } from 'src/components/dar_analytics/TurnaroundSection'
@@ -106,5 +106,18 @@ describe('TurnaroundSection', () => {
     renderSection()
 
     expect(screen.queryByText(/left out of these figures/)).not.toBeInTheDocument()
+  })
+
+  it('hides the caveat while the other level is still on screen', async () => {
+    vi.mocked(DarMetrics.getDecisionTurnaround).mockResolvedValue(buildReport([
+      { bucketStart: Q1, count: 2, unmeasured: 0, meanDays: 5, medianDays: 5, modeDays: 5 },
+    ], 3))
+    vi.mocked(DarMetrics.getDatasetDecisionTurnaround).mockReturnValue(new Promise(() => {}))
+
+    renderSection()
+    await screen.findByText(/left out of these figures: 3 in this range/)
+    fireEvent.click(screen.getByRole('button', { name: 'Per dataset' }))
+
+    await waitFor(() => expect(screen.queryByText(/left out of these figures/)).not.toBeInTheDocument())
   })
 })
