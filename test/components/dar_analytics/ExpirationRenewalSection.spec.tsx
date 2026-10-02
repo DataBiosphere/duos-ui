@@ -1,7 +1,7 @@
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { ExpirationRenewalSection } from 'src/components/dar_analytics/ExpirationRenewalSection'
@@ -57,6 +57,42 @@ describe('ExpirationRenewalSection', () => {
     expect(screen.getByRole('group', { name: 'Expired' })).toHaveTextContent('5')
     expect(screen.getByRole('group', { name: 'Closed out' })).toHaveTextContent('1')
     expect(screen.getByRole('group', { name: 'Datasets renewed' })).toHaveTextContent('4')
+    expect(DarMetrics.getExpirations).toHaveBeenCalledWith({ ...range, limit: 1 })
+    expect(DarMetrics.getRenewals).toHaveBeenCalledWith({ ...range, limit: 1 })
+  })
+
+  it('starts weeks on Monday, including the week the range starts in', async () => {
+    const week: DarAnalyticsRange = { from: '2026-01-01', to: '2026-01-14', bucket: 'week' }
+    const weekly = { from: week.from, to: week.to, bucket: 'WEEK' as const }
+    vi.mocked(DarMetrics.getExpirations).mockResolvedValue({
+      ...expirations([{ bucketStart: Date.parse('2026-01-05T00:00:00Z'), reason: 'EXPIRED', count: 2 }]), ...weekly,
+    })
+    vi.mocked(DarMetrics.getRenewals).mockResolvedValue({ ...renewals([]), ...weekly })
+
+    render(section(new QueryClient({ defaultOptions: { queries: { retry: false } } }), week))
+
+    await screen.findByRole('grid', { name: 'Expiration and renewal per period' })
+    expect(cellsFor('Week of Dec 29, 2025')).toEqual(['Week of Dec 29, 2025', '0', '0', '0'])
+    expect(cellsFor('Week of Jan 5, 2026')).toEqual(['Week of Jan 5, 2026', '2', '0', '0'])
+    expect(cellsFor('Week of Jan 12, 2026')).toEqual(['Week of Jan 12, 2026', '0', '0', '0'])
+  })
+
+  it('pages monthly periods ten at a time', async () => {
+    const year: DarAnalyticsRange = { from: '2026-01-01', to: '2026-12-31', bucket: 'month' }
+    const monthly = { from: year.from, to: year.to, bucket: 'MONTH' as const }
+    vi.mocked(DarMetrics.getExpirations).mockResolvedValue({
+      ...expirations([{ bucketStart: Date.parse('2026-12-01T00:00:00Z'), reason: 'CLOSED_OUT', count: 1 }]), ...monthly,
+    })
+    vi.mocked(DarMetrics.getRenewals).mockResolvedValue({ ...renewals([]), ...monthly })
+
+    render(section(new QueryClient({ defaultOptions: { queries: { retry: false } } }), year))
+
+    await screen.findByRole('grid', { name: 'Expiration and renewal per period' })
+    expect(cellsFor('Oct 2026')).toEqual(['Oct 2026', '0', '0', '0'])
+    expect(screen.queryByRole('gridcell', { name: 'Dec 2026' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Go to next page' }))
+    expect(await screen.findByRole('gridcell', { name: 'Dec 2026' })).toBeInTheDocument()
+    expect(cellsFor('Dec 2026')).toEqual(['Dec 2026', '0', '1', '0'])
   })
 
   it('shows the empty state when nothing ended or was renewed', async () => {
