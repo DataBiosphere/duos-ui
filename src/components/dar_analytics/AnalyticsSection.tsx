@@ -7,7 +7,7 @@ interface AnalyticsSectionProps {
   title: string
   description?: React.ReactNode
   /** Shown beside the figures they qualify, whatever state the section is in. */
-  caveats?: React.ReactNode[]
+  caveats?: string[]
   isLoading: boolean
   /** Showing the previous range's figures while the new one loads. */
   isRefreshing?: boolean
@@ -22,26 +22,24 @@ export const AnalyticsSection = ({
 }: AnalyticsSectionProps) => {
   const headingId = `${title.toLowerCase().replaceAll(/\W+/g, '-')}-heading`
 
-  const body = () => {
-    if (isLoading) {
-      return <CircularProgress aria-label={`Loading ${title}`} />
-    }
+  const content = () => {
     if (error) {
       return <Alert severity="error">Unable to load {title}: {extractError(error)}</Alert>
     }
     if (isEmpty) {
       return <Typography sx={descriptionStyle}>{emptyText}</Typography>
     }
-    return <Box aria-busy={isRefreshing} sx={{ opacity: isRefreshing ? 0.5 : 1 }}>{children}</Box>
+    return children
   }
+  const body = () => (isLoading
+    ? <CircularProgress aria-label={`Loading ${title}`} />
+    : <Box aria-busy={isRefreshing} sx={{ opacity: isRefreshing ? 0.5 : 1 }}>{content()}</Box>)
 
   return (
     <Box component="section" aria-labelledby={headingId}>
       <Typography component="h2" id={headingId} sx={{ ...headingStyle, maxWidth: 'none', mt: '2rem' }}>{title}</Typography>
       {description && <Typography sx={{ ...descriptionStyle, mb: '1rem' }}>{description}</Typography>}
-      {caveats.map((caveat, index) => (
-        <Alert key={index} severity="info" sx={{ mb: '1rem' }}>{caveat}</Alert>
-      ))}
+      {caveats.map(caveat => <Alert key={caveat} severity="info" sx={{ mb: '1rem' }}>{caveat}</Alert>)}
       {body()}
     </Box>
   )

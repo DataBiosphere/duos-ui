@@ -8,7 +8,7 @@ import { DecisionBucketCount, DecisionState, MetricsBucket } from 'src/types/dar
 import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
 import { bucketStartsInRange, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
-import { useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
+import { coverSameRange, useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
 
 interface StateRow {
@@ -36,11 +36,11 @@ const DAR_STATES = STATES.filter(row => row.dar)
 interface CountRow {
   id: string
   label: string
-  dars: number | string
-  datasets: number | string
+  dars: number | null
+  datasets: number | null
 }
 
-// Chart beside the table from the MUI `lg` breakpoint, stacked below it.
+// Chart beside the table from the MUI `lg` breakpoint, above it on narrower screens.
 const layoutStyle = {
   display: 'grid',
   gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 3fr) minmax(0, 2fr)' },
@@ -48,10 +48,11 @@ const layoutStyle = {
   alignItems: 'start',
 }
 
+const notReported = (value: number | null) => value ?? '–'
 const COLUMNS: GridColDef<CountRow>[] = [
   { field: 'label', headerName: 'State', flex: 1, sortable: false },
-  { field: 'dars', headerName: 'DARs', type: 'number', flex: 1, sortable: false },
-  { field: 'datasets', headerName: 'Datasets on DARs', type: 'number', flex: 1, sortable: false },
+  { field: 'dars', headerName: 'DARs', type: 'number', flex: 1, sortable: false, valueFormatter: notReported },
+  { field: 'datasets', headerName: 'Datasets on DARs', type: 'number', flex: 1, sortable: false, valueFormatter: notReported },
 ]
 
 /** Buckets come split by how each decision was made, so the same state can appear more than once. */
@@ -79,8 +80,8 @@ export const DecisionFunnelSection = ({ range }: DecisionFunnelSectionProps) => 
     ...STATES.map(({ state, label, dar, dataset }) => ({
       id: state,
       label,
-      dars: dar ? darCounts[state] : '–',
-      datasets: dataset ? datasetCounts[state] : '–',
+      dars: dar ? darCounts[state] : null,
+      datasets: dataset ? datasetCounts[state] : null,
     })),
     { id: 'TOTAL', label: 'Total', dars: dars.data?.total ?? 0, datasets: datasets.data?.total ?? 0 },
   ]
@@ -105,8 +106,7 @@ export const DecisionFunnelSection = ({ range }: DecisionFunnelSectionProps) => 
       description={'DARs submitted in the range, by their DAC decision. A DAR is decided once every '
         + 'dataset on it is decided or canceled, and a reopened decision counts as pending until the '
         + 'DAC decides again.'}
-      // One report on the new range and one on the old would mix ranges across columns.
-      isLoading={dars.isLoading || datasets.isLoading || dars.isPlaceholderData !== datasets.isPlaceholderData}
+      isLoading={dars.isPending || datasets.isPending || !coverSameRange(dars.data, datasets.data)}
       isRefreshing={dars.isPlaceholderData || datasets.isPlaceholderData}
       error={dars.error ?? datasets.error}
       isEmpty={(dars.data?.total ?? 0) === 0 && (datasets.data?.total ?? 0) === 0}
@@ -121,11 +121,13 @@ export const DecisionFunnelSection = ({ range }: DecisionFunnelSectionProps) => 
         ]}
       />
       <Box sx={layoutStyle}>
-        <BarChart
-          height={320}
-          xAxis={[{ scaleType: 'band', data: bucketStarts.map(start => formatBucketStart(start, shown.bucket)) }]}
-          series={series}
-        />
+        <Box role="img" aria-label="DARs by decision state per period; the table gives the totals">
+          <BarChart
+            height={320}
+            xAxis={[{ scaleType: 'band', data: bucketStarts.map(start => formatBucketStart(start, shown.bucket)) }]}
+            series={series}
+          />
+        </Box>
         <DataGrid
           aria-label="Decision counts"
           rows={rows}
