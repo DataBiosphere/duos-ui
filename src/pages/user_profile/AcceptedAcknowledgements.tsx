@@ -2,7 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
 import { AcknowledgementMap } from 'src/types/model'
+import { SO_ATTESTATION_ACK_KEY } from './SigningOfficialRequest'
 import './UserProfile.css'
+
+const acknowledgementNames: Record<string, string> = {
+  [SO_ATTESTATION_ACK_KEY]: 'Signing Official status attestation',
+}
 
 interface AcknowledgmentItem {
   name: string
@@ -29,7 +34,7 @@ export default function AcceptedAcknowledgements() {
           const day = String(date.getDate()).padStart(2, '0')
           const year = date.getFullYear()
           const newAcknowledgment: AcknowledgmentItem = {
-            name: currAcknowledgement.ackKey,
+            name: acknowledgementNames[currAcknowledgement.ackKey] ?? currAcknowledgement.ackKey,
             attestedTime: `${month}/${day}/${year}`,
           }
           allAcknowledgements.push(newAcknowledgment)
