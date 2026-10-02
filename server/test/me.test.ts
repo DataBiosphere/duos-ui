@@ -76,6 +76,10 @@ describe('getMe', () => {
       expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
       expect(reply.status).toHaveBeenCalledWith(401)
       expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+      expect(request.log.info).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'auth.session.destroyed', reason: 'expired' }),
+        'auth.session.destroyed',
+      )
     }
   })
 
@@ -137,6 +141,10 @@ describe('getMe', () => {
     expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
     expect(reply.status).toHaveBeenCalledWith(401)
     expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+    expect(request.log.info).toHaveBeenCalledWith(
+      { event: 'auth.session.destroyed', reason: 'upstream_401', idp: 'google' },
+      'auth.session.destroyed',
+    )
   })
 
   it('still answers 401 when the rejected session cannot be destroyed', async () => {
@@ -150,6 +158,8 @@ describe('getMe', () => {
     expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
     expect(reply.status).toHaveBeenCalledWith(401)
     expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+    // A destroy that failed is not a session that ended, so it must not be counted as one.
+    expect(request.log.info).not.toHaveBeenCalledWith(expect.objectContaining({ event: 'auth.session.destroyed' }), expect.anything())
   })
 
   it('marks every answer uncacheable — the profile must never be replayed across sessions', async () => {
@@ -184,6 +194,10 @@ describe('getMe', () => {
     expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
     expect(reply.status).toHaveBeenCalledWith(409)
     expect(reply.send).toHaveBeenCalledWith({ authenticated: false, error: 'provider_conflict', message })
+    expect(request.log.info).toHaveBeenCalledWith(
+      { event: 'auth.session.destroyed', reason: 'provider_conflict', idp: 'microsoft' },
+      'auth.session.destroyed',
+    )
   })
 
   it('answers the 409 with a fallback message when the upstream body is unusable', async () => {
