@@ -7,7 +7,7 @@ import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { DecisionBucketCount, DecisionState, MetricsBucket } from 'src/types/darMetrics'
 import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
-import { bucketStartsInRange, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
+import { bucketStartsInRange, describePeriods, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
 import { coverSameRange, useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
 
@@ -93,6 +93,7 @@ export const DecisionFunnelSection = ({ range }: DecisionFunnelSectionProps) => 
   const bucketStarts = bucketStartsInRange(shown)
   const key = (start: number, state: DecisionState) => `${start}|${state}`
   const countAt = darBuckets.reduce((m, b) => m.set(key(b.bucketStart, b.state), (m.get(key(b.bucketStart, b.state)) ?? 0) + b.count), new Map<string, number>())
+  const labels = bucketStarts.map(start => formatBucketStart(start, shown.bucket))
   const series = DAR_STATES.map(({ state, label, color }) => ({
     label,
     color,
@@ -121,13 +122,13 @@ export const DecisionFunnelSection = ({ range }: DecisionFunnelSectionProps) => 
         ]}
       />
       <Box sx={layoutStyle}>
-        <Box role="img" aria-label="DARs by decision state per period; the table gives the totals">
-          <BarChart
-            height={320}
-            xAxis={[{ scaleType: 'band', data: bucketStarts.map(start => formatBucketStart(start, shown.bucket)) }]}
-            series={series}
-          />
-        </Box>
+        <BarChart
+          title="DARs by decision state per period"
+          desc={describePeriods(labels, series)}
+          height={320}
+          xAxis={[{ scaleType: 'band', data: labels }]}
+          series={series}
+        />
         <DataGrid
           aria-label="Decision counts"
           rows={rows}
