@@ -1,6 +1,7 @@
 import * as oidc from 'openid-client'
 import type { FastifyRequest, Session } from 'fastify'
 import { hashValue } from '../logging.js'
+import { endSession, logAuthEvent, sessionIdp } from './authEvents.js'
 import { getOidcConfig } from './oidcClient.js'
 
 /**
@@ -93,7 +94,14 @@ export async function refreshAccessToken(request: FastifyRequest): Promise<void>
     // its access token (B2C omits one when `offline_access` was not granted), so
     // it is only ever seconds away from being useless. Destroy it now and make
     // the user re-authenticate rather than serve 401s until the token expires.
-    await request.session.destroy()
+    // Per caller, outside the flight, by design (Epic 6, story 6-F): this check
+    // runs before the `inFlight` lookup, so it is not deduplicated and cannot
+    // share `auth.refresh.completed`'s denominator. Concurrent requests that
+    // hydrate the same session before the first destroy lands each log here and
+    // each emit `auth.session.destroyed`, so both are upper bounds. Exact
+    // session counts come from `user_session_audit`, not from these lines.
+    logAuthEvent(request, 'auth.refresh.unrefreshable', { idp: sessionIdp(request) }, 'warn')
+    await endSession(request, 'refresh_terminal')
     throw new RefreshFailedError('no_refresh_token')
   }
 
@@ -127,10 +135,24 @@ export async function refreshAccessToken(request: FastifyRequest): Promise<void>
   // and can still see the pre-rotation token — destroying a healthy session.
   // Holding the flight through persistence keeps the store strictly ahead of
   // the map, so that re-read always finds the winner's tokens.
+  //
+  // `auth.refresh.completed` is emitted here, once the whole flight has settled,
+  // so a failed exchange, a failed config lookup and a failed save each count as
+  // one event, and `succeeded` is never logged for a refresh the caller sees fail.
+  // The idp is read up front because a terminal failure destroys the session.
+  const idp = sessionIdp(request)
   const flight = (async (): Promise<RefreshedTokens> => {
-    const tokens = await doRefresh(request, sid, usedRefreshToken)
-    await applyTokens(request, tokens)
-    return tokens
+    let result: Awaited<ReturnType<typeof doRefresh>>
+    try {
+      result = await doRefresh(request, sid, usedRefreshToken)
+      await applyTokens(request, result.tokens)
+    }
+    catch (err: unknown) {
+      logRefreshFailure(request, idp, err)
+      throw err
+    }
+    logAuthEvent(request, 'auth.refresh.completed', { outcome: result.outcome, idp })
+    return result.tokens
   })()
   inFlight.set(sid, flight)
   try {
@@ -139,6 +161,15 @@ export async function refreshAccessToken(request: FastifyRequest): Promise<void>
   finally {
     inFlight.delete(sid)
   }
+}
+
+/** Terminal when B2C rejected the token and the session is gone; anything else is transient. */
+function logRefreshFailure(request: FastifyRequest, idp: 'google' | 'microsoft' | 'unknown', err: unknown): void {
+  if (err instanceof RefreshFailedError) {
+    logAuthEvent(request, 'auth.refresh.completed', { outcome: 'terminal', reason: 'refresh_failed', idp }, 'warn')
+    return
+  }
+  logAuthEvent(request, 'auth.refresh.completed', { outcome: 'transient', err, idp }, 'warn')
 }
 
 /**
@@ -155,7 +186,7 @@ async function doRefresh(
   request: FastifyRequest,
   sid: string,
   usedRefreshToken: string,
-): Promise<RefreshedTokens> {
+): Promise<{ tokens: RefreshedTokens, outcome: 'succeeded' | 'race_adopted' }> {
   const config = await getOidcConfig()
 
   let refreshed: Awaited<ReturnType<typeof oidc.refreshTokenGrant>>
@@ -191,10 +222,13 @@ async function doRefresh(
       if (stored?.refreshToken && stored.refreshToken !== usedRefreshToken && stored.accessToken) {
         request.log.info({ sidHash: hashValue(sid) }, '[auth] refresh lost a cross-pod race — adopting the stored tokens')
         return {
-          accessToken: stored.accessToken,
-          refreshToken: stored.refreshToken,
-          idToken: stored.idToken,
-          tokenExpiry: stored.tokenExpiry ?? 0,
+          outcome: 'race_adopted',
+          tokens: {
+            accessToken: stored.accessToken,
+            refreshToken: stored.refreshToken,
+            idToken: stored.idToken,
+            tokenExpiry: stored.tokenExpiry ?? 0,
+          },
         }
       }
 
@@ -208,12 +242,20 @@ async function doRefresh(
       // rejection and return 401. Their own session objects stay in memory but
       // unmodified, so nothing writes the row back.
       request.log.warn({ sidHash: hashValue(sid) }, '[auth] B2C rejected the refresh token — destroying the session')
-      await request.session.destroy()
+      await endSession(request, 'refresh_terminal')
       throw new RefreshFailedError('refresh_failed')
     }
     throw err
   }
 
+  return { outcome: 'succeeded', tokens: toRefreshedTokens(request, refreshed, usedRefreshToken) }
+}
+
+function toRefreshedTokens(
+  request: FastifyRequest,
+  refreshed: Awaited<ReturnType<typeof oidc.refreshTokenGrant>>,
+  usedRefreshToken: string,
+): RefreshedTokens {
   return {
     accessToken: refreshed.access_token,
     // Rotation is optional per B2C policy: keep the existing token when the
