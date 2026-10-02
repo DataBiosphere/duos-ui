@@ -53,6 +53,8 @@ export default defineConfig({
       // Role fixture specs, against real dev Consent.
       name: 'chromium',
       testIgnore: [...MOCK_SPECS, ...THROTTLE_SPECS, ...SHORT_SESSION_SPECS],
+      // Up to three sign-in attempts, each as long as 8 seconds, plus the waits between them.
+      timeout: 60_000,
       use: { ...devices['Desktop Chrome'] },
       retries: process.env.CI ? 1 : 0,
     },
