@@ -33,11 +33,15 @@ describe('isValidRange', () => {
 
 describe('isChartable', () => {
   it.each([
-    ['2024-10-01', '2026-10-01', 'day', true],
-    ['2016-01-01', '2026-10-01', 'day', false],
-    ['2010-01-01', '2026-10-01', 'week', true],
-    ['1900-01-01', '2026-10-01', 'week', false],
-    ['1900-01-01', '2026-10-01', 'quarter', true],
+    ['2024-01-01', '2026-09-26', 'day', true],
+    ['2024-01-01', '2026-09-27', 'day', false],
+    ['2007-01-01', '2026-02-23', 'week', true],
+    ['2007-01-01', '2026-02-24', 'week', false],
+    ['1950-01-01', '2026-08-02', 'month', true],
+    ['1950-01-01', '2026-08-03', 'month', false],
+    ['1900-01-01', '2146-03-02', 'quarter', true],
+    ['1900-01-01', '2146-03-03', 'quarter', false],
+    ['2026-03-01', '2026-03-01', 'day', true],
   ] as const)('%s to %s by %s is %s', (from, to, bucket, expected) => {
     expect(isChartable({ from, to, bucket })).toBe(expected)
   })

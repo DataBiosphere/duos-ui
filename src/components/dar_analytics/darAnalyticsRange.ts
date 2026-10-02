@@ -39,8 +39,8 @@ export const isValidRange = (from: string, to: string): boolean =>
 /** More buckets than this can't be drawn legibly, and would stall the page building them. */
 export const MAX_BUCKETS = 1000
 
-const SHORTEST_BUCKET_DAYS: Record<MetricsBucket, number> = { day: 1, week: 7, month: 28, quarter: 89 }
+const SHORTEST_BUCKET_DAYS: Record<MetricsBucket, number> = { day: 1, week: 7, month: 28, quarter: 90 }
 
 /** An upper bound on the buckets a range spans, assuming the shortest month and quarter. */
 export const isChartable = ({ from, to, bucket }: DarAnalyticsRange): boolean =>
-  Math.floor(dayjs(to).diff(dayjs(from), 'day') / SHORTEST_BUCKET_DAYS[bucket]) + 2 <= MAX_BUCKETS
+  Math.floor((dayjs(to).diff(dayjs(from), 'day') - 1) / SHORTEST_BUCKET_DAYS[bucket]) + 2 <= MAX_BUCKETS

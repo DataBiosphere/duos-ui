@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Box, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material'
+import { Box, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { MetricsBucket } from 'src/types/darMetrics'
 import { BUCKETS, DarAnalyticsRange, isChartable, isValidRange } from 'src/components/dar_analytics/darAnalyticsRange'
 
@@ -26,13 +26,14 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
   const settle = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   // Back and Forward change the range without remounting; show the dates the reports now use.
-  const [shownRange, setShownRange] = useState(`${range.from}|${range.to}`)
-  if (shownRange !== `${range.from}|${range.to}`) {
-    setShownRange(`${range.from}|${range.to}`)
+  const rangeKey = `${range.from}|${range.to}|${range.bucket}`
+  const [shownRange, setShownRange] = useState(rangeKey)
+  if (shownRange !== rangeKey) {
+    setShownRange(rangeKey)
     setFrom(range.from)
     setTo(range.to)
   }
-  useEffect(() => clearTimeout(settle.current), [range.from, range.to])
+  useEffect(() => clearTimeout(settle.current), [rangeKey])
   useEffect(() => () => clearTimeout(settle.current), [])
 
   const valid = isValidRange(from, to)
@@ -47,9 +48,13 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
   if (!valid) {
     helperText = 'Enter dates from 1900 on, with To on or after From'
   }
+  else if (!isChartable({ from, to, bucket: 'quarter' })) {
+    helperText = 'Too long to chart; shorten the range'
+  }
   else if (!chartable) {
     helperText = `Too long to group by ${range.bucket}; shorten the range or group by a longer period`
   }
+  const unavailable = BUCKETS.filter(({ value }) => !isChartable({ ...shownDates, bucket: value }))
 
   const updateDates = (nextFrom: string, nextTo: string) => {
     setFrom(nextFrom)
@@ -86,6 +91,7 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
         exclusive
         value={range.bucket}
         onChange={(_e, bucket: MetricsBucket | null) => bucket && chooseBucket(bucket)}
+        aria-describedby={unavailable.length ? 'group-by-limit' : undefined}
       >
         {BUCKETS.map(({ value, label }) => (
           <ToggleButton key={value} value={value} disabled={!isChartable({ ...shownDates, bucket: value })}>
@@ -93,6 +99,11 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
+      {unavailable.length > 0 && (
+        <Typography id="group-by-limit" sx={{ fontSize: '12px', alignSelf: 'center' }}>
+          {`Grouping by ${unavailable.map(({ label }) => label.toLowerCase()).join(' or ')} needs a shorter range.`}
+        </Typography>
+      )}
     </Box>
   )
 }
