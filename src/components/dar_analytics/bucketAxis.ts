@@ -54,6 +54,7 @@ export const formatBucketStart = (bucketStart: number, bucket: MetricsBucket): s
   }
 }
 
+const valuesAt = (series: { label: string, data: (number | null)[] }[], i: number) => series.map(s => `${s.label} ${s.data[i] ?? 'none'}`).join(', ')
 /** A per-period chart as text, for assistive technology: `Q1: Approved 4, Denied 1; Q2: …`. */
-export const describePeriods = (labels: string[], series: { label: string, data: (number | null)[] }[]) =>
-  labels.map((label, i) => `${label}: ${series.map(s => `${s.label} ${s.data[i] ?? 'none'}`).join(', ')}`).join('; ')
+export const describePeriods = (labels: string[], series: Parameters<typeof valuesAt>[0]) =>
+  labels.map((label, i) => `${label}: ${valuesAt(series, i)}`).join('; ')
