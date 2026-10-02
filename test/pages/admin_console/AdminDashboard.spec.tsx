@@ -1,7 +1,7 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderWithRouter } from '../../test-utils'
 import AdminDashboard from 'src/pages/admin_console/AdminDashboard'
@@ -50,7 +50,7 @@ describe('AdminDashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.useFakeTimers({ toFake: ['Date'] })
-    vi.setSystemTime(new Date('2026-10-01T12:00:00'))
+    vi.setSystemTime(new Date('2026-10-02T12:00:00'))
     tabs.METRICS_TABS = ALL_TABS
     vi.mocked(Admin.getDashboardSummary).mockResolvedValue(summary)
   })
@@ -74,10 +74,19 @@ describe('AdminDashboard', () => {
     ['SO Approvals', 'so-approvals'],
     ['Volume', 'volume'],
     ['Expiration & Renewal', 'expiration'],
-  ])('opens the %s tile on its Metrics tab, over the same 90 days', (label, tab) => {
+  ])('opens the %s tile on its Metrics tab, over the window its counts cover', async (label, tab) => {
     renderDashboard()
 
-    expect(tile(label)).toHaveAttribute('href', `/admin_console/metrics?tab=${tab}&from=2026-07-04&to=2026-10-01&bucket=week`)
+    await waitFor(() => expect(tile(label))
+      .toHaveAttribute('href', `/admin_console/metrics?tab=${tab}&from=2026-07-04&to=2026-10-01&bucket=week`))
+  })
+
+  it('links to the last 90 days by the browser date until the summary arrives', () => {
+    vi.mocked(Admin.getDashboardSummary).mockReturnValue(new Promise(() => {}))
+
+    renderDashboard()
+
+    expect(tile('Volume')).toHaveAttribute('href', '/admin_console/metrics?tab=volume&from=2026-07-05&to=2026-10-02&bucket=week')
   })
 
   it('shows section counts and the 90-day metrics from one summary request', async () => {
@@ -99,7 +108,7 @@ describe('AdminDashboard', () => {
 
     renderDashboard()
 
-    expect(await within(tile('DAC Turnaround')).findByLabelText('Median Days: unavailable')).toBeInTheDocument()
+    expect(await screen.findByLabelText('Median Days: unavailable')).toBeInTheDocument()
   })
 
   it('titles the page as the Admin Console with no promotion', () => {

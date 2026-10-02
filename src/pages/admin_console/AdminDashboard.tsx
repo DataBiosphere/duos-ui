@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
+import { useQuery } from '@tanstack/react-query'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
@@ -75,8 +76,8 @@ const sectionTiles: Tile[] = [
 
 // The tiles report the last 90 days, so each opens its tab on that window. A tile for a tab the
 // Metrics page doesn't have yet would quietly open the first tab, so it's left out instead.
-const metricTiles = (today: Dayjs): Tile[] => {
-  const window = `from=${today.subtract(89, 'day').format(DATE_FORMAT)}&to=${today.format(DATE_FORMAT)}&bucket=week`
+const metricTiles = (from: string, to: string): Tile[] => {
+  const window = `from=${from}&to=${to}&bucket=week`
   const metricTile = (tab: string, tile: Omit<Tile, 'link'>): Tile[] =>
     METRICS_TABS.some(({ key }) => key === tab) ? [{ ...tile, link: `${ADMIN_METRICS_ROUTE}?tab=${tab}&${window}` }] : []
   return [
@@ -134,12 +135,19 @@ const metricTiles = (today: Dayjs): Tile[] => {
   ]
 }
 
+const SUMMARY_KEY = ['admin-dashboard-summary']
+
 export default function AdminDashboard(): React.JSX.Element {
-  const tileMeta = useMemo(() => [...sectionTiles, ...metricTiles(dayjs())], [])
+  // Reads the summary ConsoleDashboard fetches, so each link opens the window behind its counts;
+  // the browser's date stands in until it arrives.
+  const { data } = useQuery({ queryKey: SUMMARY_KEY, queryFn: Admin.getDashboardSummary, enabled: false })
+  const from = data?.metrics?.from ?? dayjs().subtract(89, 'day').format(DATE_FORMAT)
+  const to = data?.metrics?.to ?? dayjs().format(DATE_FORMAT)
+  const tileMeta = useMemo(() => [...sectionTiles, ...metricTiles(from, to)], [from, to])
   return (
     <ConsoleDashboard
       consoleTitle="Admin Console"
-      queryKey={['admin-dashboard-summary']}
+      queryKey={SUMMARY_KEY}
       queryFn={Admin.getDashboardSummary}
       tileMeta={tileMeta}
       resourcesHeading="Helpful Resources"
