@@ -70,6 +70,9 @@ export const SoApprovalsSection = ({ range }: { range: DarAnalyticsRange }) => {
       isLoading={report.isPending}
       isRefreshing={report.isPlaceholderData}
       error={report.error}
+      onRetry={() => {
+        report.refetch()
+      }}
       isEmpty={(report.data?.total ?? 0) === 0}
       emptyText="Nothing was submitted in this range."
     >

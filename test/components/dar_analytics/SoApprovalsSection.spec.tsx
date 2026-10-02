@@ -34,7 +34,7 @@ const renderSection = () => render(section(new QueryClient({ defaultOptions: { q
 
 describe('SoApprovalsSection', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
   })
 
   it('counts each status across submission kinds and lists each submission', async () => {
@@ -67,6 +67,43 @@ describe('SoApprovalsSection', () => {
     expect(within(row).getAllByRole('gridcell').map(cell => cell.textContent))
       .toEqual(['Closeout', 'Feb 1, 2026', 'Approved', 'Feb 4, 2026', '3.0'])
     expect(DarMetrics.getSoApprovals).toHaveBeenCalledWith({ ...range, limit: 25, offset: 0 })
+  })
+
+  it('shows pending and skipped rows with no approval date, and a status it does not know as sent', async () => {
+    const submitted = new Date(2026, 1, 1, 12).getTime()
+    vi.mocked(DarMetrics.getSoApprovals).mockResolvedValue(buildReport([bucket('ORIGINAL', 'PENDING', 3)], [
+      { referenceId: 'ref-1', collectionId: 1, kind: 'ORIGINAL', submissionDate: submitted, status: 'PENDING', approvalDate: null, elapsedDays: null },
+      { referenceId: 'ref-2', collectionId: 2, kind: 'PROGRESS_REPORT', submissionDate: submitted, status: 'SKIPPED' },
+      { referenceId: 'ref-3', collectionId: 3, kind: 'ORIGINAL', submissionDate: submitted, status: 'ESCALATED' as SoApproval['status'] },
+    ]))
+
+    renderSection()
+
+    const grid = await screen.findByRole('grid', { name: 'SO approval per submission' })
+    const cells = (status: string) => within(within(grid).getByRole('gridcell', { name: status }).closest<HTMLElement>('[role="row"]')!)
+      .getAllByRole('gridcell').map(cell => cell.textContent)
+    expect(cells('Pending')).toEqual(['DAR', 'Feb 1, 2026', 'Pending', '–', '–'])
+    expect(cells('Skipped')).toEqual(['Progress report', 'Feb 1, 2026', 'Skipped', '–', '–'])
+    expect(cells('ESCALATED')).toEqual(['DAR', 'Feb 1, 2026', 'ESCALATED', '–', '–'])
+  })
+
+  it('offers a retry when a later page fails, rather than stranding the user', async () => {
+    const rows: SoApproval[] = Array.from({ length: 25 }, (_, i) => ({
+      referenceId: `ref-${i}`, collectionId: i, kind: 'ORIGINAL', submissionDate: new Date(2026, 1, 1, 12).getTime(), status: 'PENDING',
+    }))
+    const firstPage = buildReport([bucket('ORIGINAL', 'PENDING', 30)], rows)
+    vi.mocked(DarMetrics.getSoApprovals)
+      .mockResolvedValueOnce(firstPage)
+      .mockRejectedValueOnce({ message: 'Bad gateway', code: 502 })
+      .mockResolvedValueOnce({ ...firstPage, rows: rows.slice(0, 5) })
+
+    renderSection()
+    fireEvent.click(await screen.findByRole('button', { name: 'Go to next page' }))
+    expect(await screen.findByText('Unable to load SO approvals: Bad gateway')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+
+    expect(await screen.findByRole('grid', { name: 'SO approval per submission' })).toBeInTheDocument()
+    expect(DarMetrics.getSoApprovals).toHaveBeenLastCalledWith({ ...range, limit: 25, offset: 25 })
   })
 
   it('shows the empty state with the history caveat', async () => {
