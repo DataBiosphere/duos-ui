@@ -2,10 +2,9 @@ import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
-import SigningOfficialRequest, { SO_REQUESTED_SETTING } from 'src/pages/user_profile/SigningOfficialRequest'
+import SigningOfficialRequest, { SO_ATTESTATION_ACK_KEY } from 'src/pages/user_profile/SigningOfficialRequest'
 import { Support } from 'src/libs/ajax/Support'
 import { User } from 'src/libs/ajax/User'
-import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
 import { DuosUser } from 'src/types/model'
 
@@ -43,9 +42,15 @@ const twoProfiles = {
   userData: { externalProfiles: { linkedIn: 'test-user', ORCID: '0000-0000-0000-0001' } },
 } as never
 
-const openAndAttest = (props: Partial<React.ComponentProps<typeof SigningOfficialRequest>> = {}) => {
+const previousRequest = Date.parse('2026-09-01T12:00:00.000Z')
+
+const buildAcknowledgement = (lastAcknowledged: number) => ({
+  [SO_ATTESTATION_ACK_KEY]: { userId: 1, ackKey: SO_ATTESTATION_ACK_KEY, firstAcknowledged: lastAcknowledged, lastAcknowledged },
+})
+
+const openAndAttest = async (props: Partial<React.ComponentProps<typeof SigningOfficialRequest>> = {}) => {
   render(<SigningOfficialRequest user={user} {...props} />)
-  fireEvent.click(screen.getByRole('button', { name: /Request Signing Official status/ }))
+  fireEvent.click(await screen.findByRole('button', { name: /Request Signing Official status/ }))
   fireEvent.click(screen.getByRole('checkbox', { name: /I legally attest/ }))
 }
 
@@ -53,23 +58,24 @@ const submitButton = () => screen.getByRole('button', { name: 'Request Signing O
 
 beforeEach(() => {
   vi.clearAllMocks()
-  localStorage.clear()
+  vi.mocked(User.getAcknowledgements).mockResolvedValue({})
+  vi.mocked(User.acceptAcknowledgments).mockResolvedValue(buildAcknowledgement(Date.parse('2026-10-01T12:00:00.000Z')))
   vi.mocked(Support.createTicket).mockReturnValue({} as never)
   vi.mocked(Support.createSupportRequest).mockResolvedValue(undefined)
 })
 
 describe('SigningOfficialRequest', () => {
-  it('starts collapsed behind a link', () => {
+  it('starts collapsed behind a link', async () => {
     render(<SigningOfficialRequest user={user} />)
 
-    expect(screen.getByRole('button', { name: /Are you your institution's Signing Official/ })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /Are you your institution's Signing Official/ })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Request Signing Official Status' })).not.toBeInTheDocument()
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
   })
 
-  it('expands to the attestation and keeps the request disabled until attested', () => {
+  it('expands to the attestation and keeps the request disabled until attested', async () => {
     render(<SigningOfficialRequest user={user} />)
-    fireEvent.click(screen.getByRole('button', { name: /Request Signing Official status/ }))
+    fireEvent.click(await screen.findByRole('button', { name: /Request Signing Official status/ }))
 
     expect(screen.getByRole('heading', { name: 'Request Signing Official Status' })).toBeInTheDocument()
     expect(screen.getByText(/required to provide two External Profiles/)).toBeInTheDocument()
@@ -79,8 +85,8 @@ describe('SigningOfficialRequest', () => {
     expect(submitButton()).toBeEnabled()
   })
 
-  it('collapses on Cancel and clears the attestation', () => {
-    openAndAttest()
+  it('collapses on Cancel and clears the attestation', async () => {
+    await openAndAttest()
 
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
     fireEvent.click(screen.getByRole('button', { name: /Request Signing Official status/ }))
@@ -89,22 +95,22 @@ describe('SigningOfficialRequest', () => {
     expect(submitButton()).toBeDisabled()
   })
 
-  it('warns in an info alert that the requestor cannot also be the Signing Official', () => {
-    openAndAttest()
+  it('warns in an info alert that the requestor cannot also be the Signing Official', async () => {
+    await openAndAttest()
 
     const alert = screen.getByRole('alert')
     expect(alert).toHaveTextContent('cannot be both the requestor and the Signing Official')
     expect(alert).toHaveTextContent('Contracts Office')
   })
 
-  it('points to the existing Signing Officials when the institution has some', () => {
-    openAndAttest({ institutionHasSigningOfficials: true })
+  it('points to the existing Signing Officials when the institution has some', async () => {
+    await openAndAttest({ institutionHasSigningOfficials: true })
 
     expect(screen.getByText(/already has Signing Officials/)).toBeInTheDocument()
   })
 
-  it('omits the existing Signing Officials note when the institution has none', () => {
-    openAndAttest()
+  it('omits the existing Signing Officials note when the institution has none', async () => {
+    await openAndAttest()
 
     expect(screen.queryByText(/already has Signing Officials/)).not.toBeInTheDocument()
   })
@@ -113,13 +119,14 @@ describe('SigningOfficialRequest', () => {
     render(<SigningOfficialRequest user={{ ...user, isSigningOfficial: true }} />)
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(User.getAcknowledgements).not.toHaveBeenCalled()
   })
 
   it('requires two External Profiles', async () => {
     vi.mocked(User.getMe).mockResolvedValue({
       userData: { externalProfiles: { linkedIn: 'test-user' } },
     } as never)
-    openAndAttest()
+    await openAndAttest()
 
     fireEvent.click(submitButton())
 
@@ -142,7 +149,7 @@ describe('SigningOfficialRequest', () => {
         },
       },
     } as never)
-    openAndAttest()
+    await openAndAttest()
 
     fireEvent.click(submitButton())
 
@@ -156,29 +163,62 @@ describe('SigningOfficialRequest', () => {
     )
   })
 
-  it('replaces the request with a submitted note so it cannot be sent twice', async () => {
+  it('records the attestation and replaces the form with a requested note', async () => {
     vi.mocked(User.getMe).mockResolvedValue(twoProfiles)
-    openAndAttest()
+    await openAndAttest()
 
     fireEvent.click(submitButton())
 
     expect(await screen.findByRole('heading', { name: 'Signing Official Status Requested' })).toBeInTheDocument()
-    expect(screen.queryByRole('button')).not.toBeInTheDocument()
-    expect(Storage.getCurrentUserSettings(SO_REQUESTED_SETTING)).toEqual(expect.any(String))
+    expect(User.acceptAcknowledgments).toHaveBeenCalledWith(SO_ATTESTATION_ACK_KEY)
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
   })
 
-  it('shows the submitted note after a reload when a request was already sent', () => {
-    Storage.setCurrentUserSettings(SO_REQUESTED_SETTING, '2026-10-01T12:00:00.000Z')
+  it('shows the requested note from a previously recorded attestation', async () => {
+    vi.mocked(User.getAcknowledgements).mockResolvedValue(buildAcknowledgement(previousRequest))
     render(<SigningOfficialRequest user={user} />)
 
-    expect(screen.getByRole('heading', { name: 'Signing Official Status Requested' })).toBeInTheDocument()
-    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Signing Official Status Requested' })).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(new Date(previousRequest).toLocaleDateString()))).toBeInTheDocument()
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+  })
+
+  it('lets a previous requester request again and tells support about the earlier request', async () => {
+    vi.mocked(User.getAcknowledgements).mockResolvedValue(buildAcknowledgement(previousRequest))
+    vi.mocked(User.getMe).mockResolvedValue(twoProfiles)
+    render(<SigningOfficialRequest user={user} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Request again' }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /I legally attest/ }))
+    fireEvent.click(submitButton())
+
+    await waitFor(() => expect(Support.createSupportRequest).toHaveBeenCalledOnce())
+    expect(vi.mocked(Support.createTicket).mock.calls[0][4])
+      .toContain(`Previously requested on ${new Date(previousRequest).toLocaleDateString()}.`)
+  })
+
+  it('treats the request as sent when the ticket is filed but recording the attestation fails', async () => {
+    vi.mocked(User.getMe).mockResolvedValue(twoProfiles)
+    vi.mocked(User.acceptAcknowledgments).mockRejectedValue(new Error('Network error'))
+    await openAndAttest()
+
+    fireEvent.click(submitButton())
+
+    expect(await screen.findByRole('heading', { name: 'Signing Official Status Requested' })).toBeInTheDocument()
+    expect(Notifications.showError).not.toHaveBeenCalled()
+  })
+
+  it('shows the request link when the acknowledgements cannot be loaded', async () => {
+    vi.mocked(User.getAcknowledgements).mockRejectedValue(new Error('Network error'))
+    render(<SigningOfficialRequest user={user} />)
+
+    expect(await screen.findByRole('button', { name: /Are you your institution's Signing Official/ })).toBeInTheDocument()
   })
 
   it('does not record a request that failed', async () => {
     vi.mocked(User.getMe).mockResolvedValue(twoProfiles)
     vi.mocked(Support.createSupportRequest).mockRejectedValue({ response: { status: 500 } })
-    openAndAttest()
+    await openAndAttest()
 
     fireEvent.click(submitButton())
 
@@ -187,13 +227,13 @@ describe('SigningOfficialRequest', () => {
         text: 'ERROR 500: Unable to request Signing Official status',
       })
     })
-    expect(Storage.getCurrentUserSettings(SO_REQUESTED_SETTING)).toBeUndefined()
+    expect(User.acceptAcknowledgments).not.toHaveBeenCalled()
     expect(submitButton()).toBeEnabled()
   })
 
   it('omits an undefined status from network error notifications', async () => {
     vi.mocked(User.getMe).mockRejectedValue(new Error('Network error'))
-    openAndAttest()
+    await openAndAttest()
 
     fireEvent.click(submitButton())
 

@@ -1,14 +1,13 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Alert, Checkbox, FormControlLabel, Link, Stack } from '@mui/material'
 import { Support } from 'src/libs/ajax/Support'
 import { User } from 'src/libs/ajax/User'
-import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
 import { DuosUser, ResponseError } from 'src/types/model'
 import { getExternalProfileLinks } from './externalProfileUtils'
 import './SigningOfficialRequest.css'
 
-export const SO_REQUESTED_SETTING = 'signingOfficialRequestedAt'
+export const SO_ATTESTATION_ACK_KEY = 'Signing_Official_Status_Attestation'
 
 const toggleSx = { font: 'inherit', verticalAlign: 'baseline' }
 const attestationSx = {
@@ -19,36 +18,53 @@ const attestationSx = {
   '& .MuiFormControlLabel-label': { font: 'inherit', lineHeight: 1.45 },
 }
 
+const formatDate = (epochMillis: number) => new Date(epochMillis).toLocaleDateString()
+
 interface SigningOfficialRequestProps {
   readonly user: DuosUser
   readonly institutionHasSigningOfficials?: boolean
 }
 
 export default function SigningOfficialRequest({ user, institutionHasSigningOfficials = false }: SigningOfficialRequestProps): React.JSX.Element | null {
+  const [isLoaded, setIsLoaded] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [hasAttested, setHasAttested] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [requestedAt, setRequestedAt] = useState(() => Storage.getCurrentUserSettings<string>(SO_REQUESTED_SETTING))
+  const [requestedAt, setRequestedAt] = useState<number>()
 
-  if (user.isSigningOfficial) {
+  useEffect(() => {
+    if (user.isSigningOfficial) {
+      return
+    }
+    User.getAcknowledgements()
+      .then(acknowledgements => setRequestedAt(acknowledgements[SO_ATTESTATION_ACK_KEY]?.lastAcknowledged))
+      .catch(() => setRequestedAt(undefined))
+      .finally(() => setIsLoaded(true))
+  }, [user.isSigningOfficial])
+
+  if (user.isSigningOfficial || !isLoaded) {
     return null
-  }
-
-  if (requestedAt) {
-    return (
-      <section className="signing-official-request" aria-labelledby="signing-official-request-title">
-        <h2 id="signing-official-request-title">Signing Official Status Requested</h2>
-        <p>
-          You requested Signing Official status on {new Date(requestedAt).toLocaleDateString()}.
-          {' '}DUOS support will follow up by email.
-        </p>
-      </section>
-    )
   }
 
   const collapse = () => {
     setIsExpanded(false)
     setHasAttested(false)
+  }
+
+  if (!isExpanded && requestedAt) {
+    return (
+      <section className="signing-official-request" aria-labelledby="signing-official-request-title">
+        <h2 id="signing-official-request-title">Signing Official Status Requested</h2>
+        <p>
+          You requested Signing Official status on {formatDate(requestedAt)}.
+          {' '}DUOS support will follow up by email.
+          {' '}
+          <Link component="button" type="button" onClick={() => setIsExpanded(true)} sx={toggleSx}>
+            Request again
+          </Link>
+        </p>
+      </section>
+    )
   }
 
   if (!isExpanded) {
@@ -59,6 +75,17 @@ export default function SigningOfficialRequest({ user, institutionHasSigningOffi
         </Link>
       </section>
     )
+  }
+
+  // The ticket is already filed, so a failed record must not surface as a failed request.
+  const recordAttestation = async (): Promise<number> => {
+    try {
+      const acknowledgements = await User.acceptAcknowledgments(SO_ATTESTATION_ACK_KEY)
+      return acknowledgements[SO_ATTESTATION_ACK_KEY]?.lastAcknowledged ?? Date.now()
+    }
+    catch {
+      return Date.now()
+    }
   }
 
   const submitRequest = async () => {
@@ -76,6 +103,7 @@ export default function SigningOfficialRequest({ user, institutionHasSigningOffi
 
       const description = `User (${user.userId}, ${user.email}) has attested that they are a Signing Official for their institution and have the authority to engage their institution in contracts related to data access and submission.\n\nExternal profile URLs:\n`
         + externalProfileLinks.map(({ label, url }) => `- ${label}: ${url}`).join('\n')
+        + (requestedAt ? `\n\nPreviously requested on ${formatDate(requestedAt)}.` : '')
       const ticket = Support.createTicket(
         user.displayName,
         'task',
@@ -87,9 +115,8 @@ export default function SigningOfficialRequest({ user, institutionHasSigningOffi
       )
 
       await Support.createSupportRequest(ticket)
-      const submittedAt = new Date().toISOString()
-      Storage.setCurrentUserSettings(SO_REQUESTED_SETTING, submittedAt)
-      setRequestedAt(submittedAt)
+      setRequestedAt(await recordAttestation())
+      collapse()
       Notifications.showSuccess({
         text: 'Signing Official status request submitted successfully.',
         timeout: 1500,
