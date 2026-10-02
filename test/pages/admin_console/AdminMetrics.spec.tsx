@@ -1,8 +1,9 @@
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
-import { MemoryRouter, useLocation } from 'react-router'
+import { fireEvent, screen } from '@testing-library/react'
+import { useLocation } from 'react-router'
+import { renderWithRouter } from '../../test-utils'
 import AdminMetrics from 'src/pages/admin_console/AdminMetrics'
 
 vi.mock('src/pages/admin_console/metricsTabs', () => ({
@@ -14,12 +15,8 @@ vi.mock('src/pages/admin_console/metricsTabs', () => ({
 
 const LocationProbe = () => <output data-testid="search">{useLocation().search}</output>
 
-const renderPage = (search = '') => render(
-  <MemoryRouter initialEntries={[`/admin_console/metrics${search}`]}>
-    <AdminMetrics />
-    <LocationProbe />
-  </MemoryRouter>,
-)
+const renderPage = (search = '') =>
+  renderWithRouter(<><AdminMetrics /><LocationProbe /></>, { route: `/admin_console/metrics${search}` })
 
 describe('AdminMetrics', () => {
   beforeEach(() => {
