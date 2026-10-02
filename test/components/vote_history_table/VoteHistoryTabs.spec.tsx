@@ -22,7 +22,7 @@ describe('VoteHistoryTabs', () => {
     expect(screen.getByRole('tab', { name: /Member Votes/ })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByRole('tab', { name: /Chair Votes/ })).toHaveAttribute('aria-selected', 'false')
     expect(screen.getByRole('tab', { name: /Member Votes/ })).toHaveStyle({ fontWeight: '700' })
-    expect(screen.getByRole('tab', { name: /Chair Votes/ })).toHaveStyle({ fontWeight: 'normal' })
+    expect(screen.getByRole('tab', { name: /Chair Votes/ })).toHaveStyle({ fontWeight: '400' })
   })
 
   it('renders the count badge, including zero', () => {

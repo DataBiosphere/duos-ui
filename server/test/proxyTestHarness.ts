@@ -1,7 +1,7 @@
 import http from 'node:http'
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http'
 import type { AddressInfo } from 'node:net'
-import Fastify, { type FastifyInstance, type FastifyRequest, type Session } from 'fastify'
+import Fastify, { type FastifyInstance, type FastifyRequest, type FastifyServerOptions, type Session } from 'fastify'
 import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
@@ -93,8 +93,8 @@ export interface SessionSeed {
 
 export const SESSION_COOKIE = SESSION_COOKIE_NAME
 
-export async function buildAppShell(): Promise<FastifyInstance> {
-  const app = Fastify({ logger: false, trustProxy: TRUST_PROXY })
+export async function buildAppShell(logger: FastifyServerOptions['logger'] = false): Promise<FastifyInstance> {
+  const app = Fastify({ logger, trustProxy: TRUST_PROXY })
   await app.register(fastifyCookie)
   await app.register(fastifySession, sessionPluginOptions({
     secret: 'a-test-session-secret-at-least-32-characters-long',
