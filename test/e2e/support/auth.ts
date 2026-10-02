@@ -58,18 +58,22 @@ export async function signInWithRetry(
   mintToken: () => Promise<string>,
   { attempts = SIGN_IN_ATTEMPTS, backoffMs = SIGN_IN_BACKOFF_MS }: SignInRetryOptions = {},
 ): Promise<number> {
-  const failures: string[] = []
-  for (let attempt = 1; attempt <= attempts; attempt++) {
+  // Attempts must run one after another, so each one calls the next from its failure path.
+  const run = async (attempt: number, failures: string[]): Promise<number> => {
     try {
       await attemptSignIn(await mintToken())
       return attempt
     }
     catch (error) {
-      failures.push(`attempt ${attempt}: ${firstLine(error)}`)
-      if (attempt < attempts) await new Promise(resolve => setTimeout(resolve, backoffMs * attempt))
+      const failed = [...failures, `attempt ${attempt}: ${firstLine(error)}`]
+      if (attempt >= attempts) {
+        throw new Error(`Sign-in failed after ${attempts} attempts\n${failed.join('\n')}`)
+      }
+      await new Promise(resolve => setTimeout(resolve, backoffMs * attempt))
+      return run(attempt + 1, failed)
     }
   }
-  throw new Error(`Sign-in failed after ${attempts} attempts\n${failures.join('\n')}`)
+  return run(1, [])
 }
 
 /** What the sign-in form shows, such as the reason the app gave for a refusal. */
