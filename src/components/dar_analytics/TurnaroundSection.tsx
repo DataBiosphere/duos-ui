@@ -20,7 +20,7 @@ const layoutStyle = {
 }
 
 const days = (value?: number | null) => (value == null ? '–' : value.toFixed(1))
-const oneDecimal = (value?: number | null) => (value == null ? null : Math.round(value * 10) / 10)
+const oneDecimal = (value?: number | null) => (value == null ? null : Number(value.toFixed(1)))
 
 interface TurnaroundRow extends TurnaroundBucket {
   id: number

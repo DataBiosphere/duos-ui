@@ -46,17 +46,17 @@ describe('TurnaroundSection', () => {
 
   it('shows mean, median and mode per bucket and the unmeasured count as a caveat', async () => {
     vi.mocked(DarMetrics.getDecisionTurnaround).mockResolvedValue(buildReport([
-      { bucketStart: Q1, count: 4, unmeasured: 1, meanDays: 12.25, medianDays: 10, modeDays: 9 },
+      { bucketStart: Q1, count: 4, unmeasured: 1, meanDays: 1.15, medianDays: 10, modeDays: 9 },
       { bucketStart: Q2, count: 0, unmeasured: 1 },
     ], 2))
 
     renderSection()
 
     expect(await screen.findByRole('grid', { name: 'Turnaround per bucket' })).toBeInTheDocument()
-    expect(cellsFor('2026 Q1')).toEqual(['2026 Q1', '4', '12.3', '10.0', '9'])
+    expect(cellsFor('2026 Q1')).toEqual(['2026 Q1', '4', '1.1', '10.0', '9'])
     expect(cellsFor('2026 Q2')).toEqual(['2026 Q2', '0', '–', '–', '–'])
     expect(document.querySelector('[aria-label="Days to decision per period"]'))
-      .toHaveAccessibleDescription('2026 Q1: Median 10, Mean 12.3; 2026 Q2: Median none, Mean none')
+      .toHaveAccessibleDescription('2026 Q1: Median 10, Mean 1.1; 2026 Q2: Median none, Mean none')
     expect(screen.getByText(/left out of these figures: 2 in this range/)).toBeInTheDocument()
     expect(screen.getByRole('group', { name: 'Decided' })).toHaveTextContent('6')
     expect(screen.getByRole('group', { name: 'Unmeasured' })).toHaveTextContent('2')
