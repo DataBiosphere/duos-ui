@@ -132,7 +132,7 @@ describe('CloseoutReview', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Please note:')).toBeVisible()
-      expect(screen.getByText('Please note:')).toHaveStyle({ fontWeight: '400' })
+      expect(screen.getByText('Please note:')).toHaveStyle({ fontWeight: '700' })
     })
   })
 
