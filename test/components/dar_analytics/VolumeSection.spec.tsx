@@ -61,7 +61,7 @@ describe('VolumeSection', () => {
     expect(figure('DARs submitted')).toHaveTextContent('5')
     expect(figure('Researchers')).toHaveTextContent('3')
     expect(figure('Institutions')).toHaveTextContent('1')
-    expect(figure('Datasets requested')).toHaveTextContent('7')
+    expect(figure('Dataset requests')).toHaveTextContent('7')
     expect(within(grid).getByRole('gridcell', { name: 'Broad Institute' })).toBeInTheDocument()
     expect(within(grid).getByRole('gridcell', { name: 'No institution' })).toBeInTheDocument()
     expect(document.querySelector('[aria-label="DARs submitted per period"]'))

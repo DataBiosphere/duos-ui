@@ -66,7 +66,7 @@ export const VolumeSection = ({ range }: { range: DarAnalyticsRange }) => {
           { label: 'Researchers', value: data?.researchers.length ?? 0 },
           { label: 'Institutions', value: institutions.filter(i => i.institutionName != null).length },
           {
-            label: 'Datasets requested',
+            label: 'Dataset requests',
             value: (data?.buckets ?? []).reduce((sum, bucket) => sum + bucket.datasetCount, 0),
           },
         ]}
