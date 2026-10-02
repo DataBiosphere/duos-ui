@@ -80,10 +80,10 @@ export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
           <ToggleButton value="dataset">Per dataset</ToggleButton>
         </ToggleButtonGroup>
       )}
-      isLoading={report.isLoading}
+      isLoading={report.isPending}
       isRefreshing={report.isPlaceholderData}
       error={report.error}
-      isEmpty={(data?.total ?? 0) === 0}
+      isEmpty={(data?.total ?? 0) + (data?.unmeasured ?? 0) === 0}
       emptyText="No DARs submitted in this range have been decided."
     >
       <HeadlineFigures

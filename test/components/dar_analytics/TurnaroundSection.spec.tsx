@@ -48,16 +48,17 @@ describe('TurnaroundSection', () => {
   it('shows mean, median and mode per bucket and the unmeasured count as a caveat', async () => {
     vi.mocked(DarMetrics.getDecisionTurnaround).mockResolvedValue(buildReport([
       { bucketStart: Q1, count: 4, unmeasured: 1, meanDays: 12.25, medianDays: 10, modeDays: 9 },
-      { bucketStart: Q2, count: 1, unmeasured: 0 },
-    ], 1))
+      { bucketStart: Q2, count: 0, unmeasured: 1 },
+    ], 2))
 
     renderSection()
 
     expect(await screen.findByRole('grid', { name: 'Turnaround per bucket' })).toBeInTheDocument()
     expect(cellsFor('2026 Q1')).toEqual(['2026 Q1', '4', '12.3', '10.0', '9'])
-    expect(cellsFor('2026 Q2')).toEqual(['2026 Q2', '1', '–', '–', '–'])
-    expect(screen.getByText(/left out of these figures: 1 in this range/)).toBeInTheDocument()
-    expect(screen.getByText('Decided', { selector: 'dt' }).nextSibling).toHaveTextContent('6')
+    expect(cellsFor('2026 Q2')).toEqual(['2026 Q2', '0', '–', '–', '–'])
+    expect(screen.getByText(/left out of these figures: 2 in this range/)).toBeInTheDocument()
+    expect(screen.getByRole('group', { name: 'Decided' })).toHaveTextContent('6')
+    expect(screen.getByRole('group', { name: 'Unmeasured' })).toHaveTextContent('2')
     expect(DarMetrics.getDecisionTurnaround).toHaveBeenCalledWith({ ...range, limit: 1 })
   })
 
@@ -78,12 +79,21 @@ describe('TurnaroundSection', () => {
   })
 
   it('shows the empty state, with the caveat, when nothing was decided', async () => {
-    vi.mocked(DarMetrics.getDecisionTurnaround).mockResolvedValue(buildReport([], 2))
+    vi.mocked(DarMetrics.getDecisionTurnaround).mockResolvedValue(buildReport([]))
 
     renderSection()
 
     expect(await screen.findByText('No DARs submitted in this range have been decided.')).toBeInTheDocument()
-    expect(screen.getByText(/left out of these figures: 2 in this range/)).toBeInTheDocument()
+    expect(screen.getByText(/left out of these figures: 0 in this range/)).toBeInTheDocument()
+  })
+
+  it('shows the figures, not the empty state, when every decision is unmeasured', async () => {
+    vi.mocked(DarMetrics.getDecisionTurnaround).mockResolvedValue(buildReport([{ bucketStart: Q1, count: 0, unmeasured: 2 }], 2))
+
+    renderSection()
+
+    expect(await screen.findByRole('group', { name: 'Decided' })).toHaveTextContent('2')
+    expect(screen.queryByText('No DARs submitted in this range have been decided.')).not.toBeInTheDocument()
   })
 
   it('keeps the level toggle when the per-DAR report is empty, so per-dataset figures stay reachable', async () => {
