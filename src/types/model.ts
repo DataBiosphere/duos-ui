@@ -434,7 +434,6 @@ export interface Study {
   piWebsiteUrl?: string
   publicVisibility: boolean
   datasetIds: number[]
-  datasets: Dataset[]
   properties: StudyProperty[]
   alternativeDataSharingPlan?: FileStorageObject
   createDate: string // Date?
