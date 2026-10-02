@@ -10,6 +10,8 @@ import type {
   RouteGenericInterface,
 } from 'fastify'
 import fastifyReplyFrom from '@fastify/reply-from'
+import { endSession } from '../auth/authEvents.js'
+import type { SessionDestroyReason } from '../auth/authEvents.js'
 import { requireEnv } from '../auth/oidcClient.js'
 import { RefreshFailedError, refreshAccessToken, tokenDisposition } from '../auth/refresh.js'
 import { fetchMetadataGuard } from '../security/fetchMetadata.js'
@@ -273,7 +275,7 @@ export async function registerUpstreamProxy(
     if (disposition === 'expired') {
       // A fixture token cannot renew: end the session now, exactly as an
       // upstream 401 would after the token expired in flight.
-      await endRejectedSession(request, reply, logTag, 'the test-fixture access token has expired')
+      await endRejectedSession(request, reply, logTag, 'the test-fixture access token has expired', 'expired')
       return reply
     }
     if (disposition === 'forward') {
@@ -365,7 +367,7 @@ export async function registerUpstreamProxy(
     }
 
     // reply-from's onResponse callback is synchronous.
-    void endRejectedSession(request, reply, logTag, 'upstream rejected the session access token')
+    void endRejectedSession(request, reply, logTag, 'upstream rejected the session access token', 'upstream_401')
   }
 
   app.addHook('onSend', (_request, reply, _payload, done) => {
@@ -547,9 +549,9 @@ function rewriteHeaders(headers: IncomingHttpHeaders): IncomingHttpHeaders {
 }
 
 /** Ends a session whose token is finished, for the `reason` the log records. */
-async function endRejectedSession(request: ProxyRequest, reply: ProxyReply, logTag: string, reason: string): Promise<void> {
+async function endRejectedSession(request: ProxyRequest, reply: ProxyReply, logTag: string, reason: string, destroyReason: SessionDestroyReason): Promise<void> {
   try {
-    await request.session.destroy()
+    await endSession(request, destroyReason)
     request.log.info(`[${logTag}] ${reason} — session destroyed, returning 401`)
   }
   catch (err: unknown) {

@@ -30,6 +30,7 @@ import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
 import { publicProxy } from './proxy/publicProxy.js'
 import { configPath, readConfig, TRUST_PROXY } from './config.js'
+import { buildLoggerOptions } from './logging.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
 
@@ -104,10 +105,10 @@ export async function buildApp(): Promise<AppInstance> {
           key: fs.readFileSync(path.join(PROJECT_ROOT, 'server.key')),
           cert: fs.readFileSync(path.join(PROJECT_ROOT, 'server.crt')),
         },
-        logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' },
+        logger: buildLoggerOptions(),
         trustProxy: TRUST_PROXY,
       })
-    : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' }, trustProxy: TRUST_PROXY })
+    : Fastify({ logger: buildLoggerOptions(), trustProxy: TRUST_PROXY })
   ) as AppInstance
 
   // Registered before any routes so all errors, including those in plugins, are caught.

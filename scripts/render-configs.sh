@@ -123,12 +123,28 @@ auth_gcloud() {
   gcloud container clusters get-credentials --zone us-central1-a --project "$PROJECT" terra-dev
 }
 
+# Remove the cert staging directory on any exit, including Ctrl-C.
+CERT_TMP=""
+cleanup() {
+  if [[ -n "$CERT_TMP" ]]; then
+    rm -rf "$CERT_TMP"
+  fi
+}
+trap cleanup EXIT
+
+# Each redirect below empties its file before kubectl runs. A failure (for
+# example, the VPN is down) would leave a valid cert empty, or a new cert next
+# to an old key. Write all three files to a staging directory first, and move
+# them into place only after every kubectl call succeeds. The directory is
+# beside the targets so each move is a rename on the same filesystem.
 write_certs() {
   echo "Writing cert files"
-  kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.crt" | base64decode }}' > ../server.crt
-  kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.key" | base64decode }}' > ../server.key
-  chmod 600 ../server.key
-  kubectl -n local-dev get configmaps kube-root-ca.crt -o 'go-template={{ index .data "ca.crt" }}' > ../ca-bundle.crt
+  CERT_TMP=$(mktemp -d ../.render-certs.XXXXXX)
+  kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.crt" | base64decode }}' > "$CERT_TMP/server.crt"
+  kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.key" | base64decode }}' > "$CERT_TMP/server.key"
+  chmod 600 "$CERT_TMP/server.key"
+  kubectl -n local-dev get configmaps kube-root-ca.crt -o 'go-template={{ index .data "ca.crt" }}' > "$CERT_TMP/ca-bundle.crt"
+  mv "$CERT_TMP/server.crt" "$CERT_TMP/server.key" "$CERT_TMP/ca-bundle.crt" ../
 }
 
 # Echo the current value of a variable from an existing .env.local, if any.

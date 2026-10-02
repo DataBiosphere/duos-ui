@@ -1,6 +1,9 @@
 {
     "name": "Combined DUOS",
-    "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:26-trixie",
+    "build": {
+        "dockerfile": "../Dockerfile",
+        "context": ".."
+    },
     "workspaceFolder": "/workspaces",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/duos-ui,type=bind,consistency=cached",
     "mounts": [
@@ -15,6 +18,11 @@
         },
         "ghcr.io/devcontainers/features/docker-in-docker:2": {
             "moby": false
+        },
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+            "helm": "none",
+            "minikube": "none"
         }
     },
     "customizations": {
