@@ -56,6 +56,8 @@ describe('TurnaroundSection', () => {
     expect(await screen.findByRole('grid', { name: 'Turnaround per bucket' })).toBeInTheDocument()
     expect(cellsFor('2026 Q1')).toEqual(['2026 Q1', '4', '12.3', '10.0', '9'])
     expect(cellsFor('2026 Q2')).toEqual(['2026 Q2', '0', '–', '–', '–'])
+    expect(document.querySelector('[aria-label="Days to decision per period"]'))
+      .toHaveAccessibleDescription('2026 Q1: Median 10, Mean 12.25; 2026 Q2: Median none, Mean none')
     expect(screen.getByText(/left out of these figures: 2 in this range/)).toBeInTheDocument()
     expect(screen.getByRole('group', { name: 'Decided' })).toHaveTextContent('6')
     expect(screen.getByRole('group', { name: 'Unmeasured' })).toHaveTextContent('2')
@@ -118,7 +120,7 @@ describe('TurnaroundSection', () => {
     expect(screen.queryByText(/left out of these figures/)).not.toBeInTheDocument()
   })
 
-  it('hides the caveat while the other level is still on screen', async () => {
+  it('shows no caveat while the other level loads', async () => {
     vi.mocked(DarMetrics.getDecisionTurnaround).mockResolvedValue(buildReport([
       { bucketStart: Q1, count: 2, unmeasured: 0, meanDays: 5, medianDays: 5, modeDays: 5 },
     ], 3))
