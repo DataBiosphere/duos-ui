@@ -69,6 +69,8 @@ describe('DecisionFunnelSection', () => {
     expect(countsFor('No election yet')).toEqual(['–', '2'])
     expect(countsFor('Canceled')).toEqual(['1', '0'])
     expect(countsFor('Total')).toEqual(['8', '9'])
+    expect(document.querySelector('[aria-label="DARs by decision state per period"]')).toHaveAccessibleDescription(
+      '2026 Q1: Pending 0, Approved 4, Denied 0, Mixed 1, Canceled 0; 2026 Q2: Pending 2, Approved 0, Denied 0, Mixed 0, Canceled 1')
   })
 
   it('asks for one row per report and shows the empty state when no DARs were submitted', async () => {
@@ -83,8 +85,8 @@ describe('DecisionFunnelSection', () => {
     expect(DarMetrics.getDatasetDecisions).toHaveBeenCalledWith({ ...range, limit: 1 })
   })
 
-  it('shows the error when either report fails', async () => {
-    vi.mocked(DarMetrics.getDecisions).mockResolvedValue(buildReport([]))
+  it('shows a failed report at once, without waiting for the other', async () => {
+    vi.mocked(DarMetrics.getDecisions).mockReturnValue(new Promise(() => {}))
     vi.mocked(DarMetrics.getDatasetDecisions).mockRejectedValue({ message: 'Forbidden', code: 403 })
 
     renderSection()

@@ -126,4 +126,24 @@ describe('DarAnalyticsControls', () => {
 
     expect(screen.getByLabelText('From')).toHaveValue(range.from)
   })
+
+  it('drops a pending date when the URL changes the range first', () => {
+    const { rerender } = render(<DarAnalyticsControls range={range} onChange={onChange} />)
+
+    typeDate('From', '2025-10-01')
+    rerender(<DarAnalyticsControls range={{ ...range, from: '2025-04-01' }} onChange={onChange} />)
+    act(() => vi.runAllTimers())
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('drops a pending date on unmount', () => {
+    const { unmount } = render(<DarAnalyticsControls range={range} onChange={onChange} />)
+
+    typeDate('From', '2025-10-01')
+    unmount()
+    act(() => vi.runAllTimers())
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
 })
