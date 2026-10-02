@@ -227,6 +227,18 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     expect(screen.queryByText('Draft could not be loaded')).not.toBeInTheDocument()
     expect(screen.getByText('Create Study')).toBeInTheDocument()
   })
+
+  it('reports a failed datasets read as a failed load, even when the study read succeeds', async () => {
+    // The consent groups come from the datasets read, so a form without them is not a usable edit.
+    vi.mocked(DataSet.getStudyById).mockResolvedValue(persistedStudy())
+    vi.mocked(DataSet.getStudyDatasets).mockRejectedValueOnce(new Error('Request failed with status 500'))
+
+    renderStudyRoute()
+
+    expect(await screen.findByText('Error Loading Page')).toBeInTheDocument()
+    // The study that did load is not shown as if it were editable without its consent groups.
+    expect(screen.queryByText('Persisted Study')).not.toBeInTheDocument()
+  })
 })
 
 describe('creating a study from a draft', () => {
