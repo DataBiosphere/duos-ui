@@ -8,6 +8,8 @@ interface AnalyticsSectionProps {
   description?: React.ReactNode
   /** Shown beside the figures they qualify, whatever state the section is in. */
   caveats?: string[]
+  /** Controls that change what the section reports, kept usable when it's empty or failed. */
+  actions?: React.ReactNode
   isLoading: boolean
   /** Showing the previous range's figures while the new one loads. */
   isRefreshing?: boolean
@@ -20,7 +22,7 @@ interface AnalyticsSectionProps {
 }
 
 export const AnalyticsSection = ({
-  title, description, caveats = [], isLoading, isRefreshing = false, error, onRetry, isEmpty, emptyText, children,
+  title, description, caveats = [], actions, isLoading, isRefreshing = false, error, onRetry, isEmpty, emptyText, children,
 }: AnalyticsSectionProps) => {
   const headingId = `${title.toLowerCase().replaceAll(/\W+/g, '-')}-heading`
 
@@ -41,6 +43,7 @@ export const AnalyticsSection = ({
       <Typography component="h2" id={headingId} sx={{ ...headingStyle, maxWidth: 'none', mt: '2rem' }}>{title}</Typography>
       {description && <Typography sx={{ ...descriptionStyle, mb: '1rem' }}>{description}</Typography>}
       {caveats.map(caveat => <Alert key={caveat} severity="info" sx={{ mb: '1rem' }}>{caveat}</Alert>)}
+      {actions}
       {body()}
     </Box>
   )
