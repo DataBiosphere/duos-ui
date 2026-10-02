@@ -11,9 +11,6 @@ import { bucketStartsInRange, describePeriods, formatBucketStart } from 'src/com
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
 import { coverSameRange, useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
 
-// Access ending is neutral, renewal is the good outcome.
-const ENDED_GREY = '#7a8691'
-
 const layoutStyle = {
   display: 'grid',
   gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 3fr) minmax(0, 2fr)' },
@@ -60,7 +57,7 @@ export const ExpirationRenewalSection = ({ range }: { range: DarAnalyticsRange }
   const total = (key: 'expired' | 'closedOut' | 'renewals') => rows.reduce((sum, row) => sum + row[key], 0)
 
   const series = [
-    { label: 'Expired', data: rows.map(row => row.expired), color: ENDED_GREY },
+    { label: 'Expired', data: rows.map(row => row.expired), color: Theme.palette.neutral },
     { label: 'Closed out', data: rows.map(row => row.closedOut), color: Theme.palette.highlighted },
     { label: 'Datasets renewed', data: rows.map(row => row.renewals), color: Theme.palette.success },
   ]
