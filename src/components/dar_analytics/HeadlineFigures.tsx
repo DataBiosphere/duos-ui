@@ -19,7 +19,7 @@ const figureStyle = {
 export const HeadlineFigures = ({ figures }: { figures: HeadlineFigure[] }) => (
   <Box component="dl" sx={rowStyle}>
     {figures.map(({ label, value }) => (
-      <Box key={label} sx={figureStyle}>
+      <Box key={label} role="group" aria-label={label} sx={figureStyle}>
         <Typography component="dt" sx={statLabelStyle}>{label}</Typography>
         <Typography component="dd" sx={{ ...statValueStyle, m: 0, fontSize: '28px' }}>{value}</Typography>
       </Box>

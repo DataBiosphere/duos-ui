@@ -16,7 +16,7 @@ describe('AnalyticsSection', () => {
     render(<AnalyticsSection {...baseProps} isRefreshing><p>Figures</p></AnalyticsSection>)
 
     expect(screen.getByRole('region', { name: 'Decision funnel' })).toBeInTheDocument()
-    expect(screen.getByText('Figures').parentElement).toHaveAttribute('aria-busy', 'true')
+    expect(screen.getByText('Figures').closest('[aria-busy="true"]')).not.toBeNull()
   })
 
   it('shows the empty text instead of the figures, keeping caveats visible', () => {
