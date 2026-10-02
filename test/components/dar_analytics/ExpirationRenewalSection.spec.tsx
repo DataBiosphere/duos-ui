@@ -1,7 +1,7 @@
 import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { ExpirationRenewalSection } from 'src/components/dar_analytics/ExpirationRenewalSection'
@@ -52,8 +52,9 @@ describe('ExpirationRenewalSection', () => {
     await screen.findByRole('grid', { name: 'Expiration and renewal per period' })
     expect(cellsFor('2026 Q1')).toEqual(['2026 Q1', '2', '1', '0'])
     expect(cellsFor('2026 Q2')).toEqual(['2026 Q2', '3', '0', '4'])
-    expect(screen.getByText('Expired', { selector: 'dt' }).nextSibling).toHaveTextContent('5')
-    expect(screen.getByText('Renewals', { selector: 'dt' }).nextSibling).toHaveTextContent('4')
+    expect(screen.getByRole('group', { name: 'Expired' })).toHaveTextContent('5')
+    expect(screen.getByRole('group', { name: 'Closed out' })).toHaveTextContent('1')
+    expect(screen.getByRole('group', { name: 'Datasets renewed' })).toHaveTextContent('4')
   })
 
   it('shows the empty state when nothing ended or was renewed', async () => {
@@ -66,7 +67,8 @@ describe('ExpirationRenewalSection', () => {
   })
 
   it('waits for both reports on a new range rather than lining renewals up with old periods', async () => {
-    vi.mocked(DarMetrics.getExpirations).mockResolvedValue(expirations([{ bucketStart: Q1, reason: 'EXPIRED', count: 2 }]))
+    const ended = expirations([{ bucketStart: Q1, reason: 'EXPIRED', count: 2 }])
+    vi.mocked(DarMetrics.getExpirations).mockResolvedValueOnce(ended).mockResolvedValueOnce({ ...ended, bucket: 'MONTH' })
     vi.mocked(DarMetrics.getRenewals).mockResolvedValueOnce(renewals([{ bucketStart: Q1, renewalCount: 1, collectionCount: 1 }]))
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const { rerender } = render(section(queryClient))
@@ -76,5 +78,30 @@ describe('ExpirationRenewalSection', () => {
     rerender(section(queryClient, { ...range, bucket: 'month' }))
 
     expect(await screen.findByLabelText('Loading Expiration and renewal')).toBeInTheDocument()
+  })
+
+  it('waits when two quick range changes leave the reports on different old ranges', async () => {
+    const ended = expirations([{ bucketStart: Q1, reason: 'EXPIRED', count: 2 }])
+    vi.mocked(DarMetrics.getExpirations).mockResolvedValueOnce(ended).mockResolvedValueOnce({ ...ended, bucket: 'MONTH' })
+      .mockReturnValueOnce(new Promise(() => {}))
+    vi.mocked(DarMetrics.getRenewals).mockResolvedValueOnce(renewals([{ bucketStart: Q1, renewalCount: 1, collectionCount: 1 }]))
+      .mockReturnValue(new Promise(() => {}))
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const { rerender } = render(section(queryClient))
+    await screen.findByRole('grid')
+    rerender(section(queryClient, { ...range, bucket: 'month' }))
+    await waitFor(() => expect(DarMetrics.getExpirations).toHaveBeenCalledTimes(2))
+    rerender(section(queryClient, { ...range, bucket: 'week' }))
+
+    expect(await screen.findByLabelText('Loading Expiration and renewal')).toBeInTheDocument()
+  })
+
+  it('shows the error when either report fails', async () => {
+    vi.mocked(DarMetrics.getExpirations).mockResolvedValue(expirations([]))
+    vi.mocked(DarMetrics.getRenewals).mockRejectedValue({ message: 'Forbidden', code: 403 })
+
+    renderSection()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Forbidden')
   })
 })

@@ -9,7 +9,7 @@ import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
 import { bucketStartsInRange, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
-import { useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
+import { coverSameRange, useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
 
 // Access ending is neutral, renewal is the good outcome.
 const ENDED_GREY = '#7a8691'
@@ -33,7 +33,7 @@ const COLUMNS: GridColDef<PeriodRow>[] = [
   { field: 'label', headerName: 'Period', flex: 1.4, sortable: false },
   { field: 'expired', headerName: 'Expired', type: 'number', flex: 1, sortable: false },
   { field: 'closedOut', headerName: 'Closed out', type: 'number', flex: 1, sortable: false },
-  { field: 'renewals', headerName: 'Renewals', type: 'number', flex: 1, sortable: false },
+  { field: 'renewals', headerName: 'Datasets renewed', type: 'number', flex: 1, sortable: false },
 ]
 
 export const ExpirationRenewalSection = ({ range }: { range: DarAnalyticsRange }) => {
@@ -65,8 +65,7 @@ export const ExpirationRenewalSection = ({ range }: { range: DarAnalyticsRange }
       description={'DAR collections whose access ended in the range, dated by when it ended, and datasets '
         + 'renewed by approved progress reports submitted in the range. Access runs 365 days from the '
         + 'newest approval on a dataset; a closeout ends it early.'}
-      // One report on the new range and one on the old would put renewals under the wrong periods.
-      isLoading={expirations.isLoading || renewals.isLoading || expirations.isPlaceholderData !== renewals.isPlaceholderData}
+      isLoading={expirations.isPending || renewals.isPending || !coverSameRange(expirations.data, renewals.data)}
       isRefreshing={expirations.isPlaceholderData || renewals.isPlaceholderData}
       error={expirations.error ?? renewals.error}
       isEmpty={(data?.total ?? 0) === 0 && (renewals.data?.total ?? 0) === 0}
@@ -76,19 +75,21 @@ export const ExpirationRenewalSection = ({ range }: { range: DarAnalyticsRange }
         figures={[
           { label: 'Expired', value: total('expired') },
           { label: 'Closed out', value: total('closedOut') },
-          { label: 'Renewals', value: total('renewals') },
+          { label: 'Datasets renewed', value: total('renewals') },
         ]}
       />
       <Box sx={layoutStyle}>
-        <BarChart
-          height={320}
-          xAxis={[{ scaleType: 'band', data: rows.map(row => row.label) }]}
-          series={[
-            { label: 'Expired', data: rows.map(row => row.expired), color: ENDED_GREY },
-            { label: 'Closed out', data: rows.map(row => row.closedOut), color: Theme.palette.highlighted },
-            { label: 'Renewals', data: rows.map(row => row.renewals), color: Theme.palette.success },
-          ]}
-        />
+        <Box role="img" aria-label="Collections expired and closed out, and datasets renewed, per period; the table gives the counts">
+          <BarChart
+            height={320}
+            xAxis={[{ scaleType: 'band', data: rows.map(row => row.label) }]}
+            series={[
+              { label: 'Expired', data: rows.map(row => row.expired), color: ENDED_GREY },
+              { label: 'Closed out', data: rows.map(row => row.closedOut), color: Theme.palette.highlighted },
+              { label: 'Datasets renewed', data: rows.map(row => row.renewals), color: Theme.palette.success },
+            ]}
+          />
+        </Box>
         <DataGrid
           aria-label="Expiration and renewal per period"
           rows={rows}
