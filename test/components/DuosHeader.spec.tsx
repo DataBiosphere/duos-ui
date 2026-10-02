@@ -224,6 +224,12 @@ describe('DuosHeader', () => {
       expect(daaAssociations?.link).toEqual('/admin_daa_associations')
     })
 
+    it('lists Metrics under the Admin Console and highlights the console there', async () => {
+      await mountHeader('/admin_console/metrics', { ...mockUser, isAdmin: true, isResearcher: false })
+      expect(screen.getByRole('tab', { name: 'Admin Console' })).toHaveClass('Mui-selected')
+      expect(screen.getByRole('tab', { name: 'Metrics' })).toBeInTheDocument()
+    })
+
     it('highlights Admin Console on /admin_daa_associations', async () => {
       await mountHeader('/admin_daa_associations', { ...mockUser, isAdmin: true, isResearcher: false })
       expect(screen.getByRole('tab', { name: 'Admin Console' })).toHaveClass('Mui-selected')
