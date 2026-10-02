@@ -24,18 +24,16 @@ export const AnalyticsSection = ({
 }: AnalyticsSectionProps) => {
   const headingId = `${title.toLowerCase().replaceAll(/\W+/g, '-')}-heading`
 
-  const content = () => {
+  const content = () => (isEmpty ? <Typography sx={descriptionStyle}>{emptyText}</Typography> : children)
+  // A failed report shows at once, even while another is still loading.
+  const body = () => {
     if (error) {
       return <Alert severity="error">Unable to load {title}: {extractError(error)}</Alert>
     }
-    if (isEmpty) {
-      return <Typography sx={descriptionStyle}>{emptyText}</Typography>
-    }
-    return children
+    return isLoading
+      ? <CircularProgress aria-label={`Loading ${title}`} />
+      : <Box aria-busy={isRefreshing} sx={{ opacity: isRefreshing ? 0.5 : 1 }}>{content()}</Box>
   }
-  const body = () => (isLoading
-    ? <CircularProgress aria-label={`Loading ${title}`} />
-    : <Box aria-busy={isRefreshing} sx={{ opacity: isRefreshing ? 0.5 : 1 }}>{content()}</Box>)
 
   return (
     <Box component="section" aria-labelledby={headingId}>
