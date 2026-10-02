@@ -139,10 +139,11 @@ const SUMMARY_KEY = ['admin-dashboard-summary']
 
 export default function AdminDashboard(): React.JSX.Element {
   // Reads the summary ConsoleDashboard fetches, so each link opens the window behind its counts;
-  // the browser's date stands in until it arrives.
-  const { data } = useQuery({ queryKey: SUMMARY_KEY, queryFn: Admin.getDashboardSummary, enabled: false })
-  const from = data?.metrics?.from ?? dayjs().subtract(89, 'day').format(DATE_FORMAT)
-  const to = data?.metrics?.to ?? dayjs().format(DATE_FORMAT)
+  // the browser's date stands in whenever those counts are hidden, as during a refetch.
+  const { data, isFetching, isError } = useQuery({ queryKey: SUMMARY_KEY, queryFn: Admin.getDashboardSummary, enabled: false })
+  const shown = isFetching || isError ? undefined : data
+  const from = shown?.metrics?.from ?? dayjs().subtract(89, 'day').format(DATE_FORMAT)
+  const to = shown?.metrics?.to ?? dayjs().format(DATE_FORMAT)
   const tileMeta = useMemo(() => [...sectionTiles, ...metricTiles(from, to)], [from, to])
   return (
     <ConsoleDashboard

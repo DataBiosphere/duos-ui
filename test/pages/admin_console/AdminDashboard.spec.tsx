@@ -38,11 +38,13 @@ const summary: AdminDashboardSummary = {
   },
 }
 
-const renderDashboard = () => renderWithRouter(
-  <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+const newClient = () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
+const renderDashboard = (queryClient = newClient()) => renderWithRouter(
+  <QueryClientProvider client={queryClient}>
     <AdminDashboard />
   </QueryClientProvider>,
 )
+const BROWSER_WINDOW = 'from=2026-07-05&to=2026-10-02&bucket=week'
 
 const tile = (name: string) => screen.getByRole('link', { name: new RegExp(`^${name}`) })
 
@@ -86,7 +88,29 @@ describe('AdminDashboard', () => {
 
     renderDashboard()
 
-    expect(tile('Volume')).toHaveAttribute('href', '/admin_console/metrics?tab=volume&from=2026-07-05&to=2026-10-02&bucket=week')
+    expect(tile('Volume')).toHaveAttribute('href', `/admin_console/metrics?tab=volume&${BROWSER_WINDOW}`)
+  })
+
+  it('links by the browser date, not a cached window, while a remounted dashboard refetches', async () => {
+    const queryClient = newClient()
+    const { unmount } = renderDashboard(queryClient)
+    await waitFor(() => expect(tile('Volume')).toHaveAttribute('href', expect.stringContaining('from=2026-07-04')))
+    unmount()
+    vi.mocked(Admin.getDashboardSummary).mockReturnValue(new Promise(() => {}))
+
+    renderDashboard(queryClient)
+
+    expect(tile('Volume')).toHaveAttribute('href', `/admin_console/metrics?tab=volume&${BROWSER_WINDOW}`)
+  })
+
+  it('keeps every tile, linked by the browser date, when the summary fails', async () => {
+    vi.mocked(Admin.getDashboardSummary).mockRejectedValue({ message: 'Bad gateway', code: 502 })
+
+    renderDashboard()
+
+    await waitFor(() => expect(Admin.getDashboardSummary).toHaveBeenCalled())
+    expect(await within(tile('Data Access Requests')).findByLabelText('Total: unavailable')).toBeInTheDocument()
+    expect(tile('Decisions')).toHaveAttribute('href', `/admin_console/metrics?tab=decisions&${BROWSER_WINDOW}`)
   })
 
   it('shows section counts and the 90-day metrics from one summary request', async () => {
