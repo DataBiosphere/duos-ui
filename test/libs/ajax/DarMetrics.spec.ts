@@ -64,6 +64,17 @@ describe('DarMetrics', () => {
     })
   })
 
+  it('leaves out an omitted bucket and a null param from untyped callers', async () => {
+    const untyped = { from: '2026-01-01', to: '2026-03-31', offset: null } as unknown as DarMetricsQuery
+
+    await DarMetrics.getVolume(untyped)
+
+    expect(fetchGet).toHaveBeenCalledWith('https://duos.example.org/api/metrics/dar-volume', {
+      ...headers,
+      params: { from: '2026-01-01', to: '2026-03-31' },
+    })
+  })
+
   it('propagates a rejection with its status intact', async () => {
     const badRequest = { message: 'to must not be before from', code: 400 }
     vi.mocked(fetchGet).mockRejectedValueOnce(badRequest)
