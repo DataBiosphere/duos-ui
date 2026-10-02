@@ -144,7 +144,7 @@ export default function SigningOfficialRequest({ user, institutionHasSigningOffi
         Only request this status if that describes your role.
       </Alert>
       {institutionHasSigningOfficials && (
-        <p className="signing-official-request-existing">
+        <p>
           Your institution already has Signing Officials, listed below. If you need a Library Card or
           approval for a Data Access Request, contact one of them instead.
         </p>
