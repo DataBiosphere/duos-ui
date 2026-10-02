@@ -52,6 +52,8 @@ describe('ExpirationRenewalSection', () => {
     await screen.findByRole('grid', { name: 'Expiration and renewal per period' })
     expect(cellsFor('2026 Q1')).toEqual(['2026 Q1', '2', '1', '0'])
     expect(cellsFor('2026 Q2')).toEqual(['2026 Q2', '3', '0', '4'])
+    expect(document.querySelector('[aria-label="Access ended and datasets renewed per period"]')).toHaveAccessibleDescription(
+      '2026 Q1: Expired 2, Closed out 1, Datasets renewed 0; 2026 Q2: Expired 3, Closed out 0, Datasets renewed 4')
     expect(screen.getByRole('group', { name: 'Expired' })).toHaveTextContent('5')
     expect(screen.getByRole('group', { name: 'Closed out' })).toHaveTextContent('1')
     expect(screen.getByRole('group', { name: 'Datasets renewed' })).toHaveTextContent('4')

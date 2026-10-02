@@ -7,7 +7,7 @@ import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { AccessEndReason, MetricsBucket } from 'src/types/darMetrics'
 import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
-import { bucketStartsInRange, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
+import { bucketStartsInRange, describePeriods, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
 import { coverSameRange, useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
 
@@ -59,6 +59,12 @@ export const ExpirationRenewalSection = ({ range }: { range: DarAnalyticsRange }
   }))
   const total = (key: 'expired' | 'closedOut' | 'renewals') => rows.reduce((sum, row) => sum + row[key], 0)
 
+  const series = [
+    { label: 'Expired', data: rows.map(row => row.expired), color: ENDED_GREY },
+    { label: 'Closed out', data: rows.map(row => row.closedOut), color: Theme.palette.highlighted },
+    { label: 'Datasets renewed', data: rows.map(row => row.renewals), color: Theme.palette.success },
+  ]
+
   return (
     <AnalyticsSection
       title="Expiration and renewal"
@@ -79,17 +85,13 @@ export const ExpirationRenewalSection = ({ range }: { range: DarAnalyticsRange }
         ]}
       />
       <Box sx={layoutStyle}>
-        <Box role="img" aria-label="Collections expired and closed out, and datasets renewed, per period; the table gives the counts">
-          <BarChart
-            height={320}
-            xAxis={[{ scaleType: 'band', data: rows.map(row => row.label) }]}
-            series={[
-              { label: 'Expired', data: rows.map(row => row.expired), color: ENDED_GREY },
-              { label: 'Closed out', data: rows.map(row => row.closedOut), color: Theme.palette.highlighted },
-              { label: 'Datasets renewed', data: rows.map(row => row.renewals), color: Theme.palette.success },
-            ]}
-          />
-        </Box>
+        <BarChart
+          title="Access ended and datasets renewed per period"
+          desc={describePeriods(rows.map(row => row.label), series)}
+          height={320}
+          xAxis={[{ scaleType: 'band', data: rows.map(row => row.label) }]}
+          series={series}
+        />
         <DataGrid
           aria-label="Expiration and renewal per period"
           rows={rows}
