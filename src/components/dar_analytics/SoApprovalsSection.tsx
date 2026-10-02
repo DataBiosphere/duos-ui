@@ -67,7 +67,7 @@ export const SoApprovalsSection = ({ range }: { range: DarAnalyticsRange }) => {
         + 'earlier submissions without an approval show as Not determined. Approval times start in June '
         + '2026 for DARs and September 2025 for closeouts.',
       ]}
-      isLoading={report.isLoading}
+      isLoading={report.isPending}
       isRefreshing={report.isPlaceholderData}
       error={report.error}
       isEmpty={(report.data?.total ?? 0) === 0}
