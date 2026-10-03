@@ -4,6 +4,7 @@ import { DecisionFunnelSection } from 'src/components/dar_analytics/DecisionFunn
 import { TurnaroundSection } from 'src/components/dar_analytics/TurnaroundSection'
 import { SoApprovalsSection } from 'src/components/dar_analytics/SoApprovalsSection'
 import { VolumeSection } from 'src/components/dar_analytics/VolumeSection'
+import { ExpirationRenewalSection } from 'src/components/dar_analytics/ExpirationRenewalSection'
 
 export interface MetricsTab {
   /** The `tab` query param, so a tab can be linked to. */
@@ -17,4 +18,5 @@ export const METRICS_TABS: MetricsTab[] = [
   { key: 'turnaround', label: 'DAC Turnaround', render: range => <TurnaroundSection range={range} /> },
   { key: 'so-approvals', label: 'SO Approvals', render: range => <SoApprovalsSection range={range} /> },
   { key: 'volume', label: 'Volume', render: range => <VolumeSection range={range} /> },
+  { key: 'expiration', label: 'Expiration & Renewal', render: range => <ExpirationRenewalSection range={range} /> },
 ]
