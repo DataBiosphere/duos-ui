@@ -21,7 +21,8 @@ interface ConsoleDashboardProps<S> {
   tileMeta: ConsoleDashboardTileMeta<S>[]
   resourcesHeading: string
   resources: ConsoleDashboardResource[]
-  promoParagraphs: string[]
+  /** Consoles with nothing to promote to their role leave the promo out. */
+  promoParagraphs?: string[]
 }
 
 /** Shared page shell and data flow for each role-specific console dashboard. */
@@ -54,10 +55,12 @@ export default function ConsoleDashboard<S>({
         currentUser={currentUser}
       />
 
-      <ConsoleDashboardPromo
-        heading="Get more out of DUOS"
-        paragraphs={promoParagraphs}
-      />
+      {promoParagraphs && (
+        <ConsoleDashboardPromo
+          heading="Get more out of DUOS"
+          paragraphs={promoParagraphs}
+        />
+      )}
     </Box>
   )
 }
