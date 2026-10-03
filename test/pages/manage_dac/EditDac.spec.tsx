@@ -476,6 +476,7 @@ describe('EditDAC Tests', () => {
     await waitFor(() => {
       expect(container.querySelector('[data-cy="uploaded_daa_name"]')).toHaveTextContent(customFileName)
       expect(container.querySelector('[data-cy="uploaded_daa_radio"]')).toBeChecked()
+      expect(container).toHaveTextContent(`Uploaded on ${new Date().toLocaleDateString()}`)
     })
 
     fillForm(container)
