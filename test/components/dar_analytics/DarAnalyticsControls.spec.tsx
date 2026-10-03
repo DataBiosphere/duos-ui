@@ -61,7 +61,7 @@ describe('DarAnalyticsControls', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Month' }))
 
-    expect(onChange).toHaveBeenCalledWith({ bucket: 'month' })
+    expect(onChange).toHaveBeenCalledWith({ from: range.from, to: range.to, bucket: 'month' })
   })
 
   it('ignores a click that would clear the bucket', () => {
@@ -78,6 +78,62 @@ describe('DarAnalyticsControls', () => {
     rerender(<DarAnalyticsControls range={{ ...range, from: '2025-04-01' }} onChange={onChange} />)
 
     expect(screen.getByLabelText('From')).toHaveValue('2025-04-01')
+  })
+
+  it('disables a grouping that would make too many buckets', () => {
+    render(<DarAnalyticsControls range={{ from: '1900-01-01', to: '2026-06-30', bucket: 'quarter' }} onChange={onChange} />)
+
+    expect(screen.getByRole('button', { name: 'Day' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Week' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Month' })).toBeDisabled()
+    expect(screen.getByRole('group', { name: 'Group by' })).toHaveAccessibleDescription('Grouping by day or week or month needs a shorter range.')
+    expect(screen.getByRole('button', { name: 'Quarter' })).toBeEnabled()
+  })
+
+  it('holds back dates too far apart for the grouping and says why', () => {
+    render(<DarAnalyticsControls range={{ ...range, bucket: 'day' }} onChange={onChange} />)
+
+    typeDate('From', '2010-01-01')
+    act(() => vi.runAllTimers())
+
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByText('Too long to group by day; shorten the range or group by a longer period')).toBeInTheDocument()
+  })
+
+  it('applies only the grouping when the typed dates are invalid', () => {
+    render(<DarAnalyticsControls range={range} onChange={onChange} />)
+
+    typeDate('To', '2025-12-31')
+    fireEvent.click(screen.getByRole('button', { name: 'Month' }))
+
+    expect(onChange).toHaveBeenCalledExactlyOnceWith({ bucket: 'month' })
+  })
+
+  it('applies held-back dates with the longer grouping chosen for them', () => {
+    render(<DarAnalyticsControls range={{ ...range, bucket: 'day' }} onChange={onChange} />)
+
+    typeDate('From', '2010-01-01')
+    expect(screen.getByRole('button', { name: 'Day' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Month' }))
+
+    expect(onChange).toHaveBeenCalledExactlyOnceWith({ from: '2010-01-01', to: range.to, bucket: 'month' })
+  })
+
+  it('says to shorten the range when even quarters are too many', () => {
+    render(<DarAnalyticsControls range={range} onChange={onChange} />)
+
+    typeDate('To', '2400-01-01')
+
+    expect(screen.getByText('Too long to chart; shorten the range')).toBeInTheDocument()
+  })
+
+  it('drops a held-back date when Back changes the grouping', () => {
+    const { rerender } = render(<DarAnalyticsControls range={{ ...range, bucket: 'day' }} onChange={onChange} />)
+    typeDate('From', '2010-01-01')
+
+    rerender(<DarAnalyticsControls range={range} onChange={onChange} />)
+
+    expect(screen.getByLabelText('From')).toHaveValue(range.from)
   })
 
   it('drops a pending date when the URL changes the range first', () => {

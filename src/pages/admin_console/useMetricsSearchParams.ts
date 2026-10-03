@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import dayjs from 'dayjs'
 import { MetricsBucket } from 'src/types/darMetrics'
-import { BUCKETS, DarAnalyticsRange, defaultRange, isValidRange } from 'src/components/dar_analytics/darAnalyticsRange'
+import { BUCKETS, DarAnalyticsRange, defaultRange, isChartable, isValidRange } from 'src/components/dar_analytics/darAnalyticsRange'
 
 const isBucket = (value: string | null): value is MetricsBucket =>
   BUCKETS.some(bucket => bucket.value === value)
@@ -20,10 +20,11 @@ export const useMetricsSearchParams = (tabKeys: string[]) => {
   const from = searchParams.get('from') ?? ''
   const to = searchParams.get('to') ?? ''
   const bucket = searchParams.get('bucket')
-  const range: DarAnalyticsRange = {
+  const requested: DarAnalyticsRange = {
     ...(isValidRange(from, to) ? { from, to } : { from: fallback.from, to: fallback.to }),
     bucket: isBucket(bucket) ? bucket : fallback.bucket,
   }
+  const range = isChartable(requested) ? requested : fallback
   const requestedTab = searchParams.get('tab')
   const tab = requestedTab && tabKeys.includes(requestedTab) ? requestedTab : tabKeys[0]
 
@@ -40,6 +41,7 @@ export const useMetricsSearchParams = (tabKeys: string[]) => {
     setTab: (key: string) => update({ tab: key }, false),
     // Only the fields given; replacing the history entry lets Back leave the page in one step.
     setRange: (change: Partial<DarAnalyticsRange>) =>
-      update(Object.fromEntries(Object.entries(change).filter(([, value]) => value !== undefined)), true),
+      // After a fallback the URL still holds the rejected range, so write the range in use.
+      update({ ...(range === requested ? {} : range), ...Object.fromEntries(Object.entries(change).filter(([, value]) => value !== undefined)) }, true),
   }
 }

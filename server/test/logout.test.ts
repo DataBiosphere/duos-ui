@@ -23,10 +23,12 @@ function makeRequest(overrides: {
   refreshToken?: string
   sessionId?: string
   idToken?: string
+  idp?: 'google' | 'microsoft' | 'unknown'
 } = {}) {
   const query = vi.fn().mockResolvedValue({ rows: [] })
   const destroy = vi.fn().mockResolvedValue(undefined)
   const logError = vi.fn()
+  const logInfo = vi.fn()
   const request = {
     session: {
       testFixture: overrides.testFixture,
@@ -34,12 +36,13 @@ function makeRequest(overrides: {
       refreshToken: overrides.refreshToken,
       idToken: overrides.idToken,
       sessionId: overrides.sessionId ?? 'test-sid',
+      idp: overrides.idp,
       destroy,
     },
     server: { pg: { query } },
-    log: { error: logError },
+    log: { error: logError, info: logInfo },
   }
-  return { request: request as unknown as FastifyRequest, query, destroy, logError }
+  return { request: request as unknown as FastifyRequest, query, destroy, logError, logInfo }
 }
 
 function makeReply() {
@@ -295,5 +298,24 @@ describe('handleLogout — front-channel (B2C) logout, story 5-E', () => {
 
     expect(reply.status).toHaveBeenCalledWith(200)
     expect(reply.send).toHaveBeenCalledWith({ redirectUrl: 'http://localhost:9000/logout' })
+  })
+})
+
+describe('handleLogout — events', () => {
+  it('emits auth.session.destroyed and an end_session auth.logout.completed carrying the session idp', async () => {
+    const { request, logInfo } = makeRequest({ idToken: 'the-id-token', idp: 'google' })
+
+    await handleLogout(request, makeReply())
+
+    expect(logInfo).toHaveBeenCalledWith({ event: 'auth.session.destroyed', reason: 'logout', idp: 'google' }, 'auth.session.destroyed')
+    expect(logInfo).toHaveBeenCalledWith({ event: 'auth.logout.completed', outcome: 'end_session', idp: 'google' }, 'auth.logout.completed')
+  })
+
+  it('reports a local outcome with idp unknown when the session has no id token or idp', async () => {
+    const { request, logInfo } = makeRequest()
+
+    await handleLogout(request, makeReply())
+
+    expect(logInfo).toHaveBeenCalledWith({ event: 'auth.logout.completed', outcome: 'local', idp: 'unknown' }, 'auth.logout.completed')
   })
 })
