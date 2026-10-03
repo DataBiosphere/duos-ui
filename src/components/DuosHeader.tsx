@@ -170,6 +170,22 @@ const navbarDuosText: React.CSSProperties = {
   verticalAlign: 'text-bottom',
 }
 
+const SIGNED_OUT_USER: DuosUser = {
+  createDate: new Date(),
+  displayName: '',
+  email: '',
+  emailPreference: false,
+  isAdmin: false,
+  isAlumni: false,
+  isChairPerson: false,
+  isDataSubmitter: false,
+  isMember: false,
+  isResearcher: false,
+  isSigningOfficial: false,
+  roles: [],
+  userId: 0,
+}
+
 const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   const { classes } = props
   const navigate = useNavigate()
@@ -267,25 +283,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   const isLogged = useUserIsLogged() ?? false
-  let currentUser: DuosUser = {
-    createDate: new Date(),
-    displayName: '',
-    email: '',
-    emailPreference: false,
-    isAdmin: false,
-    isAlumni: false,
-    isChairPerson: false,
-    isDataSubmitter: false,
-    isMember: false,
-    isResearcher: false,
-    isSigningOfficial: false,
-    roles: [],
-    userId: 0,
-  }
-
-  if (isLogged) {
-    currentUser = Storage.getCurrentUser()
-  }
+  const currentUser: DuosUser = isLogged ? Storage.getCurrentUser() : SIGNED_OUT_USER
 
   const contactUsSource = state.hover ? contactUsHover : contactUsStandard
   const contactUsIcon = isLogged ? '' : <img src={contactUsSource} alt="Contact Us Icon" style={{ display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline' }} />
