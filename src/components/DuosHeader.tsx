@@ -99,6 +99,8 @@ export const headerTabsConfig: Tab[] = [
       { label: 'Institutions', link: '/admin_manage_institutions' },
       { label: 'Library Cards', link: '/admin_manage_lc' },
       { label: 'DAA Associations', link: '/admin_daa_associations' },
+      // `search` keeps the tab selected on /admin_manage_articles/new and /admin_manage_articles/:postId.
+      { label: 'Articles', link: '/admin_manage_articles', search: '/admin_manage_articles' },
     ],
     isRendered: user => user.isAdmin,
     isConsole: true,

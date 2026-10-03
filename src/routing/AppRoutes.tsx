@@ -52,6 +52,10 @@ import { StudyTemplateUpload } from 'src/pages/data_submission/StudyTemplateUplo
 import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
 import { DataLibrary } from 'src/pages/DataLibrary'
 import { StudyNameSearch } from 'src/routing/StudyNameSearch'
+import AdminManageArticles from 'src/pages/AdminManageArticles'
+import AdminEditArticleRoute from 'src/pages/AdminEditArticle'
+import ArticleIndex from 'src/pages/articles/ArticleIndex'
+import ArticlePage from 'src/pages/articles/ArticlePage'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -73,6 +77,9 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/tos_acceptance" element={<TermsOfServiceAcceptance />} />
       <Route path="/nih_dms_policy" element={<NIHDMSPolicyInfo />} />
       <Route path="/anvil_dms_policy" element={<AnVILDMSPolicyInfo />} />
+      <Route path="/articles" element={<ArticleIndex />} />
+      <Route path="/articles/:category" element={<ArticleIndex />} />
+      <Route path="/articles/:category/:slug" element={<ArticlePage />} />
       <Route element={<EnvRoute env={envGroups.DEV} />}>
         <Route path="/backgroundsignin" element={<BackgroundSignIn {...props} />} />
       </Route>
@@ -147,6 +154,9 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/admin_daa_associations" element={<AdminDaaAssociations />} />
           <Route path="/admin_manage_dar_collections/" element={<AdminManageDarCollections />} />
           <Route path="/manage_add_dac_daa" element={<EditDac />} />
+          <Route path="/admin_manage_articles" element={<AdminManageArticles />} />
+          <Route path="/admin_manage_articles/new" element={<AdminEditArticleRoute />} />
+          <Route path="/admin_manage_articles/:postId" element={<AdminEditArticleRoute />} />
         </Route>
       </Route>
       <Route path="*" element={<NotFound />} />

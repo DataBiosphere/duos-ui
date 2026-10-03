@@ -10,6 +10,9 @@ interface ConfigType {
   tdrApiUrl: string
   terraUrl: string
   bffEnabled?: boolean
+  // TEMPORARY (DT-4234): serve blog data from a browser-local mock until consent ships /api/blog.
+  // Honored outside prod only — see src/libs/ajax/blogMock.ts.
+  blogMock?: boolean
 }
 
 let configPromise: Promise<ConfigType> | null = null
