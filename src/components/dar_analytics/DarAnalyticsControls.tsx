@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Box, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material'
+import { Box, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { MetricsBucket } from 'src/types/darMetrics'
-import { BUCKETS, DarAnalyticsRange, isValidRange } from 'src/components/dar_analytics/darAnalyticsRange'
+import { BUCKETS, DarAnalyticsRange, isChartable, isValidRange } from 'src/components/dar_analytics/darAnalyticsRange'
 
 interface DarAnalyticsControlsProps {
   range: DarAnalyticsRange
@@ -26,22 +26,41 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
   const settle = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   // Back and Forward change the range without remounting; show the dates the reports now use.
-  const [shownRange, setShownRange] = useState(`${range.from}|${range.to}`)
-  if (shownRange !== `${range.from}|${range.to}`) {
-    setShownRange(`${range.from}|${range.to}`)
+  const rangeKey = `${range.from}|${range.to}|${range.bucket}`
+  const [shownRange, setShownRange] = useState(rangeKey)
+  if (shownRange !== rangeKey) {
+    setShownRange(rangeKey)
     setFrom(range.from)
     setTo(range.to)
   }
-  useEffect(() => clearTimeout(settle.current), [range.from, range.to])
+  useEffect(() => clearTimeout(settle.current), [rangeKey])
   useEffect(() => () => clearTimeout(settle.current), [])
 
   const valid = isValidRange(from, to)
+  // Groupings are judged against the dates shown, and choosing one applies those dates with it.
+  const shownDates = valid ? { from, to } : { from: range.from, to: range.to }
+  const chooseBucket = (bucket: MetricsBucket) => {
+    clearTimeout(settle.current)
+    onChange(valid ? { ...shownDates, bucket } : { bucket })
+  }
+  const chartable = valid && isChartable({ from, to, bucket: range.bucket })
+  let helperText: string | undefined
+  if (!valid) {
+    helperText = 'Enter dates from 1900 on, with To on or after From'
+  }
+  else if (!isChartable({ from, to, bucket: 'quarter' })) {
+    helperText = 'Too long to chart; shorten the range'
+  }
+  else if (!chartable) {
+    helperText = `Too long to group by ${range.bucket}; shorten the range or group by a longer period`
+  }
+  const unavailable = BUCKETS.filter(({ value }) => !isChartable({ ...shownDates, bucket: value }))
 
   const updateDates = (nextFrom: string, nextTo: string) => {
     setFrom(nextFrom)
     setTo(nextTo)
     clearTimeout(settle.current)
-    if (isValidRange(nextFrom, nextTo)) {
+    if (isValidRange(nextFrom, nextTo) && isChartable({ from: nextFrom, to: nextTo, bucket: range.bucket })) {
       settle.current = setTimeout(() => onChange({ from: nextFrom, to: nextTo }), DATE_SETTLE_MS)
     }
   }
@@ -62,8 +81,8 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
         size="small"
         value={to}
         onChange={e => updateDates(from, e.target.value)}
-        error={!valid}
-        helperText={valid ? undefined : 'Enter dates from 1900 on, with To on or after From'}
+        error={!chartable}
+        helperText={helperText}
         slotProps={{ inputLabel: { shrink: true } }}
       />
       <ToggleButtonGroup
@@ -71,12 +90,20 @@ export const DarAnalyticsControls = ({ range, onChange }: DarAnalyticsControlsPr
         size="small"
         exclusive
         value={range.bucket}
-        onChange={(_e, bucket: MetricsBucket | null) => bucket && onChange({ bucket })}
+        onChange={(_e, bucket: MetricsBucket | null) => bucket && chooseBucket(bucket)}
+        aria-describedby={unavailable.length ? 'group-by-limit' : undefined}
       >
         {BUCKETS.map(({ value, label }) => (
-          <ToggleButton key={value} value={value}>{label}</ToggleButton>
+          <ToggleButton key={value} value={value} disabled={!isChartable({ ...shownDates, bucket: value })}>
+            {label}
+          </ToggleButton>
         ))}
       </ToggleButtonGroup>
+      {unavailable.length > 0 && (
+        <Typography id="group-by-limit" sx={{ fontSize: '12px', alignSelf: 'center' }}>
+          {`Grouping by ${unavailable.map(({ label }) => label.toLowerCase()).join(' or ')} needs a shorter range.`}
+        </Typography>
+      )}
     </Box>
   )
 }

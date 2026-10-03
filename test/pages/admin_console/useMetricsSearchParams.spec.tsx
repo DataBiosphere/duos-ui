@@ -73,4 +73,27 @@ describe('useMetricsSearchParams', () => {
 
     expect(result.current.params.range).toEqual({ from: '2025-02-01', to: '2025-06-30', bucket: 'month' })
   })
+
+  it('falls back when the URL asks for more buckets than can be charted', () => {
+    const { result } = setup('?from=1900-01-01&to=2026-06-30&bucket=day')
+
+    expect(result.current.params.range).toEqual({ from: '2024-07-01', to: '2026-08-14', bucket: 'quarter' })
+  })
+
+  it('writes the range in use, not the rejected one, on the next change after a fallback', () => {
+    const { result } = setup('?from=1900-01-01&to=2026-06-30&bucket=day')
+
+    act(() => result.current.params.setRange({ bucket: 'month' }))
+
+    expect(result.current.params.range).toEqual({ from: '2024-07-01', to: '2026-08-14', bucket: 'month' })
+  })
+
+  it('keeps the fallback bucket when only dates change after a fallback', () => {
+    const { result } = setup('?from=1900-01-01&to=2026-06-30&bucket=day')
+
+    act(() => result.current.params.setRange({ from: '2026-01-01', to: '2026-03-31' }))
+
+    expect(result.current.params.range).toEqual({ from: '2026-01-01', to: '2026-03-31', bucket: 'quarter' })
+    expect(result.current.location.search).toContain('bucket=quarter')
+  })
 })
