@@ -15,6 +15,7 @@ import { usePageTitle } from 'src/hooks/usePageTitle'
 import { Theme } from 'src/libs/theme'
 import { DuosUser } from 'src/types/model'
 import PageHeading from 'src/components/PageHeading'
+import './profileControls.css'
 import './UserProfile.css'
 
 // FormInputGeneric sets its padding inline, so the shared control size has to be passed the same way.

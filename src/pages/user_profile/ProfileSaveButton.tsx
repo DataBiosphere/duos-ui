@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button } from '@mui/material'
-import './UserProfile.css'
+import './profileControls.css'
 
 interface ProfileSaveButtonProps {
   readonly onClick: () => void

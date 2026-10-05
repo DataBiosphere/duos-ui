@@ -1,11 +1,3 @@
-.user-profile-page,
-.external-profile {
-  /* One size and border for every input and Save button on the page. */
-  --profile-control-height: 40px;
-  --profile-control-padding: 8px 12px;
-  --profile-control-border-color: #ccc;
-}
-
 .user-profile-page {
   width: min(100%, 1200px);
   margin: 0 auto;
