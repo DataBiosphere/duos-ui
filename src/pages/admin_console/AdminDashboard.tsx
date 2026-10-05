@@ -1,28 +1,19 @@
 import React, { useMemo } from 'react'
-import dayjs from 'dayjs'
-import { useQuery } from '@tanstack/react-query'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import ApartmentOutlinedIcon from '@mui/icons-material/ApartmentOutlined'
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined'
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined'
-import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined'
-import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined'
-import VerifiedUserOutlinedIcon from '@mui/icons-material/VerifiedUserOutlined'
-import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined'
-import EventBusyOutlinedIcon from '@mui/icons-material/EventBusyOutlined'
 import ConsoleDashboard from 'src/components/dashboard/ConsoleDashboard'
 import { COMMON_CONSOLE_RESOURCES } from 'src/components/dashboard/dashboardResources'
 import { ConsoleDashboardTileMeta } from 'src/components/dashboard/useConsoleDashboardSummary'
+import { useMetricTiles } from 'src/components/dashboard/metricTiles'
 import { Admin, AdminDashboardSummary } from 'src/libs/ajax/Admin'
-import { DATE_FORMAT } from 'src/components/dar_analytics/darAnalyticsRange'
 import { ADMIN_CONSOLE_SECTIONS, ADMIN_METRICS_ROUTE } from './adminConsoleRoutes'
 import { METRICS_TABS } from './metricsTabs'
 
 type Tile = ConsoleDashboardTileMeta<AdminDashboardSummary>
-
-const roundDays = (days?: number | null) => (days == null ? null : Math.round(days * 10) / 10)
 
 const sectionTiles: Tile[] = [
   {
@@ -74,77 +65,11 @@ const sectionTiles: Tile[] = [
   },
 ]
 
-// The tiles report the last 90 days, so each opens its tab on that window. A tile for a tab the
-// Metrics page doesn't have yet would quietly open the first tab, so it's left out instead.
-const metricTiles = (from: string, to: string): Tile[] => {
-  const window = `from=${from}&to=${to}&bucket=week`
-  const metricTile = (tab: string, tile: Omit<Tile, 'link'>): Tile[] =>
-    METRICS_TABS.some(({ key }) => key === tab) ? [{ ...tile, link: `${ADMIN_METRICS_ROUTE}?tab=${tab}&${window}` }] : []
-  return [
-    ...metricTile('decisions', {
-      label: 'Decisions',
-      icon: FactCheckOutlinedIcon,
-      description: 'DAC decisions on DARs submitted in the last 90 days.',
-      stats: [
-        { label: 'Submitted', value: s => s.metrics?.decisions?.submitted },
-        { label: 'Approved', value: s => s.metrics?.decisions?.approved },
-        { label: 'Denied', value: s => s.metrics?.decisions?.denied },
-        { label: 'Pending', value: s => s.metrics?.decisions?.pending },
-      ],
-    }),
-    ...metricTile('turnaround', {
-      label: 'DAC Turnaround',
-      icon: TimerOutlinedIcon,
-      description: 'Days from submission to DAC decision, last 90 days.',
-      stats: [
-        { label: 'Median Days', value: s => roundDays(s.metrics?.turnaround?.medianDays) },
-        { label: 'Mode Days', value: s => s.metrics?.turnaround?.modeDays },
-        { label: 'Decided', value: s => s.metrics?.turnaround?.decided },
-      ],
-    }),
-    ...metricTile('so-approvals', {
-      label: 'SO Approvals',
-      icon: VerifiedUserOutlinedIcon,
-      description: 'Where submissions from the last 90 days stand with their Signing Official.',
-      stats: [
-        { label: 'Approved', value: s => s.metrics?.soApprovals?.approved },
-        { label: 'Pending', value: s => s.metrics?.soApprovals?.pending },
-        { label: 'Skipped', value: s => s.metrics?.soApprovals?.skipped },
-      ],
-    }),
-    ...metricTile('volume', {
-      label: 'Volume',
-      icon: BarChartOutlinedIcon,
-      description: 'DARs submitted in the last 90 days, and by whom.',
-      stats: [
-        { label: 'DARs', value: s => s.metrics?.volume?.dars },
-        { label: 'Researchers', value: s => s.metrics?.volume?.researchers },
-        { label: 'Institutions', value: s => s.metrics?.volume?.institutions },
-      ],
-    }),
-    ...metricTile('expiration', {
-      label: 'Expiration & Renewal',
-      icon: EventBusyOutlinedIcon,
-      description: 'Access that ended, and datasets renewed, in the last 90 days.',
-      stats: [
-        { label: 'Expired', value: s => s.metrics?.expiration?.expired },
-        { label: 'Closed Out', value: s => s.metrics?.expiration?.closedOut },
-        { label: 'Renewals', value: s => s.metrics?.expiration?.renewals },
-      ],
-    }),
-  ]
-}
-
 const SUMMARY_KEY = ['admin-dashboard-summary']
 
 export default function AdminDashboard(): React.JSX.Element {
-  // Reads the summary ConsoleDashboard fetches, so each link opens the window behind its counts;
-  // the browser's date stands in whenever those counts are hidden, as during a refetch.
-  const { data, isFetching, isError } = useQuery({ queryKey: SUMMARY_KEY, queryFn: Admin.getDashboardSummary, enabled: false })
-  const shown = isFetching || isError ? undefined : data
-  const from = shown?.metrics?.from ?? dayjs().subtract(89, 'day').format(DATE_FORMAT)
-  const to = shown?.metrics?.to ?? dayjs().format(DATE_FORMAT)
-  const tileMeta = useMemo(() => [...sectionTiles, ...metricTiles(from, to)], [from, to])
+  const metricTiles = useMetricTiles(SUMMARY_KEY, Admin.getDashboardSummary, ADMIN_METRICS_ROUTE, METRICS_TABS)
+  const tileMeta = useMemo(() => [...sectionTiles, ...metricTiles], [metricTiles])
   return (
     <ConsoleDashboard
       consoleTitle="Admin Console"

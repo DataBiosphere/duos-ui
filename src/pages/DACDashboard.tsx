@@ -1,15 +1,16 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined'
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
-import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined'
 import ConsoleDashboard from 'src/components/dashboard/ConsoleDashboard'
 import { ConsoleDashboardResource } from 'src/components/dashboard/ConsoleDashboardResources'
 import { COMMON_CONSOLE_RESOURCES } from 'src/components/dashboard/dashboardResources'
 import { createDataLibraryTile } from 'src/components/dashboard/dashboardTiles'
 import { ConsoleDashboardTileMeta } from 'src/components/dashboard/useConsoleDashboardSummary'
 import { DAC, DacDashboardSummary } from 'src/libs/ajax/DAC'
+import { useMetricTiles } from 'src/components/dashboard/metricTiles'
+import { DAC_METRICS_ROUTE, DAC_METRICS_TABS } from 'src/pages/admin_console/metricsTabs'
 
 // These pages no longer have their own top-nav sub-tabs; the Dashboard is now the only place DAC
 // members and chairs navigate to them from, so the tile list lives here.
@@ -42,13 +43,6 @@ const tileMeta: ConsoleDashboardTileMeta<DacDashboardSummary>[] = [
     stats: [{ label: 'Datasets', value: summary => summary.dacDatasets?.total }],
     isRenderedForUser: user => user?.isChairPerson === true,
   },
-  {
-    label: 'Metrics',
-    link: '/dac_console/metrics',
-    icon: InsightsOutlinedIcon,
-    description: 'Decisions, turnaround, volume, and expiration and renewal for your DAC\'s datasets.',
-    stats: [],
-  },
   createDataLibraryTile<DacDashboardSummary>(),
 ]
 
@@ -68,12 +62,16 @@ const promoParagraphs = [
   'Reach out if you\'d like to learn more about what DUOS can do for your committee.',
 ]
 
+const SUMMARY_KEY = ['dac-dashboard-summary']
+
 export default function DACDashboard(): React.JSX.Element {
+  const metricTiles = useMetricTiles(SUMMARY_KEY, DAC.getDashboardSummary, DAC_METRICS_ROUTE, DAC_METRICS_TABS)
+  const allTiles = useMemo(() => [...tileMeta, ...metricTiles], [metricTiles])
   return (
     <ConsoleDashboard
-      queryKey={['dac-dashboard-summary']}
+      queryKey={SUMMARY_KEY}
       queryFn={DAC.getDashboardSummary}
-      tileMeta={tileMeta}
+      tileMeta={allTiles}
       resourcesHeading="Helpful Resources for DACs"
       resources={helpfulResources}
       promoParagraphs={promoParagraphs}

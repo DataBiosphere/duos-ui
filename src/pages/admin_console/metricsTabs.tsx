@@ -14,5 +14,7 @@ export const METRICS_TABS: MetricsTab[] = [
   { key: 'expiration', label: 'Expiration & Renewal', render: range => <ExpirationRenewalSection range={range} /> },
 ]
 
+export const DAC_METRICS_ROUTE = '/dac_console/metrics'
+
 /** SO approvals have no DAC dimension, so DACs get every other tab. */
 export const DAC_METRICS_TABS: MetricsTab[] = METRICS_TABS.filter(({ key }) => key !== 'so-approvals')
