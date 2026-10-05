@@ -8,12 +8,12 @@ import { Storage } from 'src/libs/storage'
 import { USER_ROLES } from 'src/libs/utils'
 import { DAC_METRICS_TABS } from 'src/pages/admin_console/metricsTabs'
 
-const DAC_ROLES: string[] = [USER_ROLES.chairperson, USER_ROLES.member]
+const DAC_ROLES = new Set<string>([USER_ROLES.chairperson, USER_ROLES.member])
 const ALL_DACS = 'all'
 
 const currentUserDacIds = (): number[] =>
   [...new Set((Storage.getCurrentUser().roles ?? [])
-    .flatMap(role => (DAC_ROLES.includes(role.name) && role.dacId !== undefined ? [role.dacId] : [])))]
+    .flatMap(role => (DAC_ROLES.has(role.name) && role.dacId !== undefined ? [role.dacId] : [])))]
 
 // Unnamed, consent reads a chair's or member's current DACs, which roles stored at sign-in may lag;
 // an admin would get every DAC, so theirs are named.

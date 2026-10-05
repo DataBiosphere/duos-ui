@@ -25,7 +25,7 @@ interface MetricsPageProps {
   scopeControl?: React.ReactNode
 }
 
-export default function MetricsPage({ tabs, description, dacIds, scopeControl }: MetricsPageProps): React.JSX.Element {
+export default function MetricsPage({ tabs, description, dacIds, scopeControl }: Readonly<MetricsPageProps>): React.JSX.Element {
   usePageTitle('Metrics')
   const { tab, range, setTab, setRange } = useMetricsSearchParams(tabs.map(({ key }) => key))
   const active = tabs.find(({ key }) => key === tab)
