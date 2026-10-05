@@ -4,8 +4,8 @@
 # security headers as the deployed proxy. Do not copy site.conf from a bucket
 # or edit it by hand: that copy drifts from the deployed config.
 #
-# You MUST have the GitHub CLI (gh) installed and authenticated with read
-# access to the private broadinstitute/terra-helmfile repo.
+# You MUST have git credentials with read access to the private
+# broadinstitute/terra-helmfile repo.
 #
 # Usage: scripts/render-site-conf.sh
 
@@ -19,7 +19,8 @@ cd "$(dirname "$0")"
 SITE_CONF_FILE="../site.conf"
 # The template's only helm value is proxyLogLevel; everything else is ${VAR}
 # syntax that httpd resolves at start.
-SITE_CONF_TEMPLATE_PATH="repos/broadinstitute/terra-helmfile/contents/charts/duos/templates/_site.conf.tpl?ref=master"
+TERRA_HELMFILE_REPO="https://github.com/broadinstitute/terra-helmfile.git"
+SITE_CONF_TEMPLATE_PATH="charts/duos/templates/_site.conf.tpl"
 PROXY_LOG_LEVEL="warn"
 
 error() {
@@ -28,9 +29,14 @@ error() {
 }
 
 echo "Rendering site.conf from the terra-helmfile duos chart template"
-command -v gh > /dev/null || error "Rendering site.conf needs the GitHub CLI (gh). See https://cli.github.com"
-template=$(gh api -H "Accept: application/vnd.github.raw" "$SITE_CONF_TEMPLATE_PATH") \
-  || error "Could not read _site.conf.tpl from terra-helmfile. Run 'gh auth login' with an account that can read broadinstitute/terra-helmfile."
+# Run a shallow clone of terra-helmfile to fetch the necessary template file.
+helmfile_dir=$(mktemp -d)
+trap 'rm -rf "$helmfile_dir"' EXIT
+GIT_TERMINAL_PROMPT=0 git clone --quiet --depth 1 --filter=blob:none --no-checkout \
+    --branch master "$TERRA_HELMFILE_REPO" "$helmfile_dir" \
+  || error "Could not clone terra-helmfile. Check that your git credentials can read broadinstitute/terra-helmfile."
+template=$(git -C "$helmfile_dir" show "HEAD:$SITE_CONF_TEMPLATE_PATH") \
+  || error "Could not read $SITE_CONF_TEMPLATE_PATH from terra-helmfile."
 # Drop the define/end wrapper lines and fill in the one helm value.
 rendered=$(echo "$template" \
   | grep -vE '^\{\{-? *(define|end)[ "-]' \
