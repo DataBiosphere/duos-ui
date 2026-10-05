@@ -16,5 +16,7 @@ export const METRICS_TABS: MetricsTab[] = [
 
 export const DAC_METRICS_ROUTE = '/dac_console/metrics'
 
-/** SO approvals have no DAC dimension, so DACs get every other tab. */
-export const DAC_METRICS_TABS: MetricsTab[] = METRICS_TABS.filter(({ key }) => key !== 'so-approvals')
+// Named rather than filtered, so a new admin tab stays off the DAC page until consent scopes it to DACs.
+const DAC_TAB_KEYS = new Set(['decisions', 'turnaround', 'volume', 'expiration'])
+
+export const DAC_METRICS_TABS: MetricsTab[] = METRICS_TABS.filter(({ key }) => DAC_TAB_KEYS.has(key))
