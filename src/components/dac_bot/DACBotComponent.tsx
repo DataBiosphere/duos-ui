@@ -49,6 +49,8 @@ type RuleGroupLabel
     | 'Send DARs to the entire DAC on submission by researchers?'
     | 'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?'
 
+const AUTO_APPROVE_GROUP: RuleGroupLabel = 'Automatically approve DARs when...'
+
 /** Maps each ruleType to a visual group heading */
 const RULE_GROUP_LABELS: { [key: string]: RuleGroupLabel } = {
   GRU_V1: 'Automatically approve DARs when...',
@@ -194,32 +196,19 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
 
   return (
     <div data-cy={dataCy} data-dac-id={dacId.toString()}>
-      <p>
-        Data Access Committees may automate Data Access Requests for a limited set of data use terms, namely datasets that are
-        {' '}
-        <b>only</b>
-        {' '}
-        tagged with either General Research Use or Health/Medical/Biomedical use and
-        {' '}
-        <b>without</b>
-        {' '}
-        modifiers (e.g. Non-Profit Use, Genetic Studies Only, etc).
-      </p>
-      <p>
-        Users from any of the following countries will not be approved consistent with
-        {' '}
-        <a href="https://www.ecfr.gov/current/title-28/chapter-I/part-202" target="_blank" rel="noreferrer">28 Code of Federal Regulations (CFR) Part 202</a>
-        {' '}
-        :  China (including Hong Kong and Macau), Russia, Iran, North Korea, Cuba, and Venezuela.
-      </p>
-      <p>
-        Check the box below to opt in to this feature, and then select the data use terms for which Data Access Requests you would like automated.
-      </p>
       {!isLoading && groupRules(parsedRules).map(({ label, rules }) => {
         const dataCy = RULE_GROUP_DATA_CY_KEYS[label] ?? label.toLowerCase().replace(/\s+/g, '-')
         return (
           <div key={label} data-cy={`rule-group-${dataCy}`} style={{ marginBottom: '1.5rem' }}>
-            <h4 style={{ marginBottom: '0.5rem', color: '#333' }}>{label}</h4>
+            <h4 style={{ marginTop: '2.5rem', marginBottom: '0.5rem', color: '#333' }}>{label}</h4>
+            {label === AUTO_APPROVE_GROUP && (
+              <p data-cy="restricted-countries-notice" style={{ fontStyle: 'italic', color: '#666', marginBottom: '0.75rem' }}>
+                Users from any of the following countries will not be approved consistent with
+                {' '}
+                <a href="https://www.ecfr.gov/current/title-28/chapter-I/part-202" target="_blank" rel="noreferrer">28 Code of Federal Regulations (CFR) Part 202</a>
+                : China (including Hong Kong and Macau), Russia, Iran, North Korea, Cuba, and Venezuela.
+              </p>
+            )}
             {rules.map(rule => (
               <DACBotCheckboxComponent
                 rule={rule}

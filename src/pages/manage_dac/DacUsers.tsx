@@ -1,5 +1,6 @@
 import { difference, union, flatMap } from 'src/utils/NodashUtil'
 import React, { useState, FC, CSSProperties } from 'react'
+import { Button } from '@mui/material'
 import { DacObject, DuosUser } from 'src/types/model'
 
 const CHAIR = 'chair'
@@ -18,7 +19,7 @@ interface DacUsersState {
   removedIds: number[]
 }
 
-const buttonPadding: CSSProperties = { paddingTop: 6 }
+const buttonPadding: CSSProperties = { display: 'flex', justifyContent: 'flex-end' }
 const headerStyle: CSSProperties = { fontWeight: 500, color: '#00609f' }
 
 export const DacUsers: FC<DacUsersProps> = (props) => {
@@ -67,17 +68,21 @@ export const DacUsers: FC<DacUsersProps> = (props) => {
         <div className={columnClass()}>{roleTitle}</div>
         {state.removeButton && (
           <div style={buttonPadding} className={columnClass()}>
-            <button
-              style={{ display: 'inline' }}
+            <Button
+              variant={isRemoved ? 'contained' : 'outlined'}
+              color="error"
+              size="small"
+              disableElevation
+              title={isRemoved ? 'Click to undo removal' : undefined}
+              sx={{ textTransform: 'none', borderRadius: '8px', fontWeight: 500, minWidth: '96px' }}
               onClick={(e) => {
                 e.preventDefault()
                 onRemove(state.dac.dacId, u.userId, role)
               }}
-              className="btn cell-button cancel-color"
               data-cy={'remove_button_' + u.userId}
             >
               {buttonMessage}
-            </button>
+            </Button>
           </div>
         )}
       </div>
