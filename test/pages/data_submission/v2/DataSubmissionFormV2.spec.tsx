@@ -34,12 +34,18 @@ vi.mock('src/libs/ajax/DataSet', () => ({
     registerDataset: vi.fn(),
     updateStudy: vi.fn(),
     getStudyById: vi.fn(),
+    getStudyDatasets: vi.fn(async () => []),
   },
+}))
+
+// Records what the form hands the builder, so a test can check the fetched datasets reach it.
+const { buildConsentGroupsFromDatasets } = vi.hoisted(() => ({
+  buildConsentGroupsFromDatasets: vi.fn((_datasets: unknown[]): unknown[] => []),
 }))
 
 vi.mock('src/pages/data_submission/v2/v2-common-functions', () => ({
   studyToDatasetSchemaSubmission: (study: Study) => study,
-  buildConsentGroupsFromStudy: (study: Study) => study.assets?.consentGroups ?? [],
+  buildConsentGroupsFromDatasets,
   getStudyPropertyValueByKey: () => ({}),
 }))
 
@@ -118,6 +124,7 @@ describe('DataSubmissionFormV2 Data Use validation errors', () => {
 
     await waitFor(() => expect(Notifications.showError).toHaveBeenCalled())
     expect(DataSet.getStudyById).toHaveBeenCalledTimes(1)
+    expect(DataSet.getStudyDatasets).toHaveBeenCalledTimes(1)
   })
 
   // The form is the only copy of the edits after a 400, so it must still hold the attachments
@@ -129,8 +136,10 @@ describe('DataSubmissionFormV2 Data Use validation errors', () => {
     vi.mocked(DataSet.getStudyById).mockResolvedValue({
       data: {},
       alternativeDataSharingPlanFile: plan,
-      assets: { consentGroups: [{ addedNIHInstitutionalCertificationFile: certification }] },
     } as unknown as Study)
+    const datasets = [{ datasetId: 7 }]
+    vi.mocked(DataSet.getStudyDatasets).mockResolvedValueOnce(datasets as never)
+    buildConsentGroupsFromDatasets.mockImplementationOnce(() => [{ datasetId: 7, addedNIHInstitutionalCertificationFile: certification }])
     vi.mocked(DataSet.updateStudy).mockRejectedValueOnce(validationRejection()).mockResolvedValueOnce({} as Study)
 
     renderForm()
@@ -139,6 +148,9 @@ describe('DataSubmissionFormV2 Data Use validation errors', () => {
     await user.click(await screen.findByRole('button', { name: /update study/i }))
 
     await waitFor(() => expect(DataSet.updateStudy).toHaveBeenCalledTimes(2))
+    // The consent groups were built from the datasets the form fetched for the study.
+    expect(DataSet.getStudyDatasets).toHaveBeenCalledWith('42')
+    expect(buildConsentGroupsFromDatasets).toHaveBeenCalledWith(datasets)
     const [, resubmitted] = vi.mocked(DataSet.updateStudy).mock.calls[1] as unknown as [string, FormData]
     expect((resubmitted.get('alternativeDataSharingPlan') as File)?.name).toBe('plan.pdf')
     expect((resubmitted.get('consentGroups[0].nihInstitutionalCertificationFile') as File)?.name).toBe('cert.pdf')
@@ -193,6 +205,8 @@ describe('DataSubmissionFormV2 Data Use validation errors', () => {
     await user.click(await screen.findByRole('button', { name: /update study/i }))
 
     await waitFor(() => expect(DataSet.getStudyById).toHaveBeenCalledTimes(2))
+    // A reload rereads the datasets too, so the consent groups match the reloaded study.
+    expect(DataSet.getStudyDatasets).toHaveBeenCalledTimes(2)
     const { text } = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: React.ReactNode }
     expect(text).toBe('Study update failed: Request failed with status 400. Please contact the help desk at duos@duos.org..  Reloading original study.')
   })
@@ -224,5 +238,7 @@ describe('DataSubmissionFormV2 Data Use validation errors', () => {
     await user.click(await screen.findByRole('button', { name: /update study/i }))
 
     await waitFor(() => expect(DataSet.getStudyById).toHaveBeenCalledTimes(2))
+    // A reload rereads the datasets too, so the consent groups match the reloaded study.
+    expect(DataSet.getStudyDatasets).toHaveBeenCalledTimes(2)
   })
 })

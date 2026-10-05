@@ -8,7 +8,7 @@
  *   Critical [1] – studyToDatasetSchemaSubmission reads study.properties[] instead of
  *                  study.data, silently deleting existing tags when the user saves without
  *                  touching the Tags panel.
- *   Critical [2] – buildConsentGroupsFromStudy reads dataset.properties[] with no fallback;
+ *   Critical [2] – buildConsentGroupsFromDatasets reads dataset.properties[] with no fallback;
  *                  if the 'data' entry is absent the entire data bag becomes {}.
  *   High     [3] – GeneralStudyInformation renders defaultValue from study.properties[] and
  *                  selectOptions from study.data — two sources that can diverge.
@@ -17,7 +17,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   studyToDatasetSchemaSubmission,
-  buildConsentGroupsFromStudy,
+  buildConsentGroupsFromDatasets,
   getStudyPropertyValueByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { Study, StudyData, StudyProperty } from 'src/pages/data_submission/v2/v2-models'
@@ -130,12 +130,12 @@ describe('Critical [1] — studyToDatasetSchemaSubmission: reads wrong source fo
 })
 
 // ---------------------------------------------------------------------------
-// Critical [2]: buildConsentGroupsFromStudy — dataset data bag not read from any fallback
+// Critical [2]: buildConsentGroupsFromDatasets — dataset data bag not read from any fallback
 // ---------------------------------------------------------------------------
 
-describe('Critical [2] — buildConsentGroupsFromStudy: drops dataset data bag when not in properties', () => {
+describe('Critical [2] — buildConsentGroupsFromDatasets: drops dataset data bag when not in properties', () => {
   /**
-   * buildConsentGroupsFromStudy hydrates consentGroup.data via:
+   * buildConsentGroupsFromDatasets hydrates consentGroup.data via:
    *   getDatasetPropertyValueByKey(DatasetData.propertyName, dataset) || {}
    *
    * This searches dataset.properties[] for an entry with propertyName === 'data'.
@@ -148,41 +148,26 @@ describe('Critical [2] — buildConsentGroupsFromStudy: drops dataset data bag w
    *                         as Record<string, unknown> || {}
    */
   it('BUG [2a]: drops cloud when dataset.properties has no data entry', () => {
-    const study: Study = {
-      piName: 'Dr. Test',
-      piEmail: 'test@example.com',
-      data: {},
-      datasets: [apiLoadedDataset()], // no 'data' property entry
-    }
+    const datasets = [apiLoadedDataset()] // no 'data' property entry
 
-    const groups = buildConsentGroupsFromStudy(study)
+    const groups = buildConsentGroupsFromDatasets(datasets)
 
     // BUG: actual value is {}.  If a caller later re-saves, cloud is permanently lost.
     expect(groups[0].data).not.toEqual({})
   })
 
   it('control: preserves cloud when dataset.properties contains a data entry', () => {
-    const study: Study = {
-      piName: 'Dr. Test',
-      piEmail: 'test@example.com',
-      data: {},
-      datasets: [apiLoadedDataset({ dataBag: { cloud: ['GCP', 'AWS'] } })],
-    }
+    const datasets = [apiLoadedDataset({ dataBag: { cloud: ['GCP', 'AWS'] } })]
 
-    const groups = buildConsentGroupsFromStudy(study)
+    const groups = buildConsentGroupsFromDatasets(datasets)
 
     expect(groups[0].data).toEqual({ cloud: ['GCP', 'AWS'] })
   })
 
   it('control: preserves tags when dataset.properties contains a data entry', () => {
-    const study: Study = {
-      piName: 'Dr. Test',
-      piEmail: 'test@example.com',
-      data: {},
-      datasets: [apiLoadedDataset({ dataBag: { tags: ['Platform: AnVIL'], cloud: ['GCP'] } })],
-    }
+    const datasets = [apiLoadedDataset({ dataBag: { tags: ['Platform: AnVIL'], cloud: ['GCP'] } })]
 
-    const groups = buildConsentGroupsFromStudy(study)
+    const groups = buildConsentGroupsFromDatasets(datasets)
 
     expect(groups[0].data).toEqual({ tags: ['Platform: AnVIL'], cloud: ['GCP'] })
   })

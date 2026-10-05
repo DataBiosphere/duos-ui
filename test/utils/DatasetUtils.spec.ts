@@ -27,7 +27,6 @@ const minimalStudy: Study & {
   piName: '',
   publicVisibility: false,
   datasetIds: [],
-  datasets: [],
   properties: [],
   createDate: '',
   createUserId: 0,

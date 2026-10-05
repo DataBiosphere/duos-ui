@@ -57,7 +57,6 @@ const mockDataset: Dataset = {
     piName: 'Principal Investigator',
     publicVisibility: false,
     datasetIds: [101],
-    datasets: [],
     properties: [],
     createDate: '2024-01-01T00:00:00.000Z',
     createUserId: 1001,
