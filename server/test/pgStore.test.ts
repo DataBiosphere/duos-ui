@@ -39,12 +39,14 @@ describe('createPgSessionStore', () => {
   let pg: PostgresDb
   let query: ReturnType<typeof vi.fn>
   let store: ReturnType<typeof createPgSessionStore>
+  let log: { info: ReturnType<typeof vi.fn>, error: ReturnType<typeof vi.fn> }
 
   beforeEach(() => {
     const fake = makeFakePg()
     pg = fake.pg
     query = fake.query
-    store = createPgSessionStore(pg)
+    log = { info: vi.fn(), error: vi.fn() }
+    store = createPgSessionStore(pg, log as never)
   })
 
   describe('get', () => {
@@ -121,6 +123,47 @@ describe('createPgSessionStore', () => {
       await expect(
         promisifyVoid(cb => store.destroy('sid-1', cb)),
       ).rejects.toThrow('delete failed')
+    })
+  })
+
+  describe('session_store.completed', () => {
+    it.each([
+      ['get', () => promisifyGet(store, 'sid-1')],
+      ['set', () => promisifyVoid(cb => store.set('sid-1', sampleSession, cb))],
+      ['destroy', () => promisifyVoid(cb => store.destroy('sid-1', cb))],
+    ])('emits one ok event at info for a successful %s', async (op, call) => {
+      query.mockResolvedValueOnce({ rows: [] })
+
+      await call()
+
+      expect(log.info).toHaveBeenCalledOnce()
+      expect(log.info).toHaveBeenCalledWith(
+        { event: 'session_store.completed', op, outcome: 'ok', idp: 'unknown' },
+        'session_store.completed',
+      )
+      expect(log.error).not.toHaveBeenCalled()
+    })
+
+    it('emits one failed event at error, carrying the error, when the query rejects', async () => {
+      const failure = new Error('connection terminated')
+      query.mockRejectedValueOnce(failure)
+
+      await expect(promisifyGet(store, 'sid-1')).rejects.toThrow('connection terminated')
+
+      expect(log.error).toHaveBeenCalledOnce()
+      expect(log.error).toHaveBeenCalledWith(
+        { event: 'session_store.completed', op: 'get', outcome: 'failed', idp: 'unknown', err: failure },
+        'session_store.completed',
+      )
+      expect(log.info).not.toHaveBeenCalled()
+    })
+
+    it('never puts the sid in the event', async () => {
+      query.mockResolvedValueOnce({ rows: [] })
+
+      await promisifyGet(store, 'SECRET-SID')
+
+      expect(JSON.stringify(log.info.mock.calls)).not.toContain('SECRET-SID')
     })
   })
 })
