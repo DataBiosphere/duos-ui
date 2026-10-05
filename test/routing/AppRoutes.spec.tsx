@@ -74,6 +74,7 @@ const roleBACRoutes: string[] = [
   '/dac_console',
   '/dac_console_dar_requests',
   '/dac_console/manage_dac',
+  '/dac_console/metrics',
   '/chair_console',
   '/member_console',
   '/signing_official_console',

@@ -23,9 +23,11 @@ interface MetricsPageProps {
   dacIds?: number[]
   /** Shown above the range controls, such as a DAC picker. */
   scopeControl?: React.ReactNode
+  /** Shown in place of the controls and tabs when there is nothing the page may report on. */
+  unavailableText?: string
 }
 
-export default function MetricsPage({ tabs, description, dacIds, scopeControl }: Readonly<MetricsPageProps>): React.JSX.Element {
+export default function MetricsPage({ tabs, description, dacIds, scopeControl, unavailableText }: Readonly<MetricsPageProps>): React.JSX.Element {
   usePageTitle('Metrics')
   const { tab, range, setTab, setRange } = useMetricsSearchParams(tabs.map(({ key }) => key))
   const active = tabs.find(({ key }) => key === tab)
@@ -33,10 +35,10 @@ export default function MetricsPage({ tabs, description, dacIds, scopeControl }:
   return (
     <Box sx={Styles.PAGE}>
       <Typography component="h1" sx={{ ...titleStyle, maxWidth: 'none' }}>Metrics</Typography>
-      <Typography sx={descriptionStyle}>{description}</Typography>
-      {scopeControl}
-      <DarAnalyticsControls range={range} onChange={setRange} />
-      {active && (
+      <Typography sx={descriptionStyle}>{unavailableText ?? description}</Typography>
+      {unavailableText === undefined && scopeControl}
+      {unavailableText === undefined && <DarAnalyticsControls range={range} onChange={setRange} />}
+      {unavailableText === undefined && active && (
         <DarMetricsScope.Provider value={dacIds}>
           <TabControl
             labels={tabs.map(({ label }) => label)}

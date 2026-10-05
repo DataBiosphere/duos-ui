@@ -94,6 +94,15 @@ describe('DacMetrics', () => {
     expect(screen.getByText('Scoped to their current DACs')).toBeInTheDocument()
   })
 
+  it('reports nothing to a user with no DAC, as an admin would otherwise see every DAC', () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ ...userWithRoles([{ name: 'Chairperson' }]), isAdmin: true })
+    renderPage()
+
+    expect(screen.getByText(/aren't a chair or member of any DAC/)).toBeInTheDocument()
+    expect(screen.queryByText(/Scoped to/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+  })
+
   it('shows no picker to a user on one DAC', () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(userWithRoles([{ name: 'Member', dacId: 4 }]))
     renderPage()
