@@ -742,17 +742,25 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
       )
     : null
 
+  // Profile mode uses a fixed-width label column so fields span the rest of the card
+  const labelColStyle: React.CSSProperties = profileMode
+    ? { flex: '0 0 200px', paddingRight: '15px', marginTop: 0 }
+    : { flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }
+  const fieldColStyle: React.CSSProperties = profileMode
+    ? { flex: 1, minWidth: 0, paddingLeft: '15px' }
+    : { flexBasis: '66.67%', paddingLeft: '15px' }
+
   const dacMembersJSX = ((state.dac.chairpersons?.length ?? 0) > 0 || (state.dac.members?.length ?? 0) > 0)
     ? (
         <div style={{ display: 'flex', marginBottom: '15px' }}>
           <div
             id="lbl_dacMembers"
-            style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
+            style={labelColStyle}
             className="control-label common-color"
           >
             DAC Members
           </div>
-          <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+          <div style={fieldColStyle}>
             <DacUsers dac={state.dac} removeButton={true} removeHandler={removeDacMember} />
           </div>
         </div>
@@ -763,12 +771,12 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
     <div style={{ display: 'flex', marginBottom: '15px' }}>
       <div
         id="lbl_dacChair"
-        style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
+        style={labelColStyle}
         className="control-label common-color"
       >
         Add Chairperson(s)
       </div>
-      <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+      <div style={fieldColStyle}>
         <AsyncSelect
           id="sel_dacChair"
           isDisabled={false}
@@ -803,15 +811,12 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
     <div style={{ display: 'flex', marginBottom: '15px' }}>
       <div
         id="lbl_dacMember"
-        style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
+        style={labelColStyle}
         className="control-label common-color"
       >
         Add Member(s)
       </div>
-      <div style={state.searchInputChanged
-        ? { paddingBottom: '10rem', flexBasis: '66.67%', paddingLeft: '15px' }
-        : { flexBasis: '66.67%', paddingLeft: '15px' }}
-      >
+      <div style={state.searchInputChanged ? { ...fieldColStyle, paddingBottom: '10rem' } : fieldColStyle}>
         <AsyncSelect
           id="sel_dacMember"
           isDisabled={false}
@@ -869,12 +874,12 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
         <label
           id="lbl_dacName"
           htmlFor="txt_dacName"
-          style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
+          style={labelColStyle}
           className="control-label common-color"
         >
           DAC Name
         </label>
-        <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+        <div style={fieldColStyle}>
           <input
             id="txt_dacName"
             type="text"
@@ -891,12 +896,12 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
         <label
           id="lbl_dacDescription"
           htmlFor="txt_dacDescription"
-          style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
+          style={labelColStyle}
           className="control-label common-color"
         >
           DAC Description
         </label>
-        <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+        <div style={fieldColStyle}>
           <textarea
             id="txt_dacDescription"
             defaultValue={state.dac.description}
@@ -912,12 +917,12 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
         <label
           id="lbl_dacEmail"
           htmlFor="txt_dacEmail"
-          style={{ flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }}
+          style={labelColStyle}
           className="control-label common-color"
         >
           DAC Email
         </label>
-        <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+        <div style={fieldColStyle}>
           <input
             id="txt_dacEmail"
             type="text"
@@ -1017,37 +1022,45 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
   )
 
   const profileSaveButtons = (
-    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingBottom: '20px', marginTop: '1rem' }}>
-      <button onClick={okHandler} className="f-left btn-primary common-background">Save</button>
-      <button onClick={closeHandler} className="f-left btn-secondary">Cancel</button>
+    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '1rem' }}>
+      <button onClick={okHandler} className="btn-primary common-background">Save</button>
+      <button onClick={closeHandler} className="btn-secondary">Cancel</button>
     </div>
   )
 
   const formContent = profileMode
     ? (
         <>
-          <DacProfileSection title="DAC Membership">
-            <div className="form-horizontal css-form" style={{ maxWidth: '1200px' }}>
+          <DacProfileSection
+            title="DAC Membership"
+            description="Manage who serves on this DAC. Chairpersons manage DAC settings and RADAR rules and issue final access approvals; Members review and vote on Data Access Requests (DARs). Additions and removals take effect when you click Save."
+          >
+            <div className="form-horizontal css-form">
               {dacMembersJSX}
               {chairSelectJSX}
               {memberSelectJSX}
             </div>
             {profileSaveButtons}
           </DacProfileSection>
-          <DacProfileSection title="DAC Info">
+          <DacProfileSection
+            title="DAC Info"
+            description="The name, description, and contact email that identify this DAC in DUOS. Changes take effect when you click Save."
+          >
             <form
               className="form-horizontal css-form"
               name="dacForm"
               noValidate
               encType="multipart/form-data"
-              style={{ maxWidth: '1200px' }}
             >
               {basicFieldsJSX}
             </form>
             {errorAlertJSX}
             {profileSaveButtons}
           </DacProfileSection>
-          <DacProfileSection title="Select a Data Access Agreement">
+          <DacProfileSection
+            title="Select a Data Access Agreement"
+            description="Choose the Data Access Agreement (DAA) that applies to requests for this DAC's datasets. Select an existing agreement or upload your own."
+          >
             {daaContentJSX}
           </DacProfileSection>
         </>

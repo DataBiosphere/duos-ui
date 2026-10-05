@@ -131,6 +131,22 @@ describe('DacProfile', () => {
     expect(screen.queryByText('Unapproved Dataset')).toBeNull()
   })
 
+  it('shows data use limitations as the Data Library chip', async () => {
+    vi.mocked(DAC.get).mockResolvedValue(existingDac)
+    vi.mocked(DAC.datasets).mockResolvedValue([
+      makeDataset({ datasetId: 1, name: 'Approved Dataset', dacApproval: true }),
+    ])
+    vi.mocked(DataUseTranslation.translateDataUseRestrictions).mockResolvedValue([
+      { code: 'NPU', description: 'Use is limited to non-profit use', type: 'Modifiers' },
+      { code: 'GRU', description: 'Use is permitted for any research purpose', type: 'Permissions' },
+    ])
+
+    await renderDacProfile()
+
+    // Primary codes lead, followed by secondary codes
+    expect(await screen.findByText('GRU-NPU')).toBeTruthy()
+  })
+
   it('shows "No datasets" message when there are no approved datasets', async () => {
     vi.mocked(DAC.get).mockResolvedValue(existingDac)
     vi.mocked(DAC.datasets).mockResolvedValue([

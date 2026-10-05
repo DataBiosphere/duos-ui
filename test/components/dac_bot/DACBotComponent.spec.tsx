@@ -59,8 +59,13 @@ describe('DACBotComponent', () => {
       vi.restoreAllMocks()
     })
 
-    it('should render component with heading and description', () => {
-      expect(screen.getByText(/Data Access Committees may automate Data Access Requests/)).toBeInTheDocument()
+    it('should not render the removed introductory text', () => {
+      expect(screen.queryByText(/Data Access Committees may automate Data Access Requests/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Check the box below to opt in/)).not.toBeInTheDocument()
+    })
+
+    it('should only show the restricted countries notice with the automatic approval rules', () => {
+      expect(screen.queryByText(/Users from any of the following countries/)).not.toBeInTheDocument()
     })
 
     it('should display all rules from API', () => {

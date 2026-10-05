@@ -19,8 +19,9 @@ export const TableHeaderSection: React.FC<TableHeaderSectionProps> = ({
   description,
 }) => {
   return (
-    <div style={{ display: 'flex', padding: '0 0 0 2em' }}>
-      <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION as React.CSSProperties}>
+    // minWidth: 0 lets a caller's single-line title ellipsize instead of overflowing the page
+    <div style={{ display: 'flex', padding: '0 0 0 2em', minWidth: 0 }}>
+      <div className="left-header-section" style={{ ...Styles.LEFT_HEADER_SECTION as React.CSSProperties, minWidth: 0 }}>
         {icon?.src && (
           <div style={Styles.ICON_CONTAINER}>
             <img

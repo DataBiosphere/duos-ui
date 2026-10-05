@@ -34,4 +34,10 @@ describe('DacProfileSection', () => {
 
     expect(screen.getByRole('region', { name: 'Datasets Managed by this DAC' })).toBeInTheDocument()
   })
+
+  it('renders help text below the heading when a description is provided', () => {
+    render(<DacProfileSection title="DAC Info" description="Help text for this section." />)
+
+    expect(screen.getByRole('region', { name: 'DAC Info' })).toContainElement(screen.getByText('Help text for this section.'))
+  })
 })
