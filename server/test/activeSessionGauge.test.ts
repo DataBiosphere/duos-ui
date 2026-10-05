@@ -65,6 +65,20 @@ describe('emitActiveSessions', () => {
 describe('startActiveSessionGauge', () => {
   afterEach(() => vi.useRealTimers())
 
+  it('keeps running and raises no unhandled rejection when the logger throws', async () => {
+    vi.useFakeTimers()
+    const pg = { query: vi.fn().mockRejectedValue(new Error('down')) }
+    const log = { info: vi.fn(), warn: vi.fn().mockImplementation(() => {
+      throw new Error('logger broke')
+    }) }
+
+    const stop = startActiveSessionGauge(pg as never, log, 1000)
+    await vi.advanceTimersByTimeAsync(2000)
+
+    expect(pg.query).toHaveBeenCalledTimes(2)
+    stop()
+  })
+
   it('emits every interval and stops when the returned function is called', async () => {
     vi.useFakeTimers()
     const pg = makePg([])

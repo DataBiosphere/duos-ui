@@ -77,9 +77,13 @@ export function startActiveSessionGauge(
   const tick = (): void => {
     if (running) return
     running = true
-    emitActiveSessions(pg, log).finally(() => {
-      running = false
-    })
+    // `emitActiveSessions` handles a failed query. The only rejection left is
+    // the logger itself throwing, and there is nowhere else to report that.
+    emitActiveSessions(pg, log)
+      .catch(() => undefined)
+      .finally(() => {
+        running = false
+      })
   }
   const timer = setInterval(tick, intervalMs)
   timer.unref()
