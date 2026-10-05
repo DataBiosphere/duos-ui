@@ -461,7 +461,7 @@ export default function ReviewHeader({
                 <ProfileFactLink label="LinkedIn" id="researcher-linkedin-fact" url={formattedLinkedIn(researcherLinkedIn)} />
               )}
               {researcherOrcid && (
-                <ProfileFactLink label="ORCID iD" id="researcher-orcid-fact" url={formattedOrcid(researcherOrcid)} />
+                <ProfileFactLink label="ORCID" id="researcher-orcid-fact" url={formattedOrcid(researcherOrcid)} />
               )}
               {researcherThroughBio && (
                 <ProfileFactLink label="Through.bio" id="researcher-through-bio-fact" url={formattedThroughBio(researcherThroughBio)} />
@@ -526,7 +526,7 @@ export default function ReviewHeader({
                         <ProfileFactLink label="LinkedIn" id="signing-official-linkedin-fact" url={formattedLinkedIn(soLinkedIn)} />
                       )}
                       {soOrcid && (
-                        <ProfileFactLink label="ORCID iD" id="signing-official-orcid-fact" url={formattedOrcid(soOrcid)} />
+                        <ProfileFactLink label="ORCID" id="signing-official-orcid-fact" url={formattedOrcid(soOrcid)} />
                       )}
                       {soThroughBio && (
                         <ProfileFactLink label="Through.bio" id="signing-official-through-bio-fact" url={formattedThroughBio(soThroughBio)} />

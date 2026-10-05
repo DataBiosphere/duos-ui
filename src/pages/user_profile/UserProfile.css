@@ -1,3 +1,11 @@
+.user-profile-page,
+.external-profile {
+  /* One size and border for every input and Save button on the page. */
+  --profile-control-height: 40px;
+  --profile-control-padding: 8px 12px;
+  --profile-control-border-color: #ccc;
+}
+
 .user-profile-page {
   width: min(100%, 1200px);
   margin: 0 auto;
@@ -55,10 +63,10 @@
   max-width: 100%;
 }
 
-.profile-save-button {
-  min-width: 72px;
-  height: 34px;
-  padding-inline: 16px;
+/* Restyles only the resting state, so bootstrap's focus and error styles still apply. */
+.user-profile-page .form-control:not(:focus, .errored) {
+  border-color: var(--profile-control-border-color);
+  box-shadow: none;
 }
 
 @media (max-width: 700px) {

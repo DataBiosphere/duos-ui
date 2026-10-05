@@ -78,7 +78,7 @@ export default function SigningOfficialReadOnlyCard(props: Readonly<SigningOffic
               <ProfileLink label="LinkedIn" url={formattedLinkedIn(linkedIn)} />
             )}
             {orcid && (
-              <ProfileLink label="ORCID iD" url={formattedOrcid(orcid)} />
+              <ProfileLink label="ORCID" url={formattedOrcid(orcid)} />
             )}
             {throughBio && (
               <ProfileLink label="Through.bio" url={formattedThroughBio(throughBio)} />
