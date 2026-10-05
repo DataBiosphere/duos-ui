@@ -12,6 +12,18 @@ set -o pipefail
 # The main config sets no workspaceFolder, so the path depends on the folder name.
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
+# On failure, tell the developer how to recover. Most failures come from a
+# missing VPN connection, which blocks kubectl.
+on_exit() {
+  local status=$?
+  if (( status != 0 )); then
+    echo >&2
+    echo "Dev container setup failed. Are you connected to the non-split Broad VPN?" >&2
+    echo "Fix the issue, then rebuild the container or run: ./scripts/setup-devcontainer.sh" >&2
+  fi
+}
+trap on_exit EXIT
+
 gcloud_cli_requirements() {
   curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     | sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/cloud.google.gpg

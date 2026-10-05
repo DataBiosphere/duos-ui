@@ -10,7 +10,7 @@ If you use Visual Studio Code (VSCode) and Docker, you can use the Dev Container
 
 3. When the setup script asks for the gcloud login, complete it in the browser that opens.
 
-4. If the setup fails (for example, the VPN is down), fix the cause and run the script again. Every 3 months the certs rotate. Run the script again to make all files again:
+4. If the setup fails (for example, the VPN is down), fix the issue. Then rebuild the container, or run the script again. Every 3 months the certs rotate. Run the script again to make all files again:
 
    ```sh
    ./scripts/setup-devcontainer.sh
