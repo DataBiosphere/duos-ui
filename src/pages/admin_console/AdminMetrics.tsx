@@ -17,7 +17,7 @@ export default function AdminMetrics(): React.JSX.Element {
     <Box sx={Styles.PAGE}>
       <Typography component="h1" sx={{ ...titleStyle, maxWidth: 'none' }}>Metrics</Typography>
       <Typography sx={descriptionStyle}>
-        How data access requests move through DUOS. The range and grouping apply to every tab.
+        How data access requests move through DUOS, and the accounts and institutions created on it. The range and grouping apply to every tab.
       </Typography>
       <DarAnalyticsControls range={range} onChange={setRange} />
       {active && (
