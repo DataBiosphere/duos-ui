@@ -1,17 +1,10 @@
 import React from 'react'
-import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
+import { MetricsTab } from 'src/components/dar_analytics/MetricsPage'
 import { DecisionFunnelSection } from 'src/components/dar_analytics/DecisionFunnelSection'
 import { TurnaroundSection } from 'src/components/dar_analytics/TurnaroundSection'
 import { SoApprovalsSection } from 'src/components/dar_analytics/SoApprovalsSection'
 import { VolumeSection } from 'src/components/dar_analytics/VolumeSection'
 import { ExpirationRenewalSection } from 'src/components/dar_analytics/ExpirationRenewalSection'
-
-export interface MetricsTab {
-  /** The `tab` query param, so a tab can be linked to. */
-  key: string
-  label: string
-  render: (range: DarAnalyticsRange) => React.ReactNode
-}
 
 export const METRICS_TABS: MetricsTab[] = [
   { key: 'decisions', label: 'Decisions', render: range => <DecisionFunnelSection range={range} /> },
@@ -20,3 +13,6 @@ export const METRICS_TABS: MetricsTab[] = [
   { key: 'volume', label: 'Volume', render: range => <VolumeSection range={range} /> },
   { key: 'expiration', label: 'Expiration & Renewal', render: range => <ExpirationRenewalSection range={range} /> },
 ]
+
+/** SO approvals have no DAC dimension, so DACs get every other tab. */
+export const DAC_METRICS_TABS: MetricsTab[] = METRICS_TABS.filter(({ key }) => key !== 'so-approvals')

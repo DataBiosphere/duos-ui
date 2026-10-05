@@ -75,6 +75,20 @@ describe('DarMetrics', () => {
     })
   })
 
+  it('sends each DAC as a repeated dacId and leaves out an empty list', async () => {
+    await DarMetrics.getRenewals({ ...query, dacIds: [3, 5] })
+    await DarMetrics.getRenewals({ ...query, dacIds: [] })
+
+    expect(fetchGet).toHaveBeenNthCalledWith(1, 'https://duos.example.org/api/metrics/dar-renewals', {
+      ...headers,
+      params: { ...query, dacId: [3, 5] },
+    })
+    expect(fetchGet).toHaveBeenNthCalledWith(2, 'https://duos.example.org/api/metrics/dar-renewals', {
+      ...headers,
+      params: query,
+    })
+  })
+
   it('propagates a rejection with its status intact', async () => {
     const badRequest = { message: 'to must not be before from', code: 400 }
     vi.mocked(fetchGet).mockRejectedValueOnce(badRequest)

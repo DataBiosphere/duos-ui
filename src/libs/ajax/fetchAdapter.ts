@@ -10,7 +10,8 @@ import { CsrfTokenSessionExpiredError, getCsrfToken, isCsrfRejection, resetCsrfT
 export type ResponseType = 'blob' | 'json' | 'text'
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 export type Credentials = 'omit' | 'same-origin' | 'include'
-export type ParamValue = string | number | boolean
+/** An array repeats its key, as `id=1&id=2`. */
+export type ParamValue = string | number | boolean | readonly (string | number)[]
 export type Params = Record<string, ParamValue>
 export type HeadersMap = Record<string, string>
 type FetchRequestConfig<TBody = unknown> = Omit<FetchRequestOptions<TBody>, 'url' | 'method' | 'data'>
@@ -124,12 +125,10 @@ const stripAuthorization = (headers: HeadersMap): void => {
 
 function buildUrlWithParams(url: string, params?: Params): string {
   if (!params || Object.keys(params).length === 0) return url
-  const query = new URLSearchParams(
-    Object.entries(params).reduce<Record<string, string>>((acc, [k, v]) => {
-      acc[k] = String(v)
-      return acc
-    }, {}),
-  ).toString()
+  const search = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) =>
+    (Array.isArray(value) ? value : [value]).forEach(v => search.append(key, String(v))))
+  const query = search.toString()
   return query ? `${url}?${query}` : url
 }
 

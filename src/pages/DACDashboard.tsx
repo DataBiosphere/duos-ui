@@ -3,6 +3,7 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined'
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
+import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined'
 import ConsoleDashboard from 'src/components/dashboard/ConsoleDashboard'
 import { ConsoleDashboardResource } from 'src/components/dashboard/ConsoleDashboardResources'
 import { COMMON_CONSOLE_RESOURCES } from 'src/components/dashboard/dashboardResources'
@@ -40,6 +41,13 @@ const tileMeta: ConsoleDashboardTileMeta<DacDashboardSummary>[] = [
     description: 'View the status of datasets submitted to your Data Access Committee.',
     stats: [{ label: 'Datasets', value: summary => summary.dacDatasets?.total }],
     isRenderedForUser: user => user?.isChairPerson === true,
+  },
+  {
+    label: 'Metrics',
+    link: '/dac_console/metrics',
+    icon: InsightsOutlinedIcon,
+    description: 'Decisions, turnaround, volume, and expiration and renewal for your DAC\'s datasets.',
+    stats: [],
   },
   createDataLibraryTile<DacDashboardSummary>(),
 ]

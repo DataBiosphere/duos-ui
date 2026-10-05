@@ -68,6 +68,7 @@ describe('DACDashboard', () => {
       'href', '/dac_console/manage_dac',
     )
     expect(screen.getByRole('link', { name: /My DAC's Datasets/ })).toHaveAttribute('href', '/dac_datasets')
+    expect(screen.getByRole('link', { name: /Metrics/ })).toHaveAttribute('href', '/dac_console/metrics')
 
     resolveSummary(summary)
     await waitFor(() => expect(screen.queryByText('–')).not.toBeInTheDocument())
