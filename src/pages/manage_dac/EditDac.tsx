@@ -102,6 +102,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
   const [selectedDaa, setSelectedDaa] = useState<DAAObject | null | undefined>(null)
   const [createdDaa, setCreatedDaa] = useState<DAAObject | null>(null)
   const [uploadedDAAFile, setUploadedDAAFile] = useState<File[] | null>(null)
+  const [uploadedDAAOn, setUploadedDAAOn] = useState<Date | null>(null)
   const [selectedUploadedFileName, setSelectedUploadedFileName] = useState<string | null>(null)
   const [daaFileData, setDaaFileData] = useState<File[] | null>(null)
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false)
@@ -680,6 +681,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
   const handleNewDacAttachment = (attachment: File[]): void => {
     // New DAC: store all files; they will be created after the DAC is persisted
     setUploadedDAAFile(attachment)
+    setUploadedDAAOn(new Date())
     setDaaFileData(attachment)
     setSelectedDaa(undefined)
     setSelectedUploadedFileName(attachment[0]?.name ?? null)
@@ -972,7 +974,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
                       <div className="row" style={{ paddingLeft: '15px' }}>
                         Uploaded on
                         {' '}
-                        {new Date().toLocaleDateString()}
+                        {uploadedDAAOn?.toLocaleDateString()}
                       </div>
                     </div>
                     <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
