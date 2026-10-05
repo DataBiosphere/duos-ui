@@ -545,7 +545,7 @@ describe('publicProxy', () => {
   })
   describe('public.completed event', () => {
     const parse = (lines: string[]) => lines
-      .map(line => JSON.parse(line) as { event?: string, route?: string, status?: number })
+      .map(line => JSON.parse(line) as { event?: string, route?: string, status?: number, idp?: string })
       .filter(entry => entry.event === 'public.completed')
 
     it('logs one event per request with the route and status, and no URL', async () => {
@@ -565,6 +565,7 @@ describe('publicProxy', () => {
         { route: 'features', status: 200 },
         { route: 'metrics_event', status: 200 },
       ])
+      expect(events.every(event => event.idp === 'unknown')).toBe(true)
       expect(JSON.stringify(events)).not.toContain(FEATURE_KEY)
     })
 

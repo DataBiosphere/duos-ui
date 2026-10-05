@@ -11,6 +11,7 @@ import type {
 } from 'fastify'
 import type { RateLimitOptions } from '@fastify/rate-limit'
 import fastifyReplyFrom from '@fastify/reply-from'
+import { logAuthEvent } from '../auth/authEvents.js'
 import { upstreamBase, upstreamPath } from './upstreamProxy.js'
 
 /**
@@ -272,12 +273,12 @@ export async function publicProxy(app: FastifyInstance): Promise<void> {
 
   // `public.completed`: one info line per public request, unsampled, so 6-G can
   // divide failures by it. Labels are an allowlist: no URL, no key, no body.
-  // These routes carry no session, so there is no `idp`.
+  // These routes carry no session, so `idp` is always `unknown`.
   app.addHook('onResponse', (request, reply, done) => {
     const url = request.routeOptions?.url
     if (url) {
       const route = url.startsWith(PUBLIC_FEATURES_PREFIX) ? 'features' : 'metrics_event'
-      request.log.info({ event: 'public.completed', route, status: reply.statusCode }, 'public.completed')
+      logAuthEvent(request, 'public.completed', { route, status: reply.statusCode, idp: 'unknown' })
     }
     done()
   })
