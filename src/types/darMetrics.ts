@@ -194,3 +194,33 @@ export interface Renewal {
 }
 
 export type DarRenewalReport = DarMetricsReport<RenewalBucket, Renewal>
+
+export interface CreatedBucket {
+  bucketStart: number
+  count: number
+}
+
+export interface RoleUserCount {
+  role: string
+  userCount: number
+}
+
+/** Users created in the range; not paged, so it has no `rows`. */
+export interface UserReport {
+  from: string
+  to: string
+  bucket: Uppercase<MetricsBucket>
+  total: number
+  buckets: CreatedBucket[]
+  /** Per role held now; a user counts once per role. */
+  roles: RoleUserCount[]
+}
+
+/** Institutions created in the range; not paged, so it has no `rows`. */
+export interface InstitutionReport {
+  from: string
+  to: string
+  bucket: Uppercase<MetricsBucket>
+  total: number
+  buckets: CreatedBucket[]
+}
