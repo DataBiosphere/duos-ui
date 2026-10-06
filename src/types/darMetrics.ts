@@ -11,6 +11,8 @@ export interface DarMetricsQuery {
   bucket?: MetricsBucket
   limit?: number
   offset?: number
+  /** Limits the report to these DACs' datasets; omitted, consent picks the caller's default scope. */
+  dacIds?: number[]
 }
 
 export interface DarMetricsReport<B, R> {

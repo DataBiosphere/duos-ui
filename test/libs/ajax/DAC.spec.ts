@@ -272,6 +272,14 @@ describe('DAC ajax', () => {
       dacs: { total: 4 },
       dacDatasets: { total: 6 },
       dataLibrary: { studies: 7, datasets: 12, models: 3, workspaces: 1 },
+      metrics: {
+        from: '2026-07-04',
+        to: '2026-10-01',
+        decisions: { submitted: 6, pending: 2, approved: 3, denied: 1, mixed: 0, canceled: 0 },
+        turnaround: { decided: 4, unmeasured: 0, medianDays: 11.24, modeDays: 9 },
+        volume: { dars: 6, researchers: 5, institutions: 4 },
+        expiration: { expired: 1, closedOut: 0, renewals: 2 },
+      },
     }
     vi.mocked(fetchGet).mockResolvedValue({ data: summary } as FetchData<DacDashboardSummary>)
 

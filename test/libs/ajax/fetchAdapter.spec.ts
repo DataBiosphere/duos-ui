@@ -440,6 +440,19 @@ describe('fetchAdapter - Fetch methods', () => {
     expect(url).toContain('active=true')
   })
 
+  it('repeats the key for each value of an array param', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({}), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    await fetchGet('/api/items', { params: { from: '2026-01-01', dacId: [3, 5] } })
+    const [url] = fetchMock.mock.calls[0]
+    expect(url).toBe('/api/items?from=2026-01-01&dacId=3&dacId=5')
+  })
+
   it('should not append query string when params is empty', async () => {
     fetchMock.mockResolvedValue(
       new Response(JSON.stringify({}), {

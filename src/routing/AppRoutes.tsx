@@ -44,6 +44,8 @@ import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions'
 import DatasetUpdateForm from 'src/pages/DatasetUpdateForm'
 import DACConsole from 'src/pages/DACConsole'
 import DACDashboard from 'src/pages/DACDashboard'
+import DacMetrics from 'src/pages/DacMetrics'
+import { DAC_METRICS_ROUTE } from 'src/pages/admin_console/metricsTabs'
 import DACDatasets from 'src/pages/DACDatasets'
 import SOAcknowledged from 'src/routing/SOAcknowledged'
 import SigningOfficialDashboard from 'src/pages/signing_official_console/SigningOfficialDashboard'
@@ -113,6 +115,7 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]} />}>
           <Route path="/dac_console" element={<DACDashboard />} />
           <Route path="/dac_console_dar_requests" element={<DACConsole />} />
+          <Route path={DAC_METRICS_ROUTE} element={<DacMetrics />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
           <Route path="/chair_console" element={<Navigate to="/dac_console_dar_requests" replace />} />

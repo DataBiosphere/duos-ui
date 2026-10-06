@@ -14,16 +14,17 @@ import {
   UserReport,
 } from 'src/types/darMetrics'
 
-const getReport = async <T>(path: string, query: DarMetricsQuery): Promise<T> => {
+const getReport = async <T>(path: string, { dacIds, ...query }: DarMetricsQuery): Promise<T> => {
   const params = Object.fromEntries(
-    Object.entries(query).filter(([, value]) => value !== undefined && value !== null),
+    Object.entries({ ...query, dacId: dacIds?.length ? dacIds : undefined })
+      .filter(([, value]) => value !== undefined && value !== null),
   ) as Params
   const url = `${await Config.getApiUrl()}/api/metrics/${path}`
   const res = await fetchGet<T>(url, { ...Config.authOpts(), params })
   return res.data
 }
 
-/** Admin-only DAR reporting. Every call needs an inclusive `from`/`to` range. */
+/** DAR reporting for admins, and for DAC chairs and members over their DACs. Every call needs an inclusive `from`/`to` range. */
 export const DarMetrics = {
   getVolume: (query: DarMetricsQuery) => getReport<DarVolumeReport>('dar-volume', query),
 

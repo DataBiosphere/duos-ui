@@ -2,7 +2,7 @@ import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router'
-import { useMetricsSearchParams } from 'src/pages/admin_console/useMetricsSearchParams'
+import { useMetricsSearchParams } from 'src/components/dar_analytics/useMetricsSearchParams'
 
 const TABS = ['decisions', 'turnaround']
 
