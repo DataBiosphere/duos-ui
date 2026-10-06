@@ -33,6 +33,7 @@ describe('ResearchTermsSection', () => {
       { id: `${PURL}MONDO_0004992`, label: 'cancer', darCount: 4 },
       { id: `${PURL}MONDO_0004979`, label: 'asthma', darCount: 1 },
       { id: `${PURL}MONDO_0005015`, darCount: 1 },
+      { id: `${PURL}HP_0001250`, label: ' ', darCount: 1 },
     ]))
 
     renderSection()
@@ -42,6 +43,7 @@ describe('ResearchTermsSection', () => {
     expect(first.textContent).toBe('1cancerMONDO:00049924 DARs')
     expect(second.textContent).toBe('2asthmaMONDO:00049791 DAR')
     expect(third.textContent).toBe('2MONDO:00050151 DAR')
+    expect(within(list).getAllByRole('listitem')[3].textContent).toBe('2HP:00012501 DAR')
     expect(DarMetrics.getDarTerms).toHaveBeenCalledWith({ from: range.from, to: range.to, limit: 10 })
   })
 
@@ -57,6 +59,22 @@ describe('ResearchTermsSection', () => {
     const bar = (item: HTMLElement) => item.querySelector('[aria-hidden="true"] > div')
     expect(bar(items[0])).toHaveStyle({ width: '100%' })
     expect(bar(items[1])).toHaveStyle({ width: '25%' })
+  })
+
+  it('does not refetch when only the grouping changes', async () => {
+    vi.mocked(DarMetrics.getDarTerms).mockResolvedValue(report([{ id: 'a', label: 'a', darCount: 1 }]))
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const { rerender } = render(
+      <QueryClientProvider client={client}><ResearchTermsSection range={range} /></QueryClientProvider>,
+    )
+    await screen.findByRole('list')
+
+    rerender(
+      <QueryClientProvider client={client}><ResearchTermsSection range={{ ...range, bucket: 'month' }} /></QueryClientProvider>,
+    )
+
+    expect(await screen.findByRole('list')).toBeInTheDocument()
+    expect(DarMetrics.getDarTerms).toHaveBeenCalledTimes(1)
   })
 
   it('shows the empty state with the counting caveat', async () => {

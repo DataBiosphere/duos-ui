@@ -26,7 +26,7 @@ export const shortTermId = (id: string) => {
 }
 
 const TermRow = ({ rank, term, max }: { rank: number, term: TermDarCount, max: number }) => {
-  const label = term.label ?? shortTermId(term.id)
+  const label = term.label?.trim() || shortTermId(term.id)
   return (
     <Box component="li" sx={rowStyle}>
       <Typography sx={{ fontSize: '14px', fontWeight: 600, color: Theme.palette.secondary }}>{rank}</Typography>
@@ -34,7 +34,7 @@ const TermRow = ({ rank, term, max }: { rank: number, term: TermDarCount, max: n
         <Typography sx={{ fontSize: '14px', fontWeight: 600, color: Theme.palette.primary }} noWrap title={label}>
           {label}
         </Typography>
-        {term.label && (
+        {term.label?.trim() && (
           <Typography sx={{ ...descriptionStyle, fontSize: '12px' }} noWrap title={term.id}>{shortTermId(term.id)}</Typography>
         )}
       </Box>
