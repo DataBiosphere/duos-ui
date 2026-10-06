@@ -10,6 +10,7 @@ import {
   DarSoApprovalReport,
   DarTurnaroundReport,
   DarVolumeReport,
+  ElectionReport,
   InstitutionReport,
   UserReport,
 } from 'src/types/darMetrics'
@@ -48,4 +49,6 @@ export const DarMetrics = {
   getUsers: (query: DarMetricsQuery) => getReport<UserReport>('users', query),
 
   getInstitutions: (query: DarMetricsQuery) => getReport<InstitutionReport>('institutions', query),
+
+  getElections: (query: DarMetricsQuery) => getReport<ElectionReport>('elections', query),
 }
