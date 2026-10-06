@@ -10,6 +10,8 @@ import {
   DarSoApprovalReport,
   DarTurnaroundReport,
   DarVolumeReport,
+  InstitutionReport,
+  UserReport,
 } from 'src/types/darMetrics'
 
 const getReport = async <T>(path: string, query: DarMetricsQuery): Promise<T> => {
@@ -41,4 +43,8 @@ export const DarMetrics = {
   getExpirations: (query: DarMetricsQuery) => getReport<DarExpirationReport>('dar-expirations', query),
 
   getRenewals: (query: DarMetricsQuery) => getReport<DarRenewalReport>('dar-renewals', query),
+
+  getUsers: (query: DarMetricsQuery) => getReport<UserReport>('users', query),
+
+  getInstitutions: (query: DarMetricsQuery) => getReport<InstitutionReport>('institutions', query),
 }
