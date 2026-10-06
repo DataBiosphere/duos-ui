@@ -1,7 +1,6 @@
 import { createContext, useContext } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { DarMetricsQuery } from 'src/types/darMetrics'
-import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
 
 /** The DACs every report on a page is scoped to; left unset, consent reads every DAC for an admin and a chair's or member's own. */
 export const DarMetricsScope = createContext<number[] | undefined>(undefined)
@@ -10,7 +9,7 @@ export const DarMetricsScope = createContext<number[] | undefined>(undefined)
 export const useDarMetricsReport = <T>(
   name: string,
   fetchReport: (query: DarMetricsQuery) => Promise<T>,
-  range: DarAnalyticsRange,
+  range: Pick<DarMetricsQuery, 'from' | 'to' | 'bucket'>,
   page: Pick<DarMetricsQuery, 'limit' | 'offset'> = {},
 ) => {
   const dacIds = useContext(DarMetricsScope)

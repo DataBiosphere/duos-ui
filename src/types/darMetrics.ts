@@ -226,3 +226,17 @@ export interface InstitutionReport {
   total: number
   buckets: CreatedBucket[]
 }
+
+export interface TermDarCount {
+  /** The ontology term id, usually an OBO PURL. */
+  id: string
+  label: string | null
+  darCount: number
+}
+
+/** The ontology terms cited by the most DARs submitted in the range, most first. */
+export interface TermReport {
+  from: string
+  to: string
+  terms: TermDarCount[]
+}

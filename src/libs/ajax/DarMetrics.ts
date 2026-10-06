@@ -11,6 +11,7 @@ import {
   DarTurnaroundReport,
   DarVolumeReport,
   InstitutionReport,
+  TermReport,
   UserReport,
 } from 'src/types/darMetrics'
 
@@ -48,4 +49,6 @@ export const DarMetrics = {
   getUsers: (query: DarMetricsQuery) => getReport<UserReport>('users', query),
 
   getInstitutions: (query: DarMetricsQuery) => getReport<InstitutionReport>('institutions', query),
+
+  getDarTerms: (query: DarMetricsQuery) => getReport<TermReport>('dar-terms', query),
 }
