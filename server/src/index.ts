@@ -29,7 +29,6 @@ import { ECM_PROXY_PREFIX, ecmProxy } from './proxy/ecmProxy.js'
 import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
 import { publicProxy } from './proxy/publicProxy.js'
-import { startActiveSessionGauge } from './session/activeSessionGauge.js'
 import { configPath, readConfig, TRUST_PROXY } from './config.js'
 import { logAuthEvent } from './auth/authEvents.js'
 import { buildLoggerOptions } from './logging.js'
@@ -196,13 +195,6 @@ export async function buildApp(): Promise<AppInstance> {
       secret: sessionSecret,
       store: createPgSessionStore(fastify.pg, fastify.log),
     }))
-
-    // Per-pod `session.active` samples for the 6-G active-session metric.
-    const stopActiveSessionGauge = startActiveSessionGauge(fastify.pg, fastify.log)
-    fastify.addHook('onClose', (_instance, done) => {
-      stopActiveSessionGauge()
-      done()
-    })
 
     // CSRF protection for cookie-authenticated, state-changing auth routes
     // (currently POST /auth/logout).
