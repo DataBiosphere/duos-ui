@@ -273,7 +273,6 @@ const createDataset = (id: number, name: string, dacApproval = true): Dataset =>
     dataTypes: ['CITE-seq'],
     name: '',
     datasetIds: [],
-    datasets: [],
     properties: [],
     alternativeDataSharingPlan: fso,
     createDate: '',

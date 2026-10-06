@@ -1,13 +1,13 @@
 {
     "name": "Node.js",
-    "build": {
-        "dockerfile": "Dockerfile"
-    },
+    "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:26-trixie",
     "postCreateCommand": "./scripts/setup-devcontainer.sh",
     "remoteUser": "node",
     "customizations": {
         "vscode": {
             "extensions": [
+                "anthropic.claude-code",
+                "openai.chatgpt",
                 "SonarSource.sonarlint-vscode"
             ],
             "settings": {
@@ -22,7 +22,6 @@
             "version": "25",
             "jdkDistro": "tem"
         },
-        "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
             "helm": "none",
             "minikube": "none"

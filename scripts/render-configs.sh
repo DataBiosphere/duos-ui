@@ -3,8 +3,8 @@
 # Certs are regenerated on a 3-month rotation so this script is optimized for that task.
 # You MUST be on the Non-Split Broad VPN to have a whitelisted Broad IP.
 # You MUST have jq, gcloud, kubectl and openssl installed to run this script.
-# --write_site_conf also needs the GitHub CLI (gh), authenticated with read
-# access to the private broadinstitute/terra-helmfile repo.
+# --write_site_conf also needs read access to the private
+# broadinstitute/terra-helmfile repo, over git HTTPS or SSH.
 # You MUST authenticate via gcloud
 #
 # See usage section below for more details. All arguments are optional.
@@ -30,7 +30,7 @@ Generate cert files for local development
   --write_config WRITE_CONFIG       Write a config.json file in public. true|false. Defaults to false
   --write_site_conf WRITE_SITE_CONF Render site.conf in the project root from the terra-helmfile
                                     duos chart template, so the local httpd proxy matches the
-                                    deployed one. Needs gh. true|false. Defaults to false
+                                    deployed one. Needs git access to terra-helmfile. true|false. Defaults to false
   --help                Display this help and exit
 EOF
     exit 0

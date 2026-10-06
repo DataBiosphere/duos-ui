@@ -5,6 +5,7 @@ import { TurnaroundSection } from 'src/components/dar_analytics/TurnaroundSectio
 import { SoApprovalsSection } from 'src/components/dar_analytics/SoApprovalsSection'
 import { VolumeSection } from 'src/components/dar_analytics/VolumeSection'
 import { ExpirationRenewalSection } from 'src/components/dar_analytics/ExpirationRenewalSection'
+import { UsersInstitutionsSection } from 'src/components/dar_analytics/UsersInstitutionsSection'
 
 export const METRICS_TABS: MetricsTab[] = [
   { key: 'decisions', label: 'Decisions', render: range => <DecisionFunnelSection range={range} /> },
@@ -12,6 +13,7 @@ export const METRICS_TABS: MetricsTab[] = [
   { key: 'so-approvals', label: 'SO Approvals', render: range => <SoApprovalsSection range={range} /> },
   { key: 'volume', label: 'Volume', render: range => <VolumeSection range={range} /> },
   { key: 'expiration', label: 'Expiration & Renewal', render: range => <ExpirationRenewalSection range={range} /> },
+  { key: 'users', label: 'Users & Institutions', render: range => <UsersInstitutionsSection range={range} /> },
 ]
 
 export const DAC_METRICS_ROUTE = '/dac_console/metrics'

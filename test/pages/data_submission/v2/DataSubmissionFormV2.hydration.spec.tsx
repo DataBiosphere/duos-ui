@@ -13,7 +13,7 @@ import { DraftDetail } from 'src/types/draft'
 import { renderWithRouter } from '../../../test-utils'
 
 vi.mock('src/libs/ajax/Draft', () => ({ Draft: { getDraft: vi.fn(), deleteDraft: vi.fn() } }))
-vi.mock('src/libs/ajax/DataSet', () => ({ DataSet: { getStudyById: vi.fn(), registerDataset: vi.fn(), updateStudy: vi.fn() } }))
+vi.mock('src/libs/ajax/DataSet', () => ({ DataSet: { getStudyById: vi.fn(), getStudyDatasets: vi.fn(async () => []), registerDataset: vi.fn(), updateStudy: vi.fn() } }))
 vi.mock('src/libs/storage', () => ({ Storage: { getCurrentUser: () => ({}), userIsLogged: () => false } }))
 
 // Swap MUI DatePicker for a plain input, as the section specs do.

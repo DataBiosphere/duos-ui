@@ -62,7 +62,6 @@ const study: Study = {
   piName: 'Dr. Test',
   publicVisibility: true,
   datasetIds: [1, 2],
-  datasets: [],
   properties: [],
   createDate: new Date().toISOString(),
   createUserId: 1,

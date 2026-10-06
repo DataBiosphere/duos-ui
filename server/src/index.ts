@@ -29,7 +29,9 @@ import { ECM_PROXY_PREFIX, ecmProxy } from './proxy/ecmProxy.js'
 import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
 import { publicProxy } from './proxy/publicProxy.js'
+import { startActiveSessionGauge } from './session/activeSessionGauge.js'
 import { configPath, readConfig, TRUST_PROXY } from './config.js'
+import { logAuthEvent } from './auth/authEvents.js'
 import { buildLoggerOptions } from './logging.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
@@ -66,7 +68,7 @@ export function shouldUseHttps(
  */
 export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
-    request.log.warn({ ip: request.ip, url: request.url }, '[server] rate limit exceeded')
+    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: request.ip, idp: 'unknown' }, 'warn')
     return reply.status(err.statusCode ?? 429).send({ error: RATE_LIMIT_ERROR_CODE })
   }
   request.log.error({ err }, '[server] Unhandled error:')
@@ -83,7 +85,7 @@ export function handleServerError(err: FastifyError, request: FastifyRequest, re
  */
 export function handleCallbackError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
-    request.log.warn({ ip: request.ip }, '[server] rate limit exceeded on the OAuth callback')
+    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: request.ip, idp: 'unknown' }, 'warn')
     return reply.redirect(`/?signInError=${RATE_LIMIT_ERROR_CODE}`)
   }
   return handleServerError(err, request, reply)
@@ -192,8 +194,15 @@ export async function buildApp(): Promise<AppInstance> {
     await fastify.register(fastifyCookie)
     await fastify.register(fastifySession, sessionPluginOptions({
       secret: sessionSecret,
-      store: createPgSessionStore(fastify.pg),
+      store: createPgSessionStore(fastify.pg, fastify.log),
     }))
+
+    // Per-pod `session.active` samples for the 6-G active-session metric.
+    const stopActiveSessionGauge = startActiveSessionGauge(fastify.pg, fastify.log)
+    fastify.addHook('onClose', (_instance, done) => {
+      stopActiveSessionGauge()
+      done()
+    })
 
     // CSRF protection for cookie-authenticated, state-changing auth routes
     // (currently POST /auth/logout).

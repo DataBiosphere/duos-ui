@@ -69,6 +69,33 @@ describe('Study', () => {
     })
   })
 
+  describe('getDatasets', () => {
+    it('fetches the datasets of a study from their own endpoint', async () => {
+      const datasets = [{ datasetId: 1 }, { datasetId: 2 }]
+      vi.mocked(fetchGet).mockResolvedValue({ data: datasets })
+
+      const result = await Study.getDatasets(7)
+
+      expect(fetchGet).toHaveBeenCalledWith(
+        'https://duos.example.org/api/dataset/study/7/datasets',
+        headers,
+      )
+      expect(result).toEqual(datasets)
+    })
+
+    it('propagates ConsentError rejections so a hidden study reads as not found', async () => {
+      const consentError = { message: 'Entity not found', code: 404 }
+      vi.mocked(fetchGet).mockRejectedValueOnce(consentError)
+
+      const error = await Study.getDatasets(7).then(
+        () => { throw new Error('expected rejection') },
+        e => e,
+      )
+
+      expect(extractConsentError(error)).toEqual(consentError)
+    })
+  })
+
   describe('getPublications', () => {
     it('requests the study\'s publications', async () => {
       vi.mocked(fetchGet).mockResolvedValueOnce({ data: [] })

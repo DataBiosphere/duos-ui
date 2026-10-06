@@ -105,6 +105,13 @@ export const DataSet = {
   getStudyById: async (studyId: number | string): Promise<Study> => StudyApi.getById<Study>(studyId),
 
   /**
+   * Fetch the datasets of a study, which the study payload no longer embeds.
+   * @param studyId The study ID whose datasets to fetch
+   * @returns Promise resolving to the study's datasets the caller may read
+   */
+  getStudyDatasets: async (studyId: number | string): Promise<Dataset[]> => StudyApi.getDatasets(studyId),
+
+  /**
    * Update a study using multipart form data with a PUT request.
    * @param studyId The study ID to update
    * @param studyObject FormData containing the updated study payload

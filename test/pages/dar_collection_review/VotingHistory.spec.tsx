@@ -179,7 +179,7 @@ const darCollection: DarCollection = {
       deletable: false,
       properties: [],
       dacApproval: true,
-      study: { piName: 'Lisa Simpson, Betty White', studyId: 0, name: '', description: '', dataTypes: [], publicVisibility: false, datasetIds: [], datasets: [], properties: [], createDate: '', createUserId: 0 },
+      study: { piName: 'Lisa Simpson, Betty White', studyId: 0, name: '', description: '', dataTypes: [], publicVisibility: false, datasetIds: [], properties: [], createDate: '', createUserId: 0 },
     },
     {
       datasetId: 14,
@@ -196,7 +196,7 @@ const darCollection: DarCollection = {
       deletable: false,
       properties: [],
       dacApproval: true,
-      study: { piName: 'Lisa Simpson, Betty White', studyId: 0, name: '', description: '', dataTypes: [], publicVisibility: false, datasetIds: [], datasets: [], properties: [], createDate: '', createUserId: 0 },
+      study: { piName: 'Lisa Simpson, Betty White', studyId: 0, name: '', description: '', dataTypes: [], publicVisibility: false, datasetIds: [], properties: [], createDate: '', createUserId: 0 },
     },
   ],
 }
