@@ -22,6 +22,8 @@ import type { SxProps, Theme } from '@mui/material'
 import type { SystemStyleObject } from '@mui/system'
 import { ArrowForward, CheckCircleOutlined } from '@mui/icons-material'
 import homeHeaderBackground from 'src/images/home_header_background.png'
+import homeHeaderVideoWebm from 'src/images/home_header_background.webm'
+import homeHeaderVideoMp4 from 'src/images/home_header_background.mp4'
 import duosLogoImg from 'src/images/duos_logo.svg'
 import duosDiagram from 'src/images/DUOS_Homepage_diagram.svg'
 import broadLogo from 'src/images/broad_logo_allwhite.png'
@@ -56,6 +58,15 @@ const homeBannerDescription: React.CSSProperties = {
   whiteSpace: 'pre-wrap',
   padding: '0 10rem',
 }
+
+const heroMedia: React.CSSProperties = {
+  display: 'block',
+  width: '100%',
+  height: 'inherit',
+  objectFit: 'cover',
+}
+
+const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
 const duosLogoStyle: React.CSSProperties = {
   height: '80px',
@@ -471,8 +482,7 @@ const roleSections: RoleSection[] = [
 const scrollToRole = (id: string) => {
   const target = document.getElementById(`role-${id}`)
   if (!target) return
-  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
-  target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+  target.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' })
   // Moves keyboard focus with the scroll, so Tab continues from the section on screen.
   target.focus({ preventScroll: true })
 }
@@ -591,7 +601,14 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
     <main className="row">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div className="row" style={{ backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}>
-          <img style={{ height: 'inherit', minWidth: '100%' }} src={homeHeaderBackground} alt="Home header background" />
+          {prefersReducedMotion()
+            ? <img style={heroMedia} src={homeHeaderBackground} alt="Home header background" />
+            : (
+                <video style={heroMedia} poster={homeHeaderBackground} autoPlay muted loop playsInline aria-hidden="true">
+                  <source src={homeHeaderVideoWebm} type="video/webm" />
+                  <source src={homeHeaderVideoMp4} type="video/mp4" />
+                </video>
+              )}
           <div style={{ position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
             <img style={duosLogoStyle} alt="DUOS logo" src={duosLogoImg} />
             <h1 style={homeTitle}>Data Use Oversight System</h1>
