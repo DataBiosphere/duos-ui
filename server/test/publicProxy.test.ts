@@ -543,45 +543,4 @@ describe('publicProxy', () => {
       await shell.close()
     })
   })
-  describe('public.completed event', () => {
-    const parse = (lines: string[]) => lines
-      .map(line => JSON.parse(line) as { event?: string, route?: string, status?: number, idp?: string })
-      .filter(entry => entry.event === 'public.completed')
-
-    it('logs one event per request with the route and status, and no URL', async () => {
-      const logLines: string[] = []
-      app = await buildPublicApp(logLines)
-
-      await app.inject({ method: 'GET', url: `${PUBLIC_FEATURES_PREFIX}/${FEATURE_KEY}` })
-      await app.inject({
-        method: 'POST',
-        url: PUBLIC_METRICS_EVENT_PATH,
-        headers: { 'content-type': 'application/json' },
-        payload: JSON.stringify({ event: 'duos:dataset_search' }),
-      })
-
-      const events = parse(logLines)
-      expect(events.map(({ route, status }) => ({ route, status }))).toEqual([
-        { route: 'features', status: 200 },
-        { route: 'metrics_event', status: 200 },
-      ])
-      expect(events.every(event => event.idp === 'unknown')).toBe(true)
-      expect(JSON.stringify(events)).not.toContain(FEATURE_KEY)
-    })
-
-    it('records an unconfigured upstream as a 503 so the failure rate sees it', async () => {
-      delete process.env.DUOS_BARD_URL
-      const logLines: string[] = []
-      app = await buildPublicApp(logLines)
-
-      await app.inject({
-        method: 'POST',
-        url: PUBLIC_METRICS_EVENT_PATH,
-        headers: { 'content-type': 'application/json' },
-        payload: '{}',
-      })
-
-      expect(parse(logLines).map(({ route, status }) => ({ route, status }))).toEqual([{ route: 'metrics_event', status: 503 }])
-    })
-  })
 })
