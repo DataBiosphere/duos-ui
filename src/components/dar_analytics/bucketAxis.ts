@@ -27,6 +27,9 @@ const STEP: Record<MetricsBucket, [number, 'day' | 'month']> = {
   quarter: [3, 'month'],
 }
 
+export const byStart = <T extends { bucketStart: number }>(buckets: T[] = []) =>
+  new Map(buckets.map(bucket => [bucket.bucketStart, bucket]))
+
 /** Every bucket start in the range, since consent sends only the buckets that have rows. */
 export const bucketStartsInRange = ({ from, to, bucket }: DarAnalyticsRange): number[] => {
   const end = dayjs.utc(to)
