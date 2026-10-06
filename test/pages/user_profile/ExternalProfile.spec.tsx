@@ -56,10 +56,10 @@ describe('ExternalProfile', () => {
     expect(inputCell).toContainElement(screen.getByLabelText('Institutional Website'))
   })
 
-  it('labels the ORCID field and placeholder as ORCID', async () => {
+  it('labels the ORCID field and placeholder as ORCID iD', async () => {
     render(<ExternalProfile {...editProps} />)
-    await waitFor(() => expect(screen.getByLabelText('ORCID')).toHaveValue('12345'))
-    expect(screen.getByLabelText('ORCID')).toHaveAttribute('placeholder', 'ORCID (e.g. https://orcid.org/0000-0000-0000-0000)')
+    await waitFor(() => expect(screen.getByLabelText('ORCID iD')).toHaveValue('12345'))
+    expect(screen.getByLabelText('ORCID iD')).toHaveAttribute('placeholder', 'ORCID iD (e.g. https://orcid.org/0000-0000-0000-0000)')
   })
 
   it('renders read-only table with two columns', async () => {
@@ -93,7 +93,7 @@ describe('ExternalProfile', () => {
 
     await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue(''))
     expect(screen.getByText('LinkedIn')).toBeInTheDocument()
-    expect(screen.getByText('ORCID')).toBeInTheDocument()
+    expect(screen.getByText('ORCID iD')).toBeInTheDocument()
     expect(screen.getByText('Through.bio')).toBeInTheDocument()
     expect(screen.getByText('Institutional Website')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'https://www.linkedin.com/in/' })).not.toBeInTheDocument()
@@ -193,9 +193,9 @@ describe('ExternalProfile', () => {
   it('performs URL validation for ORCID', async () => {
     const user = userEvent.setup()
     render(<ExternalProfile {...editProps} />)
-    await waitFor(() => expect(screen.getByLabelText('ORCID')).toHaveValue('12345'))
-    await user.clear(screen.getByLabelText('ORCID'))
-    await user.type(screen.getByLabelText('ORCID'), 'testing')
+    await waitFor(() => expect(screen.getByLabelText('ORCID iD')).toHaveValue('12345'))
+    await user.clear(screen.getByLabelText('ORCID iD'))
+    await user.type(screen.getByLabelText('ORCID iD'), 'testing')
     await waitFor(() =>
       expect(screen.getByRole('link', { name: 'https://orcid.org/testing' })).toHaveAttribute('href', 'https://orcid.org/testing'),
     )

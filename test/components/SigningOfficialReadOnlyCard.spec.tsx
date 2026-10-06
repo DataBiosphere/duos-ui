@@ -54,7 +54,7 @@ describe('SigningOfficialReadOnlyCard', () => {
         externalProfiles={{ ORCID: '0000-0002-1825-0097' }}
       />,
     )
-    const link = screen.getByRole('link', { name: /^ORCID:/ })
+    const link = screen.getByRole('link', { name: /^ORCID iD:/ })
     expect(link.getAttribute('href')).toBe('https://orcid.org/0000-0002-1825-0097')
   })
 
@@ -98,7 +98,7 @@ describe('SigningOfficialReadOnlyCard', () => {
         externalProfiles={{ linkedIn: 'janesmith' }}
       />,
     )
-    expect(screen.queryByText('ORCID')).toBeNull()
+    expect(screen.queryByText('ORCID iD')).toBeNull()
     expect(screen.queryByText('Through.bio')).toBeNull()
     expect(screen.queryByText('Institutional Website')).toBeNull()
     expect(screen.getByText('LinkedIn')).toBeTruthy()
@@ -118,7 +118,7 @@ describe('SigningOfficialReadOnlyCard', () => {
     )
     expect(screen.queryByText('External Profile')).toBeNull()
     expect(screen.queryByText('LinkedIn')).toBeNull()
-    expect(screen.queryByText('ORCID')).toBeNull()
+    expect(screen.queryByText('ORCID iD')).toBeNull()
     expect(screen.queryByText('Through.bio')).toBeNull()
     expect(screen.queryByText('Institutional Website')).toBeNull()
   })

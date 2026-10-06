@@ -186,7 +186,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
   }
 
   const getLinkedInLink = () => getProfileValue(linkedIn, 'LinkedIn', 'No LinkedIn profile provided', formattedLinkedIn)
-  const getOrcidLink = () => getProfileValue(orcid, 'ORCID', 'No ORCID provided', formattedOrcid)
+  const getOrcidLink = () => getProfileValue(orcid, 'ORCID iD', 'No ORCID iD provided', formattedOrcid)
   const getThroughBioLink = () => getProfileValue(throughBio, 'Through.bio', 'No Through.bio profile provided', formattedThroughBio)
   const getInstitutionalWebsiteLink = () => getProfileValue(institutionalWebsite, 'Institutional Website', 'No institutional website provided')
 
@@ -209,7 +209,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
           <h4>External Profile</h4>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div style={{ fontWeight: 'bold' }}>LinkedIn</div><div>{getLinkedInLink()}</div>
-            <div style={{ fontWeight: 'bold' }}>ORCID</div><div>{getOrcidLink()}</div>
+            <div style={{ fontWeight: 'bold' }}>ORCID iD</div><div>{getOrcidLink()}</div>
             <div style={{ fontWeight: 'bold' }}>Through.bio</div><div>{getThroughBioLink()}</div>
             <div style={{ fontWeight: 'bold' }}>Institutional Website</div><div>{getInstitutionalWebsiteLink()}</div>
             {otherUrls.length > 0 && otherUrls.map((entry, index) => (
@@ -251,8 +251,8 @@ export default function ExternalProfile(props: ExternalProfileProps) {
                     type="text"
                     id="ORCID"
                     name="ORCID"
-                    aria-label="ORCID"
-                    placeholder="ORCID (e.g. https://orcid.org/0000-0000-0000-0000)"
+                    aria-label="ORCID iD"
+                    placeholder="ORCID iD (e.g. https://orcid.org/0000-0000-0000-0000)"
                     value={orcid}
                     minLength={2}
                     onChange={onOrcidChange}
