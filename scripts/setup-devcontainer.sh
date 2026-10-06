@@ -1,101 +1,51 @@
 #!/bin/bash
-# Runs after the dev container is created. Makes the local config files by
-# calling render-configs.sh with every write option, from inside the container.
-#
-#   scripts/setup-devcontainer.sh            run only when a config file is missing
-#   scripts/setup-devcontainer.sh --refresh  run always (for cert rotation)
-#
-# The script always exits 0. A missing login is not a container error.
-# It prints the command that fixes the problem. Run this script again after.
+# Runs after the dev container is created. Installs gcloud, asks for a gcloud
+# login, then makes the local config files by calling render-configs.sh with
+# every write option. Each step can run again safely, so run this script again
+# after a failure or when the certs rotate.
 #
 # Developers who do not use the dev container run render-configs.sh directly.
 
 set -eu
+set -o pipefail
 
 # The main config sets no workspaceFolder, so the path depends on the folder name.
-WORKSPACE=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-CONFIG_FILES=(server.crt server.key ca-bundle.crt .env.local public/config.json site.conf)
-REFRESH=false
-RERUN="./scripts/setup-devcontainer.sh"
-if [[ "${1:-}" == "--refresh" ]]; then
-  REFRESH=true
-  RERUN="./scripts/setup-devcontainer.sh --refresh"
-fi
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-missing_files() {
-  local f
-  for f in "${CONFIG_FILES[@]}"; do
-    # -s: an empty file (a failed render) counts as missing.
-    if [[ ! -s "$WORKSPACE/$f" ]]; then
-      echo "$f"
-    fi
-  done
-  return 0
+# On failure, tell the developer how to recover. Most failures come from a
+# missing VPN connection, which blocks kubectl.
+on_exit() {
+  local status=$?
+  if (( status != 0 )); then
+    echo >&2
+    echo "Dev container setup failed. Are you connected to the non-split Broad VPN?" >&2
+    echo "Fix the issue, then rebuild the container or run: ./scripts/setup-devcontainer.sh" >&2
+  fi
+}
+trap on_exit EXIT
+
+gcloud_cli_requirements() {
+  curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+    | sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/cloud.google.gpg
+  echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
+    | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list > /dev/null
 }
 
-# Print the tools that are not installed, joined with ", ".
-missing_tools() {
-  local tool list=""
-  for tool in gcloud kubectl gh; do
-    if ! command -v "$tool" > /dev/null; then
-      list="${list:+$list, }$tool"
-    fi
-  done
-  echo "$list"
-  return 0
+install_gcloud_cli() {
+  sudo apt-get update
+  sudo apt-get install -y google-cloud-cli google-cloud-cli-gke-gcloud-auth-plugin
 }
 
-# Print what is wrong. Return 1 if a tool or a login is missing.
-# A login hint is printed only for an installed tool. The gcloud login check
-# also needs kubectl, so it is skipped when either one is missing.
-check_logins() {
-  local ok=0 absent
-  absent=$(missing_tools)
-  if [[ -n "$absent" ]]; then
-    echo "Missing tools: $absent. Rebuild the container."
-    ok=1
-  fi
-  if command -v gcloud > /dev/null && command -v kubectl > /dev/null \
-    && [[ -z "$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2> /dev/null)" ]]; then
-    echo "Google Cloud is not ready. Connect the host to the non-split Broad VPN. Then run:"
-    echo "  gcloud auth login --no-launch-browser"
-    ok=1
-  fi
-  if command -v gh > /dev/null && ! gh auth status > /dev/null 2>&1; then
-    echo "GitHub is not ready. Use an account that can read broadinstitute/terra-helmfile. Run:"
-    echo "  gh auth login"
-    ok=1
-  fi
-  return "$ok"
+install_duos_config() {
+  printf "\n"
+  gcloud auth login
+  ./scripts/render-configs.sh --write_env true --write_config true --write_site_conf true
 }
 
-missing=$(missing_files | tr '\n' ' ')
-if [[ -z "$missing" && "$REFRESH" == "false" ]]; then
-  echo "All local config files are present."
-  exit 0
-fi
+dev_container() {
+  gcloud_cli_requirements
+  install_gcloud_cli
+  install_duos_config
+}
 
-if [[ -n "$missing" ]]; then
-  echo "Missing local config files: $missing"
-fi
-
-if ! check_logins; then
-  echo
-  echo "After you fix this, run: $RERUN"
-  echo "See DEVNOTES.md for details."
-  exit 0
-fi
-
-# render-configs.sh replaces the cert files only after every kubectl call
-# succeeds, so a failed run (for example, no VPN) leaves the old files as they were.
-if ! "$WORKSPACE/scripts/render-configs.sh" --write_env true --write_config true --write_site_conf true; then
-  echo "WARNING: render-configs.sh failed. Fix the cause above and run $RERUN again."
-  exit 0
-fi
-
-missing=$(missing_files | tr '\n' ' ')
-if [[ -z "$missing" ]]; then
-  echo "All local config files are present."
-else
-  echo "Still missing: $missing"
-fi
+dev_container

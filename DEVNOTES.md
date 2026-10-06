@@ -2,21 +2,19 @@
 
 ## Dev Container
 
-If you use Visual Studio Code (VSCode) and Docker, you can use the Dev Container configuration. The container makes the local config files for you. When the container is created, it runs `scripts/setup-devcontainer.sh`, which runs [render-configs.sh](scripts/render-configs.sh) with all write options.
+If you use Visual Studio Code (VSCode) and Docker, you can use the Dev Container configuration. The container makes the local config files for you. When the container is created, it runs `scripts/setup-devcontainer.sh`, which installs gcloud, asks for a gcloud login, and runs [render-configs.sh](scripts/render-configs.sh) with all write options. Every new or rebuilt container starts from scratch and makes all files again.
 
-1. Connect the host to the non-split Broad VPN.
+1. Connect the host to the non-split Broad VPN. Make sure that the host's git credentials can read `broadinstitute/terra-helmfile`. VSCode shares them with the container.
 
 2. Open the project in VSCode. When the notification in the bottom right corner asks about the Dev Container, click "Reopen in container".
 
-3. On each new container, the script asks for two logins. Run the commands it prints in the container terminal, then run the script again:
+3. When the setup script asks for the gcloud login, complete it in the browser that opens.
+
+4. If the setup fails (for example, the VPN is down), fix the issue. Then rebuild the container, or run the script again. Every 3 months the certs rotate. Run the script again to make all files again:
 
    ```sh
-   gcloud auth login --no-launch-browser
-   gh auth login
    ./scripts/setup-devcontainer.sh
    ```
-
-4. Every 3 months the certs rotate. Run `./scripts/setup-devcontainer.sh --refresh` to make all files again.
 
 If you do not use the Dev Container, follow [Local Setup](#local-setup) and run `render-configs.sh` yourself.
 
@@ -72,7 +70,7 @@ will simulate it for local development.
 127.0.0.1	local.dsde-dev.broadinstitute.org
 ```
 
-5. Make sure that `site.conf` is in the project root. `docker compose` mounts it into the httpd proxy. The `--write_site_conf true` option in step 3 renders it from the [terra-helmfile duos chart template](https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl), so the local proxy sends the same security headers as the deployed one. The option needs the GitHub CLI (`gh`), with read access to `broadinstitute/terra-helmfile`. When the template changes, run `./scripts/render-site-conf.sh` to render `site.conf` again. This script does not need the VPN. Do not copy `site.conf` from a bucket or edit it by hand, because that copy drifts from the deployed config.
+5. Make sure that `site.conf` is in the project root. `docker compose` mounts it into the httpd proxy. The `--write_site_conf true` option in step 3 renders it from the [terra-helmfile duos chart template](https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl), so the local proxy sends the same security headers as the deployed one. The option needs read access to `broadinstitute/terra-helmfile`, with either git HTTPS credentials or a GitHub SSH key. The script tries HTTPS first, then SSH. When the template changes, run `./scripts/render-site-conf.sh` to render `site.conf` again. This script does not need the VPN. Do not copy `site.conf` from a bucket or edit it by hand, because that copy drifts from the deployed config.
 
 6. Start the development server. There are two modes:
 

@@ -1,9 +1,6 @@
 {
     "name": "Combined DUOS",
-    "build": {
-        "dockerfile": "../Dockerfile",
-        "context": ".."
-    },
+    "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:26-trixie",
     "workspaceFolder": "/workspaces",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/duos-ui,type=bind,consistency=cached",
     "mounts": [
@@ -19,7 +16,6 @@
         "ghcr.io/devcontainers/features/docker-in-docker:2": {
             "moby": false
         },
-        "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
             "helm": "none",
             "minikube": "none"
@@ -28,6 +24,8 @@
     "customizations": {
         "vscode": {
             "extensions": [
+                "anthropic.claude-code",
+                "openai.chatgpt",
                 "SonarSource.sonarlint-vscode"
             ],
             "settings": {
