@@ -9,6 +9,7 @@ These metrics come from the structured log events of story 6-F. Cloud Logging re
 ## Rules for every metric
 
 - Filter on `jsonPayload.event`. Never filter on the message text.
+- The `route` label on `auth.rate_limited` is the route pattern, for example `/auth/callback` and `/auth/login`. It is never the bare name `callback`.
 - Tag every metric with the `idp` label: `google`, `microsoft` or `unknown`.
 - A rate is a count of one outcome divided by the count of all events of its population. Each rate states a window and a minimum sample. Do not alert on a rate below its minimum sample.
 - `proxy.completed` is not sampled. Do not sample it, or every rate that divides by it reads too high.
@@ -18,7 +19,7 @@ These metrics come from the structured log events of story 6-F. Cloud Logging re
 | Metric | Numerator filter | Denominator | Window / min sample | Alert |
 |---|---|---|---|---|
 | Callback error rate | `auth.callback.completed`, `outcome=failed` | all `auth.callback.completed` | 5 min / 20 | > 1% |
-| Callback throttle count | `auth.rate_limited`, `route=callback` | none | 5 min | sustained non-zero |
+| Callback throttle count | `auth.rate_limited`, `route=/auth/callback` | none | 5 min | sustained non-zero |
 | Terminal refresh rejection rate | `auth.refresh.completed`, `outcome=terminal` | all `auth.refresh.completed` | 15 min / 20 | > 0.5% |
 | Sessions without a refresh token | `auth.refresh.unrefreshable` | none (per caller) | 15 min | spike over baseline |
 | Transient refresh failure rate | `auth.refresh.completed`, `outcome=transient` | all `auth.refresh.completed` | 15 min / 20 | > 5% |
