@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import homeHeaderBackground from 'src/images/home_header_background.png'
+import homeHeaderVideoWebm from 'src/images/home_header_background.webm'
+import homeHeaderVideoMp4 from 'src/images/home_header_background.mp4'
 import duosLogoImg from 'src/images/duos_logo.svg'
 import duosDiagram from 'src/images/DUOS_Homepage_diagram.svg'
 import broadLogo from 'src/images/broad_logo_allwhite.png'
@@ -98,6 +100,17 @@ const logoImg: React.CSSProperties = {
   objectFit: 'contain',
   display: 'block',
 }
+
+const heroMedia: React.CSSProperties = {
+  display: 'block',
+  width: '100%',
+  height: 'inherit',
+  objectFit: 'cover',
+}
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+  && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const CheckIcon = ({ color }: { color: string }) => (
   <svg className="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -347,7 +360,14 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
       <div className="row">
         <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div className="row" style={{ backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}>
-            <img style={{ height: 'inherit', minWidth: '100%' }} src={homeHeaderBackground} alt="Home header background" />
+            {prefersReducedMotion()
+              ? <img style={heroMedia} src={homeHeaderBackground} alt="Home header background" />
+              : (
+                  <video style={heroMedia} poster={homeHeaderBackground} autoPlay muted loop playsInline aria-hidden="true">
+                    <source src={homeHeaderVideoWebm} type="video/webm" />
+                    <source src={homeHeaderVideoMp4} type="video/mp4" />
+                  </video>
+                )}
             <div style={{ position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
               <img style={duosLogoStyle} alt="DUOS logo" src={duosLogoImg} />
               <h1 style={homeTitle}>Data Use Oversight System</h1>
