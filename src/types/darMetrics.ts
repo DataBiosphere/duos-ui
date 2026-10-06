@@ -230,7 +230,8 @@ export interface InstitutionReport {
 export interface TermDarCount {
   /** The ontology term id, usually an OBO PURL. */
   id: string
-  label: string | null
+  /** Absent when no DAR recorded one and the term isn't indexed. */
+  label?: string
   darCount: number
 }
 

@@ -32,7 +32,7 @@ describe('ResearchTermsSection', () => {
     vi.mocked(DarMetrics.getDarTerms).mockResolvedValue(report([
       { id: `${PURL}MONDO_0004992`, label: 'cancer', darCount: 4 },
       { id: `${PURL}MONDO_0004979`, label: 'asthma', darCount: 1 },
-      { id: `${PURL}MONDO_0005015`, label: null, darCount: 1 },
+      { id: `${PURL}MONDO_0005015`, darCount: 1 },
     ]))
 
     renderSection()
