@@ -321,6 +321,40 @@ describe('ManageUsersTable', () => {
     expect(screen.getByText('1–10 of 24')).toBeInTheDocument()
   })
 
+  it('shows only the users holding the chosen role', async () => {
+    renderTable({ role: 'SigningOfficial' })
+
+    await rowFor(bob.displayName)
+    expect(userOrder()).toEqual([bob.displayName])
+  })
+
+  it('applies the role and the search text together', async () => {
+    renderTable({ userList: [alice, bob, dave], role: 'Chairperson', searchText: 'bob' })
+
+    expect(await screen.findByText('No rows')).toBeInTheDocument()
+  })
+
+  it('restarts at the first page when a role is chosen', async () => {
+    const RoleHarness = ({ users }: { users: DuosUser[] }) => {
+      const [role, setRole] = useState<ManageUsersTableProps['role']>()
+      return (
+        <>
+          <button type="button" onClick={() => setRole('Researcher')}>Choose role</button>
+          <ManageUsersTable isLoading={false} userList={users} searchText="" role={role} />
+        </>
+      )
+    }
+    renderWithRouter(<RoleHarness users={numberedUsers(24)} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: /go to next page/i }))
+    expect(screen.getByText('11–20 of 24')).toBeInTheDocument()
+
+    // Every numbered user is a Researcher, so only the reset can move the grid.
+    fireEvent.click(screen.getByRole('button', { name: 'Choose role' }))
+
+    expect(screen.getByText('1–10 of 24')).toBeInTheDocument()
+  })
+
   it('shows a loading indicator while users are being fetched', () => {
     renderTable({ isLoading: true, userList: [] })
 
