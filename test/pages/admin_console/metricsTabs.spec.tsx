@@ -12,7 +12,9 @@ vi.mock('src/libs/ajax/DarMetrics', () => ({
 
 describe('metricsTabs', () => {
   it('gives DACs only the tabs consent scopes to DACs, in the admin order', () => {
-    expect(DAC_METRICS_TABS.map(({ key }) => key)).toEqual(['decisions', 'turnaround', 'volume', 'expiration'])
+    expect(DAC_METRICS_TABS.map(({ key }) => key)).toEqual(
+      ['decisions', 'turnaround', 'volume', 'expiration', 'datasets', 'elections', 'terms'],
+    )
     expect(METRICS_TABS.map(({ key }) => key)).toContain('so-approvals')
   })
 

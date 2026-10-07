@@ -25,6 +25,6 @@ export const METRICS_TABS: MetricsTab[] = [
 export const DAC_METRICS_ROUTE = '/dac_console/metrics'
 
 // Named rather than filtered, so a new admin tab stays off the DAC page until consent scopes it to DACs.
-const DAC_TAB_KEYS = new Set(['decisions', 'turnaround', 'volume', 'expiration'])
+const DAC_TAB_KEYS = new Set(['decisions', 'turnaround', 'volume', 'expiration', 'datasets', 'elections', 'terms'])
 
 export const DAC_METRICS_TABS: MetricsTab[] = METRICS_TABS.filter(({ key }) => DAC_TAB_KEYS.has(key))

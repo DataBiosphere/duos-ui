@@ -68,7 +68,7 @@ export default function DacMetrics(): React.JSX.Element {
   return (
     <MetricsPage
       tabs={DAC_METRICS_TABS}
-      description="How data access requests for your DACs' datasets move through DUOS. The range and grouping apply to every tab."
+      description="How data access requests for your DACs' datasets move through DUOS, the research terms they cite, and your DACs' datasets, studies, elections and votes. The range applies to every tab, and the grouping to every chart."
       dacIds={scope(selected, dacIds, isAdmin)}
       scopeControl={picker}
       // Unnamed, an admin's reports would cover every DAC, so with no DAC to name there's nothing to show.
