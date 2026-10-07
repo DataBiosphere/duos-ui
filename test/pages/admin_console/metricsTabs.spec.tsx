@@ -7,7 +7,7 @@ import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { DAC_METRICS_TABS, METRICS_TABS } from 'src/pages/admin_console/metricsTabs'
 
 vi.mock('src/libs/ajax/DarMetrics', () => ({
-  DarMetrics: { getDatasets: vi.fn(), getStudies: vi.fn(), getElections: vi.fn() },
+  DarMetrics: { getDatasets: vi.fn(), getStudies: vi.fn(), getElections: vi.fn(), getDarTerms: vi.fn() },
 }))
 
 describe('metricsTabs', () => {
@@ -51,5 +51,21 @@ describe('metricsTabs', () => {
     expect(tab?.label).toBe('Elections & Votes')
     expect(await screen.findByText('No elections were opened and no votes were cast in this range.')).toBeInTheDocument()
     expect(DarMetrics.getElections).toHaveBeenCalledWith(range)
+  })
+
+  it('renders the Research Terms section for the range on the terms tab', async () => {
+    const range = { from: '2026-01-01', to: '2026-03-31', bucket: 'month' as const }
+    vi.mocked(DarMetrics.getDarTerms).mockResolvedValue({ from: range.from, to: range.to, terms: [] })
+    const tab = METRICS_TABS.find(({ key }) => key === 'terms')
+
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        {tab?.render(range)}
+      </QueryClientProvider>,
+    )
+
+    expect(tab?.label).toBe('Research Terms')
+    expect(await screen.findByText('No DAR submitted in this range cited an ontology term.')).toBeInTheDocument()
+    expect(DarMetrics.getDarTerms).toHaveBeenCalledWith({ from: range.from, to: range.to, limit: 10 })
   })
 })

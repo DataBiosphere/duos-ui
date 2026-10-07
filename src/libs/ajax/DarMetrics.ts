@@ -14,6 +14,7 @@ import {
   ElectionReport,
   InstitutionReport,
   StudyReport,
+  TermReport,
   UserReport,
 } from 'src/types/darMetrics'
 
@@ -57,4 +58,6 @@ export const DarMetrics = {
   getStudies: (query: DarMetricsQuery) => getReport<StudyReport>('studies', query),
 
   getElections: (query: DarMetricsQuery) => getReport<ElectionReport>('elections', query),
+
+  getDarTerms: (query: DarMetricsQuery) => getReport<TermReport>('dar-terms', query),
 }

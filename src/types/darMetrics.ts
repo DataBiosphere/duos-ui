@@ -276,3 +276,18 @@ export interface ElectionReport {
   elections: ElectionBucket[]
   votes: VoteBucket[]
 }
+
+export interface TermDarCount {
+  /** The ontology term id, usually an OBO PURL. */
+  id: string
+  /** Absent when no DAR recorded one and the term isn't indexed. */
+  label?: string
+  darCount: number
+}
+
+/** The ontology terms cited by the most DARs submitted in the range, most first. */
+export interface TermReport {
+  from: string
+  to: string
+  terms: TermDarCount[]
+}
