@@ -2,15 +2,13 @@ packages:
   - server
 
 overrides:
-  # Missing buffer bounds check in v3/v5/v6 (GHSA-w5hq-g745-h8pq). Pulled in by
-  # autocannon > hyperid, which only ever calls uuid.v4 -- and only as a fallback
-  # when crypto.randomUUID is missing, so this is dead code on our Node. The
-  # advisory range is unbounded below, so no 8.x clears audit. Held at 11.x
-  # rather than the root's 14.x because hyperid's uuid-node.js is CommonJS and
-  # 11.1.1 is the newest line that still ships a require export.
-  uuid@8: 11.1.1
+  # autocannon@8 asks for hyperid ^3, whose uuid@8 dependency is flagged by
+  # GHSA-w5hq-g745-h8pq. hyperid 4 drops uuid (and uuid-parse) for the native
+  # crypto.randomUUID; its API is unchanged, so it is a drop-in for autocannon.
+  hyperid@3: 4.0.0
 
 allowBuilds:
   esbuild: false
 allowedDeprecatedVersions:
   node-domexception: "1.0.0"
+trustPolicy: no-downgrade
