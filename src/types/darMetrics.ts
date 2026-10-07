@@ -227,6 +227,56 @@ export interface InstitutionReport {
   buckets: CreatedBucket[]
 }
 
+export interface DatasetBucket extends CreatedBucket {
+  /** Of those created in the bucket, how many the DAC has approved now. */
+  dacApproved: number
+}
+
+/** Datasets created in the range; not paged, so it has no `rows`. */
+export interface DatasetReport {
+  from: string
+  to: string
+  bucket: Uppercase<MetricsBucket>
+  total: number
+  /** Datasets created in the range that the DAC has approved now. */
+  dacApproved: number
+  buckets: DatasetBucket[]
+}
+
+/** Studies created in the range; not paged, so it has no `rows`. */
+export interface StudyReport {
+  from: string
+  to: string
+  bucket: Uppercase<MetricsBucket>
+  total: number
+  buckets: CreatedBucket[]
+}
+
+export interface ElectionBucket {
+  bucketStart: number
+  /** The election's status now, in consent's ElectionStatus spelling. */
+  status: string
+  count: number
+}
+
+export interface VoteBucket {
+  bucketStart: number
+  /** Consent's VoteType value, e.g. DAC, FINAL or RADAR_APPROVE. */
+  type: string
+  count: number
+}
+
+/** Data access elections opened and votes cast in the range; not paged, so it has no `rows`. */
+export interface ElectionReport {
+  from: string
+  to: string
+  bucket: Uppercase<MetricsBucket>
+  electionsOpened: number
+  votesCast: number
+  elections: ElectionBucket[]
+  votes: VoteBucket[]
+}
+
 export interface TermDarCount {
   /** The ontology term id, usually an OBO PURL. */
   id: string

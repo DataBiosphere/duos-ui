@@ -48,8 +48,8 @@ vi.mock('src/components/PageHeading', () => ({
 }))
 
 vi.mock('src/pages/user_profile/ExternalProfile', () => ({
-  default: ({ userId }: { userId?: number }) =>
-    React.createElement('div', { 'data-testid': 'external-profile', 'data-user-id': String(userId) }),
+  default: ({ userId, readonly }: { userId?: number, readonly?: boolean }) =>
+    React.createElement('div', { 'data-testid': 'external-profile', 'data-user-id': String(userId), 'data-readonly': String(readonly) }),
 }))
 
 vi.mock('src/images/icon_edit_user.png', () => ({ default: 'icon_edit_user.png' }))
@@ -123,7 +123,7 @@ describe('AdminEditUser', () => {
     vi.mocked(User.getById).mockResolvedValue(mockUser)
     await act(async () => renderWithRoute())
     expect(screen.getByTestId('researcher-review')).toBeInTheDocument()
-    expect(screen.getByTestId('external-profile')).toBeInTheDocument()
+    expect(screen.getByTestId('external-profile')).toHaveAttribute('data-readonly', 'true')
   })
 
   it('does not show ResearcherReview before user is loaded', () => {

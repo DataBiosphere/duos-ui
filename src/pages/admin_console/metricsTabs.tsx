@@ -6,6 +6,8 @@ import { SoApprovalsSection } from 'src/components/dar_analytics/SoApprovalsSect
 import { VolumeSection } from 'src/components/dar_analytics/VolumeSection'
 import { ExpirationRenewalSection } from 'src/components/dar_analytics/ExpirationRenewalSection'
 import { UsersInstitutionsSection } from 'src/components/dar_analytics/UsersInstitutionsSection'
+import { DatasetsStudiesSection } from 'src/components/dar_analytics/DatasetsStudiesSection'
+import { ElectionsVotesSection } from 'src/components/dar_analytics/ElectionsVotesSection'
 import { ResearchTermsSection } from 'src/components/dar_analytics/ResearchTermsSection'
 
 export const METRICS_TABS: MetricsTab[] = [
@@ -15,6 +17,8 @@ export const METRICS_TABS: MetricsTab[] = [
   { key: 'volume', label: 'Volume', render: range => <VolumeSection range={range} /> },
   { key: 'expiration', label: 'Expiration & Renewal', render: range => <ExpirationRenewalSection range={range} /> },
   { key: 'users', label: 'Users & Institutions', render: range => <UsersInstitutionsSection range={range} /> },
+  { key: 'datasets', label: 'Datasets & Studies', render: range => <DatasetsStudiesSection range={range} /> },
+  { key: 'elections', label: 'Elections & Votes', render: range => <ElectionsVotesSection range={range} /> },
   { key: 'terms', label: 'Research Terms', render: range => <ResearchTermsSection range={range} /> },
 ]
 

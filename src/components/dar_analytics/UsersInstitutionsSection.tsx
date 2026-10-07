@@ -3,10 +3,10 @@ import { Box } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { BarChart } from '@mui/x-charts/BarChart'
 import { DarMetrics } from 'src/libs/ajax/DarMetrics'
-import { CreatedBucket, MetricsBucket, RoleUserCount } from 'src/types/darMetrics'
+import { MetricsBucket, RoleUserCount } from 'src/types/darMetrics'
 import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
-import { bucketStartsInRange, describePeriods, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
+import { bucketStartsInRange, byStart, describePeriods, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
 import { coverSameRange, useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
 
@@ -26,24 +26,21 @@ const COLUMNS: GridColDef<RoleRow>[] = [
   { field: 'userCount', headerName: 'Users', type: 'number', flex: 1, sortable: false },
 ]
 
-const countsByStart = (buckets: CreatedBucket[] = []) =>
-  new Map(buckets.map(({ bucketStart, count }) => [bucketStart, count]))
-
 export const UsersInstitutionsSection = ({ range }: { range: DarAnalyticsRange }) => {
   const users = useDarMetricsReport('users', DarMetrics.getUsers, range)
   const institutions = useDarMetricsReport('institutions', DarMetrics.getInstitutions, range)
   const shown: DarAnalyticsRange = users.data
     ? { from: users.data.from, to: users.data.to, bucket: users.data.bucket.toLowerCase() as MetricsBucket }
     : range
-  const usersAt = countsByStart(users.data?.buckets)
-  const institutionsAt = countsByStart(institutions.data?.buckets)
+  const usersAt = byStart(users.data?.buckets)
+  const institutionsAt = byStart(institutions.data?.buckets)
   const starts = bucketStartsInRange(shown)
   const rows: RoleRow[] = (users.data?.roles ?? []).map(role => ({ ...role, id: role.role }))
 
   const labels = starts.map(start => formatBucketStart(start, shown.bucket))
   const series = [
-    { label: 'Users created', data: starts.map(start => usersAt.get(start) ?? 0) },
-    { label: 'Institutions created', data: starts.map(start => institutionsAt.get(start) ?? 0) },
+    { label: 'Users created', data: starts.map(start => usersAt.get(start)?.count ?? 0) },
+    { label: 'Institutions created', data: starts.map(start => institutionsAt.get(start)?.count ?? 0) },
   ]
 
   return (

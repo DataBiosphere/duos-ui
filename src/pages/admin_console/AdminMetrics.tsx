@@ -6,7 +6,7 @@ export default function AdminMetrics(): React.JSX.Element {
   return (
     <MetricsPage
       tabs={METRICS_TABS}
-      description="How data access requests move through DUOS, and the accounts and institutions created on it. The range applies to every tab, and the grouping to every chart."
+      description="How data access requests move through DUOS, and the accounts, institutions, datasets and studies created on it. The range applies to every tab, and the grouping to every chart."
     />
   )
 }
