@@ -10,13 +10,14 @@ import {
   formatRegistrationDate,
   formatUserDacs,
   formatUserRoles,
+  hasRole,
   institutionName,
   UserDac,
   userDacs,
   yesNo,
 } from 'src/components/manage_users_table/manageUsersTableUtils'
 import { isNil } from 'src/utils/NodashUtil'
-import { DacObject, DuosUser } from 'src/types/model'
+import { DacObject, DuosUser, UserRoleName } from 'src/types/model'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
 
@@ -25,6 +26,8 @@ export interface ManageUsersTableProps {
   userList: DuosUser[]
   dacList?: DacObject[]
   searchText: string
+  /** Only users holding this role; every user when absent. */
+  role?: UserRoleName
   daaLabelsById?: Map<number, string>
 }
 
@@ -116,26 +119,27 @@ const filterFn = getSearchFilterFunctions().users
 const EMPTY_DAA_LABELS: Map<number, string> = new Map()
 
 export const ManageUsersTable = function ManageUsersTable({
-  isLoading, userList, dacList = [], searchText, daaLabelsById = EMPTY_DAA_LABELS,
+  isLoading, userList, dacList = [], searchText, role, daaLabelsById = EMPTY_DAA_LABELS,
 }: ManageUsersTableProps) {
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: PAGE_SIZE_OPTIONS[0] })
-  const [lastSearchText, setLastSearchText] = useState(searchText)
+  const [lastFilters, setLastFilters] = useState({ searchText, role })
 
   const dacNameById = useMemo(() => dacNameMap(dacList), [dacList])
 
   // Filtering is derived, so a keystroke costs one render rather than a cascade of effects.
   const rows = useMemo(() => {
     const terms = searchText.split(' ').filter(term => term.length > 0)
-    return terms.reduce((list, term) => filterFn(term, list), userList ?? [])
+    const inRole = (userList ?? []).filter(user => isNil(role) || hasRole(user, role))
+    return terms.reduce((list, term) => filterFn(term, list), inRole)
       .map(user => toUserRow(user, dacNameById, daaLabelsById))
-  }, [userList, searchText, dacNameById, daaLabelsById])
+  }, [userList, searchText, role, dacNameById, daaLabelsById])
 
   const lastPage = Math.max(0, Math.ceil(rows.length / paginationModel.pageSize) - 1)
 
   // Adjusted during render rather than clamped for the render alone, so widening the results again
   // cannot restore the page the admin was already moved off.
-  if (searchText !== lastSearchText) {
-    setLastSearchText(searchText)
+  if (searchText !== lastFilters.searchText || role !== lastFilters.role) {
+    setLastFilters({ searchText, role })
     setPaginationModel(model => ({ ...model, page: 0 }))
   }
   else if (paginationModel.page > lastPage) {

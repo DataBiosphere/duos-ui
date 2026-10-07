@@ -5,11 +5,14 @@ import {
   formatRegistrationDate,
   formatUserDacs,
   formatUserRoles,
+  hasRole,
   institutionName,
+  roleLabel,
+  roleOptions,
   userDacs,
   yesNo,
 } from 'src/components/manage_users_table/manageUsersTableUtils'
-import { DacObject, InstitutionInterface, LibraryCard, UserRole } from 'src/types/model'
+import { DacObject, DuosUser, InstitutionInterface, LibraryCard, UserRole } from 'src/types/model'
 
 const role = (name: UserRole['name'], userId = 1): UserRole => ({
   roleId: 1,
@@ -192,5 +195,37 @@ describe('formatRegistrationDate', () => {
 
   it('reads - - for an unparseable create date', () => {
     expect(formatRegistrationDate('not a date')).toBe('- -')
+  })
+})
+
+const withRoles = (...names: UserRole['name'][]): DuosUser => ({ roles: names.map(name => role(name)) } as DuosUser)
+
+describe('roleLabel', () => {
+  it('spaces a multi-word role name', () => {
+    expect(roleLabel('SigningOfficial')).toBe('Signing Official')
+    expect(roleLabel('Admin')).toBe('Admin')
+  })
+})
+
+describe('roleOptions', () => {
+  it('offers each role held by anyone once, sorted by its label, leaving out Researcher', () => {
+    const users = [withRoles('SigningOfficial', 'Researcher'), withRoles('Admin', 'Researcher'), withRoles()]
+
+    expect(roleOptions(users)).toEqual(['Admin', 'SigningOfficial'])
+  })
+
+  it('offers nothing for an empty list', () => {
+    expect(roleOptions([])).toEqual([])
+  })
+})
+
+describe('hasRole', () => {
+  it('matches a user holding the role among others', () => {
+    expect(hasRole(withRoles('Researcher', 'SigningOfficial'), 'SigningOfficial')).toBe(true)
+  })
+
+  it('rejects a user without the role, or without roles', () => {
+    expect(hasRole(withRoles('Researcher'), 'SigningOfficial')).toBe(false)
+    expect(hasRole({} as DuosUser, 'SigningOfficial')).toBe(false)
   })
 })

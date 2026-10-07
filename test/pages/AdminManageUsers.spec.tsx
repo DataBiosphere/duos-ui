@@ -1,7 +1,7 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { AdminManageUsers } from 'src/pages/AdminManageUsers'
 import { User } from 'src/libs/ajax/User'
 import { DAC } from 'src/libs/ajax/DAC'
@@ -32,13 +32,19 @@ vi.mock('src/libs/utils', async (importActual) => {
 })
 
 vi.mock('src/components/manage_users_table/ManageUsersTable', () => ({
-  ManageUsersTable: ({ userList, dacList, isLoading, daaLabelsById }: {
+  ManageUsersTable: ({ userList, dacList, isLoading, role, daaLabelsById }: {
     userList: DuosUser[]
     dacList: DacObject[]
     isLoading: boolean
+    role?: string
     daaLabelsById: Map<number, string>
   }) => (
-    <div data-testid="manage-users-table" data-loading={isLoading} data-daa-label-count={daaLabelsById.size}>
+    <div
+      data-testid="manage-users-table"
+      data-loading={isLoading}
+      data-role={role ?? ''}
+      data-daa-label-count={daaLabelsById.size}
+    >
       {userList.map(u => <span key={u.userId}>{u.displayName}</span>)}
       {dacList.map(dac => <span key={dac.dacId}>{dac.name}</span>)}
     </div>
@@ -123,6 +129,44 @@ describe('AdminManageUsers', () => {
     await renderPage()
     expect(screen.getByText('Alice Admin')).toBeInTheDocument()
     expect(screen.getByText('Bob Admin')).toBeInTheDocument()
+  })
+
+  it('filters the table to the role chosen from the roles users hold', async () => {
+    vi.mocked(User.list).mockResolvedValue([
+      makeUser({ userId: 1, displayName: 'Sam SO', roles: [{ roleId: 7, name: 'SigningOfficial', userId: 1 }] }),
+      makeUser({ userId: 2, displayName: 'Ada Admin', roles: [{ roleId: 4, name: 'Admin', userId: 2 }] }),
+    ])
+    await renderPage()
+    expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-role', '')
+
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: 'Role' }))
+    const options = within(screen.getByRole('listbox')).getAllByRole('option').map(option => option.textContent)
+    expect(options).toEqual(['All roles', 'Admin', 'Signing Official'])
+
+    fireEvent.click(screen.getByRole('option', { name: 'Signing Official' }))
+    expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-role', 'SigningOfficial')
+
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: 'Role' }))
+    fireEvent.click(screen.getByRole('option', { name: 'All roles' }))
+    expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-role', '')
+  })
+
+  it('drops back to every role when a refreshed list no longer holds the chosen one', async () => {
+    vi.mocked(User.list).mockResolvedValueOnce([
+      makeUser({ userId: 1, displayName: 'Sam SO', roles: [{ roleId: 7, name: 'SigningOfficial', userId: 1 }] }),
+    ])
+    await renderPage()
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: 'Role' }))
+    fireEvent.click(screen.getByRole('option', { name: 'Signing Official' }))
+
+    // Adding a user refetches the list, which here no longer has a Signing Official.
+    vi.mocked(User.list).mockResolvedValueOnce([makeUser({ userId: 2, displayName: 'Ada Admin' })])
+    fireEvent.click(screen.getByText('ADD USER'))
+    fireEvent.click(screen.getByText('OK'))
+
+    await waitFor(() => expect(screen.getByText('Ada Admin')).toBeInTheDocument())
+    expect(screen.getByTestId('manage-users-table')).toHaveAttribute('data-role', '')
+    expect(screen.getByRole('combobox', { name: 'Role' })).toHaveTextContent('All roles')
   })
 
   it('fetches the DAC list on mount, for the table to name a user\'s DACs', async () => {

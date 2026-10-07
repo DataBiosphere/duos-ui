@@ -1,19 +1,32 @@
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { isNil, uniq } from 'src/utils/NodashUtil'
-import { DacObject, InstitutionInterface, LibraryCard, UserRole, UserRoleName } from 'src/types/model'
+import { DacObject, DuosUser, InstitutionInterface, LibraryCard, UserRole, UserRoleName } from 'src/types/model'
 
 dayjs.extend(utc)
 
 const STATUS_COLUMN_ROLES = new Set<UserRoleName>(['Researcher', 'DataSubmitter'])
 
+// SigningOfficial -> Signing Official
+export const roleLabel = (name: string): string => name.replace(/([A-Z])/g, ' $1').trim()
+
 export const formatUserRoles = (roles: UserRole[] | undefined, libraryCard: LibraryCard | undefined): string => {
   const named = (roles ?? []).map(role => role.name).filter(name => !STATUS_COLUMN_ROLES.has(name))
   const withCard = isNil(libraryCard) ? named : [...named, 'LibraryCard']
-  // SigningOfficial -> Signing Official
-  const spaced = withCard.map(name => name.replace(/([A-Z])/g, ' $1').trim())
-  return uniq(spaced).join(', ') || 'None'
+  return uniq(withCard.map(roleLabel)).join(', ') || 'None'
 }
+
+/**
+ * The roles anyone in the list holds, sorted by label, so the filter never offers an empty choice.
+ * Researcher is left out: nearly everyone holds it, and the Researcher Status column reads the library card.
+ */
+export const roleOptions = (users: DuosUser[]): UserRoleName[] =>
+  uniq(users.flatMap(user => (user.roles ?? []).map(role => role.name)))
+    .filter(name => name !== 'Researcher')
+    .sort((a, b) => roleLabel(a).localeCompare(roleLabel(b)))
+
+export const hasRole = (user: DuosUser, role: UserRoleName): boolean =>
+  (user.roles ?? []).some(userRole => userRole.name === role)
 
 export const institutionName = (institution: InstitutionInterface | undefined): string => institution?.name ?? 'N/A'
 
