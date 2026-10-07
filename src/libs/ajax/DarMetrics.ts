@@ -11,6 +11,7 @@ import {
   DarTurnaroundReport,
   DarVolumeReport,
   DatasetReport,
+  ElectionReport,
   InstitutionReport,
   StudyReport,
   UserReport,
@@ -54,4 +55,6 @@ export const DarMetrics = {
   getDatasets: (query: DarMetricsQuery) => getReport<DatasetReport>('datasets', query),
 
   getStudies: (query: DarMetricsQuery) => getReport<StudyReport>('studies', query),
+
+  getElections: (query: DarMetricsQuery) => getReport<ElectionReport>('elections', query),
 }

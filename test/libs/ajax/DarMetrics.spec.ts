@@ -46,6 +46,7 @@ describe('DarMetrics', () => {
     ['getInstitutions', 'institutions'],
     ['getDatasets', 'datasets'],
     ['getStudies', 'studies'],
+    ['getElections', 'elections'],
   ] as const)('%s gets /api/metrics/%s with the range as query params', async (method, path) => {
     const report = { from: query.from, to: query.to, bucket: 'MONTH', total: 0, buckets: [], rows: [] }
     vi.mocked(fetchGet).mockResolvedValueOnce({ data: report })
