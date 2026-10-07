@@ -1,0 +1,10 @@
+/*
+ * Shared size and border for the User Profile inputs and Save buttons. Import this file
+ * from any component or stylesheet that uses the variables, rather than relying on another
+ * profile stylesheet having loaded first.
+ */
+:root {
+  --profile-control-height: 40px;
+  --profile-control-padding: 8px 12px;
+  --profile-control-border-color: #ccc;
+}

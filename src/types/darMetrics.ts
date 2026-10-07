@@ -227,6 +227,31 @@ export interface InstitutionReport {
   buckets: CreatedBucket[]
 }
 
+export interface DatasetBucket extends CreatedBucket {
+  /** Of those created in the bucket, how many the DAC has approved now. */
+  dacApproved: number
+}
+
+/** Datasets created in the range; not paged, so it has no `rows`. */
+export interface DatasetReport {
+  from: string
+  to: string
+  bucket: Uppercase<MetricsBucket>
+  total: number
+  /** Datasets created in the range that the DAC has approved now. */
+  dacApproved: number
+  buckets: DatasetBucket[]
+}
+
+/** Studies created in the range; not paged, so it has no `rows`. */
+export interface StudyReport {
+  from: string
+  to: string
+  bucket: Uppercase<MetricsBucket>
+  total: number
+  buckets: CreatedBucket[]
+}
+
 export interface ElectionBucket {
   bucketStart: number
   /** The election's status now, in consent's ElectionStatus spelling. */
