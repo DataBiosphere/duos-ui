@@ -10,11 +10,19 @@ import AffiliationAndRoles from './AffiliationAndRoles'
 import ResearcherStatus from './ResearcherStatus'
 import AcceptedAcknowledgements from './AcceptedAcknowledgements'
 import ExternalProfile from './ExternalProfile'
+import ProfileSaveButton from './ProfileSaveButton'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { Theme } from 'src/libs/theme'
 import { DuosUser } from 'src/types/model'
 import PageHeading from 'src/components/PageHeading'
+import './profileControls.css'
 import './UserProfile.css'
+
+// FormInputGeneric sets its padding inline, so the shared control size has to be passed the same way.
+const profileInputStyle = {
+  height: 'var(--profile-control-height)',
+  padding: 'var(--profile-control-padding)',
+}
 
 const emailToggleSx = {
   '& .MuiSwitch-switchBase.Mui-checked': { color: Theme.palette.success },
@@ -127,14 +135,9 @@ export default function UserProfile() {
             hideTitle={true}
             defaultValue={name}
             onChange={updateRef}
+            inputStyle={profileInputStyle}
           />
-          <button
-            type="button"
-            className="btn-primary common-background profile-save-button"
-            onClick={updateName}
-          >
-            Save
-          </button>
+          <ProfileSaveButton onClick={updateName} />
         </div>
         <div className="user-profile-field user-profile-input">
           <FormField
@@ -144,6 +147,7 @@ export default function UserProfile() {
             hideTitle={true}
             defaultValue={user.email}
             disabled={true}
+            inputStyle={profileInputStyle}
           />
         </div>
         <div className="user-profile-field">

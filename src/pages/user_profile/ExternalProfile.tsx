@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import './profileControls.css'
 import './UserProfile.css'
 import './ExternalProfile.css'
 import RemoveCircleOutlinedIcon from '@mui/icons-material/RemoveCircleOutlined'
@@ -6,7 +7,9 @@ import IconButton from '@mui/material/IconButton'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
 import { ExternalProfiles } from 'src/types/model'
+import { formattedLinkedIn, formattedOrcid, formattedThroughBio } from 'src/utils/ExternalProfileUtils'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
+import ProfileSaveButton from './ProfileSaveButton'
 
 interface ExternalProfileProps {
   readonly userId?: number
@@ -16,12 +19,6 @@ interface ExternalProfileProps {
 interface OtherUrlEntry {
   id: string
   value: string
-}
-
-const formattedIdentifierUrl = (profileId: string | undefined, baseUrl: string): string => {
-  const normalizedProfileValue = profileId?.trim() ?? ''
-  const normalizedProfileId = normalizedProfileValue.replace(/^\/+/, '')
-  return validateHttpUrl(normalizedProfileValue) ?? `${baseUrl}${normalizedProfileId}`
 }
 
 export default function ExternalProfile(props: ExternalProfileProps) {
@@ -34,18 +31,6 @@ export default function ExternalProfile(props: ExternalProfileProps) {
   const [institutionalWebsite, setInstitutionalWebsite] = useState<string>('')
   const [otherUrls, setOtherUrls] = useState<OtherUrlEntry[]>([])
   const [invalidUrls, setInvalidUrls] = useState<Array<string>>([])
-
-  const formattedLinkedIn = (profileId: string | undefined): string => {
-    return formattedIdentifierUrl(profileId, 'https://www.linkedin.com/in/')
-  }
-
-  const formattedOrcid = (profileId: string | undefined): string => {
-    return formattedIdentifierUrl(profileId, 'https://orcid.org/')
-  }
-
-  const formattedThroughBio = (profileId: string | undefined): string => {
-    return formattedIdentifierUrl(profileId, 'https://through.bio/')
-  }
 
   const onChange = ({ key, value }: { key: string, value: unknown }) => {
     setExternalProfilesUpdate((previous) => {
@@ -192,32 +177,18 @@ export default function ExternalProfile(props: ExternalProfileProps) {
     init()
   }, [readonly, props.userId])
 
-  const getLinkedInLink = () => {
-    if (!linkedIn.trim()) {
-      return <span>{readonly ? 'No LinkedIn profile provided' : 'LinkedIn'}</span>
+  // Shows the saved value as a link, or the field name (edit mode) or a "not provided" note (read-only) when empty.
+  const getProfileValue = (value: string, emptyLabel: string, readonlyEmptyText: string, toUrl: (value: string) => string = url => url) => {
+    if (!value.trim()) {
+      return <span>{readonly ? readonlyEmptyText : emptyLabel}</span>
     }
-    return getUrlLink(formattedLinkedIn(linkedIn))
+    return getUrlLink(toUrl(value))
   }
 
-  const getOrcidLink = () => {
-    if (!orcid.trim()) {
-      return <span>{readonly ? 'No ORCID provided' : 'ORCID'}</span>
-    }
-    return getUrlLink(formattedOrcid(orcid))
-  }
-
-  const getThroughBioLink = () => {
-    if (!throughBio.trim()) {
-      return <span>{readonly ? 'No Through.bio profile provided' : 'Through.bio'}</span>
-    }
-    return getUrlLink(formattedThroughBio(throughBio))
-  }
-
-  const getInstitutionalWebsiteLink = () => {
-    return (
-      readonly && !institutionalWebsite.trim() ? <span>No institutional website provided</span> : getUrlLink(institutionalWebsite)
-    )
-  }
+  const getLinkedInLink = () => getProfileValue(linkedIn, 'LinkedIn', 'No LinkedIn profile provided', formattedLinkedIn)
+  const getOrcidLink = () => getProfileValue(orcid, 'ORCID iD', 'No ORCID iD provided', formattedOrcid)
+  const getThroughBioLink = () => getProfileValue(throughBio, 'Through.bio', 'No Through.bio profile provided', formattedThroughBio)
+  const getInstitutionalWebsiteLink = () => getProfileValue(institutionalWebsite, 'Institutional Website', 'No institutional website provided')
 
   const getUrlLink = (url: string) => {
     const validUrl = validateHttpUrl(url)
@@ -238,7 +209,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
           <h4>External Profile</h4>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div style={{ fontWeight: 'bold' }}>LinkedIn</div><div>{getLinkedInLink()}</div>
-            <div style={{ fontWeight: 'bold' }}>ORCID</div><div>{getOrcidLink()}</div>
+            <div style={{ fontWeight: 'bold' }}>ORCID iD</div><div>{getOrcidLink()}</div>
             <div style={{ fontWeight: 'bold' }}>Through.bio</div><div>{getThroughBioLink()}</div>
             <div style={{ fontWeight: 'bold' }}>Institutional Website</div><div>{getInstitutionalWebsiteLink()}</div>
             {otherUrls.length > 0 && otherUrls.map((entry, index) => (
@@ -251,11 +222,7 @@ export default function ExternalProfile(props: ExternalProfileProps) {
       )
     : (
         <div className="external-profile">
-          <div className="header-container">
-            <h1 className="profile-card-heading">
-              External Profiles
-            </h1>
-          </div>
+          <h1 className="profile-card-heading">External Profiles</h1>
           <table>
             <tbody>
               <tr>
@@ -284,8 +251,8 @@ export default function ExternalProfile(props: ExternalProfileProps) {
                     type="text"
                     id="ORCID"
                     name="ORCID"
-                    aria-label="ORCID"
-                    placeholder="ORCID (e.g. https://orcid.org/0000-0000-0000-0000)"
+                    aria-label="ORCID iD"
+                    placeholder="ORCID iD (e.g. https://orcid.org/0000-0000-0000-0000)"
                     value={orcid}
                     minLength={2}
                     onChange={onOrcidChange}
@@ -311,14 +278,14 @@ export default function ExternalProfile(props: ExternalProfileProps) {
               </tr>
               <tr>
                 <td>
-                  <label htmlFor="institutionalWebsite">Institutional Website</label>
-                  {institutionalWebsite.trim() && <div className="external-profile-value external-profile-link-value">{getInstitutionalWebsiteLink()}</div>}
+                  <div className="external-profile-value external-profile-link-value">{getInstitutionalWebsiteLink()}</div>
                 </td>
                 <td>
                   <input
                     type="url"
                     id="institutionalWebsite"
-                    name="Institutional Website"
+                    name="institutionalWebsite"
+                    aria-label="Institutional Website"
                     placeholder="Institutional Website (e.g. https://www.institution.edu/~username)"
                     value={institutionalWebsite}
                     onChange={onInstitutionalWebsiteChange}
@@ -354,8 +321,8 @@ export default function ExternalProfile(props: ExternalProfileProps) {
             </tbody>
           </table>
           <div className="external-profile-actions">
-            <button type="button" onClick={addNewOtherUrl} className="external-profile-add-url">+ Add URL</button>
-            <button type="button" disabled={invalidUrls.length > 0} onClick={onSaveClick} className="btn-primary common-background external-profile-save-button">Save</button>
+            <button type="button" onClick={addNewOtherUrl} className="external-profile-add-url">Add URL</button>
+            <ProfileSaveButton disabled={invalidUrls.length > 0} onClick={onSaveClick} />
           </div>
         </div>
       )
