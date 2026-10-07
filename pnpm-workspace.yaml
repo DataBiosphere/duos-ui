@@ -11,4 +11,4 @@ allowBuilds:
   esbuild: false
 allowedDeprecatedVersions:
   node-domexception: "1.0.0"
-trust-policy: no-downgrade
+trustPolicy: no-downgrade
