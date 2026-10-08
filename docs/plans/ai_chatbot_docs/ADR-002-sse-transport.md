@@ -97,8 +97,10 @@ and the header.
 
 1. **The proxy behavior is unverified today.** Open question 2 is still open,
    and decisions 4 through 6 are proposals. If `httpd-terra-proxy` buffers the
-   body whatever the headers say, the fallback is decision 1 of the rejected
-   alternatives below, and the client work in §5.2 changes with it. Story 1-B
+   body whatever the headers say, the fallback is **WebSocket** (the second
+   rejected alternative below — chunked JSON over `reply.send` is not a
+   fallback, because it re-opens constraint 1), and the client work in §5.2
+   changes with it. Story 1-B
    runs first in Chat 1 for this reason.
 2. **A hijacked reply skips every Fastify hook, not only `onSend`.** Anything
    the team later adds as an `onSend` or `onResponse` hook — an access log, a

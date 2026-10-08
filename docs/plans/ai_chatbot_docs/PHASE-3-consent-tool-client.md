@@ -100,8 +100,8 @@ sees a half-finished answer instead of a sign-in redirect.
 **Decision.** The tool client does not destroy the session. On a tool `401`:
 
 1. Stop the turn.
-2. Emit an `error` event with a code the client can act on, for example
-   `session_expired`.
+2. Emit an `error` event with the `session_expired` code from the Phase 2
+   story 2-A taxonomy, which the client maps to its sign-out path.
 3. Close the stream.
 4. Let the client redirect to sign-in, exactly as it does for a proxy `401`.
 
@@ -137,9 +137,12 @@ Rules:
   failure.
 
 Consider whether the turn should end with `done` and a plain-English answer, or
-with `error`. Recommend `status` followed by `error` with a `rate_limited`
-code, so the client can style it and the metrics can count it. Confirm in
-review.
+with `error`. Recommend `status` followed by `error` with the
+`upstream_rate_limited` code from the Phase 2 story 2-A taxonomy, so the
+client can style it and the metrics can count it. Not `rate_limited`: that is
+the BFF's own pre-hijack burst-limit code (Phase 6 story 6-A), and the UI
+answers it with "wait a minute", which is the wrong advice for a Consent
+budget the user's page traffic is also spending. Confirm in review.
 
 Tests: a `429` with `Retry-After` emits a `status` naming the wait; no second
 upstream call is made; the turn ends once.

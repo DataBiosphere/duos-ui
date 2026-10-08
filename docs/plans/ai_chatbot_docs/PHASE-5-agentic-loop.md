@@ -52,8 +52,9 @@ literal. The version is in the filename, so a change to behavior is visible in
 a diff and in a file list.
 
 **Who reviews a change:** the same reviewers as any server change, plus a
-passing Phase 4 run against Gemini (story 4-E). Put that rule in a header
-comment at the top of the file.
+passing Phase 4 run — against the stub until Chat 9 lands the Gemini backend,
+and against Gemini from then on (story 4-E states the two stages). Put that
+rule, with its current stage, in a header comment at the top of the file.
 
 **What it says.** Five jobs, and no capability claims:
 

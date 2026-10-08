@@ -71,14 +71,19 @@ Rules, each from §3.4:
    `401` reject that caller afterwards. Never key on a hashed value that a
    caller can choose.
 2. **`max = ceil(turnsPerMinute / DUOS_REPLICA_COUNT)`.** Read the divisor
-   from a new env var. Fail startup, naming the variable, when it is unset or
-   not a positive whole number, the way `maxFromEnv` already does for the auth
-   limits. Default it to `1` only in development, never in a deployed
-   environment.
+   from a new env var. Read it **only where the chat route registers** — inside
+   the `chatEnabled` gate from Phase 7 story 7-A — and fail startup there,
+   naming the variable, when it is unset or not a positive whole number, the
+   way `maxFromEnv` already does for the auth limits. An environment with chat
+   off never reads it, so this story cannot break boot in dev, staging, prod
+   or a BEE that has not turned chat on. Story 6-C's quota env var follows the
+   same rule. Development (`NODE_ENV !== 'production'`) defaults to `1`.
 3. **Deliver `DUOS_REPLICA_COUNT` from `.Values.replicas` in `terra-helmfile`**,
    the way the Consent chart delivers `podCount`. This is a chart change in
-   `charts/duos/templates/deployment.yaml`, filed in this story. Until it
-   merges, a BEE runs with the development default.
+   `charts/duos/templates/deployment.yaml`, and **it merges before this
+   story**: the chart renders the variable in every environment whether or not
+   chat is on, so the value is already present when the first BEE flips
+   `chatEnabled`. The Playwright servers set it explicitly (Phase 8 story 8-A).
 4. **`turnsPerMinute` is a multiple of the replica count** (dev and prod both
    run 2 replicas today). The env override is `DUOS_RATE_LIMIT_CHAT_MAX`,
    through `maxFromEnv`, and it holds the deployment-wide number; the code
@@ -98,8 +103,9 @@ maps a limiter error to `429 { error: 'rate_limited' }` through
 Tests: the seventh turn inside a minute from one user gives `429` as JSON; a
 second user on the same IP is not throttled; a sessionless caller is keyed on
 IP and then gets `401`; an unset `DUOS_REPLICA_COUNT` fails startup in
-production mode and names the variable; the Playwright `mock` project runs its
-chat spec under the raised limit.
+production mode **with chat enabled** and names the variable, and does not
+fail startup with chat disabled; the Playwright `mock` project runs its chat
+spec under the raised limit.
 
 **Files:** `server/src/security/rateLimit.ts`, `server/src/chat/route.ts`, `server/src/config.ts`, `playwright.config.ts`, `.env.example`, `server/test/rateLimit.test.ts`, `server/test/chatRoute.test.ts`; `terra-helmfile`: `charts/duos/templates/deployment.yaml`, `charts/duos/values.yaml`
 **Effort:** 1d &nbsp;|&nbsp; **Risk:** Low
@@ -108,7 +114,7 @@ chat spec under the raised limit.
 
 ### 6-B: The quota table, as a Consent Liquibase changeset
 
-One table, in the series the BFF already uses:
+Two tables, in one changeset, in the series the BFF already uses:
 
 ```
 changesets/changelog-consent-2026-MM-DD-bff-03-chat-turn-quota.xml
@@ -117,12 +123,20 @@ changesets/changelog-consent-2026-MM-DD-bff-03-chat-turn-quota.xml
 *Proposal — confirm in review:*
 
 ```sql
+-- The daily count. One row per user per UTC day.
 CREATE TABLE chat_turn_quota (
   user_id  text    NOT NULL,   -- the session's userId: the B2C email claim
   day      date    NOT NULL,   -- UTC calendar day
   turns    integer NOT NULL DEFAULT 0,
-  lease_until timestamptz,     -- story 6-D: the open turn's expiry, or NULL
   PRIMARY KEY (user_id, day)
+);
+
+-- The open-turn lease (story 6-D). One row per user, independent of the day,
+-- so a turn that spans UTC midnight holds one lease, not two rows.
+CREATE TABLE chat_turn_lease (
+  user_id     text        PRIMARY KEY,
+  lease_token uuid        NOT NULL,   -- owner check on release
+  lease_until timestamptz NOT NULL
 );
 ```
 
@@ -130,9 +144,12 @@ Rules:
 
 - **Keyed on `userId`, not on the session.** The quota must outlive a logout
   and a session rotation (§3.4), so it cannot sit in `user_sessions.sess`.
-- **One row per user per day, upserted.** `INSERT … ON CONFLICT (user_id, day)
-  DO UPDATE SET turns = chat_turn_quota.turns + 1 RETURNING turns` is one
-  round-trip and is safe across pods.
+- **One quota row per user per day, upserted.** `INSERT … ON CONFLICT
+  (user_id, day) DO UPDATE SET turns = chat_turn_quota.turns + 1 RETURNING
+  turns` is one round-trip and is safe across pods.
+- **The lease is its own row.** Keeping it on the day row would let a turn
+  started at 23:59:50 hold yesterday's row while a second tab at 00:00:01
+  creates today's row and runs beside it.
 - **Retention.** Add a daily delete of rows older than 35 days, or state why
   the table may grow. The `user_session_audit` changeset is the precedent for
   how Consent handles a BFF table's housekeeping; follow it.
@@ -156,24 +173,40 @@ lose no turn.
 
 ### 6-C: Enforce the daily quota in the route
 
-A `preHandler` on `POST /api/chat`, after the limiter and the session check,
-before the hijack:
+**The last pre-hijack step, and nothing else after it.** Every check that can
+refuse the request for free runs first — the guards and the limiter
+(`onRequest`), the `401` for no session, the `expired` fixture case, the
+refresh and its `502`, the body validation (Phase 1 story 1-D), and the `503`
+for no configured backend (Phase 2 story 2-F). Only once all of them pass does
+the route touch the database:
 
-1. Upsert the user's row for today (UTC) and read back `turns`.
+1. Upsert the user's quota row for today (UTC) and read back `turns`.
 2. If `turns` exceeds the quota, answer `429 { error: 'quota_exceeded',
    resetsAt: <ISO timestamp of the next UTC midnight> }` as JSON.
+3. Take the lease (story 6-D). If it is held, answer `409`.
+4. Hijack.
+
+The order is the point: a request that fails validation, has no backend, or
+has no session must not spend a turn or leave a lease behind. It also means
+the `NOT NULL user_id` upsert never runs for a signed-out caller — the `401`
+has already answered. Put the quota and lease calls in the route handler
+itself, immediately before `reply.hijack()`, not in a `preHandler`, because
+Fastify runs route `preHandler` hooks before the handler's own checks.
 
 Decisions, each stated here so the UI story can rely on them:
 
 - **Count at turn start, not at turn end.** A turn that the client abandons
   still spent model time up to the abort. Counting at the end would let a user
-  abandon turns for free. Say so in the code comment.
+  abandon turns for free. "Turn start" means the step above, after every free
+  rejection. Say so in the code comment.
 - **A distinct error code from the burst limit.** `rate_limited` means wait a
   minute; `quota_exceeded` means wait until tomorrow. The UI (Phase 7) shows a
   different message for each, and the metrics (story 5-E) count them apart.
 - **The quota is an env value, `DUOS_CHAT_DAILY_TURN_QUOTA`**, read in
-  `server/src/config.ts` and validated at startup. It is a count of turns, not
-  a dollar figure (§3.4). *Proposal — replace in 6-E:* 50.
+  `server/src/config.ts` and validated at startup — inside the `chatEnabled`
+  gate, like `DUOS_REPLICA_COUNT` (story 6-A), so an environment with chat off
+  never requires it. It is a count of turns, not a dollar figure (§3.4).
+  *Proposal — replace in 6-E:* 50.
 - **A database error here is a `503`, not a free turn.** State the choice. The
   conservative reading is that a quota you cannot check is a quota you cannot
   enforce; the user-friendly reading is that one database blip should not
@@ -187,7 +220,9 @@ away.
 
 Tests: the fifty-first turn in a UTC day gives `429` with the documented body;
 the first turn after midnight succeeds; a database error gives `503`; no SSE
-frame is ever sent on a rejection.
+frame is ever sent on a rejection; a request rejected by validation, by a
+missing backend, or by a missing session leaves `turns` unchanged and no lease
+row behind.
 
 **Files:** `server/src/chat/quota.ts`, `server/src/chat/route.ts`, `server/src/config.ts`, `server/src/chat/events.ts`, `.env.example`, `server/test/chatQuota.test.ts`
 **Effort:** 1d &nbsp;|&nbsp; **Risk:** Low
@@ -202,20 +237,28 @@ needs a shared lease, and a lease needs a release path for a disconnect, a
 crash and a turn that outruns its deadline.
 
 *Proposal — confirm in review:* **one open turn per user, deployment-wide,
-leased in the `chat_turn_quota` row.**
+leased in the `chat_turn_lease` row with an owner token.**
 
-1. In the same upsert as story 6-C, set `lease_until = now() + <turn deadline
-   + 10 s>` **only if** `lease_until IS NULL OR lease_until < now()`. Use the
-   `RETURNING` clause to learn whether the lease was taken.
-2. If it was not taken, answer `409 { error: 'turn_in_progress' }` as JSON. The
+1. Mint a `lease_token` (`crypto.randomUUID()`) for the turn. Then, as the
+   last pre-hijack step after the quota upsert (story 6-C): `INSERT INTO
+   chat_turn_lease (user_id, lease_token, lease_until) VALUES ($1, $2, now() +
+   <turn deadline + 10 s>) ON CONFLICT (user_id) DO UPDATE SET lease_token =
+   EXCLUDED.lease_token, lease_until = EXCLUDED.lease_until WHERE
+   chat_turn_lease.lease_until < now() RETURNING lease_token`. A row comes
+   back only when the lease was free or expired; compare the returned token
+   with the minted one.
+2. If no row came back, answer `409 { error: 'turn_in_progress' }` as JSON. The
    UI (Phase 7) already cancels an open turn before it starts a new one, so a
    user sees this only across tabs.
-3. Release the lease — set it to `NULL` — on `done`, on `error`, and on client
-   disconnect (Phase 1 story 1-F's `close` listener). A crash releases nothing,
-   and that is what the expiry is for: a lease outlives its turn by ten seconds
-   at most.
-4. The lease write on release is the one database call that happens **after
-   the hijack**. It touches `chat_turn_quota`, never the session, so ADR-002
+3. Release the lease on `done`, on `error`, and on client disconnect (Phase 1
+   story 1-F's `close` listener): `DELETE FROM chat_turn_lease WHERE user_id =
+   $1 AND lease_token = $2`. **The token is the owner check.** Without it,
+   turn A's late release would clear a lease that turn B took after A's
+   expired, and a third tab could start beside B. A crash releases nothing,
+   and that is what the expiry is for: a lease outlives its turn by ten
+   seconds at most.
+4. The lease delete on release is the one database call that happens **after
+   the hijack**. It touches `chat_turn_lease`, never the session, so ADR-002
    decision 2 holds; say so in the code comment next to it.
 
 Why not an in-process counter: it would be simpler, and the Phase 1 turn
@@ -225,8 +268,9 @@ code cannot see. Keep the registry for shutdown; use the lease for the cap.
 
 Tests: a second turn while one is open gives `409`; a turn that ends by `done`,
 by `error` and by disconnect each release the lease; a lease older than the
-deadline plus grace is treated as free; the release path runs with the session
-untouched.
+deadline plus grace is treated as free; a release carrying a stale token
+deletes nothing; a turn that spans UTC midnight holds one lease and increments
+yesterday's quota row only; the release path runs with the session untouched.
 
 **Files:** `server/src/chat/quota.ts`, `server/src/chat/route.ts`, `server/src/chat/turnRegistry.ts`, `server/test/chatQuota.test.ts`, `server/test/chatSessionSafety.test.ts`
 **Effort:** 1.5d &nbsp;|&nbsp; **Risk:** Medium — a leaked lease blocks a user for the grace period
@@ -265,13 +309,16 @@ file header as pre-Gemini.
 
 ## Suggested sequencing
 
-6-B first, because it deploys with Consent on Consent's cadence and the two
-route stories wait on it. 6-A is independent and can land any time after
-Phase 1.
+The `terra-helmfile` change (the replica count and the quota env var, from
+6-A and 6-C) merges first, because the chart must render the variables before
+any environment turns chat on. 6-B goes early too, because it deploys with
+Consent on Consent's cadence and the two route stories wait on it. 6-A is
+otherwise independent and can land any time after Phase 1 and Phase 7 story
+7-A, whose gate it reads.
 
 ```
-6-A ──────────────────┐
-6-B ─→ 6-C ─→ 6-D ────┴─→ 6-E (after 5-E, and again after Chat 9)
+helmfile ─→ 6-A ──────────┐
+6-B ─→ 6-C ─→ 6-D ────────┴─→ 6-E (after 5-E, and again after Chat 9)
 ```
 
 ---
@@ -281,12 +328,15 @@ Phase 1.
 1. A user's seventh turn in a minute is rejected as JSON `429` before any SSE
    frame, and the limit divides by `DUOS_REPLICA_COUNT` delivered from the
    chart.
-2. The quota table exists in Consent's changelog as `bff-03`, and the scratch
-   schema in `server/test/load/README.md` matches it.
-3. The daily quota rejects with `quota_exceeded`, counts at turn start, and
-   survives a logout and a session rotation.
-4. A second concurrent turn for one user is rejected deployment-wide, and every
-   end state releases the lease.
+2. The quota and lease tables exist in Consent's changelog as `bff-03`, and
+   the scratch schema in `server/test/load/README.md` matches them.
+3. The daily quota rejects with `quota_exceeded`, counts at turn start after
+   every free rejection, and survives a logout and a session rotation.
+4. A second concurrent turn for one user is rejected deployment-wide, every
+   end state releases the lease, and a release checks its owner token.
 5. All three numbers are recorded with their arithmetic, and the measurement
    that produced them is appended to this document.
 6. No story in this phase writes to the session after the hijack.
+7. An environment with `chatEnabled` off boots without any of this phase's env
+   vars, and a request rejected before the hijack spends no turn and leaves no
+   lease.

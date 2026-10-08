@@ -60,16 +60,31 @@ mock provider, and every request is recorded in the scenario's
 switch (`test/e2e/mocks/scenarios.ts`) that makes the search answer `429` with
 `Retry-After`, so the Phase 3 story 3-C path has a browser test too.
 
-Then make the `mock` server select the stub backend: add the Phase 2 story 2-F
-env var to the port-3001 entry in `playwright.config.ts`, beside the raised
-rate limits, and add `DUOS_RATE_LIMIT_CHAT_MAX` (Phase 6 story 6-A) at the
-same time.
+Then turn the chat on in the harness. Three things, because the route and the
+button are both gated (Phase 7 story 7-A) and the Phase 6 env vars are
+required wherever the gate is open:
+
+1. **`chatEnabled: true` in the harness `config.json`.**
+   `.github/workflows/integration-tests.yml` builds it with
+   `jq '.bffEnabled = true' config/dev.json > public/config.json`; extend that
+   expression with `.chatEnabled = true`. One `config.json` serves all four
+   Playwright servers, so the flag is on for all of them.
+2. **The Phase 6 env vars on every server**, because every server now
+   registers the route and reads them at startup: `DUOS_REPLICA_COUNT=1`,
+   `DUOS_CHAT_DAILY_TURN_QUOTA` (high enough for a full run), and
+   `DUOS_RATE_LIMIT_CHAT_MAX=600` beside the other raised limits. Put them in
+   `serverDefaults` in `playwright.config.ts`, not on one entry, or the
+   `chromium` and short-session servers fail to boot.
+3. **The stub backend on the `mock` and `mock-short-session` servers** (ports
+   3001 and 3003): the Phase 2 story 2-F env var, so chat cases there reach no
+   network. The `chromium` server keeps whatever 2-F's default is; no chat
+   case runs there.
 
 Tests: `mockHarness.spec.ts` gains a case that calls each new path through the
 proxy with the echo pattern and sees the fixture body and exactly one
 `Authorization` header.
 
-**Files:** `test/e2e/mocks/consentUpstream.ts`, `test/e2e/mocks/scenarios.ts`, `test/e2e/mocks/settings.ts`, `playwright.config.ts`, `test/e2e/mockHarness.spec.ts`
+**Files:** `test/e2e/mocks/consentUpstream.ts`, `test/e2e/mocks/scenarios.ts`, `test/e2e/mocks/settings.ts`, `playwright.config.ts`, `.github/workflows/integration-tests.yml`, `test/e2e/mockHarness.spec.ts`
 **Effort:** 1d &nbsp;|&nbsp; **Risk:** Low
 
 ---
@@ -163,8 +178,10 @@ before the UI exists. 8-B waits for Phase 7.
 
 ## Exit criteria
 
-1. The mock Consent upstream serves both tool paths and a `429` scenario, and
-   the `mock` server runs the stub backend.
+1. The mock Consent upstream serves both tool paths and a `429` scenario; the
+   harness `config.json` has `chatEnabled: true`; every Playwright server
+   boots with the Phase 6 env vars; the `mock` and short-session servers run
+   the stub backend.
 2. `chat.spec.ts` passes in CI on every PR, with the stream, markdown, abort,
    rate-limit and sign-out cases.
 3. The CSP collector sees zero violations with the panel open and a turn run.

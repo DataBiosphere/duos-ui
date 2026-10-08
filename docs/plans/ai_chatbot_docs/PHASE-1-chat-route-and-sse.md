@@ -203,8 +203,10 @@ Rules:
   the server import. The client trims before it sends. The server trims again
   and **does not reject** an over-long history, because a stale client tab
   should degrade rather than break. A history that exceeds the *body size limit*
-  is still a `400` — that is a different bound, and it is a defence against
-  volume, not against staleness.
+  is still rejected — as `413`, which is what Fastify's `bodyLimit` answers
+  (`FST_ERR_CTP_BODY_TOO_LARGE`) — because that is a different bound: a
+  defence against volume, not against staleness. The client maps `413` to a
+  "message too long" notice (Phase 7 story 7-B).
 
 Return every rejection as JSON before the hijack.
 
@@ -306,8 +308,11 @@ Change the handler: when the path starts with `/api/`, answer `404` with the
 JSON error shape the rest of the server uses. Everything else keeps
 `reply.html()`.
 
-Consider covering the proxy prefixes in the same guard — `/duos-api/`, `/ecm/`,
-`/tdr/`, `/bard/`. Check first whether their encapsulated handlers already
+Consider covering the proxy prefixes in the same guard — `/duos-api/`,
+`/ecm-api/`, `/tdr-api/`, `/bard-api/` and `/public/`. Import the exported
+prefix constants (`PROXY_PREFIX`, `ECM_PROXY_PREFIX`, `TDR_PROXY_PREFIX`,
+`BARD_PROXY_PREFIX`) rather than repeating the strings, so the guard cannot
+drift from the routes. Check first whether their encapsulated handlers already
 catch the mistyped-path case; if they do, leave them alone and say so in the
 commit message.
 

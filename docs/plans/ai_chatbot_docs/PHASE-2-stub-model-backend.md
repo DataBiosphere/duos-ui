@@ -66,10 +66,28 @@ Three rules:
 3. **No vendor name appears in this module** — not in a type, a field, a comment
    or an import.
 
-Also define the error taxonomy the loop reports through the `error` event:
-`backend_unavailable`, `backend_error`, `tool_error`, `bound_exceeded`,
-`server_shutting_down`. Story 1-E already needs `server_shutting_down`; keep one
-list.
+Also define the error taxonomy the loop reports through the `error` event.
+This is the complete list; a later story that needs a code adds it here, not
+in its own module:
+
+| Code | Raised by |
+|---|---|
+| `backend_unavailable` | No backend configured mid-turn (the pre-hijack `503` covers the usual case) |
+| `backend_error` | The model backend failed mid-stream |
+| `tool_error` | A tool call failed for a reason the model cannot act on |
+| `session_expired` | A tool call answered `401` (Phase 3 story 3-B) |
+| `upstream_rate_limited` | A tool call answered `429` (Phase 3 story 3-C) |
+| `bound_exceeded` | An iteration, deadline or byte bound tripped (Phase 5 story 5-C) |
+| `server_shutting_down` | Shutdown abort (Phase 1 story 1-F) |
+
+These are **error-frame** codes, sent on a `200` stream after the hijack. The
+**pre-hijack JSON** codes — `rate_limited`, `quota_exceeded`,
+`turn_in_progress` from Phase 6, and the `csrf_validation_failed` and
+`cross_site_request_blocked` bodies the guards already send — are a separate
+set with HTTP statuses, and the two sets must not share a name: a Consent
+`429` inside a turn and the BFF's own burst limit mean different things to the
+user and to the metrics. Story 1-E already needs `server_shutting_down`; keep
+one list.
 
 **Files:** `server/src/chat/backend/types.ts`, `server/src/chat/backend/errors.ts`
 **Effort:** 1d &nbsp;|&nbsp; **Risk:** Low, but a wrong shape here is expensive later

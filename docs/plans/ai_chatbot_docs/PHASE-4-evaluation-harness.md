@@ -25,10 +25,15 @@ times, and both matter:
 
 | Run against | What it proves |
 |---|---|
-| The stub (now, Phase 4 and 5) | The loop's plumbing. Given a scripted tool call, does the loop execute it, append the result, re-invoke, and stop correctly? |
+| The stub, before Phase 5 lands | Only the harness itself: the fixture format loads, the scorer reads a scripted turn, and the report names failures. There is no loop yet, so the run passes by construction. |
+| The stub, from Phase 5 story 5-B on | The loop's plumbing. Given a scripted tool call, does the loop execute it, append the result, re-invoke, and stop correctly? |
 | Gemini (later, Chat 10) | The model's tool choice. Given a real question, does the model pick the right tool with the right arguments? |
 
-The same harness, the same question set, two different claims. Build it once.
+The same harness, the same question set, three different claims. Build it
+once. The runner takes a *turn executor* as its parameter: before 5-B that is
+a pass-through that feeds the backend's scripted chunks straight to the
+scorer; from 5-B it is the loop. Say which one ran in the report header, so a
+green run before 5-B is never read as a loop result.
 
 It is also the gate on two changes that otherwise ship unmeasured: a model
 version bump (open question 1) and a system prompt edit (open question 7, and
@@ -131,8 +136,13 @@ Run the set in CI on every change, against the stub, with no network.
 - Assert no socket opens, the same way Phase 2 story 2-F does.
 - Fail the build on a regression, not on a threshold that drifts upward.
   Against the stub the expected score is 100%, because the stub is scripted —
-  anything less is a loop bug. Say that in the CI job's comment, so nobody
-  later relaxes it thinking it is a model score.
+  anything less is a loop bug **once the loop exists**. Say that in the CI
+  job's comment, so nobody later relaxes it thinking it is a model score.
+- **Land the CI gate with Phase 5 story 5-B, not before it.** Stories 4-A
+  through 4-C can merge ahead of the loop; a CI gate that runs the
+  pass-through executor proves nothing about the loop and would need rework
+  when 5-B swaps the executor. Wire the job in the same PR as 5-B, or in the
+  PR right after it.
 - Keep the run fast. This is a plumbing check in CI, not a model benchmark.
 
 Follow the existing test layout: the runner sits under `server/test/`, next to
@@ -159,6 +169,20 @@ Three changes must pass a run before they merge:
 Against the stub, a run proves the plumbing. Against Gemini, it measures the
 model. State which run each change needs: 1 and 2 need a Gemini run and cannot
 merge on a stub pass alone; 3 needs both.
+
+**Until the Gemini backend exists (Chat 9), the Gemini half of the rule is
+suspended, and the rule must say so.** Chat 9 waits on Phase 0, and Phase 5
+story 5-A's `system-v1.md` is itself a prompt change — so an unconditional
+Gemini requirement would block 5-A and 5-B while Phases 1 through 8 are meant
+to run against the stub in parallel with Chat 0. Write the rule in two stages:
+
+- *Before Chat 9:* a prompt, declaration or model-config change merges on a
+  stub run. The first Gemini run (Chat 10) is the baseline, and it reviews
+  every prompt and declaration merged under this stage together.
+- *From Chat 9 on:* the full rule above.
+
+Put the stage, and the date it changes, in the prompt file's header comment
+(story 5-A) and in this document.
 
 Record the rule in this file, in the Phase 5 story 5-A prompt file header, and
 in the repository's contributing notes if there is a natural place.

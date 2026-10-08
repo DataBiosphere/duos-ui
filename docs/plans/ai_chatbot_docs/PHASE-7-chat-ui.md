@@ -94,17 +94,22 @@ getCsrfToken() }, body, signal })`. No `Authorization` header, ever (§7).
    `resetsAt`>". `409` with `turn_in_progress`: "a turn is already running in
    another tab". Each is a message in the panel, not a toast, because the user
    is looking at the panel.
-4. `503`: "chat is unavailable". Do not retry automatically.
-5. `200 text/event-stream`: parse frames.
+4. `413`: "message too long" — the body limit from Phase 1 story 1-D. Keep
+   the draft in the textarea so the user can shorten it.
+5. `503`: "chat is unavailable". Do not retry automatically.
+6. `200 text/event-stream`: parse frames.
 
 **The parser.** Read `response.body` with a `TextDecoder`; split on blank
 lines; for each frame read `event:` and `data:`; ignore comment lines (the
 `:keep-alive` frame). Dispatch on the four event types from the shared
 contract module and nothing else. `token` appends to the open assistant entry;
 `status` replaces the status line; `done` closes the entry and clears the
-status; `error` closes the entry, sets `phase: 'error'`, and maps its `code`:
-`session_expired` goes to the sign-out path, every other code renders its
-message. Treat an `error` frame as seriously as a failed request (ADR-002).
+status; `error` closes the entry, sets `phase: 'error'`, and maps its `code`
+from the Phase 2 story 2-A taxonomy: `session_expired` goes to the sign-out
+path; `upstream_rate_limited` renders the wait from the preceding `status`
+frame, worded as the DUOS API's limit rather than the chat's; every other code
+renders its message. Treat an `error` frame as seriously as a failed request
+(ADR-002).
 
 **Abort.** One `AbortController` per turn. Closing the panel aborts; sending a
 new question aborts the previous one first; unmount aborts. An abort leaves the
