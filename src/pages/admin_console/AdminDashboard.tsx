@@ -5,6 +5,7 @@ import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import ApartmentOutlinedIcon from '@mui/icons-material/ApartmentOutlined'
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined'
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined'
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
 import ConsoleDashboard from 'src/components/dashboard/ConsoleDashboard'
 import { COMMON_CONSOLE_RESOURCES } from 'src/components/dashboard/dashboardResources'
 import { ConsoleDashboardTileMeta } from 'src/components/dashboard/useConsoleDashboardSummary'
@@ -62,6 +63,12 @@ const sectionTiles: Tile[] = [
       { label: 'Agreements', value: s => s.daaAssociations?.agreements },
       { label: 'Researchers Approved', value: s => s.daaAssociations?.researchersApproved },
     ],
+  },
+  {
+    ...ADMIN_CONSOLE_SECTIONS[6],
+    icon: EmailOutlinedIcon,
+    description: 'Review the emails DUOS has sent, by type and time sent.',
+    stats: [],
   },
 ]
 
