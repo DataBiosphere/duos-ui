@@ -49,7 +49,8 @@ export const Email = {
     const emails = new Map<number, MailMessage>()
     let truncated = false
     let more = true
-    for (let offset = 0; more; offset += EMAIL_LOG_PAGE_SIZE) {
+    let offset = 0
+    while (more) {
       const { data } = await fetchGet<MailMessage[]>(url, {
         ...Config.authOpts(),
         params: { ...range, limit: EMAIL_LOG_PAGE_SIZE, offset },
@@ -69,6 +70,7 @@ export const Email = {
         }
         emails.set(email.emailId, email)
       }
+      offset += EMAIL_LOG_PAGE_SIZE
     }
     return { emails: [...emails.values()], truncated }
   },
