@@ -28,7 +28,6 @@ import {
 import { FormValidationState } from 'src/pages/dar_application/FormValidationState'
 import { getApprovedElectionDatasetIds } from 'src/utils/DarUtils'
 import { useNavigate } from 'react-router'
-import { isEqual } from 'src/utils/NodashUtil'
 import 'src/pages/dar_application/DataAccessRequestApplication.css'
 type ProgressReportApplicationProps = {
   readonly dar: CombinedDataAccessRequest // corresponds either to the parent DAR for a new application or an existing readonly progress report
@@ -210,27 +209,31 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     if (readOnlyMode) {
       return datasets.filter(dataset => dar.datasetIds.includes(dataset.datasetId))
     }
+    else if (formState.closeoutYesNo) {
+      return datasets
+    }
     else {
       const approvedDatasetIds = dar.elections ? getApprovedElectionDatasetIds(Object.values(dar.elections)) : []
       return datasets.filter(dataset => approvedDatasetIds.includes(dataset.datasetId))
         .filter(ds => ds.dacApproval)
     }
-  }, [datasets, readOnlyMode, dar.datasetIds, dar.elections])
+  }, [datasets, readOnlyMode, dar.datasetIds, dar.elections, formState.closeoutYesNo])
 
-  const datasetIdsMatch = (a: Dataset[], b: Dataset[]) =>
-    isEqual(
-      a.map(ds => ds.datasetId).sort((a, b) => (a - b)),
-      b.map(ds => ds.datasetId).sort((a, b) => (a - b)),
-    )
+  // The parent passes a freshly merged `dar` on every render, so key on dataset ids and
+  // closeout mode rather than array identity.
+  const approvedDatasetsKey = `${formState.closeoutYesNo}:${approvedDatasets.map(ds => ds.datasetId).join(',')}`
+  const initializedDatasetsKey = useRef<string | null>(null)
 
-  // required because the datasets state changes during component mount
+  // Reset selection when available datasets or closeout mode change, while preserving
+  // a researcher's removals during an ordinary progress report.
   useEffect(() => {
-    if (!datasetIdsMatch(approvedDatasets, formState.selectedDatasets)) {
-      onFormChange({ datasets: approvedDatasets }, false) // Mark as non-user interaction
+    if (initializedDatasetsKey.current !== approvedDatasetsKey) {
+      initializedDatasetsKey.current = approvedDatasetsKey
+      onFormChange({ datasets: approvedDatasets }, false)
       onSelectedDatasetChange(approvedDatasets)
     }
-    isMounted.current = true // Mark as mounted after initial setup
-  }, [approvedDatasets, onFormChange, onSelectedDatasetChange, formState.selectedDatasets])
+    isMounted.current = true
+  }, [approvedDatasetsKey, approvedDatasets, onFormChange, onSelectedDatasetChange])
 
   return (
     <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
@@ -251,7 +254,8 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
           <h2>Step 2: Dataset(s) in this DAR</h2>
           <p style={{ marginBottom: '1rem' }}>Currently selected datasets:</p>
           <SelectableDatasets
-            disabled={readOnlyMode}
+            key={formState.closeoutYesNo ? 'closeout' : 'progress-report'}
+            disabled={readOnlyMode || formState.closeoutYesNo}
             datasets={formState.datasets}
             setSelectedDatasets={onSelectedDatasetChange}
             referenceId={dar.referenceId}
