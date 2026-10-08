@@ -104,8 +104,9 @@ vi.mock('src/pages/progress_reports/SummarySection', () => {
 })
 
 vi.mock('src/pages/dar_application/SelectableDatasets', () => ({
-  default: ({ datasets }: { datasets: Dataset[] }) => (
+  default: ({ datasets, disabled, setSelectedDatasets }: { datasets: Dataset[], disabled?: boolean, setSelectedDatasets: (datasets: Dataset[]) => void }) => (
     <div data-testid="selectable-datasets">
+      {!disabled && <button onClick={() => setSelectedDatasets(datasets.slice(1))}>Remove dataset</button>}
       {(datasets || []).map((ds, i) => (
         <div key={i} className="collaborator-summary-card">
           {ds.name || ds.datasetName}
@@ -135,19 +136,19 @@ vi.mock('src/pages/progress_reports/DataManagementIncident', () => ({
 }))
 
 vi.mock('src/pages/progress_reports/DarCloseout', () => ({
-  default: ({ formState }: { formState: FormState }) => (
+  default: ({ formState, onFormChange }: { formState: FormState, onFormChange: (state: Partial<FormState>) => void }) => (
     <div data-testid="dar-closeout">
       <input
         id="closeoutYesNo_yes"
         type="radio"
         checked={formState.closeoutYesNo}
-        onChange={() => {}}
+        onChange={() => onFormChange({ closeoutYesNo: true })}
       />
       <input
         id="closeoutYesNo_no"
         type="radio"
         checked={!formState.closeoutYesNo}
-        onChange={() => {}}
+        onChange={() => onFormChange({ closeoutYesNo: false })}
       />
     </div>
   ),
@@ -157,11 +158,13 @@ vi.mock('src/pages/progress_reports/SubmitProgressReport', () => ({
   default: ({
     isValid,
     onValidate,
+    formState,
   }: {
+    formState: FormState
     isValid?: boolean
     onValidate?: () => void
   }) => (
-    <div>
+    <div data-testid="submit-state" data-dataset-ids={formState.datasetIds.join(',')}>
       {isValid
         ? <button data-cy="pr-submit-button">Submit</button>
         : (
@@ -371,6 +374,23 @@ describe('ProgressReportApplication', () => {
       darErrors: nihValid ? {} : { nihEraId: { valid: false, message: 'NIH ERA Commons ID is required' } },
     } as ReturnType<typeof validatePRFormData>))
     vi.mocked(validationFailed).mockReturnValue(true)
+  })
+
+  it('restores every collection dataset and disables removal when closeout is selected', async () => {
+    const datasets = [createDataset(1, 'Dataset 1', true), createDataset(2, 'Dataset 2', true), createDataset(3, 'Dataset 3', true)]
+    await mountComponent({ elections: { 1: createApprovedElection(1, 1), 2: createApprovedElection(2, 2) } }, false, datasets)
+    expect(screen.getByRole('button', { name: 'Remove dataset' })).toBeVisible()
+    fireEvent.click(screen.getByRole('button', { name: 'Remove dataset' }))
+    await waitFor(() => expect(screen.getByTestId('submit-state')).toHaveAttribute('data-dataset-ids', '2'))
+    fireEvent.click(document.getElementById('closeoutYesNo_yes')!)
+
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'Remove dataset' })).not.toBeInTheDocument()
+      expect(screen.getByTestId('submit-state')).toHaveAttribute('data-dataset-ids', '1,2,3')
+      expect(screen.getByText('Dataset 3')).toBeVisible()
+    })
+    fireEvent.click(document.getElementById('closeoutYesNo_no')!)
+    expect(screen.getByRole('button', { name: 'Remove dataset' })).toBeVisible()
   })
 
   it('renders the component without errors', async () => {
