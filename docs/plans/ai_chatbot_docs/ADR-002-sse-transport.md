@@ -1,6 +1,6 @@
 # ADR-002 — Stream chat turns with SSE over a hijacked Fastify reply
 
-**Status:** Proposed (2026-09-02) &nbsp;|&nbsp; **Work item:** Chat 1 (stories 1-B, 1-E, 1-F), Chat 5 (story 5-F)
+**Status:** Accepted (2026-10-08; proposed 2026-09-02). Decisions 4–6 stay proposals until story 1-B measures them. &nbsp;|&nbsp; **Work item:** Chat 1 (stories 1-B, 1-E, 1-F), Chat 5 (story 5-F)
 **Related:** [AI_Chatbot_Overview.md](../AI_Chatbot_Overview.md) §3.1, §5.2, §7, open question 2
 **Supersedes:** nothing
 

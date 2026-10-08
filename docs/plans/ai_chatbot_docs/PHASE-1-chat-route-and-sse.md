@@ -1,7 +1,7 @@
 # Phase 1: Stub `POST /api/chat` — route, CSRF and SSE
 
-**Phase:** 1 of 5 (near-term set) &nbsp;|&nbsp; **Effort:** ~6.25d &nbsp;|&nbsp; **Risk:** 🟡 Medium
-**Depends on:** BFF stories 5-F (Helmet + CSP), 5-G (rate limiting) and 6-D-pre (Playwright BFF sign-in). Story 1-A confirms all three.
+**Phase:** 1 of 8 (near-term set) &nbsp;|&nbsp; **Effort:** ~6d &nbsp;|&nbsp; **Risk:** 🟡 Medium
+**Depends on:** BFF stories 5-F (Helmet + CSP), 5-G (rate limiting) and 6-D-pre (Playwright BFF sign-in) — all merged, see story 1-A. Stories 1-B and the "live" exit criterion need a BEE with `bffEnabled: true`; no deployed environment is cut over yet (overview §1).
 **Blocks:** Phase 2 (the stub backend plugs into this route), Phase 5 (the loop replaces the canned events), Chat 7 (the UI)
 **Can parallelize with:** Phase 0
 **Reference:** [AI_Chatbot_Overview.md](../AI_Chatbot_Overview.md) §3.1, §5.2, §7, open questions 2 and 3 &nbsp;|&nbsp; [ADR-002](ADR-002-sse-transport.md)
@@ -40,33 +40,37 @@ and the CSRF plugin, so it registers in the same `bffEnabled` block, after
 `fastify.register(fastifyCsrf, csrfPluginOptions)`.
 
 **The `/api/*` path space is free.** The BFF proxies mount at `/duos-api/*`,
-`/ecm/*`, `/tdr/*` and `/bard/*`. Nothing else claims `/api/*`, so the chat
-route does not collide with a proxy prefix.
+`/ecm-api/*`, `/tdr-api/*` and `/bard-api/*`, and the unauthenticated routes at
+`/public/*`. Nothing claims `/api/*`, so the chat route does not collide with a
+proxy prefix. (Consent's own paths start with `/api/`, but they reach the BFF
+as `/duos-api/api/...`.)
+
+**Every authenticated BFF route runs the Fetch Metadata guard ahead of CSRF.**
+`server/src/security/fetchMetadata.ts` (BFF story 5-B) rejects a same-site
+sibling-subdomain request before it costs a session read. The proxies and
+`/auth/me` carry it; the chat route carries it too (story 1-C).
 
 ---
 
 ## Stories
 
-### 1-A: Confirm the three BFF dependencies are live
+### 1-A: The three BFF dependencies — confirmed live
 
-A gate, not a build. Verify each in `develop` before the rest of the phase
-starts, because each one changes a later story if it is missing or different.
+Not a story any more. All three merged, verified against `develop` at
+`30831e1a` on 2026-10-08:
 
-| Dependency | What to check | Why it matters here |
+| Dependency | State | What it gives this phase |
 |---|---|---|
-| BFF 5-F — Helmet + CSP | `@fastify/helmet` is registered in `server/src/index.ts`, and read the `connect-src` directive | The chat UI must fit the CSP. Same-origin SSE fits `connect-src 'self'`, but confirm the directive says that. |
-| BFF 5-G — rate limiting | `@fastify/rate-limit` is registered with `global: false` | Phase 6 keys a chat limit on the same plugin. A global cap would also throttle SPA asset loads. |
-| BFF 6-D-pre — Playwright BFF sign-in | A Playwright harness signs in through the BFF flow | Chat 8's E2E test has no other sign-in route. The legacy `test/e2e/auth.spec.ts` background flow is dead under the BFF. |
+| BFF 5-F — Helmet + CSP | Merged 2026-09-04 (#3907, #3908) | `connect-src` is `'self'` plus the banner bucket in BFF mode (`server/src/security/csp.ts`), so same-origin SSE fits. The policy is enforced in every deployed environment (`DUOS_CSP_REPORT_ONLY=false`). |
+| BFF 5-G — rate limiting | Merged 2026-09-04 (#3910–#3912) | `@fastify/rate-limit` is registered with `global: false` in `server/src/index.ts`; routes opt in through `config.rateLimit` (`server/src/security/rateLimit.ts`). Phase 6 keys the chat limit on it. |
+| BFF 6-D-pre — Playwright BFF sign-in | Merged 2026-09-25 (#3954, #3955) | `signInAs(role)` in `test/e2e/support/auth.ts` signs in through `POST /auth/test-signin`. The mock OIDC provider and mock Consent upstream (6-D-mock, #3962/#3963) are merged too. |
 
-Confirmed absent at commit `faf06354`: neither `@fastify/helmet` nor
-`@fastify/rate-limit` is a dependency, and `server/src/index.ts` registers
-neither. Treat this story as real work until that changes.
+One thing the table does not give: a deployed environment with the BFF on.
+`bffEnabled` is `false` in dev, staging and prod, and Epic 6 story 6-I has not
+started. Story 1-B and exit criterion 1 use a BEE with `bffEnabled: true`.
 
-If 5-F or 5-G has not merged, Phase 1 still proceeds — neither blocks the route
-itself. Record the gap and re-check before Chat 7 (UI) and Phase 6 (limits).
-
-**Files:** none. Record the finding in this file.
-**Effort:** 0.25d &nbsp;|&nbsp; **Risk:** Low
+**Files:** none.
+**Effort:** 0 &nbsp;|&nbsp; **Risk:** none
 
 ---
 
@@ -77,7 +81,10 @@ transport and therefore changes the client work in §5.2.
 
 Build the smallest thing that answers the question: a route that hijacks the
 reply and emits one frame per second for 90 seconds. Call it from a browser in
-dev, through the real proxy, not through a direct port.
+a BEE with `bffEnabled: true`, through the real `httpd-terra-proxy` sidecar,
+not through a direct port and not through the compose stack. The compose proxy
+runs image `v0.1.16`; the chart runs `v0.1.19`, so the local stack does not
+stand in for the deployed one.
 
 Measure four things:
 
@@ -85,8 +92,15 @@ Measure four things:
    that arrives on time proves the proxy does not buffer the body.
 2. **Does an idle stream survive longer than 60 seconds?** Emit nothing for 75
    seconds and see whether the connection lives.
-3. **What is the proxy's idle timeout?** Read it from the sidecar config rather
-   than inferring it from a test.
+3. **What is the proxy's idle timeout?** Read it from the running sidecar
+   rather than inferring it from a test. What the configuration says, as of
+   2026-10-08: the DUOS chart's `_site.conf.tpl` sets
+   `ProxyTimeout ${PROXY_TIMEOUT}`, and `charts/duos/templates/deployment.yaml`
+   sets no `PROXY_TIMEOUT` on the proxy container, so the image default
+   applies. Other Terra charts set it to 650 seconds through a shared helper;
+   DUOS does not use that helper. `kubectl exec` into the sidecar and read
+   `env`. If the default is below 60 seconds, add the env var to the DUOS chart
+   in this story.
 4. **Does the keep-alive frame reset that timer?**
 
 **Proposal — confirm in this story.** Apply these and report whether each was
@@ -119,24 +133,40 @@ Create `server/src/chat/route.ts` and register it in the `bffEnabled` block of
 Order matters, and ADR-002 explains why: the HTTP status commits at the first
 byte, so **every check that can fail the turn runs before the hijack.**
 
-1. `onRequest: fastify.csrfProtection` — the same option shape as
-   `POST /auth/logout`. The session cookie is `SameSite=Lax`, and dev and
-   staging share `broadinstitute.org` with sibling services, so this guard is
-   mandatory at launch (§7).
+1. `onRequest: [fetchMetadataGuard, fastify.csrfProtection]`, in that order —
+   the same pair the proxies run, and the same CSRF option shape as
+   `POST /auth/logout`. The Fetch Metadata guard goes first so a rejected
+   request costs no session read (`server/src/security/fetchMetadata.ts`). The
+   session cookie is `SameSite=Lax`, and dev and staging share
+   `broadinstitute.org` with sibling services, so both guards are mandatory at
+   launch (§7). Phase 6 adds the rate limiter to the same `onRequest` list.
 2. Return `401` with a JSON body when `request.session.accessToken` is absent.
-3. Refresh up front when the token expires inside `REFRESH_WINDOW_SECONDS`
-   (60 seconds, exported from `server/src/auth/refresh.ts`). Follow the shape in
-   `server/src/auth/me.ts`, which already does this outside the proxy layer.
-   Distinguish the two failure modes the way `refresh.ts` documents them:
-   `RefreshFailedError` means the session is dead, so answer `401`; anything
-   else is transient, so answer `502`.
+3. Decide the token with `tokenDisposition(request.session)` from
+   `server/src/auth/refresh.ts`, never with a hand-rolled expiry check. It has
+   three answers, and `server/src/auth/me.ts` handles all three outside the
+   proxy layer — follow it:
+   - `expired` — an E2E fixture session (`session.testFixture`) at its real
+     expiry. It cannot refresh. End the session through `endSession(request,
+     'expired')`, clear the cookie, answer `401`. Skip this and the Chat 8 E2E
+     breaks the first time a fixture token ages out mid-run.
+   - `refresh` — inside `REFRESH_WINDOW_SECONDS` (60 seconds). Call
+     `refreshAccessToken(request)`. Distinguish the two failure modes the way
+     `refresh.ts` documents them: `RefreshFailedError` means the session is
+     dead, so clear the cookie and answer `401`; anything else is transient, so
+     answer `502` and leave the session alone.
+   - `forward` — use the token as it is.
 4. Call `request.session.save()` explicitly, then hijack. **Nothing writes to
    the session after the hijack.**
 
-Tests: a missing CSRF header gives `403`; a wrong token gives `403`; no session
-gives `401`; an expired-but-refreshable token refreshes once and proceeds; a
-`RefreshFailedError` gives `401`; a transient refresh error gives `502`. Assert
-that a failed check sends JSON and never an SSE frame.
+Tests: a missing CSRF header gives `403`; a wrong token gives `403`; a request
+with `Sec-Fetch-Site: same-site` gives `403` with the `cross_site_request_blocked`
+body; no session gives `401`; an expired fixture session gives `401` and the
+session row is gone; an expired-but-refreshable token refreshes once and
+proceeds; a `RefreshFailedError` gives `401`; a transient refresh error gives
+`502`. Assert that a failed check sends JSON and never an SSE frame. Build the
+tests on `server/test/proxyTestHarness.ts`, which stands up the real session
+and CSRF plugins; `server/test/index.test.ts` mocks the session plugin away and
+cannot exercise this route.
 
 **Files:** `server/src/chat/route.ts`, `server/src/index.ts`, `server/test/chatRoute.test.ts`
 **Effort:** 1d &nbsp;|&nbsp; **Risk:** Low
@@ -239,7 +269,11 @@ Phase 5 it stops the model call and any in-flight tool call.
 **On shutdown.** `fastify.close()` waits for in-flight requests, so one held
 stream delays every rolling deploy (hazard 3). Keep a registry of open turns.
 Add an `onClose` hook that aborts every open turn, emits a final `error` frame
-with a `server_shutting_down` code, and ends each socket.
+with a `server_shutting_down` code, and ends each socket. The budget is fixed:
+the DUOS pod's `terminationGracePeriodSeconds` is 60, and the app container's
+`preStop` sleep (`app.shutdownSleep` in the chart values) comes out of it. A
+turn deadline of 60 seconds without this abort means a deploy that kills a pod
+mid-turn.
 
 **A turn that ends by disconnect is neither a success nor an error.** Record the
 distinction now, because story 5-E reads it.
@@ -301,9 +335,12 @@ can go at any point, including as a filler task.
 
 ## Exit criteria
 
-1. `POST /api/chat` exists in dev behind `bffEnabled`, and a browser can call it.
-2. A forged request without `X-CSRF-Token` gives `403`.
-3. A signed-out request gives `401` as JSON, never as an SSE frame.
+1. `POST /api/chat` exists behind `bffEnabled`, and a browser can call it in a
+   BEE with the flag on.
+2. A forged request without `X-CSRF-Token` gives `403`, and so does a
+   same-site request with Fetch Metadata headers.
+3. A signed-out request, or an expired fixture session, gives `401` as JSON,
+   never as an SSE frame.
 4. A stream emits its first frame immediately through the real reverse proxy,
    and survives longer than 60 seconds idle.
 5. The four event types exist in one shared module that the client imports.

@@ -1,6 +1,6 @@
 # Phase 3: Consent tool client and the two v1 tools
 
-**Phase:** 3 of 5 (near-term set) &nbsp;|&nbsp; **Effort:** ~5.5d &nbsp;|&nbsp; **Risk:** 🔴 High — this is the security boundary
+**Phase:** 3 of 8 (near-term set) &nbsp;|&nbsp; **Effort:** ~5.5d &nbsp;|&nbsp; **Risk:** 🔴 High — this is the security boundary
 **Depends on:** Phase 2 story 2-A for `ToolDeclaration` and `ToolResult`
 **Blocks:** Phase 4 (the harness asserts tool choice), Phase 5 (the loop executes these tools)
 **Can parallelize with:** Phase 0, and with Phases 2-B through 2-F once 2-A lands
@@ -71,7 +71,11 @@ Recommended split, to confirm in the story:
 
 The timeout matters. A tool call that hangs burns the turn's wall-clock deadline
 (story 5-C) and gives the user nothing. Set a per-call timeout well below the
-turn deadline, and state the arithmetic in a comment.
+turn deadline, and state the arithmetic in a comment. The precedent is
+`UPSTREAM_TIMEOUT_MS = 5000` in `server/src/auth/me.ts`, applied through
+`AbortSignal.timeout`; combine it with the turn's signal through
+`AbortSignal.any`. Dataset search can run slower than the profile call, so
+measure one real search in dev before you keep the five-second number.
 
 Tests: the bearer token comes from the session and appears in no log; a hung
 upstream trips the per-call timeout; the turn's `AbortSignal` cancels an

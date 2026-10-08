@@ -1,6 +1,6 @@
 # Phase 0: Compliance and Infosec — one ask
 
-**Phase:** 0 of 5 (near-term set) &nbsp;|&nbsp; **Effort:** 2–3d of drafting, then an unknown review wait &nbsp;|&nbsp; **Risk:** 🔴 High
+**Phase:** 0 of 8 (near-term set) &nbsp;|&nbsp; **Effort:** 2–3d of drafting, then an unknown review wait &nbsp;|&nbsp; **Risk:** 🔴 High
 **Depends on:** nothing
 **Blocks:** Chat 9 (Vertex), Chat 10 (prompt tuning), Chat 11 (rollout). It blocks no work in Phases 1–5.
 **Can parallelize with:** Phases 1–5, all of which run against the stub backend

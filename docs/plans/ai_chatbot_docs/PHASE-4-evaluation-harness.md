@@ -1,6 +1,6 @@
 # Phase 4: Evaluation fixtures and the tool-choice harness
 
-**Phase:** 4 of 5 (near-term set) &nbsp;|&nbsp; **Effort:** ~4d &nbsp;|&nbsp; **Risk:** 🟡 Medium
+**Phase:** 4 of 8 (near-term set) &nbsp;|&nbsp; **Effort:** ~4d &nbsp;|&nbsp; **Risk:** 🟡 Medium
 **Depends on:** Phase 2 (the backend interface and the fixture format), Phase 3 (the tool declarations the set asserts against)
 **Blocks:** Phase 5 — the loop must have this check from its first commit
 **Can parallelize with:** Phase 0

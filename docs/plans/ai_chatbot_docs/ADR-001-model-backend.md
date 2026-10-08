@@ -1,6 +1,6 @@
 # ADR-001 — Use Vertex AI in every environment; run no local model
 
-**Status:** Proposed (2026-08-28) &nbsp;|&nbsp; **Work item:** Chat 9 (Vertex), Chat 2 (stub)
+**Status:** Accepted (2026-10-08; proposed 2026-08-28) &nbsp;|&nbsp; **Work item:** Chat 9 (Vertex), Chat 2 (stub)
 **Related:** [AI_Chatbot_Overview.md](../AI_Chatbot_Overview.md) §2, §3.2, §4.1, open questions 1 and 5
 **Raised by:** review feedback on duos-ui [#3892](https://github.com/DataBiosphere/duos-ui/pull/3892)
 

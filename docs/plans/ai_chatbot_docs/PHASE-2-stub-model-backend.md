@@ -1,6 +1,6 @@
 # Phase 2: Stub model backend
 
-**Phase:** 2 of 5 (near-term set) &nbsp;|&nbsp; **Effort:** ~5d &nbsp;|&nbsp; **Risk:** 🟡 Medium
+**Phase:** 2 of 8 (near-term set) &nbsp;|&nbsp; **Effort:** ~5d &nbsp;|&nbsp; **Risk:** 🟡 Medium
 **Depends on:** Phase 1 for the route and the event contract (stories 1-E, 1-F)
 **Blocks:** Phase 4 (the harness runs against a backend), Phase 5 (the loop drives a backend), Chat 8 (E2E), Chat 9 (Vertex implements the same interface)
 **Can parallelize with:** Phase 0, and with Phase 3 once story 2-A lands

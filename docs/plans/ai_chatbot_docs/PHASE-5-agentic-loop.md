@@ -1,6 +1,6 @@
 # Phase 5: The agentic loop, with hard bounds
 
-**Phase:** 5 of 5 (near-term set) &nbsp;|&nbsp; **Effort:** ~6d &nbsp;|&nbsp; **Risk:** 🔴 High
+**Phase:** 5 of 8 (near-term set) &nbsp;|&nbsp; **Effort:** ~6d &nbsp;|&nbsp; **Risk:** 🔴 High
 **Depends on:** Phase 1 (route, events, lifecycle), Phase 2 (backend interface and stub), Phase 3 (tool registry), Phase 4 (the harness that gates it)
 **Blocks:** Chat 7 (UI), Chat 8 (E2E), Chat 9 (Vertex), Chat 10 (prompt tuning)
 **Can parallelize with:** Phase 0
@@ -178,8 +178,32 @@ no frame follows a `done` or an `error`.
 
 ### 5-E: Per-turn metrics
 
-Record the operational shape of every turn. Follow the Phase 6 metrics pattern
-from BFF story 6-G.
+Record the operational shape of every turn. Follow the Phase 6 pattern from BFF
+stories 6-F and 6-G: **one structured completion event per turn, and a Cloud
+Logging log-based metric on it.** There is no metrics library in the server.
+
+The event shape is story 6-F's, which is merged (`server/src/auth/authEvents.ts`):
+a stable `event` name, an `outcome` field, and an allowlist of labels the
+caller names one by one. Add a `chat.turn.completed` event through the same
+helper shape — either `logAuthEvent` itself or a sibling `logChatEvent` in
+`server/src/chat/metrics.ts` that writes the same fields. Every event carries
+`idp` from `sessionIdp(request)`, so chat turns join the provider-split views
+the auth events already have.
+
+Two facts about the logger decide the field names (`server/src/logging.ts`):
+
+- Pino redacts `userId`, `email`, `sid` and `sessionId` on every line, at the
+  top level and one level down. A per-user turn count must therefore carry
+  `userHash: hashValue(session.userId)` — the same digest the refresh code logs
+  as `sidHash`. Never log the raw `userId` and expect it to survive.
+- The `err` serializer drops non-Error causes and response bodies. Log a tool
+  failure as an `Error`, and never attach the upstream body.
+
+Story 6-G's metric definitions landed and were reverted (#3994) over a
+Postgres auth conflict under FIPS Node; PR #4003 re-lands them, and they will
+be in place before this phase starts. Add the chat rows to
+`docs/observability/bff-metrics.md` when that document exists in `develop`;
+until then, record the filter in this story.
 
 Record: duration, iteration count, tool-call count by tool, input and output
 token counts, and the end reason.

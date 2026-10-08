@@ -1,7 +1,7 @@
 # AI Chat Implementation Plan — Post-BFF
 
 **Project:** duos-ui
-**Date:** August 2026
+**Date:** August 2026, revised 2026-10-08 against `develop` at `30831e1a`
 
 Parent Epic: https://broadworkbench.atlassian.net/browse/DT-3069
 
@@ -49,8 +49,9 @@ The sequence is this feature's own. It does not continue the BFF numbering in
 
 ### Phase documents
 
-Chats 0 through 5 are expanded into ticket-sized stories. Chats 6 through 13
-are still high level here; expand them when their phase starts.
+Chats 0 through 8 are expanded into ticket-sized stories. Chats 9 through 13
+are still high level here; expand them when Chat 0 returns, because they
+change target if the answer is no.
 
 | Phase | Covers | Stories |
 |---|---|---|
@@ -60,6 +61,9 @@ are still high level here; expand them when their phase starts.
 | [PHASE-3](ai_chatbot_docs/PHASE-3-consent-tool-client.md) | Chat 3 — Consent tool client and the two v1 tools | 6 |
 | [PHASE-4](ai_chatbot_docs/PHASE-4-evaluation-harness.md) | Chat 4 — evaluation fixtures and tool-choice harness | 5 |
 | [PHASE-5](ai_chatbot_docs/PHASE-5-agentic-loop.md) | Chat 5 — agentic loop with hard bounds | 6 |
+| [PHASE-6](ai_chatbot_docs/PHASE-6-limits-and-quota.md) | Chat 6 — burst limit, daily quota, concurrency cap | 5 |
+| [PHASE-7](ai_chatbot_docs/PHASE-7-chat-ui.md) | Chat 7 — panel, messages, stream hook, flag, accessibility | 6 |
+| [PHASE-8](ai_chatbot_docs/PHASE-8-e2e.md) | Chat 8 — Playwright E2E on the BFF harness | 4 |
 
 ---
 
@@ -78,8 +82,11 @@ them; it does not rebuild them.
 | Client CSRF helper | `src/libs/ajax/csrf.ts` | `X-CSRF-Token` header on chat requests |
 | Client session state (`/auth/me`) | `src/libs/auth/session.ts` | Show or hide the chat button |
 | Upstream proxy pattern at `/duos-api/*` | `server/src/proxy/` | Nothing directly — it frees the `/api/*` path space for the chat route |
-| Helmet CSP + rate limits (Phase 5, stories 5-F / 5-G — **not merged yet**) | `server/src/index.ts` | Chat must fit the CSP; chat route gets a rate limit |
-| BFF E2E sign-in for Playwright (Phase 6, story 6-D-pre) | `cypress`/Playwright harness | End-to-end chat tests |
+| Helmet CSP + rate limits (Phase 5, stories 5-F / 5-G — merged 2026-09-04, PRs #3907–#3912) | `server/src/index.ts`, `server/src/security/` | Chat must fit the CSP; chat route gets a rate limit |
+| Fetch Metadata guard (Phase 5, story 5-B) | `server/src/security/fetchMetadata.ts` | Runs ahead of CSRF on every authenticated BFF route; `POST /api/chat` gets it too (§3.1) |
+| BFF E2E sign-in for Playwright (Phase 6, story 6-D-pre — merged 2026-09-25, PRs #3954/#3955) | `test/e2e/support/auth.ts` (`signInAs`), `POST /auth/test-signin` | End-to-end chat tests |
+| Mock OIDC provider + mock Consent upstream (Phase 6, story 6-D-mock) | `test/e2e/mocks/` | A network-free E2E project for the chat (Chat 8) |
+| Structured log events (Phase 6, story 6-F) | `server/src/auth/authEvents.ts`, `server/src/logging.ts` | The shape every chat event follows (§3.2) |
 | Session `userId` = the B2C email claim | `server/src/auth/callback.ts` | Rate-limit key that matches Consent's own bucket key (§3.4) |
 | Per-user Consent API rate limit — [consent#2976](https://github.com/DataBiosphere/consent/pull/2976), merged 2026-07-16 | Consent `RateLimitFilter` | The budget every chat tool call spends (§3.4) |
 
@@ -89,10 +96,27 @@ token is accepted for `/api/*` calls. Two caveats follow, both in §3.4: the
 chat shares the existing per-user API rate limit, and the daily quota needs a
 table in a schema that Consent owns.
 
-Two rows above are not live today. Stories 5-F, 5-G and 6-D-pre are the only
-hard dependencies for the chat. Story 6-J (legacy removal) only simplifies the
-feature flag, so chat work does not have to wait for all of Phase 6. Chat 1
-(§6) confirms the three are live before later work depends on them.
+Every row above is live in `develop` as of 2026-10-08. Stories 5-F, 5-G and
+6-D-pre were the only hard dependencies for the chat, and all three are merged.
+Story 6-J (legacy removal) only simplifies the feature flag, so chat work does
+not have to wait for all of Phase 6.
+
+**One dependency remains, and it is the cutover, not a story.** `bffEnabled` is
+`false` in every deployed environment (`values/app/duos/live/{dev,staging,prod}.yaml`
+in `terra-helmfile`), and Epic 6 story 6-I has not started. The chat route
+registers inside the `bffEnabled` block of `server/src/index.ts`, so nothing
+under `/api/chat` answers in a deployed environment until that environment is
+cut over. Two things follow:
+
+- Every story can be built and unit-tested against `develop` now. The E2E
+  harness already runs the production server with `bffEnabled: true`.
+- "Live in dev" (Chat 1) and the proxy measurement (story 1-B) need a BEE with
+  `bffEnabled: true`, or the dev cutover. Plan on the BEE; do not wait for 6-I.
+
+One row is in flux: story 6-G's log-based metrics landed and were reverted
+(#3994, a Postgres MD5-versus-SCRAM auth conflict under FIPS Node). PR #4003
+re-lands it, and it will be in place before this plan starts. The event
+*shape* the chat follows is story 6-F's, which is merged and unaffected.
 
 ---
 
@@ -130,9 +154,16 @@ High-level items only. Each becomes a story with full detail after approval.
 ### 3.1 `POST /api/chat` route
 
 - Register a Fastify plugin after the session and CSRF middleware.
-- Guard the route with `fastify.csrfProtection` (same pattern as `POST /auth/logout`).
+- Guard the route with `fetchMetadataGuard` first, then `fastify.csrfProtection`
+  (same pattern as `POST /auth/logout`). Every authenticated BFF route runs the
+  Fetch Metadata guard ahead of CSRF (`server/src/security/fetchMetadata.ts`);
+  the chat route is not an exception.
 - Return `401` when `request.session.accessToken` is absent, and refresh the
-  token up front when it is inside `REFRESH_WINDOW_SECONDS`.
+  token up front when it is inside `REFRESH_WINDOW_SECONDS`. Use
+  `tokenDisposition()` from `server/src/auth/refresh.ts`, not a hand-rolled
+  expiry check: it returns `expired` for an E2E fixture session, and that case
+  must end the session and answer `401` the way `/auth/me` does, or the Chat 8
+  E2E breaks at token expiry.
 - Stream the answer with SSE (Server-Sent Events). Four event types:
   `token`, `status`, `done`, `error`. This is a contract with the client, so it
   stays here.
@@ -189,7 +220,13 @@ Record them here, and let Chat 1 pick the fix and the numbers:
   and the bill runs with it. The loop story picks the numbers.
 - Emit `status` events around tool calls and `token` events for text.
 - Record per turn: duration, iteration count, tool-call count, token counts,
-  and error type. Follow the Phase 6 metrics pattern (story 6-G).
+  and error type. Follow the Phase 6 pattern: one structured completion event
+  per turn through the story 6-F helper shape (`logAuthEvent` in
+  `server/src/auth/authEvents.ts`: a stable `event` name, an `outcome` field,
+  an allowlist of labels), and a Cloud Logging log-based metric on that event
+  (story 6-G). Pino redacts `userId` and `email` on every line
+  (`server/src/logging.ts`), so a per-user count must carry `hashValue(userId)`
+  under another field name, as the refresh code does with `sidHash`.
 - Keep a fixture set of questions with recorded tool results, so a prompt edit
   or a model-version bump has a regression check. This lands as its own story
   **before** the loop story, not after. One E2E test does not cover tool choice.
@@ -248,17 +285,30 @@ by the replica count. `podCount` comes from `.Values.replicas` in
 so the divisor always tracks the real pod count. Apply the same shape to
 `/api/chat`:
 
-1. Register `@fastify/rate-limit` with `global: false`. The same Fastify
-   instance serves every SPA asset through `@fastify/vite`, so a low global cap
-   blocks page loads (Phase 5, story 5-G).
+1. `@fastify/rate-limit` is already registered with `global: false` (Phase 5,
+   story 5-G, `server/src/security/rateLimit.ts`). The same Fastify instance
+   serves every SPA asset through `@fastify/vite`, so a low global cap blocks
+   page loads. The chat route opts in through its own route `config.rateLimit`,
+   like `/auth/login`.
 2. Set `max` to `ceil(turnsPerMinute / DUOS_REPLICA_COUNT)`, and deliver the
-   divisor from `.Values.replicas` exactly as the Consent chart does.
+   divisor from `.Values.replicas` exactly as the Consent chart does. **This is
+   new work in `terra-helmfile`:** the DUOS chart delivers no replica-count
+   value today (`charts/duos/templates/deployment.yaml` sets no such env var),
+   so Chat 6 files that change alongside the route.
 3. Key on `request.session.userId`, not `request.ip`. `callback.ts` sets
    `userId` to the B2C email claim — the same key Consent's filter uses — so
-   one person maps to one bucket on both sides.
+   one person maps to one bucket on both sides. The session is available to the
+   key generator: with `global: false` the limiter attaches a *route*-level
+   `onRequest` hook, which Fastify runs after the instance-level session hook
+   (`rateLimit.ts` documents this ordering). The existing limiter keys on IP
+   only because its routes run before a session exists.
 4. Choose `turnsPerMinute` as a multiple of the replica count. Chat limits are
    small numbers, so the rounding error is proportionally far larger than it is
    at Consent's 100 per minute.
+5. Make the number an env override, `DUOS_RATE_LIMIT_CHAT_MAX`, through the
+   existing `maxFromEnv` helper. The Playwright config already raises
+   `DUOS_RATE_LIMIT_LOGIN_MAX` so parallel workers do not throttle each other;
+   the chat limit needs the same override in `playwright.config.ts`.
 
 **Spend Control needs a durable tracker.** A per-minute bucket bounds bursts,
 not spend: it resets on every pod restart and forgets an idle user in minutes.
@@ -267,9 +317,12 @@ session store already uses and which every pod shares.
 
 The quota must outlive a logout and a session rotation, so it cannot sit inside
 `user_sessions.sess`. It needs its own table, and Consent owns that schema
-(`server/test/load/README.md`). Settle the migration route before the quota
-story starts: a Consent Liquibase changeset, or a schema the BFF owns. This is
-the one Consent-side change the chat needs (§1).
+(`server/test/load/README.md`). The migration route is settled (open question
+6): a Consent Liquibase changeset in the existing BFF series —
+`changelog-consent-2026-06-16-bff-01-user-sessions.xml` and
+`-02-user-session-audit.xml` already live there, included from
+`changelog-master.xml`. The quota table is `bff-03`. This is the one
+Consent-side change the chat needs (§1).
 
 Call it a turn quota, because that is what it is. A turn count is not a dollar
 ceiling: turns differ in history size, iteration count and output length. §3.2
@@ -305,6 +358,9 @@ model files on anyone's disk (ADR-001).
 - Compose must mount `~/.config/gcloud` read-only into the `app` container and
   set the project. That mount hands the container the developer's own Google
   identity, which is wider than a scoped service account — DEVNOTES must say so.
+- The dev container (`.devcontainer/`, merged 2026-10-01 under DT-4206) needs
+  the same mount and the same warning. `scripts/setup-devcontainer.sh` is the
+  place to check that the credential file exists, next to its existing checks.
 - Set the quota project (`gcloud auth application-default set-quota-project`),
   or the first call fails with an unhelpful error.
 - **Verify the auth path under `node --enable-fips`.** The `app` service runs
@@ -382,20 +438,30 @@ backend (§3.2) carries every story below it while that review runs.
 The other unknown to reach early is whether SSE survives the reverse proxy
 (open question 2). Chat 1 answers it in about a day.
 
-Chats 0 through 5 are expanded into stories in the phase documents:
+Chats 0 through 8 are expanded into stories in the phase documents:
 [PHASE-0](ai_chatbot_docs/PHASE-0-compliance-and-data-contract.md),
 [PHASE-1](ai_chatbot_docs/PHASE-1-chat-route-and-sse.md),
 [PHASE-2](ai_chatbot_docs/PHASE-2-stub-model-backend.md),
 [PHASE-3](ai_chatbot_docs/PHASE-3-consent-tool-client.md),
-[PHASE-4](ai_chatbot_docs/PHASE-4-evaluation-harness.md) and
-[PHASE-5](ai_chatbot_docs/PHASE-5-agentic-loop.md). Chats 6 through 13 stay
-high level here until their phase starts.
+[PHASE-4](ai_chatbot_docs/PHASE-4-evaluation-harness.md),
+[PHASE-5](ai_chatbot_docs/PHASE-5-agentic-loop.md),
+[PHASE-6](ai_chatbot_docs/PHASE-6-limits-and-quota.md),
+[PHASE-7](ai_chatbot_docs/PHASE-7-chat-ui.md) and
+[PHASE-8](ai_chatbot_docs/PHASE-8-e2e.md). Chats 9 through 13 stay high level
+here until Chat 0 returns.
+
+**Housekeeping before the first ticket.** Draft PR
+[#3487](https://github.com/DataBiosphere/duos-ui/pull/3487) (DT-3266, May 2026)
+is the Ollama proof of concept. It routes tool calls through an MCP endpoint and
+keeps sessions in Redis, and both contradict this plan. Close it with a comment
+that points here, and delete the `fb-dt-2388-ai-chatbot` branch with it, so
+nobody reads either as the design.
 
 ```
 Chat 0.  Compliance + Infosec: field-level data contract AND the dev role grant,
          one ask                                       (open question 5)
          ── everything below runs against the stub, in parallel with Chat 0 ──
-Chat 1.  Stub POST /api/chat: CSRF, SSE, keep-alive, canned events, live in dev
+Chat 1.  Stub POST /api/chat: CSRF, SSE, keep-alive, canned events, live in a BEE
 Chat 2.  Stub model backend: recorded fixtures, multi-iteration turns, failures
 Chat 3.  Consent tool client + two bounded tool declarations
 Chat 4.  Evaluation fixtures + tool-choice harness
@@ -488,7 +554,17 @@ backend interface provider-neutral.
 2. **SSE through the reverse proxy.** The app sits behind one reverse-proxy
    hop (`httpd-terra-proxy` sidecar in k8s). Verify that the proxy does not
    buffer SSE responses and that its idle timeout exceeds a 60-second chat
-   turn. Test this in dev before the UI work lands.
+   turn. Test this in a BEE with `bffEnabled: true` before the UI work lands.
+
+   What is known from configuration, 2026-10-08: the DUOS chart's `site.conf`
+   template sets `ProxyTimeout ${PROXY_TIMEOUT}`, and the chart sets no
+   `PROXY_TIMEOUT` on the proxy container, so the image default applies and the
+   value is not in any file this team owns. Story 1-B reads it from the running
+   sidecar (`kubectl exec … env`) rather than inferring it. The pod's
+   `terminationGracePeriodSeconds` is 60, which bounds the shutdown abort in
+   story 1-F. The compose stack runs an older image tag than the chart
+   (`v0.1.16` against `v0.1.19`), so a local measurement does not stand in for
+   the BEE one.
 
 3. **Conversation history cap.** Agree on the cap (suggested: last 10 turns)
    before implementation, so the client and the server use one limit.
@@ -512,9 +588,13 @@ backend interface provider-neutral.
    answer worth having early is whether DUOS text may reach Vertex **at all** —
    because a no changes the architecture, not the schedule.
 
-6. **Where the quota table lives.** The daily quota needs a durable table, and
-   Consent owns the schema the BFF already uses. Decide before Chat 6: a Consent
-   Liquibase changeset, or a schema the BFF owns. See §3.4.
+6. **Where the quota table lives — answered 2026-10-08.** A Consent Liquibase
+   changeset. Consent already carries the two BFF tables as
+   `changelog-consent-2026-06-16-bff-01-user-sessions.xml` and
+   `-02-user-session-audit.xml`, so the quota table is `bff-03` in the same
+   series, and `server/test/load/README.md` gains its `CREATE TABLE` for the
+   scratch database. No cross-team step applies: the Consent schema is this
+   team's. See §3.4 and Phase 6 story 6-B.
 
 7. **What the system prompt says.** The loop needs one, so this is a question of
    content and ownership, not of whether.
