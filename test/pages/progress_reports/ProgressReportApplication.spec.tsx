@@ -393,6 +393,36 @@ describe('ProgressReportApplication', () => {
     expect(screen.getByRole('button', { name: 'Remove dataset' })).toBeVisible()
   })
 
+  it('keeps dataset removals when the parent re-renders with an equal dar', async () => {
+    const datasets = [createDataset(1, 'Dataset 1', true), createDataset(2, 'Dataset 2', true)]
+    const elections = { 1: createApprovedElection(1, 1), 2: createApprovedElection(2, 2) }
+    const renderWith = (dar: CombinedDataAccessRequest) => (
+      <BrowserRouter>
+        <ProgressReportApplication
+          dar={dar}
+          datasets={datasets}
+          readOnlyMode={false}
+          researcher={researcher}
+          countriesOfOperation={[]}
+        />
+      </BrowserRouter>
+    )
+    // The parent builds `dar` with merge() on each render, so every render passes new references
+    const freshDar = () => ({ ...baseDar, elections: { ...elections }, datasetIds: [...(baseDar.datasetIds ?? [])] }) as CombinedDataAccessRequest
+    let rerender: (ui: React.ReactElement) => void = () => {}
+    await act(async () => {
+      rerender = render(renderWith(freshDar())).rerender
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Remove dataset' }))
+    await waitFor(() => expect(screen.getByTestId('submit-state')).toHaveAttribute('data-dataset-ids', '2'))
+
+    await act(async () => {
+      rerender(renderWith(freshDar()))
+    })
+
+    expect(screen.getByTestId('submit-state')).toHaveAttribute('data-dataset-ids', '2')
+  })
+
   it('renders the component without errors', async () => {
     await mountComponent({})
     expect(document.querySelector('.accordion-step-container')).toBeVisible()

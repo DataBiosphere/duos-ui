@@ -219,18 +219,21 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
     }
   }, [datasets, readOnlyMode, dar.datasetIds, dar.elections, formState.closeoutYesNo])
 
-  const initializedDatasets = useRef<Dataset[] | null>(null)
+  // The parent passes a freshly merged `dar` on every render, so key on dataset ids and
+  // closeout mode rather than array identity.
+  const approvedDatasetsKey = `${formState.closeoutYesNo}:${approvedDatasets.map(ds => ds.datasetId).join(',')}`
+  const initializedDatasetsKey = useRef<string | null>(null)
 
   // Reset selection when available datasets or closeout mode change, while preserving
   // a researcher's removals during an ordinary progress report.
   useEffect(() => {
-    if (initializedDatasets.current !== approvedDatasets) {
-      initializedDatasets.current = approvedDatasets
+    if (initializedDatasetsKey.current !== approvedDatasetsKey) {
+      initializedDatasetsKey.current = approvedDatasetsKey
       onFormChange({ datasets: approvedDatasets }, false)
       onSelectedDatasetChange(approvedDatasets)
     }
     isMounted.current = true
-  }, [approvedDatasets, onFormChange, onSelectedDatasetChange])
+  }, [approvedDatasetsKey, approvedDatasets, onFormChange, onSelectedDatasetChange])
 
   return (
     <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
