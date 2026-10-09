@@ -53,6 +53,10 @@ services:
       - --address=0.0.0.0
       - --port=5432
       - --health-check
+      # Without this, the proxy starts and answers /readiness with 200 even when
+      # the instance is unreachable, and `app` would start against a dead
+      # database. With it, the proxy exits at startup with the real error.
+      - --run-connection-test
       - ${CLOUDSQL_INSTANCE:?set CLOUDSQL_INSTANCE in .env.local (see the header of docker-compose.cloudsql.yaml)}
     # See setup step 4. The proxy binary runs under any UID; port 5432 and the
     # 9090 health server need no privileges.
@@ -60,10 +64,19 @@ services:
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: /secrets/adc.json
     volumes:
-      # Your own gcloud application-default credentials, read-only.
-      - ${GCLOUD_ADC_FILE:-~/.config/gcloud/application_default_credentials.json}:/secrets/adc.json:ro
+      # Your own gcloud application-default credentials, read-only. The long
+      # syntax lets us stop Compose from creating an empty directory when the
+      # file is missing; Docker then fails with a clear "source path does not
+      # exist" error instead of the proxy reading a directory.
+      - type: bind
+        source: ${GCLOUD_ADC_FILE:-~/.config/gcloud/application_default_credentials.json}
+        target: /secrets/adc.json
+        read_only: true
+        bind:
+          create_host_path: false
     healthcheck:
-      # /readiness answers 200 only after the proxy can reach the instance.
+      # /readiness answers 200 once the proxy has started; --run-connection-test
+      # above is what ties startup to a reachable instance.
       # Use 127.0.0.1, not localhost: wget tries ::1 first, and the proxy
       # health server listens on IPv4 loopback only.
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/readiness >/dev/null"]

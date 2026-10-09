@@ -180,8 +180,8 @@ UID 65532, so the proxy fails with `open /secrets/adc.json: permission denied`. 
 echo "CLOUDSQL_PROXY_USER=$(id -u):$(id -g)" >> .env.local
 ```
 
-Docker Desktop for Mac maps file ownership and needs no change. `render-configs.sh --write_env true` carries
-all four `CLOUDSQL_*`/`GCLOUD_*` variables forward when it regenerates `.env.local`.
+Docker Desktop for Mac maps file ownership and needs no change. `render-configs.sh --write_env true` copies every
+variable it does not manage, these included, unchanged when it regenerates `.env.local`.
 
 `--env-file .env.local` is required in every mode — the `${VAR:?...}` placeholders in these compose files are resolved
 by Compose's own YAML interpolation, which only reads a file literally named `.env` by default, and that name is

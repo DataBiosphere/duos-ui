@@ -150,6 +150,31 @@ existing_env() {
   fi
 }
 
+# Variables that write_env renders itself. Every other VAR=value line in an
+# existing .env.local is copied unchanged by extra_env_lines, quotes and all,
+# so compose-only settings (CLOUDSQL_INSTANCE, DUOS_HOST_PORT, ...) and any
+# optional server variable survive a re-run.
+MANAGED_VARS=" HOST HTTPS SSL_CRT_FILE SSL_KEY_FILE DUOS_SESSION_SECRET
+ DUOS_DB_HOST DUOS_DB_NAME DUOS_DB_PORT DUOS_DB_USER DUOS_DB_PASSWORD
+ DUOS_AZURE_CLIENT_ID DUOS_AZURE_CLIENT_SECRET DUOS_AZURE_ISSUER_URL
+ DUOS_OAUTH_REDIRECT_URI DUOS_POST_LOGOUT_REDIRECT_URI DUOS_API_URL
+ DUOS_ECM_URL DUOS_TDR_URL DUOS_BARD_URL DUOS_CSP_REPORT_ONLY "
+
+# Echo every VAR=value line of an existing .env.local whose VAR is not in
+# MANAGED_VARS, byte for byte.
+extra_env_lines() {
+  if [[ ! -f "$ENV_FILE" ]]; then
+    return 0
+  fi
+  local line name
+  grep -E '^[A-Za-z_][A-Za-z0-9_]*=' "$ENV_FILE" | while IFS= read -r line; do
+    name=${line%%=*}
+    if ! [[ "$MANAGED_VARS" =~ [[:space:]]"$name"[[:space:]] ]]; then
+      printf '%s\n' "$line"
+    fi
+  done
+}
+
 fetch_azure_client_secret() {
   echo "Fetching Azure B2C client secret from the terra-dev namespace"
   # kubectl's .data values are base64-wrapped, so the decode is mandatory:
@@ -180,9 +205,9 @@ write_env() {
   fetch_azure_client_secret
 
   # Per-setup values carry forward from an existing .env.local so a re-run
-  # (e.g. on cert rotation) never loses hand-filled configuration. Every
-  # variable this script knows is listed here; a variable that is not listed
-  # does NOT survive a re-run, so add new .env.local variables to this list.
+  # (e.g. on cert rotation) never loses hand-filled configuration. The
+  # variables below are re-rendered with defaults; every other variable in the
+  # file is copied unchanged at the end (see extra_env_lines).
   SESSION_SECRET=$(existing_env DUOS_SESSION_SECRET)
   if [[ -z "$SESSION_SECRET" || "$SESSION_SECRET" == "change-me-to-a-random-32-plus-char-string" ]]; then
     SESSION_SECRET=$(openssl rand -base64 32)
@@ -206,12 +231,8 @@ write_env() {
   TDR_URL=$(existing_env DUOS_TDR_URL)
   BARD_URL=$(existing_env DUOS_BARD_URL)
   CSP_REPORT_ONLY=$(existing_env DUOS_CSP_REPORT_ONLY)
-  # Compose-only settings. The server never reads them; the overlays do.
-  HOST_PORT=$(existing_env DUOS_HOST_PORT)
-  CLOUDSQL_INSTANCE=$(existing_env CLOUDSQL_INSTANCE)
-  GCLOUD_ADC_FILE=$(existing_env GCLOUD_ADC_FILE)
-  CLOUDSQL_PROXY_VERSION=$(existing_env CLOUDSQL_PROXY_VERSION)
-  CLOUDSQL_PROXY_USER=$(existing_env CLOUDSQL_PROXY_USER)
+  # Read before the redirect below truncates the file.
+  EXTRA_LINES=$(extra_env_lines)
 
   if [[ -f "$ENV_FILE" ]]; then
     echo "Backing up existing .env.local to .env.local.bak"
@@ -260,27 +281,12 @@ DUOS_BARD_URL=${BARD_URL:-$BARD_URL_DEFAULT}
 # does. Set true to only report violations while you debug the policy.
 DUOS_CSP_REPORT_ONLY=${CSP_REPORT_ONLY:-$CSP_REPORT_ONLY_DEFAULT}
 EOF
-    # Compose-only settings, written only when the previous file had them.
-    # CLOUDSQL_INSTANCE is required by docker-compose.cloudsql.yaml, so a
-    # re-run must not drop it.
-    if [[ -n "$HOST_PORT" || -n "$CLOUDSQL_INSTANCE" || -n "$GCLOUD_ADC_FILE" || -n "$CLOUDSQL_PROXY_VERSION" || -n "$CLOUDSQL_PROXY_USER" ]]; then
+    if [[ -n "$EXTRA_LINES" ]]; then
       echo
-      echo "# Docker compose settings carried forward from the previous .env.local."
-      if [[ -n "$HOST_PORT" ]]; then
-        echo "DUOS_HOST_PORT=$HOST_PORT"
-      fi
-      if [[ -n "$CLOUDSQL_INSTANCE" ]]; then
-        echo "CLOUDSQL_INSTANCE=$CLOUDSQL_INSTANCE"
-      fi
-      if [[ -n "$GCLOUD_ADC_FILE" ]]; then
-        echo "GCLOUD_ADC_FILE=$GCLOUD_ADC_FILE"
-      fi
-      if [[ -n "$CLOUDSQL_PROXY_VERSION" ]]; then
-        echo "CLOUDSQL_PROXY_VERSION=$CLOUDSQL_PROXY_VERSION"
-      fi
-      if [[ -n "$CLOUDSQL_PROXY_USER" ]]; then
-        echo "CLOUDSQL_PROXY_USER=$CLOUDSQL_PROXY_USER"
-      fi
+      echo "# Carried forward unchanged from the previous .env.local (this script"
+      echo "# does not manage these; e.g. docker compose settings such as"
+      echo "# CLOUDSQL_INSTANCE and DUOS_HOST_PORT)."
+      printf '%s\n' "$EXTRA_LINES"
     fi
   } > "$ENV_FILE"
   chmod 600 "$ENV_FILE"
