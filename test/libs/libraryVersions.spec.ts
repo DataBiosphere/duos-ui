@@ -51,6 +51,7 @@ describe('Library Versions - Tests', () => {
       expect(nonFeaturedLibraries).toContain('terra')
       expect(nonFeaturedLibraries).toContain('mgb')
       expect(nonFeaturedLibraries).toContain('nhlbi')
+      expect(nonFeaturedLibraries).toContain('hartwig')
     })
 
     it('includes all expected library keys', () => {

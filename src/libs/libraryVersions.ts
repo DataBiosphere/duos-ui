@@ -28,6 +28,7 @@ import PBNIcon from 'src/images/PBN_logo.jpg'
 import HelmsleyIcon from 'src/images/Helmsley_logo.png'
 import ccxdpIcon from 'src/images/ccxdp-logo.png'
 import ga4ghIcon from 'src/images/ga4gh-logo.svg'
+import hartwigIcon from 'src/images/hartwig-logo.svg'
 import nasaIcon from 'src/images/nasa-logo.svg'
 import nasaWormIcon from 'src/images/nasa-logo-worm.svg'
 
@@ -888,6 +889,23 @@ export const getLibraryVersions = (
       title: 'GA4GH Data Library',
       featured: false,
       order: 999,
+    },
+    'hartwig': {
+      query: {
+        bool: {
+          should: [
+            {
+              terms: {
+                [StudyDataEsFields.TAGS_KEYWORD]: ['Hartwig'],
+              },
+            },
+          ],
+        },
+      },
+      icon: hartwigIcon,
+      title: 'Hartwig Medical Foundation Data Library',
+      featured: false,
+      order: 26,
     },
   }
 }
