@@ -201,4 +201,36 @@ describe('Home page', () => {
       expect(screen.getByTestId('support-modal')).toBeInTheDocument()
     })
   })
+
+  describe('features by role', () => {
+    it.each([
+      ['researcher', 'Request controlled-access data in one application'],
+      ['submitter', 'Register studies and make them discoverable'],
+      ['dac', 'Review requests with full context'],
+      ['so', 'Authorize researchers at your institution'],
+    ])('renders the %s section', (id, title) => {
+      const { container } = renderHome(false)
+      const section = container.querySelector(`#role-${id}`)!
+      expect(section).not.toBeNull()
+      expect(section).toHaveTextContent(title)
+    })
+
+    it('scrolls to the matching section when a role chip is clicked', async () => {
+      const scrollIntoView = vi.fn()
+      Element.prototype.scrollIntoView = scrollIntoView
+      renderHome(false)
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Signing Officials' }))
+      })
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
+    })
+
+    it('opens contact modal from the data submitter section', async () => {
+      renderHome(false)
+      await act(async () => {
+        fireEvent.click(screen.getByText('Talk to our team'))
+      })
+      expect(screen.getByTestId('support-modal')).toBeInTheDocument()
+    })
+  })
 })
