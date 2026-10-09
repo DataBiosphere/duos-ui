@@ -23,7 +23,7 @@
 #      writes the ADC file owner-only (mode 600), so the bind mount below is
 #      unreadable unless the container runs as you. Add your own IDs:
 #        echo "CLOUDSQL_PROXY_USER=$(id -u):$(id -g)" >> .env.local
-#      Docker Desktop (Mac/Windows) maps file ownership and needs no change.
+#      Docker Desktop for Mac maps file ownership and needs no change.
 #
 # The proxy publishes no host port, so it cannot clash with a consent stack
 # that holds host port 5432. Containers on this compose network can reach it.
