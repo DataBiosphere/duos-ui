@@ -15,7 +15,8 @@
 #        gcloud --project broad-dsde-dev secrets versions access latest \
 #          --secret=consent-postgres-creds | jq -r .instance_name
 #   3. DUOS_DB_NAME, DUOS_DB_USER and DUOS_DB_PASSWORD in .env.local must be the
-#      dev values. DUOS_DB_HOST is set below and overrides any value in .env.local.
+#      dev values. DUOS_DB_HOST and DUOS_DB_PORT are set below and override any
+#      value in .env.local.
 #   4. Native Linux Docker only: the proxy image runs as UID 65532, and gcloud
 #      writes the ADC file owner-only (mode 600), so the bind mount below is
 #      unreadable unless the container runs as you. Add your own IDs:
@@ -35,6 +36,9 @@ services:
       - ${DUOS_HOST_PORT:-18080}:${PORT:-8080}
     environment:
       DUOS_DB_HOST: cloudsql-proxy
+      # The proxy listens on 5432 only (see its --port below), so a port kept in
+      # .env.local for a host-run database must not reach this mode.
+      DUOS_DB_PORT: "5432"
       # The proxy encrypts the link to Cloud SQL. The hop from `app` to the
       # proxy stays on the private compose network and does not speak TLS.
       DUOS_DB_SSL: "false"
