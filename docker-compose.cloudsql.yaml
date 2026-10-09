@@ -18,8 +18,7 @@
 #      dev values. DUOS_DB_HOST is set below and overrides any value in .env.local.
 #
 # The proxy publishes no host port, so it cannot clash with a consent stack
-# that holds host port 5432. Containers on this compose network can reach it;
-# nothing outside the network can.
+# that holds host port 5432. Containers on this compose network can reach it.
 #
 # WARNING: the BFF writes its session rows into the SHARED dev database.
 services:

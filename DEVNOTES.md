@@ -189,7 +189,9 @@ DUOS_SESSION_MAX_AGE_MS=      # cookie max-age in milliseconds (default: 2880000
 
 # PostgreSQL connection
 # DUOS_DB_HOST is not listed here — it's supplied by whichever compose overlay
-# you run with (see the three modes above); only set it to override that default.
+# you run with (see the three modes above). Only docker-compose.consent.yaml
+# honors a value set here; the standalone and Cloud SQL overlays set a fixed
+# hostname (db / cloudsql-proxy) that wins over .env.local.
 DUOS_DB_NAME=                 # database name
 DUOS_DB_PORT=5432             # defaults to 5432 if omitted
 DUOS_DB_USER=                 # database user
