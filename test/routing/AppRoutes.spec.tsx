@@ -98,6 +98,7 @@ const roleBACRoutes: string[] = [
   '/admin_manage_institutions',
   '/admin_manage_lc/',
   '/admin_daa_associations',
+  '/admin_email_log',
   '/admin_manage_dar_collections/',
   '/manage_add_dac_daa',
 ]
