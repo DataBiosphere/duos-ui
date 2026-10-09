@@ -180,7 +180,9 @@ write_env() {
   fetch_azure_client_secret
 
   # Per-setup values carry forward from an existing .env.local so a re-run
-  # (e.g. on cert rotation) never loses hand-filled configuration.
+  # (e.g. on cert rotation) never loses hand-filled configuration. Every
+  # variable this script knows is listed here; a variable that is not listed
+  # does NOT survive a re-run, so add new .env.local variables to this list.
   SESSION_SECRET=$(existing_env DUOS_SESSION_SECRET)
   if [[ -z "$SESSION_SECRET" || "$SESSION_SECRET" == "change-me-to-a-random-32-plus-char-string" ]]; then
     SESSION_SECRET=$(openssl rand -base64 32)
@@ -204,6 +206,11 @@ write_env() {
   TDR_URL=$(existing_env DUOS_TDR_URL)
   BARD_URL=$(existing_env DUOS_BARD_URL)
   CSP_REPORT_ONLY=$(existing_env DUOS_CSP_REPORT_ONLY)
+  # Compose-only settings. The server never reads them; the overlays do.
+  HOST_PORT=$(existing_env DUOS_HOST_PORT)
+  CLOUDSQL_INSTANCE=$(existing_env CLOUDSQL_INSTANCE)
+  GCLOUD_ADC_FILE=$(existing_env GCLOUD_ADC_FILE)
+  CLOUDSQL_PROXY_VERSION=$(existing_env CLOUDSQL_PROXY_VERSION)
 
   if [[ -f "$ENV_FILE" ]]; then
     echo "Backing up existing .env.local to .env.local.bak"
@@ -252,6 +259,25 @@ DUOS_BARD_URL=${BARD_URL:-$BARD_URL_DEFAULT}
 # does. Set true to only report violations while you debug the policy.
 DUOS_CSP_REPORT_ONLY=${CSP_REPORT_ONLY:-$CSP_REPORT_ONLY_DEFAULT}
 EOF
+    # Compose-only settings, written only when the previous file had them.
+    # CLOUDSQL_INSTANCE is required by docker-compose.cloudsql.yaml, so a
+    # re-run must not drop it.
+    if [[ -n "$HOST_PORT" || -n "$CLOUDSQL_INSTANCE" || -n "$GCLOUD_ADC_FILE" || -n "$CLOUDSQL_PROXY_VERSION" ]]; then
+      echo
+      echo "# Docker compose settings carried forward from the previous .env.local."
+      if [[ -n "$HOST_PORT" ]]; then
+        echo "DUOS_HOST_PORT=$HOST_PORT"
+      fi
+      if [[ -n "$CLOUDSQL_INSTANCE" ]]; then
+        echo "CLOUDSQL_INSTANCE=$CLOUDSQL_INSTANCE"
+      fi
+      if [[ -n "$GCLOUD_ADC_FILE" ]]; then
+        echo "GCLOUD_ADC_FILE=$GCLOUD_ADC_FILE"
+      fi
+      if [[ -n "$CLOUDSQL_PROXY_VERSION" ]]; then
+        echo "CLOUDSQL_PROXY_VERSION=$CLOUDSQL_PROXY_VERSION"
+      fi
+    fi
   } > "$ENV_FILE"
   chmod 600 "$ENV_FILE"
 }

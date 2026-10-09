@@ -17,9 +17,9 @@
 #   3. DUOS_DB_NAME, DUOS_DB_USER and DUOS_DB_PASSWORD in .env.local must be the
 #      dev values. DUOS_DB_HOST is set below and overrides any value in .env.local.
 #
-# The proxy publishes no host port. Only the `app` container can reach it, so
-# nothing else on your machine or network can use your credentials, and it
-# cannot clash with a consent stack that holds host port 5432.
+# The proxy publishes no host port, so it cannot clash with a consent stack
+# that holds host port 5432. Containers on this compose network can reach it;
+# nothing outside the network can.
 #
 # WARNING: the BFF writes its session rows into the SHARED dev database.
 services:
