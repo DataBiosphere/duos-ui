@@ -27,7 +27,7 @@ small independent fix.
 |---|---|
 | 1. `@fastify/session` `onSend` double-send | ADR-002 decisions 1–2; stories 1-C and 1-E; proved under a real loop in story 5-F |
 | 2. Reverse-proxy idle timeout and buffering | Story 1-B |
-| 3. `close()` waits for in-flight requests | Story 1-F |
+| 3. Nothing calls `close()` today, and `onClose` runs after in-flight requests | Story 1-F |
 | 4. The SPA fallback answers a mistyped `/api/*` with the client shell | Story 1-G |
 
 Two constraints from the existing server shape every story here.
@@ -134,42 +134,80 @@ Order matters, and ADR-002 explains why: the HTTP status commits at the first
 byte, so **every check that can fail the turn runs before the hijack.**
 
 1. `onRequest: [fetchMetadataGuard, fastify.csrfProtection]`, in that order —
-   the same pair the proxies run, and the same CSRF option shape as
-   `POST /auth/logout`. The Fetch Metadata guard goes first so a rejected
-   request costs no session read (`server/src/security/fetchMetadata.ts`). The
-   session cookie is `SameSite=Lax`, and dev and staging share
-   `broadinstitute.org` with sibling services, so both guards are mandatory at
-   launch (§7). Phase 6 adds the rate limiter to the same `onRequest` list.
+   the same pair the proxies and `/auth/me` run. (`POST /auth/logout` runs
+   CSRF only; it is the precedent for the CSRF option shape, not for the
+   pair.) The Fetch Metadata guard goes first so a rejected request costs no
+   CSRF check, no refresh and no upstream call. It does **not** avoid the
+   session read: `@fastify/session` hydrates in an instance-level `onRequest`
+   hook, and route hooks run after it — `rateLimit.ts` says so, and the
+   "costs no session read" line in `fetchMetadata.ts` is a stale comment to
+   fix in passing. The session cookie is `SameSite=Lax`, and dev and staging
+   share `broadinstitute.org` with sibling services, so both guards are
+   mandatory at launch (§7). Phase 6 adds the rate limiter to the same
+   `onRequest` list.
+
+   **Register the route in its own encapsulated plugin with its own error
+   handler.** The root `handleServerError` in `server/src/index.ts` answers a
+   CSRF rejection with `403 { error: 'An unexpected error occurred.' }`; only
+   the proxies' encapsulated handler (`upstreamProxy.ts`) maps
+   `FST_CSRF_MISSING_SECRET` and `FST_CSRF_INVALID_TOKEN` to
+   `{ error: 'csrf_validation_failed', reason }`. The client's
+   `isCsrfRejection()` matches on that body, so a chat `403` under the root
+   handler would never trigger the token refresh and retry in Phase 7 story
+   7-B. Lift the mapping into a shared helper and use it in the chat plugin's
+   `setErrorHandler`. (`/auth/logout` has the same gap today; note it as a
+   follow-up, do not fix it here.)
 2. Return `401` with a JSON body when `request.session.accessToken` is absent.
-3. Decide the token with `tokenDisposition(request.session)` from
-   `server/src/auth/refresh.ts`, never with a hand-rolled expiry check. It has
-   three answers, and `server/src/auth/me.ts` handles all three outside the
-   proxy layer — follow it:
-   - `expired` — an E2E fixture session (`session.testFixture`) at its real
-     expiry. It cannot refresh. End the session through `endSession(request,
-     'expired')`, clear the cookie, answer `401`. Skip this and the Chat 8 E2E
-     breaks the first time a fixture token ages out mid-run.
-   - `refresh` — inside `REFRESH_WINDOW_SECONDS` (60 seconds). Call
-     `refreshAccessToken(request)`. Distinguish the two failure modes the way
-     `refresh.ts` documents them: `RefreshFailedError` means the session is
-     dead, so clear the cookie and answer `401`; anything else is transient, so
-     answer `502` and leave the session alone.
+3. Decide the token with `tokenDisposition()` from `server/src/auth/refresh.ts`,
+   never with a hand-rolled expiry check — **but with a wider window than the
+   proxies use.** The proxy refreshes when fewer than `REFRESH_WINDOW_SECONDS`
+   (60) remain, because a proxied call finishes in milliseconds. A chat turn
+   runs for up to the 60-second deadline, and **no refresh can happen after
+   the hijack** (ADR-002 decision 2: `refreshAccessToken` writes the session).
+   With the proxy's window, a token with 61 seconds left passes the check and
+   expires mid-turn, and the tool call gets a `401` from Consent. So the token
+   must outlive the turn when the turn starts.
+
+   *Proposal — confirm in review:* give `tokenDisposition` a second parameter,
+   `minimumLifetimeSeconds` (default `0`, so every existing caller is
+   unchanged), and have the chat route pass the turn deadline plus a margin
+   (`60 + 30`). The rule becomes:
+   - a real session refreshes when `secondsRemaining < max(REFRESH_WINDOW_SECONDS,
+     minimumLifetimeSeconds)`;
+   - a fixture session (`session.testFixture`) reads `expired` when
+     `secondsRemaining < minimumLifetimeSeconds`, because it cannot refresh and
+     would otherwise pass the check with five seconds left and fail mid-turn —
+     the Chat 8 flake this step exists to prevent.
+
+   Then handle the three answers the way `server/src/auth/me.ts` does outside
+   the proxy layer:
+   - `expired` — end the session through `endSession(request, 'expired')`,
+     clear the cookie, answer `401`.
+   - `refresh` — call `refreshAccessToken(request)`. Distinguish the two
+     failure modes the way `refresh.ts` documents them: `RefreshFailedError`
+     means the session is dead, so clear the cookie and answer `401`; anything
+     else is transient, so answer `502` and leave the session alone.
    - `forward` — use the token as it is.
+
+   A B2C access token lasts about an hour, so the wider window costs one extra
+   refresh per session at most. Phase 3 story 3-B's claim that "an ordinary
+   expiry never reaches the tool client" depends on this step.
 4. Call `request.session.save()` explicitly, then hijack. **Nothing writes to
    the session after the hijack.**
 
 Tests: a missing CSRF header gives `403`; a wrong token gives `403`; a request
 with `Sec-Fetch-Site: same-site` gives `403` with the `cross_site_request_blocked`
-body; no session gives `401`; an expired fixture session gives `401` and the
-session row is gone; an expired-but-refreshable token refreshes once and
-proceeds; a `RefreshFailedError` gives `401`; a transient refresh error gives
-`502`. Assert that a failed check sends JSON and never an SSE frame. Build the
+body; a CSRF `403` carries the `csrf_validation_failed` body; no session gives
+`401`; an expired fixture session gives `401` and the session row is gone; a
+fixture session with less than the turn's minimum lifetime left gives `401`
+too; a real token with 61 seconds left refreshes before the turn; a
+`RefreshFailedError` gives `401`; a transient refresh error gives `502`. Assert that a failed check sends JSON and never an SSE frame. Build the
 tests on `server/test/proxyTestHarness.ts`, which stands up the real session
 and CSRF plugins; `server/test/index.test.ts` mocks the session plugin away and
 cannot exercise this route.
 
-**Files:** `server/src/chat/route.ts`, `server/src/index.ts`, `server/test/chatRoute.test.ts`
-**Effort:** 1d &nbsp;|&nbsp; **Risk:** Low
+**Files:** `server/src/chat/route.ts`, `server/src/chat/errors.ts` (the shared CSRF mapping, lifted from `upstreamProxy.ts`), `server/src/auth/refresh.ts` (the `minimumLifetimeSeconds` parameter), `server/src/index.ts`, `server/test/chatRoute.test.ts`, `server/test/refresh.test.ts`
+**Effort:** 1.5d &nbsp;|&nbsp; **Risk:** Medium — the lifetime rule is a change to a shared auth helper
 
 ---
 
@@ -264,14 +302,31 @@ the test states which; a thrown error inside the emitter produces exactly one
 
 Stop spending on an answer nobody reads.
 
-**On client disconnect.** Listen for `close` on `request.raw`. Abort the turn's
-`AbortController`. In this phase the abort only stops the canned timer; from
-Phase 5 it stops the model call and any in-flight tool call.
+**On client disconnect.** Listen for `close` on **`reply.raw`**, not on
+`request.raw`. Node's `IncomingMessage` emits `close` as soon as the request
+body has been consumed — about ten milliseconds into a healthy turn — so a
+listener there aborts every turn at once. The `ServerResponse` emits `close`
+when the connection goes away; test `reply.raw.writableFinished` in the
+handler and treat `close` with the response unfinished as the abort. Abort the
+turn's `AbortController`. In this phase the abort only stops the canned timer;
+from Phase 5 it stops the model call and any in-flight tool call.
 
-**On shutdown.** `fastify.close()` waits for in-flight requests, so one held
-stream delays every rolling deploy (hazard 3). Keep a registry of open turns.
-Add an `onClose` hook that aborts every open turn, emits a final `error` frame
-with a `server_shutting_down` code, and ends each socket. The budget is fixed:
+**On shutdown.** Two facts about the server today set this story's shape:
+
+- **Nothing calls `fastify.close()`.** `server/src/index.ts` installs no
+  `SIGTERM` or `SIGINT` handler, so Kubernetes' stop signal kills the process
+  outright and every open stream dies with no final frame. Hazard 3 as written
+  ("`close()` waits for in-flight requests") is not yet the failure; the
+  absence of `close()` is. This story adds the signal handler:
+  `process.once('SIGTERM', () => fastify.close())`, and the same for `SIGINT`.
+- **`onClose` runs too late.** Fastify runs `onClose` after in-flight requests
+  finish, so an `onClose` abort would wait for the very stream it means to
+  cut. Use the **`preClose`** hook (Fastify 5.12.5 has it), which runs before
+  the server stops accepting connections and before it waits on anything.
+
+So: keep a registry of open turns, and add a `preClose` hook that aborts every
+open turn, emits a final `error` frame with a `server_shutting_down` code, and
+ends each socket. The budget is fixed:
 the DUOS pod's `terminationGracePeriodSeconds` is 60, and the app container's
 `preStop` sleep (`app.shutdownSleep` in the chart values) comes out of it. A
 turn deadline of 60 seconds without this abort means a deploy that kills a pod
@@ -280,9 +335,12 @@ mid-turn.
 **A turn that ends by disconnect is neither a success nor an error.** Record the
 distinction now, because story 5-E reads it.
 
-Tests: a client that destroys the socket triggers the abort; the registry empties
-when a turn ends normally, so it does not leak; `fastify.close()` with an open
-turn resolves without waiting for the turn's natural end.
+Tests: a healthy turn is **not** aborted when the request body finishes; a
+client that destroys the socket triggers the abort; the registry empties when
+a turn ends normally, so it does not leak; `fastify.close()` with an open turn
+resolves without waiting for the turn's natural end, and the client received
+the `server_shutting_down` frame first; a `SIGTERM` to a test child process
+produces the same frame.
 
 **Files:** `server/src/chat/turnRegistry.ts`, `server/src/chat/route.ts`, `server/src/index.ts`, `server/test/chatLifecycle.test.ts`
 **Effort:** 1d &nbsp;|&nbsp; **Risk:** Medium — a leaked registry entry holds a deploy open

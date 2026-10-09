@@ -60,10 +60,13 @@ Fetch Metadata, none of which a server-side JSON call needs.
 
 Recommended split, to confirm in the story:
 
-- **Reuse** the refresh policy. `REFRESH_WINDOW_SECONDS` and
-  `refreshAccessToken` live in `server/src/auth/refresh.ts` and are already
-  imported outside the proxy layer by `server/src/auth/me.ts`. Follow `me.ts`,
-  not `upstreamProxy.ts`.
+- **Do not refresh inside a turn.** `refreshAccessToken` writes the session,
+  and nothing may write the session after the hijack (ADR-002 decision 2).
+  The refresh happens once, before the hijack, with a window that outlives
+  the turn (Phase 1 story 1-C's `minimumLifetimeSeconds`). The tool client
+  therefore holds a token that is good for the whole turn and never calls
+  `refresh.ts` at all. A `401` inside the turn is terminal for the turn
+  (story 3-B), never a refresh trigger.
 - **Do not reuse** `upstreamProxy`'s request machinery. Write a small `fetch`
   wrapper: build the URL, set `Authorization: Bearer <session accessToken>`, set
   `Accept: application/json`, apply a per-call timeout, and pass the turn's
@@ -109,8 +112,11 @@ The session row is left alone. The next ordinary request through the proxy
 finds the dead token and ends the session through the existing path, which
 keeps one place responsible for that decision.
 
-Refresh once before the turn (story 1-C), so an ordinary expiry never reaches
-this path. A `401` that survives that refresh is a real failure, not a race.
+Refresh once before the turn with a window wider than the turn deadline
+(story 1-C's `minimumLifetimeSeconds`), so an ordinary expiry never reaches
+this path. With the proxy's 60-second window alone that claim is false — a
+token with 61 seconds left would expire mid-turn — which is why 1-C widens
+it. A `401` that survives the pre-turn refresh is a real failure, not a race.
 
 Tests: a tool `401` produces exactly one `error` frame and a closed stream; the
 session row still exists afterwards; the client-visible code is stable and

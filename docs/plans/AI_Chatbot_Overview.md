@@ -77,7 +77,7 @@ them; it does not rebuild them.
 |---|---|---|
 | PostgreSQL session store | `server/src/session/pgStore.ts` | Session access on every chat request |
 | `request.session.accessToken` + `tokenExpiry` | `server/src/types/session.ts` | Bearer token for Consent tool calls |
-| `refreshAccessToken(request)` + `REFRESH_WINDOW_SECONDS` | `server/src/auth/refresh.ts` | Token refresh before and during a chat turn |
+| `refreshAccessToken(request)` + `tokenDisposition()` | `server/src/auth/refresh.ts` | Token refresh **before** a chat turn only, with a window that outlives the turn; a refresh writes the session, and nothing may after the hijack (ADR-002) |
 | CSRF protection (`@fastify/csrf-protection`, header-only token) | `server/src/auth/csrf.ts` | Guard on `POST /api/chat` |
 | Client CSRF helper | `src/libs/ajax/csrf.ts` | `X-CSRF-Token` header on chat requests |
 | Client session state (`/auth/me`) | `src/libs/auth/session.ts` | Show or hide the chat button |
@@ -155,9 +155,9 @@ High-level items only. Each becomes a story with full detail after approval.
 
 - Register a Fastify plugin after the session and CSRF middleware.
 - Guard the route with `fetchMetadataGuard` first, then `fastify.csrfProtection`
-  (same pattern as `POST /auth/logout`). Every authenticated BFF route runs the
-  Fetch Metadata guard ahead of CSRF (`server/src/security/fetchMetadata.ts`);
-  the chat route is not an exception.
+  — the pair the proxies and `/auth/me` run (`POST /auth/logout` runs CSRF
+  only). Register the route in its own encapsulated plugin with the proxies'
+  CSRF error shape, or the client's retry never matches the `403` body.
 - Return `401` when `request.session.accessToken` is absent, and refresh the
   token up front when it is inside `REFRESH_WINDOW_SECONDS`. Use
   `tokenDisposition()` from `server/src/auth/refresh.ts`, not a hand-rolled
@@ -182,8 +182,10 @@ Record them here, and let Chat 1 pick the fix and the numbers:
    note in `server/src/auth/refresh.ts`.
 2. The reverse proxy has an idle timeout. A long turn needs a keep-alive frame
    and a socket timeout that outlasts the turn (open question 2).
-3. Fastify `close()` waits for in-flight requests, so a held stream delays every
-   rolling deploy.
+3. Nothing calls Fastify `close()` today — there is no `SIGTERM` handler — so a
+   deploy kills open streams with no final frame; and once `close()` is
+   wired, `onClose` runs only after in-flight requests, so the abort must be
+   a `preClose` hook.
 4. The SPA fallback in `server/src/index.ts` answers a mistyped `/api/*` path
    with the client shell instead of JSON.
 
@@ -214,8 +216,10 @@ Record them here, and let Chat 1 pick the fix and the numbers:
   It ships with the loop and it changes under review, because a prompt edit
   changes behavior as surely as a code edit. Open question 7 settles what it
   says.
-- **Bound every turn.** Cap the iteration count, set a wall-clock deadline, and
-  cap the bytes of each tool result. Emit `error` and stop when a bound trips.
+- **Bound every turn.** Cap the iteration count, the tool calls per iteration
+  and per turn, and the output tokens; set a wall-clock deadline; and cap the
+  bytes of each tool result (that last one truncates rather than stops). Emit
+  `error` and stop when a stopping bound trips.
   Without bounds, a model that keeps calling tools runs until the socket dies,
   and the bill runs with it. The loop story picks the numbers.
 - Emit `status` events around tool calls and `token` events for text.

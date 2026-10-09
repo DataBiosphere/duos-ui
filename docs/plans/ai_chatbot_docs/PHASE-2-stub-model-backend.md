@@ -55,7 +55,7 @@ Define at least:
 | `ToolCall` | `{ id: string, name: string, arguments: unknown }` — `unknown`, because the model can emit a malformed argument (2-E) |
 | `ToolResult` | `{ toolCallId: string, content: string, isError: boolean }` |
 | `BackendChunk` | A discriminated union: a text piece, a tool-call request, or a turn end with a stop reason |
-| `ModelBackend` | One method that takes messages plus declarations plus an `AbortSignal`, and returns an async iterable of `BackendChunk` |
+| `ModelBackend` | One method that takes messages, declarations, an `AbortSignal` and a `maxOutputTokens` number, and returns an async iterable of `BackendChunk`. The output cap is a turn bound (Phase 5 story 5-C) that only the provider can enforce, so it is part of the call. |
 
 Three rules:
 
@@ -115,8 +115,14 @@ Design decisions to settle in this story:
   normalization only when a test needs it. State the choice in the loader's
   comment.
 - **The unmatched case.** What does the stub do with a question no fixture
-  covers? Recommend a loud failure: throw with the unmatched message quoted, so
-  a missing fixture is obvious rather than silently answered.
+  covers? Recommend a loud failure: throw, so a missing fixture is obvious
+  rather than silently answered. **Do not put the message text in the
+  error.** `sanitizeError` in `server/src/logging.ts` keeps `err.message`, and
+  `scrubSecrets` strips only bearer tokens and query secrets, so a quoted
+  prompt would reach the logs — the one thing §7 forbids, and the stub runs
+  under the real logger in Playwright. Quote the message's length and the
+  first eight hex characters of its SHA-256 instead, plus the list of fixture
+  names that exist; a test that hits this can print the real message itself.
 - **Fixture reuse.** Phase 4 records its own evaluation fixtures. Use one
   format for both, so the harness and the stub read the same files.
 
@@ -204,7 +210,8 @@ One factory reads the configuration and returns a backend.
 The `503` runs **before the hijack** (ADR-002), so it is an ordinary JSON reply.
 
 Follow the existing configuration idiom: read env vars in
-`server/src/config.ts`, coerce booleans through `envBool`, and fail at startup
+`server/src/config.ts`, coerce booleans through `envBool` (exported from
+`server/src/index.ts`), and fail at startup
 with an error that names the variable when a half-configured deployment would
 otherwise boot and fail on first use.
 

@@ -1,9 +1,9 @@
 # Phase 6: Burst limit, daily turn quota and concurrency cap
 
 **Phase:** 6 of 8 (near-term set) &nbsp;|&nbsp; **Effort:** ~5d &nbsp;|&nbsp; **Risk:** 🟡 Medium
-**Depends on:** Phase 1 (the route and its pre-hijack check order), Phase 5 story 5-E (the per-turn token counts that size the numbers)
-**Blocks:** Chat 11 (rollout). Chat 7 (UI) only needs the error codes from story 6-A and 6-C to style them.
-**Can parallelize with:** Phase 0, Phase 7, Phase 8
+**Depends on:** Phase 1 (the route and its pre-hijack check order), Phase 7 story 7-A only (the `chatEnabled` gate that 6-A and 6-C read their env vars behind), Phase 5 story 5-E (the per-turn token counts that size the numbers)
+**Blocks:** Phase 8 (its servers need this phase's env vars and tables), Chat 11 (rollout). Chat 7 stories 7-B onward only need the error codes from 6-A and 6-C to style them, and can stub those.
+**Can parallelize with:** Phase 0, Phase 7 from story 7-B on. Story order across the two phases: 7-A, then 6-A, then 7-B.
 **Reference:** [AI_Chatbot_Overview.md](../AI_Chatbot_Overview.md) §3.4, §7, open questions 4 and 6
 
 ---
@@ -73,8 +73,12 @@ Rules, each from §3.4:
 2. **`max = ceil(turnsPerMinute / DUOS_REPLICA_COUNT)`.** Read the divisor
    from a new env var. Read it **only where the chat route registers** — inside
    the `chatEnabled` gate from Phase 7 story 7-A — and fail startup there,
-   naming the variable, when it is unset or not a positive whole number, the
-   way `maxFromEnv` already does for the auth limits. An environment with chat
+   naming the variable, when it is unset or not a positive whole number.
+   `maxFromEnv` is not the helper for this: it returns the default when the
+   variable is unset and fails only on a malformed value. Write a
+   `requiredIntFromEnv` beside it (or compose `requireEnv` from
+   `server/src/auth/oidcClient.ts` with the same integer check), and use it
+   for every required number this phase adds. An environment with chat
    off never reads it, so this story cannot break boot in dev, staging, prod
    or a BEE that has not turned chat on. Story 6-C's quota env var follows the
    same rule. Development (`NODE_ENV !== 'production'`) defaults to `1`.
@@ -180,18 +184,22 @@ refresh and its `502`, the body validation (Phase 1 story 1-D), and the `503`
 for no configured backend (Phase 2 story 2-F). Only once all of them pass does
 the route touch the database:
 
-1. Upsert the user's quota row for today (UTC) and read back `turns`.
-2. If `turns` exceeds the quota, answer `429 { error: 'quota_exceeded',
-   resetsAt: <ISO timestamp of the next UTC midnight> }` as JSON.
-3. Take the lease (story 6-D). If it is held, answer `409`.
+1. Take the lease (story 6-D). If it is held, answer `409` — **before** the
+   quota is touched, so a second tab's `409` spends nothing.
+2. Upsert the user's quota row for today (UTC) and read back `turns`.
+3. If `turns` exceeds the quota, release the lease (the token is still in
+   hand) and answer `429 { error: 'quota_exceeded', resetsAt: <ISO timestamp
+   of the next UTC midnight> }` as JSON.
 4. Hijack.
 
-The order is the point: a request that fails validation, has no backend, or
-has no session must not spend a turn or leave a lease behind. It also means
-the `NOT NULL user_id` upsert never runs for a signed-out caller — the `401`
-has already answered. Put the quota and lease calls in the route handler
-itself, immediately before `reply.hijack()`, not in a `preHandler`, because
-Fastify runs route `preHandler` hooks before the handler's own checks.
+Run steps 1 to 3 in one transaction, so a crash between them leaves neither a
+held lease nor a spent turn. The order is the point: a request that fails
+validation, has no backend, has no session, or loses to an open turn must not
+spend a turn or leave a lease behind. It also means the `NOT NULL user_id`
+upsert never runs for a signed-out caller — the `401` has already answered.
+Put the lease and quota calls in the route handler itself, immediately before
+`reply.hijack()`, not in a `preHandler`, because Fastify runs route
+`preHandler` hooks before the handler's own checks.
 
 Decisions, each stated here so the UI story can rely on them:
 
@@ -240,7 +248,7 @@ crash and a turn that outruns its deadline.
 leased in the `chat_turn_lease` row with an owner token.**
 
 1. Mint a `lease_token` (`crypto.randomUUID()`) for the turn. Then, as the
-   last pre-hijack step after the quota upsert (story 6-C): `INSERT INTO
+   first database step, ahead of the quota upsert (story 6-C): `INSERT INTO
    chat_turn_lease (user_id, lease_token, lease_until) VALUES ($1, $2, now() +
    <turn deadline + 10 s>) ON CONFLICT (user_id) DO UPDATE SET lease_token =
    EXCLUDED.lease_token, lease_until = EXCLUDED.lease_until WHERE
@@ -250,9 +258,9 @@ leased in the `chat_turn_lease` row with an owner token.**
 2. If no row came back, answer `409 { error: 'turn_in_progress' }` as JSON. The
    UI (Phase 7) already cancels an open turn before it starts a new one, so a
    user sees this only across tabs.
-3. Release the lease on `done`, on `error`, and on client disconnect (Phase 1
-   story 1-F's `close` listener): `DELETE FROM chat_turn_lease WHERE user_id =
-   $1 AND lease_token = $2`. **The token is the owner check.** Without it,
+3. Release the lease on `done`, on `error`, on a quota rejection in 6-C, and
+   on client disconnect (Phase 1 story 1-F's `reply.raw` `close` listener):
+   `DELETE FROM chat_turn_lease WHERE user_id = $1 AND lease_token = $2`. **The token is the owner check.** Without it,
    turn A's late release would clear a lease that turn B took after A's
    expired, and a third tab could start beside B. A crash releases nothing,
    and that is what the expiry is for: a lease outlives its turn by ten

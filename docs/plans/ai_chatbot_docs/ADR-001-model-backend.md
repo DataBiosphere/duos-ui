@@ -24,7 +24,7 @@ all? It does not.
 
 ### Why a local model is not like the local Postgres
 
-The compose stack runs `postgres:16.14-alpine`, so the obvious precedent says
+The compose stack runs `postgres:16.13-alpine`, so the obvious precedent says
 run the model locally too. That argument doesn't hold.
 
 A local dependency earns its place when it **reproduces production behavior**.

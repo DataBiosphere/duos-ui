@@ -51,6 +51,17 @@ regression tests in place, which is the whole point of the ordering.
 literal. The version is in the filename, so a change to behavior is visible in
 a diff and in a file list.
 
+**How it is found at runtime.** `tsc` emits only `.ts` output into
+`server/dist/`, so the loader cannot read the file relative to
+`import.meta.dirname`. The file still ships: `pnpm deploy` copies the whole
+server package into the image because `server/package.json` declares no
+`files` list, so it sits at `server/src/chat/prompt/system-v1.md` next to
+`server/dist/`. Resolve it from the package root, the way `index.ts` builds
+`PROJECT_ROOT` from `import.meta.dirname`, and fail startup with the resolved
+path in the message when the file is missing — so a future `files` list or a
+build change shows up at boot, not on the first turn. Add a server test that
+loads the prompt through the production path.
+
 **Who reviews a change:** the same reviewers as any server change, plus a
 passing Phase 4 run — against the stub until Chat 9 lands the Gemini backend,
 and against Gemini from then on (story 4-E states the two stages). Put that
@@ -125,14 +136,18 @@ first commit.
 
 ### 5-C: Hard bounds
 
-Three bounds. Each one trips into an `error` event with a `bound_exceeded`
-code, and stops the turn.
+Five bounds stop the turn with an `error` event carrying `bound_exceeded`,
+and one bound truncates and continues. Keep the two kinds apart in the code
+and in the metrics.
 
-| Bound | What it stops | Notes |
-|---|---|---|
-| Iteration cap | A model that keeps calling tools | Count model invocations, not tool calls. Two parallel calls in one iteration is one iteration. |
-| Wall-clock deadline | A slow turn, and a slow upstream | 60 seconds (§8.2). The per-call tool timeout from Phase 3 story 3-A sits below it. |
-| Tool result byte cap | An oversized upstream response | **Enforced in Phase 3 story 3-F**, where the bytes exist. This story reads the constant and reports the truncation; it does not re-implement the cap. |
+| Bound | What it stops | Effect | Notes |
+|---|---|---|---|
+| Iteration cap | A model that keeps calling tools | Stops the turn | Count model invocations, not tool calls. Two parallel calls in one iteration is one iteration. |
+| Tool calls per iteration | A model that fans out | Stops the turn | Story 5-B recommends concurrent execution, so without this cap one iteration can spend the whole shared Consent budget (§3.4). *Proposal:* 4. |
+| Tool calls per turn | A model that stays under both caps above and still runs up a bill | Stops the turn | The product of the two caps is the ceiling; set this lower. *Proposal:* 8. |
+| Wall-clock deadline | A slow turn, and a slow upstream | Stops the turn | 60 seconds (§8.2). The per-call tool timeout from Phase 3 story 3-A sits below it. |
+| Output token cap | A model that answers at length | Stops the generation; the loop ends the turn with what arrived and `bound_exceeded` | Passed to the backend as a provider-neutral `maxOutputTokens` option on the `ModelBackend` call (add it to Phase 2 story 2-A). Every provider exposes one. |
+| Tool result byte cap | An oversized upstream response | **Truncates and continues** | Enforced in Phase 3 story 3-F, where the bytes exist. This story reads the constant and reports the truncation; it does not re-implement the cap and does not end the turn. |
 
 Pick the iteration cap in this story. Base it on the evaluation set: story 4-C
 reports iteration counts per question, so set the cap above the worst
@@ -145,8 +160,10 @@ loop story picks the numbers; this is where they live.
 a truncated result and does not know it will answer as though it saw everything.
 
 Tests: the iteration-bound fixture from Phase 2 story 2-E trips the cap and
-emits exactly one `error`; a slow stub trips the deadline; a truncated result
-carries a marker the model can read.
+emits exactly one `error`; a fixture that requests five tools in one iteration
+trips the per-iteration cap before any executor runs; a slow stub trips the
+deadline; the output cap reaches the backend call; a truncated result carries
+a marker the model can read and the turn continues.
 
 **Files:** `server/src/chat/limits.ts`, `server/src/chat/loop.ts`, `server/test/chatBounds.test.ts`
 **Effort:** 1d &nbsp;|&nbsp; **Risk:** Medium
@@ -216,8 +233,11 @@ hides the case where users abandon slow turns.
 
 Two constraints:
 
-- **ADR-002 accepted risk 2:** a hijacked reply skips every Fastify hook, so an
-  `onResponse` metric never fires for this route. Emit from the handler.
+- **ADR-002 accepted risk 2:** a hijacked reply skips `onSend` and the error
+  handler, but `onResponse` **does** fire when the socket ends. Emit the
+  completion event from the handler, where the end reason is known, and add a
+  test that one turn produces exactly one event — an `onResponse`-based
+  counter would double it.
 - **§7:** prompts and answers stay out of ordinary logs. Record counts and
   types. Do not record text. Open question 8 asks what usage data may be kept
   beyond this, and its answer belongs in the Phase 0 story 0-A contract, not
@@ -236,8 +256,10 @@ measurement.
 
 Hazard 1, tested under a real loop rather than under canned events.
 
-`@fastify/session` saves in an `onSend` hook. The comment on `rolling: false` in
-[server/src/index.ts](../../../server/src/index.ts) records the failure chain:
+`@fastify/session` saves in an `onSend` hook. The comments in
+[server/src/auth/refresh.ts](../../../server/src/auth/refresh.ts) (`applyTokens`)
+and [server/src/auth/csrf.ts](../../../server/src/auth/csrf.ts) record the
+failure chain:
 an async `onSend` write leaves `reply.sent` false when the handler resolves,
 Fastify's `wrapThenable` fires a second `reply.send()`, and the later write
 throws `ERR_HTTP_HEADERS_SENT` and kills the process. The doc comment in

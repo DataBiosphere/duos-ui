@@ -1,9 +1,9 @@
 # Phase 7: The chat UI — panel, messages, stream hook, flag, accessibility
 
 **Phase:** 7 of 8 (near-term set) &nbsp;|&nbsp; **Effort:** ~6d &nbsp;|&nbsp; **Risk:** 🟡 Medium
-**Depends on:** Phase 1 story 1-E (the event contract) and 1-D (`MAX_HISTORY_TURNS`); Phase 6 stories 6-A and 6-C for the two `429` codes it styles
-**Blocks:** Phase 8 (the E2E drives this UI), Chat 11 (rollout)
-**Can parallelize with:** Phase 0, Phase 6 (against the canned emitter from Phase 1)
+**Depends on:** Phase 1 story 1-E (the event contract) and 1-D (`MAX_HISTORY_TURNS`). Story 7-A depends on nothing else and goes first, because Phase 6 story 6-A reads its gate. Stories 7-B onward use the `429`/`409` codes from Phase 6 stories 6-A and 6-C, and can land ahead of them with the codes stubbed.
+**Blocks:** Phase 6 story 6-A (through 7-A), Phase 8 (the E2E drives this UI), Chat 11 (rollout)
+**Can parallelize with:** Phase 0, Phase 6 (against the canned emitter from Phase 1). Story order across the two phases: 7-A, then 6-A, then 7-B.
 **Reference:** [AI_Chatbot_Overview.md](../AI_Chatbot_Overview.md) §5, §7, open question 9 &nbsp;|&nbsp; [ADR-002](ADR-002-sse-transport.md) decisions 7 and 8
 
 ---
@@ -22,8 +22,11 @@ as it arrives, and cancels what nobody reads.
 `useUserIsLogged()` in `src/hooks/useSession.ts`, backed by the `/auth/me`
 probe in `src/libs/auth/session.ts`. The CSRF token is `getCsrfToken()` in
 `src/libs/ajax/csrf.ts`, and `isCsrfRejection()` identifies a rejected one by
-its body. A `401` from the BFF signs the user out through `redirectOnLogout()`
-in `src/libs/ajax/fetchAdapter.ts`; the chat must reach the same path, not
+its body — which is why Phase 1 story 1-C gives the chat route the proxies'
+CSRF error shape; under the root error handler the body would be generic and
+the retry would never run. A `401` from the BFF signs the user out through
+`redirectOnLogout()` in `src/libs/auth/auth.ts`, which
+`src/libs/ajax/fetchAdapter.ts` calls; the chat must reach the same path, not
 build its own. `react-markdown` 10.1.0 is already a dependency, and
 `rehype-raw` is not.
 
@@ -233,8 +236,15 @@ existing metrics path, carrying no text.**
   **before** launch (open question 9) — that is a measurement task, not UI
   work, and it belongs in Chat 11.
 
-Tests: a click sends one event with the rating and no text; a second click on
-the same entry changes the rating rather than sending a second event.
+`Metrics.captureEvent` only appends; there is no update. So a changed rating
+sends a **second** event carrying the same per-turn id and the new rating, and
+the analysis takes the last event per turn id. Give each completed assistant
+entry a client-generated turn id for this purpose; it is not a server
+identifier and carries no session data.
+
+Tests: a click sends one event with the rating, the turn id and no text; a
+second click on the same entry sends a second event with the same turn id and
+the new rating.
 
 **Files:** `src/components/chat/ChatMessage.tsx`, `src/libs/ajax/Metrics.ts`, `src/libs/events.ts`, `test/components/chat/ChatMessage.spec.tsx`
 **Effort:** 0.5d &nbsp;|&nbsp; **Risk:** Low

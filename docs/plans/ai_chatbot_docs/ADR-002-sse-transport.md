@@ -20,9 +20,11 @@ preference.
 session in an `onSend` hook. Phase 2 of the BFF hit the failure this creates:
 an async `onSend` write leaves `reply.sent` false when the route handler
 resolves, Fastify's `wrapThenable` fires a second `reply.send()`, and the later
-write throws `ERR_HTTP_HEADERS_SENT` and kills the process. The comment on
-`rolling: false` in [server/src/index.ts](../../../server/src/index.ts) records
-the whole chain. A route that writes to the raw socket for a minute and then
+write throws `ERR_HTTP_HEADERS_SENT` and kills the process. The chain is
+recorded in [server/src/auth/refresh.ts](../../../server/src/auth/refresh.ts)
+(`applyTokens`), [server/src/auth/csrf.ts](../../../server/src/auth/csrf.ts)
+(`handleCsrfToken`) and `login.ts`; `rolling: false` itself is set in
+[server/src/session/sessionOptions.ts](../../../server/src/session/sessionOptions.ts). A route that writes to the raw socket for a minute and then
 returns normally re-runs that crash. `reply.hijack()` removes the reply from
 Fastify's lifecycle, so no `onSend` hook and no second send can fire.
 
@@ -68,7 +70,10 @@ and the header.
    No `EventSource`. This follows from constraint 3.
 8. **Every turn holds an `AbortController` on both sides.** The client aborts
    on a closed panel or a new question. The server aborts the model call when
-   `request.raw` emits `close`, and it aborts open streams on shutdown.
+   `reply.raw` emits `close` with the response unfinished (`request.raw`
+   closes as soon as the body is read, so it is the wrong signal), and it
+   aborts open streams from a `preClose` hook on shutdown — which first needs a
+   `SIGTERM` handler that calls `fastify.close()`, because none exists today.
 
 ## Consequences
 
@@ -76,10 +81,13 @@ and the header.
   `index.ts` never sees a fault after the hijack, because the reply is no longer
   Fastify's. The handler must catch its own errors, emit an `error` frame, and
   end the socket. Story 1-E owns that shape.
-- **A held stream delays every rolling deploy**, because `fastify.close()` waits
-  for in-flight requests. Hazard 3 in §3.1. The turn deadline bounds the delay
-  to 60 seconds, and story 1-F adds the shutdown abort so a deploy does not
-  wait even that long.
+- **A held stream dies without a final frame on every rolling deploy**, because
+  nothing in the server calls `fastify.close()` today: `SIGTERM` kills the
+  process. Hazard 3 in §3.1. Story 1-F adds the signal handler and a
+  `preClose` abort — `preClose`, not `onClose`, because `onClose` runs only
+  after in-flight requests finish and would wait on the stream it means to
+  cut. The turn deadline then bounds the delay to 60 seconds, and the abort
+  makes a deploy wait less than that.
 - **The HTTP status is committed at the first byte.** Once a frame is sent, the
   turn cannot become a `500`. Every check that can fail a turn — no session, no
   access token, a refused CSRF token, a rate-limit rejection, no configured
@@ -102,10 +110,15 @@ and the header.
    fallback, because it re-opens constraint 1), and the client work in §5.2
    changes with it. Story 1-B
    runs first in Chat 1 for this reason.
-2. **A hijacked reply skips every Fastify hook, not only `onSend`.** Anything
-   the team later adds as an `onSend` or `onResponse` hook — an access log, a
-   metric, a header — will not apply to `/api/chat`. Story 5-E must emit its
-   metrics from the handler.
+2. **A hijacked reply skips `onSend`, `preSerialization` and the error
+   handler — but `onResponse` still fires.** Fastify attaches its
+   `onResponse` runner to `reply.raw`'s `finish` event when the request
+   starts, and `hijack()` does not remove it (`fastify/lib/reply.js`,
+   `onResFinished`). So an `onResponse` hook added later for an access log or
+   a metric *does* run for `/api/chat`, once, when the socket ends. Story 5-E
+   emits its completion event from the handler, where the end reason is known,
+   and must not also count the turn in an `onResponse` hook, or every turn is
+   recorded twice.
 3. **A missed `request.session.save()` loses a refreshed token silently.** The
    session write must complete before the hijack. Story 5-F tests this under a
    real multi-iteration loop, not only under canned events.

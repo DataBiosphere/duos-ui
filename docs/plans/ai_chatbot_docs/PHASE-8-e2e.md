@@ -1,9 +1,9 @@
 # Phase 8: Playwright E2E on the BFF harness
 
 **Phase:** 8 of 8 (near-term set) &nbsp;|&nbsp; **Effort:** ~3.5d &nbsp;|&nbsp; **Risk:** 🟡 Medium
-**Depends on:** Phase 2 story 2-F (the stub backend is selectable by env), Phase 3 (the two tool paths the mock upstream must serve), Phase 7 (the UI the spec drives)
+**Depends on:** Phase 2 story 2-F (the stub backend is selectable by env), Phase 3 (the two tool paths the mock upstream must serve), Phase 6 (the env vars every harness server needs, and the two tables), Phase 7 (the UI the spec drives)
 **Blocks:** Chat 11 (rollout)
-**Can parallelize with:** Phase 0, Phase 6
+**Can parallelize with:** Phase 0. Story 8-A's mock-upstream half can start after Phase 3; the rest waits on Phases 6 and 7.
 **Reference:** [AI_Chatbot_Overview.md](../AI_Chatbot_Overview.md) §6; BFF Epic 6 stories 6-D-mock, 6-K1, 6-K2
 
 ---
@@ -79,12 +79,20 @@ required wherever the gate is open:
    3001 and 3003): the Phase 2 story 2-F env var, so chat cases there reach no
    network. The `chromium` server keeps whatever 2-F's default is; no chat
    case runs there.
+4. **The two Phase 6 tables in the CI database.** The workflow loads only
+   `test/e2e/sql/user_sessions.sql` today
+   (`.github/workflows/integration-tests.yml`, the `psql … -f` step), so a
+   chat request that passes every check would fail at the lease insert. Add
+   `test/e2e/sql/chat_turn_quota.sql`, copied from the `bff-03` changeset the
+   way `user_sessions.sql` copies `bff-01`, and a second `-f` on the same
+   `psql` step. The scratch schema in `server/test/load/README.md` (Phase 6
+   story 6-B) is for the load harness, not CI; both copies cite the changeset.
 
 Tests: `mockHarness.spec.ts` gains a case that calls each new path through the
 proxy with the echo pattern and sees the fixture body and exactly one
 `Authorization` header.
 
-**Files:** `test/e2e/mocks/consentUpstream.ts`, `test/e2e/mocks/scenarios.ts`, `test/e2e/mocks/settings.ts`, `playwright.config.ts`, `.github/workflows/integration-tests.yml`, `test/e2e/mockHarness.spec.ts`
+**Files:** `test/e2e/mocks/consentUpstream.ts`, `test/e2e/mocks/scenarios.ts`, `test/e2e/mocks/settings.ts`, `playwright.config.ts`, `.github/workflows/integration-tests.yml`, `test/e2e/sql/chat_turn_quota.sql`, `test/e2e/mockHarness.spec.ts`
 **Effort:** 1d &nbsp;|&nbsp; **Risk:** Low
 
 ---
