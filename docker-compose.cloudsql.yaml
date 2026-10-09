@@ -24,9 +24,6 @@
 #      unreadable unless the container runs as you. Add your own IDs:
 #        echo "CLOUDSQL_PROXY_USER=$(id -u):$(id -g)" >> .env.local
 #      Docker Desktop (Mac/Windows) maps file ownership and needs no change.
-#   5. Windows only: gcloud writes the ADC file under %APPDATA%\gcloud, not the
-#      default path below. Set the full path, with forward slashes, in .env.local:
-#        GCLOUD_ADC_FILE=C:/Users/<you>/AppData/Roaming/gcloud/application_default_credentials.json
 #
 # The proxy publishes no host port, so it cannot clash with a consent stack
 # that holds host port 5432. Containers on this compose network can reach it.
@@ -63,8 +60,7 @@ services:
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: /secrets/adc.json
     volumes:
-      # Your own gcloud application-default credentials, read-only. The default
-      # is the Linux/macOS location; see setup step 5 for Windows.
+      # Your own gcloud application-default credentials, read-only.
       - ${GCLOUD_ADC_FILE:-~/.config/gcloud/application_default_credentials.json}:/secrets/adc.json:ro
     healthcheck:
       # /readiness answers 200 only after the proxy can reach the instance.
