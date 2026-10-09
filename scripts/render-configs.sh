@@ -59,10 +59,12 @@ AZURE_CLIENT_ID_DEFAULT="a0e99acd-7b8d-400d-a1d3-60e497495806"
 # The consent database is named `consent` in every environment.
 DB_NAME_DEFAULT="consent"
 AZURE_ISSUER_URL_DEFAULT="https://terradevb2c.b2clogin.com/terradevb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=b2c_1a_signup_signin_duos_dev"
-# Both redirect URIs are registered in B2C: this one (with :3000) matches the
-# pnpm-start dev server; drop the port when running under docker compose.
-OAUTH_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/auth/callback"
-POST_LOGOUT_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/post-logout"
+# Both redirect URIs are registered in B2C. These defaults (no port) match the
+# docker compose modes. For `pnpm run start:server`, which serves the BFF on
+# port 3000, use https://local.dsde-dev.broadinstitute.org:3000 instead.
+# `pnpm start` runs Vite only, has no auth callback, and needs neither.
+OAUTH_REDIRECT_URI_DEFAULT="https://local.dsde-dev.broadinstitute.org/auth/callback"
+POST_LOGOUT_REDIRECT_URI_DEFAULT="https://local.dsde-dev.broadinstitute.org/post-logout"
 API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
 # The single-feature proxy upstreams (ECM, TDR, Bard). Optional server-side —
 # the BFF boots without them and leaves each route dark — but written here so

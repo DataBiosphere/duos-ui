@@ -1,0 +1,60 @@
+# Mode 3 (example) — against the REMOTE dev consent database, through a Cloud
+# SQL Auth Proxy container that runs inside this compose stack.
+#
+# Use it with the base file only. Passing explicit -f files opts out of the
+# automatic docker-compose.override.yaml merge, so the bundled `db` service is
+# never defined:
+#   docker compose --env-file .env.local -f docker-compose.yaml -f docker-compose.cloudsql.yaml up -d
+#
+# One-time setup:
+#   1. gcloud auth application-default login
+#      Your account needs the Cloud SQL Client role on broad-dsde-dev.
+#   2. Add the instance connection name to .env.local:
+#        CLOUDSQL_INSTANCE=broad-dsde-dev:us-central1:<instance_name>
+#      Read <instance_name> with:
+#        gcloud --project broad-dsde-dev secrets versions access latest \
+#          --secret=consent-postgres-creds | jq -r .instance_name
+#   3. DUOS_DB_NAME, DUOS_DB_USER and DUOS_DB_PASSWORD in .env.local must be the
+#      dev values. DUOS_DB_HOST is set below and overrides any value in .env.local.
+#
+# The proxy publishes no host port. Only the `app` container can reach it, so
+# nothing else on your machine or network can use your credentials, and it
+# cannot clash with a consent stack that holds host port 5432.
+#
+# WARNING: the BFF writes its session rows into the SHARED dev database.
+services:
+  app:
+    depends_on:
+      cloudsql-proxy:
+        condition: service_healthy
+    ports:
+      - ${DUOS_HOST_PORT:-18080}:${PORT:-8080}
+    environment:
+      DUOS_DB_HOST: cloudsql-proxy
+      # The proxy encrypts the link to Cloud SQL. The hop from `app` to the
+      # proxy stays on the private compose network and does not speak TLS.
+      DUOS_DB_SSL: "false"
+
+  cloudsql-proxy:
+    # The alpine variant includes a shell and wget, which the healthcheck needs.
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:${CLOUDSQL_PROXY_VERSION:-2.14.0}-alpine
+    container_name: duos-cloudsql-proxy
+    command:
+      - --address=0.0.0.0
+      - --port=5432
+      - --health-check
+      - ${CLOUDSQL_INSTANCE:?set CLOUDSQL_INSTANCE in .env.local (see the header of docker-compose.cloudsql.yaml)}
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/adc.json
+    volumes:
+      # Your own gcloud application-default credentials, read-only.
+      - ${GCLOUD_ADC_FILE:-~/.config/gcloud/application_default_credentials.json}:/secrets/adc.json:ro
+    healthcheck:
+      # /readiness answers 200 only after the proxy can reach the instance.
+      # Use 127.0.0.1, not localhost: wget tries ::1 first, and the proxy
+      # health server listens on IPv4 loopback only.
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/readiness >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
