@@ -8,7 +8,9 @@
 #
 # One-time setup:
 #   1. gcloud auth application-default login
-#      Your account needs the Cloud SQL Client role on broad-dsde-dev.
+#      Your account needs two roles on broad-dsde-dev: Cloud SQL Client, for the
+#      proxy, and Secret Manager Secret Accessor on the consent-postgres-creds
+#      secret, for the gcloud command in step 2.
 #   2. Add the instance connection name to .env.local:
 #        CLOUDSQL_INSTANCE=broad-dsde-dev:us-central1:<instance_name>
 #      Read <instance_name> with:

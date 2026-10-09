@@ -154,7 +154,9 @@ docker compose --env-file .env.local -f docker-compose.yaml -f docker-compose.cl
 
 Prerequisites, all one-time:
 
-1. Run `gcloud auth application-default login`. Your account needs the Cloud SQL Client role on `broad-dsde-dev`.
+1. Run `gcloud auth application-default login`. Your account needs two roles on `broad-dsde-dev`: Cloud SQL Client,
+   which the proxy uses, and Secret Manager Secret Accessor on the `consent-postgres-creds` secret, which the
+   `gcloud secrets` command in step 2 needs.
 2. Add the instance connection name to `.env.local`:
    ```properties
    CLOUDSQL_INSTANCE=broad-dsde-dev:us-central1:<instance_name>
