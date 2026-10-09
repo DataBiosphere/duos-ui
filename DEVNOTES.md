@@ -169,8 +169,17 @@ Prerequisites, all one-time:
 The overlay sets `DUOS_DB_HOST` to `cloudsql-proxy` and `DUOS_DB_SSL` to `false`; the proxy encrypts the link to Cloud
 SQL itself. The proxy publishes no host port, so it cannot clash with a `consent` stack on host port 5432. Optional
 `GCLOUD_ADC_FILE` and `CLOUDSQL_PROXY_VERSION` override the credentials file and proxy image version; see the header
-of `docker-compose.cloudsql.yaml`. `render-configs.sh --write_env true` carries all three variables forward when it
-regenerates `.env.local`.
+of `docker-compose.cloudsql.yaml`.
+
+On native Linux Docker, the bind mount keeps the ADC file's host ownership and mode 600, and the proxy image runs as
+UID 65532, so the proxy fails with `open /secrets/adc.json: permission denied`. Run it as your own user instead:
+
+```shell
+echo "CLOUDSQL_PROXY_USER=$(id -u):$(id -g)" >> .env.local
+```
+
+Docker Desktop (Mac/Windows) maps file ownership and needs no change. `render-configs.sh --write_env true` carries
+all four `CLOUDSQL_*`/`GCLOUD_*` variables forward when it regenerates `.env.local`.
 
 `--env-file .env.local` is required in every mode — the `${VAR:?...}` placeholders in these compose files are resolved
 by Compose's own YAML interpolation, which only reads a file literally named `.env` by default, and that name is

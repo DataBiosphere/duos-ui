@@ -211,6 +211,7 @@ write_env() {
   CLOUDSQL_INSTANCE=$(existing_env CLOUDSQL_INSTANCE)
   GCLOUD_ADC_FILE=$(existing_env GCLOUD_ADC_FILE)
   CLOUDSQL_PROXY_VERSION=$(existing_env CLOUDSQL_PROXY_VERSION)
+  CLOUDSQL_PROXY_USER=$(existing_env CLOUDSQL_PROXY_USER)
 
   if [[ -f "$ENV_FILE" ]]; then
     echo "Backing up existing .env.local to .env.local.bak"
@@ -262,7 +263,7 @@ EOF
     # Compose-only settings, written only when the previous file had them.
     # CLOUDSQL_INSTANCE is required by docker-compose.cloudsql.yaml, so a
     # re-run must not drop it.
-    if [[ -n "$HOST_PORT" || -n "$CLOUDSQL_INSTANCE" || -n "$GCLOUD_ADC_FILE" || -n "$CLOUDSQL_PROXY_VERSION" ]]; then
+    if [[ -n "$HOST_PORT" || -n "$CLOUDSQL_INSTANCE" || -n "$GCLOUD_ADC_FILE" || -n "$CLOUDSQL_PROXY_VERSION" || -n "$CLOUDSQL_PROXY_USER" ]]; then
       echo
       echo "# Docker compose settings carried forward from the previous .env.local."
       if [[ -n "$HOST_PORT" ]]; then
@@ -276,6 +277,9 @@ EOF
       fi
       if [[ -n "$CLOUDSQL_PROXY_VERSION" ]]; then
         echo "CLOUDSQL_PROXY_VERSION=$CLOUDSQL_PROXY_VERSION"
+      fi
+      if [[ -n "$CLOUDSQL_PROXY_USER" ]]; then
+        echo "CLOUDSQL_PROXY_USER=$CLOUDSQL_PROXY_USER"
       fi
     fi
   } > "$ENV_FILE"

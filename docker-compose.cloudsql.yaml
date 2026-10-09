@@ -16,6 +16,11 @@
 #          --secret=consent-postgres-creds | jq -r .instance_name
 #   3. DUOS_DB_NAME, DUOS_DB_USER and DUOS_DB_PASSWORD in .env.local must be the
 #      dev values. DUOS_DB_HOST is set below and overrides any value in .env.local.
+#   4. Native Linux Docker only: the proxy image runs as UID 65532, and gcloud
+#      writes the ADC file owner-only (mode 600), so the bind mount below is
+#      unreadable unless the container runs as you. Add your own IDs:
+#        echo "CLOUDSQL_PROXY_USER=$(id -u):$(id -g)" >> .env.local
+#      Docker Desktop (Mac/Windows) maps file ownership and needs no change.
 #
 # The proxy publishes no host port, so it cannot clash with a consent stack
 # that holds host port 5432. Containers on this compose network can reach it.
@@ -43,6 +48,9 @@ services:
       - --port=5432
       - --health-check
       - ${CLOUDSQL_INSTANCE:?set CLOUDSQL_INSTANCE in .env.local (see the header of docker-compose.cloudsql.yaml)}
+    # See setup step 4. The proxy binary runs under any UID; port 5432 and the
+    # 9090 health server need no privileges.
+    user: ${CLOUDSQL_PROXY_USER:-65532:65532}
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: /secrets/adc.json
     volumes:
