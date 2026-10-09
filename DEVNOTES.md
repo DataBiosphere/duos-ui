@@ -113,8 +113,9 @@ Build:
 docker build . -t duos --platform linux/amd64
 ```
 
-Run — there are two modes, split across three compose files (`docker-compose.yaml` is the shared base; the two
-`docker-compose.override.yaml`/`docker-compose.consent.yaml` files each add the bits specific to one mode):
+Run — there are three modes, split across four compose files (`docker-compose.yaml` is the shared base; the
+`docker-compose.override.yaml`, `docker-compose.consent.yaml` and `docker-compose.cloudsql.yaml` files each add the
+bits specific to one mode):
 
 **Standalone (bundled Postgres stands in for the consent DB):**
 
@@ -142,7 +143,47 @@ docker compose --env-file .env.local -f docker-compose.yaml -f docker-compose.co
 Passing explicit `-f` files opts out of the automatic `docker-compose.override.yaml` merge, so the bundled `db`
 service is never defined and can't fight consent's `sqlproxy` for host port 5432.
 
-`--env-file .env.local` is required in both modes — the `${VAR:?...}` placeholders in these compose files are resolved
+**Against the remote dev consent database** (through a Cloud SQL Auth Proxy container):
+
+```shell
+docker compose --env-file .env.local -f docker-compose.yaml -f docker-compose.cloudsql.yaml up -d
+```
+
+> **WARNING:** this mode writes the BFF's `user_sessions` rows into the **shared dev database** that the deployed dev
+> environment uses. Do not use it for destructive experiments.
+
+Prerequisites, all one-time:
+
+1. Run `gcloud auth application-default login`. Your account needs two roles on `broad-dsde-dev`: Cloud SQL Client,
+   which the proxy uses, and Secret Manager Secret Accessor on the `consent-postgres-creds` secret, which the
+   `gcloud secrets` command in step 2 needs.
+2. Add the instance connection name to `.env.local`:
+   ```properties
+   CLOUDSQL_INSTANCE=broad-dsde-dev:us-central1:<instance_name>
+   ```
+   Read `<instance_name>` with:
+   ```shell
+   gcloud --project broad-dsde-dev secrets versions access latest --secret=consent-postgres-creds | jq -r .instance_name
+   ```
+3. Set `DUOS_DB_NAME`, `DUOS_DB_USER` and `DUOS_DB_PASSWORD` in `.env.local` to the dev values. `render-configs.sh
+   --write_env true` fetches the user and password from the dev cluster when they are unset.
+
+The overlay sets `DUOS_DB_HOST` to `cloudsql-proxy` and `DUOS_DB_SSL` to `false`; the proxy encrypts the link to Cloud
+SQL itself. The proxy publishes no host port, so it cannot clash with a `consent` stack on host port 5432. Optional
+`GCLOUD_ADC_FILE` and `CLOUDSQL_PROXY_VERSION` override the credentials file and proxy image version; see the header
+of `docker-compose.cloudsql.yaml`.
+
+On native Linux Docker, the bind mount keeps the ADC file's host ownership and mode 600, and the proxy image runs as
+UID 65532, so the proxy fails with `open /secrets/adc.json: permission denied`. Run it as your own user instead:
+
+```shell
+echo "CLOUDSQL_PROXY_USER=$(id -u):$(id -g)" >> .env.local
+```
+
+Docker Desktop for Mac maps file ownership and needs no change. `render-configs.sh --write_env true` copies every
+variable it does not manage, these included, unchanged when it regenerates `.env.local`.
+
+`--env-file .env.local` is required in every mode — the `${VAR:?...}` placeholders in these compose files are resolved
 by Compose's own YAML interpolation, which only reads a file literally named `.env` by default, and that name is
 reserved for real secrets (see `.gitignore`).
 
@@ -150,7 +191,7 @@ Visit https://local.dsde-dev.broadinstitute.org/ to see the instance running und
 
 ### Environment variables
 
-The server reads sensitive configuration from `.env.local` in the project root (gitignored). Create this file before running `docker compose up` — `./scripts/render-configs.sh --write_env true` generates it fully populated, including the Azure B2C client secret and consent DB credentials fetched from the dev cluster (see the render-configs notes above). Under docker compose, also change `DUOS_OAUTH_REDIRECT_URI` to the portless variant (`https://local.dsde-dev.broadinstitute.org/auth/callback`) — both variants are registered in B2C, but the script's default (with `:3000`) targets the pnpm dev server. `DUOS_POST_LOGOUT_REDIRECT_URI` (the B2C front-channel logout return URI, `.../post-logout`) follows the same port rule, and B2C requires an exact match against a URI registered on the app registration. The required variables are:
+The server reads sensitive configuration from `.env.local` in the project root (gitignored). Create this file before running `docker compose up` — `./scripts/render-configs.sh --write_env true` generates it fully populated, including the Azure B2C client secret and consent DB credentials fetched from the dev cluster (see the render-configs notes above). When a value is unset, the script writes the portless HTTPS redirect URI (`https://local.dsde-dev.broadinstitute.org/auth/callback`), which suits docker compose. Values already present in `.env.local` carry forward unchanged, so an existing file keeps whatever it had, including the old `http://...:3000` defaults. Both variants are registered in B2C. If you run `pnpm run start:server`, which serves the BFF on port 3000, set `DUOS_OAUTH_REDIRECT_URI` to `https://local.dsde-dev.broadinstitute.org:3000/auth/callback`. `pnpm start` runs Vite only, has no auth callback, and needs neither. `DUOS_POST_LOGOUT_REDIRECT_URI` (the B2C front-channel logout return URI, `.../post-logout`) follows the same port rule, and B2C requires an exact match against a URI registered on the app registration. When you switch between docker compose and `pnpm run start:server`, update both redirect variables by hand; the script never rewrites a value that is already set. The required variables are:
 
 ```properties
 # Fastify session
@@ -159,7 +200,9 @@ DUOS_SESSION_MAX_AGE_MS=      # cookie max-age in milliseconds (default: 2880000
 
 # PostgreSQL connection
 # DUOS_DB_HOST is not listed here — it's supplied by whichever compose overlay
-# you run with (see the two modes above); only set it to override that default.
+# you run with (see the three modes above). Only docker-compose.consent.yaml
+# honors a value set here; the standalone and Cloud SQL overlays set a fixed
+# hostname (db / cloudsql-proxy) that wins over .env.local.
 DUOS_DB_NAME=                 # database name
 DUOS_DB_PORT=5432             # defaults to 5432 if omitted
 DUOS_DB_USER=                 # database user

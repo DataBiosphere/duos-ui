@@ -59,10 +59,12 @@ AZURE_CLIENT_ID_DEFAULT="a0e99acd-7b8d-400d-a1d3-60e497495806"
 # The consent database is named `consent` in every environment.
 DB_NAME_DEFAULT="consent"
 AZURE_ISSUER_URL_DEFAULT="https://terradevb2c.b2clogin.com/terradevb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=b2c_1a_signup_signin_duos_dev"
-# Both redirect URIs are registered in B2C: this one (with :3000) matches the
-# pnpm-start dev server; drop the port when running under docker compose.
-OAUTH_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/auth/callback"
-POST_LOGOUT_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/post-logout"
+# Both redirect URIs are registered in B2C. These defaults (no port) match the
+# docker compose modes. For `pnpm run start:server`, which serves the BFF on
+# port 3000, use https://local.dsde-dev.broadinstitute.org:3000 instead.
+# `pnpm start` runs Vite only, has no auth callback, and needs neither.
+OAUTH_REDIRECT_URI_DEFAULT="https://local.dsde-dev.broadinstitute.org/auth/callback"
+POST_LOGOUT_REDIRECT_URI_DEFAULT="https://local.dsde-dev.broadinstitute.org/post-logout"
 API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
 # The single-feature proxy upstreams (ECM, TDR, Bard). Optional server-side —
 # the BFF boots without them and leaves each route dark — but written here so
@@ -148,6 +150,31 @@ existing_env() {
   fi
 }
 
+# Variables that write_env renders itself. Every other VAR=value line in an
+# existing .env.local is copied unchanged by extra_env_lines, quotes and all,
+# so compose-only settings (CLOUDSQL_INSTANCE, DUOS_HOST_PORT, ...) and any
+# optional server variable survive a re-run.
+MANAGED_VARS=" HOST HTTPS SSL_CRT_FILE SSL_KEY_FILE DUOS_SESSION_SECRET
+ DUOS_DB_HOST DUOS_DB_NAME DUOS_DB_PORT DUOS_DB_USER DUOS_DB_PASSWORD
+ DUOS_AZURE_CLIENT_ID DUOS_AZURE_CLIENT_SECRET DUOS_AZURE_ISSUER_URL
+ DUOS_OAUTH_REDIRECT_URI DUOS_POST_LOGOUT_REDIRECT_URI DUOS_API_URL
+ DUOS_ECM_URL DUOS_TDR_URL DUOS_BARD_URL DUOS_CSP_REPORT_ONLY "
+
+# Echo every VAR=value line of an existing .env.local whose VAR is not in
+# MANAGED_VARS, byte for byte.
+extra_env_lines() {
+  if [[ ! -f "$ENV_FILE" ]]; then
+    return 0
+  fi
+  local line name
+  grep -E '^[A-Za-z_][A-Za-z0-9_]*=' "$ENV_FILE" | while IFS= read -r line; do
+    name=${line%%=*}
+    if ! [[ "$MANAGED_VARS" =~ [[:space:]]"$name"[[:space:]] ]]; then
+      printf '%s\n' "$line"
+    fi
+  done
+}
+
 fetch_azure_client_secret() {
   echo "Fetching Azure B2C client secret from the terra-dev namespace"
   # kubectl's .data values are base64-wrapped, so the decode is mandatory:
@@ -178,7 +205,9 @@ write_env() {
   fetch_azure_client_secret
 
   # Per-setup values carry forward from an existing .env.local so a re-run
-  # (e.g. on cert rotation) never loses hand-filled configuration.
+  # (e.g. on cert rotation) never loses hand-filled configuration. The
+  # variables below are re-rendered with defaults; every other variable in the
+  # file is copied unchanged at the end (see extra_env_lines).
   SESSION_SECRET=$(existing_env DUOS_SESSION_SECRET)
   if [[ -z "$SESSION_SECRET" || "$SESSION_SECRET" == "change-me-to-a-random-32-plus-char-string" ]]; then
     SESSION_SECRET=$(openssl rand -base64 32)
@@ -202,6 +231,8 @@ write_env() {
   TDR_URL=$(existing_env DUOS_TDR_URL)
   BARD_URL=$(existing_env DUOS_BARD_URL)
   CSP_REPORT_ONLY=$(existing_env DUOS_CSP_REPORT_ONLY)
+  # Read before the redirect below truncates the file.
+  EXTRA_LINES=$(extra_env_lines)
 
   if [[ -f "$ENV_FILE" ]]; then
     echo "Backing up existing .env.local to .env.local.bak"
@@ -250,6 +281,13 @@ DUOS_BARD_URL=${BARD_URL:-$BARD_URL_DEFAULT}
 # does. Set true to only report violations while you debug the policy.
 DUOS_CSP_REPORT_ONLY=${CSP_REPORT_ONLY:-$CSP_REPORT_ONLY_DEFAULT}
 EOF
+    if [[ -n "$EXTRA_LINES" ]]; then
+      echo
+      echo "# Carried forward unchanged from the previous .env.local (this script"
+      echo "# does not manage these; e.g. docker compose settings such as"
+      echo "# CLOUDSQL_INSTANCE and DUOS_HOST_PORT)."
+      printf '%s\n' "$EXTRA_LINES"
+    fi
   } > "$ENV_FILE"
   chmod 600 "$ENV_FILE"
 }

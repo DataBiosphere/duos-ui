@@ -1,0 +1,86 @@
+# Mode 3 (example) — against the REMOTE dev consent database, through a Cloud
+# SQL Auth Proxy container that runs inside this compose stack.
+#
+# Use it with the base file only. Passing explicit -f files opts out of the
+# automatic docker-compose.override.yaml merge, so the bundled `db` service is
+# never defined:
+#   docker compose --env-file .env.local -f docker-compose.yaml -f docker-compose.cloudsql.yaml up -d
+#
+# One-time setup:
+#   1. gcloud auth application-default login
+#      Your account needs two roles on broad-dsde-dev: Cloud SQL Client, for the
+#      proxy, and Secret Manager Secret Accessor on the consent-postgres-creds
+#      secret, for the gcloud command in step 2.
+#   2. Add the instance connection name to .env.local:
+#        CLOUDSQL_INSTANCE=broad-dsde-dev:us-central1:<instance_name>
+#      Read <instance_name> with:
+#        gcloud --project broad-dsde-dev secrets versions access latest \
+#          --secret=consent-postgres-creds | jq -r .instance_name
+#   3. DUOS_DB_NAME, DUOS_DB_USER and DUOS_DB_PASSWORD in .env.local must be the
+#      dev values. DUOS_DB_HOST and DUOS_DB_PORT are set below and override any
+#      value in .env.local.
+#   4. Native Linux Docker only: the proxy image runs as UID 65532, and gcloud
+#      writes the ADC file owner-only (mode 600), so the bind mount below is
+#      unreadable unless the container runs as you. Add your own IDs:
+#        echo "CLOUDSQL_PROXY_USER=$(id -u):$(id -g)" >> .env.local
+#      Docker Desktop for Mac maps file ownership and needs no change.
+#
+# The proxy publishes no host port, so it cannot clash with a consent stack
+# that holds host port 5432. Containers on this compose network can reach it.
+#
+# WARNING: the BFF writes its session rows into the SHARED dev database.
+services:
+  app:
+    depends_on:
+      cloudsql-proxy:
+        condition: service_healthy
+    ports:
+      - ${DUOS_HOST_PORT:-18080}:${PORT:-8080}
+    environment:
+      DUOS_DB_HOST: cloudsql-proxy
+      # The proxy listens on 5432 only (see its --port below), so a port kept in
+      # .env.local for a host-run database must not reach this mode.
+      DUOS_DB_PORT: "5432"
+      # The proxy encrypts the link to Cloud SQL. The hop from `app` to the
+      # proxy stays on the private compose network and does not speak TLS.
+      DUOS_DB_SSL: "false"
+
+  cloudsql-proxy:
+    # The alpine variant includes a shell and wget, which the healthcheck needs.
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:${CLOUDSQL_PROXY_VERSION:-2.14.0}-alpine
+    container_name: duos-cloudsql-proxy
+    command:
+      - --address=0.0.0.0
+      - --port=5432
+      - --health-check
+      # Without this, the proxy starts and answers /readiness with 200 even when
+      # the instance is unreachable, and `app` would start against a dead
+      # database. With it, the proxy exits at startup with the real error.
+      - --run-connection-test
+      - ${CLOUDSQL_INSTANCE:?set CLOUDSQL_INSTANCE in .env.local (see the header of docker-compose.cloudsql.yaml)}
+    # See setup step 4. The proxy binary runs under any UID; port 5432 and the
+    # 9090 health server need no privileges.
+    user: ${CLOUDSQL_PROXY_USER:-65532:65532}
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/adc.json
+    volumes:
+      # Your own gcloud application-default credentials, read-only. The long
+      # syntax lets us stop Compose from creating an empty directory when the
+      # file is missing; Docker then fails with a clear "source path does not
+      # exist" error instead of the proxy reading a directory.
+      - type: bind
+        source: ${GCLOUD_ADC_FILE:-~/.config/gcloud/application_default_credentials.json}
+        target: /secrets/adc.json
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      # /readiness answers 200 once the proxy has started; --run-connection-test
+      # above is what ties startup to a reachable instance.
+      # Use 127.0.0.1, not localhost: wget tries ::1 first, and the proxy
+      # health server listens on IPv4 loopback only.
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/readiness >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
