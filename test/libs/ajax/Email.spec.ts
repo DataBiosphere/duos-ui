@@ -68,18 +68,18 @@ describe('Email', () => {
   })
 
   describe('getSendsByDateRange', () => {
-    const email = (sendId: number, createDate: Date): MailSend => ({
+    const send = (sendId: number, createDate: Date, lastCreateDate = createDate): MailSend => ({
       sendId,
       emailType: 4,
-      entityReferenceId: 'DAR-1',
       createDate: createDate.getTime(),
+      lastCreateDate: lastCreateDate.getTime(),
       recipientCount: 1,
       recipients: [],
       darCode: 'DAR-1',
       datasetIdentifiers: [],
     })
     const page = (firstId: number, count: number) =>
-      ({ data: Array.from({ length: count }, (_, index) => email(firstId + index, new Date(2026, 9, 1, 12))) })
+      ({ data: Array.from({ length: count }, (_, index) => send(firstId + index, new Date(2026, 9, 1, 12))) })
     const offsets = () => vi.mocked(fetchGet).mock.calls.map(([, config]) => config?.params?.offset)
 
     it('asks Consent for a day either side of the range, in the format it parses', async () => {
@@ -96,10 +96,10 @@ describe('Email', () => {
     it('keeps only the sends logged within the local days chosen', async () => {
       vi.mocked(fetchGet).mockResolvedValueOnce({
         data: [
-          email(1, new Date(2026, 9, 3, 0, 0, 0)),
-          email(2, new Date(2026, 9, 2, 23, 59, 59)),
-          email(3, new Date(2026, 9, 1, 0, 0, 0)),
-          email(4, new Date(2026, 8, 30, 23, 59, 59)),
+          send(1, new Date(2026, 9, 3, 0, 0, 0)),
+          send(2, new Date(2026, 9, 2, 23, 59, 59)),
+          send(3, new Date(2026, 9, 1, 0, 0, 0)),
+          send(4, new Date(2026, 8, 30, 23, 59, 59)),
         ],
       })
 
@@ -120,22 +120,21 @@ describe('Email', () => {
       expect(log.sends).toHaveLength(EMAIL_LOG_PAGE_SIZE + 2)
     })
 
-    it('stops reading once the sends pass the start of the range', async () => {
+    it('keeps a send that began before the range but ended inside it', async () => {
       vi.mocked(fetchGet).mockResolvedValueOnce({
         data: [
-          ...page(1, EMAIL_LOG_PAGE_SIZE - 1).data,
-          email(EMAIL_LOG_PAGE_SIZE, new Date(2026, 8, 30, 12)),
+          send(1, new Date(2026, 8, 30, 23, 58), new Date(2026, 9, 1, 0, 5)),
+          send(2, new Date(2026, 8, 30, 12), new Date(2026, 8, 30, 12, 5)),
         ],
       })
 
       const log = await Email.getSendsByDateRange('2026-10-01', '2026-10-01')
 
-      expect(offsets()).toEqual([0])
-      expect(log.sends).toHaveLength(EMAIL_LOG_PAGE_SIZE - 1)
+      expect(log.sends.map(({ sendId }) => sendId)).toEqual([1])
     })
 
     it('counts only sends in the range toward the cap, and flags one past it', async () => {
-      const afterRange = email(0, new Date(2026, 9, 2, 1))
+      const afterRange = send(0, new Date(2026, 9, 2, 1))
       vi.mocked(fetchGet).mockImplementation(async (_, config) => {
         const offset = Number(config?.params?.offset)
         const rows = page(offset + 1, EMAIL_LOG_PAGE_SIZE).data

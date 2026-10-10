@@ -5,8 +5,8 @@ import { MailSend } from 'src/libs/ajax/Email'
 const send = (sendId: number, emailType: number, overrides: Partial<MailSend> = {}): MailSend => ({
   sendId,
   emailType,
-  entityReferenceId: null,
   createDate: 0,
+  lastCreateDate: 0,
   recipientCount: 0,
   recipients: [],
   darCode: null,

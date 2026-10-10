@@ -53,7 +53,7 @@ export const emailTypeOptions = (sends: MailSend[]): number[] =>
 export const formatTimestamp = (date: number): string => dayjs(date).format('YYYY-MM-DD HH:mm:ss')
 
 export const recipientName = (recipient: MailSend['recipients'][number]): string =>
-  recipient.displayName ?? `User ${recipient.userId ?? 'unknown'}`
+  recipient.displayName ?? `User ${recipient.userId}`
 
 /** The lowercased text search looks through: type, DAR code, DUOS-IDs and listed recipients. */
 export const sendSearchText = (send: MailSend): string =>
@@ -64,6 +64,8 @@ export const sendSearchText = (send: MailSend): string =>
     ...send.recipients.map(recipientName),
   ].join('\n').toLowerCase()
 
-/** Orders DAR codes by number, so DAR-99 sorts before DAR-200. */
-export const compareDarCodes = (a: string, b: string): number =>
-  a.localeCompare(b, undefined, { numeric: true })
+/** Orders DAR codes by number, so DAR-99 sorts before DAR-200, with blanks after every code. */
+export const compareDarCodes = (a: string, b: string): number => {
+  if (a === '' || b === '') return Number(a === '') - Number(b === '')
+  return a.localeCompare(b, undefined, { numeric: true })
+}

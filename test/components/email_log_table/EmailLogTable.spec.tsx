@@ -10,8 +10,8 @@ const at = (day: number, hour = 9): number => new Date(2026, 9, day, hour, 0, 0)
 const send = (sendId: number, emailType: number, createDate: number, overrides: Partial<MailSend> = {}): MailSend => ({
   sendId,
   emailType,
-  entityReferenceId: null,
   createDate,
+  lastCreateDate: createDate,
   recipientCount: 1,
   recipients: [{ userId: sendId, displayName: `User ${sendId}`, delivered: true }],
   darCode: null,
@@ -146,6 +146,15 @@ describe('EmailLogTable', () => {
     fireEvent.click(columnHeader('DAR-ID'))
 
     expect(columnText(3)).toEqual(['DAR-99', 'DAR-200', 'DAR-1000'])
+  })
+
+  it('sorts sends without a DAR-ID after every DAR-ID', () => {
+    renderTable({ sends: [send(1, 4, at(1)), send(2, 4, at(2), { darCode: 'DAR-5' })] })
+
+    fireEvent.click(columnHeader('DAR-ID'))
+
+    expect(columnText(3)).toEqual(['DAR-5'])
+    expect(screen.getAllByRole('row')[1]).toHaveTextContent('DAR-5')
   })
 
   it('restarts at the first page when a new range loads', async () => {

@@ -5,6 +5,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { EmailLogTable } from 'src/components/email_log_table/EmailLogTable'
 import { emailTypeLabel, emailTypeOptions } from 'src/components/email_log_table/emailLogUtils'
 import { DATE_FORMAT, isValidRange } from 'src/components/dar_analytics/darAnalyticsRange'
+import SearchBar from 'src/components/SearchBar'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { Email, EMAIL_LOG_LIMIT } from 'src/libs/ajax/Email'
@@ -89,16 +90,8 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
               <MenuItem key={type} value={type}>{emailTypeLabel(type)}</MenuItem>
             ))}
           </TextField>
-          <TextField
-            label="Search"
-            type="search"
-            size="small"
-            value={search}
-            onChange={event => setSearch(event.target.value)}
-            helperText="Type, recipient, DAR-ID or DUOS-ID"
-            sx={{ minWidth: '18rem' }}
-          />
         </Box>
+        <SearchBar handleSearchChange={setSearch} placeholder="Search type, recipient, DAR-ID or DUOS-ID" />
       </div>
       {data?.truncated && (
         <Alert severity="info" sx={{ marginTop: 2, marginLeft: 3 }}>

@@ -3,7 +3,7 @@ import { Config } from '../config'
 import { fetchGet, fetchPost } from 'src/libs/ajax/fetchAdapter'
 
 export interface MailSendRecipient {
-  userId: number | null
+  userId: number
   displayName: string | null
   /** False when SendGrid rejected the email, or the user or the environment has email turned off. */
   delivered: boolean
@@ -13,8 +13,9 @@ export interface MailSendRecipient {
 export interface MailSend {
   sendId: number
   emailType: number
-  entityReferenceId: string | null
+  /** Its first email; `lastCreateDate` is its last. A send spanning the range edge is still listed. */
   createDate: number
+  lastCreateDate: number
   recipientCount: number
   /** The first 100 recipients by display name; `recipientCount` counts them all. */
   recipients: MailSendRecipient[]
@@ -70,12 +71,8 @@ export const Email = {
       })
       more = data.length === EMAIL_LOG_PAGE_SIZE
       for (const send of data) {
-        if (send.createDate >= end.valueOf() || sends.has(send.sendId)) continue
-        // Newest first, so every send from here on is older than the range too.
-        if (send.createDate < start.valueOf()) {
-          more = false
-          break
-        }
+        // Kept if any of its emails falls in the range; Consent's day of padding bounds the read.
+        if (send.createDate >= end.valueOf() || send.lastCreateDate < start.valueOf() || sends.has(send.sendId)) continue
         if (sends.size === EMAIL_LOG_LIMIT) {
           truncated = true
           more = false

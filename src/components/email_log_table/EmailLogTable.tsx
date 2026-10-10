@@ -1,4 +1,4 @@
-import { useDeferredValue, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Box, Tooltip } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { DATA_GRID_CONTAINER_SX, DATA_GRID_SX } from 'src/components/dataGridDefaults'
@@ -7,6 +7,7 @@ import { MailSend } from 'src/libs/ajax/Email'
 import { isNil } from 'src/utils/NodashUtil'
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100]
+const MULTIPLE = 'Multiple'
 
 export interface EmailLogTableProps {
   isLoading: boolean
@@ -24,7 +25,6 @@ interface EmailRow {
   recipientCount: number
   darCode: string
   datasets: string
-  searchText: string
   send: MailSend
 }
 
@@ -65,7 +65,7 @@ const COLUMNS: GridColDef<EmailRow>[] = [
   },
   {
     field: 'recipientCount',
-    headerName: 'To',
+    headerName: 'Recipients',
     minWidth: 150,
     sortingOrder: ['desc', 'asc'],
     renderCell: ({ row, tabIndex }) => {
@@ -78,11 +78,9 @@ const COLUMNS: GridColDef<EmailRow>[] = [
     field: 'datasets',
     headerName: 'DUOS-ID',
     minWidth: 150,
-    renderCell: ({ row, tabIndex }) => {
-      const ids = row.send.datasetIdentifiers
-      if (ids.length <= 1) return ids[0] ?? ''
-      return <HoverList label="Multiple" items={ids} tabIndex={tabIndex} />
-    },
+    renderCell: ({ row, value, tabIndex }) => value === MULTIPLE
+      ? <HoverList label={MULTIPLE} items={row.send.datasetIdentifiers} tabIndex={tabIndex} />
+      : value,
   },
 ]
 
@@ -94,16 +92,19 @@ export const EmailLogTable = function EmailLogTable({ isLoading, sends, emailTyp
     recipientCount: send.recipientCount,
     darCode: send.darCode ?? '',
     // Sorts on what the cell shows.
-    datasets: send.datasetIdentifiers.length > 1 ? 'Multiple' : send.datasetIdentifiers[0] ?? '',
-    searchText: sendSearchText(send),
+    datasets: send.datasetIdentifiers.length > 1 ? MULTIPLE : send.datasetIdentifiers[0] ?? '',
     send,
   })), [sends])
 
-  // Typing stays responsive while a large log re-filters behind it.
-  const term = useDeferredValue(search.trim().toLowerCase())
+  // Built only once someone searches, then reused for every term.
+  const term = search.trim().toLowerCase()
+  const searching = term !== ''
+  const searchTexts = useMemo(
+    () => (searching ? new Map(allRows.map(row => [row.id, sendSearchText(row.send)])) : undefined),
+    [allRows, searching])
   const rows = useMemo(() => allRows.filter(row =>
-    (isNil(emailType) || row.send.emailType === emailType) && (term === '' || row.searchText.includes(term))),
-  [allRows, emailType, term])
+    (isNil(emailType) || row.send.emailType === emailType) && (searchTexts?.get(row.id)?.includes(term) ?? true)),
+  [allRows, emailType, term, searchTexts])
 
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: PAGE_SIZE_OPTIONS[0] })
   const [lastFilters, setLastFilters] = useState({ sends, emailType, term })
