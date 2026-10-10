@@ -5,8 +5,8 @@ import { fetchGet, fetchPost } from 'src/libs/ajax/fetchAdapter'
 export interface MailSendRecipient {
   userId: number
   displayName: string | null
-  /** False when SendGrid rejected the email, or the user or the environment has email turned off. */
-  delivered: boolean
+  /** SendGrid accepted the email; false when it rejected it, or the user or the environment has email off. Not proof of delivery. */
+  sent: boolean
 }
 
 /** One email sent to one or more recipients, as Consent groups its log; dates are epoch milliseconds. */

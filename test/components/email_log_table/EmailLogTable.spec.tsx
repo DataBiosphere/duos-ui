@@ -13,7 +13,7 @@ const send = (sendId: number, emailType: number, createDate: number, overrides: 
   createDate,
   lastCreateDate: createDate,
   recipientCount: 1,
-  recipients: [{ userId: sendId, displayName: `User ${sendId}`, delivered: true }],
+  recipients: [{ userId: sendId, displayName: `User ${sendId}`, sent: true }],
   darCode: null,
   datasetIdentifiers: [],
   ...overrides,
@@ -64,13 +64,13 @@ describe('EmailLogTable', () => {
     expect(within(tooltip).getByText('DUOS-000002')).toBeInTheDocument()
   })
 
-  it('counts recipients and lists them on hover, marking undelivered ones and the unlisted rest', async () => {
+  it('counts recipients and lists them on hover, marking unsent ones and the unlisted rest', async () => {
     renderTable({
       sends: [send(1, 34, at(1), {
         recipientCount: 102,
         recipients: [
-          { userId: 1, displayName: 'Ada', delivered: true },
-          { userId: 2, displayName: 'Bo', delivered: false },
+          { userId: 1, displayName: 'Ada', sent: true },
+          { userId: 2, displayName: 'Bo', sent: false },
         ],
       })],
     })
@@ -79,7 +79,7 @@ describe('EmailLogTable', () => {
 
     const tooltip = await screen.findByRole('tooltip')
     expect(within(tooltip).getByText('Ada')).toBeInTheDocument()
-    expect(within(tooltip).getByText('Bo (not delivered)')).toBeInTheDocument()
+    expect(within(tooltip).getByText('Bo (not sent)')).toBeInTheDocument()
     expect(within(tooltip).getByText('and 100 more')).toBeInTheDocument()
   })
 

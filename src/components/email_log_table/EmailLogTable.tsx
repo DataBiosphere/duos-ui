@@ -44,7 +44,7 @@ const HoverList = ({ label, items, tabIndex }: { label: string, items: string[],
 
 const recipientItems = (send: MailSend): string[] => {
   const names = send.recipients.map(recipient =>
-    recipient.delivered ? recipientName(recipient) : `${recipientName(recipient)} (not delivered)`)
+    recipient.sent ? recipientName(recipient) : `${recipientName(recipient)} (not sent)`)
   const unlisted = send.recipientCount - send.recipients.length
   return unlisted > 0 ? [...names, `and ${unlisted.toLocaleString()} more`] : names
 }
