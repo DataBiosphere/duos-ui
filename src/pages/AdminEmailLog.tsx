@@ -19,6 +19,7 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
   const [from, setFrom] = useState(() => dayjs().subtract(DEFAULT_RANGE_DAYS - 1, 'day').format(DATE_FORMAT))
   const [to, setTo] = useState(() => dayjs().format(DATE_FORMAT))
   const [emailType, setEmailType] = useState<number | undefined>()
+  const [search, setSearch] = useState('')
   // A date input reports every keystroke, so only a whole, ordered range replaces the one on show.
   const [range, setRange] = useState({ from, to })
   const valid = isValidRange(from, to)
@@ -28,7 +29,7 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
 
   const { data, isFetching, isError } = useQuery({
     queryKey: ['admin-email-log', range.from, range.to],
-    queryFn: () => Email.getEmailsByDateRange(range.from, range.to),
+    queryFn: () => Email.getSendsByDateRange(range.from, range.to),
     // The last range stays on screen while the next loads, so the type filter isn't judged against nothing.
     placeholderData: keepPreviousData,
   })
@@ -39,8 +40,8 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
     }
   }, [isError])
 
-  const emailList = useMemo(() => data?.emails ?? [], [data])
-  const types = useMemo(() => emailTypeOptions(emailList), [emailList])
+  const sends = useMemo(() => data?.sends ?? [], [data])
+  const types = useMemo(() => emailTypeOptions(sends), [sends])
   // Cleared rather than hidden, so a later range can't revive a filter the select no longer shows.
   if (emailType !== undefined && data !== undefined && !types.includes(emailType)) {
     setEmailType(undefined)
@@ -51,7 +52,7 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
       <div>
         <TableHeaderSection
           title="Email Log"
-          description="Emails DUOS has sent, by type and time sent"
+          description="Emails DUOS has sent, one row per send, with who received them and the DAR and datasets they concern"
         />
       </div>
       <div style={{ ...Styles.SEARCH_ACTION_HEADER_SECTION }}>
@@ -88,14 +89,23 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
               <MenuItem key={type} value={type}>{emailTypeLabel(type)}</MenuItem>
             ))}
           </TextField>
+          <TextField
+            label="Search"
+            type="search"
+            size="small"
+            value={search}
+            onChange={event => setSearch(event.target.value)}
+            helperText="Type, recipient, DAR-ID or DUOS-ID"
+            sx={{ minWidth: '18rem' }}
+          />
         </Box>
       </div>
       {data?.truncated && (
         <Alert severity="info" sx={{ marginTop: 2, marginLeft: 3 }}>
-          {`Showing the newest ${EMAIL_LOG_LIMIT.toLocaleString()} emails. Narrow the dates to see the rest.`}
+          {`Showing the newest ${EMAIL_LOG_LIMIT.toLocaleString()} sends. Narrow the dates to see the rest.`}
         </Alert>
       )}
-      <EmailLogTable emails={emailList} isLoading={isFetching} emailType={emailType} />
+      <EmailLogTable sends={sends} isLoading={isFetching} emailType={emailType} search={search} />
     </div>
   )
 }

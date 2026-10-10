@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { MailMessage } from 'src/libs/ajax/Email'
+import { MailSend } from 'src/libs/ajax/Email'
 
 /** Consent's EmailType enum, keyed by the number it stores. */
 const EMAIL_TYPE_LABELS: Record<number, string> = {
@@ -45,9 +45,24 @@ const EMAIL_TYPE_LABELS: Record<number, string> = {
 export const emailTypeLabel = (emailType: number): string =>
   EMAIL_TYPE_LABELS[emailType] ?? `Email Type ${emailType}`
 
-/** The types present in `emails`, alphabetical by label. */
-export const emailTypeOptions = (emails: MailMessage[]): number[] =>
-  [...new Set(emails.map(email => email.emailType))]
+/** The types present in `sends`, alphabetical by label. */
+export const emailTypeOptions = (sends: MailSend[]): number[] =>
+  [...new Set(sends.map(send => send.emailType))]
     .sort((a, b) => emailTypeLabel(a).localeCompare(emailTypeLabel(b)))
 
 export const formatTimestamp = (date: number): string => dayjs(date).format('YYYY-MM-DD HH:mm:ss')
+
+export const recipientName = (recipient: MailSend['recipients'][number]): string =>
+  recipient.displayName ?? `User ${recipient.userId ?? 'unknown'}`
+
+/** Whether `term` appears, ignoring case, in the send's type, recipients, DAR code or DUOS-IDs. */
+export const sendMatches = (send: MailSend, term: string): boolean => {
+  const needle = term.trim().toLowerCase()
+  if (needle === '') return true
+  return [
+    emailTypeLabel(send.emailType),
+    send.darCode ?? '',
+    ...send.datasetIdentifiers,
+    ...send.recipients.map(recipientName),
+  ].some(value => value.toLowerCase().includes(needle))
+}
