@@ -55,14 +55,15 @@ export const formatTimestamp = (date: number): string => dayjs(date).format('YYY
 export const recipientName = (recipient: MailSend['recipients'][number]): string =>
   recipient.displayName ?? `User ${recipient.userId ?? 'unknown'}`
 
-/** Whether `term` appears, ignoring case, in the send's type, recipients, DAR code or DUOS-IDs. */
-export const sendMatches = (send: MailSend, term: string): boolean => {
-  const needle = term.trim().toLowerCase()
-  if (needle === '') return true
-  return [
+/** The lowercased text search looks through: type, DAR code, DUOS-IDs and listed recipients. */
+export const sendSearchText = (send: MailSend): string =>
+  [
     emailTypeLabel(send.emailType),
     send.darCode ?? '',
     ...send.datasetIdentifiers,
     ...send.recipients.map(recipientName),
-  ].some(value => value.toLowerCase().includes(needle))
-}
+  ].join('\n').toLowerCase()
+
+/** Orders DAR codes by number, so DAR-99 sorts before DAR-200. */
+export const compareDarCodes = (a: string, b: string): number =>
+  a.localeCompare(b, undefined, { numeric: true })

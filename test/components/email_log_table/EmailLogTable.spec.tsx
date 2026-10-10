@@ -124,6 +124,30 @@ describe('EmailLogTable', () => {
     expect(screen.getByText(/1–25 of 60/)).toBeInTheDocument()
   })
 
+  it('keeps the page when the search changes only by spaces', async () => {
+    const sends = numberedSends(60)
+    const { rerender } = renderTable({ sends, search: 'User' })
+    fireEvent.click(await screen.findByRole('button', { name: /go to next page/i }))
+
+    rerender(<EmailLogTable isLoading={false} sends={sends} search="User " />)
+
+    expect(screen.getByText(/26–50 of 60/)).toBeInTheDocument()
+  })
+
+  it('sorts DAR-IDs by number', () => {
+    renderTable({
+      sends: [
+        send(1, 4, at(1), { darCode: 'DAR-1000' }),
+        send(2, 4, at(2), { darCode: 'DAR-99' }),
+        send(3, 4, at(3), { darCode: 'DAR-200' }),
+      ],
+    })
+
+    fireEvent.click(columnHeader('DAR-ID'))
+
+    expect(columnText(3)).toEqual(['DAR-99', 'DAR-200', 'DAR-1000'])
+  })
+
   it('restarts at the first page when a new range loads', async () => {
     const { rerender } = renderTable({ sends: numberedSends(60) })
     fireEvent.click(await screen.findByRole('button', { name: /go to next page/i }))

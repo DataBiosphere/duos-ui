@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { emailTypeLabel, emailTypeOptions, sendMatches } from 'src/components/email_log_table/emailLogUtils'
+import { compareDarCodes, emailTypeLabel, emailTypeOptions, sendSearchText } from 'src/components/email_log_table/emailLogUtils'
 import { MailSend } from 'src/libs/ajax/Email'
 
 const send = (sendId: number, emailType: number, overrides: Partial<MailSend> = {}): MailSend => ({
@@ -28,19 +28,22 @@ describe('emailTypeOptions', () => {
   })
 })
 
-describe('sendMatches', () => {
-  const matching = send(1, 4, {
-    darCode: 'DAR-123',
-    datasetIdentifiers: ['DUOS-000045'],
-    recipients: [{ userId: 7, displayName: 'Ada Researcher', delivered: true }],
-  })
+describe('sendSearchText', () => {
+  it('holds the type, DAR code, DUOS-IDs and recipients, lowercased', () => {
+    const text = sendSearchText(send(1, 4, {
+      darCode: 'DAR-123',
+      datasetIdentifiers: ['DUOS-000045'],
+      recipients: [{ userId: 7, displayName: 'Ada Researcher', delivered: true }],
+    }))
 
-  it.each(['new dar', 'dar-123', 'duos-000045', 'ADA'])('matches %s, ignoring case', (term) => {
-    expect(sendMatches(matching, term)).toBe(true)
+    for (const term of ['new dar', 'dar-123', 'duos-000045', 'ada researcher']) {
+      expect(text).toContain(term)
+    }
   })
+})
 
-  it('matches every send for blank text, and none for text it does not hold', () => {
-    expect(sendMatches(matching, '  ')).toBe(true)
-    expect(sendMatches(matching, 'Grace')).toBe(false)
+describe('compareDarCodes', () => {
+  it('orders DAR codes by number', () => {
+    expect(['DAR-1000', 'DAR-99', 'DAR-200'].sort(compareDarCodes)).toEqual(['DAR-99', 'DAR-200', 'DAR-1000'])
   })
 })
