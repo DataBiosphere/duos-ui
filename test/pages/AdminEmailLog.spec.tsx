@@ -21,8 +21,8 @@ vi.mock('src/libs/utils', async (importActual) => {
 })
 
 vi.mock('src/components/email_log_table/EmailLogTable', () => ({
-  EmailLogTable: ({ sends, isLoading, emailType, search }: { sends: MailSend[], isLoading: boolean, emailType?: number, search?: string }) => (
-    <div data-testid="email-log-table" data-loading={isLoading} data-email-type={emailType ?? ''} data-search={search}>
+  EmailLogTable: ({ sends, isLoading, emailType }: { sends: MailSend[], isLoading: boolean, emailType?: number }) => (
+    <div data-testid="email-log-table" data-loading={isLoading} data-email-type={emailType ?? ''}>
       {sends.map(send => <span key={send.sendId}>{`email-${send.sendId}`}</span>)}
     </div>
   ),
@@ -62,7 +62,7 @@ describe('AdminEmailLog', () => {
 
     expect(await screen.findByText('email-2')).toBeInTheDocument()
     expect(screen.getByText('email-1')).toBeInTheDocument()
-    expect(Email.getSendsByDateRange).toHaveBeenCalledWith('2026-09-09', '2026-10-08')
+    expect(Email.getSendsByDateRange).toHaveBeenCalledWith('2026-09-09', '2026-10-08', '', [], expect.any(AbortSignal))
     expect(screen.getByLabelText('From')).toHaveValue('2026-09-09')
     expect(screen.getByLabelText('To')).toHaveValue('2026-10-08')
   })
@@ -87,13 +87,13 @@ describe('AdminEmailLog', () => {
     expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '4')
   })
 
-  it('passes the search text to the table', async () => {
+  it('asks consent to search, along with the types whose label matches', async () => {
     mountPage()
     await screen.findByText('email-1')
 
-    fireEvent.change(screen.getByRole('textbox', { name: 'search' }), { target: { value: 'DAR-12' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'search' }), { target: { value: 'digest' } })
 
-    await waitFor(() => expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-search', 'DAR-12'))
+    await waitFor(() => expect(Email.getSendsByDateRange).toHaveBeenLastCalledWith('2026-09-09', '2026-10-08', 'digest', [34, 36], expect.any(AbortSignal)))
   })
 
   it('reloads a new range, dropping a type filter it no longer holds', async () => {
@@ -105,7 +105,7 @@ describe('AdminEmailLog', () => {
     fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-01-01' } })
 
     await waitFor(() => expect(screen.queryByText('email-2')).not.toBeInTheDocument())
-    expect(Email.getSendsByDateRange).toHaveBeenLastCalledWith('2026-01-01', '2026-10-08')
+    expect(Email.getSendsByDateRange).toHaveBeenLastCalledWith('2026-01-01', '2026-10-08', '', [], expect.any(AbortSignal))
     expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '')
 
     // A range holding the type again must not bring back a filter the select no longer shows.
@@ -114,6 +114,29 @@ describe('AdminEmailLog', () => {
 
     await screen.findByText('email-2')
     expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '')
+  })
+
+  it('keeps the chosen type while a search narrows the results', async () => {
+    mountPage()
+    await screen.findByText('email-1')
+    await chooseType('New DAR')
+    vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends: [sends[1]], truncated: false })
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'search' }), { target: { value: 'Ada' } })
+
+    await waitFor(() => expect(screen.queryByText('email-1')).not.toBeInTheDocument())
+    expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '4')
+  })
+
+  it('lists nothing when a search fails, rather than the last result', async () => {
+    mountPage()
+    await screen.findByText('email-1')
+    vi.mocked(Email.getSendsByDateRange).mockRejectedValue(new Error('boom'))
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'search' }), { target: { value: 'Ada' } })
+
+    await waitFor(() => expect(screen.queryByText('email-1')).not.toBeInTheDocument())
+    expect(Notifications.showError).toHaveBeenCalled()
   })
 
   it('says when the range held more sends than it lists', async () => {

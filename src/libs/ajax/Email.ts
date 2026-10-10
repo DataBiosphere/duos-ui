@@ -52,8 +52,13 @@ export const Email = {
    * The sends logged from the start of `from` through the end of `to`, in local time, newest first.
    * @param from First day, `YYYY-MM-DD`
    * @param to Last day, `YYYY-MM-DD`
+   * @param search Only sends whose DAR code, DUOS-IDs or any recipient's name contains this text,
+   *   or whose type is in `searchTypes`
+   * @param signal Cancels the remaining page reads, as a newer search does
    */
-  getSendsByDateRange: async (from: string, to: string): Promise<EmailLog> => {
+  getSendsByDateRange: async (
+    from: string, to: string, search = '', searchTypes: number[] = [], signal?: AbortSignal,
+  ): Promise<EmailLog> => {
     const url = `${await Config.getApiUrl()}/api/mail/sends`
     const start = dayjs(from).startOf('day')
     const end = dayjs(to).add(1, 'day').startOf('day')
@@ -67,7 +72,8 @@ export const Email = {
     while (more) {
       const { data } = await fetchGet<MailSend[]>(url, {
         ...Config.authOpts(),
-        params: { ...range, limit: EMAIL_LOG_PAGE_SIZE, offset },
+        signal,
+        params: { ...range, ...(search.trim() === '' ? {} : { search: search.trim(), searchTypes }), limit: EMAIL_LOG_PAGE_SIZE, offset },
       })
       more = data.length === EMAIL_LOG_PAGE_SIZE
       for (const send of data) {

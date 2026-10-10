@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import { Alert, Box, MenuItem, TextField } from '@mui/material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { EmailLogTable } from 'src/components/email_log_table/EmailLogTable'
-import { emailTypeLabel, emailTypeOptions } from 'src/components/email_log_table/emailLogUtils'
+import { emailTypeLabel, emailTypeOptions, emailTypesMatching } from 'src/components/email_log_table/emailLogUtils'
 import { DATE_FORMAT, isValidRange } from 'src/components/dar_analytics/darAnalyticsRange'
 import SearchBar from 'src/components/SearchBar'
 import TableHeaderSection from 'src/components/TableHeaderSection'
@@ -28,9 +28,10 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
     setRange({ from, to })
   }
 
-  const { data, isFetching, isError } = useQuery({
-    queryKey: ['admin-email-log', range.from, range.to],
-    queryFn: () => Email.getSendsByDateRange(range.from, range.to),
+  const { data, isFetching, isError, errorUpdatedAt } = useQuery({
+    queryKey: ['admin-email-log', range.from, range.to, search.trim()],
+    // Consent searches every recipient, not just the 100 a send lists, so the search is its to run.
+    queryFn: ({ signal }) => Email.getSendsByDateRange(range.from, range.to, search, emailTypesMatching(search), signal),
     // The last range stays on screen while the next loads, so the type filter isn't judged against nothing.
     placeholderData: keepPreviousData,
   })
@@ -39,12 +40,14 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
     if (isError) {
       Notifications.showError({ text: 'Error: Unable to retrieve the email log from server' })
     }
-  }, [isError])
+  }, [isError, errorUpdatedAt])
 
-  const sends = useMemo(() => data?.sends ?? [], [data])
+  // A failed load lists nothing, rather than the last result under the new range or search.
+  const sends = useMemo(() => (isError ? [] : data?.sends ?? []), [data, isError])
   const types = useMemo(() => emailTypeOptions(sends), [sends])
   // Cleared rather than hidden, so a later range can't revive a filter the select no longer shows.
-  if (emailType !== undefined && data !== undefined && !types.includes(emailType)) {
+  // Only a new range clears it; a search narrowing the results keeps the type for when it's cleared.
+  if (emailType !== undefined && data !== undefined && search.trim() === '' && !types.includes(emailType)) {
     setEmailType(undefined)
   }
 
@@ -103,7 +106,7 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
           {`Showing the newest ${EMAIL_LOG_LIMIT.toLocaleString()} sends. Narrow the dates to see the rest.`}
         </Alert>
       )}
-      <EmailLogTable sends={sends} isLoading={isFetching} emailType={emailType} search={search} />
+      <EmailLogTable sends={sends} isLoading={isFetching} emailType={emailType} />
     </div>
   )
 }

@@ -97,12 +97,6 @@ describe('EmailLogTable', () => {
     expect(columnText(0)).toEqual(['New DAR'])
   })
 
-  it('shows only sends matching the search', () => {
-    renderTable({ search: 'duos-000003' })
-
-    expect(columnText(0)).toEqual(['Dataset Approved'])
-  })
-
   it('restarts at the first page when the type filter changes', async () => {
     const sends = numberedSends(60)
     const { rerender } = renderTable({ sends })
@@ -112,26 +106,6 @@ describe('EmailLogTable', () => {
     rerender(<EmailLogTable isLoading={false} sends={sends} emailType={4} />)
 
     expect(screen.getByText(/1–25 of 30/)).toBeInTheDocument()
-  })
-
-  it('restarts at the first page when the search changes', async () => {
-    const sends = numberedSends(60)
-    const { rerender } = renderTable({ sends })
-    fireEvent.click(await screen.findByRole('button', { name: /go to next page/i }))
-
-    rerender(<EmailLogTable isLoading={false} sends={sends} search="User" />)
-
-    expect(screen.getByText(/1–25 of 60/)).toBeInTheDocument()
-  })
-
-  it('keeps the page when the search changes only by spaces', async () => {
-    const sends = numberedSends(60)
-    const { rerender } = renderTable({ sends, search: 'User' })
-    fireEvent.click(await screen.findByRole('button', { name: /go to next page/i }))
-
-    rerender(<EmailLogTable isLoading={false} sends={sends} search="User " />)
-
-    expect(screen.getByText(/26–50 of 60/)).toBeInTheDocument()
   })
 
   it('sorts DAR-IDs by number', () => {
@@ -148,12 +122,13 @@ describe('EmailLogTable', () => {
     expect(columnText(3)).toEqual(['DAR-99', 'DAR-200', 'DAR-1000'])
   })
 
-  it('sorts sends without a DAR-ID after every DAR-ID', () => {
+  it('sorts sends without a DAR-ID after every DAR-ID, in either direction', () => {
     renderTable({ sends: [send(1, 4, at(1)), send(2, 4, at(2), { darCode: 'DAR-5' })] })
 
     fireEvent.click(columnHeader('DAR-ID'))
+    expect(screen.getAllByRole('row')[1]).toHaveTextContent('DAR-5')
 
-    expect(columnText(3)).toEqual(['DAR-5'])
+    fireEvent.click(columnHeader('DAR-ID'))
     expect(screen.getAllByRole('row')[1]).toHaveTextContent('DAR-5')
   })
 

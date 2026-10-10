@@ -12,7 +12,6 @@ interface SearchBarProps {
   readonly initialValue?: string
   readonly placeholder?: string
   readonly style?: React.CSSProperties
-  /** The input's CSS width; defaults to 30ch. */
   readonly width?: string
 }
 

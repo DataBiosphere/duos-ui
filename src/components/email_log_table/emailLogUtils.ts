@@ -53,19 +53,21 @@ export const emailTypeOptions = (sends: MailSend[]): number[] =>
 export const formatTimestamp = (date: number): string => dayjs(date).format('YYYY-MM-DD HH:mm:ss')
 
 export const recipientName = (recipient: MailSend['recipients'][number]): string =>
-  recipient.displayName ?? `User ${recipient.userId}`
+  recipient.displayName?.trim() || `User ${recipient.userId}`
 
-/** The lowercased text search looks through: type, DAR code, DUOS-IDs and listed recipients. */
-export const sendSearchText = (send: MailSend): string =>
-  [
-    emailTypeLabel(send.emailType),
-    send.darCode ?? '',
-    ...send.datasetIdentifiers,
-    ...send.recipients.map(recipientName),
-  ].join('\n').toLowerCase()
-
-/** Orders DAR codes by number, so DAR-99 sorts before DAR-200, with blanks after every code. */
-export const compareDarCodes = (a: string, b: string): number => {
-  if (a === '' || b === '') return Number(a === '') - Number(b === '')
-  return a.localeCompare(b, undefined, { numeric: true })
+/** The known types whose label contains `term`, ignoring case, for consent's search to match too. */
+export const emailTypesMatching = (term: string): number[] => {
+  const needle = term.trim().toLowerCase()
+  if (needle === '') return []
+  return Object.entries(EMAIL_TYPE_LABELS)
+    .filter(([, label]) => label.toLowerCase().includes(needle))
+    .map(([type]) => Number(type))
 }
+
+/** Orders DAR codes by number, so DAR-99 sorts before DAR-200, with blanks last in either direction. */
+export const darCodeComparator = (direction: 'asc' | 'desc' | null | undefined) =>
+  (a: string, b: string): number => {
+    if (a === '' || b === '') return Number(a === '') - Number(b === '')
+    const order = a.localeCompare(b, undefined, { numeric: true })
+    return direction === 'desc' ? -order : order
+  }

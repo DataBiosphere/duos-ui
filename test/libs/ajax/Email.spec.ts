@@ -93,6 +93,19 @@ describe('Email', () => {
       })
     })
 
+    it('passes a search and the types it matches to consent', async () => {
+      vi.mocked(fetchGet).mockResolvedValueOnce({ data: [] })
+
+      const { signal } = new AbortController()
+      await Email.getSendsByDateRange('2026-09-30', '2026-10-31', ' Ada ', [34], signal)
+
+      expect(fetchGet).toHaveBeenCalledWith('https://duos.example.org/api/mail/sends', {
+        ...headers,
+        signal,
+        params: { start: '09/29/2026', end: '11/02/2026', search: 'Ada', searchTypes: [34], limit: EMAIL_LOG_PAGE_SIZE, offset: 0 },
+      })
+    })
+
     it('keeps only the sends logged within the local days chosen', async () => {
       vi.mocked(fetchGet).mockResolvedValueOnce({
         data: [

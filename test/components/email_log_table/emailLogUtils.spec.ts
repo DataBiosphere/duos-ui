@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { compareDarCodes, emailTypeLabel, emailTypeOptions, sendSearchText } from 'src/components/email_log_table/emailLogUtils'
+import { darCodeComparator, emailTypeLabel, emailTypeOptions, emailTypesMatching } from 'src/components/email_log_table/emailLogUtils'
 import { MailSend } from 'src/libs/ajax/Email'
 
 const send = (sendId: number, emailType: number, overrides: Partial<MailSend> = {}): MailSend => ({
@@ -28,22 +28,24 @@ describe('emailTypeOptions', () => {
   })
 })
 
-describe('sendSearchText', () => {
-  it('holds the type, DAR code, DUOS-IDs and recipients, lowercased', () => {
-    const text = sendSearchText(send(1, 4, {
-      darCode: 'DAR-123',
-      datasetIdentifiers: ['DUOS-000045'],
-      recipients: [{ userId: 7, displayName: 'Ada Researcher', delivered: true }],
-    }))
+describe('emailTypesMatching', () => {
+  it('lists the types whose label contains the text, ignoring case', () => {
+    expect(emailTypesMatching(' digest ')).toEqual([34, 36])
+  })
 
-    for (const term of ['new dar', 'dar-123', 'duos-000045', 'ada researcher']) {
-      expect(text).toContain(term)
-    }
+  it('matches no types for blank text', () => {
+    expect(emailTypesMatching('  ')).toEqual([])
   })
 })
 
-describe('compareDarCodes', () => {
-  it('orders DAR codes by number', () => {
-    expect(['DAR-1000', 'DAR-99', 'DAR-200'].sort(compareDarCodes)).toEqual(['DAR-99', 'DAR-200', 'DAR-1000'])
+describe('darCodeComparator', () => {
+  const codes = ['DAR-1000', '', 'DAR-99', 'DAR-200']
+
+  it('orders DAR codes by number, blanks last', () => {
+    expect([...codes].sort(darCodeComparator('asc'))).toEqual(['DAR-99', 'DAR-200', 'DAR-1000', ''])
+  })
+
+  it('keeps blanks last when descending', () => {
+    expect([...codes].sort(darCodeComparator('desc'))).toEqual(['DAR-1000', 'DAR-200', 'DAR-99', ''])
   })
 })

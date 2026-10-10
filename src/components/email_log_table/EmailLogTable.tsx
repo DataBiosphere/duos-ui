@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Box, Tooltip } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { DATA_GRID_CONTAINER_SX, DATA_GRID_SX } from 'src/components/dataGridDefaults'
-import { compareDarCodes, emailTypeLabel, formatTimestamp, recipientName, sendSearchText } from 'src/components/email_log_table/emailLogUtils'
+import { darCodeComparator, emailTypeLabel, formatTimestamp, recipientName } from 'src/components/email_log_table/emailLogUtils'
 import { MailSend } from 'src/libs/ajax/Email'
 import { isNil } from 'src/utils/NodashUtil'
 
@@ -14,8 +14,6 @@ export interface EmailLogTableProps {
   sends: MailSend[]
   /** Only sends of this type; every send when absent. */
   emailType?: number
-  /** Only sends whose type, recipients, DAR code or DUOS-IDs contain this text. */
-  search?: string
 }
 
 interface EmailRow {
@@ -70,10 +68,10 @@ const COLUMNS: GridColDef<EmailRow>[] = [
     sortingOrder: ['desc', 'asc'],
     renderCell: ({ row, tabIndex }) => {
       const label = row.recipientCount === 1 ? '1 recipient' : `${row.recipientCount.toLocaleString()} recipients`
-      return <HoverList label={label} items={recipientItems(row.send)} tabIndex={tabIndex} />
+      return row.recipientCount === 0 ? label : <HoverList label={label} items={recipientItems(row.send)} tabIndex={tabIndex} />
     },
   },
-  { field: 'darCode', headerName: 'DAR-ID', minWidth: 130, sortComparator: compareDarCodes },
+  { field: 'darCode', headerName: 'DAR-ID', minWidth: 130, getSortComparator: darCodeComparator },
   {
     field: 'datasets',
     headerName: 'DUOS-ID',
@@ -84,7 +82,7 @@ const COLUMNS: GridColDef<EmailRow>[] = [
   },
 ]
 
-export const EmailLogTable = function EmailLogTable({ isLoading, sends, emailType, search = '' }: EmailLogTableProps) {
+export const EmailLogTable = function EmailLogTable({ isLoading, sends, emailType }: EmailLogTableProps) {
   const allRows = useMemo(() => sends.map((send): EmailRow => ({
     id: send.sendId,
     type: emailTypeLabel(send.emailType),
@@ -96,23 +94,16 @@ export const EmailLogTable = function EmailLogTable({ isLoading, sends, emailTyp
     send,
   })), [sends])
 
-  // Built only once someone searches, then reused for every term.
-  const term = search.trim().toLowerCase()
-  const searching = term !== ''
-  const searchTexts = useMemo(
-    () => (searching ? new Map(allRows.map(row => [row.id, sendSearchText(row.send)])) : undefined),
-    [allRows, searching])
-  const rows = useMemo(() => allRows.filter(row =>
-    (isNil(emailType) || row.send.emailType === emailType) && (searchTexts?.get(row.id)?.includes(term) ?? true)),
-  [allRows, emailType, term, searchTexts])
+  const rows = useMemo(() => allRows.filter(row => isNil(emailType) || row.send.emailType === emailType),
+    [allRows, emailType])
 
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: PAGE_SIZE_OPTIONS[0] })
-  const [lastFilters, setLastFilters] = useState({ sends, emailType, term })
+  const [lastFilters, setLastFilters] = useState({ sends, emailType })
   const lastPage = Math.max(0, Math.ceil(rows.length / paginationModel.pageSize) - 1)
 
-  // A new range, type or search starts at page 1; adjusted in render, as remounting would drop the sort.
-  if (sends !== lastFilters.sends || emailType !== lastFilters.emailType || term !== lastFilters.term) {
-    setLastFilters({ sends, emailType, term })
+  // A new range, search or type starts at page 1; adjusted in render, as remounting would drop the sort.
+  if (sends !== lastFilters.sends || emailType !== lastFilters.emailType) {
+    setLastFilters({ sends, emailType })
     setPaginationModel(model => ({ ...model, page: 0 }))
   }
   else if (paginationModel.page > lastPage) {
