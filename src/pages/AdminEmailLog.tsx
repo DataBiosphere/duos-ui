@@ -91,7 +91,12 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
             ))}
           </TextField>
         </Box>
-        <SearchBar handleSearchChange={setSearch} placeholder="Search type, recipient, DAR-ID or DUOS-ID" />
+        <SearchBar
+          handleSearchChange={setSearch}
+          placeholder="Search type, recipient, DAR-ID or DUOS-ID"
+          width="46ch"
+          style={{ width: 'auto' }}
+        />
       </div>
       {data?.truncated && (
         <Alert severity="info" sx={{ marginTop: 2, marginLeft: 3 }}>

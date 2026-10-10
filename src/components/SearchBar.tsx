@@ -12,6 +12,8 @@ interface SearchBarProps {
   readonly initialValue?: string
   readonly placeholder?: string
   readonly style?: React.CSSProperties
+  /** The input's CSS width; defaults to 30ch. */
+  readonly width?: string
 }
 
 const Search = styled('div')(({ theme }) => ({
@@ -51,10 +53,10 @@ const ClearIconWrapper = styled('div')(({ theme }) => ({
 }))
 
 const StyledInputBase = styled(InputBase, {
-  shouldForwardProp: prop => prop !== 'showClear',
-})<{ showClear: boolean }>(({ theme, showClear }) => ({
+  shouldForwardProp: prop => prop !== 'showClear' && prop !== 'inputWidth',
+})<{ showClear: boolean, inputWidth: string }>(({ theme, showClear, inputWidth }) => ({
   'color': 'inherit',
-  'width': '30ch',
+  'width': inputWidth,
   'border': '1px solid #cecece',
   'borderRadius': '5px',
   'height': '4rem',
@@ -72,7 +74,7 @@ const StyledInputBase = styled(InputBase, {
 }))
 
 export default function SearchBar(props: SearchBarProps) {
-  const { handleSearchChange, initialValue = '', placeholder = 'Enter search terms', style } = props
+  const { handleSearchChange, initialValue = '', placeholder = 'Enter search terms', style, width = '30ch' } = props
   const [value, setValue] = useState(initialValue)
   const debouncedValue = useDebouncedValue(value, 300)
 
@@ -121,6 +123,7 @@ export default function SearchBar(props: SearchBarProps) {
         )}
         <StyledInputBase
           showClear={!!value}
+          inputWidth={width}
           placeholder={placeholder}
           inputProps={{ 'aria-label': 'search', 'data-cy': 'search-bar' }}
           value={value}
