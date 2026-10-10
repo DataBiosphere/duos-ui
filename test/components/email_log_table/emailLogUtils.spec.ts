@@ -1,8 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { emailTypeLabel, emailTypeOptions } from 'src/components/email_log_table/emailLogUtils'
-import { MailMessage } from 'src/libs/ajax/Email'
+import { darCodeComparator, emailTypeLabel, emailTypeOptions, emailTypesMatching } from 'src/components/email_log_table/emailLogUtils'
+import { MailSend } from 'src/libs/ajax/Email'
 
-const email = (emailId: number, emailType: number): MailMessage => ({ emailId, emailType, createDate: 0 })
+const send = (sendId: number, emailType: number, overrides: Partial<MailSend> = {}): MailSend => ({
+  sendId,
+  emailType,
+  createDate: 0,
+  lastCreateDate: 0,
+  recipientCount: 0,
+  recipients: [],
+  darCode: null,
+  datasetIdentifiers: [],
+  ...overrides,
+})
 
 describe('emailTypeLabel', () => {
   it('falls back to the type number for a type it does not know', () => {
@@ -12,8 +22,32 @@ describe('emailTypeLabel', () => {
 
 describe('emailTypeOptions', () => {
   it('lists each type present once, alphabetical by label', () => {
-    const emails = [email(1, 4), email(2, 19), email(3, 4), email(4, 3)]
+    const sends = [send(1, 4), send(2, 19), send(3, 4), send(4, 3)]
 
-    expect(emailTypeOptions(emails)).toEqual([19, 4, 3])
+    expect(emailTypeOptions(sends)).toEqual([19, 4, 3])
+  })
+})
+
+describe('emailTypesMatching', () => {
+  it('lists the types whose label holds the text as whole words, ignoring case', () => {
+    expect(emailTypesMatching(' digest ')).toEqual([34, 36])
+    expect(emailTypesMatching('vote reminder')).toEqual([3, 34])
+    expect(emailTypesMatching('ada')).toEqual([])
+  })
+
+  it('matches no types for blank text', () => {
+    expect(emailTypesMatching('  ')).toEqual([])
+  })
+})
+
+describe('darCodeComparator', () => {
+  const codes = ['DAR-1000', '', 'DAR-99', 'DAR-200']
+
+  it('orders DAR codes by number, blanks last', () => {
+    expect([...codes].sort(darCodeComparator('asc'))).toEqual(['DAR-99', 'DAR-200', 'DAR-1000', ''])
+  })
+
+  it('keeps blanks last when descending', () => {
+    expect([...codes].sort(darCodeComparator('desc'))).toEqual(['DAR-1000', 'DAR-200', 'DAR-99', ''])
   })
 })

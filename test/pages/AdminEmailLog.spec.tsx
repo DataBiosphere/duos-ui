@@ -4,12 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AdminEmailLog } from 'src/pages/AdminEmailLog'
-import { Email, MailMessage } from 'src/libs/ajax/Email'
+import { Email, MailSend } from 'src/libs/ajax/Email'
 import { Notifications } from 'src/libs/utils'
 
 vi.mock('src/libs/ajax/Email', () => ({
-  Email: { getEmailsByDateRange: vi.fn() },
+  Email: { getSendsByDateRange: vi.fn() },
   EMAIL_LOG_LIMIT: 10000,
+  EMAIL_LOG_SEARCH_MAX_LENGTH: 200,
 }))
 
 vi.mock('src/libs/utils', async (importActual) => {
@@ -21,17 +22,18 @@ vi.mock('src/libs/utils', async (importActual) => {
 })
 
 vi.mock('src/components/email_log_table/EmailLogTable', () => ({
-  EmailLogTable: ({ emails, isLoading, emailType }: { emails: MailMessage[], isLoading: boolean, emailType?: number }) => (
+  EmailLogTable: ({ sends, isLoading, emailType }: { sends: MailSend[], isLoading: boolean, emailType?: number }) => (
     <div data-testid="email-log-table" data-loading={isLoading} data-email-type={emailType ?? ''}>
-      {emails.map(email => <span key={email.emailId}>{`email-${email.emailId}`}</span>)}
+      {sends.map(send => <span key={send.sendId}>{`email-${send.sendId}`}</span>)}
     </div>
   ),
 }))
 
-const emails: MailMessage[] = [
-  { emailId: 1, emailType: 4, createDate: 1 },
-  { emailId: 2, emailType: 19, createDate: 2 },
-]
+const send = (sendId: number, emailType: number, createDate: number): MailSend => ({
+  sendId, emailType, createDate, lastCreateDate: createDate, recipientCount: 1, recipients: [], darCode: null, datasetIdentifiers: [],
+})
+
+const sends: MailSend[] = [send(1, 4, 1), send(2, 19, 2)]
 
 const mountPage = () => render(
   <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
@@ -48,7 +50,7 @@ describe('AdminEmailLog', () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['Date'] })
     vi.setSystemTime(new Date(2026, 9, 8, 12))
-    vi.mocked(Email.getEmailsByDateRange).mockResolvedValue({ emails, truncated: false })
+    vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends, truncated: false })
   })
 
   afterEach(() => {
@@ -61,7 +63,7 @@ describe('AdminEmailLog', () => {
 
     expect(await screen.findByText('email-2')).toBeInTheDocument()
     expect(screen.getByText('email-1')).toBeInTheDocument()
-    expect(Email.getEmailsByDateRange).toHaveBeenCalledWith('2026-09-09', '2026-10-08')
+    expect(Email.getSendsByDateRange).toHaveBeenCalledWith('2026-09-09', '2026-10-08', '', [], expect.any(AbortSignal))
     expect(screen.getByLabelText('From')).toHaveValue('2026-09-09')
     expect(screen.getByLabelText('To')).toHaveValue('2026-10-08')
   })
@@ -73,7 +75,7 @@ describe('AdminEmailLog', () => {
     fireEvent.change(screen.getByLabelText('To'), { target: { value: '2026-01-01' } })
 
     expect(screen.getByText('Enter dates from 1900 on, with To on or after From')).toBeInTheDocument()
-    expect(Email.getEmailsByDateRange).toHaveBeenCalledOnce()
+    expect(Email.getSendsByDateRange).toHaveBeenCalledOnce()
     expect(screen.getByText('email-2')).toBeInTheDocument()
   })
 
@@ -86,36 +88,109 @@ describe('AdminEmailLog', () => {
     expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '4')
   })
 
+  it('asks consent to search, along with the types whose label matches', async () => {
+    mountPage()
+    await screen.findByText('email-1')
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'search' }), { target: { value: 'digest' } })
+
+    await waitFor(() => expect(Email.getSendsByDateRange).toHaveBeenLastCalledWith('2026-09-09', '2026-10-08', 'digest', [34, 36], expect.any(AbortSignal)))
+  })
+
   it('reloads a new range, dropping a type filter it no longer holds', async () => {
     mountPage()
     await screen.findByText('email-1')
     await chooseType('Dataset Approved')
-    vi.mocked(Email.getEmailsByDateRange).mockResolvedValue({ emails: [emails[0]], truncated: false })
+    vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends: [sends[0]], truncated: false })
 
     fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-01-01' } })
 
     await waitFor(() => expect(screen.queryByText('email-2')).not.toBeInTheDocument())
-    expect(Email.getEmailsByDateRange).toHaveBeenLastCalledWith('2026-01-01', '2026-10-08')
+    expect(Email.getSendsByDateRange).toHaveBeenLastCalledWith('2026-01-01', '2026-10-08', '', [], expect.any(AbortSignal))
     expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '')
 
     // A range holding the type again must not bring back a filter the select no longer shows.
-    vi.mocked(Email.getEmailsByDateRange).mockResolvedValue({ emails, truncated: false })
+    vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends, truncated: false })
     fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-02-01' } })
 
     await screen.findByText('email-2')
     expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '')
   })
 
-  it('says when the range held more emails than it lists', async () => {
-    vi.mocked(Email.getEmailsByDateRange).mockResolvedValue({ emails, truncated: true })
+  it('keeps the chosen type while a search narrows the results', async () => {
+    mountPage()
+    await screen.findByText('email-1')
+    await chooseType('New DAR')
+    vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends: [sends[1]], truncated: false })
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'search' }), { target: { value: 'Ada' } })
+
+    await waitFor(() => expect(screen.queryByText('email-1')).not.toBeInTheDocument())
+    expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '4')
+  })
+
+  it('lists nothing when a search fails, rather than the last result', async () => {
+    mountPage()
+    await screen.findByText('email-1')
+    vi.mocked(Email.getSendsByDateRange).mockRejectedValue(new Error('boom'))
+
+    fireEvent.change(screen.getByRole('textbox', { name: 'search' }), { target: { value: 'Ada' } })
+
+    await waitFor(() => expect(screen.queryByText('email-1')).not.toBeInTheDocument())
+    expect(Notifications.showError).toHaveBeenCalled()
+  })
+
+  it('keeps the chosen type, and lists it, through a search that lacks it and its clearing', async () => {
+    mountPage()
+    await screen.findByText('email-1')
+    await chooseType('New DAR')
+    vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends: [sends[1]], truncated: false })
+    const searchBox = screen.getByRole('textbox', { name: 'search' })
+
+    fireEvent.change(searchBox, { target: { value: 'Ada' } })
+    await waitFor(() => expect(screen.queryByText('email-1')).not.toBeInTheDocument())
+    expect(screen.getByRole('combobox', { name: 'Type of Email Sent' })).toHaveTextContent('New DAR')
+
+    // A new range while searching, so the unsearched results aren't cached when the search clears.
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-01-01' } })
+    await waitFor(() => expect(Email.getSendsByDateRange).toHaveBeenLastCalledWith('2026-01-01', '2026-10-08', 'Ada', [], expect.any(AbortSignal)))
+    vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends, truncated: false })
+    fireEvent.change(searchBox, { target: { value: '' } })
+    await screen.findByText('email-1')
+    expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '4')
+  })
+
+  it('hides the truncation notice when a load fails', async () => {
+    vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends, truncated: true })
+    mountPage()
+    await screen.findByText('email-1')
+    await chooseType('New DAR')
+    vi.mocked(Email.getSendsByDateRange).mockRejectedValue(new Error('boom'))
+
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-01-01' } })
+
+    await waitFor(() => expect(screen.queryByText('email-1')).not.toBeInTheDocument())
+    expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '4')
+    expect(screen.queryByText(/Showing the newest/)).not.toBeInTheDocument()
+  })
+
+  it('limits the search to what consent accepts', async () => {
+    mountPage()
+    await screen.findByText('email-1')
+
+    expect(screen.getByRole('textbox', { name: 'search' })).toHaveAttribute('maxlength', '200')
+  })
+
+  it('says when the range held more sends than it lists', async () => {
+    vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends, truncated: true })
 
     mountPage()
 
-    expect(await screen.findByText('Showing the newest 10,000 emails. Narrow the dates to see the rest.')).toBeInTheDocument()
+    expect(await screen.findByText('Showing the newest 10,000 sends. Narrow the dates to see the rest.')).toBeInTheDocument()
   })
 
   it('reports a failed load', async () => {
-    vi.mocked(Email.getEmailsByDateRange).mockRejectedValue(new Error('boom'))
+    vi.mocked(Email.getSendsByDateRange).mockRejectedValue(new Error('boom'))
 
     mountPage()
 

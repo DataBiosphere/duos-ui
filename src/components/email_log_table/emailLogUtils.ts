@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { MailMessage } from 'src/libs/ajax/Email'
+import { MailSend } from 'src/libs/ajax/Email'
 
 /** Consent's EmailType enum, keyed by the number it stores. */
 const EMAIL_TYPE_LABELS: Record<number, string> = {
@@ -45,9 +45,34 @@ const EMAIL_TYPE_LABELS: Record<number, string> = {
 export const emailTypeLabel = (emailType: number): string =>
   EMAIL_TYPE_LABELS[emailType] ?? `Email Type ${emailType}`
 
-/** The types present in `emails`, alphabetical by label. */
-export const emailTypeOptions = (emails: MailMessage[]): number[] =>
-  [...new Set(emails.map(email => email.emailType))]
+/** The types present in `sends`, alphabetical by label. */
+export const emailTypeOptions = (sends: MailSend[]): number[] =>
+  [...new Set(sends.map(send => send.emailType))]
     .sort((a, b) => emailTypeLabel(a).localeCompare(emailTypeLabel(b)))
 
 export const formatTimestamp = (date: number): string => dayjs(date).format('YYYY-MM-DD HH:mm:ss')
+
+export const recipientName = (recipient: MailSend['recipients'][number]): string =>
+  recipient.displayName?.trim() || `User ${recipient.userId}`
+
+const words = (text: string): string[] => text.toLowerCase().split(/[\s()]+/).filter(word => word !== '')
+
+/** The known types whose label holds `term` as whole words, ignoring case, for consent's search to match too. */
+export const emailTypesMatching = (term: string): number[] => {
+  const needle = words(term)
+  if (needle.length === 0) return []
+  return Object.entries(EMAIL_TYPE_LABELS)
+    .filter(([, label]) => {
+      const labelWords = words(label)
+      return labelWords.some((_, start) => needle.every((word, offset) => labelWords[start + offset] === word))
+    })
+    .map(([type]) => Number(type))
+}
+
+/** Orders DAR codes by number, so DAR-99 sorts before DAR-200, with blanks last in either direction. */
+export const darCodeComparator = (direction: 'asc' | 'desc' | null | undefined) =>
+  (a: string, b: string): number => {
+    if (a === '' || b === '') return Number(a === '') - Number(b === '')
+    const order = a.localeCompare(b, undefined, { numeric: true })
+    return direction === 'desc' ? -order : order
+  }
