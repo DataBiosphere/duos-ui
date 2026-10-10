@@ -32,6 +32,9 @@ export interface EmailLog {
 /** The most sends one range lists, so a years-wide range can't fetch the whole log. */
 export const EMAIL_LOG_LIMIT = 10000
 
+/** Consent rejects a longer search. */
+export const EMAIL_LOG_SEARCH_MAX_LENGTH = 200
+
 /** Consent's largest sends page. */
 export const EMAIL_LOG_PAGE_SIZE = 1000
 

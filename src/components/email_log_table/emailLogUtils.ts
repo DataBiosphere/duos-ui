@@ -55,12 +55,17 @@ export const formatTimestamp = (date: number): string => dayjs(date).format('YYY
 export const recipientName = (recipient: MailSend['recipients'][number]): string =>
   recipient.displayName?.trim() || `User ${recipient.userId}`
 
-/** The known types whose label contains `term`, ignoring case, for consent's search to match too. */
+const words = (text: string): string[] => text.toLowerCase().split(/[\s()]+/).filter(word => word !== '')
+
+/** The known types whose label holds `term` as whole words, ignoring case, for consent's search to match too. */
 export const emailTypesMatching = (term: string): number[] => {
-  const needle = term.trim().toLowerCase()
-  if (needle === '') return []
+  const needle = words(term)
+  if (needle.length === 0) return []
   return Object.entries(EMAIL_TYPE_LABELS)
-    .filter(([, label]) => label.toLowerCase().includes(needle))
+    .filter(([, label]) => {
+      const labelWords = words(label)
+      return labelWords.some((_, start) => needle.every((word, offset) => labelWords[start + offset] === word))
+    })
     .map(([type]) => Number(type))
 }
 

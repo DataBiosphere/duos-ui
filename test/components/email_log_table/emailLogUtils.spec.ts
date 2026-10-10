@@ -29,8 +29,10 @@ describe('emailTypeOptions', () => {
 })
 
 describe('emailTypesMatching', () => {
-  it('lists the types whose label contains the text, ignoring case', () => {
+  it('lists the types whose label holds the text as whole words, ignoring case', () => {
     expect(emailTypesMatching(' digest ')).toEqual([34, 36])
+    expect(emailTypesMatching('vote reminder')).toEqual([3, 34])
+    expect(emailTypesMatching('ada')).toEqual([])
   })
 
   it('matches no types for blank text', () => {

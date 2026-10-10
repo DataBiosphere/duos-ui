@@ -10,6 +10,7 @@ import { Notifications } from 'src/libs/utils'
 vi.mock('src/libs/ajax/Email', () => ({
   Email: { getSendsByDateRange: vi.fn() },
   EMAIL_LOG_LIMIT: 10000,
+  EMAIL_LOG_SEARCH_MAX_LENGTH: 200,
 }))
 
 vi.mock('src/libs/utils', async (importActual) => {
@@ -137,6 +138,47 @@ describe('AdminEmailLog', () => {
 
     await waitFor(() => expect(screen.queryByText('email-1')).not.toBeInTheDocument())
     expect(Notifications.showError).toHaveBeenCalled()
+  })
+
+  it('keeps the chosen type, and lists it, through a search that lacks it and its clearing', async () => {
+    mountPage()
+    await screen.findByText('email-1')
+    await chooseType('New DAR')
+    vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends: [sends[1]], truncated: false })
+    const searchBox = screen.getByRole('textbox', { name: 'search' })
+
+    fireEvent.change(searchBox, { target: { value: 'Ada' } })
+    await waitFor(() => expect(screen.queryByText('email-1')).not.toBeInTheDocument())
+    expect(screen.getByRole('combobox', { name: 'Type of Email Sent' })).toHaveTextContent('New DAR')
+
+    // A new range while searching, so the unsearched results aren't cached when the search clears.
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-01-01' } })
+    await waitFor(() => expect(Email.getSendsByDateRange).toHaveBeenLastCalledWith('2026-01-01', '2026-10-08', 'Ada', [], expect.any(AbortSignal)))
+    vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends, truncated: false })
+    fireEvent.change(searchBox, { target: { value: '' } })
+    await screen.findByText('email-1')
+    expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '4')
+  })
+
+  it('hides the truncation notice when a load fails', async () => {
+    vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends, truncated: true })
+    mountPage()
+    await screen.findByText('email-1')
+    await chooseType('New DAR')
+    vi.mocked(Email.getSendsByDateRange).mockRejectedValue(new Error('boom'))
+
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-01-01' } })
+
+    await waitFor(() => expect(screen.queryByText('email-1')).not.toBeInTheDocument())
+    expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '4')
+    expect(screen.queryByText(/Showing the newest/)).not.toBeInTheDocument()
+  })
+
+  it('limits the search to what consent accepts', async () => {
+    mountPage()
+    await screen.findByText('email-1')
+
+    expect(screen.getByRole('textbox', { name: 'search' })).toHaveAttribute('maxlength', '200')
   })
 
   it('says when the range held more sends than it lists', async () => {

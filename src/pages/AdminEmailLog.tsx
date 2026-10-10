@@ -8,7 +8,7 @@ import { DATE_FORMAT, isValidRange } from 'src/components/dar_analytics/darAnaly
 import SearchBar from 'src/components/SearchBar'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { usePageTitle } from 'src/hooks/usePageTitle'
-import { Email, EMAIL_LOG_LIMIT } from 'src/libs/ajax/Email'
+import { Email, EMAIL_LOG_LIMIT, EMAIL_LOG_SEARCH_MAX_LENGTH } from 'src/libs/ajax/Email'
 import { Styles } from 'src/libs/theme'
 import { Notifications } from 'src/libs/utils'
 
@@ -28,7 +28,7 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
     setRange({ from, to })
   }
 
-  const { data, isFetching, isError, errorUpdatedAt } = useQuery({
+  const { data, isFetching, isError, errorUpdatedAt, isPlaceholderData } = useQuery({
     queryKey: ['admin-email-log', range.from, range.to, search.trim()],
     // Consent searches every recipient, not just the 100 a send lists, so the search is its to run.
     queryFn: ({ signal }) => Email.getSendsByDateRange(range.from, range.to, search, emailTypesMatching(search), signal),
@@ -44,10 +44,15 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
 
   // A failed load lists nothing, rather than the last result under the new range or search.
   const sends = useMemo(() => (isError ? [] : data?.sends ?? []), [data, isError])
-  const types = useMemo(() => emailTypeOptions(sends), [sends])
+  // The chosen type stays listed while a search's results lack it, so the select never shows blank.
+  const types = useMemo(() => {
+    const options = emailTypeOptions(sends)
+    return emailType === undefined || options.includes(emailType) ? options : [...options, emailType]
+  }, [sends, emailType])
   // Cleared rather than hidden, so a later range can't revive a filter the select no longer shows.
-  // Only a new range clears it; a search narrowing the results keeps the type for when it's cleared.
-  if (emailType !== undefined && data !== undefined && search.trim() === '' && !types.includes(emailType)) {
+  // Only a loaded new range clears it; a search narrowing the results keeps the type for when it's cleared.
+  if (emailType !== undefined && data !== undefined && !isPlaceholderData && search.trim() === ''
+    && !emailTypeOptions(sends).includes(emailType)) {
     setEmailType(undefined)
   }
 
@@ -98,10 +103,11 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
           handleSearchChange={setSearch}
           placeholder="Search type, recipient, DAR-ID or DUOS-ID"
           width="46ch"
+          maxLength={EMAIL_LOG_SEARCH_MAX_LENGTH}
           style={{ width: 'auto' }}
         />
       </div>
-      {data?.truncated && (
+      {!isError && data?.truncated && (
         <Alert severity="info" sx={{ marginTop: 2, marginLeft: 3 }}>
           {`Showing the newest ${EMAIL_LOG_LIMIT.toLocaleString()} sends. Narrow the dates to see the rest.`}
         </Alert>

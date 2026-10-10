@@ -13,6 +13,7 @@ interface SearchBarProps {
   readonly placeholder?: string
   readonly style?: React.CSSProperties
   readonly width?: string
+  readonly maxLength?: number
 }
 
 const Search = styled('div')(({ theme }) => ({
@@ -73,7 +74,7 @@ const StyledInputBase = styled(InputBase, {
 }))
 
 export default function SearchBar(props: SearchBarProps) {
-  const { handleSearchChange, initialValue = '', placeholder = 'Enter search terms', style, width = '30ch' } = props
+  const { handleSearchChange, initialValue = '', placeholder = 'Enter search terms', style, width = '30ch', maxLength } = props
   const [value, setValue] = useState(initialValue)
   const debouncedValue = useDebouncedValue(value, 300)
 
@@ -124,7 +125,7 @@ export default function SearchBar(props: SearchBarProps) {
           showClear={!!value}
           inputWidth={width}
           placeholder={placeholder}
-          inputProps={{ 'aria-label': 'search', 'data-cy': 'search-bar' }}
+          inputProps={{ 'aria-label': 'search', 'data-cy': 'search-bar', maxLength }}
           value={value}
           onChange={handleChange}
         />
