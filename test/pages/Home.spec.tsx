@@ -202,6 +202,20 @@ describe('Home page', () => {
     })
   })
 
+  describe('page structure', () => {
+    it('renders its content inside a main landmark', () => {
+      renderHome(false)
+      expect(screen.getByRole('main')).toBeInTheDocument()
+    })
+
+    it('never skips a heading level', () => {
+      const { container } = renderHome(false)
+      const levels = [...container.querySelectorAll('h1, h2, h3, h4, h5, h6')].map(h => Number(h.tagName[1]))
+      expect(levels[0]).toBe(1)
+      levels.slice(1).forEach((level, i) => expect(level).toBeLessThanOrEqual(levels[i] + 1))
+    })
+  })
+
   describe('features by role', () => {
     it.each([
       ['researcher', 'Request controlled-access data in one application'],
@@ -215,14 +229,34 @@ describe('Home page', () => {
       expect(section).toHaveTextContent(title)
     })
 
-    it('scrolls to the matching section when a role chip is clicked', async () => {
+    it('scrolls to and focuses the matching section when a role chip is clicked', async () => {
       const scrollIntoView = vi.fn()
       Element.prototype.scrollIntoView = scrollIntoView
-      renderHome(false)
+      const { container } = renderHome(false)
       await act(async () => {
         fireEvent.click(screen.getByRole('button', { name: 'Signing Officials' }))
       })
+      const section = container.querySelector('#role-so')
+      expect(scrollIntoView).toHaveBeenCalledTimes(1)
+      expect(scrollIntoView.mock.contexts[0]).toBe(section)
       expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
+      expect(section).toHaveFocus()
+    })
+
+    it('jumps without animation when the user prefers reduced motion', async () => {
+      const scrollIntoView = vi.fn()
+      Element.prototype.scrollIntoView = scrollIntoView
+      vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }))
+      try {
+        renderHome(false)
+        await act(async () => {
+          fireEvent.click(screen.getByRole('button', { name: 'Researchers' }))
+        })
+        expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' })
+      }
+      finally {
+        vi.unstubAllGlobals()
+      }
     })
 
     it('opens contact modal from the data submitter section', async () => {
