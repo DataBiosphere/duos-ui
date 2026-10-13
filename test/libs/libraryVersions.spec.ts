@@ -39,7 +39,7 @@ describe('Library Versions - Tests', () => {
       expect(featuredLibraries).toContain('count-me-in')
       expect(featuredLibraries).toContain('crispi')
 
-      expect(featuredLibraries.length).toBe(24)
+      expect(featuredLibraries).toHaveLength(24)
     })
 
     it('marks non-featured libraries correctly', () => {
@@ -118,11 +118,12 @@ describe('Library Versions - Tests', () => {
         .map(([key, library]) => ({ key, ...library }))
         .sort((a, b) => a.order - b.order || a.key.localeCompare(b.key))
 
-      expect(featuredLibraries.length).toBe(24)
+      expect(featuredLibraries).toHaveLength(24)
 
       expect(featuredLibraries[0].key).toBe('/datalibrary') // order: 1
       expect(featuredLibraries[1].key).toBe('broad') // order: 2
       expect(featuredLibraries[2].key).toBe('elwazi') // order: 3
+      expect(featuredLibraries.at(-1)?.key).toBe('crispi') // order: 26
 
       featuredLibraries.forEach((library) => {
         expect(library).toHaveProperty('key')
@@ -197,10 +198,10 @@ describe('Library Versions - Tests', () => {
     it('returns correct library for branded query param (crispi)', () => {
       const library = getBrandedLibrary(undefined, undefined, 'crispi')
 
-      expect(library).not.toBe(undefined)
+      expect(library).toBeDefined()
       expect(library.title).toBe('CRISPI Data Library')
       expect(library.featured).toBe(true)
-      expect(library.icon).not.toBe(undefined)
+      expect(library.icon).toBeDefined()
       expect(library.query).toEqual({
         bool: { should: [{ terms: { 'study.data.tags.keyword': ['CRISPI'] } }] },
       })
