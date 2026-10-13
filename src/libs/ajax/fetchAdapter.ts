@@ -82,8 +82,9 @@ export const reportError = async (url: string, status: number): Promise<void> =>
   if (isLegacyBardUrl(url, bardApiUrl) || url.startsWith(`${BFF_BARD_PREFIX}/`) || isPublicMetricsEvent(url)) {
     return
   }
+  // The query string can hold what a user searched for, such as a person's name.
   const msg = 'Error fetching response: '
-    .concat(JSON.stringify(url))
+    .concat(JSON.stringify(url.split('?')[0]))
     .concat('Status: ')
     .concat(String(status))
   // noinspection ES6MissingAwait,JSIgnoredPromiseFromCall
@@ -324,6 +325,10 @@ async function fetchRequest<T>(
     if (error instanceof CsrfTokenSessionExpiredError) {
       return throwSessionExpired(fullUrl)
     }
+    // The caller cancelled it, as a newer search does; that is not a failure to report.
+    if (signal?.aborted) {
+      throw error
+    }
     // TypeError = network-level failure (offline, invalid URL, CORS, etc.) that never reached the server
     // DOMException (e.g. AbortError, NotAllowedError) = aborted request or blocked by permissions policy
     // Report with status 0 (no HTTP response) rather than 502 (bad gateway) to avoid misleading monitoring
@@ -390,6 +395,10 @@ async function fetchMultipartRequest<T>(
     // correct, not accidental.
     if (error instanceof CsrfTokenSessionExpiredError) {
       return throwSessionExpired(fullUrl)
+    }
+    // The caller cancelled it, as a newer search does; that is not a failure to report.
+    if (signal?.aborted) {
+      throw error
     }
     // TypeError = network-level failure (offline, invalid URL, CORS, etc.) that never reached the server
     // DOMException (e.g. AbortError, NotAllowedError) = aborted request or blocked by permissions policy
