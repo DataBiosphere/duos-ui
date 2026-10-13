@@ -120,6 +120,13 @@ const arrowSlide = {
   '&:hover .home-arrow': { transform: 'translateX(4px)' },
 }
 
+// The global `a:hover, a:focus` rule in bootstrap_replacement.css recolours and underlines
+// every link, so links here restate their own colour and decoration for both states.
+const linkStates = (textColor: string, hoverColor: string) => ({
+  '&:focus': { color: textColor, textDecoration: 'none' },
+  '&:hover': { color: hoverColor, textDecoration: 'none' },
+})
+
 const primaryButtonSx = (accent: Accent): SystemStyleObject<Theme> => ({
   'px': 2.5,
   'py': 1.25,
@@ -128,19 +135,21 @@ const primaryButtonSx = (accent: Accent): SystemStyleObject<Theme> => ({
   'lineHeight': 1.2,
   'textTransform': 'none',
   'borderRadius': '10px',
+  'color': '#FFFFFF',
   'bgcolor': accent.main,
-  '&:hover': { bgcolor: accent.hover },
+  '&:focus': { color: '#FFFFFF', textDecoration: 'none' },
+  '&:hover': { color: '#FFFFFF', textDecoration: 'none', bgcolor: accent.hover },
   ...focusRing,
 })
 
 const textLinkSx = (accent: Accent): SystemStyleObject<Theme> => ({
-  'display': 'inline-flex',
-  'alignItems': 'center',
-  'gap': 0.75,
-  'fontSize': '13.5px',
-  'fontWeight': 600,
-  'color': accent.main,
-  '&:hover': { color: accent.hover },
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 0.75,
+  fontSize: '13.5px',
+  fontWeight: 600,
+  color: accent.main,
+  ...linkStates(accent.main, accent.hover),
   ...arrowSlide,
   ...focusRing,
 })
@@ -298,7 +307,8 @@ const MockPill = ({ label, accent, muted = false }: { label: string, accent: Acc
       height: 22,
       fontSize: '11px',
       fontWeight: 700,
-      color: muted ? color.muted : accent.main,
+      // color.muted is 4.47:1 on surfaceMuted, just under 4.5:1, so muted pills use body text.
+      color: muted ? color.body : accent.main,
       bgcolor: muted ? color.surfaceMuted : accent.soft,
     }}
   />
@@ -760,7 +770,13 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
                       variant="outlined"
                       sx={{ 'height': '100%', 'overflow': 'visible', 'borderColor': color.border, 'borderRadius': '16px', 'boxShadow': shadowSm, ...hoverLift, '&:hover': { boxShadow: shadowLg, borderColor: 'rgba(0, 128, 122, 0.45)' } }}
                     >
-                      <Tooltip title={tooltipText} describeChild>
+                      <Tooltip
+                        title={tooltipText}
+                        describeChild
+                        // The tooltip renders in a portal outside the page wrapper, so it needs its own
+                        // reduced-motion rule; it overrides the Grow transition's inline style.
+                        slotProps={{ tooltip: { sx: { '@media (prefers-reduced-motion: reduce)': { transition: 'none !important' } } } }}
+                      >
                         <CardActionArea
                           component={RouterLink}
                           to={isLogged ? libraryPath : '#'}
@@ -770,7 +786,7 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
                               handleSignIn(libraryPath, navigate)
                             }
                           }}
-                          sx={{ height: '100%', p: 1.5, borderRadius: 'inherit', ...arrowSlide, ...focusRing }}
+                          sx={{ height: '100%', p: 1.5, borderRadius: 'inherit', ...linkStates(color.ink, color.ink), ...arrowSlide, ...focusRing }}
                         >
                           <Box
                             className="logo-card"
@@ -783,7 +799,8 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
                               : <Typography aria-hidden="true" sx={{ px: 2, fontSize: '18px', fontWeight: 700, color: color.navy, textAlign: 'center' }}>{libraryName}</Typography>}
                           </Box>
                           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1.5, px: 0.75, pt: 1.5, pb: 0.25 }}>
-                            <Typography sx={{ fontSize: '15px', fontWeight: 600, color: color.ink, overflowWrap: 'anywhere' }}>{libraryName}</Typography>
+                            {/* Room for two lines, so a wrapped name doesn't make its row taller than the others. */}
+                            <Typography sx={{ display: 'flex', alignItems: 'center', minHeight: '3em', fontSize: '15px', fontWeight: 600, lineHeight: 1.5, color: color.ink, overflowWrap: 'anywhere' }}>{libraryName}</Typography>
                             <ArrowForward className="home-arrow" aria-hidden="true" sx={{ flexShrink: 0, fontSize: '18px', color: accents.teal.main }} />
                           </Stack>
                         </CardActionArea>

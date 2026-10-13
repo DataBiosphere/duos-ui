@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act, within } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import { MemoryRouter, Route, Routes } from 'react-router'
 import Home from 'src/pages/Home'
 
 vi.mock('src/libs/libraryVersions', () => ({
@@ -183,11 +183,19 @@ describe('Home page', () => {
 
     it('navigates directly without calling handleSignIn when logged in', async () => {
       const { handleSignIn } = await import('src/libs/signInUtils')
-      renderHome(true)
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<Home isLogged={true} />} />
+            <Route path="/datalibrary/broad" element={<div>Broad library page</div>} />
+          </Routes>
+        </MemoryRouter>,
+      )
       await act(async () => {
-        fireEvent.click(libraryLinks()[0])
+        fireEvent.click(screen.getByRole('link', { name: 'Broad' }))
       })
       expect(handleSignIn).not.toHaveBeenCalled()
+      expect(screen.getByText('Broad library page')).toBeInTheDocument()
     })
 
     it('renders one card per featured library', () => {

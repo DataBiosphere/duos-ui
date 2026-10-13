@@ -4,6 +4,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { page } from 'vitest/browser'
+import 'src/styles/bootstrap_replacement.css'
 import Home from 'src/pages/Home'
 import { getLibraryVersions } from 'src/libs/libraryVersions'
 
@@ -34,5 +35,38 @@ describe('Home Page - Responsive Layout (browser)', () => {
       expect(window.getComputedStyle(logoGrid)[prop as keyof CSSStyleDeclaration]).toBe(value)
     }
     expect(container.querySelectorAll('.logo-card')).toHaveLength(featuredLibraryCount)
+  })
+
+  it('keeps guide link colours and removes the global underline on focus', async () => {
+    await page.viewport(1200, 800)
+    const { container } = render(
+      <MemoryRouter>
+        <Home isLogged={false} />
+      </MemoryRouter>,
+    )
+    // bootstrap_replacement.css sets a:focus { color: #23527c; text-decoration: underline }.
+    const soButton = container.querySelector<HTMLElement>('#blog-support-so-link')!
+    soButton.focus()
+    expect(document.activeElement).toBe(soButton)
+    expect(getComputedStyle(soButton).color).toBe('rgb(255, 255, 255)')
+    expect(getComputedStyle(soButton).textDecorationLine).toBe('none')
+
+    const dacLink = container.querySelector<HTMLElement>('#blog-support-dac-link')!
+    dacLink.focus()
+    expect(getComputedStyle(dacLink).color).toBe('rgb(31, 59, 80)')
+    expect(getComputedStyle(dacLink).textDecorationLine).toBe('none')
+  })
+
+  it('renders every library card at the same height, even when a name wraps', async () => {
+    await page.viewport(1200, 800)
+    const { container } = render(
+      <MemoryRouter>
+        <Home isLogged={true} />
+      </MemoryRouter>,
+    )
+    const heights = [...container.querySelectorAll('.logo-grid .MuiCard-root')]
+      .map(card => Math.round(card.getBoundingClientRect().height))
+    expect(heights).toHaveLength(featuredLibraryCount)
+    expect(new Set(heights).size).toBe(1)
   })
 })
