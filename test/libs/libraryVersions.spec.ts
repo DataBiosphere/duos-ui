@@ -234,7 +234,7 @@ describe('Library Versions - Tests', () => {
 
       descriptionLibraries.forEach((key) => {
         const library = versions[key]
-        expect(library.query).not.toBe(null)
+        expect(library.query).not.toBeNull()
         expect(library.query).toHaveProperty('bool')
 
         const query = library.query as { bool: { should: object[] } }
@@ -286,8 +286,8 @@ describe('Library Versions - Tests', () => {
       const matchPhraseClause = query.bool.should.find(c => 'match_phrase' in c)
       const termsClause = query.bool.should.find(c => 'terms' in c)
 
-      expect(matchPhraseClause).not.toBe(undefined)
-      expect(termsClause).not.toBe(undefined)
+      expect(matchPhraseClause).toBeDefined()
+      expect(termsClause).toBeDefined()
       expect(matchPhraseClause!.match_phrase).toHaveProperty('submitter.institution.name')
       expect(termsClause!.terms['study.data.tags.keyword']).toContain('The Broad Institute of MIT and Harvard')
     })
