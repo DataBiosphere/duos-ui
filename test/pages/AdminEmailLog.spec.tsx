@@ -160,6 +160,20 @@ describe('AdminEmailLog', () => {
     expect(screen.getByTestId('email-log-table')).toHaveAttribute('data-email-type', '4')
   })
 
+  it('searches at most 365 days, saying so rather than asking consent', async () => {
+    mountPage()
+    await screen.findByText('email-1')
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2025-10-08' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'search' }), { target: { value: 'Ada' } })
+
+    await screen.findByText('A search covers at most 365 days. Narrow the dates to search.')
+    expect(Email.getSendsByDateRange).not.toHaveBeenCalledWith('2025-10-08', '2026-10-08', 'Ada', [], expect.any(AbortSignal))
+    expect(screen.queryByText('email-1')).not.toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2025-10-09' } })
+    await waitFor(() => expect(Email.getSendsByDateRange).toHaveBeenLastCalledWith('2025-10-09', '2026-10-08', 'Ada', [], expect.any(AbortSignal)))
+  })
+
   it('hides the truncation notice when a load fails', async () => {
     vi.mocked(Email.getSendsByDateRange).mockResolvedValue({ sends, truncated: true })
     mountPage()

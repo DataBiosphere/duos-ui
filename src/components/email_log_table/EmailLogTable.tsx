@@ -31,7 +31,8 @@ const HoverList = ({ label, items, tabIndex }: { label: string, items: string[],
   <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
     <Tooltip
       title={(
-        <Box component="ul" sx={{ m: 0, pl: 2, maxHeight: '50vh', overflowY: 'auto' }}>
+        // Focusable so a keyboard can scroll a list taller than the tooltip.
+        <Box component="ul" tabIndex={0} sx={{ m: 0, pl: 2, maxHeight: '50vh', overflowY: 'auto' }}>
           {items.map((item, index) => <li key={`${item}-${index}`}>{item}</li>)}
         </Box>
       )}

@@ -14,6 +14,8 @@ import { Notifications } from 'src/libs/utils'
 
 const ALL_TYPES = 'all'
 const DEFAULT_RANGE_DAYS = 30
+// Consent searches at most 367 days, and the read pads the range by three.
+const MAX_SEARCH_DAYS = 364
 
 export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
   usePageTitle('Email Log')
@@ -28,12 +30,15 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
     setRange({ from, to })
   }
 
+  const searchTooWide = search.trim() !== '' && dayjs(range.to).diff(dayjs(range.from), 'day') > MAX_SEARCH_DAYS
+
   const { data, isFetching, isError, errorUpdatedAt, isPlaceholderData } = useQuery({
     queryKey: ['admin-email-log', range.from, range.to, search.trim()],
     // Consent searches every recipient, not just the 100 a send lists, so the search is its to run.
     queryFn: ({ signal }) => Email.getSendsByDateRange(range.from, range.to, search, emailTypesMatching(search), signal),
     // The last range stays on screen while the next loads, so the type filter isn't judged against nothing.
     placeholderData: keepPreviousData,
+    enabled: !searchTooWide,
   })
 
   useEffect(() => {
@@ -43,7 +48,7 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
   }, [isError, errorUpdatedAt])
 
   // A failed load lists nothing, rather than the last result under the new range or search.
-  const sends = useMemo(() => (isError ? [] : data?.sends ?? []), [data, isError])
+  const sends = useMemo(() => (isError || searchTooWide ? [] : data?.sends ?? []), [data, isError, searchTooWide])
   // The chosen type stays listed while a search's results lack it, so the select never shows blank.
   const types = useMemo(() => {
     const options = emailTypeOptions(sends)
@@ -51,7 +56,7 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
   }, [sends, emailType])
   // Cleared rather than hidden, so a later range can't revive a filter the select no longer shows.
   // Only a loaded new range clears it; a search narrowing the results keeps the type for when it's cleared.
-  if (emailType !== undefined && data !== undefined && !isPlaceholderData && search.trim() === ''
+  if (emailType !== undefined && data !== undefined && !isError && !isPlaceholderData && search.trim() === ''
     && !emailTypeOptions(sends).includes(emailType)) {
     setEmailType(undefined)
   }
@@ -107,7 +112,12 @@ export const AdminEmailLog = function AdminEmailLog(): React.JSX.Element {
           style={{ width: 'auto' }}
         />
       </div>
-      {!isError && data?.truncated && (
+      {searchTooWide && (
+        <Alert severity="info" sx={{ marginTop: 2, marginLeft: 3 }}>
+          {`A search covers at most ${(MAX_SEARCH_DAYS + 1).toLocaleString()} days. Narrow the dates to search.`}
+        </Alert>
+      )}
+      {!isError && !searchTooWide && data?.truncated && (
         <Alert severity="info" sx={{ marginTop: 2, marginLeft: 3 }}>
           {`Showing the newest ${EMAIL_LOG_LIMIT.toLocaleString()} sends. Narrow the dates to see the rest.`}
         </Alert>
