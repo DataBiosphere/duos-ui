@@ -592,7 +592,16 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
           </div>
         </div>
 
-        <Box sx={{ fontFamily: 'Montserrat, sans-serif', color: color.body }}>
+        <Box
+          sx={{
+            'fontFamily': 'Montserrat, sans-serif',
+            'color': color.body,
+            // Also stops MUI's own transitions and ripples.
+            '@media (prefers-reduced-motion: reduce)': {
+              '& *, & *::before, & *::after': { transition: 'none !important', animation: 'none !important' },
+            },
+          }}
+        >
           <HomeSection
             labelledBy="home-audience-heading"
             sx={{
