@@ -48,11 +48,24 @@ describe('ExternalProfile', () => {
     expect(linkedInRow).toHaveTextContent('https://www.linkedin.com/in/abcdef')
   })
 
+  it('renders the institutional website value beside its editable field', async () => {
+    render(<ExternalProfile {...editProps} />)
+    await waitFor(() => expect(screen.getByLabelText('Institutional Website')).toHaveValue('https://www.broadinstitute.org'))
+    const [valueCell, inputCell] = screen.getByLabelText('Institutional Website').closest('tr')!.querySelectorAll('td')
+    expect(valueCell).toContainElement(screen.getByRole('link', { name: 'https://www.broadinstitute.org' }))
+    expect(inputCell).toContainElement(screen.getByLabelText('Institutional Website'))
+  })
+
+  it('labels the ORCID field and placeholder as ORCID iD', async () => {
+    render(<ExternalProfile {...editProps} />)
+    await waitFor(() => expect(screen.getByLabelText('ORCID iD')).toHaveValue('12345'))
+    expect(screen.getByLabelText('ORCID iD')).toHaveAttribute('placeholder', 'ORCID iD (e.g. https://orcid.org/0000-0000-0000-0000)')
+  })
+
   it('renders read-only table with two columns', async () => {
     render(<ExternalProfile {...readOnlyProps} />)
     await waitFor(() => expect(screen.getAllByRole('link')).toHaveLength(5))
-    expect(document.querySelector('.btn-secondary')).not.toBeInTheDocument()
-    expect(document.querySelector('.btn-primary')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument()
     expect(document.querySelector('input')).not.toBeInTheDocument()
   })
 
@@ -80,8 +93,9 @@ describe('ExternalProfile', () => {
 
     await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue(''))
     expect(screen.getByText('LinkedIn')).toBeInTheDocument()
-    expect(screen.getByText('ORCID')).toBeInTheDocument()
+    expect(screen.getByText('ORCID iD')).toBeInTheDocument()
     expect(screen.getByText('Through.bio')).toBeInTheDocument()
+    expect(screen.getByText('Institutional Website')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'https://www.linkedin.com/in/' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'https://orcid.org/' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'https://through.bio/' })).not.toBeInTheDocument()
@@ -179,9 +193,9 @@ describe('ExternalProfile', () => {
   it('performs URL validation for ORCID', async () => {
     const user = userEvent.setup()
     render(<ExternalProfile {...editProps} />)
-    await waitFor(() => expect(screen.getByLabelText('ORCID')).toHaveValue('12345'))
-    await user.clear(screen.getByLabelText('ORCID'))
-    await user.type(screen.getByLabelText('ORCID'), 'testing')
+    await waitFor(() => expect(screen.getByLabelText('ORCID iD')).toHaveValue('12345'))
+    await user.clear(screen.getByLabelText('ORCID iD'))
+    await user.type(screen.getByLabelText('ORCID iD'), 'testing')
     await waitFor(() =>
       expect(screen.getByRole('link', { name: 'https://orcid.org/testing' })).toHaveAttribute('href', 'https://orcid.org/testing'),
     )
@@ -213,7 +227,7 @@ describe('ExternalProfile', () => {
     const user = userEvent.setup()
     render(<ExternalProfile {...editProps} />)
     await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue('abcdef'))
-    await user.click(screen.getByRole('button', { name: '+ Add URL' }))
+    await user.click(screen.getByRole('button', { name: 'Add URL' }))
     const otherUrlInput = document.querySelector('input[name="Other URL 1"]') as HTMLInputElement
     await user.clear(otherUrlInput)
     await user.type(otherUrlInput, 'https://www.test.com')
@@ -227,7 +241,7 @@ describe('ExternalProfile', () => {
     render(<ExternalProfile {...editProps} />)
     await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue('abcdef'))
 
-    await user.click(screen.getByRole('button', { name: '+ Add URL' }))
+    await user.click(screen.getByRole('button', { name: 'Add URL' }))
 
     const newOtherUrlInput = screen.getByLabelText('Other URL 2')
     expect(newOtherUrlInput.closest('tr')).toHaveTextContent('Other URL 2')
@@ -237,18 +251,18 @@ describe('ExternalProfile', () => {
     const user = userEvent.setup()
     render(<ExternalProfile {...editProps} />)
     await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue('abcdef'))
-    await user.click(screen.getByRole('button', { name: '+ Add URL' }))
+    await user.click(screen.getByRole('button', { name: 'Add URL' }))
     const otherUrlInput = document.querySelector('input[name="Other URL 1"]') as HTMLInputElement
     await user.clear(otherUrlInput)
     await user.type(otherUrlInput, 'not a url')
-    await waitFor(() => expect(document.querySelector('.btn-primary')).toBeDisabled())
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled())
   })
 
   it('clears stale URL validation when profiles are reinitialized', async () => {
     const user = userEvent.setup()
     const { rerender } = render(<ExternalProfile {...editProps} userId={1} />)
     await waitFor(() => expect(screen.getByLabelText('LinkedIn')).toHaveValue('abcdef'))
-    await user.click(screen.getByRole('button', { name: '+ Add URL' }))
+    await user.click(screen.getByRole('button', { name: 'Add URL' }))
     const newOtherUrlInput = screen.getByLabelText('Other URL 2')
     await user.type(newOtherUrlInput, 'not a url')
     await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled())
@@ -263,8 +277,8 @@ describe('ExternalProfile', () => {
     const showErrorSpy = vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
     const user = userEvent.setup()
     render(<ExternalProfile {...editProps} />)
-    await waitFor(() => expect(document.querySelector('.btn-primary')).not.toBeDisabled())
-    await user.click(document.querySelector('.btn-primary')!)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).not.toBeDisabled())
+    await user.click(screen.getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(showErrorSpy).toHaveBeenCalled())
   })
 

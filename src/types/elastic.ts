@@ -236,7 +236,7 @@ export const studyIdFromBucketKey = (key: StudyAggregationBucket['key']): number
   typeof key === 'number' ? key : key.study_id
 
 /** Raw Elasticsearch document shape for a model asset; derived from ModelAsset so both stay in sync. */
-export type PartialModelAsset = Partial<ModelAsset>
+export type PartialModelAsset = Omit<Partial<ModelAsset>, 'cloud'> & { cloud?: string[] | string }
 
 /** Bucket shape from a terms aggregation on study.studyId, used for the Models view */
 export interface ModelStudyAggregationBucket {
@@ -434,7 +434,7 @@ export interface FundingResourceStudyAggregationResponse {
 }
 
 /** Raw Elasticsearch document shape for a workspace asset */
-export type PartialWorkspaceAsset = Partial<WorkspaceAsset>
+export type PartialWorkspaceAsset = Omit<Partial<WorkspaceAsset>, 'cloud'> & { cloud?: string[] | string }
 
 /** Bucket shape from a terms aggregation on study.studyId, used for the Workspaces view */
 export interface WorkspaceStudyAggregationBucket {

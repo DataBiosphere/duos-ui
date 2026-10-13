@@ -10,8 +10,12 @@ import type {
   RouteGenericInterface,
 } from 'fastify'
 import fastifyReplyFrom from '@fastify/reply-from'
+import { endSession, logAuthEvent, sessionIdp } from '../auth/authEvents.js'
+import type { SessionDestroyReason } from '../auth/authEvents.js'
 import { requireEnv } from '../auth/oidcClient.js'
-import { REFRESH_WINDOW_SECONDS, RefreshFailedError, refreshAccessToken } from '../auth/refresh.js'
+import { RefreshFailedError, refreshAccessToken, tokenDisposition } from '../auth/refresh.js'
+import { recordBffError, registerProxyCompletedEvent } from './proxyEvents.js'
+import type { ProxyUpstream } from './proxyEvents.js'
 import { fetchMetadataGuard } from '../security/fetchMetadata.js'
 import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
@@ -60,6 +64,8 @@ export interface UpstreamProxyConfig {
   upstreamEnvVar: string
   /** Log-line tag: every line this proxy's scope logs starts `[<logTag>]`. */
   logTag: string
+  /** The `upstream` label on this proxy's `proxy.completed` events. */
+  upstream: ProxyUpstream
   /**
    * Paths the client calls with no `Authorization` header today, matched
    * exactly. They proxy through without a session, and without a token even
@@ -197,6 +203,7 @@ export async function registerUpstreamProxy(
   }
 
   const upstream = upstreamBase(config.upstreamEnvVar)
+  registerProxyCompletedEvent(app, config.upstream)
 
   const pathFor = (url: string): string => upstreamPath(url, prefix)
 
@@ -211,10 +218,12 @@ export async function registerUpstreamProxy(
   app.setErrorHandler((err: FastifyError, request, reply) => {
     const reason = err.code === undefined ? undefined : CSRF_REJECTION_REASONS.get(err.code)
     if (reason !== undefined) {
-      request.log.info({ err }, `[${logTag}] CSRF validation failed — rejecting`)
+      logAuthEvent(request, 'proxy.csrf.rejected', { reason, idp: sessionIdp(request) })
+      recordBffError(request, CSRF_ERROR_CODE)
       return reply.status(403).send({ error: CSRF_ERROR_CODE, reason })
     }
     request.log.error({ err }, `[${logTag}] unhandled error`)
+    recordBffError(request, 'unhandled_error')
     return reply.status(err.statusCode ?? 500).send({ error: 'An unexpected error occurred.' })
   })
 
@@ -264,13 +273,20 @@ export async function registerUpstreamProxy(
     // there for a scope that registers the proxy on its own — which the tests
     // do, to exercise this branch without standing up a Postgres session store.
     if (!request.session?.accessToken) {
+      recordBffError(request, 'unauthenticated')
       return reply.status(401).send({ error: 'unauthenticated' })
     }
 
     // A missing tokenExpiry reads as already expired, which refreshes rather than
     // forwarding a token of unknown age upstream.
-    const secondsRemaining = (request.session.tokenExpiry ?? 0) - Math.floor(Date.now() / 1000)
-    if (secondsRemaining >= REFRESH_WINDOW_SECONDS) {
+    const disposition = tokenDisposition(request.session)
+    if (disposition === 'expired') {
+      // A fixture token cannot renew: end the session now, exactly as an
+      // upstream 401 would after the token expired in flight.
+      await endRejectedSession(request, reply, logTag, 'the test-fixture access token has expired', 'expired')
+      return reply
+    }
+    if (disposition === 'forward') {
       return undefined
     }
 
@@ -288,6 +304,7 @@ export async function registerUpstreamProxy(
         // destroyed. Clear the cookie so the browser stops presenting a dead sid,
         // as /auth/me does on the same verdict.
         request.log.info({ err }, `[${logTag}] session cannot be refreshed — returning 401`)
+        recordBffError(request, 'session_expired')
         return reply.clearCookie(SESSION_COOKIE_NAME).status(401).send({ error: 'session_expired' })
       }
       // Transient — a network blip, B2C 5xx, a rotated-wrong client secret, a DB
@@ -295,6 +312,7 @@ export async function registerUpstreamProxy(
       // that would sign out every user the moment B2C hiccuped. 502 tells the
       // client to surface an error and leave the session alone.
       request.log.error({ err }, `[${logTag}] token refresh failed transiently — returning 502`)
+      recordBffError(request, 'upstream_unavailable')
       return reply.status(502).send({ error: 'upstream_unavailable' })
     }
 
@@ -359,7 +377,7 @@ export async function registerUpstreamProxy(
     }
 
     // reply-from's onResponse callback is synchronous.
-    void endRejectedSession(request, reply, logTag)
+    void endRejectedSession(request, reply, logTag, 'upstream rejected the session access token', 'upstream_401')
   }
 
   app.addHook('onSend', (_request, reply, _payload, done) => {
@@ -422,6 +440,7 @@ export async function registerUpstreamProxy(
 function onUpstreamTransportError(reply: ProxyReply, { error }: { error: Error }): void {
   const statusCode = (error as Error & { statusCode?: number }).statusCode ?? 502
   const isGatewayClass = statusCode >= 502 && statusCode <= 504
+  recordBffError(reply.request, 'upstream_unavailable')
   reply.status(isGatewayClass ? statusCode : 502).send({ error: 'upstream_unavailable' })
 }
 
@@ -440,7 +459,7 @@ function onUpstreamTransportError(reply: ProxyReply, { error }: { error: Error }
  * (protocol `localhost:`, pathname `8000`) from a genuine path, which would
  * otherwise be reported as "has a path".
  */
-function upstreamBase(envVar: string): string {
+export function upstreamBase(envVar: string): string {
   const base = requireEnv(envVar)
   const mustBeOrigin = 'it must be a bare origin (scheme, host, and port only), because the proxy appends the upstream path to it'
 
@@ -540,13 +559,15 @@ function rewriteHeaders(headers: IncomingHttpHeaders): IncomingHttpHeaders {
   )
 }
 
-async function endRejectedSession(request: ProxyRequest, reply: ProxyReply, logTag: string): Promise<void> {
+/** Ends a session whose token is finished, for the `reason` the log records. */
+async function endRejectedSession(request: ProxyRequest, reply: ProxyReply, logTag: string, reason: string, destroyReason: SessionDestroyReason): Promise<void> {
   try {
-    await request.session.destroy()
-    request.log.info(`[${logTag}] upstream rejected the session access token — session destroyed, returning 401`)
+    await endSession(request, destroyReason)
+    request.log.info(`[${logTag}] ${reason} — session destroyed, returning 401`)
   }
   catch (err: unknown) {
-    request.log.error({ err }, `[${logTag}] upstream rejected the session access token but the session could not be destroyed — returning 401 anyway`)
+    request.log.error({ err }, `[${logTag}] ${reason} but the session could not be destroyed — returning 401 anyway`)
   }
+  recordBffError(request, 'session_expired')
   reply.clearCookie(SESSION_COOKIE_NAME).status(401).send({ error: 'session_expired' })
 }

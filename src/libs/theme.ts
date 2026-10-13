@@ -7,6 +7,7 @@ export const Theme = {
     error: '#DB3214',
     success: '#00928A',
     disabled: '#cccccc',
+    neutral: '#7a8691',
     white: '#ffffff',
     background: {
       secondary: 'rgba(0, 96, 159, 0.1)',
@@ -140,15 +141,6 @@ export const Styles = {
     width: 220,
     border: '1px solid #BABEC1',
     margin: '.5rem 1rem .5rem 0',
-    overflowX: 'hidden',
-    overflowY: 'scroll',
-  },
-  READ_MORE: {
-    border: '1px solid #BABEC1',
-    alignContent: 'center',
-    borderRadius: 9,
-    backgroundColor: Theme.palette.background.secondary,
-    margin: '1rem 1rem 1rem 0',
     overflowX: 'hidden',
     overflowY: 'scroll',
   },

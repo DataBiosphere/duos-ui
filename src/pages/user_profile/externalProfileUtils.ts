@@ -28,7 +28,7 @@ export const getExternalProfileLinks = (profiles: ExternalProfiles = {}): Extern
     .map((url, index) => ({ label: `Other URL ${index + 1}`, url }))
   const links: Array<ExternalProfileLink | undefined> = [
     linkedIn ? { label: 'LinkedIn', url: linkedIn } : undefined,
-    orcid ? { label: 'ORCID', url: orcid } : undefined,
+    orcid ? { label: 'ORCID iD', url: orcid } : undefined,
     throughBio ? { label: 'Through.bio', url: throughBio } : undefined,
     institutionalWebsite ? { label: 'Institutional Website', url: institutionalWebsite } : undefined,
     ...otherUrls,

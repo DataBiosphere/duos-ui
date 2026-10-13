@@ -26,7 +26,9 @@ vi.mock('src/libs/utils', () => ({
 }))
 
 vi.mock('src/pages/user_profile/SigningOfficialRequest', () => ({
-  default: () => <div data-testid="signing-official-request" />,
+  default: ({ institutionHasSigningOfficials }: { institutionHasSigningOfficials?: boolean }) => (
+    <div data-testid="signing-official-request" data-has-sos={String(institutionHasSigningOfficials)} />
+  ),
 }))
 
 import { Institution } from 'src/libs/ajax/Institution'
@@ -171,5 +173,14 @@ describe('AffiliationAndRole', () => {
     render(<AffiliationAndRole user={user} />)
 
     expect(screen.getByTestId('signing-official-request')).toBeInTheDocument()
+  })
+
+  it('tells the Signing Official request whether the institution already has Signing Officials', async () => {
+    vi.mocked(User.getSOsForCurrentUser).mockResolvedValue([soWithData])
+    render(<AffiliationAndRole user={user} />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('signing-official-request')).toHaveAttribute('data-has-sos', 'true')
+    })
   })
 })

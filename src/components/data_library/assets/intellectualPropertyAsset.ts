@@ -16,15 +16,22 @@ const matchesIntellectualPropertyFilters = (ip: IntellectualPropertyAsset, filte
 
   // Inverted bounds build no ES clause, so they must not narrow rows here
   // either — otherwise the grid empties while the panel flags the range.
-  if (!isFilterActive('ipFiledDate', filters)) {
-    return true
+  if (isFilterActive('ipFiledDate', filters)) {
+    // A missing date matches neither bound, as the ES range clause does.
+    const { after, before } = filters.ipFiledDate
+    if (after && (!ip.filingDate || ip.filingDate < after)) {
+      return false
+    }
+    if (before && (!ip.filingDate || ip.filingDate > before)) {
+      return false
+    }
   }
 
-  const filingDate = ip.filingDate || ''
-  if (filters.ipFiledDate.after && filingDate < filters.ipFiledDate.after) {
+  if (filters.ipType.length > 0 && !filters.ipType.includes(ip.type)) {
     return false
   }
-  return !(filters.ipFiledDate.before && filingDate > filters.ipFiledDate.before)
+
+  return filters.ipStatus.length === 0 || filters.ipStatus.includes(ip.status)
 }
 
 export const intellectualPropertyAsset: AssetDefinition = {
@@ -81,12 +88,12 @@ export const intellectualPropertyAsset: AssetDefinition = {
           ipId: ip.ipId || `${bucket.key}-${ipIndex}`,
           studyId: bucket.key,
           studyName: (studyData as { studyName?: string }).studyName || '',
-          type: ip.type || '',
+          type: (ip.type || '').trim(),
           title: ip.title || '',
           assignee: ip.assignee || '',
           patentNumber: ip.patentNumber || '',
           filingDate: ip.filingDate || '',
-          status: ip.status || '',
+          status: (ip.status || '').trim(),
           url: ip.url || '',
           contact: ip.contact || '',
           tags: ip.tags || [],

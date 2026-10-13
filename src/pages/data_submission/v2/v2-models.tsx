@@ -2,7 +2,6 @@ import {
   AiModel,
   Biospecimen,
   ClinicalTrial,
-  Dataset,
   FileStorageObject,
   FundingResource, IntellectualProperty,
   Presentation,
@@ -383,7 +382,6 @@ export interface Study {
   piEmail: string
   publicVisibility?: boolean
   datasetIds?: number[]
-  datasets?: Dataset[]
   properties?: StudyProperty[]
   alternativeDataSharingPlan?: FileStorageObject
   alternativeDataSharingPlanFile?: File

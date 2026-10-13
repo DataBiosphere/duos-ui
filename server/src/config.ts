@@ -18,6 +18,7 @@ export function configPath(projectRoot: string, isDev: boolean): string {
  * environments set DUOS_API_URL too (terra-helmfile envSecrets) — it MUST be
  * the downstream consent API base URL, the same value the ConfigMap's
  * config.json already carries as `apiUrl`, so the override is consistent there.
+ * Also fills in `bannersUrl` from `env` when the file leaves it unset.
  *
  * The merged result is cached for the life of the process — both inputs (the
  * deploy-time config file and DUOS_API_URL) are fixed at startup, and this is
@@ -40,7 +41,29 @@ async function loadAndMerge(configPath: string): Promise<Record<string, unknown>
   if (process.env.DUOS_API_URL) {
     config.apiUrl = process.env.DUOS_API_URL
   }
+  if (!isConfiguredString(config.bannersUrl)) {
+    const bannersUrl = defaultBannersUrl(config.env)
+    if (bannersUrl) {
+      config.bannersUrl = bannersUrl
+    }
+  }
   return config
+}
+
+const isConfiguredString = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim() !== ''
+
+/**
+ * The public GCS object holding the environment's notification banners, when
+ * config.json does not name one. Each environment's bucket lives in its Terra
+ * project (broad-dsde-<env>), so the default follows `env`; a local dev server
+ * reads the dev feed. The CSP allowlists the same value the client fetches, so
+ * this is the one place the location is decided. See docs/notification-banners.md.
+ */
+export function defaultBannersUrl(env: unknown): string | undefined {
+  if (!isConfiguredString(env)) return undefined
+  const bucketEnv = env === 'local' ? 'dev' : env
+  return `https://storage.googleapis.com/duos-banners-${bucketEnv}/${bucketEnv}_notifications.json`
 }
 
 // Test-only: clear the process-lifetime cache between cases.

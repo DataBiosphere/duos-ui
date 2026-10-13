@@ -1,7 +1,7 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import DACDashboard from 'src/pages/DACDashboard'
@@ -34,6 +34,14 @@ const summary: DacDashboardSummary = {
   dacs: { total: 4 },
   dacDatasets: { total: 6 },
   dataLibrary: { studies: 7, datasets: 12, models: 3, workspaces: 1 },
+  metrics: {
+    from: '2026-07-04',
+    to: '2026-10-01',
+    decisions: { submitted: 6, pending: 2, approved: 3, denied: 1, mixed: 0, canceled: 0 },
+    turnaround: { decided: 4, unmeasured: 0, medianDays: 11.24, modeDays: 9 },
+    volume: { dars: 6, researchers: 5, institutions: 4 },
+    expiration: { expired: 1, closedOut: 0, renewals: 2 },
+  },
 }
 
 const renderDashboard = (
@@ -60,7 +68,7 @@ describe('DACDashboard', () => {
     )
     renderDashboard()
 
-    expect(screen.getAllByText('–')).toHaveLength(10)
+    expect(screen.getAllByText('–')).toHaveLength(23)
     expect(screen.getByRole('link', { name: /Data Access Requests/ })).toHaveAttribute(
       'href', '/dac_console_dar_requests',
     )
@@ -77,14 +85,27 @@ describe('DACDashboard', () => {
     expect(DAC.getDashboardSummary).toHaveBeenCalledTimes(1)
   })
 
+  it('shows the 90-day metric tiles, each opening its DAC Metrics tab, without SO Approvals', async () => {
+    renderDashboard()
+
+    expect(await screen.findByLabelText('Median Days: 11.2')).toBeInTheDocument()
+    expect(screen.getByLabelText('Renewals: 2')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByRole('link', { name: /^Decisions/ })).toHaveAttribute(
+      'href', '/dac_console/metrics?tab=decisions&from=2026-07-04&to=2026-10-01&bucket=week',
+    ))
+    expect(screen.getByRole('link', { name: /^Expiration & Renewal/ })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /^SO Approvals/ })).not.toBeInTheDocument()
+  })
+
   it('shows meaningful DAR counts without the misleading Denied count', async () => {
     renderDashboard()
 
     expect(await screen.findByLabelText('Total: 8')).toBeInTheDocument()
-    expect(screen.getByLabelText('Approved: 3')).toBeInTheDocument()
-    expect(screen.getByLabelText('Pending: 5')).toBeInTheDocument()
-    expect(screen.getByLabelText('Awaiting My Vote: 2')).toBeInTheDocument()
-    expect(screen.queryByText('Denied')).not.toBeInTheDocument()
+    const darTile = within(screen.getByRole('link', { name: /^Data Access Requests/ }))
+    expect(darTile.getByLabelText('Approved: 3')).toBeInTheDocument()
+    expect(darTile.getByLabelText('Pending: 5')).toBeInTheDocument()
+    expect(darTile.getByLabelText('Awaiting My Vote: 2')).toBeInTheDocument()
+    expect(darTile.queryByText('Denied')).not.toBeInTheDocument()
   })
 
   it('hides chair-only tiles from members but still makes one summary request', async () => {
@@ -115,7 +136,7 @@ describe('DACDashboard', () => {
     await waitFor(() => expect(notification).toHaveBeenCalledWith({
       text: 'Error: Unable to load dashboard statistics: backend unavailable',
     }))
-    expect(screen.getAllByText('–')).toHaveLength(10)
-    expect(screen.getByLabelText('Pending: unavailable')).toBeInTheDocument()
+    expect(screen.getAllByText('–')).toHaveLength(23)
+    expect(within(screen.getByRole('link', { name: /^Data Access Requests/ })).getByLabelText('Pending: unavailable')).toBeInTheDocument()
   })
 })

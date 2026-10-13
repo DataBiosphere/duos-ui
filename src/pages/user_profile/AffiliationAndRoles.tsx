@@ -54,7 +54,7 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
             )}
         <p className="user-profile-subheading">My Role(s)</p>
         <p data-cy="user-roles">{roles}</p>
-        <SigningOfficialRequest user={user} />
+        <SigningOfficialRequest user={user} institutionHasSigningOfficials={signingOfficialUsers.length > 0} />
         <p className="user-profile-subheading">My Institution&apos;s Signing Official(s)</p>
         {signingOfficialUsers.length === 0
           ? (

@@ -32,7 +32,11 @@ import { FORM_MODES } from 'src/components/institution_table/InstitutionFormMode
 import AdminManageInstitutions from 'src/pages/AdminManageInstitutions'
 import AdminManageLC from 'src/pages/AdminManageLC'
 import AdminDaaAssociations from 'src/pages/AdminDaaAssociations'
+import AdminEmailLog from 'src/pages/AdminEmailLog'
 import AdminManageDarCollections from 'src/pages/AdminManageDarCollections'
+import AdminMetrics from 'src/pages/admin_console/AdminMetrics'
+import AdminDashboard from 'src/pages/admin_console/AdminDashboard'
+import { ADMIN_DASHBOARD_ROUTE, ADMIN_METRICS_ROUTE } from 'src/pages/admin_console/adminConsoleRoutes'
 import ManageDac from 'src/pages/manage_dac/ManageDac'
 import ManageRadar from 'src/pages/manage_dac/ManageRadar'
 import EditDac from 'src/pages/manage_dac/EditDac'
@@ -41,6 +45,8 @@ import DatasetSubmissions from 'src/pages/researcher_console/DatasetSubmissions'
 import DatasetUpdateForm from 'src/pages/DatasetUpdateForm'
 import DACConsole from 'src/pages/DACConsole'
 import DACDashboard from 'src/pages/DACDashboard'
+import DacMetrics from 'src/pages/DacMetrics'
+import { DAC_METRICS_ROUTE } from 'src/pages/admin_console/metricsTabs'
 import DACDatasets from 'src/pages/DACDatasets'
 import SOAcknowledged from 'src/routing/SOAcknowledged'
 import SigningOfficialDashboard from 'src/pages/signing_official_console/SigningOfficialDashboard'
@@ -110,6 +116,7 @@ const AppRoutes = (props: AppRoutesProps) => {
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]} />}>
           <Route path="/dac_console" element={<DACDashboard />} />
           <Route path="/dac_console_dar_requests" element={<DACConsole />} />
+          <Route path={DAC_METRICS_ROUTE} element={<DacMetrics />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.chairperson]} />}>
           <Route path="/chair_console" element={<Navigate to="/dac_console_dar_requests" replace />} />
@@ -137,6 +144,9 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/manage_radar/:dacId" element={<ManageRadar />} />
         </Route>
         <Route element={<RoleBAC rolesAllowed={[USER_ROLES.admin]} />}>
+          <Route path="/admin_console" element={<Navigate to={ADMIN_DASHBOARD_ROUTE} replace />} />
+          <Route path={ADMIN_DASHBOARD_ROUTE} element={<AdminDashboard />} />
+          <Route path={ADMIN_METRICS_ROUTE} element={<AdminMetrics />} />
           <Route path="/admin_review_collection/:collectionId" element={<DarCollectionReview adminPage={true} />} />
           <Route path="/admin_manage_users" element={<AdminManageUsers />} />
           <Route path="/admin_edit_user/:userId" element={<AdminEditUser />} />
@@ -145,6 +155,7 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/admin_manage_institutions" element={<AdminManageInstitutions />} />
           <Route path="/admin_manage_lc/" element={<AdminManageLC />} />
           <Route path="/admin_daa_associations" element={<AdminDaaAssociations />} />
+          <Route path="/admin_email_log" element={<AdminEmailLog />} />
           <Route path="/admin_manage_dar_collections/" element={<AdminManageDarCollections />} />
           <Route path="/manage_add_dac_daa" element={<EditDac />} />
         </Route>

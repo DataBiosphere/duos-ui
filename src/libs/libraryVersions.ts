@@ -153,11 +153,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'elwazi',
-              },
-            },
-            {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['elwazi'],
               },
@@ -186,13 +181,13 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'anvil',
+              terms: {
+                'data.tags.keyword': ['dbGaP_dac_name: NHGRI'],
               },
             },
             {
               terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['anvil'],
+                [StudyDataEsFields.TAGS_KEYWORD]: ['Platform: AnVIL', 'NHGRI'],
               },
             },
           ],
@@ -208,8 +203,8 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'NHLBI',
+              terms: {
+                'data.tags.keyword': ['dbGaP_dac_name: NHLBI'],
               },
             },
             {
@@ -230,11 +225,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'Single Cell Portal',
-              },
-            },
-            {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['(Platform: Single Cell Portal)'],
               },
@@ -251,11 +241,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'NHLBI Blood Disorders and Blood Safety',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Blood Disorders and Blood Safety'],
@@ -274,11 +259,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'NHLBI Health Disparities',
-              },
-            },
-            {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Health Disparities'],
               },
@@ -295,11 +275,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'NHLBI Heart and Vascular Diseases',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Heart and Vascular Diseases'],
@@ -318,11 +293,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'NHLBI Lung Diseases',
-              },
-            },
-            {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Lung Diseases'],
               },
@@ -339,11 +309,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'NHLBI Obesity, Nutrition, and Physical Activity',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Obesity, Nutrition, and Physical Activity'],
@@ -362,11 +327,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'NHLBI Population and Epidemiology Studies',
-              },
-            },
-            {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Population and Epidemiology Studies'],
               },
@@ -383,11 +343,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'NHLBI Precision Medicine Activities',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Precision Medicine Activities'],
@@ -406,11 +361,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'NHLBI Research Spectrum',
-              },
-            },
-            {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Research Spectrum'],
               },
@@ -428,11 +378,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'NHLBI Sleep Science and Sleep Disorders',
-              },
-            },
-            {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Sleep Science and Sleep Disorders'],
               },
@@ -449,11 +394,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'NHLBI Women\'s Health',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Women\'s Health'],
@@ -489,13 +429,8 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'hca dcp',
-              },
-            },
-            {
               terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['hca dcp'],
+                [StudyDataEsFields.TAGS_KEYWORD]: ['HCA_DCP'],
               },
             },
           ],
@@ -510,11 +445,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'zoonomics',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['zoonomics'],
@@ -540,11 +470,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'cfde',
-              },
-            },
-            {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['cfde'],
               },
@@ -562,11 +487,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'FireCloud',
-              },
-            },
-            {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['FireCloud'],
               },
@@ -583,11 +503,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'All of Us',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['All of Us'],
@@ -623,13 +538,8 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'International Fetal Genomics Consortium',
-              },
-            },
-            {
               terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['International Fetal Genomics Consortium'],
+                [StudyDataEsFields.TAGS_KEYWORD]: ['International Fetal Genomics Consortium', 'IFGC'],
               },
             },
           ],
@@ -644,11 +554,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'SCHARE',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['SCHARE'],
@@ -667,11 +572,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'Stanley Center',
-              },
-            },
-            {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['Stanley Center'],
               },
@@ -688,11 +588,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'Stanley Center',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['Stanley Center'],
@@ -711,11 +606,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'Getz Lab',
-              },
-            },
-            {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['Getz Lab'],
               },
@@ -733,13 +623,8 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'ASAP',
-              },
-            },
-            {
               terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['ASAP'],
+                [StudyDataEsFields.TAGS_KEYWORD]: ['Broad: ASAP'],
               },
             },
           ],
@@ -754,11 +639,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'GP2',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['GP2'],
@@ -777,13 +657,8 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'ASD',
-              },
-            },
-            {
               terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['ASD'],
+                [StudyDataEsFields.TAGS_KEYWORD]: ['Broad: ASD'],
               },
             },
           ],
@@ -798,11 +673,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'PBN',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['PBN'],
@@ -820,11 +690,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'PGC',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['PGC'],
@@ -860,13 +725,8 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'ESP',
-              },
-            },
-            {
               terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['ESP'],
+                [StudyDataEsFields.TAGS_KEYWORD]: ['Broad: Epi25'],
               },
             },
           ],
@@ -882,13 +742,8 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'IBD',
-              },
-            },
-            {
               terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['IBD'],
+                [StudyDataEsFields.TAGS_KEYWORD]: ['Broad: IBD'],
               },
             },
           ],
@@ -903,11 +758,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'Helmsley',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['Helmsley'],
@@ -926,13 +776,8 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'Eating Disorder Sequencing Program',
-              },
-            },
-            {
               terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Eating Disorder Sequencing Program'],
+                [StudyDataEsFields.TAGS_KEYWORD]: ['Broad: GED'],
               },
             },
           ],
@@ -947,11 +792,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'CCXDP',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['CCXDP'],
@@ -969,11 +809,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'NCPI DUO',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NCPI DUO'],
@@ -993,7 +828,7 @@ export const getLibraryVersions = (
           should: [
             {
               terms: {
-                'study.data.tags.keyword': ['Count Me In'],
+                [StudyDataEsFields.TAGS_KEYWORD]: ['Count Me In'],
               },
             },
           ],
@@ -1008,11 +843,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'NASA',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NASA'],
@@ -1031,11 +861,6 @@ export const getLibraryVersions = (
         bool: {
           should: [
             {
-              match_phrase: {
-                'study.description': 'NASA',
-              },
-            },
-            {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['NASA'],
               },
@@ -1052,11 +877,6 @@ export const getLibraryVersions = (
       query: {
         bool: {
           should: [
-            {
-              match_phrase: {
-                'study.description': 'ga4gh',
-              },
-            },
             {
               terms: {
                 [StudyDataEsFields.TAGS_KEYWORD]: ['ga4gh'],

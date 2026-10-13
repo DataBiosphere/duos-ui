@@ -15,6 +15,7 @@ import { MemoryRouter } from 'react-router'
 import { LibraryDataGrid } from 'src/components/data_library/LibraryDataGrid'
 import { AssetType, ExportableDatasets, SortOrder, StudyAggregation } from 'src/types/library'
 import { DatasetTerm, StudyTerm, UserTerm } from 'src/types/model'
+import { Storage } from 'src/libs/storage'
 
 beforeAll(() => {
   global.ResizeObserver = class {
@@ -117,7 +118,7 @@ describe('LibraryDataGrid', () => {
   })
 
   it('renders dataset data correctly', () => {
-    mountGrid(
+    const { container } = mountGrid(
       <LibraryDataGrid assetType={AssetType.DATASETS} data={datasets} total={3} {...baseProps} />,
     )
     expect(screen.getByText('Dataset 101')).toBeInTheDocument()
@@ -126,9 +127,14 @@ describe('LibraryDataGrid', () => {
     expect(screen.getByText('40')).toBeInTheDocument()
     expect(screen.getByText('Dataset 103')).toBeInTheDocument()
     expect(screen.getByText('20')).toBeInTheDocument()
-    expect(screen.getByText('via DUOS').closest('.MuiChip-root')).toHaveClass('MuiChip-colorPrimary')
-    expect(screen.getByText('Open Access').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSuccess')
-    expect(screen.getByText('External to DUOS').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSecondary')
+    // Scoped to the Access cell: 'External to DUOS' is also how the Data Location column
+    // labels a location outside Terra, so the bare text is not unique on the row.
+    const accessCell = (datasetId: number) => container.querySelector(
+      `.MuiDataGrid-row[data-id="${datasetId}"] [data-field="accessManagement"]`,
+    ) as HTMLElement
+    expect(within(accessCell(101)).getByText('via DUOS').closest('.MuiChip-root')).toHaveClass('MuiChip-colorPrimary')
+    expect(within(accessCell(102)).getByText('Open Access').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSuccess')
+    expect(within(accessCell(103)).getByText('External to DUOS').closest('.MuiChip-root')).toHaveClass('MuiChip-colorSecondary')
   })
 
   it('renders loading state', () => {
@@ -152,11 +158,40 @@ describe('LibraryDataGrid', () => {
       'DUOS-000201': [{ id: 'snap-001', name: 'Snapshot 001', duosId: 'DUOS-000201', cloudPlatform: 'gcp', resourceLocks: {} }],
     }
 
-    it('renders an Actions column header when exportableDatasets has entries', () => {
+    /**
+     * The wiring, not just the button: the Request Path column has to ask about DAC approval for
+     * the button ever to know. Selection already refuses these rows, so leaving this path open
+     * meant one click could still raise a DAR against an unapproved dataset.
+     */
+    it('disables Request Now for a controlled dataset awaiting DAC approval', () => {
+      // A card, so DAC approval is the only thing that can disable the button here. Without it
+      // the button is disabled for want of Active Researcher Status and this proves nothing.
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ libraryCard: {} } as never)
+      const pending = makeDatasetTerm({
+        datasetId: 203, datasetName: 'Pending Dataset', datasetIdentifier: 'DUOS-000203',
+        participantCount: 10, accessManagement: 'controlled', dacApproval: false,
+      })
+      mountGrid(
+        <LibraryDataGrid assetType={AssetType.DATASETS} data={[pending]} total={1} {...baseProps} />,
+      )
+      expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
+    })
+
+    it('leaves Request Now enabled for an approved controlled dataset', () => {
+      // A card, so the only thing under test here is DAC approval - without it the button is
+      // disabled for want of Active Researcher Status and the assertion proves nothing.
+      vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ libraryCard: {} } as never)
+      mountGrid(
+        <LibraryDataGrid assetType={AssetType.DATASETS} data={[exportableDataset]} total={1} {...baseProps} />,
+      )
+      expect(screen.getByRole('button', { name: 'Request Now' })).not.toBeDisabled()
+    })
+
+    it('renders an Export column header when exportableDatasets has entries', () => {
       mountGrid(
         <LibraryDataGrid assetType={AssetType.DATASETS} data={[exportableDataset]} total={1} {...baseProps} exportableDatasets={exportableDatasets} />,
       )
-      expect(screen.getByText('Actions')).toBeInTheDocument()
+      expect(screen.getByRole('columnheader', { name: 'Export' })).toBeInTheDocument()
     })
 
     it('renders an Export link for a dataset with matching snapshots', () => {
@@ -191,6 +226,20 @@ describe('LibraryDataGrid', () => {
         <LibraryDataGrid assetType={AssetType.DATASETS} data={[exportableDataset]} total={1} {...baseProps} />,
       )
       expect(screen.queryByRole('link', { name: /Export/ })).not.toBeInTheDocument()
+    })
+
+    /**
+     * The column, not just the links. My Data Submissions supplies no exports and replaces the
+     * trailing column with its own 'actions' column, matched by field name - so once this one was
+     * renamed to 'export' it stopped being replaced and sat there permanently empty. Asserted
+     * through the grid rather than against makeDatasetColumns directly, because the grid used to
+     * default the prop to {} and erase the very distinction this relies on.
+     */
+    it('renders no Export column at all when exportableDatasets is not provided', () => {
+      mountGrid(
+        <LibraryDataGrid assetType={AssetType.DATASETS} data={[exportableDataset]} total={1} {...baseProps} />,
+      )
+      expect(screen.queryByRole('columnheader', { name: 'Export' })).not.toBeInTheDocument()
     })
 
     it('does not render Export links for the Studies grid even if exportableDatasets is provided', () => {

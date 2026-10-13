@@ -28,7 +28,7 @@ const matchResult: MatchResult = {
   consent: 'consent-001',
   match: true,
   abstain: false,
-  algorithmVersion: 'v2',
+  algorithmVersion: 'v5',
   rationales: ['rationale A'],
   createDate: '2024-01-01',
   failed: false,

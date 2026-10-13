@@ -108,6 +108,14 @@ describe('ProfileLinks', () => {
     expect(screen.queryByText(/Signed in with/)).not.toBeInTheDocument()
   })
 
+  it('shows no badge when the server could not read the idp claim (unknown)', async () => {
+    vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true, idp: 'unknown' })
+    const user = userEvent.setup()
+    renderComponent()
+    await user.click(screen.getByText(mockUser.displayName))
+    expect(screen.queryByText(/Signed in with/)).not.toBeInTheDocument()
+  })
+
   it('shows no badge when the session reports no idp (legacy flow)', async () => {
     vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
     const user = userEvent.setup()

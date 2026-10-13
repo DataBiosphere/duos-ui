@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { Storage } from 'src/libs/storage'
 import { DuosUser } from 'src/types/model'
 import { OidcUser } from 'src/libs/auth/oidcBroker'
+import { isLegacyOidcKey } from 'src/libs/auth/legacyOidcKeys'
 
 const mockUser: DuosUser = {
   createDate: new Date(),
@@ -35,6 +36,24 @@ describe('Storage', () => {
       expect(localStorage.length).toBeGreaterThan(0)
       expect(Storage.getCurrentUser()).not.toBeNull()
       expect(Storage.getOidcUser()).not.toBeNull()
+    })
+
+    it('leaves no legacy OIDC key behind, so the BFF regression check cannot count its own cleanup', () => {
+      localStorage.setItem('OidcUser', 'stale')
+      localStorage.setItem('oidc.user:authority:client', 'stale')
+
+      Storage.clearStorage()
+
+      expect(Object.keys(localStorage).filter(isLegacyOidcKey)).toEqual([])
+    })
+
+    it('still reads as signed out once the OIDC user is cleared', () => {
+      Storage.setOidcUser({ ...Storage.getOidcUser(), profile: { exp: Math.floor(Date.now() / 1000) + 3600 } } as ReturnType<typeof Storage.getOidcUser>)
+      expect(Storage.userIsLogged()).toBe(true)
+
+      Storage.clearStorage()
+
+      expect(Storage.userIsLogged()).toBe(false)
     })
   })
 

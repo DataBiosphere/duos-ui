@@ -39,6 +39,7 @@ export async function ecmProxy(app: FastifyInstance, options: UpstreamProxyOptio
     prefix: ECM_PROXY_PREFIX,
     upstreamEnvVar: 'DUOS_ECM_URL',
     logTag: 'ecm-proxy',
+    upstream: 'ecm',
     unauthenticatedPaths: NO_PATHS,
     csrfExemptUnsafeRequests: NO_PATHS,
     destroySessionOnUpstream401: false,

@@ -2,15 +2,15 @@ import { beforeEach, describe, it, expect, vi } from 'vitest'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import {
-  buildConsentGroupsFromStudy,
+  buildConsentGroupsFromDatasets,
   datasetSchemaSubmissionToStudy,
   extractThroughBioId,
   getStudyPropertyValueByKey,
   studyToDatasetSchemaSubmission,
 } from 'src/pages/data_submission/v2/v2-common-functions'
-import { DatasetRegistrationSchemaV1, Study } from 'src/pages/data_submission/v2/v2-models'
+import { DatasetRegistrationSchemaV1 } from 'src/pages/data_submission/v2/v2-models'
 import { DraftDetail } from 'src/types/draft'
-import { DataUse } from 'src/types/model'
+import { Dataset, DataUse } from 'src/types/model'
 
 vi.mock('src/libs/storage', () => ({
   Storage: {
@@ -68,23 +68,41 @@ describe('extractThroughBioId', () => {
   })
 })
 
-describe('buildConsentGroupsFromStudy primary data use', () => {
-  const studyWithDataUse = (dataUse: DataUse): Study => ({
-    datasets: [{ datasetId: 1, name: 'DS 1', dataUse, properties: [] }],
-  } as unknown as Study)
+describe('buildConsentGroupsFromDatasets primary data use', () => {
+  const datasetsWithDataUse = (dataUse: DataUse): Dataset[] => ([
+    { datasetId: 1, name: 'DS 1', dataUse, properties: [] },
+  ] as unknown as Dataset[])
 
   // An empty array would light the Disease-Specific radio beside the record's real primary
   it('treats an empty diseaseRestrictions as no disease-specific primary', () => {
-    const [consentGroup] = buildConsentGroupsFromStudy(studyWithDataUse({ diseaseRestrictions: [], other: 'Not for profit' } as DataUse))
+    const [consentGroup] = buildConsentGroupsFromDatasets(datasetsWithDataUse({ diseaseRestrictions: [], other: 'Not for profit' } as DataUse))
 
     expect(consentGroup.diseaseSpecificUse).toBeUndefined()
     expect(consentGroup.otherPrimary).toBe('Not for profit')
   })
 
   it('keeps a populated diseaseRestrictions', () => {
-    const [consentGroup] = buildConsentGroupsFromStudy(studyWithDataUse({ diseaseRestrictions: ['DOID_1'] } as DataUse))
+    const [consentGroup] = buildConsentGroupsFromDatasets(datasetsWithDataUse({ diseaseRestrictions: ['DOID_1'] } as DataUse))
 
     expect(consentGroup.diseaseSpecificUse).toEqual(['DOID_1'])
+  })
+})
+
+describe('buildConsentGroupsFromDatasets', () => {
+  it('builds one consent group per dataset, in order', () => {
+    const datasets = [
+      { datasetId: 1, name: 'DS 1', dataUse: { generalUse: true }, properties: [] },
+      { datasetId: 2, name: 'DS 2', dataUse: { hmbResearch: true }, properties: [] },
+    ] as unknown as Dataset[]
+
+    const groups = buildConsentGroupsFromDatasets(datasets)
+
+    expect(groups.map(group => group.datasetId)).toEqual([1, 2])
+    expect(groups.map(group => group.consentGroupName)).toEqual(['DS 1', 'DS 2'])
+  })
+
+  it('builds no consent groups for a study with no datasets', () => {
+    expect(buildConsentGroupsFromDatasets([])).toEqual([])
   })
 })
 

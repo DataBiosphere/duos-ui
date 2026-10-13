@@ -7,11 +7,11 @@ import { useSessionInfo } from 'src/hooks/useSession'
 import type { SessionInfo } from 'src/libs/auth/session'
 
 // Keyed off the SessionInfo union so adding a provider without a label (or
-// typo-ing one) is a compile error.
+// typo-ing one) is a compile error. 'unknown' has no label on purpose.
 const IDP_LABELS = {
   google: 'Google',
   microsoft: 'Microsoft',
-} satisfies Record<NonNullable<SessionInfo['idp']>, string>
+} satisfies Record<Exclude<NonNullable<SessionInfo['idp']>, 'unknown'>, string>
 
 interface ProfileLinksProps {
   currentUser: DuosUser
@@ -26,7 +26,7 @@ export const ProfileLinks: React.FC<ProfileLinksProps> = (props) => {
   // /auth/me reports which sub-provider (Google or Microsoft) the user chose
   // on the B2C login page — display only, nothing sensitive is stored.
   const idp = useSessionInfo()?.idp
-  const idpLabel = idp ? IDP_LABELS[idp] : undefined
+  const idpLabel = idp && idp !== 'unknown' ? IDP_LABELS[idp] : undefined
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget)

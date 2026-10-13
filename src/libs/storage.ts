@@ -65,7 +65,9 @@ export const Storage = {
   clearStorage: (): void => {
     localStorage.clear()
     localStorage.setItem(CurrentUser, JSON.stringify(DEFAULT_DUOS_USER))
-    localStorage.setItem(OidcUser, JSON.stringify(DEFAULT_OIDC_USER))
+    // No OidcUser write: getOidcUser() already returns DEFAULT_OIDC_USER for a
+    // missing key, and under the BFF a stored key is a legacy residue that the
+    // 6-H regression check would count as DUOS writing it again.
   },
 
   setCurrentUser: (data: DuosUser): void => {

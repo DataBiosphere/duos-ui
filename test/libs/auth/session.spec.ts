@@ -3,6 +3,7 @@ import { getSessionInfo, resetSessionCache, resetSessionProbeState, revalidateSe
 import { Config } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 import { ToastNotifications } from 'src/libs/ToastNotifications'
+import { reportLegacyOidcKeys } from 'src/libs/auth/legacyOidcKeys'
 
 vi.mock('src/libs/config', async importOriginal => ({
   ...(await importOriginal<typeof import('src/libs/config')>()),
@@ -11,6 +12,8 @@ vi.mock('src/libs/config', async importOriginal => ({
   },
 }))
 
+vi.mock('src/libs/auth/legacyOidcKeys', () => ({ reportLegacyOidcKeys: vi.fn() }))
+
 describe('session probe', () => {
   let fetchMock: ReturnType<typeof vi.fn>
 
@@ -18,6 +21,7 @@ describe('session probe', () => {
     fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
     vi.mocked(Config.isBffEnabled).mockResolvedValue(true)
+    vi.mocked(reportLegacyOidcKeys).mockClear()
     resetSessionProbeState()
   })
 
@@ -277,6 +281,58 @@ describe('session probe', () => {
     )
 
     await expect(userIsLogged()).resolves.toBe(true)
+  })
+
+  describe('legacy key regression check', () => {
+    const respond = (body: object, status = 200) => new Response(JSON.stringify(body), {
+      status,
+      headers: { 'content-type': 'application/json' },
+    })
+
+    it('reports a regression once /auth/me confirms a BFF session', async () => {
+      const report = vi.mocked(reportLegacyOidcKeys)
+      fetchMock.mockResolvedValue(respond({ authenticated: true }))
+
+      await getSessionInfo()
+
+      expect(report).toHaveBeenCalledExactlyOnceWith('regression')
+    })
+
+    it('reports again on a focus revalidation that confirms the session', async () => {
+      vi.useFakeTimers()
+      try {
+        const report = vi.mocked(reportLegacyOidcKeys)
+        // A fresh Response per call: a body can be read only once.
+        fetchMock.mockImplementation(() => Promise.resolve(respond({ authenticated: true })))
+        await getSessionInfo()
+
+        vi.advanceTimersByTime(10 * 1000)
+        await revalidateSessionInfo()
+
+        expect(report).toHaveBeenCalledTimes(2)
+      }
+      finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('does not report when there is no session', async () => {
+      const report = vi.mocked(reportLegacyOidcKeys)
+      fetchMock.mockResolvedValue(new Response(null, { status: 401 }))
+
+      await getSessionInfo()
+
+      expect(report).not.toHaveBeenCalled()
+    })
+
+    it('does not report in legacy mode, where the keys are expected', async () => {
+      const report = vi.mocked(reportLegacyOidcKeys)
+      vi.mocked(Config.isBffEnabled).mockResolvedValue(false)
+
+      await getSessionInfo()
+
+      expect(report).not.toHaveBeenCalled()
+    })
   })
 
   describe('legacy mode (BFF disabled)', () => {

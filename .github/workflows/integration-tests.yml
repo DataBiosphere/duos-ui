@@ -3,10 +3,39 @@ name: Playwright integration tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  DUOS_DB_HOST: localhost
+  DUOS_DB_PORT: '5432'
+  DUOS_DB_NAME: consent
+  DUOS_DB_USER: consent
+  # Ephemeral CI database credential.
+  DUOS_DB_PASSWORD: consent
+  # The local Postgres service does not support TLS.
+  DUOS_DB_SSL: 'false'
+  DUOS_API_URL: https://consent.dsde-dev.broadinstitute.org
+  # `pnpm run serve` defaults this off to spare a developer's browser; CI has none.
+  DUOS_HSTS: 'true'
+  DUOS_TEST_SIGNIN_ENABLED: 'true'
+
 jobs:
   playwright-run:
     runs-on: ubuntu-latest
     if: github.actor != 'dependabot[bot]'
+    services:
+      postgres:
+        image: postgres:16.13-alpine
+        env:
+          POSTGRES_DB: consent
+          POSTGRES_USER: consent
+          POSTGRES_PASSWORD: consent
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U consent -d consent"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -27,14 +56,39 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm exec playwright install chromium --with-deps
       - name: Copy Configs
-        run: cp config/dev.json public/config.json
+        run: jq '.bffEnabled = true' config/dev.json > public/config.json
       - name: Map local dev hostname
         run: echo "127.0.0.1 local.dsde-dev.broadinstitute.org" | sudo tee -a /etc/hosts
+      # Secure session cookies require HTTPS; Playwright accepts this self-signed certificate.
+      - name: Generate a TLS certificate for the server
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
+            -keyout server.key -out server.crt \
+            -subj "/CN=local.dsde-dev.broadinstitute.org" \
+            -addext "subjectAltName=DNS:local.dsde-dev.broadinstitute.org,DNS:localhost,IP:127.0.0.1"
+      # Session secrets must contain at least 32 characters. Masked because this repository is public.
+      - name: Generate a session secret
+        run: |
+          SECRET=$(openssl rand -base64 48)
+          echo "::add-mask::$SECRET"
+          echo "DUOS_SESSION_SECRET=$SECRET" >> $GITHUB_ENV
+      # The session store requires this table before its first write.
+      - name: Apply the session schema
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f test/e2e/sql/user_sessions.sql
+        env:
+          DATABASE_URL: postgresql://consent:consent@localhost:5432/consent
       - name: Build app
         run: CI=false pnpm run build
+      # playwright.config.ts starts the mock OIDC provider and Consent upstream
+      # beside two servers: one on dev Consent, one on the mock (DT-4069).
       - name: Run Playwright integration tests
-        run: pnpm run test:e2e
+        run: |
+          DUOS_TEST_SIGNIN_EMAILS=$(node scripts/e2e-fixture-emails.mjs)
+          export DUOS_TEST_SIGNIN_EMAILS
+          pnpm run test:e2e
         env:
+          # The servers reach the mock provider over HTTPS, and this certificate is self-signed.
+          NODE_EXTRA_CA_CERTS: ${{ github.workspace }}/server.crt
           DUOS_AUTOMATION_ADMIN_SA: ${{ secrets.DUOS_AUTOMATION_ADMIN_SA }}
           DUOS_AUTOMATION_CHAIR_SA: ${{ secrets.DUOS_AUTOMATION_CHAIR_SA }}
           DUOS_AUTOMATION_MEMBER_SA: ${{ secrets.DUOS_AUTOMATION_MEMBER_SA }}

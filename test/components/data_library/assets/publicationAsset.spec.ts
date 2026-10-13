@@ -24,6 +24,7 @@ const makeBucket = (
     publishedDate?: string
     authors?: Array<{ name: string }>
     url?: string
+    access?: string
     tags?: string[]
     citation?: boolean
     datasetCitation?: string
@@ -50,6 +51,7 @@ const makeBucket = (
                   publishedDate: p.publishedDate,
                   authors: p.authors,
                   url: p.url,
+                  access: p.access,
                   tags: p.tags,
                   citation: p.citation,
                   datasetCitation: p.datasetCitation,
@@ -262,29 +264,72 @@ describe('publicationAsset — transformResponse', () => {
     expect(result.total).toBe(0)
   })
 
-  it('returns only matching publications when a citation filter is present', () => {
+  it('returns only publications matching the journal filter', () => {
     const response = makeResponse([
       makeBucket(1, [
-        {
-          publicationId: 'PUB-CITED',
-          title: 'Cited Publication',
-          citation: true,
-        },
-        {
-          publicationId: 'PUB-NOT-CITED',
-          title: 'Not Cited Publication',
-          citation: false,
-        },
+        { publicationId: 'p1', journal: 'Nature' },
+        { publicationId: 'p2', journal: 'Cell' },
+      ]),
+    ])
+
+    const result = publicationAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, publicationJournal: ['Nature'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as PublicationAsset).publicationId).toBe('p1')
+  })
+
+  it('returns only publications matching the access filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { publicationId: 'p1', access: 'open' },
+        { publicationId: 'p2', access: 'restricted' },
+      ]),
+    ])
+
+    const result = publicationAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, publicationAccess: ['open'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as PublicationAsset).publicationId).toBe('p1')
+  })
+
+  it('returns only publications within the publicationPublishedDate range', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { publicationId: 'p-old', publishedDate: '2019-05-01' },
+        { publicationId: 'p-in-range', publishedDate: '2022-03-01' },
+        { publicationId: 'p-new', publishedDate: '2025-01-01' },
       ]),
     ])
 
     const result = publicationAsset.transformResponse(response, pagination, {
       ...EMPTY_FILTERS,
-      publicationsDatasetsCited: true,
+      publicationPublishedDate: { after: '2020-01-01', before: '2023-12-31' },
     })
 
-    expect(result.items).toHaveLength(1)
-    expect((result.items[0] as PublicationAsset).publicationId).toBe('PUB-CITED')
+    expect(result.total).toBe(1)
+    expect((result.items[0] as PublicationAsset).publicationId).toBe('p-in-range')
+  })
+
+  // A row with no date must not slip through a one-sided bound.
+  it('excludes a publication with no published date from either one-sided bound', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { publicationId: 'p-dated', publishedDate: '2022-03-01' },
+        { publicationId: 'p-undated' },
+      ]),
+    ])
+
+    const before = publicationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      publicationPublishedDate: { before: '2023-12-31' },
+    })
+    expect(before.items.map(i => (i as PublicationAsset).publicationId)).toEqual(['p-dated'])
+
+    const after = publicationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      publicationPublishedDate: { after: '2020-01-01' },
+    })
+    expect(after.items.map(i => (i as PublicationAsset).publicationId)).toEqual(['p-dated'])
   })
 })
 
@@ -388,6 +433,7 @@ describe('publicationAsset — makeColumns', () => {
     expect(fields).toContain('journal')
     expect(fields).toContain('publishedDate')
     expect(fields).toContain('doi')
+    expect(fields).toContain('access')
     expect(fields).toContain('authorNames')
     expect(fields).toContain('tags')
   })
@@ -396,5 +442,35 @@ describe('publicationAsset — makeColumns', () => {
     const a = publicationAsset.makeColumns()
     const b = publicationAsset.makeColumns({})
     expect(a.map(c => c.field)).toEqual(b.map(c => c.field))
+  })
+})
+
+describe('publicationAsset — indexed values are normalized', () => {
+  it('matches a row whose indexed journal carries stray whitespace', () => {
+    const response = makeResponse([makeBucket(1, [{ publicationId: 'a1', journal: '  Nature ' }])])
+
+    // Options are trimmed, so an untrimmed row is dropped by its own filter.
+    const result = publicationAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, publicationJournal: ['Nature'] })
+
+    expect(result.items).toHaveLength(1)
+  })
+})
+
+// No clause is built, so the client-side pass must not narrow either.
+describe('publicationAsset — inverted publicationPublishedDate', () => {
+  it('leaves rows visible when the bounds are crossed', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { publicationId: 'a1', publishedDate: '2024-06-01' },
+        { publicationId: 'a2', publishedDate: '2020-01-01' },
+      ]),
+    ])
+
+    const result = publicationAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      publicationPublishedDate: { after: '2024-12-31', before: '2024-01-01' },
+    })
+
+    expect(result.items).toHaveLength(2)
   })
 })

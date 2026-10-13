@@ -21,33 +21,16 @@ import {
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { FilterKey, LibraryFilterSection, LibraryFiltersProps } from 'src/types/library'
+import { FilterKey, FilterState, LibraryFilterSection, LibraryFiltersProps } from 'src/types/library'
 import { COUNT_BADGE_COLOR, COUNT_BADGE_SX } from 'src/components/data_library/countBadgeStyles'
 import { isFilterActive, isInvertedDateRange } from 'src/components/data_library/filterRegistry'
 import { muiCheckboxFix, muiTextFieldFix } from 'src/libs/muiThemeFix'
 
-const CHECKBOX_FILTER_KEYS = [
-  'accessManagement',
-  'dataUse',
-  'dataUseModifiers',
-  'dataType',
-  'dac',
-  'workspaceTools',
-  'workspacePlatform',
-  'clinicalTrialStatus',
-  'clinicalTrialPhase',
-  'clinicalTrialInterventionType',
-  'clinicalTrialRegistry',
-  'biospecimenType',
-  'biospecimenDataUse',
-  'biospecimenPostMortemIntervalUnit',
-  'soApprovalModel',
-] as const
-
-type CheckboxFilterKey = (typeof CHECKBOX_FILTER_KEYS)[number]
-
-const isCheckboxFilterKey = (key: FilterKey): key is CheckboxFilterKey =>
-  (CHECKBOX_FILTER_KEYS as readonly string[]).includes(key)
+// Dispatch reads each section's own `control` instead of a key list here, so a
+// newly registered filter renders without touching this file.
+type KeysWithValue<V> = { [K in FilterKey]: FilterState[K] extends V ? K : never }[FilterKey]
+type CheckboxFilterKey = KeysWithValue<string[]>
+type BooleanFilterKey = KeysWithValue<boolean | undefined>
 
 const COMPACT_ACCORDION_SX = {
   '&:before': { display: 'none' },
@@ -122,6 +105,20 @@ const DATE_SECTION_CONFIG = {
       { stateKey: 'after', label: 'Filed After' },
     ],
     invertedMessage: 'Filed After cannot be later than Filed Before',
+  },
+  presentationDate: {
+    fields: [
+      { stateKey: 'before', label: 'Presented Before' },
+      { stateKey: 'after', label: 'Presented After' },
+    ],
+    invertedMessage: 'Presented After cannot be later than Presented Before',
+  },
+  publicationPublishedDate: {
+    fields: [
+      { stateKey: 'before', label: 'Published Before' },
+      { stateKey: 'after', label: 'Published After' },
+    ],
+    invertedMessage: 'Published After cannot be later than Published Before',
   },
   fundingDate: {
     fields: [
@@ -199,18 +196,15 @@ const DateFilterField: React.FC<DateFilterFieldProps> = ({ label, value, error, 
   )
 }
 
-// Yes/No/Any radio groups. A registered key claimed by neither this list nor
-// CHECKBOX_FILTER_KEYS renders nothing at all.
-const BOOLEAN_FILTER_KEYS = [
-  'datasetsCited',
-  'publicationsDatasetsCited',
-  'instantApproval',
-] as const
+const isCheckboxSection = (section: LibraryFilterSection): section is LibraryFilterSection & { key: CheckboxFilterKey } =>
+  section.control === 'checkbox'
 
-type BooleanFilterKey = (typeof BOOLEAN_FILTER_KEYS)[number]
+const isBooleanSection = (section: LibraryFilterSection): section is LibraryFilterSection & { key: BooleanFilterKey } =>
+  section.control === 'boolean'
 
-const isBooleanFilterKey = (key: FilterKey): key is BooleanFilterKey =>
-  (BOOLEAN_FILTER_KEYS as readonly string[]).includes(key)
+// No DATE_SECTION_CONFIG entry means no field labels, so skip rather than throw.
+const isDateSection = (section: LibraryFilterSection): section is LibraryFilterSection & { key: DateFilterSectionKey } =>
+  section.control === 'dateRange' && section.key in DATE_SECTION_CONFIG
 
 export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
   filters,
@@ -288,11 +282,8 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
     </Box>
   )
 
-  const renderCheckboxSection = (section: LibraryFilterSection) => {
+  const renderCheckboxSection = (section: LibraryFilterSection & { key: CheckboxFilterKey }) => {
     const { key, label, options = [] } = section
-    if (!isCheckboxFilterKey(key)) {
-      return null
-    }
     return (
       <Accordion key={key} disableGutters defaultExpanded={key === 'accessManagement'} sx={COMPACT_ACCORDION_SX}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={COMPACT_SUMMARY_SX}>
@@ -616,20 +607,15 @@ export const LibraryFilters: React.FC<LibraryFiltersProps> = React.memo(({
                   return renderPostMortemIntervalSection(section)
                 }
 
-                if (isBooleanFilterKey(section.key)) {
+                if (isBooleanSection(section)) {
                   return renderBooleanSection(section.key, section.label)
                 }
 
-                if (
-                  section.key === 'clinicalTrialDates'
-                  || section.key === 'biospecimenCollectionDate'
-                  || section.key === 'ipFiledDate'
-                  || section.key === 'fundingDate'
-                ) {
+                if (isDateSection(section)) {
                   return renderDateSection(section.key, section.label)
                 }
 
-                return renderCheckboxSection(section)
+                return isCheckboxSection(section) ? renderCheckboxSection(section) : null
               })}
             </>
           )

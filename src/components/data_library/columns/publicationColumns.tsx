@@ -4,6 +4,7 @@ import { Link, Chip, Box, Tooltip } from '@mui/material'
 import { Link as RouterLink } from 'react-router'
 import { PublicationAsset } from 'src/types/library'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
+import { citationColumn, truncatedTextColumn } from 'src/components/data_library/columns/sharedColumns'
 
 /**
  * Column definitions for the Publications view in the Data Library.
@@ -182,4 +183,6 @@ export const makePublicationColumns = (): GridColDef<PublicationAsset>[] => [
       )
     },
   },
+  truncatedTextColumn<PublicationAsset>('access', 'Access', 120),
+  citationColumn<PublicationAsset>(row => row.datasetCitation || ''),
 ]

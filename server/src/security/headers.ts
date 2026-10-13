@@ -5,7 +5,7 @@ import { type CspEnvironment, contentSecurityPolicyOptions } from './csp.js'
 
 export function helmetOptions(
   config: Record<string, unknown>,
-  env: CspEnvironment,
+  env: CspEnvironment & { hsts?: boolean },
 ): FastifyHelmetOptions {
   return {
     contentSecurityPolicy: contentSecurityPolicyOptions(config, env),
@@ -19,9 +19,11 @@ export function helmetOptions(
     crossOriginResourcePolicy: { policy: 'same-origin' },
     referrerPolicy: { policy: 'no-referrer' },
     xFrameOptions: { action: 'deny' },
-    // Avoid pinning a developer's browser to HTTPS.
-    strictTransportSecurity: env.isDev
-      ? false
-      : { maxAge: 31536000, includeSubDomains: true, preload: false },
+    // Avoid pinning a developer's browser to HTTPS. `hsts` overrides the
+    // inference for the E2E harness, which runs the production build on the
+    // hostname a developer browses.
+    strictTransportSecurity: (env.hsts ?? !env.isDev)
+      ? { maxAge: 31536000, includeSubDomains: true, preload: false }
+      : false,
   }
 }

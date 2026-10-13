@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined'
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined'
@@ -9,6 +9,8 @@ import { COMMON_CONSOLE_RESOURCES } from 'src/components/dashboard/dashboardReso
 import { createDataLibraryTile } from 'src/components/dashboard/dashboardTiles'
 import { ConsoleDashboardTileMeta } from 'src/components/dashboard/useConsoleDashboardSummary'
 import { DAC, DacDashboardSummary } from 'src/libs/ajax/DAC'
+import { useMetricTiles } from 'src/components/dashboard/metricTiles'
+import { DAC_METRICS_ROUTE, DAC_METRICS_TABS } from 'src/pages/admin_console/metricsTabs'
 
 // These pages no longer have their own top-nav sub-tabs; the Dashboard is now the only place DAC
 // members and chairs navigate to them from, so the tile list lives here.
@@ -60,12 +62,16 @@ const promoParagraphs = [
   'Reach out if you\'d like to learn more about what DUOS can do for your committee.',
 ]
 
+const SUMMARY_KEY = ['dac-dashboard-summary']
+
 export default function DACDashboard(): React.JSX.Element {
+  const metricTiles = useMetricTiles(SUMMARY_KEY, DAC.getDashboardSummary, DAC_METRICS_ROUTE, DAC_METRICS_TABS)
+  const allTiles = useMemo(() => [...tileMeta, ...metricTiles], [metricTiles])
   return (
     <ConsoleDashboard
-      queryKey={['dac-dashboard-summary']}
+      queryKey={SUMMARY_KEY}
       queryFn={DAC.getDashboardSummary}
-      tileMeta={tileMeta}
+      tileMeta={allTiles}
       resourcesHeading="Helpful Resources for DACs"
       resources={helpfulResources}
       promoParagraphs={promoParagraphs}

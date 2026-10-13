@@ -52,7 +52,7 @@ const renderCell = (
 
 describe('datasetColumns — column order', () => {
   it('returns columns in the expected order', () => {
-    const fields = makeDatasetColumns().map(c => c.field)
+    const fields = makeDatasetColumns({}).map(c => c.field)
     expect(fields).toEqual([
       'datasetName',
       'studyName',
@@ -62,13 +62,54 @@ describe('datasetColumns — column order', () => {
       'participantCount',
       'dataUse',
       'dac',
-      'actions',
+      'dataLocation',
+      'export',
     ])
+  })
+
+  /**
+   * My Data Submissions supplies no exports and overrides the trailing column with its own
+   * 'actions' column. That override matches by field name, so once this column was renamed from
+   * 'actions' to 'export' it no longer replaced anything and the page grew a second, permanently
+   * empty Export column. A column that can never render a control is not emitted at all.
+   */
+  it('omits the Export column for a caller that supplies no exports', () => {
+    expect(makeDatasetColumns().map(c => c.field)).not.toContain('export')
+    expect(makeDatasetColumns({}).map(c => c.field)).toContain('export')
   })
 
   it('includes the SO Approval column when authorization-model data is supplied', () => {
     const fields = makeDatasetColumns({}, new Set(), new Map()).map(c => c.field)
     expect(fields).toContain('soApprovalModel')
+  })
+})
+
+describe('datasetColumns — Data Location column', () => {
+  it('renders the friendly label for a known location, linked to the dataset url', () => {
+    renderCell('dataLocation', 'TDR Location', { url: 'https://example.org/snapshot' })
+    const link = screen.getByRole('link', { name: 'Terra Data Repo' })
+    expect(link).toHaveAttribute('href', 'https://example.org/snapshot')
+    expect(link).toHaveAttribute('target', '_blank')
+  })
+
+  it('falls back to "External to DUOS" for an unrecognized location', () => {
+    renderCell('dataLocation', 'AWS S3', { url: '' })
+    expect(screen.getByText('External to DUOS')).toBeInTheDocument()
+  })
+
+  it('renders the label without a link when the url is not a valid http url', () => {
+    const { container } = renderCell('dataLocation', 'Terra Workspace', { url: 'javascript:alert(1)' })
+    expect(screen.getByText('Terra Workspace')).toBeInTheDocument()
+    expect(container.querySelector('a')).not.toBeInTheDocument()
+  })
+
+  it('renders nothing when data location is empty', () => {
+    const { container } = renderCell('dataLocation', '')
+    expect(container.textContent).toBe('')
+  })
+
+  it('is not sortable, because the cell label differs from the stored value', () => {
+    expect(makeDatasetColumns().find(c => c.field === 'dataLocation')?.sortable).toBe(false)
   })
 })
 
@@ -346,10 +387,18 @@ describe('datasetColumns — Request Path column', () => {
     expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
   })
 
-  it('disables the "Request Now" button when datasets are selected elsewhere on the page', () => {
-    const columnsWithSelection = makeDatasetColumns({}, new Set(), undefined, true)
-    renderCell('requestLocation', null, { accessManagement: 'controlled' }, columnsWithSelection)
+  it('disables the "Request Now" button when another dataset is selected on the page', () => {
+    const columnsWithSelection = makeDatasetColumns({}, new Set(), undefined, [999])
+    renderCell('requestLocation', null, { accessManagement: 'controlled', datasetId: 1 }, columnsWithSelection)
     expect(screen.getByRole('button', { name: 'Request Now' })).toBeDisabled()
+  })
+
+  it('keeps the "Request Now" button enabled when this row is the whole selection', () => {
+    // Requesting it would submit exactly what 'Apply for Access' would, so there is nothing
+    // to disambiguate — this is the case a study page's default selection produces.
+    const columnsWithSelection = makeDatasetColumns({}, new Set(), undefined, [1])
+    renderCell('requestLocation', null, { accessManagement: 'controlled', datasetId: 1 }, columnsWithSelection)
+    expect(screen.getByRole('button', { name: 'Request Now' })).not.toBeDisabled()
   })
 
   it('shows a link to the requestLocation for external datasets', () => {

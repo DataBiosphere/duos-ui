@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router'
 import { useCallback, useMemo } from 'react'
 import { AssetType, DEFAULT_PAGE_SIZE, FilterState, LibraryUrlState, PAGE_SIZE_OPTIONS, SortOrder } from 'src/types/library'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 type ArrayFilterParamConfig = {
   key: keyof Pick<
@@ -12,6 +13,20 @@ type ArrayFilterParamConfig = {
     | 'dac'
     | 'workspaceTools'
     | 'workspacePlatform'
+    | 'modelFormat'
+    | 'modelLicense'
+    | 'modelCloud'
+    | 'modelTags'
+    | 'workspaceCloud'
+    | 'workspaceAccess'
+    | 'presentationEvent'
+    | 'presentationFormat'
+    | 'presentationAccess'
+    | 'publicationJournal'
+    | 'publicationAccess'
+    | 'ipType'
+    | 'ipStatus'
+    | 'fundingFunderName'
     | 'clinicalTrialStatus'
     | 'clinicalTrialPhase'
     | 'clinicalTrialInterventionType'
@@ -33,7 +48,7 @@ type RangeFilterParamConfig = {
 }
 
 type DateFilterParamConfig = {
-  key: keyof Pick<FilterState, 'clinicalTrialDates' | 'biospecimenCollectionDate' | 'ipFiledDate' | 'fundingDate'>
+  key: keyof Pick<FilterState, 'clinicalTrialDates' | 'biospecimenCollectionDate' | 'ipFiledDate' | 'fundingDate' | 'presentationDate' | 'publicationPublishedDate'>
   startParam: string
   endParam: string
   startKey?: string
@@ -48,6 +63,20 @@ const ARRAY_FILTER_PARAM_CONFIG: ArrayFilterParamConfig[] = [
   { key: 'dac', param: 'dac' },
   { key: 'workspaceTools', param: 'workspaceTools' },
   { key: 'workspacePlatform', param: 'workspacePlatform' },
+  { key: 'modelFormat', param: 'modelFormat' },
+  { key: 'modelLicense', param: 'modelLicense' },
+  { key: 'modelCloud', param: 'modelCloud' },
+  { key: 'modelTags', param: 'modelTags' },
+  { key: 'workspaceCloud', param: 'workspaceCloud' },
+  { key: 'workspaceAccess', param: 'workspaceAccess' },
+  { key: 'presentationEvent', param: 'presentationEvent' },
+  { key: 'presentationFormat', param: 'presentationFormat' },
+  { key: 'presentationAccess', param: 'presentationAccess' },
+  { key: 'publicationJournal', param: 'publicationJournal' },
+  { key: 'publicationAccess', param: 'publicationAccess' },
+  { key: 'ipType', param: 'ipType' },
+  { key: 'ipStatus', param: 'ipStatus' },
+  { key: 'fundingFunderName', param: 'fundingFunderName' },
   { key: 'clinicalTrialStatus', param: 'clinicalTrialStatus' },
   { key: 'clinicalTrialPhase', param: 'clinicalTrialPhase' },
   { key: 'clinicalTrialInterventionType', param: 'clinicalTrialInterventionType' },
@@ -69,11 +98,16 @@ const RANGE_FILTER_PARAM_CONFIG: RangeFilterParamConfig[] = [
   },
 ]
 
+// Params from the retired presentation/publication "Datasets Cited" booleans.
+const RETIRED_PARAMS = ['datasetsCited', 'presentationsDatasetsCited', 'publicationsDatasetsCited']
+
 const DATE_FILTER_PARAM_CONFIG: DateFilterParamConfig[] = [
   { key: 'clinicalTrialDates', startParam: 'clinicalTrialStartDate', endParam: 'clinicalTrialEndDate' },
   { key: 'biospecimenCollectionDate', startParam: 'biospecimenCollectedAfter', endParam: 'biospecimenCollectedBefore', startKey: 'after', endKey: 'before' },
   { key: 'ipFiledDate', startParam: 'ipFiledAfter', endParam: 'ipFiledBefore', startKey: 'after', endKey: 'before' },
   { key: 'fundingDate', startParam: 'fundingStartDate', endParam: 'fundingEndDate' },
+  { key: 'presentationDate', startParam: 'presentedAfter', endParam: 'presentedBefore', startKey: 'after', endKey: 'before' },
+  { key: 'publicationPublishedDate', startParam: 'publishedAfter', endParam: 'publishedBefore', startKey: 'after', endKey: 'before' },
 ]
 
 // Parse an integer URL param defensively: a malformed value (e.g. ?page=abc)
@@ -240,15 +274,16 @@ const serializeBooleanFilterToUrl = (
 }
 
 /**
- * Parse filters from URL search params
+ * Parse filters from URL search params. Seeded with EMPTY_FILTERS because the
+ * spreads below are `Record`s the cast cannot check: a key missing from every
+ * param config would arrive undefined and throw on `filters[key].length`.
  */
 const parseFiltersFromUrl = (searchParams: URLSearchParams): FilterState => {
   return {
+    ...EMPTY_FILTERS,
     ...parseArrayFilters(searchParams),
     ...parseRangeFilters(searchParams),
     ...parseDateFilters(searchParams),
-    datasetsCited: parseBooleanParam(searchParams, ['datasetsCited', 'presentationsDatasetsCited']),
-    publicationsDatasetsCited: parseBooleanParam(searchParams, ['publicationsDatasetsCited']),
     instantApproval: parseBooleanParam(searchParams, ['instantApproval']),
   } as FilterState
 }
@@ -261,8 +296,6 @@ const serializeFiltersToUrl = (
   searchParams: URLSearchParams,
 ): void => {
   serializeArrayFiltersToUrl(filters, searchParams)
-  serializeBooleanFilterToUrl(filters.datasetsCited, 'datasetsCited', searchParams, ['presentationsDatasetsCited'])
-  serializeBooleanFilterToUrl(filters.publicationsDatasetsCited, 'publicationsDatasetsCited', searchParams)
   serializeBooleanFilterToUrl(filters.instantApproval, 'instantApproval', searchParams)
   serializeRangeFiltersToUrl(filters, searchParams)
   serializeDateFiltersToUrl(filters, searchParams)
@@ -379,6 +412,10 @@ export const useLibraryUrlState = (defaultTab: AssetType = AssetType.DATASETS) =
     applySortFieldUpdate(updates, newParams)
     applySortOrderUpdate(updates, newParams)
     applyHideFiltersUpdate(updates, newParams)
+
+    // Writes go over a copy of the current params, so an unserialized param is
+    // never dropped — an old link's would otherwise persist forever.
+    RETIRED_PARAMS.forEach(param => newParams.delete(param))
 
     if (updates.filters !== undefined) {
       serializeFiltersToUrl(updates.filters, newParams)

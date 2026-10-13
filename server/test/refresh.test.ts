@@ -385,3 +385,116 @@ describe('refreshAccessToken', () => {
     })
   })
 })
+
+describe('refreshAccessToken — events', () => {
+  const COMPLETED = (outcome: string, extra: Record<string, unknown> = {}) => expect.objectContaining({ event: 'auth.refresh.completed', outcome, idp: 'unknown', ...extra })
+
+  beforeEach(async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(NOW_MS)
+    resetInFlightRefreshes()
+    const oidcClient = await import('../src/auth/oidcClient.js')
+    vi.mocked(oidcClient.getOidcConfig).mockReset().mockResolvedValue({} as Configuration)
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.refreshTokenGrant).mockReset().mockResolvedValue(makeTokens())
+  })
+
+  it('emits one succeeded event per flight, not one per caller', async () => {
+    const { request } = makeRequest()
+    const follower = makeRequest()
+
+    await Promise.all([refreshAccessToken(request), refreshAccessToken(follower.request)])
+
+    const events = [request, follower.request].flatMap(r => vi.mocked(r.log.info).mock.calls)
+      .filter(([fields]) => (fields as { event?: string }).event === 'auth.refresh.completed')
+    expect(events).toHaveLength(1)
+    expect(events[0][0]).toMatchObject({ outcome: 'succeeded' })
+  })
+
+  it('emits auth.refresh.unrefreshable at warn, then session.destroyed, when there is no refresh token', async () => {
+    const { request } = makeRequest({ refreshToken: undefined })
+
+    await expect(refreshAccessToken(request)).rejects.toThrow(RefreshFailedError)
+
+    expect(request.log.warn).toHaveBeenCalledWith(expect.objectContaining({ event: 'auth.refresh.unrefreshable' }), 'auth.refresh.unrefreshable')
+    expect(request.log.info).toHaveBeenCalledWith(expect.objectContaining({ event: 'auth.session.destroyed', reason: 'refresh_terminal' }), 'auth.session.destroyed')
+  })
+
+  it('emits a terminal event at warn when B2C rejects the refresh token', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.refreshTokenGrant).mockRejectedValue(oauthError('invalid_grant'))
+    const { request } = makeRequest()
+
+    await expect(refreshAccessToken(request)).rejects.toThrow(RefreshFailedError)
+
+    expect(request.log.warn).toHaveBeenCalledWith(COMPLETED('terminal', { reason: 'refresh_failed' }), 'auth.refresh.completed')
+    expect(request.log.info).toHaveBeenCalledWith(expect.objectContaining({ event: 'auth.session.destroyed', reason: 'refresh_terminal' }), 'auth.session.destroyed')
+  })
+
+  it('emits race_adopted at info, which is not a failure, when another pod already rotated the tokens', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.refreshTokenGrant).mockRejectedValue(oauthError('invalid_grant'))
+    const { request } = makeRequest({ stored: { accessToken: 'winner', refreshToken: 'winner-refresh', tokenExpiry: NOW_S + 3000 } })
+
+    await refreshAccessToken(request)
+
+    expect(request.log.info).toHaveBeenCalledWith(COMPLETED('race_adopted'), 'auth.refresh.completed')
+    expect(request.log.warn).not.toHaveBeenCalledWith(COMPLETED('terminal'), expect.anything())
+  })
+
+  it('emits a transient event at warn and keeps the session', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.refreshTokenGrant).mockRejectedValue(new TypeError('fetch failed'))
+    const { request, session } = makeRequest()
+
+    await expect(refreshAccessToken(request)).rejects.toThrow(TypeError)
+
+    expect(request.log.warn).toHaveBeenCalledWith(COMPLETED('transient'), 'auth.refresh.completed')
+    expect(session.destroy).not.toHaveBeenCalled()
+  })
+
+  it('emits a single transient event, and no succeeded event, when saving the refreshed session fails', async () => {
+    const { request, session } = makeRequest()
+    session.save.mockRejectedValue(new Error('store unavailable'))
+
+    await expect(refreshAccessToken(request)).rejects.toThrow('store unavailable')
+
+    const events = vi.mocked(request.log.info).mock.calls.concat(vi.mocked(request.log.warn).mock.calls)
+      .filter(([fields]) => (fields as { event?: string }).event === 'auth.refresh.completed')
+    expect(events).toHaveLength(1)
+    expect(events[0][0]).toMatchObject({ outcome: 'transient' })
+  })
+
+  it('emits a transient event when the OIDC config cannot be loaded', async () => {
+    const oidcClient = await import('../src/auth/oidcClient.js')
+    vi.mocked(oidcClient.getOidcConfig).mockRejectedValue(new Error('discovery failed'))
+    const { request } = makeRequest()
+
+    await expect(refreshAccessToken(request)).rejects.toThrow('discovery failed')
+
+    expect(request.log.warn).toHaveBeenCalledWith(COMPLETED('transient'), 'auth.refresh.completed')
+  })
+
+  it('does not report race_adopted when persisting the adopted tokens fails', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.refreshTokenGrant).mockRejectedValue(oauthError('invalid_grant'))
+    const { request, session } = makeRequest({ stored: { accessToken: 'winner', refreshToken: 'winner-refresh', tokenExpiry: NOW_S + 3000 } })
+    session.save.mockRejectedValue(new Error('store unavailable'))
+
+    await expect(refreshAccessToken(request)).rejects.toThrow('store unavailable')
+
+    expect(request.log.info).not.toHaveBeenCalledWith(COMPLETED('race_adopted'), expect.anything())
+    expect(request.log.warn).toHaveBeenCalledWith(COMPLETED('transient'), 'auth.refresh.completed')
+  })
+
+  it('keeps the idp on the terminal event even though the destroy has emptied the session', async () => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.refreshTokenGrant).mockRejectedValue(oauthError('invalid_grant'))
+    const { request, session } = makeRequest()
+    ;(session as unknown as { idp: string }).idp = 'microsoft'
+
+    await expect(refreshAccessToken(request)).rejects.toThrow(RefreshFailedError)
+
+    expect(request.log.warn).toHaveBeenCalledWith(COMPLETED('terminal', { idp: 'microsoft' }), 'auth.refresh.completed')
+  })
+})

@@ -46,31 +46,82 @@ const buildTabCountsQuery = (
  * even while a refetch is in flight and this hook is serving the previous
  * response as placeholder data.
  */
+const tabCountsQueryOptions = (
+  libraryConfig: LibraryVersionNew,
+  filters: FilterState,
+  queryTerm: string,
+) => ({
+  queryKey: [
+    LIBRARY_TAB_COUNTS_QUERY_KEY,
+    libraryConfig.key,
+    filters,
+    queryTerm,
+  ],
+  queryFn: async (): Promise<ElasticsearchResponse> => {
+    const { queryChunks, filterQuery } = buildCommonQueryClauses(
+      libraryConfig,
+      filters,
+      queryTerm,
+      ALL_SEARCH_FIELDS,
+    )
+    const query = buildTabCountsQuery(queryChunks, filterQuery, libraryConfig.showAllControlled)
+    return DataSet.searchDatasetIndexV2(query)
+  },
+  staleTime: 5 * 60 * 1000, // 5 minutes
+  retry: 1,
+  // Keep the previous counts visible while a new query loads to avoid flicker.
+  placeholderData: (previousData?: ElasticsearchResponse) => previousData,
+})
+
 export const useLibraryTabCounts = (
   libraryConfig: LibraryVersionNew,
   filters: FilterState,
   queryTerm: string,
-) => {
-  return useQuery({
-    queryKey: [
-      LIBRARY_TAB_COUNTS_QUERY_KEY,
-      libraryConfig.key,
+) => useQuery(tabCountsQueryOptions(libraryConfig, filters, queryTerm))
+
+export const LIBRARY_OPTION_CORPUS_QUERY_KEY = 'library-option-corpus'
+
+/**
+ * The corpus a tab's options come from, scoped by every filter but its own.
+ * Leaner than the counts query because options only read `study.assets.*` and
+ * never the badge aggregations. Disabled when the counts response already is it.
+ */
+export const useOptionCorpus = (
+  libraryConfig: LibraryVersionNew,
+  filters: FilterState,
+  queryTerm: string,
+  enabled: boolean,
+) => useQuery({
+  queryKey: [LIBRARY_OPTION_CORPUS_QUERY_KEY, libraryConfig.key, filters, queryTerm],
+  queryFn: async (): Promise<ElasticsearchResponse> => {
+    const { queryChunks, filterQuery } = buildCommonQueryClauses(
+      libraryConfig,
       filters,
       queryTerm,
-    ],
-    queryFn: async (): Promise<ElasticsearchResponse> => {
-      const { queryChunks, filterQuery } = buildCommonQueryClauses(
-        libraryConfig,
-        filters,
-        queryTerm,
-        ALL_SEARCH_FIELDS,
-      )
-      const query = buildTabCountsQuery(queryChunks, filterQuery, libraryConfig.showAllControlled)
-      return DataSet.searchDatasetIndexV2(query)
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1,
-    // Keep the previous counts visible while a new query loads to avoid flicker.
-    placeholderData: previousData => previousData,
-  })
-}
+      ALL_SEARCH_FIELDS,
+    )
+    return DataSet.searchDatasetIndexV2({
+      size: 0,
+      query: {
+        bool: {
+          must: queryChunks,
+          ...(filterQuery.length > 0 && { filter: filterQuery }),
+        },
+      },
+      aggs: {
+        studies: {
+          terms: { field: 'study.studyId', size: 10000 },
+          aggs: {
+            study_details: {
+              top_hits: { size: 1, _source: ['study.studyId', 'study.assets.*'] },
+            },
+          },
+        },
+      },
+    })
+  },
+  enabled,
+  staleTime: 5 * 60 * 1000,
+  retry: 1,
+  placeholderData: (previousData?: ElasticsearchResponse) => previousData,
+})

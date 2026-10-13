@@ -4,9 +4,20 @@ import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from 
 import { Link } from 'react-router'
 import { getSearchFilterFunctions, hasDataSubmitterRole } from 'src/libs/utils'
 import { DATA_GRID_CONTAINER_SX, DATA_GRID_SX } from 'src/components/dataGridDefaults'
-import { dacNameMap, formatUserDacs, formatUserRoles, institutionName, UserDac, userDacs, yesNo } from 'src/components/manage_users_table/manageUsersTableUtils'
+import {
+  dacNameMap,
+  formatPreAuth,
+  formatRegistrationDate,
+  formatUserDacs,
+  formatUserRoles,
+  hasRole,
+  institutionName,
+  UserDac,
+  userDacs,
+  yesNo,
+} from 'src/components/manage_users_table/manageUsersTableUtils'
 import { isNil } from 'src/utils/NodashUtil'
-import { DacObject, DuosUser } from 'src/types/model'
+import { DacObject, DuosUser, UserRoleName } from 'src/types/model'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
 
@@ -15,6 +26,9 @@ export interface ManageUsersTableProps {
   userList: DuosUser[]
   dacList?: DacObject[]
   searchText: string
+  /** Only users holding this role; every user when absent. */
+  role?: UserRoleName
+  daaLabelsById?: Map<number, string>
 }
 
 interface UserRow {
@@ -22,23 +36,27 @@ interface UserRow {
   displayName: string
   email: string
   institution: string
+  registrationDate: string
   roles: string
+  preauth: string
   dacs: string
   dacDetails: UserDac[]
   researcherStatus: string
   dataSubmitterStatus: string
 }
 
-// Roles and institution are flattened to their displayed text, so every column sorts on what is read.
+// Every column is flattened to its displayed text, so each one sorts on what is read.
 // The isResearcher/isDataSubmitter flags are set for the signed-in user only, so a list response has neither.
-const toUserRow = (user: DuosUser, dacNameById: Map<number, string>): UserRow => {
+const toUserRow = (user: DuosUser, dacNameById: Map<number, string>, daaLabelsById: Map<number, string>): UserRow => {
   const dacDetails = userDacs(user.roles, dacNameById)
   return {
     id: user.userId,
     displayName: user.displayName,
     email: user.email,
     institution: institutionName(user.institution),
+    registrationDate: formatRegistrationDate(user.createDate),
     roles: formatUserRoles(user.roles, user.libraryCard),
+    preauth: formatPreAuth(user.libraryCard, daaLabelsById),
     dacs: formatUserDacs(dacDetails),
     dacDetails,
     researcherStatus: yesNo(!isNil(user.libraryCard)),
@@ -61,7 +79,9 @@ const COLUMNS: GridColDef<UserRow>[] = [
   },
   { field: 'email', headerName: 'Email', flex: 1.25, minWidth: 200 },
   { field: 'institution', headerName: 'Institution', flex: 1, minWidth: 180 },
+  { field: 'registrationDate', headerName: 'Registration Date', flex: 1, minWidth: 160 },
   { field: 'roles', headerName: 'Roles', flex: 1, minWidth: 180 },
+  { field: 'preauth', headerName: 'Pre-Auth', flex: 1, minWidth: 180 },
   {
     field: 'dacs',
     headerName: 'DACs',
@@ -95,24 +115,31 @@ const AUTO_HEIGHT_DATA_GRID_SX = {
 
 const filterFn = getSearchFilterFunctions().users
 
-export const ManageUsersTable = function ManageUsersTable({ isLoading, userList, dacList = [], searchText }: ManageUsersTableProps) {
+// Shared, so an omitted prop doesn't hand a new Map to the row memo each render.
+const EMPTY_DAA_LABELS: Map<number, string> = new Map()
+
+export const ManageUsersTable = function ManageUsersTable({
+  isLoading, userList, dacList = [], searchText, role, daaLabelsById = EMPTY_DAA_LABELS,
+}: ManageUsersTableProps) {
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: PAGE_SIZE_OPTIONS[0] })
-  const [lastSearchText, setLastSearchText] = useState(searchText)
+  const [lastFilters, setLastFilters] = useState({ searchText, role })
 
   const dacNameById = useMemo(() => dacNameMap(dacList), [dacList])
 
   // Filtering is derived, so a keystroke costs one render rather than a cascade of effects.
   const rows = useMemo(() => {
     const terms = searchText.split(' ').filter(term => term.length > 0)
-    return terms.reduce((list, term) => filterFn(term, list), userList ?? []).map(user => toUserRow(user, dacNameById))
-  }, [userList, searchText, dacNameById])
+    const inRole = (userList ?? []).filter(user => isNil(role) || hasRole(user, role))
+    return terms.reduce((list, term) => filterFn(term, list), inRole)
+      .map(user => toUserRow(user, dacNameById, daaLabelsById))
+  }, [userList, searchText, role, dacNameById, daaLabelsById])
 
   const lastPage = Math.max(0, Math.ceil(rows.length / paginationModel.pageSize) - 1)
 
   // Adjusted during render rather than clamped for the render alone, so widening the results again
   // cannot restore the page the admin was already moved off.
-  if (searchText !== lastSearchText) {
-    setLastSearchText(searchText)
+  if (searchText !== lastFilters.searchText || role !== lastFilters.role) {
+    setLastFilters({ searchText, role })
     setPaginationModel(model => ({ ...model, page: 0 }))
   }
   else if (paginationModel.page > lastPage) {

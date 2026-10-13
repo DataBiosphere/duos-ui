@@ -120,7 +120,7 @@ async function buildAuthApp(pg: PostgresDb, options: AuthAppOptions = {}): Promi
   await app.register(fastifyCookie)
   await app.register(fastifySession, sessionPluginOptions({
     secret: SECRET,
-    store: createPgSessionStore(pg),
+    store: createPgSessionStore(pg, app.log),
     sameSiteOverride: options.sameSiteOverride,
   }))
   // Real CSRF plugin, registered with index.ts's own options — after
@@ -530,8 +530,12 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       expect(await idpAfterCallback({ email: 'user@example.com', idp: 'google.com' })).toBe('google')
     })
 
-    it('derives \'microsoft\' when the idp claim is absent', async () => {
-      expect(await idpAfterCallback({ email: 'user@example.com' })).toBe('microsoft')
+    it('derives \'microsoft\' from an Entra issuer URL in the idp claim', async () => {
+      expect(await idpAfterCallback({ email: 'user@example.com', idp: 'https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0' })).toBe('microsoft')
+    })
+
+    it('derives \'unknown\' when the idp claim is absent, never a default provider', async () => {
+      expect(await idpAfterCallback({ email: 'user@example.com' })).toBe('unknown')
     })
   })
 

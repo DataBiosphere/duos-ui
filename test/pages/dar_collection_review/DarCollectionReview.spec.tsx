@@ -214,7 +214,7 @@ const matchResponse = [
     failed: false,
     abstain: false,
     createDate: 1668729600000,
-    algorithmVersion: 'v2',
+    algorithmVersion: 'v5',
     rationales: [],
   },
 ] as unknown as MatchResult[]

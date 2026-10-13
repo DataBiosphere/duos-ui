@@ -14,6 +14,7 @@ const makeRow = (overrides: Partial<WorkspaceAsset> = {}): WorkspaceAsset => ({
   url: 'https://app.terra.bio/#workspaces/test/my-workspace',
   description: 'A test workspace for genomics analysis',
   tools: ['WDL', 'Jupyter'],
+  cloud: ['AWS'],
   access: 'open',
   tags: [],
   ...overrides,
@@ -123,6 +124,20 @@ describe('makeWorkspaceColumns — Tools column', () => {
   })
 })
 
+describe('makeWorkspaceColumns — Cloud column', () => {
+  it('renders nothing when cloud array is empty', () => {
+    const col = makeWorkspaceColumns().find(c => c.field === 'cloud')!
+    const result = col.renderCell!(mockParams(undefined, { cloud: [] }))
+    expect(result).toBeNull()
+  })
+
+  it('renders a chip per cloud provider', () => {
+    renderCell('cloud', undefined, { cloud: ['AWS', 'GCP'] })
+    expect(screen.getByText('AWS')).toBeInTheDocument()
+    expect(screen.getByText('GCP')).toBeInTheDocument()
+  })
+})
+
 describe('makeWorkspaceColumns — Access column', () => {
   it('renders the access text', () => {
     renderCell('access', 'controlled')
@@ -165,13 +180,13 @@ describe('makeWorkspaceColumns — Tags column', () => {
 })
 
 describe('makeWorkspaceColumns — column structure', () => {
-  it('returns 8 column definitions', () => {
-    expect(makeWorkspaceColumns()).toHaveLength(8)
+  it('returns 9 column definitions', () => {
+    expect(makeWorkspaceColumns()).toHaveLength(9)
   })
 
   it('defines expected fields in order', () => {
     const fields = makeWorkspaceColumns().map(c => c.field)
-    expect(fields).toEqual(['name', 'studyName', 'platform', 'url', 'description', 'tools', 'access', 'tags'])
+    expect(fields).toEqual(['name', 'studyName', 'platform', 'url', 'description', 'tools', 'cloud', 'access', 'tags'])
   })
 
   it('marks url, tools, and tags as non-sortable', () => {

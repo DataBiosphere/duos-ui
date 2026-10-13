@@ -4,7 +4,9 @@ import '@testing-library/jest-dom/vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router'
 
-vi.mock('src/libs/config', () => ({
+// Keep production path constants while mocking Config getters.
+vi.mock('src/libs/config', async importOriginal => ({
+  ...(await importOriginal<typeof import('src/libs/config')>()),
   Config: {
     getEnv: vi.fn().mockResolvedValue('ci'),
     getApiUrl: vi.fn().mockResolvedValue('http://localhost'),
@@ -28,9 +30,17 @@ vi.mock('src/libs/ajax/ServiceStatus', () => ({
 }))
 
 vi.mock('src/libs/notificationService', () => ({
+  // AppRoutes statically imports UserProfile and DataAccessRequestApplication, so the mock has to
+  // carry what they use as well as the header's.
   NotificationService: {
     getActiveBanners: vi.fn().mockResolvedValue([]),
+    getBannerObjectById: vi.fn().mockResolvedValue(null),
   },
+  isBannerVisible: vi.fn().mockReturnValue(true),
+  isBannerDismissed: vi.fn().mockReturnValue(false),
+  visibleBanner: vi.fn(banner => banner ?? null),
+  dismissBanner: vi.fn(),
+  onBannerDismissed: vi.fn(() => () => {}),
 }))
 
 // Both vi.fn()s default to undefined: the probe reads as in-flight, so every

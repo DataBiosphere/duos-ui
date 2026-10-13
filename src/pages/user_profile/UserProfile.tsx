@@ -1,20 +1,28 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { FormControlLabel, Switch } from '@mui/material'
 import { FormField, FormFieldTypes } from 'src/components/forms/forms'
-import { Notification } from 'src/components/Notification'
+import { DismissibleBanner } from 'src/components/DismissibleBanner'
 import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
-import { Banner, NotificationService } from 'src/libs/notificationService'
+import { Banner, NotificationService, visibleBanner } from 'src/libs/notificationService'
 import { Notifications, setUserRoleStatuses } from 'src/libs/utils'
 import AffiliationAndRoles from './AffiliationAndRoles'
 import ResearcherStatus from './ResearcherStatus'
 import AcceptedAcknowledgements from './AcceptedAcknowledgements'
 import ExternalProfile from './ExternalProfile'
+import ProfileSaveButton from './ProfileSaveButton'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { Theme } from 'src/libs/theme'
 import { DuosUser } from 'src/types/model'
 import PageHeading from 'src/components/PageHeading'
+import './profileControls.css'
 import './UserProfile.css'
+
+// FormInputGeneric sets its padding inline, so the shared control size has to be passed the same way.
+const profileInputStyle = {
+  height: 'var(--profile-control-height)',
+  padding: 'var(--profile-control-padding)',
+}
 
 const emailToggleSx = {
   '& .MuiSwitch-switchBase.Mui-checked': { color: Theme.palette.success },
@@ -37,6 +45,8 @@ export default function UserProfile() {
   const [savingEmailPreference, setSavingEmailPreference] = useState<boolean>(false)
 
   const [notificationData, setNotificationData] = useState<Banner | null | undefined>(null)
+
+  const clearBanner = useCallback(() => setNotificationData(null), [])
 
   const updateRef = ({ value }: { key: string, value: string, isValid: boolean }) => {
     setName(value)
@@ -95,7 +105,7 @@ export default function UserProfile() {
         setUser(user)
         setName(user.displayName)
         setEmailPreference(Boolean(user.emailPreference))
-        setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'))
+        setNotificationData(visibleBanner(await NotificationService.getBannerObjectById('eRACommonsOutage')))
       }
       catch {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' })
@@ -107,7 +117,7 @@ export default function UserProfile() {
 
   return (
     <main className="user-profile-page">
-      <Notification notificationData={notificationData} />
+      <DismissibleBanner banner={notificationData} onDismissed={clearBanner} />
       <PageHeading
         id="researcherProfile"
         color="common"
@@ -125,14 +135,9 @@ export default function UserProfile() {
             hideTitle={true}
             defaultValue={name}
             onChange={updateRef}
+            inputStyle={profileInputStyle}
           />
-          <button
-            type="button"
-            className="btn-primary common-background profile-save-button"
-            onClick={updateName}
-          >
-            Save
-          </button>
+          <ProfileSaveButton onClick={updateName} />
         </div>
         <div className="user-profile-field user-profile-input">
           <FormField
@@ -142,6 +147,7 @@ export default function UserProfile() {
             hideTitle={true}
             defaultValue={user.email}
             disabled={true}
+            inputStyle={profileInputStyle}
           />
         </div>
         <div className="user-profile-field">

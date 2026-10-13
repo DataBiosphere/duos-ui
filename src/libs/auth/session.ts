@@ -1,6 +1,7 @@
 import { Config } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 import { ToastNotifications } from 'src/libs/ToastNotifications'
+import { reportLegacyOidcKeys } from 'src/libs/auth/legacyOidcKeys'
 import { DuosUser } from 'src/types/model'
 
 /**
@@ -26,8 +27,11 @@ export interface SessionInfo {
   authenticated: boolean
   /** The upstream DUOS user profile, forwarded by /auth/me when authenticated. */
   user?: DuosUser
-  /** The B2C sub-provider the user chose on the B2C login page. */
-  idp?: 'google' | 'microsoft'
+  /**
+   * The B2C sub-provider the user chose on the B2C login page. 'unknown'
+   * means the server could not read it from the id_token; show no label.
+   */
+  idp?: 'google' | 'microsoft' | 'unknown'
 }
 
 /**
@@ -94,6 +98,9 @@ const probeBffSession = async (): Promise<SessionInfo> => {
     }
     const info = await res.json() as SessionInfo
     lastAuthoritativeAnswer = info
+    // Every confirmed BFF session passes through here — the first probe and
+    // each focus/TTL revalidation — the moments a legacy write would show up.
+    if (info.authenticated) reportLegacyOidcKeys('regression')
     return info
   }
   catch {

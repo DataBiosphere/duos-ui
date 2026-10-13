@@ -24,13 +24,13 @@ const validate = async (page: Page) => {
 /** Drafts persist in dev, so a run that creates one removes it rather than leaving it behind. */
 const deleteDraft = async (page: Page, draftUuid: string) => {
   const status = await page.evaluate(async (uuid) => {
-    const stored = localStorage.getItem('OidcUser')
-    const user = stored ? JSON.parse(stored) : {}
-    const token = user?.profile?.idp_access_token ?? user?.id_token
-    const config = await (await fetch('/config.json')).json()
-    const response = await fetch(`${config.apiUrl}/api/draft/v1/${uuid}`, {
+    const csrf = await fetch('/auth/csrf-token', { credentials: 'same-origin' })
+    if (!csrf.ok) return csrf.status
+    const { token } = await csrf.json()
+    const response = await fetch(`/duos-api/api/draft/v1/${uuid}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'same-origin',
+      headers: { 'X-CSRF-Token': token },
     })
     return response.status
   }, draftUuid)

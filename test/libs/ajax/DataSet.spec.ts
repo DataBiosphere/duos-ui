@@ -65,7 +65,6 @@ const buildStudy = (overrides = {}) => ({
   piEmail: 'pi@example.org',
   publicVisibility: true,
   datasetIds: [],
-  datasets: [],
   properties: [],
   createDate: '2026-01-01',
   createUserId: 1,
@@ -383,6 +382,26 @@ describe('DataSet', () => {
       )
       expect(extractConsentError(error)).toEqual(consentError)
       expect(extractError(error)).toBe('Study 10 not found')
+    })
+  })
+
+  describe('getStudyDatasets', () => {
+    it('fetches the datasets of a study and returns the data', async () => {
+      const datasets = [buildDataset({ datasetId: 1 }), buildDataset({ datasetId: 2 })]
+      vi.mocked(fetchGet).mockResolvedValue({ data: datasets })
+
+      const result = await DataSet.getStudyDatasets(10)
+
+      expect(fetchGet).toHaveBeenCalledWith(
+        'https://duos.example.org/api/dataset/study/10/datasets',
+        headers,
+      )
+      expect(result).toEqual(datasets)
+    })
+
+    it('propagates fetch failures', async () => {
+      vi.mocked(fetchGet).mockRejectedValueOnce(new Error('network failure'))
+      await expect(DataSet.getStudyDatasets(10)).rejects.toThrow('network failure')
     })
   })
 

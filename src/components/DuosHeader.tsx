@@ -9,7 +9,7 @@ import DuosLogo from 'src/images/duos-network-logo.svg'
 import contactUsStandard from 'src/images/navbar_icon_contact_us.svg'
 import contactUsHover from 'src/images/navbar_icon_contact_us_hover.svg'
 import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
-import { Banner, NotificationService } from 'src/libs/notificationService'
+import { Banner, dismissBanner, isBannerVisible, NotificationService, onBannerDismissed } from 'src/libs/notificationService'
 import { Storage } from 'src/libs/storage'
 import { withStyles } from 'tss-react/mui'
 import { SupportRequestModal } from './modals/SupportRequestModal'
@@ -21,6 +21,7 @@ import { useNavigationState } from 'src/contexts/NavigationStateContext'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUserIsLogged } from 'src/hooks/useSession'
 import { MY_INSTITUTION_LIBRARY_ROUTE, SO_CONSOLE_SECTIONS, SO_DASHBOARD_ROUTE } from 'src/pages/signing_official_console/signingOfficialConsoleRoutes'
+import { ADMIN_CONSOLE_SECTIONS, ADMIN_DASHBOARD_ROUTE, ADMIN_METRICS_ROUTE } from 'src/pages/admin_console/adminConsoleRoutes'
 import { RESEARCHER_CONSOLE_SECTIONS, RESEARCHER_DASHBOARD_ROUTE, RESEARCHER_DETAIL_ROUTES } from 'src/pages/researcher_console/researcherConsoleRoutes'
 
 export type { SubTab }
@@ -91,14 +92,11 @@ export const headerTabsConfig: Tab[] = [
   },
   {
     label: 'Admin Console',
-    link: '/admin_manage_dar_collections',
+    link: ADMIN_DASHBOARD_ROUTE,
     children: [
-      { label: 'Data Access Requests', link: '/admin_manage_dar_collections' },
-      { label: 'DACs', link: '/manage_dac' },
-      { label: 'Users', link: '/admin_manage_users' },
-      { label: 'Institutions', link: '/admin_manage_institutions' },
-      { label: 'Library Cards', link: '/admin_manage_lc' },
-      { label: 'DAA Associations', link: '/admin_daa_associations' },
+      { label: 'Dashboard', link: ADMIN_DASHBOARD_ROUTE, hideSubTabBar: true },
+      ...ADMIN_CONSOLE_SECTIONS,
+      { label: 'Metrics', link: ADMIN_METRICS_ROUTE },
     ],
     isRendered: user => user.isAdmin,
     isConsole: true,
@@ -172,6 +170,22 @@ const navbarDuosText: React.CSSProperties = {
   verticalAlign: 'text-bottom',
 }
 
+const SIGNED_OUT_USER: DuosUser = {
+  createDate: new Date(),
+  displayName: '',
+  email: '',
+  emailPreference: false,
+  isAdmin: false,
+  isAlumni: false,
+  isChairPerson: false,
+  isDataSubmitter: false,
+  isMember: false,
+  isResearcher: false,
+  isSigningOfficial: false,
+  roles: [],
+  userId: 0,
+}
+
 const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   const { classes } = props
   const navigate = useNavigate()
@@ -190,13 +204,24 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   useEffect(() => {
     const fetchNotificationData = async (): Promise<void> => {
       const notificationData = await NotificationService.getActiveBanners()
+      const visibleNotificationData = Array.isArray(notificationData)
+        ? notificationData.filter(isBannerVisible)
+        : []
       setState(prev => ({
         ...prev,
-        notificationData: Array.isArray(notificationData) ? notificationData : [],
+        notificationData: visibleNotificationData,
       }))
     }
     void fetchNotificationData()
   }, [])
+
+  // The same banner can be dismissed from a page below, so the header follows suit.
+  useEffect(() => onBannerDismissed((bannerId) => {
+    setState(prev => ({
+      ...prev,
+      notificationData: prev.notificationData.filter(banner => banner.id !== bannerId),
+    }))
+  }), [])
 
   const toggleHover = (): void => {
     setState({
@@ -231,8 +256,18 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
     })
   }
 
+  const dismissNotification = (bannerId: string): void => {
+    dismissBanner(bannerId)
+  }
+
   const makeNotifications = (): React.ReactNode[] => {
-    return state.notificationData.map((d, index) => <Notification notificationData={d} key={d.message} index={index} />)
+    return state.notificationData.map(d => (
+      <Notification
+        notificationData={d}
+        key={d.id}
+        onDismiss={() => dismissNotification(d.id)}
+      />
+    ))
   }
 
   const toggleDrawer = (boolVal: boolean): void => {
@@ -248,25 +283,7 @@ const DuosHeader: React.FC<DuosHeaderProps> = (props) => {
   }
 
   const isLogged = useUserIsLogged() ?? false
-  let currentUser: DuosUser = {
-    createDate: new Date(),
-    displayName: '',
-    email: '',
-    emailPreference: false,
-    isAdmin: false,
-    isAlumni: false,
-    isChairPerson: false,
-    isDataSubmitter: false,
-    isMember: false,
-    isResearcher: false,
-    isSigningOfficial: false,
-    roles: [],
-    userId: 0,
-  }
-
-  if (isLogged) {
-    currentUser = Storage.getCurrentUser()
-  }
+  const currentUser: DuosUser = isLogged ? Storage.getCurrentUser() : SIGNED_OUT_USER
 
   const contactUsSource = state.hover ? contactUsHover : contactUsStandard
   const contactUsIcon = isLogged ? '' : <img src={contactUsSource} alt="Contact Us Icon" style={{ display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline' }} />

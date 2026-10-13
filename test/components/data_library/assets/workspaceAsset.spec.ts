@@ -22,6 +22,7 @@ const makeBucket = (
     url?: string
     description?: string
     tools?: string[]
+    cloud?: string[] | string
     access?: string
     tags?: string[]
   }> = [],
@@ -45,6 +46,7 @@ const makeBucket = (
                   url: w.url,
                   description: w.description,
                   tools: w.tools,
+                  cloud: w.cloud,
                   access: w.access,
                   tags: w.tags,
                 })),
@@ -83,6 +85,8 @@ describe('workspaceAsset — searchFields', () => {
   it('includes workspace-specific fields', () => {
     expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.name')
     expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.platform')
+    // Cloud is a displayed, filterable field, so free-text search must reach it.
+    expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.cloud')
     expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.description')
     expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.tools')
     expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.tags')
@@ -241,9 +245,7 @@ describe('workspaceAsset — transformResponse', () => {
     expect(result.total).toBe(0)
   })
 
-  // The ES clauses for these filters only decide which studies are aggregated;
-  // every workspace of a qualifying study comes back, so transformResponse must
-  // re-check each row or the grid and count badge include non-matching rows.
+  // Every workspace of a qualifying study comes back, so rows need re-checking.
   it('returns only workspaces matching the tools filter', () => {
     const response = makeResponse([
       makeBucket(1, [
@@ -272,6 +274,87 @@ describe('workspaceAsset — transformResponse', () => {
     const result = workspaceAsset.transformResponse(response, pagination, {
       ...EMPTY_FILTERS,
       workspacePlatform: ['Terra'],
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w1')
+  })
+
+  // `access` is a bare form field with no options or validator, and cloud is a
+  // creatable select, so both carry whatever casing the submitter typed.
+  it('matches the cloud filter regardless of the indexed casing', () => {
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: ['AWS'] }])])
+
+    const result = workspaceAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, workspaceCloud: ['aws'] })
+
+    expect(result.total).toBe(1)
+  })
+
+  it('matches the access filter regardless of the indexed casing', () => {
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', access: 'Open' }])])
+
+    const result = workspaceAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, workspaceAccess: ['open'] })
+
+    expect(result.total).toBe(1)
+  })
+
+  it('maps the cloud field onto the row', () => {
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: ['AWS', 'Azure'] }])])
+    const row = workspaceAsset.transformResponse(response, pagination).items[0] as WorkspaceAsset
+    expect(row.cloud).toEqual(['AWS', 'Azure'])
+  })
+
+  it('normalizes a cloud indexed as a bare string into an array', () => {
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: 'Azure' }])])
+    const row = workspaceAsset.transformResponse(response, pagination).items[0] as WorkspaceAsset
+    expect(row.cloud).toEqual(['Azure'])
+  })
+
+  it('matches the cloud filter against a cloud indexed as a bare string', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { workspaceId: 'w1', cloud: 'AWS' },
+        { workspaceId: 'w2', cloud: 'GCP' },
+      ]),
+    ])
+
+    const result = workspaceAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      workspaceCloud: ['GCP'],
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w2')
+  })
+
+  it('returns only workspaces matching the cloud filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { workspaceId: 'w1', cloud: ['AWS'] },
+        { workspaceId: 'w2', cloud: ['GCP'] },
+      ]),
+    ])
+
+    const result = workspaceAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      workspaceCloud: ['GCP'],
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w2')
+  })
+
+  it('returns only workspaces matching the access filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { workspaceId: 'w1', access: 'open' },
+        { workspaceId: 'w2', access: 'restricted' },
+      ]),
+    ])
+
+    const result = workspaceAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      workspaceAccess: ['open'],
     })
 
     expect(result.total).toBe(1)
@@ -372,5 +455,25 @@ describe('workspaceAsset — makeColumns', () => {
     const a = workspaceAsset.makeColumns()
     const b = workspaceAsset.makeColumns({})
     expect(a.map(c => c.field)).toEqual(b.map(c => c.field))
+  })
+})
+
+describe('workspaceAsset — indexed values are normalized', () => {
+  it('matches a row whose indexed access carries stray whitespace', () => {
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', access: '  open ' }])])
+
+    // The option list is built from trimmed values, so the row has to be
+    // trimmed too or the filter that offered 'open' drops the only row.
+    const result = workspaceAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, workspaceAccess: ['open'] })
+
+    expect(result.items).toHaveLength(1)
+  })
+
+  it('trims list-shaped values and drops the empties', () => {
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: ['  AWS ', '  ', 'GCP'] }])])
+
+    const result = workspaceAsset.transformResponse(response, pagination)
+
+    expect((result.items[0] as WorkspaceAsset).cloud).toEqual(['AWS', 'GCP'])
   })
 })

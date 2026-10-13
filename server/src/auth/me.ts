@@ -1,6 +1,8 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import { endSession } from './authEvents.js'
+import type { SessionDestroyReason } from './authEvents.js'
 import { requireEnv } from './oidcClient.js'
-import { REFRESH_WINDOW_SECONDS, RefreshFailedError, refreshAccessToken } from './refresh.js'
+import { RefreshFailedError, refreshAccessToken, tokenDisposition } from './refresh.js'
 import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
 const UPSTREAM_TIMEOUT_MS = 5000
@@ -13,11 +15,11 @@ const PROVIDER_CONFLICT_FALLBACK_MESSAGE
   = 'You may have previously signed in with a different authentication provider (Google or Microsoft). Please sign in with that provider.'
 
 /**
- * Ends a session the upstream has authoritatively rejected.
+ * Ends a session that can no longer be used, recording why.
  */
-async function destroySession(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+async function destroySession(request: FastifyRequest, reply: FastifyReply, reason: SessionDestroyReason): Promise<void> {
   try {
-    await request.session.destroy()
+    await endSession(request, reason)
   }
   catch (err: unknown) {
     request.log.error({ err }, '[auth] upstream rejected the session but it could not be destroyed — answering as signed out anyway')
@@ -35,8 +37,7 @@ async function destroySession(request: FastifyRequest, reply: FastifyReply): Pro
  * Returns false when the refresh failed and the reply has already gone out.
  */
 async function refreshedIfExpiring(request: FastifyRequest, reply: FastifyReply): Promise<boolean> {
-  const secondsRemaining = (request.session.tokenExpiry ?? 0) - Math.floor(Date.now() / 1000)
-  if (secondsRemaining >= REFRESH_WINDOW_SECONDS) return true
+  if (tokenDisposition(request.session) !== 'refresh') return true
   try {
     await refreshAccessToken(request)
     return true
@@ -97,6 +98,14 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     return
   }
 
+  if (tokenDisposition(request.session) === 'expired') {
+    // A fixture token cannot renew: end the session now, exactly as an
+    // upstream 401 would after the token expired in flight.
+    await destroySession(request, reply, 'expired')
+    reply.status(401).send({ authenticated: false })
+    return
+  }
+
   if (!(await refreshedIfExpiring(request, reply))) return
 
   const url = `${requireEnv('DUOS_API_URL')}/api/user/me`
@@ -123,7 +132,7 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     // The upstream rejected the token itself — revoked mid-lifetime (before refresh-before-forward would
     // touch it) or the account was disabled. The terminal 401 is final so the session must be destroyed.
     // The client still needs to know it is signed out, so the reply goes out after the session is destroyed.
-    await destroySession(request, reply)
+    await destroySession(request, reply, 'upstream_401')
     reply.status(401).send({ authenticated: false })
     return
   }
@@ -142,7 +151,7 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     // upstream's actionable message (sign in with the other provider, plus the support link) instead
     // of a generic failure.
     const message = await providerConflictMessage(res)
-    await destroySession(request, reply)
+    await destroySession(request, reply, 'provider_conflict')
     reply.status(409).send({ authenticated: false, error: 'provider_conflict', message })
     return
   }
@@ -168,6 +177,6 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
   reply.send({
     authenticated: true,
     user,
-    idp: request.session.idp, // 'google' | 'microsoft'
+    idp: request.session.idp, // 'google' | 'microsoft' | 'unknown'
   })
 }
