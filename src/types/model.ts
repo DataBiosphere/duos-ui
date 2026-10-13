@@ -25,22 +25,6 @@ export type UserRoleName
     | 'ServiceAccount'
     | 'All'
 
-/**
- * Secondary data use codes that suppress a legacy (v1/v2) system match. Scoped to legacy results
- * on purpose: from v3 Consent decides abstention itself — see `calculateAlgorithmResultForBucket`.
- */
-export const AbstainDataUseCodes: ReadonlySet<string> = new Set([
-  'OTHER',
-  'POP-M',
-  'POP-F',
-  'COL',
-  'IRB',
-  'GSO',
-  'PUB',
-  'MOR',
-  'POP-PD',
-])
-
 export interface UserRole {
   roleId: number
   name: UserRoleName
@@ -387,15 +371,69 @@ export interface Author extends Person {
 
 export type Maintainer = Contact
 
+export interface StudyComment {
+  studyCommentId: number
+  studyId: number
+  userId: number
+  rating: number
+  commentText?: string
+  createDate: string
+  updateDate: string
+  displayName: string
+  institutionName?: string
+}
+
+/**
+ * One recommended study, as `/api/metrics/study-recommendations/{studyId}/*` returns it: what a
+ * study card shows, so the recommendation sections need no index lookup of their own. The card
+ * fields are optional because a Consent build older than the one adding them omits them.
+ */
+export interface StudyRecommendation {
+  studyId: number
+  studyName: string
+  studyDescription?: string
+  piName?: string
+  species?: string
+  phenotype?: string
+  dataTypes?: string[]
+  /** Distinct DUO data use codes (e.g. `HMB`, `GRU`) across the study's datasets */
+  dataUseCodes?: string[]
+  /** Distinct `accessManagement` values (e.g. `open`, `controlled`, `external`) across the study's datasets */
+  accessTypes?: string[]
+  datasetCount: number
+  totalParticipants?: number
+  datasetIds: number[]
+  modelCount?: number
+  workspaceCount?: number
+}
+
+/** One page of a study's comments. `GET .../comments` is paged; see `StudyComments.listComments`. */
+export interface StudyCommentsSummary {
+  comments: StudyComment[]
+  /** Across every comment on the study, not just the returned page, so paging does not move it. */
+  averageRating?: number
+  /** How many comments the study has in total, so the caller can tell whether more pages remain. */
+  total: number
+  /**
+   * The signed-in user's own comment, or absent when they have none. Carried separately because
+   * paging puts it on an unpredictable page, and the composer needs it to know whether saving
+   * adds a comment or revises one.
+   */
+  yourComment?: StudyComment
+}
+
 export interface Study {
   studyId: number
   name: string
   description: string
   dataTypes: string[]
   piName: string
+  piInstitution?: { id: number, name: string }
+  piOrcid?: string
+  piLinkedinUrl?: string
+  piWebsiteUrl?: string
   publicVisibility: boolean
   datasetIds: number[]
-  datasets: Dataset[]
   properties: StudyProperty[]
   alternativeDataSharingPlan?: FileStorageObject
   createDate: string // Date?
@@ -632,8 +670,12 @@ export interface DatasetStatisticsDar {
   projectTitle: string
   darCode: string
   nonTechRus: string
+  rus?: string
   referenceId: string
   expired: boolean
+  /** Absent when the dataset has no study: see DarMetric.yaml. The requester's name is never sent. */
+  institutionName?: string
+  submissionDate?: number
 }
 
 /**

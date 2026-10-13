@@ -54,7 +54,7 @@ describe('SigningOfficialReadOnlyCard', () => {
         externalProfiles={{ ORCID: '0000-0002-1825-0097' }}
       />,
     )
-    const link = screen.getByRole('link', { name: /ORCID/ })
+    const link = screen.getByRole('link', { name: /^ORCID iD:/ })
     expect(link.getAttribute('href')).toBe('https://orcid.org/0000-0002-1825-0097')
   })
 

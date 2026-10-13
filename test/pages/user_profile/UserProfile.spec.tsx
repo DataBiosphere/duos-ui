@@ -25,6 +25,9 @@ vi.mock('src/libs/notificationService', () => ({
   NotificationService: {
     getBannerObjectById: vi.fn(),
   },
+  dismissBanner: vi.fn(),
+  visibleBanner: vi.fn(banner => banner ?? null),
+  onBannerDismissed: vi.fn(() => () => {}),
 }))
 
 vi.mock('src/libs/utils', () => ({
@@ -61,7 +64,19 @@ vi.mock('src/pages/user_profile/ExternalProfile', () => ({
 }))
 
 vi.mock('src/components/Notification', () => ({
-  Notification: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Notification: ({ notificationData, onDismiss }: {
+    notificationData?: { message: string } | null
+    onDismiss?: () => void
+  }) => (
+    notificationData
+      ? (
+          <div>
+            {notificationData.message}
+            {onDismiss && <button onClick={onDismiss}>Dismiss notification</button>}
+          </div>
+        )
+      : null
+  ),
 }))
 
 vi.mock('src/components/forms/forms', () => {
@@ -85,7 +100,8 @@ vi.mock('src/components/forms/forms', () => {
 
 import { Storage } from 'src/libs/storage'
 import { User } from 'src/libs/ajax/User'
-import { NotificationService } from 'src/libs/notificationService'
+import { dismissBanner, NotificationService, onBannerDismissed, visibleBanner } from 'src/libs/notificationService'
+import { bannerDismissalBus } from '../../test-utils'
 import { Notifications } from 'src/libs/utils'
 
 const mockUser: DuosUser = {
@@ -112,9 +128,14 @@ function renderUserProfile() {
   )
 }
 
+const dismissalBus = bannerDismissalBus()
+
 describe('UserProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    dismissalBus.reset()
+    vi.mocked(onBannerDismissed).mockImplementation(dismissalBus.subscribe)
+    vi.mocked(dismissBanner).mockImplementation(dismissalBus.publish)
     vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser)
     vi.mocked(User.getMe).mockResolvedValue(mockUser)
     vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue(null)
@@ -259,5 +280,39 @@ describe('UserProfile', () => {
         text: 'Error: Unable to retrieve user data from server',
       })
     })
+  })
+
+  it('shows the eRACommonsOutage banner and hides it after dismissal', async () => {
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue({
+      id: 'eRACommonsOutage',
+      active: true,
+      message: 'eRA Commons is down',
+      level: 'warning',
+    })
+
+    renderUserProfile()
+    await waitFor(() => {
+      expect(screen.getByText('eRA Commons is down')).toBeInTheDocument()
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
+
+    expect(dismissBanner).toHaveBeenCalledWith('eRACommonsOutage')
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
+  })
+
+  it('does not show an already-dismissed eRACommonsOutage banner', async () => {
+    vi.mocked(NotificationService.getBannerObjectById).mockResolvedValue({
+      id: 'eRACommonsOutage',
+      active: true,
+      message: 'eRA Commons is down',
+      level: 'warning',
+    })
+    vi.mocked(visibleBanner).mockReturnValueOnce(null)
+
+    renderUserProfile()
+    await waitFor(() => screen.getByDisplayValue('Test User'))
+
+    expect(screen.queryByText('eRA Commons is down')).not.toBeInTheDocument()
   })
 })

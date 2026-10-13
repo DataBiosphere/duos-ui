@@ -1,5 +1,5 @@
-# Base compose file — shared by both local dev modes. Never run alone; see the
-# two modes below. Both are documented in full in DEVNOTES.md.
+# Base compose file — shared by all three local dev modes. Never run alone; see
+# the modes below. All three are documented in full in DEVNOTES.md.
 #
 # Ensure the following configuration files exist in the project root:
 #   * public/config.json, ca-bundle.crt, server.crt, server.key, site.conf
@@ -18,7 +18,12 @@
 #   so the bundled `db` service is never defined and can't fight consent's
 #   `sqlproxy` for host port 5432.
 #
-# --env-file .env.local is required in both modes: the `${VAR:?...}`
+# Mode 3 — against the REMOTE dev consent database, through a Cloud SQL Auth
+# Proxy container (see the header of docker-compose.cloudsql.yaml for setup):
+#   docker compose --env-file .env.local -f docker-compose.yaml -f docker-compose.cloudsql.yaml up -d
+#   WARNING: this mode writes BFF session rows into the shared dev database.
+#
+# --env-file .env.local is required in every mode: the `${VAR:?...}`
 # placeholders below are resolved by Compose's own YAML interpolation, which
 # only reads a file literally named `.env` by default. `.env` is reserved for
 # real dev secrets (see .gitignore) and is never read by this stack.
@@ -44,7 +49,8 @@ services:
       DUOS_SESSION_MAX_AGE_MS: ${DUOS_SESSION_MAX_AGE_MS:-}
       # DUOS_DB_HOST is intentionally NOT set here — it's mode-specific and
       # comes from whichever overlay file is merged in (docker-compose.override.yaml
-      # sets it to `db`; docker-compose.consent.yaml sets it to host.docker.internal).
+      # sets it to `db`; docker-compose.consent.yaml sets it to host.docker.internal;
+      # docker-compose.cloudsql.yaml sets it to `cloudsql-proxy`).
       # Same for `ports`, `extra_hosts`, and `depends_on` below — all mode-specific,
       # all live in the overlay files instead of here.
       DUOS_DB_PORT: ${DUOS_DB_PORT:-5432}
@@ -77,7 +83,8 @@ services:
       LOG_LEVEL: warn
       OIDC_CLAIM: Require all granted
       PROXY_PATH: /
-      PROXY_URL: http://app:8080/
+      # Follows PORT so an override moves the app and the route together.
+      PROXY_URL: http://app:${PORT:-8080}/
       SERVER_NAME: local.dsde-dev.broadinstitute.org
       SERVER_NAME_INT: local.dsde-dev.broadinstitute.org
       ENABLE_TCELL: 'no'

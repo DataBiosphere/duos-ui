@@ -269,6 +269,23 @@ describe('fundingResourceAsset — transformResponse', () => {
     expect((result.items[0] as FundingResourceRow).fundingId).toBe('f-in-range')
   })
 
+  it('returns only funding resources matching the funderName filter', () => {
+    const response = makeResponse([
+      makeBucket('1', [
+        { fundingId: 'f1', funderName: 'NIH' },
+        { fundingId: 'f2', funderName: 'NSF' },
+      ]),
+    ])
+
+    const result = fundingResourceAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      fundingFunderName: ['NIH'],
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as FundingResourceRow).fundingId).toBe('f1')
+  })
+
   // An inverted range builds no ES clause, so it must not narrow rows here
   // either — otherwise the grid empties while the panel flags the range.
   it('ignores an inverted fundingDate range instead of filtering everything out', () => {
@@ -394,5 +411,16 @@ describe('fundingResourceAsset — makeColumns', () => {
     const a = fundingResourceAsset.makeColumns()
     const b = fundingResourceAsset.makeColumns({})
     expect(a.map(c => c.field)).toEqual(b.map(c => c.field))
+  })
+})
+
+describe('fundingResourceAsset — indexed values are normalized', () => {
+  it('matches a row whose indexed funderName carries stray whitespace', () => {
+    const response = makeResponse([makeBucket('1', [{ fundingId: 'a1', funderName: '  NIH ' }])])
+
+    // Options are trimmed, so an untrimmed row is dropped by its own filter.
+    const result = fundingResourceAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, fundingFunderName: ['NIH'] })
+
+    expect(result.items).toHaveLength(1)
   })
 })

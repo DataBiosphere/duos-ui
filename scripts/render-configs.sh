@@ -3,6 +3,8 @@
 # Certs are regenerated on a 3-month rotation so this script is optimized for that task.
 # You MUST be on the Non-Split Broad VPN to have a whitelisted Broad IP.
 # You MUST have jq, gcloud, kubectl and openssl installed to run this script.
+# --write_site_conf also needs read access to the private
+# broadinstitute/terra-helmfile repo, over git HTTPS or SSH.
 # You MUST authenticate via gcloud
 #
 # See usage section below for more details. All arguments are optional.
@@ -26,6 +28,9 @@ Generate cert files for local development
                                     carried forward, and the old file is backed up to
                                     .env.local.bak. true|false. Defaults to false
   --write_config WRITE_CONFIG       Write a config.json file in public. true|false. Defaults to false
+  --write_site_conf WRITE_SITE_CONF Render site.conf in the project root from the terra-helmfile
+                                    duos chart template, so the local httpd proxy matches the
+                                    deployed one. Needs git access to terra-helmfile. true|false. Defaults to false
   --help                Display this help and exit
 EOF
     exit 0
@@ -40,6 +45,7 @@ error() {
 PROJECT="broad-dsde-dev"
 WRITE_ENV="false"
 WRITE_CONFIG="false"
+WRITE_SITE_CONF="false"
 
 ENV_FILE="../.env.local"
 
@@ -53,10 +59,12 @@ AZURE_CLIENT_ID_DEFAULT="a0e99acd-7b8d-400d-a1d3-60e497495806"
 # The consent database is named `consent` in every environment.
 DB_NAME_DEFAULT="consent"
 AZURE_ISSUER_URL_DEFAULT="https://terradevb2c.b2clogin.com/terradevb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=b2c_1a_signup_signin_duos_dev"
-# Both redirect URIs are registered in B2C: this one (with :3000) matches the
-# pnpm-start dev server; drop the port when running under docker compose.
-OAUTH_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/auth/callback"
-POST_LOGOUT_REDIRECT_URI_DEFAULT="http://local.dsde-dev.broadinstitute.org:3000/post-logout"
+# Both redirect URIs are registered in B2C. These defaults (no port) match the
+# docker compose modes. For `pnpm run start:server`, which serves the BFF on
+# port 3000, use https://local.dsde-dev.broadinstitute.org:3000 instead.
+# `pnpm start` runs Vite only, has no auth callback, and needs neither.
+OAUTH_REDIRECT_URI_DEFAULT="https://local.dsde-dev.broadinstitute.org/auth/callback"
+POST_LOGOUT_REDIRECT_URI_DEFAULT="https://local.dsde-dev.broadinstitute.org/post-logout"
 API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
 # The single-feature proxy upstreams (ECM, TDR, Bard). Optional server-side —
 # the BFF boots without them and leaves each route dark — but written here so
@@ -65,6 +73,9 @@ API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
 ECM_URL_DEFAULT="https://externalcreds.dsde-dev.broadinstitute.org"
 TDR_URL_DEFAULT="https://jade.datarepo-dev.broadinstitute.org"
 BARD_URL_DEFAULT="https://terra-bard-dev.appspot.com"
+# Every deployed environment enforces the Content Security Policy
+# (terra-helmfile#6500), so local dev enforces it too.
+CSP_REPORT_ONLY_DEFAULT="false"
 
 parse_cli_args() {
     while [[ $# -gt 0 ]]; do
@@ -79,6 +90,10 @@ parse_cli_args() {
                 ;;
             --write_config)
                 WRITE_CONFIG=$2
+                shift 2
+                ;;
+            --write_site_conf)
+                WRITE_SITE_CONF=$2
                 shift 2
                 ;;
             --help)
@@ -96,12 +111,28 @@ auth_gcloud() {
   gcloud container clusters get-credentials --zone us-central1-a --project "$PROJECT" terra-dev
 }
 
+# Remove the cert staging directory on any exit, including Ctrl-C.
+CERT_TMP=""
+cleanup() {
+  if [[ -n "$CERT_TMP" ]]; then
+    rm -rf "$CERT_TMP"
+  fi
+}
+trap cleanup EXIT
+
+# Each redirect below empties its file before kubectl runs. A failure (for
+# example, the VPN is down) would leave a valid cert empty, or a new cert next
+# to an old key. Write all three files to a staging directory first, and move
+# them into place only after every kubectl call succeeds. The directory is
+# beside the targets so each move is a rename on the same filesystem.
 write_certs() {
   echo "Writing cert files"
-  kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.crt" | base64decode }}' > ../server.crt
-  kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.key" | base64decode }}' > ../server.key
-  chmod 600 ../server.key
-  kubectl -n local-dev get configmaps kube-root-ca.crt -o 'go-template={{ index .data "ca.crt" }}' > ../ca-bundle.crt
+  CERT_TMP=$(mktemp -d ../.render-certs.XXXXXX)
+  kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.crt" | base64decode }}' > "$CERT_TMP/server.crt"
+  kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.key" | base64decode }}' > "$CERT_TMP/server.key"
+  chmod 600 "$CERT_TMP/server.key"
+  kubectl -n local-dev get configmaps kube-root-ca.crt -o 'go-template={{ index .data "ca.crt" }}' > "$CERT_TMP/ca-bundle.crt"
+  mv "$CERT_TMP/server.crt" "$CERT_TMP/server.key" "$CERT_TMP/ca-bundle.crt" ../
 }
 
 # Echo the current value of a variable from an existing .env.local, if any.
@@ -117,6 +148,31 @@ existing_env() {
     fi
     echo "$val"
   fi
+}
+
+# Variables that write_env renders itself. Every other VAR=value line in an
+# existing .env.local is copied unchanged by extra_env_lines, quotes and all,
+# so compose-only settings (CLOUDSQL_INSTANCE, DUOS_HOST_PORT, ...) and any
+# optional server variable survive a re-run.
+MANAGED_VARS=" HOST HTTPS SSL_CRT_FILE SSL_KEY_FILE DUOS_SESSION_SECRET
+ DUOS_DB_HOST DUOS_DB_NAME DUOS_DB_PORT DUOS_DB_USER DUOS_DB_PASSWORD
+ DUOS_AZURE_CLIENT_ID DUOS_AZURE_CLIENT_SECRET DUOS_AZURE_ISSUER_URL
+ DUOS_OAUTH_REDIRECT_URI DUOS_POST_LOGOUT_REDIRECT_URI DUOS_API_URL
+ DUOS_ECM_URL DUOS_TDR_URL DUOS_BARD_URL DUOS_CSP_REPORT_ONLY "
+
+# Echo every VAR=value line of an existing .env.local whose VAR is not in
+# MANAGED_VARS, byte for byte.
+extra_env_lines() {
+  if [[ ! -f "$ENV_FILE" ]]; then
+    return 0
+  fi
+  local line name
+  grep -E '^[A-Za-z_][A-Za-z0-9_]*=' "$ENV_FILE" | while IFS= read -r line; do
+    name=${line%%=*}
+    if ! [[ "$MANAGED_VARS" =~ [[:space:]]"$name"[[:space:]] ]]; then
+      printf '%s\n' "$line"
+    fi
+  done
 }
 
 fetch_azure_client_secret() {
@@ -149,7 +205,9 @@ write_env() {
   fetch_azure_client_secret
 
   # Per-setup values carry forward from an existing .env.local so a re-run
-  # (e.g. on cert rotation) never loses hand-filled configuration.
+  # (e.g. on cert rotation) never loses hand-filled configuration. The
+  # variables below are re-rendered with defaults; every other variable in the
+  # file is copied unchanged at the end (see extra_env_lines).
   SESSION_SECRET=$(existing_env DUOS_SESSION_SECRET)
   if [[ -z "$SESSION_SECRET" || "$SESSION_SECRET" == "change-me-to-a-random-32-plus-char-string" ]]; then
     SESSION_SECRET=$(openssl rand -base64 32)
@@ -172,6 +230,9 @@ write_env() {
   ECM_URL=$(existing_env DUOS_ECM_URL)
   TDR_URL=$(existing_env DUOS_TDR_URL)
   BARD_URL=$(existing_env DUOS_BARD_URL)
+  CSP_REPORT_ONLY=$(existing_env DUOS_CSP_REPORT_ONLY)
+  # Read before the redirect below truncates the file.
+  EXTRA_LINES=$(extra_env_lines)
 
   if [[ -f "$ENV_FILE" ]]; then
     echo "Backing up existing .env.local to .env.local.bak"
@@ -215,7 +276,18 @@ DUOS_API_URL=${API_URL:-$API_URL_DEFAULT}
 DUOS_ECM_URL=${ECM_URL:-$ECM_URL_DEFAULT}
 DUOS_TDR_URL=${TDR_URL:-$TDR_URL_DEFAULT}
 DUOS_BARD_URL=${BARD_URL:-$BARD_URL_DEFAULT}
+
+# false enforces the Content Security Policy, as every deployed environment
+# does. Set true to only report violations while you debug the policy.
+DUOS_CSP_REPORT_ONLY=${CSP_REPORT_ONLY:-$CSP_REPORT_ONLY_DEFAULT}
 EOF
+    if [[ -n "$EXTRA_LINES" ]]; then
+      echo
+      echo "# Carried forward unchanged from the previous .env.local (this script"
+      echo "# does not manage these; e.g. docker compose settings such as"
+      echo "# CLOUDSQL_INSTANCE and DUOS_HOST_PORT)."
+      printf '%s\n' "$EXTRA_LINES"
+    fi
   } > "$ENV_FILE"
   chmod 600 "$ENV_FILE"
 }
@@ -229,6 +301,12 @@ write_config() {
   jq '.hash = "dev"' ../public/config.json > /dev/null
 }
 
+# render-site-conf.sh also runs on its own, to render site.conf again without
+# the VPN.
+write_site_conf() {
+  ./render-site-conf.sh
+}
+
 parse_cli_args "$@"
 auth_gcloud
 write_certs
@@ -239,4 +317,8 @@ fi
 if [[ "$WRITE_CONFIG" == "true" ]]
 then
   write_config
+fi
+if [[ "$WRITE_SITE_CONF" == "true" ]]
+then
+  write_site_conf
 fi

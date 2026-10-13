@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import AcceptedAcknowledgements from 'src/pages/user_profile/AcceptedAcknowledgements'
+import { SO_ATTESTATION_ACK_KEY } from 'src/pages/user_profile/SigningOfficialRequest'
 import { AcknowledgementMap } from 'src/types/model'
 
 vi.mock('src/libs/ajax/User', () => ({
@@ -63,6 +64,21 @@ describe('AcceptedAcknowledgements', () => {
       expect(screen.getByText('DUOS Research Purpose Policy')).toBeInTheDocument()
       expect(screen.getByText('DUOS Privacy Policy')).toBeInTheDocument()
     })
+  })
+
+  it('shows a readable name for the Signing Official status attestation', async () => {
+    vi.mocked(User.getAcknowledgements).mockResolvedValue({
+      [SO_ATTESTATION_ACK_KEY]: {
+        userId: 1,
+        ackKey: SO_ATTESTATION_ACK_KEY,
+        firstAcknowledged: new Date('2026-10-01').getTime(),
+        lastAcknowledged: new Date('2026-10-01').getTime(),
+      },
+    })
+    render(<AcceptedAcknowledgements />)
+
+    expect(await screen.findByText('Signing Official status attestation')).toBeInTheDocument()
+    expect(screen.queryByText(SO_ATTESTATION_ACK_KEY)).not.toBeInTheDocument()
   })
 
   it('renders the Document Name and Attestation Date column headers', async () => {

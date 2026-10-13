@@ -144,7 +144,7 @@ async function buildApp(pg: PostgresDb): Promise<FastifyInstance> {
   await app.register(fastifyCookie)
   await app.register(fastifySession, sessionPluginOptions({
     secret: SECRET,
-    store: createPgSessionStore(pg),
+    store: createPgSessionStore(pg, app.log),
     secure: false,
   }))
   app.post('/auth/login', handleLogin)

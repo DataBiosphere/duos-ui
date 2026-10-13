@@ -4,6 +4,7 @@
   "tag": "dev",
   "bardApiUrl": "https://terra-bard-dev.appspot.com",
   "apiUrl": "https://consent.dsde-dev.broadinstitute.org",
+  "bannersUrl": "https://storage.googleapis.com/duos-banners-dev/dev_notifications.json",
   "terraUrl": "https://bvdp-saturn-dev.appspot.com",
   "tdrApiUrl": "https://jade.datarepo-dev.broadinstitute.org",
   "ecmApiUrl": "https://externalcreds.dsde-dev.broadinstitute.org",

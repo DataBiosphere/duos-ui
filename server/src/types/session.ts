@@ -10,6 +10,7 @@ import 'fastify'
  */
 declare module 'fastify' {
   interface Session {
+    testFixture?: boolean // SA role fixture: cannot refresh; reject at real token expiry
     userId?: string
     accessToken?: string
     idToken?: string
@@ -19,9 +20,7 @@ declare module 'fastify' {
     pkceState?: string
     returnTo?: string // post-login redirect target, stored during OAuth initiation
     // Sub-provider the user chose on the B2C login page, derived from the B2C
-    // id_token's `idp` claim at callback (Phase 2). All tokens are B2C-issued
-    // regardless — this field exists for the audit trail and observability,
-    // not client selection.
-    idp?: 'google' | 'microsoft'
+    // id_token's `idp` claim at callback.
+    idp?: 'google' | 'microsoft' | 'unknown'
   }
 }

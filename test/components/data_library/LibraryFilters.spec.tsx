@@ -25,6 +25,20 @@ const availableFilters: AvailableFilters = {
     { value: 'Genomic', label: 'Genomic', count: 4 },
   ],
   dac: [],
+  modelFormat: [],
+  modelLicense: [],
+  modelCloud: [],
+  modelTags: [],
+  workspaceCloud: [],
+  workspaceAccess: [],
+  presentationEvent: [],
+  presentationFormat: [],
+  presentationAccess: [],
+  publicationJournal: [],
+  publicationAccess: [],
+  ipType: [],
+  ipStatus: [],
+  fundingFunderName: [],
   workspaceTools: [],
   workspacePlatform: [],
   clinicalTrialStatus: [],
@@ -36,14 +50,6 @@ const availableFilters: AvailableFilters = {
   biospecimenPostMortemIntervalUnit: [
     { value: 'HOURS', label: 'HOURS' },
     { value: 'DAYS', label: 'DAYS' },
-  ],
-  datasetsCited: [
-    { value: 'true', label: 'Yes' },
-    { value: 'false', label: 'No' },
-  ],
-  publicationsDatasetsCited: [
-    { value: 'true', label: 'Yes' },
-    { value: 'false', label: 'No' },
   ],
   soApprovalModel: [
     { value: 'PER_REQUEST', label: 'Per-Request Approval' },
@@ -181,7 +187,8 @@ describe('LibraryFilters', () => {
     expect(screen.queryByText('Access Request Process')).not.toBeInTheDocument()
   })
 
-  it('renders only configured filters for presentations', () => {
+  // It is a column now; the tab's own filters are untouched by the swap.
+  it('no longer offers Datasets Cited on presentations, and inherits no other tab\'s filters', () => {
     render(
       <LibraryFilters
         filters={EMPTY_FILTERS}
@@ -190,7 +197,8 @@ describe('LibraryFilters', () => {
         sections={getFilterSectionsForAsset(AssetType.PRESENTATIONS, availableFilters)}
       />,
     )
-    expect(screen.getByText('Datasets Cited (Presentations)?')).toBeInTheDocument()
+    expect(screen.queryByText('Datasets Cited (Presentations)?')).not.toBeInTheDocument()
+    expect(screen.getByText('Event')).toBeInTheDocument()
     expect(screen.queryByText('Participants')).not.toBeInTheDocument()
     expect(screen.queryByText('Access Request Process')).not.toBeInTheDocument()
   })
@@ -618,5 +626,125 @@ describe('LibraryFilters — collapseable panel', () => {
       />,
     )
     expect(screen.queryByText('Clear')).not.toBeInTheDocument()
+  })
+})
+
+// A returned section is not a rendered one, so assert on the panel.
+describe('LibraryFilters — model and workspace sections render', () => {
+  const withOptions: AvailableFilters = {
+    ...availableFilters,
+    modelFormat: [{ value: 'ONNX', label: 'ONNX' }],
+    modelLicense: [{ value: 'MIT', label: 'MIT' }],
+    modelCloud: [{ value: 'AWS', label: 'AWS' }],
+    modelTags: [{ value: 'vision', label: 'vision' }],
+    workspaceCloud: [{ value: 'GCP', label: 'GCP' }],
+    workspaceAccess: [{ value: 'open', label: 'open' }],
+  }
+
+  it('renders every Models section with its options', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.MODELS, withOptions)}
+      />,
+    )
+    for (const label of ['Format (AI Models)', 'License', 'Cloud (AI Models)', 'Tags']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+    expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
+  })
+
+  it('renders the new Workspaces sections alongside the existing ones', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.WORKSPACES, withOptions)}
+      />,
+    )
+    for (const label of ['Tools', 'Platform', 'Cloud (Workspaces)', 'Access (Workspaces)']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+  })
+})
+
+describe('LibraryFilters — presentation and publication sections render', () => {
+  const withOptions: AvailableFilters = {
+    ...availableFilters,
+    presentationEvent: [{ value: 'ASHG 2024', label: 'ASHG 2024' }],
+    presentationFormat: [{ value: 'Oral', label: 'Oral' }],
+    presentationAccess: [{ value: 'open', label: 'open' }],
+    publicationJournal: [{ value: 'Nature', label: 'Nature' }],
+    publicationAccess: [{ value: 'open', label: 'open' }],
+  }
+
+  it('renders every Presentations section, including the date range', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.PRESENTATIONS, withOptions)}
+      />,
+    )
+    for (const label of ['Event', 'Format (Presentations)', 'Access (Presentations)', 'Presentation Date']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+    expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
+  })
+
+  it('renders every Publications section, including the date range', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.PUBLICATIONS, withOptions)}
+      />,
+    )
+    for (const label of ['Journal', 'Access (Publications)', 'Published Date']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+  })
+})
+
+describe('LibraryFilters — IP and funding sections render', () => {
+  const withOptions: AvailableFilters = {
+    ...availableFilters,
+    ipType: [{ value: 'Patent', label: 'Patent' }],
+    ipStatus: [{ value: 'Granted', label: 'Granted' }],
+    fundingFunderName: [{ value: 'NIH', label: 'NIH' }],
+  }
+
+  it('renders the Intellectual Property sections alongside the existing date range', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.INTELLECTUAL_PROPERTY, withOptions)}
+      />,
+    )
+    for (const label of ['Type', 'Status (Intellectual Property)', 'Filed Date']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+    expect(screen.queryByText('No filters available')).not.toBeInTheDocument()
+  })
+
+  it('renders the Funding Resources sections', () => {
+    render(
+      <LibraryFilters
+        filters={EMPTY_FILTERS}
+        onChange={vi.fn()}
+        onClear={vi.fn()}
+        sections={getFilterSectionsForAsset(AssetType.FUNDING_RESOURCES, withOptions)}
+      />,
+    )
+    for (const label of ['Funder Name', 'Funding Dates']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
   })
 })

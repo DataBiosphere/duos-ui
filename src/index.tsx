@@ -7,6 +7,7 @@ import { Auth } from 'src/libs/auth/auth'
 import { Config } from 'src/libs/config'
 import { OidcBroker } from 'src/libs/auth/oidcBroker'
 import { BrowserRouter } from 'react-router'
+import ScrollToTopOnNavigate from 'src/components/ScrollToTopOnNavigate'
 
 const load = async () => {
   await Auth.initialize()
@@ -26,7 +27,7 @@ const load = async () => {
   }
   const container = document.getElementById('root')
   const root = createRoot(container!)
-  root.render(<BrowserRouter><App /></BrowserRouter>)
+  root.render(<BrowserRouter><ScrollToTopOnNavigate /><App /></BrowserRouter>)
 }
 
 await load()

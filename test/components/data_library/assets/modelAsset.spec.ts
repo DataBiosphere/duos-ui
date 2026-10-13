@@ -9,6 +9,7 @@ import {
   ModelStudyAggregationBucket,
   QueryClause,
 } from 'src/types/elastic'
+import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
 
 const pagination: PaginationState = { page: 0, pageSize: 25 }
 
@@ -19,6 +20,7 @@ const makeBucket = (
     name?: string
     format?: string
     license?: string
+    cloud?: string[] | string
     tags?: string[]
     url?: string
     maintainer?: { name: string, email: string }
@@ -41,6 +43,7 @@ const makeBucket = (
                   name: m.name,
                   format: m.format,
                   license: m.license,
+                  cloud: m.cloud,
                   tags: m.tags,
                   url: m.url,
                   maintainer: m.maintainer,
@@ -82,6 +85,8 @@ describe('modelAsset — searchFields', () => {
     expect(modelAsset.searchFields).toContain('study.assets.models.format')
     expect(modelAsset.searchFields).toContain('study.assets.models.license')
     expect(modelAsset.searchFields).toContain('study.assets.models.tags')
+    // Cloud is a displayed, filterable field, so free-text search must reach it.
+    expect(modelAsset.searchFields).toContain('study.assets.models.cloud')
   })
 
   it('includes study-level fields', () => {
@@ -234,6 +239,131 @@ describe('modelAsset — transformResponse', () => {
     expect(result.items).toHaveLength(0)
     expect(result.total).toBe(0)
   })
+
+  it('maps the cloud field onto the row', () => {
+    const response = makeResponse([makeBucket(1, [{ modelId: 'm1', cloud: ['AWS', 'GCP'] }])])
+    const row = modelAsset.transformResponse(response, pagination).items[0] as ModelAsset
+    expect(row.cloud).toEqual(['AWS', 'GCP'])
+  })
+
+  it('normalizes a cloud indexed as a bare string into an array', () => {
+    const response = makeResponse([makeBucket(1, [{ modelId: 'm1', cloud: 'AWS' }])])
+    const row = modelAsset.transformResponse(response, pagination).items[0] as ModelAsset
+    expect(row.cloud).toEqual(['AWS'])
+  })
+
+  it('matches the cloud filter against a cloud indexed as a bare string', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { modelId: 'm1', cloud: 'AWS' },
+        { modelId: 'm2', cloud: 'GCP' },
+      ]),
+    ])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelCloud: ['GCP'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+  })
+
+  // Every model of a qualifying study comes back, so rows need re-checking.
+  it('returns only models matching the format filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { modelId: 'm1', format: 'ONNX' },
+        { modelId: 'm2', format: 'PyTorch' },
+      ]),
+    ])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as ModelAsset).modelId).toBe('m1')
+  })
+
+  it('returns only models matching the license filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { modelId: 'm1', license: 'Apache-2.0' },
+        { modelId: 'm2', license: 'MIT' },
+      ]),
+    ])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelLicense: ['MIT'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+  })
+
+  it('returns only models matching the cloud filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { modelId: 'm1', cloud: ['AWS'] },
+        { modelId: 'm2', cloud: ['GCP'] },
+      ]),
+    ])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelCloud: ['GCP'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+  })
+
+  it('returns only models matching the tags filter', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { modelId: 'm1', tags: ['vision'] },
+        { modelId: 'm2', tags: ['nlp'] },
+      ]),
+    ])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelTags: ['nlp'] })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+  })
+
+  // The four model fields are free text, so the corpus can carry either casing
+  // while the analyzed ES clause admits both; the row pass must agree.
+  it.each([
+    ['modelFormat', 'format'],
+    ['modelLicense', 'license'],
+  ])('matches %s regardless of the indexed casing', (key, field) => {
+    const response = makeResponse([makeBucket(1, [{ modelId: 'm1', [field]: 'PyTorch' }])])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, [key]: ['pytorch'] })
+
+    expect(result.total).toBe(1)
+  })
+
+  it.each([
+    ['modelCloud', 'cloud'],
+    ['modelTags', 'tags'],
+  ])('matches %s regardless of the indexed casing', (key, field) => {
+    const response = makeResponse([makeBucket(1, [{ modelId: 'm1', [field]: ['AWS'] }])])
+
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, [key]: ['aws'] })
+
+    expect(result.total).toBe(1)
+  })
+
+  it('combines multiple active model filters with AND', () => {
+    const response = makeResponse([
+      makeBucket(1, [
+        { modelId: 'm1', format: 'ONNX', license: 'MIT' },
+        { modelId: 'm2', format: 'ONNX', license: 'Apache-2.0' },
+      ]),
+    ])
+
+    const result = modelAsset.transformResponse(response, pagination, {
+      ...EMPTY_FILTERS,
+      modelFormat: ['ONNX'],
+      modelLicense: ['Apache-2.0'],
+    })
+
+    expect(result.total).toBe(1)
+    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+  })
 })
 
 describe('modelAsset — getRowId', () => {
@@ -331,6 +461,7 @@ describe('modelAsset — makeColumns', () => {
     expect(fields).toContain('studyName')
     expect(fields).toContain('format')
     expect(fields).toContain('license')
+    expect(fields).toContain('cloud')
     expect(fields).toContain('maintainer')
     expect(fields).toContain('url')
     expect(fields).toContain('tags')
@@ -340,5 +471,25 @@ describe('modelAsset — makeColumns', () => {
     const a = modelAsset.makeColumns()
     const b = modelAsset.makeColumns({})
     expect(a.map(c => c.field)).toEqual(b.map(c => c.field))
+  })
+})
+
+describe('modelAsset — indexed values are normalized', () => {
+  it('matches a row whose indexed format carries stray whitespace', () => {
+    const response = makeResponse([makeBucket(1, [{ modelId: 'w1', format: '  ONNX ' }])])
+
+    // The option list is built from trimmed values, so the row has to be
+    // trimmed too or the filter that offered 'ONNX' drops the only row.
+    const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
+
+    expect(result.items).toHaveLength(1)
+  })
+
+  it('trims list-shaped values and drops the empties', () => {
+    const response = makeResponse([makeBucket(1, [{ modelId: 'w1', cloud: ['  AWS ', '  ', 'GCP'] }])])
+
+    const result = modelAsset.transformResponse(response, pagination)
+
+    expect((result.items[0] as ModelAsset).cloud).toEqual(['AWS', 'GCP'])
   })
 })

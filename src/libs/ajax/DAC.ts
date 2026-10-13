@@ -2,7 +2,7 @@ import { fetchGet, fetchPost, fetchPut, fetchDelete } from 'src/libs/ajax/fetchA
 import { DacObject, Dataset, DuosUser } from 'src/types/model'
 import { Config } from 'src/libs/config'
 import { DACbotRule } from 'src/components/dac_bot/DACBotComponent'
-import { DashboardDataLibrary, fetchDashboardSummary } from 'src/libs/ajax/Dashboard'
+import { DashboardDataLibrary, DashboardMetrics, fetchDashboardSummary } from 'src/libs/ajax/Dashboard'
 
 type SuccessResponseCode = 200
 
@@ -33,6 +33,8 @@ export interface DacDashboardSummary {
   dacDatasets: { total: number }
   /** Counts matching the four Data Library tab badges visible to the caller. */
   dataLibrary: DashboardDataLibrary
+  /** Over the caller's DACs' datasets, without SO approvals. */
+  metrics: DashboardMetrics
 }
 
 export const DAC = {

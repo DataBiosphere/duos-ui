@@ -10,7 +10,8 @@ import {
 import AuthStatusChip from './AuthStatusChip'
 import AuthActionButton from './AuthActionButton'
 import { AuthStatus, DAARowData } from './types'
-import { daaLabel, formatDateYYYYMMDD } from './researcherViewHelpers'
+import { formatDateYYYYMMDD } from './researcherViewHelpers'
+import { daaLabel } from 'src/libs/daaHelpers'
 import { ACTION_COLUMN, withoutActionColumn } from './subtableColumns'
 
 const FONT = 'Montserrat'

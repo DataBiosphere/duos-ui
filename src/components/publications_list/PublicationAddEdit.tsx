@@ -86,12 +86,12 @@ function AuthorsFieldset({
 }) {
   return (
     <div style={{ marginBottom: '1rem', width: '100%' }}>
-      <fieldset style={{ fontWeight: 600, marginTop: '4rem' }} aria-label="Authors (Name + ORCID)">
-        <legend style={{ fontSize: 16 }}>Authors (Name + ORCID)*</legend>
+      <fieldset style={{ fontWeight: 600, marginTop: '4rem' }} aria-label="Authors (Name + ORCID iD)">
+        <legend style={{ fontSize: 16 }}>Authors (Name + ORCID iD)*</legend>
         {(submitted || touched.authors) && validation.authors && (
           <div className="error-message">
             {(validation.authors.failed || []).includes('required')
-              ? 'At least one author with name and valid ORCID is required.'
+              ? 'At least one author with name and valid ORCID iD is required.'
               : (validation.authors.failed || []).map(f => (
                   <div key={f}>{f}</div>
                 ))}
@@ -122,7 +122,7 @@ function AuthorsFieldset({
               className="form-control"
               style={{ flex: 1 }}
               value={a.orcId}
-              placeholder="ORCID (0000-0000-0000-0000)"
+              placeholder="ORCID iD (0000-0000-0000-0000)"
               onChange={e => updateAuthorField(idx, 'orcId', e.target.value)}
               disabled={readOnly}
             />
@@ -149,7 +149,7 @@ function AuthorsFieldset({
           disabled={disableAddAuthor || readOnly}
           title={
             disableAddAuthor
-              ? 'Fill all existing author name and valid ORCID first'
+              ? 'Fill all existing author name and valid ORCID iD first'
               : 'Add another author'
           }
         >

@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useLibraryTabCounts } from 'src/hooks/useLibraryTabCounts'
+import { useLibraryTabCounts, useOptionCorpus } from 'src/hooks/useLibraryTabCounts'
 import { computeTabCounts } from 'src/hooks/libraryCounts'
 import { AssetType, FilterState, LibraryVersionNew } from 'src/types/library'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
@@ -138,5 +138,44 @@ describe('useLibraryTabCounts', () => {
     const query = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[0][0] as ElasticsearchQuery
     expect(query.query?.bool.filter).toBeDefined()
     expect(query.query?.bool.filter?.length).toBeGreaterThan(0)
+  })
+})
+
+const CorpusComponent = ({ filters, enabled }: { filters: FilterState, enabled: boolean }) => {
+  const { data } = useOptionCorpus(libraryConfig, filters, '', enabled)
+  return <div data-testid="loaded">{data ? 'yes' : 'no'}</div>
+}
+
+const renderCorpus = (props: { filters: FilterState, enabled: boolean }) => render(
+  <QueryClientProvider client={new QueryClient()}>
+    <CorpusComponent {...props} />
+  </QueryClientProvider>,
+)
+
+describe('useOptionCorpus', () => {
+  beforeEach(() => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockReset()
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(mockResponse)
+  })
+
+  it('makes no request when the tab needs no corpus of its own', async () => {
+    await act(async () => {
+      renderCorpus({ filters: { ...EMPTY_FILTERS }, enabled: false })
+    })
+    expect(DataSet.searchDatasetIndexV2).not.toHaveBeenCalled()
+  })
+
+  // Asking for more would duplicate the counts payload for no reader.
+  it('asks only for the asset fields, and for no count aggregations', async () => {
+    await act(async () => {
+      renderCorpus({ filters: { ...EMPTY_FILTERS }, enabled: true })
+    })
+
+    const query = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls[0][0] as ElasticsearchQuery
+    expect(Object.keys(query.aggs!)).toEqual(['studies'])
+    const source = (query.aggs!.studies as unknown as {
+      aggs: { study_details: { top_hits: { _source: string[] } } }
+    }).aggs.study_details.top_hits._source
+    expect(source).toEqual(['study.studyId', 'study.assets.*'])
   })
 })

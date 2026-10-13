@@ -16,11 +16,12 @@ const ENV = { DUOS_API_URL: 'https://consent.dsde-dev.broadinstitute.org' }
 // tests exercise the forward path untouched.
 const FRESH_EXPIRY = () => Math.floor(Date.now() / 1000) + 3600
 
-function makeRequest(overrides: { accessToken?: string, idp?: 'google' | 'microsoft', tokenExpiry?: number } = {}) {
+function makeRequest(overrides: { accessToken?: string, testFixture?: boolean, idp?: 'google' | 'microsoft', tokenExpiry?: number } = {}) {
   const destroy = vi.fn().mockResolvedValue(undefined)
   const request = {
     session: {
       accessToken: overrides.accessToken,
+      testFixture: overrides.testFixture,
       idp: overrides.idp,
       tokenExpiry: overrides.tokenExpiry ?? FRESH_EXPIRY(),
       destroy,
@@ -57,6 +58,29 @@ describe('getMe', () => {
   afterEach(() => {
     for (const key of Object.keys(ENV)) delete process.env[key]
     vi.unstubAllGlobals()
+  })
+
+  it.each([30, 0])('fixture with %s seconds remaining skips refresh; at expiry the session ends', async (remaining) => {
+    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(200, { email: 'role@example.com' }) as never)
+    const { request, destroy } = makeRequest({ accessToken: 'sa-token', testFixture: true, tokenExpiry: Math.floor(Date.now() / 1000) + remaining })
+    const reply = makeReply()
+    await getMe(request, reply)
+    expect(refreshAccessToken).not.toHaveBeenCalled()
+    if (remaining > 0) {
+      expect(fetch).toHaveBeenCalledOnce()
+      expect(destroy).not.toHaveBeenCalled()
+    }
+    else {
+      expect(fetch).not.toHaveBeenCalled()
+      expect(destroy).toHaveBeenCalledOnce()
+      expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
+      expect(reply.status).toHaveBeenCalledWith(401)
+      expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+      expect(request.log.info).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'auth.session.destroyed', reason: 'expired' }),
+        'auth.session.destroyed',
+      )
+    }
   })
 
   it('returns 401 without calling the upstream API when there is no access token', async () => {
@@ -117,6 +141,10 @@ describe('getMe', () => {
     expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
     expect(reply.status).toHaveBeenCalledWith(401)
     expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+    expect(request.log.info).toHaveBeenCalledWith(
+      { event: 'auth.session.destroyed', reason: 'upstream_401', idp: 'google' },
+      'auth.session.destroyed',
+    )
   })
 
   it('still answers 401 when the rejected session cannot be destroyed', async () => {
@@ -130,6 +158,8 @@ describe('getMe', () => {
     expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
     expect(reply.status).toHaveBeenCalledWith(401)
     expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+    // A destroy that failed is not a session that ended, so it must not be counted as one.
+    expect(request.log.info).not.toHaveBeenCalledWith(expect.objectContaining({ event: 'auth.session.destroyed' }), expect.anything())
   })
 
   it('marks every answer uncacheable — the profile must never be replayed across sessions', async () => {
@@ -164,6 +194,10 @@ describe('getMe', () => {
     expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
     expect(reply.status).toHaveBeenCalledWith(409)
     expect(reply.send).toHaveBeenCalledWith({ authenticated: false, error: 'provider_conflict', message })
+    expect(request.log.info).toHaveBeenCalledWith(
+      { event: 'auth.session.destroyed', reason: 'provider_conflict', idp: 'microsoft' },
+      'auth.session.destroyed',
+    )
   })
 
   it('answers the 409 with a fallback message when the upstream body is unusable', async () => {

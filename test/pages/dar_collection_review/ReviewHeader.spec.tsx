@@ -396,7 +396,7 @@ describe('ReviewHeader - Tests', () => {
     expect(container.querySelector('#researcher-linkedin-fact')).toBeTruthy()
     expect(screen.getByRole('link', { name: /LinkedIn/ }).getAttribute('href')).toBe('https://www.linkedin.com/in/janedoe')
     expect(container.querySelector('#researcher-orcid-fact')).toBeTruthy()
-    expect(screen.getByRole('link', { name: /ORCID/ }).getAttribute('href')).toBe('https://orcid.org/0000-0002-1825-0097')
+    expect(screen.getByRole('link', { name: /^ORCID iD:/ }).getAttribute('href')).toBe('https://orcid.org/0000-0002-1825-0097')
     expect(container.querySelector('#researcher-through-bio-fact')).toBeTruthy()
     expect(container.querySelector('#researcher-institutional-website-fact')).toBeTruthy()
     expect(screen.queryByText('External Profile')).toBeNull()
@@ -416,7 +416,7 @@ describe('ReviewHeader - Tests', () => {
     )
 
     expect(screen.getByRole('link', { name: /LinkedIn/ }).getAttribute('href')).toBe('https://www.linkedin.com/in/janedoe')
-    expect(screen.getByRole('link', { name: /ORCID/ }).getAttribute('href')).toBe('https://orcid.org/0000-0002-1825-0097')
+    expect(screen.getByRole('link', { name: /^ORCID iD:/ }).getAttribute('href')).toBe('https://orcid.org/0000-0002-1825-0097')
     expect(screen.getByRole('link', { name: /Through.bio/ }).getAttribute('href')).toBe('https://through.bio/janedoe')
   })
 

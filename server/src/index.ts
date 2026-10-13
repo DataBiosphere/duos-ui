@@ -17,8 +17,9 @@ import { cspReportRoute, REPORTING_ENDPOINTS_HEADER } from './security/cspReport
 import { sessionPluginOptions } from './session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
 import { fetchMetadataGuard } from './security/fetchMetadata.js'
-import { callbackRateLimit, isRateLimitError, loginRateLimit, RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } from './security/rateLimit.js'
+import { callbackRateLimit, testSigninRateLimit, isRateLimitError, loginRateLimit, RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } from './security/rateLimit.js'
 import { getOidcConfig } from './auth/oidcClient.js'
+import { testSigninEmails, createTestSigninHandler } from './auth/testSignin.js'
 import { handleLogin } from './auth/login.js'
 import { handleCallback } from './auth/callback.js'
 import { handleLogout } from './auth/logout.js'
@@ -27,14 +28,16 @@ import { apiProxy } from './proxy/apiProxy.js'
 import { ECM_PROXY_PREFIX, ecmProxy } from './proxy/ecmProxy.js'
 import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
+import { publicProxy } from './proxy/publicProxy.js'
 import { configPath, readConfig, TRUST_PROXY } from './config.js'
+import { logAuthEvent } from './auth/authEvents.js'
+import { buildLoggerOptions } from './logging.js'
 import './types/session.js'
 import FastifyVite from '@fastify/vite'
 
 const PROJECT_ROOT = path.join(import.meta.dirname, '..', '..')
 const isDev = process.env.NODE_ENV !== 'production'
 const isCI = Boolean(process.env.CI)
-const useHttps = isDev && !isCI
 
 type AppInstance = FastifyInstance<http.Server | https.Server>
 
@@ -49,13 +52,22 @@ export function envBool(value: string | undefined, defaultValue: boolean): boole
   return defaultValue
 }
 
+/** Explicit TLS override; defaults to HTTPS only in local development outside CI. */
+export function shouldUseHttps(
+  value = process.env.DUOS_SERVER_HTTPS,
+  dev = isDev,
+  ci = isCI,
+): boolean {
+  return envBool(value, dev && !ci)
+}
+
 /**
  * The app-level error handler. The body is always generic: an error message
  * can carry internal detail, and no client branches on it.
  */
 export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
-    request.log.warn({ ip: request.ip, url: request.url }, '[server] rate limit exceeded')
+    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: request.ip, idp: 'unknown' }, 'warn')
     return reply.status(err.statusCode ?? 429).send({ error: RATE_LIMIT_ERROR_CODE })
   }
   request.log.error({ err }, '[server] Unhandled error:')
@@ -72,7 +84,7 @@ export function handleServerError(err: FastifyError, request: FastifyRequest, re
  */
 export function handleCallbackError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
-    request.log.warn({ ip: request.ip }, '[server] rate limit exceeded on the OAuth callback')
+    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: request.ip, idp: 'unknown' }, 'warn')
     return reply.redirect(`/?signInError=${RATE_LIMIT_ERROR_CODE}`)
   }
   return handleServerError(err, request, reply)
@@ -87,16 +99,17 @@ export async function buildApp(): Promise<AppInstance> {
   // @fastify/session silently refuses to persist sessions once cookie.secure
   // is true, since it never sees `request.protocol === 'https'`. See its
   // definition in config.ts for why it names peers instead of counting hops.
+  const useHttps = shouldUseHttps()
   const fastify = (useHttps
     ? Fastify<https.Server>({
         https: {
           key: fs.readFileSync(path.join(PROJECT_ROOT, 'server.key')),
           cert: fs.readFileSync(path.join(PROJECT_ROOT, 'server.crt')),
         },
-        logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' },
+        logger: buildLoggerOptions(),
         trustProxy: TRUST_PROXY,
       })
-    : Fastify({ logger: { level: process.env.FASTIFY_LOG_LEVEL ?? 'info' }, trustProxy: TRUST_PROXY })
+    : Fastify({ logger: buildLoggerOptions(), trustProxy: TRUST_PROXY })
   ) as AppInstance
 
   // Registered before any routes so all errors, including those in plugins, are caught.
@@ -109,10 +122,14 @@ export async function buildApp(): Promise<AppInstance> {
   const configJsonPath = configPath(PROJECT_ROOT, isDev)
   const clientConfig = await readConfig(configJsonPath, fastify.log)
 
+  const fixtureEmails = testSigninEmails(clientConfig)
+
   // Register before routes so Helmet's hooks cover every response.
   const cspReportOnly = envBool(process.env.DUOS_CSP_REPORT_ONLY, true)
   fastify.log.info(`[server] Content Security Policy is ${cspReportOnly ? 'report-only (set DUOS_CSP_REPORT_ONLY=false to enforce)' : 'enforced'}`)
-  await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly }))
+  // On outside development unless a harness turns it off; see headers.ts.
+  const hsts = envBool(process.env.DUOS_HSTS, !isDev)
+  await fastify.register(fastifyHelmet, helmetOptions(clientConfig, { isDev, reportOnly: cspReportOnly, hsts }))
 
   // Resolves the policy's `report-to` group; `report-uri` remains the fallback.
   fastify.addHook('onRequest', async (_request, reply) => {
@@ -121,6 +138,9 @@ export async function buildApp(): Promise<AppInstance> {
 
   // Collect CSP reports in both legacy and BFF modes.
   await fastify.register(cspReportRoute)
+
+  // Public routes must not depend on session infrastructure or the BFF cutover.
+  await fastify.register(publicProxy)
 
   // DB/session infrastructure is configured independently of BFF cutover.
   if (process.env.DUOS_DB_HOST) {
@@ -173,7 +193,7 @@ export async function buildApp(): Promise<AppInstance> {
     await fastify.register(fastifyCookie)
     await fastify.register(fastifySession, sessionPluginOptions({
       secret: sessionSecret,
-      store: createPgSessionStore(fastify.pg),
+      store: createPgSessionStore(fastify.pg, fastify.log),
     }))
 
     // CSRF protection for cookie-authenticated, state-changing auth routes
@@ -212,7 +232,15 @@ export async function buildApp(): Promise<AppInstance> {
     // rather than on the first request.
     const loginLimit = loginRateLimit()
     const callbackLimit = callbackRateLimit()
-    fastify.log.info({ login: loginLimit.max, callback: callbackLimit.max }, '[server] auth rate limits, in requests per minute per client IP')
+    const fixtureLimit = fixtureEmails && testSigninRateLimit()
+    fastify.log.info({ login: loginLimit.max, callback: callbackLimit.max, testSignin: fixtureLimit?.max }, '[server] auth rate limits, in requests per minute per client IP')
+
+    if (fixtureEmails) {
+      fastify.post('/auth/test-signin', {
+        onRequest: fetchMetadataGuard,
+        config: { rateLimit: fixtureLimit },
+      }, createTestSigninHandler(fixtureEmails))
+    }
 
     fastify.post('/auth/login', { config: { rateLimit: loginLimit } }, handleLogin)
     fastify.get('/auth/callback', { config: { rateLimit: callbackLimit }, errorHandler: handleCallbackError }, handleCallback)
@@ -280,7 +308,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const fastify = await buildApp()
     await fastify.listen({ port: PORT, host: HOST })
     if (isDev && !isCI) {
-      const protocol = useHttps ? 'https' : 'http'
+      const protocol = shouldUseHttps() ? 'https' : 'http'
       await open(`${protocol}://local.dsde-dev.broadinstitute.org:${PORT}`)
     }
   }

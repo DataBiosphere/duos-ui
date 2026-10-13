@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { dacNameMap, formatUserDacs, formatUserRoles, institutionName, userDacs, yesNo } from 'src/components/manage_users_table/manageUsersTableUtils'
-import { DacObject, InstitutionInterface, LibraryCard, UserRole } from 'src/types/model'
+import {
+  dacNameMap,
+  formatPreAuth,
+  formatRegistrationDate,
+  formatUserDacs,
+  formatUserRoles,
+  hasRole,
+  institutionName,
+  roleLabel,
+  roleOptions,
+  userDacs,
+  yesNo,
+} from 'src/components/manage_users_table/manageUsersTableUtils'
+import { DacObject, DuosUser, InstitutionInterface, LibraryCard, UserRole } from 'src/types/model'
 
 const role = (name: UserRole['name'], userId = 1): UserRole => ({
   roleId: 1,
@@ -129,5 +141,91 @@ describe('yesNo', () => {
 
   it('reads No for false', () => {
     expect(yesNo(false)).toBe('No')
+  })
+})
+
+describe('formatPreAuth', () => {
+  const cardWithDaas = (daaIds: number[]): LibraryCard => ({
+    ...libraryCard(),
+    daaDetails: daaIds.map(daaId => ({ daaId })),
+  })
+
+  it('reads None when the user has no library card', () => {
+    expect(formatPreAuth(undefined, new Map())).toBe('None')
+  })
+
+  it('reads None when the library card has no daaDetails', () => {
+    expect(formatPreAuth(libraryCard(), new Map())).toBe('None')
+  })
+
+  it('labels a pre-authorized DAA from the lookup map', () => {
+    expect(formatPreAuth(cardWithDaas([1]), new Map([[1, 'Broad DAA v2.pdf']]))).toBe('Broad DAA v2.pdf')
+  })
+
+  it('falls back to a stable token for a DAA missing from the lookup map', () => {
+    expect(formatPreAuth(cardWithDaas([7]), new Map())).toBe('DAA-7')
+  })
+
+  it('lists several pre-authorized DAAs separated by commas', () => {
+    const daaLabelsById = new Map([[1, 'Alpha DAA'], [2, 'Beta DAA']])
+    expect(formatPreAuth(cardWithDaas([1, 2]), daaLabelsById)).toBe('Alpha DAA, Beta DAA')
+  })
+
+  it('lists a repeated DAA once', () => {
+    expect(formatPreAuth(cardWithDaas([1, 1]), new Map([[1, 'Alpha DAA']]))).toBe('Alpha DAA')
+  })
+})
+
+describe('formatRegistrationDate', () => {
+  it('formats a create date as YYYY-MM-DD', () => {
+    expect(formatRegistrationDate(new Date('2022-01-01T00:00:00.000Z'))).toBe('2022-01-01')
+  })
+
+  it('formats a create date received as an ISO string', () => {
+    expect(formatRegistrationDate('2022-01-01T00:00:00.000Z')).toBe('2022-01-01')
+  })
+
+  it('reads the UTC calendar date rather than the viewer local one', () => {
+    expect(formatRegistrationDate('2022-01-01T00:30:00.000Z')).toBe('2022-01-01')
+  })
+
+  it('reads - - when there is no create date', () => {
+    expect(formatRegistrationDate(undefined)).toBe('- -')
+  })
+
+  it('reads - - for an unparseable create date', () => {
+    expect(formatRegistrationDate('not a date')).toBe('- -')
+  })
+})
+
+const withRoles = (...names: UserRole['name'][]): DuosUser => ({ roles: names.map(name => role(name)) } as DuosUser)
+
+describe('roleLabel', () => {
+  it('spaces a multi-word role name', () => {
+    expect(roleLabel('SigningOfficial')).toBe('Signing Official')
+    expect(roleLabel('Admin')).toBe('Admin')
+  })
+})
+
+describe('roleOptions', () => {
+  it('offers each role held by anyone once, sorted by its label, leaving out Researcher', () => {
+    const users = [withRoles('SigningOfficial', 'Researcher'), withRoles('Admin', 'Researcher'), withRoles()]
+
+    expect(roleOptions(users)).toEqual(['Admin', 'SigningOfficial'])
+  })
+
+  it('offers nothing for an empty list', () => {
+    expect(roleOptions([])).toEqual([])
+  })
+})
+
+describe('hasRole', () => {
+  it('matches a user holding the role among others', () => {
+    expect(hasRole(withRoles('Researcher', 'SigningOfficial'), 'SigningOfficial')).toBe(true)
+  })
+
+  it('rejects a user without the role, or without roles', () => {
+    expect(hasRole(withRoles('Researcher'), 'SigningOfficial')).toBe(false)
+    expect(hasRole({} as DuosUser, 'SigningOfficial')).toBe(false)
   })
 })

@@ -12,17 +12,30 @@ jsconfig.json
 /.pnpm-store
 server/node_modules
 
+# The workspace keeps one authoritative lockfile at the root. Any pnpm command
+# run with server/ as the cwd writes a stray nested lock that must never be
+# committed: CI installs from the root lock only.
+server/pnpm-lock.yaml
+
 # IDE
 ./idea
 *.models.json
 models.json
+
+# crash dumps
+# A core dump takes the whole memory of the process that crashed, so one landing in the repo
+# root can carry credentials that were only ever meant to live in that process.
+/core
+/core.[0-9]*
+hs_err_pid*
+*.hprof
 
 # testing
 /coverage
 /.vitest
 /test-results
 /playwright-report
-/test/e2e/fixtures/duos-automation*.json
+/test/e2e/fixtures/duos-automation*
 
 # production
 /build
@@ -31,6 +44,7 @@ models.json
 .DS_Store
 .env
 .env.local
+.env.local.*
 .env.development.local
 .env.test.local
 .env.production.local

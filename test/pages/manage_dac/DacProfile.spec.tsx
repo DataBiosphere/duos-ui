@@ -48,7 +48,6 @@ const makeStudy = (datasetId: number): Study => ({
   piName: 'Test PI',
   publicVisibility: true,
   datasetIds: [datasetId],
-  datasets: [],
   properties: [],
   createDate: '2026-05-01',
   createUserId: 1,

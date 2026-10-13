@@ -4,18 +4,28 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   buildStudyDatasetsQuery,
+  useFrequentlyRequestedWithStudies,
+  useSimilarStudies,
   useStudyDatasets,
   useStudyExportableDatasets,
 } from 'src/hooks/useStudyDetailsData'
 import { DataSet } from 'src/libs/ajax/DataSet'
+import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { ElasticsearchResponse } from 'src/types/elastic'
-import { DatasetTerm, StudyTerm } from 'src/types/model'
+import { DatasetTerm, StudyRecommendation, StudyTerm } from 'src/types/model'
 import { EnumerateSnapshotModel, SnapshotSummaryModel } from 'src/types/tdrModel'
 
 vi.mock('src/libs/ajax/DataSet', () => ({
   DataSet: {
     searchDatasetIndexV2: vi.fn(),
+  },
+}))
+
+vi.mock('src/libs/ajax/StudyRecommendations', () => ({
+  StudyRecommendations: {
+    getSimilar: vi.fn(),
+    getFrequentlyRequestedWith: vi.fn(),
   },
 }))
 
@@ -189,5 +199,107 @@ describe('useStudyExportableDatasets', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toEqual({})
+  })
+})
+
+const recommendation = (studyId: number, datasetIds: number[]): StudyRecommendation => ({
+  studyId,
+  studyName: `Recommended ${studyId}`,
+  studyDescription: `About ${studyId}`,
+  piName: `PI ${studyId}`,
+  species: 'Human',
+  phenotype: 'Asthma',
+  dataTypes: ['WGS'],
+  dataUseCodes: ['GRU'],
+  accessTypes: ['controlled'],
+  datasetCount: datasetIds.length,
+  totalParticipants: 900,
+  datasetIds,
+  modelCount: 1,
+  workspaceCount: 0,
+})
+
+describe.each([
+  { name: 'useSimilarStudies', useList: useSimilarStudies, endpoint: 'getSimilar' as const },
+  {
+    name: 'useFrequentlyRequestedWithStudies',
+    useList: useFrequentlyRequestedWithStudies,
+    endpoint: 'getFrequentlyRequestedWith' as const,
+  },
+])('$name', ({ useList, endpoint }) => {
+  it('maps each recommendation onto a study card, in recommended order', async () => {
+    vi.mocked(StudyRecommendations[endpoint]).mockResolvedValue([
+      recommendation(9, [901]), recommendation(3, [301, 302]),
+    ])
+
+    const { result } = renderHook(() => useList('1'), { wrapper })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(result.current.data?.map(study => study.studyId)).toEqual([9, 3])
+    expect(result.current.data?.[1]).toEqual({
+      studyId: 3,
+      studyName: 'Recommended 3',
+      studyDescription: 'About 3',
+      piName: 'PI 3',
+      species: 'Human',
+      phenotype: 'Asthma',
+      dataCustodianEmail: [],
+      dataTypes: ['WGS'],
+      dataUseCodes: ['GRU'],
+      accessTypes: ['controlled'],
+      datasetCount: 2,
+      totalParticipants: 900,
+      datasetIds: [301, 302],
+      modelCount: 1,
+      workspaceCount: 0,
+    })
+    // The card needs nothing the endpoint did not send
+    expect(DataSet.searchDatasetIndexV2).not.toHaveBeenCalled()
+  })
+
+  it('does not recommend the study being viewed', async () => {
+    vi.mocked(StudyRecommendations[endpoint]).mockResolvedValue([
+      recommendation(1, [101]), recommendation(7, [701]),
+    ])
+
+    const { result } = renderHook(() => useList('1'), { wrapper })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(result.current.data?.map(study => study.studyId)).toEqual([7])
+  })
+
+  /**
+   * The response a Consent build from before the card fields sends. StudyCard reads the arrays
+   * unguarded, so an absent one would take the study page down with it.
+   */
+  it('defaults the card fields an older Consent build omits', async () => {
+    vi.mocked(StudyRecommendations[endpoint]).mockResolvedValue([{
+      studyId: 7,
+      studyName: 'Recommended 7',
+      studyDescription: 'About 7',
+      datasetCount: 1,
+      datasetIds: [701],
+    }])
+
+    const { result } = renderHook(() => useList('1'), { wrapper })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(result.current.data?.[0]).toEqual({
+      studyId: 7,
+      studyName: 'Recommended 7',
+      studyDescription: 'About 7',
+      piName: '',
+      species: '',
+      phenotype: '',
+      dataCustodianEmail: [],
+      dataTypes: [],
+      dataUseCodes: [],
+      accessTypes: [],
+      datasetCount: 1,
+      totalParticipants: undefined,
+      datasetIds: [701],
+      modelCount: 0,
+      workspaceCount: 0,
+    })
   })
 })

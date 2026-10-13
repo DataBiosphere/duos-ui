@@ -109,7 +109,7 @@ const tiles: ConsoleDashboardTile[] = [{
   stats: [{ label: 'Total', value: 4 }],
 }]
 
-const renderDashboard = (consoleTitle?: string) => render(
+const renderDashboard = (consoleTitle?: string, { withPromo = true } = {}) => render(
   <ConsoleDashboard
     consoleTitle={consoleTitle}
     queryKey={queryKey}
@@ -117,7 +117,7 @@ const renderDashboard = (consoleTitle?: string) => render(
     tileMeta={tileMeta}
     resourcesHeading="Helpful Resources"
     resources={resources}
-    promoParagraphs={['Learn more about DUOS.']}
+    promoParagraphs={withPromo ? ['Learn more about DUOS.'] : undefined}
   />,
 )
 
@@ -155,5 +155,11 @@ describe('ConsoleDashboard', () => {
     renderDashboard()
 
     expect(screen.queryByTestId('dashboard-title')).not.toBeInTheDocument()
+  })
+
+  it('leaves the promotion out when there is nothing to promote', () => {
+    renderDashboard('Test Console', { withPromo: false })
+
+    expect(screen.queryByTestId('dashboard-promo')).not.toBeInTheDocument()
   })
 })

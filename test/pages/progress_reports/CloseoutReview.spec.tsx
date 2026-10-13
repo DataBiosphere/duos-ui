@@ -132,7 +132,7 @@ describe('CloseoutReview', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Please note:')).toBeVisible()
-      expect(screen.getByText('Please note:')).toHaveStyle({ fontWeight: 'bold' })
+      expect(screen.getByText('Please note:')).toHaveStyle({ fontWeight: '700' })
     })
   })
 
@@ -144,7 +144,7 @@ describe('CloseoutReview', () => {
     await waitFor(() => {
       const text = screen.getByText(/If there are issues with the content/)
       expect(text).toBeVisible()
-      expect(text).not.toHaveStyle({ fontWeight: 'bold' })
+      expect(text).toHaveStyle({ fontWeight: '400' })
     })
   })
 

@@ -55,6 +55,15 @@ export const STUDIES_AGG: AggregationDefinition = {
   },
 }
 
+/** Documents indexed before these fields became multi-selects still hold a bare string. */
+export const toStringArray = (value: unknown): string[] => {
+  const entries: unknown[] = Array.isArray(value) ? value : [value]
+  return entries
+    .filter((entry): entry is string => typeof entry === 'string')
+    .map(entry => entry.trim())
+    .filter(Boolean)
+}
+
 /** Union of every row type that can appear in the DataGrid */
 export type LibraryRow = DatasetTerm | StudyAggregation | ModelAsset | WorkspaceAsset | ClinicalTrialAsset | BiospecimenAsset | PublicationAsset | PresentationAsset | IntellectualPropertyAsset | FundingResourceAsset
 
@@ -70,8 +79,9 @@ export interface ColumnsProps {
   exportableDatasets?: ExportableDatasets
   radarEnabledDatasetIds?: Set<number>
   soApprovalModelByDatasetId?: Map<number, SoApprovalModel>
-  /** Whether any datasets are currently selected — selection mode disables row-level request actions */
-  hasSelection?: boolean
+  /** The datasets currently selected on the page. A row-level request action is disabled while
+   *  any *other* dataset is selected, so clicking it can never silently drop the rest. */
+  selectedDatasetIds?: number[]
 }
 
 export interface AssetDefinition {

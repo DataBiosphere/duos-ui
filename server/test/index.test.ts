@@ -168,7 +168,7 @@ describe('handleServerError', () => {
   // the child-logger factory a route uses is fixed when that route registers,
   // so a built app's request.log cannot be stubbed afterwards.
   function fakeRequest() {
-    return { ip: '203.0.113.1', url: '/auth/login', log: { warn: vi.fn(), error: vi.fn() } }
+    return { ip: '203.0.113.1', url: '/auth/login?code=SECRET', routeOptions: { url: '/auth/login' }, log: { warn: vi.fn(), error: vi.fn() } }
   }
 
   function fakeReply() {
@@ -241,7 +241,10 @@ describe('handleServerError', () => {
 
     const { request, reply } = await run(err as unknown as Error)
 
-    expect(request.log.warn).toHaveBeenCalled()
+    expect(request.log.warn).toHaveBeenCalledWith(
+      { event: 'auth.rate_limited', route: '/auth/login', ip: '203.0.113.1', idp: 'unknown' },
+      'auth.rate_limited',
+    )
     expect(request.log.error).not.toHaveBeenCalled()
     expect(reply.sentStatus).toBe(429)
     expect(reply.sentBody).toEqual({ error: RATE_LIMIT_ERROR_CODE })
@@ -260,6 +263,29 @@ describe('handleServerError', () => {
     expect(request.log.warn).not.toHaveBeenCalled()
     expect(reply.status).toHaveBeenCalledWith(502)
     expect(reply.send).toHaveBeenCalledWith({ error: 'An unexpected error occurred.' })
+  })
+})
+
+describe('handleCallbackError', () => {
+  it('logs a throttled callback as auth.rate_limited with the route pattern, and never the query string', async () => {
+    const { handleCallbackError } = await import('../src/index.js')
+    const { rateLimitPluginOptions } = await import('../src/security/rateLimit.js')
+    const err = rateLimitPluginOptions.errorResponseBuilder!(
+      {} as FastifyRequest,
+      { statusCode: 429, ban: false, after: '1 minute', max: 60, ttl: 60_000 },
+    )
+    const request = { ip: '203.0.113.2', url: '/auth/callback?code=SECRET&state=SECRET', routeOptions: { url: '/auth/callback' }, log: { warn: vi.fn(), error: vi.fn() } }
+    const reply = { redirect: vi.fn() }
+
+    // oxlint-disable-next-line @typescript-eslint/no-explicit-any
+    handleCallbackError(err as any, request as any, reply as any)
+
+    expect(request.log.warn).toHaveBeenCalledWith(
+      { event: 'auth.rate_limited', route: '/auth/callback', ip: '203.0.113.2', idp: 'unknown' },
+      'auth.rate_limited',
+    )
+    expect(JSON.stringify(request.log.warn.mock.calls)).not.toContain('SECRET')
+    expect(reply.redirect).toHaveBeenCalledWith('/?signInError=rate_limited')
   })
 })
 
@@ -353,7 +379,11 @@ describe('GET /config.json', () => {
 
     const res = await localApp.inject({ method: 'GET', url: '/config.json' })
     expect(res.statusCode).toBe(200)
-    expect(res.json()).toEqual({ apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443', env: 'dev' })
+    expect(res.json()).toEqual({
+      apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443',
+      env: 'dev',
+      bannersUrl: 'https://storage.googleapis.com/duos-banners-dev/dev_notifications.json',
+    })
 
     // HEAD must serve the same (overridden) resource, not fall through to the
     // static file — mismatched GET/HEAD Content-Length corrupts caches.
@@ -420,6 +450,8 @@ describe('BFF auth route registration', () => {
   let dir: string
 
   afterEach(async () => {
+    delete process.env.DUOS_TEST_SIGNIN_ENABLED
+    delete process.env.DUOS_TEST_SIGNIN_EMAILS
     delete process.env.CONFIG_PATH
     delete process.env.DUOS_ECM_URL
     delete process.env.DUOS_TDR_URL
@@ -448,6 +480,26 @@ describe('BFF auth route registration', () => {
     const { buildApp } = await import('../src/index.js')
     return buildApp()
   }
+
+  it.each(['staging', 'prod', undefined])('refuses to boot with test sign-in enabled in %s, even before cutover', async (env) => {
+    process.env.DUOS_TEST_SIGNIN_ENABLED = 'true'
+    await expect(buildAppWithConfig({ env, bffEnabled: false })).rejects.toThrow('dev or BEE only')
+  })
+
+  it('registers the fixture route only when explicitly enabled in dev', async () => {
+    process.env.DUOS_TEST_SIGNIN_ENABLED = 'true'
+    process.env.DUOS_TEST_SIGNIN_EMAILS = ['admin', 'chair', 'member', 'researcher', 'so']
+      .map(role => `${role}@automation.iam.gserviceaccount.com`).join(',')
+    const enabled = await buildAppWithConfig({ env: 'dev', bffEnabled: true })
+    expect(enabled.hasRoute({ method: 'POST', url: '/auth/test-signin' })).toBe(true)
+    // Avoid the mocked session store.
+    expect((await enabled.inject({ method: 'POST', url: '/auth/test-signin', payload: {} })).statusCode).toBe(401)
+    await enabled.close()
+    delete process.env.DUOS_TEST_SIGNIN_ENABLED
+    const disabled = await buildAppWithConfig({ env: 'dev', bffEnabled: true })
+    expect(disabled.hasRoute({ method: 'POST', url: '/auth/test-signin' })).toBe(false)
+    await disabled.close()
+  })
 
   it('registers all four /auth/* routes when bffEnabled is true', async () => {
     const localApp = await buildAppWithConfig({ bffEnabled: true })
@@ -664,6 +716,23 @@ describe('BFF auth route registration', () => {
     await localApp.close()
   })
 
+  it('answers the public metrics route with 503 rather than the SPA page when DUOS_BARD_URL is not set', async () => {
+    delete process.env.DUOS_BARD_URL
+    const localApp = await buildAppWithConfig({ bffEnabled: true })
+
+    const res = await localApp.inject({
+      method: 'POST',
+      url: '/public/metrics/event',
+      headers: { 'content-type': 'application/json' },
+      payload: '{"event":"duos:page_view"}',
+    })
+
+    expect(res.statusCode).toBe(503)
+    expect(res.headers['content-type']).toContain('application/json')
+
+    await localApp.close()
+  })
+
   it('does not register the /bard-api proxy route when bffEnabled is false, even with DUOS_BARD_URL set', async () => {
     process.env.DUOS_BARD_URL = 'https://terra-bard-dev.appspot.com'
     const localApp = await buildAppWithConfig({ bffEnabled: false })
@@ -746,6 +815,21 @@ describe('envBool', () => {
     const { envBool } = await import('../src/index.js')
     for (const v of ['false', 'FALSE', '0', 'no', 'off']) expect(envBool(v, true)).toBe(false)
     for (const v of ['true', 'True', '1', 'yes', 'on']) expect(envBool(v, false)).toBe(true)
+  })
+})
+
+describe('shouldUseHttps', () => {
+  it('terminates TLS in local development only, when nothing overrides it', async () => {
+    const { shouldUseHttps } = await import('../src/index.js')
+    expect(shouldUseHttps(undefined, true, false)).toBe(true)
+    expect(shouldUseHttps(undefined, true, true)).toBe(false)
+    expect(shouldUseHttps(undefined, false, false)).toBe(false)
+  })
+
+  it('lets DUOS_SERVER_HTTPS select the transport in either direction', async () => {
+    const { shouldUseHttps } = await import('../src/index.js')
+    expect(shouldUseHttps('true', false, true)).toBe(true)
+    expect(shouldUseHttps('false', true, false)).toBe(false)
   })
 })
 

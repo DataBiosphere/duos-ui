@@ -137,6 +137,18 @@ describe('makePublicationColumns — DOI column', () => {
   })
 })
 
+describe('makePublicationColumns — Access column', () => {
+  it('renders the access text', () => {
+    renderCell('access', 'open')
+    expect(screen.getByText('open')).toBeInTheDocument()
+  })
+
+  it('renders gracefully when access is empty', () => {
+    const { container } = renderCell('access', '')
+    expect(container.textContent?.trim()).toBe('')
+  })
+})
+
 describe('makePublicationColumns — Authors column', () => {
   it('renders comma-separated author names', () => {
     renderCell('authorNames', ['Alice Smith', 'Bob Jones', 'Carol White'])
@@ -146,6 +158,17 @@ describe('makePublicationColumns — Authors column', () => {
   it('renders gracefully when authorNames is empty', () => {
     const { container } = renderCell('authorNames', [])
     expect(container.textContent?.trim()).toBe('')
+  })
+})
+
+describe('makePublicationColumns — Datasets Cited column', () => {
+  // Behaviour lives in sharedColumns.spec; this is the wiring.
+  it('reads the citation flag and exposes the citation text', () => {
+    const column = makePublicationColumns().find(c => c.field === 'citation')!
+    expect(column.headerName).toBe('Datasets Cited')
+
+    renderCell('citation', true, { citation: true, datasetCitation: 'Smith et al. 2024' })
+    expect(screen.getByText('Yes')).toHaveAccessibleDescription('Smith et al. 2024')
   })
 })
 
@@ -175,5 +198,17 @@ describe('makePublicationColumns — Tags column', () => {
     const chips = container.querySelectorAll('.MuiChip-root')
     expect(chips).toHaveLength(3)
     chips.forEach(chip => expect(chip.textContent).not.toMatch(/^\+\d+$/))
+  })
+})
+
+describe('makePublicationColumns — Access column', () => {
+  it('renders the access text', () => {
+    renderCell('access', 'open')
+    expect(screen.getByText('open')).toBeInTheDocument()
+  })
+
+  it('renders gracefully when access is empty', () => {
+    const { container } = renderCell('access', '')
+    expect(container.textContent?.trim()).toBe('')
   })
 })

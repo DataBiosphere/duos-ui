@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { gzipSync } from 'node:zlib'
+import { Writable } from 'node:stream'
 import Fastify, { type FastifyInstance } from 'fastify'
 import fastifyCookie from '@fastify/cookie'
 import { RefreshFailedError } from '../src/auth/refresh.js'
+import { buildLoggerOptions } from '../src/logging.js'
 import { CSRF_ERROR_CODE, CSRF_EXEMPT_UNSAFE_REQUESTS, PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
 import {
   SESSION_COOKIE,
@@ -58,6 +60,29 @@ describe('apiProxy', () => {
   const freshSession = (accessToken = 'session-access-token'): SessionSeed => ({
     accessToken,
     tokenExpiry: nowSeconds() + 3600,
+  })
+
+  it.each([30, 0])('fixture with %s seconds remaining skips refresh; at expiry the session ends', async (remaining) => {
+    const { refreshAccessToken } = await import('../src/auth/refresh.js')
+    app = await buildAppShell()
+    seedSession(app, { accessToken: 'sa-token', testFixture: true, tokenExpiry: nowSeconds() + remaining })
+    const destroy = vi.fn()
+    app.addHook('onRequest', async (request) => {
+      request.session.destroy = destroy
+    })
+    await app.register(apiProxy)
+    const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+    expect(res.statusCode).toBe(remaining > 0 ? 200 : 401)
+    expect(upstream.received).toHaveLength(remaining > 0 ? 1 : 0)
+    expect(refreshAccessToken).not.toHaveBeenCalled()
+    if (remaining > 0) {
+      expect(destroy).not.toHaveBeenCalled()
+    }
+    else {
+      expect(res.json()).toEqual({ error: 'session_expired' })
+      expect(destroy).toHaveBeenCalledOnce()
+      expect([res.headers['set-cookie']].flat().join(';')).toMatch(/^sessionId=;/)
+    }
   })
 
   describe('upstreamPath', () => {
@@ -1104,6 +1129,50 @@ describe('apiProxy', () => {
       const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
 
       expect(res.statusCode).toBe(503)
+    })
+  })
+
+  describe('auth.session.destroyed events', () => {
+    // The proxy ends sessions for two reasons, and the metrics key on which, so the
+    // reason is asserted rather than the destroy alone.
+    async function buildLoggingApp(seed: SessionSeed): Promise<{ app: FastifyInstance, destroyed: () => Record<string, unknown>[] }> {
+      const lines: string[] = []
+      const stream = new Writable({
+        write(chunk, _enc, done) {
+          lines.push(...chunk.toString().split('\n').filter(Boolean))
+          done()
+        },
+      })
+      const shell = await buildAppShell({ ...buildLoggerOptions(), level: 'info', stream })
+      seedSession(shell, seed)
+      await shell.register(apiProxy)
+      return {
+        app: shell,
+        destroyed: () => lines.map(line => JSON.parse(line) as Record<string, unknown>).filter(entry => entry.event === 'auth.session.destroyed'),
+      }
+    }
+
+    it('logs reason expired when a test-fixture token has expired, without contacting the upstream', async () => {
+      const built = await buildLoggingApp({ accessToken: 'sa-token', testFixture: true, tokenExpiry: nowSeconds() })
+      app = built.app
+
+      await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(built.destroyed()).toEqual([expect.objectContaining({ reason: 'expired', idp: 'unknown' })])
+      expect(upstream.received).toHaveLength(0)
+    })
+
+    it('logs reason upstream_401 when the upstream rejects the session token', async () => {
+      upstream.respondWith((_req, res) => {
+        res.writeHead(401, { 'content-type': 'application/json' })
+        res.end('{"message":"Unauthorized"}')
+      })
+      const built = await buildLoggingApp(freshSession())
+      app = built.app
+
+      await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+
+      expect(built.destroyed()).toEqual([expect.objectContaining({ reason: 'upstream_401' })])
     })
   })
 

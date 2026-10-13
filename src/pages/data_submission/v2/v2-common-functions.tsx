@@ -311,10 +311,10 @@ const getDatasetPropertyValueByKey = <T = unknown>(key: string, dataset: Dataset
   return undefined
 }
 
-export const buildConsentGroupsFromStudy = (study: Study): ConsentGroup2[] => {
+/** Rebuilds a persisted study's consent groups from its datasets, one group per dataset. */
+export const buildConsentGroupsFromDatasets = (datasets: Dataset[]): ConsentGroup2[] => {
   const consentGroups: ConsentGroup2[] = []
-  const studyDatasets = study.datasets || []
-  studyDatasets.forEach((dataset) => {
+  datasets.forEach((dataset) => {
     const consentGroup = {} as ConsentGroup2
     // see consent's ConsentGroupFromDataset.java -> build for an example of how to do this in Java.
     consentGroup.datasetId = dataset.datasetId
