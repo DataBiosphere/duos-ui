@@ -27,7 +27,9 @@ import PGCIcon from 'src/images/PGC_logo.jpg'
 import PBNIcon from 'src/images/PBN_logo.jpg'
 import HelmsleyIcon from 'src/images/Helmsley_logo.png'
 import ccxdpIcon from 'src/images/ccxdp-logo.png'
+import crispiIcon from 'src/images/crispi-logo.png'
 import ga4ghIcon from 'src/images/ga4gh-logo.svg'
+import hartwigIcon from 'src/images/hartwig-logo.svg'
 import nasaIcon from 'src/images/nasa-logo.svg'
 import nasaWormIcon from 'src/images/nasa-logo-worm.svg'
 
@@ -56,6 +58,22 @@ export interface BoolQuery {
 }
 
 type ElasticsearchQuery = MatchPhraseQuery | BoolQuery | null
+
+/**
+ * Builds the query for a library that matches studies by tag alone.
+ * @param tags - Study tags; a study matches if it has any of them
+ */
+const tagsQuery = (...tags: string[]): BoolQuery => ({
+  bool: {
+    should: [
+      {
+        terms: {
+          [StudyDataEsFields.TAGS_KEYWORD]: tags,
+        },
+      },
+    ],
+  },
+})
 
 export interface LibraryVersion {
   query: ElasticsearchQuery
@@ -148,17 +166,7 @@ export const getLibraryVersions = (
       order: 999,
     },
     'elwazi': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['elwazi'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('elwazi'),
       icon: elwaziIcon,
       title: 'eLwazi Data Library',
       featured: true,
@@ -220,238 +228,98 @@ export const getLibraryVersions = (
       order: 999,
     },
     'scp': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['(Platform: Single Cell Portal)'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('(Platform: Single Cell Portal)'),
       icon: scpIcon,
       title: 'Single Cell Portal Data Library',
       featured: true,
       order: 5,
     },
     'nhlbi-blood-disorders-and-blood-safety': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Blood Disorders and Blood Safety'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NHLBI Blood Disorders and Blood Safety'),
       icon: nhlbiIcon,
       title: 'NHLBI Blood Disorders and Blood Safety Data Library',
       featured: false,
       order: 999,
     },
     'nhlbi-health-disparities': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Health Disparities'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NHLBI Health Disparities'),
       icon: nhlbiIcon,
       title: 'NHLBI Health Disparities Data Library',
       featured: false,
       order: 999,
     },
     'nhlbi-heart-and-vascular-diseases': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Heart and Vascular Diseases'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NHLBI Heart and Vascular Diseases'),
       icon: nhlbiIcon,
       title: 'NHLBI Heart and Vascular Diseases Data Library',
       featured: false,
       order: 999,
     },
     'nhlbi-lung-diseases': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Lung Diseases'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NHLBI Lung Diseases'),
       icon: nhlbiIcon,
       title: 'NHLBI Lung Diseases Data Library',
       featured: false,
       order: 999,
     },
     'nhlbi-obesity-nutrition-and-physical-activity': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Obesity, Nutrition, and Physical Activity'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NHLBI Obesity, Nutrition, and Physical Activity'),
       icon: nhlbiIcon,
       title: 'NHLBI Obesity, Nutrition, and Physical Activity Data Library',
       featured: false,
       order: 999,
     },
     'nhlbi-population-and-epidemiology-studies': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Population and Epidemiology Studies'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NHLBI Population and Epidemiology Studies'),
       icon: nhlbiIcon,
       title: 'NHLBI Population and Epidemiology Studies Data Library',
       featured: false,
       order: 999,
     },
     'nhlbi-precision-medicine-activities': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Precision Medicine Activities'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NHLBI Precision Medicine Activities'),
       icon: nhlbiIcon,
       title: 'NHLBI Precision Medicine Activities Data Library',
       featured: false,
       order: 999,
     },
     'nhlbi-research-spectrum': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Research Spectrum'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NHLBI Research Spectrum'),
       icon: nhlbiIcon,
       title: 'NHLBI Research Spectrum Data Library',
       featured: false,
       order: 999,
     },
     'nhlbi-sleep-science-and-sleep-disorders': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Sleep Science and Sleep Disorders'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NHLBI Sleep Science and Sleep Disorders'),
       icon: nhlbiIcon,
       title: 'NHLBI Sleep Science and Sleep Disorders Data Library',
       featured: false,
       order: 999,
     },
     'nhlbi-womens-health': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NHLBI Women\'s Health'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NHLBI Women\'s Health'),
       icon: nhlbiIcon,
       title: 'NHLBI Women\'s Health Data Library',
       featured: false,
       order: 999,
     },
     'anvil': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Platform: AnVIL'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('Platform: AnVIL'),
       icon: anvilIcon,
       title: 'AnVIL Data Library',
       featured: true,
       order: 6,
     },
     'hca': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['HCA_DCP'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('HCA_DCP'),
       icon: hcaIcon,
       title: 'Human Cell Atlas Data Library',
       featured: true,
       order: 7,
     },
     'zoonomics': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['zoonomics'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('zoonomics'),
       icon: zoonomicsIcon,
       title: 'Center for Zoonomics Data Library',
       featured: false,
@@ -465,51 +333,21 @@ export const getLibraryVersions = (
       order: 999,
     },
     'cfde': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['cfde'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('cfde'),
       icon: cfdeIcon,
       title: 'CFDE Data Library',
       featured: false,
       order: 999,
     },
     'firecloud': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['FireCloud'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('FireCloud'),
       icon: firecloudIcon,
       title: 'FireCloud Data Library',
       featured: false,
       order: 999,
     },
     'allofus': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['All of Us'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('All of Us'),
       icon: aouIcon,
       title: 'All of Us Data Library',
       featured: false,
@@ -533,361 +371,165 @@ export const getLibraryVersions = (
       order: 999,
     },
     'ifgc': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['International Fetal Genomics Consortium', 'IFGC'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('International Fetal Genomics Consortium', 'IFGC'),
       icon: ifgcIcon,
       title: 'International Fetal Genomics Consortium Data Library',
       featured: true,
       order: 8,
     },
     'schare': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['SCHARE'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('SCHARE'),
       icon: schareIcon,
       title: 'SCHARE Data Library',
       featured: true,
       order: 9,
     },
     'stanley': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Stanley Center'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('Stanley Center'),
       icon: stanleyIcon,
       title: 'Stanley Center Data Library',
       featured: false,
       order: 999,
     },
     'stanleycenter': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Stanley Center'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('Stanley Center'),
       icon: stanleyIcon,
       title: 'Stanley Center Data Library',
       featured: true,
       order: 10,
     },
     'getzlab': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Getz Lab'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('Getz Lab'),
       icon: getzLabIcon,
       title: 'Getz Lab Data Library',
       featured: false,
       order: 999,
     },
     'asap': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Broad: ASAP'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('Broad: ASAP'),
       icon: asapIcon,
       title: 'Aligning Science Across Parkinson\'s Data Library',
       featured: true,
       order: 11,
     },
     'gp2': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['GP2'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('GP2'),
       icon: gp2Icon,
       title: 'Global Parkinson\'s Genetics Program Data Library',
       featured: true,
       order: 12,
     },
     'broadasd': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Broad: ASD'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('Broad: ASD'),
       icon: broadIcon,
       title: 'Broad Institute Autism Spectrum Disorder (ASD) Data Library',
       featured: true,
       order: 13,
     },
     'pbn': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['PBN'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('PBN'),
       icon: PBNIcon,
       title: 'Psychiatric Biomarkers Network Data Library',
       featured: true,
       order: 14,
     },
     'pgc': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['PGC'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('PGC'),
       icon: PGCIcon,
       title: 'Psychiatric Genomics Consortium - PsychChip Data Library',
       featured: true,
       order: 15,
     },
     'broadsczbd': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Broad: SCZ_BD'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('Broad: SCZ_BD'),
       icon: broadIcon,
       title: 'Broad Institute Schizophrenia & Bipolar Disorder Data Library',
       featured: true,
       order: 16,
     },
     'esp': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Broad: Epi25'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('Broad: Epi25'),
       icon: epi25Icon,
       title: 'Broad Institute Epilepsy Data Library',
       featured: true,
       order: 17,
     },
     'broadibd': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Broad: IBD'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('Broad: IBD'),
       icon: broadIcon,
       title: 'Broad Institute IBD Data Library',
       featured: true,
       order: 18,
     },
     'helmsley': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Helmsley'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('Helmsley'),
       icon: HelmsleyIcon,
       title: 'Helmsley Data Library',
       featured: true,
       order: 19,
     },
     'ged': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Broad: GED'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('Broad: GED'),
       icon: gedIcon,
       title: 'Genetics of Eating Disorders Data Library',
       featured: true,
       order: 20,
     },
     'ccxdp': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['CCXDP'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('CCXDP'),
       icon: ccxdpIcon,
       title: 'CCXDP Data Library',
       featured: true,
       order: 21,
     },
     'ncpi-duo': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NCPI DUO'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NCPI DUO'),
       icon: ncpiIcon,
       title: 'NCPI DUO Data Library',
       featured: true,
       order: 22,
     },
     'count-me-in': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['Count Me In'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('Count Me In'),
       icon: countMeInIcon,
       title: 'Count Me In Data Library',
       featured: true,
       order: 23,
     },
     'nasa': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NASA'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NASA'),
       icon: nasaIcon,
       title: 'NASA Data Library',
       featured: false,
       order: 24,
     },
     'nasa2': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['NASA'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('NASA'),
       icon: nasaWormIcon,
       title: 'NASA Data Library',
       featured: false,
       order: 25,
     },
     'ga4gh': {
-      query: {
-        bool: {
-          should: [
-            {
-              terms: {
-                [StudyDataEsFields.TAGS_KEYWORD]: ['ga4gh'],
-              },
-            },
-          ],
-        },
-      },
+      query: tagsQuery('ga4gh'),
       icon: ga4ghIcon,
       title: 'GA4GH Data Library',
       featured: false,
       order: 999,
+    },
+    'crispi': {
+      query: tagsQuery('CRISPI'),
+      icon: crispiIcon,
+      title: 'CRISPI Data Library',
+      featured: true,
+      order: 26,
+    },
+    'hartwig': {
+      query: tagsQuery('Hartwig'),
+      icon: hartwigIcon,
+      title: 'Hartwig Medical Foundation Data Library',
+      featured: false,
+      order: 27,
     },
   }
 }

@@ -32,6 +32,7 @@ import { FORM_MODES } from 'src/components/institution_table/InstitutionFormMode
 import AdminManageInstitutions from 'src/pages/AdminManageInstitutions'
 import AdminManageLC from 'src/pages/AdminManageLC'
 import AdminDaaAssociations from 'src/pages/AdminDaaAssociations'
+import AdminEmailLog from 'src/pages/AdminEmailLog'
 import AdminManageDarCollections from 'src/pages/AdminManageDarCollections'
 import AdminMetrics from 'src/pages/admin_console/AdminMetrics'
 import AdminDashboard from 'src/pages/admin_console/AdminDashboard'
@@ -154,6 +155,7 @@ const AppRoutes = (props: AppRoutesProps) => {
           <Route path="/admin_manage_institutions" element={<AdminManageInstitutions />} />
           <Route path="/admin_manage_lc/" element={<AdminManageLC />} />
           <Route path="/admin_daa_associations" element={<AdminDaaAssociations />} />
+          <Route path="/admin_email_log" element={<AdminEmailLog />} />
           <Route path="/admin_manage_dar_collections/" element={<AdminManageDarCollections />} />
           <Route path="/manage_add_dac_daa" element={<EditDac />} />
         </Route>

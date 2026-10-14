@@ -659,6 +659,32 @@ describe('fetchAdapter - Fetch methods', () => {
       await vi.waitFor(() => expect(ErrorReporter.report).toHaveBeenCalledOnce(), { timeout: 5000 })
     })
 
+    it('reports the URL without its query string', async () => {
+      fetchMock.mockResolvedValue(
+        new Response('Not Found', {
+          status: 404,
+          headers: { 'content-type': 'text/html' },
+        }),
+      )
+
+      await fetchGet('/api/mail/sends', { params: { search: 'Ada Lovelace' } }).catch(() => {})
+      await vi.waitFor(() => expect(ErrorReporter.report).toHaveBeenCalledOnce(), { timeout: 5000 })
+      expect(vi.mocked(ErrorReporter.report).mock.calls[0][0]).not.toContain('Ada')
+    })
+
+    it('does not report a request its caller aborted', async () => {
+      const controller = new AbortController()
+      controller.abort()
+      const abortError = new DOMException('The user aborted a request.', 'AbortError')
+      fetchMock.mockRejectedValue(abortError)
+
+      const error = await fetchGet('/api/mail/sends', { signal: controller.signal }).catch(e => e)
+      await new Promise(resolve => setTimeout(resolve, 0))
+
+      expect(error).toBe(abortError)
+      expect(ErrorReporter.report).not.toHaveBeenCalled()
+    })
+
     it('still reports other endpoints when bardApiUrl is blank', async () => {
       vi.mocked(Config.getBardApiUrl).mockResolvedValue('')
       fetchMock.mockResolvedValue(
