@@ -249,6 +249,32 @@ describe('Home page', () => {
     })
   })
 
+  describe('header', () => {
+    it('plays a muted, looping video hidden from screen readers, with the image as its poster', () => {
+      const { container } = renderHome(false)
+      const video = container.querySelector('video')!
+      expect(video).not.toBeNull()
+      expect(video.muted).toBe(true)
+      expect(video).toHaveAttribute('loop')
+      expect(video).toHaveAttribute('playsinline')
+      expect(video).toHaveAttribute('aria-hidden', 'true')
+      expect(video).toHaveAttribute('poster')
+      expect([...video.querySelectorAll('source')].map(s => s.getAttribute('type'))).toEqual(['video/webm', 'video/mp4'])
+    })
+
+    it('shows the static image instead when the user prefers reduced motion', () => {
+      vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }))
+      try {
+        const { container } = renderHome(false)
+        expect(container.querySelector('video')).toBeNull()
+        expect(screen.getByAltText('Home header background')).toBeInTheDocument()
+      }
+      finally {
+        vi.unstubAllGlobals()
+      }
+    })
+  })
+
   describe('features by role', () => {
     const originalScrollIntoView = Element.prototype.scrollIntoView
 
