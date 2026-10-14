@@ -619,6 +619,7 @@ const HeroMedia = () => {
         loop
         playsInline
         aria-hidden="true"
+        tabIndex={-1}
       >
         <source src={homeHeaderVideoWebm} type="video/webm" />
         <source src={homeHeaderVideoMp4} type="video/mp4" />

@@ -274,6 +274,7 @@ describe('Home page', () => {
       expect(video).toHaveAttribute('loop')
       expect(video).toHaveAttribute('playsinline')
       expect(video).toHaveAttribute('aria-hidden', 'true')
+      expect(video).toHaveAttribute('tabindex', '-1')
       expect(video).toHaveAttribute('poster', 'home_header_background.png')
       expect([...video.querySelectorAll('source')].map(source => source.getAttribute('src')))
         .toEqual(['home_header_background.webm', 'home_header_background.mp4'])
