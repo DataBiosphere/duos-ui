@@ -45,7 +45,7 @@ describe('HeroNetwork', () => {
   it('slowly reshapes every cluster', () => {
     const svg = renderNetwork(true, false)
     const morphs = [...svg.querySelectorAll('.morph')]
-    expect(morphs.length).toBe(svg.querySelectorAll('g.drift').length)
+    expect(morphs).toHaveLength(svg.querySelectorAll('g.drift').length)
     morphs.forEach((el) => {
       expect(getComputedStyle(el).animationName).not.toBe(getComputedStyle(el.parentElement!).animationName)
       expect((el as SVGGElement).style.getPropertyValue('--skew')).toMatch(/deg$/)
