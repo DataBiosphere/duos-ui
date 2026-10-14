@@ -10,6 +10,7 @@ import {
   Chip,
   Container,
   Grid,
+  IconButton,
   LinearProgress,
   Link,
   Paper,
@@ -17,11 +18,11 @@ import {
   Stack,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from '@mui/material'
 import type { SxProps, Theme } from '@mui/material'
 import type { SystemStyleObject } from '@mui/system'
-import { ArrowForward, CheckCircleOutlined } from '@mui/icons-material'
-import homeHeaderBackground from 'src/images/home_header_background.png'
+import { ArrowForward, CheckCircleOutlined, Pause, PlayArrow } from '@mui/icons-material'
 import duosLogoImg from 'src/images/duos_logo.svg'
 import duosDiagram from 'src/images/DUOS_Homepage_diagram.svg'
 import broadLogo from 'src/images/broad_logo_allwhite.png'
@@ -34,6 +35,7 @@ import { Link as RouterLink, useLocation, useNavigate } from 'react-router'
 import { getLibraryVersions } from 'src/libs/libraryVersions'
 import { handleSignIn } from 'src/libs/signInUtils'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
+import { HeroNetwork } from 'src/components/HeroNetwork'
 
 export interface HomeProps {
   isLogged: boolean
@@ -56,6 +58,14 @@ const homeBannerDescription: React.CSSProperties = {
   whiteSpace: 'pre-wrap',
   padding: '0 10rem',
 }
+
+const heroMedia: React.CSSProperties = {
+  display: 'block',
+  width: '100%',
+  height: 'inherit',
+}
+
+const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
 const duosLogoStyle: React.CSSProperties = {
   height: '80px',
@@ -471,8 +481,7 @@ const roleSections: RoleSection[] = [
 const scrollToRole = (id: string) => {
   const target = document.getElementById(`role-${id}`)
   if (!target) return
-  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
-  target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+  target.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' })
   // Moves keyboard focus with the scroll, so Tab continues from the section on screen.
   target.focus({ preventScroll: true })
 }
@@ -569,6 +578,37 @@ const RoleRow = ({ role, reversed, onContact }: { role: RoleSection, reversed: b
   )
 }
 
+const HeroMedia = () => {
+  const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
+  const [paused, setPaused] = useState(false)
+
+  if (reduceMotion) {
+    return <HeroNetwork style={heroMedia} animated={false} paused />
+  }
+
+  return (
+    <>
+      <HeroNetwork style={heroMedia} animated paused={paused} />
+      <IconButton
+        onClick={() => setPaused(!paused)}
+        aria-label={paused ? 'Play background animation' : 'Pause background animation'}
+        size="small"
+        sx={{
+          'position': 'absolute',
+          'right': 12,
+          'bottom': 12,
+          'zIndex': 1,
+          'color': '#FFFFFF',
+          'backgroundColor': 'rgba(15, 37, 55, 0.45)',
+          '&:hover': { backgroundColor: 'rgba(15, 37, 55, 0.65)' },
+        }}
+      >
+        {paused ? <PlayArrow fontSize="small" /> : <Pause fontSize="small" />}
+      </IconButton>
+    </>
+  )
+}
+
 const Home = ({ isLogged }: Readonly<HomeProps>) => {
   const location = useLocation()
   const navigate = useNavigate()
@@ -591,7 +631,7 @@ const Home = ({ isLogged }: Readonly<HomeProps>) => {
     <main className="row">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div className="row" style={{ backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}>
-          <img style={{ height: 'inherit', minWidth: '100%' }} src={homeHeaderBackground} alt="Home header background" />
+          <HeroMedia />
           <div style={{ position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
             <img style={duosLogoStyle} alt="DUOS logo" src={duosLogoImg} />
             <h1 style={homeTitle}>Data Use Oversight System</h1>

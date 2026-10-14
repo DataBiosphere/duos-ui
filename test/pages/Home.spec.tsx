@@ -47,10 +47,19 @@ vi.mock('src/components/modals/SupportRequestModal', () => ({
     showModal ? React.createElement('div', { 'data-testid': 'support-modal' }) : null,
 }))
 
-vi.mock('src/images/home_header_background.png', () => ({ default: 'home_header_background.png' }))
 vi.mock('src/images/duos_logo.svg', () => ({ default: 'duos_logo.svg' }))
 vi.mock('src/images/DUOS_Homepage_diagram.svg', () => ({ default: 'DUOS_Homepage_diagram.svg' }))
 vi.mock('src/images/broad_logo_allwhite.png', () => ({ default: 'broad_logo_allwhite.png' }))
+
+const stubReducedMotion = (reduce: boolean) =>
+  vi.stubGlobal('matchMedia', vi.fn().mockImplementation((query: string) => ({
+    matches: reduce && query === '(prefers-reduced-motion: reduce)',
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+  })))
 
 const renderHome = (isLogged: boolean) =>
   render(
@@ -249,6 +258,38 @@ describe('Home page', () => {
     })
   })
 
+  describe('header', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
+
+    const network = (container: HTMLElement) => container.querySelector('svg[viewBox="0 0 1440 440"]')
+
+    it('draws the decorative network animation, hidden from screen readers', () => {
+      const { container } = renderHome(false)
+      expect(network(container)).toHaveAttribute('aria-hidden', 'true')
+      expect(network(container)!.querySelectorAll('.drift').length).toBeGreaterThan(0)
+    })
+
+    it('pauses and resumes the animation from its button', () => {
+      const { container } = renderHome(false)
+      const playState = () => getComputedStyle(network(container)!.querySelector('.drift')!).animationPlayState
+      expect(playState()).toBe('running')
+      fireEvent.click(screen.getByRole('button', { name: 'Pause background animation' }))
+      expect(playState()).toBe('paused')
+      fireEvent.click(screen.getByRole('button', { name: 'Play background animation' }))
+      expect(playState()).toBe('running')
+    })
+
+    it('shows the network without a pause button when the user prefers reduced motion', () => {
+      stubReducedMotion(true)
+      const { container } = renderHome(false)
+      expect(network(container)).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /background animation/ })).toBeNull()
+    })
+  })
+
   describe('features by role', () => {
     const originalScrollIntoView = Element.prototype.scrollIntoView
 
@@ -285,7 +326,7 @@ describe('Home page', () => {
     it('jumps without animation when the user prefers reduced motion', async () => {
       const scrollIntoView = vi.fn()
       Element.prototype.scrollIntoView = scrollIntoView
-      vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }))
+      stubReducedMotion(true)
       try {
         renderHome(false)
         await act(async () => {
