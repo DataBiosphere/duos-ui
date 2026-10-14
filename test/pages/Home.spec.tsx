@@ -279,16 +279,23 @@ describe('Home page', () => {
         .toEqual(['home_header_background.webm', 'home_header_background.mp4'])
     })
 
-    it('pauses and resumes the video from its button', () => {
+    it('pauses and resumes the video from its button, following the video\'s own state', () => {
       const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {})
       const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
-      renderHome(false)
+      const pausedState = vi.spyOn(HTMLMediaElement.prototype, 'paused', 'get')
+      const { container } = renderHome(false)
+      const video = container.querySelector('video')!
 
+      pausedState.mockReturnValue(false)
       fireEvent.click(screen.getByRole('button', { name: 'Pause background animation' }))
       expect(pause).toHaveBeenCalledTimes(1)
+      fireEvent.pause(video)
+      expect(video).not.toHaveAttribute('autoplay')
 
+      pausedState.mockReturnValue(true)
       fireEvent.click(screen.getByRole('button', { name: 'Play background animation' }))
       expect(play).toHaveBeenCalledTimes(1)
+      fireEvent.play(video)
       expect(screen.getByRole('button', { name: 'Pause background animation' })).toBeInTheDocument()
     })
 

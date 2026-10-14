@@ -593,13 +593,12 @@ const HeroMedia = () => {
   const togglePlayback = () => {
     const video = videoRef.current
     if (!video) return
-    if (paused) {
+    if (video.paused) {
       void video.play()
     }
     else {
       video.pause()
     }
-    setPaused(!paused)
   }
 
   return (
@@ -612,7 +611,10 @@ const HeroMedia = () => {
         }}
         style={heroMedia}
         poster={homeHeaderBackground}
-        autoPlay
+        // Kept off after a pause, so a video remounted by a motion-setting change stays paused.
+        autoPlay={!paused}
+        onPlay={() => setPaused(false)}
+        onPause={() => setPaused(true)}
         muted
         loop
         playsInline
