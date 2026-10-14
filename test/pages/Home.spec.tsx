@@ -48,9 +48,21 @@ vi.mock('src/components/modals/SupportRequestModal', () => ({
 }))
 
 vi.mock('src/images/home_header_background.png', () => ({ default: 'home_header_background.png' }))
+vi.mock('src/images/home_header_background.webm', () => ({ default: 'home_header_background.webm' }))
+vi.mock('src/images/home_header_background.mp4', () => ({ default: 'home_header_background.mp4' }))
 vi.mock('src/images/duos_logo.svg', () => ({ default: 'duos_logo.svg' }))
 vi.mock('src/images/DUOS_Homepage_diagram.svg', () => ({ default: 'DUOS_Homepage_diagram.svg' }))
 vi.mock('src/images/broad_logo_allwhite.png', () => ({ default: 'broad_logo_allwhite.png' }))
+
+const stubReducedMotion = (reduce: boolean) =>
+  vi.stubGlobal('matchMedia', vi.fn().mockImplementation((query: string) => ({
+    matches: reduce && query === '(prefers-reduced-motion: reduce)',
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+  })))
 
 const renderHome = (isLogged: boolean) =>
   render(
@@ -250,28 +262,42 @@ describe('Home page', () => {
   })
 
   describe('header', () => {
-    it('plays a muted, looping video hidden from screen readers, with the image as its poster', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
+
+    it('plays a muted, looping video hidden from screen readers, with the header image as its poster', () => {
       const { container } = renderHome(false)
       const video = container.querySelector('video')!
-      expect(video).not.toBeNull()
-      expect(video.muted).toBe(true)
+      expect(video).toHaveAttribute('muted')
       expect(video).toHaveAttribute('loop')
       expect(video).toHaveAttribute('playsinline')
       expect(video).toHaveAttribute('aria-hidden', 'true')
-      expect(video).toHaveAttribute('poster')
-      expect([...video.querySelectorAll('source')].map(s => s.getAttribute('type'))).toEqual(['video/webm', 'video/mp4'])
+      expect(video).toHaveAttribute('poster', 'home_header_background.png')
+      expect([...video.querySelectorAll('source')].map(source => source.getAttribute('src')))
+        .toEqual(['home_header_background.webm', 'home_header_background.mp4'])
     })
 
-    it('shows the static image instead when the user prefers reduced motion', () => {
-      vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }))
-      try {
-        const { container } = renderHome(false)
-        expect(container.querySelector('video')).toBeNull()
-        expect(screen.getByAltText('Home header background')).toBeInTheDocument()
-      }
-      finally {
-        vi.unstubAllGlobals()
-      }
+    it('pauses and resumes the video from its button', () => {
+      const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {})
+      const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      renderHome(false)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Pause background animation' }))
+      expect(pause).toHaveBeenCalledTimes(1)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Play background animation' }))
+      expect(play).toHaveBeenCalledTimes(1)
+      expect(screen.getByRole('button', { name: 'Pause background animation' })).toBeInTheDocument()
+    })
+
+    it('shows the static image, without a video or pause button, when the user prefers reduced motion', () => {
+      stubReducedMotion(true)
+      const { container } = renderHome(false)
+      expect(container.querySelector('video')).toBeNull()
+      expect(screen.queryByRole('button', { name: /background animation/ })).toBeNull()
+      expect(container.querySelector('img[src="home_header_background.png"]')).toHaveAttribute('alt', '')
     })
   })
 
@@ -311,7 +337,7 @@ describe('Home page', () => {
     it('jumps without animation when the user prefers reduced motion', async () => {
       const scrollIntoView = vi.fn()
       Element.prototype.scrollIntoView = scrollIntoView
-      vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }))
+      stubReducedMotion(true)
       try {
         renderHome(false)
         await act(async () => {
