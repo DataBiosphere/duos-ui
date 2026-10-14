@@ -205,8 +205,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
               <p data-cy="restricted-countries-notice" style={{ fontStyle: 'italic', color: '#666', marginBottom: '0.75rem' }}>
                 Users from any of the following countries will not be approved consistent with
                 {' '}
-                <a href="https://www.ecfr.gov/current/title-28/chapter-I/part-202" target="_blank" rel="noreferrer">28 Code of Federal Regulations (CFR) Part 202</a>
-                : China (including Hong Kong and Macau), Russia, Iran, North Korea, Cuba, and Venezuela.
+                <a href="https://www.ecfr.gov/current/title-28/chapter-I/part-202" target="_blank" rel="noreferrer">28 Code of Federal Regulations (CFR) Part 202</a>: China (including Hong Kong and Macau), Russia, Iran, North Korea, Cuba, and Venezuela.
               </p>
             )}
             {rules.map(rule => (

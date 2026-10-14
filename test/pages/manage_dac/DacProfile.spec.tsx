@@ -146,6 +146,21 @@ describe('DacProfile', () => {
     expect(await screen.findByText('GRU-NPU')).toBeTruthy()
   })
 
+  it('names the tier of an Other restriction only once in the data use tooltip', async () => {
+    vi.mocked(DAC.get).mockResolvedValue(existingDac)
+    vi.mocked(DAC.datasets).mockResolvedValue([
+      makeDataset({ datasetId: 1, name: 'Approved Dataset', dacApproval: true }),
+    ])
+    vi.mocked(DataUseTranslation.translateDataUseRestrictions).mockResolvedValue([
+      { code: 'OTH1', description: 'Primary Other: Approved projects only', type: 'Permissions' },
+    ])
+
+    await renderDacProfile()
+    fireEvent.mouseOver(await screen.findByText('OTH1'))
+
+    expect(await screen.findByText('Primary — OTH1: Approved projects only')).toBeTruthy()
+  })
+
   it('shows "No datasets" message when there are no approved datasets', async () => {
     vi.mocked(DAC.get).mockResolvedValue(existingDac)
     vi.mocked(DAC.datasets).mockResolvedValue([

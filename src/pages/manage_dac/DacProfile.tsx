@@ -41,11 +41,17 @@ const getDatasetProperty = (properties: DatasetProperty[], propName: string): st
   return prop?.propertyValue ?? ''
 }
 
+// The chip tooltip already names the tier, so drop the translator's "Primary Other: " prefix
+const OTHER_TIER_PREFIX = /^(Primary|Secondary) Other: /
+
 // Mirrors the search index summary the Data Library chip is built from
-const toDataUseSummary = (translations: TranslationEntry[]): DataUseSummary => ({
-  primary: translations.filter(t => t.type === ControlledAccessType.permissions),
-  secondary: translations.filter(t => t.type === ControlledAccessType.modifiers),
-})
+const toDataUseSummary = (translations: TranslationEntry[]): DataUseSummary => {
+  const terms = translations.map(t => ({ ...t, description: t.description.replace(OTHER_TIER_PREFIX, '') }))
+  return {
+    primary: terms.filter(t => t.type === ControlledAccessType.permissions),
+    secondary: terms.filter(t => t.type === ControlledAccessType.modifiers),
+  }
+}
 
 const translateDataset = async (dataset: Dataset): Promise<[number, DataUseSummary]> => {
   const translations = await DataUseTranslation.translateDataUseRestrictions(dataset.dataUse)
