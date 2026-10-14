@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, fireEvent, act, within } from '@testing-library/react'
+import { MemoryRouter, Route, Routes } from 'react-router'
 import Home from 'src/pages/Home'
 
 vi.mock('src/libs/libraryVersions', () => ({
@@ -59,6 +59,9 @@ const renderHome = (isLogged: boolean) =>
     </MemoryRouter>,
   )
 
+const librariesRegion = () => screen.getByRole('region', { name: 'Search Data Libraries in DUOS' })
+const libraryLinks = () => within(librariesRegion()).getAllByRole('link')
+
 describe('Home page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -86,10 +89,9 @@ describe('Home page', () => {
 
     it('calls handleSignIn when a library link is clicked', async () => {
       const { handleSignIn } = await import('src/libs/signInUtils')
-      const { container } = renderHome(false)
-      const libraryLink = container.querySelector('.logo-card a')!
+      renderHome(false)
       await act(async () => {
-        fireEvent.click(libraryLink)
+        fireEvent.click(libraryLinks()[0])
       })
       expect(handleSignIn).toHaveBeenCalled()
     })
@@ -99,21 +101,38 @@ describe('Home page', () => {
       expect(screen.queryByTitle('Please login to access Terra Data Library')).not.toBeInTheDocument()
     })
 
-    it('renders one card per featured library, each with a link', () => {
-      const { container } = renderHome(false)
-      const cards = container.querySelectorAll('.logo-card')
-      expect(cards).toHaveLength(3)
-      cards.forEach((card) => {
-        expect(card.querySelector('a')).not.toBeNull()
+    it('renders one link per featured library, each wrapping its logo', () => {
+      renderHome(false)
+      const links = libraryLinks()
+      expect(links).toHaveLength(3)
+      links.forEach((link) => {
+        expect(link.querySelector('.logo-card')).not.toBeNull()
       })
     })
 
     it('calls handleSignIn with the target library path when a card is clicked', async () => {
       const { handleSignIn } = await import('src/libs/signInUtils')
-      const { container } = renderHome(false)
-      const libraryLink = container.querySelector('.logo-card a')!
+      renderHome(false)
       await act(async () => {
-        fireEvent.click(libraryLink)
+        fireEvent.click(libraryLinks()[0])
+      })
+      expect(handleSignIn).toHaveBeenCalledWith('/datalibrary', expect.any(Function))
+    })
+
+    it('treats a click on the library label as a click on the card', async () => {
+      const { handleSignIn } = await import('src/libs/signInUtils')
+      renderHome(false)
+      await act(async () => {
+        fireEvent.click(within(librariesRegion()).getByText('eLwazi'))
+      })
+      expect(handleSignIn).toHaveBeenCalledWith('/datalibrary/elwazi', expect.any(Function))
+    })
+
+    it('calls handleSignIn for the Data Library when "Sign In to Browse Data" is clicked', async () => {
+      const { handleSignIn } = await import('src/libs/signInUtils')
+      renderHome(false)
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Sign In to Browse Data' }))
       })
       expect(handleSignIn).toHaveBeenCalledWith('/datalibrary', expect.any(Function))
     })
@@ -151,34 +170,37 @@ describe('Home page', () => {
       expect(screen.queryByTitle('Terra')).not.toBeInTheDocument()
     })
 
-    it('renders library labels in order', () => {
-      const { container } = renderHome(true)
-      const logoCardImgs = container.querySelectorAll('.logo-card img')
-      expect(logoCardImgs[0]).toHaveAttribute('alt', 'DUOS')
-      expect(logoCardImgs[1]).toHaveAttribute('alt', 'Broad')
-      expect(logoCardImgs[2]).toHaveAttribute('alt', 'eLwazi')
+    it('renders library links in order', () => {
+      renderHome(true)
+      expect(libraryLinks().map(link => link.textContent)).toEqual(['DUOS', 'Broad', 'eLwazi'])
     })
 
     it('applies dark background styling to the Broad card', () => {
       renderHome(true)
-      const broadImg = screen.getByAltText('Broad')
-      const logoCar = broadImg.closest('.logo-card')
-      expect(logoCar).toHaveStyle({ background: '#1F3B50', padding: '15px' })
+      const logoCard = screen.getByRole('link', { name: 'Broad' }).querySelector('.logo-card')
+      expect(logoCard).toHaveStyle({ background: '#1F3B50', padding: '15px' })
     })
 
     it('navigates directly without calling handleSignIn when logged in', async () => {
       const { handleSignIn } = await import('src/libs/signInUtils')
-      const { container } = renderHome(true)
-      const libraryLink = container.querySelector('.logo-card a')!
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<Home isLogged={true} />} />
+            <Route path="/datalibrary/broad" element={<div>Broad library page</div>} />
+          </Routes>
+        </MemoryRouter>,
+      )
       await act(async () => {
-        fireEvent.click(libraryLink)
+        fireEvent.click(screen.getByRole('link', { name: 'Broad' }))
       })
       expect(handleSignIn).not.toHaveBeenCalled()
+      expect(screen.getByText('Broad library page')).toBeInTheDocument()
     })
 
     it('renders one card per featured library', () => {
-      const { container } = renderHome(true)
-      expect(container.querySelectorAll('.logo-card')).toHaveLength(3)
+      renderHome(true)
+      expect(libraryLinks()).toHaveLength(3)
     })
   })
 
@@ -197,6 +219,89 @@ describe('Home page', () => {
       expect(screen.queryByTestId('support-modal')).not.toBeInTheDocument()
       await act(async () => {
         fireEvent.click(screen.getByText('Request a Meeting'))
+      })
+      expect(screen.getByTestId('support-modal')).toBeInTheDocument()
+    })
+  })
+
+  describe('page structure', () => {
+    it('renders its content inside a main landmark', () => {
+      renderHome(false)
+      expect(screen.getByRole('main')).toBeInTheDocument()
+    })
+
+    it('never skips a heading level', () => {
+      const { container } = renderHome(false)
+      const levels = [...container.querySelectorAll('h1, h2, h3, h4, h5, h6')].map(h => Number(h.tagName[1]))
+      expect(levels[0]).toBe(1)
+      levels.slice(1).forEach((level, i) => expect(level).toBeLessThanOrEqual(levels[i] + 1))
+    })
+
+    it.each([
+      ['Who uses DUOS?', 'Built for every role in data sharing'],
+      ['Streamline access oversight', 'DUOS for DACs'],
+      ['Data Submitters', 'Register studies and make them discoverable'],
+    ])('places "%s" after its heading so screen readers reach the heading first', (label, heading) => {
+      renderHome(false)
+      const headingEl = screen.getByRole('heading', { name: heading })
+      const labelEl = within(headingEl.parentElement!).getByText(label)
+      expect(headingEl.compareDocumentPosition(labelEl) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+  })
+
+  describe('features by role', () => {
+    const originalScrollIntoView = Element.prototype.scrollIntoView
+
+    afterEach(() => {
+      Element.prototype.scrollIntoView = originalScrollIntoView
+    })
+
+    it.each([
+      ['researcher', 'Request controlled-access data in one application'],
+      ['submitter', 'Register studies and make them discoverable'],
+      ['dac', 'Review requests with full context'],
+      ['so', 'Authorize researchers at your institution'],
+    ])('renders the %s section', (id, title) => {
+      const { container } = renderHome(false)
+      const section = container.querySelector(`#role-${id}`)!
+      expect(section).not.toBeNull()
+      expect(section).toHaveTextContent(title)
+    })
+
+    it('scrolls to and focuses the matching section when a role chip is clicked', async () => {
+      const scrollIntoView = vi.fn()
+      Element.prototype.scrollIntoView = scrollIntoView
+      const { container } = renderHome(false)
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Signing Officials' }))
+      })
+      const section = container.querySelector('#role-so')
+      expect(scrollIntoView).toHaveBeenCalledTimes(1)
+      expect(scrollIntoView.mock.contexts[0]).toBe(section)
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
+      expect(section).toHaveFocus()
+    })
+
+    it('jumps without animation when the user prefers reduced motion', async () => {
+      const scrollIntoView = vi.fn()
+      Element.prototype.scrollIntoView = scrollIntoView
+      vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }))
+      try {
+        renderHome(false)
+        await act(async () => {
+          fireEvent.click(screen.getByRole('button', { name: 'Researchers' }))
+        })
+        expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' })
+      }
+      finally {
+        vi.unstubAllGlobals()
+      }
+    })
+
+    it('opens contact modal from the data submitter section', async () => {
+      renderHome(false)
+      await act(async () => {
+        fireEvent.click(screen.getByText('Talk to our team'))
       })
       expect(screen.getByTestId('support-modal')).toBeInTheDocument()
     })
