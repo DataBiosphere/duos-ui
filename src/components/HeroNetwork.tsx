@@ -13,7 +13,10 @@ type Cluster = {
   rotate: number
   duration: number
   delay: number
+  morph: Morph
 }
+
+type Morph = { scaleX: number, scaleY: number, skew: number, duration: number, delay: number }
 
 const WIDTH = 1440
 const HEIGHT = 440
@@ -29,9 +32,19 @@ const mulberry32 = (seed: number) => {
   }
 }
 
-const random = mulberry32(4249)
-const between = (min: number, max: number) => min + random() * (max - min)
+const rangeFrom = (random: () => number) => (min: number, max: number) => min + random() * (max - min)
+const between = rangeFrom(mulberry32(4249))
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y)
+
+// Own stream so morph values don't shift the drift layout.
+const morphBetween = rangeFrom(mulberry32(4250))
+const makeMorph = (): Morph => ({
+  scaleX: morphBetween(0.88, 1.12),
+  scaleY: morphBetween(0.88, 1.12),
+  skew: morphBetween(-8, 8),
+  duration: morphBetween(18, 34),
+  delay: -morphBetween(0, 34),
+})
 
 const makeCluster = (centre: Point, spread: number, size: number): Cluster => {
   const nodes = Array.from({ length: size }, () => ({
@@ -57,6 +70,7 @@ const makeCluster = (centre: Point, spread: number, size: number): Cluster => {
     rotate: between(-6, 6),
     duration: between(14, 26),
     delay: -between(0, 26),
+    morph: makeMorph(),
   }
 }
 
@@ -86,6 +100,19 @@ const drift = keyframes`
   to { transform: translate(var(--dx), var(--dy)) rotate(var(--rotate)); }
 `
 
+const morph = keyframes`
+  from { transform: scale(1, 1) skewX(0deg); }
+  to { transform: scale(var(--scale-x), var(--scale-y)) skewX(var(--skew)); }
+`
+
+const morphMotion = (item: Morph) => ({
+  '--scale-x': item.scaleX,
+  '--scale-y': item.scaleY,
+  '--skew': `${item.skew}deg`,
+  'animationDuration': `${item.duration}s`,
+  'animationDelay': `${item.delay}s`,
+}) as React.CSSProperties
+
 const motion = (item: { dx: number, dy: number, rotate?: number, duration: number, delay: number }) => ({
   '--dx': `${item.dx}px`,
   '--dy': `${item.dy}px`,
@@ -96,17 +123,21 @@ const motion = (item: { dx: number, dy: number, rotate?: number, duration: numbe
 
 const NODE_COLOURS = ['#5FD3DC', '#C7A9A8']
 
-const ClusterShape = ({ cluster, strokeOpacity, nodeRadius }: { cluster: Cluster, strokeOpacity: number, nodeRadius: number }) => (
-  <g className="drift" style={motion(cluster)}>
-    {cluster.facets.map(([a, b, c]) => (
-      <polygon key={`${a.x},${b.x},${c.x}`} points={`${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y}`} fill="#5FD3DC" fillOpacity={0.07} />
-    ))}
-    {cluster.edges.map(([a, b]) => (
-      <line key={`${a.x},${a.y}-${b.x},${b.y}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#5FD3DC" strokeOpacity={strokeOpacity} strokeWidth={1} />
-    ))}
-    {cluster.nodes.map((node, i) => (
-      <circle key={`${node.x},${node.y}`} cx={node.x} cy={node.y} r={nodeRadius} fill={NODE_COLOURS[i % 2]} />
-    ))}
+type ClusterShapeProps = { cluster: Cluster, strokeOpacity: number, nodeRadius: number, filter?: string }
+
+const ClusterShape = ({ cluster, strokeOpacity, nodeRadius, filter }: ClusterShapeProps) => (
+  <g className="drift" style={motion(cluster)} filter={filter}>
+    <g className="morph" style={morphMotion(cluster.morph)}>
+      {cluster.facets.map(([a, b, c]) => (
+        <polygon key={`${a.x},${b.x},${c.x}`} points={`${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y}`} fill="#5FD3DC" fillOpacity={0.07} />
+      ))}
+      {cluster.edges.map(([a, b]) => (
+        <line key={`${a.x},${a.y}-${b.x},${b.y}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#5FD3DC" strokeOpacity={strokeOpacity} strokeWidth={1} />
+      ))}
+      {cluster.nodes.map((node, i) => (
+        <circle key={`${node.x},${node.y}`} cx={node.x} cy={node.y} r={nodeRadius} fill={NODE_COLOURS[i % 2]} />
+      ))}
+    </g>
   </g>
 )
 
@@ -125,12 +156,16 @@ export const HeroNetwork = ({ animated, paused, style }: Readonly<HeroNetworkPro
     focusable="false"
     style={style}
     sx={{
-      '& .drift': {
+      '& .drift, & .morph': {
         transformBox: 'fill-box',
         transformOrigin: 'center',
-        animation: animated ? `${drift} ease-in-out infinite alternate` : 'none',
+        animationTimingFunction: 'ease-in-out',
+        animationIterationCount: 'infinite',
+        animationDirection: 'alternate',
         animationPlayState: paused ? 'paused' : 'running',
       },
+      '& .drift': { animationName: animated ? `${drift}` : 'none' },
+      '& .morph': { animationName: animated ? `${morph}` : 'none' },
     }}
   >
     <defs>
@@ -147,6 +182,9 @@ export const HeroNetwork = ({ animated, paused, style }: Readonly<HeroNetworkPro
         <stop offset="0" stopColor="#B8E4E8" stopOpacity="0.35" />
         <stop offset="1" stopColor="#B8E4E8" stopOpacity="0" />
       </radialGradient>
+      <filter id="hero-network-soften" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="0.8" />
+      </filter>
     </defs>
     <rect width={WIDTH} height={HEIGHT} fill="url(#hero-network-sky)" />
     <rect width={WIDTH} height={HEIGHT} fill="url(#hero-network-glow)" />
@@ -157,7 +195,7 @@ export const HeroNetwork = ({ animated, paused, style }: Readonly<HeroNetworkPro
       <circle key={`${dot.x},${dot.y}`} className="drift" style={motion(dot)} cx={dot.x} cy={dot.y} r={dot.r} fill="url(#hero-network-bokeh)" />
     ))}
     {frontLayer.map(cluster => (
-      <ClusterShape key={`${cluster.nodes[0].x}`} cluster={cluster} strokeOpacity={0.55} nodeRadius={2.6} />
+      <ClusterShape key={`${cluster.nodes[0].x}`} cluster={cluster} strokeOpacity={0.55} nodeRadius={2.6} filter="url(#hero-network-soften)" />
     ))}
   </Box>
 )

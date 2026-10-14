@@ -9,7 +9,8 @@ const renderNetwork = (animated: boolean, paused: boolean) => {
   return container.querySelector('svg')!
 }
 
-const driftStyles = (svg: SVGSVGElement) => [...svg.querySelectorAll('.drift')].map(el => getComputedStyle(el))
+const motionStyles = (svg: SVGSVGElement, selector = '.drift, .morph') =>
+  [...svg.querySelectorAll(selector)].map(el => getComputedStyle(el))
 
 describe('HeroNetwork', () => {
   it('is decorative, so screen readers and keyboard focus skip it', () => {
@@ -30,20 +31,40 @@ describe('HeroNetwork', () => {
     expect(second).toBe(first)
   })
 
-  it('drifts each cluster and dot while animated', () => {
-    const styles = driftStyles(renderNetwork(true, false))
+  it('animates every cluster and dot while animated', () => {
+    const styles = motionStyles(renderNetwork(true, false))
     expect(styles.length).toBeGreaterThan(0)
     styles.forEach((style) => {
-      expect(style.animation).toMatch(/infinite alternate/)
+      expect(style.animationName).toMatch(/^animation-/)
+      expect(style.animationIterationCount).toBe('infinite')
+      expect(style.animationDirection).toBe('alternate')
       expect(style.animationPlayState).toBe('running')
     })
   })
 
+  it('slowly reshapes every cluster', () => {
+    const svg = renderNetwork(true, false)
+    const morphs = [...svg.querySelectorAll('.morph')]
+    expect(morphs.length).toBe(svg.querySelectorAll('g.drift').length)
+    morphs.forEach((el) => {
+      expect(getComputedStyle(el).animationName).not.toBe(getComputedStyle(el.parentElement!).animationName)
+      expect((el as SVGGElement).style.getPropertyValue('--skew')).toMatch(/deg$/)
+    })
+  })
+
+  it('softens only the foreground clusters', () => {
+    const svg = renderNetwork(true, false)
+    expect(svg.querySelector('#hero-network-soften feGaussianBlur')).toHaveAttribute('stdDeviation', '0.8')
+    const blurred = svg.querySelectorAll('g.drift[filter="url(#hero-network-soften)"]')
+    expect(blurred.length).toBeGreaterThan(0)
+    expect(blurred.length).toBeLessThan(svg.querySelectorAll('g.drift').length)
+  })
+
   it('holds still when paused', () => {
-    driftStyles(renderNetwork(true, true)).forEach(style => expect(style.animationPlayState).toBe('paused'))
+    motionStyles(renderNetwork(true, true)).forEach(style => expect(style.animationPlayState).toBe('paused'))
   })
 
   it('draws a still frame when not animated', () => {
-    driftStyles(renderNetwork(false, true)).forEach(style => expect(style.animation).toBe('none'))
+    motionStyles(renderNetwork(false, true)).forEach(style => expect(style.animationName).toBe('none'))
   })
 })
