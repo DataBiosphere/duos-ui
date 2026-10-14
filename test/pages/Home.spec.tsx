@@ -286,6 +286,7 @@ describe('Home page', () => {
       const pausedState = vi.spyOn(HTMLMediaElement.prototype, 'paused', 'get')
       const { container } = renderHome(false)
       const video = container.querySelector('video')!
+      fireEvent.play(video)
 
       pausedState.mockReturnValue(false)
       fireEvent.click(screen.getByRole('button', { name: 'Pause background animation' }))
@@ -298,6 +299,23 @@ describe('Home page', () => {
       expect(play).toHaveBeenCalledTimes(1)
       fireEvent.play(video)
       expect(screen.getByRole('button', { name: 'Pause background animation' })).toBeInTheDocument()
+    })
+
+    it('offers Play until the video starts, so a blocked autoplay is labelled correctly', () => {
+      renderHome(false)
+      expect(screen.getByRole('button', { name: 'Play background animation' })).toBeInTheDocument()
+    })
+
+    it('keeps autoplay off and still offers Play when the browser refuses to play', async () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockRejectedValue(new DOMException('blocked', 'NotAllowedError'))
+      vi.spyOn(HTMLMediaElement.prototype, 'paused', 'get').mockReturnValue(true)
+      const { container } = renderHome(false)
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Play background animation' }))
+      })
+      expect(container.querySelector('video')).not.toHaveAttribute('autoplay')
+      expect(screen.getByRole('button', { name: 'Play background animation' })).toBeInTheDocument()
     })
 
     it('shows the static image, without a video or pause button, when the user prefers reduced motion', () => {

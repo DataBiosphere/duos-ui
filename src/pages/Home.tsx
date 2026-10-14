@@ -584,7 +584,9 @@ const RoleRow = ({ role, reversed, onContact }: { role: RoleSection, reversed: b
 const HeroMedia = () => {
   const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  const [paused, setPaused] = useState(false)
+  // Follows the video's own events, so a browser that blocks autoplay leaves the button offering Play.
+  const [playing, setPlaying] = useState(false)
+  const [userPaused, setUserPaused] = useState(false)
 
   if (reduceMotion) {
     return <img style={heroMedia} src={homeHeaderBackground} alt="" />
@@ -594,9 +596,11 @@ const HeroMedia = () => {
     const video = videoRef.current
     if (!video) return
     if (video.paused) {
-      void video.play()
+      setUserPaused(false)
+      video.play().catch(() => setUserPaused(true))
     }
     else {
+      setUserPaused(true)
       video.pause()
     }
   }
@@ -611,10 +615,10 @@ const HeroMedia = () => {
         }}
         style={heroMedia}
         poster={homeHeaderBackground}
-        // Kept off after a pause, so a video remounted by a motion-setting change stays paused.
-        autoPlay={!paused}
-        onPlay={() => setPaused(false)}
-        onPause={() => setPaused(true)}
+        // Kept off after the user pauses, so a video remounted by a motion-setting change stays paused.
+        autoPlay={!userPaused}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
         muted
         loop
         playsInline
@@ -626,7 +630,7 @@ const HeroMedia = () => {
       </video>
       <IconButton
         onClick={togglePlayback}
-        aria-label={paused ? 'Play background animation' : 'Pause background animation'}
+        aria-label={playing ? 'Pause background animation' : 'Play background animation'}
         size="small"
         sx={{
           'position': 'absolute',
@@ -638,7 +642,7 @@ const HeroMedia = () => {
           '&:hover': { backgroundColor: 'rgba(15, 37, 55, 0.65)' },
         }}
       >
-        {paused ? <PlayArrow fontSize="small" /> : <Pause fontSize="small" />}
+        {playing ? <Pause fontSize="small" /> : <PlayArrow fontSize="small" />}
       </IconButton>
     </>
   )
