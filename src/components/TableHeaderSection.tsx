@@ -19,9 +19,9 @@ export const TableHeaderSection: React.FC<TableHeaderSectionProps> = ({
   description,
 }) => {
   return (
-    // minWidth: 0 lets a caller's single-line title ellipsize instead of overflowing the page
-    <div style={{ display: 'flex', padding: '0 0 0 2em', minWidth: 0 }}>
-      <div className="left-header-section" style={{ ...Styles.LEFT_HEADER_SECTION as React.CSSProperties, minWidth: 0 }}>
+    <div style={{ display: 'flex', padding: '0 0 0 2em' }}>
+      {/* flexGrow lets long titles wrap at the full header width rather than a shrink-to-fit guess */}
+      <div className="left-header-section" style={{ ...Styles.LEFT_HEADER_SECTION as React.CSSProperties, flexGrow: 1 }}>
         {icon?.src && (
           <div style={Styles.ICON_CONTAINER}>
             <img

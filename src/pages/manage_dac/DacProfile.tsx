@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Link, useParams } from 'react-router'
 import { Box, CircularProgress, Typography } from '@mui/material'
-import { DataGrid, GridAutosizeOptions, GridColDef } from '@mui/x-data-grid'
+import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { DAC } from 'src/libs/ajax/DAC'
 import { ControlledAccessType, DataUseTranslation, TranslationEntry } from 'src/libs/dataUseTranslation'
 import { DATA_USE_GRID_COLUMN } from 'src/components/dataUseGridColumn'
@@ -20,15 +20,12 @@ import editDACIcon from 'src/images/dac_icon.svg'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
 
-// Caps the page column so the profile cards size to their content on wide screens
 const PAGE_MAX_WIDTH = '1100px'
 
-// Fit 50 characters of the DAC name on the first line; longer names wrap. Montserrat semibold
-// averages under 0.7em per character, so the line needs 35em: the header width less its
-// 2em left padding and 76px icon column (~104px). Never larger than the standard 2.8rem title.
+// 37em fits 50 all-caps characters on one line; 104px is the header's left padding plus icon column
 const TITLE_STYLE: React.CSSProperties = {
   display: 'block',
-  fontSize: 'clamp(2rem, calc((100cqi - 104px) / 35), 2.8rem)',
+  fontSize: 'clamp(2rem, calc((100cqi - 104px) / 37), 2.8rem)',
   overflowWrap: 'anywhere',
 }
 
@@ -44,8 +41,7 @@ const getDatasetProperty = (properties: DatasetProperty[], propName: string): st
   return prop?.propertyValue ?? ''
 }
 
-// Permissions are primary data use terms and modifiers are secondary, matching the search index
-// summary the Data Library's chip is built from
+// Mirrors the search index summary the Data Library chip is built from
 const toDataUseSummary = (translations: TranslationEntry[]): DataUseSummary => ({
   primary: translations.filter(t => t.type === ControlledAccessType.permissions),
   secondary: translations.filter(t => t.type === ControlledAccessType.modifiers),
@@ -56,8 +52,7 @@ const translateDataset = async (dataset: Dataset): Promise<[number, DataUseSumma
   return [dataset.datasetId, toDataUseSummary(translations)]
 }
 
-// Size the ID column to its widest value so identifiers are never truncated
-const AUTOSIZE_OPTIONS: GridAutosizeOptions = { columns: ['datasetIdentifier'], includeHeaders: true, includeOutliers: true }
+const DATA_USE_COLUMN = DATA_USE_GRID_COLUMN as GridColDef
 
 const DATASET_COLUMNS: GridColDef[] = [
   {
@@ -82,11 +77,12 @@ const DATASET_COLUMNS: GridColDef[] = [
     ),
   },
   {
-    // Same chip as the Data Library's Data Use column; the shared renderer only reads row.dataUse
-    ...(DATA_USE_GRID_COLUMN as GridColDef),
+    // The shared renderer reads row.dataUse
+    ...DATA_USE_COLUMN,
     headerName: 'Data Use Limitations',
     flex: 1,
     minWidth: 200,
+    renderCell: params => DATA_USE_COLUMN.renderCell?.(params) ?? <span style={{ color: '#999' }}>---</span>,
   },
   { field: 'dataType', headerName: 'Data Type', width: 120 },
   { field: 'pi', headerName: 'Principal Investigator', width: 170 },
@@ -212,8 +208,6 @@ export const DacProfile: React.FC = () => {
                   onPaginationModelChange={setPaginationModel}
                   disableRowSelectionOnClick
                   autoHeight
-                  autosizeOnMount
-                  autosizeOptions={AUTOSIZE_OPTIONS}
                   sx={DATAGRID_SX}
                 />
               )}

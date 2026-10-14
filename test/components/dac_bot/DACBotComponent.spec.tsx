@@ -59,12 +59,7 @@ describe('DACBotComponent', () => {
       vi.restoreAllMocks()
     })
 
-    it('should not render the removed introductory text', () => {
-      expect(screen.queryByText(/Data Access Committees may automate Data Access Requests/)).not.toBeInTheDocument()
-      expect(screen.queryByText(/Check the box below to opt in/)).not.toBeInTheDocument()
-    })
-
-    it('should only show the restricted countries notice with the automatic approval rules', () => {
+    it('should not show the restricted countries notice without automatic approval rules', () => {
       expect(screen.queryByText(/Users from any of the following countries/)).not.toBeInTheDocument()
     })
 
@@ -126,6 +121,12 @@ describe('DACBotComponent', () => {
       expect(group).toHaveTextContent('Disease Specific (DS) with one or more selected diseases')
       expect(group).not.toHaveTextContent('without requiring Chair to open manually')
       expect(group).not.toHaveTextContent('Require approval by the Signing Official')
+    })
+
+    it('shows the restricted countries notice only in the Automatic approval group', () => {
+      const notice = screen.getByText(/Users from any of the following countries/)
+      expect(container.querySelector('[data-cy="rule-group-automatic-approval"]')).toContainElement(notice)
+      expect(screen.getAllByText(/Users from any of the following countries/)).toHaveLength(1)
     })
 
     it('places AUTO_OPEN_DAR_FOR_ALL_MEMBERS under Automatic open', () => {

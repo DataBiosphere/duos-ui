@@ -744,7 +744,6 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
       )
     : null
 
-  // Profile mode uses a fixed-width label column so fields span the rest of the card
   const labelColStyle: React.CSSProperties = profileMode
     ? { flex: '0 0 200px', paddingRight: '15px', marginTop: 0 }
     : { flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }

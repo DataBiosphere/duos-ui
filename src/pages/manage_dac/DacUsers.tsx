@@ -19,7 +19,7 @@ interface DacUsersState {
   removedIds: number[]
 }
 
-const buttonPadding: CSSProperties = { display: 'flex', justifyContent: 'flex-end' }
+const buttonPadding: CSSProperties = { display: 'flex', justifyContent: 'flex-end', paddingRight: 0 }
 const headerStyle: CSSProperties = { fontWeight: 500, color: '#00609f' }
 
 export const DacUsers: FC<DacUsersProps> = (props) => {
