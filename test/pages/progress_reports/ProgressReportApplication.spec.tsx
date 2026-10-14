@@ -147,7 +147,8 @@ vi.mock('src/pages/progress_reports/DarCloseout', () => ({
       <input
         id="closeoutYesNo_no"
         type="radio"
-        checked={!formState.closeoutYesNo}
+        // Unanswered selects neither option, as in the real Yes/No radio group
+        checked={formState.closeoutYesNo === false}
         onChange={() => onFormChange({ closeoutYesNo: false })}
       />
     </div>
@@ -390,6 +391,18 @@ describe('ProgressReportApplication', () => {
       expect(screen.getByText('Dataset 3')).toBeVisible()
     })
     fireEvent.click(document.getElementById('closeoutYesNo_no')!)
+    expect(screen.getByRole('button', { name: 'Remove dataset' })).toBeVisible()
+  })
+
+  it('keeps dataset removals when the closeout question is first answered No', async () => {
+    const datasets = [createDataset(1, 'Dataset 1', true), createDataset(2, 'Dataset 2', true)]
+    await mountComponent({ elections: { 1: createApprovedElection(1, 1), 2: createApprovedElection(2, 2) } }, false, datasets)
+    fireEvent.click(screen.getByRole('button', { name: 'Remove dataset' }))
+    await waitFor(() => expect(screen.getByTestId('submit-state')).toHaveAttribute('data-dataset-ids', '2'))
+
+    fireEvent.click(document.getElementById('closeoutYesNo_no')!)
+
+    await waitFor(() => expect(screen.getByTestId('submit-state')).toHaveAttribute('data-dataset-ids', '2'))
     expect(screen.getByRole('button', { name: 'Remove dataset' })).toBeVisible()
   })
 

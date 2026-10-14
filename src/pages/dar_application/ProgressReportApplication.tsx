@@ -220,8 +220,9 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
   }, [datasets, readOnlyMode, dar.datasetIds, dar.elections, formState.closeoutYesNo])
 
   // The parent passes a freshly merged `dar` on every render, so key on dataset ids and
-  // closeout mode rather than array identity.
-  const approvedDatasetsKey = `${formState.closeoutYesNo}:${approvedDatasets.map(ds => ds.datasetId).join(',')}`
+  // closeout mode rather than array identity. Unanswered and "No" are the same mode, so the first
+  // "No" must not reset a researcher's removals.
+  const approvedDatasetsKey = `${!!formState.closeoutYesNo}:${approvedDatasets.map(ds => ds.datasetId).join(',')}`
   const initializedDatasetsKey = useRef<string | null>(null)
 
   // Reset selection when available datasets or closeout mode change, while preserving
