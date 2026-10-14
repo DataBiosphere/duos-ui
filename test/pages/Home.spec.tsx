@@ -47,9 +47,6 @@ vi.mock('src/components/modals/SupportRequestModal', () => ({
     showModal ? React.createElement('div', { 'data-testid': 'support-modal' }) : null,
 }))
 
-vi.mock('src/images/home_header_background.png', () => ({ default: 'home_header_background.png' }))
-vi.mock('src/images/home_header_background.webm', () => ({ default: 'home_header_background.webm' }))
-vi.mock('src/images/home_header_background.mp4', () => ({ default: 'home_header_background.mp4' }))
 vi.mock('src/images/duos_logo.svg', () => ({ default: 'duos_logo.svg' }))
 vi.mock('src/images/DUOS_Homepage_diagram.svg', () => ({ default: 'DUOS_Homepage_diagram.svg' }))
 vi.mock('src/images/broad_logo_allwhite.png', () => ({ default: 'broad_logo_allwhite.png' }))
@@ -267,63 +264,29 @@ describe('Home page', () => {
       vi.restoreAllMocks()
     })
 
-    it('plays a muted, looping video hidden from screen readers, with the header image as its poster', () => {
+    const network = (container: HTMLElement) => container.querySelector('svg[viewBox="0 0 1440 440"]')
+
+    it('draws the decorative network animation, hidden from screen readers', () => {
       const { container } = renderHome(false)
-      const video = container.querySelector('video')!
-      expect(video).toHaveAttribute('muted')
-      expect(video).toHaveAttribute('loop')
-      expect(video).toHaveAttribute('playsinline')
-      expect(video).toHaveAttribute('aria-hidden', 'true')
-      expect(video).toHaveAttribute('tabindex', '-1')
-      expect(video).toHaveAttribute('poster', 'home_header_background.png')
-      expect([...video.querySelectorAll('source')].map(source => source.getAttribute('src')))
-        .toEqual(['home_header_background.webm', 'home_header_background.mp4'])
+      expect(network(container)).toHaveAttribute('aria-hidden', 'true')
+      expect(network(container)!.querySelectorAll('.drift').length).toBeGreaterThan(0)
     })
 
-    it('pauses and resumes the video from its button, following the video\'s own state', () => {
-      const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {})
-      const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
-      const pausedState = vi.spyOn(HTMLMediaElement.prototype, 'paused', 'get')
+    it('pauses and resumes the animation from its button', () => {
       const { container } = renderHome(false)
-      const video = container.querySelector('video')!
-      fireEvent.play(video)
-
-      pausedState.mockReturnValue(false)
+      const playState = () => getComputedStyle(network(container)!.querySelector('.drift')!).animationPlayState
+      expect(playState()).toBe('running')
       fireEvent.click(screen.getByRole('button', { name: 'Pause background animation' }))
-      expect(pause).toHaveBeenCalledTimes(1)
-      fireEvent.pause(video)
-      expect(video).not.toHaveAttribute('autoplay')
-
-      pausedState.mockReturnValue(true)
+      expect(playState()).toBe('paused')
       fireEvent.click(screen.getByRole('button', { name: 'Play background animation' }))
-      expect(play).toHaveBeenCalledTimes(1)
-      fireEvent.play(video)
-      expect(screen.getByRole('button', { name: 'Pause background animation' })).toBeInTheDocument()
+      expect(playState()).toBe('running')
     })
 
-    it('offers Play until the video starts, so a blocked autoplay is labelled correctly', () => {
-      renderHome(false)
-      expect(screen.getByRole('button', { name: 'Play background animation' })).toBeInTheDocument()
-    })
-
-    it('keeps autoplay off and still offers Play when the browser refuses to play', async () => {
-      vi.spyOn(HTMLMediaElement.prototype, 'play').mockRejectedValue(new DOMException('blocked', 'NotAllowedError'))
-      vi.spyOn(HTMLMediaElement.prototype, 'paused', 'get').mockReturnValue(true)
-      const { container } = renderHome(false)
-
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Play background animation' }))
-      })
-      expect(container.querySelector('video')).not.toHaveAttribute('autoplay')
-      expect(screen.getByRole('button', { name: 'Play background animation' })).toBeInTheDocument()
-    })
-
-    it('shows the static image, without a video or pause button, when the user prefers reduced motion', () => {
+    it('shows the network without a pause button when the user prefers reduced motion', () => {
       stubReducedMotion(true)
       const { container } = renderHome(false)
-      expect(container.querySelector('video')).toBeNull()
+      expect(network(container)).toBeInTheDocument()
       expect(screen.queryByRole('button', { name: /background animation/ })).toBeNull()
-      expect(container.querySelector('img[src="home_header_background.png"]')).toHaveAttribute('alt', '')
     })
   })
 

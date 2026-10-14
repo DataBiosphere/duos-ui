@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   Avatar,
   Box,
@@ -23,9 +23,6 @@ import {
 import type { SxProps, Theme } from '@mui/material'
 import type { SystemStyleObject } from '@mui/system'
 import { ArrowForward, CheckCircleOutlined, Pause, PlayArrow } from '@mui/icons-material'
-import homeHeaderBackground from 'src/images/home_header_background.png'
-import homeHeaderVideoWebm from 'src/images/home_header_background.webm'
-import homeHeaderVideoMp4 from 'src/images/home_header_background.mp4'
 import duosLogoImg from 'src/images/duos_logo.svg'
 import duosDiagram from 'src/images/DUOS_Homepage_diagram.svg'
 import broadLogo from 'src/images/broad_logo_allwhite.png'
@@ -38,6 +35,7 @@ import { Link as RouterLink, useLocation, useNavigate } from 'react-router'
 import { getLibraryVersions } from 'src/libs/libraryVersions'
 import { handleSignIn } from 'src/libs/signInUtils'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
+import { HeroNetwork } from 'src/components/HeroNetwork'
 
 export interface HomeProps {
   isLogged: boolean
@@ -65,7 +63,6 @@ const heroMedia: React.CSSProperties = {
   display: 'block',
   width: '100%',
   height: 'inherit',
-  objectFit: 'cover',
 }
 
 const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
@@ -583,54 +580,18 @@ const RoleRow = ({ role, reversed, onContact }: { role: RoleSection, reversed: b
 
 const HeroMedia = () => {
   const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
-  const videoRef = useRef<HTMLVideoElement | null>(null)
-  // Follows the video's own events, so a browser that blocks autoplay leaves the button offering Play.
-  const [playing, setPlaying] = useState(false)
-  const [userPaused, setUserPaused] = useState(false)
+  const [paused, setPaused] = useState(false)
 
   if (reduceMotion) {
-    return <img style={heroMedia} src={homeHeaderBackground} alt="" />
-  }
-
-  const togglePlayback = () => {
-    const video = videoRef.current
-    if (!video) return
-    if (video.paused) {
-      setUserPaused(false)
-      video.play().catch(() => setUserPaused(true))
-    }
-    else {
-      setUserPaused(true)
-      video.pause()
-    }
+    return <HeroNetwork style={heroMedia} animated={false} paused />
   }
 
   return (
     <>
-      <video
-        // React sets muted only as a property; iOS Safari checks the attribute before autoplaying.
-        ref={(video) => {
-          videoRef.current = video
-          video?.setAttribute('muted', '')
-        }}
-        style={heroMedia}
-        poster={homeHeaderBackground}
-        // Kept off after the user pauses, so a video remounted by a motion-setting change stays paused.
-        autoPlay={!userPaused}
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        muted
-        loop
-        playsInline
-        aria-hidden="true"
-        tabIndex={-1}
-      >
-        <source src={homeHeaderVideoWebm} type="video/webm" />
-        <source src={homeHeaderVideoMp4} type="video/mp4" />
-      </video>
+      <HeroNetwork style={heroMedia} animated paused={paused} />
       <IconButton
-        onClick={togglePlayback}
-        aria-label={playing ? 'Pause background animation' : 'Play background animation'}
+        onClick={() => setPaused(!paused)}
+        aria-label={paused ? 'Play background animation' : 'Pause background animation'}
         size="small"
         sx={{
           'position': 'absolute',
@@ -642,7 +603,7 @@ const HeroMedia = () => {
           '&:hover': { backgroundColor: 'rgba(15, 37, 55, 0.65)' },
         }}
       >
-        {playing ? <Pause fontSize="small" /> : <PlayArrow fontSize="small" />}
+        {paused ? <PlayArrow fontSize="small" /> : <Pause fontSize="small" />}
       </IconButton>
     </>
   )
