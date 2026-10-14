@@ -278,7 +278,7 @@ const LibraryCardTable: React.FC<LibraryCardTableProps> = (props) => {
 
   // Template for render
   return (
-    <div data-cy="manage-library-card-table" style={Styles.PAGE}>
+    <div data-cy="manage-library-card-table" style={{ ...Styles.PAGE, ...Styles.PAGE_BOTTOM_SPACING }}>
       <div>
         <TableHeaderSection
           title="Manage Library Cards"

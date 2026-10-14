@@ -207,7 +207,7 @@ export const DacProfile: React.FC = () => {
   }
 
   return (
-    <div style={Styles.PAGE}>
+    <div style={{ ...Styles.PAGE, ...Styles.PAGE_BOTTOM_SPACING }}>
 
       {/* Page header */}
       <div style={{ display: 'flex', alignItems: 'flex-start' }}>

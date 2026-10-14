@@ -78,6 +78,11 @@ export const Styles = {
     width: '90%',
     margin: '0 auto',
   },
+  // Gap between a page's last element and the global footer. Matches the
+  // .profile-card top margin. Only for pages without their own bottom spacing.
+  PAGE_BOTTOM_SPACING: {
+    paddingBottom: '48px',
+  },
   TITLE: {
     fontFamily: targetFont,
     fontWeight: Theme.font.weight.semibold,

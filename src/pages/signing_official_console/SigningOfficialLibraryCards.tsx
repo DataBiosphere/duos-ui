@@ -34,7 +34,7 @@ export default function SigningOfficialLibraryCards(): React.JSX.Element {
   }, [])
 
   return (
-    <div style={Styles.PAGE}>
+    <div style={{ ...Styles.PAGE, ...Styles.PAGE_BOTTOM_SPACING }}>
       <div className="signing-official-tabs">
         {signingOfficial && (
           <SigningOfficialTable

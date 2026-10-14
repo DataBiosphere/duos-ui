@@ -106,7 +106,7 @@ export default function DACConsole() {
   )
 
   return (
-    <div style={Styles.PAGE}>
+    <div style={{ ...Styles.PAGE, ...Styles.PAGE_BOTTOM_SPACING }}>
       <div>
         <TableHeaderSection
           title="My DAC's Data Access Requests"

@@ -3,22 +3,36 @@
 @import './styles/profile-card.css';
 @import './styles/typography.css';
 
-html, body, .body, #root {
+html, body, #root {
   height: 100%;
   font-family: 'Montserrat', sans-serif;
 }
 
-.wrap, .body, #root {
+.body, #root {
   min-height: 100%;
   min-width: 100%;
+}
+
+/* A column that is at least one screen tall. .wrap takes the free space, so
+   the footer sits at the bottom of a short page and after a long one. */
+.body {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.body > * {
+  flex-shrink: 0;
+}
+
+.body > .wrap {
+  flex-grow: 1;
 }
 
 .main {
   position: relative;
   overflow-x: clip;
   min-width: 100%;
-  min-height: 100vh;
-  /* must be same height as the footer */
 }
 
 @media (max-width: 1200px) {
