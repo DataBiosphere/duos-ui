@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Box } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import { NavigationStateProvider } from 'src/contexts/NavigationStateContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -124,19 +125,21 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={muiThemeFix}>
         <NavigationStateProvider>
-          <div className="body">
-            <div className="wrap">
-              <div className="main">
+          {/* A column at least one screen tall: .wrap takes the free space, so the
+              footer sits at the bottom of a short page and after a long one. */}
+          <Box className="body" sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%', minWidth: '100%' }}>
+            <Box className="wrap" sx={{ flexGrow: 1, minWidth: '100%' }}>
+              <Box className="main" sx={{ position: 'relative', overflowX: 'clip', minWidth: '100%' }}>
                 {/* The header derives role tabs and the profile menu from
                     Storage.getCurrentUser() — it is identity-bearing UI and
                     must hide during reconciliation like the routes do. */}
                 {!reconciling && <DuosHeader />}
                 {(isLoading || reconciling) && <div style={loadingSyle}><Spinner /></div>}
                 {!(isLoading || reconciling) && <AppRoutes isLogged={isLoggedIn} env={env} />}
-              </div>
-            </div>
+              </Box>
+            </Box>
             <DuosFooter />
-          </div>
+          </Box>
         </NavigationStateProvider>
       </ThemeProvider>
     </QueryClientProvider>

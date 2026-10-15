@@ -269,7 +269,7 @@ export default function DatasetStatistics() {
 
   if (!isLoading && datasetTerm) {
     return (
-      <div style={{ ...Styles.PAGE, color: Theme.palette.primary }}>
+      <div style={{ ...Styles.PAGE, ...Styles.PAGE_BOTTOM_SPACING, color: Theme.palette.primary }}>
         <div style={{ justifyContent: 'space-between' }}>
           <div style={{ marginTop: '25px' }}>
             <div style={{ fontSize: 20, fontWeight: 600, display: 'flex', alignItems: 'center', gap: '12px' }}>

@@ -54,7 +54,7 @@ export default function SigningOfficialDarRequests(): React.JSX.Element {
   })
 
   return (
-    <div style={Styles.PAGE}>
+    <div style={{ ...Styles.PAGE, ...Styles.PAGE_BOTTOM_SPACING }}>
       <div>
         <TableHeaderSection
           title="My Institution's Data Access Requests"

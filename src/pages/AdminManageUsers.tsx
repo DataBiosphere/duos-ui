@@ -79,7 +79,7 @@ export const AdminManageUsers = function AdminManageUsers() {
   const activeRole = role && roles.includes(role) ? role : undefined
 
   return (
-    <div style={Styles.PAGE}>
+    <div style={{ ...Styles.PAGE, ...Styles.PAGE_BOTTOM_SPACING }}>
       <div>
         <TableHeaderSection
           title="Manage Users"

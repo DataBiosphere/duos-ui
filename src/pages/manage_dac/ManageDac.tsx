@@ -165,7 +165,7 @@ export const ManageDac = function ManageDac() {
   }, [selectedDatasets, indexedDataUse, viewedDacId])
 
   return (
-    <div style={Styles.PAGE}>
+    <div style={{ ...Styles.PAGE, ...Styles.PAGE_BOTTOM_SPACING }}>
 
       {/* ── Section 1: Manage My Data Access Committee ── */}
       <TableHeaderSection

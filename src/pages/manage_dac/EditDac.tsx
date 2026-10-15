@@ -1106,7 +1106,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
     (isLoading || isDaaOperationInProgress)
       ? <Spinner />
       : (
-          <div style={hideHeader ? {} : Styles.PAGE}>
+          <div style={hideHeader ? {} : { ...Styles.PAGE, ...Styles.PAGE_BOTTOM_SPACING }}>
             {!hideHeader && (
               <div>
                 <Link

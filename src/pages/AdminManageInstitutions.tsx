@@ -66,7 +66,7 @@ export default function AdminManageInstitutions() {
   }
 
   return (
-    <div style={Styles.PAGE} data-cy="admin-manage-institutions">
+    <div style={{ ...Styles.PAGE, ...Styles.PAGE_BOTTOM_SPACING }} data-cy="admin-manage-institutions">
       <div>
         <TableHeaderSection
           title="Manage Institutions"

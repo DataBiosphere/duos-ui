@@ -33,7 +33,7 @@ export default function MetricsPage({ tabs, description, dacIds, scopeControl, u
   const active = tabs.find(({ key }) => key === tab)
 
   return (
-    <Box sx={Styles.PAGE}>
+    <Box sx={{ ...Styles.PAGE, ...Styles.PAGE_BOTTOM_SPACING }}>
       <Typography component="h1" sx={{ ...titleStyle, maxWidth: 'none' }}>Metrics</Typography>
       <Typography sx={descriptionStyle}>{unavailableText ?? description}</Typography>
       {unavailableText === undefined && scopeControl}
