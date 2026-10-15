@@ -1060,9 +1060,10 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
           </DacProfileSection>
           <DacProfileSection
             title="Select a Data Access Agreement"
-            description="Choose the Data Access Agreement (DAA) that applies to requests for this DAC's datasets. Select an existing agreement or upload your own."
+            description="Choose the Data Access Agreement (DAA) that applies to requests for this DAC's datasets. Select an existing agreement and click Save, or upload your own."
           >
             {daaContentJSX}
+            {profileSaveButtons}
           </DacProfileSection>
         </>
       )
