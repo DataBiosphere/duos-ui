@@ -1,5 +1,0 @@
-We’re excited to announce a new [SSRN publication](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5374625) co-authored by **Bronwyn Walsh**, **Jonathan Lawson, Sofia Labrecque, and Vasiliki Rahimzadeh**, _“Where Is All the NIH Data? A Landscape Analysis of the 150 NIH Repositories and the Path Beyond the Mountains.”_
-
-This comprehensive study maps out the current NIH-supported data repository ecosystem—spanning roughly 150 domain‑specific and generalist repositories—and evaluates gaps and usability. It provides critical insights into how NIH data is organized, discoverable, and maintained across different platforms, while identifying challenges around access, metadata standardization, and sustainability.
-
-The paper concludes with a forward-looking “path beyond the mountains,” recommending strategic improvements such as enhancing metadata harmonization, strengthening repository integration, and leveraging FAIR and GA4GH standardsto bolster discoverability and ease of datasharing and use across NIH-funded datasets .

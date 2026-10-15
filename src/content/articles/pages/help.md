@@ -1,5 +1,0 @@
--   [DAC User Guide](/articles/user-guides/dacguide)
--   [FAQs](/articles/user-guides/faqs)
--   [NIH RAS in DUOS](/articles/user-guides/nih-ras)
--   [Researcher User Guide](/articles/user-guides/researcherguide)
--   [Signing Official User Guide](/articles/user-guides/signingofficialguide)
