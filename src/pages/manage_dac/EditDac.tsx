@@ -12,6 +12,7 @@ import editDACIcon from 'src/images/dac_icon.svg'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Spinner } from 'src/components/Spinner'
 import { Styles } from 'src/libs/theme'
+import { Button } from '@mui/material'
 import PublishIcon from '@mui/icons-material/Publish'
 import { UploadDaaModal } from 'src/components/modals/UploadDaaModal'
 import { CreateDacUserModal } from 'src/components/modals/CreateDacUserModal'
@@ -1028,8 +1029,8 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
 
   const profileSaveButtons = (
     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '1rem' }}>
-      <button onClick={okHandler} className="btn-primary common-background">Save</button>
-      <button onClick={closeHandler} className="btn-secondary">Cancel</button>
+      <Button variant="contained" onClick={okHandler}>Save</Button>
+      <Button variant="outlined" onClick={closeHandler}>Cancel</Button>
     </div>
   )
 

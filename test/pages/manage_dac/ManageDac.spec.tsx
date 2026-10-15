@@ -6,14 +6,14 @@ import { MemoryRouter, Routes, Route, useLocation } from 'react-router'
 import Modal from 'react-modal'
 import ManageDac from 'src/pages/manage_dac/ManageDac'
 import { DAC } from 'src/libs/ajax/DAC'
-import { DataUseTranslation } from 'src/libs/dataUseTranslation'
+import { DataSet } from 'src/libs/ajax/DataSet'
 import { Notifications } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
-import type { DacObject, Dataset, DuosUser, UserRole } from 'src/types/model'
+import type { DacObject, Dataset, DatasetTerm, DuosUser, UserRole } from 'src/types/model'
 import type { ManageDacTableProps } from 'src/components/manage_dac_table/ManageDacTable'
 
 vi.mock('src/libs/ajax/DAC')
-vi.mock('src/libs/dataUseTranslation')
+vi.mock('src/libs/ajax/DataSet')
 vi.mock('src/libs/storage')
 vi.mock('src/libs/utils', async (importOriginal) => {
   const original = await importOriginal<typeof import('src/libs/utils')>()
@@ -190,7 +190,7 @@ beforeAll(() => {
 beforeEach(() => {
   vi.clearAllMocks()
   mockDacDatasetsImpl = () => Promise.resolve([])
-  vi.mocked(DataUseTranslation.translateDataUseRestrictions).mockResolvedValue([])
+  vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([])
 })
 
 describe('ManageDac', () => {
@@ -293,6 +293,24 @@ describe('ManageDac', () => {
     })
     expect(screen.queryByText('Unapproved Dataset')).toBeNull()
     await act(async () => {})
+  })
+
+  it('shows data use for viewed datasets as the Data Library chip', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.list).mockResolvedValue([primaryDac])
+    vi.mocked(DAC.datasets).mockResolvedValue([makeDataset(1, 'Approved Dataset', true)] as never)
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([
+      { datasetId: 1, dataUse: { primary: [{ code: 'HMB', description: 'Health/medical/biomedical research' }] } } as DatasetTerm,
+    ])
+    mockDacDatasetsImpl = dacId => DAC.datasets(dacId)
+
+    mountManageDac()
+    fireEvent.click(await screen.findByRole('button', { name: 'View Datasets' }))
+
+    expect(await screen.findByText('HMB')).toBeInTheDocument()
+    expect(vi.mocked(DataSet.searchDatasetIndex)).toHaveBeenCalledWith(
+      expect.objectContaining({ query: { terms: { dacId: [primaryDac.dacId] } } }),
+    )
   })
 
   it('shows an error when a DAC has no approved datasets', async () => {
