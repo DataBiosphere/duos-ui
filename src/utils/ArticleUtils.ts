@@ -68,37 +68,31 @@ const articleErrors = (article: Article): string[] => {
   return errors
 }
 
-/** Problems with the article index and its body files; empty when they agree and every entry is valid. */
-export const validateArticles = (articles: readonly Article[], bodyFiles: readonly string[]): string[] => {
+/** Errors that depend on the other articles in the list. */
+const listErrors = (article: Article, index: number, articles: readonly Article[], pageSlugs: Set<string>): string[] => {
+  const earlier = articles.slice(0, index)
   const errors: string[] = []
-  const seen = new Set<string>()
-  const legacyUrls = new Set<string>()
-  const pageSlugs = new Set(articles.filter(article => article.category === 'PAGE').map(article => article.slug))
-  for (const article of articles) {
-    const path = articlePath(article)
-    errors.push(...articleErrors(article).map(error => `${path}: ${error}`))
-    if (seen.has(path)) {
-      errors.push(`${path}: listed more than once`)
-    }
-    seen.add(path)
-    if (article.parent !== undefined && !pageSlugs.has(article.parent)) {
-      errors.push(`${path}: parent ${article.parent} is not a page`)
-    }
-    if (article.legacyUrl !== undefined) {
-      if (legacyUrls.has(article.legacyUrl)) {
-        errors.push(`${path}: legacyUrl ${article.legacyUrl} is used by another article`)
-      }
-      legacyUrls.add(article.legacyUrl)
-    }
-    if (!bodyFiles.includes(articleBodyFile(article))) {
-      errors.push(`${path}: missing ${articleBodyFile(article)}`)
-    }
+  if (earlier.some(other => articlePath(other) === articlePath(article))) {
+    errors.push('listed more than once')
   }
-  const expectedFiles = new Set(articles.map(articleBodyFile))
-  for (const file of bodyFiles) {
-    if (!expectedFiles.has(file)) {
-      errors.push(`${file}: not listed in articles.ts`)
-    }
+  if (article.parent !== undefined && !pageSlugs.has(article.parent)) {
+    errors.push(`parent ${article.parent} is not a page`)
+  }
+  if (article.legacyUrl !== undefined && earlier.some(other => other.legacyUrl === article.legacyUrl)) {
+    errors.push(`legacyUrl ${article.legacyUrl} is used by another article`)
   }
   return errors
+}
+
+/** Problems with the article index and its body files; empty when they agree and every entry is valid. */
+export const validateArticles = (articles: readonly Article[], bodyFiles: readonly string[]): string[] => {
+  const pageSlugs = new Set(articles.filter(article => article.category === 'PAGE').map(article => article.slug))
+  const entryErrors = articles.flatMap((article, index) => {
+    const missingBody = bodyFiles.includes(articleBodyFile(article)) ? [] : [`missing ${articleBodyFile(article)}`]
+    return [...articleErrors(article), ...listErrors(article, index, articles, pageSlugs), ...missingBody]
+      .map(error => `${articlePath(article)}: ${error}`)
+  })
+  const expectedFiles = new Set(articles.map(articleBodyFile))
+  const unlistedFiles = bodyFiles.filter(file => !expectedFiles.has(file)).map(file => `${file}: not listed in articles.ts`)
+  return [...entryErrors, ...unlistedFiles]
 }
