@@ -74,11 +74,9 @@ export const DacUsers: FC<DacUsersProps> = (props) => {
               size="small"
               disableElevation
               title={isRemoved ? 'Click to undo removal' : undefined}
+              aria-pressed={isRemoved}
               sx={{ textTransform: 'none', borderRadius: '8px', fontWeight: 500, minWidth: '96px' }}
-              onClick={(e) => {
-                e.preventDefault()
-                onRemove(state.dac.dacId, u.userId, role)
-              }}
+              onClick={() => onRemove(state.dac.dacId, u.userId, role)}
               data-cy={'remove_button_' + u.userId}
             >
               {buttonMessage}

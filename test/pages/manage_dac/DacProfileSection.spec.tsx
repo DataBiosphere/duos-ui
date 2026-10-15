@@ -40,4 +40,10 @@ describe('DacProfileSection', () => {
 
     expect(screen.getByRole('region', { name: 'DAC Info' })).toContainElement(screen.getByText('Help text for this section.'))
   })
+
+  it('describes the section with its help text', () => {
+    render(<DacProfileSection title="DAC Info" description="Help text for this section." />)
+
+    expect(screen.getByRole('region', { name: 'DAC Info' })).toHaveAccessibleDescription('Help text for this section.')
+  })
 })

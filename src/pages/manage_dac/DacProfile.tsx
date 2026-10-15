@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Link, useParams } from 'react-router'
-import { Box, CircularProgress, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { DAC } from 'src/libs/ajax/DAC'
-import { ControlledAccessType, DataUseTranslation, TranslationEntry } from 'src/libs/dataUseTranslation'
+import { DataSet } from 'src/libs/ajax/DataSet'
 import { DATA_USE_GRID_COLUMN } from 'src/components/dataUseGridColumn'
 import { Notifications } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
@@ -15,6 +15,7 @@ import { DACBotComponent } from 'src/components/dac_bot/DACBotComponent'
 import { DacProfileSection } from 'src/pages/manage_dac/DacProfileSection'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 import type { DacObject, Dataset, DatasetProperty, DataUseSummary } from 'src/types/model'
+import type { ElasticsearchQuery } from 'src/types/elastic'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import editDACIcon from 'src/images/dac_icon.svg'
 
@@ -41,30 +42,30 @@ const getDatasetProperty = (properties: DatasetProperty[], propName: string): st
   return prop?.propertyValue ?? ''
 }
 
-// The chip tooltip already names the tier, so drop the translator's "Primary Other: " prefix
-const OTHER_TIER_PREFIX = /^(Primary|Secondary) Other: /
-
-// Mirrors the search index summary the Data Library chip is built from
-const toDataUseSummary = (translations: TranslationEntry[]): DataUseSummary => {
-  const terms = translations.map(t => ({ ...t, description: t.description.replace(OTHER_TIER_PREFIX, '') }))
-  return {
-    primary: terms.filter(t => t.type === ControlledAccessType.permissions),
-    secondary: terms.filter(t => t.type === ControlledAccessType.modifiers),
-  }
+// Data use comes from the search index so codes match the Data Library and DAC Datasets chips
+const fetchIndexedDataUse = async (dacId: number): Promise<Map<number, DataUseSummary>> => {
+  const query = { from: 0, size: 10000, query: { terms: { dacId: [dacId] } } } as unknown as ElasticsearchQuery
+  const terms = await DataSet.searchDatasetIndex(query)
+  return new Map(terms.map(term => [term.datasetId, term.dataUse]))
 }
 
-const translateDataset = async (dataset: Dataset): Promise<[number, DataUseSummary]> => {
-  const translations = await DataUseTranslation.translateDataUseRestrictions(dataset.dataUse)
-  return [dataset.datasetId, toDataUseSummary(translations)]
+const loadProfile = async (dacId: number) => {
+  const [dac, allDatasets, dataUse] = await Promise.all([
+    DAC.get(dacId),
+    DAC.datasets(dacId),
+    fetchIndexedDataUse(dacId).catch(() => {
+      Notifications.showError({ text: 'Failed to load data use limitations.' })
+      return new Map<number, DataUseSummary>()
+    }),
+  ])
+  return { dac, datasets: allDatasets.filter((d: Dataset) => d.dacApproval), dataUse }
 }
-
-const DATA_USE_COLUMN = DATA_USE_GRID_COLUMN as GridColDef
 
 const DATASET_COLUMNS: GridColDef[] = [
   {
     field: 'datasetIdentifier',
     headerName: 'Dataset ID',
-    width: 150,
+    width: 140,
     renderCell: params => (
       params.value
         ? <Link to={`/dataset/${params.value}`} style={{ color: '#216fb4' }}>{params.value}</Link>
@@ -83,16 +84,14 @@ const DATASET_COLUMNS: GridColDef[] = [
     ),
   },
   {
-    // The shared renderer reads row.dataUse
-    ...DATA_USE_COLUMN,
-    headerName: 'Data Use Limitations',
+    ...DATA_USE_GRID_COLUMN,
     flex: 1,
-    minWidth: 200,
-    renderCell: params => DATA_USE_COLUMN.renderCell?.(params) ?? <span style={{ color: '#999' }}>---</span>,
+    // Same minimum as the DAC Datasets grid, which its longest code sequences need
+    minWidth: 230,
   },
   { field: 'dataType', headerName: 'Data Type', width: 120 },
-  { field: 'pi', headerName: 'Principal Investigator', width: 170 },
-  { field: 'participants', headerName: '# of Participants', width: 140 },
+  { field: 'pi', headerName: 'Principal Investigator', width: 160 },
+  { field: 'participants', headerName: '# of Participants', width: 130 },
 ]
 
 export const DacProfile: React.FC = () => {
@@ -102,7 +101,7 @@ export const DacProfile: React.FC = () => {
 
   const [dac, setDac] = useState<DacObject | null>(null)
   const [datasets, setDatasets] = useState<Dataset[]>([])
-  const [translatedDataUse, setTranslatedDataUse] = useState<Map<number, DataUseSummary>>(new Map())
+  const [dataUseById, setDataUseById] = useState<Map<number, DataUseSummary>>(new Map())
   const [isLoading, setIsLoading] = useState(dacId !== undefined)
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [sectionKey, setSectionKey] = useState(0)
@@ -116,13 +115,11 @@ export const DacProfile: React.FC = () => {
     let cancelled = false
     ;(async () => {
       try {
-        const [fetchedDac, allDatasets] = await Promise.all([
-          DAC.get(dacId),
-          DAC.datasets(dacId),
-        ])
+        const profile = await loadProfile(dacId)
         if (cancelled) return
-        setDac(fetchedDac)
-        setDatasets(allDatasets.filter((d: Dataset) => d.dacApproval))
+        setDac(profile.dac)
+        setDatasets(profile.datasets)
+        setDataUseById(profile.dataUse)
       }
       catch {
         if (!cancelled) Notifications.showError({ text: 'Failed to load DAC profile.' })
@@ -136,30 +133,14 @@ export const DacProfile: React.FC = () => {
     }
   }, [dacId])
 
-  // Translate data use restrictions whenever the dataset list changes.
-  // Promise.all([]) resolves to [] when datasets is empty, yielding an empty Map.
-  useEffect(() => {
-    let cancelled = false
-    const translateAll = async () => {
-      const entries = await Promise.all(datasets.map(translateDataset))
-      if (!cancelled) setTranslatedDataUse(new Map(entries))
-    }
-    void translateAll()
-    return () => {
-      cancelled = true
-    }
-  }, [datasets])
-
   // After EditDac saves or cancels: re-fetch fresh data, then re-mount sections
   const handleEditClose = useCallback(async () => {
     if (dacId === undefined) return
     try {
-      const [fetchedDac, allDatasets] = await Promise.all([
-        DAC.get(dacId),
-        DAC.datasets(dacId),
-      ])
-      setDac(fetchedDac)
-      setDatasets(allDatasets.filter((d: Dataset) => d.dacApproval))
+      const profile = await loadProfile(dacId)
+      setDac(profile.dac)
+      setDatasets(profile.datasets)
+      setDataUseById(profile.dataUse)
     }
     catch {
       // EditDac already surfaces errors; silently continue
@@ -180,11 +161,9 @@ export const DacProfile: React.FC = () => {
       dataType: getDatasetProperty(props, 'Data Type'),
       pi: dataset.study?.piName || getDatasetProperty(props, 'Principal Investigator(PI)'),
       participants: getDatasetProperty(props, '# of participants'),
-      dataUse: translatedDataUse.get(dataset.datasetId),
+      dataUse: dataUseById.get(dataset.datasetId),
     }
-  }), [datasets, translatedDataUse])
-
-  const isTranslating = datasets.length > 0 && translatedDataUse.size < datasets.length
+  }), [datasets, dataUseById])
 
   const datasetCountLabel = `${datasets.length.toLocaleString()} ${datasets.length === 1 ? 'dataset' : 'datasets'}`
 
@@ -199,24 +178,16 @@ export const DacProfile: React.FC = () => {
           <Typography sx={{ color: '#00609f', fontFamily: 'Montserrat, sans-serif', fontSize: '15px', fontWeight: 'bold', mb: 1 }}>
             {datasetCountLabel}
           </Typography>
-          {isTranslating
-            ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '12rem' }}>
-                  <CircularProgress />
-                </Box>
-              )
-            : (
-                <DataGrid
-                  rows={datasetRows}
-                  columns={DATASET_COLUMNS}
-                  pageSizeOptions={PAGE_SIZE_OPTIONS}
-                  paginationModel={paginationModel}
-                  onPaginationModelChange={setPaginationModel}
-                  disableRowSelectionOnClick
-                  autoHeight
-                  sx={DATAGRID_SX}
-                />
-              )}
+          <DataGrid
+            rows={datasetRows}
+            columns={DATASET_COLUMNS}
+            pageSizeOptions={PAGE_SIZE_OPTIONS}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            disableRowSelectionOnClick
+            autoHeight
+            sx={DATAGRID_SX}
+          />
         </Box>
       )
 

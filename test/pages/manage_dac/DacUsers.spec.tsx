@@ -87,11 +87,15 @@ describe('DacUsers Component Tests', () => {
     const chair = dacData.chairpersons![0]
     const btn = () => container.querySelector(`[data-cy="remove_button_${chair.userId}"]`) as HTMLElement
 
+    expect(btn()).toHaveAttribute('aria-pressed', 'false')
+
     fireEvent.click(btn())
     expect(btn()).toHaveTextContent('Pending Removal')
+    expect(btn()).toHaveAttribute('aria-pressed', 'true')
 
     fireEvent.click(btn())
     expect(btn()).toHaveTextContent('Remove')
+    expect(btn()).toHaveAttribute('aria-pressed', 'false')
   })
 
   it('applies pending removal styling when marked for removal', () => {

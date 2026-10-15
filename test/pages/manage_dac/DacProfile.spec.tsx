@@ -4,12 +4,12 @@ import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router'
 import DacProfile from 'src/pages/manage_dac/DacProfile'
 import { DAC } from 'src/libs/ajax/DAC'
-import { DataUseTranslation } from 'src/libs/dataUseTranslation'
+import { DataSet } from 'src/libs/ajax/DataSet'
 import { Notifications } from 'src/libs/utils'
-import type { DacObject, Dataset, DuosUser, Study } from 'src/types/model'
+import type { DacObject, Dataset, DatasetTerm, DataUseSummary, DuosUser, Study } from 'src/types/model'
 
 vi.mock('src/libs/ajax/DAC')
-vi.mock('src/libs/dataUseTranslation')
+vi.mock('src/libs/ajax/DataSet')
 vi.mock('src/libs/utils', async (importOriginal) => {
   const original = await importOriginal<typeof import('src/libs/utils')>()
   return {
@@ -78,6 +78,8 @@ const makeDataset = ({
   dacApproval,
 })
 
+const indexTerm = (datasetId: number, dataUse: DataUseSummary) => ({ datasetId, dataUse }) as DatasetTerm
+
 const renderDacProfile = async (dacId: number | string = 1) => {
   await act(async () => {
     render(
@@ -94,7 +96,7 @@ const renderDacProfile = async (dacId: number | string = 1) => {
 describe('DacProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(DataUseTranslation.translateDataUseRestrictions).mockResolvedValue([])
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([])
   })
 
   it('shows the DAC name after loading', async () => {
@@ -130,35 +132,37 @@ describe('DacProfile', () => {
     expect(screen.queryByText('Unapproved Dataset')).toBeNull()
   })
 
-  it('shows data use limitations as the Data Library chip', async () => {
+  it('shows data use limitations from the search index, as the Data Library does', async () => {
     vi.mocked(DAC.get).mockResolvedValue(existingDac)
     vi.mocked(DAC.datasets).mockResolvedValue([
       makeDataset({ datasetId: 1, name: 'Approved Dataset', dacApproval: true }),
     ])
-    vi.mocked(DataUseTranslation.translateDataUseRestrictions).mockResolvedValue([
-      { code: 'NPU', description: 'Use is limited to non-profit use', type: 'Modifiers' },
-      { code: 'GRU', description: 'Use is permitted for any research purpose', type: 'Permissions' },
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([
+      indexTerm(1, {
+        primary: [{ code: 'GRU', description: 'Use is permitted for any research purpose' }],
+        secondary: [{ code: 'POP-F', description: 'Female population only' }, { code: 'MOR', description: 'Publication moratorium' }],
+      }),
     ])
 
     await renderDacProfile()
 
-    // Primary codes lead, followed by secondary codes
-    expect(await screen.findByText('GRU-NPU')).toBeTruthy()
+    expect(await screen.findByText('GRU-MOR-POP-F')).toBeTruthy()
+    expect(vi.mocked(DataSet.searchDatasetIndex)).toHaveBeenCalledWith(
+      expect.objectContaining({ query: { terms: { dacId: [1] } } }),
+    )
   })
 
-  it('names the tier of an Other restriction only once in the data use tooltip', async () => {
+  it('still lists datasets when the search index fails', async () => {
     vi.mocked(DAC.get).mockResolvedValue(existingDac)
     vi.mocked(DAC.datasets).mockResolvedValue([
       makeDataset({ datasetId: 1, name: 'Approved Dataset', dacApproval: true }),
     ])
-    vi.mocked(DataUseTranslation.translateDataUseRestrictions).mockResolvedValue([
-      { code: 'OTH1', description: 'Primary Other: Approved projects only', type: 'Permissions' },
-    ])
+    vi.mocked(DataSet.searchDatasetIndex).mockRejectedValue(new Error('Index down'))
 
     await renderDacProfile()
-    fireEvent.mouseOver(await screen.findByText('OTH1'))
 
-    expect(await screen.findByText('Primary — OTH1: Approved projects only')).toBeTruthy()
+    expect(await screen.findByText('Approved Dataset')).toBeTruthy()
+    expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Failed to load data use limitations.' })
   })
 
   it('shows "No datasets" message when there are no approved datasets', async () => {
