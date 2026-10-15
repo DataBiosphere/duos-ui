@@ -130,6 +130,37 @@ describe('DacProfile', () => {
     expect(screen.queryByText('Unapproved Dataset')).toBeNull()
   })
 
+  it('shows data use limitations as the Data Library chip', async () => {
+    vi.mocked(DAC.get).mockResolvedValue(existingDac)
+    vi.mocked(DAC.datasets).mockResolvedValue([
+      makeDataset({ datasetId: 1, name: 'Approved Dataset', dacApproval: true }),
+    ])
+    vi.mocked(DataUseTranslation.translateDataUseRestrictions).mockResolvedValue([
+      { code: 'NPU', description: 'Use is limited to non-profit use', type: 'Modifiers' },
+      { code: 'GRU', description: 'Use is permitted for any research purpose', type: 'Permissions' },
+    ])
+
+    await renderDacProfile()
+
+    // Primary codes lead, followed by secondary codes
+    expect(await screen.findByText('GRU-NPU')).toBeTruthy()
+  })
+
+  it('names the tier of an Other restriction only once in the data use tooltip', async () => {
+    vi.mocked(DAC.get).mockResolvedValue(existingDac)
+    vi.mocked(DAC.datasets).mockResolvedValue([
+      makeDataset({ datasetId: 1, name: 'Approved Dataset', dacApproval: true }),
+    ])
+    vi.mocked(DataUseTranslation.translateDataUseRestrictions).mockResolvedValue([
+      { code: 'OTH1', description: 'Primary Other: Approved projects only', type: 'Permissions' },
+    ])
+
+    await renderDacProfile()
+    fireEvent.mouseOver(await screen.findByText('OTH1'))
+
+    expect(await screen.findByText('Primary — OTH1: Approved projects only')).toBeTruthy()
+  })
+
   it('shows "No datasets" message when there are no approved datasets', async () => {
     vi.mocked(DAC.get).mockResolvedValue(existingDac)
     vi.mocked(DAC.datasets).mockResolvedValue([
