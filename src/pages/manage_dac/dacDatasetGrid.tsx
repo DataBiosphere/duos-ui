@@ -2,7 +2,6 @@ import React from 'react'
 import { Link } from 'react-router'
 import { GridColDef } from '@mui/x-data-grid'
 import { DataSet } from 'src/libs/ajax/DataSet'
-import { Notifications } from 'src/libs/utils'
 import { DATA_USE_GRID_COLUMN } from 'src/components/dataUseGridColumn'
 import { validateHttpUrl } from 'src/utils/UrlUtils'
 import type { Dataset, DatasetProperty, DataUseSummary } from 'src/types/model'
@@ -22,20 +21,13 @@ const getDatasetProperty = (properties: DatasetProperty[], propName: string): st
   return prop?.propertyValue ?? ''
 }
 
-/**
- * Data use for a DAC's datasets, read from the search index so the chips match the Data Library
- * and DAC Datasets. Resolves to an empty map, after showing an error, if the index call fails.
- */
-export const loadIndexedDataUse = async (dacId: number): Promise<Map<number, DataUseSummary>> => {
+export const DATA_USE_LOAD_ERROR = 'Failed to load data use limitations.'
+
+/** Data use read from the search index, so chips match the Data Library and DAC Datasets */
+export const fetchIndexedDataUse = async (dacId: number, signal: AbortSignal): Promise<Map<number, DataUseSummary>> => {
   const query = { from: 0, size: 10000, query: { terms: { dacId: [dacId] } } } as unknown as ElasticsearchQuery
-  try {
-    const terms = await DataSet.searchDatasetIndex(query)
-    return new Map(terms.map(term => [term.datasetId, term.dataUse]))
-  }
-  catch {
-    Notifications.showError({ text: 'Failed to load data use limitations.' })
-    return new Map()
-  }
+  const terms = await DataSet.searchDatasetIndex(query, { signal })
+  return new Map(terms.map(term => [term.datasetId, term.dataUse]))
 }
 
 export const toDacDatasetRow = (dataset: Dataset, dataUse: DataUseSummary | undefined) => {

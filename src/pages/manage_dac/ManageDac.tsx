@@ -11,13 +11,14 @@ import AddObjectButton from 'src/components/AddObjectButton'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
 import type { DacObject, Dataset, DataUseSummary } from 'src/types/model'
 import { DataGrid } from '@mui/x-data-grid'
-import { Box, CircularProgress, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { useNavigate } from 'react-router'
 import {
   DAC_DATASET_COLUMNS,
   DAC_DATASET_GRID_SX,
   DAC_DATASET_PAGE_SIZE_OPTIONS,
-  loadIndexedDataUse,
+  DATA_USE_LOAD_ERROR,
+  fetchIndexedDataUse,
   toDacDatasetRow,
 } from 'src/pages/manage_dac/dacDatasetGrid'
 
@@ -60,8 +61,10 @@ export const ManageDac = function ManageDac() {
 
   const [selectedDac, setSelectedDac] = useState<DacObject | null>(null)
   const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([])
-  const [dataUseById, setDataUseById] = useState<Map<number, DataUseSummary> | null>(null)
-  const dataUseRequest = useRef(0)
+  const [dataUseById, setDataUseById] = useState<Map<number, DataUseSummary>>(new Map())
+  const dataUseRequest = useRef<AbortController | null>(null)
+
+  useEffect(() => () => dataUseRequest.current?.abort(), [])
   const [datasetPaginationModel, setDatasetPaginationModel] = useState({ page: 0, pageSize: 10 })
 
   const initializeDACs = useCallback(async () => {
@@ -129,15 +132,22 @@ export const ManageDac = function ManageDac() {
     }
     setSelectedDac(dac)
     setSelectedDatasets(datasets)
-    setDataUseById(null)
+    setDataUseById(new Map())
     setShowDatasetsPage(true)
     setTimeout(() => {
       document.getElementById('dac-datasets-section')?.scrollIntoView({ behavior: 'smooth' })
     }, 50)
-    // Ignore a slow response for a DAC that is no longer selected
-    const request = ++dataUseRequest.current
-    const dataUse = dac.dacId === undefined ? new Map<number, DataUseSummary>() : await loadIndexedDataUse(dac.dacId)
-    if (request === dataUseRequest.current) setDataUseById(dataUse)
+    dataUseRequest.current?.abort()
+    if (dac.dacId === undefined) return
+    const controller = new AbortController()
+    dataUseRequest.current = controller
+    try {
+      const dataUse = await fetchIndexedDataUse(dac.dacId, controller.signal)
+      if (!controller.signal.aborted) setDataUseById(dataUse)
+    }
+    catch {
+      if (!controller.signal.aborted) Notifications.showError({ text: DATA_USE_LOAD_ERROR })
+    }
   }, [])
 
   const addDac = () => {
@@ -145,13 +155,14 @@ export const ManageDac = function ManageDac() {
   }
 
   const handleDatasetsClose = useCallback(() => {
+    dataUseRequest.current?.abort()
     setShowDatasetsPage(false)
     setSelectedDatasets([])
     setSelectedDac(null)
   }, [])
 
   const datasetRows = useMemo(
-    () => selectedDatasets.map(dataset => toDacDatasetRow(dataset, dataUseById?.get(dataset.datasetId))),
+    () => selectedDatasets.map(dataset => toDacDatasetRow(dataset, dataUseById.get(dataset.datasetId))),
     [selectedDatasets, dataUseById],
   )
 
@@ -206,26 +217,18 @@ export const ManageDac = function ManageDac() {
               Close
             </button>
           </Box>
-          {dataUseById === null
-            ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '12rem' }}>
-                  <CircularProgress />
-                </Box>
-              )
-            : (
-                <Box sx={{ width: '100%', mt: 1 }}>
-                  <DataGrid
-                    rows={datasetRows}
-                    columns={DAC_DATASET_COLUMNS}
-                    pageSizeOptions={DAC_DATASET_PAGE_SIZE_OPTIONS}
-                    paginationModel={datasetPaginationModel}
-                    onPaginationModelChange={setDatasetPaginationModel}
-                    disableRowSelectionOnClick
-                    autoHeight
-                    sx={DAC_DATASET_GRID_SX}
-                  />
-                </Box>
-              )}
+          <Box sx={{ width: '100%', mt: 1 }}>
+            <DataGrid
+              rows={datasetRows}
+              columns={DAC_DATASET_COLUMNS}
+              pageSizeOptions={DAC_DATASET_PAGE_SIZE_OPTIONS}
+              paginationModel={datasetPaginationModel}
+              onPaginationModelChange={setDatasetPaginationModel}
+              disableRowSelectionOnClick
+              autoHeight
+              sx={DAC_DATASET_GRID_SX}
+            />
+          </Box>
         </div>
       )}
     </div>

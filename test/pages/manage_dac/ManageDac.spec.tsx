@@ -310,6 +310,7 @@ describe('ManageDac', () => {
     expect(await screen.findByText('HMB')).toBeInTheDocument()
     expect(vi.mocked(DataSet.searchDatasetIndex)).toHaveBeenCalledWith(
       expect.objectContaining({ query: { terms: { dacId: [primaryDac.dacId] } } }),
+      { signal: expect.any(AbortSignal) },
     )
   })
 

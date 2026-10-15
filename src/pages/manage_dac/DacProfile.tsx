@@ -15,7 +15,8 @@ import {
   DAC_DATASET_COLUMNS,
   DAC_DATASET_GRID_SX,
   DAC_DATASET_PAGE_SIZE_OPTIONS,
-  loadIndexedDataUse,
+  DATA_USE_LOAD_ERROR,
+  fetchIndexedDataUse,
   toDacDatasetRow,
 } from 'src/pages/manage_dac/dacDatasetGrid'
 import type { DacObject, Dataset, DataUseSummary } from 'src/types/model'
@@ -25,12 +26,11 @@ import editDACIcon from 'src/images/dac_icon.svg'
 const PAGE_MAX_WIDTH = '1100px'
 
 const loadProfile = async (dacId: number) => {
-  const [dac, allDatasets, dataUse] = await Promise.all([
+  const [dac, allDatasets] = await Promise.all([
     DAC.get(dacId),
     DAC.datasets(dacId),
-    loadIndexedDataUse(dacId),
   ])
-  return { dac, datasets: allDatasets.filter((d: Dataset) => d.dacApproval), dataUse }
+  return { dac, datasets: allDatasets.filter((d: Dataset) => d.dacApproval) }
 }
 
 export const DacProfile: React.FC = () => {
@@ -58,7 +58,6 @@ export const DacProfile: React.FC = () => {
         if (cancelled) return
         setDac(profile.dac)
         setDatasets(profile.datasets)
-        setDataUseById(profile.dataUse)
       }
       catch {
         if (!cancelled) Notifications.showError({ text: 'Failed to load DAC profile.' })
@@ -72,6 +71,20 @@ export const DacProfile: React.FC = () => {
     }
   }, [dacId])
 
+  // Data use fills in after the profile renders, so a slow index never holds up the page
+  useEffect(() => {
+    if (dacId === undefined) return
+    const controller = new AbortController()
+    fetchIndexedDataUse(dacId, controller.signal)
+      .then((dataUse) => {
+        if (!controller.signal.aborted) setDataUseById(dataUse)
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) Notifications.showError({ text: DATA_USE_LOAD_ERROR })
+      })
+    return () => controller.abort()
+  }, [dacId])
+
   // After EditDac saves or cancels: re-fetch fresh data, then re-mount sections
   const handleEditClose = useCallback(async () => {
     if (dacId === undefined) return
@@ -79,7 +92,6 @@ export const DacProfile: React.FC = () => {
       const profile = await loadProfile(dacId)
       setDac(profile.dac)
       setDatasets(profile.datasets)
-      setDataUseById(profile.dataUse)
     }
     catch {
       // EditDac already surfaces errors; silently continue

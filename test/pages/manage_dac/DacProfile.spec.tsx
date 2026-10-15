@@ -149,6 +149,7 @@ describe('DacProfile', () => {
     expect(await screen.findByText('GRU-MOR-POP-F')).toBeTruthy()
     expect(vi.mocked(DataSet.searchDatasetIndex)).toHaveBeenCalledWith(
       expect.objectContaining({ query: { terms: { dacId: [1] } } }),
+      { signal: expect.any(AbortSignal) },
     )
   })
 
@@ -163,6 +164,43 @@ describe('DacProfile', () => {
 
     expect(await screen.findByText('Approved Dataset')).toBeTruthy()
     expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Failed to load data use limitations.' })
+  })
+
+  it('renders the profile while data use is still loading', async () => {
+    vi.mocked(DAC.get).mockResolvedValue(existingDac)
+    vi.mocked(DAC.datasets).mockResolvedValue([
+      makeDataset({ datasetId: 1, name: 'Approved Dataset', dacApproval: true }),
+    ])
+    vi.mocked(DataSet.searchDatasetIndex).mockReturnValue(new Promise(() => {}))
+
+    await renderDacProfile()
+
+    expect(await screen.findByText('Approved Dataset')).toBeTruthy()
+    expect(screen.getByTestId('edit-dac-stub')).toBeTruthy()
+  })
+
+  it('does not report a data use failure after the page is left', async () => {
+    vi.mocked(DAC.get).mockResolvedValue(existingDac)
+    vi.mocked(DAC.datasets).mockResolvedValue([])
+    let failIndex: (reason: Error) => void = () => {}
+    vi.mocked(DataSet.searchDatasetIndex).mockReturnValue(new Promise((_resolve, reject) => {
+      failIndex = reject
+    }))
+
+    let unmount: () => void = () => {}
+    await act(async () => {
+      ({ unmount } = render(
+        <MemoryRouter initialEntries={['/manage_dac/1']}>
+          <Routes>
+            <Route path="/manage_dac/:dacId" element={<DacProfile />} />
+          </Routes>
+        </MemoryRouter>,
+      ))
+    })
+    unmount()
+    await act(async () => failIndex(new Error('aborted')))
+
+    expect(Notifications.showError).not.toHaveBeenCalled()
   })
 
   it('shows "No datasets" message when there are no approved datasets', async () => {
