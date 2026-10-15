@@ -138,6 +138,7 @@ export const ManageDac = function ManageDac() {
   // Data use fills in after the grid renders; closing or switching DACs aborts the request
   const viewedDacId = showDatasetsPage ? selectedDac?.dacId : undefined
   useEffect(() => {
+    setDataUseById(new Map())
     if (viewedDacId === undefined) return
     const controller = new AbortController()
     fetchIndexedDataUse(viewedDacId, controller.signal)
