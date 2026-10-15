@@ -127,16 +127,16 @@ function App() {
         <NavigationStateProvider>
           {/* A column at least one screen tall: .wrap takes the free space, so the
               footer sits at the bottom of a short page and after a long one. */}
-          <Box className="body" sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Box className="wrap" sx={{ flexGrow: 1 }}>
-              <div className="main">
+          <Box className="body" sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%', minWidth: '100%' }}>
+            <Box className="wrap" sx={{ flexGrow: 1, minWidth: '100%' }}>
+              <Box className="main" sx={{ position: 'relative', overflowX: 'clip', minWidth: '100%' }}>
                 {/* The header derives role tabs and the profile menu from
                     Storage.getCurrentUser() — it is identity-bearing UI and
                     must hide during reconciliation like the routes do. */}
                 {!reconciling && <DuosHeader />}
                 {(isLoading || reconciling) && <div style={loadingSyle}><Spinner /></div>}
                 {!(isLoading || reconciling) && <AppRoutes isLogged={isLoggedIn} env={env} />}
-              </div>
+              </Box>
             </Box>
             <DuosFooter />
           </Box>

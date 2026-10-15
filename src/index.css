@@ -8,14 +8,8 @@ html, body, #root {
   font-family: 'Montserrat', sans-serif;
 }
 
-.wrap, .body, #root {
+#root {
   min-height: 100%;
-  min-width: 100%;
-}
-
-.main {
-  position: relative;
-  overflow-x: clip;
   min-width: 100%;
 }
 
