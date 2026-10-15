@@ -56,12 +56,12 @@ export const ManageDac = function ManageDac() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [dacs, setDacs] = useState<DacObject[]>([])
 
-  const [showDatasetsPage, setShowDatasetsPage] = useState<boolean>(false)
   const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false)
 
-  const [selectedDac, setSelectedDac] = useState<DacObject | null>(null)
+  const [dacToDelete, setDacToDelete] = useState<DacObject | null>(null)
+  const [viewedDac, setViewedDac] = useState<DacObject | null>(null)
   const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([])
-  const [dataUseById, setDataUseById] = useState<Map<number, DataUseSummary>>(new Map())
+  const [indexedDataUse, setIndexedDataUse] = useState<{ dacId: number, dataUseById: Map<number, DataUseSummary> } | null>(null)
   const [datasetPaginationModel, setDatasetPaginationModel] = useState({ page: 0, pageSize: 10 })
 
   const initializeDACs = useCallback(async () => {
@@ -105,15 +105,21 @@ export const ManageDac = function ManageDac() {
     }
   }, [chairDACIds, roles])
 
+  const handleDatasetsClose = useCallback(() => {
+    setSelectedDatasets([])
+    setViewedDac(null)
+  }, [])
+
   const handleDeleteDac = async () => {
-    if (selectedDac?.dacId === undefined) {
+    if (dacToDelete?.dacId === undefined) {
       Notifications.showError({ text: 'DAC could not be deleted.' })
       return
     }
-    const { status } = await DAC.delete(selectedDac.dacId)
+    const { status } = await DAC.delete(dacToDelete.dacId)
     if (Number(status) === 200) {
       Notifications.showSuccess({ text: 'DAC successfully deleted.' })
       setShowConfirmationModal(false)
+      if (viewedDac?.dacId === dacToDelete.dacId) handleDatasetsClose()
       await initializeDACs()
     }
     else {
@@ -127,23 +133,21 @@ export const ManageDac = function ManageDac() {
       Notifications.showError({ text: 'DAC has no datasets.' })
       return
     }
-    setSelectedDac(dac)
+    setViewedDac(dac)
     setSelectedDatasets(datasets)
-    setShowDatasetsPage(true)
     setTimeout(() => {
       document.getElementById('dac-datasets-section')?.scrollIntoView({ behavior: 'smooth' })
     }, 50)
   }, [])
 
   // Data use fills in after the grid renders; closing or switching DACs aborts the request
-  const viewedDacId = showDatasetsPage ? selectedDac?.dacId : undefined
+  const viewedDacId = viewedDac?.dacId
   useEffect(() => {
-    setDataUseById(new Map())
     if (viewedDacId === undefined) return
     const controller = new AbortController()
     fetchIndexedDataUse(viewedDacId, controller.signal)
-      .then((dataUse) => {
-        if (!controller.signal.aborted) setDataUseById(dataUse)
+      .then((dataUseById) => {
+        if (!controller.signal.aborted) setIndexedDataUse({ dacId: viewedDacId, dataUseById })
       })
       .catch(() => {
         if (!controller.signal.aborted) Notifications.showError({ text: DATA_USE_LOAD_ERROR })
@@ -155,16 +159,10 @@ export const ManageDac = function ManageDac() {
     navigate('/manage_add_dac_daa')
   }
 
-  const handleDatasetsClose = useCallback(() => {
-    setShowDatasetsPage(false)
-    setSelectedDatasets([])
-    setSelectedDac(null)
-  }, [])
-
-  const datasetRows = useMemo(
-    () => selectedDatasets.map(dataset => toDacDatasetRow(dataset, dataUseById.get(dataset.datasetId))),
-    [selectedDatasets, dataUseById],
-  )
+  const datasetRows = useMemo(() => {
+    const dataUseById = indexedDataUse?.dacId === viewedDacId ? indexedDataUse?.dataUseById : undefined
+    return selectedDatasets.map(dataset => toDacDatasetRow(dataset, dataUseById?.get(dataset.datasetId)))
+  }, [selectedDatasets, indexedDataUse, viewedDacId])
 
   return (
     <div style={Styles.PAGE}>
@@ -189,7 +187,7 @@ export const ManageDac = function ManageDac() {
         userRole={userRole}
         onViewDatasets={handleViewDatasets}
         setShowConfirmationModal={setShowConfirmationModal}
-        setSelectedDac={setSelectedDac}
+        setSelectedDac={setDacToDelete}
       />
 
       <ConfirmationModal
@@ -197,17 +195,17 @@ export const ManageDac = function ManageDac() {
         closeConfirmation={() => setShowConfirmationModal(false)}
         title="Delete DAC?"
         message="Are you sure you want to delete this Data Access Committee?"
-        header={selectedDac?.name}
+        header={dacToDelete?.name}
         onConfirm={handleDeleteDac}
       />
 
       {/* ── Section 2: DAC Datasets associated with DAC: ── */}
-      {showDatasetsPage && selectedDac && selectedDatasets.length > 0 && (
+      {viewedDac && selectedDatasets.length > 0 && (
         <div id="dac-datasets-section">
           <hr style={SECTION_DIVIDER} />
           <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
             <Typography sx={SECTION_TITLE_SX}>
-              {`DAC Datasets associated with DAC: ${selectedDac.name ?? ''}`}
+              {`DAC Datasets associated with DAC: ${viewedDac.name ?? ''}`}
             </Typography>
             <button
               className="btn btn-link"
