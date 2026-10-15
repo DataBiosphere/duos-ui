@@ -12,6 +12,7 @@ import editDACIcon from 'src/images/dac_icon.svg'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import { Spinner } from 'src/components/Spinner'
 import { Styles } from 'src/libs/theme'
+import { Button } from '@mui/material'
 import PublishIcon from '@mui/icons-material/Publish'
 import { UploadDaaModal } from 'src/components/modals/UploadDaaModal'
 import { CreateDacUserModal } from 'src/components/modals/CreateDacUserModal'
@@ -744,16 +745,20 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
       )
     : null
 
+  // In profile mode the field wraps under its label once the row is narrower than both bases
+  const fieldRowStyle: React.CSSProperties = profileMode
+    ? { display: 'flex', flexWrap: 'wrap', columnGap: '30px', marginBottom: '15px' }
+    : { display: 'flex', marginBottom: '15px' }
   const labelColStyle: React.CSSProperties = profileMode
-    ? { flex: '0 0 200px', paddingRight: '15px', marginTop: 0 }
+    ? { flex: '0 0 200px', marginTop: 0 }
     : { flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }
   const fieldColStyle: React.CSSProperties = profileMode
-    ? { flex: 1, minWidth: 0, paddingLeft: '15px' }
+    ? { flex: '1 1 240px', minWidth: 0 }
     : { flexBasis: '66.67%', paddingLeft: '15px' }
 
   const dacMembersJSX = ((state.dac.chairpersons?.length ?? 0) > 0 || (state.dac.members?.length ?? 0) > 0)
     ? (
-        <div style={{ display: 'flex', marginBottom: '15px' }}>
+        <div style={fieldRowStyle}>
           <div
             id="lbl_dacMembers"
             style={labelColStyle}
@@ -769,7 +774,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
     : null
 
   const chairSelectJSX = (
-    <div style={{ display: 'flex', marginBottom: '15px' }}>
+    <div style={fieldRowStyle}>
       <div
         id="lbl_dacChair"
         style={labelColStyle}
@@ -809,7 +814,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
   )
 
   const memberSelectJSX = (
-    <div style={{ display: 'flex', marginBottom: '15px' }}>
+    <div style={fieldRowStyle}>
       <div
         id="lbl_dacMember"
         style={labelColStyle}
@@ -871,7 +876,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
 
   const basicFieldsJSX = (
     <>
-      <div style={{ display: 'flex', marginBottom: '15px' }}>
+      <div style={fieldRowStyle}>
         <label
           id="lbl_dacName"
           htmlFor="txt_dacName"
@@ -893,7 +898,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
           />
         </div>
       </div>
-      <div style={{ display: 'flex', marginBottom: '15px' }}>
+      <div style={fieldRowStyle}>
         <label
           id="lbl_dacDescription"
           htmlFor="txt_dacDescription"
@@ -914,7 +919,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
           />
         </div>
       </div>
-      <div style={{ display: 'flex', marginBottom: '15px' }}>
+      <div style={fieldRowStyle}>
         <label
           id="lbl_dacEmail"
           htmlFor="txt_dacEmail"
@@ -1024,8 +1029,8 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
 
   const profileSaveButtons = (
     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '1rem' }}>
-      <button onClick={okHandler} className="btn-primary common-background">Save</button>
-      <button onClick={closeHandler} className="btn-secondary">Cancel</button>
+      <Button variant="contained" onClick={okHandler}>Save</Button>
+      <Button variant="outlined" onClick={closeHandler}>Cancel</Button>
     </div>
   )
 
@@ -1034,7 +1039,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
         <>
           <DacProfileSection
             title="DAC Membership"
-            description="Manage who serves on this DAC. Chairpersons manage DAC settings and RADAR rules and issue final access approvals; Members review and vote on Data Access Requests (DARs). Additions and removals take effect when you click Save."
+            description="Manage who serves on this DAC. Chairpersons manage DAC settings and RADAR rules and issue final access approvals; Members review and vote on Data Access Requests (DARs). Save applies changes in this section, DAC Info, and the Data Access Agreement together; Cancel discards all of them."
           >
             <div className="form-horizontal css-form">
               {dacMembersJSX}
@@ -1045,7 +1050,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
           </DacProfileSection>
           <DacProfileSection
             title="DAC Info"
-            description="The name, description, and contact email that identify this DAC in DUOS. Changes take effect when you click Save."
+            description="The name, description, and contact email that identify this DAC in DUOS. Saved together with DAC Membership and the agreement when you click Save."
           >
             <form
               className="form-horizontal css-form"
@@ -1060,7 +1065,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
           </DacProfileSection>
           <DacProfileSection
             title="Select a Data Access Agreement"
-            description="Choose the Data Access Agreement (DAA) that applies to requests for this DAC's datasets. Select an existing agreement and click Save, or upload your own."
+            description="Choose the Data Access Agreement (DAA) that applies to requests for this DAC's datasets. Select an existing agreement and click Save, or upload your own, which is saved right away."
           >
             {daaContentJSX}
             {profileSaveButtons}

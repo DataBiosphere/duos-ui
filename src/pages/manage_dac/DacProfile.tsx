@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Link, useParams } from 'react-router'
-import { Box, CircularProgress, Typography } from '@mui/material'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { Box, Typography } from '@mui/material'
+import { DataGrid } from '@mui/x-data-grid'
 import { DAC } from 'src/libs/ajax/DAC'
-import { ControlledAccessType, DataUseTranslation, TranslationEntry } from 'src/libs/dataUseTranslation'
-import { DATA_USE_GRID_COLUMN } from 'src/components/dataUseGridColumn'
 import { Notifications } from 'src/libs/utils'
 import { Styles } from 'src/libs/theme'
 import { usePageTitle } from 'src/hooks/usePageTitle'
@@ -13,87 +11,27 @@ import { Spinner } from 'src/components/Spinner'
 import EditDac from 'src/pages/manage_dac/EditDac'
 import { DACBotComponent } from 'src/components/dac_bot/DACBotComponent'
 import { DacProfileSection } from 'src/pages/manage_dac/DacProfileSection'
-import { validateHttpUrl } from 'src/utils/UrlUtils'
-import type { DacObject, Dataset, DatasetProperty, DataUseSummary } from 'src/types/model'
+import {
+  DAC_DATASET_COLUMNS,
+  DAC_DATASET_GRID_SX,
+  DAC_DATASET_PAGE_SIZE_OPTIONS,
+  DATA_USE_LOAD_ERROR,
+  fetchIndexedDataUse,
+  toDacDatasetRow,
+} from 'src/pages/manage_dac/dacDatasetGrid'
+import type { DacObject, Dataset, DataUseSummary } from 'src/types/model'
 import backArrowIcon from 'src/images/back_arrow.svg'
 import editDACIcon from 'src/images/dac_icon.svg'
 
-const PAGE_SIZE_OPTIONS = [10, 25, 50]
-
 const PAGE_MAX_WIDTH = '1100px'
 
-// 37em fits 50 all-caps characters on one line; 104px is the header's left padding plus icon column
-const TITLE_STYLE: React.CSSProperties = {
-  display: 'block',
-  fontSize: 'clamp(2rem, calc((100cqi - 104px) / 37), 2.8rem)',
-  overflowWrap: 'anywhere',
+const loadProfile = async (dacId: number) => {
+  const [dac, allDatasets] = await Promise.all([
+    DAC.get(dacId),
+    DAC.datasets(dacId),
+  ])
+  return { dac, datasets: allDatasets.filter((d: Dataset) => d.dacApproval) }
 }
-
-const DATAGRID_SX = {
-  '& .MuiDataGrid-cell:focus': { outline: 'none' },
-  '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
-  '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
-  '& .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
-}
-
-const getDatasetProperty = (properties: DatasetProperty[], propName: string): string => {
-  const prop = properties?.find(p => p.propertyName.toLowerCase() === propName.toLowerCase())
-  return prop?.propertyValue ?? ''
-}
-
-// The chip tooltip already names the tier, so drop the translator's "Primary Other: " prefix
-const OTHER_TIER_PREFIX = /^(Primary|Secondary) Other: /
-
-// Mirrors the search index summary the Data Library chip is built from
-const toDataUseSummary = (translations: TranslationEntry[]): DataUseSummary => {
-  const terms = translations.map(t => ({ ...t, description: t.description.replace(OTHER_TIER_PREFIX, '') }))
-  return {
-    primary: terms.filter(t => t.type === ControlledAccessType.permissions),
-    secondary: terms.filter(t => t.type === ControlledAccessType.modifiers),
-  }
-}
-
-const translateDataset = async (dataset: Dataset): Promise<[number, DataUseSummary]> => {
-  const translations = await DataUseTranslation.translateDataUseRestrictions(dataset.dataUse)
-  return [dataset.datasetId, toDataUseSummary(translations)]
-}
-
-const DATA_USE_COLUMN = DATA_USE_GRID_COLUMN as GridColDef
-
-const DATASET_COLUMNS: GridColDef[] = [
-  {
-    field: 'datasetIdentifier',
-    headerName: 'Dataset ID',
-    width: 150,
-    renderCell: params => (
-      params.value
-        ? <Link to={`/dataset/${params.value}`} style={{ color: '#216fb4' }}>{params.value}</Link>
-        : <span style={{ color: '#999' }}>---</span>
-    ),
-  },
-  { field: 'name', headerName: 'Dataset Name', flex: 1, minWidth: 160 },
-  {
-    field: 'url',
-    headerName: 'URL',
-    width: 80,
-    renderCell: params => (
-      params.value
-        ? <a href={params.value} target="_blank" rel="noreferrer" style={{ color: '#216fb4' }}>Link</a>
-        : <span style={{ color: '#999' }}>---</span>
-    ),
-  },
-  {
-    // The shared renderer reads row.dataUse
-    ...DATA_USE_COLUMN,
-    headerName: 'Data Use Limitations',
-    flex: 1,
-    minWidth: 200,
-    renderCell: params => DATA_USE_COLUMN.renderCell?.(params) ?? <span style={{ color: '#999' }}>---</span>,
-  },
-  { field: 'dataType', headerName: 'Data Type', width: 120 },
-  { field: 'pi', headerName: 'Principal Investigator', width: 170 },
-  { field: 'participants', headerName: '# of Participants', width: 140 },
-]
 
 export const DacProfile: React.FC = () => {
   const { dacId: dacIdParam } = useParams<{ dacId: string }>()
@@ -102,7 +40,7 @@ export const DacProfile: React.FC = () => {
 
   const [dac, setDac] = useState<DacObject | null>(null)
   const [datasets, setDatasets] = useState<Dataset[]>([])
-  const [translatedDataUse, setTranslatedDataUse] = useState<Map<number, DataUseSummary>>(new Map())
+  const [dataUseById, setDataUseById] = useState<Map<number, DataUseSummary>>(new Map())
   const [isLoading, setIsLoading] = useState(dacId !== undefined)
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [sectionKey, setSectionKey] = useState(0)
@@ -116,13 +54,10 @@ export const DacProfile: React.FC = () => {
     let cancelled = false
     ;(async () => {
       try {
-        const [fetchedDac, allDatasets] = await Promise.all([
-          DAC.get(dacId),
-          DAC.datasets(dacId),
-        ])
+        const profile = await loadProfile(dacId)
         if (cancelled) return
-        setDac(fetchedDac)
-        setDatasets(allDatasets.filter((d: Dataset) => d.dacApproval))
+        setDac(profile.dac)
+        setDatasets(profile.datasets)
       }
       catch {
         if (!cancelled) Notifications.showError({ text: 'Failed to load DAC profile.' })
@@ -136,30 +71,28 @@ export const DacProfile: React.FC = () => {
     }
   }, [dacId])
 
-  // Translate data use restrictions whenever the dataset list changes.
-  // Promise.all([]) resolves to [] when datasets is empty, yielding an empty Map.
+  // Data use fills in after the profile renders, so a slow index never holds up the page
+  const loadedDacId = dac?.dacId
   useEffect(() => {
-    let cancelled = false
-    const translateAll = async () => {
-      const entries = await Promise.all(datasets.map(translateDataset))
-      if (!cancelled) setTranslatedDataUse(new Map(entries))
-    }
-    void translateAll()
-    return () => {
-      cancelled = true
-    }
-  }, [datasets])
+    if (loadedDacId === undefined) return
+    const controller = new AbortController()
+    fetchIndexedDataUse(loadedDacId, controller.signal)
+      .then((dataUse) => {
+        if (!controller.signal.aborted) setDataUseById(dataUse)
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) Notifications.showError({ text: DATA_USE_LOAD_ERROR })
+      })
+    return () => controller.abort()
+  }, [loadedDacId])
 
   // After EditDac saves or cancels: re-fetch fresh data, then re-mount sections
   const handleEditClose = useCallback(async () => {
     if (dacId === undefined) return
     try {
-      const [fetchedDac, allDatasets] = await Promise.all([
-        DAC.get(dacId),
-        DAC.datasets(dacId),
-      ])
-      setDac(fetchedDac)
-      setDatasets(allDatasets.filter((d: Dataset) => d.dacApproval))
+      const profile = await loadProfile(dacId)
+      setDac(profile.dac)
+      setDatasets(profile.datasets)
     }
     catch {
       // EditDac already surfaces errors; silently continue
@@ -169,22 +102,10 @@ export const DacProfile: React.FC = () => {
     }
   }, [dacId])
 
-  const datasetRows = useMemo(() => datasets.map((dataset) => {
-    const props = dataset.properties ?? []
-    const rawUrl = getDatasetProperty(props, 'url')
-    return {
-      id: dataset.datasetId,
-      datasetIdentifier: dataset.datasetIdentifier,
-      name: dataset.name ?? '',
-      url: validateHttpUrl(rawUrl) ?? '',
-      dataType: getDatasetProperty(props, 'Data Type'),
-      pi: dataset.study?.piName || getDatasetProperty(props, 'Principal Investigator(PI)'),
-      participants: getDatasetProperty(props, '# of participants'),
-      dataUse: translatedDataUse.get(dataset.datasetId),
-    }
-  }), [datasets, translatedDataUse])
-
-  const isTranslating = datasets.length > 0 && translatedDataUse.size < datasets.length
+  const datasetRows = useMemo(
+    () => datasets.map(dataset => toDacDatasetRow(dataset, dataUseById.get(dataset.datasetId))),
+    [datasets, dataUseById],
+  )
 
   const datasetCountLabel = `${datasets.length.toLocaleString()} ${datasets.length === 1 ? 'dataset' : 'datasets'}`
 
@@ -199,24 +120,16 @@ export const DacProfile: React.FC = () => {
           <Typography sx={{ color: '#00609f', fontFamily: 'Montserrat, sans-serif', fontSize: '15px', fontWeight: 'bold', mb: 1 }}>
             {datasetCountLabel}
           </Typography>
-          {isTranslating
-            ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '12rem' }}>
-                  <CircularProgress />
-                </Box>
-              )
-            : (
-                <DataGrid
-                  rows={datasetRows}
-                  columns={DATASET_COLUMNS}
-                  pageSizeOptions={PAGE_SIZE_OPTIONS}
-                  paginationModel={paginationModel}
-                  onPaginationModelChange={setPaginationModel}
-                  disableRowSelectionOnClick
-                  autoHeight
-                  sx={DATAGRID_SX}
-                />
-              )}
+          <DataGrid
+            rows={datasetRows}
+            columns={DAC_DATASET_COLUMNS}
+            pageSizeOptions={DAC_DATASET_PAGE_SIZE_OPTIONS}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            disableRowSelectionOnClick
+            autoHeight
+            sx={DAC_DATASET_GRID_SX}
+          />
         </Box>
       )
 
@@ -237,10 +150,11 @@ export const DacProfile: React.FC = () => {
         >
           <img src={backArrowIcon} style={{ ...Styles.HEADER_IMG, width: '30px' }} alt="Back" />
         </Link>
-        <div style={{ flex: 1, minWidth: 0, containerType: 'inline-size' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <TableHeaderSection
             icon={{ src: editDACIcon }}
-            title={<span style={TITLE_STYLE}>{dacTitle}</span>}
+            // 2.5rem fits 50 all-caps characters on one line at the page cap and scales with zoom
+            title={<span style={{ display: 'block', fontSize: '2.5rem', overflowWrap: 'anywhere' }}>{dacTitle}</span>}
             description={dac?.description}
           />
         </div>

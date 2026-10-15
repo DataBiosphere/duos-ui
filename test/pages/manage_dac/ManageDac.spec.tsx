@@ -1,19 +1,19 @@
 import React from 'react'
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, act, within } from '@testing-library/react'
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router'
 import Modal from 'react-modal'
 import ManageDac from 'src/pages/manage_dac/ManageDac'
 import { DAC } from 'src/libs/ajax/DAC'
-import { DataUseTranslation } from 'src/libs/dataUseTranslation'
+import { DataSet } from 'src/libs/ajax/DataSet'
 import { Notifications } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
-import type { DacObject, Dataset, DuosUser, UserRole } from 'src/types/model'
+import type { DacObject, Dataset, DatasetTerm, DuosUser, UserRole } from 'src/types/model'
 import type { ManageDacTableProps } from 'src/components/manage_dac_table/ManageDacTable'
 
 vi.mock('src/libs/ajax/DAC')
-vi.mock('src/libs/dataUseTranslation')
+vi.mock('src/libs/ajax/DataSet')
 vi.mock('src/libs/storage')
 vi.mock('src/libs/utils', async (importOriginal) => {
   const original = await importOriginal<typeof import('src/libs/utils')>()
@@ -190,7 +190,7 @@ beforeAll(() => {
 beforeEach(() => {
   vi.clearAllMocks()
   mockDacDatasetsImpl = () => Promise.resolve([])
-  vi.mocked(DataUseTranslation.translateDataUseRestrictions).mockResolvedValue([])
+  vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([])
 })
 
 describe('ManageDac', () => {
@@ -293,6 +293,78 @@ describe('ManageDac', () => {
     })
     expect(screen.queryByText('Unapproved Dataset')).toBeNull()
     await act(async () => {})
+  })
+
+  it('shows data use for viewed datasets as the Data Library chip', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.list).mockResolvedValue([primaryDac])
+    vi.mocked(DAC.datasets).mockResolvedValue([makeDataset(1, 'Approved Dataset', true)] as never)
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([
+      { datasetId: 1, dataUse: { primary: [{ code: 'HMB', description: 'Health/medical/biomedical research' }] } } as DatasetTerm,
+    ])
+    mockDacDatasetsImpl = dacId => DAC.datasets(dacId)
+
+    mountManageDac()
+    fireEvent.click(await screen.findByRole('button', { name: 'View Datasets' }))
+
+    expect(await screen.findByText('HMB')).toBeInTheDocument()
+    expect(vi.mocked(DataSet.searchDatasetIndex)).toHaveBeenCalledWith(
+      expect.objectContaining({ query: { terms: { dacId: [primaryDac.dacId] } } }),
+      { signal: expect.any(AbortSignal) },
+    )
+  })
+
+  it('does not load data use when a DAC is only selected for deletion', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.list).mockResolvedValue([primaryDac])
+
+    mountManageDac()
+    fireEvent.click(await screen.findByRole('button', { name: /delete/i }))
+    await act(async () => {})
+
+    expect(DataSet.searchDatasetIndex).not.toHaveBeenCalled()
+  })
+
+  it('keeps the viewed DAC data use when another DAC is selected for deletion', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.list).mockResolvedValue([primaryDac, secondaryDac])
+    vi.mocked(DAC.datasets).mockResolvedValue([makeDataset(1, 'Approved Dataset', true)] as never)
+    vi.mocked(DataSet.searchDatasetIndex).mockResolvedValue([
+      { datasetId: 1, dataUse: { primary: [{ code: 'HMB', description: 'Health/medical/biomedical research' }] } } as DatasetTerm,
+    ])
+    mockDacDatasetsImpl = dacId => DAC.datasets(dacId)
+
+    mountManageDac()
+    fireEvent.click(within(await screen.findByTestId('dac-row-1')).getByRole('button', { name: 'View Datasets' }))
+    expect(await screen.findByText('HMB')).toBeInTheDocument()
+
+    fireEvent.click(within(screen.getByTestId('dac-row-2')).getByRole('button', { name: 'Delete' }))
+    await act(async () => {})
+
+    expect(screen.getByText('HMB')).toBeInTheDocument()
+    expect(screen.getByText('DAC Datasets associated with DAC: Alpha DAC')).toBeInTheDocument()
+    expect(DataSet.searchDatasetIndex).toHaveBeenCalledTimes(1)
+  })
+
+  it('closes the datasets section when the viewed DAC is deleted', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.list)
+      .mockResolvedValueOnce([primaryDac])
+      .mockResolvedValueOnce([])
+    vi.mocked(DAC.datasets).mockResolvedValue([makeDataset(1, 'Approved Dataset', true)] as never)
+    vi.mocked(DAC.delete).mockResolvedValue({ status: 200 } as never)
+    mockDacDatasetsImpl = dacId => DAC.datasets(dacId)
+
+    mountManageDac()
+    fireEvent.click(await screen.findByRole('button', { name: 'View Datasets' }))
+    expect(await screen.findByText('DAC Datasets associated with DAC: Alpha DAC')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }))
+
+    await waitFor(() => {
+      expect(screen.queryByText('DAC Datasets associated with DAC: Alpha DAC')).toBeNull()
+    })
   })
 
   it('shows an error when a DAC has no approved datasets', async () => {

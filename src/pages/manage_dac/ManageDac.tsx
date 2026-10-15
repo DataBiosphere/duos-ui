@@ -9,18 +9,22 @@ import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import AddObjectButton from 'src/components/AddObjectButton'
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined'
-import type { DacObject, Dataset, DatasetProperty } from 'src/types/model'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { Box, CircularProgress, Typography } from '@mui/material'
-import { Link, useNavigate } from 'react-router'
-import { DataUseTranslation } from 'src/libs/dataUseTranslation'
-import { validateHttpUrl } from 'src/utils/UrlUtils'
+import type { DacObject, Dataset, DataUseSummary } from 'src/types/model'
+import { DataGrid } from '@mui/x-data-grid'
+import { Box, Typography } from '@mui/material'
+import { useNavigate } from 'react-router'
+import {
+  DAC_DATASET_COLUMNS,
+  DAC_DATASET_GRID_SX,
+  DAC_DATASET_PAGE_SIZE_OPTIONS,
+  DATA_USE_LOAD_ERROR,
+  fetchIndexedDataUse,
+  toDacDatasetRow,
+} from 'src/pages/manage_dac/dacDatasetGrid'
 
 const CHAIR = 'Chairperson'
 const ADMIN = 'Admin'
 type ManageDacRole = typeof CHAIR | typeof ADMIN
-
-const PAGE_SIZE_OPTIONS = [10, 25, 50]
 
 const SECTION_DIVIDER: React.CSSProperties = {
   border: 'none',
@@ -37,65 +41,6 @@ const SECTION_TITLE_SX = {
   mb: 2,
 }
 
-const DATAGRID_SX = {
-  '& .MuiDataGrid-cell:focus': { outline: 'none' },
-  '& .MuiDataGrid-cell:focus-within': { outline: 'none' },
-  '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
-  '& .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
-}
-
-const getDatasetProperty = (properties: DatasetProperty[], propName: string): string => {
-  const prop = properties?.find(p => p.propertyName.toLowerCase() === propName.toLowerCase())
-  return prop?.propertyValue ?? ''
-}
-
-const translateDataset = async (dataset: Dataset): Promise<[number, string]> => {
-  const translations = await DataUseTranslation.translateDataUseRestrictions(dataset.dataUse)
-  const text = (translations as Array<{ description: string }>).map(t => t.description).join('\n')
-  return [dataset.datasetId, text]
-}
-
-const DATASET_COLUMNS: GridColDef[] = [
-  {
-    field: 'datasetIdentifier',
-    headerName: 'Dataset ID',
-    width: 140,
-    renderCell: params => (
-      params.value
-        ? <Link to={`/dataset/${params.value}`} style={{ color: '#216fb4' }}>{params.value}</Link>
-        : <span style={{ color: '#999' }}>---</span>
-    ),
-  },
-  { field: 'name', headerName: 'Dataset Name', flex: 1, minWidth: 180 },
-  {
-    field: 'url',
-    headerName: 'URL',
-    width: 100,
-    renderCell: params => (
-      params.value
-        ? <a href={params.value} target="_blank" rel="noreferrer" style={{ color: '#216fb4' }}>Link</a>
-        : <span style={{ color: '#999' }}>---</span>
-    ),
-  },
-  {
-    field: 'dataUseText',
-    headerName: 'Data Use Limitations',
-    flex: 1,
-    minWidth: 220,
-    renderCell: (params) => {
-      const text = params.value as string
-      if (!text) {
-        return <span style={{ color: '#999' }}>---</span>
-      }
-      const short = text.length >= 75 ? `${text.slice(0, 75)}...` : text
-      return <span title={text}>{short}</span>
-    },
-  },
-  { field: 'dataType', headerName: 'Data Type', width: 130 },
-  { field: 'pi', headerName: 'Principal Investigator', width: 200 },
-  { field: 'participants', headerName: '# of Participants', width: 150 },
-]
-
 export const ManageDac = function ManageDac() {
   usePageTitle('DACs')
   const navigate = useNavigate()
@@ -111,12 +56,12 @@ export const ManageDac = function ManageDac() {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [dacs, setDacs] = useState<DacObject[]>([])
 
-  const [showDatasetsPage, setShowDatasetsPage] = useState<boolean>(false)
   const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false)
 
-  const [selectedDac, setSelectedDac] = useState<DacObject | null>(null)
+  const [dacToDelete, setDacToDelete] = useState<DacObject | null>(null)
+  const [viewedDac, setViewedDac] = useState<DacObject | null>(null)
   const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([])
-  const [translatedDataUse, setTranslatedDataUse] = useState<Map<number, string>>(new Map())
+  const [indexedDataUse, setIndexedDataUse] = useState<{ dacId: number, dataUseById: Map<number, DataUseSummary> } | null>(null)
   const [datasetPaginationModel, setDatasetPaginationModel] = useState({ page: 0, pageSize: 10 })
 
   const initializeDACs = useCallback(async () => {
@@ -160,29 +105,21 @@ export const ManageDac = function ManageDac() {
     }
   }, [chairDACIds, roles])
 
-  // Translate data use restrictions whenever the dataset list changes.
-  // Promise.all([]) resolves to [] when selectedDatasets is empty, yielding an empty Map.
-  useEffect(() => {
-    let cancelled = false
-    const translateAll = async () => {
-      const entries = await Promise.all(selectedDatasets.map(translateDataset))
-      if (!cancelled) setTranslatedDataUse(new Map(entries))
-    }
-    void translateAll()
-    return () => {
-      cancelled = true
-    }
-  }, [selectedDatasets])
+  const handleDatasetsClose = useCallback(() => {
+    setSelectedDatasets([])
+    setViewedDac(null)
+  }, [])
 
   const handleDeleteDac = async () => {
-    if (selectedDac?.dacId === undefined) {
+    if (dacToDelete?.dacId === undefined) {
       Notifications.showError({ text: 'DAC could not be deleted.' })
       return
     }
-    const { status } = await DAC.delete(selectedDac.dacId)
+    const { status } = await DAC.delete(dacToDelete.dacId)
     if (Number(status) === 200) {
       Notifications.showSuccess({ text: 'DAC successfully deleted.' })
       setShowConfirmationModal(false)
+      if (viewedDac?.dacId === dacToDelete.dacId) handleDatasetsClose()
       await initializeDACs()
     }
     else {
@@ -196,40 +133,36 @@ export const ManageDac = function ManageDac() {
       Notifications.showError({ text: 'DAC has no datasets.' })
       return
     }
-    setSelectedDac(dac)
+    setViewedDac(dac)
     setSelectedDatasets(datasets)
-    setShowDatasetsPage(true)
     setTimeout(() => {
       document.getElementById('dac-datasets-section')?.scrollIntoView({ behavior: 'smooth' })
     }, 50)
   }, [])
 
+  // Data use fills in after the grid renders; closing or switching DACs aborts the request
+  const viewedDacId = viewedDac?.dacId
+  useEffect(() => {
+    if (viewedDacId === undefined) return
+    const controller = new AbortController()
+    fetchIndexedDataUse(viewedDacId, controller.signal)
+      .then((dataUseById) => {
+        if (!controller.signal.aborted) setIndexedDataUse({ dacId: viewedDacId, dataUseById })
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) Notifications.showError({ text: DATA_USE_LOAD_ERROR })
+      })
+    return () => controller.abort()
+  }, [viewedDacId])
+
   const addDac = () => {
     navigate('/manage_add_dac_daa')
   }
 
-  const handleDatasetsClose = useCallback(() => {
-    setShowDatasetsPage(false)
-    setSelectedDatasets([])
-    setSelectedDac(null)
-  }, [])
-
-  const datasetRows = useMemo(() => selectedDatasets.map((dataset) => {
-    const props = dataset.properties ?? []
-    const rawUrl = getDatasetProperty(props, 'url')
-    return {
-      id: dataset.datasetId,
-      datasetIdentifier: dataset.datasetIdentifier,
-      name: dataset.name ?? '',
-      url: validateHttpUrl(rawUrl) ?? '',
-      dataType: getDatasetProperty(props, 'Data Type'),
-      pi: dataset.study?.piName || getDatasetProperty(props, 'Principal Investigator(PI)'),
-      participants: getDatasetProperty(props, '# of participants'),
-      dataUseText: translatedDataUse.get(dataset.datasetId) ?? '',
-    }
-  }), [selectedDatasets, translatedDataUse])
-
-  const isTranslating = selectedDatasets.length > 0 && translatedDataUse.size < selectedDatasets.length
+  const datasetRows = useMemo(() => {
+    const dataUseById = indexedDataUse?.dacId === viewedDacId ? indexedDataUse?.dataUseById : undefined
+    return selectedDatasets.map(dataset => toDacDatasetRow(dataset, dataUseById?.get(dataset.datasetId)))
+  }, [selectedDatasets, indexedDataUse, viewedDacId])
 
   return (
     <div style={Styles.PAGE}>
@@ -254,7 +187,7 @@ export const ManageDac = function ManageDac() {
         userRole={userRole}
         onViewDatasets={handleViewDatasets}
         setShowConfirmationModal={setShowConfirmationModal}
-        setSelectedDac={setSelectedDac}
+        setSelectedDac={setDacToDelete}
       />
 
       <ConfirmationModal
@@ -262,17 +195,17 @@ export const ManageDac = function ManageDac() {
         closeConfirmation={() => setShowConfirmationModal(false)}
         title="Delete DAC?"
         message="Are you sure you want to delete this Data Access Committee?"
-        header={selectedDac?.name}
+        header={dacToDelete?.name}
         onConfirm={handleDeleteDac}
       />
 
       {/* ── Section 2: DAC Datasets associated with DAC: ── */}
-      {showDatasetsPage && selectedDac && selectedDatasets.length > 0 && (
+      {viewedDac && selectedDatasets.length > 0 && (
         <div id="dac-datasets-section">
           <hr style={SECTION_DIVIDER} />
           <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
             <Typography sx={SECTION_TITLE_SX}>
-              {`DAC Datasets associated with DAC: ${selectedDac.name ?? ''}`}
+              {`DAC Datasets associated with DAC: ${viewedDac.name ?? ''}`}
             </Typography>
             <button
               className="btn btn-link"
@@ -282,26 +215,18 @@ export const ManageDac = function ManageDac() {
               Close
             </button>
           </Box>
-          {isTranslating
-            ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '12rem' }}>
-                  <CircularProgress />
-                </Box>
-              )
-            : (
-                <Box sx={{ width: '100%', mt: 1 }}>
-                  <DataGrid
-                    rows={datasetRows}
-                    columns={DATASET_COLUMNS}
-                    pageSizeOptions={PAGE_SIZE_OPTIONS}
-                    paginationModel={datasetPaginationModel}
-                    onPaginationModelChange={setDatasetPaginationModel}
-                    disableRowSelectionOnClick
-                    autoHeight
-                    sx={DATAGRID_SX}
-                  />
-                </Box>
-              )}
+          <Box sx={{ width: '100%', mt: 1 }}>
+            <DataGrid
+              rows={datasetRows}
+              columns={DAC_DATASET_COLUMNS}
+              pageSizeOptions={DAC_DATASET_PAGE_SIZE_OPTIONS}
+              paginationModel={datasetPaginationModel}
+              onPaginationModelChange={setDatasetPaginationModel}
+              disableRowSelectionOnClick
+              autoHeight
+              sx={DAC_DATASET_GRID_SX}
+            />
+          </Box>
         </div>
       )}
     </div>

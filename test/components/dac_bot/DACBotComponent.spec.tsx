@@ -129,6 +129,11 @@ describe('DACBotComponent', () => {
       expect(screen.getAllByText(/Users from any of the following countries/)).toHaveLength(1)
     })
 
+    it('states which datasets are eligible for automatic approval', () => {
+      const notice = container.querySelector('[data-cy="auto-approval-notice"]')
+      expect(notice).toHaveTextContent('Only datasets tagged solely with General Research Use or Health/Medical/Biomedical use, with no modifiers, are eligible for automatic approval.')
+    })
+
     it('places AUTO_OPEN_DAR_FOR_ALL_MEMBERS under Automatic open', () => {
       const group = container.querySelector('[data-cy="rule-group-automatic-open"]') as HTMLElement
       expect(group).toHaveTextContent('without requiring Chair to open manually')

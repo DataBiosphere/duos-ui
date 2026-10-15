@@ -53,24 +53,24 @@ const AUTO_APPROVE_GROUP: RuleGroupLabel = 'Automatically approve DARs when...'
 
 /** Maps each ruleType to a visual group heading */
 const RULE_GROUP_LABELS: { [key: string]: RuleGroupLabel } = {
-  GRU_V1: 'Automatically approve DARs when...',
-  HMB_V1: 'Automatically approve DARs when...',
-  GRU_DSV1: 'Automatically approve DARs when...',
-  HMB_DSV1: 'Automatically approve DARs when...',
+  GRU_V1: AUTO_APPROVE_GROUP,
+  HMB_V1: AUTO_APPROVE_GROUP,
+  GRU_DSV1: AUTO_APPROVE_GROUP,
+  HMB_DSV1: AUTO_APPROVE_GROUP,
   AUTO_OPEN_DAR_FOR_ALL_MEMBERS: 'Send DARs to the entire DAC on submission by researchers?',
   REQUIRE_SO_DAR_APPROVAL: 'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?',
 }
 
 /** Order in which groups appear; rules with unknown types go last */
 const GROUP_ORDER: RuleGroupLabel[] = [
-  'Automatically approve DARs when...',
+  AUTO_APPROVE_GROUP,
   'Send DARs to the entire DAC on submission by researchers?',
   'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?',
 ]
 
 /** Stable data-cy key for each group label — avoids fragile long-string selectors in tests */
 const RULE_GROUP_DATA_CY_KEYS: { [key: string]: string } = {
-  'Automatically approve DARs when...': 'automatic-approval',
+  [AUTO_APPROVE_GROUP]: 'automatic-approval',
   'Send DARs to the entire DAC on submission by researchers?': 'automatic-open',
   'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?': 'so-prior-approval',
 }
@@ -136,7 +136,6 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
     try {
       setIsLoading(true)
       const rules = await DAC.fetchDACbotRules(dacId)
-      setIsLoading(false)
       setDACbotRules(rules)
       return rules
     }
@@ -151,6 +150,9 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
             horizontal: 'right',
           },
         })
+    }
+    finally {
+      setIsLoading(false)
     }
   }, [dacId])
 
@@ -202,7 +204,10 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
           <div key={label} data-cy={`rule-group-${dataCy}`} style={{ marginBottom: '1.5rem' }}>
             <h4 style={{ marginTop: '2.5rem', marginBottom: '0.5rem', color: '#333' }}>{label}</h4>
             {label === AUTO_APPROVE_GROUP && (
-              <p data-cy="restricted-countries-notice" style={{ fontStyle: 'italic', color: '#666', marginBottom: '0.75rem' }}>
+              <p data-cy="auto-approval-notice" style={{ fontStyle: 'italic', color: '#666', marginBottom: '0.75rem' }}>
+                Only datasets tagged solely with General Research Use or Health/Medical/Biomedical use, with no
+                modifiers, are eligible for automatic approval.
+                {' '}
                 Users from any of the following countries will not be approved consistent with
                 {' '}
                 <a href="https://www.ecfr.gov/current/title-28/chapter-I/part-202" target="_blank" rel="noreferrer">28 Code of Federal Regulations (CFR) Part 202</a>: China (including Hong Kong and Macau), Russia, Iran, North Korea, Cuba, and Venezuela.
