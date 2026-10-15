@@ -205,6 +205,9 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
             <h4 style={{ marginTop: '2.5rem', marginBottom: '0.5rem', color: '#333' }}>{label}</h4>
             {label === AUTO_APPROVE_GROUP && (
               <p data-cy="restricted-countries-notice" style={{ fontStyle: 'italic', color: '#666', marginBottom: '0.75rem' }}>
+                Only datasets tagged solely with General Research Use or Health/Medical/Biomedical use, with no
+                modifiers, are eligible for automatic approval.
+                {' '}
                 Users from any of the following countries will not be approved consistent with
                 {' '}
                 <a href="https://www.ecfr.gov/current/title-28/chapter-I/part-202" target="_blank" rel="noreferrer">28 Code of Federal Regulations (CFR) Part 202</a>: China (including Hong Kong and Macau), Russia, Iran, North Korea, Cuba, and Venezuela.
