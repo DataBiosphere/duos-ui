@@ -33,6 +33,46 @@ export const articleBodyFile = (article: Pick<Article, 'category' | 'slug'>): st
 export const isArticleVisible = (article: Pick<Article, 'draft' | 'publishDate'>, now: number = Date.now()): boolean =>
   !article.draft && Date.parse(article.publishDate) <= now
 
+/** Visible articles, featured first, then newest first. */
+export const visibleArticles = (articles: readonly Article[], now: number = Date.now()): Article[] =>
+  articles
+    .filter(article => isArticleVisible(article, now))
+    .sort((a, b) => Number(b.featured ?? false) - Number(a.featured ?? false) || b.publishDate.localeCompare(a.publishDate))
+
+/** Visible articles in one category (or all) carrying a tag (or any). */
+export const listArticles = (
+  articles: readonly Article[],
+  category: ArticleCategory | undefined,
+  tag: string | undefined,
+  now: number = Date.now(),
+): Article[] => {
+  const inCategory = (article: Article) => category === undefined || article.category === category
+  const tagged = (article: Article) => tag === undefined || (article.tags ?? []).includes(tag)
+  return visibleArticles(articles, now).filter(article => inCategory(article) && tagged(article))
+}
+
+/** The page a ?page= value names, kept within 1..pageCount. */
+export const pageNumber = (param: string | null, pageCount: number): number =>
+  Math.min(Math.max(1, pageCount), Math.max(1, Math.trunc(Number(param)) || 1))
+
+/** A visible article and the visible page it sits under, if any. */
+export const findArticle = (
+  articles: readonly Article[],
+  category: ArticleCategory | undefined,
+  slug: string | undefined,
+): { article?: Article, parent?: Article } => {
+  const visible = articles.filter(entry => isArticleVisible(entry))
+  const article = visible.find(entry => entry.category === category && entry.slug === slug)
+  const parent = visible.find(entry => entry.category === 'PAGE' && entry.slug === article?.parent)
+  return { article, parent }
+}
+
+export const formatArticleDate = (publishDate: string): string =>
+  new Date(publishDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })
+
+export const readingTimeMinutes = (markdown: string): number =>
+  Math.max(1, Math.round(markdown.split(/\s+/).filter(word => word !== '').length / 200))
+
 export const fetchArticleBody = async (
   article: Pick<Article, 'category' | 'slug'>,
   bodyUrls: Record<string, string> = ARTICLE_BODY_URLS,

@@ -48,7 +48,7 @@ Move the blog posts, user guides, announcements and help pages from duos.blog (h
 Each PR stays under 500 lines of code and tests.
 
 1. **Article format:** this plan, the metadata type and list, the body loader, the validation spec, and the Markdown renderer.
-2. **Public pages:** `/articles` (all articles and per-category tabs, with tag filter and pagination) and `/articles/<category>/<slug>` (breadcrumb, byline, body, not-found page). Article pages load on demand.
+2. **Public pages:** `/articles` (all articles and per-category tabs, with tag filter and pagination) and `/articles/<category>/<slug>` (breadcrumb, byline, body, not-found page). Bodies load on demand; the metadata list ships with the app.
 3. **duos.blog import:** a checked-in script turns the 25 posts and 13 pages into Markdown and copies the images. The output is reviewed as a normal diff.
 4. **Search indexing:** a static page per article plus `sitemap.xml`. It starts by checking that the BFF and the non-BFF deploy serve those pages before falling back to the app. If they don't, the fallback is per-article meta tags injected by the BFF.
 5. **Study and dataset cards,** once DT-4274, DT-4275 and DT-4281 are done.
