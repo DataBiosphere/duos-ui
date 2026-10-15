@@ -747,13 +747,13 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
 
   // In profile mode the field wraps under its label once the row is narrower than both bases
   const fieldRowStyle: React.CSSProperties = profileMode
-    ? { display: 'flex', flexWrap: 'wrap', marginBottom: '15px' }
+    ? { display: 'flex', flexWrap: 'wrap', columnGap: '30px', marginBottom: '15px' }
     : { display: 'flex', marginBottom: '15px' }
   const labelColStyle: React.CSSProperties = profileMode
-    ? { flex: '0 0 200px', paddingRight: '15px', marginTop: 0 }
+    ? { flex: '0 0 200px', marginTop: 0 }
     : { flexBasis: '33.33%', paddingRight: '15px', marginTop: 0 }
   const fieldColStyle: React.CSSProperties = profileMode
-    ? { flex: '1 1 240px', minWidth: 0, paddingLeft: '15px' }
+    ? { flex: '1 1 240px', minWidth: 0 }
     : { flexBasis: '66.67%', paddingLeft: '15px' }
 
   const dacMembersJSX = ((state.dac.chairpersons?.length ?? 0) > 0 || (state.dac.members?.length ?? 0) > 0)

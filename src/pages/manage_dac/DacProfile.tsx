@@ -72,10 +72,11 @@ export const DacProfile: React.FC = () => {
   }, [dacId])
 
   // Data use fills in after the profile renders, so a slow index never holds up the page
+  const loadedDacId = dac?.dacId
   useEffect(() => {
-    if (dacId === undefined) return
+    if (loadedDacId === undefined) return
     const controller = new AbortController()
-    fetchIndexedDataUse(dacId, controller.signal)
+    fetchIndexedDataUse(loadedDacId, controller.signal)
       .then((dataUse) => {
         if (!controller.signal.aborted) setDataUseById(dataUse)
       })
@@ -83,7 +84,7 @@ export const DacProfile: React.FC = () => {
         if (!controller.signal.aborted) Notifications.showError({ text: DATA_USE_LOAD_ERROR })
       })
     return () => controller.abort()
-  }, [dacId])
+  }, [loadedDacId])
 
   // After EditDac saves or cancels: re-fetch fresh data, then re-mount sections
   const handleEditClose = useCallback(async () => {

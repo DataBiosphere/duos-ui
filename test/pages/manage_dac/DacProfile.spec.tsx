@@ -166,6 +166,16 @@ describe('DacProfile', () => {
     expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Failed to load data use limitations.' })
   })
 
+  it('does not query data use for a DAC that fails to load', async () => {
+    vi.mocked(DAC.get).mockRejectedValue(new Error('Not found'))
+    vi.mocked(DAC.datasets).mockRejectedValue(new Error('Not found'))
+
+    await renderDacProfile()
+
+    expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Failed to load DAC profile.' })
+    expect(DataSet.searchDatasetIndex).not.toHaveBeenCalled()
+  })
+
   it('renders the profile while data use is still loading', async () => {
     vi.mocked(DAC.get).mockResolvedValue(existingDac)
     vi.mocked(DAC.datasets).mockResolvedValue([
