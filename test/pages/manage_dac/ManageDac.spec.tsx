@@ -314,6 +314,17 @@ describe('ManageDac', () => {
     )
   })
 
+  it('does not load data use when a DAC is only selected for deletion', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.list).mockResolvedValue([primaryDac])
+
+    mountManageDac()
+    fireEvent.click(await screen.findByRole('button', { name: /delete/i }))
+    await act(async () => {})
+
+    expect(DataSet.searchDatasetIndex).not.toHaveBeenCalled()
+  })
+
   it('shows an error when a DAC has no approved datasets', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
     vi.mocked(DAC.list).mockResolvedValue([primaryDac])

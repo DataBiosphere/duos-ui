@@ -130,7 +130,7 @@ describe('DACBotComponent', () => {
     })
 
     it('states which datasets are eligible for automatic approval', () => {
-      const notice = container.querySelector('[data-cy="restricted-countries-notice"]')
+      const notice = container.querySelector('[data-cy="auto-approval-notice"]')
       expect(notice).toHaveTextContent('Only datasets tagged solely with General Research Use or Health/Medical/Biomedical use, with no modifiers, are eligible for automatic approval.')
     })
 

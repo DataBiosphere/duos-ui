@@ -204,7 +204,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
           <div key={label} data-cy={`rule-group-${dataCy}`} style={{ marginBottom: '1.5rem' }}>
             <h4 style={{ marginTop: '2.5rem', marginBottom: '0.5rem', color: '#333' }}>{label}</h4>
             {label === AUTO_APPROVE_GROUP && (
-              <p data-cy="restricted-countries-notice" style={{ fontStyle: 'italic', color: '#666', marginBottom: '0.75rem' }}>
+              <p data-cy="auto-approval-notice" style={{ fontStyle: 'italic', color: '#666', marginBottom: '0.75rem' }}>
                 Only datasets tagged solely with General Research Use or Health/Medical/Biomedical use, with no
                 modifiers, are eligible for automatic approval.
                 {' '}

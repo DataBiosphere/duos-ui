@@ -1,5 +1,5 @@
 import ManageDacTable from 'src/components/manage_dac_table/ManageDacTable'
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Styles } from 'src/libs/theme'
 import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
@@ -62,9 +62,6 @@ export const ManageDac = function ManageDac() {
   const [selectedDac, setSelectedDac] = useState<DacObject | null>(null)
   const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>([])
   const [dataUseById, setDataUseById] = useState<Map<number, DataUseSummary>>(new Map())
-  const dataUseRequest = useRef<AbortController | null>(null)
-
-  useEffect(() => () => dataUseRequest.current?.abort(), [])
   const [datasetPaginationModel, setDatasetPaginationModel] = useState({ page: 0, pageSize: 10 })
 
   const initializeDACs = useCallback(async () => {
@@ -125,37 +122,39 @@ export const ManageDac = function ManageDac() {
   }
 
   // Combined callback for ManageDacTable: validates datasets and opens the datasets section.
-  const handleViewDatasets = useCallback(async (dac: DacObject, datasets: Dataset[]) => {
+  const handleViewDatasets = useCallback((dac: DacObject, datasets: Dataset[]) => {
     if (datasets.length === 0) {
       Notifications.showError({ text: 'DAC has no datasets.' })
       return
     }
     setSelectedDac(dac)
     setSelectedDatasets(datasets)
-    setDataUseById(new Map())
     setShowDatasetsPage(true)
     setTimeout(() => {
       document.getElementById('dac-datasets-section')?.scrollIntoView({ behavior: 'smooth' })
     }, 50)
-    dataUseRequest.current?.abort()
-    if (dac.dacId === undefined) return
-    const controller = new AbortController()
-    dataUseRequest.current = controller
-    try {
-      const dataUse = await fetchIndexedDataUse(dac.dacId, controller.signal)
-      if (!controller.signal.aborted) setDataUseById(dataUse)
-    }
-    catch {
-      if (!controller.signal.aborted) Notifications.showError({ text: DATA_USE_LOAD_ERROR })
-    }
   }, [])
+
+  // Data use fills in after the grid renders; closing or switching DACs aborts the request
+  const viewedDacId = showDatasetsPage ? selectedDac?.dacId : undefined
+  useEffect(() => {
+    if (viewedDacId === undefined) return
+    const controller = new AbortController()
+    fetchIndexedDataUse(viewedDacId, controller.signal)
+      .then((dataUse) => {
+        if (!controller.signal.aborted) setDataUseById(dataUse)
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) Notifications.showError({ text: DATA_USE_LOAD_ERROR })
+      })
+    return () => controller.abort()
+  }, [viewedDacId])
 
   const addDac = () => {
     navigate('/manage_add_dac_daa')
   }
 
   const handleDatasetsClose = useCallback(() => {
-    dataUseRequest.current?.abort()
     setShowDatasetsPage(false)
     setSelectedDatasets([])
     setSelectedDac(null)
