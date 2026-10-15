@@ -8,25 +8,9 @@ html, body, #root {
   font-family: 'Montserrat', sans-serif;
 }
 
-.body, #root {
+.wrap, .body, #root {
   min-height: 100%;
   min-width: 100%;
-}
-
-/* A column that is at least one screen tall. .wrap takes the free space, so
-   the footer sits at the bottom of a short page and after a long one. */
-.body {
-  display: flex;
-  flex-direction: column;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.body > * {
-  flex-shrink: 0;
-}
-
-.body > .wrap {
-  flex-grow: 1;
 }
 
 .main {
