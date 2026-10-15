@@ -13,6 +13,17 @@
   font-weight: 600;
 }
 
+.profile-card-heading:has(+ .profile-card-description) {
+  margin-bottom: 8px;
+}
+
+.profile-card-description {
+  margin: 0 0 24px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 @media (max-width: 700px) {
   .profile-card {
     padding: 20px;

@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, act, within } from '@testing-library/react'
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { MemoryRouter, Route, Routes } from 'react-router'
@@ -935,6 +935,16 @@ describe('EditDAC Tests - Profile Mode Sections', () => {
 
     const section = await screen.findByRole('region', { name: title })
     expect(section).toContainElement(screen.getByRole('heading', { name: title }))
+  })
+
+  it('gives the DAA section its own Save button', async () => {
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.get).mockResolvedValue(existingDac as never)
+    vi.mocked(DAA.getDaas).mockResolvedValue([])
+    mountProfileEditDac(existingDac.dacId as number)
+
+    const section = await screen.findByRole('region', { name: 'Select a Data Access Agreement' })
+    expect(within(section).getByRole('button', { name: 'Save' })).toBeInTheDocument()
   })
 
   it('renders no section cards outside profile mode', async () => {

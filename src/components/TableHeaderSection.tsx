@@ -20,7 +20,8 @@ export const TableHeaderSection: React.FC<TableHeaderSectionProps> = ({
 }) => {
   return (
     <div style={{ display: 'flex', padding: '0 0 0 2em' }}>
-      <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION as React.CSSProperties}>
+      {/* flexGrow lets long titles wrap at the full header width rather than a shrink-to-fit guess */}
+      <div className="left-header-section" style={{ ...Styles.LEFT_HEADER_SECTION as React.CSSProperties, flexGrow: 1 }}>
         {icon?.src && (
           <div style={Styles.ICON_CONTAINER}>
             <img
