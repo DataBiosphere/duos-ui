@@ -58,6 +58,8 @@ import { StudyTemplateUpload } from 'src/pages/data_submission/StudyTemplateUplo
 import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
 import { DataLibrary } from 'src/pages/DataLibrary'
 import { StudyNameSearch } from 'src/routing/StudyNameSearch'
+import ArticleIndex from 'src/pages/articles/ArticleIndex'
+import ArticlePage from 'src/pages/articles/ArticlePage'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -79,6 +81,9 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/tos_acceptance" element={<TermsOfServiceAcceptance />} />
       <Route path="/nih_dms_policy" element={<NIHDMSPolicyInfo />} />
       <Route path="/anvil_dms_policy" element={<AnVILDMSPolicyInfo />} />
+      <Route path="/articles" element={<ArticleIndex />} />
+      <Route path="/articles/:category" element={<ArticleIndex />} />
+      <Route path="/articles/:category/:slug" element={<ArticlePage />} />
       <Route element={<EnvRoute env={envGroups.DEV} />}>
         <Route path="/backgroundsignin" element={<BackgroundSignIn {...props} />} />
       </Route>

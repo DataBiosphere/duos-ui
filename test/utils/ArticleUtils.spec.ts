@@ -6,6 +6,8 @@ import {
   categoryFromPath,
   fetchArticleBody,
   isArticleVisible,
+  pageNumber,
+  readingTimeMinutes,
   validateArticles,
 } from 'src/utils/ArticleUtils'
 
@@ -110,5 +112,22 @@ describe('fetchArticleBody', () => {
     await expect(fetchArticleBody(guide, { [guideFile]: '/assets/dac-guide.md' }))
       .rejects.toThrow('Failed to load /articles/user-guides/dac-guide: 404')
     await expect(fetchArticleBody(guide, {})).rejects.toThrow('No body for /articles/user-guides/dac-guide')
+  })
+})
+
+describe('article listing helpers', () => {
+  it('estimates reading time at 200 words a minute', () => {
+    expect(readingTimeMinutes('word '.repeat(600))).toBe(3)
+  })
+})
+
+describe('pageNumber', () => {
+  it.each([
+    [null, 3, 1],
+    ['9', 3, 3],
+    ['2.7', 3, 2],
+    ['abc', 0, 1],
+  ])('reads %s with %i pages as page %i', (param, pageCount, expected) => {
+    expect(pageNumber(param, pageCount)).toBe(expected)
   })
 })

@@ -18,6 +18,16 @@ export const ARTICLE_CATEGORY_LABELS: Record<ArticleCategory, string> = {
   PAGE: 'Page',
 }
 
+/** Plural labels for the category tabs on /articles. */
+export const ARTICLE_CATEGORY_PLURAL_LABELS: Record<ArticleCategory, string> = {
+  BLOG_POST: 'Blog Posts',
+  USER_GUIDE: 'User Guides',
+  FEATURE_ANNOUNCEMENT: 'Feature Announcements',
+  IN_THE_NEWS: 'In the News',
+  POLICY_BRIEF: 'Policy Briefs',
+  PAGE: 'Pages',
+}
+
 /** Each category's URL segment and content folder: /articles/<segment>/<slug>. */
 export const ARTICLE_CATEGORY_PATHS: Record<ArticleCategory, string> = {
   BLOG_POST: 'blog-posts',
