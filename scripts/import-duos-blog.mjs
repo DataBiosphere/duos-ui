@@ -65,7 +65,7 @@ export const decodeEntities = text => text
   .replaceAll(/&([a-z]+);/g, (match, name) => ENTITIES[name] ?? match)
 
 // Block boundaries become spaces; inline tags vanish so no space lands before punctuation.
-export const plainText = html => decodeEntities(html.replaceAll(/<br\s*\/?>|<\/(?:p|h\d|li|div|td)>/g, ' ').replaceAll(/<[^>]+>/g, ''))
+export const plainText = html => decodeEntities(html.replaceAll(/<br ?\/?>|<\/(?:p|h\d|li|div|td)>/g, ' ').replaceAll(/<[^>]+>/g, ''))
   .replaceAll('\u200B', '')
   .replaceAll(/\s+/g, ' ')
   .trim()
@@ -98,10 +98,11 @@ export const createConverter = () => {
 /** Points duos.blog links at the migrated articles, by path or by WordPress's ?p=<id> form. */
 export const rewriteLinks = (markdown, targetsByPath, targetsById) =>
   markdown.replaceAll(/https?:\/\/(?:www\.)?duos\.blog(\/[^\s)"]*)?/g, (match, rest = '/') => {
-    const id = rest.match(/[?&](?:amp;|#038;)?p=(\d+)/)?.[1]
-    const [path, fragment] = [rest.split(/[?#]/)[0], rest.match(/#[\w-]+$/)?.[0] ?? '']
+    const id = /[?&](?:amp;|#038;)?p=(\d+)/.exec(rest)?.[1]
+    const path = rest.split(/[?#]/)[0]
+    const fragment = /#[\w-]+$/.exec(rest)?.[0] ?? ''
     const target = id ? targetsById.get(Number(id)) : targetsByPath.get(path.endsWith('/') ? path : `${path}/`)
-    return target ? `${target}${fragment}` : match
+    return target ? target + fragment : match
   })
 
 const IMAGE_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp' }
@@ -109,39 +110,53 @@ const IMAGE_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif
 const downloadImage = async (url) => {
   try {
     const res = await fetch(url)
-    const extension = IMAGE_TYPES[res.headers.get('content-type')?.split(';')[0]]
-    return res.ok && extension ? { extension, bytes: Buffer.from(await res.arrayBuffer()) } : { error: `${res.status} ${res.headers.get('content-type')}` }
+    const contentType = res.headers.get('content-type')
+    const extension = IMAGE_TYPES[contentType?.split(';')[0]]
+    if (!res.ok || extension === undefined) {
+      return { error: `${res.status} ${contentType}` }
+    }
+    return { extension, bytes: Buffer.from(await res.arrayBuffer()) }
   } catch (error) {
     return { error: String(error) }
   }
 }
 
+const imageUrls = markdown => [...new Set([...markdown.matchAll(/!\[[^\]]*\]\((https?:[^)\s]+)/g)].map(match => match[1]))]
+
+const dropImage = (markdown, url) =>
+  markdown.replaceAll(new RegExp(String.raw`!\[[^\]]*\]\(` + RegExp.escape(url) + String.raw`[^)]*\)`, 'g'), '')
+
 /**
- * Downloads each image the Markdown references and links it from public/article-images instead,
- * storing identical images once. An image that no longer downloads is already broken on duos.blog,
- * so it is dropped, with any link wrapped around it, and reported.
+ * Links each article's images from public/article-images, naming each file after the first
+ * article to use it and storing identical images once. An image that no longer downloads is
+ * already broken on duos.blog, so it is dropped, with any link wrapped around it, and reported.
+ *
+ * @returns the rewritten articles and the image files to write, by file name
  */
-const localizeImages = async (markdown, slug, savedByHash) => {
-  const urls = [...new Set([...markdown.matchAll(/!\[[^\]]*\]\((https?:[^)\s]+)/g)].map(match => match[1]))]
-  let result = markdown
-  let saved = 0
-  for (const url of urls) {
-    const image = await downloadImage(url)
-    if (image.error) {
-      console.warn(`Dropped ${url} from ${slug}: ${image.error}`)
-      result = result.replaceAll(new RegExp(`!\\[[^\\]]*\\]\\(${RegExp.escape(url)}[^)]*\\)`, 'g'), '')
-      continue
+export const localizeImages = (drafts, imagesByUrl) => {
+  const fileByHash = new Map()
+  const files = new Map()
+  const localized = drafts.map((draft) => {
+    let markdown = draft.markdown
+    let saved = 0
+    for (const url of imageUrls(draft.markdown)) {
+      const image = imagesByUrl.get(url)
+      if (image.error) {
+        console.warn(`Dropped ${url} from ${draft.slug}: ${image.error}`)
+        markdown = dropImage(markdown, url)
+        continue
+      }
+      const hash = createHash('sha256').update(image.bytes).digest('hex')
+      if (!fileByHash.has(hash)) {
+        saved += 1
+        fileByHash.set(hash, `${draft.slug}-${saved}.${image.extension}`)
+        files.set(fileByHash.get(hash), image.bytes)
+      }
+      markdown = markdown.replaceAll(url, `/article-images/${fileByHash.get(hash)}`)
     }
-    const hash = createHash('sha256').update(image.bytes).digest('hex')
-    if (!savedByHash.has(hash)) {
-      saved += 1
-      const file = `${slug}-${saved}.${image.extension}`
-      await writeFile(`${IMAGE_DIR}/${file}`, image.bytes)
-      savedByHash.set(hash, file)
-    }
-    result = result.replaceAll(url, `/article-images/${savedByHash.get(hash)}`)
-  }
-  return result
+    return { ...draft, markdown }
+  })
+  return { localized, files }
 }
 
 /** Removes links with no text, which WordPress content and dropped images leave behind. */
@@ -160,7 +175,7 @@ const words = text => new Set(text.toLowerCase().match(/[a-z0-9]+/g) ?? [])
  */
 export const fitHeadings = (markdown, title) => {
   let body = markdown.trimStart().replaceAll(/^(#{1,6}) ([*_]{1,2})(.+)\2[ \t]*$/gm, '$1 $3')
-  const leading = body.match(/^#{1,2} (.+)\n+/)
+  const leading = /^#{1,2} (.+)\n+/.exec(body)
   const titleWords = words(title)
   if (leading && [...titleWords].filter(word => words(leading[1]).has(word)).length * 2 > titleWords.size) {
     body = body.slice(leading[0].length)
@@ -180,13 +195,15 @@ const fetchAll = async (type) => {
   return posts
 }
 
-const quote = value => `'${String(value).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}'`
+const quote = value => `'${String(value).replaceAll('\\', String.raw`\\`).replaceAll('\'', String.raw`\'`)}'`
+
+const formatValue = value => (Array.isArray(value) ? `[${value.map(quote).join(', ')}]` : quote(value))
 
 export const toTypeScript = (articles) => {
   const entries = articles.map((article) => {
     const fields = Object.entries(article)
       .filter(([, value]) => value !== undefined)
-      .map(([key, value]) => `    ${key}: ${Array.isArray(value) ? `[${value.map(quote).join(', ')}]` : quote(value)},`)
+      .map(([key, value]) => `    ${key}: ${formatValue(value)},`)
     return `  {\n${fields.join('\n')}\n  },`
   })
   return [
@@ -201,8 +218,9 @@ export const toTypeScript = (articles) => {
   ].join('\n')
 }
 
-const main = async () => {
-  const items = [...await fetchAll('post'), ...await fetchAll('page')]
+/** Fetches everything first, so a failure leaves the existing content untouched. */
+export const runImport = async () => {
+  const items = (await Promise.all(['post', 'page'].map(fetchAll))).flat()
     .filter(item => LISTING_REDIRECTS[legacyPath(item.URL)] === undefined)
   const toArticle = item => ({ category: categoryFor(item), slug: slugFor(item) })
   const pathOf = ({ category, slug }) => `/articles/${CATEGORY_PATHS[category]}/${slug}`
@@ -212,35 +230,42 @@ const main = async () => {
   ])
   const targetsById = new Map(items.map(item => [item.ID, pathOf(toArticle(item))]))
   const convert = createConverter()
-  const savedByHash = new Map()
+
+  const drafts = items.map((item) => {
+    const { category, slug } = toArticle(item)
+    const markdown = rewriteLinks(convert(item.content), targetsByPath, targetsById)
+    // An untitled page opens with its title as a heading.
+    const title = decodeEntities(item.title).trim() || /^#+ (.+)$/m.exec(markdown)?.[1].trim() || slug
+    return { item, category, slug, title, markdown: fitHeadings(markdown, title) }
+  })
+  const urls = [...new Set(drafts.flatMap(draft => imageUrls(draft.markdown)))]
+  const images = await Promise.all(urls.map(downloadImage))
+  const { localized, files } = localizeImages(drafts, new Map(urls.map((url, index) => [url, images[index]])))
 
   await Promise.all([CONTENT_DIR, IMAGE_DIR].map(dir => rm(dir, { recursive: true, force: true })))
-  await mkdir(IMAGE_DIR, { recursive: true })
-  const articles = []
-  for (const item of items) {
-    const { category, slug } = toArticle(item)
-    let markdown = rewriteLinks(convert(item.content), targetsByPath, targetsById)
-    // An untitled page opens with its title as a heading.
-    const title = decodeEntities(item.title).trim() || markdown.match(/^#+ (.+)$/m)?.[1].trim() || slug
-    markdown = await localizeImages(fitHeadings(markdown, title), slug, savedByHash)
-    markdown = promoteTableHeaders(removeEmptyLinks(markdown))
-    await mkdir(`${CONTENT_DIR}/${CATEGORY_PATHS[category]}`, { recursive: true })
-    await writeFile(`${CONTENT_DIR}/${CATEGORY_PATHS[category]}/${slug}.md`, `${markdown.trim()}\n`)
-    articles.push({
-      category,
-      slug,
-      title,
-      excerpt: excerptFrom(item.content),
-      publishDate: item.date.slice(0, 10),
-      parent: parentFor(item),
-      legacyUrl: `https://duos.blog${legacyPath(item.URL)}`,
-    })
-  }
+  const folders = new Set(localized.map(draft => `${CONTENT_DIR}/${CATEGORY_PATHS[draft.category]}`))
+  await Promise.all([IMAGE_DIR, ...folders].map(dir => mkdir(dir, { recursive: true })))
+  await Promise.all([
+    ...[...files].map(([file, bytes]) => writeFile(`${IMAGE_DIR}/${file}`, bytes)),
+    ...localized.map(({ category, slug, markdown }) =>
+      writeFile(`${CONTENT_DIR}/${CATEGORY_PATHS[category]}/${slug}.md`, `${promoteTableHeaders(removeEmptyLinks(markdown)).trim()}\n`)),
+  ])
+  const articles = localized.map(({ item, category, slug, title }) => ({
+    category,
+    slug,
+    title,
+    excerpt: excerptFrom(item.content),
+    publishDate: item.date.slice(0, 10),
+    parent: parentFor(item),
+    legacyUrl: `https://duos.blog${legacyPath(item.URL)}`,
+  }))
   articles.sort((a, b) => a.category.localeCompare(b.category) || b.publishDate.localeCompare(a.publishDate))
   await writeFile(`${CONTENT_DIR}/articles.ts`, toTypeScript(articles))
   console.log(`Imported ${articles.length} articles`)
 }
 
+/* v8 ignore start -- the command-line entry point */
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await main()
+  await runImport()
 }
+/* v8 ignore stop */
