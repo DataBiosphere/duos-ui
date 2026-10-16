@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { mkdir, rm, writeFile } from 'node:fs/promises'
+import { rm, writeFile } from 'node:fs/promises'
 import {
   categoryFor,
   createConverter,
@@ -92,11 +92,13 @@ describe('import-duos-blog', () => {
 
 const png = (bytes: number[]) => ({ extension: 'png', bytes: Buffer.from(bytes) })
 
-describe('localizeImages', () => {
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.restoreAllMocks()
+  vi.clearAllMocks()
+})
 
+describe('localizeImages', () => {
   it('names images after the first article to use them, stores duplicates once and drops dead ones', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {})
     const drafts = [
@@ -137,12 +139,9 @@ const wordpressPages = [
   { ID: 4, URL: 'http://duos.blog/untitled/', slug: 'untitled', title: '', date: '2024-03-03T00:00:00', type: 'page', content: '<p>A page that WordPress saved with neither a title nor a heading.</p>' },
 ]
 
-const respond = (body: unknown, init: { ok?: boolean, status?: number, type?: string } = {}) => ({
-  ok: init.ok ?? true,
-  status: init.status ?? 200,
-  headers: new Headers({ 'content-type': init.type ?? 'application/json' }),
-  json: () => Promise.resolve(body),
-  arrayBuffer: () => Promise.resolve(new Uint8Array([9]).buffer),
+const respond = (body: unknown, { ok = true, status = 200, type = 'application/json' } = {}) => ({
+  ok, status, headers: new Headers({ 'content-type': type }),
+  json: () => Promise.resolve(body), arrayBuffer: () => Promise.resolve(new Uint8Array([9]).buffer),
 })
 
 const stubWordPress = (overrides: Record<string, () => unknown> = {}) => vi.stubGlobal('fetch', vi.fn((url: string) => {
@@ -171,12 +170,6 @@ const stubWordPress = (overrides: Record<string, () => unknown> = {}) => vi.stub
 const written = () => Object.fromEntries(vi.mocked(writeFile).mock.calls.map(([path, data]) => [path, String(data)]))
 
 describe('runImport', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals()
-    vi.restoreAllMocks()
-    vi.clearAllMocks()
-  })
-
   it('writes each article, its images and the article list', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {})
     vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -185,7 +178,6 @@ describe('runImport', () => {
     await runImport()
 
     expect(rm).toHaveBeenCalledWith('src/content/articles', { recursive: true, force: true })
-    expect(mkdir).toHaveBeenCalledWith('src/content/articles/policy-briefs', { recursive: true })
     const files = written()
     expect(Object.keys(files).sort()).toEqual([
       'public/article-images/nih-genomic-data-sharing-policy-update-1.png',

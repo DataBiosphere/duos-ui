@@ -17,7 +17,6 @@ export const ArticleCard = ({ article }: { readonly article: Article }) => (
       'display': 'flex',
       'flexDirection': 'column',
       'gap': 1,
-      '&:hover': { boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)' },
       '&:focus-within': { boxShadow: `0 0 0 2px ${Theme.palette.link}` },
     }}
   >
