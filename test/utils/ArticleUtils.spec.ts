@@ -7,6 +7,7 @@ import {
   fetchArticleBody,
   formatArticleDate,
   isArticleVisible,
+  listArticles,
   pageNumber,
   readingTimeMinutes,
   validateArticles,
@@ -124,6 +125,17 @@ describe('article listing helpers', () => {
   it('estimates reading time at 200 words a minute', () => {
     expect(readingTimeMinutes('word '.repeat(600))).toBe(3)
     expect(readingTimeMinutes('')).toBe(1)
+  })
+})
+
+describe('listArticles', () => {
+  it('filters visible articles by category and tag, skipping untagged ones', () => {
+    const tagged: Article = { ...guide, slug: 'tagged', tags: ['dac'] }
+    const page: Article = { ...guide, category: 'PAGE', slug: 'page', tags: ['dac'] }
+    const now = Date.parse('2024-06-01')
+
+    expect(listArticles([guide, tagged, page], 'USER_GUIDE', 'dac', now)).toEqual([tagged])
+    expect(listArticles([guide, tagged, page], undefined, undefined, now)).toHaveLength(3)
   })
 })
 
