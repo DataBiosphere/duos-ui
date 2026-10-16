@@ -29,8 +29,8 @@ const ArticleLink = ({ href = '', children, node: _node, ...props }: React.Ancho
 }
 
 // react-markdown always passes alt, empty for an image written without one.
-const ArticleImage = ({ node: _node, ...props }: React.ImgHTMLAttributes<HTMLImageElement> & { node?: unknown }) =>
-  <img {...props} loading="lazy" />
+const ArticleImage = ({ node: _node, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement> & { node?: unknown }) =>
+  <img {...props} alt={alt} loading="lazy" />
 
 const markdownComponents = { a: ArticleLink, img: ArticleImage }
 
