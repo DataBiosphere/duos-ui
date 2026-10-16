@@ -127,11 +127,9 @@ const dropImage = (markdown, url) =>
   markdown.replaceAll(new RegExp(String.raw`!\[[^\]]*\]\(` + RegExp.escape(url) + String.raw`[^)]*\)`, 'g'), '')
 
 /**
- * Links each article's images from public/article-images, naming each file after the first
- * article to use it and storing identical images once. An image that no longer downloads is
- * already broken on duos.blog, so it is dropped, with any link wrapped around it, and reported.
- *
- * @returns the rewritten articles and the image files to write, by file name
+ * Links each article's images from public/article-images, storing identical images once under the
+ * first article to use them. An image that no longer downloads is already broken on duos.blog, so
+ * it is dropped and reported. Returns the rewritten articles and the image files to write.
  */
 export const localizeImages = (drafts, imagesByUrl) => {
   const fileByHash = new Map()
