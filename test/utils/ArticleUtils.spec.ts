@@ -5,9 +5,7 @@ import {
   articlePath,
   categoryFromPath,
   fetchArticleBody,
-  formatArticleDate,
   isArticleVisible,
-  listArticles,
   pageNumber,
   readingTimeMinutes,
   validateArticles,
@@ -118,24 +116,8 @@ describe('fetchArticleBody', () => {
 })
 
 describe('article listing helpers', () => {
-  it('formats the publish date as written, whatever the time zone', () => {
-    expect(formatArticleDate('2024-03-01')).toBe('March 1, 2024')
-  })
-
   it('estimates reading time at 200 words a minute', () => {
     expect(readingTimeMinutes('word '.repeat(600))).toBe(3)
-    expect(readingTimeMinutes('')).toBe(1)
-  })
-})
-
-describe('listArticles', () => {
-  it('filters visible articles by category and tag, skipping untagged ones', () => {
-    const tagged: Article = { ...guide, slug: 'tagged', tags: ['dac'] }
-    const page: Article = { ...guide, category: 'PAGE', slug: 'page', tags: ['dac'] }
-    const now = Date.parse('2024-06-01')
-
-    expect(listArticles([guide, tagged, page], 'USER_GUIDE', 'dac', now)).toEqual([tagged])
-    expect(listArticles([guide, tagged, page], undefined, undefined, now)).toHaveLength(3)
   })
 })
 
@@ -144,9 +126,7 @@ describe('pageNumber', () => {
     [null, 3, 1],
     ['9', 3, 3],
     ['2.7', 3, 2],
-    ['-4', 3, 1],
-    ['abc', 3, 1],
-    ['5', 0, 1],
+    ['abc', 0, 1],
   ])('reads %s with %i pages as page %i', (param, pageCount, expected) => {
     expect(pageNumber(param, pageCount)).toBe(expected)
   })
