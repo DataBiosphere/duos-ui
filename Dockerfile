@@ -23,7 +23,7 @@ COPY public ./public
 COPY index.html aliases.ts tsconfig.json vite.config.ts ./
 COPY scripts ./scripts
 COPY config/base_config.json ./public/config.json
-RUN pnpm exec vite build && node scripts/write-vite-config-json.mjs
+RUN pnpm exec vite build && node scripts/write-vite-config-json.mjs && pnpm exec tsx scripts/prerender-articles.tsx
 
 # Build server
 COPY server/src ./server/src

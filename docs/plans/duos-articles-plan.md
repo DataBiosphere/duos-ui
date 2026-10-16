@@ -17,7 +17,7 @@ Move the blog posts, user guides, announcements and help pages from duos.blog (h
 | Rendering | `react-markdown` with `remark-gfm` for tables and strikethrough. Raw HTML is never rendered, and unsafe URLs such as `javascript:` are dropped. Internal links stay in the app; external links open in a new tab. |
 | Images | Stored in `public/article-images/` and linked by absolute path (`/article-images/...`), because Vite copies a Markdown asset as-is and wouldn't emit images it references. The import copies in the duos.blog images, which hot-link Google Docs export URLs that tend to expire. |
 | Study and datasets | Shown as cards whose details come from the Showcase public lookup, so private datasets stay hidden. |
-| Search indexing | The build writes a static HTML page per article (title, description, link-preview tags, body) plus `sitemap.xml`. Readers still get the app. |
+| Search indexing | The build writes a static HTML page per article (title, description, link-preview tags, canonical URL on duos.org, body) plus `sitemap.xml`, and the server serves it at the article's URL. Readers still get the app, which replaces the static content when it starts. Articles dated in the future get their page at the first build on or after their date. |
 
 ## Article metadata
 
@@ -53,7 +53,7 @@ Stacked PRs, each under 500 lines of code, tests and content.
 4. **Pages and feature announcements.**
 5. **User guides.**
 6. **Blog posts, news and policy briefs.** Links between articles all resolve once this lands.
-7. **Search indexing:** a static page per article plus `sitemap.xml`. It starts by checking that the BFF and the non-BFF deploy serve those pages before falling back to the app. If they don't, the fallback is per-article meta tags injected by the BFF.
+7. **Search indexing:** `scripts/prerender-articles.tsx` runs after `vite build` and writes a page per visible article (title, description, link-preview tags, canonical URL and body) plus `sitemap.xml`. Both deployments run the same Fastify server, and `@fastify/vite` serves `build/` files only at their exact paths, so `server/src/pages/articlePages.ts` registers an exact route for each prebuilt page at startup and leaves every other path to the app.
 8. **Study and dataset cards,** once DT-4274, DT-4275 and DT-4281 are done.
 9. **Switch the links:** the 10 hardcoded `duos.blog` links and the logged-out "Blog" tab point to `/articles`, and their specs are updated. duos.blog then redirects or is retired.
 
