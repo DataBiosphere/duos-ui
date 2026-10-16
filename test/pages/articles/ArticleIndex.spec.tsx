@@ -19,6 +19,7 @@ const { articles } = vi.hoisted(() => {
   const others: Article[] = [
     { category: 'BLOG_POST', slug: 'featured', title: 'Featured post', excerpt: 'Read this first', publishDate: '2020-01-01', featured: true, tags: ['dac'], author: 'DUOS Team' },
     { category: 'BLOG_POST', slug: 'tagged', title: 'Tagged post', excerpt: 'About DACs', publishDate: '2023-06-01', tags: ['dac'] },
+    { category: 'PAGE', slug: 'untagged', title: 'Untagged page', excerpt: 'No tags', publishDate: '2019-01-01' },
     { category: 'BLOG_POST', slug: 'draft', title: 'Draft post', excerpt: 'Not ready', publishDate: '2023-01-01', draft: true },
     { category: 'BLOG_POST', slug: 'scheduled', title: 'Scheduled post', excerpt: 'Coming soon', publishDate: '2999-01-01' },
   ]
