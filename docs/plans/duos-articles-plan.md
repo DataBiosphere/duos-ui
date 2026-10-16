@@ -55,12 +55,12 @@ Stacked PRs, each under 500 lines of code, tests and content.
 6. **Blog posts, news and policy briefs.** Links between articles all resolve once this lands.
 7. **Search indexing:** `scripts/prerender-articles.tsx` runs after `vite build` and writes a page per visible article (title, description, link-preview tags, canonical URL and body) plus `sitemap.xml`. Both deployments run the same Fastify server, and `@fastify/vite` serves `build/` files only at their exact paths, so `server/src/pages/articlePages.ts` registers an exact route for each prebuilt page at startup and leaves every other path to the app.
 8. **Study and dataset cards,** once DT-4274, DT-4275 and DT-4281 are done.
-9. **Switch the links:** the 10 hardcoded `duos.blog` links and the logged-out "Blog" tab point to `/articles`, and their specs are updated. duos.blog then redirects or is retired.
+9. **Switch the links:** the app's 15 `duos.blog` links, including the logged-out About, FAQs and Blog tabs, point to `/articles` through `src/content/articles/links.ts`, which the content spec checks against the visible articles. They still open in a new tab. duos.blog then redirects or is retired.
 
 The renderer, URL helpers and public pages come from the UI-only branch `lawson-dt-4234-duos-native-blog`.
 
 ## Open items
 
-- Where `help/preauthorize_researchers_librarycards` points: it isn't among the 13 pages. The import resolves it.
+- `help/preauthorize_researchers_librarycards`, linked from the Signing Official dashboard, already 404s on duos.blog; the link now points to the Signing Official guide, which covers pre-authorization and library cards.
 - Whether duos.blog stays up as a redirect site or is retired.
 - Who writes posts after the move, now that it needs a PR.

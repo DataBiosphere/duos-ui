@@ -36,6 +36,7 @@ import { getLibraryVersions } from 'src/libs/libraryVersions'
 import { handleSignIn } from 'src/libs/signInUtils'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 import { HeroNetwork } from 'src/components/HeroNetwork'
+import { ARTICLE_LINKS } from 'src/content/articles/links'
 
 export interface HomeProps {
   isLogged: boolean
@@ -75,9 +76,9 @@ const duosLogoStyle: React.CSSProperties = {
   padding: '0 3rem',
 }
 
-const DAC_GUIDE_URL = 'https://duos.blog/help/dacguide/'
-const SO_GUIDE_URL = 'https://duos.blog/help/signingofficialguide/'
-const RESEARCHER_GUIDE_URL = 'https://duos.blog/help/researcherguide/'
+const DAC_GUIDE_URL = ARTICLE_LINKS.dacGuide
+const SO_GUIDE_URL = ARTICLE_LINKS.signingOfficialGuide
+const RESEARCHER_GUIDE_URL = ARTICLE_LINKS.researcherGuide
 const SIMPLE_SETUP_TEXT = 'Simple one-time setup — no repeat steps per dataset'
 
 // Font sizes are in px because the root font-size is 10px (see src/libs/muiThemeFix.ts).

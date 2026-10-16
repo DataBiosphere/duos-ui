@@ -11,6 +11,7 @@ import { ConsoleDashboardTileMeta } from 'src/components/dashboard/useConsoleDas
 import { DAC, DacDashboardSummary } from 'src/libs/ajax/DAC'
 import { useMetricTiles } from 'src/components/dashboard/metricTiles'
 import { DAC_METRICS_ROUTE, DAC_METRICS_TABS } from 'src/pages/admin_console/metricsTabs'
+import { ARTICLE_LINKS } from 'src/content/articles/links'
 
 // These pages no longer have their own top-nav sub-tabs; the Dashboard is now the only place DAC
 // members and chairs navigate to them from, so the tile list lives here.
@@ -51,7 +52,7 @@ const helpfulResources: ConsoleDashboardResource[] = [
     icon: MenuBookOutlinedIcon,
     label: 'DAC User Guide',
     description: 'A walkthrough of the DAC role, from reviewing data access requests to managing your committee\'s datasets.',
-    href: 'https://duos.blog/help/dacguide/',
+    href: ARTICLE_LINKS.dacGuide,
   },
   ...COMMON_CONSOLE_RESOURCES,
 ]

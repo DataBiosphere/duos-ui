@@ -7,6 +7,7 @@ import loadingIndicator from 'src/images/loading-indicator.svg'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import 'src/styles/tooltip.css'
+import { ARTICLE_LINKS } from 'src/content/articles/links'
 
 interface ErrorInfo {
   title?: string
@@ -148,7 +149,7 @@ export const SignInButton = () => {
         <a
           className="navbar-duos-icon-help"
           style={{ color: 'white', height: 16, width: 16, marginLeft: 5 }}
-          href="https://duos.blog/link_institutional_email_to_gmail/"
+          href={ARTICLE_LINKS.institutionalEmail}
           data-tooltip-id="tip_google-help"
           data-tooltip-content="Need account help? Click here!"
           aria-label="Need account help? Click here!"
