@@ -11,6 +11,7 @@ import { COMMON_CONSOLE_RESOURCES } from 'src/components/dashboard/dashboardReso
 import { ConsoleDashboardTileMeta } from 'src/components/dashboard/useConsoleDashboardSummary'
 import { SigningOfficial, SigningOfficialDashboardSummary } from 'src/libs/ajax/SigningOfficial'
 import { SO_CONSOLE_SECTIONS } from './signingOfficialConsoleRoutes'
+import { ARTICLE_LINKS } from 'src/content/articles/links'
 
 const tileMeta: ConsoleDashboardTileMeta<SigningOfficialDashboardSummary>[] = [
   {
@@ -69,7 +70,7 @@ const helpfulResources: ConsoleDashboardResource[] = [
     icon: MenuBookOutlinedIcon,
     label: 'Signing Official Guide',
     description: 'A walkthrough of the Signing Official role, from pre-authorizing researchers to issuing library cards.',
-    href: 'https://duos.blog/help/preauthorize_researchers_librarycards/',
+    href: ARTICLE_LINKS.signingOfficialGuide,
   },
   ...COMMON_CONSOLE_RESOURCES,
 ]

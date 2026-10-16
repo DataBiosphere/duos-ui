@@ -21,6 +21,14 @@ vi.mock('src/libs/libraryVersions', () => ({
       icon: null,
       query: null,
     },
+    // No logo, and the same order as Broad, so the key breaks the tie.
+    'anvil': {
+      title: 'AnVIL Data Library',
+      featured: true,
+      order: 2,
+      icon: undefined,
+      query: null,
+    },
     'elwazi': {
       title: 'eLwazi Data Library',
       featured: true,
@@ -43,8 +51,8 @@ vi.mock('src/libs/signInUtils', () => ({
 }))
 
 vi.mock('src/components/modals/SupportRequestModal', () => ({
-  SupportRequestModal: ({ showModal }: { showModal: boolean }) =>
-    showModal ? React.createElement('div', { 'data-testid': 'support-modal' }) : null,
+  SupportRequestModal: ({ showModal, onCloseRequest }: { showModal: boolean, onCloseRequest: () => void }) =>
+    showModal ? React.createElement('div', { 'data-testid': 'support-modal' }, React.createElement('button', { onClick: onCloseRequest }, 'Close support')) : null,
 }))
 
 vi.mock('src/images/duos_logo.svg', () => ({ default: 'duos_logo.svg' }))
@@ -113,7 +121,7 @@ describe('Home page', () => {
     it('renders one link per featured library, each wrapping its logo', () => {
       renderHome(false)
       const links = libraryLinks()
-      expect(links).toHaveLength(3)
+      expect(links).toHaveLength(4)
       links.forEach((link) => {
         expect(link.querySelector('.logo-card')).not.toBeNull()
       })
@@ -179,9 +187,16 @@ describe('Home page', () => {
       expect(screen.queryByTitle('Terra')).not.toBeInTheDocument()
     })
 
-    it('renders library links in order', () => {
+    it('renders library links in order, breaking ties by key', () => {
       renderHome(true)
-      expect(libraryLinks().map(link => link.textContent)).toEqual(['DUOS', 'Broad', 'eLwazi'])
+      expect(libraryLinks().map(link => link.getAttribute('href'))).toEqual(['/datalibrary', '/datalibrary/anvil', '/datalibrary/broad', '/datalibrary/elwazi'])
+    })
+
+    it('shows a library\'s name in place of a missing logo', () => {
+      renderHome(true)
+      const anvil = libraryLinks()[1].querySelector('.logo-card')!
+      expect(anvil.querySelector('img')).toBeNull()
+      expect(anvil).toHaveTextContent('AnVIL')
     })
 
     it('applies dark background styling to the Broad card', () => {
@@ -209,7 +224,7 @@ describe('Home page', () => {
 
     it('renders one card per featured library', () => {
       renderHome(true)
-      expect(libraryLinks()).toHaveLength(3)
+      expect(libraryLinks()).toHaveLength(4)
     })
   })
 
@@ -230,6 +245,10 @@ describe('Home page', () => {
         fireEvent.click(screen.getByText('Request a Meeting'))
       })
       expect(screen.getByTestId('support-modal')).toBeInTheDocument()
+      await act(async () => {
+        fireEvent.click(screen.getByText('Close support'))
+      })
+      expect(screen.queryByTestId('support-modal')).not.toBeInTheDocument()
     })
   })
 
@@ -321,6 +340,21 @@ describe('Home page', () => {
       expect(scrollIntoView.mock.contexts[0]).toBe(section)
       expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
       expect(section).toHaveFocus()
+    })
+
+    it('does nothing when the chosen role\'s section is missing', async () => {
+      const scrollIntoView = vi.fn()
+      Element.prototype.scrollIntoView = scrollIntoView
+      const onError = vi.fn((event: ErrorEvent) => event.preventDefault())
+      globalThis.addEventListener('error', onError)
+      const { container } = renderHome(false)
+      container.querySelector('#role-so')!.remove()
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Signing Officials' }))
+      })
+      globalThis.removeEventListener('error', onError)
+      expect(scrollIntoView).not.toHaveBeenCalled()
+      expect(onError).not.toHaveBeenCalled()
     })
 
     it('jumps without animation when the user prefers reduced motion', async () => {

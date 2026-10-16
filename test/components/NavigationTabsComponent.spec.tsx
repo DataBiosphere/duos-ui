@@ -157,6 +157,17 @@ describe('NavigationTabsComponent', () => {
     expect(screen.getByText('About')).toBeVisible()
     expect(screen.getByText('FAQs')).toBeVisible()
     expect(screen.getByText('Blog')).toBeVisible()
+    expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute('href', '/articles/pages/aboutduos')
+    expect(screen.getByRole('link', { name: 'FAQs' })).toHaveAttribute('href', '/articles/user-guides/faqs')
+    expect(screen.getByRole('link', { name: 'Blog' })).toHaveAttribute('href', '/articles')
+  })
+
+  it('selects no main tab on a page that is not one of them', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    renderComponent({ initialTab: -1 })
+    expect(screen.getAllByRole('tab').filter(tab => tab.getAttribute('aria-selected') === 'true')).toHaveLength(0)
+    expect(consoleError).not.toHaveBeenCalled()
+    consoleError.mockRestore()
   })
 
   it('hides main tabs when not logged in', () => {

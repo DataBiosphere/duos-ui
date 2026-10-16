@@ -5,6 +5,7 @@ import { Notifications } from 'src/libs/utils'
 import { DuosUser, InstitutionInterface, SigningOfficialUserWithData } from 'src/types/model'
 import SigningOfficialRequest from './SigningOfficialRequest'
 import './UserProfile.css'
+import { ARTICLE_LINKS } from 'src/content/articles/links'
 
 interface AffiliationAndRoleProps {
   readonly user: DuosUser
@@ -60,7 +61,7 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
           ? (
               <p>
                 No Signing Official found for your institution. Please refer to{' '}
-                <a href="https://duos.blog/2025/08/06/how-to-get-a-library-card-from-your-signing-official/" target="_blank" rel="noreferrer">
+                <a href={ARTICLE_LINKS.libraryCard} target="_blank" rel="noreferrer">
                   this help article
                 </a>{' '}
                 for instructions on how to get a Library Card.

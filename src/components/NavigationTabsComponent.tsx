@@ -8,6 +8,7 @@ import { Tab as TabItem } from 'src/components/DuosHeader'
 import { visibleSubTabs } from 'src/components/navigation/subTabVisibility'
 import { DuosUser } from 'src/types/model'
 import { ProfileLinks } from 'src/components/navigation/ProfileLinks'
+import { ARTICLE_LINKS } from 'src/content/articles/links'
 
 type Orientation = 'horizontal' | 'vertical'
 
@@ -149,7 +150,7 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
                   <a
                     id="link_about"
                     className="navbar-duos-link"
-                    href="https://duos.blog/aboutduos/"
+                    href={ARTICLE_LINKS.about}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -161,7 +162,7 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
                   <a
                     id="link_help"
                     className="navbar-duos-link"
-                    href="https://duos.blog/help/faqs/"
+                    href={ARTICLE_LINKS.faqs}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -173,7 +174,7 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
                   <a
                     id="link_blog"
                     className="navbar-duos-link"
-                    href="https://duos.blog/"
+                    href={ARTICLE_LINKS.articles}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -202,7 +203,7 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
                 minWidth: '185px',
                 display: 'flex',
                 alignItems: 'center',
-                flexDirection: orientation === 'horizontal' ? 'row' : 'column',
+                flexDirection: 'row',
               }}
             >
               <SignInButton />
@@ -217,7 +218,7 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
             }}
           >
             <a
-              href="https://duos.blog/help/"
+              href={ARTICLE_LINKS.help}
               id="blog-support-docs-link"
               target="_blank"
               rel="noreferrer"

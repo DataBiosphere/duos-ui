@@ -16,6 +16,7 @@ import { createDataLibraryTile } from 'src/components/dashboard/dashboardTiles'
 import { ConsoleDashboardTileMeta } from 'src/components/dashboard/useConsoleDashboardSummary'
 import { Researcher, ResearcherDashboardSummary } from 'src/libs/ajax/Researcher'
 import { RESEARCHER_CONSOLE_SECTIONS } from './researcherConsoleRoutes'
+import { ARTICLE_LINKS } from 'src/content/articles/links'
 
 // Tiles reuse the header's section entries so a tile and its sub-tab can never disagree about a
 // route or about who is allowed to see it.
@@ -56,14 +57,14 @@ const helpfulResources: ConsoleDashboardResource[] = [
     icon: MenuBookOutlinedIcon,
     label: 'Researcher Guide',
     description: 'A walkthrough of the Researcher role, from browsing the data library to submitting a data access request.',
-    href: 'https://duos.blog/help/researcherguide/',
+    href: ARTICLE_LINKS.researcherGuide,
   },
   ...COMMON_CONSOLE_RESOURCES,
   {
     icon: BadgeOutlinedIcon,
     label: 'Linking Your NIH RAS Account',
     description: 'Learn how to link your NIH Researcher Auth Service (RAS) identity to your DUOS profile.',
-    href: 'https://duos.blog/help/nih_ras/',
+    href: ARTICLE_LINKS.nihRas,
   },
   {
     icon: AutoStoriesOutlinedIcon,

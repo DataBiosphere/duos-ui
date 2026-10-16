@@ -123,6 +123,7 @@ describe('ResearcherDashboard', () => {
     expect(await screen.findByRole('link', { name: /Data Submissions/ })).toHaveAttribute(
       'href', '/dataset_submissions',
     )
+    expect(await screen.findByLabelText('All Submissions: 9')).toBeInTheDocument()
   })
 
   it('preserves the Researcher Console tab context when navigating to a section', () => {

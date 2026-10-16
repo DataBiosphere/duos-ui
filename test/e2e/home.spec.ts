@@ -8,6 +8,6 @@ test('Home page loads correctly', async ({ page }) => {
   await expect(page.getByText('DUOS for DACs')).toBeVisible()
   await expect(page.getByText('Looking for data')).toBeVisible()
   await expect(page.getByText('Data Libraries in DUOS')).toBeVisible()
-  await expect(page.locator('#blog-support-dac-link')).toHaveAttribute('href', 'https://duos.blog/help/dacguide/')
-  await expect(page.locator('#blog-support-so-link')).toHaveAttribute('href', 'https://duos.blog/help/signingofficialguide/')
+  await expect(page.locator('#blog-support-dac-link')).toHaveAttribute('href', '/articles/user-guides/dacguide')
+  await expect(page.locator('#blog-support-so-link')).toHaveAttribute('href', '/articles/user-guides/signingofficialguide')
 })

@@ -80,6 +80,16 @@ describe('AffiliationAndRole', () => {
     })
   })
 
+  it('shows no institution when the lookup finds none, and links the library card guide', async () => {
+    vi.mocked(Institution.getById).mockResolvedValue(undefined as never)
+    render(<AffiliationAndRole user={user} />)
+
+    await waitFor(() => expect(User.getSOsForCurrentUser).toHaveBeenCalled())
+    expect(screen.queryByText(/Test Institution/)).not.toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'this help article' }))
+      .toHaveAttribute('href', '/articles/user-guides/how-to-get-a-library-card-from-your-signing-official')
+  })
+
   it('displays the "contact us" fallback text when user has no institutionId', async () => {
     const userWithoutInstitution = { ...user, institutionId: undefined }
     const { container } = render(<AffiliationAndRole user={userWithoutInstitution} />)

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const ABOUT_HREF = 'https://duos.blog/aboutduos/'
+const ABOUT_HREF = '/articles/pages/aboutduos'
 
 test('About link is correct on desktop', async ({ page }) => {
   await page.setViewportSize({ width: 2000, height: 2000 })
