@@ -14,9 +14,10 @@ const { articles } = vi.hoisted(() => {
     title: `Guide ${index + 1}`,
     excerpt: 'A guide',
     publishDate: `2024-01-${String(index + 1).padStart(2, '0')}`,
+    tags: ['guide'],
   }))
   const others: Article[] = [
-    { category: 'BLOG_POST', slug: 'featured', title: 'Featured post', excerpt: 'Read this first', publishDate: '2020-01-01', featured: true, tags: ['dac'] },
+    { category: 'BLOG_POST', slug: 'featured', title: 'Featured post', excerpt: 'Read this first', publishDate: '2020-01-01', featured: true, tags: ['dac'], author: 'DUOS Team' },
     { category: 'BLOG_POST', slug: 'tagged', title: 'Tagged post', excerpt: 'About DACs', publishDate: '2023-06-01', tags: ['dac'] },
     { category: 'BLOG_POST', slug: 'draft', title: 'Draft post', excerpt: 'Not ready', publishDate: '2023-01-01', draft: true },
     { category: 'BLOG_POST', slug: 'scheduled', title: 'Scheduled post', excerpt: 'Coming soon', publishDate: '2999-01-01' },
@@ -42,6 +43,7 @@ describe('ArticleIndex', () => {
     renderAt('/articles/blog-posts')
 
     expect(titles()).toEqual(['Featured post', 'Tagged post'])
+    expect(screen.getByText('By DUOS Team')).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Blog Posts' })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('tab', { name: 'All' })).not.toHaveAttribute('aria-current')
   })
@@ -59,6 +61,13 @@ describe('ArticleIndex', () => {
 
     expect(titles()).toHaveLength(12)
     expect(titles()[0]).toBe('Guide 13')
+    await userEvent.click(screen.getByRole('button', { name: 'Go to page 2' }))
+    expect(titles()).toEqual(['Guide 1'])
+  })
+
+  it('keeps the tag filter when paging', async () => {
+    renderAt('/articles?tag=guide')
+
     await userEvent.click(screen.getByRole('button', { name: 'Go to page 2' }))
     expect(titles()).toEqual(['Guide 1'])
   })
