@@ -45,14 +45,17 @@ Move the blog posts, user guides, announcements and help pages from duos.blog (h
 
 ## Work
 
-Each PR stays under 500 lines of code and tests.
+Stacked PRs, each under 500 lines of code, tests and content.
 
-1. **Article format:** this plan, the metadata type and list, the body loader, the validation spec, and the Markdown renderer.
-2. **Public pages:** `/articles` (all articles and per-category tabs, with tag filter and pagination) and `/articles/<category>/<slug>` (breadcrumb, byline, body, not-found page). Bodies load on demand; the metadata list ships with the app.
-3. **duos.blog import:** a checked-in script turns the 25 posts and 13 pages into Markdown and copies the images. The output is reviewed as a normal diff.
-4. **Search indexing:** a static page per article plus `sitemap.xml`. It starts by checking that the BFF and the non-BFF deploy serve those pages before falling back to the app. If they don't, the fallback is per-article meta tags injected by the BFF.
-5. **Study and dataset cards,** once DT-4274, DT-4275 and DT-4281 are done.
-6. **Switch the links:** the 10 hardcoded `duos.blog` links and the logged-out "Blog" tab point to `/articles`, and their specs are updated. duos.blog then redirects or is retired.
+1. **Article format** (#4020): this plan, the metadata type and list, the body loader, the validation spec, and the Markdown renderer.
+2. **Public pages** (#4021): `/articles` (all articles and per-category tabs, with tag filter and pagination) and `/articles/<category>/<slug>` (breadcrumb, byline, body, not-found page). Bodies load on demand; the metadata list ships with the app.
+3. **duos.blog import script** (#4022): `scripts/import-duos-blog.mjs` turns the 25 posts and 13 pages into Markdown and copies the images. Its output lands in the next three PRs.
+4. **Pages and feature announcements.**
+5. **User guides.**
+6. **Blog posts, news and policy briefs.** Links between articles all resolve once this lands.
+7. **Search indexing:** a static page per article plus `sitemap.xml`. It starts by checking that the BFF and the non-BFF deploy serve those pages before falling back to the app. If they don't, the fallback is per-article meta tags injected by the BFF.
+8. **Study and dataset cards,** once DT-4274, DT-4275 and DT-4281 are done.
+9. **Switch the links:** the 10 hardcoded `duos.blog` links and the logged-out "Blog" tab point to `/articles`, and their specs are updated. duos.blog then redirects or is retired.
 
 The renderer, URL helpers and public pages come from the UI-only branch `lawson-dt-4234-duos-native-blog`.
 
