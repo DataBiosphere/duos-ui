@@ -24,8 +24,10 @@ const escapeHtml = (text: string) =>
 export const renderMarkdown = (markdown: string): string =>
   renderToStaticMarkup(<ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>)
 
+const attributeHtml = ([name, value]: [string, string]) => `${name}="${escapeHtml(value)}"`
+
 const headTagHtml = ({ tag, attributes }: { tag: string, attributes: Readonly<Record<string, string>> }) =>
-  `<${tag} ${Object.entries(attributes).map(([name, value]) => `${name}="${escapeHtml(value)}"`).join(' ')} ${ARTICLE_META_ATTRIBUTE}>`
+  `<${tag} ${Object.entries(attributes).map(attributeHtml).join(' ')} ${ARTICLE_META_ATTRIBUTE}>`
 
 /**
  * The app's index.html with the article's title and head tags (src/utils/articleMeta.ts), and its
@@ -45,8 +47,8 @@ export const sitemapXml = (articles: readonly Article[]): string => {
     ...ARTICLE_CATEGORIES.map(category => ({ path: `/articles/${ARTICLE_CATEGORY_PATHS[category]}` })),
     ...articles.map(article => ({ path: pathOf(article), lastmod: article.publishDate })),
   ]
-  const urls = pages.map(({ path, lastmod }) =>
-    `  <url><loc>${SITE_ORIGIN}${path}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}</url>`)
+  const lastmodXml = (lastmod?: string) => (lastmod ? '<lastmod>' + lastmod + '</lastmod>' : '')
+  const urls = pages.map(({ path, lastmod }) => `  <url><loc>${SITE_ORIGIN}${path}</loc>${lastmodXml(lastmod)}</url>`)
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`
 }
 
