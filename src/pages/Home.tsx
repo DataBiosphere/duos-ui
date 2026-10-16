@@ -205,14 +205,14 @@ const SectionHead = ({ id, eyebrow, title, children }: { id: string, eyebrow: st
   </Stack>
 )
 
-const HomeSection = ({ labelledBy, muted = false, sx, children }: { labelledBy: string, muted?: boolean, sx?: SxProps<Theme>, children: React.ReactNode }) => (
+const HomeSection = ({ labelledBy, muted = false, sx, children }: { labelledBy: string, muted?: boolean, sx?: SystemStyleObject<Theme>, children: React.ReactNode }) => (
   <Box
     component="section"
     aria-labelledby={labelledBy}
     sx={[
       { position: 'relative', py: { xs: 6, md: 8 }, px: { xs: 2, md: 3 } },
       muted && { bgcolor: color.surfaceMuted, borderTop: `1px solid ${color.border}` },
-      ...(Array.isArray(sx) ? sx : [sx]),
+      sx ?? false,
     ]}
   >
     <Container maxWidth="lg" disableGutters sx={{ position: 'relative' }}>

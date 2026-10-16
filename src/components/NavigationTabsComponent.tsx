@@ -203,7 +203,7 @@ export const NavigationTabsComponent: React.FC<NavigationTabsComponentProps> = (
                 minWidth: '185px',
                 display: 'flex',
                 alignItems: 'center',
-                flexDirection: orientation === 'horizontal' ? 'row' : 'column',
+                flexDirection: 'row',
               }}
             >
               <SignInButton />

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { isEmpty } from 'src/utils/NodashUtil'
 import { Alert } from 'src/components/Alert'
 import { Auth, Redirect } from 'src/libs/auth/auth'
 import { Storage } from 'src/libs/storage'
@@ -10,13 +9,9 @@ import 'src/styles/tooltip.css'
 import { ARTICLE_LINKS } from 'src/content/articles/links'
 
 interface ErrorInfo {
-  title?: string
-  description?: string
-  show?: boolean
-  msg?: string
+  title: string
+  description: string
 }
-
-type ErrorDisplay = ErrorInfo | React.JSX.Element
 
 /**
  * A single sign-in button that starts the BFF login flow: POST /auth/login
@@ -27,7 +22,7 @@ type ErrorDisplay = ErrorInfo | React.JSX.Element
  * takes it from there (user fetch, registration, ToS gate).
  */
 export const SignInButton = () => {
-  const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({})
+  const [errorDisplay, setErrorDisplay] = useState<ErrorInfo>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isConsentDown, setIsConsentDown] = useState<boolean>(false)
   const [isSamDown, setIsSamDown] = useState<boolean>(false)
@@ -62,13 +57,12 @@ export const SignInButton = () => {
       Storage.clearStorage()
       if (String(error).includes('Popup closed by user')) {
         setErrorDisplay({
-          show: true,
           title: 'Sign in cancelled',
           description: 'Sign in cancelled by closing the sign in window',
         })
       }
       else {
-        setErrorDisplay({ show: true, title: 'Error', description: Auth.signInError() })
+        setErrorDisplay({ title: 'Error', description: Auth.signInError() })
       }
       setIsLoading(false)
     }
@@ -161,7 +155,7 @@ export const SignInButton = () => {
 
   return (
     <div>
-      {isEmpty(errorDisplay)
+      {errorDisplay === undefined
         ? (
             <div>
               {signInElement()}
@@ -172,9 +166,9 @@ export const SignInButton = () => {
               <Alert
                 id="dialog"
                 type="danger"
-                title={(errorDisplay as ErrorInfo).title || 'Error'}
-                description={(errorDisplay as ErrorInfo).description || ''}
-                onClose={() => setErrorDisplay({})}
+                title={errorDisplay.title}
+                description={errorDisplay.description}
+                onClose={() => setErrorDisplay(undefined)}
               />
             </div>
           )}

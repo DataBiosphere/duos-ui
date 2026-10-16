@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SignInButton from 'src/components/SignInButton'
 import { Auth, Redirect } from 'src/libs/auth/auth'
@@ -161,6 +161,34 @@ describe('SignInButton', () => {
     expect(await screen.findByText(signInError)).toBeInTheDocument()
     expect(screen.getByText('Error')).toBeInTheDocument()
     expect(screen.queryByText(signInText)).not.toBeInTheDocument()
+  })
+
+  it('highlights the button while it is hovered or focused', async () => {
+    mountComponent()
+    await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
+    const button = screen.getByRole('button')
+
+    fireEvent.mouseEnter(button)
+    expect(button).toHaveStyle({ background: 'rgb(0, 93, 154)' })
+    fireEvent.mouseLeave(button)
+    expect(button).toHaveStyle({ background: 'transparent' })
+    fireEvent.focus(button)
+    expect(button).toHaveStyle({ background: 'rgb(0, 93, 154)' })
+    fireEvent.blur(button)
+    expect(button).toHaveStyle({ background: 'transparent' })
+  })
+
+  it('brings the Sign In button back when the error alert is closed', async () => {
+    vi.mocked(Auth.signIn).mockRejectedValue(new Error(signInError))
+    mountComponent()
+    await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
+    await userEvent.click(screen.getByRole('button'))
+    await screen.findByText(signInError)
+
+    await userEvent.click(screen.getByTestId('CloseIcon'))
+
+    expect(screen.queryByText(signInError)).not.toBeInTheDocument()
+    expect(screen.getByText(signInText)).toBeInTheDocument()
   })
 
   it('is disabled when SAM is unhealthy', async () => {
