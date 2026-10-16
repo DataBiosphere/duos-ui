@@ -20,7 +20,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material'
-import type { SxProps, Theme } from '@mui/material'
+import type { Theme } from '@mui/material'
 import type { SystemStyleObject } from '@mui/system'
 import { ArrowForward, CheckCircleOutlined, Pause, PlayArrow } from '@mui/icons-material'
 import duosLogoImg from 'src/images/duos_logo.svg'
