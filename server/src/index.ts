@@ -29,6 +29,7 @@ import { ECM_PROXY_PREFIX, ecmProxy } from './proxy/ecmProxy.js'
 import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
 import { publicProxy } from './proxy/publicProxy.js'
+import { articlePages } from './pages/articlePages.js'
 import { configPath, readConfig, TRUST_PROXY } from './config.js'
 import { logAuthEvent } from './auth/authEvents.js'
 import { buildLoggerOptions } from './logging.js'
@@ -293,6 +294,11 @@ export async function buildApp(): Promise<AppInstance> {
   })
 
   await fastify.vite.ready()
+
+  // Dev serves articles through Vite; production has their prebuilt pages in build/.
+  if (!isDev) {
+    await fastify.register(articlePages, { root: path.join(PROJECT_ROOT, 'build') })
+  }
 
   // SPA fallback
   fastify.setNotFoundHandler((_req, reply) => reply.html())

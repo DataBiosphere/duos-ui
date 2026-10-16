@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { Box, Breadcrumbs, Chip, LinearProgress, Typography } from '@mui/material'
+import { useArticleMeta } from 'src/hooks/useArticleMeta'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import { ArticleMarkdown } from 'src/components/articles/ArticleMarkdown'
 import { ArticleMessage } from 'src/components/articles/ArticleMessage'
@@ -59,6 +60,7 @@ const ArticleView = ({ article, parent, markdown }: ArticleViewProps) => {
 export const ArticlePage = () => {
   const { category: categorySegment, slug } = useParams()
   const { article, parent } = findArticle(ARTICLES, categoryFromPath(categorySegment), slug)
+  useArticleMeta(article)
   usePageTitle(article?.title ?? 'Articles')
   // Keyed by path, so following a link to another article shows loading rather than the old body.
   const path = article ? articlePath(article) : undefined

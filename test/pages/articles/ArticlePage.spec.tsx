@@ -50,6 +50,7 @@ describe('ArticlePage', () => {
     expect(screen.getByRole('link', { name: 'Help' })).toHaveAttribute('href', '/articles/pages/help')
     expect(screen.getByRole('link', { name: 'dac' })).toHaveAttribute('href', '/articles?tag=dac')
     expect(document.title).toBe('DAC Guide | DUOS')
+    expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute('href', 'https://duos.org/articles/user-guides/dac-guide')
   })
 
   it.each([

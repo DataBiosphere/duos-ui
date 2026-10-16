@@ -1,3 +1,5 @@
 # Enable all URLs to be retrieved
 User-agent: *
 Disallow:
+
+Sitemap: https://duos.org/sitemap.xml
