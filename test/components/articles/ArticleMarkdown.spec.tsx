@@ -65,4 +65,10 @@ describe('ArticleMarkdown', () => {
 
     expect(screen.getByRole('img', { name: 'Team photo' })).toHaveAttribute('loading', 'lazy')
   })
+
+  it('keeps an image without alt text out of the accessibility tree', () => {
+    const { container } = renderMarkdown('![](https://example.org/decoration.png)')
+
+    expect(container.querySelector('img')).toHaveAttribute('alt', '')
+  })
 })

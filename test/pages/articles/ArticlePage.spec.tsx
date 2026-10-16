@@ -1,9 +1,9 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes } from 'react-router'
+import { Link, MemoryRouter, Route, Routes } from 'react-router'
 import { ArticlePage } from 'src/pages/articles/ArticlePage'
 import { fetchArticleBody } from 'src/utils/ArticleUtils'
 import type { Article } from 'src/types/article'
@@ -26,6 +26,7 @@ vi.mock('src/utils/ArticleUtils', async importOriginal => ({
 
 const renderAt = (path: string) => render(
   <MemoryRouter initialEntries={[path]}>
+    <Link to="/articles/pages/help">Go to Help</Link>
     <Routes>
       <Route path="/articles/:category/:slug" element={<ArticlePage />} />
     </Routes>
@@ -75,6 +76,21 @@ describe('ArticlePage', () => {
     expect(screen.getByRole('progressbar', { name: 'Loading article' })).toBeInTheDocument()
     resolveHelp('Body of help')
     expect(await screen.findByText('Body of help')).toBeInTheDocument()
+  })
+
+  it('ignores a body that arrives after leaving the article', async () => {
+    let resolveGuide = (_body: string) => {}
+    vi.mocked(fetchArticleBody)
+      .mockReturnValueOnce(new Promise((resolve) => { resolveGuide = resolve }))
+      .mockResolvedValueOnce('Body of help')
+    renderAt('/articles/user-guides/dac-guide')
+
+    await userEvent.click(screen.getByRole('link', { name: 'Go to Help' }))
+    expect(await screen.findByText('Body of help')).toBeInTheDocument()
+    await act(async () => resolveGuide('Body of dac-guide'))
+
+    expect(screen.getByText('Body of help')).toBeInTheDocument()
+    expect(screen.queryByText('Body of dac-guide')).not.toBeInTheDocument()
   })
 
   it('says so when the body fails to load', async () => {
