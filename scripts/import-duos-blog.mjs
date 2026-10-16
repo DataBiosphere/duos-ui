@@ -65,7 +65,7 @@ export const decodeEntities = text => text
   .replaceAll(/&([a-z]+);/g, (match, name) => ENTITIES[name] ?? match)
 
 // Block boundaries become spaces; inline tags vanish so no space lands before punctuation.
-export const plainText = html => decodeEntities(html.replaceAll(/<br ?\/?>|<\/(?:p|h\d|li|div|td)>/g, ' ').replaceAll(/<[^>]+>/g, ''))
+export const plainText = html => decodeEntities(html.replaceAll(/<br ?\/?>|<\/(?:p|h\d|li|div|td)>/g, ' ').replaceAll(/<[^<>]*>/g, ''))
   .replaceAll('\u200B', '')
   .replaceAll(/\s+/g, ' ')
   .trim()
@@ -101,7 +101,8 @@ export const rewriteLinks = (markdown, targetsByPath, targetsById) =>
     const id = /[?&](?:amp;|#038;)?p=(\d+)/.exec(rest)?.[1]
     const path = rest.split(/[?#]/)[0]
     const fragment = /#[\w-]+$/.exec(rest)?.[0] ?? ''
-    const target = id ? targetsById.get(Number(id)) : targetsByPath.get(path.endsWith('/') ? path : `${path}/`)
+    const pathKey = path.endsWith('/') ? path : `${path}/`
+    const target = id ? targetsById.get(Number(id)) : targetsByPath.get(pathKey)
     return target ? target + fragment : match
   })
 
@@ -193,7 +194,8 @@ const fetchAll = async (type) => {
   return posts
 }
 
-const quote = value => `'${String(value).replaceAll('\\', String.raw`\\`).replaceAll('\'', String.raw`\'`)}'`
+const escapeQuoted = value => String(value).replaceAll('\\', String.raw`\\`).replaceAll('\'', String.raw`\'`)
+const quote = value => `'${escapeQuoted(value)}'`
 
 const formatValue = value => (Array.isArray(value) ? `[${value.map(quote).join(', ')}]` : quote(value))
 
