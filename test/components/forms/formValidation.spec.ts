@@ -144,6 +144,12 @@ describe('Form Validator tests', () => {
     it('validates an empty string as false', () => {
       expect(dayJSValidator.isValid('')).toBe(false)
     })
+    it('rejects an impossible date instead of rolling it over', () => {
+      expect(dayJSValidator.isValid('2025-02-30')).toBe(false)
+    })
+    it('rejects a date in another format', () => {
+      expect(dayJSValidator.isValid('08/06/2025')).toBe(false)
+    })
   })
 
   describe('uniqueValidator', () => {
@@ -224,6 +230,16 @@ describe('Form Validator tests', () => {
       expect(emailDomainValidator.msg).toBe(
         'Please enter an email that matches your organization domains',
       )
+    })
+
+    it('resolves whether the email matches an institution domain', async () => {
+      // A fresh module instance, so the institution it caches doesn't leak into other tests.
+      vi.resetModules()
+      const { emailDomainValidator: validator } = await import('src/components/forms/formValidation')
+      const { Institution } = await import('src/libs/ajax/Institution')
+      vi.mocked(Institution.getById).mockResolvedValue({ id: 1, name: 'Test', domains: ['example.org'] } as never)
+      await expect(validator.isValid('person@example.org')).resolves.toBe(true)
+      await expect(validator.isValid('person@sample.org')).resolves.toBe(false)
     })
   })
 

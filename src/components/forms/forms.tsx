@@ -24,7 +24,6 @@ import 'src/components/forms/forms.css'
 import {
   dateValidator,
   dayJSValidator,
-  emailDomainValidator,
   emailValidator,
   isValid,
   NotUrlValidator,
@@ -303,7 +302,6 @@ export const FormValidators: Record<string, Validator> = {
   NOTURL: NotUrlValidator,
   // isEmailAddress is typed (email: string) but validators receive unknown at runtime; cast at JS→TS boundary
   EMAIL: emailValidator as Validator,
-  EMAILDOMAIN: emailDomainValidator as Validator,
   DATE: dateValidator,
   DATEJS: dayJSValidator,
 }

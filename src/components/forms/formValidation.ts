@@ -2,6 +2,7 @@ import { isEmailAddress } from 'src/libs/utils'
 import { isString, isEmpty, isNil, isArray, isNumber } from 'src/utils/NodashUtil'
 import { Storage } from 'src/libs/storage'
 import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Institution } from 'src/libs/ajax/Institution'
 import { isValidHttpUrl } from 'src/utils/UrlUtils'
 import { InstitutionInterface } from 'src/types/model'
@@ -14,9 +15,18 @@ export interface Validation {
 
 export interface Validator {
   id: string
-  isValid: (value: unknown, ...extra: unknown[]) => boolean | Promise<boolean>
+  isValid: (value: unknown, ...extra: unknown[]) => boolean
   readonly msg: string
 }
+
+// validateFormValue runs synchronously, so an async check can't be a Validator; callers await it themselves.
+export interface AsyncValidator {
+  id: string
+  isValid: (value: unknown) => Promise<boolean>
+  readonly msg: string
+}
+
+dayjs.extend(customParseFormat)
 
 let cachedInstitution: InstitutionInterface | null = null
 
@@ -46,7 +56,7 @@ export const emailValidator: Validator = {
   msg: 'Please enter a valid email address (e.g., person@example.com)',
 }
 
-export const emailDomainValidator: Validator = {
+export const emailDomainValidator: AsyncValidator = {
   id: 'emailDomain',
   isValid: async (newUserEmail: unknown): Promise<boolean> => {
     const institutionId = Storage.getCurrentUser().institutionId
@@ -104,7 +114,7 @@ export const fileTypeValidator = (acceptedExtensions: string[] = ACCEPTED_DOCUME
   msg: `Invalid file type. Please upload an accepted document format (${acceptedExtensions.join(', ')}).`,
 })
 
-const allValidators: Validator[] = [
+const allValidators: Pick<Validator, 'id' | 'msg'>[] = [
   requiredValidator,
   urlValidator,
   NotUrlValidator,
