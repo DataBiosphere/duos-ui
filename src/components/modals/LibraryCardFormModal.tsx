@@ -10,6 +10,7 @@ import { MultiValue } from 'react-select'
 import { DuosUser, LibraryCard, UserRole } from 'src/types/model'
 import { Spinner } from 'src/components/Spinner'
 import { FormField, FormValidators } from 'src/components/forms/forms'
+import { emailDomainValidator } from 'src/components/forms/formValidation'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { User } from 'src/libs/ajax/User'
 import { CreateDuosUserRequest } from 'src/types/requestTypes'
@@ -124,7 +125,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
     else if (!FormValidators.EMAIL.isValid(u.email)) {
       v.email = makeError('email')
     }
-    else if (!(await FormValidators.EMAILDOMAIN.isValid(u.email))) {
+    else if (!(await emailDomainValidator.isValid(u.email))) {
       v.email = makeError('emailDomain')
     }
     return v
@@ -162,7 +163,7 @@ const FormFieldRow: React.FC<FormFieldRowProps> = (props) => {
                     hideTitle={true}
                     defaultValue={newUser?.email}
                     placeholder="User Email"
-                    validators={[FormValidators.REQUIRED, FormValidators.EMAIL, FormValidators.EMAILDOMAIN]}
+                    validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
                     onChange={handleNewUserChange}
                     validation={validation.email}
                     style={{ flex: 1, padding: '0.5rem' }}
