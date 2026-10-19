@@ -100,7 +100,8 @@ type DatasetShelf<K extends DatasetSectionKey>
   = | { items: DuosIdentifier[], ranking?: never }
     | { ranking: (typeof SECTION_RANKINGS)[K][number], scope?: Scope, limit?: number, pin?: DuosIdentifier[], exclude?: DuosIdentifier[], items?: never }
 
-/** Computed-only dataset sections. */
+/** Computed-only dataset sections: hand-curated rankings go stale (delivery plan section 3). Only
+ * `open-access-datasets` may be editorial. */
 type ComputedShelf<K extends DatasetSectionKey> = Extract<DatasetShelf<K>, { ranking: string }>
 
 /** Hero stats are computed live; a stat whose value is 0 is hidden. `studies` and `datasets` come
@@ -132,10 +133,10 @@ export interface SectionConfigs {
   'masthead': Section<{ logos: (Image & { url?: SafeUrl })[] }>
   'hero': Section<{ intro: string, stats: HeroStat[], scope?: Scope, announcements: Announcement[], onboarding: Link[], primaryCtas: Link[] }>
   'latest-data-releases': Section<ComputedShelf<'latest-data-releases'>>
-  'most-requested-datasets': Section<DatasetShelf<'most-requested-datasets'>>
-  'largest-cohorts': Section<DatasetShelf<'largest-cohorts'>>
+  'most-requested-datasets': Section<ComputedShelf<'most-requested-datasets'>>
+  'largest-cohorts': Section<ComputedShelf<'largest-cohorts'>>
   'open-access-datasets': Section<DatasetShelf<'open-access-datasets'>>
-  'instant-approval': Section<DatasetShelf<'instant-approval'>>
+  'instant-approval': Section<ComputedShelf<'instant-approval'>>
   /** `full-catalog` is flagship-only (current DT-3904 Story 13). */
   'datasets-at-a-glance': Section<{ charts: ('disease-area' | 'data-type' | 'access-type')[], scope: 'curated' | 'full-catalog' }>
   'datasets-moving-to-archive': Section<ComputedShelf<'datasets-moving-to-archive'>>
