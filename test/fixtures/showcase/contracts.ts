@@ -83,8 +83,9 @@ type DatasetShelf
   = | { items: DuosIdentifier[], ranking?: never }
     | { ranking: Ranking, scope?: Scope, limit?: number, pin?: DuosIdentifier[], exclude?: DuosIdentifier[], items?: never }
 
-/** Hero stats are computed live. `studies` and `datasets` come from the lookup `stats` mode; `tools`
- * counts the enabled `featured-tools` and `featured-workspaces` items in the showcase config. */
+/** Hero stats are computed live. `studies` and `datasets` come from the lookup `stats` mode with the
+ * hero's `scope` (none: the whole public catalog); `tools` counts the enabled `featured-tools` and
+ * `featured-workspaces` items in the showcase config. */
 type HeroStat = 'studies' | 'datasets' | 'tools'
 
 interface Announcement { id: string, text: string, url: SafeUrl, startDate: DateString, endDate: DateString }
@@ -109,11 +110,11 @@ interface ProgramPanel { description: string, ctas: Link[] }
 
 export interface SectionConfigs {
   'masthead': Section<{ logos: (Image & { url?: SafeUrl })[] }>
-  'hero': Section<{ intro: string, stats: HeroStat[], announcements: Announcement[], onboarding: Link[], primaryCtas: Link[] }>
+  'hero': Section<{ intro: string, stats: HeroStat[], scope?: Scope, announcements: Announcement[], onboarding: Link[], primaryCtas: Link[] }>
   'latest-data-releases': Section<{ ranking: 'newest', scope?: Scope, limit?: number, pin?: DuosIdentifier[], exclude?: DuosIdentifier[] }>
   'most-requested-datasets': Section<DatasetShelf>
   'largest-cohorts': Section<DatasetShelf>
-  'open-access-datasets': Section<{ items: DuosIdentifier[] } | { ranking: 'newest', scope?: Scope, limit?: number, pin?: DuosIdentifier[], exclude?: DuosIdentifier[] }>
+  'open-access-datasets': Section<{ items: DuosIdentifier[], ranking?: never } | { ranking: 'newest', scope?: Scope, limit?: number, pin?: DuosIdentifier[], exclude?: DuosIdentifier[], items?: never }>
   'instant-approval': Section<DatasetShelf>
   'datasets-at-a-glance': Section<{ charts: ('disease-area' | 'data-type' | 'access-type')[], scope: 'curated' | 'full-catalog' }>
   'datasets-moving-to-archive': Section<DatasetShelf>
@@ -168,22 +169,24 @@ const RESERVED_DISABLED = {
 
 const PLACEHOLDER = 'Placeholder copy; the product owner supplies the text.'
 
+const HERO: Extract<SectionConfigs['hero'], { enabled: true }> = {
+  enabled: true,
+  intro: PLACEHOLDER,
+  stats: ['studies', 'datasets', 'tools'],
+  announcements: [
+    { id: 'announcement-1', text: PLACEHOLDER, url: '/datalibrary', startDate: '2026-11-01', endDate: '2026-12-01' },
+  ],
+  onboarding: [{ label: 'Get started', url: 'https://example.org/get-started' }],
+  primaryCtas: [{ label: 'Search the Data Library', url: '/datalibrary' }],
+}
+
 /** Flagship (`/data`): the whole catalog in scope; computed open-access shelf. */
 export const flagshipConfig: ShowcaseConfig = {
   schemaVersion: 1,
   branding: { theme: 'default' },
   sections: {
     'masthead': { enabled: true, logos: [{ src: 'showcase/flagship/logo.svg', alt: 'DUOS' }] },
-    'hero': {
-      enabled: true,
-      intro: PLACEHOLDER,
-      stats: ['studies', 'datasets', 'tools'],
-      announcements: [
-        { id: 'announcement-1', text: PLACEHOLDER, url: '/datalibrary', startDate: '2026-11-01', endDate: '2026-12-01' },
-      ],
-      onboarding: [{ label: 'Get started', url: 'https://example.org/get-started' }],
-      primaryCtas: [{ label: 'Search the Data Library', url: '/datalibrary' }],
-    },
+    'hero': HERO,
     'latest-data-releases': { enabled: true, ranking: 'newest', limit: 12 },
     'most-requested-datasets': RESERVED_DISABLED['most-requested-datasets'],
     'largest-cohorts': RESERVED_DISABLED['largest-cohorts'],
@@ -219,13 +222,14 @@ export const flagshipConfig: ShowcaseConfig = {
   },
 }
 
-/** Partner (`/showcase/example-partner`): DAC scope, editorial open-access shelf, two sections off. */
+/** Partner (`/showcase/example-partner`): DAC-scoped hero and releases, editorial open-access shelf, two sections off. */
 export const partnerConfig: ShowcaseConfig = {
   ...flagshipConfig,
   branding: { theme: 'blue' },
   sections: {
     ...flagshipConfig.sections,
     'masthead': { enabled: true, logos: [{ src: 'showcase/example-partner/logo.svg', alt: 'Example Partner', url: 'https://example.org' }] },
+    'hero': { ...HERO, scope: { dac: ['Example DAC'] } },
     'latest-data-releases': { enabled: true, ranking: 'newest', scope: { dac: ['Example DAC'] }, limit: 12, pin: ['DUOS-000789'], exclude: ['DUOS-000111'] },
     'open-access-datasets': { enabled: true, items: ['DUOS-000123', 'DUOS-000456'] },
     'featured-tools': { enabled: false },
@@ -294,7 +298,7 @@ export const lookupExamples: { name: string, request: LookupRequest, status: num
     },
   },
   {
-    name: 'stats: counts of eligible datasets and their studies in the scope; no scope means the whole catalog',
+    name: 'stats: the partner hero, using its scope; the flagship hero sends no scope (whole catalog)',
     request: { mode: 'stats', scope: { dac: ['Example DAC'] } },
     status: 200,
     response: { studyCount: 14, datasetCount: 37 },
