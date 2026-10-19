@@ -72,7 +72,8 @@ export const NEW_BADGE_DAYS = 30
 /** `YYYY-MM-DD` calendar date in UTC. Date ranges include both `startDate` and `endDate`. */
 type DateString = `${number}-${number}-${number}`
 /** `https://` URL, a same-origin path beginning with exactly one `/`, or `#<section key>` for a
- * same-page section. A `#` link is hidden when its target section isn't visible. */
+ * same-page section. A `#` link is hidden when its target section isn't visible. The type admits
+ * `//host` and `/\host`; the S1.2 CI guard and the renderer reject them. */
 type SafeUrl = `https://${string}` | `/${string}` | `#${SectionKey}`
 /** Production identifier matching `DUOS_IDENTIFIER_PATTERN`. */
 type DuosIdentifier = `DUOS-${number}`
@@ -332,6 +333,12 @@ export const lookupExamples: LookupExample[] = [
     request: { mode: 'stats', scope: { dac: ['Example DAC'] } },
     status: 200,
     response: { studyCount: 14, datasetCount: 37 },
+  },
+  {
+    name: 'rejected: non-canonical identifier (consent would return it as DUOS-000123)',
+    request: { mode: 'identifiers', section: 'open-access-datasets', identifiers: ['DUOS-123'] },
+    status: 400,
+    response: { message: 'Identifier "DUOS-123" is not canonical; use "DUOS-000123"' },
   },
   {
     name: 'rejected: field not allowed in this mode',

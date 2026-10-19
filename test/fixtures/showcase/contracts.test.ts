@@ -18,8 +18,9 @@ describe('Data Showcase contract fixtures', () => {
     expect(enabled.every(key => MVP_SECTION_KEYS.includes(key))).toBe(true)
   })
 
-  it('uses only canonical identifiers', () => {
-    const identifiers = JSON.stringify([configs, lookupExamples]).match(/DUOS-[^"]*/g) ?? []
+  it('uses only canonical identifiers outside rejection examples', () => {
+    const accepted = lookupExamples.filter(example => example.status === 200)
+    const identifiers = JSON.stringify([configs, accepted]).match(/DUOS-[^"]*/g) ?? []
     expect(identifiers.length).toBeGreaterThan(0)
     identifiers.forEach(id => expect(id).toMatch(DUOS_IDENTIFIER_PATTERN))
   })
