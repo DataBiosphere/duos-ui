@@ -1,10 +1,8 @@
 import { isEmailAddress } from 'src/libs/utils'
 import { isString, isEmpty, isNil, isArray, isNumber } from 'src/utils/NodashUtil'
-import { Storage } from 'src/libs/storage'
 import dayjs from 'dayjs'
-import { Institution } from 'src/libs/ajax/Institution'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { isValidHttpUrl } from 'src/utils/UrlUtils'
-import { InstitutionInterface } from 'src/types/model'
 
 export interface Validation {
   valid?: boolean
@@ -14,11 +12,11 @@ export interface Validation {
 
 export interface Validator {
   id: string
-  isValid: (value: unknown, ...extra: unknown[]) => boolean | Promise<boolean>
+  isValid: (value: unknown, ...extra: unknown[]) => boolean
   readonly msg: string
 }
 
-let cachedInstitution: InstitutionInterface | null = null
+dayjs.extend(customParseFormat)
 
 export const requiredValidator: Validator = {
   id: 'required',
@@ -46,34 +44,10 @@ export const emailValidator: Validator = {
   msg: 'Please enter a valid email address (e.g., person@example.com)',
 }
 
-export const emailDomainValidator: Validator = {
-  id: 'emailDomain',
-  isValid: async (newUserEmail: unknown): Promise<boolean> => {
-    const institutionId = Storage.getCurrentUser().institutionId
-    if (!cachedInstitution && institutionId != null) {
-      cachedInstitution = await Institution.getById(institutionId)
-    }
-    const institutionDomains = cachedInstitution?.domains ?? []
-    const newUserDomain = (newUserEmail as string).split('@')[1]
-    return institutionDomains.includes(newUserDomain)
-  },
-  get msg(): string {
-    const domains = cachedInstitution?.domains?.join(', ') ?? ''
-    const baseMessage = 'Please enter an email that matches your organization domains'
-    return domains ? `${baseMessage}: ${domains}` : baseMessage
-  },
-}
-
 export const dateValidator: Validator = {
   id: 'date',
   isValid: (val: unknown): boolean => isValidDate(val as string),
   msg: 'Please enter a date (YYYY-MM-DD), e.g. 2018-11-13',
-}
-
-export const dayJSValidator: Validator = {
-  id: 'dayjs',
-  isValid: (val: unknown): boolean => isValidDayjsDate(val as string),
-  msg: 'Please select a valid date.',
 }
 
 export const uniqueValidator: Validator = {
@@ -109,9 +83,7 @@ const allValidators: Validator[] = [
   urlValidator,
   NotUrlValidator,
   emailValidator,
-  emailDomainValidator,
   dateValidator,
-  dayJSValidator,
   uniqueValidator,
   greaterThanZeroValidator,
   fileTypeValidator(),
@@ -176,8 +148,4 @@ const validURLObject = (val: unknown): boolean => {
   return true
 }
 
-const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/
-
-const isValidDate = (val: string): boolean => dateRegex.test(val)
-
-const isValidDayjsDate = (val: string): boolean => dayjs(val, 'YYYY-MM-DD', true).isValid()
+export const isValidDate = (val: string): boolean => dayjs(val, 'YYYY-MM-DD', true).isValid()

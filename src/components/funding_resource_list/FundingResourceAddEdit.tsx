@@ -3,7 +3,7 @@ import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/
 import { FundingResource } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { unset } from 'src/utils/NodashUtil'
-import { isValidDate } from 'src/pages/data_submission/v2/v2-common-functions'
+import { isValidDate } from 'src/components/forms/formValidation'
 
 interface FundingSourceAddEditProps {
   readonly id: number

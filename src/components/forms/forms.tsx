@@ -23,31 +23,19 @@ import {
 import 'src/components/forms/forms.css'
 import {
   dateValidator,
-  dayJSValidator,
-  emailDomainValidator,
   emailValidator,
   isValid,
   NotUrlValidator,
   requiredValidator,
   urlValidator,
+  Validation,
+  Validator,
 } from 'src/components/forms/formValidation'
 
 // Dynamic component dispatch — resolved at runtime from FormFieldTypeConfig,
 // so prop types can't be known statically. React.ComponentType<any> is the standard escape hatch here.
 // oxlint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyComponent = React.ComponentType<any>
-
-export interface Validation {
-  valid?: boolean
-  failed?: string[]
-  messages?: string[]
-}
-
-export interface Validator {
-  id: string
-  isValid: (value: unknown, ...extra: unknown[]) => boolean | Promise<boolean>
-  readonly msg: string
-}
 
 export interface FormFieldChangeEvent {
   key: string
@@ -297,16 +285,13 @@ export const FormFieldTypes: Record<string, FormFieldTypeConfig> = {
 // ======                                     FORM VALIDATORS                                     ====== //
 // ----------------------------------------------------------------------------------------------------- //
 // oxlint-disable-next-line react-refresh/only-export-components
-export const FormValidators: Record<string, Validator> = {
+export const FormValidators = {
   REQUIRED: requiredValidator,
   URL: urlValidator,
   NOTURL: NotUrlValidator,
-  // isEmailAddress is typed (email: string) but validators receive unknown at runtime; cast at JS→TS boundary
-  EMAIL: emailValidator as Validator,
-  EMAILDOMAIN: emailDomainValidator as Validator,
+  EMAIL: emailValidator,
   DATE: dateValidator,
-  DATEJS: dayJSValidator,
-}
+} as const satisfies Record<string, Validator>
 
 // ----------------------------------------------------------------------------------------------------- //
 // ======                                     MAIN COMPONENTS                                     ====== //

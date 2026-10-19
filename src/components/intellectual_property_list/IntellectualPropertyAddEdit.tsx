@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { IntellectualProperty } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
-import { isValidDate } from 'src/pages/data_submission/v2/v2-common-functions'
+import { isValidDate } from 'src/components/forms/formValidation'
 
 interface IntellectualPropertyAddEditProps {
   readonly id: number

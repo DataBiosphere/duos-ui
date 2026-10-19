@@ -50,7 +50,7 @@ describe('FormField - Tests', () => {
         id: 'releaseDate',
         title: 'Release Date',
         defaultValue: dayjs(),
-        validators: [FormValidators.REQUIRED, FormValidators.DATEJS],
+        validators: [FormValidators.REQUIRED, FormValidators.DATE],
       }
       render(<FormField {...props} />)
       expect(document.getElementById('lbl_releaseDate')).toHaveTextContent('Release Date*')
@@ -63,7 +63,7 @@ describe('FormField - Tests', () => {
         id: 'optionalDate',
         title: 'Optional Date',
         defaultValue: dayjs('2024-11-15'),
-        validators: [FormValidators.DATEJS],
+        validators: [FormValidators.DATE],
       }
       render(<FormField {...props} />)
       expect(document.getElementById('lbl_optionalDate')).toHaveTextContent('Optional Date')
@@ -77,10 +77,10 @@ describe('FormField - Tests', () => {
         id: 'optionalDate',
         title: 'Optional Date',
         defaultValue: dayjs('Hello World!'),
-        validators: [FormValidators.DATEJS],
+        validators: [FormValidators.DATE],
       }
       render(<FormField {...props} />)
-      expect(document.querySelector('.formField-optionalDate .error-message')).toHaveTextContent(FormValidators.DATEJS.msg)
+      expect(document.querySelector('.formField-optionalDate .error-message')).toHaveTextContent(FormValidators.DATE.msg)
     })
 
     it('initialized with a specific date shows label without required indicator', () => {
@@ -90,7 +90,7 @@ describe('FormField - Tests', () => {
         title: 'Fixed Date',
         type: FormFieldTypes.CALENDAR,
         defaultValue: '1970-01-01',
-        validators: [FormValidators.DATEJS],
+        validators: [FormValidators.DATE],
       }
       render(<FormField {...props} />)
       expect(document.getElementById('lbl_fixedDate')).toHaveTextContent('Fixed Date')
