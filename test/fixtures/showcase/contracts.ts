@@ -70,12 +70,12 @@ export const DUOS_IDENTIFIER_PATTERN = /^DUOS-(\d{6}|[1-9]\d{6,})$/
 export const NEW_BADGE_DAYS = 30
 
 /** `YYYY-MM-DD` calendar date in UTC. Date ranges include both `startDate` and `endDate`. */
-type DateString = string
+type DateString = `${number}-${number}-${number}`
 /** `https://` URL, a same-origin path beginning with exactly one `/`, or `#<section key>` for a
  * same-page section. A `#` link is hidden when its target section isn't visible. */
-type SafeUrl = string
+type SafeUrl = `https://${string}` | `/${string}` | `#${SectionKey}`
 /** Production identifier matching `DUOS_IDENTIFIER_PATTERN`. */
-type DuosIdentifier = string
+type DuosIdentifier = `DUOS-${number}`
 
 interface Link { label: string, url: SafeUrl }
 interface Image { src: string, alt: string }
