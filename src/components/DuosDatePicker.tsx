@@ -13,7 +13,10 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { Button } from '@mui/material'
 import DialogActions from '@mui/material/DialogActions'
 import dayjs, { Dayjs } from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import '@mui/x-date-pickers/themeAugmentation'
+
+dayjs.extend(customParseFormat)
 
 interface DUOSDatePickerProps {
   id?: string

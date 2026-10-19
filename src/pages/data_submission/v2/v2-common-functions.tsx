@@ -46,7 +46,8 @@ import {
   DatasetData,
   ThroughBioId,
 } from 'src/pages/data_submission/v2/v2-models'
-import { FormField, FormFieldTypes, Validator } from 'src/components/forms/forms'
+import { FormField, FormFieldTypes } from 'src/components/forms/forms'
+import { Validator } from 'src/components/forms/formValidation'
 import { set, isEmpty } from 'src/utils/NodashUtil'
 import { Storage } from 'src/libs/storage'
 import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInstitutesAndCenters'
@@ -54,9 +55,6 @@ import { AccessManagementType, ConsentGroup2, FileType } from 'src/pages/data_su
 import { Dataset } from 'src/types/model'
 import { DatasetDataMetadata, StudyDataMetadata } from 'src/libs/data-metadata'
 import dayjs from 'dayjs'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
-
-dayjs.extend(customParseFormat)
 
 export type MasterChangeHandler = ({ key, value, isValid, remove }: { key: string, value: unknown, isValid: boolean, remove?: boolean }) => void
 
@@ -421,7 +419,3 @@ export const extractThroughBioId = (input: string): string => {
   }
 }
 
-export const isValidDate = (dateString: string): boolean => {
-  const format = 'YYYY-MM-DD'
-  return dayjs(dateString, format, true).isValid()
-}

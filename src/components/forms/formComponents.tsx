@@ -10,19 +10,7 @@ import { DuosDatePicker } from 'src/components/DuosDatePicker'
 import { RadioButton } from 'src/components/RadioButton'
 import { FormField } from 'src/components/forms/forms'
 import { getKey } from 'src/components/forms/formUtils'
-import { isValid, validateFormValue, validationMessage } from 'src/components/forms/formValidation'
-
-export interface Validation {
-  valid?: boolean
-  failed?: string[]
-  messages?: string[]
-}
-
-export interface Validator {
-  id: string
-  isValid: (value: unknown, ...extra: unknown[]) => boolean | Promise<boolean>
-  readonly msg: string
-}
+import { isValid, validateFormValue, validationMessage, Validation, Validator } from 'src/components/forms/formValidation'
 
 export interface SelectOption {
   key: string
@@ -137,10 +125,6 @@ export interface FormDatePickerConfig extends BaseFormComponentConfig {
   readOnly?: boolean
 }
 
-// validateFormValue is a JS function typed via JSDoc as (formValue: object, ...).
-// This wrapper widens the parameter to unknown so callers can pass any value safely.
-const runValidation = validateFormValue as (value: unknown, validators: Validator[] | undefined) => Validation
-
 const styles = {
   inputStyle: {
     padding: '25px 15px',
@@ -150,7 +134,7 @@ const styles = {
 
 const updateValidation = (config: BaseFormComponentConfig, value: unknown): boolean => {
   const { setValidation, validators } = config
-  const validation = runValidation(value, validators)
+  const validation = validateFormValue(value, validators)
   setValidation(validation)
   return isValid(validation)
 }
@@ -158,7 +142,7 @@ const updateValidation = (config: BaseFormComponentConfig, value: unknown): bool
 const onFormInputChange = (config: BaseFormComponentConfig, value: unknown): void => {
   const { type, onChange, formValue, setFormValue, validators, setValidation } = config
   const key = getKey(config)
-  const validation = runValidation(value, validators)
+  const validation = validateFormValue(value, validators)
   setValidation(validation)
 
   let processedValue = value
@@ -265,7 +249,7 @@ export const FormInputMultiText = (config: FormInputMultiTextConfig): React.Reac
     const value = element.value.trim()
     if (!value) return
 
-    const inputVal = runValidation(value, validators)
+    const inputVal = validateFormValue(value, validators)
     setInputValidation(inputVal)
     if (!isValid(inputVal)) return
 

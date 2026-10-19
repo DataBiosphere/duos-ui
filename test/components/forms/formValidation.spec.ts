@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import {
   greaterThanZeroValidator,
   NotUrlValidator,
@@ -6,32 +6,14 @@ import {
   urlValidator,
   emailValidator,
   dateValidator,
-  dayJSValidator,
   uniqueValidator,
-  emailDomainValidator,
   fileTypeValidator,
   validateFormValue,
   validationMessage,
   isValid,
 } from 'src/components/forms/formValidation'
 
-vi.mock('src/libs/storage', () => ({
-  Storage: {
-    getCurrentUser: vi.fn(() => ({ institutionId: 1 })),
-  },
-}))
-
-vi.mock('src/libs/ajax/Institution', () => ({
-  Institution: {
-    getById: vi.fn(),
-  },
-}))
-
 describe('Form Validator tests', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   describe('requiredValidator', () => {
     it('validates a non-whitespace string as true', () => {
       expect(requiredValidator.isValid('hello! I am a test')).toBe(true)
@@ -132,23 +114,16 @@ describe('Form Validator tests', () => {
     it('validates a date with an out-of-range day as false', () => {
       expect(dateValidator.isValid('2023-01-32')).toBe(false)
     })
-  })
-
-  describe('dayJSValidator', () => {
-    it('validates a valid YYYY-MM-DD date as true', () => {
-      expect(dayJSValidator.isValid('2023-06-15')).toBe(true)
+    it('validates a day past the end of its month as false', () => {
+      expect(dateValidator.isValid('2025-02-30')).toBe(false)
+      expect(dateValidator.isValid('2025-04-31')).toBe(false)
     })
-    it('validates an invalid date string as false', () => {
-      expect(dayJSValidator.isValid('not-a-date')).toBe(false)
+    it('validates a leap day as true only in a leap year', () => {
+      expect(dateValidator.isValid('2024-02-29')).toBe(true)
+      expect(dateValidator.isValid('2023-02-29')).toBe(false)
     })
     it('validates an empty string as false', () => {
-      expect(dayJSValidator.isValid('')).toBe(false)
-    })
-    it('rejects an impossible date instead of rolling it over', () => {
-      expect(dayJSValidator.isValid('2025-02-30')).toBe(false)
-    })
-    it('rejects a date in another format', () => {
-      expect(dayJSValidator.isValid('08/06/2025')).toBe(false)
+      expect(dateValidator.isValid('')).toBe(false)
     })
   })
 
@@ -222,24 +197,6 @@ describe('Form Validator tests', () => {
       expect(validator.msg).toBe(
         'Invalid file type. Please upload an accepted document format (.png, .jpg).',
       )
-    })
-  })
-
-  describe('emailDomainValidator', () => {
-    it('has a default msg when no institution is cached', () => {
-      expect(emailDomainValidator.msg).toBe(
-        'Please enter an email that matches your organization domains',
-      )
-    })
-
-    it('resolves whether the email matches an institution domain', async () => {
-      // A fresh module instance, so the institution it caches doesn't leak into other tests.
-      vi.resetModules()
-      const { emailDomainValidator: validator } = await import('src/components/forms/formValidation')
-      const { Institution } = await import('src/libs/ajax/Institution')
-      vi.mocked(Institution.getById).mockResolvedValue({ id: 1, name: 'Test', domains: ['example.org'] } as never)
-      await expect(validator.isValid('person@example.org')).resolves.toBe(true)
-      await expect(validator.isValid('person@sample.org')).resolves.toBe(false)
     })
   })
 

@@ -12,8 +12,8 @@ import {
   FormInputCheckbox,
   FormInputSlider,
   FormInputFile,
-  type Validation,
 } from 'src/components/forms/formComponents'
+import type { Validation } from 'src/components/forms/formValidation'
 
 vi.mock('src/components/forms/formValidation', () => ({
   isValid: (v: Validation | undefined) => v?.valid !== false,
