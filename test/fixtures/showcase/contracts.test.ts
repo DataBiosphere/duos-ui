@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { flagshipConfig, MVP_SECTION_KEYS, partnerConfig, SECTION_KEYS } from './contracts'
+import { DUOS_IDENTIFIER_PATTERN, flagshipConfig, lookupExamples, MVP_SECTION_KEYS, partnerConfig, SECTION_KEYS } from './contracts'
+
+const configs = [['flagship', flagshipConfig], ['partner', partnerConfig]] as const
 
 describe('Data Showcase contract fixtures', () => {
   it('lists 23 unique registry keys', () => {
@@ -7,12 +9,18 @@ describe('Data Showcase contract fixtures', () => {
     expect(new Set(SECTION_KEYS).size).toBe(23)
   })
 
-  it.each([['flagship', flagshipConfig], ['partner', partnerConfig]])('%s config has every key in fixed order', (_, config) => {
+  it.each(configs)('%s config has every key in fixed order', (_, config) => {
     expect(Object.keys(config.sections)).toEqual([...SECTION_KEYS])
   })
 
-  it.each([['flagship', flagshipConfig], ['partner', partnerConfig]])('%s config enables only MVP sections', (_, config) => {
+  it.each(configs)('%s config enables only MVP sections', (_, config) => {
     const enabled = SECTION_KEYS.filter(key => config.sections[key].enabled)
     expect(enabled.every(key => MVP_SECTION_KEYS.includes(key))).toBe(true)
+  })
+
+  it('uses only canonical identifiers', () => {
+    const identifiers = JSON.stringify([configs, lookupExamples]).match(/DUOS-[^"]*/g) ?? []
+    expect(identifiers.length).toBeGreaterThan(0)
+    identifiers.forEach(id => expect(id).toMatch(DUOS_IDENTIFIER_PATTERN))
   })
 })

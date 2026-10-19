@@ -4,9 +4,6 @@
  * The types are provisional: S1.2 (DT-4273) replaces them with `src/types/showcase.ts`, and S2.1
  * (DT-4274) finalizes the lookup field names and `scope` vocabulary. The decisions behind them are
  * recorded in consent `docs/plans/data-showcase-contracts.md`.
- *
- * Two copies exist: consent `docs/plans/data-showcase-fixtures.ts` (reference) and duos-ui
- * `test/fixtures/showcase/contracts.ts` (type-checked and tested). Keep them identical.
  */
 
 /** All 23 registry keys, in fixed render order. */
@@ -48,14 +45,36 @@ export const MVP_SECTION_KEYS: readonly SectionKey[] = [
   'featured-workspaces',
 ]
 
-/** A dataset whose `availableDate` is at most this many days old shows the "New in DUOS" badge. */
-export const NEW_IN_DUOS_BADGE_DAYS = 30
+/** Sections whose items the hero `tools` stat counts. Workspaces are not tools. */
+export const TOOL_SECTION_KEYS = ['featured-tools', 'new-workflow-tools', 'notebooks', 'ai-models'] as const
 
-/** `YYYY-MM-DD`. */
+/** Rankings each computed dataset section accepts. */
+export const SECTION_RANKINGS = {
+  'latest-data-releases': ['newest'],
+  'most-requested-datasets': ['most-requested'],
+  'largest-cohorts': ['largest-cohort'],
+  'open-access-datasets': ['newest'],
+  'instant-approval': ['instant-eligible'],
+  'datasets-moving-to-archive': ['archive-soonest'],
+} as const
+
+export type DatasetSectionKey = keyof typeof SECTION_RANKINGS
+export type Ranking = (typeof SECTION_RANKINGS)[DatasetSectionKey][number]
+
+/** Canonical identifier: `DUOS-` plus the alias zero-padded to six digits, never more padding.
+ * Configs use it, and consent echoes it unchanged. */
+export const DUOS_IDENTIFIER_PATTERN = /^DUOS-(\d{6}|[1-9]\d{6,})$/
+
+/** A dataset whose `availableDate` is at most this many days before today (UTC) shows "New in DUOS".
+ * Workflow items use the same window with their `addedDate`. */
+export const NEW_BADGE_DAYS = 30
+
+/** `YYYY-MM-DD` calendar date in UTC. Date ranges include both `startDate` and `endDate`. */
 type DateString = string
-/** `https://` URL or a same-origin path beginning with exactly one `/`. */
+/** `https://` URL, a same-origin path beginning with exactly one `/`, or `#<section key>` for a
+ * same-page section. A `#` link is hidden when its target section isn't visible. */
 type SafeUrl = string
-/** Production `DUOS-` identifier. */
+/** Production identifier matching `DUOS_IDENTIFIER_PATTERN`. */
 type DuosIdentifier = string
 
 interface Link { label: string, url: SafeUrl }
@@ -70,22 +89,23 @@ interface SectionCommon {
   seeAllUrl?: SafeUrl
 }
 
-/** A disabled section needs only `enabled: false`. */
-type Section<T> = { enabled: false } | ({ enabled: true } & SectionCommon & T)
-
-export type Ranking = 'newest' | 'most-requested' | 'largest-cohort' | 'instant-eligible' | 'archive-soonest'
+/** A disabled section may keep its content. */
+type Section<T> = ({ enabled: false } & Partial<SectionCommon & T>) | ({ enabled: true } & SectionCommon & T)
 
 /** Provisional until S2.1 agrees the scope vocabulary. */
 export interface Scope { dac?: string[] }
 
 /** Dataset sections are editorial (`items`) or computed (`ranking`), never both. */
-type DatasetShelf
+type DatasetShelf<K extends DatasetSectionKey>
   = | { items: DuosIdentifier[], ranking?: never }
-    | { ranking: Ranking, scope?: Scope, limit?: number, pin?: DuosIdentifier[], exclude?: DuosIdentifier[], items?: never }
+    | { ranking: (typeof SECTION_RANKINGS)[K][number], scope?: Scope, limit?: number, pin?: DuosIdentifier[], exclude?: DuosIdentifier[], items?: never }
 
-/** Hero stats are computed live. `studies` and `datasets` come from the lookup `stats` mode with the
- * hero's `scope` (none: the whole public catalog); `tools` counts the enabled `featured-tools` and
- * `featured-workspaces` items in the showcase config. */
+/** Computed-only dataset sections. */
+type ComputedShelf<K extends DatasetSectionKey> = Extract<DatasetShelf<K>, { ranking: string }>
+
+/** Hero stats are computed live; a stat whose value is 0 is hidden. `studies` and `datasets` come
+ * from the lookup `stats` mode with the hero's `scope` (none: the whole public catalog). `tools`
+ * counts the items in the enabled `TOOL_SECTION_KEYS` sections. */
 type HeroStat = 'studies' | 'datasets' | 'tools'
 
 interface Announcement { id: string, text: string, url: SafeUrl, startDate: DateString, endDate: DateString }
@@ -111,25 +131,34 @@ interface ProgramPanel { description: string, ctas: Link[] }
 export interface SectionConfigs {
   'masthead': Section<{ logos: (Image & { url?: SafeUrl })[] }>
   'hero': Section<{ intro: string, stats: HeroStat[], scope?: Scope, announcements: Announcement[], onboarding: Link[], primaryCtas: Link[] }>
-  'latest-data-releases': Section<{ ranking: 'newest', scope?: Scope, limit?: number, pin?: DuosIdentifier[], exclude?: DuosIdentifier[] }>
-  'most-requested-datasets': Section<DatasetShelf>
-  'largest-cohorts': Section<DatasetShelf>
-  'open-access-datasets': Section<{ items: DuosIdentifier[], ranking?: never } | { ranking: 'newest', scope?: Scope, limit?: number, pin?: DuosIdentifier[], exclude?: DuosIdentifier[], items?: never }>
-  'instant-approval': Section<DatasetShelf>
+  'latest-data-releases': Section<ComputedShelf<'latest-data-releases'>>
+  'most-requested-datasets': Section<DatasetShelf<'most-requested-datasets'>>
+  'largest-cohorts': Section<DatasetShelf<'largest-cohorts'>>
+  'open-access-datasets': Section<DatasetShelf<'open-access-datasets'>>
+  'instant-approval': Section<DatasetShelf<'instant-approval'>>
+  /** `full-catalog` is flagship-only (current DT-3904 Story 13). */
   'datasets-at-a-glance': Section<{ charts: ('disease-area' | 'data-type' | 'access-type')[], scope: 'curated' | 'full-catalog' }>
-  'datasets-moving-to-archive': Section<DatasetShelf>
+  'datasets-moving-to-archive': Section<ComputedShelf<'datasets-moving-to-archive'>>
   'featured-tools': Section<{ items: (ResourceItem & { featured?: boolean })[] }>
-  'new-workflow-tools': Section<{ items: ResourceItem[] }>
+  /** `addedDate` drives the "New" badge (original Story 15). */
+  'new-workflow-tools': Section<{ items: (ResourceItem & { addedDate?: DateString })[] }>
   'notebooks': Section<{ items: ResourceItem[] }>
   'ai-models': Section<{ items: ResourceItem[] }>
   'featured-workspaces': Section<{ items: ResourceItem[] }>
   'latest-published-science': Section<{ items: PublicationItem[], selfReportPrompt: boolean }>
   'research-area': Section<{ items: GroupingItem[] }>
   'research-initiative': Section<{ items: GroupingItem[] }>
-  'program-impact': Section<{ embedUrl?: SafeUrl, attribution: string, statBanner: { label: string, value: string }[] }>
+  /** Original Story 21: an embed, or a periodically refreshed snapshot of through.bio data, shown as
+   * not live, with attribution. */
+  'program-impact': Section<
+    | { mode: 'embed', embedUrl: SafeUrl, attribution: string }
+    | { mode: 'snapshot', snapshotDate: DateString, sourceUrl: SafeUrl, attribution: string, statBanner: { label: string, value: string }[] }
+  >
   'community-conference': Section<{
     startDate: DateString
     endDate: DateString
+    /** IANA time zone, e.g. `America/New_York`. */
+    timezone: string
     location: string
     description: string
     registration: { state: 'open', url: SafeUrl } | { state: 'alert-signup' }
@@ -146,26 +175,7 @@ export interface ShowcaseConfig {
   sections: { [K in SectionKey]: SectionConfigs[K] }
 }
 
-/** The 17 reserved, non-MVP types: present in every config, disabled. */
-const RESERVED_DISABLED = {
-  'most-requested-datasets': { enabled: false },
-  'largest-cohorts': { enabled: false },
-  'instant-approval': { enabled: false },
-  'datasets-at-a-glance': { enabled: false },
-  'datasets-moving-to-archive': { enabled: false },
-  'new-workflow-tools': { enabled: false },
-  'notebooks': { enabled: false },
-  'ai-models': { enabled: false },
-  'latest-published-science': { enabled: false },
-  'research-area': { enabled: false },
-  'research-initiative': { enabled: false },
-  'program-impact': { enabled: false },
-  'community-conference': { enabled: false },
-  'where-else': { enabled: false },
-  'training-workshops': { enabled: false },
-  'scholars-program': { enabled: false },
-  'tech-policy-interns': { enabled: false },
-} as const
+const OFF = { enabled: false } as const
 
 const PLACEHOLDER = 'Placeholder copy; the product owner supplies the text.'
 
@@ -174,9 +184,13 @@ const HERO: Extract<SectionConfigs['hero'], { enabled: true }> = {
   intro: PLACEHOLDER,
   stats: ['studies', 'datasets', 'tools'],
   announcements: [
-    { id: 'announcement-1', text: PLACEHOLDER, url: '/datalibrary', startDate: '2026-11-01', endDate: '2026-12-01' },
+    { id: 'announcement-1', text: PLACEHOLDER, url: '/datalibrary', startDate: '2026-11-01', endDate: '2026-11-30' },
   ],
-  onboarding: [{ label: 'Get started', url: 'https://example.org/get-started' }],
+  // The `#featured-workspaces` link is the Story 18 cross-link; it is hidden where that section is off.
+  onboarding: [
+    { label: 'Get started', url: 'https://example.org/get-started' },
+    { label: 'Starter workspaces', url: '#featured-workspaces' },
+  ],
   primaryCtas: [{ label: 'Search the Data Library', url: '/datalibrary' }],
 }
 
@@ -188,12 +202,12 @@ export const flagshipConfig: ShowcaseConfig = {
     'masthead': { enabled: true, logos: [{ src: 'showcase/flagship/logo.svg', alt: 'DUOS' }] },
     'hero': HERO,
     'latest-data-releases': { enabled: true, ranking: 'newest', limit: 12 },
-    'most-requested-datasets': RESERVED_DISABLED['most-requested-datasets'],
-    'largest-cohorts': RESERVED_DISABLED['largest-cohorts'],
+    'most-requested-datasets': OFF,
+    'largest-cohorts': OFF,
     'open-access-datasets': { enabled: true, ranking: 'newest', limit: 12 },
-    'instant-approval': RESERVED_DISABLED['instant-approval'],
-    'datasets-at-a-glance': RESERVED_DISABLED['datasets-at-a-glance'],
-    'datasets-moving-to-archive': RESERVED_DISABLED['datasets-moving-to-archive'],
+    'instant-approval': OFF,
+    'datasets-at-a-glance': OFF,
+    'datasets-moving-to-archive': OFF,
     'featured-tools': {
       enabled: true,
       items: [
@@ -201,28 +215,29 @@ export const flagshipConfig: ShowcaseConfig = {
         { id: 'tool-2', name: 'Example Viewer', description: PLACEHOLDER, tags: ['visualization'], launchUrl: 'https://example.org/viewer' },
       ],
     },
-    'new-workflow-tools': RESERVED_DISABLED['new-workflow-tools'],
-    'notebooks': RESERVED_DISABLED['notebooks'],
-    'ai-models': RESERVED_DISABLED['ai-models'],
+    'new-workflow-tools': OFF,
+    'notebooks': OFF,
+    'ai-models': OFF,
     'featured-workspaces': {
       enabled: true,
       items: [
         { id: 'workspace-1', name: 'Example Starter Workspace', description: PLACEHOLDER, tags: ['GWAS'], launchUrl: 'https://example.org/workspace' },
       ],
     },
-    'latest-published-science': RESERVED_DISABLED['latest-published-science'],
-    'research-area': RESERVED_DISABLED['research-area'],
-    'research-initiative': RESERVED_DISABLED['research-initiative'],
-    'program-impact': RESERVED_DISABLED['program-impact'],
-    'community-conference': RESERVED_DISABLED['community-conference'],
-    'where-else': RESERVED_DISABLED['where-else'],
-    'training-workshops': RESERVED_DISABLED['training-workshops'],
-    'scholars-program': RESERVED_DISABLED['scholars-program'],
-    'tech-policy-interns': RESERVED_DISABLED['tech-policy-interns'],
+    'latest-published-science': OFF,
+    'research-area': OFF,
+    'research-initiative': OFF,
+    'program-impact': OFF,
+    'community-conference': OFF,
+    'where-else': OFF,
+    'training-workshops': OFF,
+    'scholars-program': OFF,
+    'tech-policy-interns': OFF,
   },
 }
 
-/** Partner (`/showcase/example-partner`): DAC-scoped hero and releases, editorial open-access shelf, two sections off. */
+/** Partner (`/showcase/example-partner`): DAC-scoped hero and releases, editorial open-access shelf,
+ * tools and workspaces off, so its hero hides the `tools` stat and the workspaces link. */
 export const partnerConfig: ShowcaseConfig = {
   ...flagshipConfig,
   branding: { theme: 'blue' },
@@ -241,39 +256,58 @@ export const partnerConfig: ShowcaseConfig = {
 // POST /public/showcase/datasets. Field names are provisional until S2.1.
 
 export type LookupRequest
-  = | { mode: 'identifiers', section: SectionKey, identifiers: DuosIdentifier[] }
-    | { mode: 'ranking', section: SectionKey, ranking: Ranking, scope?: Scope, limit?: number, pin?: DuosIdentifier[], exclude?: DuosIdentifier[] }
+  = | { mode: 'identifiers', section: DatasetSectionKey, identifiers: DuosIdentifier[] }
+    | { [K in DatasetSectionKey]: { mode: 'ranking', section: K, ranking: (typeof SECTION_RANKINGS)[K][number], scope?: Scope, limit?: number, pin?: DuosIdentifier[], exclude?: DuosIdentifier[] } }[DatasetSectionKey]
     | { mode: 'all', pageSize?: number, cursor?: string }
     | { mode: 'stats', scope?: Scope }
 
 export interface DatasetSummary {
   identifier: DuosIdentifier
   title: string
-  accessManagement: 'open' | 'controlled' | 'external'
+  /** `null` when the dataset has no recognized access management. */
+  accessManagement: 'open' | 'controlled' | 'external' | null
   dacName: string | null
+  /** Human-readable consent codes, e.g. `GRU`, `HMB`. */
+  consentCodes: string[]
   participantCount: number | null
   /** "New in DUOS" date: `dac_approval_date` (controlled) or `create_date` (open/external). */
   availableDate: DateString | null
+  /** Approved provider link for open and external datasets; `null` for controlled datasets, which
+   * use the DUOS request handoff. */
+  accessUrl: SafeUrl | null
 }
 
 export interface UnavailableResult { identifier: DuosIdentifier, status: 'unavailable' }
 
-export type LookupResponse
-  = | { datasets: (DatasetSummary | UnavailableResult)[] }
-    | { datasets: DatasetSummary[], nextCursor: string | null }
-    | { studyCount: number, datasetCount: number }
+interface ErrorResponse { message: string }
 
-export const lookupExamples: { name: string, request: LookupRequest, status: number, response: LookupResponse | { message: string } }[] = [
+/** Requestable tier (S2.1): the same rows a shelf can show. */
+interface StatsResponse { studyCount: number, datasetCount: number }
+
+export type LookupExample
+  = | { name: string, request: Extract<LookupRequest, { mode: 'identifiers' }>, status: 200, response: { datasets: (DatasetSummary | UnavailableResult)[] } }
+    | { name: string, request: Extract<LookupRequest, { mode: 'ranking' }>, status: 200, response: { datasets: DatasetSummary[] } }
+    | { name: string, request: Extract<LookupRequest, { mode: 'all' }>, status: 200, response: { datasets: DatasetSummary[], nextCursor: string | null } }
+    | { name: string, request: Extract<LookupRequest, { mode: 'stats' }>, status: 200, response: StatsResponse }
+    | { name: string, request: unknown, status: 400 | 413, response: ErrorResponse }
+
+const OPEN_COHORT: DatasetSummary = {
+  identifier: 'DUOS-000123',
+  title: 'Example Open Cohort',
+  accessManagement: 'open',
+  dacName: null,
+  consentCodes: ['GRU'],
+  participantCount: 1200,
+  availableDate: '2026-10-02',
+  accessUrl: 'https://example.org/open-cohort',
+}
+
+export const lookupExamples: LookupExample[] = [
   {
     name: 'identifiers: one eligible, one unavailable (private and nonexistent look the same)',
     request: { mode: 'identifiers', section: 'open-access-datasets', identifiers: ['DUOS-000123', 'DUOS-000999'] },
     status: 200,
-    response: {
-      datasets: [
-        { identifier: 'DUOS-000123', title: 'Example Open Cohort', accessManagement: 'open', dacName: null, participantCount: 1200, availableDate: '2026-10-02' },
-        { identifier: 'DUOS-000999', status: 'unavailable' },
-      ],
-    },
+    response: { datasets: [OPEN_COHORT, { identifier: 'DUOS-000999', status: 'unavailable' }] },
   },
   {
     name: 'ranking: newest within a DAC scope, eligible pin first, exclusion removed',
@@ -281,8 +315,8 @@ export const lookupExamples: { name: string, request: LookupRequest, status: num
     status: 200,
     response: {
       datasets: [
-        { identifier: 'DUOS-000789', title: 'Example Cohort', accessManagement: 'controlled', dacName: 'Example DAC', participantCount: 5400, availableDate: '2026-09-30' },
-        { identifier: 'DUOS-000790', title: 'Example Follow-up Cohort', accessManagement: 'controlled', dacName: 'Example DAC', participantCount: null, availableDate: '2026-10-05' },
+        { identifier: 'DUOS-000789', title: 'Example Cohort', accessManagement: 'controlled', dacName: 'Example DAC', consentCodes: ['HMB'], participantCount: 5400, availableDate: '2026-09-30', accessUrl: null },
+        { identifier: 'DUOS-000790', title: 'Example Follow-up Cohort', accessManagement: 'controlled', dacName: 'Example DAC', consentCodes: ['GRU'], participantCount: null, availableDate: '2026-10-05', accessUrl: null },
       ],
     },
   },
@@ -290,12 +324,7 @@ export const lookupExamples: { name: string, request: LookupRequest, status: num
     name: 'all: first page of the public catalog',
     request: { mode: 'all', pageSize: 100 },
     status: 200,
-    response: {
-      datasets: [
-        { identifier: 'DUOS-000123', title: 'Example Open Cohort', accessManagement: 'open', dacName: null, participantCount: 1200, availableDate: '2026-10-02' },
-      ],
-      nextCursor: null,
-    },
+    response: { datasets: [OPEN_COHORT], nextCursor: null },
   },
   {
     name: 'stats: the partner hero, using its scope; the flagship hero sends no scope (whole catalog)',
@@ -305,7 +334,7 @@ export const lookupExamples: { name: string, request: LookupRequest, status: num
   },
   {
     name: 'rejected: field not allowed in this mode',
-    request: { mode: 'stats', limit: 12 } as unknown as LookupRequest,
+    request: { mode: 'stats', limit: 12 },
     status: 400,
     response: { message: 'Unrecognized field "limit" for mode "stats"' },
   },
