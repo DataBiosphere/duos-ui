@@ -418,4 +418,3 @@ export const extractThroughBioId = (input: string): string => {
     return trimmed === '' ? '' : trimmed
   }
 }
-
