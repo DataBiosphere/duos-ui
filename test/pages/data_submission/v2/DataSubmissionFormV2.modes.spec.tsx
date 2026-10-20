@@ -217,7 +217,7 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     expect(Draft.deleteDraft).not.toHaveBeenCalled()
   })
 
-  it('resubmits the assets from the registration read, so an update keeps them', async () => {
+  it('resubmits the assets and fields the form does not edit, so an update keeps them', async () => {
     // The raw study payload keeps each list in its own property; only the registration read assembles them.
     const assets = {
       models: [{ modelId: '', name: 'Stored Model' }],
@@ -226,7 +226,12 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
       legacyNote: 'kept',
     }
     vi.mocked(DataSet.getStudyById).mockResolvedValue(persistedStudy())
-    vi.mocked(DataSet.getStudyRegistration).mockResolvedValueOnce({ assets } as never)
+    const unedited = {
+      externalIdentifier: 'SCP1671',
+      externalIdentifierType: 'Single Cell Portal',
+      alternativeDataSharingPlanAccessManagement: 'Open Access',
+    }
+    vi.mocked(DataSet.getStudyRegistration).mockResolvedValueOnce({ assets, ...unedited } as never)
     vi.mocked(DataSet.updateStudy).mockResolvedValue({} as never)
 
     renderStudyRoute()
@@ -238,6 +243,7 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     const submitted = JSON.parse(formData.get('dataset') as string)
     expect(DataSet.getStudyRegistration).toHaveBeenCalledWith(STUDY_ID)
     expect(submitted.assets).toEqual(assets)
+    expect(submitted).toMatchObject(unedited)
   })
 
   it('still reports a failed load inline, keeping the form on the page', async () => {

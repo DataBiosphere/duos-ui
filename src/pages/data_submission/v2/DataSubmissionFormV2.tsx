@@ -4,7 +4,7 @@ import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
 import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
-import { Study } from 'src/pages/data_submission/v2/v2-models'
+import { DatasetRegistrationSchemaV1, Study } from 'src/pages/data_submission/v2/v2-models'
 import { NihAdministrativeInformation } from 'src/pages/data_submission/v2/NihAdministrativeInformation'
 import { NihDataManagement } from 'src/pages/data_submission/v2/NihDataManagement'
 import { Styles } from 'src/libs/theme'
@@ -31,6 +31,16 @@ export type DataSubmissionFormV2Props = {
 }
 
 export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFile'
+
+// The form has no fields for these, but the update replaces every study property, so they are sent back as loaded.
+type UneditedRegistrationFields = Pick<DatasetRegistrationSchemaV1,
+  'externalIdentifier' | 'externalIdentifierType' | 'alternativeDataSharingPlanAccessManagement'>
+
+const pickUneditedFields = (registration: DatasetRegistrationSchemaV1): UneditedRegistrationFields => ({
+  externalIdentifier: registration.externalIdentifier,
+  externalIdentifierType: registration.externalIdentifierType,
+  alternativeDataSharingPlanAccessManagement: registration.alternativeDataSharingPlanAccessManagement,
+})
 
 /** A draft id is not a study id: a draft has never been submitted, so it creates rather than updates. */
 export type FormMode = 'create' | 'edit' | 'draft'
@@ -95,6 +105,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const [loadingError, setLoadingError] = useState(false)
   const [loadedDraftUuid, setLoadedDraftUuid] = useState<string>()
   const [showContactModal, setShowContactModal] = useState(false)
+  const [uneditedFields, setUneditedFields] = useState<UneditedRegistrationFields>({})
 
   const navigate = useNavigate()
 
@@ -115,6 +126,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
       ]).then(([study, datasets, registration]) => {
         const consentGroupAssets: ConsentGroup2[] = buildConsentGroupsFromDatasets(datasets)
         study.assets = { ...registration.assets, consentGroups: consentGroupAssets }
+        setUneditedFields(pickUneditedFields(registration))
         setStudy(study)
         setIsEditing(true)
       }).catch(onLoadFailure)
@@ -149,7 +161,8 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
         multiPartFormData.append(fieldKey, consentGroup.addedNIHInstitutionalCertificationFile, consentGroup.addedNIHInstitutionalCertificationFile.name)
       }
     })
-    multiPartFormData.append('dataset', JSON.stringify(studyToDatasetSchemaSubmission(withoutAttachments(study))))
+    const submission = { ...uneditedFields, ...studyToDatasetSchemaSubmission(withoutAttachments(study)) }
+    multiPartFormData.append('dataset', JSON.stringify(submission))
     return multiPartFormData
   }
   const onUpdateStudy = async () => {
