@@ -225,13 +225,22 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
       biospecimens: [{ biospecimenId: 'S-1' }],
       legacyNote: 'kept',
     }
-    vi.mocked(DataSet.getStudyById).mockResolvedValue(persistedStudy())
+    vi.mocked(DataSet.getStudyById).mockResolvedValue({
+      ...persistedStudy(),
+      properties: [{ key: 'alternativeDataSharingPlanAccessManagement', type: 'String', value: 'Open Access' }],
+    } as unknown as Study)
     const unedited = {
       externalIdentifier: 'SCP1671',
       externalIdentifierType: 'Single Cell Portal',
-      alternativeDataSharingPlanAccessManagement: 'Open Access',
+      alternativeDataSharingPlanFileName: 'sharing-plan.pdf',
     }
-    vi.mocked(DataSet.getStudyRegistration).mockResolvedValueOnce({ assets, ...unedited } as never)
+    // As Consent's registration read sends them: the enum by constant name, the PI institution from the study.
+    vi.mocked(DataSet.getStudyRegistration).mockResolvedValueOnce({
+      assets,
+      ...unedited,
+      alternativeDataSharingPlanAccessManagement: 'OPEN_ACCESS',
+      piInstitution: 42,
+    } as never)
     vi.mocked(DataSet.updateStudy).mockResolvedValue({} as never)
 
     renderStudyRoute()
@@ -243,7 +252,11 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     const submitted = JSON.parse(formData.get('dataset') as string)
     expect(DataSet.getStudyRegistration).toHaveBeenCalledWith(STUDY_ID)
     expect(submitted.assets).toEqual(assets)
-    expect(submitted).toMatchObject(unedited)
+    expect(submitted).toMatchObject({
+      ...unedited,
+      alternativeDataSharingPlanAccessManagement: 'Open Access',
+      piInstitution: 42,
+    })
   })
 
   it('still reports a failed load inline, keeping the form on the page', async () => {
@@ -267,6 +280,25 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     expect(await screen.findByText('Error Loading Page')).toBeInTheDocument()
     // The study that did load is not shown as if it were editable without its consent groups.
     expect(screen.queryByText('Persisted Study')).not.toBeInTheDocument()
+  })
+
+  it('sends no kept field when creating after a failed reload', async () => {
+    vi.mocked(DataSet.getStudyById).mockResolvedValue(persistedStudy())
+    vi.mocked(DataSet.getStudyRegistration)
+      .mockResolvedValueOnce({ externalIdentifier: 'SCP1671' } as never)
+      .mockRejectedValueOnce(new Error('Request failed with status 500'))
+    vi.mocked(DataSet.updateStudy).mockRejectedValueOnce(new Error('Request failed with status 500'))
+    vi.mocked(DataSet.registerDataset).mockResolvedValue({} as never)
+
+    renderStudyRoute()
+    expect(await screen.findByText('Update Study')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Update Study'))
+    expect(await screen.findByText('Create Study')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Create Study'))
+
+    await waitFor(() => expect(DataSet.registerDataset).toHaveBeenCalled())
+    const formData = vi.mocked(DataSet.registerDataset).mock.calls[0][0] as FormData
+    expect(JSON.parse(formData.get('dataset') as string).externalIdentifier).toBeUndefined()
   })
 
   it('reports a failed registration read as a failed load, so an update cannot drop the assets', async () => {

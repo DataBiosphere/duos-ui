@@ -4,7 +4,7 @@ import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
 import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
-import { DatasetRegistrationSchemaV1, Study } from 'src/pages/data_submission/v2/v2-models'
+import { DatasetRegistrationSchemaV1, PiInstitution, Study } from 'src/pages/data_submission/v2/v2-models'
 import { NihAdministrativeInformation } from 'src/pages/data_submission/v2/NihAdministrativeInformation'
 import { NihDataManagement } from 'src/pages/data_submission/v2/NihDataManagement'
 import { Styles } from 'src/libs/theme'
@@ -12,7 +12,7 @@ import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetMan
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Notifications } from 'src/libs/utils'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
-import { studyToDatasetSchemaSubmission, buildConsentGroupsFromDatasets } from 'src/pages/data_submission/v2/v2-common-functions'
+import { studyToDatasetSchemaSubmission, buildConsentGroupsFromDatasets, getStudyPropertyValueByKey } from 'src/pages/data_submission/v2/v2-common-functions'
 import { loadStudyDatasetDraft } from 'src/pages/data_submission/v2/studyDatasetDraft'
 import { Draft } from 'src/libs/ajax/Draft'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
@@ -34,12 +34,16 @@ export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFil
 
 // The form has no fields for these, but the update replaces every study property, so they are sent back as loaded.
 type UneditedRegistrationFields = Pick<DatasetRegistrationSchemaV1,
-  'externalIdentifier' | 'externalIdentifierType' | 'alternativeDataSharingPlanAccessManagement'>
+  'externalIdentifier' | 'externalIdentifierType' | 'alternativeDataSharingPlanAccessManagement'
+  | 'alternativeDataSharingPlanFileName'>
 
-const pickUneditedFields = (registration: DatasetRegistrationSchemaV1): UneditedRegistrationFields => ({
+const pickUneditedFields = (registration: DatasetRegistrationSchemaV1, study: Study): UneditedRegistrationFields => ({
   externalIdentifier: registration.externalIdentifier,
   externalIdentifierType: registration.externalIdentifierType,
-  alternativeDataSharingPlanAccessManagement: registration.alternativeDataSharingPlanAccessManagement,
+  // The registration read writes this enum's constant name, which the update rejects; the property holds its label.
+  alternativeDataSharingPlanAccessManagement: getStudyPropertyValueByKey(study, 'alternativeDataSharingPlanAccessManagement') as
+    DatasetRegistrationSchemaV1['alternativeDataSharingPlanAccessManagement'],
+  alternativeDataSharingPlanFileName: registration.alternativeDataSharingPlanFileName,
 })
 
 /** A draft id is not a study id: a draft has never been submitted, so it creates rather than updates. */
@@ -110,6 +114,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const navigate = useNavigate()
 
   const onLoadFailure = () => {
+    setUneditedFields({})
     setStudy({ data: {} } as Study)
     setIsEditing(false)
     setLoadingError(true)
@@ -126,7 +131,14 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
       ]).then(([study, datasets, registration]) => {
         const consentGroupAssets: ConsentGroup2[] = buildConsentGroupsFromDatasets(datasets)
         study.assets = { ...registration.assets, consentGroups: consentGroupAssets }
-        setUneditedFields(pickUneditedFields(registration))
+        // A PI institution set by patch lives on the study, not in the property the form reads.
+        if (registration.piInstitution) {
+          study.properties = [
+            ...(study.properties ?? []).filter(prop => prop.key !== PiInstitution.key),
+            new PiInstitution(registration.piInstitution),
+          ]
+        }
+        setUneditedFields(pickUneditedFields(registration, study))
         setStudy(study)
         setIsEditing(true)
       }).catch(onLoadFailure)
@@ -161,7 +173,14 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
         multiPartFormData.append(fieldKey, consentGroup.addedNIHInstitutionalCertificationFile, consentGroup.addedNIHInstitutionalCertificationFile.name)
       }
     })
-    const submission = { ...uneditedFields, ...studyToDatasetSchemaSubmission(withoutAttachments(study)) }
+    const kept: UneditedRegistrationFields = isEditing
+      ? {
+          ...uneditedFields,
+          alternativeDataSharingPlanFileName:
+            study.alternativeDataSharingPlanFile?.name ?? uneditedFields.alternativeDataSharingPlanFileName,
+        }
+      : {}
+    const submission = { ...kept, ...studyToDatasetSchemaSubmission(withoutAttachments(study)) }
     multiPartFormData.append('dataset', JSON.stringify(submission))
     return multiPartFormData
   }
