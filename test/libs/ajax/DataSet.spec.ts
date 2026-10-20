@@ -405,6 +405,21 @@ describe('DataSet', () => {
     })
   })
 
+  describe('getStudyRegistration', () => {
+    it('fetches the study as a registration document and returns the data', async () => {
+      const registration = { studyName: 'Study', assets: { models: [] } }
+      vi.mocked(fetchGet).mockResolvedValue({ data: registration })
+
+      const result = await DataSet.getStudyRegistration(10)
+
+      expect(fetchGet).toHaveBeenCalledWith(
+        'https://duos.example.org/api/dataset/study/registration/10',
+        headers,
+      )
+      expect(result).toEqual(registration)
+    })
+  })
+
   describe('updateStudy', () => {
     it('puts multipart form data and returns the updated study', async () => {
       const study = buildStudy({ studyId: 10 })

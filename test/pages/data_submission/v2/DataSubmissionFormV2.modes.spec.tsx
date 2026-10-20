@@ -16,7 +16,7 @@ import { renderWithRouter } from '../../../test-utils'
 
 vi.mock('src/libs/ajax/Draft', () => ({ Draft: { getDraft: vi.fn(), deleteDraft: vi.fn() } }))
 vi.mock('src/libs/ErrorReporter', () => ({ ErrorReporter: { report: vi.fn() } }))
-vi.mock('src/libs/ajax/DataSet', () => ({ DataSet: { getStudyById: vi.fn(), getStudyDatasets: vi.fn(async () => []), registerDataset: vi.fn(), updateStudy: vi.fn() } }))
+vi.mock('src/libs/ajax/DataSet', () => ({ DataSet: { getStudyById: vi.fn(), getStudyDatasets: vi.fn(async () => []), getStudyRegistration: vi.fn(async () => ({})), registerDataset: vi.fn(), updateStudy: vi.fn() } }))
 vi.mock('src/libs/utils', async () => {
   const actual = await vi.importActual<typeof import('src/libs/utils')>('src/libs/utils')
   return { ...actual, Notifications: { showNotification: vi.fn(), showError: vi.fn() } }
@@ -217,6 +217,78 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     expect(Draft.deleteDraft).not.toHaveBeenCalled()
   })
 
+  it('resubmits the assets and fields the form does not edit, so an update keeps them', async () => {
+    // The raw study payload keeps each list in its own property; only the registration read assembles them.
+    const assets = {
+      models: [{ modelId: '', name: 'Stored Model' }],
+      workspaces: [{ workspaceId: 'w1', name: 'Stored Workspace' }],
+      biospecimens: [{ biospecimenId: 'S-1' }],
+      legacyNote: 'kept',
+    }
+    vi.mocked(DataSet.getStudyById).mockResolvedValue({
+      ...persistedStudy(),
+      properties: [
+        { key: 'alternativeDataSharingPlan', type: 'Boolean', value: true },
+        { key: 'alternativeDataSharingPlanAccessManagement', type: 'String', value: 'Open Access' },
+      ],
+    } as unknown as Study)
+    const unedited = {
+      externalIdentifier: 'SCP1671',
+      externalIdentifierType: 'Single Cell Portal',
+      alternativeDataSharingPlanFileName: 'sharing-plan.pdf',
+    }
+    // As Consent's registration read sends them: the enum by constant name, the PI institution from the study.
+    vi.mocked(DataSet.getStudyRegistration).mockResolvedValueOnce({
+      assets,
+      ...unedited,
+      alternativeDataSharingPlanAccessManagement: 'OPEN_ACCESS',
+      piInstitution: 42,
+    } as never)
+    vi.mocked(DataSet.updateStudy).mockResolvedValue({} as never)
+
+    renderStudyRoute()
+    expect(await screen.findByText('Update Study')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Update Study'))
+
+    await waitFor(() => expect(DataSet.updateStudy).toHaveBeenCalled())
+    const formData = vi.mocked(DataSet.updateStudy).mock.calls[0][1] as FormData
+    const submitted = JSON.parse(formData.get('dataset') as string)
+    expect(DataSet.getStudyRegistration).toHaveBeenCalledWith(STUDY_ID)
+    expect(submitted.assets).toEqual(assets)
+    expect(submitted).toMatchObject({
+      ...unedited,
+      alternativeDataSharingPlanAccessManagement: 'Open Access',
+      piInstitution: 42,
+    })
+  })
+
+  it('drops the kept sharing plan file and access mode once the study has no sharing plan', async () => {
+    vi.mocked(DataSet.getStudyById).mockResolvedValue({
+      ...persistedStudy(),
+      properties: [
+        { key: 'alternativeDataSharingPlan', type: 'Boolean', value: false },
+        { key: 'alternativeDataSharingPlanAccessManagement', type: 'String', value: 'Open Access' },
+      ],
+    } as unknown as Study)
+    vi.mocked(DataSet.getStudyRegistration).mockResolvedValueOnce({
+      externalIdentifier: 'SCP1671',
+      alternativeDataSharingPlanFileName: 'sharing-plan.pdf',
+      alternativeDataSharingPlanAccessManagement: 'OPEN_ACCESS',
+    } as never)
+    vi.mocked(DataSet.updateStudy).mockResolvedValue({} as never)
+
+    renderStudyRoute()
+    expect(await screen.findByText('Update Study')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Update Study'))
+
+    await waitFor(() => expect(DataSet.updateStudy).toHaveBeenCalled())
+    const formData = vi.mocked(DataSet.updateStudy).mock.calls[0][1] as FormData
+    const submitted = JSON.parse(formData.get('dataset') as string)
+    expect(submitted.externalIdentifier).toBe('SCP1671')
+    expect(submitted).not.toHaveProperty('alternativeDataSharingPlanFileName')
+    expect(submitted).not.toHaveProperty('alternativeDataSharingPlanAccessManagement')
+  })
+
   it('still reports a failed load inline, keeping the form on the page', async () => {
     // Only the draft path replaces the form with an error page; this one is unchanged.
     vi.mocked(DataSet.getStudyById).mockRejectedValue(new Error('Request failed with status 404'))
@@ -238,6 +310,36 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     expect(await screen.findByText('Error Loading Page')).toBeInTheDocument()
     // The study that did load is not shown as if it were editable without its consent groups.
     expect(screen.queryByText('Persisted Study')).not.toBeInTheDocument()
+  })
+
+  it('sends no kept field when creating after a failed reload', async () => {
+    vi.mocked(DataSet.getStudyById).mockResolvedValue(persistedStudy())
+    vi.mocked(DataSet.getStudyRegistration)
+      .mockResolvedValueOnce({ externalIdentifier: 'SCP1671' } as never)
+      .mockRejectedValueOnce(new Error('Request failed with status 500'))
+    vi.mocked(DataSet.updateStudy).mockRejectedValueOnce(new Error('Request failed with status 500'))
+    vi.mocked(DataSet.registerDataset).mockResolvedValue({} as never)
+
+    renderStudyRoute()
+    expect(await screen.findByText('Update Study')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Update Study'))
+    expect(await screen.findByText('Create Study')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Create Study'))
+
+    await waitFor(() => expect(DataSet.registerDataset).toHaveBeenCalled())
+    const formData = vi.mocked(DataSet.registerDataset).mock.calls[0][0] as FormData
+    expect(JSON.parse(formData.get('dataset') as string).externalIdentifier).toBeUndefined()
+  })
+
+  it('reports a failed registration read as a failed load, so an update cannot drop the assets', async () => {
+    vi.mocked(DataSet.getStudyById).mockResolvedValue(persistedStudy())
+    vi.mocked(DataSet.getStudyRegistration).mockRejectedValueOnce(new Error('Request failed with status 500'))
+
+    renderStudyRoute()
+
+    expect(await screen.findByText('Error Loading Page')).toBeInTheDocument()
+    expect(screen.queryByText('Persisted Study')).not.toBeInTheDocument()
+    expect(screen.queryByText('Update Study')).not.toBeInTheDocument()
   })
 })
 

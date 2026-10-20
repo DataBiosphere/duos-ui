@@ -503,6 +503,10 @@ export interface DatasetRegistrationSchemaV1 {
              * @enum {string}
              */
   alternativeDataSharingPlanAccessManagement?: 'Controlled Access' | 'Open Access' | 'External Access'
+  /** @description The identifier for this study in an external system (e.g. SCP1671 in Single Cell Portal) */
+  externalIdentifier?: string
+  /** @description The name of the external system the identifier belongs to (e.g. Single Cell Portal) */
+  externalIdentifierType?: string
   /** @description Consent Groups */
   consentGroups: Array<ConsentGroup2>
   /** Study Assets excluding Consent Groups */
