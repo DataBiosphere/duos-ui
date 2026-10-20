@@ -12,7 +12,7 @@ import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetMan
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Notifications } from 'src/libs/utils'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
-import { studyToDatasetSchemaSubmission, buildConsentGroupsFromDatasets, getStudyPropertyValueByKey } from 'src/pages/data_submission/v2/v2-common-functions'
+import { studyToDatasetSchemaSubmission, buildConsentGroupsFromDatasets } from 'src/pages/data_submission/v2/v2-common-functions'
 import { loadStudyDatasetDraft } from 'src/pages/data_submission/v2/studyDatasetDraft'
 import { Draft } from 'src/libs/ajax/Draft'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
@@ -106,11 +106,15 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
 
   const onLoadFormData = (studyId: string | undefined) => {
     if (studyId) {
-      // The study payload lists only its dataset ids, so the datasets come from their own read.
-      Promise.all([DataSet.getStudyById(studyId), DataSet.getStudyDatasets(studyId)]).then(([study, datasets]) => {
+      // The study payload lists only its dataset ids, and its asset lists are spread across properties;
+      // the datasets and the assembled assets come from their own reads.
+      Promise.all([
+        DataSet.getStudyById(studyId),
+        DataSet.getStudyDatasets(studyId),
+        DataSet.getStudyRegistration(studyId),
+      ]).then(([study, datasets, registration]) => {
         const consentGroupAssets: ConsentGroup2[] = buildConsentGroupsFromDatasets(datasets)
-        const studyAssets = getStudyPropertyValueByKey(study, 'assets') as object || {}
-        study.assets = { ...studyAssets, consentGroups: consentGroupAssets }
+        study.assets = { ...registration.assets, consentGroups: consentGroupAssets }
         setStudy(study)
         setIsEditing(true)
       }).catch(onLoadFailure)

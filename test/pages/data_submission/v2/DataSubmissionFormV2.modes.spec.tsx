@@ -16,7 +16,7 @@ import { renderWithRouter } from '../../../test-utils'
 
 vi.mock('src/libs/ajax/Draft', () => ({ Draft: { getDraft: vi.fn(), deleteDraft: vi.fn() } }))
 vi.mock('src/libs/ErrorReporter', () => ({ ErrorReporter: { report: vi.fn() } }))
-vi.mock('src/libs/ajax/DataSet', () => ({ DataSet: { getStudyById: vi.fn(), getStudyDatasets: vi.fn(async () => []), registerDataset: vi.fn(), updateStudy: vi.fn() } }))
+vi.mock('src/libs/ajax/DataSet', () => ({ DataSet: { getStudyById: vi.fn(), getStudyDatasets: vi.fn(async () => []), getStudyRegistration: vi.fn(async () => ({})), registerDataset: vi.fn(), updateStudy: vi.fn() } }))
 vi.mock('src/libs/utils', async () => {
   const actual = await vi.importActual<typeof import('src/libs/utils')>('src/libs/utils')
   return { ...actual, Notifications: { showNotification: vi.fn(), showError: vi.fn() } }
@@ -217,6 +217,29 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     expect(Draft.deleteDraft).not.toHaveBeenCalled()
   })
 
+  it('resubmits the assets from the registration read, so an update keeps them', async () => {
+    // The raw study payload keeps each list in its own property; only the registration read assembles them.
+    const assets = {
+      models: [{ modelId: '', name: 'Stored Model' }],
+      workspaces: [{ workspaceId: 'w1', name: 'Stored Workspace' }],
+      biospecimens: [{ biospecimenId: 'S-1' }],
+      legacyNote: 'kept',
+    }
+    vi.mocked(DataSet.getStudyById).mockResolvedValue(persistedStudy())
+    vi.mocked(DataSet.getStudyRegistration).mockResolvedValueOnce({ assets } as never)
+    vi.mocked(DataSet.updateStudy).mockResolvedValue({} as never)
+
+    renderStudyRoute()
+    expect(await screen.findByText('Update Study')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Update Study'))
+
+    await waitFor(() => expect(DataSet.updateStudy).toHaveBeenCalled())
+    const formData = vi.mocked(DataSet.updateStudy).mock.calls[0][1] as FormData
+    const submitted = JSON.parse(formData.get('dataset') as string)
+    expect(DataSet.getStudyRegistration).toHaveBeenCalledWith(STUDY_ID)
+    expect(submitted.assets).toEqual(assets)
+  })
+
   it('still reports a failed load inline, keeping the form on the page', async () => {
     // Only the draft path replaces the form with an error page; this one is unchanged.
     vi.mocked(DataSet.getStudyById).mockRejectedValue(new Error('Request failed with status 404'))
@@ -238,6 +261,17 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     expect(await screen.findByText('Error Loading Page')).toBeInTheDocument()
     // The study that did load is not shown as if it were editable without its consent groups.
     expect(screen.queryByText('Persisted Study')).not.toBeInTheDocument()
+  })
+
+  it('reports a failed registration read as a failed load, so an update cannot drop the assets', async () => {
+    vi.mocked(DataSet.getStudyById).mockResolvedValue(persistedStudy())
+    vi.mocked(DataSet.getStudyRegistration).mockRejectedValueOnce(new Error('Request failed with status 500'))
+
+    renderStudyRoute()
+
+    expect(await screen.findByText('Error Loading Page')).toBeInTheDocument()
+    expect(screen.queryByText('Persisted Study')).not.toBeInTheDocument()
+    expect(screen.queryByText('Update Study')).not.toBeInTheDocument()
   })
 })
 

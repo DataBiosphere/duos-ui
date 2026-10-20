@@ -52,6 +52,16 @@ export const Study = {
     return res.data
   },
 
+  /**
+   * Fetches a study as a registration document. Its `assets` is assembled by Consent from the
+   * promoted asset properties and the legacy `assets` object, which the raw study payload is not.
+   */
+  getRegistration: async <T>(studyId: number | string): Promise<T> => {
+    const url = `${await Config.getApiUrl()}/api/dataset/study/registration/${studyId}`
+    const res = await fetchGet<T>(url, Config.authOpts())
+    return res.data
+  },
+
   getModels: (studyId: number | string) => getAssets<ModelAsset>(studyId, 'models'),
 
   getWorkspaces: (studyId: number | string) => getAssets<WorkspaceAsset>(studyId, 'workspaces'),

@@ -35,6 +35,7 @@ vi.mock('src/libs/ajax/DataSet', () => ({
     updateStudy: vi.fn(),
     getStudyById: vi.fn(),
     getStudyDatasets: vi.fn(async () => []),
+    getStudyRegistration: vi.fn(async () => ({})),
   },
 }))
 
