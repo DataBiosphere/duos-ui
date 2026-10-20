@@ -4,7 +4,7 @@ import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
 import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
-import { DatasetRegistrationSchemaV1, PiInstitution, Study } from 'src/pages/data_submission/v2/v2-models'
+import { AlternativeDataSharingPlan, DatasetRegistrationSchemaV1, PiInstitution, Study } from 'src/pages/data_submission/v2/v2-models'
 import { NihAdministrativeInformation } from 'src/pages/data_submission/v2/NihAdministrativeInformation'
 import { NihDataManagement } from 'src/pages/data_submission/v2/NihDataManagement'
 import { Styles } from 'src/libs/theme'
@@ -173,11 +173,16 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
         multiPartFormData.append(fieldKey, consentGroup.addedNIHInstitutionalCertificationFile, consentGroup.addedNIHInstitutionalCertificationFile.name)
       }
     })
+    const hasSharingPlan = getStudyPropertyValueByKey(study, AlternativeDataSharingPlan.key) === true
     const kept: UneditedRegistrationFields = isEditing
       ? {
           ...uneditedFields,
-          alternativeDataSharingPlanFileName:
-            study.alternativeDataSharingPlanFile?.name ?? uneditedFields.alternativeDataSharingPlanFileName,
+          alternativeDataSharingPlanFileName: hasSharingPlan
+            ? study.alternativeDataSharingPlanFile?.name ?? uneditedFields.alternativeDataSharingPlanFileName
+            : undefined,
+          alternativeDataSharingPlanAccessManagement: hasSharingPlan
+            ? uneditedFields.alternativeDataSharingPlanAccessManagement
+            : undefined,
         }
       : {}
     const submission = { ...kept, ...studyToDatasetSchemaSubmission(withoutAttachments(study)) }

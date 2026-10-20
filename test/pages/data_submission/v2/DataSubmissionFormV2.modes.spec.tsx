@@ -227,7 +227,10 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     }
     vi.mocked(DataSet.getStudyById).mockResolvedValue({
       ...persistedStudy(),
-      properties: [{ key: 'alternativeDataSharingPlanAccessManagement', type: 'String', value: 'Open Access' }],
+      properties: [
+        { key: 'alternativeDataSharingPlan', type: 'Boolean', value: true },
+        { key: 'alternativeDataSharingPlanAccessManagement', type: 'String', value: 'Open Access' },
+      ],
     } as unknown as Study)
     const unedited = {
       externalIdentifier: 'SCP1671',
@@ -257,6 +260,33 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
       alternativeDataSharingPlanAccessManagement: 'Open Access',
       piInstitution: 42,
     })
+  })
+
+  it('drops the kept sharing plan file and access mode once the study has no sharing plan', async () => {
+    vi.mocked(DataSet.getStudyById).mockResolvedValue({
+      ...persistedStudy(),
+      properties: [
+        { key: 'alternativeDataSharingPlan', type: 'Boolean', value: false },
+        { key: 'alternativeDataSharingPlanAccessManagement', type: 'String', value: 'Open Access' },
+      ],
+    } as unknown as Study)
+    vi.mocked(DataSet.getStudyRegistration).mockResolvedValueOnce({
+      externalIdentifier: 'SCP1671',
+      alternativeDataSharingPlanFileName: 'sharing-plan.pdf',
+      alternativeDataSharingPlanAccessManagement: 'OPEN_ACCESS',
+    } as never)
+    vi.mocked(DataSet.updateStudy).mockResolvedValue({} as never)
+
+    renderStudyRoute()
+    expect(await screen.findByText('Update Study')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Update Study'))
+
+    await waitFor(() => expect(DataSet.updateStudy).toHaveBeenCalled())
+    const formData = vi.mocked(DataSet.updateStudy).mock.calls[0][1] as FormData
+    const submitted = JSON.parse(formData.get('dataset') as string)
+    expect(submitted.externalIdentifier).toBe('SCP1671')
+    expect(submitted).not.toHaveProperty('alternativeDataSharingPlanFileName')
+    expect(submitted).not.toHaveProperty('alternativeDataSharingPlanAccessManagement')
   })
 
   it('still reports a failed load inline, keeping the form on the page', async () => {
