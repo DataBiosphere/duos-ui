@@ -187,7 +187,7 @@ describe('Home page', () => {
     it('applies dark background styling to the Broad card', () => {
       renderHome(true)
       const logoCard = screen.getByRole('link', { name: 'Broad' }).querySelector('.logo-card')
-      expect(logoCard).toHaveStyle({ background: '#1F3B50', padding: '15px' })
+      expect(logoCard).toHaveStyle({ backgroundColor: '#1F3B50', padding: '15px' })
     })
 
     it('navigates directly without calling handleSignIn when logged in', async () => {
