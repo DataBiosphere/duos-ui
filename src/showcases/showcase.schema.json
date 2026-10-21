@@ -1,0 +1,3061 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "branding": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "theme"
+      ],
+      "additionalProperties": false
+    },
+    "sections": {
+      "type": "object",
+      "properties": {
+        "masthead": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "logos": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "src": {
+                        "type": "string"
+                      },
+                      "alt": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      }
+                    },
+                    "required": [
+                      "src",
+                      "alt"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "logos"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "logos": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "src": {
+                        "type": "string"
+                      },
+                      "alt": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      }
+                    },
+                    "required": [
+                      "src",
+                      "alt"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "hero": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "intro": {
+                  "type": "string"
+                },
+                "stats": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "studies",
+                      "datasets",
+                      "tools"
+                    ]
+                  }
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "announcements": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "startDate": {
+                        "$ref": "#/$defs/ShowcaseDateString"
+                      },
+                      "endDate": {
+                        "$ref": "#/$defs/ShowcaseDateString"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "text",
+                      "url",
+                      "startDate",
+                      "endDate"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "onboarding": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseLink"
+                  }
+                },
+                "primaryCtas": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseLink"
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "intro",
+                "stats",
+                "announcements",
+                "onboarding",
+                "primaryCtas"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "intro": {
+                  "type": "string"
+                },
+                "stats": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "studies",
+                      "datasets",
+                      "tools"
+                    ]
+                  }
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "announcements": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "startDate": {
+                        "$ref": "#/$defs/ShowcaseDateString"
+                      },
+                      "endDate": {
+                        "$ref": "#/$defs/ShowcaseDateString"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "text",
+                      "url",
+                      "startDate",
+                      "endDate"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "onboarding": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseLink"
+                  }
+                },
+                "primaryCtas": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseLink"
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "latest-data-releases": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "ranking": {
+                  "type": "string",
+                  "enum": [
+                    "newest"
+                  ]
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "ranking"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "ranking": {
+                  "type": "string",
+                  "enum": [
+                    "newest"
+                  ]
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "most-requested-datasets": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "ranking": {
+                  "type": "string",
+                  "enum": [
+                    "most-requested"
+                  ]
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "ranking"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "ranking": {
+                  "type": "string",
+                  "enum": [
+                    "most-requested"
+                  ]
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "largest-cohorts": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "ranking": {
+                  "type": "string",
+                  "enum": [
+                    "largest-cohort"
+                  ]
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "ranking"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "ranking": {
+                  "type": "string",
+                  "enum": [
+                    "largest-cohort"
+                  ]
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "open-access-datasets": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "ranking": {
+                  "not": {}
+                }
+              },
+              "required": [
+                "enabled",
+                "items"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "ranking": {
+                  "type": "string",
+                  "enum": [
+                    "newest"
+                  ]
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "items": {
+                  "not": {}
+                }
+              },
+              "required": [
+                "enabled",
+                "ranking"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "ranking": {
+                  "not": {}
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "ranking": {
+                  "type": "string",
+                  "enum": [
+                    "newest"
+                  ]
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "items": {
+                  "not": {}
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "instant-approval": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "ranking": {
+                  "type": "string",
+                  "enum": [
+                    "instant-eligible"
+                  ]
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "ranking"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "ranking": {
+                  "type": "string",
+                  "enum": [
+                    "instant-eligible"
+                  ]
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "datasets-at-a-glance": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "charts": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "disease-area",
+                      "data-type",
+                      "access-type"
+                    ]
+                  }
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": [
+                    "curated",
+                    "full-catalog"
+                  ]
+                }
+              },
+              "required": [
+                "enabled",
+                "charts",
+                "scope"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "charts": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "disease-area",
+                      "data-type",
+                      "access-type"
+                    ]
+                  }
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": [
+                    "curated",
+                    "full-catalog"
+                  ]
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "datasets-moving-to-archive": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "ranking": {
+                  "type": "string",
+                  "enum": [
+                    "archive-soonest"
+                  ]
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "ranking"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "ranking": {
+                  "type": "string",
+                  "enum": [
+                    "archive-soonest"
+                  ]
+                },
+                "scope": {
+                  "$ref": "#/$defs/ShowcaseScope"
+                },
+                "limit": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseDuosIdentifier"
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "featured-tools": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "thumbnail": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "launchUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "docsUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "featured": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "tags",
+                      "launchUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "items"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "thumbnail": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "launchUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "docsUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "featured": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "tags",
+                      "launchUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "new-workflow-tools": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "thumbnail": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "launchUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "docsUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "addedDate": {
+                        "$ref": "#/$defs/ShowcaseDateString"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "tags",
+                      "launchUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "items"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "thumbnail": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "launchUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "docsUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "addedDate": {
+                        "$ref": "#/$defs/ShowcaseDateString"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "tags",
+                      "launchUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "notebooks": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "thumbnail": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "launchUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "docsUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "tags",
+                      "launchUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "items"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "thumbnail": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "launchUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "docsUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "tags",
+                      "launchUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "ai-models": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "thumbnail": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "launchUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "docsUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "tags",
+                      "launchUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "items"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "thumbnail": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "launchUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "docsUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "tags",
+                      "launchUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "featured-workspaces": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "thumbnail": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "launchUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "docsUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "tags",
+                      "launchUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "items"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "thumbnail": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "launchUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "docsUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "description",
+                      "tags",
+                      "launchUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "latest-published-science": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "citation": {
+                        "type": "string"
+                      },
+                      "summary": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "year": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "citation",
+                      "summary",
+                      "url",
+                      "year"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "selfReportPrompt": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "enabled",
+                "items",
+                "selfReportPrompt"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "citation": {
+                        "type": "string"
+                      },
+                      "summary": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      },
+                      "year": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "citation",
+                      "summary",
+                      "url",
+                      "year"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "selfReportPrompt": {
+                  "type": "boolean"
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "research-area": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "icon": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "destinationUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "label",
+                      "description",
+                      "destinationUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "items"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "icon": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "destinationUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "label",
+                      "description",
+                      "destinationUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "research-initiative": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "icon": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "destinationUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "label",
+                      "description",
+                      "destinationUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "items"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "icon": {
+                        "$ref": "#/$defs/ShowcaseImage"
+                      },
+                      "destinationUrl": {
+                        "$ref": "#/$defs/ShowcaseSafeUrl"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "label",
+                      "description",
+                      "destinationUrl"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "program-impact": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "mode": {
+                  "type": "string",
+                  "const": "embed"
+                },
+                "embedUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "attribution": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "enabled",
+                "mode",
+                "embedUrl",
+                "attribution"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "mode": {
+                  "type": "string",
+                  "const": "snapshot"
+                },
+                "snapshotDate": {
+                  "$ref": "#/$defs/ShowcaseDateString"
+                },
+                "sourceUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "attribution": {
+                  "type": "string"
+                },
+                "statBanner": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "label",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "mode",
+                "snapshotDate",
+                "sourceUrl",
+                "attribution",
+                "statBanner"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "mode": {
+                  "type": "string",
+                  "const": "embed"
+                },
+                "embedUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "attribution": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "mode": {
+                  "type": "string",
+                  "const": "snapshot"
+                },
+                "snapshotDate": {
+                  "$ref": "#/$defs/ShowcaseDateString"
+                },
+                "sourceUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "attribution": {
+                  "type": "string"
+                },
+                "statBanner": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "label",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "community-conference": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "startDate": {
+                  "$ref": "#/$defs/ShowcaseDateString"
+                },
+                "endDate": {
+                  "$ref": "#/$defs/ShowcaseDateString"
+                },
+                "timezone": {
+                  "type": "string"
+                },
+                "location": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "registration": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "const": "open"
+                        },
+                        "url": {
+                          "$ref": "#/$defs/ShowcaseSafeUrl"
+                        }
+                      },
+                      "required": [
+                        "state",
+                        "url"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "const": "alert-signup"
+                        }
+                      },
+                      "required": [
+                        "state"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "enabled",
+                "startDate",
+                "endDate",
+                "timezone",
+                "location",
+                "description",
+                "registration"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "startDate": {
+                  "$ref": "#/$defs/ShowcaseDateString"
+                },
+                "endDate": {
+                  "$ref": "#/$defs/ShowcaseDateString"
+                },
+                "timezone": {
+                  "type": "string"
+                },
+                "location": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "registration": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "const": "open"
+                        },
+                        "url": {
+                          "$ref": "#/$defs/ShowcaseSafeUrl"
+                        }
+                      },
+                      "required": [
+                        "state",
+                        "url"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "const": "alert-signup"
+                        }
+                      },
+                      "required": [
+                        "state"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "where-else": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "ctas": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseLink"
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "description",
+                "ctas"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "ctas": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseLink"
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "training-workshops": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "ctas": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseLink"
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "description",
+                "ctas"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "ctas": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseLink"
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "scholars-program": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "ctas": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseLink"
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "description",
+                "ctas"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "ctas": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseLink"
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "tech-policy-interns": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "ctas": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseLink"
+                  }
+                }
+              },
+              "required": [
+                "enabled",
+                "description",
+                "ctas"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string"
+                },
+                "navLabel": {
+                  "type": "string"
+                },
+                "cta": {
+                  "$ref": "#/$defs/ShowcaseLink"
+                },
+                "seeAllUrl": {
+                  "$ref": "#/$defs/ShowcaseSafeUrl"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "ctas": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/ShowcaseLink"
+                  }
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "const": false
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "masthead",
+        "hero",
+        "latest-data-releases",
+        "most-requested-datasets",
+        "largest-cohorts",
+        "open-access-datasets",
+        "instant-approval",
+        "datasets-at-a-glance",
+        "datasets-moving-to-archive",
+        "featured-tools",
+        "new-workflow-tools",
+        "notebooks",
+        "ai-models",
+        "featured-workspaces",
+        "latest-published-science",
+        "research-area",
+        "research-initiative",
+        "program-impact",
+        "community-conference",
+        "where-else",
+        "training-workshops",
+        "scholars-program",
+        "tech-policy-interns"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "branding",
+    "sections"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "ShowcaseLink": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "url": {
+          "$ref": "#/$defs/ShowcaseSafeUrl"
+        }
+      },
+      "required": [
+        "label",
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    "ShowcaseSafeUrl": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^https:\\/\\/[\\s\\S]{0,}$"
+        },
+        {
+          "type": "string",
+          "pattern": "^\\/[\\s\\S]{0,}$"
+        },
+        {
+          "type": "string",
+          "pattern": "^#(masthead|hero|latest-data-releases|most-requested-datasets|largest-cohorts|open-access-datasets|instant-approval|datasets-at-a-glance|datasets-moving-to-archive|featured-tools|new-workflow-tools|notebooks|ai-models|featured-workspaces|latest-published-science|research-area|research-initiative|program-impact|community-conference|where-else|training-workshops|scholars-program|tech-policy-interns)$"
+        }
+      ]
+    },
+    "ShowcaseScope": {
+      "type": "object",
+      "properties": {
+        "dac": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ShowcaseDateString": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "ShowcaseDuosIdentifier": {
+      "type": "string",
+      "pattern": "^DUOS-(\\d{6}|[1-9]\\d{6,})$"
+    },
+    "ShowcaseImage": {
+      "type": "object",
+      "properties": {
+        "src": {
+          "type": "string"
+        },
+        "alt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "src",
+        "alt"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
