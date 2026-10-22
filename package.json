@@ -43,7 +43,8 @@
     "react-select": "5.10.2",
     "react-tooltip": "6.0.9",
     "tss-react": "4.9.21",
-    "uuid": "14.0.3"
+    "uuid": "14.0.3",
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@emotion/styled": "11.14.1",
