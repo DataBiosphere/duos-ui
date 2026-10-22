@@ -2,7 +2,7 @@
  * Data Showcase config types (DT-4273, S1.2).
  *
  * The zod schemas in `src/showcases/schema.ts` are the one definition. The types here derive from
- * them, and `src/showcases/showcase.schema.json` exports them as JSON Schema for any future backend.
+ * them.
  * The decisions behind them are in consent `docs/plans/data-showcase-contracts.md`.
  *
  * This module holds no runtime zod import, so code that only needs the constants or the types does

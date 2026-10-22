@@ -1,11 +1,10 @@
 /**
  * The one definition of the Data Showcase config, the showcase registry and the public catalog
- * lookup (DT-4273, S1.2). `src/types/showcase.ts` derives the TypeScript types from these schemas,
- * and `showcase.schema.json` is the JSON Schema export of `ShowcaseConfigSchema`.
+ * lookup (DT-4273, S1.2). `src/types/showcase.ts` derives the TypeScript types from these schemas.
  *
  * The schemas check shape. The CI guard adds the rules that a JSON Schema can't express (key order,
  * implemented types, the full URL policy, retired keys, limits and the asset budget). Calendar-date
- * checks are zod refinements, which the JSON Schema export leaves out.
+ * checks are zod refinements, which a JSON Schema export leaves out.
  */
 import * as z from 'zod'
 import {

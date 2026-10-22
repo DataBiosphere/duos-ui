@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import { DatasetSummarySchema, DateStringSchema, DuosIdentifierSchema, LookupRequestSchema, ShowcaseConfigSchema } from 'src/showcases/schema'
-import * as z from 'zod'
 import {
   DUOS_IDENTIFIER_PATTERN,
   type DateString,
@@ -122,18 +121,5 @@ describe('LookupRequestSchema', () => {
   it('brands identifiers in the parsed request', () => {
     const parsed: LookupRequest = LookupRequestSchema.parse({ mode: 'identifiers', section: 'open-access-datasets', identifiers: ['DUOS-000123'] })
     expect(parsed.mode).toBe('identifiers')
-  })
-})
-
-describe('showcase.schema.json', () => {
-  const exported = z.toJSONSchema(ShowcaseConfigSchema)
-
-  it('matches the JSON Schema that the zod schema exports', async () => {
-    await expect(`${JSON.stringify(exported, null, 2)}\n`).toMatchFileSnapshot('../../src/showcases/showcase.schema.json')
-  })
-
-  it('lists the section keys in fixed order', () => {
-    const sections = exported.properties?.sections as { properties: Record<string, unknown> }
-    expect(Object.keys(sections.properties)).toEqual([...SECTION_KEYS])
   })
 })
