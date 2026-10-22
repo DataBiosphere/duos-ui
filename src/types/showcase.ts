@@ -91,6 +91,39 @@ export const DATASET_SECTION_KEYS = Object.keys(SECTION_RANKINGS) as DatasetSect
 /** The only dataset section that may list its datasets by hand. Hand-curated rankings go stale. */
 export const EDITORIAL_SECTION_KEY = 'open-access-datasets' satisfies DatasetSectionKey
 
+/** Sections that render no anchor, so a same-page `#` link can't target them. */
+export const NO_ANCHOR_SECTION_KEYS = ['masthead', 'hero'] as const satisfies readonly SectionKey[]
+
+/** Sections that a same-page `#<section key>` link may target. */
+export const ANCHOR_SECTION_KEYS = SECTION_KEYS.filter(
+  (key): key is Exclude<SectionKey, (typeof NO_ANCHOR_SECTION_KEYS)[number]> => !(NO_ANCHOR_SECTION_KEYS as readonly string[]).includes(key),
+)
+
+/**
+ * Section types with a renderer. Only these can be enabled; the CI guard rejects any other enabled
+ * section. Each E3 story adds its type here with its renderer, guard rules and fixtures.
+ */
+export const IMPLEMENTED_SECTION_KEYS: readonly SectionKey[] = []
+
+/**
+ * The public lookup's bounds (S2.2). Consent and the BFF proxy enforce them, and the schemas mirror
+ * them so a config can't ask for more. Change them only through a reviewed contract change.
+ */
+export const LOOKUP_LIMITS = {
+  /** Submitted `identifiers`, counted before deduplication. The page's one editorial lookup is
+   * the `open-access-datasets` items, so this also caps the page at 200 IDs. */
+  identifiers: 200,
+  pin: 50,
+  exclude: 200,
+  /** Typed values for each scope key. */
+  scopeValues: 20,
+  /** Results for one ranking (`limit`); the default is 12. */
+  rankingLimit: 50,
+  pageSize: 200,
+  identifierLength: 32,
+  cursorLength: 512,
+} as const
+
 /** Canonical identifier: `DUOS-` plus the alias zero-padded to six digits, never more padding.
  * Configs use it, and consent echoes it unchanged. */
 export const DUOS_IDENTIFIER_PATTERN = /^DUOS-(\d{6}|[1-9]\d{6,})$/

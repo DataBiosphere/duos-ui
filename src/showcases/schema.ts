@@ -13,9 +13,10 @@ import {
   type DateStringInput,
   DUOS_IDENTIFIER_PATTERN,
   type DuosIdentifierInput,
+  ANCHOR_SECTION_KEYS,
   EDITORIAL_SECTION_KEY,
+  LOOKUP_LIMITS,
   SCHEMA_VERSION,
-  SECTION_KEYS,
   SECTION_RANKINGS,
   SHOWCASE_KEY_PATTERN,
 } from 'src/types/showcase'
@@ -27,7 +28,7 @@ const isCalendarDate = (value: string) => {
 }
 
 // The casts keep the authored (input) type a template string while the parsed output is branded.
-export const DuosIdentifierSchema = z.string().regex(DUOS_IDENTIFIER_PATTERN).meta({ id: 'ShowcaseDuosIdentifier' }).brand<'DuosIdentifier'>() as unknown as z.ZodType<
+export const DuosIdentifierSchema = z.string().max(LOOKUP_LIMITS.identifierLength).regex(DUOS_IDENTIFIER_PATTERN).meta({ id: 'ShowcaseDuosIdentifier' }).brand<'DuosIdentifier'>() as unknown as z.ZodType<
   string & z.$brand<'DuosIdentifier'>,
   DuosIdentifierInput
 >
@@ -38,12 +39,12 @@ export const DateStringSchema = z.string().regex(DATE_PATTERN).refine(isCalendar
 >
 
 /** `https://` URL, a same-origin path beginning with `/`, or `#<section key>` for a same-page
- * section. This is the shape only: the CI guard and the renderer also reject `//host`, backslash
+ * section that renders an anchor (not `masthead` or `hero`). This is the shape only: the CI guard and the renderer also reject `//host`, backslash
  * variants, control characters, credentials and malformed encodings. */
 export const SafeUrlSchema = z.union([
   z.templateLiteral(['https://', z.string()]),
   z.templateLiteral(['/', z.string()]),
-  z.templateLiteral(['#', z.enum(SECTION_KEYS)]),
+  z.templateLiteral(['#', z.enum(ANCHOR_SECTION_KEYS)]),
 ]).meta({ id: 'ShowcaseSafeUrl' })
 
 const LinkSchema = z.strictObject({ label: z.string(), url: SafeUrlSchema }).meta({ id: 'ShowcaseLink' })
@@ -52,7 +53,7 @@ const LinkSchema = z.strictObject({ label: z.string(), url: SafeUrlSchema }).met
 const ImageSchema = z.strictObject({ src: z.string(), alt: z.string() }).meta({ id: 'ShowcaseImage' })
 
 /** Provisional until S2.1 agrees the scope vocabulary. */
-export const ScopeSchema = z.strictObject({ dac: z.array(z.string()).optional() }).meta({ id: 'ShowcaseScope' })
+export const ScopeSchema = z.strictObject({ dac: z.array(z.string()).max(LOOKUP_LIMITS.scopeValues).optional() }).meta({ id: 'ShowcaseScope' })
 
 /** Fields every section type accepts. */
 const COMMON_FIELDS = {
@@ -80,9 +81,9 @@ const sectionVariants = <A extends z.ZodRawShape, B extends z.ZodRawShape>(a: A,
 const rankingFields = <K extends DatasetSectionKey>(key: K) => ({
   ranking: z.enum(SECTION_RANKINGS[key]),
   scope: ScopeSchema.optional(),
-  limit: z.number().int().positive().optional(),
-  pin: z.array(DuosIdentifierSchema).optional(),
-  exclude: z.array(DuosIdentifierSchema).optional(),
+  limit: z.number().int().positive().max(LOOKUP_LIMITS.rankingLimit).optional(),
+  pin: z.array(DuosIdentifierSchema).max(LOOKUP_LIMITS.pin).optional(),
+  exclude: z.array(DuosIdentifierSchema).max(LOOKUP_LIMITS.exclude).optional(),
 })
 
 /** Computed-only dataset sections: hand-curated rankings go stale (delivery plan section 3). */
@@ -90,7 +91,7 @@ const computedShelf = <K extends DatasetSectionKey>(key: K) => section(rankingFi
 
 /** The editorial section lists datasets by hand (`items`) or is computed (`ranking`), never both. */
 const editorialShelf = sectionVariants(
-  { items: z.array(DuosIdentifierSchema), ranking: z.never().optional() },
+  { items: z.array(DuosIdentifierSchema).max(LOOKUP_LIMITS.identifiers), ranking: z.never().optional() },
   { ...rankingFields(EDITORIAL_SECTION_KEY), items: z.never().optional() },
 )
 
@@ -237,7 +238,7 @@ export const LookupRequestSchema = z.union([
   z.strictObject({
     mode: z.literal('identifiers'),
     section: z.literal(EDITORIAL_SECTION_KEY),
-    identifiers: z.array(DuosIdentifierSchema),
+    identifiers: z.array(DuosIdentifierSchema).max(LOOKUP_LIMITS.identifiers),
   }),
   rankingRequest('latest-data-releases'),
   rankingRequest('most-requested-datasets'),
@@ -245,7 +246,11 @@ export const LookupRequestSchema = z.union([
   rankingRequest('open-access-datasets'),
   rankingRequest('instant-approval'),
   rankingRequest('datasets-moving-to-archive'),
-  z.strictObject({ mode: z.literal('all'), pageSize: z.number().int().positive().optional(), cursor: z.string().optional() }),
+  z.strictObject({
+    mode: z.literal('all'),
+    pageSize: z.number().int().positive().max(LOOKUP_LIMITS.pageSize).optional(),
+    cursor: z.string().max(LOOKUP_LIMITS.cursorLength).optional(),
+  }),
   z.strictObject({ mode: z.literal('stats'), scope: ScopeSchema.optional() }),
 ])
 
