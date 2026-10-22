@@ -227,6 +227,10 @@ export const ShowcaseRegistrySchema = z.strictObject({
 // Lookup contract: POST /showcase/datasets (consent), proxied by the BFF as
 // POST /public/showcase/datasets. Field names are provisional until S2.1.
 
+/** A provider link in a lookup response. Unlike an authored `SafeUrl`, consent returns any absolute
+ * `http` or `https` URL, with the scheme in any case, and the value is kept unchanged. */
+const ProviderUrlSchema = z.url({ protocol: /^https?$/i })
+
 const rankingRequest = <K extends DatasetSectionKey>(key: K) =>
   z.strictObject({ mode: z.literal('ranking'), section: z.literal(key), ...rankingFields(key) })
 
@@ -259,7 +263,7 @@ export const DatasetSummarySchema = z.object({
   availableDate: DateStringSchema.nullable(),
   /** Approved provider link for open and external datasets; `null` for controlled datasets, which
    * use the DUOS request handoff. */
-  accessUrl: SafeUrlSchema.nullable(),
+  accessUrl: ProviderUrlSchema.nullable(),
 })
 
 export const UnavailableResultSchema = z.object({ identifier: DuosIdentifierSchema, status: z.literal('unavailable') })

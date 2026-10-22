@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DateStringSchema, DuosIdentifierSchema, LookupRequestSchema, ShowcaseConfigSchema } from 'src/showcases/schema'
+import { DatasetSummarySchema, DateStringSchema, DuosIdentifierSchema, LookupRequestSchema, ShowcaseConfigSchema } from 'src/showcases/schema'
 import * as z from 'zod'
 import {
   DUOS_IDENTIFIER_PATTERN,
@@ -58,6 +58,31 @@ describe('TOOL_SECTION_KEYS', () => {
     TOOL_SECTION_KEYS.forEach(key => expect(SECTION_KEYS).toContain(key))
     const keys: readonly SectionKey[] = TOOL_SECTION_KEYS
     expect(keys).toHaveLength(4)
+  })
+})
+
+describe('DatasetSummarySchema accessUrl', () => {
+  const summary = {
+    identifier: 'DUOS-000123',
+    title: 'Example Open Cohort',
+    accessManagement: 'open',
+    dacName: null,
+    consentCodes: ['GRU'],
+    participantCount: 1200,
+    availableDate: '2026-10-02',
+  }
+
+  // Consent returns any absolute http or https provider URL unchanged, with the scheme in any case.
+  it.each(['https://example.org/data', 'http://example.org/data', 'HTTPS://example.org/data', 'Http://example.org/data'])('accepts the provider link %s unchanged', (accessUrl) => {
+    expect(DatasetSummarySchema.parse({ ...summary, accessUrl }).accessUrl).toBe(accessUrl)
+  })
+
+  it('accepts null for a controlled dataset', () => {
+    expect(DatasetSummarySchema.safeParse({ ...summary, accessUrl: null }).success).toBe(true)
+  })
+
+  it.each(['javascript:alert(1)', 'data:text/html,x', 'ftp://example.org/data', '/datalibrary', '#hero', 'example.org/data', 'https://'])('rejects %s', (accessUrl) => {
+    expect(DatasetSummarySchema.safeParse({ ...summary, accessUrl }).success).toBe(false)
   })
 })
 
