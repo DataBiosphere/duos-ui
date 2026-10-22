@@ -1,5 +1,5 @@
 # builder image
-FROM node:26.4.0-trixie AS builder
+FROM node:26.12.1-trixie AS builder
 LABEL maintainer="dsp-data-team@broadinstitute.org"
 
 # set working directory
@@ -34,7 +34,7 @@ RUN pnpm --filter duos-server run build
 RUN pnpm --filter duos-server deploy --prod --legacy /tmp/server-deploy
 
 # Commit hash to us.gcr.io/broad-dsp-gcr-public/base/nodejs:26-debian-fips
-FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:8f063eb3974c187c4ad0ea23ab392235510fa67f131c453a8220aa4cd124d9ce
+FROM us.gcr.io/broad-dsp-gcr-public/base/nodejs@sha256:17903edee631b25b0afcfe4c66f8a7738e4480c2c03ca178e6afcf417d66a14f
 ARG NODE_ENV=production
 ARG PORT=8080
 ENV NODE_ENV=${NODE_ENV}
