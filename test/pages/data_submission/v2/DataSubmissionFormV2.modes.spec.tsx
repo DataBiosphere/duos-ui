@@ -227,21 +227,18 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     }
     vi.mocked(DataSet.getStudyById).mockResolvedValue({
       ...persistedStudy(),
-      properties: [
-        { key: 'alternativeDataSharingPlan', type: 'Boolean', value: true },
-        { key: 'alternativeDataSharingPlanAccessManagement', type: 'String', value: 'Open Access' },
-      ],
+      properties: [{ key: 'alternativeDataSharingPlan', type: 'Boolean', value: true }],
     } as unknown as Study)
     const unedited = {
       externalIdentifier: 'SCP1671',
       externalIdentifierType: 'Single Cell Portal',
       alternativeDataSharingPlanFileName: 'sharing-plan.pdf',
+      alternativeDataSharingPlanAccessManagement: 'Open Access',
     }
-    // As Consent's registration read sends them: the enum by constant name, the PI institution from the study.
+    // The PI institution comes from the study, as Consent's registration read sends it.
     vi.mocked(DataSet.getStudyRegistration).mockResolvedValueOnce({
       assets,
       ...unedited,
-      alternativeDataSharingPlanAccessManagement: 'OPEN_ACCESS',
       piInstitution: 42,
     } as never)
     vi.mocked(DataSet.updateStudy).mockResolvedValue({} as never)
@@ -255,25 +252,18 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     const submitted = JSON.parse(formData.get('dataset') as string)
     expect(DataSet.getStudyRegistration).toHaveBeenCalledWith(STUDY_ID)
     expect(submitted.assets).toEqual(assets)
-    expect(submitted).toMatchObject({
-      ...unedited,
-      alternativeDataSharingPlanAccessManagement: 'Open Access',
-      piInstitution: 42,
-    })
+    expect(submitted).toMatchObject({ ...unedited, piInstitution: 42 })
   })
 
   it('drops the kept sharing plan file and access mode once the study has no sharing plan', async () => {
     vi.mocked(DataSet.getStudyById).mockResolvedValue({
       ...persistedStudy(),
-      properties: [
-        { key: 'alternativeDataSharingPlan', type: 'Boolean', value: false },
-        { key: 'alternativeDataSharingPlanAccessManagement', type: 'String', value: 'Open Access' },
-      ],
+      properties: [{ key: 'alternativeDataSharingPlan', type: 'Boolean', value: false }],
     } as unknown as Study)
     vi.mocked(DataSet.getStudyRegistration).mockResolvedValueOnce({
       externalIdentifier: 'SCP1671',
       alternativeDataSharingPlanFileName: 'sharing-plan.pdf',
-      alternativeDataSharingPlanAccessManagement: 'OPEN_ACCESS',
+      alternativeDataSharingPlanAccessManagement: 'Open Access',
     } as never)
     vi.mocked(DataSet.updateStudy).mockResolvedValue({} as never)
 
