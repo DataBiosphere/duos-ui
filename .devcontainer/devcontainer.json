@@ -26,5 +26,14 @@
             "helm": "none",
             "minikube": "none"
         }
+    },
+    "initializeCommand": "mkdir -p \"$HOME/.claude\" \"$HOME/.codex\"",
+    "mounts": [
+        "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind",
+        "source=${localEnv:HOME}/.codex,target=/home/node/.codex,type=bind"
+    ],
+    "containerEnv": {
+        "CLAUDE_CONFIG_DIR": "/home/node/.claude",
+        "CODEX_HOME": "/home/node/.codex"
     }
 }
