@@ -37,12 +37,10 @@ type UneditedRegistrationFields = Pick<DatasetRegistrationSchemaV1,
   'externalIdentifier' | 'externalIdentifierType' | 'alternativeDataSharingPlanAccessManagement'
   | 'alternativeDataSharingPlanFileName'>
 
-const pickUneditedFields = (registration: DatasetRegistrationSchemaV1, study: Study): UneditedRegistrationFields => ({
+const pickUneditedFields = (registration: DatasetRegistrationSchemaV1): UneditedRegistrationFields => ({
   externalIdentifier: registration.externalIdentifier,
   externalIdentifierType: registration.externalIdentifierType,
-  // The registration read writes this enum's constant name, which the update rejects; the property holds its label.
-  alternativeDataSharingPlanAccessManagement: getStudyPropertyValueByKey(study, 'alternativeDataSharingPlanAccessManagement') as
-    DatasetRegistrationSchemaV1['alternativeDataSharingPlanAccessManagement'],
+  alternativeDataSharingPlanAccessManagement: registration.alternativeDataSharingPlanAccessManagement,
   alternativeDataSharingPlanFileName: registration.alternativeDataSharingPlanFileName,
 })
 
@@ -138,7 +136,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
             new PiInstitution(registration.piInstitution),
           ]
         }
-        setUneditedFields(pickUneditedFields(registration, study))
+        setUneditedFields(pickUneditedFields(registration))
         setStudy(study)
         setIsEditing(true)
       }).catch(onLoadFailure)
