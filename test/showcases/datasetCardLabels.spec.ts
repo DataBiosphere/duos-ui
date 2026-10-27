@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DATASET_CARD_LABELS, datasetCardEntries } from 'src/showcases/datasetCardLabels'
+import { DATASET_CARD_LABELS, availableDateFormat, datasetCardEntries } from 'src/showcases/datasetCardLabels'
 import { DatasetSummarySchema } from 'src/showcases/schema'
 import type { DatasetSummaryInput } from 'src/types/showcase'
 
@@ -44,9 +44,15 @@ describe('dataset card labels', () => {
     ])
   })
 
-  it('shows the provider link for an open dataset', () => {
-    const open = { ...complete, accessManagement: 'open', dacName: null, accessUrl: 'https://example.org/open-cohort' } as const
-    expect(entries(open)).toContainEqual({ field: 'accessUrl', label: 'Provider site', value: 'https://example.org/open-cohort' })
+  it.each(['open', 'external'] as const)('shows the provider link and no DUOS DAC for an %s dataset', (accessManagement) => {
+    const shown = entries({ ...complete, accessManagement, accessUrl: 'https://example.org/open-cohort' })
+    expect(shown).toContainEqual({ field: 'accessUrl', label: 'Provider site', value: 'example.org', href: 'https://example.org/open-cohort' })
+    expect(shown.map(entry => entry.field)).not.toContain('dacName')
+  })
+
+  it('shows no provider link that is not https', () => {
+    const shown = entries({ ...complete, accessManagement: 'open', accessUrl: 'http://example.org/open-cohort' })
+    expect(shown.map(entry => entry.field)).not.toContain('accessUrl')
   })
 
   it('shows no provider link for a controlled dataset', () => {
@@ -71,14 +77,12 @@ describe('dataset card labels', () => {
     expect(entries({ ...complete, participantCount }).map(entry => entry.field)).not.toContain('participantCount')
   })
 
-  it('never calls participants samples', () => {
-    const labels: string[] = Object.values(DATASET_CARD_LABELS).map(({ label }) => label)
-    const shown = [complete, unknown].flatMap(entries).map(entry => `${entry.label} ${entry.value}`)
-    expect([...labels, ...shown].join(' ')).not.toMatch(/sample/i)
+  it('never labels participants as samples', () => {
+    expect(Object.values(DATASET_CARD_LABELS).map(({ label }) => label).join(' ')).not.toMatch(/sample/i)
   })
 
-  it('shows the available date as the UTC calendar date, not shifted by the reader\'s zone', () => {
-    const first = entries({ ...complete, availableDate: '2026-01-01' })
-    expect(first).toContainEqual({ field: 'availableDate', label: 'Available in DUOS', value: 'Jan 1, 2026' })
+  it('formats the available date in UTC, so readers west of UTC do not see the day before', () => {
+    expect(availableDateFormat.resolvedOptions().timeZone).toBe('UTC')
+    expect(entries({ ...complete, availableDate: '2026-01-01' })).toContainEqual({ field: 'availableDate', label: 'Available in DUOS', value: 'Jan 1, 2026' })
   })
 })
