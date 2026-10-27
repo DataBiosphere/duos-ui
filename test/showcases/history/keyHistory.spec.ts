@@ -65,6 +65,12 @@ describe('checkKeyHistory', () => {
         .toEqual([expect.stringContaining('retired key "alpha" can\'t be reused')])
     })
 
+    it('a key retired in the same PR that keeps its entry', () => {
+      const base = registry([entry('alpha')])
+      expect(checkKeyHistory(base, registry([entry('alpha')], ['alpha'])))
+        .toEqual([expect.stringContaining('retired key "alpha" can\'t be reused')])
+    })
+
     it('a rollback that resurrects a retired identity', () => {
       // `alpha` was retired and `beta` added after the old revision that the rollback restores.
       const current = registry([entry('beta')], ['alpha'])

@@ -37,8 +37,9 @@ export const checkKeyHistory = (base: KeyHistory, proposed: KeyHistory): string[
     ...base.retiredKeys
       .filter(key => !proposedRetired.has(key))
       .map(key => `tombstone "${key}" was deleted; retired keys are permanent`),
+    // A key retired in this PR counts too, so a PR can't retire a key and keep its entry live.
     ...proposed.entries
-      .filter(({ key }) => base.retiredKeys.includes(key))
+      .filter(({ key }) => base.retiredKeys.includes(key) || proposedRetired.has(key))
       .map(({ key }) => `retired key "${key}" can't be reused; use status "hidden" for a reversible withdrawal`),
   ]
 }
