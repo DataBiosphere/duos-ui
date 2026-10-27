@@ -30,8 +30,12 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm ci --ignore-scripts
-      # The showcase key history check reads the registry on the PR's base branch, and the checkout
-      # is shallow. Every shard fetches it, because any shard can run that test file.
+      # test/showcases/keyHistory.spec.ts checks that a PR doesn't drop or reuse a showcase key. It
+      # compares src/showcases/registry.json in this PR with the same file on the branch that the PR
+      # merges into (for example develop). actions/checkout downloads only the PR's own commit, so
+      # that branch isn't in the clone. This step downloads the branch's latest commit as
+      # origin/<branch>. Vitest decides which shard runs each test file, so every shard does this;
+      # it is a one-commit download.
       - name: Fetch the PR base branch
         run: git fetch --no-tags --depth=1 origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
         env:
@@ -39,6 +43,7 @@ jobs:
       - name: Run Vitest (root, sharded)
         run: pnpm exec vitest run --reporter=blob --reporter=default --coverage.enabled=true --shard=${{ matrix.shard }}/3
         env:
+          # Tells keyHistory.spec.ts which branch to compare with: the one fetched above.
           SHOWCASE_BASE_REF: origin/${{ github.base_ref }}
       - name: Upload blob report
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.0
