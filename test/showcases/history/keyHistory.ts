@@ -46,7 +46,12 @@ export const checkKeyHistory = (base: KeyHistory, proposed: KeyHistory): string[
 /** Runs git with `args` and returns its output, or throws when git fails. */
 export type Git = (args: string[]) => string
 
-const runGit: Git = args => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+/** A fixed path, so a writable directory in `PATH` can't supply a different `git`. macOS and the
+ * Ubuntu CI runners both install git here. Without it, the base reads as unavailable: CI fails and
+ * a local run skips the check. */
+const GIT = '/usr/bin/git'
+
+const runGit: Git = args => execFileSync(GIT, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
 
 const attempt = <T>(action: () => T): T | undefined => {
   try {
