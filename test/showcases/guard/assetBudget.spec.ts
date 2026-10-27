@@ -1,3 +1,4 @@
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import type { ShowcaseConfigInput } from 'src/types/showcase'
 import { flagshipConfig } from '../../fixtures/showcase/contracts'
@@ -110,5 +111,13 @@ describe('readImageSize', () => {
   it('returns undefined for a missing file or a directory', () => {
     expect(readImageSize('showcase/missing/logo.svg')).toBeUndefined()
     expect(readImageSize('.')).toBeUndefined()
+  })
+
+  it.each(['../../package.json', resolve('package.json')])('returns undefined for a path outside src/images: %s', (src) => {
+    expect(readImageSize(src)).toBeUndefined()
+  })
+
+  it('reads a path with .. that stays below src/images', () => {
+    expect(readImageSize('../images/duos-network-logo.svg')).toBe(readImageSize('duos-network-logo.svg'))
   })
 })

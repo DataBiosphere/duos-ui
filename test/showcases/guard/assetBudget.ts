@@ -5,7 +5,7 @@
  * here. The logo limits are the hard limits in `DATA-LIBRARY.md`.
  */
 import { statSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { isAbsolute, relative, resolve, sep } from 'node:path'
 
 const KB = 1024
 
@@ -21,9 +21,19 @@ export const ASSET_BUDGET = {
 /** Returns an image's size in bytes, or `undefined` when the file does not exist. */
 export type ReadSize = (src: string) => number | undefined
 
-/** Config image `src` values are paths below `src/images`. Vitest runs from the repository root. */
+/** Vitest runs from the repository root. */
+const IMAGES_ROOT = resolve('src/images')
+
+const isBelowImages = (file: string) => {
+  const path = relative(IMAGES_ROOT, file)
+  return path !== '..' && !path.startsWith(`..${sep}`) && !isAbsolute(path)
+}
+
+/** Config image `src` values are paths below `src/images`. A path that leaves it, such as
+ * `../../package.json` or an absolute path, reads as missing. */
 export const readImageSize: ReadSize = (src) => {
-  const stats = statSync(resolve('src/images', src), { throwIfNoEntry: false })
+  const file = resolve(IMAGES_ROOT, src)
+  const stats = isBelowImages(file) ? statSync(file, { throwIfNoEntry: false }) : undefined
   return stats?.isFile() ? stats.size : undefined
 }
 
