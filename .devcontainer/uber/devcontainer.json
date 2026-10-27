@@ -3,9 +3,16 @@
     "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:26-trixie",
     "workspaceFolder": "/workspaces",
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/duos-ui,type=bind,consistency=cached",
+    "initializeCommand": "mkdir -p \"$HOME/.claude\" \"$HOME/.codex\"",
     "mounts": [
+        "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind",
+        "source=${localEnv:HOME}/.codex,target=/home/node/.codex,type=bind",
         "source=${localWorkspaceFolder}/../consent,target=/workspaces/consent,type=bind,consistency=cached"
     ],
+    "containerEnv": {
+        "CLAUDE_CONFIG_DIR": "/home/node/.claude",
+        "CODEX_HOME": "/home/node/.codex"
+    },
     "features": {
         "ghcr.io/devcontainers/features/java:1": {
             "version": "25",
@@ -13,7 +20,7 @@
             "installMaven": true,
             "installGradle": true
         },
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+        "ghcr.io/devcontainers/features/docker-in-docker:4": {
             "moby": false
         },
         "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
