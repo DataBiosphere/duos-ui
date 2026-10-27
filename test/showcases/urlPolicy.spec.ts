@@ -40,6 +40,7 @@ describe('urlProblem', () => {
     ['https://example.org/%E0%A4%A', 'percent-encoding'],
     ['https:///path', 'host'],
     ['https://', 'host'],
+    ['https://[::1/path', 'host'],
   ])('fails %s (%s)', (url, reason) => {
     expect(urlProblem(url)).toContain(reason)
   })
