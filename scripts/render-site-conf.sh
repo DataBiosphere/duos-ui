@@ -17,7 +17,7 @@ set -o pipefail
 cd "$(dirname "$0")"
 
 SITE_CONF_FILE="../site.conf"
-# The template's only helm value is proxyLogLevel; everything else is ${VAR}
+# The template's only helm value is proxy.logLevel; everything else is ${VAR}
 # syntax that httpd resolves at start.
 TERRA_HELMFILE_HTTPS="https://github.com/broadinstitute/terra-helmfile.git"
 TERRA_HELMFILE_SSH="git@github.com:broadinstitute/terra-helmfile.git"
@@ -52,7 +52,7 @@ template=$(git -C "$helmfile_dir" show "HEAD:$SITE_CONF_TEMPLATE_PATH") \
 # Drop the define/end wrapper lines and fill in the one helm value.
 rendered=$(echo "$template" \
   | grep -vE '^\{\{-? *(define|end)[ "-]' \
-  | sed "s/{{ *\.Values\.proxyLogLevel *}}/$PROXY_LOG_LEVEL/")
+  | sed "s/{{ *\.Values\.proxy\.logLevel *}}/$PROXY_LOG_LEVEL/")
 # Any helm syntax left over means the template gained a value this script
 # does not know about. Fail rather than hand httpd a broken config.
 if grep -q '{{' <<< "$rendered"; then
