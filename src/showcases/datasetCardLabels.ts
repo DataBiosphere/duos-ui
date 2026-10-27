@@ -6,7 +6,7 @@ export type DatasetCardField = Exclude<keyof DatasetSummary, 'title'>
 type FieldLabel = { label: string, display: (summary: DatasetSummary) => string | null }
 
 /** Reads `availableDate` as the UTC calendar date it is, whatever the reader's time zone. */
-export const availableDateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' })
+const availableDateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' })
 
 const isProviderManaged = (s: DatasetSummary) => s.accessManagement === 'open' || s.accessManagement === 'external'
 

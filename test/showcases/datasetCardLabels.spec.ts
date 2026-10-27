@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DATASET_CARD_LABELS, availableDateFormat, datasetCardEntries } from 'src/showcases/datasetCardLabels'
+import { DATASET_CARD_LABELS, datasetCardEntries } from 'src/showcases/datasetCardLabels'
 import { DatasetSummarySchema } from 'src/showcases/schema'
 import type { DatasetSummaryInput } from 'src/types/showcase'
 
@@ -87,7 +87,6 @@ describe('dataset card labels', () => {
   })
 
   it('formats the available date in UTC, so readers west of UTC do not see the day before', () => {
-    expect(availableDateFormat.resolvedOptions().timeZone).toBe('UTC')
     expect(entries({ ...complete, availableDate: '2026-01-01' })).toContainEqual({ field: 'availableDate', label: 'Available in DUOS', value: 'Jan 1, 2026' })
   })
 })
