@@ -30,8 +30,16 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm ci --ignore-scripts
+      # The showcase key history check reads the registry on the PR's base branch, and the checkout
+      # is shallow. Every shard fetches it, because any shard can run that test file.
+      - name: Fetch the PR base branch
+        run: git fetch --no-tags --depth=1 origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+        env:
+          BASE_REF: ${{ github.base_ref }}
       - name: Run Vitest (root, sharded)
         run: pnpm exec vitest run --reporter=blob --reporter=default --coverage.enabled=true --shard=${{ matrix.shard }}/3
+        env:
+          SHOWCASE_BASE_REF: origin/${{ github.base_ref }}
       - name: Upload blob report
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.0
         with:
