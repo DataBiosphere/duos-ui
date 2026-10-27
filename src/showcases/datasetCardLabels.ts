@@ -28,7 +28,7 @@ export const DATASET_CARD_LABELS = {
   participantCount: { label: 'Participants', display: s => (s.participantCount !== null && s.participantCount > 0 ? s.participantCount.toLocaleString('en-US') : null) },
   availableDate: { label: 'Available in DUOS', display: s => (s.availableDate === null ? null : availableDateFormat.format(new Date(s.availableDate))) },
   // Controlled datasets use the DUOS request handoff, and provider links must be https.
-  accessUrl: { label: 'Provider site', display: s => (isProviderManaged(s) && s.accessUrl?.startsWith('https://') ? s.accessUrl : null) },
+  accessUrl: { label: 'Provider site', display: s => (isProviderManaged(s) && s.accessUrl !== null && new URL(s.accessUrl).protocol === 'https:' ? s.accessUrl : null) },
 } as const satisfies Record<DatasetCardField, FieldLabel>
 
 /** `href` is set on the provider link, whose `value` is the provider's host. */
