@@ -21,6 +21,16 @@ const decodes = (url: string) => {
   }
 }
 
+// Not `URL.canParse`: the browserslist still includes Chrome 109 and iOS Safari 16.6, which lack it.
+const parse = (url: string) => {
+  try {
+    return new URL(url)
+  }
+  catch {
+    return undefined
+  }
+}
+
 const anchorProblem = (url: string): string | undefined => {
   const key = url.slice(1)
   if (key === '') {
@@ -37,11 +47,11 @@ const httpsProblem = (url: string): string | undefined => {
     return 'must use the https scheme, a /path or a #section'
   }
   // The URL parser drops extra slashes, so `https:///path` would parse with the host `path`.
-  if (!/^https:\/\/[^/?#]/.test(url) || !URL.canParse(url)) {
+  const parsed = /^https:\/\/[^/?#]/.test(url) ? parse(url) : undefined
+  if (parsed === undefined) {
     return 'has no host'
   }
-  const { username, password } = new URL(url)
-  return username || password ? 'contains credentials' : undefined
+  return parsed.username || parsed.password ? 'contains credentials' : undefined
 }
 
 /** Returns why `url` breaks the policy, or `undefined` when it is safe. */
