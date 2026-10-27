@@ -2,6 +2,10 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 import { aliases_from_tsconfig } from './aliases'
 
+// A zone west of UTC, so code that formats a UTC date in local time fails here and not only for
+// users. Set before the worker threads start; `test.env` reaches them too late to change the zone.
+process.env.TZ = 'America/Los_Angeles'
+
 export default defineConfig({
   plugins: [
     react({ include: /\.(mdx|js|jsx|ts|tsx)$/ }),
