@@ -32,7 +32,6 @@
     "@tanstack/react-query": "5.104.5",
     "dayjs": "1.11.23",
     "oidc-client-ts": "3.5.0",
-    "query-string": "9.5.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "react-dropzone": "20.1.4",
