@@ -46,6 +46,7 @@ export function nameCellData({ name = '- -', dacId, label = 'dac-name' }: NameCe
     isComponent: true,
     id: dacId,
     label,
+    value: name || '- -',
     data: (
       <Link
         to={`/manage_dac/${dacId}`}

@@ -24,7 +24,7 @@ const electionWithMemberVotes1: ElectionWithMemberVotes = {
   version: 2,
   archived: false,
   votes: {},
-  progressReport: true,
+  requestType: 'Progress Report 1',
   memberVotes: [
     {
       voteId: 3,
@@ -73,7 +73,7 @@ const electionWithMemberVotes2: ElectionWithMemberVotes = {
   version: 1,
   archived: false,
   votes: {},
-  progressReport: false,
+  requestType: 'Initial DAR',
   memberVotes: [
     {
       voteId: 5,
@@ -119,7 +119,7 @@ const electionWithMemberVotes3: ElectionWithMemberVotes = {
   version: 3,
   archived: false,
   votes: {},
-  progressReport: true,
+  requestType: 'Progress Report 2',
   memberVotes: [
     {
       voteId: 7,
@@ -161,7 +161,7 @@ describe('ElectionWithMemberVotesTable', () => {
     const { container } = render(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
 
     const row0 = container.querySelectorAll('.row-data-0 [role="cell"]')
-    expect(row0[0]).toHaveTextContent('Progress Report')
+    expect(row0[0]).toHaveTextContent('Progress Report 2')
     expect(row0[1]).toHaveTextContent('DUOS-00404')
     expect(row0[2]).toHaveTextContent('2023-03-10')
     expect(row0[3]).toHaveTextContent('In Progress')
@@ -169,7 +169,7 @@ describe('ElectionWithMemberVotesTable', () => {
     expect(row0[5]).toHaveTextContent('No votes cast')
 
     const row1 = container.querySelectorAll('.row-data-1 [role="cell"]')
-    expect(row1[0]).toHaveTextContent('Progress Report')
+    expect(row1[0]).toHaveTextContent('Progress Report 1')
     expect(row1[1]).toHaveTextContent('DUOS-00202')
     expect(row1[2]).toHaveTextContent('2023-02-01')
     expect(row1[3]).toHaveTextContent('In Progress')
@@ -198,6 +198,19 @@ describe('ElectionWithMemberVotesTable', () => {
     expect(container.querySelectorAll('.row-data-0 [role="cell"]')[1]).toHaveTextContent('DUOS-00202')
     expect(container.querySelectorAll('.row-data-1 [role="cell"]')[1]).toHaveTextContent('DUOS-00303')
     expect(container.querySelectorAll('.row-data-2 [role="cell"]')[1]).toHaveTextContent('DUOS-00404')
+  })
+
+  it('sorts by request type when its header is clicked', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
+
+    const requestTypeSortButton = container.querySelectorAll('.cell-sort')[0]
+    expect(requestTypeSortButton).toHaveTextContent('Request Type')
+    await user.click(requestTypeSortButton)
+
+    expect(container.querySelectorAll('.row-data-0 [role="cell"]')[0]).toHaveTextContent('Initial DAR')
+    expect(container.querySelectorAll('.row-data-1 [role="cell"]')[0]).toHaveTextContent('Progress Report 1')
+    expect(container.querySelectorAll('.row-data-2 [role="cell"]')[0]).toHaveTextContent('Progress Report 2')
   })
 
   it('expands and collapses election rows', async () => {

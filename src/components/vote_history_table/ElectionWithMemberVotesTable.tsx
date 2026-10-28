@@ -103,9 +103,11 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
               className={`sort-icon dar-expand-dropdown-arrow ${electionIsExpanded(election.electionId) ? 'sort-icon-up' : 'sort-icon-down'}`}
               onClick={() => toggleElectionExpansion(election.electionId)}
             />
-            {election.progressReport ? 'Progress Report' : 'Initial DAR'}
+            {election.requestType}
           </div>
         ),
+        // The cell renders an icon too, so sort on the label alone
+        value: election.requestType,
         cellStyle: { width: '10%' },
         label: 'Request Type',
         id: i,

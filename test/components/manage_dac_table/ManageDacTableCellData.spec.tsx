@@ -31,6 +31,10 @@ describe('ManageDacTableCellData', () => {
       expect(link).toHaveTextContent('Test DAC')
     })
 
+    it('sorts by the DAC name rather than the rendered link', () => {
+      expect(nameCellData({ name: 'Test DAC', dacId: 42 }).value).toBe('Test DAC')
+    })
+
     it('falls back to "- -" when name is empty', () => {
       const cell = nameCellData({ name: '', dacId: 1 })
       renderNode(cell.data)
