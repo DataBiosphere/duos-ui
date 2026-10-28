@@ -76,6 +76,10 @@ import type { FastifyRequest } from 'fastify'
  *     the sidecar in the same pod. A pod that reaches the app port directly
  *     has a `10.x` peer, so its `X-Real-IP` is ignored. The header must also
  *     hold exactly one IP literal; Node joins a repeated header with `, `.
+ *     Loopback is not proof that the load balancer set the header: the
+ *     sidecar does not touch `X-Real-IP`, so a pod that calls the sidecar's
+ *     own port passes its chosen value through. Consent's `ClientIpResolver`
+ *     has the same gap. Only callers outside the cluster are covered.
  *   - **Otherwise the key is `request.ip`.** That keeps local dev and
  *     docker-compose (no `X-Real-IP`) working as before. `request.ip` honors
  *     `X-Forwarded-For` because `TRUST_PROXY` (config.ts) names the trusted
