@@ -4,6 +4,8 @@ import { Link } from 'react-router'
 import { ConfirmationDialog } from '../../components/modals/ConfirmationDialog'
 import { FormFieldTitle } from '../../components/forms/forms'
 import { FileStorageObject } from 'src/types/model'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 export type DraftFileUploadProps = {
   description: string
@@ -53,10 +55,12 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
           <Link
             style={{ marginLeft: '15px' }}
             id={`${defaultValue.fileStorageObjectId}_delete`}
-            className="glyphicon glyphicon-trash"
+            aria-label={`Delete ${defaultValue.fileName}`}
             onClick={() => handleDeleteClick()}
             to="#"
-          />
+          >
+            <DeleteOutlinedIcon sx={inlineIconSx} />
+          </Link>
           <ConfirmationDialog
             title="Delete Attachment"
             openState={open}

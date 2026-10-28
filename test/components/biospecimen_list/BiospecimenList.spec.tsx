@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeAll } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, waitFor } from '@testing-library/react'
+import { render, waitFor, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Modal from 'react-modal'
 import BiospecimenList from 'src/components/biospecimen_list/BiospecimenList'
@@ -75,7 +75,7 @@ describe('BiospecimenList component', () => {
   it('deletes a biospecimen via modal confirmation', async () => {
     const user = userEvent.setup()
     const deleteAction = vi.fn()
-    const { container } = render(
+    render(
       <BiospecimenSummary
         biospecimen={sampleBiospecimen}
         columnsToShow={['donorId', 'specimenType', 'preservationMethod']}
@@ -84,7 +84,7 @@ describe('BiospecimenList component', () => {
         disabled={false}
       />,
     )
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    await user.click(screen.getByRole('button', { name: 'Delete Biospecimen' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!

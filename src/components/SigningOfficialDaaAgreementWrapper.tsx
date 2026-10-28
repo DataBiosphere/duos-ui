@@ -8,6 +8,8 @@ import Acknowledgments, { acceptAcknowledgments } from 'src/libs/acknowledgement
 import { Styles } from 'src/libs/theme'
 import { NIHDataUseCertificationAgreement } from 'src/components/external_docs/NIHDataUseCertificationAgreement'
 import { extractError } from 'src/utils/ErrorUtils'
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 interface SigningOfficialDaaAgreementWrapperProps {
   readonly isDataSubmitterTab: boolean
@@ -50,14 +52,14 @@ export const SigningOfficialDaaAgreementWrapper = (props: SigningOfficialDaaAgre
           {isDataSubmitterTab
             ? (
                 <a target="_blank" rel="noreferrer" href={DataSubmitterAgreementLink} className="button button-white">
-                  <span className="glyphicon glyphicon-download" />
+                  <FileDownloadOutlinedIcon sx={inlineIconSx} />
                   {' '}
                   DUOS Data Submitter Agreement
                 </a>
               )
             : (
                 <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink} className="button button-white">
-                  <span className="glyphicon glyphicon-download" />
+                  <FileDownloadOutlinedIcon sx={inlineIconSx} />
                   {' '}
                   Broad Library Card Agreement
                 </a>
@@ -70,7 +72,7 @@ export const SigningOfficialDaaAgreementWrapper = (props: SigningOfficialDaaAgre
                 <div>
                   <div style={{ marginBottom: '25px' }}>
                     <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink} className="button button-white">
-                      <span className="glyphicon glyphicon-download" />
+                      <FileDownloadOutlinedIcon sx={inlineIconSx} />
                       {' '}
                       NIH Library Card Agreement
                     </a>

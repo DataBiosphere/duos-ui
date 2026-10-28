@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import CollaboratorList from 'src/components/collaborator_list/CollaboratorList'
 import { Collaborator } from 'src/types/model'
 
@@ -100,8 +100,7 @@ describe('CollaboratorList - Component Tests', () => {
 
     expect(document.querySelectorAll('.collaborator-summary-card')).toHaveLength(2)
 
-    const trashIcon = document.querySelectorAll('.glyphicon-trash')[0]
-    fireEvent.click(trashIcon.parentElement as HTMLElement)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete collaborator' })[0])
 
     const deleteButton = document.querySelector('.delete-modal-primary-button') as HTMLElement
     fireEvent.click(deleteButton)
@@ -260,9 +259,9 @@ describe('CollaboratorList - Component Tests', () => {
 
     // Should show view icon (eye) instead of edit/delete icons
     const firstCard = document.querySelectorAll('.collaborator-summary-card')[0]
-    expect(firstCard.querySelector('.glyphicon-eye-open')).toBeTruthy()
+    expect(within(firstCard as HTMLElement).getByRole('button', { name: 'View collaborator' })).toBeInTheDocument()
     expect(firstCard.querySelector('.glyphicon-pencil')).toBeNull()
-    expect(firstCard.querySelector('.glyphicon-trash')).toBeNull()
+    expect(within(firstCard as HTMLElement).queryByRole('button', { name: 'Delete collaborator' })).toBeNull()
   })
 
   it('opens read-only collaborator details when view icon is clicked', () => {
@@ -274,11 +273,10 @@ describe('CollaboratorList - Component Tests', () => {
     render(<CollaboratorList {...readOnlyProps} />)
 
     expect(document.querySelectorAll('.collaborator-summary-card')).toHaveLength(2)
-    expect(document.querySelector('.glyphicon-eye-open')).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: 'View collaborator' })).toHaveLength(2)
 
     // Click the view icon
-    const eyeIcon = document.querySelectorAll('.glyphicon-eye-open')[0]
-    fireEvent.click(eyeIcon.parentElement as HTMLElement)
+    fireEvent.click(screen.getAllByRole('button', { name: 'View collaborator' })[0])
 
     // Should open read-only view with correct header
     expect(screen.getByText(`View ${mockCollaborators[0].name} Information`)).toBeInTheDocument()
