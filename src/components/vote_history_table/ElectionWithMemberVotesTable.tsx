@@ -106,6 +106,8 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
             {election.requestType}
           </div>
         ),
+        // The cell renders an icon too, so sort on the label alone
+        value: election.requestType,
         cellStyle: { width: '10%' },
         label: 'Request Type',
         id: i,

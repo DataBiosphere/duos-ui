@@ -200,6 +200,19 @@ describe('ElectionWithMemberVotesTable', () => {
     expect(container.querySelectorAll('.row-data-2 [role="cell"]')[1]).toHaveTextContent('DUOS-00404')
   })
 
+  it('sorts by request type when its header is clicked', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
+
+    const requestTypeSortButton = container.querySelectorAll('.cell-sort')[0]
+    expect(requestTypeSortButton).toHaveTextContent('Request Type')
+    await user.click(requestTypeSortButton)
+
+    expect(container.querySelectorAll('.row-data-0 [role="cell"]')[0]).toHaveTextContent('Initial DAR')
+    expect(container.querySelectorAll('.row-data-1 [role="cell"]')[0]).toHaveTextContent('Progress Report 1')
+    expect(container.querySelectorAll('.row-data-2 [role="cell"]')[0]).toHaveTextContent('Progress Report 2')
+  })
+
   it('expands and collapses election rows', async () => {
     const user = userEvent.setup()
     const { container } = render(<ElectionWithMemberVotesTable electionsWithMemberVotes={electionHistory} />)
