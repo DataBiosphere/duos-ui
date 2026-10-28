@@ -17,6 +17,7 @@ import PublishIcon from '@mui/icons-material/Publish'
 import { UploadDaaModal } from 'src/components/modals/UploadDaaModal'
 import { CreateDacUserModal } from 'src/components/modals/CreateDacUserModal'
 import { Storage } from 'src/libs/storage'
+import { refreshCurrentUserIfAffected } from 'src/libs/auth/refreshCurrentUser'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import type { DAAObject, DacObject, DuosUser, SimplifiedDuosUser } from 'src/types/model'
 import { DaaTabs } from 'src/components/DaaTabs'
@@ -355,6 +356,14 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
 
     const allOperations = buildSaveOperations(currentDacId, dacIdParam === undefined)
     const responses = await PromiseSerial(allOperations)
+    // Before closeHandler navigates: an editor who changed their own DAC role
+    // must land on the next page with the new roles (DT-505).
+    await refreshCurrentUserIfAffected([
+      ...state.chairIdsToAdd,
+      ...state.chairIdsToRemove,
+      ...state.memberIdsToAdd,
+      ...state.memberIdsToRemove,
+    ])
     const errorCodes = responses.filter(
       r => JSON.stringify(r) !== '200' && JSON.stringify((r as { status?: number })?.status) !== '201',
     )

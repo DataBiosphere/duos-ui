@@ -9,6 +9,7 @@ import { getSearchFilterFunctions, hasDataSubmitterRole, Notifications, ROLES } 
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import { LibraryCard } from 'src/libs/ajax/LibraryCard'
 import { User } from 'src/libs/ajax/User'
+import { refreshCurrentUserIfAffected } from 'src/libs/auth/refreshCurrentUser'
 import { LibraryCardAgreementTermsDownload } from 'src/components/LibraryCardAgreementTermsDownload'
 import { processLibraryCards } from 'src/utils/LibraryCardUtils'
 import { extractError } from 'src/utils/ErrorUtils'
@@ -426,6 +427,8 @@ export default function SigningOfficialTable(props: SigningOfficialTableProps): 
         ? await User.addRoleToUser(userId, ROLES.dataSubmitter.roleId)
         : await User.deleteRoleFromUser(userId, ROLES.dataSubmitter.roleId)
       updateResearchers(current => applyDataSubmitterRole(current, userId, shouldIssue, updatedUser))
+      // A signing official can change their own Data Submitter role (DT-505).
+      await refreshCurrentUserIfAffected([userId])
       setShowConfirmation(false)
       Notifications.showSuccess({ text: `${shouldIssue ? 'Issued' : 'Removed'} ${messageName} ${shouldIssue ? 'as' : 'as a'} Data Submitter` })
     }

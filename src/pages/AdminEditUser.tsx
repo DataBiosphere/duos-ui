@@ -2,6 +2,7 @@ import { concat, filter, includes, isEmpty, map, union, matches as lodashMatches
 import React, { useEffect, useRef, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
 import { Notifications, ROLES } from 'src/libs/utils'
+import { refreshCurrentUserIfAffected } from 'src/libs/auth/refreshCurrentUser'
 import { ResearcherReview } from 'src/components/ResearcherReview'
 import editUserIcon from 'src/images/icon_edit_user.png'
 import { PageHeading } from 'src/components/PageHeading'
@@ -109,6 +110,8 @@ export const AdminEditUser = () => {
     try {
       await User.update(user, uid)
       await updateRolesIfDifferent(uid, state.updatedRoles)
+      // An admin who edited their own roles must navigate with them (DT-505).
+      await refreshCurrentUserIfAffected([uid])
       navigate('/admin_manage_users')
     }
     catch (error) {

@@ -6,6 +6,7 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import { AdminEditUser } from 'src/pages/AdminEditUser'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
+import { refreshCurrentUserIfAffected } from 'src/libs/auth/refreshCurrentUser'
 import { DuosUser, UserRole } from 'src/types/model'
 
 const mockNavigate = vi.fn()
@@ -26,6 +27,8 @@ vi.mock('src/libs/ajax/User', () => ({
     deleteRoleFromUser: vi.fn(),
   },
 }))
+
+vi.mock('src/libs/auth/refreshCurrentUser')
 
 vi.mock('src/libs/utils', async (importActual) => {
   const actual = await importActual<typeof import('src/libs/utils')>()
@@ -171,6 +174,17 @@ describe('AdminEditUser', () => {
     })
     await waitFor(() => expect(User.update).toHaveBeenCalledTimes(1))
     expect(mockNavigate).toHaveBeenCalledWith('/admin_manage_users')
+  })
+
+  it('refreshes the stored user with the edited user before it navigates', async () => {
+    vi.mocked(User.getById).mockResolvedValue(mockUser)
+    await act(async () => renderWithRoute())
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    })
+    await waitFor(() => expect(refreshCurrentUserIfAffected).toHaveBeenCalledWith([mockUser.userId]))
+    expect(vi.mocked(refreshCurrentUserIfAffected).mock.invocationCallOrder[0])
+      .toBeLessThan(mockNavigate.mock.invocationCallOrder[0])
   })
 
   it('shows an error notification when save fails', async () => {
