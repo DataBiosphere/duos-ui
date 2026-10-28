@@ -33,7 +33,7 @@ import { Countries } from 'src/libs/ajax/Countries'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview'
 import { buildVoteRecords, getDarStatus } from 'src/pages/dar_application/votingHistoryData'
-import { progressReportNumber } from 'src/utils/DarCollectionUtils'
+import { progressReportNumber } from 'src/utils/ProgressReportUtils'
 import { useNavigate, useParams } from 'react-router'
 import {
   CombinedDataAccessRequest,

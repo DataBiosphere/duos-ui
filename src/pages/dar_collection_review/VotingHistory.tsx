@@ -4,7 +4,7 @@ import ElectionWithMemberVotesTable from 'src/components/vote_history_table/Elec
 import VoteHistoryTabs, { voteHistoryTabId, voteHistoryTabPanelId } from 'src/components/vote_history_table/VoteHistoryTabs'
 import { Styles } from 'src/libs/theme'
 import { DarCollection, DataAccessRequest, Election, ElectionWithMemberVotes, Vote, VoteHistoryRow } from 'src/types/model'
-import { requestTypeLabel } from 'src/utils/DarCollectionUtils'
+import { requestTypeLabel } from 'src/utils/ProgressReportUtils'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
 
 const VOTE_HISTORY_TABS = {

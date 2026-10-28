@@ -1,6 +1,6 @@
 import { ElectionStatus, VOTE_TYPES, VoteDecision } from 'src/utils/DarUtils'
 import { DataAccessRequest as DataAccessRequestModel, Dataset, Election } from 'src/types/model'
-import { requestTypeLabel } from 'src/utils/DarCollectionUtils'
+import { requestTypeLabel } from 'src/utils/ProgressReportUtils'
 
 const NO_ELECTION_STATUS = 'Awaiting Election Opening'
 const NO_FINAL_VOTE_STATUS = 'Awaiting Final Vote'
