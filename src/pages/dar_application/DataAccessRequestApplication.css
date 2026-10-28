@@ -27,11 +27,6 @@ a.btn-secondary {
   line-height: 18px;
 }
 
-.btn-download-pdf .glyphicon {
-  margin-right: 10px;
-  font-size: 16px;
-}
-
 .fileUpload.btn-download-pdf {
   margin-bottom: 10px;
 }
