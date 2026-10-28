@@ -12,15 +12,15 @@ export type Clock = () => Date
 
 export const systemClock: Clock = () => new Date()
 
-/** A window with no `startDate` is open from the past, for items that show until they end. */
-export type DateWindow = { startDate?: string, endDate: string }
+/** Both dates are required, as the schema requires them on every dated item. */
+export type DateWindow = { startDate: string, endDate: string }
 
 /** Today's UTC calendar date as `YYYY-MM-DD`. */
 export const utcToday = (clock: Clock = systemClock): string => clock().toISOString().slice(0, 10)
 
 // `YYYY-MM-DD` strings compare in calendar order, so no date parsing is needed.
 const includesDay = ({ startDate, endDate }: DateWindow, day: string) =>
-  (startDate === undefined || startDate <= day) && day <= endDate
+  startDate <= day && day <= endDate
 
 export const isInDateWindow = (window: DateWindow, clock: Clock = systemClock): boolean =>
   includesDay(window, utcToday(clock))

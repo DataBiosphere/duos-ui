@@ -33,13 +33,6 @@ describe('isInDateWindow', () => {
     expect(isInDateWindow(oneDay, at('2026-03-01T23:59:59.999Z'))).toBe(true)
     expect(isInDateWindow(oneDay, at('2026-03-02T00:00:00Z'))).toBe(false)
   })
-
-  it('treats a window without startDate as open until it ends', () => {
-    const untilEnd = { endDate: '2026-06-03' }
-    expect(isInDateWindow(untilEnd, at('2020-01-01T00:00:00Z'))).toBe(true)
-    expect(isInDateWindow(untilEnd, at('2026-06-03T23:59:59.999Z'))).toBe(true)
-    expect(isInDateWindow(untilEnd, at('2026-06-04T00:00:00Z'))).toBe(false)
-  })
 })
 
 describe('filterByDateWindow', () => {
