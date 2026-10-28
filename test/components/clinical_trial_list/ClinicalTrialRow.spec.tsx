@@ -50,7 +50,7 @@ describe('ClinicalTrialRow', () => {
   it('shows summary when not in edit mode and triggers edit', async () => {
     const user = userEvent.setup()
     const editFn = vi.fn()
-    const { container } = render(
+    render(
       <ClinicalTrialRow
         id={0}
         editMode={false}
@@ -65,7 +65,7 @@ describe('ClinicalTrialRow', () => {
       />,
     )
     expect(screen.getByText(sampleTrial.title)).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit clinical trial' }))
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 
@@ -112,7 +112,7 @@ describe('ClinicalTrialRow', () => {
   it('triggers viewAction when view button is clicked', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <ClinicalTrialRow
         id={0}
         editMode={false}
@@ -128,7 +128,7 @@ describe('ClinicalTrialRow', () => {
         disabled={false}
       />,
     )
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View clinical trial' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })

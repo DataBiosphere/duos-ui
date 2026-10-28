@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import CollaboratorList from 'src/components/collaborator_list/CollaboratorList'
 import { Collaborator } from 'src/types/model'
 
@@ -78,10 +78,9 @@ describe('CollaboratorList - Component Tests', () => {
     expect(screen.getByText(mockCollaborators[0].name)).toBeInTheDocument()
 
     const firstCard = document.querySelectorAll('.collaborator-summary-card')[0]
-    expect(firstCard.querySelector('.glyphicon-pencil')).toBeTruthy()
+    expect(within(firstCard as HTMLElement).queryByRole('button', { name: 'Edit collaborator' })).toBeTruthy()
 
-    const pencilIcon = document.querySelectorAll('.glyphicon-pencil')[0]
-    fireEvent.click(pencilIcon.parentElement as HTMLElement)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit collaborator' })[0])
 
     expect(screen.getByText(`Edit ${mockCollaborators[0].name} Information`)).toBeInTheDocument()
     expect((document.getElementById('name') as HTMLInputElement).value).toBe(mockCollaborators[0].name)
@@ -100,8 +99,7 @@ describe('CollaboratorList - Component Tests', () => {
 
     expect(document.querySelectorAll('.collaborator-summary-card')).toHaveLength(2)
 
-    const trashIcon = document.querySelectorAll('.glyphicon-trash')[0]
-    fireEvent.click(trashIcon.parentElement as HTMLElement)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete collaborator' })[0])
 
     const deleteButton = document.querySelector('.delete-modal-primary-button') as HTMLElement
     fireEvent.click(deleteButton)
@@ -153,8 +151,7 @@ describe('CollaboratorList - Component Tests', () => {
       />,
     )
 
-    const pencilIcon = document.querySelectorAll('.glyphicon-pencil')[0]
-    fireEvent.click(pencilIcon.parentElement as HTMLElement)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit collaborator' })[0])
 
     const nameInput = document.getElementById('name') as HTMLInputElement
     fireEvent.change(nameInput, { target: { value: 'Updated Name' } })
@@ -212,8 +209,7 @@ describe('CollaboratorList - Component Tests', () => {
   it('clears edit state after a successful edit', () => {
     render(<CollaboratorList {...defaultProps} />)
 
-    const pencilIcon = document.querySelectorAll('.glyphicon-pencil')[0]
-    fireEvent.click(pencilIcon.parentElement as HTMLElement)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit collaborator' })[0])
     expect(screen.getByText(`Edit ${mockCollaborators[0].name} Information`)).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('Save'))
@@ -225,8 +221,8 @@ describe('CollaboratorList - Component Tests', () => {
   it('maintains proper edit state when editing multiple collaborators', () => {
     render(<CollaboratorList {...defaultProps} />)
 
-    const pencilIcons = document.querySelectorAll('.glyphicon-pencil')
-    fireEvent.click(pencilIcons[0].parentElement as HTMLElement)
+    const editButtons = screen.getAllByRole('button', { name: 'Edit collaborator' })
+    fireEvent.click(editButtons[0])
     expect(screen.getByText(`Edit ${mockCollaborators[0].name} Information`)).toBeInTheDocument()
 
     expect(screen.getByText(mockCollaborators[1].name)).toBeInTheDocument()
@@ -236,8 +232,8 @@ describe('CollaboratorList - Component Tests', () => {
     expect(screen.getByText(mockCollaborators[0].name)).toBeInTheDocument()
     expect(screen.getByText(mockCollaborators[1].name)).toBeInTheDocument()
 
-    const pencilIconsAfter = document.querySelectorAll('.glyphicon-pencil')
-    fireEvent.click(pencilIconsAfter[1].parentElement as HTMLElement)
+    const editButtonsAfter = screen.getAllByRole('button', { name: 'Edit collaborator' })
+    fireEvent.click(editButtonsAfter[1])
 
     expect(screen.getByText(mockCollaborators[0].name)).toBeInTheDocument()
     expect(screen.getByText(`Edit ${mockCollaborators[1].name} Information`)).toBeInTheDocument()
@@ -260,9 +256,9 @@ describe('CollaboratorList - Component Tests', () => {
 
     // Should show view icon (eye) instead of edit/delete icons
     const firstCard = document.querySelectorAll('.collaborator-summary-card')[0]
-    expect(firstCard.querySelector('.glyphicon-eye-open')).toBeTruthy()
-    expect(firstCard.querySelector('.glyphicon-pencil')).toBeNull()
-    expect(firstCard.querySelector('.glyphicon-trash')).toBeNull()
+    expect(within(firstCard as HTMLElement).queryByRole('button', { name: 'View collaborator' })).toBeTruthy()
+    expect(within(firstCard as HTMLElement).queryByRole('button', { name: 'Edit collaborator' })).toBeNull()
+    expect(within(firstCard as HTMLElement).queryByRole('button', { name: 'Delete collaborator' })).toBeNull()
   })
 
   it('opens read-only collaborator details when view icon is clicked', () => {
@@ -274,11 +270,10 @@ describe('CollaboratorList - Component Tests', () => {
     render(<CollaboratorList {...readOnlyProps} />)
 
     expect(document.querySelectorAll('.collaborator-summary-card')).toHaveLength(2)
-    expect(document.querySelector('.glyphicon-eye-open')).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: 'View collaborator' })).toHaveLength(2)
 
     // Click the view icon
-    const eyeIcon = document.querySelectorAll('.glyphicon-eye-open')[0]
-    fireEvent.click(eyeIcon.parentElement as HTMLElement)
+    fireEvent.click(screen.getAllByRole('button', { name: 'View collaborator' })[0])
 
     // Should open read-only view with correct header
     expect(screen.getByText(`View ${mockCollaborators[0].name} Information`)).toBeInTheDocument()

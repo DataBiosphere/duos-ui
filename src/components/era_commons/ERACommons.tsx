@@ -9,6 +9,8 @@ import { extractEraAuthenticationState, nihAccountLabel } from 'src/components/e
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 import { DuosUser } from 'src/types/model'
+import HighlightOffIcon from '@mui/icons-material/HighlightOff'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 // -------------------- Types --------------------
 
@@ -152,8 +154,8 @@ export default function ERACommons({
                   minWidth: '10px',
                 }}
               >
-                <span
-                  className="glyphicon glyphicon-remove-circle"
+                <HighlightOffIcon
+                  sx={inlineIconSx}
                   data-tooltip-id="tip_clear_era_commons_link"
                 />
               </AsyncSpinnerButton>

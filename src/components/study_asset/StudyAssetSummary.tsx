@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
 import { DeletePresentationOrPublication } from 'src/components/presentation_publication_shared/DeletePresentationOrPublication'
 import { renderColumnContent } from 'src/utils/RenderUtils'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 interface StudyAssetSummaryProps<T> {
   readonly asset: T
@@ -54,15 +58,15 @@ export default function StudyAssetSummary<T>({
       })}
       <div className="collaborator-summary-edit-delete-buttons">
         <button type="button" style={{ marginLeft: 10 }} onClick={() => viewAction?.()} aria-label={`View ${objectName}`}>
-          <span className="glyphicon glyphicon-eye-open caret-margin collaborator-view-icon" aria-hidden="true" />
+          <VisibilityOutlinedIcon className="caret-margin collaborator-view-icon" sx={inlineIconSx} />
           <span style={{ marginLeft: '1rem' }}></span>
         </button>
         <button type="button" style={{ marginLeft: 10, ...editButtonStyle }} onClick={() => !disabled && editAction()} disabled={disabled} aria-label={`Edit ${objectName}`}>
-          <span className="glyphicon glyphicon-pencil caret-margin collaborator-edit-icon" aria-hidden="true" />
+          <EditOutlinedIcon className="caret-margin collaborator-edit-icon" sx={inlineIconSx} />
           <span style={{ marginLeft: '1rem' }}></span>
         </button>
         <button type="button" style={{ marginLeft: 10, ...deleteButtonStyle }} onClick={() => !(disabled || disableDelete) && setShowDeleteModal(true)} disabled={disabled || disableDelete} aria-label={`Delete ${objectName}`}>
-          <span className="glyphicon glyphicon-trash caret-margin collaborator-delete-icon" aria-hidden="true" />
+          <DeleteOutlinedIcon className="caret-margin collaborator-delete-icon" sx={inlineIconSx} />
           <span style={{ marginLeft: '1rem' }}></span>
         </button>
       </div>

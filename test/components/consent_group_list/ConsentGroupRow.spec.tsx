@@ -41,7 +41,7 @@ describe('ConsentGroupRow', () => {
   it('shows summary when not in edit mode and triggers editAction', async () => {
     const user = userEvent.setup()
     const editFn = vi.fn()
-    const { container } = render(
+    render(
       <MemoryRouter>
         <ConsentGroupRow
           id={0}
@@ -58,7 +58,7 @@ describe('ConsentGroupRow', () => {
       </MemoryRouter>,
     )
     expect(screen.getByText(sampleConsentGroup.consentGroupName)).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit consent group' }))
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 
@@ -109,7 +109,7 @@ describe('ConsentGroupRow', () => {
   it('triggers viewAction when view button is clicked', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <MemoryRouter>
         <ConsentGroupRow
           id={0}
@@ -126,7 +126,7 @@ describe('ConsentGroupRow', () => {
         />
       </MemoryRouter>,
     )
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View consent group' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })

@@ -41,7 +41,7 @@ describe('IntellectualPropertyRow', () => {
   it('shows summary when not in edit mode and triggers editAction', async () => {
     const user = userEvent.setup()
     const editFn = vi.fn()
-    const { container } = render(
+    render(
       <IntellectualPropertyRow
         id={0}
         editMode={false}
@@ -56,7 +56,7 @@ describe('IntellectualPropertyRow', () => {
       />,
     )
     expect(screen.getByText(sampleIp.title)).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit intellectual property' }))
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 
@@ -103,7 +103,7 @@ describe('IntellectualPropertyRow', () => {
   it('triggers viewAction when view button is clicked', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <IntellectualPropertyRow
         id={0}
         editMode={false}
@@ -118,7 +118,7 @@ describe('IntellectualPropertyRow', () => {
         disabled={false}
       />,
     )
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View intellectual property' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })
