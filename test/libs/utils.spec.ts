@@ -313,6 +313,18 @@ describe('processElectionStatus utils - tests', () => {
     expect(rowData[2][3].data).toBe(true)
   })
 
+  it('sortVisibleTable sorts on the first column', () => {
+    const rowData: TableCell[][] = [
+      [{ data: 'Progress Report 2', label: 'Request Type', id: 0 }],
+      [{ data: 'Initial DAR', label: 'Request Type', id: 1 }],
+      [{ data: 'Progress Report 1', label: 'Request Type', id: 2 }],
+    ]
+
+    sortVisibleTable({ list: rowData, sort: { colIndex: 0, dir: 1 } })
+
+    expect(rowData.map(row => row[0].data)).toEqual(['Initial DAR', 'Progress Report 1', 'Progress Report 2'])
+  })
+
   it('sortVisibleTable should not error when no data is passed', () => {
     expect(() => sortVisibleTable({ list: undefined, sort: { colIndex: 1, dir: -1 } })).not.toThrow()
   })

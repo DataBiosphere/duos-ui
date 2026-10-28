@@ -788,7 +788,8 @@ export const sortVisibleTable = <T extends TableCell = TableCell>({
   list: T[][] | undefined
   sort: SortConfig | undefined
 }): T[][] => {
-  if (!list?.length || !sort?.colIndex) {
+  // Column 0 is a real column, so test for a missing sort rather than a falsy index
+  if (!list?.length || !sort) {
     return list ?? []
   }
   list.sort((a, b) => {

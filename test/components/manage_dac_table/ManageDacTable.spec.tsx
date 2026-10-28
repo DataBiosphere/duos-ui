@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { ManageDacTable } from 'src/components/manage_dac_table/ManageDacTable'
 import { DAC } from 'src/libs/ajax/DAC'
-import { Notifications } from 'src/libs/utils'
+import { Notifications, recalculateVisibleTable } from 'src/libs/utils'
 import type { DacObject, Dataset } from 'src/types/model'
 
 vi.mock('src/libs/ajax/DAC', () => ({
@@ -147,5 +147,19 @@ describe('ManageDacTable', () => {
       render(<ManageDacTable {...baseProps} dacs={[]} />)
     })
     expect(screen.queryAllByTestId('table-row')).toHaveLength(0)
+  })
+
+  it('sorts by DAC name, A to Z, by default', async () => {
+    await act(async () => {
+      render(<ManageDacTable {...baseProps} />)
+    })
+    expect(recalculateVisibleTable).toHaveBeenCalledWith(expect.objectContaining({ sort: { colIndex: 0, dir: 1 } }))
+  })
+
+  it('sorts by DAC name, A to Z, when the name column is not first', async () => {
+    await act(async () => {
+      render(<ManageDacTable {...baseProps} columns={['description', 'name']} />)
+    })
+    expect(recalculateVisibleTable).toHaveBeenCalledWith(expect.objectContaining({ sort: { colIndex: 1, dir: 1 } }))
   })
 })
