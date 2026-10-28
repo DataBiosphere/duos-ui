@@ -103,7 +103,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
               className={`sort-icon dar-expand-dropdown-arrow ${electionIsExpanded(election.electionId) ? 'sort-icon-up' : 'sort-icon-down'}`}
               onClick={() => toggleElectionExpansion(election.electionId)}
             />
-            {election.progressReport ? 'Progress Report' : 'Initial DAR'}
+            {election.requestType}
           </div>
         ),
         cellStyle: { width: '10%' },

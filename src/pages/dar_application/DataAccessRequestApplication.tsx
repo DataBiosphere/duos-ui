@@ -33,6 +33,7 @@ import { Countries } from 'src/libs/ajax/Countries'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview'
 import { buildVoteRecords, getDarStatus } from 'src/pages/dar_application/votingHistoryData'
+import { progressReportNumber } from 'src/utils/DarCollectionUtils'
 import { useNavigate, useParams } from 'react-router'
 import {
   CombinedDataAccessRequest,
@@ -127,8 +128,8 @@ const buildApplicationTabs = ({ readOnly, isProgressReportApplication, dars, dar
   const draftTab = isProgressReportApplication
     ? [{ name: `Progress Report ${dars.length}`, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
     : []
-  const reportTabs = dars.map((_dar, index) => {
-    const whichPRIsThis = dars.length - index - 1
+  const reportTabs = dars.map((dar, index) => {
+    const whichPRIsThis = progressReportNumber(dar, dars)
     const itemLabel = index === dars.length - 1 ? darCode : `Progress Report ${whichPRIsThis}`
     return { name: itemLabel ?? '', id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
   })
@@ -172,7 +173,7 @@ const PreviousProgressReports = ({ dars, datasets, researcher, countriesOfOperat
   <div className="dar-summary">
     <h3>Previous Updates</h3>
     {dars.slice(0, -1).map((dar, index) => {
-      const whichPRIsThis = dars.length - index - 1
+      const whichPRIsThis = progressReportNumber(dar, dars)
       const sectionId = `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`
       return (
         <div key={dar.referenceId} id={sectionId} {...panelProps(sectionId)}>

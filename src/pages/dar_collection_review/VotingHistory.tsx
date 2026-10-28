@@ -4,6 +4,7 @@ import ElectionWithMemberVotesTable from 'src/components/vote_history_table/Elec
 import VoteHistoryTabs, { voteHistoryTabId, voteHistoryTabPanelId } from 'src/components/vote_history_table/VoteHistoryTabs'
 import { Styles } from 'src/libs/theme'
 import { DarCollection, DataAccessRequest, Election, ElectionWithMemberVotes, Vote, VoteHistoryRow } from 'src/types/model'
+import { requestTypeLabel } from 'src/utils/DarCollectionUtils'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
 
 const VOTE_HISTORY_TABS = {
@@ -65,8 +66,10 @@ const extractChairVotes = (darCollection: DarCollection, filteredDatasetIds: num
   }
 
   const votesByRole: VoteHistoryRow[] = []
+  const collectionDars = Object.values(darCollection.dars)
 
-  Object.values(darCollection.dars).forEach((dar: DataAccessRequest) => {
+  collectionDars.forEach((dar: DataAccessRequest) => {
+    const requestType = requestTypeLabel(dar, collectionDars)
     Object.values(dar.elections ?? [])
       .filter((election: Election) => election.electionType == 'DataAccess' && filteredDatasetIds.includes(election.datasetId))
       .forEach((election: Election) => {
@@ -76,7 +79,7 @@ const extractChairVotes = (darCollection: DarCollection, filteredDatasetIds: num
             votesByRole.push({
               ...vote,
               datasetIdentifier: dataset?.datasetIdentifier || `Dataset-${election.datasetId}`,
-              progressReport: dar.progressReport,
+              requestType,
               electionDate: election.createDate,
             })
           }
@@ -93,8 +96,10 @@ const extractElectionsWithMemberVotes = (darCollection: DarCollection, filteredD
   }
 
   const dacMemberVotes: ElectionWithMemberVotes[] = []
+  const collectionDars = Object.values(darCollection.dars)
 
-  Object.values(darCollection.dars ?? []).forEach((dar: DataAccessRequest) => {
+  collectionDars.forEach((dar: DataAccessRequest) => {
+    const requestType = requestTypeLabel(dar, collectionDars)
     Object.values(dar.elections ?? [])
       .filter((election: Election) => election.electionType == 'DataAccess' && filteredDatasetIds.includes(election.datasetId))
       .forEach((election: Election) => {
@@ -102,7 +107,7 @@ const extractElectionsWithMemberVotes = (darCollection: DarCollection, filteredD
         const electionWithMemberVotes: ElectionWithMemberVotes = {
           ...election,
           datasetIdentifier: dataset?.datasetIdentifier || `Dataset-${election.datasetId}`,
-          progressReport: dar.progressReport,
+          requestType,
           memberVotes: [],
         }
         Object.values(election.votes ?? []).forEach((vote: Vote) => {

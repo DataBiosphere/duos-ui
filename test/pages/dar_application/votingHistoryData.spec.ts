@@ -9,7 +9,9 @@ const datasets = [
 
 // Only the fields the voting history reads are stubbed, so each fixture needs a bridging cast
 // rather than a fully-populated DAR, election and vote.
-const buildDar = (datasetIds: number[], elections: Record<string, unknown>) => ({
+const buildDar = (datasetIds: number[], elections: Record<string, unknown>, id = 1, progressReport = false) => ({
+  id,
+  progressReport,
   collectionId: 7,
   datasetIds,
   elections,
@@ -24,6 +26,24 @@ const closedElection = (datasetId: number, votes: Record<string, unknown>[], cre
 })
 
 describe('buildVoteRecords', () => {
+  it('numbers each progress report as the Full DAR tab does', () => {
+    const initial = buildDar([1], {}, 5)
+    const second = buildDar([2], {}, 9, true)
+    const first = buildDar([1], {}, 7, true)
+
+    const records = buildVoteRecords([second, first, initial], datasets)
+
+    expect(records.map(r => r.requestType).toSorted()).toEqual(['Initial DAR', 'Progress Report 1', 'Progress Report 2'])
+  })
+
+  it('orders progress reports by number when their rows tie on everything else', () => {
+    const dars = Array.from({ length: 11 }, (_, i) => buildDar([1], {}, i + 1, i > 0))
+
+    const records = buildVoteRecords(dars, datasets)
+
+    expect(records.map(r => r.requestType).slice(-2)).toEqual(['Progress Report 9', 'Progress Report 10'])
+  })
+
   it('leaves a final vote that has not been cast undated', () => {
     const dar = buildDar([1], { one: closedElection(1, [{ type: 'FINAL', vote: null, createDate: '2024-06-01T12:00:00Z' }]) })
 

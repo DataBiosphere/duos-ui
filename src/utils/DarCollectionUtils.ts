@@ -1,8 +1,19 @@
 import { Styles } from 'src/libs/theme'
 import { formatDate, Notifications } from 'src/libs/utils'
 import { Collections } from 'src/libs/ajax/Collections'
-import { DarCollectionSummary, Election, UserRoleName, Vote } from 'src/types/model'
+import { DarCollectionSummary, DataAccessRequest, Election, UserRoleName, Vote } from 'src/types/model'
 import { groupBy, isNil, cloneDeep } from 'src/utils/NodashUtil'
+
+/**
+ * A DAR's place in its collection in id order: the initial DAR is 0 and each later DAR is the
+ * next progress report. The Full DAR tab and the voting history both number reports this way.
+ */
+export const progressReportNumber = (dar: Pick<DataAccessRequest, 'id'>, collectionDars: Pick<DataAccessRequest, 'id'>[]): number =>
+  collectionDars.filter(other => other.id < dar.id).length
+
+/** 'Initial DAR', or 'Progress Report N' with the number the Full DAR tab gives that report. */
+export const requestTypeLabel = (dar: Pick<DataAccessRequest, 'id' | 'progressReport'>, collectionDars: Pick<DataAccessRequest, 'id'>[]): string =>
+  dar.progressReport ? `Progress Report ${progressReportNumber(dar, collectionDars)}` : 'Initial DAR'
 
 interface VotesByType {
   chairpersonVotes: Vote[]

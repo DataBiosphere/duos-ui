@@ -24,7 +24,7 @@ const electionWithMemberVotes1: ElectionWithMemberVotes = {
   version: 2,
   archived: false,
   votes: {},
-  progressReport: true,
+  requestType: 'Progress Report 1',
   memberVotes: [
     {
       voteId: 3,
@@ -73,7 +73,7 @@ const electionWithMemberVotes2: ElectionWithMemberVotes = {
   version: 1,
   archived: false,
   votes: {},
-  progressReport: false,
+  requestType: 'Initial DAR',
   memberVotes: [
     {
       voteId: 5,
@@ -119,7 +119,7 @@ const electionWithMemberVotes3: ElectionWithMemberVotes = {
   version: 3,
   archived: false,
   votes: {},
-  progressReport: true,
+  requestType: 'Progress Report 1',
   memberVotes: [
     {
       voteId: 7,
