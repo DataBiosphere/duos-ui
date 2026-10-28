@@ -7,6 +7,7 @@ import SigningOfficialTable from 'src/pages/signing_official_console/SigningOffi
 import { LibraryCard as LibraryCardApi } from 'src/libs/ajax/LibraryCard'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
+import { refreshCurrentUserIfAffected } from 'src/libs/auth/refreshCurrentUser'
 import { DuosUser, DuosUserWithInstitutionId, LibraryCard, UserRole } from 'src/types/model'
 
 vi.mock('src/libs/ajax/LibraryCard', () => ({
@@ -15,6 +16,8 @@ vi.mock('src/libs/ajax/LibraryCard', () => ({
     deleteLibraryCard: vi.fn(),
   },
 }))
+
+vi.mock('src/libs/auth/refreshCurrentUser')
 
 vi.mock('src/libs/ajax/User', () => ({
   User: {
@@ -421,5 +424,19 @@ describe('SigningOfficialTable', () => {
     fireEvent.click(within(row).getByRole('switch', { name: /^Submitter Status/ }))
     fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }))
     await waitFor(() => expect(User.deleteRoleFromUser).toHaveBeenCalledWith(mockResearcher1.userId, 8))
+  })
+
+  it('refreshes the stored user with the researcher whose Data Submitter role changed', async () => {
+    vi.mocked(User.addRoleToUser).mockResolvedValue(mockResearcher1)
+
+    renderTable()
+
+    const row = await rowFor(mockResearcher1.displayName)
+    fireEvent.click(within(row).getByRole('switch', { name: /^Submitter Status/ }))
+    const issueConfirm = await screen.findByRole('button', { name: 'Confirm' })
+    await waitFor(() => expect(issueConfirm).not.toBeDisabled())
+    fireEvent.click(issueConfirm)
+
+    await waitFor(() => expect(refreshCurrentUserIfAffected).toHaveBeenCalledWith([mockResearcher1.userId]))
   })
 })

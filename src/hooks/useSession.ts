@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router'
-import { SessionInfo, getSessionInfo, revalidateSessionInfo } from 'src/libs/auth/session'
+import { SESSION_CHANGED_EVENT, SessionInfo, getSessionInfo, revalidateSessionInfo } from 'src/libs/auth/session'
 
 /**
  * React view of the BFF session probe (`GET /auth/me`, cached per page load in
@@ -50,6 +50,15 @@ export const useSessionInfo = (): SessionInfo | undefined => {
       globalThis.removeEventListener('focus', revalidate)
       document.removeEventListener('visibilitychange', revalidate)
     }
+  }, [publishLatest])
+
+  // Probe again when this tab changed the signed-in profile without a
+  // navigation (announceSessionChange already dropped the cache). The new
+  // answer is a new object, so each consumer re-renders off fresh storage.
+  useEffect(() => {
+    const reprobe = () => publishLatest(getSessionInfo())
+    globalThis.addEventListener(SESSION_CHANGED_EVENT, reprobe)
+    return () => globalThis.removeEventListener(SESSION_CHANGED_EVENT, reprobe)
   }, [publishLatest])
 
   // Retire every in-flight probe on unmount so none of them publish late.
