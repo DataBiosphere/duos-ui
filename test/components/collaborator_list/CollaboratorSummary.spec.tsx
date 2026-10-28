@@ -152,15 +152,14 @@ describe('CollaboratorSummary - Component Tests', () => {
     )
 
     // Should show eye-open icon for viewing
-    expect(document.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
-    expect(document.querySelector('.glyphicon-eye-open')!.closest('a')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View collaborator' })).toBeInTheDocument()
 
     // Should not show edit or delete icons at all in read-only mode
     expect(document.querySelector('.glyphicon-pencil')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Delete collaborator' })).not.toBeInTheDocument()
 
     // Clicking the eye icon should call editAction (to open in view mode)
-    fireEvent.click(document.querySelector('.glyphicon-eye-open')!.closest('a')!)
+    fireEvent.click(screen.getByRole('button', { name: 'View collaborator' }))
     expect(editAction).toHaveBeenCalled()
 
     // Delete modal should never appear in read-only mode

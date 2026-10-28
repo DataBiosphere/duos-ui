@@ -112,7 +112,7 @@ describe('PublicationRow', () => {
   it('triggers viewAction when view button is clicked', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <PublicationRow
         id={0}
         editMode={false}
@@ -128,7 +128,7 @@ describe('PublicationRow', () => {
         disabled={false}
       />,
     )
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View publication' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })

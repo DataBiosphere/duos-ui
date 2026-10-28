@@ -139,7 +139,7 @@ describe('ConsentGroupList component', () => {
         <ConsentGroupListHarness initial={[sampleConsentGroup]} />
       </MemoryRouter>,
     )
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View consent group' }))
     expect(screen.getByText(sampleConsentGroup.consentGroupName)).toBeInTheDocument()
     expect(container.querySelector('#consentGroupName')).toBeDisabled()
     expect(container.querySelector('.collaborator-form-add-save-button')).not.toBeInTheDocument()
@@ -153,10 +153,10 @@ describe('ConsentGroupList component', () => {
         <ConsentGroupListHarness initial={[sampleConsentGroup]} />
       </MemoryRouter>,
     )
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View consent group' }))
     await user.click(container.querySelector('.collaborator-form-cancel-button')!)
     expect(container.querySelector('#consentGroupName')).not.toBeInTheDocument()
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View consent group' })).toBeInTheDocument()
   })
 
   it('adds a new consent group', async () => {
