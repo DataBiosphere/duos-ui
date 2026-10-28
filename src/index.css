@@ -1145,9 +1145,6 @@ a .editable:hover, a .enabled:hover {
 .btn-primary[disabled] {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.btn-primary[disabled] {
   color: white !important;
 }
 
