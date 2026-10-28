@@ -958,6 +958,39 @@ describe('auth endpoint rate limiting', () => {
     await app.close()
   })
 
+  // The other limited routes set no keyGenerator, so they inherit the plugin's
+  // rateLimitKey. A route keyGenerator would override it (Object.assign).
+  it.each([
+    // A throttled callback redirects to the SPA; see the test above.
+    { route: 'GET /auth/callback', limited: 302, method: 'GET' as const, url: '/auth/callback', headers: {}, payload: undefined },
+    {
+      route: 'POST /csp-report',
+      limited: 429,
+      method: 'POST' as const,
+      url: '/csp-report',
+      headers: { 'content-type': 'application/csp-report' },
+      payload: JSON.stringify({ 'csp-report': { 'blocked-uri': 'https://example.org/x' } }),
+    },
+  ])('keys $route on X-Real-IP too', async ({ limited, method, url, headers, payload }) => {
+    vi.stubEnv('DUOS_RATE_LIMIT_TRUST_REAL_IP', 'true')
+    const app = await buildLimitedApp({ callback: '1' })
+    const via = (realIp: string) => app.inject({
+      method,
+      url,
+      payload,
+      headers: { ...headers, ...from('35.191.75.100'), 'x-real-ip': realIp },
+    })
+
+    let sameClient = 0
+    for (let i = 0; i < MAX_REQUESTS_PER_WINDOW + 1; i += 1) sameClient = (await via('203.0.113.50')).statusCode
+    const otherClient = await via('198.51.100.50')
+
+    expect(sameClient).toBe(limited)
+    expect(otherClient.statusCode).not.toBe(limited)
+
+    await app.close()
+  })
+
   // BEEs: HAProxy passes a client-supplied X-Real-IP through untouched.
   it('ignores a rotated X-Real-IP when the switch is off', async () => {
     const app = await buildLimitedApp({ login: '1' })
