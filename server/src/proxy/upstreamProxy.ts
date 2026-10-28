@@ -1,15 +1,15 @@
-import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
+import type { IncomingHttpHeaders } from 'node:http'
 import type {
   FastifyError,
   FastifyInstance,
   FastifyReply,
   FastifyRequest,
-  RawReplyDefaultExpression,
   RawServerBase,
   RequestGenericInterface,
   RouteGenericInterface,
 } from 'fastify'
 import fastifyReplyFrom from '@fastify/reply-from'
+import type { FastifyReplyFromResponse } from '@fastify/reply-from'
 import { endSession, logAuthEvent, sessionIdp } from '../auth/authEvents.js'
 import type { SessionDestroyReason } from '../auth/authEvents.js'
 import { requireEnv } from '../auth/oidcClient.js'
@@ -171,13 +171,6 @@ export function upstreamPath(url: string, prefix: string): string {
  */
 type ProxyRequest = FastifyRequest<RequestGenericInterface, RawServerBase>
 type ProxyReply = FastifyReply<RouteGenericInterface, RawServerBase>
-
-// reply-from types this as a ServerResponse even though the stream is incoming.
-type UpstreamResponse = RawReplyDefaultExpression<RawServerBase> & { stream: IncomingMessage }
-
-function upstreamHeaders(res: UpstreamResponse): IncomingHttpHeaders {
-  return (res as unknown as { headers: IncomingHttpHeaders }).headers
-}
 
 /**
  * Registers a proxy for one upstream. The caller hands this to
@@ -352,7 +345,7 @@ export async function registerUpstreamProxy(
     }
   }
 
-  const onUpstreamResponse = (request: ProxyRequest, reply: ProxyReply, res: UpstreamResponse): void => {
+  const onUpstreamResponse = (request: ProxyRequest, reply: ProxyReply, res: FastifyReplyFromResponse): void => {
     // An upstream 401 ends the session only where the config says the upstream's
     // verdict on the token is authoritative — see `destroySessionOnUpstream401`.
     const endsSession = config.destroySessionOnUpstream401
@@ -370,7 +363,7 @@ export async function registerUpstreamProxy(
     res.stream.resume()
 
     // Remove metadata for the discarded body; preserve reply-from's connection header.
-    for (const name of Object.keys(upstreamHeaders(res))) {
+    for (const name of Object.keys(res.headers)) {
       if (name !== 'connection') {
         reply.removeHeader(name)
       }

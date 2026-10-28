@@ -100,8 +100,7 @@ describe('CollaboratorList - Component Tests', () => {
 
     expect(document.querySelectorAll('.collaborator-summary-card')).toHaveLength(2)
 
-    const trashIcon = document.querySelectorAll('.glyphicon-trash')[0]
-    fireEvent.click(trashIcon.parentElement as HTMLElement)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete collaborator' })[0])
 
     const deleteButton = document.querySelector('.delete-modal-primary-button') as HTMLElement
     fireEvent.click(deleteButton)
@@ -262,7 +261,7 @@ describe('CollaboratorList - Component Tests', () => {
     const firstCard = document.querySelectorAll('.collaborator-summary-card')[0]
     expect(within(firstCard as HTMLElement).getByRole('button', { name: 'View collaborator' })).toBeInTheDocument()
     expect(firstCard.querySelector('.glyphicon-pencil')).toBeNull()
-    expect(firstCard.querySelector('.glyphicon-trash')).toBeNull()
+    expect(within(firstCard as HTMLElement).queryByRole('button', { name: 'Delete collaborator' })).toBeNull()
   })
 
   it('opens read-only collaborator details when view icon is clicked', () => {

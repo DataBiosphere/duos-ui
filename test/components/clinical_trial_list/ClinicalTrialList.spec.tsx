@@ -123,8 +123,8 @@ describe('ClinicalTrialList component', () => {
 
   it('deletes a clinical trial via modal confirmation', async () => {
     const user = userEvent.setup()
-    const { container } = render(<ClinicalTrialListHarness initial={[sampleTrial]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    render(<ClinicalTrialListHarness initial={[sampleTrial]} />)
+    await user.click(screen.getByRole('button', { name: 'Delete clinical trial' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!

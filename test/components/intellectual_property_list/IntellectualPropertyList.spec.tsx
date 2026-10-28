@@ -91,8 +91,8 @@ describe('IntellectualPropertyList', () => {
 
   it('deletes an intellectual property via modal confirmation', async () => {
     const user = userEvent.setup()
-    const { container } = render(<IntellectualPropertyListHarness initial={[sampleIp]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    render(<IntellectualPropertyListHarness initial={[sampleIp]} />)
+    await user.click(screen.getByRole('button', { name: 'Delete intellectual property' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!

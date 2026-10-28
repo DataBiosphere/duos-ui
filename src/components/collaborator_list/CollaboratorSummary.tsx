@@ -1,3 +1,4 @@
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import React, { useState } from 'react'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import CollaboratorDelete from './CollaboratorDelete'
@@ -85,20 +86,16 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
                   <span style={{ marginLeft: '1rem' }}></span>
                 </a>
                 {/* delete button */}
-                <a
+                <button
+                  type="button"
                   id={deleteButtonId}
-                  style={{ marginLeft: 10 }}
+                  style={{ ...ICON_BUTTON, marginLeft: 10 }}
                   onClick={() => setShowDeleteModal(true)}
+                  aria-label="Delete collaborator"
                 >
-                  <span
-                    className="glyphicon glyphicon-trash collaborator-delete-icon"
-                    aria-hidden="true"
-                    data-tip="Delete dataset"
-                    data-for="tip_delete"
-                  >
-                  </span>
+                  <DeleteOutlinedIcon className="collaborator-delete-icon" sx={inlineIconSx} />
                   <span style={{ marginLeft: '1rem' }}></span>
-                </a>
+                </button>
               </>
             )}
       </div>

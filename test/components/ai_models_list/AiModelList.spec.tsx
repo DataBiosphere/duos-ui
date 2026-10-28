@@ -86,8 +86,8 @@ describe('AiModelList component', () => {
 
   it('deletes a model via modal confirmation', async () => {
     const user = userEvent.setup()
-    const { container } = render(<AiModelListHarness initial={[sampleModel]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    render(<AiModelListHarness initial={[sampleModel]} />)
+    await user.click(screen.getByRole('button', { name: 'Delete AI model' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!

@@ -84,8 +84,8 @@ describe('WorkspaceList component', () => {
 
   it('deletes a workspace via modal confirmation', async () => {
     const user = userEvent.setup()
-    const { container } = render(<WorkspaceListHarness initial={[sampleWorkspace]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    render(<WorkspaceListHarness initial={[sampleWorkspace]} />)
+    await user.click(screen.getByRole('button', { name: 'Delete workspace' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!
