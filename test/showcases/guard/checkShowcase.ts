@@ -9,8 +9,9 @@
  */
 import type * as z from 'zod'
 import { ShowcaseConfigSchema } from 'src/showcases/schema'
+import { contrastProblems, themeColors } from 'src/showcases/themes'
 import { urlProblem } from 'src/showcases/urlPolicy'
-import { DATE_PATTERN, IMPLEMENTED_SECTION_KEYS, SECTION_KEYS, type SectionKey } from 'src/types/showcase'
+import { DATE_PATTERN, HEX_COLOR_PATTERN, type HexColor, IMPLEMENTED_SECTION_KEYS, SECTION_KEYS, type SectionKey, THEME_PRESET_KEYS, type ThemePresetKey } from 'src/types/showcase'
 import { checkAssetBudget, type ReadSize } from './assetBudget'
 import { walkObjects } from './walk'
 
@@ -87,6 +88,23 @@ const checkItemIds = (config: unknown): string[] => {
   return errors
 }
 
+const isPreset = (value: unknown): value is ThemePresetKey => THEME_PRESET_KEYS.includes(value as ThemePresetKey)
+const isHexOrAbsent = (value: unknown): value is HexColor | undefined =>
+  value === undefined || (typeof value === 'string' && HEX_COLOR_PATTERN.test(value))
+
+/** Low-contrast branding fails CI. An unknown preset or a malformed colour is a schema error, so
+ * the rule checks only a branding block the schema would accept. */
+const checkContrast = (config: unknown): string[] => {
+  const branding = (config as { branding?: Record<string, unknown> } | null)?.branding
+  if (!branding || !isPreset(branding.theme) || !isHexOrAbsent(branding.primary) || !isHexOrAbsent(branding.accent)) {
+    return []
+  }
+  const { theme, primary, accent } = branding
+  const overridden = { primary: primary !== undefined, accent: accent !== undefined }
+  return contrastProblems(themeColors({ theme, primary, accent }))
+    .map(({ field, message }) => `branding.${overridden[field] ? field : 'theme'}: ${message}`)
+}
+
 const pathOf = (error: string) => {
   const end = error.indexOf(': ')
   return end === -1 ? '' : error.slice(0, end)
@@ -114,6 +132,7 @@ export const checkShowcase = (config: unknown, options: GuardOptions = {}): stri
     ...checkLogoAlt(config),
     ...checkDateRanges(config),
     ...checkItemIds(config),
+    ...checkContrast(config),
   ]
   return [...ruleErrors, ...schemaErrors(config, ruleErrors), ...checkAssetBudget(config, readSize)]
 }

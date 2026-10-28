@@ -154,6 +154,25 @@ describe('checkShowcase', () => {
     })
   })
 
+  describe('branding contrast', () => {
+    it('passes a branding override with enough contrast', () => {
+      expect(guard(broken(c => Object.assign(c.branding, { primary: '#00609f', accent: '#a65c00' })))).toEqual([])
+    })
+
+    it('fails a low-contrast primary override', () => {
+      expectErrors(guard(broken(c => Object.assign(c.branding, { primary: '#2fa4e7' }))), 'branding.primary: #2fa4e7 on #ffffff')
+    })
+
+    it('fails an accent override too light for a button label', () => {
+      expectErrors(guard(broken(c => Object.assign(c.branding, { accent: '#00928a' }))), 'branding.accent: #00928a on #ffffff')
+    })
+
+    it('reports an unknown preset or a malformed colour once, as a schema error', () => {
+      expectErrors(guard(broken(c => Object.assign(c.branding, { theme: 'neon' }))), 'branding.theme')
+      expectErrors(guard(broken(c => Object.assign(c.branding, { primary: 'red' }))), 'branding.primary')
+    })
+  })
+
   describe('identifiers', () => {
     it.each(['DUOS-123', 'DUOS-0001234', 'duos-000123', 'DUOS-1e3'])('fails the malformed identifier %s', (identifier) => {
       const config = broken((c) => {
