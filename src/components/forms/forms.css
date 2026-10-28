@@ -97,3 +97,7 @@
   height: 50px;
   flex-shrink: 0;
 }
+
+.formTable-row .btn-formTable-delete[disabled] {
+  color: #cccccc;
+}
