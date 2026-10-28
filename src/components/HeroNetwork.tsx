@@ -123,10 +123,10 @@ const motion = (item: { dx: number, dy: number, rotate?: number, duration: numbe
 
 const NODE_COLOURS = ['#5FD3DC', '#C7A9A8']
 
-type ClusterShapeProps = { cluster: Cluster, strokeOpacity: number, nodeRadius: number, filter?: string }
+type ClusterShapeProps = { cluster: Cluster, strokeOpacity: number, nodeRadius: number }
 
-const ClusterShape = ({ cluster, strokeOpacity, nodeRadius, filter }: ClusterShapeProps) => (
-  <g className="drift" style={motion(cluster)} filter={filter}>
+const ClusterShape = ({ cluster, strokeOpacity, nodeRadius }: ClusterShapeProps) => (
+  <g className="drift" style={motion(cluster)}>
     <g className="morph" style={morphMotion(cluster.morph)}>
       {cluster.facets.map(([a, b, c]) => (
         <polygon key={`${a.x},${b.x},${c.x}`} points={`${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y}`} fill="#5FD3DC" fillOpacity={0.07} />
@@ -182,7 +182,8 @@ export const HeroNetwork = ({ animated, paused, style }: Readonly<HeroNetworkPro
         <stop offset="0" stopColor="#B8E4E8" stopOpacity="0.35" />
         <stop offset="1" stopColor="#B8E4E8" stopOpacity="0" />
       </radialGradient>
-      <filter id="hero-network-soften" x="-50%" y="-50%" width="200%" height="200%">
+      {/* Fixed region: a bbox-relative one goes stale while the clusters morph, and Firefox clips them to it. */}
+      <filter id="hero-network-soften" filterUnits="userSpaceOnUse" x={0} y={0} width={WIDTH} height={HEIGHT}>
         <feGaussianBlur stdDeviation="0.8" />
       </filter>
     </defs>
@@ -194,8 +195,10 @@ export const HeroNetwork = ({ animated, paused, style }: Readonly<HeroNetworkPro
     {bokeh.map(dot => (
       <circle key={`${dot.x},${dot.y}`} className="drift" style={motion(dot)} cx={dot.x} cy={dot.y} r={dot.r} fill="url(#hero-network-bokeh)" />
     ))}
-    {frontLayer.map(cluster => (
-      <ClusterShape key={`${cluster.nodes[0].x}`} cluster={cluster} strokeOpacity={0.55} nodeRadius={2.6} filter="url(#hero-network-soften)" />
-    ))}
+    <g filter="url(#hero-network-soften)">
+      {frontLayer.map(cluster => (
+        <ClusterShape key={`${cluster.nodes[0].x}`} cluster={cluster} strokeOpacity={0.55} nodeRadius={2.6} />
+      ))}
+    </g>
   </Box>
 )
