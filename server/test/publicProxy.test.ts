@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import Fastify, { type FastifyInstance } from 'fastify'
 import fastifyRateLimit from '@fastify/rate-limit'
 import {
@@ -33,6 +33,7 @@ describe('publicProxy', () => {
   })
 
   afterEach(async () => {
+    vi.unstubAllEnvs()
     await app?.close()
     app = undefined
     await api.close()
@@ -405,6 +406,7 @@ describe('publicProxy', () => {
       app = await buildPublicApp(logLines)
       // The sidecar forwards the load balancer's X-Real-IP; the log names that
       // key, so the keying can be checked in a deployed environment.
+      vi.stubEnv('DUOS_RATE_LIMIT_TRUST_REAL_IP', 'true')
       const request = { method: 'GET' as const, url: PUBLIC_FEATURES_PREFIX, headers: { 'x-real-ip': '203.0.113.40' } }
       for (let i = 0; i < FEATURES_MAX_PER_WINDOW; i += 1) {
         await app.inject(request)

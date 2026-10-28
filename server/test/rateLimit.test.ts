@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, vi } from 'vitest'
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import type { FastifyRequest } from 'fastify'
 import {
   CALLBACK_MAX_ENV_VAR,
@@ -6,8 +6,10 @@ import {
   callbackRateLimit,
   isRateLimitError,
   loginRateLimit,
+  TRUST_REAL_IP_ENV_VAR,
   rateLimitKey,
   rateLimitPluginOptions,
+  trustRealIpFromEnv,
 } from '../src/security/rateLimit.js'
 
 afterEach(() => {
@@ -35,6 +37,23 @@ describe('rateLimitPluginOptions', () => {
 describe('rateLimitKey', () => {
   // The fields that rateLimitKey reads. In k8s the socket peer is the Apache
   // sidecar on loopback, and request.ip is a Google front-end address.
+  const request = (peer: string | undefined, headers: Record<string, string> = {}, ip = '35.191.75.100') =>
+    ({ socket: { remoteAddress: peer }, headers, ip }) as unknown as FastifyRequest
+
+  // Behind the HAProxy ingress in BEEs nothing overwrites X-Real-IP, so a
+  // caller could rotate it. Off by default; only gke deployments turn it on.
+  it.each([undefined, '', 'false'])('ignores X-Real-IP when the switch is %s', (value) => {
+    if (value !== undefined) vi.stubEnv(TRUST_REAL_IP_ENV_VAR, value)
+
+    expect(rateLimitKey(request('127.0.0.1', { 'x-real-ip': '198.51.100.9' }))).toBe('35.191.75.100')
+  })
+})
+
+describe('rateLimitKey with DUOS_RATE_LIMIT_TRUST_REAL_IP=true', () => {
+  beforeEach(() => {
+    vi.stubEnv(TRUST_REAL_IP_ENV_VAR, 'true')
+  })
+
   const request = (peer: string | undefined, headers: Record<string, string> = {}, ip = '35.191.75.100') =>
     ({ socket: { remoteAddress: peer }, headers, ip }) as unknown as FastifyRequest
 
@@ -78,6 +97,25 @@ describe('rateLimitKey', () => {
 
   it('groups an IPv6 fallback address to its /64 too', () => {
     expect(rateLimitKey(request('10.64.4.18', {}, '2001:db8:1:2:aaaa::1'))).toBe('2001:db8:1:2::')
+  })
+})
+
+describe('trustRealIpFromEnv', () => {
+  it('is off when unset', () => {
+    expect(trustRealIpFromEnv()).toBe(false)
+  })
+
+  it.each([['true', true], [' true ', true], ['false', false], ['  ', false]])('reads %j as %s', (value, expected) => {
+    vi.stubEnv(TRUST_REAL_IP_ENV_VAR, value)
+
+    expect(trustRealIpFromEnv()).toBe(expected)
+  })
+
+  // A typo must not silently leave the switch in a state nobody chose.
+  it.each(['TRUE', '1', 'yes', 'on'])('throws when the value is %s', (value) => {
+    vi.stubEnv(TRUST_REAL_IP_ENV_VAR, value)
+
+    expect(() => trustRealIpFromEnv()).toThrow(TRUST_REAL_IP_ENV_VAR)
   })
 })
 

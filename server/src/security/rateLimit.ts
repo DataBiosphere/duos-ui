@@ -89,9 +89,12 @@ import type { FastifyRequest } from 'fastify'
  *     That is a property of `TRUST_PROXY` (which also governs
  *     `X-Forwarded-Proto`) rather than of this module, and it is another
  *     reason the edge is the real control.
- *   - Only the `gke` ingress class renders that `BackendConfig`. Behind
- *     another ingress, such as the HAProxy ingress in BEEs, nothing
- *     overwrites a client-supplied `X-Real-IP`.
+ *   - **The header counts only when `DUOS_RATE_LIMIT_TRUST_REAL_IP` is
+ *     `true`.** Only the `gke` ingress class renders that `BackendConfig`.
+ *     Behind another ingress, such as the HAProxy ingress in BEEs, nothing
+ *     overwrites a client-supplied `X-Real-IP`, so trusting it there would let
+ *     a caller rotate the header and get a fresh bucket for each request. The
+ *     switch is off when unset; set it only where the gke ingress serves.
  *
  * IPv6 keys are grouped to a /64 — the standard single-customer delegation —
  * so one client cannot spend 2^64 buckets. The plugin does this only for its
@@ -107,6 +110,7 @@ const RATE_LIMIT_ERROR_MARKER = 'DUOS_RATE_LIMITED'
 export const LOGIN_MAX_ENV_VAR = 'DUOS_RATE_LIMIT_LOGIN_MAX'
 export const CALLBACK_MAX_ENV_VAR = 'DUOS_RATE_LIMIT_CALLBACK_MAX'
 export const TEST_SIGNIN_MAX_ENV_VAR = 'DUOS_RATE_LIMIT_TEST_SIGNIN_MAX'
+export const TRUST_REAL_IP_ENV_VAR = 'DUOS_RATE_LIMIT_TRUST_REAL_IP'
 
 const DEFAULT_LOGIN_MAX = 30
 const DEFAULT_CALLBACK_MAX = 60
@@ -145,9 +149,22 @@ function realIpHeader(request: FastifyRequest): string | undefined {
   return isIP(literal) !== 0 && !literal.includes('%') ? literal : undefined
 }
 
+/**
+ * True only where the ingress overwrites `X-Real-IP`. See "Keying" above.
+ * Read on each request; index.ts reads it once at startup, so a bad value
+ * fails there rather than on the first limited request.
+ */
+export function trustRealIpFromEnv(): boolean {
+  const raw = process.env[TRUST_REAL_IP_ENV_VAR]?.trim()
+  if (!raw || raw === 'false') return false
+  if (raw === 'true') return true
+  throw new Error(`${TRUST_REAL_IP_ENV_VAR} is set to '${raw}', which is not true or false — unset it to leave X-Real-IP untrusted`)
+}
+
 /** The rate-limit key for every limited route. See "Keying" above. */
 export function rateLimitKey(request: FastifyRequest): string {
-  const realIp = isLoopback(request.socket.remoteAddress) ? realIpHeader(request) : undefined
+  const trusted = trustRealIpFromEnv() && isLoopback(request.socket.remoteAddress)
+  const realIp = trusted ? realIpHeader(request) : undefined
   return normalizeIP(realIp ?? request.ip)
 }
 

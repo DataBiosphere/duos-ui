@@ -267,6 +267,10 @@ describe('handleServerError', () => {
 })
 
 describe('handleCallbackError', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   it('logs a throttled callback as auth.rate_limited with the route pattern, and never the query string', async () => {
     const { handleCallbackError } = await import('../src/index.js')
     const { rateLimitPluginOptions } = await import('../src/security/rateLimit.js')
@@ -275,6 +279,7 @@ describe('handleCallbackError', () => {
       { statusCode: 429, ban: false, after: '1 minute', max: 60, ttl: 60_000 },
     )
     // From the sidecar: the log names the X-Real-IP key, not the front end.
+    vi.stubEnv('DUOS_RATE_LIMIT_TRUST_REAL_IP', 'true')
     const request = { ip: '35.191.75.100', socket: { remoteAddress: '127.0.0.1' }, headers: { 'x-real-ip': '203.0.113.2' }, url: '/auth/callback?code=SECRET&state=SECRET', routeOptions: { url: '/auth/callback' }, log: { warn: vi.fn(), error: vi.fn() } }
     const reply = { redirect: vi.fn() }
 
@@ -939,6 +944,7 @@ describe('auth endpoint rate limiting', () => {
   // names the same bucket for everyone. The load balancer's X-Real-IP is the
   // real client, and app.inject() presents as the loopback sidecar.
   it('counts each X-Real-IP in its own bucket when X-Forwarded-For is the same front end', async () => {
+    vi.stubEnv('DUOS_RATE_LIMIT_TRUST_REAL_IP', 'true')
     const app = await buildLimitedApp({ login: '1' })
     const via = (realIp: string) => ({ ...from('35.191.75.100'), 'x-real-ip': realIp })
 
@@ -952,7 +958,27 @@ describe('auth endpoint rate limiting', () => {
     await app.close()
   })
 
+  // BEEs: HAProxy passes a client-supplied X-Real-IP through untouched.
+  it('ignores a rotated X-Real-IP when the switch is off', async () => {
+    const app = await buildLimitedApp({ login: '1' })
+    const via = (realIp: string) => ({ ...from('203.0.113.21'), 'x-real-ip': realIp })
+
+    await app.inject({ method: 'POST', url: '/auth/login', headers: via('198.51.100.21') })
+    const rotated = await app.inject({ method: 'POST', url: '/auth/login', headers: via('198.51.100.22') })
+
+    expect(rotated.statusCode).toBe(429)
+
+    await app.close()
+  })
+
+  it('fails startup when DUOS_RATE_LIMIT_TRUST_REAL_IP is not true or false', async () => {
+    vi.stubEnv('DUOS_RATE_LIMIT_TRUST_REAL_IP', 'yes')
+
+    await expect(buildLimitedApp()).rejects.toThrow('DUOS_RATE_LIMIT_TRUST_REAL_IP')
+  })
+
   it('ignores X-Real-IP from a peer that is not the loopback sidecar', async () => {
+    vi.stubEnv('DUOS_RATE_LIMIT_TRUST_REAL_IP', 'true')
     const app = await buildLimitedApp({ login: '1' })
     const direct = (realIp: string) => ({ method: 'POST' as const, url: '/auth/login', remoteAddress: '203.0.113.30', headers: { 'x-real-ip': realIp } })
 
