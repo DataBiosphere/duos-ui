@@ -220,8 +220,8 @@ const multiDarCollection = (): DarCollection => {
     ...darCollection,
     dars: {
       [darId]: base,
-      'second-ref': { ...base, id: 1765, referenceId: 'second-ref', parentId: 1764, progressReport: true },
-      'third-ref': { ...base, id: 1766, referenceId: 'third-ref', parentId: 1765, progressReport: true },
+      'second-ref': { ...base, id: 1765, referenceId: 'second-ref', parentId: 1764 },
+      'third-ref': { ...base, id: 1766, referenceId: 'third-ref', parentId: 1765 },
     },
   } as unknown as DarCollection
 }
@@ -449,7 +449,7 @@ describe('DataAccessRequestApplication - page modes', () => {
         dars: {
           [darId]: base,
           'sibling-ref': { ...base, id: 1765, referenceId: 'sibling-ref' },
-          'report-ref': { ...base, id: 1766, referenceId: 'report-ref', parentId: 1765, progressReport: true },
+          'report-ref': { ...base, id: 1766, referenceId: 'report-ref', parentId: 1765 },
         },
       } as unknown as DarCollection,
     })

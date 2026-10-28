@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { nextProgressReportNumber, progressReportNumber, requestTypeLabel } from 'src/utils/ProgressReportUtils'
 
-const original = (id: number) => ({ id, progressReport: false })
-const report = (id: number) => ({ id, progressReport: true })
+const original = (id: number) => ({ id })
+const report = (id: number, parentId = 1) => ({ id, parentId })
 
 // ids are deliberately out of order, as they come from the collection's map
 const collectionDars = [report(30), original(10), report(20)]
@@ -23,6 +23,14 @@ describe('progressReportNumber', () => {
 
   it('gives an original DAR no number', () => {
     expect(progressReportNumber(original(11), siblingOriginals)).toBe(0)
+  })
+})
+
+describe('progressReportNumber after a revert to draft', () => {
+  it('still numbers a report whose backend progressReport flag is false', () => {
+    // A revert to draft sets every DAR to draft, and a draft always has progressReport = false
+    const reverted = [{ id: 10, progressReport: false }, { id: 11, parentId: 10, progressReport: false }]
+    expect(requestTypeLabel(reverted[1], reverted)).toBe('Progress Report 1')
   })
 })
 
