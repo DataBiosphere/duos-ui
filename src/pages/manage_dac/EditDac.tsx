@@ -17,6 +17,7 @@ import PublishIcon from '@mui/icons-material/Publish'
 import { UploadDaaModal } from 'src/components/modals/UploadDaaModal'
 import { CreateDacUserModal } from 'src/components/modals/CreateDacUserModal'
 import { Storage } from 'src/libs/storage'
+import { refreshCurrentUserIfAffected } from 'src/libs/auth/refreshCurrentUser'
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import type { DAAObject, DacObject, DuosUser, SimplifiedDuosUser } from 'src/types/model'
 import { DaaTabs } from 'src/components/DaaTabs'
@@ -333,12 +334,8 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
     return [...demoteChairsFromMember, ...removeMembers, ...addChairs, ...removeChairs, ...addMembers, ...assignDaa]
   }
 
-  const okHandler = async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
-    event.preventDefault()
-    if (!state.dirtyFlag) {
-      return
-    }
-
+  /** Persists the DAC and its role changes. Returns true when every step succeeded. */
+  const saveDac = async (): Promise<boolean> => {
     const currentDac = state.dac
     const dacName = currentDac.name ?? ''
     const dacDescription = currentDac.description ?? ''
@@ -346,13 +343,13 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
 
     const persistedDac = await persistDacChanges(user, currentDac, dacName, dacDescription, dacEmail)
     if (persistedDac === null) {
-      return
+      return false
     }
 
     const currentDacId = persistedDac.dacId
     if (currentDacId === undefined) {
       handleErrors(saveErrorMessage)
-      return
+      return false
     }
 
     const allOperations = buildSaveOperations(currentDacId, dacIdParam === undefined)
@@ -360,12 +357,41 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
     const errorCodes = responses.filter(
       r => JSON.stringify(r) !== '200' && JSON.stringify((r as { status?: number })?.status) !== '201',
     )
-
-    if (errorCodes.length === 0) {
-      closeHandler()
-    }
-    else {
+    if (errorCodes.length > 0) {
       handleErrors(saveErrorMessage)
+      return false
+    }
+    return true
+  }
+
+  const okHandler = async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+    event.preventDefault()
+    if (!state.dirtyFlag) {
+      return
+    }
+
+    let saved = false
+    try {
+      saved = await saveDac()
+    }
+    catch {
+      // Each DAC role call throws on failure, so PromiseSerial (or the new-DAC
+      // chair step) rejects partway, after some roles already changed.
+      handleErrors(saveErrorMessage)
+    }
+    finally {
+      // Before closeHandler navigates, and even after a partial failure: an
+      // editor who changed their own DAC role must keep working with the roles
+      // the server now holds (DT-505).
+      await refreshCurrentUserIfAffected([
+        ...state.chairIdsToAdd,
+        ...state.chairIdsToRemove,
+        ...state.memberIdsToAdd,
+        ...state.memberIdsToRemove,
+      ])
+    }
+    if (saved) {
+      closeHandler()
     }
   }
 

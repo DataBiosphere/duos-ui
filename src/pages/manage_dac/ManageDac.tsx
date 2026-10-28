@@ -4,6 +4,7 @@ import { Styles } from 'src/libs/theme'
 import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
+import { refreshCurrentUserIfAffected } from 'src/libs/auth/refreshCurrentUser'
 import ConfirmationModal from 'src/components/modals/ConfirmationModal'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import TableHeaderSection from 'src/components/TableHeaderSection'
@@ -120,6 +121,12 @@ export const ManageDac = function ManageDac() {
       Notifications.showSuccess({ text: 'DAC successfully deleted.' })
       setShowConfirmationModal(false)
       if (viewedDac?.dacId === dacToDelete.dacId) handleDatasetsClose()
+      // Deleting a DAC removes its chair and member roles; an admin who held
+      // one must keep working with the roles the server now holds (DT-505).
+      await refreshCurrentUserIfAffected([
+        ...(dacToDelete.chairpersons ?? []),
+        ...(dacToDelete.members ?? []),
+      ].map(u => u.userId))
       await initializeDACs()
     }
     else {
