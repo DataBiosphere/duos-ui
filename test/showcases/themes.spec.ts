@@ -17,6 +17,10 @@ describe('contrastRatio', () => {
   it('reads upper-case hex', () => {
     expect(contrastRatio('#FFFFFF', '#000000')).toBe(21)
   })
+
+  it.each(['#fff', '#ffffff80', '#gggggg', 'ffffff'] as const)('throws on %s instead of mismeasuring it', (colour) => {
+    expect(() => contrastRatio(colour as `#${string}`, '#000000')).toThrow(`Not a #rrggbb colour: "${colour}"`)
+  })
 })
 
 describe('THEME_PRESETS', () => {
