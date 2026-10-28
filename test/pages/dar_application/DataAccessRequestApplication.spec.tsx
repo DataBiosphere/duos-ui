@@ -220,8 +220,8 @@ const multiDarCollection = (): DarCollection => {
     ...darCollection,
     dars: {
       [darId]: base,
-      'second-ref': { ...base, id: 1765, referenceId: 'second-ref' },
-      'third-ref': { ...base, id: 1766, referenceId: 'third-ref' },
+      'second-ref': { ...base, id: 1765, referenceId: 'second-ref', parentId: 1764, progressReport: true },
+      'third-ref': { ...base, id: 1766, referenceId: 'third-ref', parentId: 1765, progressReport: true },
     },
   } as unknown as DarCollection
 }
@@ -439,6 +439,26 @@ describe('DataAccessRequestApplication - page modes', () => {
     expect(screen.getByText('Previous Updates')).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Progress Report 1' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Progress Report 2' })).toBeInTheDocument()
+  })
+
+  it('labels a sibling original DAR as an initial DAR, not a progress report', async () => {
+    const base = darCollection.dars[darId]
+    mockServices({
+      collection: {
+        ...darCollection,
+        dars: {
+          [darId]: base,
+          'sibling-ref': { ...base, id: 1765, referenceId: 'sibling-ref' },
+          'report-ref': { ...base, id: 1766, referenceId: 'report-ref', parentId: 1765, progressReport: true },
+        },
+      } as unknown as DarCollection,
+    })
+
+    await renderReview()
+
+    expect(screen.getByRole('tab', { name: 'Initial DAR' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Progress Report 1' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Progress Report 2' })).not.toBeInTheDocument()
   })
 
   it('navigates back when the Back button is used', async () => {

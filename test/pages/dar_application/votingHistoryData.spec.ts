@@ -9,8 +9,9 @@ const datasets = [
 
 // Only the fields the voting history reads are stubbed, so each fixture needs a bridging cast
 // rather than a fully-populated DAR, election and vote.
-const buildDar = (datasetIds: number[], elections: Record<string, unknown>, id = 1) => ({
+const buildDar = (datasetIds: number[], elections: Record<string, unknown>, id = 1, progressReport = false) => ({
   id,
+  progressReport,
   collectionId: 7,
   datasetIds,
   elections,
@@ -27,16 +28,22 @@ const closedElection = (datasetId: number, votes: Record<string, unknown>[], cre
 describe('buildVoteRecords', () => {
   it('numbers each progress report as the Full DAR tab does', () => {
     const initial = buildDar([1], {}, 5)
-    const second = buildDar([2], {}, 9)
-    const first = buildDar([1], {}, 7)
+    const second = buildDar([2], {}, 9, true)
+    const first = buildDar([1], {}, 7, true)
 
     const records = buildVoteRecords([second, first, initial], datasets)
 
     expect(records.map(r => r.requestType).toSorted()).toEqual(['Initial DAR', 'Progress Report 1', 'Progress Report 2'])
   })
 
+  it('labels each original DAR of a pre-2022 collection as an initial DAR', () => {
+    const records = buildVoteRecords([buildDar([1], {}, 10), buildDar([2], {}, 11), buildDar([1], {}, 12, true)], datasets)
+
+    expect(records.map(r => r.requestType).toSorted()).toEqual(['Initial DAR', 'Initial DAR', 'Progress Report 1'])
+  })
+
   it('orders progress reports by number when their rows tie on everything else', () => {
-    const dars = Array.from({ length: 11 }, (_, i) => buildDar([1], {}, i + 1))
+    const dars = Array.from({ length: 11 }, (_, i) => buildDar([1], {}, i + 1, i > 0))
 
     const records = buildVoteRecords(dars, datasets)
 
