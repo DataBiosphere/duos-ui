@@ -1,6 +1,8 @@
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import React, { useState } from 'react'
 import { DeletePresentationOrPublication } from 'src/components/presentation_publication_shared/DeletePresentationOrPublication'
 import { renderColumnContent } from 'src/utils/RenderUtils'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 interface StudyAssetSummaryProps<T> {
   readonly asset: T
@@ -62,7 +64,7 @@ export default function StudyAssetSummary<T>({
           <span style={{ marginLeft: '1rem' }}></span>
         </button>
         <button type="button" style={{ marginLeft: 10, ...deleteButtonStyle }} onClick={() => !(disabled || disableDelete) && setShowDeleteModal(true)} disabled={disabled || disableDelete} aria-label={`Delete ${objectName}`}>
-          <span className="glyphicon glyphicon-trash caret-margin collaborator-delete-icon" aria-hidden="true" />
+          <DeleteOutlinedIcon className="caret-margin collaborator-delete-icon" sx={inlineIconSx} />
           <span style={{ marginLeft: '1rem' }}></span>
         </button>
       </div>

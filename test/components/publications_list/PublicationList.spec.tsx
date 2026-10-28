@@ -75,8 +75,8 @@ describe('PublicationList component', () => {
 describe('Publication delete flow', () => {
   it('deletes a publication via modal confirmation', async () => {
     const user = userEvent.setup()
-    const { container } = render(<PublicationListHarness initial={[samplePublication]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    render(<PublicationListHarness initial={[samplePublication]} />)
+    await user.click(screen.getByRole('button', { name: 'Delete publication' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!

@@ -121,7 +121,7 @@ describe('PresentationList component', () => {
   it('deletes a presentation via modal confirmation', async () => {
     const user = userEvent.setup()
     const { container } = render(<PresentationListHarness initial={[samplePresentation]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    await user.click(screen.getByRole('button', { name: 'Delete presentation' }))
     await waitFor(() => expect(container.querySelector('.delete-modal-primary-button')).toBeVisible())
     const deleteBtn = container.querySelector('.delete-modal-primary-button')!
     await user.click(deleteBtn)

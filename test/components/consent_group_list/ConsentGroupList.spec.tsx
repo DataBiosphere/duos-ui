@@ -226,12 +226,12 @@ describe('ConsentGroupList component', () => {
 
   it('deletes a consent group via modal confirmation', async () => {
     const user = userEvent.setup()
-    const { container } = render(
+    render(
       <MemoryRouter>
         <ConsentGroupListHarness initial={[sampleConsentGroup]} />
       </MemoryRouter>,
     )
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    await user.click(screen.getByRole('button', { name: 'Delete consent group' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!

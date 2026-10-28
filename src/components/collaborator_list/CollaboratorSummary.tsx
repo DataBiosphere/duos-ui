@@ -1,6 +1,8 @@
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import React, { useState } from 'react'
 import CollaboratorDelete from './CollaboratorDelete'
 import { Collaborator } from 'src/types/model'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 interface CollaboratorSummaryProps {
   collaborator: Collaborator
@@ -12,6 +14,9 @@ interface CollaboratorSummaryProps {
   readonly index?: number
   readonly collaboratorKey?: string
 }
+
+// Strip the native button chrome, so the icon looks as the old bare link did.
+const ICON_BUTTON: React.CSSProperties = { border: 'none', background: 'none', padding: 0, cursor: 'pointer' }
 
 export default function CollaboratorSummary(props: CollaboratorSummaryProps): React.JSX.Element {
   const { collaborator, columnsToShow, editAction, deleteAction, readOnly, index, collaboratorKey } = props
@@ -84,20 +89,16 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
                   <span style={{ marginLeft: '1rem' }}></span>
                 </a>
                 {/* delete button */}
-                <a
+                <button
+                  type="button"
                   id={deleteButtonId}
-                  style={{ marginLeft: 10 }}
+                  style={{ ...ICON_BUTTON, marginLeft: 10 }}
                   onClick={() => setShowDeleteModal(true)}
+                  aria-label="Delete collaborator"
                 >
-                  <span
-                    className="glyphicon glyphicon-trash collaborator-delete-icon"
-                    aria-hidden="true"
-                    data-tip="Delete dataset"
-                    data-for="tip_delete"
-                  >
-                  </span>
+                  <DeleteOutlinedIcon className="collaborator-delete-icon" sx={inlineIconSx} />
                   <span style={{ marginLeft: '1rem' }}></span>
-                </a>
+                </button>
               </>
             )}
       </div>

@@ -13,6 +13,8 @@ import ApproverStatus from 'src/pages/dar_application/collaborator/ApproverStatu
 import { Countries } from 'src/libs/ajax/Countries'
 import { ApproverStatusType, Collaborator } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 export interface CollaboratorFormProps {
   readonly index: number
@@ -221,12 +223,7 @@ export default function CollaboratorForm(props: Readonly<CollaboratorFormProps>)
                 cursor: 'pointer',
               }}
             >
-              <span
-                className="collaborator-delete-icon glyphicon glyphicon-trash"
-                aria-hidden="true"
-                data-tip="Delete dataset"
-                data-for="tip_delete"
-              />
+              <DeleteOutlinedIcon className="collaborator-delete-icon" sx={inlineIconSx} />
               <span style={{ marginLeft: '1rem', color: '#0948B7', verticalAlign: 'middle' }}>
                 Delete this entry
               </span>
