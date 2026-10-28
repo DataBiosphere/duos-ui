@@ -40,7 +40,7 @@ describe('AiModelSummary', () => {
   it('renders view button and triggers viewAction', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <AiModelSummary
         aiModel={sampleModel}
         columnsToShow={['name']}
@@ -50,8 +50,8 @@ describe('AiModelSummary', () => {
         disabled={false}
       />,
     )
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    expect(screen.getByRole('button', { name: 'View AI model' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'View AI model' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })

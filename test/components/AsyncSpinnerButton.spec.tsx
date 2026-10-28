@@ -47,7 +47,7 @@ describe('AsyncSpinnerButton', () => {
     const mockOnClick = vi.fn().mockResolvedValue(undefined)
     render(
       <AsyncSpinnerButton onClick={mockOnClick} aria-label="Clear account link">
-        <span className="glyphicon glyphicon-remove-circle" />
+        <span aria-hidden="true" />
       </AsyncSpinnerButton>,
     )
 

@@ -45,13 +45,11 @@
   z-index: 1;
 }
 
-.error-message .glyphicon-play {
+.error-message .error-message-arrow {
   color: red;
-  background-color: transparent;
-  transform: scaleY(0.6) rotate(-90deg);
   position: absolute;
   top: -17px;
-  font-size: 2.5rem;
+  font-size: 3rem;
 }
 
 /* ----------------------------------------------------
