@@ -71,7 +71,7 @@ describe('ClinicalTrialList component', () => {
   it('opens trial in view mode when view button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<ClinicalTrialListHarness initial={[sampleTrial]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View clinical trial' }))
     expect(screen.getByText(sampleTrial.title)).toBeInTheDocument()
     expect(container.querySelector('#title')).toBeDisabled()
     expect(container.querySelector('#registry')).toBeDisabled()
@@ -84,10 +84,10 @@ describe('ClinicalTrialList component', () => {
   it('closes view mode when close button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<ClinicalTrialListHarness initial={[sampleTrial]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View clinical trial' }))
     await user.click(container.querySelector('.collaborator-form-cancel-button')!)
     expect(container.querySelector('#title')).not.toBeInTheDocument()
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View clinical trial' })).toBeInTheDocument()
   })
 
   it('adds a new clinical trial', async () => {
@@ -123,8 +123,8 @@ describe('ClinicalTrialList component', () => {
 
   it('deletes a clinical trial via modal confirmation', async () => {
     const user = userEvent.setup()
-    const { container } = render(<ClinicalTrialListHarness initial={[sampleTrial]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    render(<ClinicalTrialListHarness initial={[sampleTrial]} />)
+    await user.click(screen.getByRole('button', { name: 'Delete clinical trial' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!

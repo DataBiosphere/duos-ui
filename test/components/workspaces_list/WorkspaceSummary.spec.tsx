@@ -40,7 +40,7 @@ describe('WorkspaceSummary', () => {
   it('renders view button and triggers viewAction', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <WorkspaceSummary
         workspace={sampleWorkspace}
         columnsToShow={['name']}
@@ -50,8 +50,8 @@ describe('WorkspaceSummary', () => {
         disabled={false}
       />,
     )
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    expect(screen.getByRole('button', { name: 'View workspace' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'View workspace' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })

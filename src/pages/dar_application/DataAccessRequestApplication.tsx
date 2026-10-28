@@ -44,6 +44,8 @@ import {
   SimplifiedDuosUser,
 } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info'
@@ -783,7 +785,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
               && (
                 <div className="col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding">
                   <button id="btn_back" type="button" onClick={back} className="btn-primary btn-back">
-                    <i className="glyphicon glyphicon-chevron-left" />
+                    <ChevronLeftIcon sx={inlineIconSx} />
                     {' '}
                     Back
                   </button>

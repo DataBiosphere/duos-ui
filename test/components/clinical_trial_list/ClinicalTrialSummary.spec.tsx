@@ -66,7 +66,7 @@ describe('ClinicalTrialSummary', () => {
   it('renders view button and triggers viewAction', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <ClinicalTrialSummary
         clinicalTrial={sampleTrial}
         columnsToShow={['title']}
@@ -76,8 +76,8 @@ describe('ClinicalTrialSummary', () => {
         disabled={false}
       />,
     )
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    expect(screen.getByRole('button', { name: 'View clinical trial' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'View clinical trial' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })

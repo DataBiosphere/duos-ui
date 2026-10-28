@@ -53,7 +53,7 @@ describe('PublicationList component', () => {
   it('opens publication in view mode when view button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<PublicationListHarness initial={[samplePublication]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View publication' }))
     expect(screen.getByText(samplePublication.title)).toBeInTheDocument()
     expect(container.querySelector('#title')).toBeDisabled()
     expect(container.querySelector('#publishedDate')).toBeDisabled()
@@ -65,18 +65,18 @@ describe('PublicationList component', () => {
   it('closes view mode when close button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<PublicationListHarness initial={[samplePublication]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View publication' }))
     await user.click(container.querySelector('.collaborator-form-cancel-button')!)
     expect(container.querySelector('#title')).not.toBeInTheDocument()
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View publication' })).toBeInTheDocument()
   })
 })
 
 describe('Publication delete flow', () => {
   it('deletes a publication via modal confirmation', async () => {
     const user = userEvent.setup()
-    const { container } = render(<PublicationListHarness initial={[samplePublication]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    render(<PublicationListHarness initial={[samplePublication]} />)
+    await user.click(screen.getByRole('button', { name: 'Delete publication' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!

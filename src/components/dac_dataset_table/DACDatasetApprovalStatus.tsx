@@ -4,11 +4,14 @@ import { DAC } from 'src/libs/ajax/DAC'
 import { Link, useNavigate } from 'react-router'
 import { isNil } from 'src/utils/NodashUtil'
 import Button from '@mui/material/Button'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
 import style from 'src/pages/DACDatasets.module.css'
 import { ConfirmationDialog } from 'src/components/modals/ConfirmationDialog'
 import { Notifications } from 'src/libs/utils'
 import { DatasetTerm } from 'src/types/model'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 interface DACDatasetApprovalStatusProps {
   dataset: DatasetTerm
@@ -47,9 +50,11 @@ export default function DACDatasetApprovalStatus({ dataset: initialDataset }: DA
           <Link
             style={{ marginLeft: '15px' }}
             id={`${ds.datasetId}_edit`}
-            className="glyphicon glyphicon-pencil"
+            aria-label={`Edit the study for ${ds.datasetName}`}
             to={`/study_update/${ds.study.studyId}`}
-          />
+          >
+            <EditOutlinedIcon sx={inlineIconSx} />
+          </Link>
         )}
       {ds.deletable
         && (
@@ -57,10 +62,12 @@ export default function DACDatasetApprovalStatus({ dataset: initialDataset }: DA
             <Link
               style={{ marginLeft: '15px' }}
               id={`${ds.datasetId}_delete`}
-              className="glyphicon glyphicon-trash"
+              aria-label={`Delete ${ds.datasetName}`}
               onClick={handleClick}
               to="#"
-            />
+            >
+              <DeleteOutlinedIcon sx={inlineIconSx} />
+            </Link>
             <ConfirmationDialog
               title="Delete dataset"
               openState={open}

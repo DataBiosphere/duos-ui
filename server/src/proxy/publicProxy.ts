@@ -1,16 +1,16 @@
-import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
+import type { IncomingHttpHeaders } from 'node:http'
 import type {
   FastifyError,
   FastifyInstance,
   FastifyReply,
   FastifyRequest,
-  RawReplyDefaultExpression,
   RawServerBase,
   RequestGenericInterface,
   RouteGenericInterface,
 } from 'fastify'
 import type { RateLimitOptions } from '@fastify/rate-limit'
 import fastifyReplyFrom from '@fastify/reply-from'
+import type { FastifyReplyFromResponse } from '@fastify/reply-from'
 import { logAuthEvent } from '../auth/authEvents.js'
 import { upstreamBase, upstreamPath } from './upstreamProxy.js'
 
@@ -60,13 +60,6 @@ const CONNECTION_SPECIFIC_RESPONSE_HEADERS: ReadonlySet<string> = new Set([
 type ProxyRequest = FastifyRequest<RequestGenericInterface, RawServerBase>
 type ProxyReply = FastifyReply<RouteGenericInterface, RawServerBase>
 
-// reply-from types this as a ServerResponse even though the stream is incoming.
-type UpstreamResponse = RawReplyDefaultExpression<RawServerBase> & { stream: IncomingMessage }
-
-function upstreamHeaders(res: UpstreamResponse): IncomingHttpHeaders {
-  return (res as unknown as { headers: IncomingHttpHeaders }).headers
-}
-
 /** request.ips is closest-first; X-Forwarded-For is original-client-first. */
 function forwardedFor(request: ProxyRequest, inbound: string | string[] | undefined): string {
   if (request.ips) {
@@ -115,13 +108,13 @@ function isJsonContentType(contentType: string | string[] | undefined): boolean 
 }
 
 /** A response with nothing to validate: no body is defined, or none was sent. */
-function carriesNoBody(res: UpstreamResponse, headers: IncomingHttpHeaders): boolean {
+function carriesNoBody(res: FastifyReplyFromResponse, headers: IncomingHttpHeaders): boolean {
   return res.statusCode === 204 || res.statusCode === 304 || headers['content-length'] === '0'
 }
 
 /** Require a JSON content type for bodies; preserve explicitly bodiless responses. */
-function enforceJsonResponse(request: ProxyRequest, reply: ProxyReply, res: UpstreamResponse): void {
-  const headers = upstreamHeaders(res)
+function enforceJsonResponse(request: ProxyRequest, reply: ProxyReply, res: FastifyReplyFromResponse): void {
+  const headers = res.headers
   if (carriesNoBody(res, headers) || isJsonContentType(headers['content-type'])) {
     reply.send(res.stream)
     return
