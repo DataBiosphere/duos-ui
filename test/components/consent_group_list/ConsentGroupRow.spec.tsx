@@ -41,7 +41,7 @@ describe('ConsentGroupRow', () => {
   it('shows summary when not in edit mode and triggers editAction', async () => {
     const user = userEvent.setup()
     const editFn = vi.fn()
-    const { container } = render(
+    render(
       <MemoryRouter>
         <ConsentGroupRow
           id={0}
@@ -58,7 +58,7 @@ describe('ConsentGroupRow', () => {
       </MemoryRouter>,
     )
     expect(screen.getByText(sampleConsentGroup.consentGroupName)).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit consent group' }))
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 

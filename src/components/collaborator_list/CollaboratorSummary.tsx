@@ -1,6 +1,7 @@
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import React, { useState } from 'react'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import CollaboratorDelete from './CollaboratorDelete'
 import { Collaborator } from 'src/types/model'
 import { inlineIconSx } from 'src/libs/inlineIcon'
@@ -71,20 +72,16 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
             )
           : (
               <>
-                <a
+                <button
+                  type="button"
                   id={editButtonId}
-                  style={{ marginLeft: 10, marginRight: 10 }}
+                  style={{ ...ICON_BUTTON, marginLeft: 10, marginRight: 10 }}
                   onClick={() => editAction()}
+                  aria-label="Edit collaborator"
                 >
-                  <span
-                    className="glyphicon glyphicon-pencil caret-margin collaborator-edit-icon"
-                    aria-hidden="true"
-                    data-tip="Edit dataset"
-                    data-for="tip_edit"
-                  >
-                  </span>
+                  <EditOutlinedIcon className="caret-margin collaborator-edit-icon" sx={inlineIconSx} />
                   <span style={{ marginLeft: '1rem' }}></span>
-                </a>
+                </button>
                 {/* delete button */}
                 <button
                   type="button"

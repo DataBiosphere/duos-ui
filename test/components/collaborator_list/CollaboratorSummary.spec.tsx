@@ -63,7 +63,7 @@ describe('CollaboratorSummary - Component Tests', () => {
     expect(screen.getByText(mockCollaborator.eraCommonsId!)).toBeInTheDocument()
 
     expect(document.querySelector('.collaborator-summary-edit-delete-buttons')).toBeInTheDocument()
-    expect(document.querySelector('.glyphicon-pencil')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Edit collaborator' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Delete collaborator' })).toBeInTheDocument()
   })
 
@@ -92,7 +92,7 @@ describe('CollaboratorSummary - Component Tests', () => {
       />,
     )
 
-    fireEvent.click(document.querySelector('.glyphicon-pencil')!.closest('a')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Edit collaborator' }))
     expect(editAction).toHaveBeenCalledOnce()
   })
 
@@ -155,7 +155,7 @@ describe('CollaboratorSummary - Component Tests', () => {
     expect(screen.getByRole('button', { name: 'View collaborator' })).toBeInTheDocument()
 
     // Should not show edit or delete icons at all in read-only mode
-    expect(document.querySelector('.glyphicon-pencil')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit collaborator' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Delete collaborator' })).not.toBeInTheDocument()
 
     // Clicking the eye icon should call editAction (to open in view mode)

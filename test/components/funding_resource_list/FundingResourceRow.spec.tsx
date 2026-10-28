@@ -23,7 +23,7 @@ describe('FundingResourceRow', () => {
   it('shows summary when not in edit mode and triggers editAction', async () => {
     const user = userEvent.setup()
     const editFn = vi.fn()
-    const { container } = render(
+    render(
       <FundingResourceRow
         id={0}
         editMode={false}
@@ -38,7 +38,7 @@ describe('FundingResourceRow', () => {
       />,
     )
     expect(screen.getByText(sampleFunding.funderName)).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit funding resource' }))
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 

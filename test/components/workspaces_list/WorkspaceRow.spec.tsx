@@ -22,7 +22,7 @@ describe('WorkspaceRow', () => {
   it('shows summary when not in edit mode and triggers editAction', async () => {
     const user = userEvent.setup()
     const editFn = vi.fn()
-    const { container } = render(
+    render(
       <WorkspaceRow
         id={0}
         editMode={false}
@@ -37,7 +37,7 @@ describe('WorkspaceRow', () => {
       />,
     )
     expect(screen.getByText(sampleWorkspace.name)).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit workspace' }))
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 

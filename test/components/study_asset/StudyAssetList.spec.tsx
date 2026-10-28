@@ -39,7 +39,7 @@ const TestRowComponent: React.FC<TestRowProps> = ({ item, editMode, viewMode, ed
       <>
         <span>{item.name}</span>
         <button onClick={viewAction} disabled={disabled}>View</button>
-        <button className="glyphicon-pencil" onClick={editAction} disabled={disabled}>Edit</button>
+        <button onClick={editAction} disabled={disabled}>Edit</button>
         <button onClick={deleteAction} disabled={disabled}>Delete</button>
       </>
     )}
@@ -195,7 +195,7 @@ describe('StudyAssetList', () => {
 
     // Put the first row into edit mode.
     const row1 = screen.getByTestId('row-item1')
-    fireEvent.click(row1.querySelector('.glyphicon-pencil') as Element)
+    fireEvent.click(within(row1).getByRole('button', { name: 'Edit' }))
     expect(screen.getByTestId('row-item1').querySelector('input')).toBeInTheDocument()
 
     // Deleting the *other* row changes the item count, which should reset the
