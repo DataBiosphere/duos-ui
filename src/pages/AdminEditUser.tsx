@@ -2,6 +2,7 @@ import { concat, filter, includes, isEmpty, map, union, matches as lodashMatches
 import React, { useEffect, useRef, useState } from 'react'
 import { User } from 'src/libs/ajax/User'
 import { Notifications, ROLES } from 'src/libs/utils'
+import { refreshCurrentUserIfAffected } from 'src/libs/auth/refreshCurrentUser'
 import { ResearcherReview } from 'src/components/ResearcherReview'
 import editUserIcon from 'src/images/icon_edit_user.png'
 import { PageHeading } from 'src/components/PageHeading'
@@ -106,14 +107,24 @@ export const AdminEditUser = () => {
       emailPreference: state.emailPreference,
     }
 
+    let saved = false
     try {
       await User.update(user, uid)
       await updateRolesIfDifferent(uid, state.updatedRoles)
-      navigate('/admin_manage_users')
+      saved = true
     }
     catch (error) {
       const errorText = extractError(error)
       Notifications.showError({ text: errorText || 'Error: Failed to update user' })
+    }
+    finally {
+      // Before navigating, and even after a partial failure (the role calls run
+      // in parallel): an admin who edited their own roles must keep working
+      // with the roles the server now holds (DT-505).
+      await refreshCurrentUserIfAffected([uid])
+    }
+    if (saved) {
+      navigate('/admin_manage_users')
     }
   }
 
