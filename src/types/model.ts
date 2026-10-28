@@ -1035,12 +1035,12 @@ export interface AlgorithmResult {
 
 export interface VoteHistoryRow extends Vote {
   datasetIdentifier: string
-  progressReport: boolean
+  requestType: string
   electionDate: string | number
 }
 
 export interface ElectionWithMemberVotes extends Election {
   datasetIdentifier: string
-  progressReport: boolean
+  requestType: string
   memberVotes: Vote[]
 }

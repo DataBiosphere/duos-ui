@@ -33,6 +33,7 @@ import { Countries } from 'src/libs/ajax/Countries'
 import useAsyncCacheFetch from 'src/hooks/useAsyncCacheFetch'
 import VotingHistoryOverview from 'src/pages/dar_application/VotingHistoryOverview'
 import { buildVoteRecords, getDarStatus } from 'src/pages/dar_application/votingHistoryData'
+import { nextProgressReportNumber, requestTypeLabel } from 'src/utils/ProgressReportUtils'
 import { useNavigate, useParams } from 'react-router'
 import {
   CombinedDataAccessRequest,
@@ -43,6 +44,8 @@ import {
   SimplifiedDuosUser,
 } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 // Constants
 const RESEARCHER_INFO_TAB_ID = 'researcher-info'
@@ -125,12 +128,13 @@ const buildApplicationTabs = ({ readOnly, isProgressReportApplication, dars, dar
   }
   // A progress report being drafted has no DAR of its own yet, so it needs a tab adding for it.
   const draftTab = isProgressReportApplication
-    ? [{ name: `Progress Report ${dars.length}`, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
+    ? [{ name: `Progress Report ${nextProgressReportNumber(dars)}`, id: PROGRESS_REPORT_APPLICATION_TAB_ID, showStep: false }]
     : []
-  const reportTabs = dars.map((_dar, index) => {
-    const whichPRIsThis = dars.length - index - 1
-    const itemLabel = index === dars.length - 1 ? darCode : `Progress Report ${whichPRIsThis}`
-    return { name: itemLabel ?? '', id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false }
+  const reportTabs = dars.map((dar, index) => {
+    // Ids follow position so each tab stays unique; the label comes from the shared numbering
+    const position = dars.length - index - 1
+    const itemLabel = index === dars.length - 1 ? darCode : requestTypeLabel(dar, dars)
+    return { name: itemLabel ?? '', id: `${PROGRESS_REPORT_TAB_ID_PREFIX}${position}`, showStep: false }
   })
   // The voting page has its own Voting History tab; only the standalone pages need this one.
   const votingTab = embedded ? [] : [{ name: 'Voting History', id: VOTING_HISTORY_TAB_ID, showStep: false }]
@@ -172,13 +176,12 @@ const PreviousProgressReports = ({ dars, datasets, researcher, countriesOfOperat
   <div className="dar-summary">
     <h3>Previous Updates</h3>
     {dars.slice(0, -1).map((dar, index) => {
-      const whichPRIsThis = dars.length - index - 1
-      const sectionId = `${PROGRESS_REPORT_TAB_ID_PREFIX}${whichPRIsThis}`
+      const sectionId = `${PROGRESS_REPORT_TAB_ID_PREFIX}${dars.length - index - 1}`
       return (
         <div key={dar.referenceId} id={sectionId} {...panelProps(sectionId)}>
           <ConditionalAccordion
             condition={true}
-            title={`Progress Report ${whichPRIsThis}`}
+            title={requestTypeLabel(dar, dars)}
             defaultExpanded={index === 0}
           >
             <ProgressReportApplication
@@ -782,7 +785,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
               && (
                 <div className="col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding">
                   <button id="btn_back" type="button" onClick={back} className="btn-primary btn-back">
-                    <i className="glyphicon glyphicon-chevron-left" />
+                    <ChevronLeftIcon sx={inlineIconSx} />
                     {' '}
                     Back
                   </button>
@@ -829,7 +832,7 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
               <div id={PROGRESS_REPORT_APPLICATION_TAB_ID} {...panelProps(PROGRESS_REPORT_APPLICATION_TAB_ID)} className="dar-steps">
                 <ConditionalAccordion
                   condition={false}
-                  title={`Progress Report ${reverseOrderedDARs.length}`}
+                  title={`Progress Report ${nextProgressReportNumber(reverseOrderedDARs)}`}
                 >
                   <ProgressReportApplication
                     readOnlyMode={false}

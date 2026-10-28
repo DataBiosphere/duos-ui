@@ -26,7 +26,7 @@ const processVoteHistoryRowData = (voteHistory: VoteHistoryRow[]) => {
 
   return voteHistory.map((row: VoteHistoryRow, i) => [
     {
-      data: row.progressReport ? 'Progress Report' : 'Initial DAR',
+      data: row.requestType,
       cellStyle: { width: '15%' },
       label: 'Request Type',
       id: i,

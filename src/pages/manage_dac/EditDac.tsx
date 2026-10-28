@@ -29,6 +29,8 @@ import {
   getDefaultTabForDac,
   sortDaasByCreationDate,
 } from 'src/libs/daaHelpers'
+import DownloadIcon from '@mui/icons-material/Download'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 export const CHAIR = 'chair'
 export const MEMBER = 'member'
@@ -1023,7 +1025,7 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
                           style={{ padding: '10px 12px' }}
                           data-cy={idx === 0 ? 'uploaded_daa_download' : undefined}
                         >
-                          <span className="glyphicon glyphicon-download-alt"></span>
+                          <DownloadIcon sx={inlineIconSx} />
                         </a>
                       </div>
                     </div>

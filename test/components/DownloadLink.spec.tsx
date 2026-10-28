@@ -23,8 +23,9 @@ describe('DownloadLink', () => {
     expect(onDownload).toHaveBeenCalledTimes(1)
   })
 
-  it('renders the download glyphicon', () => {
-    const { container } = render(<DownloadLink label="My File" onDownload={vi.fn()} />)
-    expect(container.querySelector('.glyphicon-download-alt')).toBeInTheDocument()
+  it('renders a decorative download icon, so the label alone names the button', () => {
+    render(<DownloadLink label="My File" onDownload={vi.fn()} />)
+    const button = screen.getByRole('button', { name: 'My File' })
+    expect(button.querySelector('svg')).toHaveAttribute('aria-hidden', 'true')
   })
 })

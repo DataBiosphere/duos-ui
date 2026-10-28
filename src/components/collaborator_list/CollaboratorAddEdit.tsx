@@ -7,6 +7,8 @@ import { nihAccountLabel } from 'src/components/era_commons/ERACommonsUtils'
 import ApproverStatus from 'src/pages/dar_application/collaborator/ApproverStatus'
 import DeleteCollaboratorModal from 'src/pages/dar_application/collaborator/DeleteCollaboratorModal'
 import { Countries } from 'src/libs/ajax/Countries'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 interface FormFieldChange {
   key: string
@@ -159,21 +161,25 @@ export default function CollaboratorAddEdit(props: CollaboratorAddEditProps): Re
         <div className="row" style={{ marginTop: 20 }}>
           {/* delete button for existing collaborators in DAR mode */}
           {!readOnly && collaboratorKey && id >= 0 && collaborator?.name && (
-            <a
+            <button
+              type="button"
               id={`${id}_deleteMember`}
               onClick={() => setShowDeleteModal(true)}
-              style={{ verticalAlign: 'middle', lineHeight: '4rem', float: 'right' }}
+              style={{
+                verticalAlign: 'middle',
+                lineHeight: '4rem',
+                float: 'right',
+                border: 'none',
+                background: 'none',
+                padding: 0,
+                cursor: 'pointer',
+              }}
             >
-              <span
-                className="collaborator-delete-icon glyphicon glyphicon-trash"
-                aria-hidden="true"
-                data-tip="Delete dataset"
-                data-for="tip_delete"
-              />
+              <DeleteOutlinedIcon className="collaborator-delete-icon" sx={inlineIconSx} />
               <span style={{ marginLeft: '1rem', color: '#0948B7', verticalAlign: 'middle' }}>
                 Delete this entry
               </span>
-            </a>
+            </button>
           )}
           {/* add/save button */}
           {!readOnly && (

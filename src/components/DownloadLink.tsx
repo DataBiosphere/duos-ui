@@ -1,6 +1,8 @@
 import React from 'react'
 import { kebabCase } from 'src/utils/NodashUtil'
 import { Theme } from 'src/libs/theme'
+import DownloadIcon from '@mui/icons-material/Download'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 interface DownloadLinkProps {
   label: string
@@ -17,7 +19,7 @@ export const DownloadLink = (props: Readonly<DownloadLinkProps>) => {
   return (
     <div>
       <button id={kebabCase(label)} type="button" onClick={onDownload} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: Theme.palette.link, textDecoration: 'underline' }}>
-        <i className="glyphicon glyphicon-download-alt" style={ICON} />
+        <DownloadIcon sx={inlineIconSx} style={ICON} />
         <span style={{ fontSize: Theme.font.size.small }}>{label}</span>
       </button>
     </div>

@@ -11,6 +11,10 @@ import { RadioButton } from 'src/components/RadioButton'
 import { FormField } from 'src/components/forms/forms'
 import { getKey } from 'src/components/forms/formUtils'
 import { isValid, validateFormValue, validationMessage, Validation, Validator } from 'src/components/forms/formValidation'
+import AddIcon from '@mui/icons-material/Add'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import CloseIcon from '@mui/icons-material/Close'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 export interface SelectOption {
   key: string
@@ -162,7 +166,7 @@ const errorMessages = (validation: Validation | undefined): React.ReactNode => {
   if (isValid(validation)) return null
   return (
     <div className="error-message fadein">
-      <span className="glyphicon glyphicon-play" />
+      <ArrowDropUpIcon className="error-message-arrow" />
       {validation?.failed?.map((err, idx) => (
         <div key={'error_message_' + idx}>{validation?.messages?.[idx] ?? validationMessage(err)}</div>
       ))}
@@ -297,14 +301,11 @@ export const FormInputMultiText = (config: FormInputMultiTextConfig): React.Reac
           type="button"
           disabled={disabled}
           style={{ marginTop: 0, minWidth: 'fit-content' }}
+          aria-label="Add"
           onClick={() => pushValue(document.getElementById(id) as HTMLInputElement)}
         >
           {!disabled && (
-            <span
-              className="glyphicon glyphicon-plus"
-              aria-label="Add"
-              style={{ margin: '0 8px' }}
-            />
+            <AddIcon sx={inlineIconSx} style={{ margin: '0 8px' }} />
           )}
         </button>
       </div>
@@ -317,14 +318,12 @@ export const FormInputMultiText = (config: FormInputMultiTextConfig): React.Reac
             className="pill btn-xs"
             type="button"
             disabled={disabled}
+            aria-label={`Remove ${val}`}
             onClick={() => removePill((formValue as string[]).indexOf(val))}
           >
             {val}
             {!disabled && (
-              <span
-                className="glyphicon glyphicon-remove"
-                style={{ marginLeft: '8px' }}
-              />
+              <CloseIcon sx={inlineIconSx} style={{ marginLeft: '8px' }} />
             )}
           </button>
         ))}

@@ -23,7 +23,7 @@ describe('AiModelRow', () => {
   it('shows summary when not in edit mode', async () => {
     const user = userEvent.setup()
     const editFn = vi.fn()
-    const { container } = render(
+    render(
       <AiModelRow
         id={0}
         editMode={false}
@@ -38,7 +38,7 @@ describe('AiModelRow', () => {
       />,
     )
     expect(screen.getByText(sampleModel.name)).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit AI model' }))
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 
@@ -85,7 +85,7 @@ describe('AiModelRow', () => {
   it('triggers viewAction when view button is clicked', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <AiModelRow
         id={0}
         editMode={false}
@@ -101,7 +101,7 @@ describe('AiModelRow', () => {
         disabled={false}
       />,
     )
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View AI model' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })

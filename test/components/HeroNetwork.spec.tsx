@@ -55,9 +55,16 @@ describe('HeroNetwork', () => {
   it('softens only the foreground clusters', () => {
     const svg = renderNetwork(true, false)
     expect(svg.querySelector('#hero-network-soften feGaussianBlur')).toHaveAttribute('stdDeviation', '0.8')
-    const blurred = svg.querySelectorAll('g.drift[filter="url(#hero-network-soften)"]')
+    const blurred = svg.querySelectorAll('[filter="url(#hero-network-soften)"] g.drift')
     expect(blurred.length).toBeGreaterThan(0)
     expect(blurred.length).toBeLessThan(svg.querySelectorAll('g.drift').length)
+  })
+
+  it('keeps the blur region fixed so morphing clusters are not clipped', () => {
+    const filter = renderNetwork(true, false).querySelector('#hero-network-soften')
+    expect(filter).toHaveAttribute('filterUnits', 'userSpaceOnUse')
+    expect(filter).toHaveAttribute('width', '1440')
+    expect(filter).toHaveAttribute('height', '440')
   })
 
   it('holds still when paused', () => {

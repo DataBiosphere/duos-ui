@@ -80,6 +80,7 @@ const darCollection: DarCollection = {
         piCountryOfOperation: 'string',
       },
       progressReport: true,
+      parentId: 2000,
       expired: false,
       expiresAt: 111111,
       eraCommonsId: 'HERMAN',
@@ -270,6 +271,19 @@ describe('VotingHistory', () => {
     expect(rowOrder(chairPanel)).toEqual(sortedOrder)
     // and so did the expanded member row
     expect(within(memberPanel).getByText('DAC Member 1')).toBeInTheDocument()
+  })
+
+  it('numbers a progress report by its place in the collection, as the Full DAR tab does', () => {
+    // An earlier initial DAR with no elections of its own makes the fixture's report the first one
+    const initialDar = { ...darCollection.dars['dars-id-123'], id: 2000, referenceId: 'dars-id-100', parentId: undefined, progressReport: false, elections: {} }
+    const collection = { ...darCollection, dars: { ...darCollection.dars, 'dars-id-100': initialDar } }
+    const { container } = render(<VotingHistory darCollection={collection} dacIds={dacIds} />)
+
+    const chairPanel = container.querySelector('#vote-history-tabpanel-chair') as HTMLElement
+    const memberPanel = container.querySelector('#vote-history-tabpanel-member') as HTMLElement
+    expect(within(chairPanel).getAllByText('Progress Report 1')).toHaveLength(2)
+    expect(within(memberPanel).getByText('Progress Report 1')).toBeInTheDocument()
+    expect(screen.queryByText('Initial DAR')).not.toBeInTheDocument()
   })
 
   it('labels each tab with the number of rows it holds', () => {

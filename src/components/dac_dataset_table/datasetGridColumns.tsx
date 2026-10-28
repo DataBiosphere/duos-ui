@@ -7,6 +7,8 @@ import { Notifications } from 'src/libs/utils'
 import { extractError } from 'src/utils/ErrorUtils'
 import DACDatasetApprovalStatus from 'src/components/dac_dataset_table/DACDatasetApprovalStatus'
 import { DACDatasetTableColumnOptions } from 'src/components/dac_dataset_table/DACDatasetConstants'
+import DownloadIcon from '@mui/icons-material/Download'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 const downloadInstitutionalCertification = (dataset: DatasetTerm) => {
   DataSet.getNIHInstitutionalCertification(dataset.datasetId).catch((error: unknown) => {
@@ -79,7 +81,7 @@ const dacDatasetGridColumns: Partial<Record<string, GridColDef<DatasetTerm>>> = 
               style={{ padding: '10px 12px' }}
               aria-label={`Download the NIH Institutional Certification for ${params.row.datasetIdentifier}`}
             >
-              <span className="glyphicon glyphicon-download-alt" />
+              <DownloadIcon sx={inlineIconSx} />
             </button>
           )
         : null

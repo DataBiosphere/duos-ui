@@ -1,6 +1,8 @@
 import React from 'react'
 import { DAA } from 'src/libs/ajax/DAA'
 import { DAAObject, Dataset } from 'src/types/model'
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 export interface RequiredDAAsProps {
   datasets: Dataset[]
@@ -70,7 +72,7 @@ export default function RequiredDAAs({ datasets, daas, agreementText }: Readonly
                     {row.fileName}
                   </button>
                   {' '}
-                  <span className="glyphicon glyphicon-download"></span>
+                  <FileDownloadOutlinedIcon sx={inlineIconSx} />
                 </td>
                 <td>{row.dacNames.join(', ')}</td>
                 <td>{row.datasetNames.join(', ')}</td>
