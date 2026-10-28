@@ -154,6 +154,21 @@ export const resetSessionProbeState = (): void => {
   lastAuthoritativeAnswer = null
 }
 
+/** Window event that tells this tab's useSessionInfo hooks to probe again. */
+export const SESSION_CHANGED_EVENT = 'duos:session-changed'
+
+/**
+ * This tab changed the signed-in user's profile without a navigation (e.g. a
+ * DAC save that added or removed the user's own chair role, DT-505). Drop the
+ * cached answer and tell every mounted useSessionInfo to probe again, so
+ * consumers re-render off the new profile. Not throttled: it is a deliberate
+ * one-off, not a burst of focus events.
+ */
+export const announceSessionChange = (): void => {
+  resetSessionCache()
+  globalThis.dispatchEvent(new Event(SESSION_CHANGED_EVENT))
+}
+
 /**
  * Drop the cached answer and probe again — for "the world may have changed"
  * moments like the tab regaining focus (another tab can sign in or out on the

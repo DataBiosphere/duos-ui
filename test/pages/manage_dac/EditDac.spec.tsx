@@ -11,6 +11,7 @@ import { User } from 'src/libs/ajax/User'
 import { Institution } from 'src/libs/ajax/Institution'
 import { Storage } from 'src/libs/storage'
 import { Notifications } from 'src/libs/utils'
+import { refreshCurrentUserIfAffected } from 'src/libs/auth/refreshCurrentUser'
 import type { DAAObject, DacObject, DuosUser } from 'src/types/model'
 import { renderWithRouter } from '../../test-utils'
 
@@ -19,6 +20,7 @@ vi.mock('src/libs/ajax/DAA')
 vi.mock('src/libs/ajax/Institution')
 vi.mock('src/libs/ajax/User')
 vi.mock('src/libs/storage')
+vi.mock('src/libs/auth/refreshCurrentUser')
 vi.mock('src/libs/utils', async (importOriginal) => {
   const original = await importOriginal<typeof import('src/libs/utils')>()
   return {
@@ -428,6 +430,131 @@ describe('EditDAC Tests', () => {
     await waitFor(() => {
       expect(vi.mocked(DAC.update)).toHaveBeenCalledOnce()
       expect(vi.mocked(DAC.addDacMember)).toHaveBeenCalledWith(existingDac.dacId, 7002)
+    })
+  })
+
+  it('Refreshes the stored user with every user whose DAC role the save changed', async () => {
+    const createdMember = { userId: 7003, displayName: 'Another Member', email: 'another-member@broadinstitute.org' } as DuosUser
+
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.get).mockResolvedValue(existingDac as never)
+    vi.mocked(DAA.getDaas).mockResolvedValue(buildExistingDaas())
+    vi.mocked(DAC.update).mockResolvedValue(existingDac as never)
+    vi.mocked(User.create).mockResolvedValue(createdMember as never)
+    const { container } = mountExistingEditDac(existingDac.dacId as number)
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-cy="btn_create_member"]')).toBeInTheDocument()
+    })
+
+    fireEvent.click(container.querySelector('[data-cy="btn_create_member"]')!)
+    await waitFor(() => {
+      expect(capturedOnUserCreated).not.toBeNull()
+    })
+    await act(async () => {
+      capturedOnUserCreated!(createdMember, 'member')
+    })
+
+    fireEvent.click(container.querySelector('[data-cy="btn_save"]')!)
+
+    await waitFor(() => {
+      expect(vi.mocked(DAC.addDacMember)).toHaveBeenCalledWith(existingDac.dacId, 7003)
+      expect(vi.mocked(refreshCurrentUserIfAffected)).toHaveBeenCalledWith([7003])
+    })
+  })
+
+  it('Refreshes the stored user and shows an error when a role change fails partway', async () => {
+    const createdMember = { userId: 7005, displayName: 'Failing Member', email: 'failing-member@broadinstitute.org' } as DuosUser
+
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.get).mockResolvedValue(existingDac as never)
+    vi.mocked(DAA.getDaas).mockResolvedValue(buildExistingDaas())
+    vi.mocked(DAC.update).mockResolvedValue(existingDac as never)
+    vi.mocked(DAC.addDacMember).mockRejectedValue(new Error('500'))
+    vi.mocked(User.create).mockResolvedValue(createdMember as never)
+    const { container } = mountExistingEditDac(existingDac.dacId as number)
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-cy="btn_create_member"]')).toBeInTheDocument()
+    })
+
+    fireEvent.click(container.querySelector('[data-cy="btn_create_member"]')!)
+    await waitFor(() => {
+      expect(capturedOnUserCreated).not.toBeNull()
+    })
+    await act(async () => {
+      capturedOnUserCreated!(createdMember, 'member')
+    })
+
+    fireEvent.click(container.querySelector('[data-cy="btn_save"]')!)
+
+    await waitFor(() => {
+      expect(vi.mocked(refreshCurrentUserIfAffected)).toHaveBeenCalledWith([7005])
+      expect(vi.mocked(Notifications.showError)).toHaveBeenCalled()
+    })
+  })
+
+  it('Refreshes the stored user when adding the first chairs to a new DAC fails', async () => {
+    const createdChair = { userId: 7006, displayName: 'Failing Chair', email: 'failing-chair@broadinstitute.org' } as DuosUser
+
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAA.getDaas).mockResolvedValue(mockDaaList)
+    vi.mocked(DAC.create).mockResolvedValue({ ...existingDac, dacId: 99 } as never)
+    vi.mocked(DAC.addDacChair).mockRejectedValue(new Error('500'))
+    vi.mocked(User.create).mockResolvedValue(createdChair as never)
+    const { container } = mountCreateEditDac()
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-cy="btn_create_chair"]')).toBeInTheDocument()
+    })
+
+    fireEvent.click(container.querySelector('[data-cy="btn_create_chair"]')!)
+    await waitFor(() => {
+      expect(capturedOnUserCreated).not.toBeNull()
+    })
+    await act(async () => {
+      capturedOnUserCreated!(createdChair, 'chair')
+    })
+
+    fillForm(container)
+    fireEvent.click(container.querySelector('[data-cy="daa_option_1"]')!)
+    fireEvent.click(container.querySelector('[data-cy="btn_save"]')!)
+
+    await waitFor(() => {
+      expect(vi.mocked(refreshCurrentUserIfAffected)).toHaveBeenCalledWith([7006])
+      expect(vi.mocked(Notifications.showError)).toHaveBeenCalled()
+    })
+  })
+
+  it('Refreshes the stored user with the chairs added to a new DAC', async () => {
+    const createdChair = { userId: 7004, displayName: 'First Chair', email: 'first-chair@broadinstitute.org' } as DuosUser
+
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAA.getDaas).mockResolvedValue(mockDaaList)
+    vi.mocked(DAC.create).mockResolvedValue({ ...existingDac, dacId: 99 } as never)
+    vi.mocked(DAA.addDaaToDac).mockResolvedValue(200 as never)
+    vi.mocked(User.create).mockResolvedValue(createdChair as never)
+    const { container } = mountCreateEditDac()
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-cy="btn_create_chair"]')).toBeInTheDocument()
+    })
+
+    fireEvent.click(container.querySelector('[data-cy="btn_create_chair"]')!)
+    await waitFor(() => {
+      expect(capturedOnUserCreated).not.toBeNull()
+    })
+    await act(async () => {
+      capturedOnUserCreated!(createdChair, 'chair')
+    })
+
+    fillForm(container)
+    fireEvent.click(container.querySelector('[data-cy="daa_option_1"]')!)
+    fireEvent.click(container.querySelector('[data-cy="btn_save"]')!)
+
+    await waitFor(() => {
+      expect(vi.mocked(DAC.addDacChair)).toHaveBeenCalledWith(99, 7004)
+      expect(vi.mocked(refreshCurrentUserIfAffected)).toHaveBeenCalledWith([7004])
     })
   })
 
