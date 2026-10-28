@@ -172,7 +172,7 @@ describe('CollaboratorRow - Component Tests', () => {
     )
 
     // In read-only mode, should show eye icon instead of edit/delete icons
-    expect(screen.queryByRole('button', { name: 'View collaborator' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View collaborator' })).toBeInTheDocument()
     expect(document.querySelector('.glyphicon-pencil')).not.toBeInTheDocument()
     expect(document.querySelector('.glyphicon-trash')).not.toBeInTheDocument()
 

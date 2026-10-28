@@ -260,7 +260,7 @@ describe('CollaboratorList - Component Tests', () => {
 
     // Should show view icon (eye) instead of edit/delete icons
     const firstCard = document.querySelectorAll('.collaborator-summary-card')[0]
-    expect(within(firstCard as HTMLElement).queryByRole('button', { name: 'View collaborator' })).toBeTruthy()
+    expect(within(firstCard as HTMLElement).getByRole('button', { name: 'View collaborator' })).toBeInTheDocument()
     expect(firstCard.querySelector('.glyphicon-pencil')).toBeNull()
     expect(firstCard.querySelector('.glyphicon-trash')).toBeNull()
   })

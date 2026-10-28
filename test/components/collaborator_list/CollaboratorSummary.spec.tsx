@@ -152,7 +152,7 @@ describe('CollaboratorSummary - Component Tests', () => {
     )
 
     // Should show eye-open icon for viewing
-    expect(screen.queryByRole('button', { name: 'View collaborator' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View collaborator' })).toBeInTheDocument()
 
     // Should not show edit or delete icons at all in read-only mode
     expect(document.querySelector('.glyphicon-pencil')).not.toBeInTheDocument()
