@@ -42,7 +42,7 @@ describe('IntellectualPropertySummary', () => {
   it('renders view button and triggers viewAction', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <IntellectualPropertySummary
         intellectualProperty={sampleIp}
         columnsToShow={['title', 'type', 'patentNumber', 'status', 'url', 'tags']}
@@ -52,8 +52,8 @@ describe('IntellectualPropertySummary', () => {
         disabled={false}
       />,
     )
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    expect(screen.getByRole('button', { name: 'View intellectual property' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'View intellectual property' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })

@@ -24,6 +24,13 @@
   padding: 0 1%;
 }
 
+/* The padding below sits outside the icon, as it did around the old font glyph. */
+.collaborator-edit-icon,
+.collaborator-view-icon,
+.collaborator-delete-icon {
+  box-sizing: content-box;
+}
+
 .collaborator-edit-icon {
   color: #ffffff !important;
   background: #0948B7 !important;
@@ -38,6 +45,12 @@
   background: #ffffff !important;
   vertical-align: middle !important;
   font-size: 1.2em;
+}
+
+/* Outranks the !important colours above, so a disabled control greys out. */
+[disabled] .collaborator-edit-icon,
+[disabled] .collaborator-delete-icon {
+  color: #cccccc !important;
 }
 
 .collaborator-view-icon {

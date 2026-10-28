@@ -79,7 +79,7 @@ describe('Draft File Upload - Tests', () => {
     )
     expect(screen.getByRole('button', { name: /Upload a file/i })).toBeDisabled()
     expect(screen.getByText('blank.pdf')).toBeInTheDocument()
-    expect(document.querySelector('a.glyphicon.glyphicon-trash')).not.toBeNull()
+    expect(screen.getByRole('link', { name: 'Delete blank.pdf' })).toBeInTheDocument()
   })
 
   it('should trigger onDelete when file is removed.', async () => {
@@ -92,7 +92,7 @@ describe('Draft File Upload - Tests', () => {
       </BrowserRouter>,
     )
 
-    const deleteLink = document.querySelector('a.glyphicon.glyphicon-trash')!
+    const deleteLink = screen.getByRole('link', { name: 'Delete blank.pdf' })
     await act(async () => {
       fireEvent.click(deleteLink)
     })

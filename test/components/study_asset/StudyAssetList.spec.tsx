@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
@@ -38,9 +38,9 @@ const TestRowComponent: React.FC<TestRowProps> = ({ item, editMode, viewMode, ed
     {!editMode && !viewMode && (
       <>
         <span>{item.name}</span>
-        <button className="glyphicon-eye-open" onClick={viewAction} disabled={disabled}>View</button>
+        <button onClick={viewAction} disabled={disabled}>View</button>
         <button className="glyphicon-pencil" onClick={editAction} disabled={disabled}>Edit</button>
-        <button className="glyphicon-trash" onClick={deleteAction} disabled={disabled}>Delete</button>
+        <button onClick={deleteAction} disabled={disabled}>Delete</button>
       </>
     )}
     {(editMode || viewMode) && (
@@ -164,7 +164,7 @@ describe('StudyAssetList', () => {
     render(<StatefulWrapper initialItems={[...sampleItems]} onItemsChange={onItemsChange} />)
 
     const row1 = screen.getByTestId('row-item1')
-    fireEvent.click(row1.querySelector('.glyphicon-trash') as Element)
+    fireEvent.click(within(row1).getByRole('button', { name: 'Delete' }))
 
     expect(onItemsChange).toHaveBeenCalled()
     const calledWith: TestAsset[] = onItemsChange.mock.calls[0][0]
@@ -201,7 +201,7 @@ describe('StudyAssetList', () => {
     // Deleting the *other* row changes the item count, which should reset the
     // per-row edit state so the first row leaves edit mode.
     const row2 = screen.getByTestId('row-item2')
-    fireEvent.click(row2.querySelector('.glyphicon-trash') as Element)
+    fireEvent.click(within(row2).getByRole('button', { name: 'Delete' }))
 
     expect(screen.getByTestId('row-item1').querySelector('input')).not.toBeInTheDocument()
     expect(screen.getByTestId('row-item1')).toHaveTextContent('First Item')
@@ -212,7 +212,7 @@ describe('StudyAssetList', () => {
 
     // Put the first row into view mode.
     const row1 = screen.getByTestId('row-item1')
-    fireEvent.click(row1.querySelector('.glyphicon-eye-open') as Element)
+    fireEvent.click(within(row1).getByRole('button', { name: 'View' }))
     expect(screen.getByTestId('row-item1').querySelector('input')).toBeInTheDocument()
 
     // Adding an item changes the item count, which should reset the per-row view

@@ -64,7 +64,7 @@ describe('CollaboratorSummary - Component Tests', () => {
 
     expect(document.querySelector('.collaborator-summary-edit-delete-buttons')).toBeInTheDocument()
     expect(document.querySelector('.glyphicon-pencil')).toBeInTheDocument()
-    expect(document.querySelector('.glyphicon-trash')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Delete collaborator' })).toBeInTheDocument()
   })
 
   it('renders different columns when columnsToShow changes', () => {
@@ -101,7 +101,7 @@ describe('CollaboratorSummary - Component Tests', () => {
 
     expect(document.querySelector('.delete-modal')).not.toBeInTheDocument()
 
-    fireEvent.click(document.querySelector('.glyphicon-trash')!.closest('a')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Delete collaborator' }))
 
     expect(document.querySelector('.delete-modal')).toBeInTheDocument()
     expect(document.querySelector('.delete-modal-title')).toBeInTheDocument()
@@ -118,7 +118,7 @@ describe('CollaboratorSummary - Component Tests', () => {
       />,
     )
 
-    fireEvent.click(document.querySelector('.glyphicon-trash')!.closest('a')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Delete collaborator' }))
 
     fireEvent.click(screen.getByText('Delete'))
 
@@ -130,7 +130,7 @@ describe('CollaboratorSummary - Component Tests', () => {
   it('closes delete modal when cancel is clicked', () => {
     render(<CollaboratorSummary {...defaultProps} />)
 
-    fireEvent.click(document.querySelector('.glyphicon-trash')!.closest('a')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Delete collaborator' }))
     expect(document.querySelector('.delete-modal')).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('Cancel'))
@@ -152,15 +152,14 @@ describe('CollaboratorSummary - Component Tests', () => {
     )
 
     // Should show eye-open icon for viewing
-    expect(document.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
-    expect(document.querySelector('.glyphicon-eye-open')!.closest('a')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View collaborator' })).toBeInTheDocument()
 
     // Should not show edit or delete icons at all in read-only mode
     expect(document.querySelector('.glyphicon-pencil')).not.toBeInTheDocument()
-    expect(document.querySelector('.glyphicon-trash')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Delete collaborator' })).not.toBeInTheDocument()
 
     // Clicking the eye icon should call editAction (to open in view mode)
-    fireEvent.click(document.querySelector('.glyphicon-eye-open')!.closest('a')!)
+    fireEvent.click(screen.getByRole('button', { name: 'View collaborator' }))
     expect(editAction).toHaveBeenCalled()
 
     // Delete modal should never appear in read-only mode
