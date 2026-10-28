@@ -3,10 +3,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { useSessionInfo, useUserIsLogged } from 'src/hooks/useSession'
-import { getSessionInfo, revalidateSessionInfo } from 'src/libs/auth/session'
+import { SESSION_CHANGED_EVENT, getSessionInfo, revalidateSessionInfo } from 'src/libs/auth/session'
 import type { SessionInfo } from 'src/libs/auth/session'
 
 vi.mock('src/libs/auth/session', () => ({
+  SESSION_CHANGED_EVENT: 'duos:session-changed',
   getSessionInfo: vi.fn(),
   revalidateSessionInfo: vi.fn(),
 }))
@@ -46,6 +47,18 @@ describe('useSession hooks', () => {
 
     await waitFor(() => expect(result.current).toEqual({ authenticated: true, idp: 'google' }))
     expect(vi.mocked(revalidateSessionInfo)).toHaveBeenCalled()
+  })
+
+  it('re-probes when this tab announces a session change, without a navigation', async () => {
+    const { result } = renderHook(() => useSessionInfo(), { wrapper })
+    await waitFor(() => expect(result.current).toEqual({ authenticated: false }))
+    vi.mocked(getSessionInfo).mockResolvedValue({ authenticated: true, idp: 'google' })
+
+    act(() => {
+      globalThis.dispatchEvent(new Event(SESSION_CHANGED_EVENT))
+    })
+
+    await waitFor(() => expect(result.current).toEqual({ authenticated: true, idp: 'google' }))
   })
 
   it('does not revalidate while the tab is hidden', async () => {
