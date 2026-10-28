@@ -57,11 +57,10 @@ describe('File Input - Tests', () => {
     expect(onAddFileSpy).toHaveBeenCalled()
     expect(screen.getByText('blank.pdf')).toBeInTheDocument()
 
-    const deleteLink = document.querySelector('a.glyphicon.glyphicon-trash')
-    expect(deleteLink).not.toBeNull()
+    const deleteLink = screen.getByRole('link', { name: 'Delete blank.pdf' })
 
     await act(async () => {
-      fireEvent.click(deleteLink!)
+      fireEvent.click(deleteLink)
     })
 
     const confirmButton = screen.getByRole('button', { name: /Confirm/i })

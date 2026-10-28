@@ -44,7 +44,7 @@ describe('FundingResourceList component', () => {
   it('opens funding resource in view mode when view button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<FundingResourceListHarness initial={[sampleFunding]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View funding resource' }))
     expect(screen.getByText(sampleFunding.funderName)).toBeInTheDocument()
     expect(container.querySelector('#funderName')).toBeDisabled()
     expect(container.querySelector('#projectTitle')).toBeDisabled()
@@ -57,10 +57,10 @@ describe('FundingResourceList component', () => {
   it('closes view mode when close button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<FundingResourceListHarness initial={[sampleFunding]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View funding resource' }))
     await user.click(container.querySelector('.collaborator-form-cancel-button')!)
     expect(container.querySelector('#funderName')).not.toBeInTheDocument()
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View funding resource' })).toBeInTheDocument()
   })
 
   it('adds a new funding resource', async () => {
@@ -86,8 +86,8 @@ describe('FundingResourceList component', () => {
 
   it('deletes a funding resource via modal confirmation', async () => {
     const user = userEvent.setup()
-    const { container } = render(<FundingResourceListHarness initial={[sampleFunding]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    render(<FundingResourceListHarness initial={[sampleFunding]} />)
+    await user.click(screen.getByRole('button', { name: 'Delete funding resource' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!

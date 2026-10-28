@@ -20,7 +20,7 @@ describe('BiospecimenRow', () => {
   it('shows summary when not in edit mode', async () => {
     const user = userEvent.setup()
     const editFn = vi.fn()
-    const { container } = render(
+    render(
       <BiospecimenRow
         id={0}
         editMode={false}
@@ -35,7 +35,7 @@ describe('BiospecimenRow', () => {
       />,
     )
     expect(screen.getByText(sampleBiospecimen.specimenType)).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit Biospecimen' }))
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 
@@ -84,7 +84,7 @@ describe('BiospecimenRow', () => {
   it('triggers viewAction when view button is clicked', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <BiospecimenRow
         id={0}
         editMode={false}
@@ -100,7 +100,7 @@ describe('BiospecimenRow', () => {
         disabled={false}
       />,
     )
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View Biospecimen' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })

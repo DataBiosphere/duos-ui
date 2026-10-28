@@ -43,7 +43,7 @@ describe('WorkspaceList component', () => {
   it('opens workspace in view mode when view button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<WorkspaceListHarness initial={[sampleWorkspace]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View workspace' }))
     expect(screen.getByText(sampleWorkspace.name)).toBeInTheDocument()
     expect(container.querySelector('#name')).toBeDisabled()
     expect(container.querySelector('#platform')).toBeDisabled()
@@ -54,10 +54,10 @@ describe('WorkspaceList component', () => {
   it('closes view mode when close button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<WorkspaceListHarness initial={[sampleWorkspace]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View workspace' }))
     await user.click(container.querySelector('.collaborator-form-cancel-button')!)
     expect(container.querySelector('#name')).not.toBeInTheDocument()
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View workspace' })).toBeInTheDocument()
   })
 
   it('adds a new workspace', async () => {
@@ -84,8 +84,8 @@ describe('WorkspaceList component', () => {
 
   it('deletes a workspace via modal confirmation', async () => {
     const user = userEvent.setup()
-    const { container } = render(<WorkspaceListHarness initial={[sampleWorkspace]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    render(<WorkspaceListHarness initial={[sampleWorkspace]} />)
+    await user.click(screen.getByRole('button', { name: 'Delete workspace' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!

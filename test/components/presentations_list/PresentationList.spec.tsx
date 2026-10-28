@@ -68,7 +68,7 @@ describe('PresentationList component', () => {
   it('opens presentation in view mode when view button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<PresentationListHarness initial={[samplePresentation]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View presentation' }))
     expect(screen.getByText(samplePresentation.title)).toBeInTheDocument()
     expect(container.querySelector('#title')).toBeDisabled()
     expect(container.querySelector('#date')).toBeDisabled()
@@ -80,10 +80,10 @@ describe('PresentationList component', () => {
   it('closes view mode when close button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<PresentationListHarness initial={[samplePresentation]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View presentation' }))
     await user.click(container.querySelector('.collaborator-form-cancel-button')!)
     expect(container.querySelector('#title')).not.toBeInTheDocument()
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View presentation' })).toBeInTheDocument()
   })
 
   it('adds a presentation through list harness', async () => {
@@ -111,7 +111,7 @@ describe('PresentationList component', () => {
   it('edits a presentation', async () => {
     const user = userEvent.setup()
     const { container } = render(<PresentationListHarness initial={[samplePresentation]} />)
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit presentation' }))
     await user.clear(container.querySelector('#title')!)
     await user.type(container.querySelector('#title')!, 'Sample Talk Edited')
     await user.click(container.querySelector('.collaborator-form-add-save-button')!)
@@ -121,7 +121,7 @@ describe('PresentationList component', () => {
   it('deletes a presentation via modal confirmation', async () => {
     const user = userEvent.setup()
     const { container } = render(<PresentationListHarness initial={[samplePresentation]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    await user.click(screen.getByRole('button', { name: 'Delete presentation' }))
     await waitFor(() => expect(container.querySelector('.delete-modal-primary-button')).toBeVisible())
     const deleteBtn = container.querySelector('.delete-modal-primary-button')!
     await user.click(deleteBtn)

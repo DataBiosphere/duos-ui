@@ -31,6 +31,9 @@ import {
   Validation,
   Validator,
 } from 'src/components/forms/formValidation'
+import AddIcon from '@mui/icons-material/Add'
+import CloseIcon from '@mui/icons-material/Close'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 // Dynamic component dispatch — resolved at runtime from FormFieldTypeConfig,
 // so prop types can't be known statically. React.ComponentType<any> is the standard escape hatch here.
@@ -103,8 +106,6 @@ export interface FormFieldConfig {
 interface StyleProps {
   enableAddingRowStyle?: React.CSSProperties
   addingRowButtonClassName?: string
-  addRowButtonIconClassName?: string
-  removeRowButtonIconClassName?: string
 }
 
 interface FormTableConfig {
@@ -422,8 +423,6 @@ export const FormTable = (config: FormTableConfig): React.JSX.Element => {
   const {
     enableAddingRowStyle = { display: 'flex', width: '100%', justifyContent: 'flex-end', marginTop: 10 },
     addingRowButtonClassName = 'pill form-btn btn-xs',
-    addRowButtonIconClassName = 'glyphicon glyphicon-plus',
-    removeRowButtonIconClassName = 'glyphicon glyphicon-remove',
   } = styleProps
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   const [formValue, setFormValue] = useState<any[]>(defaultValue ?? [{}])
@@ -477,6 +476,7 @@ export const FormTable = (config: FormTableConfig): React.JSX.Element => {
             className="btn-formTable-delete btn-xs"
             type="button"
             disabled={disabled || formValue.length <= (minLength ?? 0)}
+            aria-label={`Remove row ${i + 1}`}
             onClick={() => {
               const formValueClone = cloneDeep(formValue)
               formValueClone.splice(i, 1)
@@ -489,7 +489,7 @@ export const FormTable = (config: FormTableConfig): React.JSX.Element => {
               }
             }}
           >
-            <span className={removeRowButtonIconClassName} />
+            <CloseIcon sx={inlineIconSx} />
           </button>
         </div>
       ))}
@@ -510,10 +510,7 @@ export const FormTable = (config: FormTableConfig): React.JSX.Element => {
             style={{ marginTop: 10 }}
           >
             {addRowLabel ?? 'Add New'}
-            <span
-              className={addRowButtonIconClassName}
-              style={{ marginLeft: '8px' }}
-            />
+            <AddIcon sx={inlineIconSx} style={{ marginLeft: '8px' }} />
           </button>
         </div>
       )}

@@ -49,7 +49,7 @@ describe('PublicationSummary', () => {
   it('renders view button and triggers viewAction', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <PublicationSummary
         publication={samplePublication}
         columnsToShow={['title', 'publishedDate']}
@@ -59,8 +59,8 @@ describe('PublicationSummary', () => {
         disabled={false}
       />,
     )
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    expect(screen.getByRole('button', { name: 'View publication' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'View publication' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })

@@ -50,7 +50,7 @@ describe('PublicationRow', () => {
   it('shows summary when not in edit mode and triggers editAction', async () => {
     const user = userEvent.setup()
     const editFn = vi.fn()
-    const { container } = render(
+    render(
       <PublicationRow
         id={0}
         editMode={false}
@@ -65,7 +65,7 @@ describe('PublicationRow', () => {
       />,
     )
     expect(screen.getByText(samplePublication.title)).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit publication' }))
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 
@@ -112,7 +112,7 @@ describe('PublicationRow', () => {
   it('triggers viewAction when view button is clicked', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <PublicationRow
         id={0}
         editMode={false}
@@ -128,7 +128,7 @@ describe('PublicationRow', () => {
         disabled={false}
       />,
     )
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View publication' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })
