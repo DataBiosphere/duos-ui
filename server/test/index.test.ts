@@ -168,7 +168,7 @@ describe('handleServerError', () => {
   // the child-logger factory a route uses is fixed when that route registers,
   // so a built app's request.log cannot be stubbed afterwards.
   function fakeRequest() {
-    return { ip: '203.0.113.1', url: '/auth/login?code=SECRET', routeOptions: { url: '/auth/login' }, log: { warn: vi.fn(), error: vi.fn() } }
+    return { ip: '203.0.113.1', socket: { remoteAddress: '203.0.113.1' }, headers: {}, url: '/auth/login?code=SECRET', routeOptions: { url: '/auth/login' }, log: { warn: vi.fn(), error: vi.fn() } }
   }
 
   function fakeReply() {
@@ -274,7 +274,8 @@ describe('handleCallbackError', () => {
       {} as FastifyRequest,
       { statusCode: 429, ban: false, after: '1 minute', max: 60, ttl: 60_000 },
     )
-    const request = { ip: '203.0.113.2', url: '/auth/callback?code=SECRET&state=SECRET', routeOptions: { url: '/auth/callback' }, log: { warn: vi.fn(), error: vi.fn() } }
+    // From the sidecar: the log names the X-Real-IP key, not the front end.
+    const request = { ip: '35.191.75.100', socket: { remoteAddress: '127.0.0.1' }, headers: { 'x-real-ip': '203.0.113.2' }, url: '/auth/callback?code=SECRET&state=SECRET', routeOptions: { url: '/auth/callback' }, log: { warn: vi.fn(), error: vi.fn() } }
     const reply = { redirect: vi.fn() }
 
     // oxlint-disable-next-line @typescript-eslint/no-explicit-any
@@ -866,8 +867,9 @@ describe('auth endpoint rate limiting', () => {
     return buildApp()
   }
 
-  // The rate limiter keys on request.ip, which honours X-Forwarded-For because
-  // TRUST_PROXY names the loopback peer that app.inject() presents as.
+  // With no X-Real-IP, the rate limiter keys on request.ip, which honours
+  // X-Forwarded-For because TRUST_PROXY names the loopback peer that
+  // app.inject() presents as.
   const from = (ip: string) => ({ 'x-forwarded-for': ip })
 
   it('returns 429 with Retry-After and the rate_limited code once /auth/login exceeds its limit', async () => {
@@ -929,6 +931,35 @@ describe('auth endpoint rate limiting', () => {
 
     expect(sameIp.statusCode).toBe(429)
     expect(otherIp.statusCode).toBe(200)
+
+    await app.close()
+  })
+
+  // Deployed, X-Forwarded-For ends in a Google front-end address, so it
+  // names the same bucket for everyone. The load balancer's X-Real-IP is the
+  // real client, and app.inject() presents as the loopback sidecar.
+  it('counts each X-Real-IP in its own bucket when X-Forwarded-For is the same front end', async () => {
+    const app = await buildLimitedApp({ login: '1' })
+    const via = (realIp: string) => ({ ...from('35.191.75.100'), 'x-real-ip': realIp })
+
+    await app.inject({ method: 'POST', url: '/auth/login', headers: via('203.0.113.20') })
+    const sameClient = await app.inject({ method: 'POST', url: '/auth/login', headers: via('203.0.113.20') })
+    const otherClient = await app.inject({ method: 'POST', url: '/auth/login', headers: via('198.51.100.20') })
+
+    expect(sameClient.statusCode).toBe(429)
+    expect(otherClient.statusCode).toBe(200)
+
+    await app.close()
+  })
+
+  it('ignores X-Real-IP from a peer that is not the loopback sidecar', async () => {
+    const app = await buildLimitedApp({ login: '1' })
+    const direct = (realIp: string) => ({ method: 'POST' as const, url: '/auth/login', remoteAddress: '203.0.113.30', headers: { 'x-real-ip': realIp } })
+
+    await app.inject(direct('198.51.100.31'))
+    const rotated = await app.inject(direct('198.51.100.32'))
+
+    expect(rotated.statusCode).toBe(429)
 
     await app.close()
   })

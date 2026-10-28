@@ -9,6 +9,7 @@ import {
   publicProxy,
 } from '../src/proxy/publicProxy.js'
 import { TRUST_PROXY } from '../src/config.js'
+import { rateLimitPluginOptions } from '../src/security/rateLimit.js'
 import {
   type Upstream,
   buildAppShell,
@@ -45,14 +46,14 @@ describe('publicProxy', () => {
       ? { level: 'info', stream: { write: (line: string) => { logLines.push(line) } } }
       : false
     const instance = Fastify({ logger, trustProxy: TRUST_PROXY })
-    await instance.register(fastifyRateLimit, { global: false })
+    await instance.register(fastifyRateLimit, rateLimitPluginOptions)
     await instance.register(publicProxy)
     return instance
   }
 
   async function buildPublicAppWithSession(accessToken: string): Promise<FastifyInstance> {
     const instance = await buildAppShell()
-    await instance.register(fastifyRateLimit, { global: false })
+    await instance.register(fastifyRateLimit, rateLimitPluginOptions)
     seedSession(instance, { accessToken, tokenExpiry: Math.floor(Date.now() / 1000) + 3600 })
     await instance.register(publicProxy)
     return instance
@@ -402,17 +403,21 @@ describe('publicProxy', () => {
     it('logs a rate-limit refusal, so the bare 429 does not also hide the event from operators', async () => {
       const logLines: string[] = []
       app = await buildPublicApp(logLines)
+      // The sidecar forwards the load balancer's X-Real-IP; the log names that
+      // key, so the keying can be checked in a deployed environment.
+      const request = { method: 'GET' as const, url: PUBLIC_FEATURES_PREFIX, headers: { 'x-real-ip': '203.0.113.40' } }
       for (let i = 0; i < FEATURES_MAX_PER_WINDOW; i += 1) {
-        await app.inject({ method: 'GET', url: PUBLIC_FEATURES_PREFIX })
+        await app.inject(request)
       }
 
-      await app.inject({ method: 'GET', url: PUBLIC_FEATURES_PREFIX })
+      await app.inject(request)
 
-      const warning = logLines.map(line => JSON.parse(line) as { level: number, msg: string, url?: string })
+      const warning = logLines.map(line => JSON.parse(line) as { level: number, msg: string, url?: string, ip?: string })
         .find(entry => entry.msg.includes('rate limit exceeded'))
       expect(warning).toBeDefined()
       expect(warning?.level).toBe(40) // pino warn
       expect(warning?.url).toBe(PUBLIC_FEATURES_PREFIX)
+      expect(warning?.ip).toBe('203.0.113.40')
     })
 
     it('does not log a client-side 4xx (malformed JSON) as a server error', async () => {

@@ -1,4 +1,6 @@
-import type { RateLimitOptions, RateLimitPluginOptions } from '@fastify/rate-limit'
+import { BlockList, isIP } from 'node:net'
+import { normalizeIP, type RateLimitOptions, type RateLimitPluginOptions } from '@fastify/rate-limit'
+import type { FastifyRequest } from 'fastify'
 
 /**
  * Rate limiting for the auth endpoints (Phase 5, stories 5-G2 and 5-G3).
@@ -58,34 +60,43 @@ import type { RateLimitOptions, RateLimitPluginOptions } from '@fastify/rate-lim
  *
  * ## Keying
  *
- * The plugin keys on `request.ip`, which honors `X-Forwarded-For` because
- * `TRUST_PROXY` (config.ts) names the trusted peers. `proxy-addr` walks the
- * chain from the socket end and stops at the first address that is **not** a
- * trusted peer, and that address becomes `request.ip`. Two consequences:
+ * The key is the client address from `rateLimitKey` below, not `request.ip`.
+ * Deployed, `request.ip` is a Google front-end address (35.191.x.x), so it
+ * names the same few buckets for every user. On dev on 2026-10-28 the load
+ * balancer logged the real client, but the sidecar and `request.ip` both saw
+ * only the front end (DT-4374).
  *
- *   - **From outside the trusted ranges an attacker cannot choose a bucket**,
- *     as long as the sidecar itself sets or appends `X-Forwarded-For`: the
- *     real client address it adds sits to the right of anything the attacker
- *     supplied, so the walk stops there first. A sidecar that instead passes
- *     a client-supplied header through untouched (httpd's `ProxyAddHeaders
- *     Off`, or any proxy that does not manage the header) breaks this — so
- *     the sidecar's `X-Forwarded-For` mode still has to be confirmed at the
- *     edge. `mod_proxy` appends by default.
- *   - **From inside the trusted ranges an attacker can choose a bucket.**
- *     `TRUST_PROXY` trusts `uniquelocal`, so for a caller whose own address
- *     is RFC1918 the walk continues *past* the appended real client and into
- *     attacker-supplied entries. k8s pod addresses are `10.x` and the server
- *     binds `0.0.0.0`, so a pod that reaches the app port directly, past the
- *     same-pod sidecar, can send a fresh `X-Forwarded-For` per request and
- *     spend an unlimited number of buckets. That is a property of
- *     `TRUST_PROXY` (which also governs `X-Forwarded-Proto`) rather than of
- *     this module, and it is another reason the edge is the real control.
+ * The GKE ingress `BackendConfig` in terra-helmfile (`charts/ingress`) sets
+ * `X-Real-IP:{client_ip_address}`. The load balancer overwrites a client
+ * header with the same name, and the httpd-terra-proxy sidecar passes it on.
+ * On dev, a spoofed `X-Real-IP` sent to Consent's showcase limiter (DT-4280)
+ * was logged as the real client address. The rules:
+ *
+ *   - **The header counts only when the socket peer is loopback**, which is
+ *     the sidecar in the same pod. A pod that reaches the app port directly
+ *     has a `10.x` peer, so its `X-Real-IP` is ignored. The header must also
+ *     hold exactly one IP literal; Node joins a repeated header with `, `.
+ *   - **Otherwise the key is `request.ip`.** That keeps local dev and
+ *     docker-compose (no `X-Real-IP`) working as before. `request.ip` honors
+ *     `X-Forwarded-For` because `TRUST_PROXY` (config.ts) names the trusted
+ *     peers. `TRUST_PROXY` trusts `uniquelocal`, so a caller whose own address
+ *     is RFC1918 (a pod past the sidecar) can still send a fresh
+ *     `X-Forwarded-For` per request and spend an unlimited number of buckets.
+ *     That is a property of `TRUST_PROXY` (which also governs
+ *     `X-Forwarded-Proto`) rather than of this module, and it is another
+ *     reason the edge is the real control.
+ *   - Only the `gke` ingress class renders that `BackendConfig`. Behind
+ *     another ingress, such as the HAProxy ingress in BEEs, nothing
+ *     overwrites a client-supplied `X-Real-IP`.
  *
  * IPv6 keys are grouped to a /64 — the standard single-customer delegation —
- * so one client cannot spend 2^64 buckets.
+ * so one client cannot spend 2^64 buckets. The plugin does this only for its
+ * default key, so `rateLimitKey` calls the plugin's `normalizeIP` itself.
  */
 
 export const RATE_LIMIT_ERROR_CODE = 'rate_limited'
+const REAL_IP_HEADER = 'x-real-ip'
+const IPV4_MAPPED_PREFIX = '::ffff:'
 const RATE_LIMIT_ERROR_MARKER = 'DUOS_RATE_LIMITED'
 
 /** Names the tuning knobs so tests and docs cannot drift from the reads below. */
@@ -111,8 +122,36 @@ function maxFromEnv(envVar: string, defaultMax: number): number {
   return Number(raw)
 }
 
+const LOOPBACK = new BlockList()
+LOOPBACK.addSubnet('127.0.0.0', 8, 'ipv4')
+LOOPBACK.addAddress('::1', 'ipv6')
+
+function isLoopback(address: string | undefined): boolean {
+  if (!address) return false
+  const unmapped = address.startsWith(IPV4_MAPPED_PREFIX) ? address.slice(IPV4_MAPPED_PREFIX.length) : address
+  if (isIP(unmapped) === 4) return LOOPBACK.check(unmapped, 'ipv4')
+  return isIP(address) === 6 && LOOPBACK.check(address, 'ipv6')
+}
+
+/** One IP literal without a zone, or undefined. See "Keying" above. */
+function realIpHeader(request: FastifyRequest): string | undefined {
+  const value = request.headers[REAL_IP_HEADER]
+  if (typeof value !== 'string') return undefined
+  const literal = value.trim()
+  return isIP(literal) !== 0 && !literal.includes('%') ? literal : undefined
+}
+
+/** The rate-limit key for every limited route. See "Keying" above. */
+export function rateLimitKey(request: FastifyRequest): string {
+  const realIp = isLoopback(request.socket.remoteAddress) ? realIpHeader(request) : undefined
+  return normalizeIP(realIp ?? request.ip)
+}
+
 export const rateLimitPluginOptions = {
   global: false,
+  // Route `config.rateLimit` objects inherit this: the plugin merges the
+  // plugin options under each route's own.
+  keyGenerator: rateLimitKey,
   errorResponseBuilder: (_request, context) => Object.assign(
     new Error(`Rate limit exceeded, retry in ${context.after}`),
     { statusCode: context.statusCode, code: RATE_LIMIT_ERROR_MARKER },
