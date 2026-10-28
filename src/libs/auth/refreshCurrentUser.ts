@@ -7,21 +7,21 @@
  */
 import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'
-import { resetSessionCache } from 'src/libs/auth/session'
+import { announceSessionChange } from 'src/libs/auth/session'
 import { setUserRoleStatuses } from 'src/libs/utils'
 
 export const refreshCurrentUserIfAffected = async (affectedUserIds: number[]): Promise<void> => {
   if (!affectedUserIds.includes(Storage.getCurrentUser().userId)) return
-  // Under the BFF the cached /auth/me probe still carries the old roles. Drop
-  // it so the next navigation probes fresh and the reconciler re-renders
-  // consumers off the new profile.
-  resetSessionCache()
   try {
     // setUserRoleStatuses persists the user itself (utils.ts).
     setUserRoleStatuses(await User.getMe(), Storage)
   }
   catch {
-    // The role change itself succeeded. Keep the stored profile; the next
-    // session probe (BFF) or sign-in (legacy) picks the new roles up.
+    // The role change itself succeeded. Keep the stored profile; under the
+    // BFF the probe below still carries the new roles from Consent.
   }
+  // A storage write is invisible to React, and a save need not navigate
+  // (DacProfile's inline EditDac). Drop the cached probe and re-probe now, so
+  // mounted consumers such as the header's DAC Console tab re-render.
+  announceSessionChange()
 }
