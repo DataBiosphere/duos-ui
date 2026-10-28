@@ -6,6 +6,8 @@ import { asIdAndDisplayText, SelectEntry } from './SelectOptionInterface'
 import { CloudProviders } from './CloudProviders'
 import { DataLocations } from './DataLocations'
 import { ResearchStage } from './ResearchStage'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 export type DataLocationInfo = {
   cloudProvider: null | SelectEntry
@@ -41,10 +43,12 @@ export const DataLocation = (props: DataLocationComponentProps) => {
         <Link
           style={{ marginLeft: '15px' }}
           id={`${idx}_deleteDataLocation`}
-          className="glyphicon glyphicon-trash"
+          aria-label={`Delete data location ${idx + 1}`}
           onClick={() => onDelete(idx)}
           to="#"
-        />
+        >
+          <DeleteOutlinedIcon sx={inlineIconSx} />
+        </Link>
       </h4>
       <FormField
         style={commonFieldStyle}

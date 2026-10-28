@@ -62,8 +62,8 @@ describe('CollaboratorRow - Component Tests', () => {
     expect(screen.getByText(mockCollaborator.title!)).toBeInTheDocument()
     expect(screen.getByText(mockCollaborator.email!)).toBeInTheDocument()
 
-    expect(document.querySelector('.glyphicon-pencil')).toBeInTheDocument()
-    expect(document.querySelector('.glyphicon-trash')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Edit collaborator' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Delete collaborator' })).toBeInTheDocument()
 
     expect(screen.queryByText('New Collaborator Information')).not.toBeInTheDocument()
     expect(screen.queryByText('Edit Collaborator Information')).not.toBeInTheDocument()
@@ -84,8 +84,8 @@ describe('CollaboratorRow - Component Tests', () => {
     expect(screen.getByText('Save')).toBeInTheDocument()
     expect(screen.getByText('Cancel')).toBeInTheDocument()
 
-    expect(document.querySelector('.glyphicon-pencil')).not.toBeInTheDocument()
-    expect(document.querySelector('.glyphicon-trash')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit collaborator' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Delete collaborator' })).not.toBeInTheDocument()
   })
 
   it('passes editAction to CollaboratorSummary and triggers it on edit button click', () => {
@@ -98,8 +98,7 @@ describe('CollaboratorRow - Component Tests', () => {
       />,
     )
 
-    const pencilIcon = document.querySelector('.glyphicon-pencil')!
-    fireEvent.click(pencilIcon.closest('a')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Edit collaborator' }))
 
     expect(editAction).toHaveBeenCalledOnce()
   })
@@ -114,8 +113,7 @@ describe('CollaboratorRow - Component Tests', () => {
       />,
     )
 
-    const trashIcon = document.querySelector('.glyphicon-trash')!
-    fireEvent.click(trashIcon.closest('a')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Delete collaborator' }))
 
     const deleteButton = document.querySelector('.delete-modal-primary-button')!
     fireEvent.click(deleteButton)
@@ -172,13 +170,12 @@ describe('CollaboratorRow - Component Tests', () => {
     )
 
     // In read-only mode, should show eye icon instead of edit/delete icons
-    expect(document.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
-    expect(document.querySelector('.glyphicon-pencil')).not.toBeInTheDocument()
-    expect(document.querySelector('.glyphicon-trash')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View collaborator' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit collaborator' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Delete collaborator' })).not.toBeInTheDocument()
 
     // Clicking the eye icon should call editAction (to view details)
-    const eyeIcon = document.querySelector('.glyphicon-eye-open')!
-    fireEvent.click(eyeIcon.closest('a')!)
+    fireEvent.click(screen.getByRole('button', { name: 'View collaborator' }))
     expect(editAction).toHaveBeenCalledOnce()
     expect(deleteAction).not.toHaveBeenCalled()
   })

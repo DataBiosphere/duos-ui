@@ -638,15 +638,12 @@ describe('FormField - Tests', () => {
         styleProps: {
           enableAddingRowStyle: { display: 'flex', width: '100%', justifyContent: 'flex-start', marginTop: 10 },
           addingRowButtonClassName: 'button-complex-outlined-secondary',
-          addRowButtonIconClassName: 'button-icon button-icon-circle-plus-outline',
-          removeRowButtonIconClassName: 'button-icon button-icon-close',
         },
       }
       render(<FormTable {...customProps} />)
       fireEvent.change(document.getElementById('fileTypes-0-functionalEquivalence')!, { target: { value: 'hello' } })
       expect(document.getElementById('add-new-table-row-fileTypes')).toHaveClass('button-complex-outlined-secondary')
-      expect(document.getElementById('add-new-table-row-fileTypes')!.querySelector('span')).toHaveClass('button-icon-circle-plus-outline')
-      expect(document.getElementById('delete-table-row-fileTypes-0')!.querySelector('span')).toHaveClass('button-icon-close')
+      expect(document.getElementById('add-new-table-row-fileTypes')!.parentElement).toHaveStyle({ justifyContent: 'flex-start' })
     })
   })
 

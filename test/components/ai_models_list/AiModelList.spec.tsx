@@ -44,7 +44,7 @@ describe('AiModelList component', () => {
   it('opens model in view mode when view button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<AiModelListHarness initial={[sampleModel]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View AI model' }))
     expect(screen.getByText(sampleModel.name)).toBeInTheDocument()
     expect(container.querySelector('#name')).toBeDisabled()
     expect(container.querySelector('#format')).toBeDisabled()
@@ -55,10 +55,10 @@ describe('AiModelList component', () => {
   it('closes view mode when close button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<AiModelListHarness initial={[sampleModel]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View AI model' }))
     await user.click(container.querySelector('.collaborator-form-cancel-button')!)
     expect(container.querySelector('#name')).not.toBeInTheDocument()
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View AI model' })).toBeInTheDocument()
   })
 
   it('adds a new model', async () => {
@@ -86,8 +86,8 @@ describe('AiModelList component', () => {
 
   it('deletes a model via modal confirmation', async () => {
     const user = userEvent.setup()
-    const { container } = render(<AiModelListHarness initial={[sampleModel]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    render(<AiModelListHarness initial={[sampleModel]} />)
+    await user.click(screen.getByRole('button', { name: 'Delete AI model' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!

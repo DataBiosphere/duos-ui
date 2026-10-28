@@ -24,14 +24,15 @@ describe('CloseIconComponent', () => {
     expect(closeFn).toHaveBeenCalledTimes(1)
   })
 
-  it('names the button for screen readers, since the glyphicon carries no text', () => {
+  it('names the button for screen readers, since the icon carries no text', () => {
     render(<CloseIconComponent closeFn={vi.fn()} />)
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
   })
 
-  it('renders the glyphicon span inside the button', () => {
-    const { container } = render(<CloseIconComponent closeFn={vi.fn()} />)
-    const span = container.querySelector('span.glyphicon.glyphicon-remove.default-color')
-    expect(span).toBeInTheDocument()
+  it('renders a decorative icon inside the button', () => {
+    render(<CloseIconComponent closeFn={vi.fn()} />)
+    const icon = screen.getByRole('button', { name: 'Close' }).querySelector('svg')
+    expect(icon).toHaveClass('default-color')
+    expect(icon).toHaveAttribute('aria-hidden', 'true')
   })
 })
