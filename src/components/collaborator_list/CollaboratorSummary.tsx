@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import CollaboratorDelete from './CollaboratorDelete'
 import { Collaborator } from 'src/types/model'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 interface CollaboratorSummaryProps {
   collaborator: Collaborator
@@ -12,6 +14,9 @@ interface CollaboratorSummaryProps {
   readonly index?: number
   readonly collaboratorKey?: string
 }
+
+// Strip the native button chrome, so the icon looks as the old bare link did.
+const ICON_BUTTON: React.CSSProperties = { border: 'none', background: 'none', padding: 0, cursor: 'pointer' }
 
 export default function CollaboratorSummary(props: CollaboratorSummaryProps): React.JSX.Element {
   const { collaborator, columnsToShow, editAction, deleteAction, readOnly, index, collaboratorKey } = props
@@ -53,19 +58,15 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
       <div className="collaborator-summary-edit-delete-buttons">
         {readOnly
           ? (
-              <a
-                style={{ marginLeft: 10, marginRight: 10 }}
+              <button
+                type="button"
+                style={{ ...ICON_BUTTON, marginLeft: 10, marginRight: 10 }}
                 onClick={() => editAction()}
+                aria-label="View collaborator"
               >
-                <span
-                  className="glyphicon glyphicon-eye-open collaborator-view-icon"
-                  aria-hidden="true"
-                  data-tip="View collaborator"
-                  data-for="tip_view"
-                >
-                </span>
+                <VisibilityOutlinedIcon className="collaborator-view-icon" sx={inlineIconSx} />
                 <span style={{ marginLeft: '1rem' }}></span>
-              </a>
+              </button>
             )
           : (
               <>

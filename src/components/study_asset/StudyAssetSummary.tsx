@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import { DeletePresentationOrPublication } from 'src/components/presentation_publication_shared/DeletePresentationOrPublication'
 import { renderColumnContent } from 'src/utils/RenderUtils'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 interface StudyAssetSummaryProps<T> {
   readonly asset: T
@@ -54,7 +56,7 @@ export default function StudyAssetSummary<T>({
       })}
       <div className="collaborator-summary-edit-delete-buttons">
         <button type="button" style={{ marginLeft: 10 }} onClick={() => viewAction?.()} aria-label={`View ${objectName}`}>
-          <span className="glyphicon glyphicon-eye-open caret-margin collaborator-view-icon" aria-hidden="true" />
+          <VisibilityOutlinedIcon className="caret-margin collaborator-view-icon" sx={inlineIconSx} />
           <span style={{ marginLeft: '1rem' }}></span>
         </button>
         <button type="button" style={{ marginLeft: 10, ...editButtonStyle }} onClick={() => !disabled && editAction()} disabled={disabled} aria-label={`Edit ${objectName}`}>

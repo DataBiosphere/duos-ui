@@ -172,13 +172,12 @@ describe('CollaboratorRow - Component Tests', () => {
     )
 
     // In read-only mode, should show eye icon instead of edit/delete icons
-    expect(document.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'View collaborator' })).toBeInTheDocument()
     expect(document.querySelector('.glyphicon-pencil')).not.toBeInTheDocument()
     expect(document.querySelector('.glyphicon-trash')).not.toBeInTheDocument()
 
     // Clicking the eye icon should call editAction (to view details)
-    const eyeIcon = document.querySelector('.glyphicon-eye-open')!
-    fireEvent.click(eyeIcon.closest('a')!)
+    fireEvent.click(screen.getByRole('button', { name: 'View collaborator' }))
     expect(editAction).toHaveBeenCalledOnce()
     expect(deleteAction).not.toHaveBeenCalled()
   })
