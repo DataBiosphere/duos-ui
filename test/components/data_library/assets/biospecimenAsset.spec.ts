@@ -3,6 +3,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { biospecimenAsset } from 'src/components/data_library/assets/biospecimenAsset'
+import { ALL_SEARCH_FIELDS } from 'src/components/data_library/assets'
 import { BiospecimenAsset, PaginationState, SortState } from 'src/types/library'
 import {
   ElasticsearchResponse,
@@ -17,7 +18,8 @@ const pagination: PaginationState = { page: 0, pageSize: 25 }
 const makeBucket = (
   studyId: number,
   biospecimens: Array<{
-    biospecimenId?: string
+    biospecimenId?: string | number
+    sampleId?: string | number
     donorId?: string
     specimenType?: BioSpecimenType
     preservationMethod?: BioSpecimenPreservationMethod
@@ -42,6 +44,7 @@ const makeBucket = (
               assets: {
                 biospecimens: biospecimens.map(b => ({
                   biospecimenId: b.biospecimenId,
+                  sampleId: b.sampleId,
                   donorId: b.donorId,
                   specimenType: b.specimenType,
                   preservationMethod: b.preservationMethod,
@@ -84,7 +87,7 @@ describe('biospecimenAsset — sortingMode', () => {
 
 describe('biospecimenAsset — searchFields', () => {
   it('includes biospecimen-specific fields', () => {
-    expect(biospecimenAsset.searchFields).toContain('study.assets.biospecimens.biospecimenId')
+    expect(biospecimenAsset.searchFields).toContain('study.assets.biospecimens.sampleId')
     expect(biospecimenAsset.searchFields).toContain('study.assets.biospecimens.donorId')
     expect(biospecimenAsset.searchFields).toContain('study.assets.biospecimens.specimenType')
   })
@@ -93,6 +96,11 @@ describe('biospecimenAsset — searchFields', () => {
     expect(biospecimenAsset.searchFields).not.toContain(
       'study.assets.biospecimens.dateOfCollection',
     )
+  })
+
+  it('searches sampleId, not the server-assigned biospecimenId, on every tab', () => {
+    expect(ALL_SEARCH_FIELDS).toContain('study.assets.biospecimens.sampleId')
+    expect(ALL_SEARCH_FIELDS).not.toContain('study.assets.biospecimens.biospecimenId')
   })
 
   it('includes study-level fields', () => {
@@ -210,6 +218,29 @@ describe('biospecimenAsset — transformResponse', () => {
     const result = biospecimenAsset.transformResponse(response, pagination)
     const row = result.items[0] as BiospecimenAsset
     expect(row.biospecimenId).toBe('99-0')
+  })
+
+  it.each([
+    ['an indexed sampleId', { biospecimenId: 17, sampleId: 'S-1' }, 'S-1'],
+    ['a string original id', { biospecimenId: 'BS-001' }, 'BS-001'],
+    ['a numeric original id outside the row-id range', { biospecimenId: 1712345678901 }, '1712345678901'],
+    ['a zero-padded original id', { biospecimenId: '007' }, '007'],
+    ['a numeric row id', { biospecimenId: 17 }, ''],
+    ['a string row id', { biospecimenId: '2147483647' }, ''],
+    ['a blank sampleId falling back to the original id', { biospecimenId: 'BS-001', sampleId: '  ' }, 'BS-001'],
+    ['a numeric sampleId as text', { biospecimenId: 17, sampleId: 0 }, '0'],
+    ['a blank original id', { biospecimenId: '  ' }, ''],
+    ['no id', {}, ''],
+  ])('shows %s as the sample id', (_label, biospecimen, expected) => {
+    const response = makeResponse([makeBucket(5, [biospecimen])])
+    const row = biospecimenAsset.transformResponse(response, pagination).items[0] as BiospecimenAsset
+    expect(row.sampleId).toBe(expected)
+  })
+
+  it('keeps a numeric row id as the string row key', () => {
+    const response = makeResponse([makeBucket(5, [{ biospecimenId: 17 }])])
+    const row = biospecimenAsset.transformResponse(response, pagination).items[0] as BiospecimenAsset
+    expect(row.biospecimenId).toBe('17')
   })
 
   it('applies client-side pagination', () => {
@@ -366,7 +397,7 @@ describe('biospecimenAsset — makeColumns', () => {
     const cols = biospecimenAsset.makeColumns()
     const fields = cols.map(c => c.field)
     expect(fields).toContain('studyName')
-    expect(fields).toContain('biospecimenId')
+    expect(fields).toContain('sampleId')
     expect(fields).toContain('specimenType')
     expect(fields).toContain('donorId')
     expect(fields).toContain('dateOfCollection')

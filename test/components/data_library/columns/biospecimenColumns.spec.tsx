@@ -44,18 +44,18 @@ describe('makeBiospecimenColumns — Study Name column', () => {
 
 describe('makeBiospecimenColumns — Biospecimen ID column', () => {
   it('renders the biospecimen ID text', () => {
-    renderCell('biospecimenId', 'BS-12345')
+    renderCell('sampleId', 'BS-12345')
     expect(screen.getByText('BS-12345')).toBeInTheDocument()
   })
 
-  it('renders an empty cell gracefully when biospecimenId is absent', () => {
-    const { container } = renderCell('biospecimenId', '')
+  it('renders an empty cell gracefully when sampleId is absent', () => {
+    const { container } = renderCell('sampleId', '')
     expect(container.textContent?.trim()).toBe('')
   })
 
   it('wraps long biospecimen IDs with tooltip and ellipsis', () => {
     const longId = 'VERY-LONG-BIOSPECIMEN-ID-WITH-MANY-CHARACTERS'
-    renderCell('biospecimenId', longId)
+    renderCell('sampleId', longId)
     const box = screen.getByText(longId)
     expect(box).toHaveStyle({ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })
   })
@@ -126,17 +126,17 @@ describe('makeBiospecimenColumns — column structure', () => {
 
   it('defines expected fields in correct order', () => {
     const fields = makeBiospecimenColumns().map(c => c.field)
-    expect(fields).toEqual(['studyName', 'biospecimenId', 'specimenType', 'donorId', 'dateOfCollection'])
+    expect(fields).toEqual(['studyName', 'sampleId', 'specimenType', 'donorId', 'dateOfCollection'])
   })
 
   it('sets appropriate widths and flex values', () => {
     const cols = makeBiospecimenColumns()
     const studyNameCol = cols.find(c => c.field === 'studyName')!
-    const biospecimenIdCol = cols.find(c => c.field === 'biospecimenId')!
+    const sampleIdCol = cols.find(c => c.field === 'sampleId')!
     expect(studyNameCol.flex).toBe(1)
     expect(studyNameCol.minWidth).toBe(150)
-    expect(biospecimenIdCol.flex).toBe(1)
-    expect(biospecimenIdCol.minWidth).toBe(150)
+    expect(sampleIdCol.flex).toBe(1)
+    expect(sampleIdCol.minWidth).toBe(150)
   })
 
   it('sets fixed widths for specimen type and donor ID columns', () => {
@@ -152,14 +152,14 @@ describe('makeBiospecimenColumns — column structure', () => {
 
 describe('makeBiospecimenColumns — tooltip and text ellipsis', () => {
   it('applies ellipsis styling to biospecimen ID', () => {
-    renderCell('biospecimenId', 'VERY-LONG-BIOSPECIMEN-IDENTIFIER')
+    renderCell('sampleId', 'VERY-LONG-BIOSPECIMEN-IDENTIFIER')
     const box = screen.getByText('VERY-LONG-BIOSPECIMEN-IDENTIFIER')
     expect(box).toHaveStyle({ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })
   })
 
   it('shows tooltip on hover for biospecimen ID', async () => {
     const user = userEvent.setup()
-    renderCell('biospecimenId', 'BS-12345-LONG')
+    renderCell('sampleId', 'BS-12345-LONG')
     await user.hover(screen.getByText('BS-12345-LONG'))
     expect(await screen.findByRole('tooltip')).toBeInTheDocument()
   })
