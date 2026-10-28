@@ -713,7 +713,7 @@ small {
   background: #D13B07 !important;
 }
 
-a[disabled], .cell-button[disabled], [disabled] .cell-button, [disabled] button, [disabled] .glyphicon {
+a[disabled], .cell-button[disabled], [disabled] .cell-button, [disabled] button {
   color: #cccccc !important;
   cursor: default !important;
   pointer-events: none;
@@ -949,19 +949,6 @@ input:checked + .slider:before {
   background-color: rgba(204, 204, 204, 0.25);
 }
 
-.list-highlighted .glyphicon-exclamation-sign {
-  margin: 0 5px 0 0;
-  font-size: 1.2em;
-  line-height: 20px;
-}
-
-.list-highlighted .glyphicon-download-alt {
-  font-size: 1.2em;
-  margin: 0 0 0 5px;
-  cursor: pointer;
-  line-height: 22px;
-}
-
 .list-highlighted .list-highlighted-item {
   vertical-align: top;
 }
@@ -1160,8 +1147,7 @@ a .editable:hover, a .enabled:hover {
   cursor: not-allowed;
 }
 
-.btn-primary[disabled],
-.btn-primary[disabled] .glyphicon {
+.btn-primary[disabled] {
   color: white !important;
 }
 
@@ -1175,19 +1161,8 @@ a .editable:hover, a .enabled:hover {
   margin-right: 20px;
 }
 
-.btn-primary.f-left .glyphicon,
-.btn-upload .glyphicon {
-  font-size: 13px;
-  margin-right: 5px;
-}
-
 .btn-primary.f-right {
   margin-left: 20px;
-}
-
-.btn-primary.f-right .glyphicon {
-  font-size: 13px;
-  margin-left: 5px;
 }
 
 .btn-secondary,
@@ -1350,29 +1325,6 @@ a .editable:hover, a .enabled:hover {
   margin-left: 10px;
   border: none;
   background: transparent;
-}
-
-.icon-actions .glyphicon {
-  font-size: 1.15em;
-  text-shadow: 1px 1px 0 #ffffff;
-  color: #777777;
-  padding-top: 8px;
-}
-
-.icon-actions button:hover .glyphicon {
-  color: #2FA4E7;
-  cursor: pointer;
-}
-
-.icon-actions button[disabled] .glyphicon, .icon-actions button[disabled]:hover .glyphicon {
-  color: #cccccc;
-  cursor: default !important;
-  pointer-events: none;
-  /*disable tooltip as well*/
-}
-
-.icon-actions .glyphicon-inbox.activated, .icon-actions button[disabled] .glyphicon-inbox.activated {
-  color: #C16B0C !important;
 }
 
 .cm-icon-button {
@@ -1630,13 +1582,6 @@ input:-webkit-autofill {
 
 .dataset-actions a:hover span {
   color: #2FA4E7 !important;
-}
-
-.dataset-actions a .glyphicon {
-  text-shadow: 1px 1px 0 #ffffff !important;
-  padding: 0;
-  vertical-align: bottom;
-  font-size: 1.15em;
 }
 
 .table-items {
