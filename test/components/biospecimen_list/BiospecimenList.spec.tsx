@@ -44,7 +44,7 @@ describe('BiospecimenList component', () => {
 
   it('renders button without default icon', async () => {
     const { container } = render(<BiospecimenListHarness initial={[]} />)
-    expect(container.querySelector('#add-biospecimen-btn .glyphicon-plus')).not.toBeInTheDocument()
+    expect(container.querySelector('#add-biospecimen-btn svg')).not.toBeInTheDocument()
   })
 
   it('updates button label when biospecimens count changes', async () => {
