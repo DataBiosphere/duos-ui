@@ -63,7 +63,7 @@ describe('CollaboratorRow - Component Tests', () => {
     expect(screen.getByText(mockCollaborator.email!)).toBeInTheDocument()
 
     expect(document.querySelector('.glyphicon-pencil')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Delete collaborator' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Delete collaborator' })).toBeInTheDocument()
 
     expect(screen.queryByText('New Collaborator Information')).not.toBeInTheDocument()
     expect(screen.queryByText('Edit Collaborator Information')).not.toBeInTheDocument()

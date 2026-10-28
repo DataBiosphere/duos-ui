@@ -64,7 +64,7 @@ describe('CollaboratorSummary - Component Tests', () => {
 
     expect(document.querySelector('.collaborator-summary-edit-delete-buttons')).toBeInTheDocument()
     expect(document.querySelector('.glyphicon-pencil')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Delete collaborator' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Delete collaborator' })).toBeInTheDocument()
   })
 
   it('renders different columns when columnsToShow changes', () => {
