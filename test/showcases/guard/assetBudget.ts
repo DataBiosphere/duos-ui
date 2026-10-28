@@ -1,8 +1,9 @@
 /**
- * CI guard rule: the asset budget for one showcase (DT-4273, S1.2).
+ * CI guard rule: the asset budget for one showcase (DT-4273, S1.2; values set in S1.3, DT-4276).
  *
- * PLACEHOLDER VALUES. S1.3 (DT-4276) sets the real per-showcase budget and may change every number
- * here. The logo limits are the hard limits in `DATA-LIBRARY.md`.
+ * The logo limits are the recommended sizes in `DATA-LIBRARY.md`, not its hard limits, so an
+ * unoptimized logo fails CI. No document sets the total or per-image limits; they are the values
+ * S1.2 chose. Images load lazily except above the fold: see `src/showcases/imageLoading.ts`.
  */
 import { statSync } from 'node:fs'
 import { isAbsolute, relative, resolve, sep } from 'node:path'
@@ -15,7 +16,7 @@ export const ASSET_BUDGET = {
   /** Each image that is not a logo, such as a thumbnail or an icon. */
   imageBytes: 300 * KB,
   /** Each masthead logo, by format. Logos must be SVG or PNG. */
-  logoBytes: { svg: 100 * KB, png: 150 * KB },
+  logoBytes: { svg: 50 * KB, png: 100 * KB },
 } as const
 
 /** Returns an image's size in bytes, or `undefined` when the file does not exist. */
