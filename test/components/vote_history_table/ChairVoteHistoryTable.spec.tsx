@@ -14,7 +14,7 @@ const testData: VoteHistoryRow[] = [
     displayName: 'Alice Johnson',
     type: 'Chair',
     datasetIdentifier: 'DUOS-00401',
-    progressReport: true,
+    requestType: 'Progress Report 2',
     electionDate: new Date('2023-01-03T10:30:00-05:00').getTime(),
     vote: true,
     updateDate: new Date('2023-01-04T10:30:00-05:00').getTime(),
@@ -28,7 +28,7 @@ const testData: VoteHistoryRow[] = [
     displayName: 'Bob Smith',
     type: 'Chair',
     datasetIdentifier: 'DUOS-00402',
-    progressReport: false,
+    requestType: 'Initial DAR',
     electionDate: new Date('2023-01-01T10:30:00-05:00').getTime(),
     vote: false,
     updateDate: new Date('2023-01-02T10:30:00-05:00').getTime(),
@@ -42,7 +42,7 @@ const testData: VoteHistoryRow[] = [
     displayName: 'Charlie Brown',
     type: 'Chair',
     datasetIdentifier: 'DUOS-00403',
-    progressReport: true,
+    requestType: 'Progress Report 1',
     electionDate: new Date('2023-01-02T10:30:00-05:00').getTime(),
     vote: false,
     updateDate: new Date('2023-01-03T10:30:00-05:00').getTime(),
@@ -68,7 +68,7 @@ describe('ChairVoteHistoryTable', () => {
     const { container } = render(<ChairVoteHistoryTable voteHistory={testData} />)
 
     const row0 = container.querySelectorAll('.row-data-0 [role="cell"]')
-    expect(row0[0]).toHaveTextContent('Progress Report')
+    expect(row0[0]).toHaveTextContent('Progress Report 2')
     expect(row0[1]).toHaveTextContent('DUOS-00401')
     expect(row0[2]).toHaveTextContent('2023-01-03')
     expect(row0[3]).toHaveTextContent('Yes')
@@ -78,7 +78,7 @@ describe('ChairVoteHistoryTable', () => {
     expect(row0[7]).toHaveTextContent('Approved')
 
     const row1 = container.querySelectorAll('.row-data-1 [role="cell"]')
-    expect(row1[0]).toHaveTextContent('Progress Report')
+    expect(row1[0]).toHaveTextContent('Progress Report 1')
     expect(row1[1]).toHaveTextContent('DUOS-00403')
     expect(row1[2]).toHaveTextContent('2023-01-02')
     expect(row1[3]).toHaveTextContent('No')
@@ -110,5 +110,17 @@ describe('ChairVoteHistoryTable', () => {
     expect(container.querySelectorAll('.row-data-0 [role="cell"]')[1]).toHaveTextContent('DUOS-00401')
     expect(container.querySelectorAll('.row-data-1 [role="cell"]')[1]).toHaveTextContent('DUOS-00402')
     expect(container.querySelectorAll('.row-data-2 [role="cell"]')[1]).toHaveTextContent('DUOS-00403')
+  })
+
+  it('sorts by request type when its header is clicked', () => {
+    const { container } = render(<ChairVoteHistoryTable voteHistory={testData} />)
+
+    const requestTypeSortButton = container.querySelectorAll('.cell-sort')[0]
+    expect(requestTypeSortButton).toHaveTextContent('Request Type')
+    fireEvent.click(requestTypeSortButton)
+
+    expect(container.querySelectorAll('.row-data-0 [role="cell"]')[0]).toHaveTextContent('Initial DAR')
+    expect(container.querySelectorAll('.row-data-1 [role="cell"]')[0]).toHaveTextContent('Progress Report 1')
+    expect(container.querySelectorAll('.row-data-2 [role="cell"]')[0]).toHaveTextContent('Progress Report 2')
   })
 })

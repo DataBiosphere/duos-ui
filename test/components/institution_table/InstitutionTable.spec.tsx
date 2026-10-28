@@ -1,7 +1,7 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router'
 import InstitutionTable, { InstitutionTableProps } from 'src/components/institution_table/InstitutionTable'
 import { DuosUser, InstitutionInterface } from 'src/types/model'
@@ -144,5 +144,25 @@ describe('InstitutionTable', () => {
       const href = link.getAttribute('href') ?? ''
       expect(href).toMatch(/\/admin_manage_institutions\/institutions\/([12])/)
     })
+  })
+
+  it('sorts by the ID column, which is the first column', () => {
+    render(
+      <BrowserRouter>
+        <InstitutionTable {...defaultProps} />
+      </BrowserRouter>,
+    )
+    const firstRowName = () => screen.getAllByText(/^Test Institution \d$/)[0]
+
+    // The default sort is by name, A to Z
+    expect(firstRowName()).toHaveTextContent('Test Institution 1')
+
+    // Which way the first click goes is the shared comparer's rule for numbers, so this checks
+    // only that the ID column sorts and that a second click reverses it
+    fireEvent.click(screen.getByRole('button', { name: /^ID/ }))
+    const afterFirstClick = firstRowName().textContent
+
+    fireEvent.click(screen.getByRole('button', { name: /^ID/ }))
+    expect(firstRowName().textContent).not.toBe(afterFirstClick)
   })
 })

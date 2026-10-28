@@ -75,7 +75,7 @@ const columnHeaderData = (cols: string[]): ColumnConfig[] => cols.map(col => col
 const getInitialSort = (cols: string[] = []): SortConfig => {
   const sortField = 'name'
   const sortIndex = cols.indexOf(sortField)
-  return sortIndex === -1 ? { colIndex: 0, dir: 1 } : { colIndex: sortIndex, dir: -1 }
+  return sortIndex === -1 ? { colIndex: 0, dir: 1 } : { colIndex: sortIndex, dir: 1 }
 }
 
 interface ProcessDacRowDataArgs {

@@ -1,5 +1,6 @@
 import { ElectionStatus, VOTE_TYPES, VoteDecision } from 'src/utils/DarUtils'
 import { DataAccessRequest as DataAccessRequestModel, Dataset, Election } from 'src/types/model'
+import { requestTypeLabel } from 'src/utils/ProgressReportUtils'
 
 const NO_ELECTION_STATUS = 'Awaiting Election Opening'
 const NO_FINAL_VOTE_STATUS = 'Awaiting Final Vote'
@@ -15,7 +16,7 @@ export interface VoteRecord {
   status: string
 }
 
-const createVoteRecord = (dar: DataAccessRequestModel, datasetId: number, election: Election | undefined, datasets: Dataset[]): VoteRecord => {
+const createVoteRecord = (dar: DataAccessRequestModel, requestType: string, datasetId: number, election: Election | undefined, datasets: Dataset[]): VoteRecord => {
   const getElectionVotes = (election: Election | undefined) => {
     if (Array.isArray(election?.votes)) {
       return election.votes
@@ -86,7 +87,7 @@ const createVoteRecord = (dar: DataAccessRequestModel, datasetId: number, electi
     datasetName,
     voteDate: voteDateRaw === null ? undatedLabel : formatDate(voteDateRaw),
     voteDateRaw,
-    requestType: dar.progressReport ? 'Progress Report' : 'Initial DAR',
+    requestType,
     linkedDarId: String(dar.collectionId),
     voteResult: { decision: getDecision(), rationale: getRationale() },
     status: election?.status ?? NO_ELECTION_STATUS,
@@ -97,10 +98,11 @@ export const buildVoteRecords = (dars: DataAccessRequestModel[], datasets: Datas
   const elections = dar.elections
     ? Object.values(dar.elections).filter(e => e.electionType === 'DataAccess')
     : []
+  const requestType = requestTypeLabel(dar, dars)
 
   return (dar.datasetIds || []).map((datasetId) => {
     const election = elections.find(e => e.datasetId === datasetId)
-    return createVoteRecord(dar, datasetId, election, datasets)
+    return createVoteRecord(dar, requestType, datasetId, election, datasets)
   })
 }).sort((a, b) => {
   // Rows with no recorded vote date first (null rather than falsy, so an epoch of 0 still
@@ -117,7 +119,8 @@ export const buildVoteRecords = (dars: DataAccessRequestModel[], datasets: Datas
   const statusCompare = (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3)
   if (statusCompare !== 0) return statusCompare
 
-  const typeCompare = a.requestType.localeCompare(b.requestType)
+  // numeric, so Progress Report 10 sorts after Progress Report 9
+  const typeCompare = a.requestType.localeCompare(b.requestType, undefined, { numeric: true })
   if (typeCompare !== 0) return typeCompare
 
   return a.datasetName.localeCompare(b.datasetName)
