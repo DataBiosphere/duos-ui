@@ -111,7 +111,7 @@ describe('CollaboratorList', () => {
     const formFieldChange = vi.fn()
     render(<CollaboratorList {...defaultProps} collaborators={existingCollaborators} formFieldChange={formFieldChange} />)
 
-    fireEvent.click(document.querySelectorAll('.glyphicon-trash')[0].parentElement as HTMLElement)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Delete collaborator' })[0])
     fireEvent.click(document.querySelector('.delete-modal-primary-button') as HTMLElement)
 
     expect(document.querySelectorAll('.collaborator-summary-card')).toHaveLength(0)
