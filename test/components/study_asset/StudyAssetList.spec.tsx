@@ -38,7 +38,7 @@ const TestRowComponent: React.FC<TestRowProps> = ({ item, editMode, viewMode, ed
     {!editMode && !viewMode && (
       <>
         <span>{item.name}</span>
-        <button className="glyphicon-eye-open" onClick={viewAction} disabled={disabled}>View</button>
+        <button onClick={viewAction} disabled={disabled}>View</button>
         <button onClick={editAction} disabled={disabled}>Edit</button>
         <button onClick={deleteAction} disabled={disabled}>Delete</button>
       </>
@@ -212,7 +212,7 @@ describe('StudyAssetList', () => {
 
     // Put the first row into view mode.
     const row1 = screen.getByTestId('row-item1')
-    fireEvent.click(row1.querySelector('.glyphicon-eye-open') as Element)
+    fireEvent.click(within(row1).getByRole('button', { name: 'View' }))
     expect(screen.getByTestId('row-item1').querySelector('input')).toBeInTheDocument()
 
     // Adding an item changes the item count, which should reset the per-row view

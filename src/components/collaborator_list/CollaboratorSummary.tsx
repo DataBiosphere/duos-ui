@@ -1,5 +1,6 @@
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import React, { useState } from 'react'
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import CollaboratorDelete from './CollaboratorDelete'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { Collaborator } from 'src/types/model'
@@ -59,19 +60,15 @@ export default function CollaboratorSummary(props: CollaboratorSummaryProps): Re
       <div className="collaborator-summary-edit-delete-buttons">
         {readOnly
           ? (
-              <a
-                style={{ marginLeft: 10, marginRight: 10 }}
+              <button
+                type="button"
+                style={{ ...ICON_BUTTON, marginLeft: 10, marginRight: 10 }}
                 onClick={() => editAction()}
+                aria-label="View collaborator"
               >
-                <span
-                  className="glyphicon glyphicon-eye-open collaborator-view-icon"
-                  aria-hidden="true"
-                  data-tip="View collaborator"
-                  data-for="tip_view"
-                >
-                </span>
+                <VisibilityOutlinedIcon className="collaborator-view-icon" sx={inlineIconSx} />
                 <span style={{ marginLeft: '1rem' }}></span>
-              </a>
+              </button>
             )
           : (
               <>

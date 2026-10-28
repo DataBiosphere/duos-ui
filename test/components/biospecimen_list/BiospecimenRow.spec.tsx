@@ -84,7 +84,7 @@ describe('BiospecimenRow', () => {
   it('triggers viewAction when view button is clicked', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <BiospecimenRow
         id={0}
         editMode={false}
@@ -100,7 +100,7 @@ describe('BiospecimenRow', () => {
         disabled={false}
       />,
     )
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View Biospecimen' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })

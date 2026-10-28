@@ -109,7 +109,7 @@ describe('ConsentGroupRow', () => {
   it('triggers viewAction when view button is clicked', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <MemoryRouter>
         <ConsentGroupRow
           id={0}
@@ -126,7 +126,7 @@ describe('ConsentGroupRow', () => {
         />
       </MemoryRouter>,
     )
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View consent group' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 })

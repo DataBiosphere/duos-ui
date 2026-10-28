@@ -105,7 +105,7 @@ describe('IntellectualPropertyList', () => {
   it('opens intellectual property in view mode when view button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<IntellectualPropertyListHarness initial={[sampleIp]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View intellectual property' }))
     expect(screen.getByText(sampleIp.title)).toBeInTheDocument()
     expect(container.querySelector('#title')).toBeDisabled()
     expect(container.querySelector('.collaborator-form-add-save-button')).not.toBeInTheDocument()
@@ -116,9 +116,9 @@ describe('IntellectualPropertyList', () => {
   it('closes view mode when close button is clicked', async () => {
     const user = userEvent.setup()
     const { container } = render(<IntellectualPropertyListHarness initial={[sampleIp]} />)
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    await user.click(screen.getByRole('button', { name: 'View intellectual property' }))
     await user.click(container.querySelector('.collaborator-form-cancel-button')!)
     expect(container.querySelector('#title')).not.toBeInTheDocument()
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View intellectual property' })).toBeInTheDocument()
   })
 })
