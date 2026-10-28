@@ -49,7 +49,7 @@ describe('BiospecimenSummary', () => {
   it('renders view button and triggers viewAction', async () => {
     const user = userEvent.setup()
     const viewFn = vi.fn()
-    const { container } = render(
+    render(
       <BiospecimenSummary
         biospecimen={sampleBiospecimen}
         columnsToShow={['specimenType']}
@@ -59,15 +59,15 @@ describe('BiospecimenSummary', () => {
         disabled={false}
       />,
     )
-    expect(container.querySelector('.glyphicon-eye-open')).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-eye-open')!)
+    expect(screen.getByRole('button', { name: 'View Biospecimen' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'View Biospecimen' }))
     expect(viewFn).toHaveBeenCalledTimes(1)
   })
 
   it('renders edit button and triggers editAction', async () => {
     const user = userEvent.setup()
     const editFn = vi.fn()
-    const { container } = render(
+    render(
       <BiospecimenSummary
         biospecimen={sampleBiospecimen}
         columnsToShow={['specimenType']}
@@ -76,8 +76,8 @@ describe('BiospecimenSummary', () => {
         disabled={false}
       />,
     )
-    expect(container.querySelector('.glyphicon-pencil')).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    expect(screen.getByRole('button', { name: 'Edit Biospecimen' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Edit Biospecimen' }))
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 })

@@ -1206,8 +1206,9 @@ a .editable:hover, a .enabled:hover {
   padding: 12px 20px 10px 17px !important;
 }
 
-.btn-back .glyphicon {
-  font-size: 12px;
+/* 1.25x the old 12px glyph, since MUI draws inside a padded box. */
+.btn-back svg {
+  font-size: 15px;
   margin-right: 5px;
 }
 

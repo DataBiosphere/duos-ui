@@ -3,6 +3,9 @@ import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { validationFailed, calcPublicationErrors } from 'src/utils/darFormUtils'
 import { Author, Publication } from 'src/types/model'
+import AddIcon from '@mui/icons-material/Add'
+import RemoveIcon from '@mui/icons-material/Remove'
+import { inlineIconSx } from 'src/libs/inlineIcon'
 
 interface FormFieldChange {
   key: string
@@ -137,7 +140,7 @@ function AuthorsFieldset({
                   : 'Remove author'
               }
             >
-              <span className="glyphicon glyphicon-minus" aria-hidden="true" />
+              <RemoveIcon sx={inlineIconSx} />
             </button>
           </div>
         ))}
@@ -153,7 +156,7 @@ function AuthorsFieldset({
               : 'Add another author'
           }
         >
-          <span className="glyphicon glyphicon-plus" aria-hidden="true" /> Add Author
+          <AddIcon sx={inlineIconSx} /> Add Author
         </button>
       </fieldset>
     </div>
