@@ -187,7 +187,7 @@ describe('StudyAssetList', () => {
   it('removes default icon when empty string is passed', () => {
     render(<StatefulWrapper addButtonIcon="" />)
     const addBtn = document.getElementById('add-test-btn') as HTMLElement
-    expect(addBtn.querySelector('.glyphicon-plus')).not.toBeInTheDocument()
+    expect(addBtn.querySelector('svg')).not.toBeInTheDocument()
   })
 
   it('resets a row out of edit mode when an item is deleted', () => {
