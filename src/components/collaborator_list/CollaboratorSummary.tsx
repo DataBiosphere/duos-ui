@@ -1,8 +1,8 @@
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import React, { useState } from 'react'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
-import CollaboratorDelete from './CollaboratorDelete'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import CollaboratorDelete from './CollaboratorDelete'
 import { Collaborator } from 'src/types/model'
 import { inlineIconSx } from 'src/libs/inlineIcon'
 

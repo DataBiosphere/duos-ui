@@ -1,8 +1,8 @@
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import React, { useState } from 'react'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
-import { DeletePresentationOrPublication } from 'src/components/presentation_publication_shared/DeletePresentationOrPublication'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import { DeletePresentationOrPublication } from 'src/components/presentation_publication_shared/DeletePresentationOrPublication'
 import { renderColumnContent } from 'src/utils/RenderUtils'
 import { inlineIconSx } from 'src/libs/inlineIcon'
 
