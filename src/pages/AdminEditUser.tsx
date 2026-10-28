@@ -107,16 +107,24 @@ export const AdminEditUser = () => {
       emailPreference: state.emailPreference,
     }
 
+    let saved = false
     try {
       await User.update(user, uid)
       await updateRolesIfDifferent(uid, state.updatedRoles)
-      // An admin who edited their own roles must navigate with them (DT-505).
-      await refreshCurrentUserIfAffected([uid])
-      navigate('/admin_manage_users')
+      saved = true
     }
     catch (error) {
       const errorText = extractError(error)
       Notifications.showError({ text: errorText || 'Error: Failed to update user' })
+    }
+    finally {
+      // Before navigating, and even after a partial failure (the role calls run
+      // in parallel): an admin who edited their own roles must keep working
+      // with the roles the server now holds (DT-505).
+      await refreshCurrentUserIfAffected([uid])
+    }
+    if (saved) {
+      navigate('/admin_manage_users')
     }
   }
 

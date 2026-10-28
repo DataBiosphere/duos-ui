@@ -1,9 +1,11 @@
 /**
  * Re-reads the signed-in user's profile after a role change that touched them.
  *
- * Sign-in is the only other writer of the stored profile, so without this a
- * user who adds themselves as a DAC chair keeps the old roles (no Chair vote
- * tab, no chair routes) until they sign out and back in (DT-505).
+ * The stored profile is otherwise written only at sign-in, by the session
+ * reconciler on a fresh probe, and by the user's own profile page. None of
+ * those runs after a role save, so without this a user who adds themselves as
+ * a DAC chair keeps the old roles (no Chair vote tab, no chair routes) until
+ * they sign out and back in (DT-505).
  */
 import { User } from 'src/libs/ajax/User'
 import { Storage } from 'src/libs/storage'

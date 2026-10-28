@@ -187,6 +187,21 @@ describe('AdminEditUser', () => {
       .toBeLessThan(mockNavigate.mock.invocationCallOrder[0])
   })
 
+  it('refreshes the stored user and stays on the page when a role change fails partway', async () => {
+    vi.mocked(User.getById).mockResolvedValue(mockUser)
+    vi.mocked(User.addRoleToUser).mockRejectedValue(new Error('500'))
+    await act(async () => renderWithRoute())
+    await act(async () => {
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Admin' }))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    })
+    await waitFor(() => expect(refreshCurrentUserIfAffected).toHaveBeenCalledWith([mockUser.userId]))
+    expect(Notifications.showError).toHaveBeenCalled()
+    expect(mockNavigate).not.toHaveBeenCalledWith('/admin_manage_users')
+  })
+
   it('shows an error notification when save fails', async () => {
     vi.mocked(User.getById).mockResolvedValue(mockUser)
     vi.mocked(User.update).mockRejectedValue(new Error('save failed'))
