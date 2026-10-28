@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import StudyAssetList from 'src/components/study_asset/StudyAssetList'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
@@ -39,7 +39,7 @@ const TestRowComponent: React.FC<TestRowProps> = ({ item, editMode, viewMode, ed
       <>
         <span>{item.name}</span>
         <button className="glyphicon-eye-open" onClick={viewAction} disabled={disabled}>View</button>
-        <button className="glyphicon-pencil" onClick={editAction} disabled={disabled}>Edit</button>
+        <button onClick={editAction} disabled={disabled}>Edit</button>
         <button className="glyphicon-trash" onClick={deleteAction} disabled={disabled}>Delete</button>
       </>
     )}
@@ -195,7 +195,7 @@ describe('StudyAssetList', () => {
 
     // Put the first row into edit mode.
     const row1 = screen.getByTestId('row-item1')
-    fireEvent.click(row1.querySelector('.glyphicon-pencil') as Element)
+    fireEvent.click(within(row1).getByRole('button', { name: 'Edit' }))
     expect(screen.getByTestId('row-item1').querySelector('input')).toBeInTheDocument()
 
     // Deleting the *other* row changes the item count, which should reset the

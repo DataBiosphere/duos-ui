@@ -111,7 +111,7 @@ describe('PresentationList component', () => {
   it('edits a presentation', async () => {
     const user = userEvent.setup()
     const { container } = render(<PresentationListHarness initial={[samplePresentation]} />)
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit presentation' }))
     await user.clear(container.querySelector('#title')!)
     await user.type(container.querySelector('#title')!, 'Sample Talk Edited')
     await user.click(container.querySelector('.collaborator-form-add-save-button')!)

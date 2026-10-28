@@ -212,7 +212,7 @@ describe('ConsentGroupList component', () => {
         <ConsentGroupListHarness initial={[sampleConsentGroup]} />
       </MemoryRouter>,
     )
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit consent group' }))
     expect(container.querySelector('#consentGroupName')).toBeInTheDocument()
     await user.clear(container.querySelector('#consentGroupName')!)
     await user.type(container.querySelector('#consentGroupName')!, 'Test Consent Group Edited')

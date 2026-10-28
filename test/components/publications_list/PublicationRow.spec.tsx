@@ -50,7 +50,7 @@ describe('PublicationRow', () => {
   it('shows summary when not in edit mode and triggers editAction', async () => {
     const user = userEvent.setup()
     const editFn = vi.fn()
-    const { container } = render(
+    render(
       <PublicationRow
         id={0}
         editMode={false}
@@ -65,7 +65,7 @@ describe('PublicationRow', () => {
       />,
     )
     expect(screen.getByText(samplePublication.title)).toBeInTheDocument()
-    await user.click(container.querySelector('.glyphicon-pencil')!)
+    await user.click(screen.getByRole('button', { name: 'Edit publication' }))
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 

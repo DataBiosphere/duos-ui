@@ -122,7 +122,7 @@ describe('CollaboratorList', () => {
     const formFieldChange = vi.fn()
     render(<CollaboratorList {...defaultProps} collaborators={existingCollaborators} formFieldChange={formFieldChange} />)
 
-    fireEvent.click(document.querySelectorAll('.glyphicon-pencil')[0].parentElement as HTMLElement)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit collaborator' })[0])
 
     // collaboratorKey is passed through, so CollaboratorAddEdit renders DAR-compatible field
     // IDs (0_collaboratorName) instead of its default bare 'name'.
