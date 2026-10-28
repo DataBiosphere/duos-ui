@@ -63,7 +63,7 @@ describe('CollaboratorSummary - Component Tests', () => {
     expect(screen.getByText(mockCollaborator.eraCommonsId!)).toBeInTheDocument()
 
     expect(document.querySelector('.collaborator-summary-edit-delete-buttons')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Edit collaborator' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Edit collaborator' })).toBeInTheDocument()
     expect(document.querySelector('.glyphicon-trash')).toBeInTheDocument()
   })
 

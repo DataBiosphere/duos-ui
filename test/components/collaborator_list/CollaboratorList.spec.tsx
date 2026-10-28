@@ -78,7 +78,7 @@ describe('CollaboratorList - Component Tests', () => {
     expect(screen.getByText(mockCollaborators[0].name)).toBeInTheDocument()
 
     const firstCard = document.querySelectorAll('.collaborator-summary-card')[0]
-    expect(within(firstCard as HTMLElement).queryByRole('button', { name: 'Edit collaborator' })).toBeTruthy()
+    expect(within(firstCard as HTMLElement).getByRole('button', { name: 'Edit collaborator' })).toBeInTheDocument()
 
     fireEvent.click(screen.getAllByRole('button', { name: 'Edit collaborator' })[0])
 
