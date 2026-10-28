@@ -86,8 +86,8 @@ describe('FundingResourceList component', () => {
 
   it('deletes a funding resource via modal confirmation', async () => {
     const user = userEvent.setup()
-    const { container } = render(<FundingResourceListHarness initial={[sampleFunding]} />)
-    await user.click(container.querySelector('.glyphicon-trash')!)
+    render(<FundingResourceListHarness initial={[sampleFunding]} />)
+    await user.click(screen.getByRole('button', { name: 'Delete funding resource' }))
     await waitFor(() => expect(document.querySelector('.ReactModal__Content')).toBeVisible())
     const modal = document.querySelector('.ReactModal__Content')!
     const deleteBtn = Array.from(modal.querySelectorAll('button')).find(b => /delete/i.test(b.textContent || ''))!
