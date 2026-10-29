@@ -155,6 +155,12 @@ export type DuosIdentifier = z.output<typeof DuosIdentifierSchema>
 export type DateString = z.output<typeof DateStringSchema>
 
 export type ShowcaseConfigInput = z.input<typeof ShowcaseConfigSchema>
+/** What a partner config lists: only what differs from `defaultShowcase` (`src/showcases/defaults.ts`). */
+export type ShowcasePartialInput = {
+  schemaVersion?: ShowcaseConfigInput['schemaVersion']
+  branding?: Partial<ShowcaseConfigInput['branding']>
+  sections?: Partial<ShowcaseConfigInput['sections']>
+}
 export type ShowcaseConfig = z.output<typeof ShowcaseConfigSchema>
 export type SectionConfigs = ShowcaseConfig['sections']
 
