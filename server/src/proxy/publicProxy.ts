@@ -15,7 +15,7 @@ import { logAuthEvent } from '../auth/authEvents.js'
 import { upstreamBase, upstreamPath } from './upstreamProxy.js'
 
 /**
- * Public feature flags and anonymous metrics, independent of session infrastructure.
+ * Public feature flags, anonymous metrics and showcase catalog lookups, independent of session infrastructure.
  * Keep credential stripping local: sharing the session proxy's header helpers
  * could introduce token injection here. Only URL helpers are shared.
  * CSRF and Fetch Metadata guards are omitted because no session authority is
@@ -28,14 +28,23 @@ export const PUBLIC_FEATURES_PREFIX = '/public/features'
 /** `POST /public/metrics/event` → `${DUOS_BARD_URL}/api/event`. */
 export const PUBLIC_METRICS_EVENT_PATH = '/public/metrics/event'
 
+/** `POST /public/showcase/datasets` → `${DUOS_SHOWCASE_API_URL}/showcase/datasets`. */
+export const PUBLIC_SHOWCASE_DATASETS_PATH = '/public/showcase/datasets'
+
 /** Bound anonymous JSON requests while allowing room for event properties. */
 export const METRICS_BODY_LIMIT = 8 * 1024
+
+/** Consent enforces the same limit at its boundary (DT-4275). */
+export const SHOWCASE_BODY_LIMIT = 64 * 1024
 
 const RATE_LIMIT_WINDOW_MS = 60_000
 
 export const FEATURES_MAX_PER_WINDOW = 60
 
 export const METRICS_MAX_PER_WINDOW = 120
+
+/** Matches Consent's default `rateLimit.showcase.requestsPerMinute`. */
+export const SHOWCASE_MAX_PER_WINDOW = 120
 
 /** Each upstream gets its own connection pool, in addition to the session proxies. */
 const PUBLIC_POOL_CONNECTIONS = 32
@@ -122,7 +131,7 @@ function enforceJsonResponse(request: ProxyRequest, reply: ProxyReply, res: Fast
 
   request.log.warn(
     { statusCode: res.statusCode, contentType: headers['content-type'] },
-    '[public-proxy] the feature-flag upstream answered with a non-JSON body — returning 502 rather than streaming it onto this origin',
+    '[public-proxy] the upstream answered with a non-JSON body — returning 502 rather than streaming it onto this origin',
   )
 
   // Drain the replaced response so undici can reuse its socket.
@@ -202,6 +211,35 @@ async function anonymousMetricsRoute(app: FastifyInstance): Promise<void> {
 }
 
 /**
+ * Showcase catalog lookups. A dedicated upstream lets content previews read
+ * production while the authenticated API stays on its own environment.
+ */
+async function showcaseLookupRoute(app: FastifyInstance): Promise<void> {
+  await app.register(fastifyReplyFrom, {
+    base: upstreamBase('DUOS_SHOWCASE_API_URL'),
+    undici: { connections: PUBLIC_POOL_CONNECTIONS },
+  })
+
+  const routeOptions = {
+    bodyLimit: SHOWCASE_BODY_LIMIT,
+    config: rateLimitConfig(SHOWCASE_MAX_PER_WINDOW),
+  }
+
+  app.post(PUBLIC_SHOWCASE_DATASETS_PATH, routeOptions, (request, reply) => {
+    reply.from('/showcase/datasets', {
+      body: request.body as string,
+      contentType: request.headers['content-type'],
+      // The upstream path is fixed; a caller's query string is not forwarded.
+      queryString: () => '',
+      rewriteRequestHeaders,
+      rewriteHeaders: rewriteResponseHeaders,
+      onResponse: enforceJsonResponse,
+      onError: onUpstreamTransportError,
+    })
+  })
+}
+
+/**
  * Bare bodies, like the session proxies' error shape under ADR-010: a parser
  * or rate-limit error message can carry framework detail, and no client reads
  * it. Logging still happens here, because this handler replaces the app-level
@@ -236,13 +274,38 @@ function parseJsonBody(
   }
 }
 
+/** The `public.completed` route label: an allowlist, never the URL. */
+function routeLabel(url: string): string {
+  if (url.startsWith(PUBLIC_FEATURES_PREFIX)) return 'features'
+  if (url === PUBLIC_SHOWCASE_DATASETS_PATH) return 'showcase_datasets'
+  return 'metrics_event'
+}
+
 /**
  * A route that answers for an upstream nobody configured.
  */
-function registerUnconfiguredUpstream(app: FastifyInstance, envVar: string, routes: { method: 'GET' | 'POST', url: string }[], feature: string): void {
+function registerUnconfiguredUpstream(app: FastifyInstance, envVar: string, routes: UnconfiguredRoute[], feature: string): void {
   app.log.warn(`[server] ${envVar} is not set — ${routes.map(route => route.url).join(' and ')} answer 503, so ${feature} will fail in this environment`)
   for (const { method, url } of routes) {
     app.route({ method, url, handler: (_request, reply) => reply.status(503).send({ error: 'upstream_not_configured' }) })
+  }
+}
+
+type UnconfiguredRoute = { method: 'GET' | 'POST', url: string }
+
+/** Register an upstream's routes, or 503 stand-ins when its env var is unset. */
+async function registerUpstream(
+  app: FastifyInstance,
+  envVar: string,
+  routes: (app: FastifyInstance) => Promise<void>,
+  fallbackRoutes: UnconfiguredRoute[],
+  feature: string,
+): Promise<void> {
+  if (process.env[envVar]) {
+    await app.register(routes)
+  }
+  else {
+    registerUnconfiguredUpstream(app, envVar, fallbackRoutes, feature)
   }
 }
 
@@ -251,7 +314,7 @@ function registerUnconfiguredUpstream(app: FastifyInstance, envVar: string, rout
  */
 export async function publicProxy(app: FastifyInstance): Promise<void> {
   if (!app.hasDecorator('rateLimit')) {
-    throw new Error(`the ${PUBLIC_FEATURES_PREFIX} and ${PUBLIC_METRICS_EVENT_PATH} routes require @fastify/rate-limit to be registered first — their per-route limits do nothing without it`)
+    throw new Error(`the ${PUBLIC_FEATURES_PREFIX}, ${PUBLIC_METRICS_EVENT_PATH} and ${PUBLIC_SHOWCASE_DATASETS_PATH} routes require @fastify/rate-limit to be registered first — their per-route limits do nothing without it`)
   }
 
   app.setErrorHandler(handlePublicError)
@@ -270,26 +333,16 @@ export async function publicProxy(app: FastifyInstance): Promise<void> {
   app.addHook('onResponse', (request, reply, done) => {
     const url = request.routeOptions?.url
     if (url) {
-      const route = url.startsWith(PUBLIC_FEATURES_PREFIX) ? 'features' : 'metrics_event'
-      logAuthEvent(request, 'public.completed', { route, status: reply.statusCode, idp: 'unknown' })
+      logAuthEvent(request, 'public.completed', { route: routeLabel(url), status: reply.statusCode, idp: 'unknown' })
     }
     done()
   })
 
-  if (process.env.DUOS_API_URL) {
-    await app.register(featureFlagRoutes)
-  }
-  else {
-    registerUnconfiguredUpstream(app, 'DUOS_API_URL', [
-      { method: 'GET', url: PUBLIC_FEATURES_PREFIX },
-      { method: 'GET', url: `${PUBLIC_FEATURES_PREFIX}/:key` },
-    ], 'pre-login feature flags')
-  }
-
-  if (process.env.DUOS_BARD_URL) {
-    await app.register(anonymousMetricsRoute)
-  }
-  else {
-    registerUnconfiguredUpstream(app, 'DUOS_BARD_URL', [{ method: 'POST', url: PUBLIC_METRICS_EVENT_PATH }], 'anonymous usage metrics')
-  }
+  await registerUpstream(app, 'DUOS_API_URL', featureFlagRoutes, [
+    { method: 'GET', url: PUBLIC_FEATURES_PREFIX },
+    { method: 'GET', url: `${PUBLIC_FEATURES_PREFIX}/:key` },
+  ], 'pre-login feature flags')
+  await registerUpstream(app, 'DUOS_BARD_URL', anonymousMetricsRoute, [{ method: 'POST', url: PUBLIC_METRICS_EVENT_PATH }], 'anonymous usage metrics')
+  // Never falls back to DUOS_API_URL: a preview must not silently read another environment.
+  await registerUpstream(app, 'DUOS_SHOWCASE_API_URL', showcaseLookupRoute, [{ method: 'POST', url: PUBLIC_SHOWCASE_DATASETS_PATH }], 'showcase catalog lookups')
 }
