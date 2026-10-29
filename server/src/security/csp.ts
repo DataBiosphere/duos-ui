@@ -42,12 +42,28 @@ export function bannerSource(bannersUrl: unknown): string | undefined {
   }
 }
 
+/**
+ * Return the legacy showcase lookup as a path-scoped source. showcaseApiUrl can
+ * name another environment's Consent (content previews read production), so
+ * only its anonymous /showcase/ routes are admitted, not the whole API.
+ */
+export function showcaseSource(showcaseApiUrl: unknown): string | undefined {
+  const origin = configuredOrigin(showcaseApiUrl)
+  return origin ? `${origin}/showcase/` : undefined
+}
+
 export function connectSources(config: Record<string, unknown>, env: CspEnvironment): string[] {
   const fields = config.bffEnabled === true ? BFF_CONNECT_FIELDS : LEGACY_CONNECT_FIELDS
   const sources = new Set<string>(['\'self\''])
   for (const field of fields) {
     const origin = configuredOrigin(config[field])
     if (origin) sources.add(origin)
+  }
+  // BFF mode reaches it through /public/showcase/datasets instead.
+  const showcase = config.bffEnabled === true ? undefined : showcaseSource(config.showcaseApiUrl)
+  // A source for the same origin as apiUrl already covers it.
+  if (showcase && !sources.has(new URL(showcase).origin)) {
+    sources.add(showcase)
   }
   const banner = bannerSource(config.bannersUrl)
   if (banner) {
