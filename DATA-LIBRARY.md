@@ -51,6 +51,10 @@ If no high-quality vector is available:
 | **Max PNG file size** | ≤ 100 KB (hard limit 150 KB) |
 | **Optimization** | Required (SVGO, pngquant, Squoosh, ImageOptim, etc.) |
 
+> **Data Showcase logos:** the showcase CI guard (`test/showcases/guard/assetBudget.ts`) fails a
+> masthead logo above the recommended sizes, SVG 50 KB and PNG 100 KB. The larger hard limits in
+> this table don't apply to showcase logos.
+
 Once the asset is finalized, save it to:
 
 ```

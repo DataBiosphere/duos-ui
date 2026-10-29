@@ -14,12 +14,15 @@ import {
   type DateStringInput,
   DUOS_IDENTIFIER_PATTERN,
   type DuosIdentifierInput,
+  HEX_COLOR_PATTERN,
+  type HexColor,
   ANCHOR_SECTION_KEYS,
   EDITORIAL_SECTION_KEY,
   LOOKUP_LIMITS,
   SCHEMA_VERSION,
   SECTION_RANKINGS,
   SHOWCASE_KEY_PATTERN,
+  THEME_PRESET_KEYS,
 } from 'src/types/showcase'
 
 const isCalendarDate = (value: string) => {
@@ -38,6 +41,8 @@ export const DateStringSchema = z.string().regex(DATE_PATTERN).refine(isCalendar
   string & z.$brand<'DateString'>,
   DateStringInput
 >
+
+const HexColorSchema = z.string().regex(HEX_COLOR_PATTERN).meta({ id: 'ShowcaseHexColor' }) as unknown as z.ZodType<HexColor>
 
 /** `https://` URL, a same-origin path beginning with `/`, or `#<section key>` for a same-page
  * section that renders an anchor (not `masthead` or `hero`). This is the shape only: the CI guard and the renderer also reject `//host`, backslash
@@ -204,8 +209,13 @@ const SectionsSchema = z.strictObject({
 
 export const ShowcaseConfigSchema = z.strictObject({
   schemaVersion: z.literal(SCHEMA_VERSION),
-  /** Theme presets are set in S1.3. Logo alt text is on the masthead logos. */
-  branding: z.strictObject({ theme: z.string() }),
+  /** A theme preset, optionally with primary and accent overrides; the CI guard checks their
+   * contrast. Logo alt text is on the masthead logos. */
+  branding: z.strictObject({
+    theme: z.enum(THEME_PRESET_KEYS),
+    primary: HexColorSchema.optional(),
+    accent: HexColorSchema.optional(),
+  }),
   sections: SectionsSchema,
 })
 
