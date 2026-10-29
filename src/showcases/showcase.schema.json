@@ -10,7 +10,18 @@
       "type": "object",
       "properties": {
         "theme": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "default",
+            "blue",
+            "teal"
+          ]
+        },
+        "primary": {
+          "$ref": "#/$defs/ShowcaseHexColor"
+        },
+        "accent": {
+          "$ref": "#/$defs/ShowcaseHexColor"
         }
       },
       "required": [
@@ -3015,6 +3026,10 @@
   ],
   "additionalProperties": false,
   "$defs": {
+    "ShowcaseHexColor": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$"
+    },
     "ShowcaseLink": {
       "type": "object",
       "properties": {
