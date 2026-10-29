@@ -8,26 +8,22 @@
  * partner can override just a colour. Every key stays present, in fixed order.
  *
  * The defaults are structure only: no titles, nav labels or copy, which the product owner supplies.
- * The computed newest-first shelves need no partner content, so they are on by default once their
- * renderers are implemented (the CI guard rejects an enabled section without one). Every other
- * section is off until a partner config turns it on with its content.
+ * Every section is off by default, the computed shelves included: a partner turns a section on in its
+ * own config, so its ranking and scope are reviewed and approved in that partner's PR.
  */
-import { IMPLEMENTED_SECTION_KEYS, SECTION_KEYS, type SectionKey, type ShowcaseConfigInput, type ShowcasePartialInput } from 'src/types/showcase'
+import { SECTION_KEYS, type ShowcaseConfigInput, type ShowcasePartialInput } from 'src/types/showcase'
 
 type Sections = ShowcaseConfigInput['sections']
 
 const OFF = { enabled: false } as const
 
-const NEWEST = { enabled: true, ranking: 'newest', limit: 12 } as const
-
-/** The default sections when `implemented` lists the section types that have a renderer. */
-export const defaultSectionsFor = (implemented: readonly SectionKey[]): Sections => ({
+const defaultSections: Sections = {
   'masthead': OFF,
   'hero': OFF,
-  'latest-data-releases': implemented.includes('latest-data-releases') ? NEWEST : OFF,
+  'latest-data-releases': OFF,
   'most-requested-datasets': OFF,
   'largest-cohorts': OFF,
-  'open-access-datasets': implemented.includes('open-access-datasets') ? NEWEST : OFF,
+  'open-access-datasets': OFF,
   'instant-approval': OFF,
   'datasets-at-a-glance': OFF,
   'datasets-moving-to-archive': OFF,
@@ -45,24 +41,37 @@ export const defaultSectionsFor = (implemented: readonly SectionKey[]): Sections
   'training-workshops': OFF,
   'scholars-program': OFF,
   'tech-policy-interns': OFF,
-})
+}
 
 export const defaultShowcase: Readonly<ShowcaseConfigInput> = {
   schemaVersion: 1,
   branding: { theme: 'default' },
-  sections: defaultSectionsFor(IMPLEMENTED_SECTION_KEYS),
+  sections: defaultSections,
 }
 
+/** The fields of `value` that are set, so an explicit `undefined` can't erase a default. */
+const setFields = <T extends object>(value: T | undefined): Partial<T> =>
+  Object.fromEntries(Object.entries(value ?? {}).filter(([, field]) => field !== undefined)) as Partial<T>
+
 /** The full config for a partner's overrides. Unknown keys are kept, after the known ones, so the
- * CI guard reports a misspelt section instead of the merge dropping it silently. */
-export const resolveShowcase = (partial: ShowcasePartialInput): ShowcaseConfigInput => {
+ * CI guard reports a misspelt section instead of the merge dropping it silently. A field set to
+ * `undefined` keeps the default. The result is a copy that shares no objects with the defaults or the
+ * partner config, so changing it can't change either.
+ *
+ * `defaults` is for tests only. The CI guard checks each entry resolved over `defaultShowcase`, so
+ * page code must use the default; resolving over anything else renders a config CI never checked. */
+export const resolveShowcase = (partial: ShowcasePartialInput, defaults: Readonly<ShowcaseConfigInput> = defaultShowcase): ShowcaseConfigInput => {
   const sections = partial.sections ?? {}
-  const known = Object.fromEntries(SECTION_KEYS.map(key => [key, sections[key] ?? defaultShowcase.sections[key]]))
-  const unknown = Object.fromEntries(Object.entries(sections).filter(([key]) => !(SECTION_KEYS as readonly string[]).includes(key)))
-  return {
-    ...defaultShowcase,
-    ...partial,
-    branding: { ...defaultShowcase.branding, ...partial.branding },
+  // Each section is copied on its own: `structuredClone` keeps shared references inside one copy,
+  // and every default section is the same `OFF` object, so one clone of the whole would still link them.
+  const known = Object.fromEntries(SECTION_KEYS.map(key => [key, structuredClone(sections[key] ?? defaults.sections[key])]))
+  const unknown = Object.fromEntries(Object.entries(sections)
+    .filter(([key]) => !(SECTION_KEYS as readonly string[]).includes(key))
+    .map(([key, section]) => [key, structuredClone(section)]))
+  return structuredClone({
+    ...defaults,
+    ...setFields(partial),
+    branding: { ...defaults.branding, ...setFields(partial.branding) },
     sections: { ...known, ...unknown } as Sections,
-  }
+  })
 }
