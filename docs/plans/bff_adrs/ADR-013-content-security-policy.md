@@ -162,7 +162,8 @@ The list is mode-specific:
   `ecmApiUrl` and `tdrApiUrl` are omitted **on purpose**; those calls are
   same-origin after cutover.
 - **Legacy mode** — the above plus `ecmApiUrl` and `tdrApiUrl`, until Epic 6
-  retires the legacy client.
+  retires the legacy client. Legacy mode also admits the `/showcase/` path of
+  `showcaseApiUrl` (DT-4281); see the showcase paragraph below.
 
 **Three browser connections stay direct even after cutover.** They are not
 oversights, and they are why BFF-mode `connect-src` is not `'self'` alone:
@@ -195,6 +196,18 @@ repointed it at the new prefix so whoever wires it up reaches the proxy rather
 than Consent. The consequence is narrow but real — the endpoint has no consumer
 to validate it, so its tests are the only proof it works, and no amount of
 exercising the app would reveal it broken.
+
+**Showcase catalog lookups (DT-4281) follow the same split.** In BFF mode the
+browser posts to `/public/showcase/datasets`, which forwards to Consent through
+its own upstream, `DUOS_SHOWCASE_API_URL`, so BFF `connect-src` does not change.
+In legacy mode the browser posts directly to `showcaseApiUrl`, which is the one
+legacy entry that can name **another environment**: a content preview reads
+production Consent while `apiUrl` stays on its own environment. So, like the
+banner bucket, it is written as a **path** source, `<origin>/showcase/`, which
+admits the anonymous lookup and not the rest of that Consent's API. When
+`showcaseApiUrl` has the same origin as `apiUrl`, the origin entry already
+covers it and no path source is added. Consent's CORS for `/showcase/*` is the
+other half of this boundary. See `docs/data-showcase-lookup.md`.
 
 **BFF-mode `connect-src` did not reach `'self'` outright.** It is `'self'` plus
 the banner bucket. DT-4063 has since repointed `notificationService.ts` at
@@ -317,7 +330,8 @@ is a much larger piece of work than this story.
   adding `blob:` back to this directive.
 - BFF-mode `connect-src` is `'self'` plus the banner bucket. Story 5-F6 moved
   feature flags and anonymous metrics onto `/public/features/*` and
-  `/public/metrics/event`. `/public/notifications` is unwritten: DT-4063 has
+  `/public/metrics/event`, and DT-4281 added showcase lookups at
+  `/public/showcase/datasets`. Legacy mode adds the `/showcase/` path of `showcaseApiUrl`. `/public/notifications` is unwritten: DT-4063 has
   settled the bucket URLs, but proxying a public GCS object has no pattern to
   copy here, and no ticket covers it yet.
 - `img-src` carries `'self'` and `data:` only. `blob:` is deliberately absent:
