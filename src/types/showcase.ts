@@ -131,6 +131,14 @@ export const DUOS_IDENTIFIER_PATTERN = /^DUOS-(\d{6}|[1-9]\d{6,})$/
 /** `YYYY-MM-DD` calendar date in UTC. Date ranges include both `startDate` and `endDate`. */
 export const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 
+/** Theme presets a config can name (DT-4276, S1.3); the colours are in `src/showcases/themes.ts`. */
+export const THEME_PRESET_KEYS = ['default', 'blue', 'teal'] as const
+export type ThemePresetKey = (typeof THEME_PRESET_KEYS)[number]
+
+/** A `#rrggbb` colour. Branding overrides use this form only, so the contrast check can read them. */
+export const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/
+export type HexColor = `#${string}`
+
 /** A showcase key: lowercase words joined by single hyphens. `data` and `flagship` are reserved. */
 export const SHOWCASE_KEY_PATTERN = /^(?!(?:data|flagship)$)[a-z0-9]+(?:-[a-z0-9]+)*$/
 
@@ -147,6 +155,12 @@ export type DuosIdentifier = z.output<typeof DuosIdentifierSchema>
 export type DateString = z.output<typeof DateStringSchema>
 
 export type ShowcaseConfigInput = z.input<typeof ShowcaseConfigSchema>
+/** What a partner config lists: only what differs from `defaultShowcase` (`src/showcases/defaults.ts`). */
+export type ShowcasePartialInput = {
+  schemaVersion?: ShowcaseConfigInput['schemaVersion']
+  branding?: Partial<ShowcaseConfigInput['branding']>
+  sections?: Partial<ShowcaseConfigInput['sections']>
+}
 export type ShowcaseConfig = z.output<typeof ShowcaseConfigSchema>
 export type SectionConfigs = ShowcaseConfig['sections']
 

@@ -17,7 +17,7 @@ import { cspReportRoute, REPORTING_ENDPOINTS_HEADER } from './security/cspReport
 import { sessionPluginOptions } from './session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from './auth/csrf.js'
 import { fetchMetadataGuard } from './security/fetchMetadata.js'
-import { callbackRateLimit, testSigninRateLimit, isRateLimitError, loginRateLimit, RATE_LIMIT_ERROR_CODE, rateLimitPluginOptions } from './security/rateLimit.js'
+import { callbackRateLimit, testSigninRateLimit, isRateLimitError, loginRateLimit, RATE_LIMIT_ERROR_CODE, rateLimitKey, rateLimitPluginOptions, trustRealIpFromEnv } from './security/rateLimit.js'
 import { getOidcConfig } from './auth/oidcClient.js'
 import { testSigninEmails, createTestSigninHandler } from './auth/testSignin.js'
 import { handleLogin } from './auth/login.js'
@@ -68,7 +68,7 @@ export function shouldUseHttps(
  */
 export function handleServerError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
-    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: request.ip, idp: 'unknown' }, 'warn')
+    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: rateLimitKey(request), idp: 'unknown' }, 'warn')
     return reply.status(err.statusCode ?? 429).send({ error: RATE_LIMIT_ERROR_CODE })
   }
   request.log.error({ err }, '[server] Unhandled error:')
@@ -85,7 +85,7 @@ export function handleServerError(err: FastifyError, request: FastifyRequest, re
  */
 export function handleCallbackError(err: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   if (isRateLimitError(err)) {
-    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: request.ip, idp: 'unknown' }, 'warn')
+    logAuthEvent(request, 'auth.rate_limited', { route: request.routeOptions?.url ?? 'unknown', ip: rateLimitKey(request), idp: 'unknown' }, 'warn')
     return reply.redirect(`/?signInError=${RATE_LIMIT_ERROR_CODE}`)
   }
   return handleServerError(err, request, reply)
@@ -118,6 +118,8 @@ export async function buildApp(): Promise<AppInstance> {
 
   // Rate limiting. Registered at app level, ahead of both cutover switches and every route.
   await fastify.register(rateLimit, rateLimitPluginOptions)
+  // Read once here, so a bad value fails startup and the log shows the key source.
+  fastify.log.info({ trustRealIp: trustRealIpFromEnv() }, '[server] rate-limit key source')
 
   // Use the same memoized config for headers, route gating, and /config.json.
   const configJsonPath = configPath(PROJECT_ROOT, isDev)

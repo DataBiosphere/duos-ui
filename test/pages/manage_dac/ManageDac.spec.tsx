@@ -9,12 +9,14 @@ import { DAC } from 'src/libs/ajax/DAC'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Notifications } from 'src/libs/utils'
 import { Storage } from 'src/libs/storage'
+import { refreshCurrentUserIfAffected } from 'src/libs/auth/refreshCurrentUser'
 import type { DacObject, Dataset, DatasetTerm, DuosUser, UserRole } from 'src/types/model'
 import type { ManageDacTableProps } from 'src/components/manage_dac_table/ManageDacTable'
 
 vi.mock('src/libs/ajax/DAC')
 vi.mock('src/libs/ajax/DataSet')
 vi.mock('src/libs/storage')
+vi.mock('src/libs/auth/refreshCurrentUser')
 vi.mock('src/libs/utils', async (importOriginal) => {
   const original = await importOriginal<typeof import('src/libs/utils')>()
   return {
@@ -452,6 +454,30 @@ describe('ManageDac', () => {
       expect(vi.mocked(DAC.list)).toHaveBeenCalledTimes(2)
       expect(vi.mocked(Notifications.showSuccess)).toHaveBeenCalledWith({ text: 'DAC successfully deleted.' })
       expect(screen.queryByText('Alpha DAC')).toBeNull()
+    })
+  })
+
+  it('refreshes the stored user with the chairs and members of a deleted DAC', async () => {
+    const memberDac = { ...primaryDac, members: [makeUser(5, 'Member Person', [])] }
+    vi.mocked(Storage.getCurrentUser).mockReturnValue(adminUser)
+    vi.mocked(DAC.list)
+      .mockResolvedValueOnce([memberDac])
+      .mockResolvedValueOnce([])
+    vi.mocked(DAC.delete).mockResolvedValue({ status: 200 } as never)
+
+    mountManageDac()
+
+    await waitFor(() => {
+      expect(screen.getByText('Alpha DAC')).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    await waitFor(() => {
+      expect(screen.getByText('Delete DAC?')).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
+
+    await waitFor(() => {
+      expect(vi.mocked(refreshCurrentUserIfAffected)).toHaveBeenCalledWith([1, 5])
     })
   })
 })
