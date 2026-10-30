@@ -1,7 +1,9 @@
 import { createHmac } from 'node:crypto'
 
 /**
- * Signed client IP for Consent's anonymous showcase rate limit (DT-4379).
+ * Signed client IP for Consent's anonymous per-IP rate limits (DT-4379).
+ * Only the showcase route signs today; another anonymous route can opt in by
+ * spreading `signClientIp(...)` into its request headers.
  *
  * The BFF calls Consent at its public URL, and Consent's load balancer
  * overwrites `X-Real-IP` with this pod's egress address, so every BFF-proxied
@@ -14,6 +16,8 @@ import { createHmac } from 'node:crypto'
  *   - signed bytes: `<ip>\n<timestamp>`, UTF-8
  *   - timestamp: Unix seconds, decimal
  *   - signature: lowercase hex
+ *
+ * Consent uses the IP only as a rate-limit key, never to grant access.
  *
  * The secret never leaves the pod. It is not `DUOS_SESSION_SECRET`: Consent
  * holds this one, and a leak from Consent must not let anyone forge sessions.
@@ -38,7 +42,7 @@ export function consentProxySecretFromEnv(): string | undefined {
   const secret = process.env[CONSENT_PROXY_SECRET_ENV_VAR]?.trim()
   if (!secret) return undefined
   if (secret.length < MIN_SECRET_LENGTH) {
-    throw new Error(`${CONSENT_PROXY_SECRET_ENV_VAR} is shorter than ${MIN_SECRET_LENGTH} characters — unset it, or set the value that Consent holds as rateLimit.showcase.clientIpSecret`)
+    throw new Error(`${CONSENT_PROXY_SECRET_ENV_VAR} is shorter than ${MIN_SECRET_LENGTH} characters — unset it, or set the value that Consent holds as rateLimit.clientIpSecret`)
   }
   return secret
 }
