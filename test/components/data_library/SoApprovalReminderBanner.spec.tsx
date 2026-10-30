@@ -5,20 +5,20 @@ import { render, screen } from '@testing-library/react'
 import SoApprovalReminderBanner from 'src/components/data_library/SoApprovalReminderBanner'
 
 describe('SoApprovalReminderBanner', () => {
-  it('states that Signing Officials approve the researcher or the request before DAC review', () => {
+  it('states that the Signing Official approves the researcher or the request before DAC review', () => {
     render(<SoApprovalReminderBanner />)
     expect(
-      screen.getByText(/require Signing Officials to approve either the researcher or individual requests before they review/),
+      screen.getByText(
+        /Your Signing Official must approve you or your data access request, as each DAC prefers, prior to a DAC reviewing your request/,
+      ),
     ).toBeInTheDocument()
   })
 
-  it('omits the per-dataset pointer when no SO Approval column is shown', () => {
+  it('links to the Signing Official Guide in a new tab', () => {
     render(<SoApprovalReminderBanner />)
-    expect(screen.queryByText(/Each dataset below/)).not.toBeInTheDocument()
-  })
-
-  it('adds the per-dataset pointer when the SO Approval column is shown', () => {
-    render(<SoApprovalReminderBanner showsPerDatasetIndicator />)
-    expect(screen.getByText(/Each dataset below indicates which approval model applies/)).toBeInTheDocument()
+    const link = screen.getByRole('link', { name: 'here' })
+    expect(link).toHaveAttribute('href', 'https://duos.blog/help/signingofficialguide/')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 })

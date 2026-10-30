@@ -31,6 +31,7 @@ const CONFIG_PATH = '/config.json'
 const DATA_GRID_ROW_SELECTOR = '.MuiDataGrid-row'
 const STUDY_CARD_SELECTOR = '[data-cy="study-card"]'
 const DATASETS_TAB_PATH = '/?tab=datasets'
+const SO_REMINDER_SELECTOR = '[data-cy="so-approval-reminder-banner"]'
 const DUOS_DATA_LIBRARY_TITLE = 'DUOS Data Library'
 const EXPORT_LABEL = 'Export to...'
 const FOOTER_SELECTOR = '[data-cy="library-footer"]'
@@ -279,7 +280,28 @@ describe('DataLibrary', () => {
     ['the Datasets tab', DATASETS_TAB_PATH],
   ])('shows the Signing Official approval reminder on %s', async (_label, path) => {
     renderLibrary(path)
-    expect(await screen.findByText(/require Signing Officials to approve/)).toBeInTheDocument()
+    expect(await screen.findByText(/Your Signing Official must approve you or your data access request/)).toBeInTheDocument()
+  })
+
+  it('links the Signing Official approval reminder to the Signing Official Guide in a new tab', async () => {
+    renderLibrary('/')
+    await screen.findByText(/Your Signing Official must approve/)
+    const link = within(document.querySelector(SO_REMINDER_SELECTOR) as HTMLElement).getByRole('link', { name: 'here' })
+    expect(link).toHaveAttribute('href', 'https://duos.blog/help/signingofficialguide/')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it('hides the Signing Official approval reminder while the filters are collapsed', async () => {
+    const user = userEvent.setup()
+    renderLibrary('/?hideFilters=true')
+    await screen.findByText(DUOS_DATA_LIBRARY_TITLE)
+
+    await waitFor(() => expect(document.querySelector(SHOW_FILTERS_BUTTON_SELECTOR)).toBeInTheDocument())
+    expect(document.querySelector(SO_REMINDER_SELECTOR)).not.toBeInTheDocument()
+
+    await user.click(getFilterToggleButton(SHOW_FILTERS_BUTTON_SELECTOR))
+    await waitFor(() => expect(document.querySelector(SO_REMINDER_SELECTOR)).toBeInTheDocument())
   })
 
   it('does not repeat the result count above the results', async () => {

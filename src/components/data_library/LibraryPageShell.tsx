@@ -126,12 +126,11 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
             isOpen={!urlState.hideFilters}
             onToggle={handleToggleFilters}
           />
+          {/* The collapsed sidebar is too narrow to hold the reminder */}
+          {showSoApprovalReminder && !urlState.hideFilters && <SoApprovalReminderBanner />}
         </Box>
 
         <Box sx={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          {showSoApprovalReminder && (
-            <SoApprovalReminderBanner showsPerDatasetIndicator={soApprovalModelByDatasetId !== undefined} />
-          )}
           {radarEnabledDatasetIds !== undefined && (
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
               <InstantApprovalBadge />
