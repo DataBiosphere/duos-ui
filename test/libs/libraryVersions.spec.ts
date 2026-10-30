@@ -53,6 +53,7 @@ describe('Library Versions - Tests', () => {
       expect(nonFeaturedLibraries).toContain('mgb')
       expect(nonFeaturedLibraries).toContain('nhlbi')
       expect(nonFeaturedLibraries).toContain('hartwig')
+      expect(nonFeaturedLibraries).toContain('mhgc')
     })
 
     it('includes all expected library keys', () => {

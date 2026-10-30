@@ -8,7 +8,7 @@
  * and add a removed key to `retiredKeys`. Use `status: 'hidden'` for a reversible withdrawal.
  */
 import registryJson from './registry.json'
-import type { RegistryEntry, ShowcaseConfigInput, ShowcaseRegistry } from 'src/types/showcase'
+import type { RegistryEntry, ShowcasePartialInput, ShowcaseRegistry } from 'src/types/showcase'
 
 const registry = registryJson as ShowcaseRegistry
 
@@ -16,8 +16,9 @@ export const showcaseEntries: readonly RegistryEntry[] = registry.entries
 
 export const retiredShowcaseKeys: readonly string[] = registry.retiredKeys
 
-/** Each entry's config, by key. Real entries land after the CI guard. */
-export const showcaseConfigs: Readonly<Record<string, ShowcaseConfigInput>> = {}
+/** Each entry's overrides of `defaultShowcase`, by key; `resolveShowcase` gives the full config.
+ * Real entries land after the CI guard. */
+export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {}
 
 /** The flagship is served at `/data`; every other showcase at `/showcase/<key>`. */
 export const showcaseRoute = ({ key, flagship }: Pick<RegistryEntry, 'key' | 'flagship'>) =>

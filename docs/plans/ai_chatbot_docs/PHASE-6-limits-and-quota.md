@@ -30,8 +30,9 @@ several tabs and starting several turns at once.
 
 **What exists in `develop` today.** `@fastify/rate-limit` is registered with
 `global: false` in `server/src/index.ts`, and `server/src/security/rateLimit.ts`
-holds the route configs for the auth routes, each keyed on `request.ip` with an
-env override through `maxFromEnv`. Nothing is keyed on a user, and nothing
+holds the route configs for the auth routes, each keyed on the client address
+from `rateLimitKey` (the plugin's `keyGenerator`, DT-4374) with an env override
+through `maxFromEnv`. Nothing is keyed on a user, and nothing
 divides by the replica count, because the DUOS chart delivers no replica-count
 value. Story 6-A adds both.
 
@@ -67,8 +68,11 @@ Rules, each from §3.4:
 
 1. **Key on `request.session.userId`**, the B2C email claim — the same key
    Consent's own filter uses, so one person maps to one bucket on both sides.
-   Fall back to `request.ip` when there is no session, and let the route's own
-   `401` reject that caller afterwards. Never key on a hashed value that a
+   Fall back to `rateLimitKey(request)` when there is no session, and let the
+   route's own `401` reject that caller afterwards. Do not fall back to
+   `request.ip`: deployed, it is a Google front-end address, so every
+   sessionless caller would share one bucket. A route `keyGenerator` replaces
+   the plugin's `rateLimitKey`, so this one must call it. Never key on a hashed value that a
    caller can choose.
 2. **`max = ceil(turnsPerMinute / DUOS_REPLICA_COUNT)`.** Read the divisor
    from a new env var. Read it **only where the chat route registers** — inside

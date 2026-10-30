@@ -531,6 +531,13 @@ export const getLibraryVersions = (
       featured: false,
       order: 27,
     },
+    'mhgc': {
+      query: tagsQuery('MHGC'),
+      icon: null,
+      title: 'MHGC Data Library',
+      featured: false,
+      order: 28,
+    },
   }
 }
 

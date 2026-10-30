@@ -168,7 +168,7 @@ describe('handleServerError', () => {
   // the child-logger factory a route uses is fixed when that route registers,
   // so a built app's request.log cannot be stubbed afterwards.
   function fakeRequest() {
-    return { ip: '203.0.113.1', url: '/auth/login?code=SECRET', routeOptions: { url: '/auth/login' }, log: { warn: vi.fn(), error: vi.fn() } }
+    return { ip: '203.0.113.1', socket: { remoteAddress: '203.0.113.1' }, headers: {}, url: '/auth/login?code=SECRET', routeOptions: { url: '/auth/login' }, log: { warn: vi.fn(), error: vi.fn() } }
   }
 
   function fakeReply() {
@@ -267,6 +267,10 @@ describe('handleServerError', () => {
 })
 
 describe('handleCallbackError', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   it('logs a throttled callback as auth.rate_limited with the route pattern, and never the query string', async () => {
     const { handleCallbackError } = await import('../src/index.js')
     const { rateLimitPluginOptions } = await import('../src/security/rateLimit.js')
@@ -274,7 +278,9 @@ describe('handleCallbackError', () => {
       {} as FastifyRequest,
       { statusCode: 429, ban: false, after: '1 minute', max: 60, ttl: 60_000 },
     )
-    const request = { ip: '203.0.113.2', url: '/auth/callback?code=SECRET&state=SECRET', routeOptions: { url: '/auth/callback' }, log: { warn: vi.fn(), error: vi.fn() } }
+    // From the sidecar: the log names the X-Real-IP key, not the front end.
+    vi.stubEnv('DUOS_RATE_LIMIT_TRUST_REAL_IP', 'true')
+    const request = { ip: '35.191.75.100', socket: { remoteAddress: '127.0.0.1' }, headers: { 'x-real-ip': '203.0.113.2' }, url: '/auth/callback?code=SECRET&state=SECRET', routeOptions: { url: '/auth/callback' }, log: { warn: vi.fn(), error: vi.fn() } }
     const reply = { redirect: vi.fn() }
 
     // oxlint-disable-next-line @typescript-eslint/no-explicit-any
@@ -866,8 +872,9 @@ describe('auth endpoint rate limiting', () => {
     return buildApp()
   }
 
-  // The rate limiter keys on request.ip, which honours X-Forwarded-For because
-  // TRUST_PROXY names the loopback peer that app.inject() presents as.
+  // With no X-Real-IP, the rate limiter keys on request.ip, which honours
+  // X-Forwarded-For because TRUST_PROXY names the loopback peer that
+  // app.inject() presents as.
   const from = (ip: string) => ({ 'x-forwarded-for': ip })
 
   it('returns 429 with Retry-After and the rate_limited code once /auth/login exceeds its limit', async () => {
@@ -929,6 +936,89 @@ describe('auth endpoint rate limiting', () => {
 
     expect(sameIp.statusCode).toBe(429)
     expect(otherIp.statusCode).toBe(200)
+
+    await app.close()
+  })
+
+  // Deployed, X-Forwarded-For ends in a Google front-end address, so it
+  // names the same bucket for everyone. The load balancer's X-Real-IP is the
+  // real client, and app.inject() presents as the loopback sidecar.
+  it('counts each X-Real-IP in its own bucket when X-Forwarded-For is the same front end', async () => {
+    vi.stubEnv('DUOS_RATE_LIMIT_TRUST_REAL_IP', 'true')
+    const app = await buildLimitedApp({ login: '1' })
+    const via = (realIp: string) => ({ ...from('35.191.75.100'), 'x-real-ip': realIp })
+
+    await app.inject({ method: 'POST', url: '/auth/login', headers: via('203.0.113.20') })
+    const sameClient = await app.inject({ method: 'POST', url: '/auth/login', headers: via('203.0.113.20') })
+    const otherClient = await app.inject({ method: 'POST', url: '/auth/login', headers: via('198.51.100.20') })
+
+    expect(sameClient.statusCode).toBe(429)
+    expect(otherClient.statusCode).toBe(200)
+
+    await app.close()
+  })
+
+  // The other limited routes set no keyGenerator, so they inherit the plugin's
+  // rateLimitKey. A route keyGenerator would override it (Object.assign).
+  it.each([
+    // A throttled callback redirects to the SPA; see the test above.
+    { route: 'GET /auth/callback', limited: 302, method: 'GET' as const, url: '/auth/callback', headers: {}, payload: undefined },
+    {
+      route: 'POST /csp-report',
+      limited: 429,
+      method: 'POST' as const,
+      url: '/csp-report',
+      headers: { 'content-type': 'application/csp-report' },
+      payload: JSON.stringify({ 'csp-report': { 'blocked-uri': 'https://example.org/x' } }),
+    },
+  ])('keys $route on X-Real-IP too', async ({ limited, method, url, headers, payload }) => {
+    vi.stubEnv('DUOS_RATE_LIMIT_TRUST_REAL_IP', 'true')
+    const app = await buildLimitedApp({ callback: '1' })
+    const via = (realIp: string) => app.inject({
+      method,
+      url,
+      payload,
+      headers: { ...headers, ...from('35.191.75.100'), 'x-real-ip': realIp },
+    })
+
+    let sameClient = 0
+    for (let i = 0; i < MAX_REQUESTS_PER_WINDOW + 1; i += 1) sameClient = (await via('203.0.113.50')).statusCode
+    const otherClient = await via('198.51.100.50')
+
+    expect(sameClient).toBe(limited)
+    expect(otherClient.statusCode).not.toBe(limited)
+
+    await app.close()
+  })
+
+  // BEEs: HAProxy passes a client-supplied X-Real-IP through untouched.
+  it('ignores a rotated X-Real-IP when the switch is off', async () => {
+    const app = await buildLimitedApp({ login: '1' })
+    const via = (realIp: string) => ({ ...from('203.0.113.21'), 'x-real-ip': realIp })
+
+    await app.inject({ method: 'POST', url: '/auth/login', headers: via('198.51.100.21') })
+    const rotated = await app.inject({ method: 'POST', url: '/auth/login', headers: via('198.51.100.22') })
+
+    expect(rotated.statusCode).toBe(429)
+
+    await app.close()
+  })
+
+  it('fails startup when DUOS_RATE_LIMIT_TRUST_REAL_IP is not true or false', async () => {
+    vi.stubEnv('DUOS_RATE_LIMIT_TRUST_REAL_IP', 'yes')
+
+    await expect(buildLimitedApp()).rejects.toThrow('DUOS_RATE_LIMIT_TRUST_REAL_IP')
+  })
+
+  it('ignores X-Real-IP from a peer that is not the loopback sidecar', async () => {
+    vi.stubEnv('DUOS_RATE_LIMIT_TRUST_REAL_IP', 'true')
+    const app = await buildLimitedApp({ login: '1' })
+    const direct = (realIp: string) => ({ method: 'POST' as const, url: '/auth/login', remoteAddress: '203.0.113.30', headers: { 'x-real-ip': realIp } })
+
+    await app.inject(direct('198.51.100.31'))
+    const rotated = await app.inject(direct('198.51.100.32'))
+
+    expect(rotated.statusCode).toBe(429)
 
     await app.close()
   })

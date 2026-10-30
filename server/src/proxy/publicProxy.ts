@@ -12,6 +12,7 @@ import type { RateLimitOptions } from '@fastify/rate-limit'
 import fastifyReplyFrom from '@fastify/reply-from'
 import type { FastifyReplyFromResponse } from '@fastify/reply-from'
 import { logAuthEvent } from '../auth/authEvents.js'
+import { rateLimitKey } from '../security/rateLimit.js'
 import { upstreamBase, upstreamPath } from './upstreamProxy.js'
 
 /**
@@ -248,7 +249,7 @@ async function showcaseLookupRoute(app: FastifyInstance): Promise<void> {
 function handlePublicError(error: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   const statusCode = error.statusCode ?? 500
   if (statusCode === 429) {
-    request.log.warn({ ip: request.ip, url: request.url }, '[public-proxy] rate limit exceeded')
+    request.log.warn({ ip: rateLimitKey(request), url: request.url }, '[public-proxy] rate limit exceeded')
   }
   else if (statusCode >= 500) {
     request.log.error({ err: error }, '[public-proxy] unhandled error')
