@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Skeleton, Typography } from '@mui/material'
+import { Box } from '@mui/material'
 import { GridColDef } from '@mui/x-data-grid'
 import LibraryTabs from 'src/components/data_library/LibraryTabs'
 import LibraryFilters from 'src/components/data_library/LibraryFilters'
@@ -60,7 +60,6 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
     error,
     isMetadataLoading,
     tabCounts,
-    currentAsset,
     filterSections,
     externalFilters,
     sortModel,
@@ -133,25 +132,11 @@ export const LibraryPageShell: React.FC<LibraryPageShellProps> = ({
           {showSoApprovalReminder && (
             <SoApprovalReminderBanner showsPerDatasetIndicator={soApprovalModelByDatasetId !== undefined} />
           )}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-            {isFetching
-              ? <Skeleton variant="text" width={120} sx={{ fontSize: '15px' }} />
-              : (
-                  <Typography
-                    sx={{
-                      color: 'primary.main',
-                      fontFamily: 'Montserrat, sans-serif',
-                      fontSize: '15px',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {(data?.total ?? 0).toLocaleString()}
-                    {' '}
-                    {data?.total === 1 ? currentAsset.label.singular : currentAsset.label.plural}
-                  </Typography>
-                )}
-            {radarEnabledDatasetIds !== undefined && <InstantApprovalBadge />}
-          </Box>
+          {radarEnabledDatasetIds !== undefined && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+              <InstantApprovalBadge />
+            </Box>
+          )}
           <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
             {(() => {
               const gridProps: React.ComponentProps<typeof LibraryDataGrid> = {
