@@ -282,6 +282,12 @@ describe('DataLibrary', () => {
     expect(await screen.findByText(/require Signing Officials to approve/)).toBeInTheDocument()
   })
 
+  it('does not repeat the result count above the results', async () => {
+    renderLibrary(DATASETS_TAB_PATH)
+    expect(await screen.findByText('Dataset One')).toBeInTheDocument()
+    expect(screen.queryByText(/^[\d,]+ Datasets?$/)).not.toBeInTheDocument()
+  })
+
   it('shows an error message when the dataset query fails', async () => {
     vi.mocked(DataSet.searchDatasetIndexV2).mockRejectedValue(new Error('boom'))
 
