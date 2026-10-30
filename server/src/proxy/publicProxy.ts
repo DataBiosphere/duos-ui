@@ -14,6 +14,7 @@ import type { FastifyReplyFromResponse } from '@fastify/reply-from'
 import { logAuthEvent } from '../auth/authEvents.js'
 import { rateLimitKey } from '../security/rateLimit.js'
 import { upstreamBase, upstreamPath } from './upstreamProxy.js'
+import { CONSENT_PROXY_SECRET_ENV_VAR, SIGNED_CLIENT_IP_HEADERS, consentProxySecretFromEnv, signClientIp } from './clientIpSignature.js'
 
 /**
  * Public feature flags, anonymous metrics and showcase catalog lookups, independent of session infrastructure.
@@ -79,9 +80,13 @@ function forwardedFor(request: ProxyRequest, inbound: string | string[] | undefi
   return chain ? `${chain}, ${request.ip}` : request.ip
 }
 
-/** Strip credentials without mutating headers that reply-from may reuse on retry. */
+/**
+ * Strip credentials without mutating headers that reply-from may reuse on retry.
+ * Also strip the signed client IP headers: only the showcase route sets them.
+ */
 function rewriteRequestHeaders(request: ProxyRequest, headers: IncomingHttpHeaders): IncomingHttpHeaders {
-  const { cookie, authorization, 'x-csrf-token': csrfToken, ...forwarded } = headers
+  const { cookie, authorization, 'x-csrf-token': csrfToken, ...rest } = headers
+  const forwarded = Object.fromEntries(Object.entries(rest).filter(([name]) => !SIGNED_CLIENT_IP_HEADERS.includes(name)))
   return {
     ...forwarded,
     // Override any caller-supplied app ID.
@@ -216,6 +221,11 @@ async function anonymousMetricsRoute(app: FastifyInstance): Promise<void> {
  * production while the authenticated API stays on its own environment.
  */
 async function showcaseLookupRoute(app: FastifyInstance): Promise<void> {
+  const proxySecret = consentProxySecretFromEnv()
+  if (!proxySecret) {
+    app.log.warn(`[server] ${CONSENT_PROXY_SECRET_ENV_VAR} is not set — showcase lookups go to Consent without a signed client IP, so all of them share one Consent rate-limit bucket`)
+  }
+
   await app.register(fastifyReplyFrom, {
     base: upstreamBase('DUOS_SHOWCASE_API_URL'),
     undici: { connections: PUBLIC_POOL_CONNECTIONS },
@@ -227,12 +237,14 @@ async function showcaseLookupRoute(app: FastifyInstance): Promise<void> {
   }
 
   app.post(PUBLIC_SHOWCASE_DATASETS_PATH, routeOptions, (request, reply) => {
+    // Consent keys its limit on the signed IP; see clientIpSignature.ts.
+    const signed = proxySecret ? signClientIp(proxySecret, rateLimitKey(request), Date.now() / 1000) : {}
     reply.from('/showcase/datasets', {
       body: request.body as string,
       contentType: request.headers['content-type'],
       // The upstream path is fixed; a caller's query string is not forwarded.
       queryString: () => '',
-      rewriteRequestHeaders,
+      rewriteRequestHeaders: (proxyRequest, headers) => ({ ...rewriteRequestHeaders(proxyRequest, headers), ...signed }),
       rewriteHeaders: rewriteResponseHeaders,
       onResponse: enforceJsonResponse,
       onError: onUpstreamTransportError,
