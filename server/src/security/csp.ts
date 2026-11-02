@@ -49,7 +49,11 @@ export function bannerSource(bannersUrl: unknown): string | undefined {
  */
 export function showcaseSource(showcaseApiUrl: unknown): string | undefined {
   const origin = configuredOrigin(showcaseApiUrl)
-  return origin ? `${origin}/showcase/` : undefined
+  if (!origin) return undefined
+  const { protocol, host } = new URL(origin)
+  // A wildcard host would admit /showcase/ on every host. The client accepts http(s) only.
+  const usable = (protocol === 'https:' || protocol === 'http:') && !host.includes('*')
+  return usable ? `${origin}/showcase/` : undefined
 }
 
 export function connectSources(config: Record<string, unknown>, env: CspEnvironment): string[] {

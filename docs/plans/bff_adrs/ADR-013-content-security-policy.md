@@ -204,7 +204,10 @@ In legacy mode the browser posts directly to `showcaseApiUrl`, which is the one
 legacy entry that can name **another environment**: a content preview reads
 production Consent while `apiUrl` stays on its own environment. So, like the
 banner bucket, it is written as a **path** source, `<origin>/showcase/`, which
-admits the anonymous lookup and not the rest of that Consent's API. When
+admits the anonymous lookup and not the rest of that Consent's API. As with
+the bucket, the path applies to the direct request only, so the showcase routes
+must not redirect. A value that is not http(s), or that has a wildcard host,
+adds no source. When
 `showcaseApiUrl` has the same origin as `apiUrl`, the origin entry already
 covers it and no path source is added. Consent's CORS for `/showcase/*` is the
 other half of this boundary. See `docs/data-showcase-lookup.md`.

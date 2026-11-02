@@ -89,7 +89,7 @@ describe('connectSources', () => {
     expect(sources.filter(source => source.startsWith(CONSENT))).toEqual([CONSENT])
   })
 
-  it.each(['', 'consent.dsde-prod.broadinstitute.org', 42])('adds no showcase source for %j', (showcaseApiUrl) => {
+  it.each(['', 'consent.dsde-prod.broadinstitute.org', 42, 'https://*', 'https://*.broadinstitute.org', 'ftp://consent.dsde-prod.broadinstitute.org'])('adds no showcase source for %j', (showcaseApiUrl) => {
     const sources = connectSources({ ...fullConfig(false), showcaseApiUrl }, PROD)
     expect(sources.some(source => source.endsWith('/showcase/'))).toBe(false)
   })
@@ -263,6 +263,14 @@ describe('the policy as helmet serialises it', () => {
     expect(policy.get('report-uri')).toEqual([CSP_REPORT_PATH])
     expect(policy.get('report-to')).toEqual([CSP_REPORT_GROUP])
     expect(policy.get('upgrade-insecure-requests')).toEqual([])
+  })
+
+  it('sends the showcase path source in the legacy-mode header', async () => {
+    app = await buildHelmetApp(PROD, fullConfig(false))
+    const res = await app.inject({ method: 'GET', url: '/page' })
+    const policy = parsePolicy(String(res.headers['content-security-policy']))
+
+    expect(policy.get('connect-src')).toEqual(['\'self\'', CONSENT, BARD, ECM, TDR, SHOWCASE_SOURCE, BANNER_SOURCE])
   })
 
   it('denies framing through both the CSP and the legacy header', async () => {

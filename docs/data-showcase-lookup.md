@@ -36,7 +36,7 @@ Two settings name the Consent that answers lookups. Both are separate from the a
 | Setting | Where | Used in | Value |
 | ------- | ----- | ------- | ----- |
 | `DUOS_SHOWCASE_API_URL` | Server environment (`.env.local`, terra-helmfile) | BFF mode | A bare origin, for example `https://consent.dsde-prod.broadinstitute.org`. A path or credentials stop the server at startup. |
-| `showcaseApiUrl` | `config.json` | Legacy mode | A Consent URL. The client and the Content Security Policy use its origin only. |
+| `showcaseApiUrl` | `config.json` | Legacy mode | An http(s) Consent URL with no wildcard host. The client and the Content Security Policy use its origin only. |
 
 Set them for each kind of environment as follows:
 
@@ -54,7 +54,9 @@ In legacy mode the client fails with `not_configured` before it sends a request.
 
 BFF mode adds nothing to `connect-src`: the route is same-origin. Legacy mode adds
 `<showcaseApiUrl origin>/showcase/`, a path source, so a preview that reads production Consent admits
-only the anonymous showcase routes, not the rest of that API. If `showcaseApiUrl` has the same
+only the anonymous showcase routes, not the rest of that API. The path applies to the direct request
+only: a browser ignores it when it checks a redirect target, so the showcase routes must not redirect.
+If `showcaseApiUrl` has the same
 origin as `apiUrl`, the `apiUrl` entry already covers it. See ADR-013
 (`docs/plans/bff_adrs/ADR-013-content-security-policy.md`).
 
@@ -71,8 +73,9 @@ direct caller cannot skip them.
 | Malformed JSON | 400, no body | 400 |
 | Request outside the contract (unknown mode, field, or limit) | Forwarded | 400 `{"message": "..."}` |
 | Upstream not configured | 503 `{"error":"upstream_not_configured"}` | — |
-| Upstream unreachable | 502 `{"error":"upstream_unavailable"}` | — |
-| Upstream body is not JSON | 502 `{"error":"upstream_not_json"}` | — |
+| Upstream unreachable or timed out | 502 or 504 `{"error":"upstream_unavailable"}` | — |
+| Upstream content type is not JSON | 502 `{"error":"upstream_not_json"}` | — |
+| Upstream sends a JSON content type with a malformed body | Streamed unchanged; the client fails with `invalid_response` | — |
 
 The proxy also drops a caller's query string, removes cookies, `Authorization` and the CSRF token
 from the request, removes `set-cookie` and `www-authenticate` from the response, and adds
