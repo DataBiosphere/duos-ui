@@ -12,6 +12,7 @@ import type { RateLimitOptions } from '@fastify/rate-limit'
 import fastifyReplyFrom from '@fastify/reply-from'
 import type { FastifyReplyFromResponse } from '@fastify/reply-from'
 import { logAuthEvent } from '../auth/authEvents.js'
+import { rateLimitKey } from '../security/rateLimit.js'
 import { upstreamBase, upstreamPath } from './upstreamProxy.js'
 
 /**
@@ -43,7 +44,11 @@ export const FEATURES_MAX_PER_WINDOW = 60
 
 export const METRICS_MAX_PER_WINDOW = 120
 
-/** Matches Consent's default `rateLimit.showcase.requestsPerMinute`. */
+/**
+ * The same number as Consent's default `rateLimit.showcase.requestsPerMinute`,
+ * but not the same buckets: this one counts each caller, while Consent puts all
+ * BFF traffic in one bucket until the hop carries the client IP (DT-4379).
+ */
 export const SHOWCASE_MAX_PER_WINDOW = 120
 
 /** Each upstream gets its own connection pool, in addition to the session proxies. */
@@ -107,6 +112,12 @@ function onUpstreamTransportError(reply: ProxyReply, { error }: { error: Error }
   const statusCode = (error as Error & { statusCode?: number }).statusCode ?? 502
   const isGatewayClass = statusCode >= 502 && statusCode <= 504
   reply.status(isGatewayClass ? statusCode : 502).send({ error: 'upstream_unavailable' })
+}
+
+/** Consent keys its anonymous limit on X-Real-IP, so a caller must not choose it. */
+function showcaseRequestHeaders(request: ProxyRequest, headers: IncomingHttpHeaders): IncomingHttpHeaders {
+  const { 'x-real-ip': realIp, ...forwarded } = rewriteRequestHeaders(request, headers)
+  return forwarded
 }
 
 /** `application/json` and the `+json` structured-suffix types, ignoring parameters. */
@@ -231,7 +242,7 @@ async function showcaseLookupRoute(app: FastifyInstance): Promise<void> {
       contentType: request.headers['content-type'],
       // The upstream path is fixed; a caller's query string is not forwarded.
       queryString: () => '',
-      rewriteRequestHeaders,
+      rewriteRequestHeaders: showcaseRequestHeaders,
       rewriteHeaders: rewriteResponseHeaders,
       onResponse: enforceJsonResponse,
       onError: onUpstreamTransportError,
@@ -248,7 +259,7 @@ async function showcaseLookupRoute(app: FastifyInstance): Promise<void> {
 function handlePublicError(error: FastifyError, request: FastifyRequest, reply: FastifyReply): FastifyReply {
   const statusCode = error.statusCode ?? 500
   if (statusCode === 429) {
-    request.log.warn({ ip: request.ip, url: request.url }, '[public-proxy] rate limit exceeded')
+    request.log.warn({ ip: rateLimitKey(request), url: request.url }, '[public-proxy] rate limit exceeded')
   }
   else if (statusCode >= 500) {
     request.log.error({ err: error }, '[public-proxy] unhandled error')

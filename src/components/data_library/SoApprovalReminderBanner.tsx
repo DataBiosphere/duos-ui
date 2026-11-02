@@ -1,24 +1,19 @@
 import React from 'react'
-import { Box, Typography } from '@mui/material'
+import { Box, Link, Typography } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
-interface SoApprovalReminderBannerProps {
-  /** Only the Datasets tab carries the per-dataset SO Approval column to point at */
-  showsPerDatasetIndicator?: boolean
-}
+const SO_GUIDE_URL = 'https://duos.blog/help/signingofficialguide/'
 
-export const SoApprovalReminderBanner: React.FC<SoApprovalReminderBannerProps> = ({
-  showsPerDatasetIndicator = false,
-}) => (
+export const SoApprovalReminderBanner: React.FC = () => (
   <Box
     data-cy="so-approval-reminder-banner"
     sx={{
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       gap: 1,
-      px: 2,
+      px: 1.5,
       py: 1,
-      mb: 1.5,
+      mt: 2,
       borderRadius: 1,
       bgcolor: 'rgba(13, 110, 253, 0.06)',
       border: '1px solid rgba(13, 110, 253, 0.25)',
@@ -26,8 +21,11 @@ export const SoApprovalReminderBanner: React.FC<SoApprovalReminderBannerProps> =
   >
     <InfoOutlinedIcon sx={{ color: '#0d6efd', fontSize: 20, flexShrink: 0 }} />
     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-      Data access committees require Signing Officials to approve either the researcher or individual requests before they review.
-      {showsPerDatasetIndicator && ' Each dataset below indicates which approval model applies.'}
+      Your Signing Official must approve you or your data access request, as each DAC prefers, prior to a DAC
+      reviewing your request. Learn more
+      {' '}
+      <Link href={SO_GUIDE_URL} target="_blank" rel="noopener noreferrer" underline="hover">here</Link>
+      .
     </Typography>
   </Box>
 )

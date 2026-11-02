@@ -337,14 +337,18 @@ report-only header passes through untouched, which is what makes that quiet.
   `/auth/logout` on the CSRF token, because a low cap on either breaks
   multiple tabs and the client's retry path. Limits are per client IP and
   environment-overridable, so tightening them from measured traffic is a
-  deployment change rather than a code release. Three items stay open and are
-  recorded in `server/src/security/rateLimit.ts`: edge or shared-store
-  enforcement (infrastructure); confirming that the httpd sidecar sets or
-  appends `X-Forwarded-For` rather than passing a client-supplied header
-  through; and the unauthenticated, CSRF-exempt `POST /duos-api/support/*`
-  proxy writes, which no limit covers yet. A caller inside the trusted ranges
-  (`TRUST_PROXY` trusts `uniquelocal`) can still choose its own bucket — a
-  property of `TRUST_PROXY`, and another reason the edge is the real control.
+  deployment change rather than a code release. The key is `rateLimitKey` in
+  `server/src/security/rateLimit.ts`: behind the GKE ingress the load balancer
+  overwrites `X-Real-IP` with the client address, so with
+  `DUOS_RATE_LIMIT_TRUST_REAL_IP=true` the key is that header when the peer is
+  the loopback sidecar. Elsewhere, such as BEEs behind HAProxy, the key is
+  `request.ip` (DT-4374). Two items stay open and are recorded in that file:
+  edge or shared-store enforcement (infrastructure), and the unauthenticated,
+  CSRF-exempt `POST /duos-api/support/*` proxy writes, which no limit covers
+  yet. A caller inside the cluster can still choose its own bucket, through
+  `X-Real-IP` on the sidecar port or `X-Forwarded-For` on the app port
+  (`TRUST_PROXY` trusts `uniquelocal`) — another reason the edge is the real
+  control.
 
 ## Target Architecture Sequence Diagrams
 

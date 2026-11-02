@@ -69,7 +69,7 @@ const helpfulResources: ConsoleDashboardResource[] = [
     icon: MenuBookOutlinedIcon,
     label: 'Signing Official Guide',
     description: 'A walkthrough of the Signing Official role, from pre-authorizing researchers to issuing library cards.',
-    href: 'https://duos.blog/help/preauthorize_researchers_librarycards/',
+    href: 'https://duos.blog/help/signingofficialguide/',
   },
   ...COMMON_CONSOLE_RESOURCES,
 ]

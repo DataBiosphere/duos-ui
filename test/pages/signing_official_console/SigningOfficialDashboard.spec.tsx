@@ -119,6 +119,10 @@ describe('SigningOfficialDashboard', () => {
     renderDashboard()
     expect(await screen.findByRole('link', { name: /Signing Official Guide/ })).toHaveAttribute('target', '_blank')
     expect(screen.getByRole('link', { name: /Signing Official Guide/ })).toHaveAttribute('rel', 'noopener noreferrer')
+    expect(screen.getByRole('link', { name: /Signing Official Guide/ })).toHaveAttribute(
+      'href',
+      'https://duos.blog/help/signingofficialguide/',
+    )
 
     fireEvent.click(screen.getByRole('button', { name: 'Contact Us' }))
     expect(screen.getByTestId('support-modal')).toHaveAttribute('data-url', window.location.href)
