@@ -23,6 +23,9 @@ const BARD = 'https://terra-bard-dev.appspot.com'
 const ECM = 'https://externalcreds.dsde-dev.broadinstitute.org'
 const TDR = 'https://jade.datarepo-dev.broadinstitute.org'
 const TERRA = 'https://bvdp-saturn-dev.appspot.com'
+// A content preview reads production Consent while apiUrl stays on dev.
+const SHOWCASE = 'https://consent.dsde-prod.broadinstitute.org'
+const SHOWCASE_SOURCE = `${SHOWCASE}/showcase/`
 // What readConfig() fills in for env dev; the policy admits the bucket, not the object.
 const BANNERS_URL = 'https://storage.googleapis.com/duos-banners-dev/dev_notifications.json'
 const BANNER_SOURCE = 'https://storage.googleapis.com/duos-banners-dev/'
@@ -34,6 +37,7 @@ const fullConfig = (bffEnabled: boolean): Record<string, unknown> => ({
   bardApiUrl: BARD,
   ecmApiUrl: ECM,
   tdrApiUrl: TDR,
+  showcaseApiUrl: SHOWCASE,
   terraUrl: TERRA,
   bannersUrl: BANNERS_URL,
   features: {},
@@ -62,12 +66,32 @@ describe('connectSources', () => {
     expect(connectSources(fullConfig(true), PROD)).not.toContain(BARD)
   })
 
+  it('drops the showcase origin in BFF mode, where lookups go through /public/showcase/datasets', () => {
+    expect(connectSources(fullConfig(true), PROD).some(source => source.startsWith(SHOWCASE))).toBe(false)
+  })
+
   it('keeps the banner bucket, the one flow with no BFF endpoint yet', () => {
     expect(connectSources(fullConfig(true), PROD)).toContain(BANNER_SOURCE)
   })
 
-  it('allows all four configured upstreams in legacy mode', () => {
-    expect(connectSources(fullConfig(false), PROD)).toEqual(['\'self\'', CONSENT, BARD, ECM, TDR, BANNER_SOURCE])
+  it('allows all four configured upstreams and the showcase routes in legacy mode', () => {
+    expect(connectSources(fullConfig(false), PROD)).toEqual(['\'self\'', CONSENT, BARD, ECM, TDR, SHOWCASE_SOURCE, BANNER_SOURCE])
+  })
+
+  it('admits only the showcase routes of another environment\'s Consent, not its whole API', () => {
+    const sources = connectSources({ ...fullConfig(false), showcaseApiUrl: `${SHOWCASE}/api/` }, PROD)
+    expect(sources).toContain(SHOWCASE_SOURCE)
+    expect(sources).not.toContain(SHOWCASE)
+  })
+
+  it('adds no showcase source when apiUrl already admits the same Consent', () => {
+    const sources = connectSources({ ...fullConfig(false), showcaseApiUrl: CONSENT }, PROD)
+    expect(sources.filter(source => source.startsWith(CONSENT))).toEqual([CONSENT])
+  })
+
+  it.each(['', 'consent.dsde-prod.broadinstitute.org', 42, 'https://*', 'https://*.broadinstitute.org', 'ftp://consent.dsde-prod.broadinstitute.org'])('adds no showcase source for %j', (showcaseApiUrl) => {
+    const sources = connectSources({ ...fullConfig(false), showcaseApiUrl }, PROD)
+    expect(sources.some(source => source.endsWith('/showcase/'))).toBe(false)
   })
 
   it('treats a missing bffEnabled key as legacy mode', () => {
@@ -239,6 +263,14 @@ describe('the policy as helmet serialises it', () => {
     expect(policy.get('report-uri')).toEqual([CSP_REPORT_PATH])
     expect(policy.get('report-to')).toEqual([CSP_REPORT_GROUP])
     expect(policy.get('upgrade-insecure-requests')).toEqual([])
+  })
+
+  it('sends the showcase path source in the legacy-mode header', async () => {
+    app = await buildHelmetApp(PROD, fullConfig(false))
+    const res = await app.inject({ method: 'GET', url: '/page' })
+    const policy = parsePolicy(String(res.headers['content-security-policy']))
+
+    expect(policy.get('connect-src')).toEqual(['\'self\'', CONSENT, BARD, ECM, TDR, SHOWCASE_SOURCE, BANNER_SOURCE])
   })
 
   it('denies framing through both the CSP and the legacy header', async () => {

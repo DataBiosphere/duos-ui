@@ -15,6 +15,7 @@ import {
   signClientIp,
 } from '../src/proxy/clientIpSignature.js'
 import { TRUST_PROXY } from '../src/config.js'
+import { rateLimitPluginOptions } from '../src/security/rateLimit.js'
 import {
   type Upstream,
   buildAppShell,
@@ -65,7 +66,7 @@ describe('publicProxy: showcase catalog lookup', () => {
       ? { level: 'info', stream: { write: (line: string) => { logLines.push(line) } } }
       : false
     const instance = Fastify({ logger, trustProxy: TRUST_PROXY })
-    await instance.register(fastifyRateLimit, { global: false })
+    await instance.register(fastifyRateLimit, rateLimitPluginOptions)
     await instance.register(publicProxy)
     return instance
   }
@@ -110,7 +111,7 @@ describe('publicProxy: showcase catalog lookup', () => {
   describe('the request leg', () => {
     it('strips the session cookie, Authorization and the CSRF token, and injects x-app-id', async () => {
       const shell = await buildAppShell()
-      await shell.register(fastifyRateLimit, { global: false })
+      await shell.register(fastifyRateLimit, rateLimitPluginOptions)
       seedSession(shell, { accessToken: 'a-live-session-access-token', tokenExpiry: Math.floor(Date.now() / 1000) + 3600 })
       await shell.register(publicProxy)
       app = shell
@@ -132,6 +133,14 @@ describe('publicProxy: showcase catalog lookup', () => {
       await lookup(app, { 'x-forwarded-for': '203.0.113.7' })
 
       expect(showcase.last().headers['x-forwarded-for']).toBe('203.0.113.7, 127.0.0.1')
+    })
+
+    it('does not forward a caller-supplied X-Real-IP, which Consent keys its limit on', async () => {
+      app = await buildPublicApp()
+
+      await lookup(app, { 'x-real-ip': '203.0.113.99' })
+
+      expect(showcase.last().headers['x-real-ip']).toBeUndefined()
     })
 
     it('needs no CSRF token and no same-origin Fetch Metadata', async () => {
@@ -202,6 +211,17 @@ describe('publicProxy: showcase catalog lookup', () => {
         expect(forwarded[name]).toBeUndefined()
       }
       expect(logLines.some(line => line.includes(`${CONSENT_PROXY_SECRET_ENV_VAR} is not set`))).toBe(true)
+    })
+
+    it('still drops a caller-supplied X-Real-IP when it signs the client IP', async () => {
+      process.env[CONSENT_PROXY_SECRET_ENV_VAR] = PROXY_SECRET
+      app = await buildPublicApp()
+
+      await lookup(app, { 'x-forwarded-for': '203.0.113.7', 'x-real-ip': '203.0.113.99' })
+
+      const forwarded = showcase.last().headers
+      expect(forwarded['x-real-ip']).toBeUndefined()
+      expect(forwarded[CLIENT_IP_HEADER]).toBe('203.0.113.7')
     })
 
     it('forwards no caller-supplied signed headers to the feature-flag upstream', async () => {
@@ -349,6 +369,23 @@ describe('publicProxy: showcase catalog lookup', () => {
       expect(showcase.received).toHaveLength(SHOWCASE_MAX_PER_WINDOW)
     })
 
+    it('keys an untrusted peer on its own address, whatever X-Real-IP or X-Forwarded-For it sends', async () => {
+      app = await buildPublicApp()
+      const fromPeer = (i: number) => app!.inject({
+        method: 'POST',
+        url: PUBLIC_SHOWCASE_DATASETS_PATH,
+        remoteAddress: '198.51.100.9',
+        headers: { ...JSON_HEADERS, 'x-real-ip': `203.0.113.${i % 250}`, 'x-forwarded-for': `192.0.2.${i % 250}` },
+        payload: LOOKUP,
+      })
+
+      for (let i = 0; i < SHOWCASE_MAX_PER_WINDOW; i += 1) {
+        await fromPeer(i)
+      }
+
+      expect((await fromPeer(SHOWCASE_MAX_PER_WINDOW)).statusCode).toBe(429)
+    })
+
     it('counts the showcase limit apart from the feature-flag limit', async () => {
       app = await buildPublicApp()
       for (let i = 0; i < SHOWCASE_MAX_PER_WINDOW; i += 1) {
@@ -378,7 +415,7 @@ describe('publicProxy: showcase catalog lookup', () => {
     it('refuses to register when DUOS_SHOWCASE_API_URL is not a bare origin', async () => {
       process.env.DUOS_SHOWCASE_API_URL = 'https://consent.dsde-dev.broadinstitute.org/showcase'
       const shell = Fastify({ logger: false })
-      await shell.register(fastifyRateLimit, { global: false })
+      await shell.register(fastifyRateLimit, rateLimitPluginOptions)
       shell.register(publicProxy)
 
       await expect(shell.ready()).rejects.toThrow('DUOS_SHOWCASE_API_URL')
