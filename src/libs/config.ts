@@ -11,6 +11,7 @@ interface ConfigType {
   tdrApiUrl: string
   terraUrl: string
   bffEnabled?: boolean
+  showcaseApiUrl?: string
 }
 
 let configPromise: Promise<ConfigType> | null = null
@@ -67,6 +68,10 @@ class ConfigClass {
     return getProject()
   }
 
+  async getShowcaseApiUrl(): Promise<string> {
+    return getShowcaseApiUrl()
+  }
+
   async getTag(): Promise<string> {
     return getTag()
   }
@@ -114,6 +119,7 @@ export const BFF_BARD_PREFIX = '/bard-api'
 export const BFF_PUBLIC_PREFIX = '/public'
 export const BFF_PUBLIC_FEATURES_PREFIX = `${BFF_PUBLIC_PREFIX}/features`
 export const BFF_PUBLIC_METRICS_PREFIX = `${BFF_PUBLIC_PREFIX}/metrics`
+export const BFF_PUBLIC_SHOWCASE_DATASETS_PATH = `${BFF_PUBLIC_PREFIX}/showcase/datasets`
 
 // Shared with the adapter's CSRF exemption and metrics error-reporting guard.
 export const BFF_PUBLIC_METRICS_EVENT_PATH = `${BFF_PUBLIC_METRICS_PREFIX}/event`
@@ -141,6 +147,15 @@ export const getUpstreamApiUrl = async (): Promise<string> => {
 export const getBannersUrl = async (): Promise<string> => {
   const config = await loadConfig()
   return config.bannersUrl ?? ''
+}
+
+/**
+ * The Consent origin for legacy-mode showcase lookups, or '' when none is
+ * configured. Independent of apiUrl: content previews read production.
+ */
+export const getShowcaseApiUrl = async (): Promise<string> => {
+  const config = await loadConfig()
+  return config.showcaseApiUrl ?? ''
 }
 
 export const getBardApiUrl = async (): Promise<string> => { // Mixpanel
