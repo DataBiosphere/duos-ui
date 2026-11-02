@@ -293,8 +293,8 @@ export interface ClinicalTrialStudyAggregationResponse {
   buckets: ClinicalTrialStudyAggregationBucket[]
 }
 
-/** Raw Elasticsearch document shape for a biospecimen asset */
-export type PartialBiospecimenAsset = Partial<BiospecimenAsset>
+/** Raw Elasticsearch document shape for a biospecimen asset; ids indexed before and after the server assigns them differ in type */
+export type PartialBiospecimenAsset = Partial<Omit<BiospecimenAsset, 'biospecimenId' | 'sampleId'>> & { biospecimenId?: string | number, sampleId?: string | number }
 
 /** Bucket shape from a terms aggregation on study.studyId, used for the Biospecimens view */
 export interface BiospecimenStudyAggregationBucket {

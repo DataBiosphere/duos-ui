@@ -599,6 +599,7 @@ export enum Sex {
 
 export interface Biospecimen {
   biospecimenId: string
+  sampleId?: string
   studyId: string
   donorId: string
   specimenType: BioSpecimenType

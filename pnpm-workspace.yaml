@@ -6,6 +6,11 @@ overrides:
   # GHSA-w5hq-g745-h8pq. hyperid 4 drops uuid (and uuid-parse) for the native
   # crypto.randomUUID; its API is unchanged, so it is a drop-in for autocannon.
   hyperid@3: 4.0.0
+  # @fastify/static@10 asks for glob ^13, which is flagged by GHSA-3g3m-2fjr-6pw4
+  # and pulls minimatch@10 (GHSA-g3hv-75wg-m249). glob 14 fixes both, and the
+  # glob() options that @fastify/static uses are unchanged. Remove this once
+  # @fastify/static asks for glob ^14.
+  "@fastify/static>glob": 14.0.3
 
 allowBuilds:
   esbuild: false

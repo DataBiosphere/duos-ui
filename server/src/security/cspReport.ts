@@ -80,8 +80,8 @@ const LOG_WINDOW_MS = 60_000
  * a violation that repeats past that adds nothing the first thirty did not
  * already say.
  *
- * `request.ip` reads X-Forwarded-For because the app sets `trustProxy`, so
- * this counts real clients rather than the sidecar. The store is per process:
+ * The key is the client address from `rateLimitKey` (rateLimit.ts), so this
+ * counts real clients rather than the sidecar. The store is per process:
  * see the note in index.ts on why the edge is where flood protection belongs.
  */
 export const MAX_REQUESTS_PER_WINDOW = 30
