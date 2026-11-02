@@ -83,5 +83,5 @@ export function createShowcaseCatalogMock(rows: MockDataset[] = MOCK_DATASETS): 
       case 'stats': return stats(rows, request)
     }
   }
-  return (async (request: LookupRequestInput) => structuredClone(resolve(request))) as Lookup
+  return ((request: LookupRequestInput) => Promise.resolve(structuredClone(resolve(request)))) as Lookup
 }
