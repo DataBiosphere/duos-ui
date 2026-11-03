@@ -101,4 +101,18 @@ describe('studyAsset.transformResponse', () => {
     )
     expect(page.items[0]).toMatchObject({ studyId: 7, studyName: 'A Study', datasetIds: [10, 11] })
   })
+  it('counts the models and workspaces their tabs render', () => {
+    const study = {
+      studyName: 'A Study',
+      assets: {
+        models: [{ modelId: 1 }, { modelId: 2 }, { name: 'no id' }, 'legacy'],
+        workspaces: [{ workspaceId: 3 }, null],
+      },
+    }
+    const page = studyAsset.transformResponse(
+      { aggregations: { studies: { buckets: [{ key: 7, ...bucketMetrics, study_details: { hits: { hits: [{ _source: { study } }] } } }] } } } as never,
+      pagination,
+    )
+    expect(page.items[0]).toMatchObject({ modelCount: 2, workspaceCount: 1 })
+  })
 })

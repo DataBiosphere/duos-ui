@@ -64,6 +64,11 @@ export const toStringArray = (value: unknown): string[] => {
     .filter(Boolean)
 }
 
+/** The entries of an indexed asset list that are objects carrying a server-assigned integer row id. */
+export const withRowIds = <T extends object, K extends keyof T>(entries: T[] | undefined, idKey: K): Array<T & Record<K, number>> =>
+  (entries || []).filter((entry): entry is T & Record<K, number> =>
+    typeof entry === 'object' && entry !== null && Number.isInteger(entry[idKey]))
+
 /** Union of every row type that can appear in the DataGrid */
 export type LibraryRow = DatasetTerm | StudyAggregation | ModelAsset | WorkspaceAsset | ClinicalTrialAsset | BiospecimenAsset | PublicationAsset | PresentationAsset | IntellectualPropertyAsset | FundingResourceAsset
 
