@@ -57,6 +57,22 @@ describe('consentProxySecretFromEnv', () => {
     expect(consentProxySecretFromEnv()).toBe(VECTOR.secret)
   })
 
+  it('trims only ASCII whitespace, the same set that Consent trims', () => {
+    process.env[CONSENT_PROXY_SECRET_ENV_VAR] = ` \t${VECTOR.secret}\r\n`
+
+    expect(consentProxySecretFromEnv()).toBe(VECTOR.secret)
+  })
+
+  it.each([
+    ['a leading byte order mark', `\uFEFF${VECTOR.secret}`],
+    ['a trailing no-break space', `${VECTOR.secret}\u00A0`],
+    ['a character outside ASCII', `${VECTOR.secret}é`],
+  ])('throws for %s, which the BFF and Consent could read differently', (_label, value) => {
+    process.env[CONSENT_PROXY_SECRET_ENV_VAR] = value
+
+    expect(() => consentProxySecretFromEnv()).toThrow('printable ASCII')
+  })
+
   it('throws for a short secret, without the value in the message', () => {
     process.env[CONSENT_PROXY_SECRET_ENV_VAR] = 'too-short-secret'
 

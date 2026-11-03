@@ -34,13 +34,22 @@ export const SIGNED_CLIENT_IP_HEADERS: readonly string[] = [CLIENT_IP_HEADER, CL
 
 const MIN_SECRET_LENGTH = 32
 
+// Only ASCII whitespace, the same set that Consent's SignedClientIpVerifier
+// trims. String.prototype.trim() also removes U+FEFF and U+00A0, and Java's
+// strip() does not, so those are rejected below instead of removed.
+const EDGE_ASCII_WHITESPACE = /^[ \t\n\r\f\v]+|[ \t\n\r\f\v]+$/g
+const PRINTABLE_ASCII = /^[\x21-\x7E]+$/
+
 /**
  * The secret, or undefined when unset. Without it the route still works, and
  * Consent falls back to one shared bucket for all BFF traffic.
  */
 export function consentProxySecretFromEnv(): string | undefined {
-  const secret = process.env[CONSENT_PROXY_SECRET_ENV_VAR]?.trim()
+  const secret = process.env[CONSENT_PROXY_SECRET_ENV_VAR]?.replace(EDGE_ASCII_WHITESPACE, '')
   if (!secret) return undefined
+  if (!PRINTABLE_ASCII.test(secret)) {
+    throw new Error(`${CONSENT_PROXY_SECRET_ENV_VAR} has a character that is not printable ASCII — set a value such as the output of openssl rand -base64 32, the same value that Consent holds as rateLimit.clientIpSecret`)
+  }
   if (secret.length < MIN_SECRET_LENGTH) {
     throw new Error(`${CONSENT_PROXY_SECRET_ENV_VAR} is shorter than ${MIN_SECRET_LENGTH} characters — unset it, or set the value that Consent holds as rateLimit.clientIpSecret`)
   }
