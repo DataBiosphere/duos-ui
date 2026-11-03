@@ -28,7 +28,9 @@ describe('signClientIp', () => {
     })
   })
 
-  it('signs an IPv6 /64 key in the form rateLimitKey gives it', () => {
+  // publicShowcaseProxy.test.ts sends a real IPv6 request through rateLimitKey and checks the
+  // same vector; Consent's SignedClientIpVerifierTest checks it too.
+  it('signs the shared IPv6 /64 vector', () => {
     const headers = signClientIp(VECTOR.secret, '2001:db8:1:2::', VECTOR.timestamp)
 
     expect(headers[CLIENT_IP_SIGNATURE_HEADER]).toBe('b7dc71a8948b2ed1b4a95d40d5787ec2af3c01747465e5027678cbc077c20e33')

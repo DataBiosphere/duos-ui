@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import Fastify, { type FastifyInstance } from 'fastify'
 import fastifyRateLimit from '@fastify/rate-limit'
 import {
+  PUBLIC_FEATURES_PREFIX,
+  PUBLIC_METRICS_EVENT_PATH,
   PUBLIC_SHOWCASE_DATASETS_PATH,
   SHOWCASE_BODY_LIMIT,
   SHOWCASE_MAX_PER_WINDOW,
@@ -183,6 +185,9 @@ describe('publicProxy: showcase catalog lookup', () => {
       expect(body.toString()).not.toContain(PROXY_SECRET)
     })
 
+    // The signed values overwrite the caller's here, so this shows the overwrite, not the strip.
+    // The strip is shown where nothing overwrites it: the unset-secret case and the routes that
+    // never sign, below.
     it('replaces caller-supplied signed headers with its own', async () => {
       process.env[CONSENT_PROXY_SECRET_ENV_VAR] = PROXY_SECRET
       app = await buildPublicApp()
@@ -224,16 +229,48 @@ describe('publicProxy: showcase catalog lookup', () => {
       expect(forwarded[CLIENT_IP_HEADER]).toBe('203.0.113.7')
     })
 
-    it('forwards no caller-supplied signed headers to the feature-flag upstream', async () => {
+    it('signs the browser\'s IPv6 /64 in the form Consent checks, with the shared vector', async () => {
+      // Same secret, key and time as the IPv6 vector in clientIpSignature.test.ts and in
+      // Consent's SignedClientIpVerifierTest, so rateLimitKey's IPv6 form is pinned end to end.
       process.env[CONSENT_PROXY_SECRET_ENV_VAR] = PROXY_SECRET
       app = await buildPublicApp()
 
-      await app.inject({ method: 'GET', url: '/public/features', headers: { [CLIENT_IP_HEADER]: '198.51.100.1', [CLIENT_IP_SIGNATURE_HEADER]: 'forged' } })
+      await lookup(app, { 'x-forwarded-for': '2001:db8:1:2:aaaa:bbbb:cccc:dddd' })
 
-      const forwarded = api.last().headers
-      for (const name of SIGNED_HEADERS) {
-        expect(forwarded[name]).toBeUndefined()
-      }
+      const forwarded = showcase.last().headers
+      expect(forwarded[CLIENT_IP_HEADER]).toBe('2001:db8:1:2::')
+      expect(forwarded[CLIENT_IP_SIGNATURE_HEADER]).toBe('b7dc71a8948b2ed1b4a95d40d5787ec2af3c01747465e5027678cbc077c20e33')
+    })
+
+    describe('on the routes that never sign', () => {
+      let bard: Upstream
+
+      beforeEach(async () => {
+        bard = await startUpstream()
+        process.env.DUOS_BARD_URL = bard.origin
+      })
+
+      afterEach(async () => {
+        await bard.close()
+        delete process.env.DUOS_BARD_URL
+      })
+
+      const forged = { [CLIENT_IP_HEADER]: '198.51.100.1', [CLIENT_IP_TIMESTAMP_HEADER]: '1', [CLIENT_IP_SIGNATURE_HEADER]: 'forged' }
+
+      it.each([
+        ['the feature-flag route', () => ({ method: 'GET' as const, url: PUBLIC_FEATURES_PREFIX, headers: forged }), () => api],
+        ['the metrics route', () => ({ method: 'POST' as const, url: PUBLIC_METRICS_EVENT_PATH, headers: { ...JSON_HEADERS, ...forged }, payload: '{}' }), () => bard],
+      ])('forwards no caller-supplied signed headers on %s, with the secret set', async (_label, request, upstream) => {
+        process.env[CONSENT_PROXY_SECRET_ENV_VAR] = PROXY_SECRET
+        app = await buildPublicApp()
+
+        await app.inject(request())
+
+        const forwarded = upstream().last().headers
+        for (const name of SIGNED_HEADERS) {
+          expect(forwarded[name]).toBeUndefined()
+        }
+      })
     })
 
     it('refuses to register when the secret is shorter than 32 characters', async () => {
