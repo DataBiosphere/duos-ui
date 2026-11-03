@@ -37,7 +37,7 @@ const MIN_SECRET_LENGTH = 32
 // Only ASCII whitespace, the same set that Consent's SignedClientIpVerifier
 // trims. String.prototype.trim() also removes U+FEFF and U+00A0, and Java's
 // strip() does not, so those are rejected below instead of removed.
-const EDGE_ASCII_WHITESPACE = /^[ \t\n\r\f\v]+|[ \t\n\r\f\v]+$/g
+const ASCII_WHITESPACE: ReadonlySet<string> = new Set([' ', '\t', '\n', '\r', '\f', '\v'])
 const PRINTABLE_ASCII = /^[\x21-\x7E]+$/
 
 /**
@@ -45,7 +45,8 @@ const PRINTABLE_ASCII = /^[\x21-\x7E]+$/
  * Consent falls back to one shared bucket for all BFF traffic.
  */
 export function consentProxySecretFromEnv(): string | undefined {
-  const secret = process.env[CONSENT_PROXY_SECRET_ENV_VAR]?.replace(EDGE_ASCII_WHITESPACE, '')
+  const raw = process.env[CONSENT_PROXY_SECRET_ENV_VAR]
+  const secret = raw === undefined ? undefined : trimAsciiWhitespace(raw)
   if (!secret) return undefined
   if (!PRINTABLE_ASCII.test(secret)) {
     throw new Error(`${CONSENT_PROXY_SECRET_ENV_VAR} has a character that is not printable ASCII — set a value such as the output of openssl rand -base64 32, the same value that Consent holds as rateLimit.clientIpSecret`)
@@ -54,6 +55,15 @@ export function consentProxySecretFromEnv(): string | undefined {
     throw new Error(`${CONSENT_PROXY_SECRET_ENV_VAR} is shorter than ${MIN_SECRET_LENGTH} characters — unset it, or set the value that Consent holds as rateLimit.clientIpSecret`)
   }
   return secret
+}
+
+/** A loop rather than a regex: an anchored `[...]+$` backtracks on long runs. */
+function trimAsciiWhitespace(value: string): string {
+  let start = 0
+  let end = value.length
+  while (start < end && ASCII_WHITESPACE.has(value[start])) start += 1
+  while (end > start && ASCII_WHITESPACE.has(value[end - 1])) end -= 1
+  return value.slice(start, end)
 }
 
 /** The three headers for one request. `ip` is the BFF's own rate-limit key. */
