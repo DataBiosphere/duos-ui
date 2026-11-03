@@ -43,7 +43,7 @@ Set them for each kind of environment as follows:
 | Environment | Points to | Why |
 | ----------- | --------- | --- |
 | Production | Production Consent | Showcase configs list production identifiers. |
-| Content preview (staging or local, to review a showcase PR) | Production Consent | `DUOS-` identifiers come from a sequence in each environment, so only production resolves them. The preview is read-only: authenticated DUOS handoffs (search, dataset detail, data access requests) must stay off, so a reviewer never sends a production identifier to a staging backend. E3 implements that rule. |
+| Content preview (dev, staging or local, to review a showcase PR) | Production Consent | `DUOS-` identifiers come from a sequence in each environment, so only production resolves them. The preview is read-only: authenticated DUOS handoffs (search, dataset detail, data access requests) must stay off, so a reviewer never sends a production identifier to a dev or staging backend. E3 implements that rule. |
 | Functional test (end-to-end request flows) | That environment's own Consent | The tests use a synthetic showcase fixture with datasets seeded in the same environment, so the lookup and the handoffs agree. |
 | Local development | Dev Consent (`.env.example`) | Change it to production to preview real content. |
 
