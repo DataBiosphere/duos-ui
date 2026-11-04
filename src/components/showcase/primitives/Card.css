@@ -1,0 +1,98 @@
+/* Styles for Card, FeaturedCard and StructuredPanel. Colors come from custom properties the
+   showcase template sets; each fallback is the template's value, so the primitives still render
+   outside it. Light theme only. */
+
+/* Provisional (design review D18): the card and panel layout, from the artifact's .card. */
+.showcase-card,
+.showcase-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  box-sizing: border-box;
+  padding: 1.35rem 1.4rem 1.45rem;
+  border-radius: 3px;
+  /* Provisional (design review D16): the neutrals, from the artifact's light theme. */
+  background: var(--showcase-surface, #ffffff);
+  border: 1px solid var(--showcase-border, rgba(33, 43, 54, 0.12));
+}
+
+.showcase-card { height: 100%; }
+
+/* Provisional (design review D18): the featured card, from the artifact's featured app card
+   (.research-card.tool-hero): media beside the text, stacked at 640px and below. */
+.showcase-card--featured {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1.8rem;
+  padding: 1.7rem 1.8rem 1.9rem;
+  border-radius: 4px;
+  background: var(--showcase-accent-tint, #ecedf8);
+  border-color: var(--showcase-border-strong, rgba(33, 43, 54, 0.24));
+}
+
+.showcase-card__media {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.showcase-card--featured .showcase-card__media { max-width: 50%; }
+
+@media (max-width: 640px) {
+  .showcase-card--featured { flex-direction: column; }
+  .showcase-card--featured .showcase-card__media { max-width: 100%; }
+}
+
+.showcase-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.showcase-card__title,
+.showcase-panel__title {
+  margin: 0;
+  color: var(--showcase-primary, #1f3b50);
+  overflow-wrap: anywhere;
+}
+
+.showcase-card__badges,
+.showcase-card__actions,
+.showcase-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.showcase-card__badge {
+  padding: 0 0.5rem;
+  border: 1px solid var(--showcase-accent, #00796f);
+  border-radius: 999px;
+  color: var(--showcase-accent, #00796f);
+}
+
+.showcase-card__metadata {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 0.75rem;
+  margin: 0;
+}
+
+.showcase-card__term { color: var(--showcase-muted-text, #637381); }
+
+/* The muted text reaches only 4.19:1 on the featured tint, below the 4.5:1 text minimum. */
+.showcase-card--featured .showcase-card__term { color: var(--showcase-primary, #1f3b50); }
+
+.showcase-card__value {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.showcase-card__actions { margin-top: auto; }
