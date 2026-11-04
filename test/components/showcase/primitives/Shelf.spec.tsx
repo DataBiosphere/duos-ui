@@ -1,7 +1,7 @@
 import React from 'react'
 import { readFileSync } from 'node:fs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { Shelf } from 'src/components/showcase/primitives/Shelf'
 
@@ -118,6 +118,32 @@ describe('Shelf', () => {
     setGeometry(list, {})
     expect(list).toHaveAttribute('tabindex', '0')
     expect(screen.getByRole('list', { name: 'Latest data releases' })).toBe(list)
+  })
+
+  it('drops the scroller tab stop once a card gains a link, without a Shelf render', async () => {
+    render(
+      <Shelf title="Latest data releases" headingId="latest-heading">
+        <p>Alpha</p>
+        <p>Beta</p>
+      </Shelf>,
+    )
+    const list = screen.getByRole('list')
+    setGeometry(list, {})
+    expect(list).toHaveAttribute('tabindex', '0')
+    const link = document.createElement('a')
+    link.href = '#alpha'
+    link.textContent = 'Alpha details'
+    list.querySelector('li')!.append(link)
+    await waitFor(() => expect(list).not.toHaveAttribute('tabindex', '0'))
+  })
+
+  it('moves focus to the first card control when a focused arrow disappears', () => {
+    const list = renderShelf()
+    setGeometry(list, {})
+    forward().focus()
+    setGeometry(list, { clientWidth: 1200, scrollWidth: 1200 })
+    expect(screen.queryByRole('button', { name: /Scroll/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Alpha' })).toHaveFocus()
   })
 
   it('renders header actions beside the arrows, and nothing when absent', () => {

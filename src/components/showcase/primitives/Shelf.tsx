@@ -33,6 +33,9 @@ const pageWidth = (list: HTMLElement) => {
 /** A horizontally scrolling row of cards with named back/forward controls (design review D1–D3). */
 export const Shelf = ({ title, headingId, heading, actions, children }: ShelfProps) => {
   const listRef = useRef<HTMLUListElement>(null)
+  const controlsRef = useRef<HTMLDivElement>(null)
+  // Set when the arrows are about to disappear while one of them has focus.
+  const refocusRef = useRef(false)
   const [scroll, setScroll] = useState({ overflows: false, atStart: true, atEnd: true, hasFocusable: true })
 
   const measure = useCallback(() => {
@@ -45,8 +48,24 @@ export const Shelf = ({ title, headingId, heading, actions, children }: ShelfPro
       atEnd: scrollLeft + clientWidth >= scrollWidth - 1,
       hasFocusable: list.querySelector(FOCUSABLE) !== null,
     }
+    const active = document.activeElement
+    if (!next.overflows && active instanceof HTMLElement && active.classList.contains('showcase-shelf__arrow')
+      && controlsRef.current?.contains(active)) {
+      refocusRef.current = true
+    }
     setScroll(prev => (Object.keys(next) as (keyof typeof next)[]).every(k => prev[k] === next[k]) ? prev : next)
   }, [])
+
+  // Removing a focused arrow would drop focus to the page body; move it to the shelf's first card
+  // control instead, or to the list itself.
+  useLayoutEffect(() => {
+    const list = listRef.current
+    if (!refocusRef.current || scroll.overflows || !list) return
+    refocusRef.current = false
+    const target = list.querySelector<HTMLElement>(FOCUSABLE) ?? list
+    if (target === list) list.tabIndex = -1
+    target.focus()
+  }, [scroll.overflows])
 
   // Cards may arrive after mount (loading skeleton, D11), which no resize event reports.
   useLayoutEffect(measure)
@@ -54,13 +73,17 @@ export const Shelf = ({ title, headingId, heading, actions, children }: ShelfPro
   useEffect(() => {
     const list = listRef.current
     if (!list) return
-    if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', measure)
-      return () => window.removeEventListener('resize', measure)
+    const resize = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(measure)
+    if (resize) resize.observe(list)
+    else window.addEventListener('resize', measure)
+    // A card can gain or lose a link without a Shelf render, which would leave hasFocusable stale.
+    const mutations = typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(measure)
+    mutations?.observe(list, { childList: true, subtree: true, attributes: true, attributeFilter: ['href', 'tabindex', 'disabled'] })
+    return () => {
+      if (resize) resize.disconnect()
+      else window.removeEventListener('resize', measure)
+      mutations?.disconnect()
     }
-    const observer = new ResizeObserver(measure)
-    observer.observe(list)
-    return () => observer.disconnect()
   }, [measure])
 
   const page = (direction: 1 | -1) => {
@@ -84,7 +107,7 @@ export const Shelf = ({ title, headingId, heading, actions, children }: ShelfPro
       <div className="showcase-shelf__header">
         {heading ?? <h2 id={headingId} className="showcase-shelf__title">{title}</h2>}
         {(actions || scroll.overflows) && (
-          <div className="showcase-shelf__controls">
+          <div className="showcase-shelf__controls" ref={controlsRef}>
             {actions}
             {scroll.overflows && (
               <>
