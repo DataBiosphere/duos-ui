@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { Validation as FieldValidation } from 'src/components/forms/formValidation'
 import { ValidationError, makeError } from 'src/pages/dar_application/FormValidationState'
+import { Countries } from 'src/libs/ajax/Countries'
 import {
   Biospecimen,
   BioSpecimenPreservationMethod,
@@ -118,6 +119,14 @@ export default function BiospecimenAddEdit(props: BiospecimenAddEditProps): Reac
   const [numbers, setNumbers] = useState<NumberInputs>(numberInputsFrom(biospecimen))
   const [unit, setUnit] = useState<PostMortemIntervalUnit | undefined>(biospecimen?.postMortemInterval?.unit)
   const [validation, setValidation] = useState<Validation>({})
+  const [countries, setCountries] = useState<string[]>([])
+
+  useEffect(() => {
+    Countries.getCountries()
+      .then(setCountries)
+      // Without the list the field only offers the stored country.
+      .catch(() => setCountries([]))
+  }, [])
 
   const onChange = ({ key, value }: FormFieldChange) => {
     // Enum selects return the chosen option, or null once cleared.
@@ -153,6 +162,11 @@ export default function BiospecimenAddEdit(props: BiospecimenAddEditProps): Reac
       dateOfCollection: blankToUndefined(current.dateOfCollection),
       age: numbers.age.trim() ? Number(numbers.age) : undefined,
       postMortemInterval: intervalValue && unit ? { value: Number(intervalValue), unit } : undefined,
+      race: blankToUndefined(current.race),
+      countryOfOrigin: blankToUndefined(current.countryOfOrigin),
+      pathology: blankToUndefined(current.pathology),
+      sourceSite: blankToUndefined(current.sourceSite),
+      optionalDataUse: blankToUndefined(current.optionalDataUse),
     }
     if (id < 0) {
       onBiospecimensChange([...biospecimens, toSave])
@@ -281,6 +295,46 @@ export default function BiospecimenAddEdit(props: BiospecimenAddEditProps): Reac
             disabled={readOnly}
           />
           <FormField
+            id="race"
+            title="Race"
+            defaultValue={biospecimen?.race}
+            placeholder="Race"
+            onChange={onChange}
+            disabled={readOnly}
+          />
+          <FormField
+            id="countryOfOrigin"
+            title="Country of Origin"
+            type={FormFieldTypes.SELECT}
+            selectOptions={countries}
+            optionsAreString={true}
+            placeholder="Select a country"
+            defaultValue={biospecimen?.countryOfOrigin}
+            onChange={onChange}
+            disabled={readOnly}
+          />
+          <FormField
+            id="extractedDiagnoses"
+            title="Extracted Diagnoses"
+            placeholder="Enter diagnoses"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={[]}
+            defaultValue={biospecimen?.extractedDiagnoses}
+            onChange={onChange}
+            disabled={readOnly}
+          />
+          <FormField
+            id="pathology"
+            title="Pathology"
+            defaultValue={biospecimen?.pathology}
+            placeholder="Pathology"
+            onChange={onChange}
+            disabled={readOnly}
+          />
+          <FormField
             id="organization"
             title="Organization"
             description="The institution, biobank or provider holding the biospecimen"
@@ -289,6 +343,24 @@ export default function BiospecimenAddEdit(props: BiospecimenAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.organization}
+            disabled={readOnly}
+          />
+          <FormField
+            id="sourceSite"
+            title="Source Site"
+            description="The clinic, hospital or site the biospecimen was collected at"
+            defaultValue={biospecimen?.sourceSite}
+            placeholder="Source Site"
+            onChange={onChange}
+            disabled={readOnly}
+          />
+          <FormField
+            id="optionalDataUse"
+            title="Data Use"
+            defaultValue={biospecimen?.optionalDataUse}
+            placeholder="Any data use terms for this biospecimen"
+            type={FormFieldTypes.TEXTAREA}
+            onChange={onChange}
             disabled={readOnly}
           />
         </div>

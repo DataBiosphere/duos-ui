@@ -12,6 +12,10 @@ import {
   Sex,
 } from 'src/types/model'
 
+vi.mock('src/libs/ajax/Countries', () => ({
+  Countries: { getCountries: vi.fn().mockResolvedValue(['Canada', 'France']) },
+}))
+
 type User = ReturnType<typeof userEvent.setup>
 
 const storedBiospecimen: Biospecimen = {
@@ -25,6 +29,8 @@ const storedBiospecimen: Biospecimen = {
   postMortemInterval: { value: 6, unit: PostMortemIntervalUnit.HOURS },
   sex: Sex.FEMALE,
   age: 61,
+  countryOfOrigin: 'Canada',
+  extractedDiagnoses: ['Alzheimer\'s disease'],
   organization: 'Brain Bank',
 }
 
@@ -101,6 +107,13 @@ describe('BiospecimenAddEdit', () => {
     await choose(user, container, 'postMortemIntervalUnit', 'Days')
     await choose(user, container, 'sex', 'Not Reported')
     await user.type(container.querySelector('#age')!, '0')
+    await user.type(container.querySelector('#race')!, 'Asian')
+    await choose(user, container, 'countryOfOrigin', 'France')
+    await user.click(container.querySelector('#extractedDiagnoses input')!)
+    await user.keyboard('Parkinson\'s disease{Enter}')
+    await user.type(container.querySelector('#pathology')!, 'Lewy bodies')
+    await user.type(container.querySelector('#sourceSite')!, 'General Hospital')
+    await user.type(container.querySelector('#optionalDataUse')!, 'Non-profit use only')
     await save(user, container)
 
     expect(saved[0][0]).toMatchObject({
@@ -109,6 +122,12 @@ describe('BiospecimenAddEdit', () => {
       postMortemInterval: { value: 2.5, unit: PostMortemIntervalUnit.DAYS },
       sex: Sex.NOT_REPORTED,
       age: 0,
+      race: 'Asian',
+      countryOfOrigin: 'France',
+      extractedDiagnoses: ['Parkinson\'s disease'],
+      pathology: 'Lewy bodies',
+      sourceSite: 'General Hospital',
+      optionalDataUse: 'Non-profit use only',
     })
   })
 

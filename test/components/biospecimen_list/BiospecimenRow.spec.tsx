@@ -3,7 +3,6 @@ import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
 import BiospecimenRow from 'src/components/biospecimen_list/BiospecimenRow'
 import { Biospecimen, BioSpecimenPreservationMethod, BioSpecimenType } from 'src/types/model'
 
@@ -15,6 +14,10 @@ const sampleBiospecimen: Biospecimen = {
   preservationMethod: BioSpecimenPreservationMethod.FRESH_FROZEN,
   organization: 'Johns Hopkins Hospital',
 }
+
+vi.mock('src/libs/ajax/Countries', () => ({
+  Countries: { getCountries: vi.fn().mockResolvedValue([]) },
+}))
 
 describe('BiospecimenRow', () => {
   it('shows summary when not in edit mode', async () => {
@@ -41,20 +44,18 @@ describe('BiospecimenRow', () => {
 
   it('renders the edit form when editMode is true', async () => {
     const { container } = render(
-      <MemoryRouter>
-        <BiospecimenRow
-          id={0}
-          editMode={true}
-          biospecimen={sampleBiospecimen}
-          biospecimens={[sampleBiospecimen]}
-          columnsToShow={['specimenType']}
-          editAction={vi.fn()}
-          deleteAction={vi.fn()}
-          closeAction={vi.fn()}
-          onBiospecimensChange={vi.fn()}
-          disabled={false}
-        />
-      </MemoryRouter>,
+      <BiospecimenRow
+        id={0}
+        editMode={true}
+        biospecimen={sampleBiospecimen}
+        biospecimens={[sampleBiospecimen]}
+        columnsToShow={['specimenType']}
+        editAction={vi.fn()}
+        deleteAction={vi.fn()}
+        closeAction={vi.fn()}
+        onBiospecimensChange={vi.fn()}
+        disabled={false}
+      />,
     )
     expect(container.querySelector('[data-cy="biospecimen-add-edit"]')).toBeInTheDocument()
     expect(screen.getByDisplayValue('DONOR-001')).not.toBeDisabled()
@@ -63,22 +64,20 @@ describe('BiospecimenRow', () => {
 
   it('renders the form read only when viewMode is true', async () => {
     const { container } = render(
-      <MemoryRouter>
-        <BiospecimenRow
-          id={0}
-          editMode={false}
-          viewMode={true}
-          biospecimen={sampleBiospecimen}
-          biospecimens={[sampleBiospecimen]}
-          columnsToShow={['specimenType']}
-          editAction={vi.fn()}
-          deleteAction={vi.fn()}
-          closeAction={vi.fn()}
-          viewAction={vi.fn()}
-          onBiospecimensChange={vi.fn()}
-          disabled={false}
-        />
-      </MemoryRouter>,
+      <BiospecimenRow
+        id={0}
+        editMode={false}
+        viewMode={true}
+        biospecimen={sampleBiospecimen}
+        biospecimens={[sampleBiospecimen]}
+        columnsToShow={['specimenType']}
+        editAction={vi.fn()}
+        deleteAction={vi.fn()}
+        closeAction={vi.fn()}
+        viewAction={vi.fn()}
+        onBiospecimensChange={vi.fn()}
+        disabled={false}
+      />,
     )
     expect(container.querySelector('[data-cy="biospecimen-add-edit"]')).toBeInTheDocument()
     expect(screen.getByDisplayValue('DONOR-001')).toBeDisabled()
