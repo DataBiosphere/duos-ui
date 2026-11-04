@@ -151,30 +151,35 @@ export function useShowcaseLookups(
     }
   }, [plan, planKey, run])
 
-  const stateOf = <T>(id: RequestId, select: (data: unknown) => T): LookupState<T> => {
-    const retry = () => {
-      // A retry from an earlier render or after unmount must not replace the current request.
-      if (livePlanKey.current !== planKey) return
-      const planned = plan.find(entry => entry.id === id)
-      if (planned) run(planned, planKey)
+  // One object per change in state or plan, so a component that memoizes the lookups, or uses them
+  // or their retry functions as effect dependencies, does not re-run on every render.
+  return useMemo(() => {
+    const stateOf = <T>(id: RequestId, select: (data: unknown) => T): LookupState<T> => {
+      const retry = () => {
+        // A retry from an earlier render or after unmount must not replace the current request.
+        if (livePlanKey.current !== planKey) return
+        const planned = plan.find(entry => entry.id === id)
+        if (planned) run(planned, planKey)
+      }
+      const raw: RawState = states[id]?.planKey === planKey ? states[id] : { status: 'loading' }
+      if (raw.status === 'ready') return { status: 'ready', data: select(raw.data), retry }
+      return raw.status === 'error' ? { status: 'error', error: raw.error, retry } : { status: 'loading', retry }
     }
-    const raw: RawState = states[id]?.planKey === planKey ? states[id] : { status: 'loading' }
-    if (raw.status === 'ready') return { status: 'ready', data: select(raw.data), retry }
-    return raw.status === 'error' ? { status: 'error', error: raw.error, retry } : { status: 'loading', retry }
-  }
 
-  const lookups: ShowcaseLookups = { datasets: {} }
-  for (const { id } of plan) {
-    if (id === EDITORIAL_ID) {
-      const items = (config.sections[EDITORIAL_SECTION_KEY] as LooseSection).items ?? []
-      lookups.datasets[EDITORIAL_SECTION_KEY] = stateOf(id, data => rebuildEditorial(items, data as IdentifiersResponse))
+    const lookups: ShowcaseLookups = { datasets: {} }
+    for (const { id, request } of plan) {
+      if (id === EDITORIAL_ID) {
+        // The planned batch holds the configured items without repeats, in order.
+        const { identifiers } = request as { identifiers: readonly string[] }
+        lookups.datasets[EDITORIAL_SECTION_KEY] = stateOf(id, data => rebuildEditorial(identifiers, data as IdentifiersResponse))
+      }
+      else if (id === STATS_ID) {
+        lookups.hero = stateOf(id, data => data as StatsResponse)
+      }
+      else {
+        lookups.datasets[id as DatasetSectionKey] = stateOf(id, data => (data as { datasets: DatasetSummary[] }).datasets)
+      }
     }
-    else if (id === STATS_ID) {
-      lookups.hero = stateOf(id, data => data as StatsResponse)
-    }
-    else {
-      lookups.datasets[id as DatasetSectionKey] = stateOf(id, data => (data as { datasets: DatasetSummary[] }).datasets)
-    }
-  }
-  return lookups
+    return lookups
+  }, [states, plan, planKey, run])
 }

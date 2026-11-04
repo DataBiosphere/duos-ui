@@ -117,6 +117,21 @@ describe('useShowcaseLookups', () => {
     expect(state?.status === 'error' && state.error).toMatchObject({ reason: 'http', status: 429, retryAfterSeconds: 30 })
   })
 
+  it('keeps the same lookups and retry functions across renders until a state changes', async () => {
+    const sections = { 'latest-data-releases': { enabled: true, ranking: 'newest' } } as const
+    const { result, rerender } = render(page(sections))
+    await waitFor(() => expect(result.current.datasets['latest-data-releases']?.status).toBe('ready'))
+    const ready = result.current
+
+    // A fresh but equal config, as a page passes on every render.
+    rerender({ config: page(sections) })
+    expect(result.current).toBe(ready)
+    expect(result.current.datasets['latest-data-releases']?.retry).toBe(ready.datasets['latest-data-releases']?.retry)
+
+    act(() => result.current.datasets['latest-data-releases']?.retry())
+    expect(result.current).not.toBe(ready)
+  })
+
   it('aborts in-flight requests on unmount and on a config change without an error state', async () => {
     const signals: AbortSignal[] = []
     lookup.mockImplementation((_request, signal) => new Promise((_resolve, reject) => {

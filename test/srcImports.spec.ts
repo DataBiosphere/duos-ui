@@ -8,8 +8,9 @@ const SRC = join(ROOT, 'src')
 const TEST = join(ROOT, 'test')
 
 const SOURCE_FILE = /\.(?:[cm]?[jt]sx?)$/
-// `import … from '…'`, `export … from '…'`, side-effect imports, `import('…')` and `require('…')`.
-const SPECIFIER = /(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*)['"]([^'"]+)['"]/g
+// `import … from '…'`, `export … from '…'`, side-effect imports, `import('…')` and `require('…')`,
+// with single, double or backtick quotes (a template literal in a dynamic import).
+const SPECIFIER = /(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*)['"`]([^'"`]+)['"`]/g
 
 const sourceFiles = (dir: string): string[] =>
   readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -37,6 +38,12 @@ describe('source imports', () => {
     expect(importsTest(file, '../../libs/ajax/ShowcaseCatalog')).toBe(false)
     expect(importsTest(file, 'src/libs/ajax/ShowcaseCatalog')).toBe(false)
     expect(importsTest(file, 'react')).toBe(false)
+  })
+
+  it('finds specifiers in every quote style', () => {
+    const specifiers = (source: string) => [...source.matchAll(SPECIFIER)].map(([, specifier]) => specifier)
+    expect(specifiers('import a from \'x\'\nexport * from "y"\nimport(\'z\')\nrequire("w")')).toEqual(['x', 'y', 'z', 'w'])
+    expect(specifiers('const m = await import(`../../test/fixtures/${name}`)')).toEqual(['../../test/fixtures/${name}'])
   })
 
   it('has no file under src/ that imports from test/', () => {
