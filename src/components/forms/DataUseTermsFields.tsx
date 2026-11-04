@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { isEmpty, isNil } from 'src/utils/NodashUtil'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { findOntologyTerms, searchOntologyTerm } from 'src/libs/utils'
-import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import { ValidationError, makeError } from 'src/pages/dar_application/FormValidationState'
 import { AccessManagementType, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { DataUse } from 'src/types/model'
 
@@ -36,8 +36,6 @@ export interface DataUseTermsValidation {
   otherSecondary?: ValidationError
 }
 
-const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
-
 const PRIMARY_CLEARED: DataUseTerms = {
   generalResearchUse: false,
   hmb: false,
@@ -67,6 +65,8 @@ const EDITOR_KEYS: (keyof DataUse)[] = [
   'geographicalRestrictions', 'publicationMoratorium', 'nonProfitUse', 'secondaryOther',
 ]
 
+const PRIMARY_KEYS: (keyof DataUse)[] = ['generalUse', 'hmbResearch', 'diseaseRestrictions', 'populationOriginsAncestry', 'other']
+
 /** The data use the terms describe, or undefined when they set none. */
 export const dataUseFromTerms = (terms: DataUseTerms): DataUse | undefined => {
   const dataUse: DataUse = {
@@ -92,22 +92,25 @@ export const dataUseFromTerms = (terms: DataUseTerms): DataUse | undefined => {
 /**
  * A data use with the fields the editor sets replaced by the terms'; any other field stays. A field
  * whose term is unchanged keeps its stored value, including values the editor can't show, such as
- * methodsResearch: true or nonProfitUse: false.
+ * methodsResearch: true or nonProfitUse: false. A selected primary term replaces every stored one, as
+ * consent accepts only one, and open access drops every field the editor sets.
  */
 export const applyTerms = (dataUse: DataUse | null | undefined, terms: DataUseTerms): DataUse | undefined => {
-  const written: DataUse = dataUseFromTerms(terms) ?? {}
+  const open = terms.accessManagement === 'open'
+  const written: DataUse = (open ? undefined : dataUseFromTerms(terms)) ?? {}
   const shown: DataUse = dataUseFromTerms(termsFromDataUse(dataUse)) ?? {}
   const merged: Record<string, unknown> = { ...dataUse }
+  const writesPrimary = selectedPrimaryGroup(terms) !== undefined
   for (const key of EDITOR_KEYS) {
     const unchanged = JSON.stringify(written[key]) === JSON.stringify(shown[key])
-    merged[key] = unchanged ? dataUse?.[key] : written[key]
+    const keep = !open && unchanged && !(writesPrimary && PRIMARY_KEYS.includes(key))
+    merged[key] = keep ? dataUse?.[key] : written[key]
   }
   const set = Object.fromEntries(Object.entries(merged).filter(([, value]) => value !== undefined))
   return isEmpty(set) ? undefined : set as DataUse
 }
 
-/** The editor's terms for a stored data use; the inverse of {@link dataUseFromTerms}. */
-export const termsFromDataUse = (dataUse?: DataUse | null): DataUseTerms => ({
+const storedTerms = (dataUse?: DataUse | null): DataUseTerms => ({
   generalResearchUse: dataUse?.generalUse,
   hmb: dataUse?.hmbResearch,
   diseaseSpecificUse: isEmpty(dataUse?.diseaseRestrictions) ? undefined : dataUse?.diseaseRestrictions,
@@ -126,9 +129,20 @@ export const termsFromDataUse = (dataUse?: DataUse | null): DataUseTerms => ({
 })
 
 /**
+ * The editor's terms for a stored data use; the inverse of {@link dataUseFromTerms}. Of several
+ * stored primary terms, only the one the editor selects is kept.
+ */
+export const termsFromDataUse = (dataUse?: DataUse | null): DataUseTerms => {
+  const terms = storedTerms(dataUse)
+  const primary = selectedPrimaryGroup(terms)
+  return primary ? { ...terms, ...PRIMARY_CLEARED, [primary]: terms[primary] } : terms
+}
+
+/**
  * Errors in the terms: a checked option without its text, or a missing access management or
  * primary term. When the terms are optional, a primary term is needed only when a data use will be
- * sent, counting the fields {@link applyTerms} keeps from the stored data use.
+ * sent. The fields {@link applyTerms} keeps from the stored data use count only once access is
+ * chosen, as consent accepts a stored data use without a primary term.
  */
 export const dataUseTermsErrors = (
   terms: DataUseTerms,
@@ -137,7 +151,8 @@ export const dataUseTermsErrors = (
 ): DataUseTermsValidation => {
   const v: DataUseTermsValidation = {}
   const primary = selectedPrimaryGroup(terms)
-  const needsPrimary = required || applyTerms(stored, terms) !== undefined
+  const keepsStored = !!terms.accessManagement && applyTerms(stored, terms) !== undefined
+  const needsPrimary = required || dataUseFromTerms(terms) !== undefined || keepsStored
   if (required && !terms.accessManagement?.trim()) v.accessManagement = makeError('required')
   if (needsPrimary && terms.accessManagement !== 'open' && !primary) v.primaryConsent = makeError('required')
   if (primary === 'diseaseSpecificUse' && isEmpty(terms.diseaseSpecificUse)) v.diseaseSpecificUse = makeError('required')

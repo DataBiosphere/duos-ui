@@ -104,6 +104,16 @@ describe('applyTerms', () => {
       .toEqual({ hmbResearch: true, methodsResearch: false, nonProfitUse: true })
   })
 
+  it('keeps only the selected primary of several stored ones', () => {
+    const stored = { generalUse: true, hmbResearch: true, aiLlmUse: true }
+    expect(applyTerms(stored, termsFromDataUse(stored))).toEqual({ generalUse: true, aiLlmUse: true })
+  })
+
+  it('drops stored values the editor cannot show when access is open', () => {
+    const stored = { generalUse: true, methodsResearch: true, nonProfitUse: false, aiLlmUse: true }
+    expect(applyTerms(stored, { ...termsFromDataUse(stored), accessManagement: 'open' })).toEqual({ aiLlmUse: true })
+  })
+
   it('leaves no data use when the terms clear the only fields it had', () => {
     expect(applyTerms({ generalUse: true, nonProfitUse: true }, { accessManagement: 'open' })).toBeUndefined()
   })

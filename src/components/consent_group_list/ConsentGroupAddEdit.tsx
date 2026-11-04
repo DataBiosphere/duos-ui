@@ -2,7 +2,7 @@ import { set, unset } from 'src/utils/NodashUtil'
 import React, { useState } from 'react'
 import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } from 'src/components/forms/forms'
 import { CloudProviders } from 'src/components/forms/CloudProviders'
-import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import { ValidationError, makeError } from 'src/pages/dar_application/FormValidationState'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import DataUseTermsFields, { DataUseTerms, DataUseTermsValidation, dataUseTermsErrors } from 'src/components/forms/DataUseTermsFields'
 import { DacPicker } from 'src/components/forms/DacPicker'
@@ -33,8 +33,6 @@ const defaultConsentGroup: ConsentGroup2 = {
   consentGroupId: '',
 }
 
-const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
-
 const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
 
 type ConsentGroupFieldValue = string | string[] | undefined | number | File | boolean
@@ -61,7 +59,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
 
   const onTermsChange = (changed: DataUseTerms) => {
     const next: ConsentGroup2 = { ...structuredClone(current), ...changed }
-    if (next.accessManagement !== 'controlled') {
+    if (next.accessManagement !== current.accessManagement && next.accessManagement !== 'controlled') {
       next.dataAccessCommitteeId = undefined
     }
     setCurrent(next)

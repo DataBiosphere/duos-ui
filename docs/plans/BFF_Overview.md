@@ -348,7 +348,11 @@ report-only header passes through untouched, which is what makes that quiet.
   yet. A caller inside the cluster can still choose its own bucket, through
   `X-Real-IP` on the sidecar port or `X-Forwarded-For` on the app port
   (`TRUST_PROXY` trusts `uniquelocal`) — another reason the edge is the real
-  control.
+  control. On the hop to Consent, the load balancer rewrites `X-Real-IP` to
+  this pod's egress address, so the showcase route also sends the browser key
+  with a timestamp and an HMAC made with `DUOS_CONSENT_PROXY_SECRET`
+  (`server/src/proxy/clientIpSignature.ts`, DT-4379). Consent keys its
+  anonymous limit on that IP only when the HMAC checks out.
 
 ## Target Architecture Sequence Diagrams
 

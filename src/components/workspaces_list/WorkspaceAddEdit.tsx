@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { CloudProviders } from 'src/components/forms/CloudProviders'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { Workspace } from 'src/types/model'
-import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import { ValidationError, makeError } from 'src/pages/dar_application/FormValidationState'
 import DataUseTermsFields, {
   DataUseTerms,
   DataUseTermsValidation,
@@ -39,8 +39,6 @@ const defaultWorkspace: Workspace = {
   access: '',
   tags: [],
 }
-
-const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
 
 const calcWorkspaceErrors = (w: Workspace): Validation => {
   const v: Validation = {}
