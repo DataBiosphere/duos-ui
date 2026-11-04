@@ -2,8 +2,14 @@
  * In-memory stand-in for `lookupShowcaseDatasets` (DT-4281), for tests and E3 development only.
  * It lives under `test/` so a deployed build cannot import it. All rows are synthetic.
  *
- * Use it with `vi.mock('src/libs/ajax/ShowcaseCatalog')` and
- * `vi.mocked(lookupShowcaseDatasets).mockImplementation(createShowcaseCatalogMock())`.
+ * Mock only `lookupShowcaseDatasets`, so `ShowcaseLookupError` stays real (see
+ * docs/data-showcase-lookup.md):
+ *
+ *     vi.mock('src/libs/ajax/ShowcaseCatalog', async importOriginal => ({
+ *       ...await importOriginal<typeof import('src/libs/ajax/ShowcaseCatalog')>(),
+ *       lookupShowcaseDatasets: vi.fn(),
+ *     }))
+ *     vi.mocked(lookupShowcaseDatasets).mockImplementation(createShowcaseCatalogMock())
  */
 import type { lookupShowcaseDatasets } from 'src/libs/ajax/ShowcaseCatalog'
 import type { DatasetSummaryInput, LookupRequestInput } from 'src/types/showcase'
