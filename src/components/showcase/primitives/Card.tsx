@@ -1,4 +1,4 @@
-import React, { useId } from 'react'
+import React, { Children, useId } from 'react'
 import { isSafeHref, isSafeImageSrc, ShowcaseAction } from 'src/components/showcase/primitives/safeHref'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
 import './Card.css'
@@ -53,14 +53,14 @@ export const Card = ({ title, headingLevel = 3, media, children, metadata = [], 
         <Heading className="showcase-card__title" id={headingId}>{title}</Heading>
         {badges.length > 0 && (
           <ul className="showcase-card__badges">
-            {badges.map(badge => <li className="showcase-card__badge" key={badge}>{badge}</li>)}
+            {badges.map((badge, i) => <li className="showcase-card__badge" key={`${i} ${badge}`}>{badge}</li>)}
           </ul>
         )}
-        {children !== undefined && <div>{children}</div>}
+        {Children.toArray(children).length > 0 && <div>{children}</div>}
         {entries.length > 0 && (
           <dl className="showcase-card__metadata">
-            {entries.map(entry => (
-              <React.Fragment key={entry.label}>
+            {entries.map((entry, i) => (
+              <React.Fragment key={`${i} ${entry.label}`}>
                 <dt className="showcase-card__term">{entry.label}</dt>
                 <dd className="showcase-card__value">
                   {entry.href !== undefined && isSafeHref(entry.href)
@@ -73,8 +73,8 @@ export const Card = ({ title, headingLevel = 3, media, children, metadata = [], 
         )}
         {links.length > 0 && (
           <ul className="showcase-card__actions">
-            {links.map(action => (
-              <li key={`${action.label} ${action.href}`}>
+            {links.map((action, i) => (
+              <li key={`${i} ${action.label}`}>
                 <ShowcaseLink href={action.href} aria-describedby={headingId}>{action.label}</ShowcaseLink>
               </li>
             ))}

@@ -1,5 +1,5 @@
 import React from 'react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
@@ -105,6 +105,25 @@ describe('Card', () => {
   it('renders a small bundled image that the build inlines as a data URL', () => {
     renderInRouter(<Card title="Example Cohort" media={{ src: 'data:image/svg+xml,%3Csvg%2F%3E', alt: 'Cohort map' }} />)
     expect(screen.getByRole('img', { name: 'Cohort map' })).toBeInTheDocument()
+  })
+
+  it('refuses a data URL that is not an inlined image type or holds a control character', () => {
+    renderInRouter(<Card title="Example Cohort" media={{ src: 'data:image/x-unknown,abc', alt: 'Odd type' }} />)
+    renderInRouter(<Card title="Example Cohort" media={{ src: 'data:image/png;base64,iVBO\u0000RK', alt: 'Control' }} />)
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
+
+  it('renders repeated badges and labels without duplicate-key warnings, and no empty body', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { container } = renderInRouter(
+      <Card title="Example Cohort" badges={['New', 'New']} metadata={[{ label: 'DAC', value: 'A' }, { label: 'DAC', value: 'B' }]}>
+        {false}
+      </Card>,
+    )
+    expect(screen.getAllByText('New')).toHaveLength(2)
+    expect(error).not.toHaveBeenCalled()
+    expect(container.querySelector('.showcase-card__body > div')).toBeNull()
+    error.mockRestore()
   })
 })
 

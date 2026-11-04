@@ -1,4 +1,4 @@
-import React, { useId } from 'react'
+import React, { Children, useId } from 'react'
 import type { HeadingLevel } from 'src/components/showcase/primitives/Card'
 import { isSafeHref, ShowcaseAction } from 'src/components/showcase/primitives/safeHref'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
@@ -21,11 +21,11 @@ export const StructuredPanel = ({ title, headingLevel = 2, children, actions = [
   return (
     <section className="showcase-panel" aria-labelledby={headingId}>
       <Heading className="showcase-panel__title" id={headingId}>{title}</Heading>
-      {children !== undefined && <div>{children}</div>}
+      {Children.toArray(children).length > 0 && <div>{children}</div>}
       {links.length > 0 && (
         <ul className="showcase-panel__actions">
-          {links.map(action => (
-            <li key={`${action.label} ${action.href}`}>
+          {links.map((action, i) => (
+            <li key={`${i} ${action.label}`}>
               <ShowcaseLink href={action.href}>{action.label}</ShowcaseLink>
             </li>
           ))}
