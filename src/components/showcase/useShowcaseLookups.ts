@@ -33,11 +33,9 @@ export interface ShowcaseLookups {
   hero?: LookupState<StatsResponse>
 }
 
-/** `editorial`, a computed section key, or `stats`. */
-type RequestId = string
-
 interface PlannedRequest {
-  id: RequestId
+  /** `editorial`, a computed section key, or `stats`. */
+  id: string
   request: LookupRequestInput
 }
 
@@ -121,8 +119,8 @@ export function useShowcaseLookups(
   const plan = useMemo(() => JSON.parse(planKey) as PlannedRequest[], [planKey])
 
   // Each state records the plan it answers, so a previous config's result never shows for this one.
-  const [states, setStates] = useState<Record<RequestId, RawState & { planKey: string }>>({})
-  const controllers = useRef(new Map<RequestId, AbortController>())
+  const [states, setStates] = useState<Record<string, RawState & { planKey: string }>>({})
+  const controllers = useRef(new Map<string, AbortController>())
   const livePlanKey = useRef<string | undefined>(undefined)
 
   const run = useCallback(({ id, request }: PlannedRequest, key: string) => {
@@ -154,7 +152,7 @@ export function useShowcaseLookups(
   // One object per change in state or plan, so a component that memoizes the lookups, or uses them
   // or their retry functions as effect dependencies, does not re-run on every render.
   return useMemo(() => {
-    const stateOf = <T>(id: RequestId, select: (data: unknown) => T): LookupState<T> => {
+    const stateOf = <T>(id: string, select: (data: unknown) => T): LookupState<T> => {
       const retry = () => {
         // A retry from an earlier render or after unmount must not replace the current request.
         if (livePlanKey.current !== planKey) return
