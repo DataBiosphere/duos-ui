@@ -43,7 +43,7 @@ Set them for each kind of environment as follows:
 | Environment | Points to | Why |
 | ----------- | --------- | --- |
 | Production | Production Consent | Showcase configs list production identifiers. |
-| Content preview (staging or local, to review a showcase PR) | Production Consent | `DUOS-` identifiers come from a sequence in each environment, so only production resolves them. The preview is read-only: authenticated DUOS handoffs (search, dataset detail, data access requests) must stay off, so a reviewer never sends a production identifier to a staging backend. E3 implements that rule. |
+| Content preview (dev, staging or local, to review a showcase PR) | Production Consent | `DUOS-` identifiers come from a sequence in each environment, so only production resolves them. The preview is read-only: authenticated DUOS handoffs (search, dataset detail, data access requests) must stay off, so a reviewer never sends a production identifier to a dev or staging backend. E3 implements that rule. |
 | Functional test (end-to-end request flows) | That environment's own Consent | The tests use a synthetic showcase fixture with datasets seeded in the same environment, so the lookup and the handoffs agree. |
 | Local development | Dev Consent (`.env.example`) | Change it to production to preview real content. |
 
@@ -69,6 +69,32 @@ only: a browser ignores it when it checks a redirect target, so the showcase rou
 If `showcaseApiUrl` has the same
 origin as `apiUrl`, the `apiUrl` entry already covers it. See ADR-013
 (`docs/plans/bff_adrs/ADR-013-content-security-policy.md`).
+
+### CORS (legacy mode)
+
+The legacy request is cross-origin and sends `Content-Type: application/json`, so the browser sends
+a preflight first. Consent's Apache proxy answers it (DT-4382). The list of origins is
+`proxy.showcaseAllowedOrigins` in terra-helmfile (`values/app/consent/live/<env>.yaml` and
+`bee.yaml.gotmpl`):
+
+| Consent | Approved origins |
+| ------- | ---------------- |
+| Production | `https://duos.org`, `https://www.duos.org`, `https://duos.broadinstitute.org`, `https://duos-k8s.dsde-prod.broadinstitute.org`, and for content previews `https://duos-k8s.dsde-dev.broadinstitute.org`, `https://duos-k8s.dsde-staging.broadinstitute.org`, `https://local.dsde-dev.broadinstitute.org` and `https://local.dsde-dev.broadinstitute.org:3000` |
+| Staging | `https://duos-k8s.dsde-staging.broadinstitute.org`, `https://local.dsde-dev.broadinstitute.org`, `https://local.dsde-dev.broadinstitute.org:3000` |
+| Dev | `https://duos-k8s.dsde-dev.broadinstitute.org`, `https://local.dsde-dev.broadinstitute.org`, `https://local.dsde-dev.broadinstitute.org:3000` |
+| BEE | `https://duos.<bee>.bee.envs-terra.bio` |
+
+For `/showcase/*` only, the proxy:
+
+- sets `Access-Control-Allow-Origin` to the request's `Origin` when it is on the list, and leaves it
+  out for any other origin, so the browser fails the preflight;
+- sets `Access-Control-Allow-Methods: POST, OPTIONS`, `Access-Control-Allow-Headers: Content-Type`
+  and `Vary: Origin`, and no `Access-Control-Allow-Credentials`;
+- answers `OPTIONS` with 204 itself. The preflight does not reach Consent, so it does not use a
+  request of the client's showcase rate limit.
+
+The authenticated `/api` routes keep their own CORS headers. A new UI origin that calls the lookup
+in legacy mode must be added to the list, or its showcase pages show no datasets.
 
 ## Limits and failures
 
@@ -118,10 +144,9 @@ The mock does not check Consent's input limits. Test those against Consent.
 
 ## Not done yet
 
-- Consent CORS and preflight for `/showcase/*` from the approved UI origins (legacy mode). It must not
-  widen what the authenticated `/api` routes accept.
-- terra-helmfile values for `DUOS_SHOWCASE_API_URL` and `showcaseApiUrl`. Until they exist, the
-  deployed route answers 503.
+- `showcase.publicLookupEnabled` in the deployed Consent configs. No deployed Consent sets it yet, so
+  `POST /showcase/datasets` answers 405 in dev, staging and production. DT-4411 adds the setting to
+  the Consent chart, still off.
 - The browser address on the BFF-to-Consent hop. Consent's load balancer overwrites `X-Real-IP` on
   that hop, so Consent puts all BFF traffic in one rate-limit bucket. A follow-up ticket from DT-4374
   covers the design.

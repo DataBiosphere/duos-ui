@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, ModelStudyAggregationResponse, QueryClause } from 'src/types/elastic'
 import { FilterState, ModelAsset, PaginationState, SortState } from 'src/types/library'
 import { makeModelColumns } from 'src/components/data_library/columns/modelColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, toStringArray } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, toStringArray, withRowIds } from 'src/components/data_library/assets/definition'
 
 const includesIgnoreCase = (source: string | undefined, values: string[]) => {
   if (values.length === 0) {
@@ -83,12 +83,9 @@ export const modelAsset: AssetDefinition = {
 
     for (const bucket of buckets) {
       const studyData = bucket.study_details?.hits?.hits?.[0]?._source?.study || {}
-      const studyModels = studyData.assets?.models || []
-      for (const [modelIndex, model] of studyModels.entries()) {
-        // modelId may be absent from the indexed document; fall back to a
-        // composite key so every row in the DataGrid has a unique id.
+      for (const model of withRowIds(studyData.assets?.models, 'modelId')) {
         const row: ModelAsset = {
-          modelId: model.modelId || `${bucket.key}-${modelIndex}`,
+          modelId: model.modelId,
           studyId: bucket.key,
           studyName: studyData.studyName || '',
           name: model.name || '',

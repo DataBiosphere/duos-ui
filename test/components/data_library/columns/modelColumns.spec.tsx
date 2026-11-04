@@ -6,7 +6,7 @@ import { makeModelColumns } from 'src/components/data_library/columns/modelColum
 import { ModelAsset } from 'src/types/library'
 
 const makeRow = (overrides: Partial<ModelAsset> = {}): ModelAsset => ({
-  modelId: 'model-1',
+  modelId: 1,
   studyId: 42,
   studyName: 'Test Study',
   name: 'My Model',
