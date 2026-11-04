@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render } from '@testing-library/react'
+import { act, render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import DataUseTermsFields, {
   DataUseTerms,
@@ -10,6 +10,7 @@ import DataUseTermsFields, {
   dataUseTermsErrors,
   termsFromDataUse,
 } from 'src/components/forms/DataUseTermsFields'
+import { findOntologyTerms } from 'src/libs/utils'
 
 vi.mock('src/libs/utils', async (importActual) => {
   const actual = await importActual<typeof import('src/libs/utils')>()
@@ -225,5 +226,24 @@ describe('DataUseTermsFields', () => {
 
     expect(onTerms).toHaveBeenLastCalledWith(expect.objectContaining({ accessManagement: 'open', hmb: false, gs: undefined, npu: false }))
     expect(container.querySelector('#primaryConsent_hmb')).not.toBeInTheDocument()
+  })
+
+  it('ignores a disease lookup that finishes after the terms were cleared', async () => {
+    const user = userEvent.setup()
+    let resolveLookup: (found: { displayText: string, id: string }[]) => void = () => {}
+    vi.mocked(findOntologyTerms).mockReturnValueOnce(new Promise((resolve) => {
+      resolveLookup = resolve
+    }))
+    const onTerms = vi.fn()
+    const { container } = render(
+      <Harness initial={{ accessManagement: 'controlled', diseaseSpecificUse: ['DOID_1'] }} onTerms={onTerms} />,
+    )
+
+    await user.click(container.querySelector('#accessManagement_open')!)
+    await act(async () => resolveLookup([{ displayText: 'Cancer', id: 'DOID_1' }]))
+    await user.click(container.querySelector('#accessManagement_controlled')!)
+    await user.click(container.querySelector('#primaryConsent_diseaseSpecificUse')!)
+
+    expect(onTerms).toHaveBeenLastCalledWith(expect.objectContaining({ diseaseSpecificUse: [] }))
   })
 })

@@ -168,7 +168,7 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
   const primary = selectedPrimaryGroup(terms)
 
   const [selectedDiseases, setSelectedDiseases] = useState<{ displayText: string, id: string }[]>([])
-  const [initialDiseases] = useState(terms.diseaseSpecificUse)
+  const [initialDiseases, setInitialDiseases] = useState(terms.diseaseSpecificUse)
   // The fields read their values only when they mount, so clearing remounts them.
   const [resetCount, setResetCount] = useState(0)
 
@@ -193,11 +193,17 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
     }
   }, [initialDiseases])
 
+  // Dropping the initial diseases cancels their lookup, so a late result can't overwrite this choice.
+  const chooseDiseases = (diseases: { displayText: string, id: string }[]) => {
+    setInitialDiseases(undefined)
+    setSelectedDiseases(diseases)
+  }
+
   const onAccessTypeChange = ({ value }: { value: string }) => {
     const accessManagement = value as AccessManagementType
     // Only open access clears the terms; clearing on every change invalidated terms filled in first.
     if (accessManagement === 'open') {
-      setSelectedDiseases([])
+      chooseDiseases([])
       onChange({ ...DATA_USE_CLEARED, accessManagement })
     }
     else {
@@ -207,7 +213,7 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
 
   const onPrimaryChange = (key: keyof DataUseTerms, value: boolean | string | string[]) => {
     if (key !== 'diseaseSpecificUse') {
-      setSelectedDiseases([])
+      chooseDiseases([])
     }
     onChange({ ...PRIMARY_CLEARED, [key]: value })
   }
@@ -254,7 +260,7 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
   )
 
   const clear = () => {
-    setSelectedDiseases([])
+    chooseDiseases([])
     setResetCount(count => count + 1)
     onClear({ ...DATA_USE_CLEARED, accessManagement: undefined })
   }
@@ -331,7 +337,7 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
                     placeholder="Please enter one or more diseases"
                     defaultValue={selectedDiseases}
                     onChange={({ value }: { value: [{ displayText: string, id: string }] }) => {
-                      setSelectedDiseases(value)
+                      chooseDiseases(value)
                       onChange({ diseaseSpecificUse: value.map((v: { id: string }) => v.id) })
                     }}
                     validation={validation.diseaseSpecificUse}
