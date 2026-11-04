@@ -2,6 +2,8 @@ import externalAccessIcon from 'src/images/external_access.svg'
 import openAccessIcon from 'src/images/open_access.svg'
 import controlledAccessIcon from 'src/images/controlled_access.svg'
 
+export type AccessManagementType = 'controlled' | 'open' | 'external'
+
 export interface ResponseError {
   readonly response?: {
     readonly data?: ConsentError
@@ -464,6 +466,8 @@ export interface AiModel {
   trainedOnDatasets: string[]
   maintainer: Maintainer
   tags?: string[]
+  accessManagement?: AccessManagementType | null
+  dataUse?: DataUse | null
 }
 
 export interface Workspace {
@@ -477,6 +481,8 @@ export interface Workspace {
   tools?: string[]
   access?: string
   tags?: string[]
+  accessManagement?: AccessManagementType | null
+  dataUse?: DataUse | null
 }
 
 export enum ClinicalTrialStatus {
