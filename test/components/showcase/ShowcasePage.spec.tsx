@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { act, render, screen } from '@testing-library/react'
@@ -23,14 +23,18 @@ const config = ShowcaseConfigSchema.parse(resolveShowcase({
 const found: ShowcaseLoadResult = { status: 'found', entry: partner, config }
 
 let navigate: ReturnType<typeof useNavigate>
-const NavigateSpy = () => {
-  navigate = useNavigate()
+const keepNavigate = (next: ReturnType<typeof useNavigate>) => {
+  navigate = next
+}
+const NavigateSpy = ({ onNavigate }: { onNavigate: typeof keepNavigate }) => {
+  const next = useNavigate()
+  useEffect(() => onNavigate(next), [next, onNavigate])
   return null
 }
 
 const renderAt = (path: string) => render(
   <MemoryRouter initialEntries={[path]}>
-    <NavigateSpy />
+    <NavigateSpy onNavigate={keepNavigate} />
     <Routes>
       <Route path="/data" element={<ShowcasePage route="flagship" />} />
       <Route path="/showcase/:key" element={<ShowcasePage route="key" />} />
