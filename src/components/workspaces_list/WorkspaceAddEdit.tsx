@@ -28,7 +28,6 @@ interface Validation extends DataUseTermsValidation {
 }
 
 const defaultWorkspace: Workspace = {
-  workspaceId: '',
   studyId: '',
   name: '',
   platform: '',
@@ -112,7 +111,6 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
       ...current,
       accessManagement: terms.accessManagement,
       dataUse: applyTerms(current.dataUse, terms),
-      workspaceId: current.workspaceId || crypto.randomUUID?.() || Date.now().toString(),
     }
     if (id < 0) {
       onWorkspaceChange([...workspaces, toSave])

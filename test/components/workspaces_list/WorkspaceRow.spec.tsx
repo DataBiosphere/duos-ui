@@ -7,7 +7,7 @@ import { Workspace } from 'src/types/model'
 import WorkspaceRow from 'src/components/workspaces_list/WorkspaceRow'
 
 const sampleWorkspace: Workspace = {
-  workspaceId: 'w1',
+  workspaceId: 1,
   studyId: 's1',
   name: 'Analysis Workspace',
   platform: 'Terra',

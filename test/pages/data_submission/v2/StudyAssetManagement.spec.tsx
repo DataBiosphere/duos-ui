@@ -61,7 +61,7 @@ vi.mock('src/components/biospecimen_list/BiospecimenList', () => ({
 }))
 
 const sampleBiospecimen: Biospecimen = {
-  biospecimenId: 'bio-1',
+  biospecimenId: 1,
   studyId: '1',
   donorId: 'donor-1',
   specimenType: BioSpecimenType.BLOOD,

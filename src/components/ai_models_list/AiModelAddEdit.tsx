@@ -17,7 +17,6 @@ const defaultMaintainer: Maintainer = {
 }
 
 const defaultAiModel: AiModel = {
-  modelId: '',
   studyId: '',
   name: '',
   description: '',
