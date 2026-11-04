@@ -265,4 +265,30 @@ describe('StudyAssetList row keys for unsaved items', () => {
 
     expect(screen.getByLabelText('Draft for Second')).toHaveValue('typed')
   })
+
+  it('never gives a saved id and an unsaved position the same key', () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      render(
+        <StudyAssetList<{ id?: number, name: string }, ValidationError, object, { item: UnsavedAsset }>
+          items={[{ id: 1, name: 'Saved' }, { name: 'Unsaved' }]}
+          onItemsChange={() => {}}
+          AddEditComponent={() => null}
+          RowComponent={DraftRow}
+          addButtonId="addMixed"
+          addButtonLabel="Add"
+          getValidationState={() => undefined}
+          getAddEditProps={() => ({})}
+          getRowProps={({ item }) => ({ item })}
+          getItemKey={item => item.id}
+        />,
+      )
+      expect(screen.getByLabelText('Draft for Saved')).toBeInTheDocument()
+      expect(screen.getByLabelText('Draft for Unsaved')).toBeInTheDocument()
+      expect(errors.mock.calls.flat().join(' ')).not.toContain('same key')
+    }
+    finally {
+      errors.mockRestore()
+    }
+  })
 })

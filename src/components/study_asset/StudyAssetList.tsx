@@ -63,9 +63,10 @@ export default function StudyAssetList<
 }: StudyAssetListProps<T, V, AddEditProps, RowProps>): React.JSX.Element {
   const [showAddEdit, setShowAddEdit] = useState(false)
   // Not keyed by object identity: the study form clones every asset on each keystroke, which would remount open rows.
+  // The prefixes keep a saved id from matching another row's position.
   const rowKey = (item: T, index: number) => {
     const key = getItemKey(item, index)
-    return key == null || key === '' ? index : key
+    return key == null || key === '' ? `position-${index}` : `id-${key}`
   }
   const [editState, setEditState] = useState<boolean[]>(items.map(() => false))
   const [viewState, setViewState] = useState<boolean[]>(items.map(() => false))
