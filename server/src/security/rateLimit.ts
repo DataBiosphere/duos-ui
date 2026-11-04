@@ -82,13 +82,11 @@ import type { FastifyRequest } from 'fastify'
  *     has the same gap. Only callers outside the cluster are covered.
  *   - **Otherwise the key is `request.ip`.** That keeps local dev and
  *     docker-compose (no `X-Real-IP`) working as before. `request.ip` honors
- *     `X-Forwarded-For` because `TRUST_PROXY` (config.ts) names the trusted
- *     peers. `TRUST_PROXY` trusts `uniquelocal`, so a caller whose own address
- *     is RFC1918 (a pod past the sidecar) can still send a fresh
- *     `X-Forwarded-For` per request and spend an unlimited number of buckets.
- *     That is a property of `TRUST_PROXY` (which also governs
- *     `X-Forwarded-Proto`) rather than of this module, and it is another
- *     reason the edge is the real control.
+ *     `X-Forwarded-For` only from the peers that `trustedProxies()`
+ *     (config.ts) names. In k8s that is loopback only, so a pod that calls
+ *     the app port directly keys on its own pod address and cannot rotate
+ *     `X-Forwarded-For` for a fresh bucket (DT-4381). docker-compose also
+ *     trusts `uniquelocal`, for its bridge-network proxy.
  *   - **The header counts only when `DUOS_RATE_LIMIT_TRUST_REAL_IP` is
  *     `true`.** Only the `gke` ingress class renders that `BackendConfig`.
  *     Behind another ingress, such as the HAProxy ingress in BEEs, nothing

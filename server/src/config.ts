@@ -71,22 +71,41 @@ export const resetConfigCache = (): void => {
   configPromise = null
 }
 
+/** Names the env var so tests and docker-compose cannot drift from the read below. */
+export const TRUST_PROXY_ENV_VAR = 'DUOS_TRUST_PROXY'
+
+const TRUSTED_PEER_NAMES = new Set(['loopback', 'linklocal', 'uniquelocal'])
+
 /**
- * Which peers may set `X-Forwarded-*` on this app's behalf.
+ * Which peers may set `X-Forwarded-*` on this app's behalf, as Fastify
+ * `trustProxy` names.
  *
- * The app always sits behind exactly one reverse-proxy hop — the
- * httpd-terra-proxy sidecar in k8s (same pod, so loopback) or the `proxy`
- * container in docker-compose (a bridge network, so RFC1918) — and both must be
+ * The app always sits behind exactly one reverse-proxy hop. That hop must be
  * trusted for `request.protocol` to honor X-Forwarded-Proto and for
- * `request.ips` to carry the client chain.
+ * `request.ip` to carry the client. Without the forwarded protocol,
+ * @fastify/session refuses to persist sessions once cookie.secure is true.
  *
- * Expressed as peer addresses rather than a hop count on purpose. Fastify 5.12.1
- * made the numeric form (`trustProxy: 1`) fail closed permanently, because a hop
- * count cannot verify who the immediate peer actually is — any direct client
- * could spoof X-Forwarded-* by supplying enough hops. A numeric value is now
- * silently equivalent to `trustProxy: false`, which drops the forwarded protocol
- * and makes @fastify/session refuse to persist sessions once cookie.secure is
- * true. `trustProxy: true` would restore the behavior but re-open that spoofing
- * hole, so the trusted peers are named instead.
+ *   - **k8s (the default, `loopback`).** The httpd-terra-proxy sidecar is in
+ *     the same pod, so it connects over loopback. Trusting only loopback means
+ *     a pod that calls the app port directly (a `10.x` peer) cannot choose its
+ *     own `request.ip` with X-Forwarded-For, so it cannot spend an unlimited
+ *     number of rate-limit buckets (DT-4381).
+ *   - **docker-compose (`loopback,uniquelocal`).** The `proxy` container
+ *     reaches the app over a bridge network, so its peer is RFC1918.
+ *
+ * Expressed as peer names rather than a hop count on purpose. Fastify 5.12.1
+ * made the numeric form (`trustProxy: 1`) fail closed permanently, because a
+ * hop count cannot verify who the immediate peer actually is. A numeric value
+ * is now silently equivalent to `trustProxy: false`. `trustProxy: true` would
+ * trust every peer, so the trusted peers are named instead. An unknown name
+ * fails startup rather than silently trusting less (or more) than intended.
  */
-export const TRUST_PROXY = ['loopback', 'uniquelocal']
+export function trustedProxies(raw = process.env[TRUST_PROXY_ENV_VAR]): string[] {
+  if (raw === undefined || raw.trim() === '') return ['loopback']
+  const names = raw.split(',').map(name => name.trim())
+  const unknown = names.filter(name => !TRUSTED_PEER_NAMES.has(name))
+  if (unknown.length > 0) {
+    throw new Error(`${TRUST_PROXY_ENV_VAR} must be a comma-separated list of ${[...TRUSTED_PEER_NAMES].join(', ')}; got ${JSON.stringify(raw)}`)
+  }
+  return names
+}

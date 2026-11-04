@@ -7,7 +7,7 @@ import fastifySession from '@fastify/session'
 import fastifyCsrf from '@fastify/csrf-protection'
 import { csrfPluginOptions, handleCsrfToken } from '../src/auth/csrf.js'
 import { SESSION_COOKIE_NAME, sessionPluginOptions } from '../src/session/sessionOptions.js'
-import { TRUST_PROXY } from '../src/config.js'
+import { trustedProxies } from '../src/config.js'
 
 /**
  * The shared harness for the per-upstream proxy suites (apiProxy.test.ts,
@@ -94,7 +94,7 @@ export interface SessionSeed {
 export const SESSION_COOKIE = SESSION_COOKIE_NAME
 
 export async function buildAppShell(logger: FastifyServerOptions['logger'] = false): Promise<FastifyInstance> {
-  const app = Fastify({ logger, trustProxy: TRUST_PROXY })
+  const app = Fastify({ logger, trustProxy: trustedProxies() })
   await app.register(fastifyCookie)
   await app.register(fastifySession, sessionPluginOptions({
     secret: 'a-test-session-secret-at-least-32-characters-long',

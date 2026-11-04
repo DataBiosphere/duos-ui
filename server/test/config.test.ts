@@ -2,7 +2,8 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { configPath, defaultBannersUrl, readConfig, resetConfigCache } from '../src/config.js'
+import Fastify from 'fastify'
+import { configPath, defaultBannersUrl, readConfig, resetConfigCache, TRUST_PROXY_ENV_VAR, trustedProxies } from '../src/config.js'
 
 describe('configPath', () => {
   afterEach(() => {
@@ -111,5 +112,60 @@ describe('defaultBannersUrl', () => {
     ['an unset env', undefined],
   ])('returns undefined for %s', (_label, env) => {
     expect(defaultBannersUrl(env)).toBeUndefined()
+  })
+})
+
+describe('trustedProxies', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('trusts only the loopback sidecar by default', () => {
+    expect(trustedProxies()).toEqual(['loopback'])
+  })
+
+  it.each(['', '  '])('falls back to loopback when the variable is %j', (value) => {
+    vi.stubEnv(TRUST_PROXY_ENV_VAR, value)
+    expect(trustedProxies()).toEqual(['loopback'])
+  })
+
+  it('reads a comma-separated list for docker-compose', () => {
+    vi.stubEnv(TRUST_PROXY_ENV_VAR, 'loopback, uniquelocal')
+    expect(trustedProxies()).toEqual(['loopback', 'uniquelocal'])
+  })
+
+  it.each(['true', '1', '10.0.0.0/8', 'loopback,,uniquelocal'])('fails startup on %j', (value) => {
+    vi.stubEnv(TRUST_PROXY_ENV_VAR, value)
+    expect(() => trustedProxies()).toThrow(TRUST_PROXY_ENV_VAR)
+  })
+
+  // What the value means once Fastify has it: the sidecar's forwarded
+  // protocol keeps the session cookie working, and a pod that calls the app
+  // port directly cannot pick its own address (DT-4381).
+  describe('as Fastify trustProxy', () => {
+    async function probe(remoteAddress: string) {
+      const app = Fastify({ trustProxy: trustedProxies() })
+      app.get('/', async request => ({ ip: request.ip, protocol: request.protocol }))
+      const response = await app.inject({
+        url: '/',
+        remoteAddress,
+        headers: { 'x-forwarded-for': '198.51.100.7', 'x-forwarded-proto': 'https' },
+      })
+      await app.close()
+      return response.json() as { ip: string, protocol: string }
+    }
+
+    it('honors X-Forwarded-* from the loopback sidecar', async () => {
+      expect(await probe('127.0.0.1')).toEqual({ ip: '198.51.100.7', protocol: 'https' })
+    })
+
+    it('ignores X-Forwarded-* from a pod that calls the app port directly', async () => {
+      expect(await probe('10.64.4.18')).toEqual({ ip: '10.64.4.18', protocol: 'http' })
+    })
+
+    it('honors X-Forwarded-* from an RFC1918 proxy when docker-compose opts in', async () => {
+      vi.stubEnv(TRUST_PROXY_ENV_VAR, 'loopback,uniquelocal')
+      expect(await probe('172.18.0.3')).toEqual({ ip: '198.51.100.7', protocol: 'https' })
+    })
   })
 })
