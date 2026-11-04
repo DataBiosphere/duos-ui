@@ -1,5 +1,5 @@
 import React from 'react'
-import { describe, it, expect, beforeAll } from 'vitest'
+import { describe, it, expect, beforeAll, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -8,7 +8,7 @@ import AiModelList from 'src/components/ai_models_list/AiModelList'
 import { AiModel } from 'src/types/model'
 
 const sampleModel: AiModel = {
-  modelId: 'm1',
+  modelId: 1,
   studyId: 's1',
   name: 'Baseline Model',
   description: 'Desc',
@@ -35,6 +35,19 @@ const AiModelListHarness: React.FC<{ initial: AiModel[] }> = ({ initial }) => {
 beforeAll(() => Modal.setAppElement(document.body))
 
 describe('AiModelList component', () => {
+  it('gives unsaved models distinct row keys', () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      render(<AiModelListHarness initial={[{ ...sampleModel, modelId: undefined, name: 'Unsaved A' }, { ...sampleModel, modelId: undefined, name: 'Unsaved B' }]} />)
+      expect(screen.getByText('Unsaved A')).toBeInTheDocument()
+      expect(screen.getByText('Unsaved B')).toBeInTheDocument()
+      expect(errors.mock.calls.flat().join(' ')).not.toContain('same key')
+    }
+    finally {
+      errors.mockRestore()
+    }
+  })
+
   it('renders existing models', () => {
     render(<AiModelListHarness initial={[sampleModel]} />)
     expect(screen.getByText(sampleModel.name)).toBeInTheDocument()

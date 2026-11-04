@@ -16,7 +16,7 @@ vi.mock('src/libs/utils', async (importActual) => {
 })
 
 const sampleWorkspace: Workspace = {
-  workspaceId: 'w1',
+  workspaceId: 1,
   studyId: 's1',
   name: 'Analysis Workspace',
   platform: 'Terra',
@@ -50,6 +50,7 @@ describe('WorkspaceAddEdit component', () => {
     expect(collected[0].name).toBe('New Workspace')
     expect(collected[0].platform).toBe('New Platform')
     expect(collected[0].cloud).toEqual([])
+    expect(collected[0]).not.toHaveProperty('workspaceId')
   })
 
   it('saves selected cloud values', async () => {
@@ -102,6 +103,7 @@ describe('WorkspaceAddEdit component', () => {
     expect(onWorkspaceChange).toHaveBeenCalledTimes(1)
     const [updated] = onWorkspaceChange.mock.calls[0] as [Workspace[]]
     expect(updated[0].name).toBe('Analysis Workspace Edited')
+    expect(updated[0].workspaceId).toBe(1)
   })
 })
 

@@ -7,7 +7,7 @@ import AiModelRow from 'src/components/ai_models_list/AiModelRow'
 import { AiModel } from 'src/types/model'
 
 const sampleModel: AiModel = {
-  modelId: 'm1',
+  modelId: 1,
   studyId: 's1',
   name: 'Baseline Model',
   description: 'Desc',
