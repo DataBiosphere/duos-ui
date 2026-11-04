@@ -36,11 +36,15 @@ beforeAll(() => Modal.setAppElement(document.body))
 describe('WorkspaceList component', () => {
   it('gives unsaved workspaces distinct row keys', () => {
     const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
-    render(<WorkspaceListHarness initial={[{ ...sampleWorkspace, workspaceId: undefined, name: 'Unsaved A' }, { ...sampleWorkspace, workspaceId: undefined, name: 'Unsaved B' }]} />)
-    expect(screen.getByText('Unsaved A')).toBeInTheDocument()
-    expect(screen.getByText('Unsaved B')).toBeInTheDocument()
-    expect(errors.mock.calls.flat().join(' ')).not.toContain('same key')
-    errors.mockRestore()
+    try {
+      render(<WorkspaceListHarness initial={[{ ...sampleWorkspace, workspaceId: undefined, name: 'Unsaved A' }, { ...sampleWorkspace, workspaceId: undefined, name: 'Unsaved B' }]} />)
+      expect(screen.getByText('Unsaved A')).toBeInTheDocument()
+      expect(screen.getByText('Unsaved B')).toBeInTheDocument()
+      expect(errors.mock.calls.flat().join(' ')).not.toContain('same key')
+    }
+    finally {
+      errors.mockRestore()
+    }
   })
 
   it('renders existing workspaces', () => {

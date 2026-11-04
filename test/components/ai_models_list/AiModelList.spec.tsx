@@ -37,11 +37,15 @@ beforeAll(() => Modal.setAppElement(document.body))
 describe('AiModelList component', () => {
   it('gives unsaved models distinct row keys', () => {
     const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
-    render(<AiModelListHarness initial={[{ ...sampleModel, modelId: undefined, name: 'Unsaved A' }, { ...sampleModel, modelId: undefined, name: 'Unsaved B' }]} />)
-    expect(screen.getByText('Unsaved A')).toBeInTheDocument()
-    expect(screen.getByText('Unsaved B')).toBeInTheDocument()
-    expect(errors.mock.calls.flat().join(' ')).not.toContain('same key')
-    errors.mockRestore()
+    try {
+      render(<AiModelListHarness initial={[{ ...sampleModel, modelId: undefined, name: 'Unsaved A' }, { ...sampleModel, modelId: undefined, name: 'Unsaved B' }]} />)
+      expect(screen.getByText('Unsaved A')).toBeInTheDocument()
+      expect(screen.getByText('Unsaved B')).toBeInTheDocument()
+      expect(errors.mock.calls.flat().join(' ')).not.toContain('same key')
+    }
+    finally {
+      errors.mockRestore()
+    }
   })
 
   it('renders existing models', () => {

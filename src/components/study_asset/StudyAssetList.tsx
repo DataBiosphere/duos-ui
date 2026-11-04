@@ -35,7 +35,7 @@ interface StudyAssetListProps<
     columnsToShow: (keyof T)[]
     disabled: boolean
   }) => RowProps
-  /** A saved item's id; an item without one gets a client-only key. */
+  /** A saved item's id; an item without one is keyed by its position. */
   readonly getItemKey: (item: T, index: number) => string | number | undefined
 }
 
@@ -62,23 +62,10 @@ export default function StudyAssetList<
   getItemKey,
 }: StudyAssetListProps<T, V, AddEditProps, RowProps>): React.JSX.Element {
   const [showAddEdit, setShowAddEdit] = useState(false)
-  // Keyed by object, so each unsaved row keeps its key when another row is deleted.
-  const [clientKey] = useState(() => {
-    const keys = new WeakMap<object, string>()
-    let next = 0
-    return (item: object) => {
-      let key = keys.get(item)
-      if (key === undefined) {
-        key = `unsaved-${next++}`
-        keys.set(item, key)
-      }
-      return key
-    }
-  })
+  // Not keyed by object identity: the study form clones every asset on each keystroke, which would remount open rows.
   const rowKey = (item: T, index: number) => {
     const key = getItemKey(item, index)
-    if (key !== undefined && key !== '') return key
-    return typeof item === 'object' && item !== null ? clientKey(item) : index
+    return key == null || key === '' ? index : key
   }
   const [editState, setEditState] = useState<boolean[]>(items.map(() => false))
   const [viewState, setViewState] = useState<boolean[]>(items.map(() => false))

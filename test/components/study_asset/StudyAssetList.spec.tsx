@@ -230,39 +230,39 @@ describe('StudyAssetList row keys for unsaved items', () => {
     name: string
   }
 
-  // Holds a draft in its own state, which follows the row's key.
-  const DraftRow: React.FC<{ item: UnsavedAsset, deleteAction: () => void }> = ({ item, deleteAction }) => (
-    <div data-testid="draft-row">
-      <input aria-label={`Draft for ${item.name}`} defaultValue="" />
-      <button onClick={deleteAction}>{`Delete ${item.name}`}</button>
-    </div>
+  // Holds a draft in its own state, which a remount would lose.
+  const DraftRow: React.FC<{ item: UnsavedAsset }> = ({ item }) => (
+    <input aria-label={`Draft for ${item.name}`} defaultValue="" />
   )
 
   const Harness = () => {
     const [items, setItems] = useState<UnsavedAsset[]>([{ name: 'First' }, { name: 'Second' }])
     return (
-      <StudyAssetList<UnsavedAsset, ValidationError, object, { item: UnsavedAsset, deleteAction: () => void }>
-        items={items}
-        onItemsChange={setItems}
-        AddEditComponent={() => null}
-        RowComponent={DraftRow}
-        addButtonId="addUnsaved"
-        addButtonLabel="Add"
-        getValidationState={() => undefined}
-        getAddEditProps={() => ({})}
-        getRowProps={({ item, deleteAction }) => ({ item, deleteAction })}
-        getItemKey={() => undefined}
-      />
+      <>
+        <button onClick={() => setItems(current => structuredClone(current))}>Clone items</button>
+        <StudyAssetList<UnsavedAsset, ValidationError, object, { item: UnsavedAsset }>
+          items={items}
+          onItemsChange={setItems}
+          AddEditComponent={() => null}
+          RowComponent={DraftRow}
+          addButtonId="addUnsaved"
+          addButtonLabel="Add"
+          getValidationState={() => undefined}
+          getAddEditProps={() => ({})}
+          getRowProps={({ item }) => ({ item })}
+          getItemKey={() => undefined}
+        />
+      </>
     )
   }
 
-  it('keeps each unsaved row its own key when an earlier row is deleted', () => {
+  // The study form clones every asset whenever a study-level field changes.
+  it('keeps an unsaved row mounted when its item is replaced by a copy', () => {
     render(<Harness />)
     fireEvent.change(screen.getByLabelText('Draft for Second'), { target: { value: 'typed' } })
 
-    fireEvent.click(screen.getByText('Delete First'))
+    fireEvent.click(screen.getByText('Clone items'))
 
-    expect(screen.getAllByTestId('draft-row')).toHaveLength(1)
     expect(screen.getByLabelText('Draft for Second')).toHaveValue('typed')
   })
 })
