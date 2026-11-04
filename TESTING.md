@@ -17,17 +17,18 @@ pnpm test:browser
 
 ## E2E Tests (Playwright)
 
-Playwright starts five processes and waits for each one:
+Playwright starts six processes and waits for each one:
 
 | Process | Port | Consent upstream | Project |
 |---|---|---|---|
-| Mock OIDC provider and mock Consent upstream | 3100 (HTTPS), 3200 | — | — |
+| Mock OIDC provider and mock Consent upstream | 3100 (HTTPS), 3200, 3201 (HTTPS) | — | — |
 | Fastify, `pnpm run serve` | 3000 | `DUOS_API_URL` (dev Consent) | `chromium` |
 | Fastify, `pnpm run serve` | 3001 | the mock | `mock` |
 | Fastify, `pnpm run serve`, one callback a minute | 3002 | the mock | `mock-throttle` |
 | Fastify, `pnpm run serve`, sessions last 10 s | 3003 | the mock | `mock-short-session` |
+| Fastify, `pnpm run serve`, legacy mode | 3004 | `DUOS_API_URL`; showcase lookups go to the mock | `legacy` |
 
-All four servers use the mock provider as their issuer; `playwright.config.ts` sets
+The four BFF servers use the mock provider as their issuer; `playwright.config.ts` sets
 the `DUOS_AZURE_*` and redirect variables for each one. The servers use the
 process environment and built `config.json`; export `.env.local` variables
 before running. `vite preview` lacks the BFF routes and security controls.
@@ -38,7 +39,7 @@ Prerequisites:
   The mock provider serves HTTPS with the same pair. If Node does not trust the
   certificate (CI's is self-signed), set `NODE_EXTRA_CA_CERTS=$PWD/server.crt`.
 - `local.dsde-dev.broadinstitute.org` resolving to `127.0.0.1` (use `/etc/hosts`).
-- Ports 3000, 3001, 3002, 3003, 3100 and 3200 free.
+- Ports 3000, 3001, 3002, 3003, 3004, 3100, 3200 and 3201 free.
 
 ### Path A: public specs
 
@@ -129,7 +130,7 @@ See the [CI workflow](.github/workflows/integration-tests.yml) and
 | Sign-in not enabled | Set `DUOS_TEST_SIGNIN_ENABLED` and `DUOS_TEST_SIGNIN_EMAILS`; restart |
 | Sign-in 401 | Server log: failing claim or tokeninfo failure |
 | Sign-in 429 | Wait a minute; default limit is 300/min/IP (`DUOS_RATE_LIMIT_TEST_SIGNIN_MAX`) |
-| Configuration ignored | Rebuild after config.json changes; restart after environment changes. Playwright reuses running servers outside CI, and a reused server keeps its own environment, not the `playwright.config.ts` values (for example the issuer). Stop anything on ports 3000, 3001, 3002, 3003, 3100 and 3200 first. |
+| Configuration ignored | Rebuild after config.json changes; restart after environment changes. Playwright reuses running servers outside CI, and a reused server keeps its own environment, not the `playwright.config.ts` values (for example the issuer). Stop anything on ports 3000, 3001, 3002, 3003, 3004, 3100, 3200 and 3201 first. |
 
 ### CSP check
 
@@ -223,6 +224,38 @@ token. It checks the client secret and PKCE, and redirects only to the registere
 
 A spec that needs global mock state must run in its own project that depends
 on `chromium`, `mock`, `mock-throttle` and `mock-short-session`, with one worker. No spec needs this today.
+
+### Legacy mode
+
+The `legacy` project runs against a server with `bffEnabled` off, where the browser calls Consent's
+anonymous `POST /showcase/datasets` itself, at `showcaseApiUrl`
+([data-showcase-lookup.md](docs/data-showcase-lookup.md)). Its webServer runs
+`test/e2e/support/writeLegacyConfig.ts`, which copies `build/config.json` to the OS temp directory
+with `bffEnabled: false` and `showcaseApiUrl` set to the mock (`https://local.dsde-dev.broadinstitute.org:3201`),
+and starts the server with `CONFIG_PATH` pointing at the copy. The server enforces its CSP
+(`DUOS_CSP_REPORT_ONLY=false`), so a spec can show what the policy blocks, and keeps `DUOS_API_URL`:
+the mock's origin must be admitted by the path-scoped showcase source, not by `apiUrl`.
+
+The mock Consent upstream answers `/showcase/datasets` on both of its ports, with no token. HTTPS
+on 3201 is for the browser, because the enforced policy's `upgrade-insecure-requests` would rewrite
+a plain-HTTP URL. It answers a preflight from the legacy origin only, and a POST as
+`test/e2e/mocks/showcaseLookup.ts` describes: a contract example's request from
+`test/fixtures/showcase/contracts.ts` gets that example's response, another request with a known
+mode gets `catalogMock.ts`'s answer, and a request with an `Authorization` header or a cookie is a 400.
+
+`legacyMode.spec.ts` proves the project works. Any built `config.json` will do; no database or
+credentials are needed:
+
+```sh
+cp config/dev.json public/config.json
+CI=false pnpm run build
+pnpm exec playwright test --project=legacy
+```
+
+Playwright still starts every webServer, so the other servers' prerequisites apply. To run legacy
+specs alone, start `pnpm exec tsx test/e2e/mocks/main.ts` and the legacy server with the command and
+environment in `playwright.config.ts` first; outside CI, Playwright reuses a server that answers its
+health URL.
 
 ### Session cleanup
 

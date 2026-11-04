@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { BiospecimenStudyAggregationResponse, ElasticsearchQuery, ElasticsearchResponse, PartialBiospecimenAsset, QueryClause } from 'src/types/elastic'
 import { BiospecimenAsset, FilterState, PaginationState, SortState } from 'src/types/library'
 import { makeBiospecimenColumns } from 'src/components/data_library/columns/biospecimenColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, withRowIds } from 'src/components/data_library/assets/definition'
 import { BioSpecimenPreservationMethod, BioSpecimenType, PostMortemIntervalUnit, Sex } from 'src/types/model'
 import { isFilterActive } from 'src/components/data_library/filterRegistry'
 
@@ -47,25 +47,8 @@ const matchesPostMortemInterval = (biospecimen: BiospecimenAsset, filters: Filte
   return !(max !== undefined && (value === undefined || value > max))
 }
 
-const MAX_ROW_ID = 2147483647
-
-// A server-assigned row id: a positive int4, as a number or plain digits.
-const isRowId = (id: string | number): boolean =>
-  typeof id === 'number'
-    ? Number.isInteger(id) && id >= 1 && id <= MAX_ROW_ID
-    : /^[1-9]\d{0,9}$/.test(id) && Number(id) <= MAX_ROW_ID
-
-const asText = (id: string | number | undefined): string => (id === undefined || id === null ? '' : String(id).trim())
-
-// Until every study is converted, a biospecimen's own id may still sit in biospecimenId.
-const sampleIdOf = (biospecimen: PartialBiospecimenAsset): string => {
-  const sampleId = asText(biospecimen.sampleId)
-  if (sampleId) {
-    return sampleId
-  }
-  const { biospecimenId } = biospecimen
-  return biospecimenId === undefined || biospecimenId === null || isRowId(biospecimenId) ? '' : asText(biospecimenId)
-}
+const sampleIdOf = ({ sampleId }: PartialBiospecimenAsset): string =>
+  sampleId === undefined || sampleId === null ? '' : String(sampleId).trim()
 
 const matchesBiospecimenFilters = (biospecimen: BiospecimenAsset, filters?: FilterState) => {
   if (!filters) {
@@ -124,12 +107,9 @@ export const biospecimenAsset: AssetDefinition = {
 
     for (const bucket of buckets) {
       const studyData = bucket.study_details?.hits?.hits?.[0]?._source?.study || {}
-      const studyBiospecimens = studyData.assets?.biospecimens || []
-      for (const [biospecimenIndex, biospecimen] of studyBiospecimens.entries()) {
-        // biospecimenId may be absent from the indexed document; fall back to a
-        // composite key so every row in the DataGrid has a unique id.
+      for (const biospecimen of withRowIds(studyData.assets?.biospecimens, 'biospecimenId')) {
         const row: BiospecimenAsset = {
-          biospecimenId: biospecimen.biospecimenId ? String(biospecimen.biospecimenId) : `${bucket.key}-${biospecimenIndex}`,
+          biospecimenId: biospecimen.biospecimenId,
           sampleId: sampleIdOf(biospecimen),
           studyId: bucket.key,
           studyName: studyData.studyName || '',

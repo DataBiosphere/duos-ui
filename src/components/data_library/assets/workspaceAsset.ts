@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { ElasticsearchQuery, ElasticsearchResponse, WorkspaceStudyAggregationResponse, QueryClause } from 'src/types/elastic'
 import { FilterState, WorkspaceAsset, PaginationState, SortState } from 'src/types/library'
 import { makeWorkspaceColumns } from 'src/components/data_library/columns/workspaceColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, toStringArray } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, STUDIES_AGG, toStringArray, withRowIds } from 'src/components/data_library/assets/definition'
 
 const includesIgnoreCase = (source: string | undefined, values: string[]) => {
   if (values.length === 0) {
@@ -86,12 +86,9 @@ export const workspaceAsset: AssetDefinition = {
 
     for (const bucket of buckets) {
       const studyData = bucket.study_details?.hits?.hits?.[0]?._source?.study || {}
-      const studyWorkspaces = studyData.assets?.workspaces || []
-      for (const [workspaceIndex, workspace] of studyWorkspaces.entries()) {
-        // workspaceId may be absent from the indexed document; fall back to a
-        // composite key so every row in the DataGrid has a unique id.
+      for (const workspace of withRowIds(studyData.assets?.workspaces, 'workspaceId')) {
         const row: WorkspaceAsset = {
-          workspaceId: workspace.workspaceId || `${bucket.key}-${workspaceIndex}`,
+          workspaceId: workspace.workspaceId,
           studyId: bucket.key,
           studyName: studyData.studyName || '',
           name: workspace.name || '',

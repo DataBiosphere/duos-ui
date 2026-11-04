@@ -1,7 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
-import { BASE_URL, MOCK_BASE_URL, SHORT_SESSION_BASE_URL, SHORT_SESSION_MAX_AGE_MS, THROTTLE_BASE_URL } from './test/e2e/support/baseUrl'
+import { BASE_URL, LEGACY_BASE_URL, MOCK_BASE_URL, SHORT_SESSION_BASE_URL, SHORT_SESSION_MAX_AGE_MS, THROTTLE_BASE_URL } from './test/e2e/support/baseUrl'
 import {
   callbackUri,
+  LEGACY_CONFIG_PATH,
   MOCK_CLIENT_ID,
   MOCK_CLIENT_SECRET,
   MOCK_CONSENT_URL,
@@ -18,10 +19,13 @@ const MOCK_SPECS = ['auth.spec.ts', 'session.spec.ts', 'mockHarness.spec.ts']
 const THROTTLE_SPECS = ['authThrottle.spec.ts']
 // Specs that need a server of their own, because they change its session lifetime.
 const SHORT_SESSION_SPECS = ['sessionExpiry.spec.ts']
+// Specs for legacy mode (bffEnabled off), where the browser calls showcaseApiUrl directly.
+const LEGACY_SPECS = ['legacyMode.spec.ts']
 
-// All three servers use the mock provider as their issuer. The role specs never run a
-// callback, so a real B2C issuer would only add a discovery call at boot. The
-// mock redirects only to the URIs it registers for each base URL.
+// The four BFF servers use the mock provider as their issuer; the legacy server
+// gets no oidcEnv. The role specs never run a callback, so a real B2C issuer
+// would only add a discovery call at boot. The mock redirects only to the URIs
+// it registers for each base URL.
 const oidcEnv = (baseUrl: string): Record<string, string> => ({
   DUOS_AZURE_ISSUER_URL: MOCK_OIDC_DISCOVERY_URL,
   DUOS_AZURE_CLIENT_ID: MOCK_CLIENT_ID,
@@ -52,7 +56,7 @@ export default defineConfig({
     {
       // Role fixture specs, against real dev Consent.
       name: 'chromium',
-      testIgnore: [...MOCK_SPECS, ...THROTTLE_SPECS, ...SHORT_SESSION_SPECS],
+      testIgnore: [...MOCK_SPECS, ...THROTTLE_SPECS, ...SHORT_SESSION_SPECS, ...LEGACY_SPECS],
       // Up to three sign-in attempts, each as long as 8 seconds, plus the waits between them.
       timeout: 60_000,
       use: { ...devices['Desktop Chrome'] },
@@ -77,6 +81,13 @@ export default defineConfig({
       name: 'mock-short-session',
       testMatch: SHORT_SESSION_SPECS,
       use: { ...devices['Desktop Chrome'], baseURL: SHORT_SESSION_BASE_URL },
+      retries: process.env.CI ? 1 : 0,
+    },
+    {
+      // Legacy mode: no BFF routes; the showcase lookup goes to the mock upstream over CORS.
+      name: 'legacy',
+      testMatch: LEGACY_SPECS,
+      use: { ...devices['Desktop Chrome'], baseURL: LEGACY_BASE_URL },
       retries: process.env.CI ? 1 : 0,
     },
   ],
@@ -135,6 +146,23 @@ export default defineConfig({
         DUOS_SESSION_MAX_AGE_MS: String(SHORT_SESSION_MAX_AGE_MS),
         DUOS_RATE_LIMIT_LOGIN_MAX: '600',
         DUOS_RATE_LIMIT_CALLBACK_MAX: '600',
+      },
+    },
+    {
+      // The build's config.json with bffEnabled off and showcaseApiUrl at the
+      // mock; see writeLegacyConfig.ts. DUOS_API_URL keeps its value: pointed
+      // at the mock, apiUrl's origin would admit the lookup without the CSP's
+      // path-scoped showcase source.
+      ...serverDefaults,
+      command: `pnpm exec tsx test/e2e/support/writeLegacyConfig.ts && ${serverDefaults.command}`,
+      url: `${LEGACY_BASE_URL}/health`,
+      env: {
+        PORT: '3004',
+        CONFIG_PATH: LEGACY_CONFIG_PATH,
+        // Enforced, so the spec can show what the policy blocks.
+        DUOS_CSP_REPORT_ONLY: 'false',
+        // The role fixture requires bffEnabled, so the server would not start.
+        DUOS_TEST_SIGNIN_ENABLED: 'false',
       },
     },
   ],
