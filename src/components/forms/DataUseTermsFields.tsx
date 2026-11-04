@@ -105,7 +105,7 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
         }
       }
     }
-    loadOntologyTerms()
+    void loadOntologyTerms()
     return () => {
       mounted = false
     }
