@@ -1,0 +1,61 @@
+/**
+ * Decides which showcase a public route renders (DT-4353, S3.1). `/data` is the flagship and
+ * `/showcase/:key` is any other live entry. Every refusal is the same `not-found`, so a hidden key
+ * can't be told apart from an unknown one (delivery plan section 3: unknown or hidden keys render
+ * the standard not-found page).
+ *
+ * `findShowcase` is pure, for tests; `loadShowcase` reads the rollout flag and the real index.
+ */
+import { isShowcaseEnabled } from 'src/libs/config'
+import { resolveShowcase } from 'src/showcases/defaults'
+import { retiredShowcaseKeys, showcaseConfigs, showcaseEntries } from 'src/showcases'
+import { SHOWCASE_KEY_PATTERN, type RegistryEntry, type ShowcaseConfigInput, type ShowcasePartialInput } from 'src/types/showcase'
+
+/** The flagship route (`/data`) or a keyed route (`/showcase/:key`, the key as the URL gave it). */
+export type ShowcaseRouteMatch = { route: 'flagship' } | { route: 'key', key: string | undefined }
+
+export type ShowcaseLoadResult = { status: 'found', entry: RegistryEntry, config: ShowcaseConfigInput } | { status: 'not-found' }
+
+export type ShowcaseSources = {
+  entries: readonly RegistryEntry[]
+  configs: Readonly<Record<string, ShowcasePartialInput>>
+  retiredKeys: readonly string[]
+  /** The rollout flag; anything but `true` is off. */
+  enabled: unknown
+}
+
+const NOT_FOUND: ShowcaseLoadResult = Object.freeze({ status: 'not-found' })
+
+/** The one entry that matches, or undefined when none or several do: an ambiguous index fails closed. */
+const single = (entries: readonly RegistryEntry[]): RegistryEntry | undefined =>
+  entries.length === 1 ? entries[0] : undefined
+
+export const findShowcase = (match: ShowcaseRouteMatch, sources: ShowcaseSources): ShowcaseLoadResult => {
+  const { entries, configs, retiredKeys, enabled } = sources
+  if (enabled !== true) return NOT_FOUND
+
+  let entry: RegistryEntry | undefined
+  if (match.route === 'flagship') {
+    entry = single(entries.filter(candidate => candidate.flagship))
+  }
+  else {
+    const { key } = match
+    if (typeof key !== 'string' || !SHOWCASE_KEY_PATTERN.test(key)) return NOT_FOUND
+    entry = single(entries.filter(candidate => candidate.key === key))
+    // The flagship's only route is `/data` (`showcaseRoute`); `/showcase/<flagship key>` is not
+    // generated, so it is not found rather than a second address for the same page.
+    if (entry?.flagship) return NOT_FOUND
+  }
+
+  if (!entry || entry.status !== 'live' || retiredKeys.includes(entry.key)) return NOT_FOUND
+  // `hasOwn`, so a key such as `constructor` can't pick up an inherited property.
+  if (!Object.hasOwn(configs, entry.key)) return NOT_FOUND
+  return { status: 'found', entry, config: resolveShowcase(configs[entry.key]) }
+}
+
+/** `findShowcase` over the real index and the config.json rollout flag. A config that fails to load
+ * counts as the flag being off. */
+export const loadShowcase = async (match: ShowcaseRouteMatch): Promise<ShowcaseLoadResult> => {
+  const enabled = await isShowcaseEnabled().catch(() => false)
+  return findShowcase(match, { entries: showcaseEntries, configs: showcaseConfigs, retiredKeys: retiredShowcaseKeys, enabled })
+}

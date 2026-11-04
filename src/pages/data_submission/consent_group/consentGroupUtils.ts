@@ -1,6 +1,6 @@
 import { isNil, isString } from 'src/utils/NodashUtil'
 import { DataLocationType } from 'src/pages/data_submission/v2/v2-models'
-import { FileStorageObject } from 'src/types/model'
+import { AccessManagementType, FileStorageObject } from 'src/types/model'
 import { DatasetDataMetadata } from 'src/libs/data-metadata'
 
 /** The primary data use fields of a `ConsentGroup2`, which is what every caller narrows in. */
@@ -11,7 +11,7 @@ export interface ConsentGroup {
   poa?: boolean
   otherPrimary?: string
 }
-export type AccessManagementType = 'controlled' | 'open' | 'external'
+export type { AccessManagementType }
 export interface ConsentGroup2 {
   /** Client-managed metadata bag. Backend stores and returns this value as-is without validation. */
   data?: DatasetDataMetadata
