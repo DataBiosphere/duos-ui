@@ -65,7 +65,7 @@ const EDITOR_KEYS: (keyof DataUse)[] = [
   'geographicalRestrictions', 'publicationMoratorium', 'nonProfitUse', 'secondaryOther',
 ]
 
-const PRIMARY_KEYS: (keyof DataUse)[] = ['generalUse', 'hmbResearch', 'diseaseRestrictions', 'populationOriginsAncestry', 'other']
+const PRIMARY_KEYS = new Set<keyof DataUse>(['generalUse', 'hmbResearch', 'diseaseRestrictions', 'populationOriginsAncestry', 'other'])
 
 /** The data use the terms describe, or undefined when they set none. */
 export const dataUseFromTerms = (terms: DataUseTerms): DataUse | undefined => {
@@ -103,7 +103,7 @@ export const applyTerms = (dataUse: DataUse | null | undefined, terms: DataUseTe
   const writesPrimary = selectedPrimaryGroup(terms) !== undefined
   for (const key of EDITOR_KEYS) {
     const unchanged = JSON.stringify(written[key]) === JSON.stringify(shown[key])
-    const keep = !open && unchanged && !(writesPrimary && PRIMARY_KEYS.includes(key))
+    const keep = !open && unchanged && !(writesPrimary && PRIMARY_KEYS.has(key))
     merged[key] = keep ? dataUse?.[key] : written[key]
   }
   const set = Object.fromEntries(Object.entries(merged).filter(([, value]) => value !== undefined))
