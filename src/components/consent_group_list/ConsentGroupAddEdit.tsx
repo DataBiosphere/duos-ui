@@ -1,10 +1,10 @@
-import { isNil, isEmpty, set, unset } from 'src/utils/NodashUtil'
-import React, { useState, useEffect } from 'react'
+import { set, unset } from 'src/utils/NodashUtil'
+import React, { useState } from 'react'
 import { FormField, FormFieldTitle, FormFieldTypes, FormTable, FormValidators } from 'src/components/forms/forms'
 import { CloudProviders } from 'src/components/forms/CloudProviders'
-import { findOntologyTerms, searchOntologyTerm } from 'src/libs/utils'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
-import { AccessManagementType, ConsentGroup, ConsentGroup2, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
+import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
+import DataUseTermsFields, { DataUseTerms, DataUseTermsValidation, dataUseTermsErrors } from 'src/components/forms/DataUseTermsFields'
 import { DacPicker } from 'src/components/forms/DacPicker'
 import { FileInput } from 'src/components/forms/FileInput'
 import { DataSet } from 'src/libs/ajax/DataSet'
@@ -20,17 +20,10 @@ interface ConsentGroupAddEditProps {
   readonly readOnly?: boolean
 }
 
-interface Validation {
+interface Validation extends DataUseTermsValidation {
   consentGroupName?: ValidationError
-  accessManagement?: ValidationError
   numberOfParticipants?: ValidationError
   dataAccessCommitteeId?: ValidationError
-  primaryConsent?: ValidationError
-  gs?: ValidationError
-  mor?: ValidationError
-  otherSecondary?: ValidationError
-  otherPrimary?: ValidationError
-  diseaseSpecificUse?: ValidationError
 }
 
 const defaultConsentGroup: ConsentGroup2 = {
@@ -63,141 +56,26 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
   const [current, setCurrent] = useState<ConsentGroup2>(consentGroup || defaultConsentGroup)
   const [validation, setValidation] = useState<Validation>({})
 
-  const [showOtherSecondaryText, setShowOtherSecondaryText] = useState(!isNil(consentGroup?.otherSecondary))
-  const [otherSecondaryText, setOtherSecondaryText] = useState(consentGroup?.otherSecondary)
-
-  const [showGSText, setShowGSText] = useState(!isNil(consentGroup?.gs))
-  const [gsText, setGSText] = useState(consentGroup?.gs || undefined)
-
-  // Follow the radio `selectedPrimaryGroup` lights: reading each field alone checks one primary
-  // beside another's input.
-  const initialPrimaryGroup = selectedPrimaryGroup(consentGroup as ConsentGroup)
-
-  const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(initialPrimaryGroup === 'otherPrimary')
-  const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup?.otherPrimary || undefined)
-
-  const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(initialPrimaryGroup === 'diseaseSpecificUse')
-  const [selectedDiseases, setSelectedDiseases] = useState<{ displayText: string, id: string }[]>([])
-
-  const diseaseSpecificUse = consentGroup?.diseaseSpecificUse
-
-  useEffect(() => {
-    let mounted = true
-    const loadOntologyTerms = async () => {
-      if (!isEmpty(diseaseSpecificUse)) {
-        try {
-          const terms = await findOntologyTerms(diseaseSpecificUse!)
-          if (mounted && Array.isArray(terms)) {
-            setSelectedDiseases(terms)
-          }
-        }
-        catch (_e) {
-          // ignore errors and leave selectedDiseases as empty array
-        }
-      }
-    }
-    loadOntologyTerms()
-    return () => {
-      mounted = false
-    }
-  }, [diseaseSpecificUse])
-
-  const [showMORText, setShowMORText] = useState(consentGroup?.mor)
-  const [morText, setMORText] = useState(consentGroup?.morDate || undefined)
   const disableAccessAdjustment = consentGroup?.datasetId !== undefined && current.accessManagement === 'controlled'
   const [editDataLocationUrl, setEditDataLocationUrl] = useState(consentGroup?.dataLocation !== 'Not Determined')
 
-  const onAccessTypeChange = ({ _key, value }: { _key: string, value: string }) => {
-    const accessManagement = value as AccessManagementType
-    const next = structuredClone(current)
-    next.accessManagement = accessManagement
-
-    // Only the fields the new strategy stops showing are cleared. Wiping the data use here marked
-    // it invalid for anyone who filled it in before choosing a strategy (DT-3579).
-    if (accessManagement !== 'controlled') {
+  const onTermsChange = (changed: DataUseTerms) => {
+    const next: ConsentGroup2 = { ...structuredClone(current), ...changed }
+    if (next.accessManagement !== 'controlled') {
       next.dataAccessCommitteeId = undefined
     }
-    if (accessManagement === 'open') {
-      next.generalResearchUse = false
-      next.hmb = false
-      next.diseaseSpecificUse = undefined
-      next.poa = false
-      next.otherPrimary = undefined
-      next.nmds = false
-      next.gso = false
-      next.pub = false
-      next.col = false
-      next.irb = false
-      next.gs = undefined
-      next.mor = false
-      next.morDate = undefined
-      next.npu = false
-      next.otherSecondary = undefined
-
-      setOtherPrimaryText(undefined)
-      setSelectedDiseases([])
-      setGSText(undefined)
-      setMORText(undefined)
-      setOtherSecondaryText(undefined)
-      setShowOtherSecondaryText(false)
-      setShowGSText(false)
-      setShowOtherPrimaryText(false)
-      setShowMORText(false)
-      setShowDiseaseSpecificUseSearchbar(false)
-    }
-
     setCurrent(next)
-    setValidation(calcErrors(next))
-  }
-
-  const onPrimaryChange = ({ key, value }: { key: string, value: boolean | string | string[] }) => {
-    const next = structuredClone(current)
-    next.generalResearchUse = false
-    next.hmb = false
-    next.diseaseSpecificUse = undefined
-    next.poa = false
-    next.otherPrimary = undefined
-    set(next, key, value)
-    setCurrent(next)
-
-    setShowDiseaseSpecificUseSearchbar(key === 'diseaseSpecificUse')
-    setShowOtherPrimaryText(key === 'otherPrimary')
-    if (!next.otherPrimary) {
-      setOtherPrimaryText(undefined)
-    }
-    if (isNil(next.diseaseSpecificUse)) {
-      setSelectedDiseases([])
-    }
-
     setValidation(calcErrors(next))
   }
 
   const calcErrors = (cg: ConsentGroup2): Validation => {
     const v: Validation = {}
     if (!cg.consentGroupName?.trim()) v.consentGroupName = makeError('required')
-    if (!cg.accessManagement?.trim()) v.accessManagement = makeError('required')
     if (!cg.numberOfParticipants || cg.numberOfParticipants <= 0) v.numberOfParticipants = makeError('greaterThanZero')
     if (cg.accessManagement === 'controlled' && !cg.dataAccessCommitteeId) {
       v.dataAccessCommitteeId = makeError('required')
     }
-    if (cg.accessManagement !== 'open' && !selectedPrimaryGroup(cg as ConsentGroup)) {
-      v.primaryConsent = makeError('required')
-    }
-    if (showDiseaseSpecificUseSearchbar && (isNil(cg.diseaseSpecificUse) || cg.diseaseSpecificUse.length === 0)) {
-      v.diseaseSpecificUse = makeError('required')
-    }
-    if (showOtherPrimaryText && (!cg.otherPrimary?.trim())) {
-      v.otherPrimary = makeError('required')
-    }
-    if (showGSText && (!cg.gs?.trim())) {
-      v.gs = makeError('required')
-    }
-    if (showMORText && (!cg.morDate?.trim())) {
-      v.mor = makeError('required')
-    }
-    if (showOtherSecondaryText && (!cg.otherSecondary?.trim())) {
-      v.otherSecondary = makeError('required')
-    }
+    Object.assign(v, dataUseTermsErrors(cg))
     return v
   }
 
@@ -271,349 +149,13 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
             }}
           />
 
-          {/* controlled, open and external access */}
-          <div>
-            <FormField
-              title="Data Access Management*"
-              description="Select a data access management strategy"
-              id="accessManagement_controlled"
-              name="accessManagement"
-              value="controlled"
-              type={FormFieldTypes.RADIOBUTTON}
-              toggleText="Controlled Access (managed by a DAC in DUOS)"
-              defaultValue={current?.accessManagement}
-              onChange={onAccessTypeChange}
-              validation={validation.accessManagement}
-              disabled={readOnly || disableAccessAdjustment}
-            />
-
-            <FormField
-              id="accessManagement_open"
-              name="accessManagement"
-              value="open"
-              type={FormFieldTypes.RADIOBUTTON}
-              toggleText="Open Access (does not need DAC approval)"
-              defaultValue={current?.accessManagement}
-              onChange={onAccessTypeChange}
-              validation={validation.accessManagement}
-              disabled={readOnly || disableAccessAdjustment}
-            />
-
-            <FormField
-              id="accessManagement_external"
-              name="accessManagement"
-              value="external"
-              type={FormFieldTypes.RADIOBUTTON}
-              toggleText="External Access (managed by a DAC external to DUOS)"
-              defaultValue={current?.accessManagement}
-              onChange={onAccessTypeChange}
-              validation={validation.accessManagement}
-              disabled={readOnly || disableAccessAdjustment}
-            />
-          </div>
-
-          {/* primary */}
-          {
-            current?.accessManagement !== 'open' && (
-              <div>
-                <FormField
-                  title="Primary Data Use Terms*"
-                  description="Please select one of the following data use permissions for your dataset"
-                  type={FormFieldTypes.RADIOBUTTON}
-                  id="primaryConsent_generalResearchUse"
-                  name="primaryConsent"
-                  value="generalResearchUse"
-                  toggleText="General Research Use"
-                  defaultValue={selectedPrimaryGroup(current as ConsentGroup)}
-                  onChange={({ value }: { value: string }) => {
-                    onPrimaryChange({ key: value, value: true })
-                  }}
-                  validation={validation.primaryConsent}
-                  disabled={readOnly}
-                />
-
-                <FormField
-                  type={FormFieldTypes.RADIOBUTTON}
-                  id="primaryConsent_hmb"
-                  name="primaryConsent"
-                  value="hmb"
-                  toggleText="Health/Medical/Biomedical Research Use"
-                  defaultValue={selectedPrimaryGroup(current as ConsentGroup)}
-                  onChange={({ value }: { value: string }) => {
-                    onPrimaryChange({ key: value, value: true })
-                  }}
-                  validation={validation.primaryConsent}
-                  disabled={readOnly}
-                />
-
-                <FormField
-                  type={FormFieldTypes.RADIOBUTTON}
-                  id="primaryConsent_diseaseSpecificUse"
-                  name="primaryConsent"
-                  value="diseaseSpecificUse"
-                  toggleText="Disease-Specific Research Use"
-                  defaultValue={selectedPrimaryGroup(current as ConsentGroup)}
-                  onChange={({ value }: { value: string }) => {
-                    onPrimaryChange({
-                      key: value,
-                      value: selectedDiseases.map(disease => disease.id),
-                    })
-                  }}
-                  validation={validation.primaryConsent}
-                  disabled={readOnly}
-                />
-                {
-                  showDiseaseSpecificUseSearchbar && (
-                    <div
-                      style={{
-                        marginBottom: '1.0rem',
-                      }}
-                    >
-                      <FormField
-                        type={FormFieldTypes.SELECT}
-                        isMulti={true}
-                        isCreatable={true}
-                        isAsync={true}
-                        loadOptions={searchOntologyTerm}
-                        id="diseaseSpecificUseText"
-                        name="diseaseSpecificUse"
-                        validators={[FormValidators.REQUIRED]}
-                        placeholder="Please enter one or more diseases"
-                        defaultValue={selectedDiseases}
-                        onChange={({ key, value }: { key: string, value: [{ displayText: string, id: string }], isValid: boolean }) => {
-                          const doids = value.map((v: { id: string }) => v.id)
-
-                          setSelectedDiseases(value)
-                          onChange({
-                            key: key,
-                            value: doids,
-                          })
-                        }}
-                        validation={validation.diseaseSpecificUse}
-                        disabled={readOnly}
-                      />
-                    </div>
-                  )
-                }
-                <FormField
-                  type={FormFieldTypes.RADIOBUTTON}
-                  id="primaryConsent_poa"
-                  name="primaryConsent"
-                  value="poa"
-                  toggleText="Populations, Origins, Ancestry Use"
-                  defaultValue={selectedPrimaryGroup(current as ConsentGroup)}
-                  onChange={({ value }: { value: string }) => {
-                    onPrimaryChange({ key: value, value: true })
-                  }}
-                  disabled={readOnly}
-                  validation={validation.primaryConsent}
-                />
-
-                <FormField
-                  type={FormFieldTypes.RADIOBUTTON}
-                  id="primaryConsent_otherPrimary"
-                  name="primaryConsent"
-                  value="otherPrimary"
-                  toggleText="Other"
-                  defaultValue={selectedPrimaryGroup(current as ConsentGroup)}
-                  onChange={({ value }: { value: string }) => {
-                    onPrimaryChange({ key: value, value: otherPrimaryText ?? '' })
-                  }}
-                  disabled={readOnly}
-                  validation={validation.primaryConsent}
-                />
-                {
-                  showOtherPrimaryText && (
-                    <FormField
-                      id="otherPrimaryText"
-                      name="otherPrimary"
-                      validators={[FormValidators.REQUIRED]}
-                      placeholder="Please specify"
-                      defaultValue={otherPrimaryText}
-                      onChange={({ key, value }: { key: string, value: string, isValid: boolean }) => {
-                        setOtherPrimaryText(value)
-                        onChange({ key: key, value: value })
-                      }}
-                      validation={validation.otherPrimary}
-                      disabled={readOnly}
-                    />
-                  )
-                }
-              </div>
-            )
-          }
-
-          {/* secondary */}
-          {
-            current?.accessManagement !== 'open' && (
-              <div>
-                <FormField
-                  title="Secondary Data Use Terms"
-                  description="Select all applicable data use parameters"
-                  id="nmds"
-                  name="nmds"
-                  type={FormFieldTypes.CHECKBOX}
-                  toggleText="No methods development or validation studies (NMDS)"
-                  defaultValue={current?.nmds}
-                  onChange={onChange}
-                  disabled={readOnly}
-                />
-
-                <FormField
-                  id="gso"
-                  name="gso"
-                  type={FormFieldTypes.CHECKBOX}
-                  toggleText="Genetic studies only (GSO)"
-                  defaultValue={current?.gso}
-                  onChange={onChange}
-                  disabled={readOnly}
-                />
-
-                <FormField
-                  id="pub"
-                  name="pub"
-                  type={FormFieldTypes.CHECKBOX}
-                  toggleText="Publication Required (PUB)"
-                  defaultValue={current?.pub}
-                  onChange={onChange}
-                  disabled={readOnly}
-                />
-
-                <FormField
-                  id="col"
-                  name="col"
-                  type={FormFieldTypes.CHECKBOX}
-                  toggleText="Collaboration Required (COL)"
-                  defaultValue={current?.col}
-                  onChange={onChange}
-                  disabled={readOnly}
-                />
-
-                <FormField
-                  id="irb"
-                  name="irb"
-                  type={FormFieldTypes.CHECKBOX}
-                  toggleText="Ethics Approval Required (IRB)"
-                  defaultValue={current?.irb}
-                  onChange={onChange}
-                  disabled={readOnly}
-                />
-
-                <FormField
-                  id="gs"
-                  name="gs"
-                  type={FormFieldTypes.CHECKBOX}
-                  toggleText="Geographic Restriction (GS-)"
-                  defaultValue={showGSText}
-                  onChange={({ key, value }: { key: string, value: boolean }) => {
-                    setShowGSText(value)
-                    if (value) {
-                      onChange({ key: key, value: gsText })
-                    }
-                    else {
-                      onChange({ key: key, value: undefined })
-                      setGSText(undefined)
-                    }
-                  }}
-                  disabled={readOnly}
-                />
-                {
-                  showGSText && (
-                    <FormField
-                      id="gsText"
-                      name="gs"
-                      validators={[FormValidators.REQUIRED]}
-                      placeholder="Specify Geographic Restriction"
-                      defaultValue={current?.gs}
-                      onChange={({ key, value }: { key: string, value: string, isValid: boolean }) => {
-                        setGSText(value)
-                        onChange({ key: key, value: value })
-                      }}
-                      validation={validation.gs}
-                      disabled={readOnly}
-                    />
-                  )
-                }
-                <FormField
-                  id="mor"
-                  name="mor"
-                  type={FormFieldTypes.CHECKBOX}
-                  toggleText="Publication Moratorium (MOR)"
-                  defaultValue={showMORText}
-                  onChange={({ key, value }: { key: string, value: boolean }) => {
-                    setShowMORText(value)
-                    onChange({ key: key, value: value })
-                    if (!value) {
-                      setMORText(undefined)
-                    }
-                  }}
-                  disabled={readOnly}
-                />
-                {
-                  showMORText && (
-                    <FormField
-                      id="morText"
-                      name="morDate"
-                      type={FormFieldTypes.CALENDAR}
-                      validators={[FormValidators.REQUIRED, FormValidators.DATE]}
-                      defaultValue={morText}
-                      onChange={({ key, value }: { key: string, value: string }) => {
-                        onChange({ key: key, value: value })
-                      }}
-                      validation={validation.mor}
-                      disabled={readOnly}
-                    />
-                  )
-                }
-
-                <FormField
-                  id="npu"
-                  name="npu"
-                  type={FormFieldTypes.CHECKBOX}
-                  toggleText="Non-profit Use Only (NPU)"
-                  defaultValue={current?.npu}
-                  onChange={onChange}
-                  disabled={readOnly}
-                />
-
-                <FormField
-                  id="otherSecondary"
-                  name="otherSecondary"
-                  type={FormFieldTypes.CHECKBOX}
-                  toggleText="Other"
-                  defaultValue={showOtherSecondaryText}
-                  onChange={({ key, value }: { key: string, value: boolean }) => {
-                    setShowOtherSecondaryText(value)
-                    if (value) {
-                      onChange({ key: key, value: otherSecondaryText })
-                    }
-                    else {
-                      onChange({ key: key, value: undefined })
-                      setOtherSecondaryText(undefined)
-                    }
-                  }}
-                  disabled={readOnly}
-                />
-                {
-                  showOtherSecondaryText && (
-                    <FormField
-                      id="otherSecondaryText"
-                      name="otherSecondary"
-                      validators={[FormValidators.REQUIRED]}
-                      placeholder="Please specify"
-                      defaultValue={otherSecondaryText || ''}
-                      onChange={({ key, value }: { key: string, value: string }) => {
-                        setOtherSecondaryText(value)
-                        onChange({ key: key, value: value })
-                      }}
-                      validation={validation.otherSecondary}
-                      disabled={readOnly}
-                    />
-                  )
-                }
-              </div>
-            )
-          }
+          <DataUseTermsFields
+            terms={current}
+            onChange={onTermsChange}
+            validation={validation}
+            readOnly={readOnly}
+            accessDisabled={disableAccessAdjustment}
+          />
 
           {/* data access committee */}
           {

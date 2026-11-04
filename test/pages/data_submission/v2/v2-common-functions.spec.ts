@@ -86,6 +86,12 @@ describe('buildConsentGroupsFromDatasets primary data use', () => {
 
     expect(consentGroup.diseaseSpecificUse).toEqual(['DOID_1'])
   })
+
+  it('loads a saved secondary Other text', () => {
+    const [consentGroup] = buildConsentGroupsFromDatasets(datasetsWithDataUse({ hmbResearch: true, secondaryOther: 'No resale' } as DataUse))
+
+    expect(consentGroup.otherSecondary).toBe('No resale')
+  })
 })
 
 describe('buildConsentGroupsFromDatasets', () => {
