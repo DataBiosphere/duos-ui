@@ -181,8 +181,21 @@ describe('WorkspaceAddEdit data use and access management', () => {
     await user.type(container.querySelector('#name')!, ' v2')
     await save(user, container)
 
-    expect(saved[0][0].dataUse).toBe(dataUse)
+    expect(saved[0][0].dataUse).toEqual(dataUse)
     expect(saved[0][0].accessManagement).toBe('controlled')
+  })
+
+  it('keeps stored data use values the form does not show when another term changes', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm({
+      ...sampleWorkspace,
+      accessManagement: 'controlled',
+      dataUse: { hmbResearch: true, methodsResearch: true, nonProfitUse: false },
+    })
+    await user.click(container.querySelector('#gso')!)
+    await save(user, container)
+
+    expect(saved[0][0].dataUse).toEqual({ hmbResearch: true, methodsResearch: true, nonProfitUse: false, geneticStudiesOnly: true })
   })
 
   it('clears access management and data use, including fields the form does not show', async () => {
