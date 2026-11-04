@@ -6,7 +6,7 @@ import { makeWorkspaceColumns } from 'src/components/data_library/columns/worksp
 import { WorkspaceAsset } from 'src/types/library'
 
 const makeRow = (overrides: Partial<WorkspaceAsset> = {}): WorkspaceAsset => ({
-  workspaceId: 'ws-001',
+  workspaceId: 1,
   studyId: 42,
   studyName: 'Test Study',
   name: 'My Workspace',
