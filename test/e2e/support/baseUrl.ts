@@ -10,3 +10,7 @@ export const THROTTLE_BASE_URL = 'https://local.dsde-dev.broadinstitute.org:3002
 // The fourth instance, whose sessions last 10 seconds (DT-4071).
 export const SHORT_SESSION_BASE_URL = 'https://local.dsde-dev.broadinstitute.org:3003'
 export const SHORT_SESSION_MAX_AGE_MS = 10_000
+
+// The fifth instance, in legacy mode: bffEnabled is off and the browser calls
+// the mock showcase lookup directly (DT-4353).
+export const LEGACY_BASE_URL = 'https://local.dsde-dev.broadinstitute.org:3004'

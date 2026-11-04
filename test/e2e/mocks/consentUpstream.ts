@@ -3,6 +3,7 @@ import { UNAUTHENTICATED_PATHS } from '../../../server/src/proxy/unauthenticated
 import { bearerToken, HttpError, requestUrl, sendJson } from './http'
 import { defaultProfile, type ScenarioStore } from './scenarios'
 import { MOCK_ECHO_PATH } from './settings'
+import { serveShowcaseLookup } from './showcaseLookup'
 
 /**
  * A stand-in for the Consent API, for the specs that sign in through the mock
@@ -71,11 +72,13 @@ function userMe(response: ServerResponse, store: ScenarioStore, key: string): vo
   }
 }
 
-export function createConsentUpstream(options: { origin: string, store: ScenarioStore }) {
-  const { origin, store } = options
+export function createConsentUpstream(options: { origin: string, store: ScenarioStore, showcaseOrigins: readonly string[] }) {
+  const { origin, store, showcaseOrigins } = options
 
-  return function handle(request: IncomingMessage, response: ServerResponse): void {
+  return async function handle(request: IncomingMessage, response: ServerResponse): Promise<void> {
     const url = requestUrl(request, origin)
+    // Anonymous, as in Consent, so it comes before the token check.
+    if (await serveShowcaseLookup(request, response, url, showcaseOrigins)) return
     if (servePublicPath(response, url)) return
     const authorization = singleAuthorization(request) ?? null
     const token = bearerToken(authorization)
