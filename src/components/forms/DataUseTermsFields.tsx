@@ -90,18 +90,20 @@ export const dataUseFromTerms = (terms: DataUseTerms): DataUse | undefined => {
 }
 
 /**
- * A data use with the fields the editor sets replaced by the terms'; any other field stays. Terms
- * that describe the stored data use leave it exactly as stored.
+ * A data use with the fields the editor sets replaced by the terms'; any other field stays. A field
+ * whose term is unchanged keeps its stored value, including values the editor can't show, such as
+ * methodsResearch: true or nonProfitUse: false.
  */
 export const applyTerms = (dataUse: DataUse | null | undefined, terms: DataUseTerms): DataUse | undefined => {
-  const written = dataUseFromTerms(terms)
-  if (JSON.stringify(written) === JSON.stringify(dataUseFromTerms(termsFromDataUse(dataUse)))) {
-    return dataUse ?? undefined
+  const written: DataUse = dataUseFromTerms(terms) ?? {}
+  const shown: DataUse = dataUseFromTerms(termsFromDataUse(dataUse)) ?? {}
+  const merged: Record<string, unknown> = { ...dataUse }
+  for (const key of EDITOR_KEYS) {
+    const unchanged = JSON.stringify(written[key]) === JSON.stringify(shown[key])
+    merged[key] = unchanged ? dataUse?.[key] : written[key]
   }
-  const edited = new Set(EDITOR_KEYS)
-  const kept = Object.fromEntries(Object.entries(dataUse ?? {}).filter(([key]) => !edited.has(key as keyof DataUse)))
-  const merged = { ...kept, ...written }
-  return isEmpty(merged) ? undefined : merged
+  const set = Object.fromEntries(Object.entries(merged).filter(([, value]) => value !== undefined))
+  return isEmpty(set) ? undefined : set as DataUse
 }
 
 /** The editor's terms for a stored data use; the inverse of {@link dataUseFromTerms}. */

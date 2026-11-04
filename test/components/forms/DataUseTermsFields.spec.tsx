@@ -88,7 +88,18 @@ describe('applyTerms', () => {
 
   it('leaves a data use the terms describe exactly as stored', () => {
     const stored = { generalUse: true, methodsResearch: true, nonProfitUse: false }
-    expect(applyTerms(stored, termsFromDataUse(stored))).toBe(stored)
+    expect(applyTerms(stored, termsFromDataUse(stored))).toEqual(stored)
+  })
+
+  it('keeps stored values the editor cannot show when another term changes', () => {
+    const stored = { generalUse: true, methodsResearch: true, nonProfitUse: false }
+    expect(applyTerms(stored, { ...termsFromDataUse(stored), gso: true }))
+      .toEqual({ generalUse: true, methodsResearch: true, nonProfitUse: false, geneticStudiesOnly: true })
+  })
+
+  it('replaces a stored value the editor cannot show once its term is set', () => {
+    expect(applyTerms({ hmbResearch: true, methodsResearch: true, nonProfitUse: false }, { hmb: true, nmds: true, npu: true }))
+      .toEqual({ hmbResearch: true, methodsResearch: false, nonProfitUse: true })
   })
 
   it('leaves no data use when the terms clear the only fields it had', () => {
