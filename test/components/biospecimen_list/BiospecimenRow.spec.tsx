@@ -39,7 +39,7 @@ describe('BiospecimenRow', () => {
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 
-  it('does not render edit form when editMode true (redirects)', async () => {
+  it('renders the edit form when editMode is true', async () => {
     const { container } = render(
       <MemoryRouter>
         <BiospecimenRow
@@ -56,10 +56,12 @@ describe('BiospecimenRow', () => {
         />
       </MemoryRouter>,
     )
-    expect(container.querySelector('[data-cy="biospecimen-add-edit"]')).not.toBeInTheDocument()
+    expect(container.querySelector('[data-cy="biospecimen-add-edit"]')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('DONOR-001')).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
   })
 
-  it('does not render view form when viewMode true (redirects)', async () => {
+  it('renders the form read only when viewMode is true', async () => {
     const { container } = render(
       <MemoryRouter>
         <BiospecimenRow
@@ -78,7 +80,9 @@ describe('BiospecimenRow', () => {
         />
       </MemoryRouter>,
     )
-    expect(container.querySelector('[data-cy="biospecimen-add-edit"]')).not.toBeInTheDocument()
+    expect(container.querySelector('[data-cy="biospecimen-add-edit"]')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('DONOR-001')).toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'Save' })).toBeNull()
   })
 
   it('triggers viewAction when view button is clicked', async () => {
