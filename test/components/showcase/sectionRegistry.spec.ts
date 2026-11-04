@@ -55,9 +55,9 @@ const sections: Sections = {
 const registry: SectionRegistry = {
   'masthead': testEntry({ navigable: false }),
   'hero': testEntry({ navigable: false }),
-  'latest-data-releases': testEntry(),
-  'featured-tools': testEntry({ hasRenderableContent: hasItems }),
-  'featured-workspaces': testEntry({ hasRenderableContent: hasItems }),
+  'latest-data-releases': testEntry({ defaultLabels: { title: 'Latest' } }),
+  'featured-tools': testEntry({ defaultLabels: { title: 'Tools' }, hasRenderableContent: hasItems }),
+  'featured-workspaces': testEntry({ defaultLabels: { title: 'Workspaces' }, hasRenderableContent: hasItems }),
 }
 
 const keys = (list: { key: SectionKey }[]) => list.map(section => section.key)
@@ -147,6 +147,12 @@ describe('visibleSections', () => {
     ])
   })
 
+  it('treats a whitespace-only title or nav label as unset', () => {
+    const config = configWith({ ...sections, 'featured-tools': { enabled: true, items: [tool], title: '  ', navLabel: ' ' } })
+    const tools = visibleSections(config, registry).find(section => section.key === 'featured-tools')
+    expect(tools).toMatchObject({ title: 'Tools', navLabel: 'Tools' })
+  })
+
   it('marks content sections navigable and masthead and hero not, whatever their entry says', () => {
     const claimsNav: SectionRegistry = { ...registry, hero: testEntry({ navigable: true }) }
     const navigable = visibleSections(configWith(sections), claimsNav).map(({ key, navigable }) => [key, navigable])
@@ -160,6 +166,13 @@ describe('subNavSections', () => {
     const nonNav: SectionRegistry = { ...registry, 'latest-data-releases': testEntry({ navigable: false }) }
     expect(keys(subNavSections(config, registry))).toEqual(['latest-data-releases', 'featured-tools'])
     expect(keys(subNavSections(config, nonNav))).toEqual(['featured-tools'])
+  })
+
+  it('leaves out a section with no nav label, title or default, which the page still renders', () => {
+    const unlabelled: SectionRegistry = { ...registry, 'latest-data-releases': testEntry() }
+    const config = configWith(sections)
+    expect(keys(subNavSections(config, unlabelled))).toEqual(['featured-tools'])
+    expect(keys(visibleSections(config, unlabelled))).toContain('latest-data-releases')
   })
 
   it('uses the same entries as the page list', () => {

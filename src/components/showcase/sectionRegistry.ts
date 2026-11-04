@@ -72,8 +72,8 @@ export const sectionDomId = (key: SectionKey): string => key
 
 const hasNoAnchor = (key: SectionKey) => (NO_ANCHOR_SECTION_KEYS as readonly string[]).includes(key)
 
-/** `undefined` for an empty or missing label, so a fallback applies. */
-const label = (...candidates: (string | undefined)[]) => candidates.find(candidate => candidate !== undefined && candidate !== '')
+/** `undefined` for a missing, empty or whitespace-only label, so a fallback applies. */
+const label = (...candidates: (string | undefined)[]) => candidates.find(candidate => candidate !== undefined && candidate.trim() !== '')
 
 const visibleSection = <K extends SectionKey>(key: K, sections: SectionConfigs, registry: SectionRegistry): VisibleSectionOf<K> | undefined => {
   // Every section type has `enabled` and the common label fields; reading them through this shape
@@ -112,6 +112,10 @@ export const visibleSections = (config: Pick<ShowcaseConfig, 'sections'>, regist
     return visible === undefined ? [] : [visible as VisibleSection]
   })
 
-/** The sections the sub-nav links to: visible and navigable, in page order. */
+/**
+ * The sections the sub-nav links to: visible, navigable and labelled, in page order. A section with
+ * no nav label, title or registry default (the defaults stay empty until the product owner gives
+ * the wording) is left out rather than shown as a link with no text.
+ */
 export const subNavSections = (config: Pick<ShowcaseConfig, 'sections'>, registry: SectionRegistry = sectionRegistry): VisibleSection[] =>
-  visibleSections(config, registry).filter(section => section.navigable)
+  visibleSections(config, registry).filter(section => section.navigable && section.navLabel !== undefined)
