@@ -27,9 +27,9 @@ const MODES: ReadonlySet<string> = new Set(['identifiers', 'ranking', 'all', 'st
 const lookup = createShowcaseCatalogMock()
 
 function corsHeaders(request: IncomingMessage, allowedOrigins: readonly string[]): Record<string, string> | undefined {
-  const origin = request.headers.origin
-  if (origin === undefined || !allowedOrigins.includes(origin)) return undefined
-  return { 'access-control-allow-origin': origin, 'vary': 'Origin' }
+  // Echo the allowlist's own entry, never the request header.
+  const allowed = allowedOrigins.find(origin => origin === request.headers.origin)
+  return allowed === undefined ? undefined : { 'access-control-allow-origin': allowed, 'vary': 'Origin' }
 }
 
 async function answer(request: IncomingMessage): Promise<{ status: number, body: unknown }> {

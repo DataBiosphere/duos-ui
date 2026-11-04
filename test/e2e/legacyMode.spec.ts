@@ -28,8 +28,6 @@ test('serves legacy mode, and the browser reaches the showcase lookup directly',
   const policy = response?.headers()['content-security-policy'] ?? ''
   expect(policy).toContain(`${MOCK_SHOWCASE_API_URL}/showcase/`)
   await expect(page.getByText('DUOS').first()).toBeVisible()
-  // The legacy client never asks the BFF for a session.
-  expect(paths).not.toContain('/auth/me')
 
   // A JSON content type makes the browser send a preflight first.
   const lookup = await page.evaluate(async ({ url, body }) => {
@@ -48,4 +46,6 @@ test('serves legacy mode, and the browser reaches the showcase lookup directly',
   expect(blocked).toBe('blocked')
   expect((await drainViolations(page, violations)).map(violation => violation.blockedUrl))
     .toEqual([`${MOCK_SHOWCASE_API_URL}/status`])
+  // The legacy client never asks the BFF for a session, before or after the lookup.
+  expect(paths).not.toContain('/auth/me')
 })

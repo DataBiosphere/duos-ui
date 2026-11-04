@@ -22,9 +22,10 @@ const SHORT_SESSION_SPECS = ['sessionExpiry.spec.ts']
 // Specs for legacy mode (bffEnabled off), where the browser calls showcaseApiUrl directly.
 const LEGACY_SPECS = ['legacyMode.spec.ts']
 
-// All three servers use the mock provider as their issuer. The role specs never run a
-// callback, so a real B2C issuer would only add a discovery call at boot. The
-// mock redirects only to the URIs it registers for each base URL.
+// The four BFF servers use the mock provider as their issuer; the legacy server
+// gets no oidcEnv. The role specs never run a callback, so a real B2C issuer
+// would only add a discovery call at boot. The mock redirects only to the URIs
+// it registers for each base URL.
 const oidcEnv = (baseUrl: string): Record<string, string> => ({
   DUOS_AZURE_ISSUER_URL: MOCK_OIDC_DISCOVERY_URL,
   DUOS_AZURE_CLIENT_ID: MOCK_CLIENT_ID,
