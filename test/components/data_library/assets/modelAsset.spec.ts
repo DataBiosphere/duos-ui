@@ -7,6 +7,7 @@ import { ModelAsset, PaginationState, SortState } from 'src/types/library'
 import {
   ElasticsearchResponse,
   ModelStudyAggregationBucket,
+  PartialModelAsset,
   QueryClause,
 } from 'src/types/elastic'
 import { EMPTY_FILTERS } from 'src/components/data_library/filterRegistry'
@@ -16,7 +17,7 @@ const pagination: PaginationState = { page: 0, pageSize: 25 }
 const makeBucket = (
   studyId: number,
   models: Array<{
-    modelId?: string
+    modelId?: number
     name?: string
     format?: string
     license?: string
@@ -151,8 +152,8 @@ describe('modelAsset — transformResponse', () => {
 
   it('flattens models from multiple studies into rows', () => {
     const response = makeResponse([
-      makeBucket(1, [{ modelId: 'm1', name: 'Alpha' }, { modelId: 'm2', name: 'Beta' }]),
-      makeBucket(2, [{ modelId: 'm3', name: 'Gamma' }]),
+      makeBucket(1, [{ modelId: 1, name: 'Alpha' }, { modelId: 2, name: 'Beta' }]),
+      makeBucket(2, [{ modelId: 3, name: 'Gamma' }]),
     ])
     const result = modelAsset.transformResponse(response, pagination)
     expect(result.items).toHaveLength(3)
@@ -162,7 +163,7 @@ describe('modelAsset — transformResponse', () => {
   it('maps fields correctly from bucket to ModelAsset', () => {
     const response = makeResponse([
       makeBucket(42, [{
-        modelId: 'model-xyz',
+        modelId: 4201,
         name: 'ResNet',
         format: 'ONNX',
         license: 'Apache-2.0',
@@ -173,7 +174,7 @@ describe('modelAsset — transformResponse', () => {
     ])
     const result = modelAsset.transformResponse(response, pagination)
     const row = result.items[0] as ModelAsset
-    expect(row.modelId).toBe('model-xyz')
+    expect(row.modelId).toBe(4201)
     expect(row.studyId).toBe(42)
     expect(row.studyName).toBe('NHGRI Study')
     expect(row.name).toBe('ResNet')
@@ -185,18 +186,31 @@ describe('modelAsset — transformResponse', () => {
     expect(row.maintainer.email).toBe('alice@example.com')
   })
 
-  it('falls back to composite key when modelId is absent', () => {
-    const response = makeResponse([
-      makeBucket(99, [{ name: 'NoId Model' }]),
-    ])
+  it('uses the server-assigned row id as the row id', () => {
+    const response = makeResponse([makeBucket(99, [{ modelId: 17 }])])
+    const row = modelAsset.transformResponse(response, pagination).items[0] as ModelAsset
+    expect(row.modelId).toBe(17)
+    expect(modelAsset.getRowId(row)).toBe(17)
+  })
+
+  it('renders no row for an entry without a row id', () => {
+    const response = makeResponse([makeBucket(99, [{ name: 'No Id' }, { modelId: 17 }])])
     const result = modelAsset.transformResponse(response, pagination)
-    const row = result.items[0] as ModelAsset
-    expect(row.modelId).toBe('99-0')
+    expect(result.items.map(row => (row as ModelAsset).modelId)).toEqual([17])
+    expect(result.total).toBe(1)
+  })
+
+  it('renders no row for an indexed element that is not an object', () => {
+    const bucket = makeBucket(99, [{ modelId: 17 }])
+    const entries = bucket.study_details?.hits?.hits?.[0]?._source?.study?.assets?.models
+    entries?.push(...(['legacy', null, 7, [18]] as unknown as PartialModelAsset[]))
+    const result = modelAsset.transformResponse(makeResponse([bucket]), pagination)
+    expect(result.items.map(row => (row as ModelAsset).modelId)).toEqual([17])
   })
 
   it('applies client-side pagination', () => {
     const models = Array.from({ length: 30 }, (_, i) => ({
-      modelId: `m${i}`,
+      modelId: i + 1,
       name: `Model ${i}`,
     }))
     const response = makeResponse([makeBucket(1, models)])
@@ -215,7 +229,7 @@ describe('modelAsset — transformResponse', () => {
   })
 
   it('reports total as the number of all models across all studies (not just page)', () => {
-    const models = Array.from({ length: 30 }, (_, i) => ({ modelId: `m${i}` }))
+    const models = Array.from({ length: 30 }, (_, i) => ({ modelId: i + 1 }))
     const response = makeResponse([makeBucket(1, models)])
     const result = modelAsset.transformResponse(response, { page: 0, pageSize: 10 })
     expect(result.total).toBe(30)
@@ -223,7 +237,7 @@ describe('modelAsset — transformResponse', () => {
 
   it('returns empty tags / maintainer defaults for missing fields', () => {
     const response = makeResponse([
-      makeBucket(1, [{}]),
+      makeBucket(1, [{ modelId: 1 }]),
     ])
     const row = modelAsset.transformResponse(response, pagination).items[0] as ModelAsset
     expect(row.tags).toEqual([])
@@ -241,13 +255,13 @@ describe('modelAsset — transformResponse', () => {
   })
 
   it('maps the cloud field onto the row', () => {
-    const response = makeResponse([makeBucket(1, [{ modelId: 'm1', cloud: ['AWS', 'GCP'] }])])
+    const response = makeResponse([makeBucket(1, [{ modelId: 1, cloud: ['AWS', 'GCP'] }])])
     const row = modelAsset.transformResponse(response, pagination).items[0] as ModelAsset
     expect(row.cloud).toEqual(['AWS', 'GCP'])
   })
 
   it('normalizes a cloud indexed as a bare string into an array', () => {
-    const response = makeResponse([makeBucket(1, [{ modelId: 'm1', cloud: 'AWS' }])])
+    const response = makeResponse([makeBucket(1, [{ modelId: 1, cloud: 'AWS' }])])
     const row = modelAsset.transformResponse(response, pagination).items[0] as ModelAsset
     expect(row.cloud).toEqual(['AWS'])
   })
@@ -255,72 +269,72 @@ describe('modelAsset — transformResponse', () => {
   it('matches the cloud filter against a cloud indexed as a bare string', () => {
     const response = makeResponse([
       makeBucket(1, [
-        { modelId: 'm1', cloud: 'AWS' },
-        { modelId: 'm2', cloud: 'GCP' },
+        { modelId: 1, cloud: 'AWS' },
+        { modelId: 2, cloud: 'GCP' },
       ]),
     ])
 
     const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelCloud: ['GCP'] })
 
     expect(result.total).toBe(1)
-    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+    expect((result.items[0] as ModelAsset).modelId).toBe(2)
   })
 
   // Every model of a qualifying study comes back, so rows need re-checking.
   it('returns only models matching the format filter', () => {
     const response = makeResponse([
       makeBucket(1, [
-        { modelId: 'm1', format: 'ONNX' },
-        { modelId: 'm2', format: 'PyTorch' },
+        { modelId: 1, format: 'ONNX' },
+        { modelId: 2, format: 'PyTorch' },
       ]),
     ])
 
     const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelFormat: ['ONNX'] })
 
     expect(result.total).toBe(1)
-    expect((result.items[0] as ModelAsset).modelId).toBe('m1')
+    expect((result.items[0] as ModelAsset).modelId).toBe(1)
   })
 
   it('returns only models matching the license filter', () => {
     const response = makeResponse([
       makeBucket(1, [
-        { modelId: 'm1', license: 'Apache-2.0' },
-        { modelId: 'm2', license: 'MIT' },
+        { modelId: 1, license: 'Apache-2.0' },
+        { modelId: 2, license: 'MIT' },
       ]),
     ])
 
     const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelLicense: ['MIT'] })
 
     expect(result.total).toBe(1)
-    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+    expect((result.items[0] as ModelAsset).modelId).toBe(2)
   })
 
   it('returns only models matching the cloud filter', () => {
     const response = makeResponse([
       makeBucket(1, [
-        { modelId: 'm1', cloud: ['AWS'] },
-        { modelId: 'm2', cloud: ['GCP'] },
+        { modelId: 1, cloud: ['AWS'] },
+        { modelId: 2, cloud: ['GCP'] },
       ]),
     ])
 
     const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelCloud: ['GCP'] })
 
     expect(result.total).toBe(1)
-    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+    expect((result.items[0] as ModelAsset).modelId).toBe(2)
   })
 
   it('returns only models matching the tags filter', () => {
     const response = makeResponse([
       makeBucket(1, [
-        { modelId: 'm1', tags: ['vision'] },
-        { modelId: 'm2', tags: ['nlp'] },
+        { modelId: 1, tags: ['vision'] },
+        { modelId: 2, tags: ['nlp'] },
       ]),
     ])
 
     const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, modelTags: ['nlp'] })
 
     expect(result.total).toBe(1)
-    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+    expect((result.items[0] as ModelAsset).modelId).toBe(2)
   })
 
   // The four model fields are free text, so the corpus can carry either casing
@@ -329,7 +343,7 @@ describe('modelAsset — transformResponse', () => {
     ['modelFormat', 'format'],
     ['modelLicense', 'license'],
   ])('matches %s regardless of the indexed casing', (key, field) => {
-    const response = makeResponse([makeBucket(1, [{ modelId: 'm1', [field]: 'PyTorch' }])])
+    const response = makeResponse([makeBucket(1, [{ modelId: 1, [field]: 'PyTorch' }])])
 
     const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, [key]: ['pytorch'] })
 
@@ -340,7 +354,7 @@ describe('modelAsset — transformResponse', () => {
     ['modelCloud', 'cloud'],
     ['modelTags', 'tags'],
   ])('matches %s regardless of the indexed casing', (key, field) => {
-    const response = makeResponse([makeBucket(1, [{ modelId: 'm1', [field]: ['AWS'] }])])
+    const response = makeResponse([makeBucket(1, [{ modelId: 1, [field]: ['AWS'] }])])
 
     const result = modelAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, [key]: ['aws'] })
 
@@ -350,8 +364,8 @@ describe('modelAsset — transformResponse', () => {
   it('combines multiple active model filters with AND', () => {
     const response = makeResponse([
       makeBucket(1, [
-        { modelId: 'm1', format: 'ONNX', license: 'MIT' },
-        { modelId: 'm2', format: 'ONNX', license: 'Apache-2.0' },
+        { modelId: 1, format: 'ONNX', license: 'MIT' },
+        { modelId: 2, format: 'ONNX', license: 'Apache-2.0' },
       ]),
     ])
 
@@ -362,14 +376,14 @@ describe('modelAsset — transformResponse', () => {
     })
 
     expect(result.total).toBe(1)
-    expect((result.items[0] as ModelAsset).modelId).toBe('m2')
+    expect((result.items[0] as ModelAsset).modelId).toBe(2)
   })
 })
 
 describe('modelAsset — getRowId', () => {
   it('returns the modelId of the row', () => {
     const row: ModelAsset = {
-      modelId: 'abc-123',
+      modelId: 123,
       studyId: 1,
       studyName: '',
       name: '',
@@ -380,14 +394,14 @@ describe('modelAsset — getRowId', () => {
       trainedOnDatasets: [],
       maintainer: { name: '', email: '' },
     }
-    expect(modelAsset.getRowId(row)).toBe('abc-123')
+    expect(modelAsset.getRowId(row)).toBe(123)
   })
 })
 
 describe('modelAsset — isRowSelectable', () => {
   it('always returns false — models do not participate in access requests', () => {
     const row: ModelAsset = {
-      modelId: 'm1',
+      modelId: 1,
       studyId: 1,
       studyName: '',
       name: '',
@@ -405,7 +419,7 @@ describe('modelAsset — isRowSelectable', () => {
 describe('modelAsset — computeRowSelection', () => {
   it('always returns an empty Set regardless of inputs', () => {
     const row: ModelAsset = {
-      modelId: 'm1',
+      modelId: 1,
       studyId: 1,
       studyName: '',
       name: '',
@@ -431,7 +445,7 @@ describe('modelAsset — selectionToDatasetIds', () => {
 describe('modelAsset — getStudyIdsForSelection', () => {
   it('always returns an empty array', () => {
     const row: ModelAsset = {
-      modelId: 'm1',
+      modelId: 1,
       studyId: 42,
       studyName: '',
       name: '',
@@ -476,7 +490,7 @@ describe('modelAsset — makeColumns', () => {
 
 describe('modelAsset — indexed values are normalized', () => {
   it('matches a row whose indexed format carries stray whitespace', () => {
-    const response = makeResponse([makeBucket(1, [{ modelId: 'w1', format: '  ONNX ' }])])
+    const response = makeResponse([makeBucket(1, [{ modelId: 1, format: '  ONNX ' }])])
 
     // The option list is built from trimmed values, so the row has to be
     // trimmed too or the filter that offered 'ONNX' drops the only row.
@@ -486,7 +500,7 @@ describe('modelAsset — indexed values are normalized', () => {
   })
 
   it('trims list-shaped values and drops the empties', () => {
-    const response = makeResponse([makeBucket(1, [{ modelId: 'w1', cloud: ['  AWS ', '  ', 'GCP'] }])])
+    const response = makeResponse([makeBucket(1, [{ modelId: 1, cloud: ['  AWS ', '  ', 'GCP'] }])])
 
     const result = modelAsset.transformResponse(response, pagination)
 

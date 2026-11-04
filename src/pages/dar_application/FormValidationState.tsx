@@ -93,3 +93,5 @@ export interface ValidationError {
   valid?: boolean
   failed?: Array<string>
 }
+
+export const makeError = (validatorId: string): ValidationError => ({ valid: false, failed: [validatorId] })
