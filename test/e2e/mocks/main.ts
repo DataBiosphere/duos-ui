@@ -16,6 +16,9 @@ import {
   MOCK_OIDC_ORIGIN,
   MOCK_OIDC_PORT,
   MOCK_SERVER_BASE_URLS,
+  MOCK_SHOWCASE_API_URL,
+  MOCK_SHOWCASE_ORIGINS,
+  MOCK_SHOWCASE_PORT,
   postLogoutUri,
 } from './settings'
 
@@ -38,7 +41,7 @@ const provider = createOidcProvider({
   store,
   signingKey: createSigningKey(),
 })
-const consent = createConsentUpstream({ origin: MOCK_CONSENT_URL, store })
+const consent = createConsentUpstream({ origin: MOCK_CONSENT_URL, store, showcaseOrigins: MOCK_SHOWCASE_ORIGINS })
 
 type Handler = (request: IncomingMessage, response: ServerResponse) => void | Promise<void>
 
@@ -58,21 +61,25 @@ const guarded = (name: string, handler: Handler) => (request: IncomingMessage, r
     })
 }
 
-const oidcServer = https.createServer({
+const tls = {
   key: fs.readFileSync(path.join(PROJECT_ROOT, 'server.key')),
   cert: fs.readFileSync(path.join(PROJECT_ROOT, 'server.crt')),
-}, guarded('oidc', provider))
+}
+const oidcServer = https.createServer(tls, guarded('oidc', provider))
 const consentServer = http.createServer(guarded('consent', consent))
+// The same upstream over HTTPS, which the legacy-mode browser calls directly.
+const showcaseServer = https.createServer(tls, guarded('consent', consent))
 
 oidcServer.listen(MOCK_OIDC_PORT, '127.0.0.1', () => console.log(`[mock oidc] listening on ${MOCK_OIDC_ORIGIN}`))
 consentServer.listen(MOCK_CONSENT_PORT, '127.0.0.1', () => console.log(`[mock consent] listening on ${MOCK_CONSENT_URL}`))
+showcaseServer.listen(MOCK_SHOWCASE_PORT, '127.0.0.1', () => console.log(`[mock consent] listening on ${MOCK_SHOWCASE_API_URL}`))
 
 // A `hang` scenario holds a response open, so close sockets rather than wait for them.
 const shutdown = (): void => {
-  oidcServer.closeAllConnections()
-  consentServer.closeAllConnections()
-  oidcServer.close()
-  consentServer.close()
+  for (const server of [oidcServer, consentServer, showcaseServer]) {
+    server.closeAllConnections()
+    server.close()
+  }
 }
 process.on('SIGTERM', shutdown)
 process.on('SIGINT', shutdown)

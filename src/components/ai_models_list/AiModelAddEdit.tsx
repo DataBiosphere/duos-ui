@@ -7,7 +7,6 @@ import DataUseTermsFields, {
   DataUseTerms,
   DataUseTermsValidation,
   applyTerms,
-  dataUseFromTerms,
   dataUseTermsErrors,
   termsFromDataUse,
 } from 'src/components/forms/DataUseTermsFields'
@@ -18,7 +17,6 @@ const defaultMaintainer: Maintainer = {
 }
 
 const defaultAiModel: AiModel = {
-  modelId: '',
   studyId: '',
   name: '',
   description: '',
@@ -72,13 +70,9 @@ const calcAiModelErrors = (model: AiModel): Validation => {
   return v
 }
 
-// Consent accepts a stored data use without a primary term, so one is needed for the kept fields only once access is chosen.
-const sendsDataUse = (model: AiModel, terms: DataUseTerms) =>
-  dataUseFromTerms(terms) !== undefined || (!!terms.accessManagement && applyTerms(model.dataUse, terms) !== undefined)
-
 const calcErrors = (model: AiModel, terms: DataUseTerms): Validation => ({
   ...calcAiModelErrors(model),
-  ...dataUseTermsErrors(terms, false, sendsDataUse(model, terms)),
+  ...dataUseTermsErrors(terms, false, model.dataUse),
 })
 
 const getHeaderTitle = (readOnly: boolean, aiModel?: AiModel) => {
@@ -272,6 +266,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             required={false}
             subject="model"
             onClear={onTermsClear}
+            idPrefix="model_"
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>

@@ -455,7 +455,8 @@ export interface Study {
 }
 
 export interface AiModel {
-  modelId: string
+  /** Server-assigned row id; absent until the study is first saved. */
+  modelId?: number
   studyId: string
   name: string
   description: string
@@ -471,7 +472,8 @@ export interface AiModel {
 }
 
 export interface Workspace {
-  workspaceId: string
+  /** Server-assigned row id; absent until the study is first saved. */
+  workspaceId?: number
   studyId: string
   name: string
   platform: string
@@ -481,6 +483,8 @@ export interface Workspace {
   tools?: string[]
   access?: string
   tags?: string[]
+  accessManagement?: AccessManagementType | null
+  dataUse?: DataUse | null
 }
 
 export enum ClinicalTrialStatus {
@@ -602,7 +606,8 @@ export enum Sex {
 }
 
 export interface Biospecimen {
-  biospecimenId: string
+  /** Server-assigned row id; absent until the study is first saved. */
+  biospecimenId?: number
   sampleId?: string
   studyId: string
   donorId: string

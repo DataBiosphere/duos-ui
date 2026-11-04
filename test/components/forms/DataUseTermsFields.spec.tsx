@@ -51,9 +51,10 @@ describe('dataUseTermsErrors when the terms are optional', () => {
     expect(dataUseTermsErrors({ accessManagement: 'external', hmb: true, npu: true }, false)).toEqual({})
   })
 
-  it('needs a primary term when the data use sent keeps other fields', () => {
-    expect(Object.keys(dataUseTermsErrors({ accessManagement: 'controlled' }, false, true))).toEqual(['primaryConsent'])
-    expect(dataUseTermsErrors({ accessManagement: 'open' }, false, true)).toEqual({})
+  it('needs a primary term when the data use sent keeps fields from the stored one', () => {
+    const stored = { aiLlmUse: true }
+    expect(Object.keys(dataUseTermsErrors({ accessManagement: 'controlled' }, false, stored))).toEqual(['primaryConsent'])
+    expect(dataUseTermsErrors({ accessManagement: 'open' }, false, stored)).toEqual({})
   })
 })
 
@@ -124,6 +125,7 @@ function Harness({ initial = {}, onTerms, ...rest }: {
   onTerms?: (terms: DataUseTerms) => void
   required?: boolean
   subject?: string
+  idPrefix?: string
 }) {
   const [terms, setTerms] = useState<DataUseTerms>(initial)
   return (
@@ -223,6 +225,23 @@ describe('DataUseTermsFields', () => {
     await user.click(container.querySelector('#mor')!)
 
     expect(onTerms).toHaveBeenLastCalledWith(expect.objectContaining({ mor: false, morDate: undefined }))
+  })
+
+  it('keeps two editors on one page apart', async () => {
+    const user = userEvent.setup()
+    const first = vi.fn()
+    const second = vi.fn()
+    const { getAllByText } = render(
+      <>
+        <Harness initial={{ accessManagement: 'controlled', hmb: true }} onTerms={first} idPrefix="model_" />
+        <Harness initial={{ accessManagement: 'controlled', hmb: true }} onTerms={second} idPrefix="workspace_" />
+      </>,
+    )
+
+    await user.click(getAllByText('Open Access (does not need DAC approval)')[1])
+
+    expect(first).not.toHaveBeenCalled()
+    expect(second).toHaveBeenLastCalledWith(expect.objectContaining({ accessManagement: 'open' }))
   })
 
   it('clears every term when access becomes open', async () => {

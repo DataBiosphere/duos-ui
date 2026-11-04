@@ -220,9 +220,9 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
   it('resubmits the assets and fields the form does not edit, so an update keeps them', async () => {
     // The raw study payload keeps each list in its own property; only the registration read assembles them.
     const assets = {
-      models: [{ modelId: '', name: 'Stored Model' }],
-      workspaces: [{ workspaceId: 'w1', name: 'Stored Workspace' }],
-      biospecimens: [{ biospecimenId: 'S-1' }],
+      models: [{ modelId: 1, name: 'Stored Model' }],
+      workspaces: [{ workspaceId: 2, name: 'Stored Workspace' }],
+      biospecimens: [{ biospecimenId: 3 }],
       legacyNote: 'kept',
     }
     vi.mocked(DataSet.getStudyById).mockResolvedValue({

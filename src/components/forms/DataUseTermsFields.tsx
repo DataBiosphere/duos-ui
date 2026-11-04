@@ -141,16 +141,18 @@ export const termsFromDataUse = (dataUse?: DataUse | null): DataUseTerms => {
 /**
  * Errors in the terms: a checked option without its text, or a missing access management or
  * primary term. When the terms are optional, a primary term is needed only when a data use will be
- * sent, which by default is when any term is set.
+ * sent. The fields {@link applyTerms} keeps from the stored data use count only once access is
+ * chosen, as consent accepts a stored data use without a primary term.
  */
 export const dataUseTermsErrors = (
   terms: DataUseTerms,
   required = true,
-  sendsDataUse = dataUseFromTerms(terms) !== undefined,
+  stored?: DataUse | null,
 ): DataUseTermsValidation => {
   const v: DataUseTermsValidation = {}
   const primary = selectedPrimaryGroup(terms)
-  const needsPrimary = required || sendsDataUse
+  const keepsStored = !!terms.accessManagement && applyTerms(stored, terms) !== undefined
+  const needsPrimary = required || dataUseFromTerms(terms) !== undefined || keepsStored
   if (required && !terms.accessManagement?.trim()) v.accessManagement = makeError('required')
   if (needsPrimary && terms.accessManagement !== 'open' && !primary) v.primaryConsent = makeError('required')
   if (primary === 'diseaseSpecificUse' && isEmpty(terms.diseaseSpecificUse)) v.diseaseSpecificUse = makeError('required')
@@ -173,10 +175,12 @@ interface DataUseTermsFieldsProps {
   readonly subject?: string
   /** Receives the cleared terms in place of onChange, for a caller that also drops what it keeps beside them. */
   readonly onClear?: (cleared: DataUseTerms) => void
+  /** Prefixes every element id and radio name, so two editors on one page stay apart. */
+  readonly idPrefix?: string
 }
 
 export default function DataUseTermsFields(props: DataUseTermsFieldsProps): React.JSX.Element {
-  const { terms, onChange, validation, readOnly = false, accessDisabled = false, required = true, subject = 'dataset', onClear = onChange } = props
+  const { terms, onChange, validation, readOnly = false, accessDisabled = false, required = true, subject = 'dataset', onClear = onChange, idPrefix = '' } = props
   const marker = required ? '*' : ''
   const primary = selectedPrimaryGroup(terms)
 
@@ -234,8 +238,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
   const primaryRadio = (value: keyof DataUseTerms, toggleText: string, onSelect: () => void, extra: object = {}) => (
     <FormField
       type={FormFieldTypes.RADIOBUTTON}
-      id={`primaryConsent_${value}`}
-      name="primaryConsent"
+      id={`${idPrefix}primaryConsent_${value}`}
+      name={`${idPrefix}primaryConsent`}
       value={value}
       toggleText={toggleText}
       defaultValue={primary}
@@ -248,8 +252,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
 
   const checkbox = (key: 'nmds' | 'gso' | 'pub' | 'col' | 'irb' | 'npu', toggleText: string, extra: object = {}) => (
     <FormField
-      id={key}
-      name={key}
+      id={`${idPrefix}${key}`}
+      name={`${idPrefix}${key}`}
       type={FormFieldTypes.CHECKBOX}
       toggleText={toggleText}
       defaultValue={terms[key]}
@@ -262,8 +266,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
   // A checked option with text holds a string, empty until the text is entered.
   const textToggle = (key: 'gs' | 'otherSecondary', toggleText: string) => (
     <FormField
-      id={key}
-      name={key}
+      id={`${idPrefix}${key}`}
+      name={`${idPrefix}${key}`}
       type={FormFieldTypes.CHECKBOX}
       toggleText={toggleText}
       defaultValue={!isNil(terms[key])}
@@ -285,8 +289,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
         <FormField
           title={`Data Access Management${marker}`}
           description="Select a data access management strategy"
-          id="accessManagement_controlled"
-          name="accessManagement"
+          id={`${idPrefix}accessManagement_controlled`}
+          name={`${idPrefix}accessManagement`}
           value="controlled"
           type={FormFieldTypes.RADIOBUTTON}
           toggleText="Controlled Access (managed by a DAC in DUOS)"
@@ -297,8 +301,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
         />
 
         <FormField
-          id="accessManagement_open"
-          name="accessManagement"
+          id={`${idPrefix}accessManagement_open`}
+          name={`${idPrefix}accessManagement`}
           value="open"
           type={FormFieldTypes.RADIOBUTTON}
           toggleText="Open Access (does not need DAC approval)"
@@ -309,8 +313,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
         />
 
         <FormField
-          id="accessManagement_external"
-          name="accessManagement"
+          id={`${idPrefix}accessManagement_external`}
+          name={`${idPrefix}accessManagement`}
           value="external"
           type={FormFieldTypes.RADIOBUTTON}
           toggleText="External Access (managed by a DAC external to DUOS)"
@@ -344,8 +348,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
                     isCreatable={true}
                     isAsync={true}
                     loadOptions={searchOntologyTerm}
-                    id="diseaseSpecificUseText"
-                    name="diseaseSpecificUse"
+                    id={`${idPrefix}diseaseSpecificUseText`}
+                    name={`${idPrefix}diseaseSpecificUse`}
                     validators={[FormValidators.REQUIRED]}
                     placeholder="Please enter one or more diseases"
                     defaultValue={selectedDiseases}
@@ -364,8 +368,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
             {
               primary === 'otherPrimary' && (
                 <FormField
-                  id="otherPrimaryText"
-                  name="otherPrimary"
+                  id={`${idPrefix}otherPrimaryText`}
+                  name={`${idPrefix}otherPrimary`}
                   validators={[FormValidators.REQUIRED]}
                   placeholder="Please specify"
                   defaultValue={terms.otherPrimary}
@@ -395,8 +399,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
             {
               !isNil(terms.gs) && (
                 <FormField
-                  id="gsText"
-                  name="gs"
+                  id={`${idPrefix}gsText`}
+                  name={`${idPrefix}gs`}
                   validators={[FormValidators.REQUIRED]}
                   placeholder="Specify Geographic Restriction"
                   defaultValue={terms.gs}
@@ -407,8 +411,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
               )
             }
             <FormField
-              id="mor"
-              name="mor"
+              id={`${idPrefix}mor`}
+              name={`${idPrefix}mor`}
               type={FormFieldTypes.CHECKBOX}
               toggleText="Publication Moratorium (MOR)"
               defaultValue={terms.mor}
@@ -418,8 +422,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
             {
               terms.mor && (
                 <FormField
-                  id="morText"
-                  name="morDate"
+                  id={`${idPrefix}morText`}
+                  name={`${idPrefix}morDate`}
                   type={FormFieldTypes.CALENDAR}
                   validators={[FormValidators.REQUIRED, FormValidators.DATE]}
                   defaultValue={terms.morDate}
@@ -434,8 +438,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
             {
               !isNil(terms.otherSecondary) && (
                 <FormField
-                  id="otherSecondaryText"
-                  name="otherSecondary"
+                  id={`${idPrefix}otherSecondaryText`}
+                  name={`${idPrefix}otherSecondary`}
                   validators={[FormValidators.REQUIRED]}
                   placeholder="Please specify"
                   defaultValue={terms.otherSecondary}
@@ -450,7 +454,7 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
       }
       {
         !required && !readOnly && (
-          <button id="clearDataUseTerms" className="btn" type="button" onClick={clear}>
+          <button id={`${idPrefix}clearDataUseTerms`} className="btn" type="button" onClick={clear}>
             Clear access management and data use
           </button>
         )

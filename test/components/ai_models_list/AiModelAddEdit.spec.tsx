@@ -16,7 +16,7 @@ vi.mock('src/libs/utils', async (importActual) => {
 })
 
 const sampleModel: AiModel = {
-  modelId: 'm1',
+  modelId: 1,
   studyId: 's1',
   name: 'Baseline Model',
   description: 'Desc',
@@ -52,6 +52,7 @@ describe('AiModelAddEdit component', () => {
     expect(onChangeSpy[0].name).toBe('My Model')
     expect(onChangeSpy[0].maintainer.email).toBe('bob@example.com')
     expect(onChangeSpy[0].cloud).toEqual([])
+    expect(onChangeSpy[0]).not.toHaveProperty('modelId')
   })
 
   it('saves selected cloud values', async () => {
@@ -105,6 +106,7 @@ describe('AiModelAddEdit component', () => {
     expect(onAiModelsChange).toHaveBeenCalledTimes(1)
     const [updated] = onAiModelsChange.mock.calls[0] as [AiModel[]]
     expect(updated[0].name).toBe('Baseline Model Edited')
+    expect(updated[0].modelId).toBe(1)
   })
 })
 
@@ -156,9 +158,9 @@ describe('AiModelAddEdit data use and access management', () => {
     const user = userEvent.setup()
     const { container, saved } = renderForm()
     await fillRequired(user, container)
-    await user.click(container.querySelector('#accessManagement_controlled')!)
-    await user.click(container.querySelector('#primaryConsent_hmb')!)
-    await user.click(container.querySelector('#npu')!)
+    await user.click(container.querySelector('#model_accessManagement_controlled')!)
+    await user.click(container.querySelector('#model_primaryConsent_hmb')!)
+    await user.click(container.querySelector('#model_npu')!)
     await save(user, container)
 
     expect(saved[0][0]).toMatchObject({
@@ -171,7 +173,7 @@ describe('AiModelAddEdit data use and access management', () => {
     const user = userEvent.setup()
     const { container, saved } = renderForm()
     await fillRequired(user, container)
-    await user.click(container.querySelector('#npu')!)
+    await user.click(container.querySelector('#model_npu')!)
     await save(user, container)
 
     expect(saved).toHaveLength(0)
@@ -180,7 +182,7 @@ describe('AiModelAddEdit data use and access management', () => {
   it('needs a primary term when the kept data use fields would be sent under controlled access', async () => {
     const user = userEvent.setup()
     const { container, saved } = renderForm({ ...sampleModel, accessManagement: 'open', dataUse: { aiLlmUse: true } })
-    await user.click(container.querySelector('#accessManagement_controlled')!)
+    await user.click(container.querySelector('#model_accessManagement_controlled')!)
     await save(user, container)
 
     expect(saved).toHaveLength(0)
@@ -213,7 +215,7 @@ describe('AiModelAddEdit data use and access management', () => {
       accessManagement: 'controlled',
       dataUse: { hmbResearch: true, aiLlmUse: true },
     })
-    await user.click(container.querySelector('#clearDataUseTerms')!)
+    await user.click(container.querySelector('#model_clearDataUseTerms')!)
     await save(user, container)
 
     expect(saved[0][0].accessManagement).toBeUndefined()
@@ -227,9 +229,9 @@ describe('AiModelAddEdit data use and access management', () => {
       accessManagement: 'controlled',
       dataUse: { generalUse: true, publicationResults: true, aiLlmUse: true },
     })
-    expect(container.querySelector<HTMLInputElement>('#pub')!.checked).toBe(true)
+    expect(container.querySelector<HTMLInputElement>('#model_pub')!.checked).toBe(true)
 
-    await user.click(container.querySelector('#accessManagement_open')!)
+    await user.click(container.querySelector('#model_accessManagement_open')!)
     await save(user, container)
 
     expect(saved[0][0].accessManagement).toBe('open')
