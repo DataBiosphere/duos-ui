@@ -224,3 +224,45 @@ describe('StudyAssetList', () => {
     expect(screen.getByTestId('row-item1')).toHaveTextContent('First Item')
   })
 })
+
+describe('StudyAssetList row keys for unsaved items', () => {
+  interface UnsavedAsset {
+    name: string
+  }
+
+  // Holds a draft in its own state, which follows the row's key.
+  const DraftRow: React.FC<{ item: UnsavedAsset, deleteAction: () => void }> = ({ item, deleteAction }) => (
+    <div data-testid="draft-row">
+      <input aria-label={`Draft for ${item.name}`} defaultValue="" />
+      <button onClick={deleteAction}>{`Delete ${item.name}`}</button>
+    </div>
+  )
+
+  const Harness = () => {
+    const [items, setItems] = useState<UnsavedAsset[]>([{ name: 'First' }, { name: 'Second' }])
+    return (
+      <StudyAssetList<UnsavedAsset, ValidationError, object, { item: UnsavedAsset, deleteAction: () => void }>
+        items={items}
+        onItemsChange={setItems}
+        AddEditComponent={() => null}
+        RowComponent={DraftRow}
+        addButtonId="addUnsaved"
+        addButtonLabel="Add"
+        getValidationState={() => undefined}
+        getAddEditProps={() => ({})}
+        getRowProps={({ item, deleteAction }) => ({ item, deleteAction })}
+        getItemKey={() => undefined}
+      />
+    )
+  }
+
+  it('keeps each unsaved row its own key when an earlier row is deleted', () => {
+    render(<Harness />)
+    fireEvent.change(screen.getByLabelText('Draft for Second'), { target: { value: 'typed' } })
+
+    fireEvent.click(screen.getByText('Delete First'))
+
+    expect(screen.getAllByTestId('draft-row')).toHaveLength(1)
+    expect(screen.getByLabelText('Draft for Second')).toHaveValue('typed')
+  })
+})
