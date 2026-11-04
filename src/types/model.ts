@@ -481,6 +481,8 @@ export interface Workspace {
   tools?: string[]
   access?: string
   tags?: string[]
+  accessManagement?: AccessManagementType | null
+  dataUse?: DataUse | null
 }
 
 export enum ClinicalTrialStatus {

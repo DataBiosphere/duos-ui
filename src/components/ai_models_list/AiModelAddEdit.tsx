@@ -75,7 +75,7 @@ const calcAiModelErrors = (model: AiModel): Validation => {
 
 const calcErrors = (model: AiModel, terms: DataUseTerms): Validation => ({
   ...calcAiModelErrors(model),
-  ...dataUseTermsErrors(terms, false, applyTerms(model.dataUse, terms) !== undefined),
+  ...dataUseTermsErrors(terms, false, model.dataUse),
 })
 
 const getHeaderTitle = (readOnly: boolean, aiModel?: AiModel) => {

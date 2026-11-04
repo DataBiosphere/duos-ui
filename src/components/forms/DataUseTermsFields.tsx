@@ -126,16 +126,16 @@ export const termsFromDataUse = (dataUse?: DataUse | null): DataUseTerms => ({
 /**
  * Errors in the terms: a checked option without its text, or a missing access management or
  * primary term. When the terms are optional, a primary term is needed only when a data use will be
- * sent, which by default is when any term is set.
+ * sent, counting the fields {@link applyTerms} keeps from the stored data use.
  */
 export const dataUseTermsErrors = (
   terms: DataUseTerms,
   required = true,
-  sendsDataUse = dataUseFromTerms(terms) !== undefined,
+  stored?: DataUse | null,
 ): DataUseTermsValidation => {
   const v: DataUseTermsValidation = {}
   const primary = selectedPrimaryGroup(terms)
-  const needsPrimary = required || sendsDataUse
+  const needsPrimary = required || applyTerms(stored, terms) !== undefined
   if (required && !terms.accessManagement?.trim()) v.accessManagement = makeError('required')
   if (needsPrimary && terms.accessManagement !== 'open' && !primary) v.primaryConsent = makeError('required')
   if (primary === 'diseaseSpecificUse' && isEmpty(terms.diseaseSpecificUse)) v.diseaseSpecificUse = makeError('required')

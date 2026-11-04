@@ -50,9 +50,10 @@ describe('dataUseTermsErrors when the terms are optional', () => {
     expect(dataUseTermsErrors({ accessManagement: 'external', hmb: true, npu: true }, false)).toEqual({})
   })
 
-  it('needs a primary term when the data use sent keeps other fields', () => {
-    expect(Object.keys(dataUseTermsErrors({ accessManagement: 'controlled' }, false, true))).toEqual(['primaryConsent'])
-    expect(dataUseTermsErrors({ accessManagement: 'open' }, false, true)).toEqual({})
+  it('needs a primary term when the data use sent keeps fields from the stored one', () => {
+    const stored = { aiLlmUse: true }
+    expect(Object.keys(dataUseTermsErrors({ accessManagement: 'controlled' }, false, stored))).toEqual(['primaryConsent'])
+    expect(dataUseTermsErrors({ accessManagement: 'open' }, false, stored)).toEqual({})
   })
 })
 

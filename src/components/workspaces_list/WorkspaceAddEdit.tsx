@@ -3,6 +3,13 @@ import { CloudProviders } from 'src/components/forms/CloudProviders'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { Workspace } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import DataUseTermsFields, {
+  DataUseTerms,
+  DataUseTermsValidation,
+  applyTerms,
+  dataUseTermsErrors,
+  termsFromDataUse,
+} from 'src/components/forms/DataUseTermsFields'
 
 interface WorkspaceAddEditProps {
   readonly id: number
@@ -13,7 +20,7 @@ interface WorkspaceAddEditProps {
   readonly readOnly?: boolean
 }
 
-interface Validation {
+interface Validation extends DataUseTermsValidation {
   name?: ValidationError
   platform?: ValidationError
   url?: ValidationError
@@ -35,7 +42,7 @@ const defaultWorkspace: Workspace = {
 
 const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
 
-const calcErrors = (w: Workspace): Validation => {
+const calcWorkspaceErrors = (w: Workspace): Validation => {
   const v: Validation = {}
   if (!w.name?.trim()) v.name = makeError('required')
   if (!w.platform?.trim()) v.platform = makeError('required')
@@ -48,6 +55,11 @@ const calcErrors = (w: Workspace): Validation => {
   if (!w.description?.trim()) v.description = makeError('required')
   return v
 }
+
+const calcErrors = (w: Workspace, terms: DataUseTerms): Validation => ({
+  ...calcWorkspaceErrors(w),
+  ...dataUseTermsErrors(terms, false, w.dataUse),
+})
 
 const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
 
@@ -68,20 +80,40 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
   const { id, workspace, workspaces, closeAction, onWorkspaceChange, readOnly = false } = props
 
   const [current, setCurrent] = useState<Workspace>(workspace || defaultWorkspace)
+  const [terms, setTerms] = useState<DataUseTerms>({
+    accessManagement: workspace?.accessManagement ?? undefined,
+    ...termsFromDataUse(workspace?.dataUse),
+  })
   const [validation, setValidation] = useState<Validation>({})
 
   const onChange = ({ key, value }: FormFieldChange) => {
     const next = { ...current, [key]: value } as Workspace
     setCurrent(next)
-    setValidation(calcErrors(next))
+    setValidation(calcErrors(next, terms))
+  }
+
+  const onTermsChange = (changed: DataUseTerms) => {
+    const next = { ...terms, ...changed }
+    setTerms(next)
+    setValidation(calcErrors(current, next))
+  }
+
+  // Clearing also drops the data use fields the editor does not show.
+  const onTermsClear = (cleared: DataUseTerms) => {
+    const next = { ...current, dataUse: undefined }
+    setCurrent(next)
+    setTerms(cleared)
+    setValidation(calcErrors(next, cleared))
   }
 
   const save = () => {
-    const validationErrors = calcErrors(current)
+    const validationErrors = calcErrors(current, terms)
     setValidation(validationErrors)
     if (validationFailed(validationErrors)) return
     const toSave: Workspace = {
       ...current,
+      accessManagement: terms.accessManagement,
+      dataUse: applyTerms(current.dataUse, terms),
       workspaceId: current.workspaceId || crypto.randomUUID?.() || Date.now().toString(),
     }
     if (id < 0) {
@@ -189,6 +221,15 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
             defaultValue={workspace?.tags}
             onChange={onChange}
             disabled={readOnly}
+          />
+          <DataUseTermsFields
+            terms={terms}
+            onChange={onTermsChange}
+            validation={validation}
+            readOnly={readOnly}
+            required={false}
+            subject="workspace"
+            onClear={onTermsClear}
           />
           <FormField
             id="citation"
