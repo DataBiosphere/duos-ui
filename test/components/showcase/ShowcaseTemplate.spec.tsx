@@ -150,6 +150,12 @@ describe('ShowcaseTemplate', () => {
     expect(style.getPropertyValue('--showcase-accent')).toBe('#1a1a1a')
   })
 
+  it('sizes type in px, since the app root is 10px, and gives every heading level the heading font', () => {
+    const css = readFileSync('src/components/showcase/ShowcaseTemplate.css', 'utf8')
+    expect(css).not.toMatch(/--showcase-font-size-[a-z-]+:\s*[\d.]+rem/)
+    expect(css).toMatch(/\.showcase-template :is\(h1, h2, h3, h4, h5, h6\) \{\s*font-family: var\(--showcase-font-heading\)/)
+  })
+
   it('has one focus rule for every control that survives forced colors', () => {
     const css = readFileSync('src/components/showcase/ShowcaseTemplate.css', 'utf8')
     const rule = '.showcase-template :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible'

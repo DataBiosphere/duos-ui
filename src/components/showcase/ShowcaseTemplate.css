@@ -5,12 +5,13 @@
      to these two lines. Montserrat is bundled in 400, 400 italic, 500 and 600; use only those. */
   --showcase-font-heading: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --showcase-font-body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  /* Provisional (design review D17): the type scale and heading weight. */
-  --showcase-font-size-page-title: 2.25rem;
-  --showcase-font-size-section-title: 1.5rem;
-  --showcase-font-size-card-title: 1.125rem;
-  --showcase-font-size-body: 1rem;
-  --showcase-font-size-label: 0.875rem;
+  /* Provisional (design review D17): the type scale and heading weight. In px, not rem: the app
+     sets html { font-size: 10px } (bootstrap_replacement.css), so 1rem is 10px here. */
+  --showcase-font-size-page-title: 36px;
+  --showcase-font-size-section-title: 24px;
+  --showcase-font-size-card-title: 18px;
+  --showcase-font-size-body: 16px;
+  --showcase-font-size-label: 14px;
   --showcase-font-weight-heading: 600;
   --showcase-line-height-heading: 1.25;
   --showcase-line-height-body: 1.5;
@@ -28,7 +29,7 @@
   line-height: var(--showcase-line-height-body);
 }
 
-.showcase-template :is(h1, h2, h3) {
+.showcase-template :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--showcase-font-heading);
   font-weight: var(--showcase-font-weight-heading);
   line-height: var(--showcase-line-height-heading);
@@ -36,7 +37,7 @@
 
 .showcase-template h1 { font-size: var(--showcase-font-size-page-title); }
 .showcase-template h2 { font-size: var(--showcase-font-size-section-title); }
-.showcase-template h3 { font-size: var(--showcase-font-size-card-title); }
+.showcase-template :is(h3, h4, h5, h6) { font-size: var(--showcase-font-size-card-title); }
 
 /* One focus style for every showcase control (D9). Specificity (0,3,0) beats the global
    `a, input { outline: 0 }` (0,0,1) without !important. An outline, not a box-shadow, so it stays
