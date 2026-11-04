@@ -2,7 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { AggregationDefinition, CompositeAggregation, ElasticsearchQuery, ElasticsearchResponse, QueryClause, StudyAggregationResponse, studyIdFromBucketKey } from 'src/types/elastic'
 import { PaginationState, SortState, StudyAggregation } from 'src/types/library'
 import { makeStudyColumns } from 'src/components/data_library/columns/studyColumns'
-import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow } from 'src/components/data_library/assets/definition'
+import { AssetDefinition, ColumnsProps, LibraryPage, LibraryRow, withRowIds } from 'src/components/data_library/assets/definition'
 import { StudyDataEsFields } from 'src/libs/data-metadata'
 
 /**
@@ -139,8 +139,8 @@ export const studyAsset: AssetDefinition = {
         datasetCount: bucket.dataset_count?.value || 0,
         totalParticipants: bucket.total_participants?.value || 0,
         datasetIds: bucket.dataset_ids?.buckets?.map(b => b.key) || [],
-        modelCount: studyData.assets?.models?.length || 0,
-        workspaceCount: studyData.assets?.workspaces?.length || 0,
+        modelCount: withRowIds(studyData.assets?.models, 'modelId').length,
+        workspaceCount: withRowIds(studyData.assets?.workspaces, 'workspaceId').length,
       }
     })
 

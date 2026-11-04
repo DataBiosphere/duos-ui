@@ -11,7 +11,7 @@ import { BiospecimenAsset } from 'src/types/library'
 import { BioSpecimenType, BioSpecimenPreservationMethod, Sex } from 'src/types/model'
 
 const makeRow = (overrides: Partial<BiospecimenAsset> = {}): BiospecimenAsset => ({
-  biospecimenId: 'BS-001',
+  biospecimenId: 1,
   studyId: 1,
   studyName: 'Test Study',
   donorId: 'DONOR-001',
