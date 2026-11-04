@@ -90,18 +90,20 @@ export const dataUseFromTerms = (terms: DataUseTerms): DataUse | undefined => {
 }
 
 /**
- * A data use with the fields the editor sets replaced by the terms'; any other field stays. Terms
- * that describe the stored data use leave it exactly as stored.
+ * A data use with the fields the editor sets replaced by the terms'; any other field stays. A field
+ * whose term is unchanged keeps its stored value, including values the editor can't show, such as
+ * methodsResearch: true or nonProfitUse: false.
  */
 export const applyTerms = (dataUse: DataUse | null | undefined, terms: DataUseTerms): DataUse | undefined => {
-  const written = dataUseFromTerms(terms)
-  if (JSON.stringify(written) === JSON.stringify(dataUseFromTerms(termsFromDataUse(dataUse)))) {
-    return dataUse ?? undefined
+  const written: DataUse = dataUseFromTerms(terms) ?? {}
+  const shown: DataUse = dataUseFromTerms(termsFromDataUse(dataUse)) ?? {}
+  const merged: Record<string, unknown> = { ...dataUse }
+  for (const key of EDITOR_KEYS) {
+    const unchanged = JSON.stringify(written[key]) === JSON.stringify(shown[key])
+    merged[key] = unchanged ? dataUse?.[key] : written[key]
   }
-  const edited = new Set(EDITOR_KEYS)
-  const kept = Object.fromEntries(Object.entries(dataUse ?? {}).filter(([key]) => !edited.has(key as keyof DataUse)))
-  const merged = { ...kept, ...written }
-  return isEmpty(merged) ? undefined : merged
+  const set = Object.fromEntries(Object.entries(merged).filter(([, value]) => value !== undefined))
+  return isEmpty(set) ? undefined : set as DataUse
 }
 
 /** The editor's terms for a stored data use; the inverse of {@link dataUseFromTerms}. */
@@ -166,7 +168,7 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
   const primary = selectedPrimaryGroup(terms)
 
   const [selectedDiseases, setSelectedDiseases] = useState<{ displayText: string, id: string }[]>([])
-  const [initialDiseases] = useState(terms.diseaseSpecificUse)
+  const [initialDiseases, setInitialDiseases] = useState(terms.diseaseSpecificUse)
   // The fields read their values only when they mount, so clearing remounts them.
   const [resetCount, setResetCount] = useState(0)
 
@@ -191,11 +193,17 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
     }
   }, [initialDiseases])
 
+  // Dropping the initial diseases cancels their lookup, so a late result can't overwrite this choice.
+  const chooseDiseases = (diseases: { displayText: string, id: string }[]) => {
+    setInitialDiseases(undefined)
+    setSelectedDiseases(diseases)
+  }
+
   const onAccessTypeChange = ({ value }: { value: string }) => {
     const accessManagement = value as AccessManagementType
     // Only open access clears the terms; clearing on every change invalidated terms filled in first.
     if (accessManagement === 'open') {
-      setSelectedDiseases([])
+      chooseDiseases([])
       onChange({ ...DATA_USE_CLEARED, accessManagement })
     }
     else {
@@ -205,7 +213,7 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
 
   const onPrimaryChange = (key: keyof DataUseTerms, value: boolean | string | string[]) => {
     if (key !== 'diseaseSpecificUse') {
-      setSelectedDiseases([])
+      chooseDiseases([])
     }
     onChange({ ...PRIMARY_CLEARED, [key]: value })
   }
@@ -252,7 +260,7 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
   )
 
   const clear = () => {
-    setSelectedDiseases([])
+    chooseDiseases([])
     setResetCount(count => count + 1)
     onClear({ ...DATA_USE_CLEARED, accessManagement: undefined })
   }
@@ -329,7 +337,7 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
                     placeholder="Please enter one or more diseases"
                     defaultValue={selectedDiseases}
                     onChange={({ value }: { value: [{ displayText: string, id: string }] }) => {
-                      setSelectedDiseases(value)
+                      chooseDiseases(value)
                       onChange({ diseaseSpecificUse: value.map((v: { id: string }) => v.id) })
                     }}
                     validation={validation.diseaseSpecificUse}

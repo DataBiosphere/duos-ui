@@ -193,7 +193,7 @@ describe('AiModelAddEdit data use and access management', () => {
     await user.type(container.querySelector('#name')!, ' v2')
     await save(user, container)
 
-    expect(saved[0][0].dataUse).toBe(dataUse)
+    expect(saved[0][0].dataUse).toEqual(dataUse)
   })
 
   it('clears access management and data use', async () => {
