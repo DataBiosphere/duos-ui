@@ -39,5 +39,5 @@ export const datasetCardEntries = (summary: DatasetSummary): DatasetCardEntry[] 
   (Object.entries(DATASET_CARD_LABELS) as [DatasetCardField, FieldLabel][]).flatMap(([field, { label, display }]): DatasetCardEntry[] => {
     const value = display(summary)
     if (value === null) return []
-    return field === 'accessUrl' ? [{ field, label, value: new URL(value).host, href: value }] : [{ field, label, value }]
+    return field === 'accessUrl' ? [{ field, label, value: new URL(value).host, href: new URL(value).href }] : [{ field, label, value }]
   })
