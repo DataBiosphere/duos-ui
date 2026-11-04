@@ -58,6 +58,7 @@ import { StudyTemplateUpload } from 'src/pages/data_submission/StudyTemplateUplo
 import SigningOfficialDarApprovals from 'src/pages/signing_official_console/SigningOfficialDarApprovals'
 import { DataLibrary } from 'src/pages/DataLibrary'
 import { StudyNameSearch } from 'src/routing/StudyNameSearch'
+import { ShowcasePage } from 'src/components/showcase/ShowcasePage'
 
 interface AppRoutesProps {
   isLogged: boolean
@@ -79,6 +80,9 @@ const AppRoutes = (props: AppRoutesProps) => {
       <Route path="/tos_acceptance" element={<TermsOfServiceAcceptance />} />
       <Route path="/nih_dms_policy" element={<NIHDMSPolicyInfo />} />
       <Route path="/anvil_dms_policy" element={<AnVILDMSPolicyInfo />} />
+      {/* Public showcases need no session (DT-4423); loadShowcase decides what each key shows. */}
+      <Route path="/data" element={<ShowcasePage route="flagship" />} />
+      <Route path="/showcase/:key" element={<ShowcasePage route="key" />} />
       <Route element={<EnvRoute env={envGroups.DEV} />}>
         <Route path="/backgroundsignin" element={<BackgroundSignIn {...props} />} />
       </Route>
