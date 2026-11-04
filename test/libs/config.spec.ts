@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
-import { Config, getEnv, getApiUrl, getBannersUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, getUpstreamApiUrl, isBffEnabled, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
+import { Config, getEnv, getApiUrl, getBannersUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, getUpstreamApiUrl, isBffEnabled, isShowcaseEnabled, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 
 const mockConfig = {
@@ -58,6 +58,7 @@ describe('Config', () => {
       ['getUpstreamApiUrl', 'https://test.api.com'],
       // bffEnabled is absent from mockConfig — the fail-safe default is false
       ['isBffEnabled', false],
+      ['isShowcaseEnabled', false],
     ] as const)('should get %s', async (method, expected) => {
       // oxlint-disable-next-line @typescript-eslint/no-explicit-any
       expect(await (Config[method] as any)()).toBe(expected)
@@ -79,6 +80,8 @@ describe('Config', () => {
       ['getTerraUrl', getTerraUrl, 'https://test.terra.bio'],
       ['getUpstreamApiUrl', getUpstreamApiUrl, 'https://test.api.com'],
       ['isBffEnabled', isBffEnabled, false],
+      // showcaseEnabled is absent from mockConfig: the showcase pages stay off
+      ['isShowcaseEnabled', isShowcaseEnabled, false],
     ] as const)('%s should return correct value', async (_name, fn, expected) => {
       expect(await fn()).toBe(expected)
     })
@@ -90,6 +93,21 @@ describe('Config', () => {
       stubConfigFetch({ ...mockConfig, bffEnabled: true })
       const freshConfig = await import('src/libs/config')
       expect(await freshConfig.isBffEnabled()).toBe(true)
+    })
+  })
+
+  describe('isShowcaseEnabled', () => {
+    it.each([
+      [true, true],
+      [false, false],
+      ['true', false],
+      [1, false],
+    ])('returns %j as %j, so only a boolean true turns the showcase pages on', async (showcaseEnabled, expected) => {
+      vi.resetModules()
+      stubConfigFetch({ ...mockConfig, showcaseEnabled })
+      const freshConfig = await import('src/libs/config')
+      expect(await freshConfig.isShowcaseEnabled()).toBe(expected)
+      expect(await freshConfig.Config.isShowcaseEnabled()).toBe(expected)
     })
   })
 
