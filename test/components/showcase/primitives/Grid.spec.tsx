@@ -17,6 +17,19 @@ describe('Grid', () => {
     expect(screen.getAllByRole('listitem')).toHaveLength(1)
   })
 
+  it('puts a featured 0 in its own list item, not as a stray text node in the list', () => {
+    render(<Grid featured={0}><p>Galaxy</p></Grid>)
+    const list = screen.getByRole('list')
+    expect(within(list).getAllByRole('listitem').map(item => item.textContent)).toEqual(['0', 'Galaxy'])
+    expect([...list.childNodes].every(node => node.nodeName === 'LI')).toBe(true)
+  })
+
+  it('renders no featured item for a false conditional', () => {
+    const showFeatured = false
+    render(<Grid featured={showFeatured && <p>Terra</p>}><p>Galaxy</p></Grid>)
+    expect(screen.getAllByRole('listitem').map(item => item.textContent)).toEqual(['Galaxy'])
+  })
+
   it('leaves out empty children, such as a false conditional', () => {
     const showOptional = false
     render(<Grid>{showOptional && <p>Optional</p>}{null}<p>Galaxy</p></Grid>)
