@@ -267,6 +267,7 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             required={false}
             subject="model"
             onClear={onTermsClear}
+            idPrefix="model_"
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>

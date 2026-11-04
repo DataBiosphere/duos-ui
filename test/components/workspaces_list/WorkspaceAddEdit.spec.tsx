@@ -152,9 +152,9 @@ describe('WorkspaceAddEdit data use and access management', () => {
     const { container, saved } = renderForm()
     await fillRequired(user, container)
     await user.type(container.querySelector('#access')!, 'Registered users')
-    await user.click(container.querySelector('#accessManagement_external')!)
-    await user.click(container.querySelector('#primaryConsent_generalResearchUse')!)
-    await user.click(container.querySelector('#pub')!)
+    await user.click(container.querySelector('#workspace_accessManagement_external')!)
+    await user.click(container.querySelector('#workspace_primaryConsent_generalResearchUse')!)
+    await user.click(container.querySelector('#workspace_pub')!)
     await save(user, container)
 
     expect(saved[0][0]).toMatchObject({
@@ -168,7 +168,7 @@ describe('WorkspaceAddEdit data use and access management', () => {
     const user = userEvent.setup()
     const { container, saved } = renderForm()
     await fillRequired(user, container)
-    await user.click(container.querySelector('#pub')!)
+    await user.click(container.querySelector('#workspace_pub')!)
     await save(user, container)
 
     expect(saved).toHaveLength(0)
@@ -192,7 +192,7 @@ describe('WorkspaceAddEdit data use and access management', () => {
       accessManagement: 'controlled',
       dataUse: { hmbResearch: true, methodsResearch: true, nonProfitUse: false },
     })
-    await user.click(container.querySelector('#gso')!)
+    await user.click(container.querySelector('#workspace_gso')!)
     await save(user, container)
 
     expect(saved[0][0].dataUse).toEqual({ hmbResearch: true, methodsResearch: true, nonProfitUse: false, geneticStudiesOnly: true })
@@ -205,7 +205,7 @@ describe('WorkspaceAddEdit data use and access management', () => {
       accessManagement: 'controlled',
       dataUse: { hmbResearch: true, aiLlmUse: true },
     })
-    await user.click(container.querySelector('#clearDataUseTerms')!)
+    await user.click(container.querySelector('#workspace_clearDataUseTerms')!)
     await save(user, container)
 
     expect(saved[0][0].accessManagement).toBeUndefined()

@@ -228,6 +228,7 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
             required={false}
             subject="workspace"
             onClear={onTermsClear}
+            idPrefix="workspace_"
           />
           <FormField
             id="citation"
