@@ -31,7 +31,7 @@ const makeModelsBucket = (studyId: number, modelCount: number) => ({
           study: {
             studyId,
             studyName: `Study ${studyId}`,
-            assets: { models: Array.from({ length: modelCount }, (_, i) => ({ name: `M${i}` })) },
+            assets: { models: Array.from({ length: modelCount }, (_, i) => ({ modelId: studyId * 100 + i, name: `M${i}` })) },
           },
         },
       }],
@@ -286,8 +286,8 @@ describe('useLibraryPageState — full-corpus filter options', () => {
               studyName: 'Study 1',
               assets: {
                 workspaces: [
-                  { workspaceId: 'w1', tools: ['Jupyter'], platform: 'Terra' },
-                  { workspaceId: 'w2', tools: ['WDL'], platform: 'AnVIL' },
+                  { workspaceId: 1, tools: ['Jupyter'], platform: 'Terra' },
+                  { workspaceId: 2, tools: ['WDL'], platform: 'AnVIL' },
                 ],
               },
             },
@@ -352,7 +352,7 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     const oneWorkspaceStudy = (studyId: number, platform: string) => ({
       key: studyId,
       study_details: {
-        hits: { hits: [{ _source: { study: { studyId, studyName: `Study ${studyId}`, assets: { workspaces: [{ workspaceId: `w${studyId}`, platform }] } } } }] },
+        hits: { hits: [{ _source: { study: { studyId, studyName: `Study ${studyId}`, assets: { workspaces: [{ workspaceId: studyId, platform }] } } } }] },
       },
     })
     const allStudies = [oneWorkspaceStudy(1, 'Terra'), oneWorkspaceStudy(2, 'AnVIL')]
@@ -391,7 +391,7 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     const anvilOnly = {
       key: 2,
       study_details: {
-        hits: { hits: [{ _source: { study: { studyId: 2, studyName: 'Study 2', assets: { workspaces: [{ workspaceId: 'w2', platform: 'AnVIL' }] } } } }] },
+        hits: { hits: [{ _source: { study: { studyId: 2, studyName: 'Study 2', assets: { workspaces: [{ workspaceId: 2, platform: 'AnVIL' }] } } } }] },
       },
     }
 
@@ -488,7 +488,7 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     const anvilOnly = {
       key: 2,
       study_details: {
-        hits: { hits: [{ _source: { study: { studyId: 2, studyName: 'Study 2', assets: { workspaces: [{ workspaceId: 'w2', platform: 'AnVIL' }] } } } }] },
+        hits: { hits: [{ _source: { study: { studyId: 2, studyName: 'Study 2', assets: { workspaces: [{ workspaceId: 2, platform: 'AnVIL' }] } } } }] },
       },
     }
 
@@ -511,7 +511,7 @@ describe('useLibraryPageState — full-corpus filter options', () => {
     const terraOnly = {
       key: 1,
       study_details: {
-        hits: { hits: [{ _source: { study: { studyId: 1, studyName: 'Study 1', assets: { workspaces: [{ workspaceId: 'w1', platform: 'Terra' }] } } } }] },
+        hits: { hits: [{ _source: { study: { studyId: 1, studyName: 'Study 1', assets: { workspaces: [{ workspaceId: 1, platform: 'Terra' }] } } } }] },
       },
     }
     mockCorpus(filters => (filters.workspacePlatform.length === 0
