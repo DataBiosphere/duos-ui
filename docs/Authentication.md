@@ -67,8 +67,8 @@ to the DUOS app registration has no effect on hop 2.
 %%{init: { 'theme': 'forest' } }%%
 sequenceDiagram
     participant DUOS as DUOS (BFF or SPA)
-    participant B2C as B2C Tenant
-    participant MS as Microsoft Entra ID
+    participant B2C as Azure AD B2C Tenant
+    participant MS as Microsoft sign-in (login.microsoftonline.com)
     DUOS ->> B2C: Hop 1: authorize, client_id = duos-<env>
     note right of B2C: User chooses Microsoft
     B2C ->> MS: Hop 2: authorize, client_id = terrab2c-<env>
@@ -79,6 +79,10 @@ sequenceDiagram
     DUOS ->> B2C: Hop 1: token exchange (BFF adds the DUOS client secret)
     B2C -->> DUOS: B2C-issued id_token and access_token
 ```
+
+Hop 2 goes to Microsoft's own sign-in service. It accepts work and school
+accounts (Microsoft Entra ID, formerly Azure AD) and personal Microsoft
+accounts. This is not Entra External ID; DUOS still uses Azure AD B2C.
 
 The Google path has the same shape, with the Google OAuth client and its
 policy key in hop 2.
