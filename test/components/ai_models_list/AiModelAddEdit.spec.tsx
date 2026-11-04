@@ -196,6 +196,16 @@ describe('AiModelAddEdit data use and access management', () => {
     expect(saved[0][0].dataUse).toEqual(dataUse)
   })
 
+  it('saves a stored data use without a primary term when access management is unset', async () => {
+    const user = userEvent.setup()
+    const dataUse = { methodsResearch: true }
+    const { container, saved } = renderForm({ ...sampleModel, accessManagement: null, dataUse })
+    await user.type(container.querySelector('#name')!, ' v2')
+    await save(user, container)
+
+    expect(saved[0][0].dataUse).toEqual(dataUse)
+  })
+
   it('clears access management and data use', async () => {
     const user = userEvent.setup()
     const { container, saved } = renderForm({

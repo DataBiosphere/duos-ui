@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import { CloudProviders } from 'src/components/forms/CloudProviders'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
-import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import { ValidationError, makeError } from 'src/pages/dar_application/FormValidationState'
 import { AiModel, Maintainer } from 'src/types/model'
 import DataUseTermsFields, {
   DataUseTerms,
   DataUseTermsValidation,
   applyTerms,
+  dataUseFromTerms,
   dataUseTermsErrors,
   termsFromDataUse,
 } from 'src/components/forms/DataUseTermsFields'
@@ -53,8 +54,6 @@ interface Validation extends DataUseTermsValidation {
   maintainerEmail?: ValidationError
 }
 
-const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
-
 const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
 
 const calcAiModelErrors = (model: AiModel): Validation => {
@@ -73,9 +72,13 @@ const calcAiModelErrors = (model: AiModel): Validation => {
   return v
 }
 
+// Consent accepts a stored data use without a primary term, so one is needed for the kept fields only once access is chosen.
+const sendsDataUse = (model: AiModel, terms: DataUseTerms) =>
+  dataUseFromTerms(terms) !== undefined || (!!terms.accessManagement && applyTerms(model.dataUse, terms) !== undefined)
+
 const calcErrors = (model: AiModel, terms: DataUseTerms): Validation => ({
   ...calcAiModelErrors(model),
-  ...dataUseTermsErrors(terms, false, applyTerms(model.dataUse, terms) !== undefined),
+  ...dataUseTermsErrors(terms, false, sendsDataUse(model, terms)),
 })
 
 const getHeaderTitle = (readOnly: boolean, aiModel?: AiModel) => {
