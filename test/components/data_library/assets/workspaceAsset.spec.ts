@@ -6,6 +6,7 @@ import { workspaceAsset } from 'src/components/data_library/assets/workspaceAsse
 import { WorkspaceAsset, PaginationState, SortState } from 'src/types/library'
 import {
   ElasticsearchResponse,
+  PartialWorkspaceAsset,
   WorkspaceStudyAggregationBucket,
   QueryClause,
 } from 'src/types/elastic'
@@ -16,7 +17,7 @@ const pagination: PaginationState = { page: 0, pageSize: 25 }
 const makeBucket = (
   studyId: number,
   workspaces: Array<{
-    workspaceId?: string
+    workspaceId?: number
     name?: string
     platform?: string
     url?: string
@@ -154,8 +155,8 @@ describe('workspaceAsset — transformResponse', () => {
 
   it('flattens workspaces from multiple studies into rows', () => {
     const response = makeResponse([
-      makeBucket(1, [{ workspaceId: 'w1', name: 'Alpha' }, { workspaceId: 'w2', name: 'Beta' }]),
-      makeBucket(2, [{ workspaceId: 'w3', name: 'Gamma' }]),
+      makeBucket(1, [{ workspaceId: 1, name: 'Alpha' }, { workspaceId: 2, name: 'Beta' }]),
+      makeBucket(2, [{ workspaceId: 3, name: 'Gamma' }]),
     ])
     const result = workspaceAsset.transformResponse(response, pagination)
     expect(result.items).toHaveLength(3)
@@ -165,7 +166,7 @@ describe('workspaceAsset — transformResponse', () => {
   it('maps fields correctly from bucket to WorkspaceAsset', () => {
     const response = makeResponse([
       makeBucket(42, [{
-        workspaceId: 'ws-xyz',
+        workspaceId: 4201,
         name: 'Terra Workspace',
         platform: 'Terra',
         url: 'https://app.terra.bio/#workspaces/test/example',
@@ -177,7 +178,7 @@ describe('workspaceAsset — transformResponse', () => {
     ])
     const result = workspaceAsset.transformResponse(response, pagination)
     const row = result.items[0] as WorkspaceAsset
-    expect(row.workspaceId).toBe('ws-xyz')
+    expect(row.workspaceId).toBe(4201)
     expect(row.studyId).toBe(42)
     expect(row.studyName).toBe('NHGRI Study')
     expect(row.name).toBe('Terra Workspace')
@@ -189,18 +190,31 @@ describe('workspaceAsset — transformResponse', () => {
     expect(row.tags).toEqual(['genomics', 'cloud'])
   })
 
-  it('falls back to composite key when workspaceId is absent', () => {
-    const response = makeResponse([
-      makeBucket(99, [{ name: 'No-Id Workspace' }]),
-    ])
+  it('uses the server-assigned row id as the row id', () => {
+    const response = makeResponse([makeBucket(99, [{ workspaceId: 17 }])])
+    const row = workspaceAsset.transformResponse(response, pagination).items[0] as WorkspaceAsset
+    expect(row.workspaceId).toBe(17)
+    expect(workspaceAsset.getRowId(row)).toBe(17)
+  })
+
+  it('renders no row for an entry without a row id', () => {
+    const response = makeResponse([makeBucket(99, [{ name: 'No Id' }, { workspaceId: 17 }])])
     const result = workspaceAsset.transformResponse(response, pagination)
-    const row = result.items[0] as WorkspaceAsset
-    expect(row.workspaceId).toBe('99-0')
+    expect(result.items.map(row => (row as WorkspaceAsset).workspaceId)).toEqual([17])
+    expect(result.total).toBe(1)
+  })
+
+  it('renders no row for an indexed element that is not an object', () => {
+    const bucket = makeBucket(99, [{ workspaceId: 17 }])
+    const entries = bucket.study_details?.hits?.hits?.[0]?._source?.study?.assets?.workspaces
+    entries?.push(...(['legacy', null, 7, [18]] as unknown as PartialWorkspaceAsset[]))
+    const result = workspaceAsset.transformResponse(makeResponse([bucket]), pagination)
+    expect(result.items.map(row => (row as WorkspaceAsset).workspaceId)).toEqual([17])
   })
 
   it('applies client-side pagination', () => {
     const workspaces = Array.from({ length: 30 }, (_, i) => ({
-      workspaceId: `w${i}`,
+      workspaceId: i + 1,
       name: `Workspace ${i}`,
     }))
     const response = makeResponse([makeBucket(1, workspaces)])
@@ -219,7 +233,7 @@ describe('workspaceAsset — transformResponse', () => {
   })
 
   it('reports total as the number of all workspaces across all studies (not just page)', () => {
-    const workspaces = Array.from({ length: 30 }, (_, i) => ({ workspaceId: `w${i}` }))
+    const workspaces = Array.from({ length: 30 }, (_, i) => ({ workspaceId: i + 1 }))
     const response = makeResponse([makeBucket(1, workspaces)])
     const result = workspaceAsset.transformResponse(response, { page: 0, pageSize: 10 })
     expect(result.total).toBe(30)
@@ -227,7 +241,7 @@ describe('workspaceAsset — transformResponse', () => {
 
   it('returns empty tools / access / tags defaults for missing fields', () => {
     const response = makeResponse([
-      makeBucket(1, [{}]),
+      makeBucket(1, [{ workspaceId: 1 }]),
     ])
     const row = workspaceAsset.transformResponse(response, pagination).items[0] as WorkspaceAsset
     expect(row.tools).toEqual([])
@@ -249,8 +263,8 @@ describe('workspaceAsset — transformResponse', () => {
   it('returns only workspaces matching the tools filter', () => {
     const response = makeResponse([
       makeBucket(1, [
-        { workspaceId: 'w1', name: 'With Jupyter', tools: ['Jupyter', 'RStudio'] },
-        { workspaceId: 'w2', name: 'Without Jupyter', tools: ['Galaxy'] },
+        { workspaceId: 1, name: 'With Jupyter', tools: ['Jupyter', 'RStudio'] },
+        { workspaceId: 2, name: 'Without Jupyter', tools: ['Galaxy'] },
       ]),
     ])
 
@@ -260,14 +274,14 @@ describe('workspaceAsset — transformResponse', () => {
     })
 
     expect(result.total).toBe(1)
-    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w1')
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe(1)
   })
 
   it('returns only workspaces matching the platform filter', () => {
     const response = makeResponse([
       makeBucket(1, [
-        { workspaceId: 'w1', platform: 'Terra' },
-        { workspaceId: 'w2', platform: 'AnVIL' },
+        { workspaceId: 1, platform: 'Terra' },
+        { workspaceId: 2, platform: 'AnVIL' },
       ]),
     ])
 
@@ -277,13 +291,13 @@ describe('workspaceAsset — transformResponse', () => {
     })
 
     expect(result.total).toBe(1)
-    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w1')
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe(1)
   })
 
   // `access` is a bare form field with no options or validator, and cloud is a
   // creatable select, so both carry whatever casing the submitter typed.
   it('matches the cloud filter regardless of the indexed casing', () => {
-    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: ['AWS'] }])])
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 1, cloud: ['AWS'] }])])
 
     const result = workspaceAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, workspaceCloud: ['aws'] })
 
@@ -291,7 +305,7 @@ describe('workspaceAsset — transformResponse', () => {
   })
 
   it('matches the access filter regardless of the indexed casing', () => {
-    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', access: 'Open' }])])
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 1, access: 'Open' }])])
 
     const result = workspaceAsset.transformResponse(response, pagination, { ...EMPTY_FILTERS, workspaceAccess: ['open'] })
 
@@ -299,13 +313,13 @@ describe('workspaceAsset — transformResponse', () => {
   })
 
   it('maps the cloud field onto the row', () => {
-    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: ['AWS', 'Azure'] }])])
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 1, cloud: ['AWS', 'Azure'] }])])
     const row = workspaceAsset.transformResponse(response, pagination).items[0] as WorkspaceAsset
     expect(row.cloud).toEqual(['AWS', 'Azure'])
   })
 
   it('normalizes a cloud indexed as a bare string into an array', () => {
-    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: 'Azure' }])])
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 1, cloud: 'Azure' }])])
     const row = workspaceAsset.transformResponse(response, pagination).items[0] as WorkspaceAsset
     expect(row.cloud).toEqual(['Azure'])
   })
@@ -313,8 +327,8 @@ describe('workspaceAsset — transformResponse', () => {
   it('matches the cloud filter against a cloud indexed as a bare string', () => {
     const response = makeResponse([
       makeBucket(1, [
-        { workspaceId: 'w1', cloud: 'AWS' },
-        { workspaceId: 'w2', cloud: 'GCP' },
+        { workspaceId: 1, cloud: 'AWS' },
+        { workspaceId: 2, cloud: 'GCP' },
       ]),
     ])
 
@@ -324,14 +338,14 @@ describe('workspaceAsset — transformResponse', () => {
     })
 
     expect(result.total).toBe(1)
-    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w2')
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe(2)
   })
 
   it('returns only workspaces matching the cloud filter', () => {
     const response = makeResponse([
       makeBucket(1, [
-        { workspaceId: 'w1', cloud: ['AWS'] },
-        { workspaceId: 'w2', cloud: ['GCP'] },
+        { workspaceId: 1, cloud: ['AWS'] },
+        { workspaceId: 2, cloud: ['GCP'] },
       ]),
     ])
 
@@ -341,14 +355,14 @@ describe('workspaceAsset — transformResponse', () => {
     })
 
     expect(result.total).toBe(1)
-    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w2')
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe(2)
   })
 
   it('returns only workspaces matching the access filter', () => {
     const response = makeResponse([
       makeBucket(1, [
-        { workspaceId: 'w1', access: 'open' },
-        { workspaceId: 'w2', access: 'restricted' },
+        { workspaceId: 1, access: 'open' },
+        { workspaceId: 2, access: 'restricted' },
       ]),
     ])
 
@@ -358,14 +372,14 @@ describe('workspaceAsset — transformResponse', () => {
     })
 
     expect(result.total).toBe(1)
-    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe('w1')
+    expect((result.items[0] as WorkspaceAsset).workspaceId).toBe(1)
   })
 })
 
 describe('workspaceAsset — getRowId', () => {
   it('returns the workspaceId of the row', () => {
     const row: WorkspaceAsset = {
-      workspaceId: 'abc-123',
+      workspaceId: 123,
       studyId: 1,
       studyName: '',
       name: '',
@@ -373,14 +387,14 @@ describe('workspaceAsset — getRowId', () => {
       url: '',
       description: '',
     }
-    expect(workspaceAsset.getRowId(row)).toBe('abc-123')
+    expect(workspaceAsset.getRowId(row)).toBe(123)
   })
 })
 
 describe('workspaceAsset — isRowSelectable', () => {
   it('always returns false — workspaces do not participate in access requests', () => {
     const row: WorkspaceAsset = {
-      workspaceId: 'w1',
+      workspaceId: 1,
       studyId: 1,
       studyName: '',
       name: '',
@@ -395,7 +409,7 @@ describe('workspaceAsset — isRowSelectable', () => {
 describe('workspaceAsset — computeRowSelection', () => {
   it('always returns an empty Set regardless of inputs', () => {
     const row: WorkspaceAsset = {
-      workspaceId: 'w1',
+      workspaceId: 1,
       studyId: 1,
       studyName: '',
       name: '',
@@ -418,7 +432,7 @@ describe('workspaceAsset — selectionToDatasetIds', () => {
 describe('workspaceAsset — getStudyIdsForSelection', () => {
   it('always returns an empty array', () => {
     const row: WorkspaceAsset = {
-      workspaceId: 'w1',
+      workspaceId: 1,
       studyId: 42,
       studyName: '',
       name: '',
@@ -460,7 +474,7 @@ describe('workspaceAsset — makeColumns', () => {
 
 describe('workspaceAsset — indexed values are normalized', () => {
   it('matches a row whose indexed access carries stray whitespace', () => {
-    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', access: '  open ' }])])
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 1, access: '  open ' }])])
 
     // The option list is built from trimmed values, so the row has to be
     // trimmed too or the filter that offered 'open' drops the only row.
@@ -470,7 +484,7 @@ describe('workspaceAsset — indexed values are normalized', () => {
   })
 
   it('trims list-shaped values and drops the empties', () => {
-    const response = makeResponse([makeBucket(1, [{ workspaceId: 'w1', cloud: ['  AWS ', '  ', 'GCP'] }])])
+    const response = makeResponse([makeBucket(1, [{ workspaceId: 1, cloud: ['  AWS ', '  ', 'GCP'] }])])
 
     const result = workspaceAsset.transformResponse(response, pagination)
 
