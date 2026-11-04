@@ -185,6 +185,31 @@ describe('ConsentGroupAddEdit access management changes', () => {
     expect(container.querySelector('#dataAccessCommitteeId')).not.toBeInTheDocument()
   })
 
+  it('keeps a stored DAC when a term changes before access management is set', async () => {
+    const user = userEvent.setup()
+    const onConsentGroupChange = vi.fn()
+    const stored: ConsentGroup2 = {
+      consentGroupId: 'cg-1',
+      consentGroupName: 'Stored',
+      numberOfParticipants: 10,
+      generalResearchUse: true,
+      dataAccessCommitteeId: 5,
+      datasetId: 1,
+      dataLocation: DataLocationType.NotDetermined,
+    } as ConsentGroup2
+    const { container } = render(
+      <MemoryRouter>
+        <ConsentGroupAddEdit id={0} consentGroup={stored} consentGroups={[stored]} closeAction={vi.fn()} onConsentGroupChange={onConsentGroupChange} />
+      </MemoryRouter>,
+    )
+
+    await user.click(container.querySelector('#primaryConsent_hmb')!)
+    await user.click(container.querySelector('#accessManagement_controlled')!)
+    await clickSaveButton(user, container)
+
+    expect(onConsentGroupChange).toHaveBeenCalledWith([expect.objectContaining({ dataAccessCommitteeId: 5 })])
+  })
+
   // Re-checking the toggle writes the retained text back into the consent group, so text cleared
   // by a switch to open access must not come back with it
   it('does not restore secondary data use text cleared by open access', async () => {

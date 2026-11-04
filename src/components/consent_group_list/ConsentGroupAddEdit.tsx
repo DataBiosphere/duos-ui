@@ -61,7 +61,7 @@ export default function ConsentGroupAddEdit(props: ConsentGroupAddEditProps): Re
 
   const onTermsChange = (changed: DataUseTerms) => {
     const next: ConsentGroup2 = { ...structuredClone(current), ...changed }
-    if (next.accessManagement !== 'controlled') {
+    if (next.accessManagement !== current.accessManagement && next.accessManagement !== 'controlled') {
       next.dataAccessCommitteeId = undefined
     }
     setCurrent(next)
