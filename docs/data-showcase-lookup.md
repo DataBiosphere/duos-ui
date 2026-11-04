@@ -126,9 +126,16 @@ are synthetic and come from the examples in `test/fixtures/showcase/contracts.ts
 `test/`, so a deployed build cannot import it. Use it in a unit test like this:
 
 ```ts
-vi.mock('src/libs/ajax/ShowcaseCatalog')
+vi.mock('src/libs/ajax/ShowcaseCatalog', async importOriginal => ({
+  ...await importOriginal<typeof import('src/libs/ajax/ShowcaseCatalog')>(),
+  lookupShowcaseDatasets: vi.fn(),
+}))
 vi.mocked(lookupShowcaseDatasets).mockImplementation(createShowcaseCatalogMock())
 ```
+
+Mock only `lookupShowcaseDatasets`. A bare `vi.mock('src/libs/ajax/ShowcaseCatalog')` also mocks
+`ShowcaseLookupError`: an error a test builds is then not an `Error`, and has no message, `reason`,
+`status` or `retryAfterSeconds`, so error and retry handling can't be tested.
 
 The mock does not check Consent's input limits. Test those against Consent.
 
