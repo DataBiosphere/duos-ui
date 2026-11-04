@@ -33,6 +33,10 @@ updates:
       - "pnpm"
     commit-message:
       prefix: "[DT-400-pnpm]"
+    ignore:
+      # 11.1.6 changes regenerate() to keep the store row; the sign-in rotation needs migrating first.
+      - dependency-name: "@fastify/session"
+        versions: [">=11.1.6"]
     groups:
       pnpm-major:
         patterns:
