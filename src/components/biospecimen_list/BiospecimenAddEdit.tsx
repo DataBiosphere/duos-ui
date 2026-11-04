@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
+import { Validation as FieldValidation } from 'src/components/forms/formValidation'
 import { ValidationError, makeError } from 'src/pages/dar_application/FormValidationState'
 import {
   Biospecimen,
   BioSpecimenPreservationMethod,
   BioSpecimenType,
+  PostMortemIntervalUnit,
+  Sex,
 } from 'src/types/model'
 
 interface BiospecimenAddEditProps {
@@ -21,6 +24,16 @@ interface Validation {
   specimenType?: ValidationError
   preservationMethod?: ValidationError
   organization?: ValidationError
+  dateOfCollection?: ValidationError
+  age?: FieldValidation
+  postMortemIntervalValue?: FieldValidation
+  postMortemIntervalUnit?: ValidationError
+}
+
+// Number fields are edited as text so that clearing one leaves it empty rather than zero.
+interface NumberInputs {
+  age: string
+  postMortemIntervalValue: string
 }
 
 interface SelectOption {
@@ -32,6 +45,8 @@ interface FormFieldChange {
   key: string
   value: string | string[] | SelectOption | null
 }
+
+const numberInput = { ...FormFieldTypes.TEXT, inputType: 'number' }
 
 // Matches the labels in the Data Library biospecimens tab, e.g. FRESH_FROZEN -> Fresh Frozen.
 const enumLabel = (value: string) =>
@@ -46,6 +61,8 @@ const optionFor = (options: SelectOption[], value?: string): SelectOption | unde
 
 const specimenTypeOptions = enumOptions(Object.values(BioSpecimenType))
 const preservationMethodOptions = enumOptions(Object.values(BioSpecimenPreservationMethod))
+const postMortemIntervalUnitOptions = enumOptions(Object.values(PostMortemIntervalUnit))
+const sexOptions = enumOptions(Object.values(Sex))
 
 // The required enums start empty: the form asks for them before it saves.
 const defaultBiospecimen = {
@@ -56,16 +73,37 @@ const defaultBiospecimen = {
   organization: '',
 } as unknown as Biospecimen
 
-const calcErrors = (b: Biospecimen): Validation => {
+const numberInputsFrom = (biospecimen?: Biospecimen): NumberInputs => ({
+  age: biospecimen?.age?.toString() ?? '',
+  postMortemIntervalValue: biospecimen?.postMortemInterval?.value?.toString() ?? '',
+})
+
+const notANonNegativeNumber = (input: string) => {
+  const parsed = Number(input)
+  return !Number.isFinite(parsed) || parsed < 0
+}
+
+const numberError: FieldValidation = { valid: false, failed: ['number'], messages: ['Please enter a number of zero or more'] }
+
+const calcErrors = (b: Biospecimen, numbers: NumberInputs, unit?: PostMortemIntervalUnit): Validation => {
   const v: Validation = {}
   if (!b.donorId?.trim()) v.donorId = makeError('required')
   if (!b.specimenType) v.specimenType = makeError('required')
   if (!b.preservationMethod) v.preservationMethod = makeError('required')
   if (!b.organization?.trim()) v.organization = makeError('required')
+  if (b.dateOfCollection && !FormValidators.DATE.isValid(b.dateOfCollection)) v.dateOfCollection = makeError('date')
+  if (numbers.age.trim() && notANonNegativeNumber(numbers.age)) v.age = numberError
+  const intervalValue = numbers.postMortemIntervalValue.trim()
+  if (intervalValue && notANonNegativeNumber(intervalValue)) v.postMortemIntervalValue = numberError
+  // An interval needs both its length and its unit.
+  if (intervalValue && !unit) v.postMortemIntervalUnit = makeError('required')
+  if (!intervalValue && unit) v.postMortemIntervalValue = makeError('required')
   return v
 }
 
 const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
+
+const blankToUndefined = (value?: string) => (value?.trim() ? value : undefined)
 
 const getHeaderTitle = (readOnly: boolean, biospecimen?: Biospecimen) => {
   if (!biospecimen) return 'New Biospecimen'
@@ -77,22 +115,45 @@ export default function BiospecimenAddEdit(props: BiospecimenAddEditProps): Reac
   const { id, biospecimen, biospecimens, closeAction, onBiospecimensChange, readOnly = false } = props
 
   const [current, setCurrent] = useState<Biospecimen>(biospecimen || defaultBiospecimen)
+  const [numbers, setNumbers] = useState<NumberInputs>(numberInputsFrom(biospecimen))
+  const [unit, setUnit] = useState<PostMortemIntervalUnit | undefined>(biospecimen?.postMortemInterval?.unit)
   const [validation, setValidation] = useState<Validation>({})
 
   const onChange = ({ key, value }: FormFieldChange) => {
     // Enum selects return the chosen option, or null once cleared.
     const selected = value !== null && typeof value === 'object' && !Array.isArray(value) ? value.key : value
-    const nextCurrent = { ...current, [key]: selected ?? undefined }
-    setCurrent(nextCurrent)
-    setValidation(calcErrors(nextCurrent))
+    let nextCurrent = current
+    let nextNumbers = numbers
+    let nextUnit = unit
+    if (key === 'age' || key === 'postMortemIntervalValue') {
+      nextNumbers = { ...numbers, [key]: (selected as string) ?? '' }
+      setNumbers(nextNumbers)
+    }
+    else if (key === 'postMortemIntervalUnit') {
+      nextUnit = (selected as PostMortemIntervalUnit | null) ?? undefined
+      setUnit(nextUnit)
+    }
+    else {
+      nextCurrent = { ...current, [key]: selected ?? undefined }
+      setCurrent(nextCurrent)
+    }
+    setValidation(calcErrors(nextCurrent, nextNumbers, nextUnit))
   }
 
   const save = () => {
-    const validationErrors = calcErrors(current)
+    const validationErrors = calcErrors(current, numbers, unit)
     setValidation(validationErrors)
     if (validationFailed(validationErrors)) return
+    const intervalValue = numbers.postMortemIntervalValue.trim()
     // An edited biospecimen keeps the biospecimenId it was loaded with; a new one is sent without one.
-    const toSave: Biospecimen = { ...current }
+    // sampleId is sent as typed: Consent keeps the stored value when it is omitted, and clears it when blank.
+    const toSave: Biospecimen = {
+      ...current,
+      preservationDetails: blankToUndefined(current.preservationDetails),
+      dateOfCollection: blankToUndefined(current.dateOfCollection),
+      age: numbers.age.trim() ? Number(numbers.age) : undefined,
+      postMortemInterval: intervalValue && unit ? { value: Number(intervalValue), unit } : undefined,
+    }
     if (id < 0) {
       onBiospecimensChange([...biospecimens, toSave])
     }
@@ -113,6 +174,15 @@ export default function BiospecimenAddEdit(props: BiospecimenAddEditProps): Reac
         <div className="row">
           <h2>{headerTitle}</h2>
           <p>Each entry is one vial or sample.</p>
+          <FormField
+            id="sampleId"
+            title="Biospecimen ID"
+            description="Your own identifier for this vial or sample"
+            defaultValue={biospecimen?.sampleId}
+            placeholder="Biospecimen ID"
+            onChange={onChange}
+            disabled={readOnly}
+          />
           <FormField
             id="donorId"
             title="Donor ID"
@@ -147,6 +217,67 @@ export default function BiospecimenAddEdit(props: BiospecimenAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.preservationMethod}
+            disabled={readOnly}
+          />
+          <FormField
+            id="preservationDetails"
+            title="Preservation Details"
+            defaultValue={biospecimen?.preservationDetails}
+            placeholder="Preservation Details"
+            onChange={onChange}
+            disabled={readOnly}
+          />
+          <FormField
+            id="dateOfCollection"
+            title="Date of Collection"
+            type={FormFieldTypes.CALENDAR}
+            defaultValue={biospecimen?.dateOfCollection}
+            validators={[FormValidators.DATE]}
+            onChange={onChange}
+            validation={validation.dateOfCollection}
+            disabled={readOnly}
+          />
+          <FormField
+            id="postMortemIntervalValue"
+            title="Post-Mortem Interval"
+            type={numberInput}
+            defaultValue={numbers.postMortemIntervalValue}
+            placeholder="Interval length"
+            onChange={onChange}
+            validation={validation.postMortemIntervalValue}
+            disabled={readOnly}
+          />
+          <FormField
+            id="postMortemIntervalUnit"
+            title="Post-Mortem Interval Unit"
+            type={FormFieldTypes.SELECT}
+            selectOptions={postMortemIntervalUnitOptions}
+            optionsAreString={false}
+            placeholder="Select a unit"
+            defaultValue={optionFor(postMortemIntervalUnitOptions, biospecimen?.postMortemInterval?.unit)}
+            onChange={onChange}
+            validation={validation.postMortemIntervalUnit}
+            disabled={readOnly}
+          />
+          <FormField
+            id="sex"
+            title="Sex"
+            type={FormFieldTypes.SELECT}
+            selectOptions={sexOptions}
+            optionsAreString={false}
+            placeholder="Select a sex"
+            defaultValue={optionFor(sexOptions, biospecimen?.sex)}
+            onChange={onChange}
+            disabled={readOnly}
+          />
+          <FormField
+            id="age"
+            title="Age"
+            type={numberInput}
+            defaultValue={numbers.age}
+            placeholder="Age"
+            onChange={onChange}
+            validation={validation.age}
             disabled={readOnly}
           />
           <FormField

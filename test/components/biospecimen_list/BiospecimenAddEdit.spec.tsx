@@ -8,6 +8,8 @@ import {
   Biospecimen,
   BioSpecimenPreservationMethod,
   BioSpecimenType,
+  PostMortemIntervalUnit,
+  Sex,
 } from 'src/types/model'
 
 type User = ReturnType<typeof userEvent.setup>
@@ -19,6 +21,10 @@ const storedBiospecimen: Biospecimen = {
   donorId: 'DONOR-1',
   specimenType: BioSpecimenType.BLOOD,
   preservationMethod: BioSpecimenPreservationMethod.FRESH_FROZEN,
+  dateOfCollection: '2024-03-01',
+  postMortemInterval: { value: 6, unit: PostMortemIntervalUnit.HOURS },
+  sex: Sex.FEMALE,
+  age: 61,
   organization: 'Brain Bank',
 }
 
@@ -69,6 +75,8 @@ describe('BiospecimenAddEdit', () => {
       organization: 'Biobank',
     })
     expect(saved[0][0].biospecimenId).toBeUndefined()
+    expect(saved[0][0].age).toBeUndefined()
+    expect(saved[0][0].postMortemInterval).toBeUndefined()
     expect(closeAction).toHaveBeenCalledTimes(1)
   })
 
@@ -83,6 +91,27 @@ describe('BiospecimenAddEdit', () => {
     expect(saved[0][1].biospecimenId).toBeUndefined()
   })
 
+  it('saves the optional fields that are filled in', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm()
+    await fillRequired(user, container)
+    await user.type(container.querySelector('#sampleId')!, 'VIAL-1')
+    await user.type(container.querySelector('#preservationDetails')!, '-80C')
+    await user.type(container.querySelector('#postMortemIntervalValue')!, '2.5')
+    await choose(user, container, 'postMortemIntervalUnit', 'Days')
+    await choose(user, container, 'sex', 'Not Reported')
+    await user.type(container.querySelector('#age')!, '0')
+    await save(user, container)
+
+    expect(saved[0][0]).toMatchObject({
+      sampleId: 'VIAL-1',
+      preservationDetails: '-80C',
+      postMortemInterval: { value: 2.5, unit: PostMortemIntervalUnit.DAYS },
+      sex: Sex.NOT_REPORTED,
+      age: 0,
+    })
+  })
+
   it('does not save without the required fields', async () => {
     const user = userEvent.setup()
     const { container, saved, closeAction } = renderForm()
@@ -91,6 +120,27 @@ describe('BiospecimenAddEdit', () => {
 
     expect(saved).toHaveLength(0)
     expect(closeAction).not.toHaveBeenCalled()
+  })
+
+  it('does not save a post-mortem interval without its unit', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm()
+    await fillRequired(user, container)
+    await user.type(container.querySelector('#postMortemIntervalValue')!, '4')
+    await save(user, container)
+
+    expect(saved).toHaveLength(0)
+  })
+
+  it('does not save a negative age', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm()
+    await fillRequired(user, container)
+    await user.type(container.querySelector('#age')!, '-3')
+    await save(user, container)
+
+    expect(saved).toHaveLength(0)
+    expect(container).toHaveTextContent('Please enter a number of zero or more')
   })
 
   it('keeps the biospecimenId and stored fields of an edited biospecimen', async () => {
@@ -118,6 +168,29 @@ describe('BiospecimenAddEdit', () => {
     expect(saved[0][0].specimenType).toBe(BioSpecimenType.PLASMA)
   })
 
+  it('removes the optional fields that are cleared on edit', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm(storedBiospecimen)
+    await user.clear(container.querySelector('#age')!)
+    await user.clear(container.querySelector('#postMortemIntervalValue')!)
+    await user.click(container.querySelector('#postMortemIntervalUnit input')!)
+    await user.keyboard('{Backspace}{Escape}')
+    await save(user, container)
+
+    expect(saved[0][0].biospecimenId).toBe(7)
+    expect(saved[0][0].age).toBeUndefined()
+    expect(saved[0][0].postMortemInterval).toBeUndefined()
+  })
+
+  it('sends a cleared biospecimen ID as blank, so it is not kept', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm(storedBiospecimen)
+    await user.clear(container.querySelector('#sampleId')!)
+    await save(user, container)
+
+    expect(saved[0][0].sampleId).toBe('')
+  })
+
   it('shows a stored biospecimen read only', async () => {
     render(
       <BiospecimenAddEdit
@@ -132,6 +205,7 @@ describe('BiospecimenAddEdit', () => {
     expect(screen.getByRole('heading', { name: 'VIAL-7' })).toBeInTheDocument()
     expect(screen.getByDisplayValue('DONOR-1')).toBeDisabled()
     expect(screen.getByText('Fresh Frozen')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('61')).toBeDisabled()
     expect(screen.queryByRole('button', { name: 'Save' })).toBeNull()
     await waitFor(() => expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument())
   })
