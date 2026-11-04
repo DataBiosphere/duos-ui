@@ -1,0 +1,79 @@
+/* The showcase template. Colors are set inline on the root from the config's theme; the rest of the
+   tokens live here. Light theme only. */
+.showcase-template {
+  /* Typography (design review D17): the families live only here, so a change of fonts is a change
+     to these two lines. Montserrat is bundled in 400, 400 italic, 500 and 600; use only those. */
+  --showcase-font-heading: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --showcase-font-body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /* Provisional (design review D17): the type scale and heading weight. */
+  --showcase-font-size-page-title: 2.25rem;
+  --showcase-font-size-section-title: 1.5rem;
+  --showcase-font-size-card-title: 1.125rem;
+  --showcase-font-size-body: 1rem;
+  --showcase-font-size-label: 0.875rem;
+  --showcase-font-weight-heading: 600;
+  --showcase-line-height-heading: 1.25;
+  --showcase-line-height-body: 1.5;
+  /* Provisional (design review D9): the focus ring. The default primary reaches 3:1 on every
+     surface the template sets (background, surface and accent tint). */
+  --showcase-focus-color: var(--showcase-primary);
+  --showcase-focus-width: 3px;
+  --showcase-focus-offset: 2px;
+  /* The height of the sticky masthead (D8), which S3.2 sets on desktop and tablet; 0 on phones. */
+  --showcase-anchor-offset: 0px;
+
+  background: var(--showcase-background);
+  font-family: var(--showcase-font-body);
+  font-size: var(--showcase-font-size-body);
+  line-height: var(--showcase-line-height-body);
+}
+
+.showcase-template :is(h1, h2, h3) {
+  font-family: var(--showcase-font-heading);
+  font-weight: var(--showcase-font-weight-heading);
+  line-height: var(--showcase-line-height-heading);
+}
+
+.showcase-template h1 { font-size: var(--showcase-font-size-page-title); }
+.showcase-template h2 { font-size: var(--showcase-font-size-section-title); }
+.showcase-template h3 { font-size: var(--showcase-font-size-card-title); }
+
+/* One focus style for every showcase control (D9). Specificity (0,3,0) beats the global
+   `a, input { outline: 0 }` (0,0,1) without !important. An outline, not a box-shadow, so it stays
+   visible in forced colors. */
+.showcase-template :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: var(--showcase-focus-width) solid var(--showcase-focus-color);
+  outline-offset: var(--showcase-focus-offset);
+}
+
+@media (forced-colors: active) {
+  .showcase-template :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* Hidden until focused (D7). Provisional (design review D7): how it looks when focused. */
+.showcase-template__skip-link {
+  display: inline-block;
+  margin: 8px 16px;
+  padding: 8px 16px;
+  background: var(--showcase-background);
+  color: var(--showcase-primary);
+  font-weight: 600;
+}
+
+.showcase-template__skip-link:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Every section renderer's root element carries the section id, so this is the anchor target. */
+.showcase-template__main > * {
+  scroll-margin-top: var(--showcase-anchor-offset);
+}
