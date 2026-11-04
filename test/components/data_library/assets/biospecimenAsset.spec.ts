@@ -8,6 +8,7 @@ import { BiospecimenAsset, PaginationState, SortState } from 'src/types/library'
 import {
   ElasticsearchResponse,
   BiospecimenStudyAggregationBucket,
+  PartialBiospecimenAsset,
   QueryClause,
 } from 'src/types/elastic'
 import { BioSpecimenType, BioSpecimenPreservationMethod, Sex } from 'src/types/model'
@@ -18,7 +19,7 @@ const pagination: PaginationState = { page: 0, pageSize: 25 }
 const makeBucket = (
   studyId: number,
   biospecimens: Array<{
-    biospecimenId?: string | number
+    biospecimenId?: number
     sampleId?: string | number
     donorId?: string
     specimenType?: BioSpecimenType
@@ -168,10 +169,10 @@ describe('biospecimenAsset — transformResponse', () => {
   it('flattens biospecimens from multiple studies into rows', () => {
     const response = makeResponse([
       makeBucket(1, [
-        { biospecimenId: 'BS-001', donorId: 'D-001' },
-        { biospecimenId: 'BS-002', donorId: 'D-002' },
+        { biospecimenId: 1, donorId: 'D-001' },
+        { biospecimenId: 2, donorId: 'D-002' },
       ]),
-      makeBucket(2, [{ biospecimenId: 'BS-003', donorId: 'D-003' }]),
+      makeBucket(2, [{ biospecimenId: 3, donorId: 'D-003' }]),
     ])
     const result = biospecimenAsset.transformResponse(response, pagination)
     expect(result.items).toHaveLength(3)
@@ -184,7 +185,7 @@ describe('biospecimenAsset — transformResponse', () => {
         42,
         [
           {
-            biospecimenId: 'BS-12345',
+            biospecimenId: 12345,
             donorId: 'DONOR-ABC',
             specimenType: BioSpecimenType.BLOOD,
             preservationMethod: BioSpecimenPreservationMethod.FRESH_FROZEN,
@@ -200,7 +201,7 @@ describe('biospecimenAsset — transformResponse', () => {
     ])
     const result = biospecimenAsset.transformResponse(response, pagination)
     const row = result.items[0] as BiospecimenAsset
-    expect(row.biospecimenId).toBe('BS-12345')
+    expect(row.biospecimenId).toBe(12345)
     expect(row.studyId).toBe(42)
     expect(row.studyName).toBe('NHGRI Study')
     expect(row.donorId).toBe('DONOR-ABC')
@@ -213,59 +214,63 @@ describe('biospecimenAsset — transformResponse', () => {
     expect(row.organization).toBe('Test Biobank')
   })
 
-  it('falls back to composite key when biospecimenId is absent', () => {
-    const response = makeResponse([makeBucket(99, [{ donorId: 'D-001' }])])
+  it('uses the server-assigned row id as the row id', () => {
+    const response = makeResponse([makeBucket(99, [{ biospecimenId: 17 }])])
+    const row = biospecimenAsset.transformResponse(response, pagination).items[0] as BiospecimenAsset
+    expect(row.biospecimenId).toBe(17)
+    expect(biospecimenAsset.getRowId(row)).toBe(17)
+  })
+
+  it('renders no row for an entry without a row id', () => {
+    const response = makeResponse([makeBucket(99, [{ donorId: 'D-001' }, { biospecimenId: 17 }])])
     const result = biospecimenAsset.transformResponse(response, pagination)
-    const row = result.items[0] as BiospecimenAsset
-    expect(row.biospecimenId).toBe('99-0')
+    expect(result.items.map(row => (row as BiospecimenAsset).biospecimenId)).toEqual([17])
+    expect(result.total).toBe(1)
+  })
+
+  it('renders no row for an indexed element that is not an object', () => {
+    const bucket = makeBucket(99, [{ biospecimenId: 17 }])
+    const entries = bucket.study_details?.hits?.hits?.[0]?._source?.study?.assets?.biospecimens
+    entries?.push(...(['legacy', null, 7, [18]] as unknown as PartialBiospecimenAsset[]))
+    const result = biospecimenAsset.transformResponse(makeResponse([bucket]), pagination)
+    expect(result.items.map(row => (row as BiospecimenAsset).biospecimenId)).toEqual([17])
   })
 
   it.each([
-    ['an indexed sampleId', { biospecimenId: 17, sampleId: 'S-1' }, 'S-1'],
-    ['a string original id', { biospecimenId: 'BS-001' }, 'BS-001'],
-    ['a numeric original id outside the row-id range', { biospecimenId: 1712345678901 }, '1712345678901'],
-    ['a zero-padded original id', { biospecimenId: '007' }, '007'],
-    ['a numeric row id', { biospecimenId: 17 }, ''],
-    ['a string row id', { biospecimenId: '2147483647' }, ''],
-    ['a blank sampleId falling back to the original id', { biospecimenId: 'BS-001', sampleId: '  ' }, 'BS-001'],
-    ['a numeric sampleId as text', { biospecimenId: 17, sampleId: 0 }, '0'],
-    ['a blank original id', { biospecimenId: '  ' }, ''],
-    ['no id', {}, ''],
+    ['an indexed sampleId', { sampleId: 'S-1' }, 'S-1'],
+    ['a trimmed sampleId', { sampleId: '  S-1 ' }, 'S-1'],
+    ['a numeric sampleId as text', { sampleId: 0 }, '0'],
+    ['a blank sampleId', { sampleId: '  ' }, ''],
+    ['no sampleId, never the row id', {}, ''],
   ])('shows %s as the sample id', (_label, biospecimen, expected) => {
-    const response = makeResponse([makeBucket(5, [biospecimen])])
+    const response = makeResponse([makeBucket(5, [{ biospecimenId: 17, ...biospecimen }])])
     const row = biospecimenAsset.transformResponse(response, pagination).items[0] as BiospecimenAsset
     expect(row.sampleId).toBe(expected)
   })
 
-  it('keeps a numeric row id as the string row key', () => {
-    const response = makeResponse([makeBucket(5, [{ biospecimenId: 17 }])])
-    const row = biospecimenAsset.transformResponse(response, pagination).items[0] as BiospecimenAsset
-    expect(row.biospecimenId).toBe('17')
-  })
-
   it('applies client-side pagination', () => {
     const biospecimens = Array.from({ length: 30 }, (_, i) => ({
-      biospecimenId: `BS-${String(i).padStart(3, '0')}`,
+      biospecimenId: i + 1,
       donorId: `DONOR-${i}`,
     }))
     const response = makeResponse([makeBucket(1, biospecimens)])
 
     const page0 = biospecimenAsset.transformResponse(response, { page: 0, pageSize: 10 })
     expect(page0.items).toHaveLength(10)
-    expect((page0.items[0] as BiospecimenAsset).biospecimenId).toBe('BS-000')
+    expect((page0.items[0] as BiospecimenAsset).biospecimenId).toBe(1)
 
     const page1 = biospecimenAsset.transformResponse(response, { page: 1, pageSize: 10 })
     expect(page1.items).toHaveLength(10)
-    expect((page1.items[0] as BiospecimenAsset).biospecimenId).toBe('BS-010')
+    expect((page1.items[0] as BiospecimenAsset).biospecimenId).toBe(11)
 
     const page2 = biospecimenAsset.transformResponse(response, { page: 2, pageSize: 10 })
     expect(page2.items).toHaveLength(10)
-    expect((page2.items[0] as BiospecimenAsset).biospecimenId).toBe('BS-020')
+    expect((page2.items[0] as BiospecimenAsset).biospecimenId).toBe(21)
   })
 
   it('reports total as the number of all biospecimens across all studies (not just page)', () => {
     const biospecimens = Array.from({ length: 30 }, (_, i) => ({
-      biospecimenId: `BS-${i}`,
+      biospecimenId: i + 1,
     }))
     const response = makeResponse([makeBucket(1, biospecimens)])
     const result = biospecimenAsset.transformResponse(response, { page: 0, pageSize: 10 })
@@ -273,9 +278,9 @@ describe('biospecimenAsset — transformResponse', () => {
   })
 
   it('returns empty/default values for missing fields', () => {
-    const response = makeResponse([makeBucket(1, [{}])])
+    const response = makeResponse([makeBucket(1, [{ biospecimenId: 1 }])])
     const row = biospecimenAsset.transformResponse(response, pagination).items[0] as BiospecimenAsset
-    expect(row.biospecimenId).toBe('1-0')
+    expect(row.biospecimenId).toBe(1)
     expect(row.donorId).toBe('')
     expect(row.organization).toBe('')
     expect(row.dateOfCollection).toBe('')
@@ -293,13 +298,13 @@ describe('biospecimenAsset — transformResponse', () => {
     const response = makeResponse([
       makeBucket(1, [
         {
-          biospecimenId: 'BS-HOURS',
+          biospecimenId: 1,
           specimenType: BioSpecimenType.BLOOD,
           dateOfCollection: '2024-01-01',
           organization: 'Org',
         },
         {
-          biospecimenId: 'BS-DAYS',
+          biospecimenId: 2,
           specimenType: BioSpecimenType.TISSUE,
           dateOfCollection: '2024-02-01',
           organization: 'Org',
@@ -313,14 +318,14 @@ describe('biospecimenAsset — transformResponse', () => {
     })
 
     expect(result.items).toHaveLength(1)
-    expect((result.items[0] as BiospecimenAsset).biospecimenId).toBe('BS-HOURS')
+    expect((result.items[0] as BiospecimenAsset).biospecimenId).toBe(1)
   })
 })
 
 describe('biospecimenAsset — getRowId', () => {
   it('returns the biospecimenId of the row', () => {
     const row: BiospecimenAsset = {
-      biospecimenId: 'BS-xyz-789',
+      biospecimenId: 789,
       studyId: 1,
       studyName: '',
       donorId: 'D-001',
@@ -328,14 +333,14 @@ describe('biospecimenAsset — getRowId', () => {
       preservationMethod: BioSpecimenPreservationMethod.FRESH_FROZEN,
       organization: 'Biobank',
     }
-    expect(biospecimenAsset.getRowId(row)).toBe('BS-xyz-789')
+    expect(biospecimenAsset.getRowId(row)).toBe(789)
   })
 })
 
 describe('biospecimenAsset — isRowSelectable', () => {
   it('always returns false — biospecimens do not participate in access requests', () => {
     const row: BiospecimenAsset = {
-      biospecimenId: 'BS-001',
+      biospecimenId: 1,
       studyId: 1,
       studyName: 'Test',
       donorId: 'D-001',
@@ -350,7 +355,7 @@ describe('biospecimenAsset — isRowSelectable', () => {
 describe('biospecimenAsset — computeRowSelection', () => {
   it('always returns an empty Set regardless of inputs', () => {
     const row: BiospecimenAsset = {
-      biospecimenId: 'BS-001',
+      biospecimenId: 1,
       studyId: 1,
       studyName: 'Test',
       donorId: 'D-001',
@@ -373,7 +378,7 @@ describe('biospecimenAsset — selectionToDatasetIds', () => {
 describe('biospecimenAsset — getStudyIdsForSelection', () => {
   it('always returns an empty array', () => {
     const row: BiospecimenAsset = {
-      biospecimenId: 'BS-001',
+      biospecimenId: 1,
       studyId: 42,
       studyName: 'Test',
       donorId: 'D-001',
