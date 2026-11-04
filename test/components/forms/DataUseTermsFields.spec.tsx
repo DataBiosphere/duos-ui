@@ -3,7 +3,13 @@ import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import DataUseTermsFields, { DataUseTerms, dataUseTermsErrors } from 'src/components/forms/DataUseTermsFields'
+import DataUseTermsFields, {
+  DataUseTerms,
+  applyTerms,
+  dataUseFromTerms,
+  dataUseTermsErrors,
+  termsFromDataUse,
+} from 'src/components/forms/DataUseTermsFields'
 
 vi.mock('src/libs/utils', async (importActual) => {
   const actual = await importActual<typeof import('src/libs/utils')>()
@@ -32,10 +38,70 @@ describe('dataUseTermsErrors', () => {
   })
 })
 
+describe('dataUseTermsErrors when the terms are optional', () => {
+  it('needs neither an access management nor any term', () => {
+    expect(dataUseTermsErrors({}, false)).toEqual({})
+    expect(dataUseTermsErrors({ accessManagement: 'controlled' }, false)).toEqual({})
+  })
+
+  it('needs a primary term once a secondary term is set, unless access is open', () => {
+    expect(Object.keys(dataUseTermsErrors({ npu: true }, false))).toEqual(['primaryConsent'])
+    expect(Object.keys(dataUseTermsErrors({ accessManagement: 'external', npu: true }, false))).toEqual(['primaryConsent'])
+    expect(dataUseTermsErrors({ accessManagement: 'external', hmb: true, npu: true }, false)).toEqual({})
+  })
+
+  it('needs a primary term when the data use sent keeps other fields', () => {
+    expect(Object.keys(dataUseTermsErrors({ accessManagement: 'controlled' }, false, true))).toEqual(['primaryConsent'])
+    expect(dataUseTermsErrors({ accessManagement: 'open' }, false, true)).toEqual({})
+  })
+})
+
+describe('dataUseFromTerms and termsFromDataUse', () => {
+  it('writes only the terms that are set', () => {
+    expect(dataUseFromTerms({
+      accessManagement: 'controlled', generalResearchUse: false, hmb: true, nmds: true, npu: true, gso: false, gs: ' ', mor: true,
+    })).toEqual({ hmbResearch: true, methodsResearch: false, nonProfitUse: true })
+  })
+
+  it('writes nothing for terms that set nothing', () => {
+    expect(dataUseFromTerms({ accessManagement: 'open', generalResearchUse: false, diseaseSpecificUse: [] })).toBeUndefined()
+  })
+
+  it('reads back what it writes', () => {
+    const dataUse = {
+      diseaseRestrictions: ['DOID_1'], methodsResearch: false, geographicalRestrictions: 'USA',
+      publicationMoratorium: '2027-01-01', secondaryOther: 'No resale', publicationResults: true,
+    }
+    expect(dataUseFromTerms(termsFromDataUse(dataUse))).toEqual(dataUse)
+  })
+
+  it('reads a moratorium as checked with its date', () => {
+    expect(termsFromDataUse({ hmbResearch: true, publicationMoratorium: '2027-01-01' }))
+      .toMatchObject({ hmb: true, mor: true, morDate: '2027-01-01' })
+  })
+})
+
+describe('applyTerms', () => {
+  it('replaces the fields the editor sets and keeps any other', () => {
+    expect(applyTerms({ generalUse: true, aiLlmUse: true }, { hmb: true })).toEqual({ aiLlmUse: true, hmbResearch: true })
+  })
+
+  it('leaves a data use the terms describe exactly as stored', () => {
+    const stored = { generalUse: true, methodsResearch: true, nonProfitUse: false }
+    expect(applyTerms(stored, termsFromDataUse(stored))).toBe(stored)
+  })
+
+  it('leaves no data use when the terms clear the only fields it had', () => {
+    expect(applyTerms({ generalUse: true, nonProfitUse: true }, { accessManagement: 'open' })).toBeUndefined()
+  })
+})
+
 /** Holds the terms the way a form does, merging each change into its state. */
-function Harness({ initial = {}, onTerms }: {
+function Harness({ initial = {}, onTerms, ...rest }: {
   initial?: DataUseTerms
   onTerms?: (terms: DataUseTerms) => void
+  required?: boolean
+  subject?: string
 }) {
   const [terms, setTerms] = useState<DataUseTerms>(initial)
   return (
@@ -47,11 +113,45 @@ function Harness({ initial = {}, onTerms }: {
         onTerms?.(next)
       }}
       validation={{}}
+      {...rest}
     />
   )
 }
 
 describe('DataUseTermsFields', () => {
+  it('marks the terms required and names a dataset by default', () => {
+    const { container } = render(<Harness />)
+    expect(container).toHaveTextContent('Data Access Management*')
+    expect(container).toHaveTextContent('Primary Data Use Terms*')
+    expect(container).toHaveTextContent('data use permissions for your dataset')
+  })
+
+  it('drops the required marker and names its subject when told to', () => {
+    const { container } = render(<Harness required={false} subject="model" />)
+    expect(container).not.toHaveTextContent('Data Access Management*')
+    expect(container).not.toHaveTextContent('Primary Data Use Terms*')
+    expect(container).toHaveTextContent('data use permissions for your model')
+  })
+
+  it('clears access management and every term when the terms are optional', async () => {
+    const user = userEvent.setup()
+    const onTerms = vi.fn()
+    const { container } = render(
+      <Harness initial={{ accessManagement: 'controlled', hmb: true, npu: true }} onTerms={onTerms} required={false} />,
+    )
+
+    await user.click(container.querySelector('#clearDataUseTerms')!)
+
+    expect(onTerms).toHaveBeenLastCalledWith(expect.objectContaining({ accessManagement: undefined, hmb: false, npu: false }))
+    expect(container.querySelector<HTMLInputElement>('#accessManagement_controlled')!.checked).toBe(false)
+    expect(container.querySelector<HTMLInputElement>('#primaryConsent_hmb')!.checked).toBe(false)
+  })
+
+  it('offers no clear control when the terms are required', () => {
+    const { container } = render(<Harness />)
+    expect(container.querySelector('#clearDataUseTerms')).not.toBeInTheDocument()
+  })
+
   it('keeps one primary term at a time', async () => {
     const user = userEvent.setup()
     const onTerms = vi.fn()

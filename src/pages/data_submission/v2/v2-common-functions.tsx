@@ -232,6 +232,10 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
   const assets = structuredClone(study.assets)
   if (assets) {
     delete assets.consentGroups
+    // Consent computes the data use summary when it reads an asset; it is never stored.
+    for (const entry of [...(assets.models ?? []), ...(assets.workspaces ?? [])]) {
+      delete (entry as { dataUseSummary?: unknown }).dataUseSummary
+    }
   }
   datasetSchema.assets = assets
   return datasetSchema

@@ -4,6 +4,7 @@ import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/
 import { findOntologyTerms, searchOntologyTerm } from 'src/libs/utils'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { AccessManagementType, selectedPrimaryGroup } from 'src/pages/data_submission/consent_group/consentGroupUtils'
+import { DataUse } from 'src/types/model'
 
 /** Access management plus the primary and secondary data use terms, in the consent group's flat shape. */
 export interface DataUseTerms {
@@ -60,12 +61,83 @@ const DATA_USE_CLEARED: DataUseTerms = {
   otherSecondary: undefined,
 }
 
-/** Errors in the terms: a missing access management or primary term, or a checked option without its text. */
-export const dataUseTermsErrors = (terms: DataUseTerms): DataUseTermsValidation => {
+const EDITOR_KEYS: (keyof DataUse)[] = [
+  'generalUse', 'hmbResearch', 'diseaseRestrictions', 'populationOriginsAncestry', 'other', 'methodsResearch',
+  'geneticStudiesOnly', 'publicationResults', 'collaboratorRequired', 'ethicsApprovalRequired',
+  'geographicalRestrictions', 'publicationMoratorium', 'nonProfitUse', 'secondaryOther',
+]
+
+/** The data use the terms describe, or undefined when they set none. */
+export const dataUseFromTerms = (terms: DataUseTerms): DataUse | undefined => {
+  const dataUse: DataUse = {
+    generalUse: terms.generalResearchUse || undefined,
+    hmbResearch: terms.hmb || undefined,
+    diseaseRestrictions: isEmpty(terms.diseaseSpecificUse) ? undefined : terms.diseaseSpecificUse,
+    populationOriginsAncestry: terms.poa || undefined,
+    other: terms.otherPrimary?.trim() || undefined,
+    methodsResearch: terms.nmds ? false : undefined,
+    geneticStudiesOnly: terms.gso || undefined,
+    publicationResults: terms.pub || undefined,
+    collaboratorRequired: terms.col || undefined,
+    ethicsApprovalRequired: terms.irb || undefined,
+    geographicalRestrictions: terms.gs?.trim() || undefined,
+    publicationMoratorium: (terms.mor && terms.morDate?.trim()) || undefined,
+    nonProfitUse: terms.npu || undefined,
+    secondaryOther: terms.otherSecondary?.trim() || undefined,
+  }
+  const set = Object.fromEntries(Object.entries(dataUse).filter(([, value]) => value !== undefined))
+  return isEmpty(set) ? undefined : set
+}
+
+/**
+ * A data use with the fields the editor sets replaced by the terms'; any other field stays. Terms
+ * that describe the stored data use leave it exactly as stored.
+ */
+export const applyTerms = (dataUse: DataUse | null | undefined, terms: DataUseTerms): DataUse | undefined => {
+  const written = dataUseFromTerms(terms)
+  if (JSON.stringify(written) === JSON.stringify(dataUseFromTerms(termsFromDataUse(dataUse)))) {
+    return dataUse ?? undefined
+  }
+  const edited = new Set(EDITOR_KEYS)
+  const kept = Object.fromEntries(Object.entries(dataUse ?? {}).filter(([key]) => !edited.has(key as keyof DataUse)))
+  const merged = { ...kept, ...written }
+  return isEmpty(merged) ? undefined : merged
+}
+
+/** The editor's terms for a stored data use; the inverse of {@link dataUseFromTerms}. */
+export const termsFromDataUse = (dataUse?: DataUse | null): DataUseTerms => ({
+  generalResearchUse: dataUse?.generalUse,
+  hmb: dataUse?.hmbResearch,
+  diseaseSpecificUse: isEmpty(dataUse?.diseaseRestrictions) ? undefined : dataUse?.diseaseRestrictions,
+  poa: dataUse?.populationOriginsAncestry,
+  otherPrimary: dataUse?.other || undefined,
+  nmds: dataUse?.methodsResearch === false || undefined,
+  gso: dataUse?.geneticStudiesOnly,
+  pub: dataUse?.publicationResults,
+  col: dataUse?.collaboratorRequired,
+  irb: dataUse?.ethicsApprovalRequired,
+  gs: dataUse?.geographicalRestrictions || undefined,
+  mor: !isEmpty(dataUse?.publicationMoratorium) || undefined,
+  morDate: dataUse?.publicationMoratorium || undefined,
+  npu: dataUse?.nonProfitUse,
+  otherSecondary: dataUse?.secondaryOther || undefined,
+})
+
+/**
+ * Errors in the terms: a checked option without its text, or a missing access management or
+ * primary term. When the terms are optional, a primary term is needed only when a data use will be
+ * sent, which by default is when any term is set.
+ */
+export const dataUseTermsErrors = (
+  terms: DataUseTerms,
+  required = true,
+  sendsDataUse = dataUseFromTerms(terms) !== undefined,
+): DataUseTermsValidation => {
   const v: DataUseTermsValidation = {}
   const primary = selectedPrimaryGroup(terms)
-  if (!terms.accessManagement?.trim()) v.accessManagement = makeError('required')
-  if (terms.accessManagement !== 'open' && !primary) v.primaryConsent = makeError('required')
+  const needsPrimary = required || sendsDataUse
+  if (required && !terms.accessManagement?.trim()) v.accessManagement = makeError('required')
+  if (needsPrimary && terms.accessManagement !== 'open' && !primary) v.primaryConsent = makeError('required')
   if (primary === 'diseaseSpecificUse' && isEmpty(terms.diseaseSpecificUse)) v.diseaseSpecificUse = makeError('required')
   if (primary === 'otherPrimary' && !terms.otherPrimary?.trim()) v.otherPrimary = makeError('required')
   if (!isNil(terms.gs) && !terms.gs.trim()) v.gs = makeError('required')
@@ -81,14 +153,22 @@ interface DataUseTermsFieldsProps {
   readonly validation: DataUseTermsValidation
   readonly readOnly?: boolean
   readonly accessDisabled?: boolean
+  readonly required?: boolean
+  /** What the terms describe, as the primary terms' description names it. */
+  readonly subject?: string
+  /** Receives the cleared terms in place of onChange, for a caller that also drops what it keeps beside them. */
+  readonly onClear?: (cleared: DataUseTerms) => void
 }
 
 export default function DataUseTermsFields(props: DataUseTermsFieldsProps): React.JSX.Element {
-  const { terms, onChange, validation, readOnly = false, accessDisabled = false } = props
+  const { terms, onChange, validation, readOnly = false, accessDisabled = false, required = true, subject = 'dataset', onClear = onChange } = props
+  const marker = required ? '*' : ''
   const primary = selectedPrimaryGroup(terms)
 
   const [selectedDiseases, setSelectedDiseases] = useState<{ displayText: string, id: string }[]>([])
   const [initialDiseases] = useState(terms.diseaseSpecificUse)
+  // The fields read their values only when they mount, so clearing remounts them.
+  const [resetCount, setResetCount] = useState(0)
 
   useEffect(() => {
     let mounted = true
@@ -171,12 +251,18 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
     />
   )
 
+  const clear = () => {
+    setSelectedDiseases([])
+    setResetCount(count => count + 1)
+    onClear({ ...DATA_USE_CLEARED, accessManagement: undefined })
+  }
+
   return (
-    <>
+    <React.Fragment key={resetCount}>
       {/* controlled, open and external access */}
       <div>
         <FormField
-          title="Data Access Management*"
+          title={`Data Access Management${marker}`}
           description="Select a data access management strategy"
           id="accessManagement_controlled"
           name="accessManagement"
@@ -219,8 +305,8 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
         terms.accessManagement !== 'open' && (
           <div>
             {primaryRadio('generalResearchUse', 'General Research Use', () => onPrimaryChange('generalResearchUse', true), {
-              title: 'Primary Data Use Terms*',
-              description: 'Please select one of the following data use permissions for your dataset',
+              title: `Primary Data Use Terms${marker}`,
+              description: `Please select one of the following data use permissions for your ${subject}`,
             })}
             {primaryRadio('hmb', 'Health/Medical/Biomedical Research Use', () => onPrimaryChange('hmb', true))}
             {primaryRadio('diseaseSpecificUse', 'Disease-Specific Research Use', () => onPrimaryChange('diseaseSpecificUse', selectedDiseases.map(disease => disease.id)))}
@@ -341,6 +427,13 @@ export default function DataUseTermsFields(props: DataUseTermsFieldsProps): Reac
           </div>
         )
       }
-    </>
+      {
+        !required && !readOnly && (
+          <button id="clearDataUseTerms" className="btn" type="button" onClick={clear}>
+            Clear access management and data use
+          </button>
+        )
+      }
+    </React.Fragment>
   )
 }

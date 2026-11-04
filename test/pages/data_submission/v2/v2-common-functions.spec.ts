@@ -8,7 +8,7 @@ import {
   getStudyPropertyValueByKey,
   studyToDatasetSchemaSubmission,
 } from 'src/pages/data_submission/v2/v2-common-functions'
-import { DatasetRegistrationSchemaV1 } from 'src/pages/data_submission/v2/v2-models'
+import { DatasetRegistrationSchemaV1, Study } from 'src/pages/data_submission/v2/v2-models'
 import { DraftDetail } from 'src/types/draft'
 import { Dataset, DataUse } from 'src/types/model'
 
@@ -109,6 +109,22 @@ describe('buildConsentGroupsFromDatasets', () => {
 
   it('builds no consent groups for a study with no datasets', () => {
     expect(buildConsentGroupsFromDatasets([])).toEqual([])
+  })
+})
+
+describe('studyToDatasetSchemaSubmission', () => {
+  it('drops the data use summary Consent computes for models and workspaces', () => {
+    const study = datasetSchemaSubmissionToStudy(draftDocument())
+    study.assets = {
+      ...study.assets,
+      models: [{ name: 'M', dataUse: { hmbResearch: true }, dataUseSummary: { primary: [] } }],
+      workspaces: [{ name: 'W', dataUseSummary: { primary: [] } }],
+    } as unknown as Study['assets']
+
+    const assets = studyToDatasetSchemaSubmission(study).assets as Record<string, Record<string, unknown>[]>
+
+    expect(assets.models[0]).toEqual({ name: 'M', dataUse: { hmbResearch: true } })
+    expect(assets.workspaces[0]).toEqual({ name: 'W' })
   })
 })
 
