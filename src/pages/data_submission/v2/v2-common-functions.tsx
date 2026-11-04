@@ -350,7 +350,7 @@ export const buildConsentGroupsFromDatasets = (datasets: Dataset[]): ConsentGrou
       consentGroup.morDate = dataset.dataUse.publicationMoratorium
     }
     consentGroup.npu = dataset.dataUse.nonProfitUse
-    if (isEmpty(consentGroup.otherSecondary)) {
+    if (isEmpty(dataset.dataUse.secondaryOther)) {
       consentGroup.otherSecondary = undefined
     }
     else {
