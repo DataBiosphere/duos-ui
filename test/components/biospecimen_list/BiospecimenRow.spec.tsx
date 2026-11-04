@@ -8,7 +8,7 @@ import BiospecimenRow from 'src/components/biospecimen_list/BiospecimenRow'
 import { Biospecimen, BioSpecimenPreservationMethod, BioSpecimenType } from 'src/types/model'
 
 const sampleBiospecimen: Biospecimen = {
-  biospecimenId: 'SPEC-001',
+  biospecimenId: 1,
   studyId: 'STUDY-001',
   donorId: 'DONOR-001',
   specimenType: BioSpecimenType.BLOOD,

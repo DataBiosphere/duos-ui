@@ -224,3 +224,71 @@ describe('StudyAssetList', () => {
     expect(screen.getByTestId('row-item1')).toHaveTextContent('First Item')
   })
 })
+
+describe('StudyAssetList row keys for unsaved items', () => {
+  interface UnsavedAsset {
+    name: string
+  }
+
+  // Holds a draft in its own state, which a remount would lose.
+  const DraftRow: React.FC<{ item: UnsavedAsset }> = ({ item }) => (
+    <input aria-label={`Draft for ${item.name}`} defaultValue="" />
+  )
+
+  const Harness = () => {
+    const [items, setItems] = useState<UnsavedAsset[]>([{ name: 'First' }, { name: 'Second' }])
+    return (
+      <>
+        <button onClick={() => setItems(current => structuredClone(current))}>Clone items</button>
+        <StudyAssetList<UnsavedAsset, ValidationError, object, { item: UnsavedAsset }>
+          items={items}
+          onItemsChange={setItems}
+          AddEditComponent={() => null}
+          RowComponent={DraftRow}
+          addButtonId="addUnsaved"
+          addButtonLabel="Add"
+          getValidationState={() => undefined}
+          getAddEditProps={() => ({})}
+          getRowProps={({ item }) => ({ item })}
+          getItemKey={() => undefined}
+        />
+      </>
+    )
+  }
+
+  // The study form clones every asset whenever a study-level field changes.
+  it('keeps an unsaved row mounted when its item is replaced by a copy', () => {
+    render(<Harness />)
+    fireEvent.change(screen.getByLabelText('Draft for Second'), { target: { value: 'typed' } })
+
+    fireEvent.click(screen.getByText('Clone items'))
+
+    expect(screen.getByLabelText('Draft for Second')).toHaveValue('typed')
+  })
+
+  it('never gives a saved id and an unsaved position the same key', () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      render(
+        <StudyAssetList<{ id?: number, name: string }, ValidationError, object, { item: UnsavedAsset }>
+          items={[{ id: 1, name: 'Saved' }, { name: 'Unsaved' }]}
+          onItemsChange={() => {}}
+          AddEditComponent={() => null}
+          RowComponent={DraftRow}
+          addButtonId="addMixed"
+          addButtonLabel="Add"
+          getValidationState={() => undefined}
+          getAddEditProps={() => ({})}
+          getRowProps={({ item }) => ({ item })}
+          getItemKey={item => item.id}
+        />,
+      )
+      expect(screen.getByLabelText('Draft for Saved')).toBeInTheDocument()
+      expect(screen.getByLabelText('Draft for Unsaved')).toBeInTheDocument()
+      expect(errors.mock.calls.flat().join(' ')).not.toContain('same key')
+    }
+    finally {
+      errors.mockRestore()
+    }
+  })
+})

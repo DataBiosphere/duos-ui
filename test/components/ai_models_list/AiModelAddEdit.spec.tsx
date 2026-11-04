@@ -16,7 +16,7 @@ vi.mock('src/libs/utils', async (importActual) => {
 })
 
 const sampleModel: AiModel = {
-  modelId: 'm1',
+  modelId: 1,
   studyId: 's1',
   name: 'Baseline Model',
   description: 'Desc',
@@ -52,6 +52,7 @@ describe('AiModelAddEdit component', () => {
     expect(onChangeSpy[0].name).toBe('My Model')
     expect(onChangeSpy[0].maintainer.email).toBe('bob@example.com')
     expect(onChangeSpy[0].cloud).toEqual([])
+    expect(onChangeSpy[0]).not.toHaveProperty('modelId')
   })
 
   it('saves selected cloud values', async () => {
@@ -105,6 +106,7 @@ describe('AiModelAddEdit component', () => {
     expect(onAiModelsChange).toHaveBeenCalledTimes(1)
     const [updated] = onAiModelsChange.mock.calls[0] as [AiModel[]]
     expect(updated[0].name).toBe('Baseline Model Edited')
+    expect(updated[0].modelId).toBe(1)
   })
 })
 
