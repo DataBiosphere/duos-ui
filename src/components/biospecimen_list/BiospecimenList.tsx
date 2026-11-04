@@ -20,16 +20,15 @@ export default function BiospecimenList(props: {
       React.ComponentProps<typeof BiospecimenAddEdit>,
       React.ComponentProps<typeof BiospecimenRow>
     >
-      items={[]} // Pass empty array to prevent listing biospecimens in the main list, as they are not managed by UI
-      columnsToShow={props.columnsToShow ?? ['donorId', 'specimenType', 'preservationMethod', 'organization']}
+      items={props.biospecimens}
+      columnsToShow={props.columnsToShow ?? ['sampleId', 'donorId', 'specimenType', 'preservationMethod', 'organization']}
       onItemsChange={props.onBiospecimenChange}
       disabled={props.disabled}
       validation={props.validation}
       AddEditComponent={BiospecimenAddEdit}
       RowComponent={BiospecimenRow}
       addButtonId="add-biospecimen-btn"
-      addButtonLabel={`${props.biospecimens.length}`}
-      addButtonIcon=""
+      addButtonLabel="Add Biospecimen"
       getValidationState={v => v?.biospecimens}
       studyAssetWrapper={props.studyAssetWrapper}
       getAddEditProps={(items, closeAction, onItemsChange) => ({

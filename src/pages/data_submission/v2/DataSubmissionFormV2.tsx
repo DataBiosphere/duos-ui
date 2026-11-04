@@ -1,6 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { GeneralStudyInformation } from 'src/pages/data_submission/v2/GeneralStudyInformation'
 import { NihAnvilUseRelated } from 'src/pages/data_submission/v2/NihAnvilUseRelated'
@@ -106,7 +105,6 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const [study, setStudy] = useState({ data: {} } as Study)
   const [loadingError, setLoadingError] = useState(false)
   const [loadedDraftUuid, setLoadedDraftUuid] = useState<string>()
-  const [showContactModal, setShowContactModal] = useState(false)
   const [uneditedFields, setUneditedFields] = useState<UneditedRegistrationFields>({})
 
   const navigate = useNavigate()
@@ -294,8 +292,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
         <NihAnvilUseRelated study={study} setStudy={setStudy} />
         <NihAdministrativeInformation study={study} setStudy={setStudy} />
         <NihDataManagement study={study} setStudy={setStudy} />
-        <StudyAssetManagement study={study} setStudy={setStudy} isEditingExistingStudy={isEditing} onOpenContactUs={() => setShowContactModal(true)} />
-        <SupportRequestModal showModal={showContactModal} onCloseRequest={() => setShowContactModal(false)} />
+        <StudyAssetManagement study={study} setStudy={setStudy} isEditingExistingStudy={isEditing} />
         {!isEditing && (
           <AsyncSpinnerButton
             onClick={onSubmitStudy}

@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetManagement'
@@ -55,8 +55,16 @@ vi.mock('src/components/funding_resource_list/FundingResourceList', () => ({
 }))
 
 vi.mock('src/components/biospecimen_list/BiospecimenList', () => ({
-  default: ({ studyAssetWrapper }: { studyAssetWrapper?: (c: React.ReactNode, b: React.ReactNode) => React.ReactNode }) => (
-    <>{studyAssetWrapper?.(null, null)}</>
+  default: ({ studyAssetWrapper, onBiospecimenChange }: {
+    studyAssetWrapper?: (c: React.ReactNode, b: React.ReactNode) => React.ReactNode
+    onBiospecimenChange: (biospecimens: Biospecimen[]) => void
+  }) => (
+    <>
+      {studyAssetWrapper?.(null, null)}
+      <button type="button" onClick={() => onBiospecimenChange([{ ...sampleBiospecimen, biospecimenId: undefined }])}>
+        Change biospecimens
+      </button>
+    </>
   ),
 }))
 
@@ -88,13 +96,12 @@ describe('StudyAssetManagement', () => {
       <StudyAssetManagement
         study={baseStudy}
         setStudy={vi.fn()}
-        onOpenContactUs={vi.fn()}
       />,
     )
 
     expect(screen.getByRole('heading', { level: 2, name: 'Study Assets' })).toBeInTheDocument()
     expect(screen.getByText(/Add datasets, models, workspaces, and other resources associated with this study/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /contact the DUOS Team/i })).toBeInTheDocument()
+    expect(screen.queryByText(/contact the DUOS Team/i)).toBeNull()
 
     expect(screen.getByRole('heading', { level: 3, name: 'Datasets' })).toBeInTheDocument()
     expect(screen.getByText('Add datasets associated with this study')).toBeInTheDocument()
@@ -121,10 +128,10 @@ describe('StudyAssetManagement', () => {
     expect(screen.getByText('Add grants and funding sources for this study')).toBeInTheDocument()
 
     expect(screen.getByRole('heading', { level: 3, name: 'Biospecimens' })).toBeInTheDocument()
-    expect(screen.getByText('View total biospecimens for this study')).toBeInTheDocument()
+    expect(screen.getByText('Add biospecimens collected for this study, one entry per vial or sample')).toBeInTheDocument()
   })
 
-  it('does not render biospecimens section when biospecimens array is empty', () => {
+  it('renders the biospecimens section when the study has none, so one can be added', () => {
     const studyWithoutBiospecimens: Study = {
       ...baseStudy,
       assets: { ...baseStudy.assets, biospecimens: [] },
@@ -134,20 +141,21 @@ describe('StudyAssetManagement', () => {
       <StudyAssetManagement
         study={studyWithoutBiospecimens}
         setStudy={vi.fn()}
-        onOpenContactUs={vi.fn()}
       />,
     )
 
-    expect(screen.queryByRole('heading', { level: 3, name: 'Biospecimens' })).toBeNull()
-    expect(screen.queryByText('View total biospecimens for this study')).toBeNull()
+    expect(screen.getByRole('heading', { level: 3, name: 'Biospecimens' })).toBeInTheDocument()
+  })
 
-    expect(screen.getByRole('heading', { level: 3, name: 'Datasets' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Models' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Featured Workspaces' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Publications' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Presentations' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Clinical Trials' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Intellectual Property' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Funding Resources' })).toBeInTheDocument()
+  it('saves biospecimen changes to the study assets', () => {
+    const setStudy = vi.fn()
+    render(<StudyAssetManagement study={baseStudy} setStudy={setStudy} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Change biospecimens' }))
+
+    const update = setStudy.mock.calls[0][0] as (prev: Study) => Study
+    const updated = update({ ...baseStudy, assets: { models: [], biospecimens: [sampleBiospecimen] } })
+    expect(updated.assets?.biospecimens).toEqual([{ ...sampleBiospecimen, biospecimenId: undefined }])
+    expect(updated.assets?.models).toEqual([])
   })
 })
