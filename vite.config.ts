@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
-import { aliases_from_tsconfig } from './aliases'
+import { aliases_from_tsconfig, e2eShowcaseAliases } from './aliases'
 
 const isCI = Boolean(process.env.CI)
 
@@ -37,6 +37,10 @@ export default defineConfig({
   server: serverOptions,
   preview: serverOptions,
   resolve: {
-    alias: aliases_from_tsconfig(),
+    // The e2e alias comes first, so it wins over the `src` prefix alias.
+    alias: [
+      ...e2eShowcaseAliases(),
+      ...Object.entries(aliases_from_tsconfig()).map(([find, replacement]) => ({ find, replacement })),
+    ],
   },
 })
