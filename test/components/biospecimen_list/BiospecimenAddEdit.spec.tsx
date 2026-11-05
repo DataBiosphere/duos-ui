@@ -1,10 +1,10 @@
 import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import BiospecimenAddEdit from 'src/components/biospecimen_list/BiospecimenAddEdit'
-import { Biospecimen, BioSpecimenPreservationMethod, BioSpecimenType } from 'src/types/model'
+import { Biospecimen, BioSpecimenPreservationMethod, BioSpecimenType, PostMortemIntervalUnit } from 'src/types/model'
 
 const sampleBiospecimen: Biospecimen = {
   biospecimenId: 7,
@@ -143,17 +143,18 @@ describe('BiospecimenAddEdit', () => {
     expect(container.querySelectorAll('label.errored[for="donorId"], label.errored[for="organization"]')).toHaveLength(2)
   })
 
-  it('saves a biospecimen whose stored donor id is a number', async () => {
+  it('saves a biospecimen whose stored ids are numbers', async () => {
     const user = userEvent.setup()
-    const numeric = { ...sampleBiospecimen, donorId: 12345 } as unknown as Biospecimen
+    const numeric = { ...sampleBiospecimen, sampleId: 987, donorId: 12345 } as unknown as Biospecimen
     const { container, saved } = renderForm({ biospecimen: numeric })
+    expect(field(container, 'sampleId')).toHaveValue('987')
     expect(field(container, 'donorId')).toHaveValue('12345')
 
     await user.type(field(container, 'organization'), ' Lab')
     await save(user, container)
 
     expect(saved).toHaveLength(1)
-    expect(saved[0][0]).toEqual({ ...sampleBiospecimen, donorId: '12345', organization: 'Johns Hopkins Hospital Lab' })
+    expect(saved[0][0]).toEqual({ ...sampleBiospecimen, sampleId: '987', donorId: '12345', organization: 'Johns Hopkins Hospital Lab' })
   })
 
   it('edits a biospecimen in place and keeps its biospecimenId', async () => {
@@ -206,5 +207,130 @@ describe('BiospecimenAddEdit', () => {
     expect(field(container, 'preservationMethod input')).toBeDisabled()
     expect(container.querySelector('.collaborator-form-add-save-button')).toBeNull()
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
+  })
+})
+
+describe('BiospecimenAddEdit collection fields', () => {
+  const collected: Biospecimen = {
+    ...sampleBiospecimen,
+    sampleId: 'VIAL-1',
+    preservationDetails: 'Stored at -80C',
+    dateOfCollection: '2024-03-05',
+    postMortemInterval: { value: 6, unit: PostMortemIntervalUnit.HOURS },
+  }
+
+  it('saves the sample id, preservation details, collection date and post-mortem interval', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm()
+    await fillRequired(user, container)
+    await user.type(field(container, 'sampleId'), ' VIAL-2 ')
+    await user.type(field(container, 'preservationDetails'), 'Stored at -80C')
+    fireEvent.change(field(container, 'dateOfCollection'), { target: { value: '2024-03-05' } })
+    await user.type(field(container, 'postMortemIntervalValue'), '1.5')
+    await choose(user, container, 'postMortemIntervalUnit', 'Days')
+    await save(user, container)
+
+    expect(saved[0][0]).toMatchObject({
+      sampleId: 'VIAL-2',
+      preservationDetails: 'Stored at -80C',
+      dateOfCollection: '2024-03-05',
+      postMortemInterval: { value: 1.5, unit: PostMortemIntervalUnit.DAYS },
+    })
+  })
+
+  it('leaves out the optional fields that are not set', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm()
+    await fillRequired(user, container)
+    await save(user, container)
+
+    for (const key of ['sampleId', 'preservationDetails', 'dateOfCollection', 'postMortemInterval']) {
+      expect(saved[0][0]).not.toHaveProperty(key)
+    }
+  })
+
+  it('loads a saved biospecimen\'s collection fields', () => {
+    const { container } = renderForm({ biospecimen: collected })
+
+    expect(field(container, 'sampleId')).toHaveValue('VIAL-1')
+    expect(field(container, 'preservationDetails')).toHaveValue('Stored at -80C')
+    expect(field(container, 'dateOfCollection')).toHaveValue('2024-03-05')
+    expect(field(container, 'postMortemIntervalValue')).toHaveValue('6')
+    expect(container.querySelector('#postMortemIntervalUnit')).toHaveTextContent('Hours')
+  })
+
+  it('sends a blank sample id to clear a stored sample id of 0', async () => {
+    const user = userEvent.setup()
+    const zero = { ...collected, sampleId: 0 } as unknown as Biospecimen
+    const { container, saved } = renderForm({ biospecimen: zero })
+    expect(field(container, 'sampleId')).toHaveValue('0')
+
+    await user.clear(field(container, 'sampleId'))
+    await save(user, container)
+
+    expect(saved[0][0].sampleId).toBe('')
+  })
+
+  it('asks for an interval unit when the stored one is not listed', async () => {
+    const user = userEvent.setup()
+    const unlisted = { ...collected, postMortemInterval: { value: 12, unit: 'SECONDS' } } as unknown as Biospecimen
+    const { container, saved } = renderForm({ biospecimen: unlisted })
+
+    await save(user, container)
+
+    expect(saved).toHaveLength(0)
+    expect(container.querySelector('label.errored[for="postMortemIntervalUnit"]')).toBeInTheDocument()
+  })
+
+  it('drops cleared fields and sends a blank sample id to clear a saved one', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm({ biospecimen: collected })
+    for (const id of ['sampleId', 'preservationDetails', 'postMortemIntervalValue']) {
+      await user.clear(field(container, id))
+    }
+    await user.click(field(container, 'postMortemIntervalUnit input'))
+    await user.keyboard('{Backspace}')
+    await save(user, container)
+
+    expect(saved).toHaveLength(1)
+    expect(saved[0][0].sampleId).toBe('')
+    expect(saved[0][0]).not.toHaveProperty('preservationDetails')
+    expect(saved[0][0]).not.toHaveProperty('postMortemInterval')
+    expect(saved[0][0].biospecimenId).toBe(collected.biospecimenId)
+  })
+
+  it.each([
+    ['-1', 'Hours', 'Please enter a number of 0 or more'],
+    ['soon', 'Hours', 'Please enter a number of 0 or more'],
+    ['', 'Hours', 'Please enter the interval for the selected unit'],
+  ])('does not save a post-mortem interval of "%s" %s', async (value, unit, message) => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm()
+    await fillRequired(user, container)
+    if (value) await user.type(field(container, 'postMortemIntervalValue'), value)
+    await choose(user, container, 'postMortemIntervalUnit', unit)
+    await save(user, container)
+
+    expect(saved).toHaveLength(0)
+    expect(container).toHaveTextContent(message)
+  })
+
+  it('needs a unit for a post-mortem interval', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm()
+    await fillRequired(user, container)
+    await user.type(field(container, 'postMortemIntervalValue'), '4')
+    await save(user, container)
+
+    expect(saved).toHaveLength(0)
+    expect(container.querySelector('label[for="postMortemIntervalUnit"]')).toHaveClass('errored')
+  })
+
+  it.each(['March 2024', ' March 2024 '])('keeps a stored collection date of "%s" in another format', async (stored) => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm({ biospecimen: { ...collected, dateOfCollection: stored } })
+    await save(user, container)
+
+    expect(saved[0][0].dateOfCollection).toBe('March 2024')
   })
 })
