@@ -16,3 +16,15 @@ export const aliases_from_tsconfig = () => {
   }
   return aliases
 }
+
+/** Set by `pnpm run build:e2e` only (DT-4424); no deployed build sets it. */
+export const E2E_SHOWCASES_ENV = 'DUOS_E2E_SHOWCASES'
+
+/**
+ * With DUOS_E2E_SHOWCASES=true, resolves the bare `src/showcases` import to the synthetic index the
+ * Playwright specs load. Anything else returns no alias, so the real index is built.
+ */
+export const e2eShowcaseAliases = (env: Readonly<Record<string, string | undefined>> = process.env) =>
+  env[E2E_SHOWCASES_ENV] === 'true'
+    ? [{ find: /^src\/showcases$/, replacement: resolve(__dirname, 'test/e2e/showcase/index.ts') }]
+    : []
