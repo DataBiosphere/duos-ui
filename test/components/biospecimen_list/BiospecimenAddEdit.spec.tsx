@@ -1,23 +1,210 @@
 import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import BiospecimenAddEdit from 'src/components/biospecimen_list/BiospecimenAddEdit'
+import { Biospecimen, BioSpecimenPreservationMethod, BioSpecimenType } from 'src/types/model'
 
-describe('BiospecimenAddEdit component', () => {
-  it('renders nothing after mount', async () => {
-    const { container } = render(
-      <MemoryRouter>
-        <BiospecimenAddEdit
-          id={-1}
-          biospecimen={undefined}
-          biospecimens={[]}
-          closeAction={vi.fn()}
-          onBiospecimensChange={vi.fn()}
-        />
-      </MemoryRouter>,
-    )
-    expect(container.querySelector('[data-cy="biospecimen-add-edit"]')).not.toBeInTheDocument()
+const sampleBiospecimen: Biospecimen = {
+  biospecimenId: 7,
+  studyId: 'STUDY-001',
+  donorId: 'DONOR-001',
+  specimenType: BioSpecimenType.BLOOD,
+  preservationMethod: BioSpecimenPreservationMethod.FRESH_FROZEN,
+  organization: 'Johns Hopkins Hospital',
+}
+
+type User = ReturnType<typeof userEvent.setup>
+
+const renderForm = (props: { biospecimen?: Biospecimen, biospecimens?: Biospecimen[], id?: number, readOnly?: boolean } = {}) => {
+  const saved: Biospecimen[][] = []
+  const closeAction = vi.fn()
+  const { biospecimen } = props
+  const view = render(
+    <BiospecimenAddEdit
+      id={props.id ?? (biospecimen ? 0 : -1)}
+      biospecimen={biospecimen}
+      biospecimens={props.biospecimens ?? (biospecimen ? [biospecimen] : [])}
+      closeAction={closeAction}
+      onBiospecimensChange={items => saved.push(items)}
+      readOnly={props.readOnly}
+    />,
+  )
+  return { ...view, saved, closeAction }
+}
+
+const field = (container: HTMLElement, id: string) => container.querySelector<HTMLInputElement>(`#${id}`)!
+
+const choose = async (user: User, container: HTMLElement, id: string, label: string) => {
+  await user.click(field(container, `${id} input`))
+  await user.keyboard(label)
+  await user.keyboard('{Enter}')
+}
+
+const fillRequired = async (user: User, container: HTMLElement) => {
+  await user.type(field(container, 'donorId'), 'DONOR-9')
+  await choose(user, container, 'specimenType', 'Plasma')
+  await choose(user, container, 'preservationMethod', 'Cryopreserved')
+  await user.type(field(container, 'organization'), 'Broad Biobank')
+}
+
+const save = (user: User, container: HTMLElement) =>
+  user.click(container.querySelector('.collaborator-form-add-save-button')!)
+
+describe('BiospecimenAddEdit', () => {
+  it('adds a new biospecimen without an id', async () => {
+    const user = userEvent.setup()
+    const { container, saved, closeAction } = renderForm({ biospecimens: [sampleBiospecimen] })
+    expect(screen.getByRole('heading', { name: 'New Biospecimen' })).toBeInTheDocument()
+
+    await fillRequired(user, container)
+    await save(user, container)
+
+    expect(saved).toHaveLength(1)
+    expect(saved[0]).toHaveLength(2)
+    expect(saved[0][0]).toBe(sampleBiospecimen)
+    expect(saved[0][1]).toEqual({
+      studyId: '',
+      donorId: 'DONOR-9',
+      specimenType: BioSpecimenType.PLASMA,
+      preservationMethod: BioSpecimenPreservationMethod.CRYO_PRESERVED,
+      organization: 'Broad Biobank',
+    })
+    expect(saved[0][1]).not.toHaveProperty('biospecimenId')
+    expect(closeAction).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not save until the required fields are set', async () => {
+    const user = userEvent.setup()
+    const { container, saved, closeAction } = renderForm()
+
+    await save(user, container)
+
+    expect(saved).toHaveLength(0)
+    expect(closeAction).not.toHaveBeenCalled()
+    const errored = Array.from(container.querySelectorAll('label.errored'), label => label.getAttribute('for'))
+    expect(errored).toEqual(['donorId', 'specimenType', 'preservationMethod', 'organization'])
+  })
+
+  it('does not save after a required select is cleared', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm({ biospecimen: sampleBiospecimen })
+    await user.click(field(container, 'specimenType input'))
+    await user.keyboard('{Backspace}')
+
+    await save(user, container)
+
+    expect(saved).toHaveLength(0)
+    expect(container.querySelector('label.errored[for="specimenType"]')).toBeInTheDocument()
+  })
+
+  it('asks for a required field the stored biospecimen lacks', async () => {
+    const user = userEvent.setup()
+    const { organization: _organization, ...lacking } = sampleBiospecimen
+    const { container, saved } = renderForm({ biospecimen: lacking as Biospecimen })
+
+    await save(user, container)
+    expect(saved).toHaveLength(0)
+    expect(container.querySelector('label.errored[for="organization"]')).toBeInTheDocument()
+
+    await user.type(field(container, 'organization'), 'Broad Biobank')
+    await save(user, container)
+    expect(saved[0][0]).toEqual({ ...sampleBiospecimen, organization: 'Broad Biobank' })
+  })
+
+  it('asks for a specimen type when the stored one is not listed', async () => {
+    const user = userEvent.setup()
+    const unlisted = { ...sampleBiospecimen, specimenType: 'blood' } as unknown as Biospecimen
+    const { container, saved } = renderForm({ biospecimen: unlisted })
+    expect(container.querySelector('#specimenType')!.textContent).toBe('')
+
+    await save(user, container)
+    expect(saved).toHaveLength(0)
+    expect(container.querySelector('label.errored[for="specimenType"]')).toBeInTheDocument()
+
+    await choose(user, container, 'specimenType', 'Blood')
+    await save(user, container)
+    expect(saved[0][0].specimenType).toBe(BioSpecimenType.BLOOD)
+  })
+
+  it('does not save a donor id or organization of only spaces', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm()
+    await fillRequired(user, container)
+    await user.clear(field(container, 'donorId'))
+    await user.type(field(container, 'donorId'), '   ')
+    await user.clear(field(container, 'organization'))
+    await user.type(field(container, 'organization'), '   ')
+
+    await save(user, container)
+
+    expect(saved).toHaveLength(0)
+    expect(container.querySelectorAll('label.errored[for="donorId"], label.errored[for="organization"]')).toHaveLength(2)
+  })
+
+  it('saves a biospecimen whose stored donor id is a number', async () => {
+    const user = userEvent.setup()
+    const numeric = { ...sampleBiospecimen, donorId: 12345 } as unknown as Biospecimen
+    const { container, saved } = renderForm({ biospecimen: numeric })
+    expect(field(container, 'donorId')).toHaveValue('12345')
+
+    await user.type(field(container, 'organization'), ' Lab')
+    await save(user, container)
+
+    expect(saved).toHaveLength(1)
+    expect(saved[0][0]).toEqual({ ...sampleBiospecimen, donorId: '12345', organization: 'Johns Hopkins Hospital Lab' })
+  })
+
+  it('edits a biospecimen in place and keeps its biospecimenId', async () => {
+    const user = userEvent.setup()
+    const other = { ...sampleBiospecimen, biospecimenId: 8, donorId: 'DONOR-002' }
+    const { container, saved } = renderForm({ biospecimen: other, biospecimens: [sampleBiospecimen, other], id: 1 })
+    expect(screen.getByRole('heading', { name: 'Edit Biospecimen from donor DONOR-002' })).toBeInTheDocument()
+    expect(field(container, 'donorId')).toHaveValue('DONOR-002')
+    expect(container.querySelector('#specimenType')).toHaveTextContent('Blood')
+    expect(container.querySelector('#preservationMethod')).toHaveTextContent('Fresh Frozen')
+
+    await user.clear(field(container, 'donorId'))
+    await user.type(field(container, 'donorId'), 'DONOR-003')
+    await choose(user, container, 'specimenType', 'Serum')
+    await save(user, container)
+
+    expect(saved).toHaveLength(1)
+    expect(saved[0][0]).toBe(sampleBiospecimen)
+    expect(saved[0][1]).toEqual({ ...other, donorId: 'DONOR-003', specimenType: BioSpecimenType.SERUM })
+  })
+
+  it('keeps fields the form does not show', async () => {
+    const user = userEvent.setup()
+    const loaded = { ...sampleBiospecimen, unknownField: 'kept' } as Biospecimen
+    const { container, saved } = renderForm({ biospecimen: loaded })
+
+    await save(user, container)
+
+    expect(saved[0][0]).toEqual(loaded)
+  })
+
+  it('does not save after cancel', async () => {
+    const user = userEvent.setup()
+    const { container, saved, closeAction } = renderForm({ biospecimen: sampleBiospecimen })
+    await user.type(field(container, 'donorId'), '-x')
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    expect(closeAction).toHaveBeenCalledTimes(1)
+    expect(saved).toHaveLength(0)
+  })
+
+  it('shows a biospecimen read-only', () => {
+    const { container } = renderForm({ biospecimen: sampleBiospecimen, readOnly: true })
+
+    expect(screen.getByRole('heading', { name: 'Biospecimen from donor DONOR-001' })).toBeInTheDocument()
+    expect(field(container, 'donorId')).toBeDisabled()
+    expect(field(container, 'organization')).toBeDisabled()
+    expect(field(container, 'specimenType input')).toBeDisabled()
+    expect(field(container, 'preservationMethod input')).toBeDisabled()
+    expect(container.querySelector('.collaborator-form-add-save-button')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
   })
 })
