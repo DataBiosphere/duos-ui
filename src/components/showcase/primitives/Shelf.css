@@ -1,0 +1,70 @@
+/* Colors come from the showcase template's custom properties; the fallbacks are the default preset. */
+.showcase-shelf {
+  /* Provisional (design review D1): the card width at every breakpoint. */
+  --showcase-shelf-card-width: 356px;
+  --showcase-shelf-gap: 16px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Wraps, so on phones the controls drop below the heading instead of overflowing (D2). */
+.showcase-shelf__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+}
+
+.showcase-shelf__title {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.showcase-shelf__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.showcase-shelf__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--showcase-primary, #1f3b50);
+  border-radius: 50%;
+  background: var(--showcase-background, #ffffff);
+  color: var(--showcase-primary, #1f3b50);
+  cursor: pointer;
+}
+
+/* Provisional (design review D2): the disabled style. */
+.showcase-shelf__arrow[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* No CSS scroll-behavior: the buttons choose smooth or instant from the reduced-motion setting. */
+.showcase-shelf__list {
+  display: flex;
+  gap: var(--showcase-shelf-gap);
+  margin: 0;
+  padding: 0 0 8px;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+}
+
+.showcase-shelf__card {
+  flex: 0 0 min(var(--showcase-shelf-card-width), 100%);
+  min-width: 0;
+  scroll-snap-align: start;
+}

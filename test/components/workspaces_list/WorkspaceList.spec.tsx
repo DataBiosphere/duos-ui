@@ -1,5 +1,5 @@
 import React from 'react'
-import { describe, it, expect, beforeAll } from 'vitest'
+import { describe, it, expect, beforeAll, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -8,7 +8,7 @@ import { Workspace } from 'src/types/model'
 import WorkspaceList from 'src/components/workspaces_list/WorkspaceList'
 
 const sampleWorkspace: Workspace = {
-  workspaceId: 'w1',
+  workspaceId: 1,
   studyId: 's1',
   name: 'Analysis Workspace',
   platform: 'Terra',
@@ -34,6 +34,19 @@ const WorkspaceListHarness: React.FC<{ initial: Workspace[] }> = ({ initial }) =
 beforeAll(() => Modal.setAppElement(document.body))
 
 describe('WorkspaceList component', () => {
+  it('gives unsaved workspaces distinct row keys', () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      render(<WorkspaceListHarness initial={[{ ...sampleWorkspace, workspaceId: undefined, name: 'Unsaved A' }, { ...sampleWorkspace, workspaceId: undefined, name: 'Unsaved B' }]} />)
+      expect(screen.getByText('Unsaved A')).toBeInTheDocument()
+      expect(screen.getByText('Unsaved B')).toBeInTheDocument()
+      expect(errors.mock.calls.flat().join(' ')).not.toContain('same key')
+    }
+    finally {
+      errors.mockRestore()
+    }
+  })
+
   it('renders existing workspaces', () => {
     render(<WorkspaceListHarness initial={[sampleWorkspace]} />)
     expect(screen.getByText(sampleWorkspace.name)).toBeInTheDocument()

@@ -50,9 +50,9 @@ describe('dataset card labels', () => {
     expect(shown.map(entry => entry.field)).not.toContain('dacName')
   })
 
-  it('accepts an https scheme in any case', () => {
+  it('accepts an https scheme in any case, and links to it in canonical form', () => {
     const shown = entries({ ...complete, accessManagement: 'open', accessUrl: 'HTTPS://example.org/open-cohort' })
-    expect(shown).toContainEqual({ field: 'accessUrl', label: 'Provider site', value: 'example.org', href: 'HTTPS://example.org/open-cohort' })
+    expect(shown).toContainEqual({ field: 'accessUrl', label: 'Provider site', value: 'example.org', href: 'https://example.org/open-cohort' })
   })
 
   it('shows no provider link that is not https', () => {
