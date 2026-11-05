@@ -97,9 +97,15 @@ const AssetIdentifierLookup = ({ identifier }: { identifier: string }) => {
   }
 }
 
+const withoutTrailingSlashes = (path: string) => {
+  let end = path.length
+  while (end > 1 && path[end - 1] === '/') end--
+  return path.slice(0, end)
+}
+
 export default function NotFound() {
   // Downstream checks, such as DatasetStatistics.getMatchPhrase, are case-sensitive.
-  const path = useLocation().pathname.toUpperCase().replace(/\/+$/, '')
+  const path = withoutTrailingSlashes(useLocation().pathname.toUpperCase())
   const identifier = path.split('/').pop() ?? ''
 
   // StudyDetails expects a database ID without the 'DUOS-S' prefix
