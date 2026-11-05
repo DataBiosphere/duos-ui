@@ -39,7 +39,7 @@ describe('Library Versions - Tests', () => {
       expect(featuredLibraries).toContain('count-me-in')
       expect(featuredLibraries).toContain('crispi')
 
-      expect(featuredLibraries).toHaveLength(24)
+      expect(featuredLibraries).toHaveLength(22)
     })
 
     it('marks non-featured libraries correctly', () => {
@@ -120,7 +120,7 @@ describe('Library Versions - Tests', () => {
         .map(([key, library]) => ({ key, ...library }))
         .sort((a, b) => a.order - b.order || a.key.localeCompare(b.key))
 
-      expect(featuredLibraries).toHaveLength(24)
+      expect(featuredLibraries).toHaveLength(22)
 
       expect(featuredLibraries[0].key).toBe('/datalibrary') // order: 1
       expect(featuredLibraries[1].key).toBe('broad') // order: 2
