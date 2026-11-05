@@ -11,6 +11,13 @@ const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000
 const GENERATION = `COALESCE(user_sessions.sess->'__fastifySessionMetadata'->>'generation', user_sessions.sid)`
 
 /**
+ * A stored session's generation, as `@fastify/session` 11.1.6 reads it: the
+ * sid for a session written before 11.1.6, which has no generation.
+ */
+export const sessionGeneration = (stored: object, sid: string): string =>
+  (stored as { __fastifySessionMetadata?: { generation?: unknown } }).__fastifySessionMetadata?.generation as string | undefined ?? sid
+
+/**
  * The `compareAndSet` that `@fastify/session` 11.1.6 requires of a store
  * (DT-4420). Until the upgrade, the 11.1.5 `SessionStore` type doesn't declare it.
  */
@@ -72,24 +79,20 @@ export function createPgSessionStore(pg: PostgresDb, log: Pick<FastifyBaseLogger
   }
 
   return {
-    // While the BFF runs @fastify/session 11.1.5, a row that 11.1.6 has
-    // regenerated (a generation other than its sid) is invisible. 11.1.6 signs
-    // a user in by moving the pre-auth row to a new generation, and 11.1.5
-    // doesn't check generations, so without this a pre-auth cookie kept from an
-    // 11.1.5 pod would load the signed-in session on any 11.1.5 pod: during the
-    // rolling upgrade, or after a rollback to this release. Remove the check in
-    // the 11.1.6 upgrade, whose `get` must return regenerated rows (DT-4420).
+    // Returns regenerated rows too: @fastify/session 11.1.6 checks the
+    // cookie's generation against the row's itself. (The 11.1.5 release hid
+    // them, so an 11.1.5 pod can't load a session 11.1.6 rotated; DT-4420.)
     get: (sid, callback) => run('get', callback, async () => {
       const { rows } = await pg.query(
-        `SELECT sess FROM user_sessions WHERE sid = $1 AND expire > NOW() AND ${GENERATION} = user_sessions.sid`,
+        'SELECT sess FROM user_sessions WHERE sid = $1 AND expire > NOW()',
         [sid],
       )
       return rows[0]?.sess ?? null
     }),
 
-    // Never overwrites a regenerated row, for the same reason: an 11.1.5 pod
-    // that loaded the pre-auth session before a sign-in must not write it back
-    // over the signed-in one. In 11.1.6, `set` is only for new sessions.
+    // Never overwrites a regenerated row: an 11.1.5 pod that loaded the
+    // pre-auth session before a sign-in must not write it back over the
+    // signed-in one. In 11.1.6, `set` is only for new sessions.
     set: (sid, session, callback) => run('set', callback, async () => {
       await pg.query(
         `INSERT INTO user_sessions (sid, sess, expire)

@@ -120,7 +120,8 @@ export function trackSession(app: FastifyInstance): { stored: () => Promise<Sess
   let sid: string | undefined
   let store: FastifyRequest['sessionStore'] | undefined
   app.addHook('onRequest', async (request) => {
-    sid = request.session.sessionId
+    // The store row's key. Since @fastify/session 11.1.6, `sessionId` is the generation.
+    sid = request.session.sessionStoreId
     store = request.sessionStore
   })
   return {

@@ -4,6 +4,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifySession from '@fastify/session'
 import type { PostgresDb } from '@fastify/postgres'
 import { createPgSessionStore } from '../src/session/pgStore.js'
+import { compareAndSetRow, stored } from './sessionTable.js'
 import { sessionPluginOptions } from '../src/session/sessionOptions.js'
 import '../src/types/session.js'
 
@@ -25,8 +26,11 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
       // The real store passes maxAge in ms and lets Postgres compute
       // NOW() + interval; this stand-in plays the role of the DB clock.
       const [sid, sess, maxAgeMs] = params as [string, unknown, number]
-      rows.set(sid, { sess, expire: new Date(Date.now() + maxAgeMs) })
+      rows.set(sid, { sess: stored(sess), expire: new Date(Date.now() + maxAgeMs) })
       return { rows: [] }
+    }
+    if (sql.includes('UPDATE user_sessions')) {
+      return compareAndSetRow(rows, params)
     }
     if (sql.includes('DELETE FROM user_sessions')) {
       rows.delete(params[0] as string)
@@ -60,8 +64,28 @@ async function buildSessionApp(pg: PostgresDb): Promise<FastifyInstance> {
     return { ok: true }
   })
 
+  // A request that loads the session, waits, then saves: the save that races a logout.
+  app.post('/slow-save', async (request) => {
+    slowSaveLoaded()
+    await slowSaveGate
+    request.session.accessToken = 'written-late'
+    return request.session.save().then(() => ({ saved: true }), (err: { code?: string }) => ({ saved: false, code: err.code }))
+  })
+
   return app
 }
+
+/** A promise and the function that resolves it. */
+function deferred(): { promise: Promise<void>, resolve: () => void } {
+  let resolve: () => void = () => {}
+  const promise = new Promise<void>((done) => {
+    resolve = done
+  })
+  return { promise, resolve }
+}
+
+let slowSaveLoaded: () => void = () => {}
+let slowSaveGate: Promise<void> = Promise.resolve()
 
 // Pull the session cookie out of an inject response so it can be replayed.
 function sessionCookieHeader(res: { cookies: Array<{ name: string, value: string }> }): string {
@@ -128,6 +152,26 @@ describe('session middleware (integration)', () => {
     })
     expect(me.json()).toEqual({ userId: 'user@example.com' })
     await restarted.close()
+  })
+
+  it('does not bring a session back when a save that loaded it lands after logout (GHSA-2hw7-jxfh-4rm3)', async () => {
+    const login = await app.inject({ method: 'POST', url: '/login' })
+    const cookie = sessionCookieHeader(login)
+    const gate = deferred()
+    slowSaveGate = gate.promise
+    const loaded = deferred()
+    slowSaveLoaded = loaded.resolve
+
+    const slow = app.inject({ method: 'POST', url: '/slow-save', headers: { cookie } })
+    await loaded.promise
+    await app.inject({ method: 'POST', url: '/logout', headers: { cookie } })
+    gate.resolve()
+
+    // compareAndSet finds no row, so the late save fails instead of recreating it.
+    expect((await slow).json()).toEqual({ saved: false, code: 'ENOENT' })
+    expect(rows.size).toBe(0)
+    const me = await app.inject({ method: 'GET', url: '/me', headers: { cookie } })
+    expect(me.json()).toEqual({ userId: null })
   })
 
   it('destroys the session on logout', async () => {

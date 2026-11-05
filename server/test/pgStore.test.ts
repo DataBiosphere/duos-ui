@@ -62,13 +62,13 @@ describe('createPgSessionStore', () => {
       expect(params).toEqual(['sid-1'])
     })
 
-    it('hides a row that @fastify/session 11.1.6 has regenerated, while the BFF runs 11.1.5', async () => {
+    it('returns a regenerated row, whose generation @fastify/session 11.1.6 checks itself', async () => {
       query.mockResolvedValueOnce({ rows: [] })
 
       await promisifyGet(store, 'sid-1')
 
       const [sql] = query.mock.calls[0]
-      expect(sql).toContain(`COALESCE(user_sessions.sess->'__fastifySessionMetadata'->>'generation', user_sessions.sid) = user_sessions.sid`)
+      expect(sql).not.toContain('__fastifySessionMetadata')
     })
 
     it('returns null when no (unexpired) row exists', async () => {

@@ -6,6 +6,7 @@ import fastifyCsrf from '@fastify/csrf-protection'
 import type { PostgresDb } from '@fastify/postgres'
 import type { Configuration } from 'openid-client'
 import { createPgSessionStore } from '../src/session/pgStore.js'
+import { compareAndSetRow, sessionGeneration, stored } from './sessionTable.js'
 import { sessionPluginOptions } from '../src/session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from '../src/auth/csrf.js'
 import { fetchMetadataGuard } from '../src/security/fetchMetadata.js'
@@ -84,8 +85,15 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
       await new Promise(resolve => setTimeout(resolve, 0)) // simulate DB latency
       const [sid, sess, maxAgeMs] = params as [string, unknown, number]
       setSids.push(sid)
-      rows.set(sid, { sess, expire: new Date(Date.now() + maxAgeMs) })
+      rows.set(sid, { sess: stored(sess), expire: new Date(Date.now() + maxAgeMs) })
       return { rows: [] }
+    }
+    if (sql.includes('UPDATE user_sessions')) {
+      // compareAndSet: write only an unexpired row that holds the expected generation.
+      await new Promise(resolve => setTimeout(resolve, 0)) // simulate DB latency
+      const result = compareAndSetRow(rows, params)
+      if (result.rowCount === 1) setSids.push(params[0] as string)
+      return result
     }
     if (sql.includes('DELETE FROM user_sessions')) {
       rows.delete(params[0] as string)
@@ -483,7 +491,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       expect(fetchSpy).not.toHaveBeenCalled()
     })
 
-    it('destroys the pre-auth session row in the store', async () => {
+    it('keeps the pre-auth row and moves it to a new generation that holds the tokens', async () => {
       const { cookie: loginCookie } = await login()
       const preAuthSid = [...rows.keys()][0]
 
@@ -493,13 +501,16 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
         headers: { cookie: loginCookie },
       })
 
-      expect(rows.has(preAuthSid)).toBe(false)
-      expect(rows.size).toBe(1)
+      // @fastify/session 11.1.6 regenerates in place; the pre-auth cookie's generation no longer loads it.
+      expect([...rows.keys()]).toEqual([preAuthSid])
+      const { sess } = rows.get(preAuthSid)!
+      expect(sessionGeneration(sess, preAuthSid)).not.toBe(preAuthSid)
+      expect(sess).toMatchObject({ accessToken: expect.any(String), userId: 'user@example.com' })
+      expect(sess).not.toHaveProperty('pkceVerifier')
     })
 
-    it('stamps the pre-auth audit row as rotated, not as an expiry', async () => {
+    it('leaves the rotated audit stamp to Consent\'s trigger', async () => {
       const { cookie: loginCookie } = await login()
-      const preAuthSid = [...rows.keys()][0]
 
       await app.inject({
         method: 'GET',
@@ -507,7 +518,8 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
         headers: { cookie: loginCookie },
       })
 
-      expect(auditUpdates).toEqual([{ reason: 'rotated', sid: preAuthSid }])
+      // audit_session_update closes the pre-auth audit row when the generation changes.
+      expect(auditUpdates).toEqual([])
     })
   })
 
@@ -578,6 +590,7 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     it('destroys the session, stamps the audit record, and clears the cookie', async () => {
       const { cookie } = await authenticate()
       expect(rows.size).toBe(1)
+      const [sid] = rows.keys()
 
       const token = await csrfToken(cookie)
       const res = await app.inject({
@@ -588,7 +601,8 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
 
       expect(res.statusCode).toBe(204)
       expect(rows.size).toBe(0) // session row deleted
-      expect(auditUpdates.filter(u => u.reason === 'logout')).toHaveLength(1)
+      // Stamped on the row's sid: after the sign-in, `sessionId` is a different generation.
+      expect(auditUpdates.filter(u => u.reason === 'logout')).toEqual([{ reason: 'logout', sid }])
       const cleared = res.cookies.find(c => c.name === 'sessionId')
       expect(cleared).toBeDefined()
       expect(cleared!.value).toBe('') // cookie cleared
@@ -808,8 +822,9 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       expect(cbRes.statusCode).toBe(302)
       const callbackWrites = fake.setSids.slice(beforeCallback)
       expect(callbackWrites).toHaveLength(2)
-      expect(new Set(callbackWrites).size).toBe(1) // both writes hit the rotated sid
-      expect(callbackWrites[0]).not.toBe(loginSid)
+      // Since @fastify/session 11.1.6 both writes rotate the login's own row to a new generation.
+      expect(new Set(callbackWrites)).toEqual(new Set([loginSid]))
+      expect(sessionGeneration(fake.rows.get(loginSid)!.sess, loginSid)).not.toBe(loginSid)
 
       await guardedApp.close()
 
