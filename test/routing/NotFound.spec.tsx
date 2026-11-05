@@ -161,8 +161,11 @@ describe('NotFound — DUOS identifiers', () => {
     expect(screen.queryByText(NOT_FOUND)).not.toBeInTheDocument()
   })
 
-  it('shows page not found for a status it does not know', async () => {
-    lookup.mockResolvedValue(buildLookup({ status: 'PENDING' as AssetLookup['status'] }))
+  it.each([
+    [{ status: 'PENDING' as AssetLookup['status'] }],
+    [{ type: 'DATASET' as const }],
+  ])('shows page not found for a status or type it cannot open: %o', async (overrides) => {
+    lookup.mockResolvedValue(buildLookup(overrides))
     await renderAt('/DUOS-M-000045')
     expect(await screen.findByText(NOT_FOUND)).toBeVisible()
   })
