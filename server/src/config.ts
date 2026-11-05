@@ -92,6 +92,13 @@ const TRUSTED_PEER_NAMES = new Set(['loopback', 'linklocal', 'uniquelocal'])
  *     number of rate-limit buckets (DT-4381).
  *   - **docker-compose (`loopback,uniquelocal`).** The `proxy` container
  *     reaches the app over a bridge network, so its peer is RFC1918.
+ *   - **BEEs (the default, accepted).** The HAProxy ingress is a `10.x` pod
+ *     in front of the sidecar, so `X-Forwarded-For` ends in its address and
+ *     `request.ip` is that pod, not the client. With
+ *     `DUOS_RATE_LIMIT_TRUST_REAL_IP` off, all BEE clients share one
+ *     rate-limit bucket per route. BEEs are test environments, so we accept
+ *     this. To key on the client there, set `loopback,uniquelocal` in the BEE
+ *     values in terra-helmfile.
  *
  * Expressed as peer names rather than a hop count on purpose. Fastify 5.12.1
  * made the numeric form (`trustProxy: 1`) fail closed permanently, because a
