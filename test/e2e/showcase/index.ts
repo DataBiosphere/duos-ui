@@ -6,7 +6,6 @@
  *
  * The content is fictional. It passes the same schema and CI-guard rules as a real entry.
  */
-import { showcaseRoute } from '../../../src/showcases/index'
 import type { RegistryEntry, ShowcasePartialInput } from 'src/types/showcase'
 
 export const E2E_FLAGSHIP: RegistryEntry = { key: 'e2e-flagship', title: 'Synthetic Flagship Data', status: 'live', flagship: true, order: 0 }
@@ -25,4 +24,4 @@ export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {
   'e2e-hidden': {},
 }
 
-export { showcaseRoute }
+export { showcaseRoute } from '../../../src/showcases/index'
