@@ -89,8 +89,8 @@ describe('the e2e showcase build switch', () => {
       expect(OTHER_INDEX_IMPORT.test(`'src/showcases/index${ext}'`)).toBe(true)
       expect(OTHER_INDEX_IMPORT.test(`'../showcases/index${ext}'`)).toBe(true)
     }
-    for (const allowed of ["'src/showcases'", "'src/showcases/schema'", "'src/showcases/indexes'"]) {
-      expect(OTHER_INDEX_IMPORT.test(allowed)).toBe(false)
+    for (const allowed of ['src/showcases', 'src/showcases/schema', 'src/showcases/indexes']) {
+      expect(OTHER_INDEX_IMPORT.test(`'${allowed}'`)).toBe(false)
     }
   })
 
