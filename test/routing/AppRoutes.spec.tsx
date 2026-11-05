@@ -44,6 +44,10 @@ vi.mock('src/pages/admin_console/AdminMetrics', () => ({
   default: () => <div>Admin Metrics</div>,
 }))
 
+vi.mock('src/components/showcase/ShowcasePage', () => ({
+  ShowcasePage: ({ route }: { route: string }) => <div>Showcase {route}</div>,
+}))
+
 vi.mock('src/pages/data_submission/StudyTemplateUpload', () => ({
   StudyTemplateUpload: () => <div>Upload Study Template</div>,
 }))
@@ -116,6 +120,23 @@ describe('AppRoutes — RoleBAC routes redirect unauthenticated users', () => {
     )
     expect(onLocationChange).toHaveBeenCalledWith(`/?redirectTo=${route}`)
     expect(container.querySelector('[data-cy="not-found"]')).not.toBeInTheDocument()
+  })
+})
+
+describe('AppRoutes — public showcase routes', () => {
+  it.each([
+    ['/data', 'Showcase flagship'],
+    ['/showcase/example-partner', 'Showcase key'],
+  ])('renders %s for a signed-out visitor without a sign-in redirect', (route, text) => {
+    const onLocationChange = vi.fn()
+    const { getByText } = render(
+      <MemoryRouter initialEntries={[route]}>
+        <LocationSpy onLocationChange={onLocationChange} />
+        <AppRoutes isLogged={false} env="dev" />
+      </MemoryRouter>,
+    )
+    expect(getByText(text)).toBeInTheDocument()
+    expect(onLocationChange).toHaveBeenLastCalledWith(route)
   })
 })
 

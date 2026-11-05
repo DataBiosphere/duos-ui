@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { findShowcase, type ShowcaseSources } from 'src/components/showcase/loadShowcase'
 import { resolveShowcase } from 'src/showcases/defaults'
+import { ShowcaseConfigSchema } from 'src/showcases/schema'
 import type { RegistryEntry, ShowcasePartialInput } from 'src/types/showcase'
 
 const flagship: RegistryEntry = { key: 'flagship-data', title: 'Flagship Data', status: 'live', flagship: true, order: 0 }
@@ -29,7 +30,7 @@ describe('findShowcase', () => {
     expect(findShowcase({ route: 'key', key: 'example-partner' }, sources())).toEqual({
       status: 'found',
       entry: partner,
-      config: resolveShowcase(partnerConfig),
+      config: ShowcaseConfigSchema.parse(resolveShowcase(partnerConfig)),
     })
   })
 
@@ -37,7 +38,7 @@ describe('findShowcase', () => {
     expect(findShowcase({ route: 'flagship' }, sources())).toEqual({
       status: 'found',
       entry: flagship,
-      config: resolveShowcase({}),
+      config: ShowcaseConfigSchema.parse(resolveShowcase({})),
     })
   })
 
@@ -99,6 +100,15 @@ describe('findShowcase', () => {
     expect(findShowcase({ route: 'flagship' }, sources({ entries }))).toEqual(NOT_FOUND)
   })
 
+  it('finds nothing, and logs why, when the resolved config fails the schema', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const invalid = { branding: { primary: 'not-a-color' } } as unknown as ShowcasePartialInput
+    const result = findShowcase({ route: 'key', key: 'example-partner' }, sources({ configs: { 'example-partner': invalid } }))
+    expect(result).toEqual(NOT_FOUND)
+    expect(error).toHaveBeenCalledWith('Showcase "example-partner" has an invalid config', expect.any(Array))
+    error.mockRestore()
+  })
+
   it('finds nothing when two entries share a key', () => {
     const entries = [partner, { ...partner, title: 'Duplicate', order: 6 }]
     expect(findShowcase({ route: 'key', key: 'example-partner' }, sources({ entries }))).toEqual(NOT_FOUND)
@@ -125,7 +135,7 @@ describe('loadShowcase', () => {
   })
 
   it('finds a showcase in the index when config.json turns the flag on', async () => {
-    expect(await loadWith(() => Promise.resolve(true))).toEqual({ status: 'found', entry: partner, config: resolveShowcase(partnerConfig) })
+    expect(await loadWith(() => Promise.resolve(true))).toEqual({ status: 'found', entry: partner, config: ShowcaseConfigSchema.parse(resolveShowcase(partnerConfig)) })
   })
 
   it('finds nothing when config.json leaves the flag off', async () => {
