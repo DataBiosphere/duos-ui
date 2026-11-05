@@ -12,6 +12,7 @@ interface ConfigType {
   terraUrl: string
   bffEnabled?: boolean
   showcaseApiUrl?: string
+  showcaseEnabled?: boolean
 }
 
 let configPromise: Promise<ConfigType> | null = null
@@ -70,6 +71,10 @@ class ConfigClass {
 
   async getShowcaseApiUrl(): Promise<string> {
     return getShowcaseApiUrl()
+  }
+
+  async isShowcaseEnabled(): Promise<boolean> {
+    return isShowcaseEnabled()
   }
 
   async getTag(): Promise<string> {
@@ -182,6 +187,15 @@ export const getHash = async (): Promise<string> => {
 export const isBffEnabled = async (): Promise<boolean> => {
   const config = await loadConfig()
   return config.bffEnabled === true
+}
+
+/**
+ * The Data Showcase rollout flag (DT-4353). The public showcase pages render only when config.json
+ * sets `showcaseEnabled` to `true`; absent or any other value keeps every showcase route off.
+ */
+export const isShowcaseEnabled = async (): Promise<boolean> => {
+  const config = await loadConfig()
+  return config.showcaseEnabled === true
 }
 
 export const getProject = async (): Promise<string> => {

@@ -50,6 +50,16 @@ Set them for each kind of environment as follows:
 A missing setting fails visibly. In BFF mode the route answers 503 `{"error":"upstream_not_configured"}`.
 In legacy mode the client fails with `not_configured` before it sends a request.
 
+### Rollout flag
+
+`showcaseEnabled` in `config.json` turns the showcase pages on. Only the boolean `true` turns them on;
+a missing key or any other value leaves them off. While it is off, `/data` and every
+`/showcase/:key` render the not-found page, whatever the index says. With it on, a route renders only
+a `live`, unretired entry that has a config; the flagship renders at `/data` only. A hidden or
+unknown key gets the same not-found page. `loadShowcase` in
+`src/components/showcase/loadShowcase.ts` applies these rules. Enabling the flag is the public
+launch, and turning it off is the rollback (delivery plan, S5.1).
+
 ### Content Security Policy
 
 BFF mode adds nothing to `connect-src`: the route is same-origin. Legacy mode adds
@@ -126,9 +136,16 @@ are synthetic and come from the examples in `test/fixtures/showcase/contracts.ts
 `test/`, so a deployed build cannot import it. Use it in a unit test like this:
 
 ```ts
-vi.mock('src/libs/ajax/ShowcaseCatalog')
+vi.mock('src/libs/ajax/ShowcaseCatalog', async importOriginal => ({
+  ...await importOriginal<typeof import('src/libs/ajax/ShowcaseCatalog')>(),
+  lookupShowcaseDatasets: vi.fn(),
+}))
 vi.mocked(lookupShowcaseDatasets).mockImplementation(createShowcaseCatalogMock())
 ```
+
+Mock only `lookupShowcaseDatasets`. A bare `vi.mock('src/libs/ajax/ShowcaseCatalog')` also mocks
+`ShowcaseLookupError`: an error a test builds is then not an `Error`, and has no message, `reason`,
+`status` or `retryAfterSeconds`, so error and retry handling can't be tested.
 
 The mock does not check Consent's input limits. Test those against Consent.
 

@@ -2,6 +2,8 @@ import externalAccessIcon from 'src/images/external_access.svg'
 import openAccessIcon from 'src/images/open_access.svg'
 import controlledAccessIcon from 'src/images/controlled_access.svg'
 
+export type AccessManagementType = 'controlled' | 'open' | 'external'
+
 export interface ResponseError {
   readonly response?: {
     readonly data?: ConsentError
@@ -453,7 +455,8 @@ export interface Study {
 }
 
 export interface AiModel {
-  modelId: string
+  /** Server-assigned row id; absent until the study is first saved. */
+  modelId?: number
   studyId: string
   name: string
   description: string
@@ -464,10 +467,13 @@ export interface AiModel {
   trainedOnDatasets: string[]
   maintainer: Maintainer
   tags?: string[]
+  accessManagement?: AccessManagementType | null
+  dataUse?: DataUse | null
 }
 
 export interface Workspace {
-  workspaceId: string
+  /** Server-assigned row id; absent until the study is first saved. */
+  workspaceId?: number
   studyId: string
   name: string
   platform: string
@@ -477,6 +483,8 @@ export interface Workspace {
   tools?: string[]
   access?: string
   tags?: string[]
+  accessManagement?: AccessManagementType | null
+  dataUse?: DataUse | null
 }
 
 export enum ClinicalTrialStatus {
@@ -598,7 +606,8 @@ export enum Sex {
 }
 
 export interface Biospecimen {
-  biospecimenId: string
+  /** Server-assigned row id; absent until the study is first saved. */
+  biospecimenId?: number
   sampleId?: string
   studyId: string
   donorId: string

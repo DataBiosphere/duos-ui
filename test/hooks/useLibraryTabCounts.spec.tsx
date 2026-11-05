@@ -44,12 +44,12 @@ const mockResponse: ElasticsearchResponse = {
     studies: {
       buckets: [
         makeStudyBucket(1, {
-          models: [{ name: 'A' }, { name: 'B' }],
-          workspaces: [{ name: 'W1' }],
+          models: [{ modelId: 1, name: 'A' }, { modelId: 2, name: 'B' }],
+          workspaces: [{ workspaceId: 1, name: 'W1' }],
           clinicalTrials: [{ title: 'T1', status: 'Recruiting' }],
         }),
         makeStudyBucket(2, {
-          models: [{ name: 'C' }],
+          models: [{ modelId: 3, name: 'C' }],
           clinicalTrials: [{ title: 'T2', status: 'Completed' }],
         }),
       ],

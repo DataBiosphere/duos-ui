@@ -1,8 +1,15 @@
 import React, { useState } from 'react'
 import { CloudProviders } from 'src/components/forms/CloudProviders'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
-import { ValidationError } from 'src/pages/dar_application/FormValidationState'
+import { ValidationError, makeError } from 'src/pages/dar_application/FormValidationState'
 import { AiModel, Maintainer } from 'src/types/model'
+import DataUseTermsFields, {
+  DataUseTerms,
+  DataUseTermsValidation,
+  applyTerms,
+  dataUseTermsErrors,
+  termsFromDataUse,
+} from 'src/components/forms/DataUseTermsFields'
 
 const defaultMaintainer: Maintainer = {
   name: '',
@@ -10,7 +17,6 @@ const defaultMaintainer: Maintainer = {
 }
 
 const defaultAiModel: AiModel = {
-  modelId: '',
   studyId: '',
   name: '',
   description: '',
@@ -37,7 +43,7 @@ interface AiModelAddEditProps {
   readonly readOnly?: boolean
 }
 
-interface Validation {
+interface Validation extends DataUseTermsValidation {
   name?: ValidationError
   url?: ValidationError
   format?: ValidationError
@@ -45,8 +51,6 @@ interface Validation {
   maintainerName?: ValidationError
   maintainerEmail?: ValidationError
 }
-
-const makeError = (message: string): ValidationError => ({ valid: false, failed: [message] })
 
 const validationFailed = (v: Validation) => Object.values(v).some(e => !!e)
 
@@ -66,6 +70,11 @@ const calcAiModelErrors = (model: AiModel): Validation => {
   return v
 }
 
+const calcErrors = (model: AiModel, terms: DataUseTerms): Validation => ({
+  ...calcAiModelErrors(model),
+  ...dataUseTermsErrors(terms, false, model.dataUse),
+})
+
 const getHeaderTitle = (readOnly: boolean, aiModel?: AiModel) => {
   if (readOnly) return aiModel?.name
   if (!aiModel) return 'New AI Model'
@@ -76,6 +85,10 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
   const { id, aiModel, aiModels, closeAction, onAiModelsChange, readOnly = false } = props
 
   const [newAiModel, setNewAiModel] = useState<AiModel>(aiModel || defaultAiModel)
+  const [terms, setTerms] = useState<DataUseTerms>({
+    accessManagement: aiModel?.accessManagement ?? undefined,
+    ...termsFromDataUse(aiModel?.dataUse),
+  })
   const [validation, setValidation] = useState<Validation>({})
 
   const onChange = ({ key, value }: FormFieldChange) => {
@@ -97,19 +110,38 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
     }
 
     setNewAiModel(updated)
-    setValidation(calcAiModelErrors(updated))
+    setValidation(calcErrors(updated, terms))
+  }
+
+  const onTermsChange = (changed: DataUseTerms) => {
+    const next = { ...terms, ...changed }
+    setTerms(next)
+    setValidation(calcErrors(newAiModel, next))
+  }
+
+  // Clearing also drops the data use fields the editor does not show.
+  const onTermsClear = (cleared: DataUseTerms) => {
+    const model = { ...newAiModel, dataUse: undefined }
+    setNewAiModel(model)
+    setTerms(cleared)
+    setValidation(calcErrors(model, cleared))
   }
 
   const save = () => {
-    const validationErrors = calcAiModelErrors(newAiModel)
+    const validationErrors = calcErrors(newAiModel, terms)
     setValidation(validationErrors)
     if (validationFailed(validationErrors)) return
+    const toSave: AiModel = {
+      ...newAiModel,
+      accessManagement: terms.accessManagement,
+      dataUse: applyTerms(newAiModel.dataUse, terms),
+    }
     if (id < 0) {
-      onAiModelsChange([...aiModels, newAiModel])
+      onAiModelsChange([...aiModels, toSave])
     }
     else {
       const copy = [...aiModels]
-      copy[id] = newAiModel
+      copy[id] = toSave
       onAiModelsChange(copy)
     }
     setNewAiModel(defaultAiModel)
@@ -225,6 +257,16 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
             defaultValue={aiModel?.tags}
             onChange={onChange}
             disabled={readOnly}
+          />
+          <DataUseTermsFields
+            terms={terms}
+            onChange={onTermsChange}
+            validation={validation}
+            readOnly={readOnly}
+            required={false}
+            subject="model"
+            onClear={onTermsClear}
+            idPrefix="model_"
           />
         </div>
         <div className="row" style={{ marginTop: 20 }}>

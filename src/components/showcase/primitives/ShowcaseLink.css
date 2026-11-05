@@ -1,0 +1,9 @@
+.showcase-link {
+  color: var(--showcase-primary, #1f3b50);
+}
+
+/* src/index.css removes every link underline with !important; color alone would not mark a link (WCAG 1.4.1). */
+.showcase-link,
+.showcase-link:hover {
+  text-decoration: underline !important;
+}

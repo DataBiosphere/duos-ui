@@ -299,12 +299,14 @@ export interface LibraryFooterProps {
   onApplyForAccess: () => void
 }
 
-export interface ModelAsset extends Omit<AiModel, 'studyId'> {
+export interface ModelAsset extends Omit<AiModel, 'studyId' | 'modelId'> {
+  modelId: number
   studyId: number
   studyName: string
 }
 
-export interface WorkspaceAsset extends Omit<Workspace, 'studyId'> {
+export interface WorkspaceAsset extends Omit<Workspace, 'studyId' | 'workspaceId'> {
+  workspaceId: number
   studyId: number
   studyName: string
 }
@@ -314,7 +316,8 @@ export interface ClinicalTrialAsset extends Omit<ClinicalTrial, 'studyId'> {
   studyName: string
 }
 
-export interface BiospecimenAsset extends Omit<Biospecimen, 'studyId'> {
+export interface BiospecimenAsset extends Omit<Biospecimen, 'studyId' | 'biospecimenId'> {
+  biospecimenId: number
   studyId: number
   studyName: string
 }

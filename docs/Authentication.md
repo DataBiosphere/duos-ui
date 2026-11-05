@@ -18,6 +18,7 @@ be used for all back-end API calls.
 
 ## Table of Contents
 * [UI Auth Flow](#UI-Auth-Flow)
+* [B2C Federation: Two OAuth Hops](#B2C-Federation-Two-OAuth-Hops)
 * [OIDC Mechanics](#OIDC-Mechanics)
 * [DSP's B2C Tenant Choices](#DSP's-B2C-Tenant-Choices)
 * [Server Auth Flow](#Server-Auth-Flow)
@@ -43,6 +44,55 @@ sequenceDiagram
     B2C Tenant -->> DUOS: user returned to UI with token
     DUOS -->> User: DUOS displays authenticated user page
 ```
+
+### B2C Federation: Two OAuth Hops
+
+This section applies to both the legacy flow and the BFF flow.
+
+A sign-in is two separate OAuth exchanges, each with its own client and its
+own credential. DUOS is the client only in the first one. In the second, the
+B2C tenant is itself an OAuth client of Google or Microsoft.
+
+| Hop | Client | Credential | Owner |
+|-----|--------|------------|-------|
+| 1. DUOS → B2C | DUOS app registration (`duos-<env>`) | DUOS client secret (BFF) | DUOS |
+| 2. B2C → Microsoft | Shared Terra registration (`terrab2c-<env>`) | B2C policy key `B2C_1A_AADAppSecret` | Shared Terra platform |
+| 2. B2C → Google | Google OAuth client for the environment | B2C policy key `B2C_1A_GoogleSecret<Env>` | Shared Terra platform |
+
+The DUOS custom policy (`TrustFrameworkExtensionsDUOS.xml.tftpl` in
+terraform-ap-deployments) names the hop 2 client ID and policy key. A change
+to the DUOS app registration has no effect on hop 2.
+
+```mermaid
+%%{init: { 'theme': 'forest' } }%%
+sequenceDiagram
+    participant DUOS as DUOS (BFF or SPA)
+    participant B2C as Azure AD B2C Tenant
+    participant MS as Microsoft sign-in (login.microsoftonline.com)
+    DUOS ->> B2C: Hop 1: authorize, client_id = duos-<env>
+    note right of B2C: User chooses Microsoft
+    B2C ->> MS: Hop 2: authorize, client_id = terrab2c-<env>
+    MS -->> B2C: authorization code
+    B2C ->> MS: Hop 2: token exchange with B2C_1A_AADAppSecret
+    MS -->> B2C: Microsoft id_token
+    B2C -->> DUOS: Hop 1: authorization code
+    DUOS ->> B2C: Hop 1: token exchange (BFF adds the DUOS client secret)
+    B2C -->> DUOS: B2C-issued id_token and access_token
+```
+
+Hop 2 goes to Microsoft's own sign-in service. It accepts work and school
+accounts (Microsoft Entra ID, formerly Azure AD) and personal Microsoft
+accounts. This is not Entra External ID; DUOS still uses Azure AD B2C.
+
+The Google path has the same shape, with the Google OAuth client and its
+policy key in hop 2.
+
+A failure in hop 2 reaches DUOS only as an error on the hop 1 callback. For
+example, an expired hop 2 secret makes B2C return `error=server_error` with
+`AADB2C90289` (`invalid_client` from the identity provider). The BFF shows the
+generic "identity provider reported an error" message. The fix is in the B2C
+tenant (rotate the secret and upload a new version of the policy key), not in
+DUOS.
 
 ### OIDC Mechanics
 
