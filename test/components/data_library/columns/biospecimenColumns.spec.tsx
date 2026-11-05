@@ -127,6 +127,7 @@ describe('makeBiospecimenColumns — column structure', () => {
   it('defines expected fields in correct order', () => {
     const fields = makeBiospecimenColumns().map(c => c.field)
     expect(fields).toEqual(['studyName', 'duosIdentifier', 'sampleId', 'specimenType', 'donorId', 'dateOfCollection'])
+    expect(makeBiospecimenColumns().find(c => c.field === 'duosIdentifier')?.headerName).toBe('DUOS ID')
   })
 
   it('sets appropriate widths and flex values', () => {
