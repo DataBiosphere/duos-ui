@@ -56,7 +56,8 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm exec playwright install chromium --with-deps
       - name: Copy Configs
-        run: jq '.bffEnabled = true' config/dev.json > public/config.json
+        # showcaseEnabled serves the synthetic showcases that build:e2e compiles in (DT-4424).
+        run: jq '.bffEnabled = true | .showcaseEnabled = true' config/dev.json > public/config.json
       - name: Map local dev hostname
         run: echo "127.0.0.1 local.dsde-dev.broadinstitute.org" | sudo tee -a /etc/hosts
       # Secure session cookies require HTTPS; Playwright accepts this self-signed certificate.
@@ -78,7 +79,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://consent:consent@localhost:5432/consent
       - name: Build app
-        run: CI=false pnpm run build
+        run: CI=false pnpm run build:e2e
       # playwright.config.ts starts the mock OIDC provider and Consent upstream
       # beside two servers: one on dev Consent, one on the mock (DT-4069).
       - name: Run Playwright integration tests
