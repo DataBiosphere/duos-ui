@@ -10,6 +10,7 @@ import {
   LOOKUP_LIMITS,
   type LookupRequestInput,
   type SectionKey,
+  type ShowcaseConfig,
   type ShowcaseConfigInput,
   type StatsResponse,
 } from 'src/types/showcase'
@@ -64,7 +65,7 @@ const definedFields = <T extends object>(value: T) =>
 
 /** The requests a page with `config` makes, in a stable order. */
 export function planShowcaseLookups(
-  config: Pick<ShowcaseConfigInput, 'sections'>,
+  config: Pick<ShowcaseConfigInput | ShowcaseConfig, 'sections'>,
   implemented: readonly SectionKey[],
 ): PlannedRequest[] {
   const live = (key: SectionKey): LooseSection | undefined => {
@@ -111,7 +112,7 @@ const asLookupError = (error: unknown): ShowcaseLookupError =>
   error instanceof ShowcaseLookupError ? error : new ShowcaseLookupError('network', 'Showcase lookup failed', { cause: error })
 
 export function useShowcaseLookups(
-  config: Pick<ShowcaseConfigInput, 'sections'>,
+  config: Pick<ShowcaseConfigInput | ShowcaseConfig, 'sections'>,
   implemented: readonly SectionKey[],
 ): ShowcaseLookups {
   // A page may pass a fresh config object on every render; only a change in requests re-fetches.

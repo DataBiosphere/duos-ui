@@ -5,16 +5,19 @@
  * the standard not-found page).
  *
  * `findShowcase` is pure, for tests; `loadShowcase` reads the rollout flag and the real index.
+ * The resolved config is parsed with `ShowcaseConfigSchema`. The CI guard rejects a config that
+ * fails it, so a failure here is a bug: it is logged and the route is not found.
  */
 import { isShowcaseEnabled } from 'src/libs/config'
 import { resolveShowcase } from 'src/showcases/defaults'
+import { ShowcaseConfigSchema } from 'src/showcases/schema'
 import { retiredShowcaseKeys, showcaseConfigs, showcaseEntries } from 'src/showcases'
-import { SHOWCASE_KEY_PATTERN, type RegistryEntry, type ShowcaseConfigInput, type ShowcasePartialInput } from 'src/types/showcase'
+import { SHOWCASE_KEY_PATTERN, type RegistryEntry, type ShowcaseConfig, type ShowcasePartialInput } from 'src/types/showcase'
 
 /** The flagship route (`/data`) or a keyed route (`/showcase/:key`, the key as the URL gave it). */
 export type ShowcaseRouteMatch = { route: 'flagship' } | { route: 'key', key: string | undefined }
 
-export type ShowcaseLoadResult = { status: 'found', entry: RegistryEntry, config: ShowcaseConfigInput } | { status: 'not-found' }
+export type ShowcaseLoadResult = { status: 'found', entry: RegistryEntry, config: ShowcaseConfig } | { status: 'not-found' }
 
 export type ShowcaseSources = {
   entries: readonly RegistryEntry[]
@@ -50,7 +53,12 @@ export const findShowcase = (match: ShowcaseRouteMatch, sources: ShowcaseSources
   if (!entry || entry.status !== 'live' || retiredKeys.includes(entry.key)) return NOT_FOUND
   // `hasOwn`, so a key such as `constructor` can't pick up an inherited property.
   if (!Object.hasOwn(configs, entry.key)) return NOT_FOUND
-  return { status: 'found', entry, config: resolveShowcase(configs[entry.key]) }
+  const parsed = ShowcaseConfigSchema.safeParse(resolveShowcase(configs[entry.key]))
+  if (!parsed.success) {
+    console.error(`Showcase "${entry.key}" has an invalid config`, parsed.error.issues)
+    return NOT_FOUND
+  }
+  return { status: 'found', entry, config: parsed.data }
 }
 
 /** `findShowcase` over the real index and the config.json rollout flag. A config that fails to load
