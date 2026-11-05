@@ -21,6 +21,8 @@ const THROTTLE_SPECS = ['authThrottle.spec.ts']
 const SHORT_SESSION_SPECS = ['sessionExpiry.spec.ts']
 // Specs for legacy mode (bffEnabled off), where the browser calls showcaseApiUrl directly.
 const LEGACY_SPECS = ['legacyMode.spec.ts']
+// Specs that run in both modes: in `chromium` (bffEnabled on) and in `legacy`.
+const BOTH_MODES_SPECS = ['showcase.spec.ts']
 
 // The four BFF servers use the mock provider as their issuer; the legacy server
 // gets no oidcEnv. The role specs never run a callback, so a real B2C issuer
@@ -86,7 +88,7 @@ export default defineConfig({
     {
       // Legacy mode: no BFF routes; the showcase lookup goes to the mock upstream over CORS.
       name: 'legacy',
-      testMatch: LEGACY_SPECS,
+      testMatch: [...LEGACY_SPECS, ...BOTH_MODES_SPECS],
       use: { ...devices['Desktop Chrome'], baseURL: LEGACY_BASE_URL },
       retries: process.env.CI ? 1 : 0,
     },

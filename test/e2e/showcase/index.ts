@@ -7,10 +7,9 @@
  * The content is fictional. It passes the same schema and CI-guard rules as a real entry.
  */
 import type { RegistryEntry, ShowcasePartialInput } from 'src/types/showcase'
+import { E2E_FLAGSHIP, E2E_HIDDEN, E2E_PARTNER } from './entries'
 
-export const E2E_FLAGSHIP: RegistryEntry = { key: 'e2e-flagship', title: 'Synthetic Flagship Data', status: 'live', flagship: true, order: 0 }
-export const E2E_PARTNER: RegistryEntry = { key: 'quillmere', title: 'Quillmere Data Showcase', status: 'live', flagship: false, order: 1 }
-export const E2E_HIDDEN: RegistryEntry = { key: 'e2e-hidden', title: 'Hidden Synthetic Data', status: 'hidden', flagship: false, order: 2 }
+export { E2E_FLAGSHIP, E2E_HIDDEN, E2E_PARTNER }
 
 export const showcaseEntries: readonly RegistryEntry[] = [E2E_FLAGSHIP, E2E_PARTNER, E2E_HIDDEN]
 
