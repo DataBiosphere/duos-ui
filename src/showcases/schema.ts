@@ -7,6 +7,8 @@
  * implemented types, the full URL policy, retired keys, limits and the asset budget). Calendar-date
  * checks are zod refinements, which the JSON Schema export leaves out.
  */
+// Must come first: it configures zod before the schemas below are built.
+import 'src/showcases/zodConfig'
 import * as z from 'zod'
 import {
   DATE_PATTERN,

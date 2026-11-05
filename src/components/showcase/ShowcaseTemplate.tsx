@@ -27,7 +27,7 @@ import {
   ShowcaseLookupsContext,
 } from 'src/components/showcase/showcaseTemplateContract'
 import { useShowcaseLookups } from 'src/components/showcase/useShowcaseLookups'
-import type { RegistryEntry, SectionKey, ShowcaseConfig, ShowcaseConfigInput } from 'src/types/showcase'
+import type { RegistryEntry, SectionKey, ShowcaseConfig } from 'src/types/showcase'
 import './ShowcaseTemplate.css'
 
 const themeStyle = (branding: ShowcaseConfig['branding']): CSSProperties => {
@@ -61,9 +61,7 @@ export interface ShowcaseTemplateProps {
 }
 
 export const ShowcaseTemplate = ({ entry, config, registry = sectionRegistry }: ShowcaseTemplateProps) => {
-  // The hook is typed for the schema's input, whose dates are plain `YYYY-MM-DD` strings rather
-  // than the parsed config's branded ones. It reads no dates, so the parsed config is safe to pass.
-  const lookups = useShowcaseLookups(config as unknown as Pick<ShowcaseConfigInput, 'sections'>, Object.keys(registry) as SectionKey[])
+  const lookups = useShowcaseLookups(config, Object.keys(registry) as SectionKey[])
   const sections = visibleSections(config, registry)
   const masthead = sections.filter(section => section.key === 'masthead')
   const content = sections.filter(section => section.key !== 'masthead')
