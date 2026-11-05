@@ -18,8 +18,6 @@ import scpIcon from 'src/images/scp_logo.png'
 import schareIcon from 'src/images/SCHARE_Logo_New.png'
 import stanleyIcon from 'src/images/stanley-center-logo.png'
 import getzLabIcon from 'src/images/getz-lab-logo.svg'
-import gp2Icon from 'src/images/gp2-logo.png'
-import asapIcon from 'src/images/asap-logo.png'
 import gedIcon from 'src/images/GED_logo.png'
 import ncpiIcon from 'src/images/ncpi-logo.png'
 import epi25Icon from 'src/images/Epi25_logo.png'
@@ -384,13 +382,6 @@ export const getLibraryVersions = (
       featured: true,
       order: 9,
     },
-    'stanley': {
-      query: tagsQuery('Stanley Center'),
-      icon: stanleyIcon,
-      title: 'Stanley Center Data Library',
-      featured: false,
-      order: 999,
-    },
     'stanleycenter': {
       query: tagsQuery('Stanley Center'),
       icon: stanleyIcon,
@@ -404,20 +395,6 @@ export const getLibraryVersions = (
       title: 'Getz Lab Data Library',
       featured: false,
       order: 999,
-    },
-    'asap': {
-      query: tagsQuery('Broad: ASAP'),
-      icon: asapIcon,
-      title: 'Aligning Science Across Parkinson\'s Data Library',
-      featured: true,
-      order: 11,
-    },
-    'gp2': {
-      query: tagsQuery('GP2'),
-      icon: gp2Icon,
-      title: 'Global Parkinson\'s Genetics Program Data Library',
-      featured: true,
-      order: 12,
     },
     'broadasd': {
       query: tagsQuery('Broad: ASD'),

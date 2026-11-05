@@ -345,10 +345,11 @@ report-only header passes through untouched, which is what makes that quiet.
   `request.ip` (DT-4374). Two items stay open and are recorded in that file:
   edge or shared-store enforcement (infrastructure), and the unauthenticated,
   CSRF-exempt `POST /duos-api/support/*` proxy writes, which no limit covers
-  yet. A caller inside the cluster can still choose its own bucket, through
-  `X-Real-IP` on the sidecar port or `X-Forwarded-For` on the app port
-  (`TRUST_PROXY` trusts `uniquelocal`) — another reason the edge is the real
-  control. On the hop to Consent, the load balancer rewrites `X-Real-IP` to
+  yet. A caller inside the cluster can still choose its own bucket through
+  `X-Real-IP` on the sidecar port, which DT-4381 accepted as a risk —
+  another reason the edge is the real control. A caller on the app port
+  cannot: in k8s the app trusts `X-Forwarded-*` from loopback only
+  (`trustedProxies()` in `server/src/config.ts`, DT-4381). On the hop to Consent, the load balancer rewrites `X-Real-IP` to
   this pod's egress address, so the showcase route also sends the browser key
   with a timestamp and an HMAC made with `DUOS_CONSENT_PROXY_SECRET`
   (`server/src/proxy/clientIpSignature.ts`, DT-4379). Consent keys its
