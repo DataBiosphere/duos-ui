@@ -30,7 +30,7 @@ import { TDR_PROXY_PREFIX, tdrProxy } from './proxy/tdrProxy.js'
 import { BARD_PROXY_PREFIX, bardProxy } from './proxy/bardProxy.js'
 import { publicProxy } from './proxy/publicProxy.js'
 import { startActiveSessionGauge } from './session/activeSessionGauge.js'
-import { configPath, readConfig, TRUST_PROXY } from './config.js'
+import { configPath, readConfig, trustedProxies } from './config.js'
 import { logAuthEvent } from './auth/authEvents.js'
 import { buildLoggerOptions } from './logging.js'
 import './types/session.js'
@@ -94,12 +94,13 @@ export function handleCallbackError(err: FastifyError, request: FastifyRequest, 
 export async function buildApp(): Promise<AppInstance> {
   // The app always sits behind exactly one reverse-proxy hop (the
   // httpd-terra-proxy sidecar in k8s, or the `proxy` container in
-  // docker-compose) that terminates TLS and forwards plain HTTP. TRUST_PROXY
+  // docker-compose) that terminates TLS and forwards plain HTTP. trustProxy
   // makes `request.protocol` honor that proxy's X-Forwarded-Proto header
   // instead of falling back to the raw (unencrypted) socket — without it,
   // @fastify/session silently refuses to persist sessions once cookie.secure
-  // is true, since it never sees `request.protocol === 'https'`. See its
-  // definition in config.ts for why it names peers instead of counting hops.
+  // is true, since it never sees `request.protocol === 'https'`. See
+  // trustedProxies() in config.ts for which peers it names, and why.
+  const trustProxy = trustedProxies()
   const useHttps = shouldUseHttps()
   const fastify = (useHttps
     ? Fastify<https.Server>({
@@ -108,9 +109,9 @@ export async function buildApp(): Promise<AppInstance> {
           cert: fs.readFileSync(path.join(PROJECT_ROOT, 'server.crt')),
         },
         logger: buildLoggerOptions(),
-        trustProxy: TRUST_PROXY,
+        trustProxy,
       })
-    : Fastify({ logger: buildLoggerOptions(), trustProxy: TRUST_PROXY })
+    : Fastify({ logger: buildLoggerOptions(), trustProxy })
   ) as AppInstance
 
   // Registered before any routes so all errors, including those in plugins, are caught.

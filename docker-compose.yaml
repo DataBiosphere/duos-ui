@@ -47,6 +47,9 @@ services:
       PORT: ${PORT:-8080}
       FASTIFY_LOG_LEVEL: ${FASTIFY_LOG_LEVEL:-debug}
       DUOS_SESSION_MAX_AGE_MS: ${DUOS_SESSION_MAX_AGE_MS:-}
+      # `proxy` reaches the app over the bridge network (an RFC1918 peer), so
+      # trust uniquelocal too; k8s keeps the loopback-only default (DT-4381).
+      DUOS_TRUST_PROXY: loopback,uniquelocal
       # DUOS_DB_HOST is intentionally NOT set here — it's mode-specific and
       # comes from whichever overlay file is merged in (docker-compose.override.yaml
       # sets it to `db`; docker-compose.consent.yaml sets it to host.docker.internal;

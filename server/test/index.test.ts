@@ -873,7 +873,7 @@ describe('auth endpoint rate limiting', () => {
   }
 
   // With no X-Real-IP, the rate limiter keys on request.ip, which honours
-  // X-Forwarded-For because TRUST_PROXY names the loopback peer that
+  // X-Forwarded-For because trustedProxies() names the loopback peer that
   // app.inject() presents as.
   const from = (ip: string) => ({ 'x-forwarded-for': ip })
 
@@ -1017,6 +1017,20 @@ describe('auth endpoint rate limiting', () => {
 
     await app.inject(direct('198.51.100.31'))
     const rotated = await app.inject(direct('198.51.100.32'))
+
+    expect(rotated.statusCode).toBe(429)
+
+    await app.close()
+  })
+
+  // DT-4381: a pod that calls the app port directly is not the sidecar, so
+  // its X-Forwarded-For is ignored and it keys on its own pod address.
+  it('ignores a rotated X-Forwarded-For from a pod that calls the app port directly', async () => {
+    const app = await buildLimitedApp({ login: '1' })
+    const direct = (forwardedFor: string) => ({ method: 'POST' as const, url: '/auth/login', remoteAddress: '10.64.4.18', headers: from(forwardedFor) })
+
+    await app.inject(direct('198.51.100.41'))
+    const rotated = await app.inject(direct('198.51.100.42'))
 
     expect(rotated.statusCode).toBe(429)
 

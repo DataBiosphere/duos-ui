@@ -8,7 +8,7 @@ import {
   PUBLIC_METRICS_EVENT_PATH,
   publicProxy,
 } from '../src/proxy/publicProxy.js'
-import { TRUST_PROXY } from '../src/config.js'
+import { trustedProxies } from '../src/config.js'
 import { rateLimitPluginOptions } from '../src/security/rateLimit.js'
 import {
   type Upstream,
@@ -46,7 +46,7 @@ describe('publicProxy', () => {
     const logger = logLines
       ? { level: 'info', stream: { write: (line: string) => { logLines.push(line) } } }
       : false
-    const instance = Fastify({ logger, trustProxy: TRUST_PROXY })
+    const instance = Fastify({ logger, trustProxy: trustedProxies() })
     await instance.register(fastifyRateLimit, rateLimitPluginOptions)
     await instance.register(publicProxy)
     return instance
