@@ -8,7 +8,7 @@ const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000
  * Where `@fastify/session` 11.1.6 keeps a session's generation. Rows written
  * before that version have none, and then the generation is the sid.
  */
-const GENERATION = `COALESCE(sess->'__fastifySessionMetadata'->>'generation', sid)`
+const GENERATION = `COALESCE(user_sessions.sess->'__fastifySessionMetadata'->>'generation', user_sessions.sid)`
 
 /**
  * The `compareAndSet` that `@fastify/session` 11.1.6 requires of a store
@@ -72,19 +72,30 @@ export function createPgSessionStore(pg: PostgresDb, log: Pick<FastifyBaseLogger
   }
 
   return {
+    // While the BFF runs @fastify/session 11.1.5, a row that 11.1.6 has
+    // regenerated (a generation other than its sid) is invisible. 11.1.6 signs
+    // a user in by moving the pre-auth row to a new generation, and 11.1.5
+    // doesn't check generations, so without this a pre-auth cookie kept from an
+    // 11.1.5 pod would load the signed-in session on any 11.1.5 pod: during the
+    // rolling upgrade, or after a rollback to this release. Remove the check in
+    // the 11.1.6 upgrade, whose `get` must return regenerated rows (DT-4420).
     get: (sid, callback) => run('get', callback, async () => {
       const { rows } = await pg.query(
-        'SELECT sess FROM user_sessions WHERE sid = $1 AND expire > NOW()',
+        `SELECT sess FROM user_sessions WHERE sid = $1 AND expire > NOW() AND ${GENERATION} = user_sessions.sid`,
         [sid],
       )
       return rows[0]?.sess ?? null
     }),
 
+    // Never overwrites a regenerated row, for the same reason: an 11.1.5 pod
+    // that loaded the pre-auth session before a sign-in must not write it back
+    // over the signed-in one. In 11.1.6, `set` is only for new sessions.
     set: (sid, session, callback) => run('set', callback, async () => {
       await pg.query(
         `INSERT INTO user_sessions (sid, sess, expire)
          VALUES ($1, $2, NOW() + $3 * interval '1 millisecond')
-         ON CONFLICT (sid) DO UPDATE SET sess = $2, expire = NOW() + $3 * interval '1 millisecond'`,
+         ON CONFLICT (sid) DO UPDATE SET sess = $2, expire = NOW() + $3 * interval '1 millisecond'
+         WHERE ${GENERATION} = user_sessions.sid`,
         [sid, session, maxAgeMs(session)],
       )
     }),

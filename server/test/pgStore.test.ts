@@ -62,6 +62,15 @@ describe('createPgSessionStore', () => {
       expect(params).toEqual(['sid-1'])
     })
 
+    it('hides a row that @fastify/session 11.1.6 has regenerated, while the BFF runs 11.1.5', async () => {
+      query.mockResolvedValueOnce({ rows: [] })
+
+      await promisifyGet(store, 'sid-1')
+
+      const [sql] = query.mock.calls[0]
+      expect(sql).toContain(`COALESCE(user_sessions.sess->'__fastifySessionMetadata'->>'generation', user_sessions.sid) = user_sessions.sid`)
+    })
+
     it('returns null when no (unexpired) row exists', async () => {
       query.mockResolvedValueOnce({ rows: [] })
       expect(await promisifyGet(store, 'missing')).toBeNull()
@@ -86,6 +95,8 @@ describe('createPgSessionStore', () => {
       // same clock `get` filters with (`expire > NOW()`) — container/DB clock
       // drift cannot shorten or extend sessions.
       expect(sql).toContain(`NOW() + $3 * interval '1 millisecond'`)
+      // An upsert never overwrites a row that 11.1.6 has regenerated.
+      expect(sql).toContain(`WHERE COALESCE(user_sessions.sess->'__fastifySessionMetadata'->>'generation', user_sessions.sid) = user_sessions.sid`)
       expect(params).toEqual(['sid-1', sampleSession, 8 * 60 * 60 * 1000])
     })
 
@@ -118,7 +129,7 @@ describe('createPgSessionStore', () => {
       expect(sql).not.toContain('INSERT')
       expect(sql).toContain('expire > NOW()')
       // Rows written before @fastify/session 11.1.6 have no generation; theirs is the sid.
-      expect(sql).toContain(`COALESCE(sess->'__fastifySessionMetadata'->>'generation', sid) = $2`)
+      expect(sql).toContain(`COALESCE(user_sessions.sess->'__fastifySessionMetadata'->>'generation', user_sessions.sid) = $2`)
       expect(sql).toContain(`NOW() + $4 * interval '1 millisecond'`)
       expect(params).toEqual(['sid-1', 'gen-1', sampleSession, 8 * 60 * 60 * 1000])
     })
