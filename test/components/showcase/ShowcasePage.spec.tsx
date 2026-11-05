@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { loadShowcase, type ShowcaseLoadResult } from 'src/components/showcase/loadShowcase'
 import { ShowcasePage } from 'src/components/showcase/ShowcasePage'
@@ -59,8 +59,10 @@ describe('ShowcasePage', () => {
     renderAt('/showcase/example-partner')
     expect(await screen.findByRole('heading', { level: 1, name: 'Example Partner Data' })).toBeInTheDocument()
     expect(loadShowcase).toHaveBeenCalledWith({ route: 'key', key: 'example-partner' })
-    expect(document.title).toBe('Example Partner Data | DUOS')
-    expect(description()).toBe('Explore Example Partner data')
+    await waitFor(() => {
+      expect(document.title).toBe('Example Partner Data | DUOS')
+      expect(description()).toBe('Explore Example Partner data')
+    })
   })
 
   it('asks for the flagship at /data', async () => {
@@ -74,29 +76,36 @@ describe('ShowcasePage', () => {
     vi.mocked(loadShowcase).mockResolvedValue({ status: 'not-found' })
     renderAt('/showcase/hidden-partner')
     expect(await screen.findByText('Not found')).toBeInTheDocument()
-    expect(document.title).toBe('DUOS')
-    expect(description()).toBeUndefined()
+    await waitFor(() => {
+      expect(document.title).toBe('DUOS')
+      expect(description()).toBeUndefined()
+    })
   })
 
   it('resets the title and description on leaving the page', async () => {
     vi.mocked(loadShowcase).mockResolvedValue(found)
     renderAt('/showcase/example-partner')
     await screen.findByRole('heading', { level: 1 })
+    await waitFor(() => expect(document.title).toBe('Example Partner Data | DUOS'))
     navigate('/elsewhere')
     expect(await screen.findByText('Elsewhere')).toBeInTheDocument()
-    expect(document.title).toBe('DUOS')
-    expect(description()).toBeUndefined()
+    await waitFor(() => {
+      expect(document.title).toBe('DUOS')
+      expect(description()).toBeUndefined()
+    })
   })
 
   it('drops the title and description when the next key is refused', async () => {
     vi.mocked(loadShowcase).mockResolvedValueOnce(found).mockResolvedValueOnce({ status: 'not-found' })
     renderAt('/showcase/example-partner')
     await screen.findByRole('heading', { level: 1 })
-    expect(document.title).toBe('Example Partner Data | DUOS')
+    await waitFor(() => expect(document.title).toBe('Example Partner Data | DUOS'))
     navigate('/showcase/hidden-partner')
     expect(await screen.findByText('Not found')).toBeInTheDocument()
-    expect(document.title).toBe('DUOS')
-    expect(description()).toBeUndefined()
+    await waitFor(() => {
+      expect(document.title).toBe('DUOS')
+      expect(description()).toBeUndefined()
+    })
   })
 
   it('loads again when the key changes, and ignores the earlier answer', async () => {
