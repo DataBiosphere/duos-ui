@@ -107,6 +107,40 @@ describe('createPgSessionStore', () => {
     })
   })
 
+  describe('compareAndSet', () => {
+    it('updates the row only when it is unexpired and holds the expected generation', async () => {
+      query.mockResolvedValueOnce({ rows: [], rowCount: 1 })
+
+      await promisifyVoid(cb => store.compareAndSet('sid-1', 'gen-1', sampleSession, cb))
+
+      const [sql, params] = query.mock.calls[0]
+      expect(sql).toContain('UPDATE user_sessions')
+      expect(sql).not.toContain('INSERT')
+      expect(sql).toContain('expire > NOW()')
+      // Rows written before @fastify/session 11.1.6 have no generation; theirs is the sid.
+      expect(sql).toContain(`COALESCE(sess->'__fastifySessionMetadata'->>'generation', sid) = $2`)
+      expect(sql).toContain(`NOW() + $4 * interval '1 millisecond'`)
+      expect(params).toEqual(['sid-1', 'gen-1', sampleSession, 8 * 60 * 60 * 1000])
+    })
+
+    it('reports ENOENT when no row matched, so a destroyed session is not written back', async () => {
+      query.mockResolvedValueOnce({ rows: [], rowCount: 0 })
+
+      const err = await promisifyVoid(cb => store.compareAndSet('sid-1', 'gen-1', sampleSession, cb)).catch((e: unknown) => e)
+
+      expect(err).toBeInstanceOf(Error)
+      expect((err as { code?: unknown }).code).toBe('ENOENT')
+      expect(query).toHaveBeenCalledOnce()
+    })
+
+    it('propagates query errors to the callback', async () => {
+      query.mockRejectedValueOnce(new Error('write failed'))
+      await expect(
+        promisifyVoid(cb => store.compareAndSet('sid-1', 'gen-1', sampleSession, cb)),
+      ).rejects.toThrow('write failed')
+    })
+  })
+
   describe('destroy', () => {
     it('deletes the row for the given sid', async () => {
       query.mockResolvedValueOnce({ rows: [] })
@@ -130,9 +164,10 @@ describe('createPgSessionStore', () => {
     it.each([
       ['get', () => promisifyGet(store, 'sid-1')],
       ['set', () => promisifyVoid(cb => store.set('sid-1', sampleSession, cb))],
+      ['compareAndSet', () => promisifyVoid(cb => store.compareAndSet('sid-1', 'gen-1', sampleSession, cb))],
       ['destroy', () => promisifyVoid(cb => store.destroy('sid-1', cb))],
     ])('emits one ok event at info for a successful %s', async (op, call) => {
-      query.mockResolvedValueOnce({ rows: [] })
+      query.mockResolvedValueOnce({ rows: [], rowCount: 1 })
 
       await call()
 
@@ -156,6 +191,21 @@ describe('createPgSessionStore', () => {
         'session_store.completed',
       )
       expect(log.info).not.toHaveBeenCalled()
+    })
+
+    it('emits a conflict at info, not a failure, when compareAndSet finds the session changed', async () => {
+      query.mockResolvedValueOnce({ rows: [], rowCount: 0 })
+
+      await expect(
+        promisifyVoid(cb => store.compareAndSet('sid-1', 'gen-1', sampleSession, cb)),
+      ).rejects.toMatchObject({ code: 'ENOENT' })
+
+      expect(log.info).toHaveBeenCalledOnce()
+      expect(log.info).toHaveBeenCalledWith(
+        { event: 'session_store.completed', op: 'compareAndSet', outcome: 'conflict', idp: 'unknown' },
+        'session_store.completed',
+      )
+      expect(log.error).not.toHaveBeenCalled()
     })
 
     it('never puts the sid in the event', async () => {
