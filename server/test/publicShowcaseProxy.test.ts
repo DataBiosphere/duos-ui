@@ -16,7 +16,7 @@ import {
   CONSENT_PROXY_SECRET_ENV_VAR,
   signClientIp,
 } from '../src/proxy/clientIpSignature.js'
-import { TRUST_PROXY } from '../src/config.js'
+import { trustedProxies } from '../src/config.js'
 import { rateLimitPluginOptions } from '../src/security/rateLimit.js'
 import {
   type Upstream,
@@ -67,7 +67,7 @@ describe('publicProxy: showcase catalog lookup', () => {
     const logger = logLines
       ? { level: 'info', stream: { write: (line: string) => { logLines.push(line) } } }
       : false
-    const instance = Fastify({ logger, trustProxy: TRUST_PROXY })
+    const instance = Fastify({ logger, trustProxy: trustedProxies() })
     await instance.register(fastifyRateLimit, rateLimitPluginOptions)
     await instance.register(publicProxy)
     return instance
