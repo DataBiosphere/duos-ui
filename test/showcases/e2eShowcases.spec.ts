@@ -80,14 +80,25 @@ describe('the e2e showcase build switch', () => {
     })
   })
 
+  // A path like `src/showcases/index` or `../showcases` would bypass the alias and mix real and
+  // synthetic entries in one e2e build.
+  const OTHER_INDEX_IMPORT = /['"](?:(?:\.{1,2}\/)+|src\/)(?:[\w-]+\/)*?showcases(?:\/index(?:\.[jt]sx?)?|\/)['"]|['"](?:\.{1,2}\/)+showcases['"]/
+
+  it('flags every other path to the index, with or without an extension', () => {
+    for (const ext of ['', '.ts', '.tsx', '.js', '.jsx']) {
+      expect(OTHER_INDEX_IMPORT.test(`'src/showcases/index${ext}'`)).toBe(true)
+      expect(OTHER_INDEX_IMPORT.test(`'../showcases/index${ext}'`)).toBe(true)
+    }
+    for (const allowed of ["'src/showcases'", "'src/showcases/schema'", "'src/showcases/indexes'"]) {
+      expect(OTHER_INDEX_IMPORT.test(allowed)).toBe(false)
+    }
+  })
+
   it('is the only way src imports the index, so the alias catches every import', () => {
-    // A path like `src/showcases/index` or `../showcases` would bypass the alias and mix real and
-    // synthetic entries in one e2e build.
     const files = (dir: string): string[] => readdirSync(dir, { withFileTypes: true })
       .flatMap(entry => entry.isDirectory() ? files(join(dir, entry.name)) : /\.[jt]sx?$/.test(entry.name) ? [join(dir, entry.name)] : [])
-    const other = /['"](?:(?:\.{1,2}\/)+|src\/)(?:[\w-]+\/)*?showcases(?:\/index(?:\.ts)?|\/)['"]|['"](?:\.{1,2}\/)+showcases['"]/
     const offenders = files(join(ROOT, 'src'))
-      .filter(file => other.test(readFileSync(file, 'utf8')))
+      .filter(file => OTHER_INDEX_IMPORT.test(readFileSync(file, 'utf8')))
     expect(offenders).toEqual([])
   })
 
