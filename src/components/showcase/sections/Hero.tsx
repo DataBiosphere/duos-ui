@@ -14,31 +14,34 @@
  * Announcements and the live stats come in later PRs; this renderer shows neither yet.
  */
 import React, { useContext, useId } from 'react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import type { SxProps, Theme } from '@mui/material/styles'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
 import { isShownHref } from 'src/components/showcase/primitives/safeHref'
 import type { EnabledSection, SectionRendererProps } from 'src/components/showcase/sectionRegistry'
+import { heroSx } from 'src/components/showcase/sections/heroStyles'
 import { SHOWCASE_MAIN_HEADING_ID, ShowcasePageInfoContext } from 'src/components/showcase/showcaseTemplateContract'
-import './Hero.css'
 
 /** Provisional copy (S3.3). */
 export const ONBOARDING_LABEL = 'Get started'
 
 type HeroLink = EnabledSection<'hero'>['primaryCtas'][number]
 
-const LinkList = ({ links, className, labelledBy }: { links: readonly HeroLink[], className: string, labelledBy?: string }) => (
-  <ul className={className} aria-labelledby={labelledBy}>
+const LinkList = ({ links, sx, labelledBy }: { links: readonly HeroLink[], sx: SxProps<Theme>, labelledBy?: string }) => (
+  <Box component="ul" sx={sx} aria-labelledby={labelledBy}>
     {links.map(link => <li key={`${link.label}-${link.url}`}><ShowcaseLink href={link.url}>{link.label}</ShowcaseLink></li>)}
-  </ul>
+  </Box>
 )
 
 const Onboarding = ({ links }: { links: readonly HeroLink[] }) => {
   const headingId = useId()
   if (links.length === 0) return null
   return (
-    <div className="showcase-hero__onboarding">
-      <h2 id={headingId} className="showcase-hero__subheading">{ONBOARDING_LABEL}</h2>
-      <LinkList links={links} className="showcase-hero__onboarding-links" labelledBy={headingId} />
-    </div>
+    <Box sx={heroSx.onboarding}>
+      <Typography variant="inherit" component="h2" id={headingId} sx={heroSx.subheading}>{ONBOARDING_LABEL}</Typography>
+      <LinkList links={links} sx={heroSx.onboardingLinks} labelledBy={headingId} />
+    </Box>
   )
 }
 
@@ -49,16 +52,16 @@ export const Hero = ({ section, id, title }: SectionRendererProps<'hero'>) => {
   const intro = section.intro.trim()
 
   return (
-    <section id={id} className="showcase-hero">
-      <div className="showcase-hero__inner">
-        <div className="showcase-hero__intro">
-          <h1 id={SHOWCASE_MAIN_HEADING_ID} className="showcase-hero__title" tabIndex={-1}>{title ?? page.title}</h1>
-          {section.subtitle !== undefined && section.subtitle.trim() !== '' && <p className="showcase-hero__subtitle">{section.subtitle}</p>}
-          {intro !== '' && <p className="showcase-hero__text">{intro}</p>}
-          {ctas.length > 0 && <LinkList links={ctas} className="showcase-hero__ctas" />}
+    <Box component="section" id={id} sx={heroSx.root}>
+      <Box sx={heroSx.inner}>
+        <div>
+          <Typography variant="inherit" component="h1" id={SHOWCASE_MAIN_HEADING_ID} tabIndex={-1} sx={heroSx.title}>{title ?? page.title}</Typography>
+          {section.subtitle !== undefined && section.subtitle.trim() !== '' && <Typography variant="inherit" sx={heroSx.subtitle}>{section.subtitle}</Typography>}
+          {intro !== '' && <Typography variant="inherit" sx={heroSx.text}>{intro}</Typography>}
+          {ctas.length > 0 && <LinkList links={ctas} sx={heroSx.ctas} />}
           <Onboarding links={shown(section.onboarding)} />
         </div>
-      </div>
-    </section>
+      </Box>
+    </Box>
   )
 }
