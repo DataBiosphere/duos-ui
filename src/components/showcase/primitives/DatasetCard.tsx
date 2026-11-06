@@ -7,12 +7,11 @@
  * - controlled: "Request access" opens the DUOS dataset page, where "Apply for Access" starts the
  *   current request path. It is a handoff, so `ShowcaseLink` labels it for a visitor who is not
  *   signed in and shows it as text in a production-data preview (S3.2).
- * - open or external: a link to the provider's page. The "Provider site" field then shows the
- *   host as text, so the card has one provider link, not two.
+ * - open or external: a link out to the data provider. `accessUrl` is the dataset's own `url`
+ *   registration field ("URL of data"), which Consent sends only for open and external datasets.
+ *   The "Provider site" field then shows the host as text, so the card has one provider link,
+ *   not two.
  * - unknown: no action.
- *
- * The projection has no file type, so the action can't tell a direct download from a provider
- * page; it always says it opens the provider page.
  */
 import React, { useContext } from 'react'
 import { datasetPath } from 'src/components/showcase/handoffs'
