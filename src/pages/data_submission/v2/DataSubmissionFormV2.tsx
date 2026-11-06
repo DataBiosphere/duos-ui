@@ -45,6 +45,33 @@ const pickUneditedFields = (registration: DatasetRegistrationSchemaV1): Unedited
   alternativeDataSharingPlanFileName: registration.alternativeDataSharingPlanFileName,
 })
 
+/**
+ * What the page is for and how it finishes, per mode. Nothing is saved as the user types, so each
+ * says which button submits; edit also says what it can't change, which otherwise only shows up as
+ * disabled fields.
+ */
+const FORM_TITLE: Record<FormMode, string> = {
+  create: 'Register a Study and Data Assets',
+  edit: 'Edit Study Registration',
+  draft: 'Review Study Draft',
+}
+
+/** What a study can hold, named as the Data Assets and Related Resources sections name them. */
+const DATA_ASSETS = 'datasets, models, and workspaces'
+const RELATED_RESOURCES = 'publications, presentations, clinical trials, intellectual property, and funding'
+
+const FORM_HELP_TEXT: Record<FormMode, string> = {
+  create: `Register a study along with its data assets (${DATA_ASSETS}) and related resources (${RELATED_RESOURCES}). `
+    + 'Researchers can then find your study in DUOS and request access to its datasets. '
+    + 'Fields marked * are required. Nothing is saved until you select Create Study at the bottom of the page.',
+  edit: `Update this study's information, its data assets (${DATA_ASSETS}), and its related resources (${RELATED_RESOURCES}). `
+    + 'The data use terms and Data Access Committee of an existing dataset can\'t be changed here. '
+    + 'Changes are saved when you select Update Study at the bottom of the page.',
+  draft: 'This draft was filled in from your study template. Review each section, complete anything missing '
+    + `(fields marked * are required), and add any other data assets (${DATA_ASSETS}) or related resources (${RELATED_RESOURCES}). `
+    + 'Then select Create Study at the bottom of the page.',
+}
+
 /** A draft id is not a study id: a draft has never been submitted, so it creates rather than updates. */
 export type FormMode = 'create' | 'edit' | 'draft'
 
@@ -295,14 +322,11 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
     <>
       {loadingError && <div>Error Loading Page</div>}
       <div style={Styles.PAGE} className="data-submission-form">
-        <div style={{ marginLeft: '-1.5%' }}>
-          <TableHeaderSection
-            title={formMode === 'draft' ? 'Study Registration Draft' : 'Study Registration Form'}
-            description={formMode === 'draft'
-              ? 'Review the values from your template, edit anything that needs it, then create the study.'
-              : 'Submit new datasets to DUOS'}
-          />
-        </div>
+        {/* The form's own header, on its column and type scale, rather than the shared table header. */}
+        <header className="dsf-page-header">
+          <h1 data-cy="table-header-title">{FORM_TITLE[formMode]}</h1>
+          <p className="dsf-page-header-description" data-cy="table-header-description">{FORM_HELP_TEXT[formMode]}</p>
+        </header>
 
         <GeneralStudyInformation study={study} setStudy={setStudy} />
         <NihAnvilUseRelated study={study} setStudy={setStudy} />

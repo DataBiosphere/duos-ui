@@ -80,7 +80,8 @@ describe('DataSubmissionFormV2 in draft mode', () => {
 
     renderDraftRoute()
 
-    expect(await screen.findByText('Study Registration Draft')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Review Study Draft' })).toBeInTheDocument()
+    expect(document.querySelector('[data-cy="table-header-description"]')).toHaveTextContent('This draft was filled in from your study template.')
   })
 
   it('offers creation rather than update, since a draft was never submitted', async () => {
@@ -141,7 +142,11 @@ describe('DataSubmissionFormV2 outside draft mode', () => {
       { route: '/data_submission_form' },
     )
 
-    expect(await screen.findByText('Study Registration Form')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Register a Study and Data Assets' })).toBeInTheDocument()
+    expect(document.querySelector('[data-cy="table-header-description"]')).toHaveTextContent('Nothing is saved until you select Create Study')
+    expect(document.querySelector('[data-cy="table-header-description"]')).toHaveTextContent(
+      'data assets (datasets, models, and workspaces) and related resources (publications, presentations, clinical trials, intellectual property, and funding)',
+    )
     expect(Draft.getDraft).not.toHaveBeenCalled()
     expect(DataSet.getStudyById).not.toHaveBeenCalled()
     expect(screen.getByText('Create Study')).toBeInTheDocument()
@@ -193,7 +198,8 @@ describe('DataSubmissionFormV2 editing a persisted study', () => {
     // The study payload lists only dataset ids, so the consent groups need the datasets' own read.
     expect(DataSet.getStudyDatasets).toHaveBeenCalledWith(STUDY_ID)
     expect(Draft.getDraft).not.toHaveBeenCalled()
-    expect(screen.getByText('Study Registration Form')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Edit Study Registration' })).toBeInTheDocument()
+    expect(document.querySelector('[data-cy="table-header-description"]')).toHaveTextContent('Changes are saved when you select Update Study')
   })
 
   it('still offers update rather than creation', async () => {
