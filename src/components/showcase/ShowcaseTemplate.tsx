@@ -26,6 +26,8 @@ import {
   SHOWCASE_MAIN_HEADING_ID,
   SHOWCASE_NEUTRALS,
   ShowcaseLookupsContext,
+  type ShowcasePageInfo,
+  ShowcasePageInfoContext,
 } from 'src/components/showcase/showcaseTemplateContract'
 import { useShowcaseLookups } from 'src/components/showcase/useShowcaseLookups'
 import type { RegistryEntry, SectionKey, ShowcaseConfig } from 'src/types/showcase'
@@ -73,6 +75,7 @@ export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRe
   const masthead = sections.filter(section => section.key === 'masthead')
   const content = sections.filter(section => section.key !== 'masthead')
   const hasHero = content.some(section => section.key === 'hero')
+  const pageInfo: ShowcasePageInfo = { title: entry.title }
 
   return (
     <div className="showcase-template" style={themeStyle(config.branding)}>
@@ -81,7 +84,7 @@ export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRe
       </a>
       <ShowcaseHandoffsContext.Provider value={handoffs}>
         <ShowcaseLookupsContext.Provider value={lookups}>
-          {masthead.map(renderSection)}
+          <ShowcasePageInfoContext.Provider value={pageInfo}>{masthead.map(renderSection)}</ShowcasePageInfoContext.Provider>
           <main className="showcase-template__main">
             {!handoffs.enabled && <p className="showcase-template__preview-notice" role="note">{PREVIEW_NOTICE}</p>}
             {!hasHero && (

@@ -27,6 +27,16 @@ export const SHOWCASE_NEUTRALS = {
  */
 export const ShowcaseLookupsContext = createContext<ShowcaseLookups>({ datasets: {} })
 
+/**
+ * What the masthead needs from the page (S3.2): the registry entry's title, for the logo alt text
+ * and for a showcase with no logo.
+ */
+export interface ShowcasePageInfo {
+  title: string
+}
+
+export const ShowcasePageInfoContext = createContext<ShowcasePageInfo>({ title: '' })
+
 /** The config's colors, with any override that fails its contrast check replaced by the preset's
  * own color, so a failing color is never rendered. */
 export const accessibleThemeColors = (branding: ShowcaseConfig['branding']): ThemeColors => {

@@ -4,7 +4,7 @@
  * Page rendering and the sub-nav both read `visibleSections`, so a section that isn't rendered has
  * no anchor and no nav link (delivery plan section 3).
  *
- * The registry is empty until the E3 stories add renderers. Its keys must equal
+ * Each E3 story adds its renderers here. The registry's keys must equal
  * `IMPLEMENTED_SECTION_KEYS`, so a renderer can't ship without the CI guard allowing its type, or
  * the other way round.
  *
@@ -16,6 +16,7 @@
  * Lookup state (a shelf that is loading or whose lookup failed) is not modelled here.
  */
 import type { ComponentType } from 'react'
+import { Masthead } from 'src/components/showcase/sections/Masthead'
 import { NO_ANCHOR_SECTION_KEYS, SECTION_KEYS, type SectionConfigs, type SectionKey, type ShowcaseConfig } from 'src/types/showcase'
 
 /** A section's config when it is enabled. Disabled sections may keep content, so the predicate and
@@ -52,7 +53,10 @@ export interface SectionRegistryEntry<K extends SectionKey> {
 export type SectionRegistry = { readonly [K in SectionKey]?: SectionRegistryEntry<K> }
 
 /** The real registry. Each E3 story adds its type here and to `IMPLEMENTED_SECTION_KEYS`. */
-export const sectionRegistry: SectionRegistry = {}
+export const sectionRegistry: SectionRegistry = {
+  // Search always renders, so an enabled masthead always has content, with or without logos.
+  masthead: { component: Masthead, defaultLabels: {}, navigable: false, hasRenderableContent: () => true },
+}
 
 export interface VisibleSectionOf<K extends SectionKey> {
   key: K
