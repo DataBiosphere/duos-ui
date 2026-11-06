@@ -21,6 +21,14 @@ function promisifyGet(
   })
 }
 
+function promisifyOutcome(
+  fn: (cb: (err?: unknown, outcome?: string) => void) => void,
+): Promise<string | undefined> {
+  return new Promise((resolve, reject) => {
+    fn((err, outcome) => (err ? reject(err) : resolve(outcome)))
+  })
+}
+
 function promisifyVoid(
   fn: (cb: (err?: unknown) => void) => void,
 ): Promise<void> {
@@ -161,6 +169,43 @@ describe('createPgSessionStore', () => {
       const [sql, params] = query.mock.calls[0]
       expect(sql).toContain('DELETE FROM user_sessions WHERE sid = $1')
       expect(params).toEqual(['sid-1'])
+    })
+
+    it('destroyGeneration deletes the row only while it holds the generation', async () => {
+      query.mockResolvedValueOnce({ rows: [], rowCount: 1 })
+
+      const outcome = await promisifyOutcome(cb => store.destroyGeneration('sid-1', 'gen-1', cb))
+
+      expect(outcome).toBe('destroyed')
+      const [sql, params] = query.mock.calls[0]
+      expect(sql).toContain(`DELETE FROM user_sessions WHERE sid = $1 AND COALESCE(user_sessions.sess->'__fastifySessionMetadata'->>'generation', user_sessions.sid) = $2`)
+      expect(params).toEqual(['sid-1', 'gen-1'])
+      expect(query).toHaveBeenCalledOnce()
+    })
+
+    it.each([
+      [[{}], 'superseded'],
+      [[], 'gone'],
+    ])('destroyGeneration rereads the row when nothing was deleted (%j → %s)', async (rows, outcome) => {
+      query.mockResolvedValueOnce({ rows: [], rowCount: 0 }).mockResolvedValueOnce({ rows })
+
+      expect(await promisifyOutcome(cb => store.destroyGeneration('sid-1', 'gen-1', cb))).toBe(outcome)
+
+      const [sql, params] = query.mock.calls[1]
+      // An expired row reads as gone, so its dead cookie is cleared.
+      expect(sql).toBe('SELECT 1 FROM user_sessions WHERE sid = $1 AND expire > NOW()')
+      expect(params).toEqual(['sid-1'])
+    })
+
+    it('destroyGeneration reads an unreadable row as superseded, so the cookie is left alone, and logs the failed read', async () => {
+      const failure = new Error('pool timeout')
+      query.mockResolvedValueOnce({ rows: [], rowCount: 0 }).mockRejectedValueOnce(failure)
+
+      expect(await promisifyOutcome(cb => store.destroyGeneration('sid-1', 'gen-1', cb))).toBe('superseded')
+      expect(log.error).toHaveBeenCalledWith(
+        { event: 'session_store.completed', op: 'get', outcome: 'failed', idp: 'unknown', err: failure },
+        'session_store.completed',
+      )
     })
 
     it('propagates query errors to the callback', async () => {

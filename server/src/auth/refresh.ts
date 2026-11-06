@@ -3,6 +3,7 @@ import type { FastifyRequest, Session } from 'fastify'
 import { hashValue } from '../logging.js'
 import { endSession, logAuthEvent, sessionIdp } from './authEvents.js'
 import { sessionGeneration } from '../session/pgStore.js'
+import { failedSaveOutcome } from '../session/sessionEnded.js'
 import { getOidcConfig } from './oidcClient.js'
 
 /**
@@ -108,7 +109,7 @@ export async function refreshAccessToken(request: FastifyRequest): Promise<void>
     // each emit `auth.session.destroyed`, so both are upper bounds. Exact
     // session counts come from `user_session_audit`, not from these lines.
     logAuthEvent(request, 'auth.refresh.unrefreshable', { idp: sessionIdp(request) }, 'warn')
-    await endSession(request, 'refresh_terminal')
+    await endSessionOrThrowSuperseded(request)
     throw new RefreshFailedError('no_refresh_token')
   }
 
@@ -170,10 +171,21 @@ export async function refreshAccessToken(request: FastifyRequest): Promise<void>
   }
 }
 
+/**
+ * Ends the session for a terminal refresh. If a later sign-in now holds the
+ * row, this request's sign-in is over but the session isn't, so the caller
+ * must not answer 401 (which clears the shared cookie): fail it as transient.
+ */
+async function endSessionOrThrowSuperseded(request: FastifyRequest): Promise<void> {
+  if (await endSession(request, 'refresh_terminal') === 'superseded') {
+    throw new Error('the session was replaced by a later sign-in')
+  }
+}
+
 /** Terminal when B2C rejected the token and the session is gone; anything else is transient. */
 function logRefreshFailure(request: FastifyRequest, idp: 'google' | 'microsoft' | 'unknown', err: unknown): void {
   if (err instanceof RefreshFailedError) {
-    logAuthEvent(request, 'auth.refresh.completed', { outcome: 'terminal', reason: 'refresh_failed', idp }, 'warn')
+    logAuthEvent(request, 'auth.refresh.completed', { outcome: 'terminal', reason: err.message, idp }, 'warn')
     return
   }
   logAuthEvent(request, 'auth.refresh.completed', { outcome: 'transient', err, idp }, 'warn')
@@ -258,7 +270,7 @@ async function doRefresh(
       // rejection and return 401. Their own session objects stay in memory but
       // unmodified, so nothing writes the row back.
       request.log.warn({ sidHash: hashValue(sid) }, '[auth] B2C rejected the refresh token — destroying the session')
-      await endSession(request, 'refresh_terminal')
+      await endSessionOrThrowSuperseded(request)
       throw new RefreshFailedError('refresh_failed')
     }
     throw err
@@ -305,7 +317,18 @@ async function applyTokens(request: FastifyRequest, tokens: RefreshedTokens): Pr
   request.session.refreshToken = tokens.refreshToken
   request.session.idToken = tokens.idToken
   request.session.tokenExpiry = tokens.tokenExpiry
-  await request.session.save()
+  try {
+    await request.session.save()
+  }
+  catch (err: unknown) {
+    // compareAndSet refused the write: the session ended during the flight
+    // (terminal), or a later sign-in took the row (transient, so the caller
+    // leaves that sign-in's cookie alone).
+    const outcome = await failedSaveOutcome(request, err)
+    if (outcome === 'ended') throw new RefreshFailedError('session_ended')
+    if (outcome === 'superseded') throw new Error('the session was replaced by a later sign-in')
+    throw err
+  }
 }
 
 /**

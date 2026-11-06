@@ -6,7 +6,7 @@ import fastifyCsrf from '@fastify/csrf-protection'
 import type { PostgresDb } from '@fastify/postgres'
 import type { Configuration } from 'openid-client'
 import { createPgSessionStore } from '../src/session/pgStore.js'
-import { compareAndSetRow, sessionGeneration, stored } from './sessionTable.js'
+import { compareAndSetRow, deleteGenerationRow, liveRowRows, sessionGeneration, stored } from './sessionTable.js'
 import { sessionPluginOptions } from '../src/session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from '../src/auth/csrf.js'
 import { fetchMetadataGuard } from '../src/security/fetchMetadata.js'
@@ -73,6 +73,8 @@ const SECRET = 'test-secret-that-is-at-least-32-characters'
 // ---------------------------------------------------------------------------
 function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>()) {
   const setSids: string[] = []
+  // A test can hold the next compareAndSet open to race it against another request.
+  const hooks: { beforeUpdate?: () => Promise<void> } = {}
   const auditUpdates: Array<{ reason: string, sid: string }> = []
   const query = async (sql: string, params: unknown[] = []) => {
     if (sql.includes('SELECT sess FROM user_sessions')) {
@@ -91,9 +93,18 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
     if (sql.includes('UPDATE user_sessions')) {
       // compareAndSet: write only an unexpired row that holds the expected generation.
       await new Promise(resolve => setTimeout(resolve, 0)) // simulate DB latency
+      const hold = hooks.beforeUpdate
+      hooks.beforeUpdate = undefined
+      await hold?.()
       const result = compareAndSetRow(rows, params)
       if (result.rowCount === 1) setSids.push(params[0] as string)
       return result
+    }
+    if (sql.includes('DELETE FROM user_sessions') && sql.includes('__fastifySessionMetadata')) {
+      return deleteGenerationRow(rows, params)
+    }
+    if (sql.includes('SELECT 1 FROM user_sessions')) {
+      return liveRowRows(rows, params)
     }
     if (sql.includes('DELETE FROM user_sessions')) {
       rows.delete(params[0] as string)
@@ -108,7 +119,7 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
     }
     return { rows: [] }
   }
-  return { pg: { query } as unknown as PostgresDb, rows, setSids, auditUpdates }
+  return { pg: { query } as unknown as PostgresDb, rows, setSids, auditUpdates, hooks }
 }
 
 interface AuthAppOptions {
@@ -520,6 +531,134 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
 
       // audit_session_update closes the pre-auth audit row when the generation changes.
       expect(auditUpdates).toEqual([])
+    })
+  })
+
+  describe('a request that outlives its sign-in (DT-4420)', () => {
+    it('answers a CSRF-token request whose session a logout ended mid-save once, with a 401', async () => {
+      const errorLog: string[] = []
+      const fake = makeInMemoryPg()
+      const guarded = await buildAuthApp(fake.pg, { errorLog })
+      const login = await guarded.inject({ method: 'POST', url: '/auth/login' })
+      const cb = await guarded.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie: sessionCookieHeader(login) } })
+      const cookie = sessionCookieHeader(cb)
+
+      // The first token writes a CSRF secret, so the request saves; a logout lands before the save.
+      fake.hooks.beforeUpdate = async () => {
+        fake.rows.clear()
+      }
+      const res = await guarded.inject({ method: 'GET', url: '/auth/csrf-token', headers: { cookie } })
+      await guarded.close()
+
+      expect(res.statusCode).toBe(401)
+      expect(res.cookies.find(c => c.name === 'sessionId')?.value).toBe('')
+      expect(errorLog.join('\n')).not.toMatch(/already sent|ERR_HTTP_HEADERS_SENT|FST_ERR_REP/i)
+    })
+
+    describe('a login whose session changes while it is prepared', () => {
+      async function signedInApp() {
+        const errorLog: string[] = []
+        const fake = makeInMemoryPg()
+        const guarded = await buildAuthApp(fake.pg, { errorLog })
+        const login = await guarded.inject({ method: 'POST', url: '/auth/login' })
+        const cb = await guarded.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie: sessionCookieHeader(login) } })
+        return { fake, guarded, errorLog, cookie: sessionCookieHeader(cb) }
+      }
+
+      it('answers once, with a 502 and a cleared cookie, when a logout ended the session', async () => {
+        const { fake, guarded, errorLog, cookie } = await signedInApp()
+        fake.hooks.beforeUpdate = async () => {
+          fake.rows.clear()
+        }
+
+        const res = await guarded.inject({ method: 'POST', url: '/auth/login', headers: { cookie } })
+        await guarded.close()
+
+        expect(res.statusCode).toBe(502)
+        expect(res.cookies.find(c => c.name === 'sessionId')?.value).toBe('')
+        expect(errorLog.join('\n')).not.toMatch(/already sent|ERR_HTTP_HEADERS_SENT|FST_ERR_REP/i)
+      })
+
+      it('answers once, with a 502 and no cookie change, when another tab\'s sign-in took the row', async () => {
+        const { fake, guarded, errorLog, cookie } = await signedInApp()
+        const [sid] = fake.rows.keys()
+        fake.hooks.beforeUpdate = async () => {
+          const row = fake.rows.get(sid)!
+          fake.rows.set(sid, { ...row, sess: { ...(row.sess as object), __fastifySessionMetadata: { generation: 'other-tab' } } })
+        }
+
+        const res = await guarded.inject({ method: 'POST', url: '/auth/login', headers: { cookie } })
+        await guarded.close()
+
+        expect(res.statusCode).toBe(502)
+        expect(res.cookies.find(c => c.name === 'sessionId')).toBeUndefined()
+        expect([...fake.rows.keys()]).toEqual([sid])
+        expect(errorLog.join('\n')).not.toMatch(/already sent|ERR_HTTP_HEADERS_SENT|FST_ERR_REP/i)
+      })
+    })
+
+    it('leaves a later sign-in on the same row signed in when the earlier one gets an upstream 401', async () => {
+      const { cookie: first } = await authenticate()
+      const [sid] = rows.keys()
+
+      // /auth/me loads the first sign-in, then waits on the upstream.
+      let answer!: (res: unknown) => void
+      vi.stubGlobal('fetch', vi.fn(() => new Promise((resolve) => {
+        answer = resolve
+      })))
+      const stale = app.inject({ method: 'GET', url: '/auth/me', headers: { cookie: first } })
+      await vi.waitFor(() => expect(answer).toBeDefined())
+
+      // Meanwhile the browser signs in again, on the same row.
+      const relogin = await app.inject({ method: 'POST', url: '/auth/login', headers: { cookie: first } })
+      const callback = await app.inject({
+        method: 'GET',
+        url: '/auth/callback?code=test-code&state=test-state',
+        headers: { cookie: sessionCookieHeader(relogin) },
+      })
+      const second = sessionCookieHeader(callback)
+
+      answer({ status: 401, ok: false, json: async () => ({}) })
+      const res = await stale
+      vi.unstubAllGlobals()
+
+      // Not a 401, which would make the client sign the browser out, and no cookie change.
+      expect(res.statusCode).toBe(502)
+      expect(res.cookies.find(c => c.name === 'sessionId')).toBeUndefined()
+      expect([...rows.keys()]).toEqual([sid])
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ status: 200, ok: true, json: async () => ({ email: 'user@example.com' }) }))
+      const me = await app.inject({ method: 'GET', url: '/auth/me', headers: { cookie: second } })
+      vi.unstubAllGlobals()
+      expect(me.statusCode).toBe(200)
+    })
+
+    it('signs the browser out when the later sign-in on the row has expired too', async () => {
+      const { cookie: first } = await authenticate()
+      const [sid] = rows.keys()
+
+      let answer!: (res: unknown) => void
+      vi.stubGlobal('fetch', vi.fn(() => new Promise((resolve) => {
+        answer = resolve
+      })))
+      const stale = app.inject({ method: 'GET', url: '/auth/me', headers: { cookie: first } })
+      await vi.waitFor(() => expect(answer).toBeDefined())
+
+      const relogin = await app.inject({ method: 'POST', url: '/auth/login', headers: { cookie: first } })
+      await app.inject({
+        method: 'GET',
+        url: '/auth/callback?code=test-code&state=test-state',
+        headers: { cookie: sessionCookieHeader(relogin) },
+      })
+      // The later sign-in's row expires before the stale request ends.
+      rows.get(sid)!.expire = new Date(Date.now() - 1000)
+
+      answer({ status: 401, ok: false, json: async () => ({}) })
+      const res = await stale
+      vi.unstubAllGlobals()
+
+      // The row is no one's live session, so its dead cookie is cleared.
+      expect(res.statusCode).toBe(401)
+      expect(res.cookies.find(c => c.name === 'sessionId')?.value).toBe('')
     })
   })
 

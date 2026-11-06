@@ -25,3 +25,24 @@ export function compareAndSetRow(rows: SessionRows, params: unknown[]): { rows: 
   rows.set(sid, { sess: stored(sess), expire: new Date(Date.now() + maxAgeMs) })
   return { rows: [], rowCount: 1 }
 }
+
+/**
+ * destroyGeneration's re-read, `SELECT 1 ... AND expire > NOW()`: an expired row
+ * reads as gone.
+ */
+export function liveRowRows(rows: SessionRows, params: unknown[]): { rows: object[] } {
+  const row = rows.get(params[0] as string)
+  return { rows: row && row.expire.getTime() > Date.now() ? [{}] : [] }
+}
+
+/**
+ * destroyGeneration's `DELETE ... AND <generation> = $2`: deletes the row only
+ * while it holds the given generation.
+ */
+export function deleteGenerationRow(rows: SessionRows, params: unknown[]): { rows: never[], rowCount: number } {
+  const [sid, generation] = params as [string, string]
+  const row = rows.get(sid)
+  if (!row || sessionGeneration(row.sess, sid) !== generation) return { rows: [], rowCount: 0 }
+  rows.delete(sid)
+  return { rows: [], rowCount: 1 }
+}
