@@ -475,6 +475,129 @@ export const FormInputSelect = (config: FormInputSelectConfig): React.ReactEleme
   )
 }
 
+export interface FormInputButtonGroupConfig extends BaseFormComponentConfig {
+  title?: string
+  /** Every option, shown at once as a wrapping row of buttons. */
+  options?: string[]
+  isMulti?: boolean
+  /** Adds an "Other…" button that takes a typed value, for fields that used to be creatable selects. */
+  allowCustom?: boolean
+  customPlaceholder?: string
+  required?: boolean
+  ariaDescribedby?: string
+}
+
+/**
+ * A segmented control: each option a toggle button (aria-pressed), every option visible without a
+ * click. Single-select by default, multi with `isMulti`. Pressing the selected button of an
+ * optional single-select clears it; a required one keeps its choice. A value that isn't an option
+ * (typed under "Other…", or loaded from before the field was a button group) is shown as one more
+ * selected button, so nothing a submitter entered is hidden.
+ */
+export const FormInputButtonGroup = (config: FormInputButtonGroupConfig): React.ReactElement => {
+  const {
+    id, title, disabled, options = [], isMulti = false, allowCustom = false,
+    customPlaceholder, required = false, ariaDescribedby,
+    formValue, validation,
+  } = config
+  const [addingCustom, setAddingCustom] = useState(false)
+  const [customText, setCustomText] = useState('')
+
+  const selected: string[] = isMulti
+    ? (isArray(formValue) ? formValue as string[] : [])
+    : (isString(formValue) && formValue !== '' ? [formValue] : [])
+  const customValues = selected.filter(value => !options.includes(value))
+  const shown = [...options, ...customValues]
+
+  const toggle = (option: string) => {
+    if (disabled) return
+    const isSelected = selected.includes(option)
+    if (isMulti) {
+      onFormInputChange(config, isSelected ? selected.filter(value => value !== option) : [...selected, option])
+      return
+    }
+    if (isSelected) {
+      if (!required) onFormInputChange(config, '')
+      return
+    }
+    onFormInputChange(config, option)
+  }
+
+  const addCustom = () => {
+    const value = customText.trim()
+    setCustomText('')
+    setAddingCustom(false)
+    if (!value) return
+    const existing = shown.find(option => option.toLowerCase() === value.toLowerCase())
+    const chosen = existing ?? value
+    if (selected.includes(chosen)) return
+    onFormInputChange(config, isMulti ? [...selected, chosen] : chosen)
+  }
+
+  return (
+    <div>
+      <div
+        className={`button-group ${isValid(validation) ? '' : 'errored'} ${disabled ? 'disabled' : ''}`}
+        id={id}
+        role="group"
+        aria-label={title}
+        aria-describedby={ariaDescribedby}
+      >
+        {shown.map(option => (
+          <button
+            key={option}
+            type="button"
+            id={`${id}-option-${option.replace(/[^A-Za-z0-9]+/g, '-')}`}
+            className={`button-group-option ${selected.includes(option) ? 'is-selected' : ''}`}
+            aria-pressed={selected.includes(option)}
+            disabled={disabled}
+            onClick={() => toggle(option)}
+          >
+            {option}
+          </button>
+        ))}
+        {allowCustom && !disabled && !addingCustom && (
+          <button
+            type="button"
+            id={`${id}-add-custom`}
+            className="button-group-option button-group-other"
+            onClick={() => setAddingCustom(true)}
+          >
+            Other…
+          </button>
+        )}
+        {allowCustom && addingCustom && (
+          <span className="button-group-custom">
+            <input
+              id={`${id}-custom-input`}
+              className="form-control"
+              aria-label={`Other ${title ?? 'value'}`}
+              placeholder={customPlaceholder ?? 'Enter a value'}
+              value={customText}
+              // The input appears because the user just asked for it, so it takes focus.
+              // oxlint-disable-next-line jsx-a11y/no-autofocus
+              autoFocus
+              onChange={event => setCustomText(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  addCustom()
+                }
+                if (event.key === 'Escape') {
+                  setCustomText('')
+                  setAddingCustom(false)
+                }
+              }}
+            />
+            <button type="button" id={`${id}-custom-add`} className="button-group-option" onClick={addCustom}>Add</button>
+          </span>
+        )}
+      </div>
+      {errorMessages(validation)}
+    </div>
+  )
+}
+
 export const FormInputRadioGroup = (config: FormInputRadioGroupConfig): React.ReactElement => {
   const {
     id, disabled,

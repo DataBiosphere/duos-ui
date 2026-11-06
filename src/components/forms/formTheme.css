@@ -276,3 +276,97 @@
   border-width: 1px;
   box-shadow: var(--duos-input-focus-ring);
 }
+
+/* ---------- Button group (FormFieldTypes.BUTTONGROUP) ---------- */
+
+/* Wraps onto as many lines as it needs; never scrolls sideways or overlaps. */
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+  margin: 4px 0 8px;
+}
+
+.button-group-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  max-width: 100%;
+  padding: 7px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  color: var(--duos-input-text);
+  background-color: #ffffff;
+  border: 1.5px solid var(--duos-input-border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.button-group-option:hover:not(:disabled) {
+  border-color: var(--duos-input-accent);
+  color: var(--duos-input-accent);
+}
+
+.button-group-option:focus-visible {
+  outline: none;
+  box-shadow: var(--duos-input-focus-ring);
+}
+
+/* Selected: solid fill, white text, and a check mark, so the choice reads at a glance and not by color alone. */
+.button-group-option.is-selected,
+.button-group-option.is-selected:hover:not(:disabled) {
+  color: #ffffff;
+  background-color: var(--duos-input-accent);
+  border-color: var(--duos-input-accent);
+  font-weight: 600;
+}
+
+.button-group-option.is-selected::before {
+  content: "\2713";
+  font-weight: 700;
+}
+
+.button-group-option:disabled {
+  cursor: not-allowed;
+  color: #7a8691;
+  background-color: var(--duos-input-disabled-bg);
+  border-color: #d5dbe1;
+}
+
+.button-group-option.is-selected:disabled {
+  color: #ffffff;
+  background-color: #6f93b0;
+  border-color: #6f93b0;
+}
+
+.button-group-other {
+  border-style: dashed;
+  color: var(--duos-input-accent);
+}
+
+.button-group-custom {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.button-group-custom .form-control {
+  width: 220px;
+  max-width: 100%;
+  min-height: 38px;
+  padding: 6px 12px;
+  border: 1px solid var(--duos-input-border);
+  border-radius: 999px;
+}
+
+.button-group.errored .button-group-option:not(.is-selected) {
+  border-color: var(--duos-input-error);
+}

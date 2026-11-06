@@ -10,6 +10,7 @@ import {
   FormInputGeneric,
   FormInputMultiText,
   FormInputSelect,
+  FormInputButtonGroup,
   FormInputCheckbox,
   FormInputSlider,
   FormInputRadioGroup,
@@ -223,6 +224,16 @@ export const FormFieldTypes: Record<string, FormFieldTypeConfig> = {
       'hideInput',
       'readOnly',
       'accept',
+    ],
+  },
+  BUTTONGROUP: {
+    defaultValue: (config: Record<string, unknown>) => (config?.isMulti ? [] : ''),
+    component: FormInputButtonGroup,
+    requiredProps: ['options'],
+    optionalProps: [
+      'isMulti',
+      'allowCustom',
+      'customPlaceholder',
     ],
   },
   CHECKBOX: {
