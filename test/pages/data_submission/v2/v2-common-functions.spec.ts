@@ -179,6 +179,18 @@ describe('datasetSchemaSubmissionToStudy', () => {
   })
 })
 
+/**
+ * What a document comes back as: unchanged, except that a study's shared Public Visibility is
+ * copied onto each dataset on submission, which a document from before inheritance never carried.
+ */
+const withInheritedVisibility = (document: DatasetRegistrationSchemaV1): DatasetRegistrationSchemaV1 => ({
+  ...document,
+  consentGroups: document.consentGroups.map(group => ({
+    ...group,
+    data: { ...group.data, publicVisibility: document.publicVisibility },
+  })),
+})
+
 describe('draft document round trip', () => {
   beforeEach(() => vi.clearAllMocks())
 
@@ -187,7 +199,7 @@ describe('draft document round trip', () => {
 
     const submitted = studyToDatasetSchemaSubmission(datasetSchemaSubmissionToStudy(document))
 
-    Object.entries(document).forEach(([field, value]) => {
+    Object.entries(withInheritedVisibility(document)).forEach(([field, value]) => {
       expect(submitted[field as keyof DatasetRegistrationSchemaV1]).toEqual(value)
     })
   })
@@ -225,7 +237,7 @@ describe('draft document round trip', () => {
 
     const submitted = studyToDatasetSchemaSubmission(datasetSchemaSubmissionToStudy(document))
 
-    Object.entries(document).forEach(([field, value]) => {
+    Object.entries(withInheritedVisibility(document)).forEach(([field, value]) => {
       expect(submitted[field as keyof DatasetRegistrationSchemaV1]).toEqual(value)
     })
   })

@@ -53,8 +53,10 @@ import { Storage } from 'src/libs/storage'
 import { NIHInstituteAndCenterAbbreviations } from 'src/components/forms/NIHInstitutesAndCenters'
 import { AccessManagementType, ConsentGroup2, FileType } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { Dataset } from 'src/types/model'
-import { DatasetDataMetadata, StudyDataMetadata } from 'src/libs/data-metadata'
+import { DataCustodianMetadata, DatasetDataMetadata, PopulationMetadata, PrincipalInvestigatorMetadata, StudyDataMetadata } from 'src/libs/data-metadata'
 import dayjs from 'dayjs'
+import { missingPopulationFields } from 'src/pages/data_submission/v2/population'
+import { normalizeDoi } from 'src/components/forms/formValidation'
 
 export type MasterChangeHandler = ({ key, value, isValid, remove }: { key: string, value: unknown, isValid: boolean, remove?: boolean }) => void
 
@@ -108,11 +110,12 @@ export const generateStudyInputFormTextField = (setStudy: React.Dispatch<React.S
   )
 }
 
-export const generateStudyPropertyFormDateField = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, studyProperty: DateStudyProperty, validators: Validator[] = [], style: React.CSSProperties = {}) => {
+export const generateStudyPropertyFormDateField = (formData: Study, setStudy: React.Dispatch<React.SetStateAction<Study>>, studyProperty: DateStudyProperty, validators: Validator[] = [], style: React.CSSProperties = {}, description?: string) => {
   return (
     <FormField
       id={studyProperty.key}
       title={studyProperty.fieldTitle}
+      description={description}
       type={FormFieldTypes.CALENDAR}
       validators={validators}
       style={style}
@@ -174,6 +177,236 @@ export const getStudyPropertyValueByKey = (formData: Study, key: string): unknow
   }
 }
 
+/** The study's `data` bag: the in-progress edit held in properties[] if any, else the one loaded from Consent. */
+export const getStudyDataBag = (study: Study): StudyDataMetadata =>
+  (getStudyPropertyValueByKey(study, StudyData.key) as StudyDataMetadata | undefined) ?? study?.data ?? {}
+
+/** A copy of the study with `changes` merged into its `data` bag; a key set to undefined is removed. */
+export const withStudyData = (study: Study, changes: Partial<StudyDataMetadata>): Study => {
+  const next = structuredClone(study)
+  const bag: StudyDataMetadata = { ...getStudyDataBag(next), ...changes }
+  for (const key of Object.keys(changes)) {
+    if (bag[key] === undefined) {
+      delete bag[key]
+    }
+  }
+  next.properties = next.properties ?? []
+  const existing = next.properties.find(prop => prop.key === StudyData.key)
+  if (existing) {
+    existing.value = bag
+  }
+  else {
+    next.properties.push(new StudyData(bag).toJSON() as StudyProperty)
+  }
+  return next
+}
+
+/** Functional, so fields edited in quick succession never overwrite each other with a stale bag. */
+export const updateStudyData = (setStudy: React.Dispatch<React.SetStateAction<Study>>, changes: Partial<StudyDataMetadata>) => {
+  setStudy(prev => withStudyData(prev, changes))
+}
+
+/** Absent reads as true: see `StudyDataMetadata.populationSameAcrossAssets`. */
+export const isPopulationSameAcrossAssets = (study: Study): boolean =>
+  getStudyDataBag(study).populationSameAcrossAssets !== false
+
+/** The name Consent displays for a PI: the non-empty parts, in order, separated by single spaces. */
+export const composePiName = (pi: PrincipalInvestigatorMetadata | undefined): string =>
+  [pi?.firstName, pi?.lastName].map(part => (part ?? '').trim()).filter(Boolean).join(' ')
+
+/**
+ * The study's PIs, from the data bag when they were entered there. A study registered before then
+ * has only `piName` and `piEmail`, so they become the one PI, the name split on whitespace as a
+ * starting point the submitter can correct: the last token is the last name and everything before
+ * it the first name, so no part of the name is dropped.
+ */
+export const getPrincipalInvestigators = (study: Study): PrincipalInvestigatorMetadata[] => {
+  const stored = getStudyDataBag(study).principalInvestigators
+  if (stored?.length) {
+    return stored
+  }
+  const tokens = (study?.piName ?? '').trim().split(/\s+/).filter(Boolean)
+  const legacy: PrincipalInvestigatorMetadata = {
+    firstName: tokens.length > 1 ? tokens.slice(0, -1).join(' ') : (tokens[0] ?? ''),
+    lastName: tokens.length > 1 ? tokens[tokens.length - 1] : '',
+  }
+  if (study?.piEmail) {
+    legacy.email = study.piEmail
+  }
+  return [legacy]
+}
+
+/** Writes the PI list and keeps Consent's `piName` and `piEmail` equal to the first PI's. */
+export const withPrincipalInvestigators = (study: Study, pis: PrincipalInvestigatorMetadata[]): Study => {
+  const next = withStudyData(study, { principalInvestigators: pis })
+  next.piName = composePiName(pis[0])
+  const email = pis[0]?.email?.trim()
+  if (email) {
+    next.piEmail = email
+  }
+  else {
+    delete (next as Partial<Study>).piEmail
+  }
+  return next
+}
+
+/** Functional, so a change is applied to the latest PI list rather than the one this render saw. */
+export const updatePrincipalInvestigators = (
+  setStudy: React.Dispatch<React.SetStateAction<Study>>,
+  change: (pis: PrincipalInvestigatorMetadata[]) => PrincipalInvestigatorMetadata[],
+) => {
+  setStudy(prev => withPrincipalInvestigators(prev, change(structuredClone(getPrincipalInvestigators(prev)))))
+}
+
+/**
+ * The study's Data Custodians, from the data bag when they were entered there. A study registered
+ * before then has only Consent's `dataCustodianEmail` list, so each email becomes a custodian with
+ * no name yet. A study with none shows one empty row to fill in.
+ */
+export const getDataCustodians = (study: Study): DataCustodianMetadata[] => {
+  const stored = getStudyDataBag(study).dataCustodians
+  if (stored?.length) {
+    return stored
+  }
+  const emails = getStudyPropertyValueByKey(study, DataCustodianEmail.key) as string[] | undefined
+  return emails?.length ? emails.map(email => ({ email })) : [{}]
+}
+
+/** Writes the custodian rows and keeps Consent's `dataCustodianEmail` equal to their emails. */
+export const withDataCustodians = (study: Study, custodians: DataCustodianMetadata[]): Study => {
+  const next = withStudyData(study, { dataCustodians: custodians })
+  const emails = [...new Set(custodians.map(custodian => custodian.email?.trim()).filter((email): email is string => !!email))]
+  const value = emails.length ? emails : undefined
+  const existing = next.properties?.find(prop => prop.key === DataCustodianEmail.key)
+  if (existing) {
+    existing.value = value
+  }
+  else if (value) {
+    next.properties = [...(next.properties ?? []), new DataCustodianEmail(value).toJSON() as StudyProperty]
+  }
+  return next
+}
+
+/** Functional, so a change is applied to the latest custodian list rather than the one this render saw. */
+export const updateDataCustodians = (
+  setStudy: React.Dispatch<React.SetStateAction<Study>>,
+  change: (custodians: DataCustodianMetadata[]) => DataCustodianMetadata[],
+) => {
+  setStudy(prev => withDataCustodians(prev, change(structuredClone(getDataCustodians(prev)))))
+}
+
+/** Absent reads as true: see `StudyDataMetadata.targetDatesSameAcrossAssets`. */
+export const isTargetDatesSameAcrossAssets = (study: Study): boolean =>
+  getStudyDataBag(study).targetDatesSameAcrossAssets !== false
+
+/** Absent reads as true: see `StudyDataMetadata.publicVisibilitySameAcrossAssets`. */
+export const isPublicVisibilitySameAcrossAssets = (study: Study): boolean =>
+  getStudyDataBag(study).publicVisibilitySameAcrossAssets !== false
+
+/** The study-level target dates as YYYY-MM-DD, however the form or Consent held them. */
+export const getStudyTargetDates = (study: Study): { targetDeliveryDate?: string, targetPublicReleaseDate?: string } => ({
+  targetDeliveryDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetDeliveryDate.key)) || undefined,
+  targetPublicReleaseDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetPublicReleaseDate.key)) || undefined,
+})
+
+/** What a dataset inherits from the study, for display in the dataset form and for submission. */
+export interface StudyInheritance {
+  populationSameAcrossAssets: boolean
+  studyPopulation?: PopulationMetadata
+  targetDatesSameAcrossAssets: boolean
+  studyTargetDeliveryDate?: string
+  studyTargetPublicReleaseDate?: string
+  publicVisibilitySameAcrossAssets: boolean
+  studyPublicVisibility?: boolean
+}
+
+export const getStudyInheritance = (study: Study): StudyInheritance => {
+  const dates = getStudyTargetDates(study)
+  return {
+    populationSameAcrossAssets: isPopulationSameAcrossAssets(study),
+    studyPopulation: getStudyDataBag(study).population,
+    targetDatesSameAcrossAssets: isTargetDatesSameAcrossAssets(study),
+    studyTargetDeliveryDate: dates.targetDeliveryDate,
+    studyTargetPublicReleaseDate: dates.targetPublicReleaseDate,
+    publicVisibilitySameAcrossAssets: isPublicVisibilitySameAcrossAssets(study),
+    studyPublicVisibility: study?.publicVisibility,
+  }
+}
+
+/**
+ * What is missing from datasets that define their own population, target dates, or visibility. The
+ * dataset form checks its own on save, but a dataset saved while the study still shared a value has
+ * none of its own, so the datasets are checked again on submission. Shared study values are optional.
+ */
+export const submissionErrors = (study: Study): string[] => {
+  const population = !isPopulationSameAcrossAssets(study)
+  const dates = !isTargetDatesSameAcrossAssets(study)
+  const visibility = !isPublicVisibilitySameAcrossAssets(study)
+  return (study.assets?.consentGroups ?? []).flatMap((group) => {
+    const missing: string[] = []
+    if (population) missing.push(...missingPopulationFields(group.data?.population))
+    if (dates && !group.data?.targetDeliveryDate) missing.push('Target Delivery Date')
+    if (dates && !group.data?.targetPublicReleaseDate) missing.push('Target Public Release Date')
+    if (visibility && typeof group.data?.publicVisibility !== 'boolean') missing.push('Public Visibility')
+    return missing.length ? [`Dataset "${group.consentGroupName}" is missing: ${missing.join(', ')}`] : []
+  })
+}
+
+/** Copies `values` onto each dataset's bag; a value that is undefined is left as the dataset had it. */
+const inheritOnto = (groups: ConsentGroup2[], values: Partial<DatasetDataMetadata>): ConsentGroup2[] => {
+  const defined = Object.fromEntries(Object.entries(values).filter(([, value]) => value !== undefined))
+  if (Object.keys(defined).length === 0) {
+    // Nothing to inherit; leave each dataset's bag exactly as it came, so drafts round trip unchanged.
+    return groups
+  }
+  return groups.map(group => ({ ...group, data: { ...group.data, ...structuredClone(defined) } }))
+}
+
+/**
+ * The study's `data` bag and consent groups as submitted, and any registration fields the
+ * inheritance settings replace. A shared value is copied from the study onto every dataset,
+ * replacing any it held. A value held per dataset is dropped at the study, so a stale hidden study
+ * value can't be mistaken for one that applies; Consent's required study `publicVisibility` is then
+ * true only if every dataset is visible, so no dataset is shown that its submitter marked hidden.
+ */
+const applyStudyInheritance = (study: Study): {
+  data: StudyDataMetadata
+  consentGroups: ConsentGroup2[]
+  overrides: Partial<DatasetRegistrationSchemaV1>
+} => {
+  const data = structuredClone(getStudyDataBag(study))
+  // Normalized at submission, not as typed, so a pasted https://doi.org/ URL doesn't jump while it's entered.
+  if (data.doi) {
+    data.doi = normalizeDoi(data.doi)
+  }
+  let consentGroups = structuredClone(study.assets?.consentGroups) || []
+  const overrides: Partial<DatasetRegistrationSchemaV1> = {}
+
+  if (isPopulationSameAcrossAssets(study)) {
+    consentGroups = inheritOnto(consentGroups, { population: data.population })
+  }
+  else {
+    delete data.population
+  }
+
+  if (isTargetDatesSameAcrossAssets(study)) {
+    consentGroups = inheritOnto(consentGroups, getStudyTargetDates(study))
+  }
+  else {
+    overrides.alternativeDataSharingPlanTargetDeliveryDate = undefined
+    overrides.alternativeDataSharingPlanTargetPublicReleaseDate = undefined
+  }
+
+  if (isPublicVisibilitySameAcrossAssets(study)) {
+    consentGroups = inheritOnto(consentGroups, { publicVisibility: study.publicVisibility })
+  }
+  else {
+    overrides.publicVisibility = consentGroups.length > 0 && consentGroups.every(group => group.data?.publicVisibility === true)
+  }
+
+  return { data, consentGroups, overrides }
+}
+
 const convertDateEpochToString = (dateEpoch: unknown): string | undefined => {
   if (typeof dateEpoch === 'number') {
     return dayjs(dateEpoch).format('YYYY-MM-DD')
@@ -191,6 +424,7 @@ const getBooleanStudyPropertyValueByKey = (study: Study, key: string): boolean |
 }
 
 export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistrationSchemaV1 => {
+  const { data, consentGroups, overrides } = applyStudyInheritance(study)
   const datasetSchema: DatasetRegistrationSchemaV1 = {
     studyName: study.name || '',
     studyType: getStudyPropertyValueByKey(study, StudyTypeProperty.key) as string || undefined,
@@ -226,8 +460,8 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     alternativeDataSharingPlanDataReleased: getBooleanStudyPropertyValueByKey(study, AlternativeDataSharingPlanDataReleased.key),
     alternativeDataSharingPlanTargetDeliveryDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetDeliveryDate.key) as string || undefined),
     alternativeDataSharingPlanTargetPublicReleaseDate: convertDateEpochToString(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanTargetPublicReleaseDate.key) as string || undefined),
-    consentGroups: structuredClone(study.assets?.consentGroups) || [],
-    data: (getStudyPropertyValueByKey(study, StudyData.key) as StudyDataMetadata | undefined) ?? study.data ?? {},
+    consentGroups,
+    data,
   }
   const assets = structuredClone(study.assets)
   if (assets) {
@@ -238,7 +472,7 @@ export const studyToDatasetSchemaSubmission = (study: Study): DatasetRegistratio
     }
   }
   datasetSchema.assets = assets
-  return datasetSchema
+  return { ...datasetSchema, ...overrides }
 }
 /**
  * The inverse of {@link studyToDatasetSchemaSubmission}: a registration-shaped document becomes the
@@ -381,7 +615,6 @@ const fileTypeAdjustment = (fileTypes: Array<FileType>) => {
   fileTypes.forEach((fileType) => {
     const adjustedFileType: FileType = {
       fileType: toTitleCase(fileType.fileType) as unknown as FileType['fileType'],
-      functionalEquivalence: fileType.functionalEquivalence,
     }
     adjustedFileTypes.push(adjustedFileType)
   })

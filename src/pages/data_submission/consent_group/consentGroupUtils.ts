@@ -46,9 +46,12 @@ export interface ConsentGroup2 {
 };
 
 export type FileTypeOptions = 'ARRAYS' | 'GENOME' | 'EXOME' | 'SURVEY' | 'PHENOTYPE'
+/**
+ * One row of the dataset's File Type/Format table. Functional Equivalence was removed; Consent still
+ * accepts it as optional, so rows saved before the removal load and resubmit without it.
+ */
 export interface FileType {
   fileType: FileTypeOptions
-  functionalEquivalence: string
 }
 
 /**
