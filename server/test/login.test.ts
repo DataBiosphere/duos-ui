@@ -38,6 +38,17 @@ describe('safeReturnTo', () => {
   ])('falls back to / for %s (%s)', (value, _description) => {
     expect(safeReturnTo(value)).toBe('/')
   })
+
+  // Same-origin as written, but each normalizes to a pathname that starts with
+  // '//', which the callback's Location header would send off-site.
+  it.each([
+    '/a/..//evil.example/path',
+    '/.//evil.example',
+    '/%2e%2e//evil.example',
+    '/a/..\\/evil.example',
+  ])('rejects %j, which normalizes to a protocol-relative path', (value) => {
+    expect(safeReturnTo(value)).toBe('/')
+  })
 })
 
 describe('handleLogin', () => {

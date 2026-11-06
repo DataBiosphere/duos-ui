@@ -31,6 +31,21 @@ describe('safeLocalPath', () => {
   it('re-serializes traversal segments', () => {
     expect(safeLocalPath('/home/../datalibrary')).toBe('/datalibrary')
   })
+
+  // Each of these is same-origin as written, but normalizes to a pathname that
+  // starts with '//', which a browser reads as a protocol-relative URL.
+  it.each([
+    '/a/..//evil.example/path',
+    '/.//evil.example',
+    '/%2e%2e//evil.example',
+    '/a/..\\/evil.example',
+  ])('rejects %j, which normalizes to a protocol-relative path', (value) => {
+    expect(safeLocalPath(value)).toBe('/')
+  })
+
+  it('keeps a double slash after the first segment', () => {
+    expect(safeLocalPath('/dataset//x')).toBe('/dataset//x')
+  })
 })
 
 describe('the stored post-logout target', () => {

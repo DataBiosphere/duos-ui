@@ -17,9 +17,9 @@ interface LocationSpyProps {
   onLocationChange: (location: string) => void
 }
 
-const renderRoutes = (extra?: React.ReactNode) =>
+const renderRoutes = (extra?: React.ReactNode, entry = '/protected') =>
   render(
-    <MemoryRouter initialEntries={['/protected']}>
+    <MemoryRouter initialEntries={[entry]}>
       {extra}
       <Routes>
         <Route element={<Authenticated />}>
@@ -78,6 +78,24 @@ describe('Authenticated', () => {
 
     expect(screen.getByTestId('home-content')).toBeInTheDocument()
     expect(pageVisitStub).toHaveBeenCalledWith('/protected')
-    expect(pageVisitStub).toHaveBeenCalledWith('/?redirectTo=/protected')
+    expect(pageVisitStub).toHaveBeenCalledWith('/?redirectTo=%2Fprotected')
+  })
+
+  it('keeps the query string in redirectTo, so search text survives sign-in', () => {
+    vi.mocked(useUserIsLogged).mockReturnValue(false)
+    const pageVisitStub = vi.fn()
+    const LocationSpy = ({ onLocationChange }: LocationSpyProps) => {
+      const location = useLocation()
+      React.useEffect(() => {
+        onLocationChange(location.pathname + location.search)
+      }, [location, onLocationChange])
+      return null
+    }
+
+    renderRoutes(<LocationSpy onLocationChange={pageVisitStub} />, '/protected?query=heart%20%26%20lung&page=2')
+
+    expect(screen.getByTestId('home-content')).toBeInTheDocument()
+    const landing = pageVisitStub.mock.calls.at(-1)?.[0] as string
+    expect(new URLSearchParams(landing.split('?')[1]).get('redirectTo')).toBe('/protected?query=heart%20%26%20lung&page=2')
   })
 })

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Auth, reportUnconfirmedSignOut } from 'src/libs/auth/auth'
+import { safeLocalPath } from 'src/libs/auth/postLogout'
 import { TosService } from 'src/libs/TosService'
 import SimpleButton from 'src/components/SimpleButton'
 import { Theme } from 'src/libs/theme'
@@ -23,9 +24,10 @@ export default function TermsOfServiceAcceptance() {
     // if there is a redirectTo, we should go to that. otherwise, just go to the appropriate
     // data library.
     const queryParams = new URLSearchParams(globalThis.location.search)
-    const redirect = queryParams.get('redirectTo') ?? '/datalibrary'
+    const redirect = queryParams.get('redirectTo')
 
-    navigate(redirect)
+    // The parameter is page input, so only an internal path is followed.
+    navigate(redirect === null ? '/datalibrary' : safeLocalPath(redirect))
   }, [navigate])
 
   const signOut = async () => {
