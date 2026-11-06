@@ -103,8 +103,11 @@ const syncSignInOrRegistrationEvent = (event: MetricsEventName) => {
 export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCancelled, latestJoinedProfile, sessionReportsNoProfile }: CompleteSignInOptions): Promise<CompleteSignInOutcome> => {
   const cancelled = () => isCancelled?.() === true
   // '/' and '/home' are landing pages, not destinations worth returning to —
-  // signed-in users on those go to their console instead.
-  const shouldRedirect = redirectPath !== '/' && redirectPath !== '/home'
+  // signed-in users on those go to their console instead. Compare the path
+  // only: a landing page with a query (?utm_source=x) or a #fragment is still
+  // a landing page.
+  const landingPath = redirectPath.split(/[?#]/, 1)[0]
+  const shouldRedirect = landingPath !== '/' && landingPath !== '/home'
   const redirectTo = shouldRedirect ? redirectPath : null
 
   // Check for ToS acceptance — redirect the user if not accepted yet. The
