@@ -18,12 +18,6 @@ export const sessionGeneration = (stored: object, sid: string): string =>
   (stored as { __fastifySessionMetadata?: { generation?: unknown } }).__fastifySessionMetadata?.generation as string | undefined ?? sid
 
 /**
- * The `compareAndSet` that `@fastify/session` 11.1.6 requires of a store
- * (DT-4420). Until the upgrade, the 11.1.5 `SessionStore` type doesn't declare it.
- */
-type CompareAndSet = (sid: string, expectedGeneration: string, session: Session, callback: (err?: unknown) => void) => void
-
-/**
  * What a generation-checked destroy found: it deleted the row, the row was
  * already gone, or a later sign-in now holds it and it was left alone.
  */
@@ -33,7 +27,7 @@ export type DestroyOutcome = 'destroyed' | 'gone' | 'superseded'
 export type DestroyGeneration = (sid: string, generation: string, callback: (err?: unknown, outcome?: DestroyOutcome) => void) => void
 
 /** The store the BFF registers: `@fastify/session`'s contract plus the generation-checked destroy. */
-export type PgSessionStore = SessionStore & { compareAndSet: CompareAndSet, destroyGeneration: DestroyGeneration }
+export type PgSessionStore = SessionStore & { destroyGeneration: DestroyGeneration }
 
 /** The error `compareAndSet` reports when the row is gone, expired or regenerated. */
 class SessionChangedError extends Error {
