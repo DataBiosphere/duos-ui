@@ -12,14 +12,21 @@
  * same name would be ambiguous in a landmark list. The hero is the top of `<main>`, and the `h1`
  * is what the skip link reaches.
  *
- * The live stats come in a later PR; this renderer shows none yet.
+ * The live stats sit between the intro and the calls to action, inside the hero (D14). A stat that
+ * is 0 is hidden, and when the counts can't load the whole strip goes and the calls to action move
+ * up. There is no data-size stat: DUOS has no trusted byte-size source (contracts record).
  */
 import React, { useContext, useId, useState } from 'react'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
 import { isShownHref } from 'src/components/showcase/primitives/safeHref'
 import type { EnabledSection, SectionRendererProps } from 'src/components/showcase/sectionRegistry'
-import { currentAnnouncements } from 'src/components/showcase/sections/heroContent'
-import { SHOWCASE_MAIN_HEADING_ID, ShowcaseClockContext, ShowcasePageInfoContext } from 'src/components/showcase/showcaseTemplateContract'
+import { currentAnnouncements, HERO_STAT_LABELS, type HeroStatKey, heroStats } from 'src/components/showcase/sections/heroContent'
+import {
+  SHOWCASE_MAIN_HEADING_ID,
+  ShowcaseClockContext,
+  ShowcaseLookupsContext,
+  ShowcasePageInfoContext,
+} from 'src/components/showcase/showcaseTemplateContract'
 import './Hero.css'
 
 /** Provisional copy (S3.3). */
@@ -27,6 +34,7 @@ export const ONBOARDING_LABEL = 'Get started'
 export const ANNOUNCEMENTS_LABEL = 'Announcements'
 export const PREVIOUS_ANNOUNCEMENT_LABEL = 'Previous announcement'
 export const NEXT_ANNOUNCEMENT_LABEL = 'Next announcement'
+export const HERO_STATS_LABEL = 'Showcase totals'
 
 type HeroLink = EnabledSection<'hero'>['primaryCtas'][number]
 type Announcement = EnabledSection<'hero'>['announcements'][number]
@@ -36,6 +44,24 @@ const LinkList = ({ links, className, labelledBy }: { links: readonly HeroLink[]
     {links.map(link => <li key={`${link.label}-${link.url}`}><ShowcaseLink href={link.url}>{link.label}</ShowcaseLink></li>)}
   </ul>
 )
+
+const Stats = ({ stats }: { stats: readonly HeroStatKey[] }) => {
+  const lookups = useContext(ShowcaseLookupsContext)
+  const { toolCount = 0 } = useContext(ShowcasePageInfoContext)
+  const shown = heroStats(stats, lookups.hero, toolCount)
+  if (shown === undefined) return null
+  return (
+    <ul className="showcase-hero__stats" aria-label={HERO_STATS_LABEL}>
+      {shown.map(({ key, value }) => (
+        <li key={key} className="showcase-hero__stat">
+          <span className="showcase-hero__stat-value">{value.toLocaleString('en-US')}</span>
+          {' '}
+          <span className="showcase-hero__stat-label">{HERO_STAT_LABELS[key]}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
 
 const Onboarding = ({ links }: { links: readonly HeroLink[] }) => {
   const headingId = useId()
@@ -106,6 +132,7 @@ export const Hero = ({ section, id, title }: SectionRendererProps<'hero'>) => {
           <h1 id={SHOWCASE_MAIN_HEADING_ID} className="showcase-hero__title" tabIndex={-1}>{title ?? page.title}</h1>
           {section.subtitle !== undefined && section.subtitle.trim() !== '' && <p className="showcase-hero__subtitle">{section.subtitle}</p>}
           {intro !== '' && <p className="showcase-hero__text">{intro}</p>}
+          <Stats stats={section.stats} />
           {ctas.length > 0 && <LinkList links={ctas} className="showcase-hero__ctas" />}
           <Onboarding links={shown(section.onboarding)} />
         </div>

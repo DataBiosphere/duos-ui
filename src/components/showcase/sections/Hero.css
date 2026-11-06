@@ -41,6 +41,40 @@
   white-space: pre-line;
 }
 
+/* Provisional (D15): the stat strip stacks at 480px. */
+.showcase-hero__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 40px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 480px) {
+  .showcase-hero__stats {
+    flex-direction: column;
+  }
+}
+
+.showcase-hero__stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.showcase-hero__stat-value {
+  font-family: var(--showcase-font-heading);
+  font-size: var(--showcase-font-size-page-title);
+  font-weight: var(--showcase-font-weight-heading);
+  line-height: var(--showcase-line-height-heading);
+  color: var(--showcase-primary);
+}
+
+.showcase-hero__stat-label {
+  font-size: var(--showcase-font-size-label);
+  color: var(--showcase-muted-text);
+}
+
 .showcase-hero__ctas,
 .showcase-hero__onboarding-links {
   display: flex;
