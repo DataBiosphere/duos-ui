@@ -135,6 +135,17 @@ const probeNamesStoredUser = (sessionUser: DuosUser | undefined, storedUserId: n
   sessionUser !== undefined && sessionUser.userId !== 0
   && sessionUser.userId === storedUserId
 
+/**
+ * Where a completed sign-in goes. The BFF callback lands the browser on the destination itself, so
+ * the path and query string are the target; the legacy popup flow reloads on the landing page with
+ * the destination still in ?redirectTo=. That parameter is page input, so only an internal path is
+ * followed.
+ */
+const signInRedirectPath = (pathname: string, search: string): string => {
+  const redirectTo = new URLSearchParams(search).get('redirectTo')
+  return redirectTo === null ? pathname + search : safeLocalPath(redirectTo)
+}
+
 export const useSessionReconciler = (queryClient: QueryClient): SessionReconciliation => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -240,15 +251,10 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
     const token: ActiveBootstrap = { targetUserId, cancelled: false }
     activeBootstrapRef.current = token
     setSnapshot({ classifiedProbe: sessionInfo, bootstrapRunning: true })
-    // The BFF callback lands the browser on the destination itself, so the
-    // path and query string are the redirect target; the legacy popup flow
-    // reloads on the landing page with the destination still in ?redirectTo=.
-    // That parameter is page input, so only an internal path is followed.
-    const redirectTo = new URLSearchParams(location.search).get('redirectTo')
     completeSignIn({
       navigate,
       queryClient,
-      redirectPath: redirectTo === null ? location.pathname + location.search : safeLocalPath(redirectTo),
+      redirectPath: signInRedirectPath(location.pathname, location.search),
       isCancelled: () => token.cancelled,
       latestJoinedProfile: () => token.pendingHydration,
       // Only the BFF probe can be authenticated without a user — the legacy
