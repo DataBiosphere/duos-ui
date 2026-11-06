@@ -1106,6 +1106,39 @@ describe('apiProxy', () => {
       })
     })
 
+    describe('with a store that checks the generation (DT-4420)', () => {
+      async function upstream401(outcome: 'destroyed' | 'gone' | 'superseded') {
+        upstream.respondWith((_req, res) => {
+          res.writeHead(401)
+          res.end()
+        })
+        app = await buildProxyApp(freshSession())
+        const destroyGeneration = vi.fn((_sid: string, _generation: string, callback: (err: unknown, outcome: string) => void) => callback(null, outcome))
+        app.addHook('onRequest', async (request) => {
+          Object.assign(request.sessionStore, { destroyGeneration })
+        })
+        const res = await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1` })
+        return { res, destroyGeneration }
+      }
+
+      it.each(['destroyed', 'gone'] as const)('answers 401 and clears the cookie when the row was %s', async (outcome) => {
+        const { res, destroyGeneration } = await upstream401(outcome)
+
+        expect(res.statusCode).toBe(401)
+        expect(res.cookies.find(c => c.name === 'sessionId')?.value).toBe('')
+        expect(destroyGeneration).toHaveBeenCalledOnce()
+      })
+
+      it('answers 502 and keeps the cookie when a later sign-in took the row', async () => {
+        const { res } = await upstream401('superseded')
+
+        // A 401 would make the client sign the browser out of the later sign-in.
+        expect(res.statusCode).toBe(502)
+        expect(res.json()).toEqual({ error: 'upstream_unavailable' })
+        expect(res.cookies.find(c => c.name === 'sessionId')).toBeUndefined()
+      })
+    })
+
     // reply-from leaves a refused connection at 500, which index.ts's error
     // handler would render as its generic "An unexpected error occurred" —
     // reading as a BFF bug rather than an upstream outage.

@@ -6,7 +6,7 @@ import fastifyCsrf from '@fastify/csrf-protection'
 import type { PostgresDb } from '@fastify/postgres'
 import type { Configuration } from 'openid-client'
 import { createPgSessionStore } from '../src/session/pgStore.js'
-import { compareAndSetRow, sessionGeneration, stored } from './sessionTable.js'
+import { compareAndSetRow, deleteGenerationRow, sessionGeneration, stored } from './sessionTable.js'
 import { sessionPluginOptions } from '../src/session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from '../src/auth/csrf.js'
 import { fetchMetadataGuard } from '../src/security/fetchMetadata.js'
@@ -94,6 +94,12 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
       const result = compareAndSetRow(rows, params)
       if (result.rowCount === 1) setSids.push(params[0] as string)
       return result
+    }
+    if (sql.includes('DELETE FROM user_sessions') && sql.includes('__fastifySessionMetadata')) {
+      return deleteGenerationRow(rows, params)
+    }
+    if (sql.includes('SELECT 1 FROM user_sessions')) {
+      return { rows: rows.has(params[0] as string) ? [{}] : [] }
     }
     if (sql.includes('DELETE FROM user_sessions')) {
       rows.delete(params[0] as string)
@@ -520,6 +526,43 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
 
       // audit_session_update closes the pre-auth audit row when the generation changes.
       expect(auditUpdates).toEqual([])
+    })
+  })
+
+  describe('a request that outlives its sign-in (DT-4420)', () => {
+    it('leaves a later sign-in on the same row signed in when the earlier one gets an upstream 401', async () => {
+      const { cookie: first } = await authenticate()
+      const [sid] = rows.keys()
+
+      // /auth/me loads the first sign-in, then waits on the upstream.
+      let answer!: (res: unknown) => void
+      vi.stubGlobal('fetch', vi.fn(() => new Promise((resolve) => {
+        answer = resolve
+      })))
+      const stale = app.inject({ method: 'GET', url: '/auth/me', headers: { cookie: first } })
+      await vi.waitFor(() => expect(answer).toBeDefined())
+
+      // Meanwhile the browser signs in again, on the same row.
+      const relogin = await app.inject({ method: 'POST', url: '/auth/login', headers: { cookie: first } })
+      const callback = await app.inject({
+        method: 'GET',
+        url: '/auth/callback?code=test-code&state=test-state',
+        headers: { cookie: sessionCookieHeader(relogin) },
+      })
+      const second = sessionCookieHeader(callback)
+
+      answer({ status: 401, ok: false, json: async () => ({}) })
+      const res = await stale
+      vi.unstubAllGlobals()
+
+      // Not a 401, which would make the client sign the browser out, and no cookie change.
+      expect(res.statusCode).toBe(502)
+      expect(res.cookies.find(c => c.name === 'sessionId')).toBeUndefined()
+      expect([...rows.keys()]).toEqual([sid])
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ status: 200, ok: true, json: async () => ({ email: 'user@example.com' }) }))
+      const me = await app.inject({ method: 'GET', url: '/auth/me', headers: { cookie: second } })
+      vi.unstubAllGlobals()
+      expect(me.statusCode).toBe(200)
     })
   })
 

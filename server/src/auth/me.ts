@@ -15,16 +15,23 @@ const PROVIDER_CONFLICT_FALLBACK_MESSAGE
   = 'You may have previously signed in with a different authentication provider (Google or Microsoft). Please sign in with that provider.'
 
 /**
- * Ends a session that can no longer be used, recording why.
+ * Ends a session that can no longer be used, recording why. Returns false, and
+ * answers 502 itself, when a later sign-in holds the row: this request's
+ * sign-in is over but the browser's is not, and a 401 would make the client
+ * sign the browser out.
  */
-async function destroySession(request: FastifyRequest, reply: FastifyReply, reason: SessionDestroyReason): Promise<void> {
+async function destroySession(request: FastifyRequest, reply: FastifyReply, reason: SessionDestroyReason): Promise<boolean> {
   try {
-    await endSession(request, reason)
+    if (await endSession(request, reason) === 'superseded') {
+      reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
+      return false
+    }
   }
   catch (err: unknown) {
     request.log.error({ err }, '[auth] upstream rejected the session but it could not be destroyed — answering as signed out anyway')
   }
   reply.clearCookie(SESSION_COOKIE_NAME)
+  return true
 }
 
 /**
@@ -101,7 +108,7 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
   if (tokenDisposition(request.session) === 'expired') {
     // A fixture token cannot renew: end the session now, exactly as an
     // upstream 401 would after the token expired in flight.
-    await destroySession(request, reply, 'expired')
+    if (!(await destroySession(request, reply, 'expired'))) return
     reply.status(401).send({ authenticated: false })
     return
   }
@@ -132,7 +139,7 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     // The upstream rejected the token itself — revoked mid-lifetime (before refresh-before-forward would
     // touch it) or the account was disabled. The terminal 401 is final so the session must be destroyed.
     // The client still needs to know it is signed out, so the reply goes out after the session is destroyed.
-    await destroySession(request, reply, 'upstream_401')
+    if (!(await destroySession(request, reply, 'upstream_401'))) return
     reply.status(401).send({ authenticated: false })
     return
   }
@@ -151,7 +158,7 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     // upstream's actionable message (sign in with the other provider, plus the support link) instead
     // of a generic failure.
     const message = await providerConflictMessage(res)
-    await destroySession(request, reply, 'provider_conflict')
+    if (!(await destroySession(request, reply, 'provider_conflict'))) return
     reply.status(409).send({ authenticated: false, error: 'provider_conflict', message })
     return
   }

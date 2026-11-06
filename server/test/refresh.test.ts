@@ -80,6 +80,8 @@ function makeRequest(overrides: {
   /** What sessionStore.get yields: a session snapshot, null, or an error. */
   stored?: Partial<Session> | null
   storeError?: Error
+  /** What the store's generation-checked destroy reports; without it, endSession falls back to destroy(). */
+  destroyOutcome?: 'destroyed' | 'gone' | 'superseded'
 } = {}): FakeRequest {
   const session = {
     sessionStoreId: overrides.sessionStoreId ?? 'sid-1',
@@ -106,7 +108,12 @@ function makeRequest(overrides: {
 
   const request = {
     session,
-    sessionStore: { get: storeGet },
+    sessionStore: {
+      get: storeGet,
+      ...overrides.destroyOutcome && {
+        destroyGeneration: (_sid: string, _generation: string, callback: (err: unknown, outcome: string) => void) => callback(null, overrides.destroyOutcome!),
+      },
+    },
     log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   } as unknown as FastifyRequest
 
@@ -140,6 +147,21 @@ describe('refreshAccessToken', () => {
     expect(session.accessToken).toBe('new-access-token')
     expect(session.tokenExpiry).toBe(NOW_S + 3600)
     expect(session.save).toHaveBeenCalledOnce()
+  })
+
+  it.each([
+    ['without a refresh token', { refreshToken: undefined }],
+    ['after B2C rejects the token', {}],
+  ])('fails as transient, without destroying, when a later sign-in holds the row %s', async (_case, overrides) => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.refreshTokenGrant).mockRejectedValue(oauthError('invalid_grant'))
+    const { request, session } = makeRequest({ ...overrides, destroyOutcome: 'superseded' })
+
+    const err = await refreshAccessToken(request).catch((e: unknown) => e)
+
+    expect(err).toBeInstanceOf(Error)
+    expect(err).not.toBeInstanceOf(RefreshFailedError)
+    expect(session.destroy).not.toHaveBeenCalled()
   })
 
   it('redeems the session refresh token against B2C', async () => {

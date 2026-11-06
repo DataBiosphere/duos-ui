@@ -108,7 +108,7 @@ export async function refreshAccessToken(request: FastifyRequest): Promise<void>
     // each emit `auth.session.destroyed`, so both are upper bounds. Exact
     // session counts come from `user_session_audit`, not from these lines.
     logAuthEvent(request, 'auth.refresh.unrefreshable', { idp: sessionIdp(request) }, 'warn')
-    await endSession(request, 'refresh_terminal')
+    await endSessionOrThrowSuperseded(request)
     throw new RefreshFailedError('no_refresh_token')
   }
 
@@ -167,6 +167,17 @@ export async function refreshAccessToken(request: FastifyRequest): Promise<void>
   }
   finally {
     inFlight.delete(generation)
+  }
+}
+
+/**
+ * Ends the session for a terminal refresh. If a later sign-in now holds the
+ * row, this request's sign-in is over but the session isn't, so the caller
+ * must not answer 401 (which clears the shared cookie): fail it as transient.
+ */
+async function endSessionOrThrowSuperseded(request: FastifyRequest): Promise<void> {
+  if (await endSession(request, 'refresh_terminal') === 'superseded') {
+    throw new Error('the session was replaced by a later sign-in')
   }
 }
 
@@ -258,7 +269,7 @@ async function doRefresh(
       // rejection and return 401. Their own session objects stay in memory but
       // unmodified, so nothing writes the row back.
       request.log.warn({ sidHash: hashValue(sid) }, '[auth] B2C rejected the refresh token — destroying the session')
-      await endSession(request, 'refresh_terminal')
+      await endSessionOrThrowSuperseded(request)
       throw new RefreshFailedError('refresh_failed')
     }
     throw err
