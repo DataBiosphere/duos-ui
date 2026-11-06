@@ -180,13 +180,13 @@ describe('makeWorkspaceColumns — Tags column', () => {
 })
 
 describe('makeWorkspaceColumns — column structure', () => {
-  it('returns 9 column definitions', () => {
-    expect(makeWorkspaceColumns()).toHaveLength(9)
+  it('returns 10 column definitions', () => {
+    expect(makeWorkspaceColumns()).toHaveLength(10)
   })
 
   it('defines expected fields in order', () => {
     const fields = makeWorkspaceColumns().map(c => c.field)
-    expect(fields).toEqual(['name', 'studyName', 'platform', 'url', 'description', 'tools', 'cloud', 'access', 'tags'])
+    expect(fields).toEqual(['name', 'studyName', 'duosIdentifier', 'platform', 'url', 'description', 'tools', 'cloud', 'access', 'tags'])
   })
 
   it('marks url, tools, and tags as non-sortable', () => {

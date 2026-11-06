@@ -120,13 +120,14 @@ describe('makeBiospecimenColumns — Date Of Collection column', () => {
 })
 
 describe('makeBiospecimenColumns — column structure', () => {
-  it('returns 5 column definitions', () => {
-    expect(makeBiospecimenColumns()).toHaveLength(5)
+  it('returns 6 column definitions', () => {
+    expect(makeBiospecimenColumns()).toHaveLength(6)
   })
 
   it('defines expected fields in correct order', () => {
     const fields = makeBiospecimenColumns().map(c => c.field)
-    expect(fields).toEqual(['studyName', 'sampleId', 'specimenType', 'donorId', 'dateOfCollection'])
+    expect(fields).toEqual(['studyName', 'duosIdentifier', 'sampleId', 'specimenType', 'donorId', 'dateOfCollection'])
+    expect(makeBiospecimenColumns().find(c => c.field === 'duosIdentifier')?.headerName).toBe('DUOS ID')
   })
 
   it('sets appropriate widths and flex values', () => {
