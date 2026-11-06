@@ -4,6 +4,7 @@ import { FundingResource } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { unset } from 'src/utils/NodashUtil'
 import { isValidDate } from 'src/components/forms/formValidation'
+import { TAGS_ENTRY_GUIDANCE } from 'src/components/forms/formGuidance'
 
 interface FundingSourceAddEditProps {
   readonly id: number
@@ -176,7 +177,8 @@ export default function FundingResourceAddEdit(props: FundingSourceAddEditProps)
           />
           <FormField
             id="tags"
-            title="Tags"
+            title="Funding Resource Tags"
+            description={TAGS_ENTRY_GUIDANCE}
             placeholder="Select or enter tags"
             type={FormFieldTypes.SELECT}
             isCreatable={true}

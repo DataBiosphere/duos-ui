@@ -16,6 +16,7 @@ import {
 import { SelectEntry } from 'src/components/forms/SelectOptionInterface'
 import { unset } from 'src/utils/NodashUtil'
 import { isValidDate } from 'src/components/forms/formValidation'
+import { TAGS_ENTRY_GUIDANCE } from 'src/components/forms/formGuidance'
 
 const defaultClinicalTrial: ClinicalTrial = {
   clinicalTrialId: '',
@@ -256,7 +257,8 @@ export default function ClinicalTrialAddEdit(props: ClinicalTrialAddEditProps): 
           />
           <FormField
             id="tags"
-            title="Tags"
+            title="Clinical Trial Tags"
+            description={TAGS_ENTRY_GUIDANCE}
             placeholder="Select or enter tags"
             type={FormFieldTypes.SELECT}
             isCreatable={true}

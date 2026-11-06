@@ -6,6 +6,7 @@ import { Author, Publication } from 'src/types/model'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import { inlineIconSx } from 'src/libs/inlineIcon'
+import { TAGS_ENTRY_GUIDANCE } from 'src/components/forms/formGuidance'
 
 interface FormFieldChange {
   key: string
@@ -379,7 +380,8 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
 
           <FormField
             id="tags"
-            title="Tags"
+            title="Publication Tags"
+            description={TAGS_ENTRY_GUIDANCE}
             placeholder="Select or enter tags"
             type={FormFieldTypes.SELECT}
             isCreatable={true}

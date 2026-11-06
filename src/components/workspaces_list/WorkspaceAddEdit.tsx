@@ -10,6 +10,7 @@ import DataUseTermsFields, {
   dataUseTermsErrors,
   termsFromDataUse,
 } from 'src/components/forms/DataUseTermsFields'
+import { TAGS_ENTRY_GUIDANCE } from 'src/components/forms/formGuidance'
 
 interface WorkspaceAddEditProps {
   readonly id: number
@@ -207,7 +208,8 @@ export default function WorkspaceAddEdit(props: WorkspaceAddEditProps): React.JS
           />
           <FormField
             id="tags"
-            title="Tags"
+            title="Workspace Tags"
+            description={TAGS_ENTRY_GUIDANCE}
             placeholder="Select or enter tags"
             type={FormFieldTypes.SELECT}
             isCreatable={true}

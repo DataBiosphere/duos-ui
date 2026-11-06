@@ -3,6 +3,7 @@ import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/
 import { IntellectualProperty } from 'src/types/model'
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { isValidDate } from 'src/components/forms/formValidation'
+import { TAGS_ENTRY_GUIDANCE } from 'src/components/forms/formGuidance'
 
 interface IntellectualPropertyAddEditProps {
   readonly id: number
@@ -205,7 +206,8 @@ export default function IntellectualPropertyAddEdit(props: IntellectualPropertyA
           />
           <FormField
             id="tags"
-            title="Tags"
+            title="Intellectual Property Tags"
+            description={TAGS_ENTRY_GUIDANCE}
             placeholder="Select or enter tags"
             type={FormFieldTypes.SELECT}
             isCreatable={true}

@@ -10,6 +10,7 @@ import DataUseTermsFields, {
   dataUseTermsErrors,
   termsFromDataUse,
 } from 'src/components/forms/DataUseTermsFields'
+import { TAGS_ENTRY_GUIDANCE } from 'src/components/forms/formGuidance'
 
 const defaultMaintainer: Maintainer = {
   name: '',
@@ -247,7 +248,8 @@ export default function AiModelAddEdit(props: AiModelAddEditProps): React.JSX.El
           />
           <FormField
             id="tags"
-            title="Tags"
+            title="Model Tags"
+            description={TAGS_ENTRY_GUIDANCE}
             placeholder="Select or enter tags"
             type={FormFieldTypes.SELECT}
             isCreatable={true}

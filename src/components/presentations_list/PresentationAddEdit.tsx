@@ -3,6 +3,7 @@ import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/
 import { ValidationError } from 'src/pages/dar_application/FormValidationState'
 import { validationFailed, calcPresentationErrors } from 'src/utils/darFormUtils'
 import { Presentation } from 'src/types/model'
+import { TAGS_ENTRY_GUIDANCE } from 'src/components/forms/formGuidance'
 
 const defaultPresentation: Presentation = {
   title: '',
@@ -243,7 +244,8 @@ export default function PresentationAddEdit(props: PresentationAddEditProps): Re
           />
           <FormField
             id="tags"
-            title="Tags"
+            title="Presentation Tags"
+            description={TAGS_ENTRY_GUIDANCE}
             placeholder="Select or enter tags"
             type={FormFieldTypes.SELECT}
             isCreatable={true}
