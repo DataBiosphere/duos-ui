@@ -57,12 +57,13 @@ async function revokeTokens(request: FastifyRequest): Promise<void> {
 
 async function stampAuditRecord(request: FastifyRequest): Promise<void> {
   try {
-    // Match the hash used by the user_session_audit INSERT trigger.
+    // Match the hash used by the user_session_audit INSERT trigger: the store
+    // row's sid. Since @fastify/session 11.1.6, `sessionId` is the generation.
     await request.server.pg.query(
       `UPDATE user_session_audit
           SET end_reason = 'logout'
         WHERE sid_hash = encode(sha256($1::bytea), 'hex') AND ended_at IS NULL`,
-      [request.session.sessionId],
+      [request.session.sessionStoreId],
     )
   }
   catch {}

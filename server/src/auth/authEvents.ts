@@ -1,4 +1,5 @@
 import type { FastifyRequest } from 'fastify'
+import type { DestroyGeneration, DestroyOutcome } from '../session/pgStore.js'
 
 /**
  * Structured auth events for Cloud Logging (BFF Epic 6, story 6-F).
@@ -35,11 +36,52 @@ export function logAuthEvent(
 }
 
 /**
+ * Whether `endSession` ended this request's session, or found that a later
+ * sign-in now holds its row. A caller that gets `superseded` must leave the
+ * cookie alone: the browser now carries the later sign-in's cookie.
+ */
+export type EndSessionOutcome = 'ended' | 'superseded'
+
+/**
  * Destroys the session and records why. The event is logged only after the
  * destroy succeeds, so a failed destroy is not counted as an ended session.
+ *
+ * Since @fastify/session 11.1.6 a sign-in keeps the store row and starts a new
+ * generation, so a request that loaded an earlier generation could otherwise
+ * delete the later sign-in (an upstream 401 on a request still in flight).
+ * The destroy therefore checks the generation (pgStore's destroyGeneration).
+ * Logout doesn't: it is the user signing this browser out.
  */
-export async function endSession(request: EventRequest, reason: SessionDestroyReason): Promise<void> {
+export async function endSession(request: EventRequest, reason: SessionDestroyReason): Promise<EndSessionOutcome> {
   const idp = sessionIdp(request)
+  const destroyGeneration = (request as { sessionStore?: { destroyGeneration?: DestroyGeneration } }).sessionStore?.destroyGeneration
+  if (reason !== 'logout' && destroyGeneration) {
+    const { sessionStoreId, sessionId } = request.session
+    let outcome: DestroyOutcome | undefined
+    try {
+      outcome = await new Promise<DestroyOutcome | undefined>((resolve, reject) => {
+        destroyGeneration(sessionStoreId, sessionId, (err, result) => {
+          if (!err) resolve(result)
+          // Store callbacks can hand back plain objects; keep those as the cause.
+          else reject(err instanceof Error ? err : new Error('session store destroy failed', { cause: err }))
+        })
+      })
+    }
+    finally {
+      // Drop the session as the plugin's destroy() would, even when the delete
+      // fails: left attached, a session saved earlier in this request would
+      // have its cookie re-sent over the caller's clearCookie. No second,
+      // unconditional DELETE either.
+      ;(request as { session: unknown }).session = null
+    }
+    if (outcome === 'superseded') {
+      logAuthEvent(request, 'auth.session.superseded', { reason, idp })
+      return 'superseded'
+    }
+    logAuthEvent(request, 'auth.session.destroyed', { reason, idp })
+    return 'ended'
+  }
   await request.session.destroy()
   logAuthEvent(request, 'auth.session.destroyed', { reason, idp })
+  return 'ended'
 }

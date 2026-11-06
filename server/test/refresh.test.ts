@@ -57,7 +57,7 @@ function oauthError(error: string): ResponseBodyError {
 }
 
 type FakeSession = Session & {
-  sessionId: string
+  sessionStoreId: string
   save: ReturnType<typeof vi.fn>
   destroy: ReturnType<typeof vi.fn>
 }
@@ -70,7 +70,9 @@ interface FakeRequest {
 }
 
 function makeRequest(overrides: {
-  sessionId?: string
+  /** The store row's key; `sessionId` is the generation, which differs after a rotation. */
+  sessionStoreId?: string
+  generation?: string
   accessToken?: string
   refreshToken?: string
   idToken?: string
@@ -78,9 +80,13 @@ function makeRequest(overrides: {
   /** What sessionStore.get yields: a session snapshot, null, or an error. */
   stored?: Partial<Session> | null
   storeError?: Error
+  /** What the store's generation-checked destroy reports; without it, endSession falls back to destroy(). */
+  destroyOutcome?: 'destroyed' | 'gone' | 'superseded'
 } = {}): FakeRequest {
   const session = {
-    sessionId: overrides.sessionId ?? 'sid-1',
+    sessionStoreId: overrides.sessionStoreId ?? 'sid-1',
+    // A session that hasn't rotated has the sid as its generation.
+    sessionId: overrides.generation ?? overrides.sessionStoreId ?? 'sid-1',
     accessToken: 'accessToken' in overrides ? overrides.accessToken : 'old-access-token',
     refreshToken: 'refreshToken' in overrides ? overrides.refreshToken : 'old-refresh-token',
     idToken: 'idToken' in overrides ? overrides.idToken : 'old-id-token',
@@ -102,7 +108,12 @@ function makeRequest(overrides: {
 
   const request = {
     session,
-    sessionStore: { get: storeGet },
+    sessionStore: {
+      get: storeGet,
+      ...overrides.destroyOutcome && {
+        destroyGeneration: (_sid: string, _generation: string, callback: (err: unknown, outcome: string) => void) => callback(null, overrides.destroyOutcome!),
+      },
+    },
     log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   } as unknown as FastifyRequest
 
@@ -136,6 +147,56 @@ describe('refreshAccessToken', () => {
     expect(session.accessToken).toBe('new-access-token')
     expect(session.tokenExpiry).toBe(NOW_S + 3600)
     expect(session.save).toHaveBeenCalledOnce()
+  })
+
+  it('fails as terminal when the session ended during the refresh, so its save is refused', async () => {
+    // A logout destroyed the row mid-flight; compareAndSet won't write it back.
+    const { request, session } = makeRequest()
+    session.save.mockRejectedValue(Object.assign(new Error('The session does not exist or has changed'), { code: 'ENOENT' }))
+
+    const err = await refreshAccessToken(request).catch((e: unknown) => e)
+
+    expect(err).toBeInstanceOf(RefreshFailedError)
+    expect((err as Error).message).toBe('session_ended')
+    expect(request.log.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ event: 'auth.refresh.completed', outcome: 'terminal', reason: 'session_ended' }),
+      'auth.refresh.completed',
+    )
+  })
+
+  it('fails as transient, and drops the session, when a later sign-in took the row during the refresh', async () => {
+    const { request, session } = makeRequest({ stored: { __fastifySessionMetadata: { generation: 'later' } } as Partial<Session> })
+    session.save.mockRejectedValue(Object.assign(new Error('The session does not exist or has changed'), { code: 'ENOENT' }))
+
+    const err = await refreshAccessToken(request).catch((e: unknown) => e)
+
+    expect(err).not.toBeInstanceOf(RefreshFailedError)
+    expect(request.session).toBeNull()
+  })
+
+  it.each([
+    ['without a refresh token', { refreshToken: undefined }],
+    ['after B2C rejects the token', {}],
+  ])('fails as transient, without destroying, when a later sign-in holds the row %s', async (_case, overrides) => {
+    const oidc = await import('openid-client')
+    vi.mocked(oidc.refreshTokenGrant).mockRejectedValue(oauthError('invalid_grant'))
+    const { request, session } = makeRequest({ ...overrides, destroyOutcome: 'superseded' })
+
+    const err = await refreshAccessToken(request).catch((e: unknown) => e)
+
+    expect(err).toBeInstanceOf(Error)
+    expect(err).not.toBeInstanceOf(RefreshFailedError)
+    expect(session.destroy).not.toHaveBeenCalled()
+  })
+
+  it('keeps any other save failure transient', async () => {
+    const { request, session } = makeRequest()
+    session.save.mockRejectedValue(new Error('connection terminated'))
+
+    const err = await refreshAccessToken(request).catch((e: unknown) => e)
+
+    expect(err).not.toBeInstanceOf(RefreshFailedError)
+    expect((err as Error).message).toBe('connection terminated')
   })
 
   it('redeems the session refresh token against B2C', async () => {
@@ -173,7 +234,7 @@ describe('refreshAccessToken', () => {
 
     vi.mocked(oidc.refreshTokenGrant).mockResolvedValue(makeTokens({ id_token: undefined }))
     resetInFlightRefreshes()
-    const withoutIdToken = makeRequest({ sessionId: 'sid-2', idToken: 'kept-id-token' })
+    const withoutIdToken = makeRequest({ sessionStoreId: 'sid-2', idToken: 'kept-id-token' })
     await refreshAccessToken(withoutIdToken.request)
     expect(withoutIdToken.session.idToken).toBe('kept-id-token')
   })
@@ -217,11 +278,12 @@ describe('refreshAccessToken', () => {
     it('adopts the stored tokens instead of destroying when another refresher already rotated them', async () => {
       const { request, session } = makeRequest({
         stored: {
+          __fastifySessionMetadata: { generation: 'sid-1' },
           accessToken: 'winner-access-token',
           refreshToken: 'winner-refresh-token',
           idToken: 'winner-id-token',
           tokenExpiry: NOW_S + 3000,
-        },
+        } as Partial<Session>,
       })
 
       await refreshAccessToken(request)
@@ -230,6 +292,40 @@ describe('refreshAccessToken', () => {
       expect(session.accessToken).toBe('winner-access-token')
       expect(session.refreshToken).toBe('winner-refresh-token')
       expect(session.tokenExpiry).toBe(NOW_S + 3000)
+    })
+
+    it('re-reads the store by the row key, not the generation, once the session has rotated', async () => {
+      const { request, session, storeGet } = makeRequest({
+        sessionStoreId: 'row-1',
+        generation: 'second-generation',
+        stored: {
+          __fastifySessionMetadata: { generation: 'second-generation' },
+          accessToken: 'winner-access-token',
+          refreshToken: 'winner-refresh-token',
+        } as Partial<Session>,
+      })
+
+      await refreshAccessToken(request)
+
+      expect(storeGet).toHaveBeenCalledWith('row-1', expect.any(Function))
+      expect(session.accessToken).toBe('winner-access-token')
+    })
+
+    it('neither adopts nor destroys a later sign-in that now holds the row', async () => {
+      const { request, session } = makeRequest({
+        stored: {
+          __fastifySessionMetadata: { generation: 'later-sign-in' },
+          accessToken: 'other-user-access-token',
+          refreshToken: 'other-user-refresh-token',
+        } as Partial<Session>,
+      })
+
+      const err = await refreshAccessToken(request).catch((e: unknown) => e)
+
+      expect(err).not.toBeInstanceOf(RefreshFailedError)
+      expect(session.destroy).not.toHaveBeenCalled()
+      expect(session.accessToken).toBe('old-access-token')
+      expect(session.save).not.toHaveBeenCalled()
     })
 
     it('destroys the session when the store still holds the same refresh token', async () => {
@@ -300,7 +396,7 @@ describe('refreshAccessToken', () => {
 
   describe('single-flight', () => {
     it('makes exactly one token-endpoint call for N concurrent requests on the same session', async () => {
-      const requests = Array.from({ length: 5 }, () => makeRequest({ sessionId: 'shared-sid' }))
+      const requests = Array.from({ length: 5 }, () => makeRequest({ sessionStoreId: 'shared-sid' }))
 
       await Promise.all(requests.map(({ request }) => refreshAccessToken(request)))
 
@@ -309,7 +405,7 @@ describe('refreshAccessToken', () => {
     })
 
     it('gives every concurrent request the refreshed token, not just the leader', async () => {
-      const requests = Array.from({ length: 5 }, () => makeRequest({ sessionId: 'shared-sid' }))
+      const requests = Array.from({ length: 5 }, () => makeRequest({ sessionStoreId: 'shared-sid' }))
 
       await Promise.all(requests.map(({ request }) => refreshAccessToken(request)))
 
@@ -327,7 +423,7 @@ describe('refreshAccessToken', () => {
     it('fails every concurrent request when the shared refresh is rejected', async () => {
       const oidc = await import('openid-client')
       vi.mocked(oidc.refreshTokenGrant).mockRejectedValue(oauthError('invalid_grant'))
-      const requests = Array.from({ length: 3 }, () => makeRequest({ sessionId: 'shared-sid' }))
+      const requests = Array.from({ length: 3 }, () => makeRequest({ sessionStoreId: 'shared-sid' }))
 
       const results = await Promise.allSettled(requests.map(({ request }) => refreshAccessToken(request)))
 
@@ -341,7 +437,7 @@ describe('refreshAccessToken', () => {
     // re-read the store, still see the pre-rotation token, and destroy a healthy
     // session.
     it('holds the flight open until the refreshed tokens are persisted', async () => {
-      const leader = makeRequest({ sessionId: 'shared-sid' })
+      const leader = makeRequest({ sessionStoreId: 'shared-sid' })
       const saveStarted = deferred()
       const saveFinished = deferred()
       leader.session.save.mockImplementation(() => {
@@ -352,7 +448,7 @@ describe('refreshAccessToken', () => {
       const leaderRefresh = refreshAccessToken(leader.request)
       await saveStarted.promise // token exchange done, store write still in flight
 
-      const late = makeRequest({ sessionId: 'shared-sid' })
+      const late = makeRequest({ sessionStoreId: 'shared-sid' })
       const lateRefresh = refreshAccessToken(late.request)
       saveFinished.resolve()
       await Promise.all([leaderRefresh, lateRefresh])
@@ -364,8 +460,19 @@ describe('refreshAccessToken', () => {
     })
 
     it('does not share a refresh between different sessions', async () => {
-      const first = makeRequest({ sessionId: 'sid-a' })
-      const second = makeRequest({ sessionId: 'sid-b' })
+      const first = makeRequest({ sessionStoreId: 'sid-a' })
+      const second = makeRequest({ sessionStoreId: 'sid-b' })
+
+      await Promise.all([refreshAccessToken(first.request), refreshAccessToken(second.request)])
+
+      const oidc = await import('openid-client')
+      expect(oidc.refreshTokenGrant).toHaveBeenCalledTimes(2)
+    })
+
+    it('never shares a flight between two sign-ins on the same row', async () => {
+      // @fastify/session 11.1.6 keeps the row across a sign-in and changes the generation.
+      const first = makeRequest({ sessionStoreId: 'shared-row', generation: 'first-sign-in' })
+      const second = makeRequest({ sessionStoreId: 'shared-row', generation: 'second-sign-in' })
 
       await Promise.all([refreshAccessToken(first.request), refreshAccessToken(second.request)])
 
@@ -374,10 +481,10 @@ describe('refreshAccessToken', () => {
     })
 
     it('starts a fresh flight once the previous one has settled', async () => {
-      const { request: first } = makeRequest({ sessionId: 'sequential-sid' })
+      const { request: first } = makeRequest({ sessionStoreId: 'sequential-sid' })
       await refreshAccessToken(first)
 
-      const { request: second } = makeRequest({ sessionId: 'sequential-sid' })
+      const { request: second } = makeRequest({ sessionStoreId: 'sequential-sid' })
       await refreshAccessToken(second)
 
       const oidc = await import('openid-client')

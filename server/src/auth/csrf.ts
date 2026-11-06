@@ -1,4 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import { failedSaveOutcome } from '../session/sessionEnded.js'
+import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
 /**
  * How the BFF registers `@fastify/csrf-protection` — one object, imported by
@@ -76,6 +78,16 @@ export async function handleCsrfToken(request: FastifyRequest, reply: FastifyRep
   // with rolling off, an unsaved modification makes @fastify/session's async
   // onSend save race Fastify's wrapThenable into a second reply.send()
   // (ERR_HTTP_HEADERS_SENT — see index.ts on the session config).
-  await request.session.save()
+  try {
+    await request.session.save()
+  }
+  catch (err: unknown) {
+    // The session ended, or a later sign-in took its row, while this request held it.
+    const outcome = await failedSaveOutcome(request, err)
+    if (!outcome) throw err
+    if (outcome === 'ended') reply.clearCookie(SESSION_COOKIE_NAME).status(401).send({ error: 'unauthenticated' })
+    else reply.status(502).send({ error: 'upstream_unavailable' })
+    return
+  }
   reply.send({ token })
 }

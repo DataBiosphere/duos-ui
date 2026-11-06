@@ -6,6 +6,7 @@ import type { PostgresDb } from '@fastify/postgres'
 import * as oidc from 'openid-client'
 import * as jose from 'jose'
 import { createPgSessionStore } from '../src/session/pgStore.js'
+import { compareAndSetRow, stored } from './sessionTable.js'
 import { sessionPluginOptions } from '../src/session/sessionOptions.js'
 import { handleLogin } from '../src/auth/login.js'
 import { handleCallback } from '../src/auth/callback.js'
@@ -127,8 +128,11 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
     }
     if (sql.includes('INSERT INTO user_sessions')) {
       const [sid, sess, maxAgeMs] = params as [string, unknown, number]
-      rows.set(sid, { sess, expire: new Date(Date.now() + maxAgeMs) })
+      rows.set(sid, { sess: stored(sess), expire: new Date(Date.now() + maxAgeMs) })
       return { rows: [] }
+    }
+    if (sql.includes('UPDATE user_sessions')) {
+      return compareAndSetRow(rows, params)
     }
     if (sql.includes('DELETE FROM user_sessions')) {
       rows.delete(params[0] as string)

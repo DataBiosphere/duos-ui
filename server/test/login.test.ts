@@ -84,6 +84,46 @@ describe('handleLogin', () => {
     for (const key of Object.keys(AZURE_ENV)) delete process.env[key]
   })
 
+  describe('when the session changed while the login was prepared (DT-4420)', () => {
+    const changed = Object.assign(new Error('The session does not exist or has changed'), { code: 'ENOENT' })
+
+    function changedRequest(stored: object | null): FastifyRequest {
+      return {
+        session: { sessionStoreId: 'row-1', save: vi.fn().mockRejectedValue(changed) },
+        sessionStore: { get: vi.fn((_sid: string, callback: (err: unknown, value: object | null) => void) => callback(null, stored)) },
+        query: {},
+        log: { info: vi.fn() },
+      } as unknown as FastifyRequest
+    }
+
+    function statusReply() {
+      const reply = { send: vi.fn(), status: vi.fn(), clearCookie: vi.fn() }
+      reply.status.mockReturnValue(reply)
+      return reply
+    }
+
+    it('answers 502 and keeps the cookie when another tab\'s sign-in replaced the session', async () => {
+      const request = changedRequest({ __fastifySessionMetadata: { generation: 'later' } })
+      const reply = statusReply()
+
+      await handleLogin(request, reply as unknown as FastifyReply)
+
+      expect(reply.status).toHaveBeenCalledWith(502)
+      expect(reply.clearCookie).not.toHaveBeenCalled()
+      // Dropped, so the plugin's onSend doesn't retry the save and clear the shared cookie.
+      expect(request.session).toBeNull()
+    })
+
+    it('answers 502 and clears the cookie when a logout ended the session', async () => {
+      const reply = statusReply()
+
+      await handleLogin(changedRequest(null), reply as unknown as FastifyReply)
+
+      expect(reply.status).toHaveBeenCalledWith(502)
+      expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
+    })
+  })
+
   it('stores the PKCE verifier, state, and sanitized returnTo in the session', async () => {
     const request = makeRequest({ returnTo: '/datalibrary' })
 

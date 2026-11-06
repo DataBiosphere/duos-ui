@@ -1,6 +1,7 @@
 -- E2E copy of Consent's BFF session changelogs:
 --   changelog-consent-2026-06-16-bff-01-user-sessions.xml
 --   changelog-consent-2026-06-16-bff-02-user-session-audit.xml
+--   changelog-consent-2026-11-05-bff-session-audit-rotation.xml
 -- Keep the schema in sync. Scheduled cleanup (pg_cron) is omitted; the session
 -- store excludes expired rows when reading. The audit table and its triggers
 -- are included because sign-in, rotation and logout write to them.
@@ -55,14 +56,29 @@ CREATE OR REPLACE TRIGGER user_sessions_audit_start
   AFTER INSERT ON user_sessions
   FOR EACH ROW EXECUTE FUNCTION audit_session_start();
 
+-- As redefined by changelog-consent-2026-11-05-bff-session-audit-rotation:
+-- a generation change (@fastify/session 11.1.6's regenerate) is a rotation.
 CREATE OR REPLACE FUNCTION audit_session_update() RETURNS trigger AS $$
+DECLARE
+  audit_sid_hash TEXT := encode(sha256(NEW.sid::bytea), 'hex');
 BEGIN
-  UPDATE user_session_audit
-     SET user_email = COALESCE(user_email, NEW.sess->>'userId'),
-         idp        = COALESCE(idp, NEW.sess->>'idp')
-   WHERE sid_hash = encode(sha256(NEW.sid::bytea), 'hex')
-     AND ended_at IS NULL
-     AND (user_email IS NULL OR idp IS NULL);
+  IF COALESCE(NEW.sess->'__fastifySessionMetadata'->>'generation', NEW.sid)
+     IS DISTINCT FROM COALESCE(OLD.sess->'__fastifySessionMetadata'->>'generation', OLD.sid) THEN
+    UPDATE user_session_audit
+       SET ended_at   = NOW(),
+           end_reason = COALESCE(end_reason, 'rotated')
+     WHERE sid_hash = audit_sid_hash
+       AND ended_at IS NULL;
+    INSERT INTO user_session_audit (sid_hash, user_email, idp)
+    VALUES (audit_sid_hash, NEW.sess->>'userId', NEW.sess->>'idp');
+  ELSE
+    UPDATE user_session_audit
+       SET user_email = COALESCE(user_email, NEW.sess->>'userId'),
+           idp        = COALESCE(idp, NEW.sess->>'idp')
+     WHERE sid_hash = audit_sid_hash
+       AND ended_at IS NULL
+       AND (user_email IS NULL OR idp IS NULL);
+  END IF;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
