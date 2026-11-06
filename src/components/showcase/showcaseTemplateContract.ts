@@ -27,15 +27,23 @@ export const SHOWCASE_NEUTRALS = {
  */
 export const ShowcaseLookupsContext = createContext<ShowcaseLookups>({ datasets: {} })
 
+/** One sub-nav link: the section's DOM id and its short label. */
+export interface SubNavLink {
+  id: string
+  label: string
+}
+
 /**
  * What the masthead needs from the page (S3.2): the registry entry's title, for the logo alt text
- * and for a showcase with no logo.
+ * and for a showcase with no logo, and the sub-nav links (`subNavSections`, so only visible,
+ * navigable, labelled sections get one).
  */
 export interface ShowcasePageInfo {
   title: string
+  subNav: readonly SubNavLink[]
 }
 
-export const ShowcasePageInfoContext = createContext<ShowcasePageInfo>({ title: '' })
+export const ShowcasePageInfoContext = createContext<ShowcasePageInfo>({ title: '', subNav: [] })
 
 /** The config's colors, with any override that fails its contrast check replaced by the preset's
  * own color, so a failing color is never rendered. */

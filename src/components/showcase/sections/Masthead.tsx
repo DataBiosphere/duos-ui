@@ -1,30 +1,39 @@
 /**
- * The showcase masthead (DT-4354, S3.2): the showcase's own logo, up to three partner logos and the
- * data library search, below the DUOS header. The DUOS header has the DUOS logo and Sign in, so
- * the masthead has neither (contracts record, D10).
+ * The showcase masthead (DT-4354, S3.2): the showcase's own logo, up to three partner logos, the
+ * data library search and the sub-nav, below the DUOS header. The DUOS header has the DUOS logo and
+ * Sign in, so the masthead has neither (contracts record, D10).
+ *
+ * It sticks to the top of the window on tablet and desktop, and not on phones (D8). While it
+ * sticks, it sets `scroll-padding-top` on the page root (`<html>`) to its own height. So nothing
+ * the browser scrolls into view is hidden under it: a section that a sub-nav link targets, a
+ * control that gets keyboard focus (WCAG 2.4.11), or the heading that the skip link focuses.
  *
  * Built from MUI components. Colors and fonts come from the showcase theme custom properties, which
  * the template sets, not from the MUI theme. Logo heights, spacing and breakpoints are provisional
  * (D10, D15).
  */
-import React, { type FormEvent, useContext, useId, useState } from 'react'
-import { Box, Button, Stack, TextField, Typography } from '@mui/material'
+import React, { type FormEvent, useContext, useId, useLayoutEffect, useRef, useState } from 'react'
+import { Box, Button, Link, Stack, TextField, Typography } from '@mui/material'
 import { useNavigate } from 'react-router'
 import { librarySearchPath, ShowcaseHandoffsContext } from 'src/components/showcase/handoffs'
 import { ShowcaseLink, SIGN_IN_REQUIRED_TEXT } from 'src/components/showcase/primitives/ShowcaseLink'
 import type { SectionRendererProps } from 'src/components/showcase/sectionRegistry'
 import { type Logo, shownLogos } from 'src/components/showcase/sections/mastheadLogos'
-import { ShowcasePageInfoContext } from 'src/components/showcase/showcaseTemplateContract'
+import { ShowcasePageInfoContext, type SubNavLink } from 'src/components/showcase/showcaseTemplateContract'
 import { imageLoading } from 'src/showcases/imageLoading'
 
 /** Provisional copy (S3.2). */
 export const SEARCH_LABEL = 'Search DUOS datasets'
 export const SEARCH_UNAVAILABLE_TEXT = 'Search is not available in this preview.'
+export const SUB_NAV_LABEL = 'Sections on this page'
 
 /** D10: on phones only the showcase's own logo is shown, at a smaller height. */
 const PHONE = '@media (max-width: 767px)'
 /** D15: search moves below the branding on phones. */
 const NARROW = '@media (max-width: 560px)'
+/** D8: sticky on tablet and desktop only. A landscape phone is 844-932px wide but about 400px
+ * tall, so the height condition keeps it from sticking there and covering much of the screen. */
+const STICKY = '@media (min-width: 768px) and (min-height: 600px)'
 
 const logoHeight = { height: 48, [PHONE]: { height: 36 } }
 
@@ -155,11 +164,67 @@ const LibrarySearch = () => {
   )
 }
 
+/** The sub-nav scrolls sideways when its links don't fit, rather than widening the page. */
+const SubNav = ({ links }: { links: readonly SubNavLink[] }) => {
+  if (links.length === 0) return null
+  return (
+    <Box component="nav" aria-label={SUB_NAV_LABEL} sx={{ maxWidth: 1400, mx: 'auto', px: 2, overflowX: 'auto' }}>
+      <Stack component="ul" direction="row" useFlexGap sx={{ gap: 3, m: 0, pt: 1, pb: 1.5, px: 0, listStyle: 'none', whiteSpace: 'nowrap' }}>
+        {links.map(link => (
+          <li key={link.id}>
+            {/* src/index.css removes every link underline with !important; color alone would not
+              * mark a link (WCAG 1.4.1). */}
+            <Link
+              href={`#${link.id}`}
+              sx={{ color: 'var(--showcase-primary)', fontSize: 'var(--showcase-font-size-label)', fontWeight: 600, textDecoration: 'underline !important', textDecorationColor: 'currentColor' }}
+            >
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </Stack>
+    </Box>
+  )
+}
+
+/** Keeps the page's `scroll-padding-top` equal to the masthead's height while it sticks, and
+ * clears it when it doesn't (phones, D8) or when the masthead unmounts. */
+const useStickyScrollPadding = (ref: React.RefObject<HTMLElement | null>) => {
+  useLayoutEffect(() => {
+    const masthead = ref.current
+    if (!masthead) return
+    const page = document.documentElement
+    const update = () => {
+      const sticks = getComputedStyle(masthead).position === 'sticky'
+      page.style.scrollPaddingTop = sticks ? `${masthead.offsetHeight}px` : ''
+    }
+    update()
+    const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(update)
+    observer?.observe(masthead)
+    globalThis.addEventListener('resize', update)
+    return () => {
+      observer?.disconnect()
+      globalThis.removeEventListener('resize', update)
+      page.style.scrollPaddingTop = ''
+    }
+  }, [ref])
+}
+
+const mastheadSx = {
+  zIndex: 10,
+  bgcolor: 'var(--showcase-surface)',
+  borderBottom: '1px solid var(--showcase-border)',
+  [STICKY]: { position: 'sticky', top: 0 },
+}
+
 export const Masthead = ({ section, id }: SectionRendererProps<'masthead'>) => {
-  const { title } = useContext(ShowcasePageInfoContext)
+  const { title, subNav } = useContext(ShowcasePageInfoContext)
+  const ref = useRef<HTMLElement>(null)
+  useStickyScrollPadding(ref)
 
   return (
-    <Box component="section" id={id} aria-label={title} sx={{ bgcolor: 'var(--showcase-surface)', borderBottom: '1px solid var(--showcase-border)' }}>
+    // The class name lets tests find the element that sticks.
+    <Box component="section" ref={ref} id={id} className="showcase-masthead" aria-label={title} sx={mastheadSx}>
       <Stack
         direction="row"
         useFlexGap
@@ -168,6 +233,7 @@ export const Masthead = ({ section, id }: SectionRendererProps<'masthead'>) => {
         <LogoList logos={section.logos} title={title} />
         <LibrarySearch />
       </Stack>
+      <SubNav links={subNav} />
     </Box>
   )
 }
