@@ -33,6 +33,7 @@ What each row leaves out on purpose:
 - A user who cancels at the provider is `outcome=cancelled`. It is in the callback denominator, not the numerator.
 - A throttled callback (429) never reaches the handler. It has its own row.
 - A terminal refresh rejection signs the user out. A transient failure keeps the session. Keep them in separate rows.
+- A refresh whose session ended during the flight, such as a logout in another tab, is `outcome=terminal` with `reason=session_ended`. B2C didn't reject anything; filter on `reason=refresh_failed` for B2C rejections alone.
 - An anonymous 401 has the error code `unauthenticated`. It is not an `auth.session.destroyed` event, so the upstream 401 row ignores it.
 - A request whose session a later sign-in has replaced logs `auth.session.superseded`, not `auth.session.destroyed`: nothing was destroyed. The upstream 401 row ignores it too.
 - A refresh whose session a later sign-in has replaced counts as `outcome=transient`. It answers 502 so the client keeps the later sign-in, and a burst of re-sign-ins can raise the transient rate.

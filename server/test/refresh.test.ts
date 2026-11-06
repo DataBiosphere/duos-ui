@@ -149,6 +149,31 @@ describe('refreshAccessToken', () => {
     expect(session.save).toHaveBeenCalledOnce()
   })
 
+  it('fails as terminal when the session ended during the refresh, so its save is refused', async () => {
+    // A logout destroyed the row mid-flight; compareAndSet won't write it back.
+    const { request, session } = makeRequest()
+    session.save.mockRejectedValue(Object.assign(new Error('The session does not exist or has changed'), { code: 'ENOENT' }))
+
+    const err = await refreshAccessToken(request).catch((e: unknown) => e)
+
+    expect(err).toBeInstanceOf(RefreshFailedError)
+    expect((err as Error).message).toBe('session_ended')
+    expect(request.log.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ event: 'auth.refresh.completed', outcome: 'terminal', reason: 'session_ended' }),
+      'auth.refresh.completed',
+    )
+  })
+
+  it('fails as transient, and drops the session, when a later sign-in took the row during the refresh', async () => {
+    const { request, session } = makeRequest({ stored: { __fastifySessionMetadata: { generation: 'later' } } as Partial<Session> })
+    session.save.mockRejectedValue(Object.assign(new Error('The session does not exist or has changed'), { code: 'ENOENT' }))
+
+    const err = await refreshAccessToken(request).catch((e: unknown) => e)
+
+    expect(err).not.toBeInstanceOf(RefreshFailedError)
+    expect(request.session).toBeNull()
+  })
+
   it.each([
     ['without a refresh token', { refreshToken: undefined }],
     ['after B2C rejects the token', {}],
@@ -162,6 +187,16 @@ describe('refreshAccessToken', () => {
     expect(err).toBeInstanceOf(Error)
     expect(err).not.toBeInstanceOf(RefreshFailedError)
     expect(session.destroy).not.toHaveBeenCalled()
+  })
+
+  it('keeps any other save failure transient', async () => {
+    const { request, session } = makeRequest()
+    session.save.mockRejectedValue(new Error('connection terminated'))
+
+    const err = await refreshAccessToken(request).catch((e: unknown) => e)
+
+    expect(err).not.toBeInstanceOf(RefreshFailedError)
+    expect((err as Error).message).toBe('connection terminated')
   })
 
   it('redeems the session refresh token against B2C', async () => {
