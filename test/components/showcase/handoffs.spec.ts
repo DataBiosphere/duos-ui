@@ -46,4 +46,10 @@ describe('isPublicPath', () => {
   it.each(['/datalibrary', '/datalibrary?query=x', '/dataset/DUOS-000790', '/dar_application/abc', '/profile', '/data/extra', '/showcase'])('treats %s as signed-in', (path) => {
     expect(isPublicPath(path)).toBe(false)
   })
+
+  // A public page with ?redirectTo= sends a signed-in visitor on to that destination, so the link
+  // is a handoff to wherever redirectTo points.
+  it.each(['/?redirectTo=%2Fdataset%2FDUOS-000790', '/home?redirectTo=/datalibrary', '/data?x=1&redirectTo=%2Fprofile'])('treats %s, which carries redirectTo, as signed-in', (path) => {
+    expect(isPublicPath(path)).toBe(false)
+  })
 })

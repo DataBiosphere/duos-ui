@@ -51,10 +51,13 @@ const PUBLIC_PATHS: ReadonlySet<string> = new Set([
   '/', '/home', '/status', '/nih_pilot_info', '/privacy', '/cookie_policy', '/tos', '/nih_dms_policy', '/anvil_dms_policy', '/data',
 ])
 
-const pathOf = (href: string): string => new URL(href, 'https://showcase.invalid').pathname
-
-/** True for an internal path that needs no session: a public page or another showcase. */
+/**
+ * True for an internal path that needs no session: a public page or another showcase. A link with
+ * `?redirectTo=` is not public, even on a public page: sign-in sends the visitor on to that
+ * destination, so the link is a handoff to wherever `redirectTo` points.
+ */
 export const isPublicPath = (href: string): boolean => {
-  const path = pathOf(href)
-  return PUBLIC_PATHS.has(path) || path.startsWith('/showcase/')
+  const url = new URL(href, 'https://showcase.invalid')
+  if (url.searchParams.has('redirectTo')) return false
+  return PUBLIC_PATHS.has(url.pathname) || url.pathname.startsWith('/showcase/')
 }

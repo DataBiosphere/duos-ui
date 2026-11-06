@@ -188,7 +188,7 @@ describe('ShowcaseLink handoffs (S3.2)', () => {
   describe('in a production-data preview', () => {
     const PREVIEW: ShowcaseHandoffs = { enabled: false, signedIn: true }
 
-    it.each(['/datalibrary?query=heart', '/dataset/DUOS-000790', '/dar_application/abc'])('renders %s as text, not a link', (href) => {
+    it.each(['/datalibrary?query=heart', '/dataset/DUOS-000790', '/dar_application/abc', '/?redirectTo=%2Fdataset%2FDUOS-000790'])('renders %s as text, not a link', (href) => {
       const { container } = renderInRouter(<ShowcaseLink href={href}>Handoff</ShowcaseLink>, PREVIEW)
       expect(screen.queryByRole('link')).toBeNull()
       expect(container.querySelector('a')).toBeNull()
