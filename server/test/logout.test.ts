@@ -21,7 +21,8 @@ function makeRequest(overrides: {
   testFixture?: boolean
   accessToken?: string
   refreshToken?: string
-  sessionId?: string
+  /** The store row's key; `sessionId` is the generation, which differs after a rotation. */
+  sessionStoreId?: string
   idToken?: string
   idp?: 'google' | 'microsoft' | 'unknown'
 } = {}) {
@@ -35,7 +36,8 @@ function makeRequest(overrides: {
       accessToken: overrides.accessToken,
       refreshToken: overrides.refreshToken,
       idToken: overrides.idToken,
-      sessionId: overrides.sessionId ?? 'test-sid',
+      sessionStoreId: overrides.sessionStoreId ?? 'test-sid',
+      sessionId: 'rotated-generation',
       idp: overrides.idp,
       destroy,
     },
@@ -86,7 +88,7 @@ describe('handleLogout', () => {
   })
 
   it('stamps the audit record for the session sid, destroys the session, and clears the cookie', async () => {
-    const { request, query, destroy } = makeRequest({ sessionId: 'the-sid' })
+    const { request, query, destroy } = makeRequest({ sessionStoreId: 'the-sid' })
     const reply = makeReply()
 
     await handleLogout(request, reply)
@@ -163,7 +165,7 @@ describe('handleLogout', () => {
   })
 
   it('completes logout (session destroy, cookie clear) even when the audit UPDATE rejects', async () => {
-    const { request, query, destroy } = makeRequest({ sessionId: 'the-sid' })
+    const { request, query, destroy } = makeRequest({ sessionStoreId: 'the-sid' })
     query.mockRejectedValue(new Error('connection terminated unexpectedly'))
     const reply = makeReply()
 
@@ -178,7 +180,7 @@ describe('handleLogout', () => {
   it('completes logout (audit stamp, session destroy, cookie clear) even when getOidcConfig() rejects', async () => {
     const oidcClient = await import('../src/auth/oidcClient.js')
     vi.mocked(oidcClient.getOidcConfig).mockRejectedValue(new Error('B2C discovery unreachable'))
-    const { request, query, destroy } = makeRequest({ sessionId: 'the-sid' })
+    const { request, query, destroy } = makeRequest({ sessionStoreId: 'the-sid' })
     const reply = makeReply()
 
     await expect(handleLogout(request, reply)).resolves.toBeUndefined()
