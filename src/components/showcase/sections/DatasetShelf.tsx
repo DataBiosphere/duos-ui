@@ -13,8 +13,8 @@
  * "Try again" moves focus to the heading first, so focus is not lost when the button goes away;
  * the heading keeps it while the shelf loads and when the cards arrive.
  *
- * The section's DOM id is on the root `div`, the target of `#<section key>` links. Hiding the
- * sub-nav and same-page links while the shelf loads or is empty (D11) comes in the next PR.
+ * The section's DOM id is on the root `div`, the target of `#<section key>` links. While the shelf
+ * loads or is empty, the template gives it no sub-nav link and hides same-page links to it (D11).
  */
 import React, { useContext, useEffect, useId, useRef } from 'react'
 import { DatasetCard } from 'src/components/showcase/primitives/DatasetCard'

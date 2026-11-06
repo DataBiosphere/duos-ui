@@ -15,6 +15,7 @@
  */
 import React, { type ComponentType, type CSSProperties, type MouseEvent, useMemo } from 'react'
 import {
+  linkTargetSections,
   type SectionRegistry,
   type SectionRendererProps,
   sectionRegistry,
@@ -82,15 +83,20 @@ export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRe
   const masthead = sections.filter(section => section.key === 'masthead')
   const content = sections.filter(section => section.key !== 'masthead')
   const hasHero = content.some(section => section.key === 'hero')
-  // `subNavSections` reads the same visible list, so a hidden or empty section gets no link. A new
-  // object on every render would re-render every context consumer (Sonar S6481).
-  const pageInfo = useMemo<ShowcasePageInfo>(() => ({
-    title: entry.title,
-    subNav: subNavSections(config, registry).flatMap(section => (section.navLabel === undefined ? [] : [{ id: section.id, label: section.navLabel }])),
-    // Recomputed here rather than read from `sections`, which is a new array on every render.
-    visibleSectionIds: visibleSections(config, registry).map(section => section.id),
-    toolCount: countToolItems(config.sections),
-  }), [entry.title, config, registry])
+  // The sub-nav and same-page links read the link targets: visible sections, less a dataset shelf
+  // that is loading or empty (D11). A new object on every render would re-render every context
+  // consumer (Sonar S6481), and `lookups` changes on every lookup state change, so the page info is
+  // memoized on the links themselves.
+  const links: Pick<ShowcasePageInfo, 'subNav' | 'visibleSectionIds'> = {
+    subNav: subNavSections(config, registry, lookups).flatMap(section => (section.navLabel === undefined ? [] : [{ id: section.id, label: section.navLabel }])),
+    visibleSectionIds: linkTargetSections(config, registry, lookups).map(section => section.id),
+  }
+  const linksKey = JSON.stringify(links)
+  const toolCount = countToolItems(config.sections)
+  const pageInfo = useMemo<ShowcasePageInfo>(
+    () => ({ title: entry.title, ...(JSON.parse(linksKey) as typeof links), toolCount }),
+    [entry.title, linksKey, toolCount],
+  )
 
   return (
     <div className="showcase-template" style={themeStyle(config.branding)}>

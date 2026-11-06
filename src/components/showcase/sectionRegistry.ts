@@ -13,14 +13,25 @@
  * an element whose id is exactly `latest-data-releases`, so a prefixed id would break every such
  * link. Masthead and hero get an id too, but no nav link, and the URL policy rejects links to them.
  *
- * Lookup state (a shelf that is loading or whose lookup failed) is not modelled here.
+ * A dataset shelf renders while its lookup loads (its skeleton, D11) and after it fails (its
+ * retry, D12), but it is a link target, in the sub-nav or a same-page link, only once it has
+ * datasets or has failed (`linkTargetSections`).
  */
 import type { ComponentType } from 'react'
+import type { ShowcaseLookups } from 'src/components/showcase/useShowcaseLookups'
 import { DatasetShelf } from 'src/components/showcase/sections/DatasetShelf'
 import { Hero } from 'src/components/showcase/sections/Hero'
 import { heroHasContent } from 'src/components/showcase/sections/heroContent'
 import { Masthead } from 'src/components/showcase/sections/Masthead'
-import { NO_ANCHOR_SECTION_KEYS, SECTION_KEYS, type SectionConfigs, type SectionKey, type ShowcaseConfig } from 'src/types/showcase'
+import {
+  DATASET_SECTION_KEYS,
+  type DatasetSectionKey,
+  NO_ANCHOR_SECTION_KEYS,
+  SECTION_KEYS,
+  type SectionConfigs,
+  type SectionKey,
+  type ShowcaseConfig,
+} from 'src/types/showcase'
 
 /** A section's config when it is enabled. Disabled sections may keep content, so the predicate and
  * renderer only ever see this variant. */
@@ -123,10 +134,35 @@ export const visibleSections = (config: Pick<ShowcaseConfig, 'sections'>, regist
     return visible === undefined ? [] : [visible as VisibleSection]
   })
 
+const isDatasetSection = (key: SectionKey): key is DatasetSectionKey => (DATASET_SECTION_KEYS as readonly string[]).includes(key)
+
+/** D11 and D12: a dataset shelf is a link target once it has datasets, or once its lookup fails so
+ * people can reach "Try again". Loading, empty or with no lookup, it is not. */
+const isLinkTarget = (key: SectionKey, lookups: ShowcaseLookups): boolean => {
+  if (!isDatasetSection(key)) return true
+  const state = lookups.datasets[key]
+  return state?.status === 'error' || (state?.status === 'ready' && state.data.length > 0)
+}
+
 /**
- * The sections the sub-nav links to: visible, navigable and labelled, in page order. A section with
- * no nav label, title or registry default (the defaults stay empty until the product owner gives
- * the wording) is left out rather than shown as a link with no text.
+ * The visible sections that a sub-nav link or a same-page `#<section key>` link may target, in page
+ * order. Without `lookups` (the lookup state is unknown) every visible section counts.
  */
-export const subNavSections = (config: Pick<ShowcaseConfig, 'sections'>, registry: SectionRegistry = sectionRegistry): VisibleSection[] =>
-  visibleSections(config, registry).filter(section => section.navigable && section.navLabel !== undefined)
+export const linkTargetSections = (
+  config: Pick<ShowcaseConfig, 'sections'>,
+  registry: SectionRegistry = sectionRegistry,
+  lookups?: ShowcaseLookups,
+): VisibleSection[] =>
+  visibleSections(config, registry).filter(section => lookups === undefined || isLinkTarget(section.key, lookups))
+
+/**
+ * The sections the sub-nav links to: link targets that are navigable and labelled, in page order. A
+ * section with no nav label, title or registry default (the defaults stay empty until the product
+ * owner gives the wording) is left out rather than shown as a link with no text.
+ */
+export const subNavSections = (
+  config: Pick<ShowcaseConfig, 'sections'>,
+  registry: SectionRegistry = sectionRegistry,
+  lookups?: ShowcaseLookups,
+): VisibleSection[] =>
+  linkTargetSections(config, registry, lookups).filter(section => section.navigable && section.navLabel !== undefined)
