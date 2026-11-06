@@ -42,27 +42,32 @@ afterEach(async () => {
 })
 const signIn = (payload: unknown = { accessToken: 'opaque-secret' }) => app.inject({ method: 'POST', url: '/auth/test-signin', payload: payload as never })
 
-it('rotates and persists a real session with verified expiry and retires the old SID', async () => {
+it('rotates a real session in place and persists it with verified expiry', async () => {
   const seed = await app.inject('/seed')
   const oldSid = seed.json().sid
   const before = nowSeconds()
   const res = await app.inject({ method: 'POST', url: '/auth/test-signin', headers: { cookie: seed.headers['set-cookie'] as string }, payload: { accessToken: 'opaque-secret' } })
   expect(res.statusCode).toBe(204)
   expect(res.payload).toBe('')
+  // @fastify/session 11.1.6 keeps the store row and gives the session a new generation.
   expect(current.session.sessionId).not.toBe(oldSid)
+  expect(current.session.sessionStoreId).toBe(oldSid)
   expect(current.session).toMatchObject({ accessToken: 'opaque-secret', userId: emails[0], testFixture: true, idp: 'google' })
   expect(current.session.tokenExpiry).toBeGreaterThanOrEqual(before + 3600)
   expect(current.session.tokenExpiry).toBeLessThanOrEqual(nowSeconds() + 3600)
   expect(current.session.refreshToken).toBeUndefined()
   expect(current.session.idToken).toBeUndefined()
-  expect(audit).toHaveBeenCalledWith(expect.stringContaining('end_reason = \'rotated\''), [oldSid])
+  // Consent's audit trigger records the rotation; the BFF writes no audit row.
+  expect(audit).not.toHaveBeenCalled()
   expect(res.headers['set-cookie']).toBeDefined()
   expect(res.headers['cache-control']).toBe('no-store')
   expect(fetch).toHaveBeenCalledWith('https://oauth2.googleapis.com/tokeninfo', expect.objectContaining({ method: 'POST', redirect: 'error', signal: expect.any(AbortSignal) }))
   const body = vi.mocked(fetch).mock.calls[0][1]?.body as URLSearchParams
   expect(body.get('access_token')).toBe('opaque-secret')
-  expect(await tracked.stored()).toBeNull()
-  await new Promise<void>((resolve, reject) => current.sessionStore.get(current.session.sessionId, (err, value) => {
+  // The pre-auth row now holds the signed-in session; the old tokens are gone.
+  expect(await tracked.stored()).toMatchObject({ testFixture: true, accessToken: 'opaque-secret' })
+  expect(await tracked.stored()).not.toHaveProperty('refreshToken')
+  await new Promise<void>((resolve, reject) => current.sessionStore.get(current.session.sessionStoreId, (err, value) => {
     if (err) return reject(err)
     expect(value).toMatchObject({ testFixture: true, accessToken: 'opaque-secret' })
     resolve()

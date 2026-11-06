@@ -554,12 +554,23 @@ function rewriteHeaders(headers: IncomingHttpHeaders): IncomingHttpHeaders {
 
 /** Ends a session whose token is finished, for the `reason` the log records. */
 async function endRejectedSession(request: ProxyRequest, reply: ProxyReply, logTag: string, reason: string, destroyReason: SessionDestroyReason): Promise<void> {
+  let superseded = false
   try {
-    await endSession(request, destroyReason)
-    request.log.info(`[${logTag}] ${reason} — session destroyed, returning 401`)
+    superseded = await endSession(request, destroyReason) === 'superseded'
+    request.log.info(`[${logTag}] ${reason} — ${superseded ? 'a later sign-in holds the session, returning 502' : 'session destroyed, returning 401'}`)
   }
   catch (err: unknown) {
-    request.log.error({ err }, `[${logTag}] ${reason} but the session could not be destroyed — returning 401 anyway`)
+    // A failed destroy can't tell whether a later sign-in holds the row, so it
+    // answers as one does; the next request retries the destroy.
+    request.log.error({ err }, `[${logTag}] ${reason} but the session could not be destroyed — returning 502`)
+    superseded = true
+  }
+  if (superseded) {
+    // A later sign-in's cookie is the browser's now. Clearing it, or a 401
+    // (which makes the client sign the browser out), would end that sign-in.
+    recordBffError(request, 'upstream_unavailable')
+    reply.status(502).send({ error: 'upstream_unavailable' })
+    return
   }
   recordBffError(request, 'session_expired')
   reply.clearCookie(SESSION_COOKIE_NAME).status(401).send({ error: 'session_expired' })
