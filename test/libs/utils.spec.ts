@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { getSearchFilterFunctions, formatDate, processElectionStatus, sortVisibleTable, TableCell } from 'src/libs/utils'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { getSearchFilterFunctions, formatDate, Navigation, processElectionStatus, sortVisibleTable, TableCell } from 'src/libs/utils'
 import { toLower } from 'src/utils/NodashUtil'
 import { VOTE_TYPES } from 'src/utils/DarUtils'
 import { DuosUser, Election, LibraryCard, Vote, DarCollectionSummary } from 'src/types/model'
@@ -327,5 +327,26 @@ describe('processElectionStatus utils - tests', () => {
 
   it('sortVisibleTable should not error when no data is passed', () => {
     expect(() => sortVisibleTable({ list: undefined, sort: { colIndex: 1, dir: -1 } })).not.toThrow()
+  })
+})
+
+describe('Navigation.console', () => {
+  afterEach(() => {
+    globalThis.history.replaceState({}, '', '/')
+  })
+
+  const destinationFor = async (redirectTo: string) => {
+    globalThis.history.replaceState({}, '', `/?redirectTo=${encodeURIComponent(redirectTo)}`)
+    const navigate = vi.fn()
+    await Navigation.console({ roles: [] } as unknown as DuosUser, navigate)
+    return navigate.mock.calls[0][0]
+  }
+
+  it('follows an internal redirectTo with its query string', async () => {
+    expect(await destinationFor('/datalibrary?query=heart')).toBe('/datalibrary?query=heart')
+  })
+
+  it.each(['https://evil.example', '//evil.example', '/\\evil.example'])('goes to / for the external redirectTo %s', async (target) => {
+    expect(await destinationFor(target)).toBe('/')
   })
 })

@@ -121,6 +121,16 @@ describe('completeSignIn', () => {
       expect(navigate).not.toHaveBeenCalled()
     })
 
+    it('leaves a ToS-accepted user in place when the destination page carries a query string', async () => {
+      const tosAcceptedUser = { ...duosUser, userStatusInfo: tosAcceptedStatus }
+      vi.mocked(User.getMe).mockResolvedValue(tosAcceptedUser as never)
+      globalThis.history.replaceState({}, '', '/datalibrary?query=heart')
+
+      await run('/datalibrary?query=heart')
+
+      expect(navigate).not.toHaveBeenCalled()
+    })
+
     it('navigates a ToS-accepted user to the destination when not already there (legacy reload)', async () => {
       const tosAcceptedUser = { ...duosUser, userStatusInfo: tosAcceptedStatus }
       vi.mocked(User.getMe).mockResolvedValue(tosAcceptedUser as never)

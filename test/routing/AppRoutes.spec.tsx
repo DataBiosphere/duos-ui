@@ -118,7 +118,7 @@ describe('AppRoutes — RoleBAC routes redirect unauthenticated users', () => {
         <AppRoutes isLogged={false} env="dev" />
       </MemoryRouter>,
     )
-    expect(onLocationChange).toHaveBeenCalledWith(`/?redirectTo=${route}`)
+    expect(onLocationChange).toHaveBeenCalledWith(`/?redirectTo=${encodeURIComponent(route)}`)
     expect(container.querySelector('[data-cy="not-found"]')).not.toBeInTheDocument()
   })
 })

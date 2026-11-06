@@ -18,8 +18,9 @@ vi.mock('src/libs/auth/postSignIn', () => ({ completeSignIn: vi.fn() }))
 vi.mock('src/libs/auth/auth', () => ({ Redirect: { to: vi.fn(), reload: vi.fn() } }))
 
 const queryClient = { clear: vi.fn() } as unknown as QueryClient
+let initialEntry = '/'
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <MemoryRouter>{children}</MemoryRouter>
+  <MemoryRouter initialEntries={[initialEntry]}>{children}</MemoryRouter>
 )
 
 const storedUser = { userId: 7, displayName: 'Stored User', roles: [] } as unknown as DuosUser
@@ -33,6 +34,7 @@ describe('useSessionReconciler', () => {
   })
 
   afterEach(() => {
+    initialEntry = '/'
     vi.restoreAllMocks()
     vi.mocked(useSessionInfo).mockReset()
     vi.mocked(completeSignIn).mockReset()
@@ -107,6 +109,28 @@ describe('useSessionReconciler', () => {
     // The legacy probe carries a user (the storage mirror), so it never
     // reports "no profile" — the bootstrap's getMe must run as usual.
     expect(vi.mocked(completeSignIn).mock.calls[0][0].sessionReportsNoProfile).toBe(false)
+  })
+
+  describe('the sign-in destination', () => {
+    const redirectPathFor = async (entry: string) => {
+      initialEntry = entry
+      vi.mocked(useSessionInfo).mockReturnValue({ authenticated: true })
+      renderReconciler()
+      await waitFor(() => expect(vi.mocked(completeSignIn)).toHaveBeenCalledOnce())
+      return vi.mocked(completeSignIn).mock.calls[0][0].redirectPath
+    }
+
+    it('keeps the query string of the page the BFF callback landed on', async () => {
+      expect(await redirectPathFor('/datalibrary?query=heart')).toBe('/datalibrary?query=heart')
+    })
+
+    it('follows a legacy ?redirectTo= destination with its query string', async () => {
+      expect(await redirectPathFor(`/?redirectTo=${encodeURIComponent('/datalibrary?query=heart')}`)).toBe('/datalibrary?query=heart')
+    })
+
+    it.each(['https://evil.example', '//evil.example', '/\\evil.example', 'javascript:alert(1)'])('follows only an internal ?redirectTo= (%s goes to /)', async (target) => {
+      expect(await redirectPathFor(`/?redirectTo=${encodeURIComponent(target)}`)).toBe('/')
+    })
   })
 
   it('tells the bootstrap the probe reported no profile, so it skips the session-destroying getMe', async () => {

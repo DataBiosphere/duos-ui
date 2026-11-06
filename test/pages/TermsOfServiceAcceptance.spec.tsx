@@ -1,6 +1,6 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import TermsOfServiceAcceptance from 'src/pages/TermsOfServiceAcceptance'
@@ -85,5 +85,29 @@ describe('Terms of Service Acceptance Page', () => {
     })
     await waitFor(() => expect(TosService.acceptTos).toHaveBeenCalledOnce())
     expect(mockNavigate).toHaveBeenCalledWith('/datalibrary')
+  })
+
+  describe('the redirectTo destination', () => {
+    afterEach(() => {
+      globalThis.history.replaceState({}, '', '/')
+    })
+
+    const acceptWithRedirect = async (target: string) => {
+      globalThis.history.replaceState({}, '', `/tos_acceptance?redirectTo=${encodeURIComponent(target)}`)
+      await renderComponent()
+      await act(async () => {
+        fireEvent.click(screen.getByText('Accept Terms of Service'))
+      })
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledOnce())
+      return mockNavigate.mock.calls[0][0]
+    }
+
+    it('goes to an internal destination with its query string', async () => {
+      expect(await acceptWithRedirect('/datalibrary?query=heart')).toBe('/datalibrary?query=heart')
+    })
+
+    it('goes to / for an external destination', async () => {
+      expect(await acceptWithRedirect('//evil.example/path')).toBe('/')
+    })
   })
 })

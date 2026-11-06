@@ -24,7 +24,8 @@ import { DuosUser } from 'src/types/model'
 export interface CompleteSignInOptions {
   navigate: NavigateFunction
   queryClient: QueryClient
-  /** The path the /auth/callback redirect landed on (location.pathname). */
+  /** Where to go after sign-in: the path and query string the /auth/callback redirect landed on,
+   * or the legacy flow's ?redirectTo= value. */
   redirectPath: string
   /**
    * Polled before every side-effecting step. When a newer reconciliation has
@@ -117,7 +118,7 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
       if (redirectPath === null) {
         await Navigation.console(Storage.getCurrentUser(), navigate)
       }
-      else if (globalThis.location.pathname !== redirectPath) {
+      else if (globalThis.location.pathname + globalThis.location.search !== redirectPath) {
         navigate(redirectPath)
       }
     }

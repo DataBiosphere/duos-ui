@@ -19,6 +19,7 @@ import {
   toLower,
 } from 'src/utils/NodashUtil'
 import { headerTabsConfig } from 'src/components/DuosHeader'
+import { safeLocalPath } from 'src/libs/auth/postLogout'
 import { VoteDecision } from 'src/utils/DarUtils'
 import { ToastNotifications } from 'src/libs/ToastNotifications'
 import {
@@ -220,7 +221,9 @@ export const Navigation = {
     const queryParams = new URLSearchParams(globalThis.location.search)
     const redirectTo = queryParams?.get('redirectTo')
     const firstConsole = headerTabsConfig.find(config => config.isConsole && config.isRendered(user))
-    const page = redirectTo || (firstConsole ? firstConsole.link : '/')
+    const fallback = firstConsole ? firstConsole.link : '/'
+    // The parameter is page input, so only an internal path is followed.
+    const page = redirectTo ? safeLocalPath(redirectTo) : fallback
     if (navigate) {
       navigate(page)
     }

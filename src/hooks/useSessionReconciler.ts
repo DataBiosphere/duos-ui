@@ -6,6 +6,7 @@ import type { SessionInfo } from 'src/libs/auth/session'
 import type { DuosUser } from 'src/types/model'
 import { useSessionInfo } from 'src/hooks/useSession'
 import { completeSignIn } from 'src/libs/auth/postSignIn'
+import { safeLocalPath } from 'src/libs/auth/postLogout'
 import { Redirect } from 'src/libs/auth/auth'
 import { Storage } from 'src/libs/storage'
 import { setUserRoleStatuses } from 'src/libs/utils'
@@ -240,13 +241,14 @@ export const useSessionReconciler = (queryClient: QueryClient): SessionReconcili
     activeBootstrapRef.current = token
     setSnapshot({ classifiedProbe: sessionInfo, bootstrapRunning: true })
     // The BFF callback lands the browser on the destination itself, so the
-    // pathname is the redirect target; the legacy popup flow reloads on the
-    // landing page with the destination still in ?redirectTo=.
+    // path and query string are the redirect target; the legacy popup flow
+    // reloads on the landing page with the destination still in ?redirectTo=.
+    // That parameter is page input, so only an internal path is followed.
     const redirectTo = new URLSearchParams(location.search).get('redirectTo')
     completeSignIn({
       navigate,
       queryClient,
-      redirectPath: redirectTo ?? location.pathname,
+      redirectPath: redirectTo === null ? location.pathname + location.search : safeLocalPath(redirectTo),
       isCancelled: () => token.cancelled,
       latestJoinedProfile: () => token.pendingHydration,
       // Only the BFF probe can be authenticated without a user — the legacy
