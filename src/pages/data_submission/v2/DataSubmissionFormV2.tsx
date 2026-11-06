@@ -146,6 +146,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   const [loadingError, setLoadingError] = useState(false)
   const [loadedDraftUuid, setLoadedDraftUuid] = useState<string>()
   const [showContactModal, setShowContactModal] = useState(false)
+  const [showThroughBioRequest, setShowThroughBioRequest] = useState(false)
   const [uneditedFields, setUneditedFields] = useState<UneditedRegistrationFields>({})
 
   const navigate = useNavigate()
@@ -328,12 +329,18 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
           <p className="dsf-page-header-description" data-cy="table-header-description">{FORM_HELP_TEXT[formMode]}</p>
         </header>
 
-        <GeneralStudyInformation study={study} setStudy={setStudy} />
+        <GeneralStudyInformation study={study} setStudy={setStudy} onRequestThroughBioProfile={() => setShowThroughBioRequest(true)} />
         <NihAnvilUseRelated study={study} setStudy={setStudy} />
         <NihAdministrativeInformation study={study} setStudy={setStudy} />
         <NihDataManagement study={study} setStudy={setStudy} />
         <StudyAssetManagement study={study} setStudy={setStudy} isEditingExistingStudy={isEditing} onOpenContactUs={() => setShowContactModal(true)} />
         <SupportRequestModal showModal={showContactModal} onCloseRequest={() => setShowContactModal(false)} />
+        <SupportRequestModal
+          showModal={showThroughBioRequest}
+          onCloseRequest={() => setShowThroughBioRequest(false)}
+          initialSubject="Request a Through.bio profile"
+          initialDescription={`Please create a Through.bio profile for the study${study.name ? ` "${study.name}"` : ''}. Its publications are listed under Related Resources on the study registration.`}
+        />
         <div className="dsf-actions">
           {!isEditing && (
             <AsyncSpinnerButton
