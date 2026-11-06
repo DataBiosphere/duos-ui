@@ -303,12 +303,14 @@ export interface ModelAsset extends Omit<AiModel, 'studyId' | 'modelId'> {
   modelId: number
   studyId: number
   studyName: string
+  duosIdentifier?: string
 }
 
 export interface WorkspaceAsset extends Omit<Workspace, 'studyId' | 'workspaceId'> {
   workspaceId: number
   studyId: number
   studyName: string
+  duosIdentifier?: string
 }
 
 export interface ClinicalTrialAsset extends Omit<ClinicalTrial, 'studyId'> {
@@ -320,6 +322,17 @@ export interface BiospecimenAsset extends Omit<Biospecimen, 'studyId' | 'biospec
   biospecimenId: number
   studyId: number
   studyName: string
+  duosIdentifier?: string
+}
+
+/** `GET /api/asset-catalog/{identifier}`; a removed asset carries only its type and status. */
+export interface AssetLookup {
+  identifier?: string
+  type: 'DATASET' | 'MODEL' | 'WORKSPACE' | 'BIOSPECIMEN'
+  status: 'LIVE' | 'RETIRED' | 'REMOVED'
+  listed?: boolean
+  assetId?: number
+  studyId?: number
 }
 
 export interface PublicationAsset extends Omit<Publication, 'studyId'> {

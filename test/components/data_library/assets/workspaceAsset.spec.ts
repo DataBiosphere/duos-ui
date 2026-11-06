@@ -18,6 +18,7 @@ const makeBucket = (
   studyId: number,
   workspaces: Array<{
     workspaceId?: number
+    duosIdentifier?: string
     name?: string
     platform?: string
     url?: string
@@ -42,6 +43,7 @@ const makeBucket = (
               assets: {
                 workspaces: workspaces.map(w => ({
                   workspaceId: w.workspaceId,
+                  duosIdentifier: w.duosIdentifier,
                   name: w.name,
                   platform: w.platform,
                   url: w.url,
@@ -489,5 +491,17 @@ describe('workspaceAsset — indexed values are normalized', () => {
     const result = workspaceAsset.transformResponse(response, pagination)
 
     expect((result.items[0] as WorkspaceAsset).cloud).toEqual(['AWS', 'GCP'])
+  })
+})
+
+describe('workspaceAsset — duosIdentifier', () => {
+  it('is searchable', () => {
+    expect(workspaceAsset.searchFields).toContain('study.assets.workspaces.duosIdentifier')
+  })
+
+  it('carries the served identifier onto its row, and none when the index has none', () => {
+    const response = makeResponse([makeBucket(42, [{ workspaceId: 12, duosIdentifier: 'DUOS-W-000012' }, { workspaceId: 13 }])])
+    const rows = workspaceAsset.transformResponse(response, pagination).items as WorkspaceAsset[]
+    expect(rows.map(row => row.duosIdentifier)).toEqual(['DUOS-W-000012', ''])
   })
 })
