@@ -8,7 +8,7 @@
  * The resolved config is parsed with `ShowcaseConfigSchema`. The CI guard rejects a config that
  * fails it, so a failure here is a bug: it is logged and the route is not found.
  */
-import { isShowcaseEnabled } from 'src/libs/config'
+import { isShowcaseEnabled, isShowcaseHandoffsEnabled } from 'src/libs/config'
 import { resolveShowcase } from 'src/showcases/defaults'
 import { ShowcaseConfigSchema } from 'src/showcases/schema'
 import { retiredShowcaseKeys, showcaseConfigs, showcaseEntries } from 'src/showcases'
@@ -18,6 +18,10 @@ import { SHOWCASE_KEY_PATTERN, type RegistryEntry, type ShowcaseConfig, type Sho
 export type ShowcaseRouteMatch = { route: 'flagship' } | { route: 'key', key: string | undefined }
 
 export type ShowcaseLoadResult = { status: 'found', entry: RegistryEntry, config: ShowcaseConfig } | { status: 'not-found' }
+
+/** What a showcase route renders: `findShowcase`'s answer plus the environment binding
+ * (`isShowcaseHandoffsEnabled`), so the page's first render already knows if handoffs open. */
+export type ShowcasePageResult = (Extract<ShowcaseLoadResult, { status: 'found' }> & { handoffsEnabled: boolean }) | { status: 'not-found' }
 
 export type ShowcaseSources = {
   entries: readonly RegistryEntry[]
@@ -61,9 +65,13 @@ export const findShowcase = (match: ShowcaseRouteMatch, sources: ShowcaseSources
   return { status: 'found', entry, config: parsed.data }
 }
 
-/** `findShowcase` over the real index and the config.json rollout flag. A config that fails to load
- * counts as the flag being off. */
-export const loadShowcase = async (match: ShowcaseRouteMatch): Promise<ShowcaseLoadResult> => {
-  const enabled = await isShowcaseEnabled().catch(() => false)
-  return findShowcase(match, { entries: showcaseEntries, configs: showcaseConfigs, retiredKeys: retiredShowcaseKeys, enabled })
+/** `findShowcase` over the real index and the config.json flags. A config that fails to load
+ * counts as both flags being off. */
+export const loadShowcase = async (match: ShowcaseRouteMatch): Promise<ShowcasePageResult> => {
+  const [enabled, handoffsEnabled] = await Promise.all([
+    isShowcaseEnabled().catch(() => false),
+    isShowcaseHandoffsEnabled().catch(() => false),
+  ])
+  const result = findShowcase(match, { entries: showcaseEntries, configs: showcaseConfigs, retiredKeys: retiredShowcaseKeys, enabled })
+  return result.status === 'found' ? { ...result, handoffsEnabled } : result
 }

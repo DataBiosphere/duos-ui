@@ -7,3 +7,24 @@
 .showcase-link:hover {
   text-decoration: underline !important;
 }
+
+/* A handoff that a production-data preview turns off: text, not a link (S3.2). */
+.showcase-link--unavailable,
+.showcase-link--unavailable:hover {
+  color: var(--showcase-muted-text, #637381);
+  text-decoration: none !important;
+}
+
+.showcase-link__note {
+  font-size: var(--showcase-font-size-label, 14px);
+}
+
+/* Read by screen readers, not shown. */
+.showcase-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

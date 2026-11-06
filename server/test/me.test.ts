@@ -16,7 +16,7 @@ const ENV = { DUOS_API_URL: 'https://consent.dsde-dev.broadinstitute.org' }
 // tests exercise the forward path untouched.
 const FRESH_EXPIRY = () => Math.floor(Date.now() / 1000) + 3600
 
-function makeRequest(overrides: { accessToken?: string, testFixture?: boolean, idp?: 'google' | 'microsoft', tokenExpiry?: number } = {}) {
+function makeRequest(overrides: { accessToken?: string, testFixture?: boolean, idp?: 'google' | 'microsoft', tokenExpiry?: number, destroyGenerationError?: Error } = {}) {
   const destroy = vi.fn().mockResolvedValue(undefined)
   const request = {
     session: {
@@ -24,9 +24,17 @@ function makeRequest(overrides: { accessToken?: string, testFixture?: boolean, i
       testFixture: overrides.testFixture,
       idp: overrides.idp,
       tokenExpiry: overrides.tokenExpiry ?? FRESH_EXPIRY(),
+      sessionStoreId: 'row-1',
+      sessionId: 'generation-1',
       destroy,
     },
     log: { error: vi.fn(), info: vi.fn() },
+    // The pg store production wires checks the generation; a failing one throws.
+    ...(overrides.destroyGenerationError && {
+      sessionStore: {
+        destroyGeneration: vi.fn((_sid: string, _generation: string, callback: (err: unknown) => void) => callback(overrides.destroyGenerationError)),
+      },
+    }),
   }
   return { request: request as unknown as FastifyRequest, destroy }
 }
@@ -147,17 +155,19 @@ describe('getMe', () => {
     )
   })
 
-  it('still answers 401 when the rejected session cannot be destroyed', async () => {
+  it('answers 502 and keeps the cookie when the rejected session cannot be destroyed', async () => {
     vi.mocked(fetch).mockResolvedValue(makeFetchResponse(401, {}) as never)
-    const { request, destroy } = makeRequest({ accessToken: 'fresh-access-token' })
-    destroy.mockRejectedValue(new Error('store unavailable'))
+    const { request } = makeRequest({ accessToken: 'fresh-access-token', destroyGenerationError: new Error('store unavailable') })
     const reply = makeReply()
 
     await getMe(request, reply)
 
-    expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
-    expect(reply.status).toHaveBeenCalledWith(401)
-    expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+    // The failed destroy can't tell whether a later sign-in holds the row, and
+    // a 401 would make the client sign the browser out of it.
+    expect(reply.clearCookie).not.toHaveBeenCalled()
+    expect(reply.status).toHaveBeenCalledWith(502)
+    expect(reply.status).not.toHaveBeenCalledWith(401)
+    expect(reply.send).toHaveBeenCalledWith({ authenticated: false, error: 'upstream_unavailable' })
     // A destroy that failed is not a session that ended, so it must not be counted as one.
     expect(request.log.info).not.toHaveBeenCalledWith(expect.objectContaining({ event: 'auth.session.destroyed' }), expect.anything())
   })
@@ -215,6 +225,21 @@ describe('getMe', () => {
       error: 'provider_conflict',
       message: expect.stringContaining('different authentication provider'),
     })
+  })
+
+  it('still forwards the 409 message, but keeps the cookie, when the session cannot be destroyed', async () => {
+    const message = 'Please sign in with that provider.'
+    vi.mocked(fetch).mockResolvedValue(makeFetchResponse(409, { message, code: 409 }) as never)
+    const { request } = makeRequest({ accessToken: 'fresh-access-token', destroyGenerationError: new Error('store unavailable') })
+    const reply = makeReply()
+
+    await getMe(request, reply)
+
+    // Only the message tells the user what to do; the failed destroy can't
+    // tell whether a later sign-in holds the row, so the cookie stays.
+    expect(reply.status).toHaveBeenCalledWith(409)
+    expect(reply.send).toHaveBeenCalledWith({ authenticated: false, error: 'provider_conflict', message })
+    expect(reply.clearCookie).not.toHaveBeenCalled()
   })
 
   it('does not refresh when the access token is comfortably fresh', async () => {

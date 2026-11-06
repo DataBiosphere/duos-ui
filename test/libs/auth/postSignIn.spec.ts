@@ -109,6 +109,25 @@ describe('completeSignIn', () => {
       expect(navigate).not.toHaveBeenCalled()
     })
 
+    it.each(['/?utm_source=x', '/home?utm_source=x', '/#about', '/home#top'])('routes a ToS-accepted user on the landing page %j to their console', async (landing) => {
+      const tosAcceptedUser = { ...duosUser, userStatusInfo: tosAcceptedStatus }
+      vi.mocked(User.getMe).mockResolvedValue(tosAcceptedUser as never)
+      globalThis.history.replaceState({}, '', landing)
+
+      await run(landing)
+
+      expect(vi.mocked(Navigation.console)).toHaveBeenCalledWith(tosAcceptedUser, navigate)
+      expect(navigate).not.toHaveBeenCalled()
+    })
+
+    it('sends a user on a landing page with a query string to /tos_acceptance with no redirectTo', async () => {
+      vi.mocked(User.getMe).mockResolvedValue(duosUser as never)
+
+      await run('/?utm_source=x')
+
+      expect(navigate).toHaveBeenCalledWith('/tos_acceptance')
+    })
+
     it('leaves a ToS-accepted user in place when the callback landed on the destination page', async () => {
       const tosAcceptedUser = { ...duosUser, userStatusInfo: tosAcceptedStatus }
       vi.mocked(User.getMe).mockResolvedValue(tosAcceptedUser as never)
@@ -118,6 +137,16 @@ describe('completeSignIn', () => {
       await run('/datalibrary')
 
       expect(vi.mocked(Navigation.console)).not.toHaveBeenCalled()
+      expect(navigate).not.toHaveBeenCalled()
+    })
+
+    it('leaves a ToS-accepted user in place when the destination page carries a query string', async () => {
+      const tosAcceptedUser = { ...duosUser, userStatusInfo: tosAcceptedStatus }
+      vi.mocked(User.getMe).mockResolvedValue(tosAcceptedUser as never)
+      globalThis.history.replaceState({}, '', '/datalibrary?query=heart')
+
+      await run('/datalibrary?query=heart')
+
       expect(navigate).not.toHaveBeenCalled()
     })
 

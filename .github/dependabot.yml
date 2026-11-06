@@ -33,13 +33,6 @@ updates:
       - "pnpm"
     commit-message:
       prefix: "[DT-400-pnpm]"
-    ignore:
-      # Held at 11.1.5 until DT-4420 migrates the session store. 11.1.6 fixes
-      # GHSA-2hw7-jxfh-4rm3 (logout race), but it won't register without a store
-      # compareAndSet, and regenerate() now keeps the store row, which breaks the
-      # sign-in rotation. Capped below 12 so a major release still opens a PR.
-      - dependency-name: "@fastify/session"
-        versions: [">=11.1.6 <12"]
     groups:
       pnpm-major:
         patterns:

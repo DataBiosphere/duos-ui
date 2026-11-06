@@ -2,6 +2,8 @@ import * as oidc from 'openid-client'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { logAuthEvent } from './authEvents.js'
 import { getOidcConfig, pkce, requireEnv } from './oidcClient.js'
+import { failedSaveOutcome } from '../session/sessionEnded.js'
+import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
 /**
  * Open-redirect guard for the post-login redirect target: accept only
@@ -18,7 +20,9 @@ export function safeReturnTo(value: unknown): string {
   if (typeof value !== 'string' || !value.startsWith('/')) return '/'
   try {
     const url = new URL(value, RETURN_TO_BASE)
-    if (url.origin !== RETURN_TO_BASE) return '/'
+    // A same-origin input can still normalize to '//host/...' ('/a/..//host'),
+    // which a browser reads as a protocol-relative URL to another site.
+    if (url.origin !== RETURN_TO_BASE || url.pathname.startsWith('//')) return '/'
     return url.pathname + url.search + url.hash
   }
   catch {
@@ -61,7 +65,19 @@ export async function handleLogin(request: FastifyRequest, reply: FastifyReply):
   // resolves — otherwise Fastify's wrapThenable fires a second reply.send() and
   // the duplicate session write crashes with ERR_HTTP_HEADERS_SENT. See the
   // fuller note in callback.ts. (This race is why /auth/login was flaky.)
-  await request.session.save()
+  try {
+    await request.session.save()
+  }
+  catch (err: unknown) {
+    // A logout ended this browser's session, or a sign-in in another tab
+    // replaced it, while this login was being prepared. Fail it as transient
+    // (the client can try again); clear the cookie only if the session is gone.
+    const outcome = await failedSaveOutcome(request, err)
+    if (!outcome) throw err
+    if (outcome === 'ended') reply.clearCookie(SESSION_COOKIE_NAME)
+    reply.status(502).send({ error: 'upstream_unavailable' })
+    return
+  }
 
   reply.send({ redirectUrl: redirectUrl.href }) // buildAuthorizationUrl returns a URL
   logAuthEvent(request, 'auth.login.completed', { outcome: 'ok', idp: 'unknown' })

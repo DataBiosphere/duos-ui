@@ -19,7 +19,7 @@
     "@fastify/postgres": "6.1.1",
     "@fastify/rate-limit": "11.2.1",
     "@fastify/reply-from": "12.8.1",
-    "@fastify/session": "11.1.5",
+    "@fastify/session": "11.1.6",
     "@fastify/static": "10.1.8",
     "@fastify/vite": "10.0.0",
     "fastify": "5.12.8",
