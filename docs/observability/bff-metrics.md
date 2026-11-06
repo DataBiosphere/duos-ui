@@ -35,7 +35,7 @@ What each row leaves out on purpose:
 - A terminal refresh rejection signs the user out. A transient failure keeps the session. Keep them in separate rows.
 - An anonymous 401 has the error code `unauthenticated`. It is not an `auth.session.destroyed` event, so the upstream 401 row ignores it.
 - A request whose session a later sign-in has replaced logs `auth.session.superseded`, not `auth.session.destroyed`: nothing was destroyed. The upstream 401 row ignores it too.
-- A refresh whose session a later sign-in has replaced counts as `outcome=transient`. It answers 502 so the client keeps the later sign-in, and a burst of re-sign-ins can raise the transient rate.
+- A refresh whose session a later sign-in replaced during the flight counts as `outcome=transient`. It answers 502 so the client keeps the later sign-in, and a burst of re-sign-ins can raise the transient rate. A session with no refresh token never starts a flight: it logs `auth.refresh.unrefreshable` and `auth.session.superseded`, and no `auth.refresh.completed`.
 - A 429 from a public endpoint is expected throttling. The public failure rate counts 5xx only.
 - A `compareAndSet` that finds its session already destroyed or regenerated is `outcome=conflict`. It is in the store denominator, not the numerator.
 
