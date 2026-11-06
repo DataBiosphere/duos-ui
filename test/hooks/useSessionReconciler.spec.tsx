@@ -128,7 +128,7 @@ describe('useSessionReconciler', () => {
       expect(await redirectPathFor(`/?redirectTo=${encodeURIComponent('/datalibrary?query=heart')}`)).toBe('/datalibrary?query=heart')
     })
 
-    it.each(['https://evil.example', '//evil.example', '/\\evil.example', 'javascript:alert(1)'])('follows only an internal ?redirectTo= (%s goes to /)', async (target) => {
+    it.each(['https://evil.example', '//evil.example', '/\\evil.example', 'javascript:alert(1)', '/.//evil.example', '/%2e//evil.example'])('follows only an internal ?redirectTo= (%s goes to /)', async (target) => {
       expect(await redirectPathFor(`/?redirectTo=${encodeURIComponent(target)}`)).toBe('/')
     })
   })

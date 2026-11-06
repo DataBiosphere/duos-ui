@@ -346,7 +346,7 @@ describe('Navigation.console', () => {
     expect(await destinationFor('/datalibrary?query=heart')).toBe('/datalibrary?query=heart')
   })
 
-  it.each(['https://evil.example', '//evil.example', '/\\evil.example'])('goes to / for the external redirectTo %s', async (target) => {
+  it.each(['https://evil.example', '//evil.example', '/\\evil.example', 'javascript:alert(1)', '/.//evil.example', '/%2e//evil.example'])('goes to / for the external redirectTo %s', async (target) => {
     expect(await destinationFor(target)).toBe('/')
   })
 })

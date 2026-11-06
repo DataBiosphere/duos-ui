@@ -106,8 +106,8 @@ describe('Terms of Service Acceptance Page', () => {
       expect(await acceptWithRedirect('/datalibrary?query=heart')).toBe('/datalibrary?query=heart')
     })
 
-    it('goes to / for an external destination', async () => {
-      expect(await acceptWithRedirect('//evil.example/path')).toBe('/')
+    it.each(['https://evil.example', '//evil.example/path', '/\\evil.example', 'javascript:alert(1)', '/.//evil.example', '/%2e//evil.example'])('goes to / for the external destination %s', async (target) => {
+      expect(await acceptWithRedirect(target)).toBe('/')
     })
   })
 })
