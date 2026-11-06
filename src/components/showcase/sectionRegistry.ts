@@ -74,6 +74,14 @@ export const sectionRegistry: SectionRegistry = {
   'hero': { component: Hero, defaultLabels: {}, navigable: false, hasRenderableContent: heroHasContent },
   // Provisional title. A computed shelf's content depends on its lookup, which the shelf renders.
   'latest-data-releases': { component: DatasetShelf, defaultLabels: { title: 'Latest data releases' }, navigable: true, hasRenderableContent: () => true },
+  // Provisional title. Curated or computed per showcase; a curated list with no items makes no
+  // lookup, so it has nothing to show.
+  'open-access-datasets': {
+    component: DatasetShelf,
+    defaultLabels: { title: 'Open access datasets' },
+    navigable: true,
+    hasRenderableContent: section => section.ranking !== undefined || (section.items ?? []).length > 0,
+  },
 }
 
 export interface VisibleSectionOf<K extends SectionKey> {

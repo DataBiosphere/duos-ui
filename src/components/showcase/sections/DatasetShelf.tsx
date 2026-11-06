@@ -1,6 +1,7 @@
 /**
  * A dataset shelf section (DT-4355, S3.3): the cards that one catalog lookup returns, in the order
- * Consent gives them. `latest-data-releases` uses it now; `open-access-datasets` will too.
+ * Consent gives them (or, for a curated `open-access-datasets`, in the listed order). Consent
+ * applies eligibility, so the open-access shelf holds open datasets only.
  *
  * - Loading (D11): the heading and a skeleton at card height, announced once as "Loading
  *   datasets". The skeleton is hidden from assistive technology.
