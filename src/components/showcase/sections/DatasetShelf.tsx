@@ -5,7 +5,8 @@
  * - Loading (D11): the heading and a skeleton at card height, announced once as "Loading
  *   datasets". The skeleton is hidden from assistive technology.
  * - Failed (D12): the heading stays, with a message and "Try again" in place of the cards. Mock
- *   or cached data is never shown.
+ *   or cached data is never shown. After a 429 (D13), "Try again" is off for the `Retry-After`
+ *   seconds, or 60 when the browser can't read the header, with a countdown that describes it.
  * - Ready: one `DatasetCard` per dataset in the `Shelf` primitive, with "See all" when the config
  *   sets `seeAllUrl` (D4).
  * - Ready with no datasets: nothing renders.
@@ -16,12 +17,13 @@
  * The section's DOM id is on the root `div`, the target of `#<section key>` links. While the shelf
  * loads or is empty, the template gives it no sub-nav link and hides same-page links to it (D11).
  */
-import React, { useContext, useEffect, useId, useRef } from 'react'
+import React, { useContext, useEffect, useId, useRef, useState } from 'react'
 import { DatasetCard } from 'src/components/showcase/primitives/DatasetCard'
 import { Shelf } from 'src/components/showcase/primitives/Shelf'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
 import type { SectionRendererProps } from 'src/components/showcase/sectionRegistry'
 import { ShowcaseLookupsContext } from 'src/components/showcase/showcaseTemplateContract'
+import type { ShowcaseLookupError } from 'src/libs/ajax/ShowcaseCatalog'
 import type { DatasetSectionKey } from 'src/types/showcase'
 import './DatasetShelf.css'
 
@@ -30,6 +32,11 @@ export const DATASETS_LOADING_TEXT = 'Loading datasets'
 export const DATASETS_FAILED_TEXT = 'These datasets can\'t be loaded right now.'
 export const TRY_AGAIN_LABEL = 'Try again'
 export const SEE_ALL_LABEL = 'See all'
+export const retryWaitText = (seconds: number) => `You can try again in ${seconds} ${seconds === 1 ? 'second' : 'seconds'}.`
+
+/** D13: the wait when a 429 has no `Retry-After` the browser can read (legacy mode until DT-4422).
+ * 60 seconds always clears the lookup's 120-a-minute limit. */
+export const RETRY_FALLBACK_SECONDS = 60
 
 const SKELETON_CARDS = 3
 
@@ -54,12 +61,47 @@ const Skeleton = () => (
   </>
 )
 
-const Failed = ({ onRetry }: { onRetry: () => void }) => (
-  <div className="showcase-dataset-shelf__failed">
-    <p>{DATASETS_FAILED_TEXT}</p>
-    <button type="button" className="showcase-dataset-shelf__retry" onClick={onRetry}>{TRY_AGAIN_LABEL}</button>
-  </div>
-)
+/** The seconds to wait before "Try again": the `Retry-After` of a 429, else 0. */
+const waitSeconds = (error: ShowcaseLookupError) =>
+  error.status === 429 ? Math.max(0, error.retryAfterSeconds ?? RETRY_FALLBACK_SECONDS) : 0
+
+/** Whole seconds left until `seconds` from mount have passed. A new failure mounts a new `Failed`. */
+const useCountdown = (seconds: number) => {
+  const [left, setLeft] = useState(seconds)
+  useEffect(() => {
+    if (seconds <= 0) return
+    const deadline = Date.now() + seconds * 1000
+    const timer = setInterval(() => {
+      const next = Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
+      setLeft(next)
+      if (next === 0) clearInterval(timer)
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [seconds])
+  return left
+}
+
+/** `aria-disabled`, not `disabled`, so the button keeps focus while it waits (D13). */
+const Failed = ({ error, onRetry }: { error: ShowcaseLookupError, onRetry: () => void }) => {
+  const left = useCountdown(waitSeconds(error))
+  const waitId = useId()
+  const waiting = left > 0
+  return (
+    <div className="showcase-dataset-shelf__failed">
+      <p>{DATASETS_FAILED_TEXT}</p>
+      <button
+        type="button"
+        className="showcase-dataset-shelf__retry"
+        aria-disabled={waiting || undefined}
+        aria-describedby={waiting ? waitId : undefined}
+        onClick={waiting ? undefined : onRetry}
+      >
+        {TRY_AGAIN_LABEL}
+      </button>
+      {waiting && <span id={waitId} className="showcase-dataset-shelf__wait">{retryWaitText(left)}</span>}
+    </div>
+  )
+}
 
 export const DatasetShelf = <K extends DatasetSectionKey>({ sectionKey, section, id, title = '' }: SectionRendererProps<K>) => {
   const state = useContext(ShowcaseLookupsContext).datasets[sectionKey]
@@ -96,7 +138,7 @@ export const DatasetShelf = <K extends DatasetSectionKey>({ sectionKey, section,
   else {
     body = (
       <Frame headingId={headingId} title={title}>
-        {state.status === 'loading' ? <Skeleton /> : <Failed onRetry={retry} />}
+        {state.status === 'loading' ? <Skeleton /> : <Failed error={state.error} onRetry={retry} />}
       </Frame>
     )
   }

@@ -41,3 +41,14 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+.showcase-dataset-shelf__retry[aria-disabled='true'] {
+  border-color: var(--showcase-border);
+  color: var(--showcase-muted-text);
+  cursor: not-allowed;
+}
+
+.showcase-dataset-shelf__wait {
+  font-size: var(--showcase-font-size-label);
+  color: var(--showcase-muted-text);
+}
