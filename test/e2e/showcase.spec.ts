@@ -74,6 +74,14 @@ for (const { entry, path } of SHOWCASES) {
   })
 }
 
+test.describe('the partner hero (S3.3)', () => {
+  test('hides the onboarding link whose target section is not on the page', async ({ page }) => {
+    await page.goto(`/showcase/${E2E_PARTNER.key}`)
+    await expect(page.getByRole('link', { name: 'Browse the data library' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Start in a workspace' })).toHaveCount(0)
+  })
+})
+
 test.describe('refused showcase URLs', () => {
   /** The visible not-found text and the document title, the two places a refused key could show. */
   const notFoundPage = async (page: Page, path: string) => {

@@ -34,13 +34,16 @@ export interface SubNavLink {
 }
 
 /**
- * What the masthead needs from the page (S3.2): the registry entry's title, for the logo alt text
- * and for a showcase with no logo, and the sub-nav links (`subNavSections`, so only visible,
- * navigable, labelled sections get one).
+ * What section renderers need from the page: the registry entry's title (S3.2), for the logo alt
+ * text, a showcase with no logo and a hero with no title of its own; the sub-nav links
+ * (`subNavSections`, so only visible, navigable, labelled sections get one); and the DOM ids of the
+ * visible sections (S3.3), so a same-page link to a section that isn't rendered is hidden.
  */
 export interface ShowcasePageInfo {
   title: string
   subNav: readonly SubNavLink[]
+  /** Undefined outside a template, where no same-page link is hidden. */
+  visibleSectionIds?: readonly string[]
 }
 
 export const ShowcasePageInfoContext = createContext<ShowcasePageInfo>({ title: '', subNav: [] })
