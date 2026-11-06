@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeAll } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Modal from 'react-modal'
 import { MemoryRouter } from 'react-router'
@@ -195,10 +195,11 @@ describe('ConsentGroupList component', () => {
       </MemoryRouter>,
     )
     await user.click(container.querySelector('#add-consent-group-btn')!)
-    expect(screen.getByText('Cloud')).toBeInTheDocument()
+    const cloud = container.querySelector('.formField-cloud') as HTMLElement
+    expect(within(cloud).getByText('Cloud')).toBeInTheDocument()
     await fillConsentGroupForm(user, container)
-    await user.type(container.querySelector('#cloud input')!, 'Azure{Enter}')
-    await user.type(container.querySelector('#cloud input')!, 'AWS{Enter}')
+    await user.click(within(cloud).getByRole('button', { name: 'Azure' }))
+    await user.click(within(cloud).getByRole('button', { name: 'AWS' }))
     await clickSaveButton(user, container)
 
     expect(collected).toHaveLength(1)

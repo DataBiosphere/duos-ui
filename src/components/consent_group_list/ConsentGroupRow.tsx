@@ -3,6 +3,7 @@ import ConsentGroupAddEdit from 'src/components/consent_group_list/ConsentGroupA
 import ConsentGroupSummary from 'src/components/consent_group_list/ConsentGroupSummary'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import StudyAssetRow from 'src/components/study_asset/StudyAssetRow'
+import type { StudyInheritance } from 'src/pages/data_submission/v2/v2-common-functions'
 
 interface ConsentGroupRowProps {
   readonly id: number
@@ -18,6 +19,8 @@ interface ConsentGroupRowProps {
   readonly onConsentGroupChange: (items: ConsentGroup2[]) => void
   readonly disabled: boolean
   readonly isEditingExistingStudy?: boolean
+  /** What each dataset takes from the study; absent outside the study form. */
+  readonly inheritance?: StudyInheritance
 }
 
 export default function ConsentGroupRow(props: ConsentGroupRowProps): React.JSX.Element {
@@ -35,6 +38,7 @@ export default function ConsentGroupRow(props: ConsentGroupRowProps): React.JSX.
     onConsentGroupChange,
     disabled,
     isEditingExistingStudy,
+    inheritance,
   } = props
 
   return (
@@ -60,6 +64,7 @@ export default function ConsentGroupRow(props: ConsentGroupRowProps): React.JSX.
         closeAction,
         onConsentGroupChange,
         isEditingExistingStudy,
+        inheritance,
       }}
       summaryProps={{
         consentGroup,

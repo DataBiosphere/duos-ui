@@ -4,6 +4,7 @@ import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGr
 import ConsentGroupAddEdit from 'src/components/consent_group_list/ConsentGroupAddEdit'
 import ConsentGroupRow from 'src/components/consent_group_list/ConsentGroupRow'
 import StudyAssetList from 'src/components/study_asset/StudyAssetList'
+import type { StudyInheritance } from 'src/pages/data_submission/v2/v2-common-functions'
 
 interface ConsentGroupListProps {
   readonly consentGroups: ConsentGroup2[]
@@ -13,6 +14,8 @@ interface ConsentGroupListProps {
   readonly validation?: DarErrors
   readonly studyAssetWrapper?: (content: React.ReactNode, button: React.ReactNode) => React.ReactNode
   readonly isEditingExistingStudy?: boolean
+  /** What each dataset takes from the study; absent outside the study form. */
+  readonly inheritance?: StudyInheritance
 }
 
 export default function ConsentGroupList(props: ConsentGroupListProps): React.JSX.Element {
@@ -40,6 +43,7 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
         closeAction,
         onConsentGroupChange: onItemsChange,
         isEditingExistingStudy: props.isEditingExistingStudy,
+        inheritance: props.inheritance,
       })}
       getRowProps={baseProps => ({
         id: baseProps.index,
@@ -55,6 +59,7 @@ export default function ConsentGroupList(props: ConsentGroupListProps): React.JS
         columnsToShow: baseProps.columnsToShow,
         disabled: baseProps.disabled,
         isEditingExistingStudy: props.isEditingExistingStudy,
+        inheritance: props.inheritance,
       })}
       getItemKey={item => item.consentGroupId}
     />
