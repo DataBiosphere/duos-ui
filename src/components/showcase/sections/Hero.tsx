@@ -17,17 +17,25 @@
  * up. There is no data-size stat: DUOS has no trusted byte-size source (contracts record).
  */
 import React, { useContext, useId, useState } from 'react'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
+import Paper from '@mui/material/Paper'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
+import type { SxProps, Theme } from '@mui/material/styles'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
 import { isShownHref } from 'src/components/showcase/primitives/safeHref'
 import type { EnabledSection, SectionRendererProps } from 'src/components/showcase/sectionRegistry'
 import { currentAnnouncements, HERO_STAT_LABELS, type HeroStatKey, heroStats } from 'src/components/showcase/sections/heroContent'
+import { heroSx } from 'src/components/showcase/sections/heroStyles'
 import {
   SHOWCASE_MAIN_HEADING_ID,
   ShowcaseClockContext,
   ShowcaseLookupsContext,
   ShowcasePageInfoContext,
 } from 'src/components/showcase/showcaseTemplateContract'
-import './Hero.css'
 
 /** Provisional copy (S3.3). */
 export const ONBOARDING_LABEL = 'Get started'
@@ -39,10 +47,10 @@ export const HERO_STATS_LABEL = 'Showcase totals'
 type HeroLink = EnabledSection<'hero'>['primaryCtas'][number]
 type Announcement = EnabledSection<'hero'>['announcements'][number]
 
-const LinkList = ({ links, className, labelledBy }: { links: readonly HeroLink[], className: string, labelledBy?: string }) => (
-  <ul className={className} aria-labelledby={labelledBy}>
+const LinkList = ({ links, sx, labelledBy }: { links: readonly HeroLink[], sx: SxProps<Theme>, labelledBy?: string }) => (
+  <Box component="ul" sx={sx} aria-labelledby={labelledBy}>
     {links.map(link => <li key={`${link.label}-${link.url}`}><ShowcaseLink href={link.url}>{link.label}</ShowcaseLink></li>)}
-  </ul>
+  </Box>
 )
 
 const Stats = ({ stats }: { stats: readonly HeroStatKey[] }) => {
@@ -51,15 +59,15 @@ const Stats = ({ stats }: { stats: readonly HeroStatKey[] }) => {
   const shown = heroStats(stats, lookups.hero, toolCount)
   if (shown === undefined) return null
   return (
-    <ul className="showcase-hero__stats" aria-label={HERO_STATS_LABEL}>
+    <Stack component="ul" direction="row" aria-label={HERO_STATS_LABEL} sx={heroSx.stats}>
       {shown.map(({ key, value }) => (
-        <li key={key} className="showcase-hero__stat">
-          <span className="showcase-hero__stat-value">{value.toLocaleString('en-US')}</span>
+        <Stack component="li" key={key}>
+          <Typography variant="inherit" component="span" sx={heroSx.statValue}>{value.toLocaleString('en-US')}</Typography>
           {' '}
-          <span className="showcase-hero__stat-label">{HERO_STAT_LABELS[key]}</span>
-        </li>
+          <Typography variant="inherit" component="span" sx={heroSx.statLabel}>{HERO_STAT_LABELS[key]}</Typography>
+        </Stack>
       ))}
-    </ul>
+    </Stack>
   )
 }
 
@@ -67,19 +75,12 @@ const Onboarding = ({ links }: { links: readonly HeroLink[] }) => {
   const headingId = useId()
   if (links.length === 0) return null
   return (
-    <div className="showcase-hero__onboarding">
-      <h2 id={headingId} className="showcase-hero__subheading">{ONBOARDING_LABEL}</h2>
-      <LinkList links={links} className="showcase-hero__onboarding-links" labelledBy={headingId} />
-    </div>
+    <Box sx={heroSx.onboarding}>
+      <Typography variant="inherit" component="h2" id={headingId} sx={heroSx.subheading}>{ONBOARDING_LABEL}</Typography>
+      <LinkList links={links} sx={heroSx.onboardingLinks} labelledBy={headingId} />
+    </Box>
   )
 }
-
-/** A decorative arrow for the announcement buttons, sized by the CSS whatever the button's font. */
-const Chevron = ({ points }: { points: string }) => (
-  <svg className="showcase-hero__chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <polyline points={points} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-)
 
 /**
  * The announcements, one at a time (D5, D6): no autoplay and no pause button. "Previous" and
@@ -98,23 +99,23 @@ const Announcements = ({ announcements }: { announcements: readonly Announcement
   const move = (step: number) => setIndex((active + step + count) % count)
 
   return (
-    <section className="showcase-hero__announcements" aria-labelledby={headingId}>
-      <h2 id={headingId} className="showcase-hero__subheading">{ANNOUNCEMENTS_LABEL}</h2>
-      <div className="showcase-hero__announcement" aria-live="polite">
+    <Paper component="section" variant="outlined" aria-labelledby={headingId} sx={heroSx.announcements}>
+      <Typography variant="inherit" component="h2" id={headingId} sx={heroSx.subheading}>{ANNOUNCEMENTS_LABEL}</Typography>
+      <Box aria-live="polite" sx={heroSx.announcement}>
         <ShowcaseLink key={current.id} href={current.url}>{current.text}</ShowcaseLink>
-      </div>
+      </Box>
       {count > 1 && (
-        <div className="showcase-hero__announcement-controls">
-          <button type="button" className="showcase-hero__announcement-button" aria-label={PREVIOUS_ANNOUNCEMENT_LABEL} onClick={() => move(-1)}>
-            <Chevron points="15 18 9 12 15 6" />
-          </button>
-          <span className="showcase-hero__announcement-position">{`${active + 1} of ${count}`}</span>
-          <button type="button" className="showcase-hero__announcement-button" aria-label={NEXT_ANNOUNCEMENT_LABEL} onClick={() => move(1)}>
-            <Chevron points="9 18 15 12 9 6" />
-          </button>
-        </div>
+        <Stack direction="row" spacing="12px" sx={heroSx.announcementControls}>
+          <IconButton aria-label={PREVIOUS_ANNOUNCEMENT_LABEL} onClick={() => move(-1)} sx={heroSx.announcementButton}>
+            <ChevronLeftIcon aria-hidden />
+          </IconButton>
+          <Typography variant="inherit" component="span" sx={heroSx.announcementPosition}>{`${active + 1} of ${count}`}</Typography>
+          <IconButton aria-label={NEXT_ANNOUNCEMENT_LABEL} onClick={() => move(1)} sx={heroSx.announcementButton}>
+            <ChevronRightIcon aria-hidden />
+          </IconButton>
+        </Stack>
       )}
-    </section>
+    </Paper>
   )
 }
 
@@ -126,18 +127,18 @@ export const Hero = ({ section, id, title }: SectionRendererProps<'hero'>) => {
   const intro = section.intro.trim()
 
   return (
-    <section id={id} className="showcase-hero">
-      <div className="showcase-hero__inner">
-        <div className="showcase-hero__intro">
-          <h1 id={SHOWCASE_MAIN_HEADING_ID} className="showcase-hero__title" tabIndex={-1}>{title ?? page.title}</h1>
-          {section.subtitle !== undefined && section.subtitle.trim() !== '' && <p className="showcase-hero__subtitle">{section.subtitle}</p>}
-          {intro !== '' && <p className="showcase-hero__text">{intro}</p>}
+    <Box component="section" id={id} sx={heroSx.root}>
+      <Box sx={heroSx.inner}>
+        <div>
+          <Typography variant="inherit" component="h1" id={SHOWCASE_MAIN_HEADING_ID} tabIndex={-1} sx={heroSx.title}>{title ?? page.title}</Typography>
+          {section.subtitle !== undefined && section.subtitle.trim() !== '' && <Typography variant="inherit" sx={heroSx.subtitle}>{section.subtitle}</Typography>}
+          {intro !== '' && <Typography variant="inherit" sx={heroSx.text}>{intro}</Typography>}
           <Stats stats={section.stats} />
-          {ctas.length > 0 && <LinkList links={ctas} className="showcase-hero__ctas" />}
+          {ctas.length > 0 && <LinkList links={ctas} sx={heroSx.ctas} />}
           <Onboarding links={shown(section.onboarding)} />
         </div>
         <Announcements announcements={currentAnnouncements(section.announcements, clock, page.visibleSectionIds)} />
-      </div>
-    </section>
+      </Box>
+    </Box>
   )
 }
