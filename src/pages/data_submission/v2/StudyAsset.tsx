@@ -17,6 +17,7 @@ export const StudyAsset: React.FC<StudyAssetProps> = ({ config }) => {
 
   return (
     <div
+      className="dsf-asset"
       style={{
         marginTop: '1rem',
         width: '100%',
@@ -45,8 +46,8 @@ export const StudyAsset: React.FC<StudyAssetProps> = ({ config }) => {
         >
           <div>{icon}</div>
           <div>
-            <h3 style={{ margin: 0 }}>{title}</h3>
-            <p style={{ margin: '0.25rem 0 0 0', color: '#666' }}>{description}</p>
+            <h3 className="dsf-asset-title">{title}</h3>
+            <p className="dsf-subtitle">{description}</p>
           </div>
         </div>
         {button && <div style={{ flexShrink: 0 }}>{button}</div>}

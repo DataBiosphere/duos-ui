@@ -20,6 +20,7 @@ import { Spinner } from 'src/components/Spinner'
 import { ConsentGroup2 } from 'src/pages/data_submission/consent_group/consentGroupUtils'
 import { ResponseError } from 'src/types/model'
 import { isEmpty } from 'src/utils/NodashUtil'
+import 'src/pages/data_submission/v2/DataSubmissionFormV2.css'
 
 export type FileProperty = {
   key: string
@@ -293,7 +294,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   return (
     <>
       {loadingError && <div>Error Loading Page</div>}
-      <div style={Styles.PAGE}>
+      <div style={Styles.PAGE} className="data-submission-form">
         <div style={{ marginLeft: '-1.5%' }}>
           <TableHeaderSection
             title={formMode === 'draft' ? 'Study Registration Draft' : 'Study Registration Form'}
@@ -309,30 +310,30 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
         <NihDataManagement study={study} setStudy={setStudy} />
         <StudyAssetManagement study={study} setStudy={setStudy} isEditingExistingStudy={isEditing} onOpenContactUs={() => setShowContactModal(true)} />
         <SupportRequestModal showModal={showContactModal} onCloseRequest={() => setShowContactModal(false)} />
-        {!isEditing && (
-          <AsyncSpinnerButton
-            onClick={onSubmitStudy}
-            onError={onError}
-            className="button button-white"
-            data-cy="data-submission-submit-button"
-            hideOnSuccess={true}
-            style={{ marginTop: '1rem', marginBottom: '12px' }}
-          >
-            Create Study
-          </AsyncSpinnerButton>
-        )}
-        { isEditing && (
-          <AsyncSpinnerButton
-            onClick={onUpdateStudy}
-            onError={onUpdateStudyError}
-            className="button button-white"
-            data-cy="data-submission-submit-button"
-            hideOnSuccess={true}
-            style={{ marginBottom: '12px' }}
-          >
-            Update Study
-          </AsyncSpinnerButton>
-        ) }
+        <div className="dsf-actions">
+          {!isEditing && (
+            <AsyncSpinnerButton
+              onClick={onSubmitStudy}
+              onError={onError}
+              className="button button-white"
+              data-cy="data-submission-submit-button"
+              hideOnSuccess={true}
+            >
+              Create Study
+            </AsyncSpinnerButton>
+          )}
+          { isEditing && (
+            <AsyncSpinnerButton
+              onClick={onUpdateStudy}
+              onError={onUpdateStudyError}
+              className="button button-white"
+              data-cy="data-submission-submit-button"
+              hideOnSuccess={true}
+            >
+              Update Study
+            </AsyncSpinnerButton>
+          ) }
+        </div>
       </div>
 
     </>

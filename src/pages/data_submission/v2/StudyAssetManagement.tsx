@@ -63,169 +63,168 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
   const biospecimens = study.assets?.biospecimens || []
 
   return (
-    <div className="data-submitter-section">
-      <h2>Study Assets</h2>
-      <p>
-        Add datasets, models, workspaces, and other resources associated with this study. To add biospecimen data,
-        <Button onClick={onOpenContactUs} style={{ cursor: 'pointer' }}>contact the DUOS Team.</Button>
-      </p>
-
-      <ConsentGroupList
-        consentGroups={consentGroups}
-        onConsentGroupChange={(consentGroups: ConsentGroup2[]) => onAssetChange('consentGroups', consentGroups)}
-        disabled={false}
-        isEditingExistingStudy={isEditingExistingStudy}
-        inheritance={getStudyInheritance(study)}
-        studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
-          <StudyAsset
-            config={{
-              icon: <DatasetIcon fontSize="large" />,
-              title: 'Datasets',
-              description: 'Add datasets associated with this study',
-              children: content,
-              button: button,
-            }}
-          />
-        )}
-      />
-      <AiModelList
-        aiModels={models}
-        onAiModelsChange={(models: AiModel[]) => onAssetChange('models', models)}
-        disabled={false}
-        studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
-          <StudyAsset
-            config={{
-              icon: <StorageIcon fontSize="large" />,
-              title: 'Models',
-              description: 'Add computational models or algorithms derived from this study',
-              children: content,
-              button: button,
-            }}
-          />
-        )}
-      />
-
-      <WorkspaceList
-        workspaces={workspaces}
-        onWorkspaceChange={(workspaces: Workspace[]) => onAssetChange('workspaces', workspaces)}
-        disabled={false}
-        studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
-          <StudyAsset
-            config={{
-              icon: <LaptopMacIcon fontSize="large" />,
-              title: 'Featured Workspaces',
-              description: 'Add computational workspaces for data analysis',
-              children: content,
-              button: button,
-            }}
-          />
-        )}
-      />
-
-      <PublicationList
-        publications={publications}
-        onPublicationChange={(publications: Publication[]) => onAssetChange('publications', publications)}
-        disabled={false}
-        studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
-          <StudyAsset
-            config={{
-              icon: <DescriptionIcon fontSize="large" />,
-              title: 'Publications',
-              description: 'Add published research papers related to this study',
-              children: content,
-              button: button,
-            }}
-          />
-        )}
-      />
-
-      <PresentationList
-        presentations={presentations}
-        onPresentationChange={(presentations: Presentation[]) => onAssetChange('presentations', presentations)}
-        disabled={false}
-        studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
-          <StudyAsset
-            config={{
-              icon: <MonitorIcon fontSize="large" />,
-              title: 'Presentations',
-              description: 'Add conference presentations or talks about this study',
-              children: content,
-              button: button,
-            }}
-          />
-        )}
-      />
-
-      <ClinicalTrialList
-        clinicalTrials={clinicalTrials}
-        onClinicalTrialChange={(clinicalTrials: ClinicalTrial[]) => onAssetChange('clinicalTrials', clinicalTrials)}
-        disabled={false}
-        studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
-          <StudyAsset
-            config={{
-              icon: <LocalHospitalIcon fontSize="large" />,
-              title: 'Clinical Trials',
-              description: 'Add clinical trials associated with this study',
-              children: content,
-              button: button,
-            }}
-          />
-        )}
-      />
-
-      <IntellectualPropertyList
-        intellectualProperties={intellectualProperties}
-        onIntellectualPropertyChange={(intellectualProperties: IntellectualProperty[]) => onAssetChange('intellectualProperties', intellectualProperties)}
-        disabled={false}
-        studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
-          <StudyAsset
-            config={{
-              icon: <VerifiedUserIcon fontSize="large" />,
-              title: 'Intellectual Property',
-              description: 'Add patents or other IP related to this study',
-              children: content,
-              button: button,
-            }}
-          />
-        )}
-      />
-
-      <FundingResourceList
-        fundingResources={fundingResources}
-        onFundingResourceChange={(fundingResources: FundingResource[]) => onAssetChange('funding', fundingResources)}
-        disabled={false}
-        studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
-          <StudyAsset
-            config={{
-              icon: <AttachMoneyIcon fontSize="large" />,
-              title: 'Funding Resources',
-              description: 'Add grants and funding sources for this study',
-              children: content,
-              button: button,
-            }}
-          />
-        )}
-      />
-
-      {/* Only show biospecimen section if there are biospecimens to display */}
-      {biospecimens.length > 0 && (
-        <BiospecimenList
-          biospecimens={biospecimens}
-          onBiospecimenChange={() => {}} // Biospecimens are not editable through the UI, so we pass an empty change handler
+    <>
+      <div className="data-submitter-section" data-cy="data-assets-section">
+        <h2>Data Assets</h2>
+        <p className="dsf-subtitle">
+          Add the datasets, models, and workspaces that hold this study&apos;s data. To add biospecimen data,
+          <Button onClick={onOpenContactUs} style={{ cursor: 'pointer' }}>contact the DUOS Team.</Button>
+        </p>
+        <ConsentGroupList
+          consentGroups={consentGroups}
+          onConsentGroupChange={(consentGroups: ConsentGroup2[]) => onAssetChange('consentGroups', consentGroups)}
           disabled={false}
+          isEditingExistingStudy={isEditingExistingStudy}
+          inheritance={getStudyInheritance(study)}
           studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
             <StudyAsset
               config={{
-                icon: <BiotechIcon fontSize="large" />,
-                title: 'Biospecimens',
-                description: 'View total biospecimens for this study',
+                icon: <DatasetIcon fontSize="large" />,
+                title: 'Datasets',
+                description: 'Add datasets associated with this study',
                 children: content,
                 button: button,
               }}
             />
           )}
         />
-      )}
-    </div>
+        <AiModelList
+          aiModels={models}
+          onAiModelsChange={(models: AiModel[]) => onAssetChange('models', models)}
+          disabled={false}
+          studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+            <StudyAsset
+              config={{
+                icon: <StorageIcon fontSize="large" />,
+                title: 'Models',
+                description: 'Add computational models or algorithms derived from this study',
+                children: content,
+                button: button,
+              }}
+            />
+          )}
+        />
+        <WorkspaceList
+          workspaces={workspaces}
+          onWorkspaceChange={(workspaces: Workspace[]) => onAssetChange('workspaces', workspaces)}
+          disabled={false}
+          studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+            <StudyAsset
+              config={{
+                icon: <LaptopMacIcon fontSize="large" />,
+                title: 'Featured Workspaces',
+                description: 'Add computational workspaces for data analysis',
+                children: content,
+                button: button,
+              }}
+            />
+          )}
+        />
+        {/* Only show biospecimen section if there are biospecimens to display */}
+        {biospecimens.length > 0 && (
+          <BiospecimenList
+            biospecimens={biospecimens}
+            onBiospecimenChange={() => {}} // Biospecimens are not editable through the UI, so we pass an empty change handler
+            disabled={false}
+            studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+              <StudyAsset
+                config={{
+                  icon: <BiotechIcon fontSize="large" />,
+                  title: 'Biospecimens',
+                  description: 'View total biospecimens for this study',
+                  children: content,
+                  button: button,
+                }}
+              />
+            )}
+          />
+        )}
+      </div>
+
+      <div className="data-submitter-section" data-cy="related-resources-section">
+        <h2>Related Resources</h2>
+        <p className="dsf-subtitle">Add the publications, presentations, clinical trials, intellectual property, and funding connected to this study.</p>
+        <PublicationList
+          publications={publications}
+          onPublicationChange={(publications: Publication[]) => onAssetChange('publications', publications)}
+          disabled={false}
+          studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+            <StudyAsset
+              config={{
+                icon: <DescriptionIcon fontSize="large" />,
+                title: 'Publications',
+                description: 'Add published research papers related to this study',
+                children: content,
+                button: button,
+              }}
+            />
+          )}
+        />
+        <PresentationList
+          presentations={presentations}
+          onPresentationChange={(presentations: Presentation[]) => onAssetChange('presentations', presentations)}
+          disabled={false}
+          studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+            <StudyAsset
+              config={{
+                icon: <MonitorIcon fontSize="large" />,
+                title: 'Presentations',
+                description: 'Add conference presentations or talks about this study',
+                children: content,
+                button: button,
+              }}
+            />
+          )}
+        />
+        <ClinicalTrialList
+          clinicalTrials={clinicalTrials}
+          onClinicalTrialChange={(clinicalTrials: ClinicalTrial[]) => onAssetChange('clinicalTrials', clinicalTrials)}
+          disabled={false}
+          studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+            <StudyAsset
+              config={{
+                icon: <LocalHospitalIcon fontSize="large" />,
+                title: 'Clinical Trials',
+                description: 'Add clinical trials associated with this study',
+                children: content,
+                button: button,
+              }}
+            />
+          )}
+        />
+        <IntellectualPropertyList
+          intellectualProperties={intellectualProperties}
+          onIntellectualPropertyChange={(intellectualProperties: IntellectualProperty[]) => onAssetChange('intellectualProperties', intellectualProperties)}
+          disabled={false}
+          studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+            <StudyAsset
+              config={{
+                icon: <VerifiedUserIcon fontSize="large" />,
+                title: 'Intellectual Property',
+                description: 'Add patents or other IP related to this study',
+                children: content,
+                button: button,
+              }}
+            />
+          )}
+        />
+        <FundingResourceList
+          fundingResources={fundingResources}
+          onFundingResourceChange={(fundingResources: FundingResource[]) => onAssetChange('funding', fundingResources)}
+          disabled={false}
+          studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+            <StudyAsset
+              config={{
+                icon: <AttachMoneyIcon fontSize="large" />,
+                title: 'Funding Resources',
+                description: 'Add grants and funding sources for this study',
+                children: content,
+                button: button,
+              }}
+            />
+          )}
+        />
+      </div>
+    </>
   )
 }

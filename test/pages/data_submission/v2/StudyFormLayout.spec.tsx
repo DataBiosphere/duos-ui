@@ -4,6 +4,7 @@ import '@testing-library/jest-dom/vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { PrincipalInvestigators } from 'src/pages/data_submission/v2/PrincipalInvestigators'
 import { StudyPopulation } from 'src/pages/data_submission/v2/StudyPopulation'
+import { StudyAsset } from 'src/pages/data_submission/v2/StudyAsset'
 import { Study } from 'src/pages/data_submission/v2/v2-models'
 import { getPrincipalInvestigators, getStudyDataBag, getStudyPropertyValueByKey } from 'src/pages/data_submission/v2/v2-common-functions'
 import { ThroughBioProfile } from 'src/pages/data_submission/v2/ThroughBioProfile'
@@ -105,6 +106,14 @@ describe('StudyPopulation', () => {
     expect(heading.nextElementSibling).toHaveClass('dsf-section-toggle')
     expect(heading.nextElementSibling).toHaveTextContent('My population is the same across all assets in this Study.')
     expect(heading.nextElementSibling).toHaveClass('dsf-section-toggle--subtle')
+  })
+})
+
+describe('StudyAsset', () => {
+  it('draws every asset card, data asset or related resource, the same way', () => {
+    const { container } = render(<StudyAsset config={{ icon: null, title: 'Publications', description: '' }} />)
+    expect(container.firstElementChild).toHaveClass('dsf-asset')
+    expect(container.firstElementChild).toHaveStyle({ backgroundColor: '#eaf0fa' })
   })
 })
 
