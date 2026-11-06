@@ -7,7 +7,11 @@ import { bannerFeed, collectViolations, drainViolations, expectServerPolicy } fr
 // Section-level checks (section headings, shelf arrows, reduced motion) come with the first
 // section renderer (S3.3).
 
-const SHOWCASES = [{ entry: E2E_FLAGSHIP, path: '/data' }, { entry: E2E_PARTNER, path: `/showcase/${E2E_PARTNER.key}` }]
+// `description` is the hero subtitle, which ShowcasePage uses as the meta description.
+const SHOWCASES = [
+  { entry: E2E_FLAGSHIP, path: '/data', description: undefined },
+  { entry: E2E_PARTNER, path: `/showcase/${E2E_PARTNER.key}`, description: 'A synthetic partner showcase' },
+]
 
 const NOT_FOUND = 'Sorry, the page you were looking for was not found.'
 
@@ -16,7 +20,7 @@ const showcaseHeading = (page: Page) => page.locator('main').getByRole('heading'
 const overflowsSideways = (page: Page) =>
   page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)
 
-for (const { entry, path } of SHOWCASES) {
+for (const { entry, path, description } of SHOWCASES) {
   test.describe(`${path} (${entry.key})`, () => {
     test('loads signed out, without a sign-in redirect or a CSP violation', async ({ page, request }, testInfo) => {
       const bannersFetched = await bannerFeed(request)
@@ -31,8 +35,9 @@ for (const { entry, path } of SHOWCASES) {
       await bannersLoaded
       expect(new URL(page.url()).pathname).toBe(path)
       await expect(page).toHaveTitle(`${entry.title} | DUOS`)
-      // The description comes from the hero, which no synthetic config renders yet.
-      await expect(page.locator('meta[name="description"]')).toHaveCount(0)
+      const meta = page.locator('meta[name="description"]')
+      if (description === undefined) await expect(meta).toHaveCount(0)
+      else await expect(meta).toHaveAttribute('content', description)
       expect(await drainViolations(page, violations)).toEqual([])
 
       if (testInfo.project.name === 'legacy') {
@@ -77,7 +82,8 @@ for (const { entry, path } of SHOWCASES) {
 test.describe('the partner hero (S3.3)', () => {
   test('hides the onboarding link whose target section is not on the page', async ({ page }) => {
     await page.goto(`/showcase/${E2E_PARTNER.key}`)
-    await expect(page.getByRole('link', { name: 'Browse the data library' })).toBeVisible()
+    // A public link, so it opens whether or not this build turns the DUOS handoffs on.
+    await expect(page.getByRole('link', { name: 'About DUOS' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Start in a workspace' })).toHaveCount(0)
   })
 })
