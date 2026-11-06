@@ -43,6 +43,11 @@ export const makeModelColumns = (): GridColDef<ModelAsset>[] => [
       </Link>
     ),
   },
+  {
+    field: 'duosIdentifier',
+    headerName: 'Identifier',
+    width: 150,
+  },
   truncatedTextColumn<ModelAsset>('format', 'Format', 150),
   truncatedTextColumn<ModelAsset>('license', 'License', 120),
   chipListColumn<ModelAsset>('cloud', 'Cloud', row => row.cloud || [], 130),
