@@ -71,6 +71,19 @@ describe('endSession', () => {
       expect(request.log.info).not.toHaveBeenCalled()
     })
 
+    it('rejects with an Error, keeping a non-Error store failure as its cause', async () => {
+      const { request } = withStore('destroyed')
+      const failure = { code: 'ECONNRESET' }
+      Object.assign(request.sessionStore, {
+        destroyGeneration: (_sid: string, _generation: string, callback: (err: unknown) => void) => callback(failure),
+      })
+
+      const err = await endSession(request, 'upstream_401').catch((e: unknown) => e)
+
+      expect(err).toBeInstanceOf(Error)
+      expect((err as Error).cause).toBe(failure)
+    })
+
     it('destroys unconditionally on logout, which signs this browser out', async () => {
       const { request, destroy, destroyGeneration } = withStore('superseded')
 

@@ -60,7 +60,11 @@ export async function endSession(request: EventRequest, reason: SessionDestroyRe
     let outcome: DestroyOutcome | undefined
     try {
       outcome = await new Promise<DestroyOutcome | undefined>((resolve, reject) => {
-        destroyGeneration(sessionStoreId, sessionId, (err, result) => (err ? reject(err) : resolve(result)))
+        destroyGeneration(sessionStoreId, sessionId, (err, result) => {
+          if (!err) resolve(result)
+          // Store callbacks can hand back plain objects; keep those as the cause.
+          else reject(err instanceof Error ? err : new Error('session store destroy failed', { cause: err }))
+        })
       })
     }
     finally {

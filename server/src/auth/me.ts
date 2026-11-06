@@ -93,6 +93,59 @@ async function providerConflictMessage(res: Response): Promise<string> {
 }
 
 /**
+ * Answers every upstream status that carries no profile: a rejected token
+ * (401), an unregistered user (404), a sub-provider conflict (409), or any
+ * other failure. Returns true when it has answered.
+ */
+async function answeredWithoutProfile(request: FastifyRequest, reply: FastifyReply, res: Response): Promise<boolean> {
+  if (res.status === 401) {
+    // The upstream rejected the token itself — revoked mid-lifetime (before refresh-before-forward would
+    // touch it) or the account was disabled. The terminal 401 is final so the session must be destroyed.
+    // The client still needs to know it is signed out, so the reply goes out after the session is destroyed.
+    if (!(await destroySession(request, reply, 'upstream_401'))) return true
+    reply.status(401).send({ authenticated: false })
+    return true
+  }
+
+  if (res.status === 404) {
+    // Authenticated but not yet registered — the session is valid, and the
+    // client's post-sign-in bootstrap needs authenticated:true (with user
+    // absent) to reach its registration flow.
+    reply.send({ authenticated: true, idp: request.session.idp })
+    return true
+  }
+
+  if (res.status === 409) {
+    // Sam sub-provider conflict: the account exists under the other B2C sub-provider and Sam rejects it.
+    // Registration cannot succeed and the session cannot become usable, so end it — but forward the
+    // upstream's actionable message (sign in with the other provider, plus the support link) instead
+    // of a generic failure.
+    const message = await providerConflictMessage(res)
+    const ended = await tryEndSession(request, 'provider_conflict')
+    if (ended === 'superseded') {
+      reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
+      return true
+    }
+    // A failed destroy still forwards the message, since only it tells the user
+    // what to do, but keeps the cookie in case a later sign-in holds the row.
+    if (ended === 'ended') reply.clearCookie(SESSION_COOKIE_NAME)
+    reply.status(409).send({ authenticated: false, error: 'provider_conflict', message })
+    return true
+  }
+
+  if (!res.ok) {
+    // An unmapped status — 5xx, an upstream outage, or a 4xx the contract
+    // does not define (400/403/429) — says nothing about whether the token
+    // itself is still valid: don't destroy the session or parse an error
+    // body as if it were a user profile. 502 tells the probe to retry.
+    reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
+    return true
+  }
+
+  return false
+}
+
+/**
  * Confirms the user is authenticated against the upstream Consent API.
  * Forwards the upstream user profile and the active sub-provider — never the
  * tokens themselves, which stay server-side in the session.
@@ -145,49 +198,7 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     return
   }
 
-  if (res.status === 401) {
-    // The upstream rejected the token itself — revoked mid-lifetime (before refresh-before-forward would
-    // touch it) or the account was disabled. The terminal 401 is final so the session must be destroyed.
-    // The client still needs to know it is signed out, so the reply goes out after the session is destroyed.
-    if (!(await destroySession(request, reply, 'upstream_401'))) return
-    reply.status(401).send({ authenticated: false })
-    return
-  }
-
-  if (res.status === 404) {
-    // Authenticated but not yet registered — the session is valid, and the
-    // client's post-sign-in bootstrap needs authenticated:true (with user
-    // absent) to reach its registration flow.
-    reply.send({ authenticated: true, idp: request.session.idp })
-    return
-  }
-
-  if (res.status === 409) {
-    // Sam sub-provider conflict: the account exists under the other B2C sub-provider and Sam rejects it.
-    // Registration cannot succeed and the session cannot become usable, so end it — but forward the
-    // upstream's actionable message (sign in with the other provider, plus the support link) instead
-    // of a generic failure.
-    const message = await providerConflictMessage(res)
-    const ended = await tryEndSession(request, 'provider_conflict')
-    if (ended === 'superseded') {
-      reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
-      return
-    }
-    // A failed destroy still forwards the message, since only it tells the user
-    // what to do, but keeps the cookie in case a later sign-in holds the row.
-    if (ended === 'ended') reply.clearCookie(SESSION_COOKIE_NAME)
-    reply.status(409).send({ authenticated: false, error: 'provider_conflict', message })
-    return
-  }
-
-  if (!res.ok) {
-    // An unmapped status — 5xx, an upstream outage, or a 4xx the contract
-    // does not define (400/403/429) — says nothing about whether the token
-    // itself is still valid: don't destroy the session or parse an error
-    // body as if it were a user profile. 502 tells the probe to retry.
-    reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
-    return
-  }
+  if (await answeredWithoutProfile(request, reply, res)) return
 
   let user: unknown
   try {
