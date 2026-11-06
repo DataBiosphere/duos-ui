@@ -147,7 +147,7 @@ describe('getMe', () => {
     )
   })
 
-  it('still answers 401 when the rejected session cannot be destroyed', async () => {
+  it('answers 502 and keeps the cookie when the rejected session cannot be destroyed', async () => {
     vi.mocked(fetch).mockResolvedValue(makeFetchResponse(401, {}) as never)
     const { request, destroy } = makeRequest({ accessToken: 'fresh-access-token' })
     destroy.mockRejectedValue(new Error('store unavailable'))
@@ -155,9 +155,12 @@ describe('getMe', () => {
 
     await getMe(request, reply)
 
-    expect(reply.clearCookie).toHaveBeenCalledWith('sessionId')
-    expect(reply.status).toHaveBeenCalledWith(401)
-    expect(reply.send).toHaveBeenCalledWith({ authenticated: false })
+    // The failed destroy can't tell whether a later sign-in holds the row, and
+    // a 401 would make the client sign the browser out of it.
+    expect(reply.clearCookie).not.toHaveBeenCalled()
+    expect(reply.status).toHaveBeenCalledWith(502)
+    expect(reply.status).not.toHaveBeenCalledWith(401)
+    expect(reply.send).toHaveBeenCalledWith({ authenticated: false, error: 'upstream_unavailable' })
     // A destroy that failed is not a session that ended, so it must not be counted as one.
     expect(request.log.info).not.toHaveBeenCalledWith(expect.objectContaining({ event: 'auth.session.destroyed' }), expect.anything())
   })

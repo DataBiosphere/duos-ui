@@ -18,17 +18,21 @@ const PROVIDER_CONFLICT_FALLBACK_MESSAGE
  * Ends a session that can no longer be used, recording why. Returns false, and
  * answers 502 itself, when a later sign-in holds the row: this request's
  * sign-in is over but the browser's is not, and a 401 would make the client
- * sign the browser out.
+ * sign the browser out. A destroy that failed answers the same way, because it
+ * can't tell whether a later sign-in holds the row; the next request retries it.
  */
 async function destroySession(request: FastifyRequest, reply: FastifyReply, reason: SessionDestroyReason): Promise<boolean> {
+  let superseded: boolean
   try {
-    if (await endSession(request, reason) === 'superseded') {
-      reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
-      return false
-    }
+    superseded = await endSession(request, reason) === 'superseded'
   }
   catch (err: unknown) {
-    request.log.error({ err }, '[auth] upstream rejected the session but it could not be destroyed — answering as signed out anyway')
+    request.log.error({ err }, '[auth] upstream rejected the session but it could not be destroyed — answering 502 and keeping the cookie')
+    superseded = true
+  }
+  if (superseded) {
+    reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
+    return false
   }
   reply.clearCookie(SESSION_COOKIE_NAME)
   return true

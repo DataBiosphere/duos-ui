@@ -130,7 +130,8 @@ export function createPgSessionStore(pg: PostgresDb, log: Pick<FastifyBaseLogger
     // The DELETE checks the generation atomically. If it removes nothing, a
     // fresh read tells a later sign-in (the row is still there) from a row a
     // concurrent destroy already removed. One statement can't: a CTE would
-    // read the row as it was before that destroy committed.
+    // read the row as it was before that destroy committed. An expired row
+    // reads as gone, as `get` would, so its dead cookie is cleared.
     destroyGeneration: (sid, generation, callback) => run('destroy', callback, async (): Promise<DestroyOutcome> => {
       const { rowCount } = await pg.query(
         `DELETE FROM user_sessions WHERE sid = $1 AND ${GENERATION} = $2`,
@@ -139,7 +140,7 @@ export function createPgSessionStore(pg: PostgresDb, log: Pick<FastifyBaseLogger
       if (rowCount === 1) return 'destroyed'
       // An unreadable row reads as superseded: the DELETE already showed it
       // isn't this request's, and the caller then leaves the cookie alone.
-      const exists = await pg.query('SELECT 1 FROM user_sessions WHERE sid = $1', [sid]).then(
+      const exists = await pg.query('SELECT 1 FROM user_sessions WHERE sid = $1 AND expire > NOW()', [sid]).then(
         ({ rows }: { rows: unknown[] }) => rows.length > 0,
         (err: unknown) => {
           // Counted as a failed read in the store error rate, though the destroy answers.

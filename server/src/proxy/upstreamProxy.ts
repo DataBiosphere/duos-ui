@@ -560,7 +560,10 @@ async function endRejectedSession(request: ProxyRequest, reply: ProxyReply, logT
     request.log.info(`[${logTag}] ${reason} — ${superseded ? 'a later sign-in holds the session, returning 502' : 'session destroyed, returning 401'}`)
   }
   catch (err: unknown) {
-    request.log.error({ err }, `[${logTag}] ${reason} but the session could not be destroyed — returning 401 anyway`)
+    // A failed destroy can't tell whether a later sign-in holds the row, so it
+    // answers as one does; the next request retries the destroy.
+    request.log.error({ err }, `[${logTag}] ${reason} but the session could not be destroyed — returning 502`)
+    superseded = true
   }
   if (superseded) {
     // A later sign-in's cookie is the browser's now. Clearing it, or a 401

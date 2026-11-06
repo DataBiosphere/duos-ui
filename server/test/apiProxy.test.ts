@@ -1107,13 +1107,14 @@ describe('apiProxy', () => {
     })
 
     describe('with a store that checks the generation (DT-4420)', () => {
-      async function upstream401(outcome: 'destroyed' | 'gone' | 'superseded') {
+      async function upstream401(outcome: 'destroyed' | 'gone' | 'superseded' | Error) {
         upstream.respondWith((_req, res) => {
           res.writeHead(401)
           res.end()
         })
         app = await buildProxyApp(freshSession())
-        const destroyGeneration = vi.fn((_sid: string, _generation: string, callback: (err: unknown, outcome: string) => void) => callback(null, outcome))
+        const destroyGeneration = vi.fn((_sid: string, _generation: string, callback: (err: unknown, outcome?: string) => void) =>
+          outcome instanceof Error ? callback(outcome) : callback(null, outcome))
         app.addHook('onRequest', async (request) => {
           Object.assign(request.sessionStore, { destroyGeneration })
         })
@@ -1136,6 +1137,16 @@ describe('apiProxy', () => {
         expect(res.statusCode).toBe(502)
         expect(res.json()).toEqual({ error: 'upstream_unavailable' })
         expect(res.cookies.find(c => c.name === 'sessionId')).toBeUndefined()
+      })
+
+      it('answers 502 and keeps the cookie when the delete fails', async () => {
+        const { res, destroyGeneration } = await upstream401(new Error('store unavailable'))
+
+        // The failed delete can't tell whether a later sign-in holds the row.
+        expect(res.statusCode).toBe(502)
+        expect(res.json()).toEqual({ error: 'upstream_unavailable' })
+        expect(res.cookies.find(c => c.name === 'sessionId')).toBeUndefined()
+        expect(destroyGeneration).toHaveBeenCalledOnce()
       })
     })
 
