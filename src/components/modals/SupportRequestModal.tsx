@@ -34,6 +34,12 @@ interface SupportRequestModalProps {
   showModal: boolean
   onCloseRequest: (type: string) => void
   url?: string
+  /**
+   * Fills an empty subject and description each time the modal opens, for a request the page
+   * already knows the purpose of. Anything the user has typed is kept.
+   */
+  initialSubject?: string
+  initialDescription?: string
 }
 
 interface RedirectLinkProps {
@@ -87,7 +93,7 @@ const resetFormData = (isLogged: boolean): FormData => {
 }
 
 export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) => {
-  const { showModal, onCloseRequest, url } = props
+  const { showModal, onCloseRequest, url, initialSubject, initialDescription } = props
 
   const isLogged = useUserIsLogged() ?? false
   const [formData, setFormData] = useState<FormData>(() => resetFormData(isLogged))
@@ -107,6 +113,19 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
   if (prevPrefillKey !== prefillKey) {
     setPrevPrefillKey(prefillKey)
     setFormData(prev => ({ ...prev, name: prefillName, email: prefillEmail }))
+  }
+
+  // Same pattern, keyed on the modal opening: the purpose prefill lands once per open.
+  const [prevShowModal, setPrevShowModal] = useState(false)
+  if (prevShowModal !== showModal) {
+    setPrevShowModal(showModal)
+    if (showModal && (initialSubject || initialDescription)) {
+      setFormData(prev => ({
+        ...prev,
+        subject: prev.subject || initialSubject || '',
+        description: prev.description || initialDescription || '',
+      }))
+    }
   }
 
   const closeHandler = () => {
