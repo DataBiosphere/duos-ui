@@ -126,7 +126,8 @@ test.describe('the latest data releases shelf (S3.3)', () => {
     await page.goto(`/showcase/${E2E_PARTNER.key}`)
     await expect(shelf(page).getByRole('heading', { level: 2, name: 'Latest data releases' })).toBeVisible()
     await expect(shelf(page).getByRole('article')).toHaveCount(2)
-    await expect(shelf(page).getByRole('link', { name: /Request access/ })).toHaveAttribute('href', '/dataset/DUOS-000901')
+    // "Request access" is a DUOS handoff, a link only when this build turns the handoffs on.
+    await expect(shelf(page).getByText(/Request access/)).toBeVisible()
     await expect(shelf(page).getByRole('link', { name: 'Open provider site' })).toHaveAttribute('href', 'https://example.org/open-cohort')
   })
 
