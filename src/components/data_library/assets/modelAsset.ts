@@ -52,6 +52,7 @@ export const modelAsset: AssetDefinition = {
     'study.assets.models.trainedOnDatasets',
     'study.assets.models.maintainer.name',
     'study.assets.models.maintainer.email',
+    'study.assets.models.duosIdentifier',
   ],
 
   buildQuery(
@@ -88,6 +89,7 @@ export const modelAsset: AssetDefinition = {
           modelId: model.modelId,
           studyId: bucket.key,
           studyName: studyData.studyName || '',
+          duosIdentifier: model.duosIdentifier || '',
           name: model.name || '',
           description: model.description || '',
           url: model.url || '',
