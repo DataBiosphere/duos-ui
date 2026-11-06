@@ -55,6 +55,7 @@ export const workspaceAsset: AssetDefinition = {
     'study.assets.workspaces.tags',
     'study.assets.workspaces.access',
     'study.assets.workspaces.url',
+    'study.assets.workspaces.duosIdentifier',
   ],
 
   buildQuery(
@@ -91,6 +92,7 @@ export const workspaceAsset: AssetDefinition = {
           workspaceId: workspace.workspaceId,
           studyId: bucket.key,
           studyName: studyData.studyName || '',
+          duosIdentifier: workspace.duosIdentifier || '',
           name: workspace.name || '',
           platform: (workspace.platform || '').trim(),
           url: workspace.url || '',

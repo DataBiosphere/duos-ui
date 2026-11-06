@@ -18,6 +18,11 @@ export const makeBiospecimenColumns = (): GridColDef<BiospecimenAsset>[] => [
     ),
   },
   {
+    field: 'duosIdentifier',
+    headerName: 'DUOS ID',
+    width: 150,
+  },
+  {
     field: 'sampleId',
     headerName: 'Biospecimen ID',
     flex: 1,

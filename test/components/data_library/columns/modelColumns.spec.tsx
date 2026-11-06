@@ -158,13 +158,13 @@ describe('makeModelColumns — Tags column', () => {
 })
 
 describe('makeModelColumns — column structure', () => {
-  it('returns 8 column definitions', () => {
-    expect(makeModelColumns()).toHaveLength(8)
+  it('returns 9 column definitions', () => {
+    expect(makeModelColumns()).toHaveLength(9)
   })
 
   it('defines expected fields', () => {
     const fields = makeModelColumns().map(c => c.field)
-    expect(fields).toEqual(['name', 'studyName', 'format', 'license', 'cloud', 'maintainer', 'url', 'tags'])
+    expect(fields).toEqual(['name', 'studyName', 'duosIdentifier', 'format', 'license', 'cloud', 'maintainer', 'url', 'tags'])
   })
 
   it('marks url and tags as non-sortable', () => {
