@@ -35,6 +35,7 @@ What each row leaves out on purpose:
 - A terminal refresh rejection signs the user out. A transient failure keeps the session. Keep them in separate rows.
 - An anonymous 401 has the error code `unauthenticated`. It is not an `auth.session.destroyed` event, so the upstream 401 row ignores it.
 - A 429 from a public endpoint is expected throttling. The public failure rate counts 5xx only.
+- A `compareAndSet` that finds its session already destroyed or regenerated is `outcome=conflict`. It is in the store denominator, not the numerator.
 
 ## Active sessions
 

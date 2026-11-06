@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import type { Page, Response } from '@playwright/test'
+import type { APIRequestContext, Page, Response } from '@playwright/test'
 
 /**
  * Collects the browser's CSP violation events. The policy itself is the one
@@ -50,4 +50,15 @@ export async function collectViolations(page: Page): Promise<Violation[]> {
 export async function drainViolations(page: Page, violations: Violation[]): Promise<Violation[]> {
   await page.evaluate(() => true)
   return violations
+}
+
+/**
+ * Matches the banner feed that config.json names, so a bucket move cannot stale it. Every page's
+ * header loads the feed and renders its Markdown, which may name an image the policy blocks, so a
+ * clean-page check waits for this response before draining.
+ */
+export async function bannerFeed(request: APIRequestContext): Promise<(response: Response) => boolean> {
+  const { bannersUrl } = await (await request.get('/config.json')).json() as { bannersUrl?: string }
+  if (!bannersUrl) throw new Error('config.json names no bannersUrl, so the banner wait cannot complete')
+  return response => response.url() === bannersUrl
 }

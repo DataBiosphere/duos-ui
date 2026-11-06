@@ -1,6 +1,6 @@
 import { test, expect } from './support/auth'
-import type { APIRequestContext, Response } from '@playwright/test'
-import { collectViolations, drainViolations, expectServerPolicy } from './support/csp'
+import type { Response } from '@playwright/test'
+import { bannerFeed, collectViolations, drainViolations, expectServerPolicy } from './support/csp'
 
 /**
  * Each flow waits for its last relevant response before checking violations.
@@ -19,13 +19,6 @@ const consentStatusFetched = (response: Response): boolean =>
 const DASHBOARD_SUMMARY = /\/api\/researcher\/dashboard-summary$/
 // img-src allows only 'self' and data:, and .invalid never resolves.
 const DISALLOWED_IMAGE = 'https://csp-probe.invalid/probe.png'
-
-/** Matches the banner feed that config.json names, so a bucket move cannot stale it. */
-async function bannerFeed(request: APIRequestContext): Promise<(response: Response) => boolean> {
-  const { bannersUrl } = await (await request.get('/config.json')).json() as { bannersUrl?: string }
-  if (!bannersUrl) throw new Error('config.json names no bannersUrl, so the banner wait cannot complete')
-  return response => response.url() === bannersUrl
-}
 
 test.describe('Content Security Policy', () => {
   test('The collector reports a violation when one happens', async ({ page }) => {
