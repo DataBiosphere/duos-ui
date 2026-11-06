@@ -249,29 +249,41 @@ describe('Masthead', () => {
     })
   })
 
-  describe('anchor offset', () => {
-    const offset = (container: HTMLElement) =>
-      (container.querySelector('.showcase-template') as HTMLElement).style.getPropertyValue('--showcase-anchor-offset')
-
-    afterEach(() => {
-      vi.restoreAllMocks()
-    })
-
-    it('equals the masthead height while it sticks', () => {
+  describe('scroll padding', () => {
+    const page = document.documentElement
+    const stickyMasthead = () => {
       const realStyle = globalThis.getComputedStyle
       vi.spyOn(globalThis, 'getComputedStyle').mockImplementation((element) => {
         const style = realStyle(element)
         return (element as HTMLElement).classList.contains('showcase-masthead') ? { ...style, position: 'sticky' } as CSSStyleDeclaration : style
       })
+    }
+
+    beforeEach(() => {
       vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(120)
-      const { container } = renderMasthead()
-      expect(offset(container)).toBe('120px')
     })
 
-    it('is 0 when the masthead does not stick (phones)', () => {
-      vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(120)
-      const { container } = renderMasthead()
-      expect(offset(container)).toBe('0px')
+    afterEach(() => {
+      vi.restoreAllMocks()
+      page.style.scrollPaddingTop = ''
+    })
+
+    it('pads the page by the masthead height while it sticks, so focus and anchors clear it', () => {
+      stickyMasthead()
+      renderMasthead()
+      expect(page.style.scrollPaddingTop).toBe('120px')
+    })
+
+    it('sets no padding when the masthead does not stick (phones)', () => {
+      renderMasthead()
+      expect(page.style.scrollPaddingTop).toBe('')
+    })
+
+    it('clears the padding when the showcase unmounts, so other pages are not affected', () => {
+      stickyMasthead()
+      const { unmount } = renderMasthead()
+      unmount()
+      expect(page.style.scrollPaddingTop).toBe('')
     })
   })
 })

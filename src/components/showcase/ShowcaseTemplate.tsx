@@ -4,8 +4,9 @@
  *
  * Each section renderer owns its own `<section id={id} aria-labelledby=...>` and heading, as
  * `SectionRendererProps.id` and the Shelf primitive do; the template adds no wrapper, so there is
- * one region per section. The renderer's root element must carry the id, so the anchor offset
- * (`scroll-margin-top`) applies to it.
+ * one region per section. The renderer's root element must carry the id, since it is the target
+ * of `#<section key>` links. The masthead keeps the page's `scroll-padding-top` equal to its height
+ * while it sticks, so a target is not hidden under it.
  *
  * The page has one `h1`, which is also the skip link's target. When the hero renders, its renderer
  * puts `id={SHOWCASE_MAIN_HEADING_ID}` and `tabIndex={-1}` on its heading; otherwise the template

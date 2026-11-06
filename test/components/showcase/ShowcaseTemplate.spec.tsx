@@ -176,6 +176,7 @@ describe('ShowcaseTemplate', () => {
     expect(css).toContain(`${rule} {\n  outline: var(--showcase-focus-width) solid var(--showcase-focus-color);`)
     expect(css).toMatch(/@media \(forced-colors: active\) \{\s*\.showcase-template :is\(a, button, input, select, textarea, summary, \[tabindex\]\):focus-visible \{\s*outline-color: Highlight;/)
     expect(css.replace(/\/\*[\s\S]*?\*\//g, '')).not.toMatch(/!important|box-shadow/)
-    expect(css).toMatch(/scroll-margin-top: var\(--showcase-anchor-offset\)/)
+    // The masthead sets the page's scroll-padding-top; a scroll-margin here would add to it.
+    expect(css).not.toMatch(/scroll-margin-top/)
   })
 })

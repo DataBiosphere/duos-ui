@@ -20,9 +20,6 @@
   --showcase-focus-color: var(--showcase-primary);
   --showcase-focus-width: 3px;
   --showcase-focus-offset: 2px;
-  /* The height of the sticky masthead (D8), which S3.2 sets on desktop and tablet; 0 on phones. */
-  --showcase-anchor-offset: 0px;
-
   background: var(--showcase-background);
   font-family: var(--showcase-font-body);
   font-size: var(--showcase-font-size-body);
@@ -72,11 +69,6 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
-}
-
-/* Every section renderer's root element carries the section id, so this is the anchor target. */
-.showcase-template__main > * {
-  scroll-margin-top: var(--showcase-anchor-offset);
 }
 
 /* Provisional (S3.2): the notice that handoffs are off in a production-data preview. */

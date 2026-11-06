@@ -4,8 +4,9 @@
  * Sign in, so the masthead has neither (contracts record, D10).
  *
  * It sticks to the top of the window on tablet and desktop, and not on phones (D8). While it
- * sticks, it sets `--showcase-anchor-offset` on the template root to its own height, so a section
- * heading that a sub-nav link scrolls to is not hidden under it.
+ * sticks, it sets `scroll-padding-top` on the page root (`<html>`) to its own height. So nothing
+ * the browser scrolls into view is hidden under it: a section that a sub-nav link targets, a
+ * control that gets keyboard focus (WCAG 2.4.11), or the heading that the skip link focuses.
  */
 import React, { type FormEvent, useContext, useId, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -95,16 +96,16 @@ const SubNav = ({ links }: { links: readonly SubNavLink[] }) => {
   )
 }
 
-/** Keeps `--showcase-anchor-offset` on the template root equal to the masthead's height while it
- * sticks, and 0 when it doesn't (phones, D8). */
-const useAnchorOffset = (ref: React.RefObject<HTMLElement | null>) => {
+/** Keeps the page's `scroll-padding-top` equal to the masthead's height while it sticks, and
+ * clears it when it doesn't (phones, D8) or when the masthead unmounts. */
+const useStickyScrollPadding = (ref: React.RefObject<HTMLElement | null>) => {
   useLayoutEffect(() => {
     const masthead = ref.current
-    const root = masthead?.closest<HTMLElement>('.showcase-template')
-    if (!masthead || !root) return
+    if (!masthead) return
+    const page = document.documentElement
     const update = () => {
       const sticks = getComputedStyle(masthead).position === 'sticky'
-      root.style.setProperty('--showcase-anchor-offset', `${sticks ? masthead.offsetHeight : 0}px`)
+      page.style.scrollPaddingTop = sticks ? `${masthead.offsetHeight}px` : ''
     }
     update()
     const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(update)
@@ -113,7 +114,7 @@ const useAnchorOffset = (ref: React.RefObject<HTMLElement | null>) => {
     return () => {
       observer?.disconnect()
       globalThis.removeEventListener('resize', update)
-      root.style.removeProperty('--showcase-anchor-offset')
+      page.style.scrollPaddingTop = ''
     }
   }, [ref])
 }
@@ -121,7 +122,7 @@ const useAnchorOffset = (ref: React.RefObject<HTMLElement | null>) => {
 export const Masthead = ({ section, id }: SectionRendererProps<'masthead'>) => {
   const { title, subNav } = useContext(ShowcasePageInfoContext)
   const ref = useRef<HTMLElement>(null)
-  useAnchorOffset(ref)
+  useStickyScrollPadding(ref)
 
   return (
     <section ref={ref} id={id} className="showcase-masthead" aria-label={title}>
