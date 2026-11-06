@@ -12,7 +12,7 @@ import { StudyAssetManagement } from 'src/pages/data_submission/v2/StudyAssetMan
 import TableHeaderSection from 'src/components/TableHeaderSection'
 import { Notifications } from 'src/libs/utils'
 import { ErrorReporter } from 'src/libs/ErrorReporter'
-import { studyToDatasetSchemaSubmission, buildConsentGroupsFromDatasets, getStudyPropertyValueByKey } from 'src/pages/data_submission/v2/v2-common-functions'
+import { studyToDatasetSchemaSubmission, buildConsentGroupsFromDatasets, getStudyPropertyValueByKey, submissionErrors } from 'src/pages/data_submission/v2/v2-common-functions'
 import { loadStudyDatasetDraft } from 'src/pages/data_submission/v2/studyDatasetDraft'
 import { Draft } from 'src/libs/ajax/Draft'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
@@ -62,6 +62,17 @@ const resolveFormMode = (draftUuid?: string, studyId?: string): FormMode => {
 const isValidationRejection = (error: unknown): boolean => {
   const response = (error as ResponseError)?.response
   return response?.status === 400 && !isEmpty(response.data?.message?.trim())
+}
+
+/** Found in the form before anything is sent, so nothing needs reloading and the edits stay. */
+class IncompleteSubmissionError extends Error {}
+
+/** Throws rather than returns: the submit buttons hide themselves once their action resolves. */
+const assertSubmittable = (study: Study) => {
+  const errors = submissionErrors(study)
+  if (errors.length) {
+    throw new IncompleteSubmissionError(errors.join('\n'))
+  }
 }
 
 /** A rejection reaches us either as a thrown Error or as the raw response it was built from. */
@@ -188,6 +199,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
     return multiPartFormData
   }
   const onUpdateStudy = async () => {
+    assertSubmittable(study)
     await DataSet.updateStudy(studyId as string, buildMultiPartFormData(study))
     Notifications.showNotification({ text: 'Study updated successfully', type: 'success' })
     if (onSaveRoute) {
@@ -199,7 +211,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
 
   const onUpdateStudyError = (error: unknown) => {
     // Nothing persisted, so reloading would discard the user's edits along with the violations.
-    if (isValidationRejection(error)) {
+    if (error instanceof IncompleteSubmissionError || isValidationRejection(error)) {
       Notifications.showError({ text: renderViolations('Study update failed:', error) })
       return
     }
@@ -228,6 +240,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   const onSubmitStudy = async () => {
+    assertSubmittable(study)
     await DataSet.registerDataset(buildMultiPartFormData(study))
     Notifications.showNotification({ text: 'Study created successfully', type: 'success' })
     await removeSourceDraft()
@@ -239,7 +252,7 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   const onError = (error: unknown) => {
-    if (isValidationRejection(error)) {
+    if (error instanceof IncompleteSubmissionError || isValidationRejection(error)) {
       Notifications.showError({ text: renderViolations('Study creation failed:', error) })
       return
     }

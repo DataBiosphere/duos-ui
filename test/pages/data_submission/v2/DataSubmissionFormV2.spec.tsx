@@ -48,6 +48,7 @@ vi.mock('src/pages/data_submission/v2/v2-common-functions', () => ({
   studyToDatasetSchemaSubmission: (study: Study) => study,
   buildConsentGroupsFromDatasets,
   getStudyPropertyValueByKey: () => ({}),
+  submissionErrors: () => [],
 }))
 
 /** Consent joins Data Use consistency violations with newlines in a single 400 message. */

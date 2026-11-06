@@ -30,6 +30,7 @@ import LaptopMacIcon from '@mui/icons-material/LaptopMac'
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
 import BiotechIcon from '@mui/icons-material/Biotech'
 import { Button } from '@mui/material'
+import { getStudyInheritance } from 'src/pages/data_submission/v2/v2-common-functions'
 
 export interface StudyAssetManagementProps {
   study: Study
@@ -74,6 +75,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
         onConsentGroupChange={(consentGroups: ConsentGroup2[]) => onAssetChange('consentGroups', consentGroups)}
         disabled={false}
         isEditingExistingStudy={isEditingExistingStudy}
+        inheritance={getStudyInheritance(study)}
         studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
           <StudyAsset
             config={{
