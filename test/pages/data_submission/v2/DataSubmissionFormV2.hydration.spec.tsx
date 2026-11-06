@@ -106,15 +106,19 @@ describe('DataSubmissionFormV2 hydrating a draft', () => {
 
     await waitFor(() => expect(inputValue('name')).toBe('Synthetic Minimal Study'), HYDRATION_TIMEOUT)
     expect(inputValue('description')).toBe('A synthetic study used only for contract tests.')
-    expect(inputValue('piName')).toBe('Synthetic Investigator')
-    expect(inputValue('piEmail')).toBe('investigator@example.org')
+    // A draft carries only the composed piName, so the form splits it into its parts.
+    expect(inputValue('pi-0-firstName')).toBe('Synthetic')
+    expect(inputValue('pi-0-lastName')).toBe('Investigator')
+    expect(inputValue('pi-0-email')).toBe('investigator@example.org')
   })
 
   it('places the fields that travel as study properties', async () => {
     renderDraft(richDocument())
 
-    await waitFor(() => expect(inputValue('phenotypeIndication')).toBe('Synthetic indication'), HYDRATION_TIMEOUT)
-    expect(inputValue('species')).toBe('Homo sapiens')
+    // Not one of the options, so it shows as an extra, selected button rather than being lost.
+    await waitFor(() => expect(document.querySelector('#phenotypeIndication-option-Synthetic-indication')).toHaveAttribute('aria-pressed', 'true'), HYDRATION_TIMEOUT)
+    // Stored as the scientific name; shown as the matching option, selected.
+    expect(document.querySelector('#species-option-Human-Homo-sapiens-')).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('lists the consent groups in the order the document gave them', async () => {

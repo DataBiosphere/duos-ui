@@ -1,49 +1,48 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { FormFieldTypes, FormField, FormValidators } from 'src/components/forms/forms'
 import {
   Study,
   StudyTypeProperty,
-  PhenotypeIndication,
-  Species,
-  DataCustodianEmail,
-  AlternativeDataSharingPlanTargetDeliveryDate,
-  AlternativeDataSharingPlanTargetPublicReleaseDate,
-  StudyData,
-  ThroughBioId,
 } from 'src/pages/data_submission/v2/v2-models'
 import { StudyDataKeys, StudyDataMetadata } from 'src/libs/data-metadata'
 import {
-  extractThroughBioId,
   generateStudyInputFormTextField,
-  generateStudyPropertyFormDateField,
-  generateStudyPropertyFormTextField,
+  getStudyDataBag,
   getStudyPropertyValueByKey,
   setStudyPropertyByKey,
+  updateStudyData,
 } from 'src/pages/data_submission/v2/v2-common-functions'
+import { StudyPopulation } from 'src/pages/data_submission/v2/StudyPopulation'
+import { StudyReleaseSettings } from 'src/pages/data_submission/v2/StudyReleaseSettings'
+import { ThroughBioProfile } from 'src/pages/data_submission/v2/ThroughBioProfile'
+import { PrincipalInvestigators } from 'src/pages/data_submission/v2/PrincipalInvestigators'
+import { DataCustodians } from 'src/pages/data_submission/v2/DataCustodians'
 import { DataTypes } from 'src/components/forms/DataTypes'
+import { TAGS_ENTRY_GUIDANCE } from 'src/components/forms/formGuidance'
 import { set } from 'src/utils/NodashUtil'
-import { ValidationError } from 'src/pages/dar_application/FormValidationState'
-
-interface Validation {
-  throughBioId?: ValidationError
-}
 
 export interface GeneralStudyInformationProps {
   study: Study
   setStudy: React.Dispatch<React.SetStateAction<Study>>
+  /** Opens a request for a Through.bio profile; absent, the request option is not offered. */
+  onRequestThroughBioProfile?: () => void
 }
 
-export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => {
-  const { setStudy, study } = props
-  const [validation, setValidation] = useState<Validation>({})
+/** Suggestions only: both selects are creatable. */
+const DATA_COLLECTION_METHOD_OPTIONS = [
+  'Survey / Questionnaire', 'Interview', 'Clinical Assessment / Exam', 'Electronic Health Records',
+  'Claims / Administrative Data', 'Registry', 'Biospecimen Collection', 'Genomic Sequencing', 'Imaging',
+  'Laboratory Assay', 'Wearable / Sensor', 'Observational', 'Experimental / Interventional',
+]
+const DATA_COLLECTION_MODALITY_OPTIONS = [
+  'In-person', 'Remote / Online', 'Telephone', 'Mail', 'Mobile App', 'Passive (device / sensor)', 'Mixed',
+]
 
-  const throughBioLink = React.useMemo(() => {
-    const id = getStudyPropertyValueByKey(study, 'throughBioId')
-    return typeof id === 'string' && id.trim() !== '' ? `https://through.bio/${id}` : undefined
-  }, [study])
+export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => {
+  const { setStudy, study, onRequestThroughBioProfile } = props
 
   // Unified source: prefer in-progress edit from properties[], fall back to API-loaded study.data.
-  const currentDataBag = (getStudyPropertyValueByKey(study, StudyData.key) as StudyDataMetadata | undefined) ?? study.data
+  const currentDataBag: StudyDataMetadata = getStudyDataBag(study)
   const onChange = ({ key, value }: { key: string, value: unknown, isValid: boolean }) => {
     setStudy((val: Study) => {
       const newForm = structuredClone(val)
@@ -54,133 +53,122 @@ export const GeneralStudyInformation = (props: GeneralStudyInformationProps) => 
   return (
     <div className="data-submitter-section">
       <h2>Study Information</h2>
-      {generateStudyInputFormTextField(setStudy, 'name', study?.name, 'Study Name', 'Enter the study name', [FormValidators.REQUIRED])}
-      <FormField
-        id={StudyTypeProperty.key}
-        title={StudyTypeProperty.fieldTitle}
-        placeholder={StudyTypeProperty.fieldPlaceholderText}
-        type={FormFieldTypes.SELECT}
-        selectOptions={StudyTypeProperty.STUDY_TYPE_OPTIONS}
-        isCreatable={true}
-        selectConfig={{}}
-        defaultValue={getStudyPropertyValueByKey(study, 'studyType')}
-        onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
-          setStudyPropertyByKey(study, setStudy, input, new StudyTypeProperty(input.value as string))
-        }}
-      />
-      <FormField
-        type={FormFieldTypes.TEXTAREA}
-        rows={6}
-        id="description"
-        title="Study Description"
-        placeholder="Description"
-        defaultValue={study?.description}
-        validators={[FormValidators.REQUIRED]}
-        onChange={onChange}
-      />
-      <FormField
-        id={StudyDataKeys.TAGS}
-        title="Tags"
-        placeholder="Add tags to help others find your study (e.g. disease area, assay type, etc.)"
-        type={FormFieldTypes.SELECT}
-        isCreatable={true}
-        isMulti={true}
-        optionsAreString={true}
-        defaultValue={currentDataBag?.tags || []}
-        selectOptions={currentDataBag?.tags || []}
-        onChange={(input: { key: string[], value: unknown, isValid: boolean }) => {
-          const tags = input.value as string[]
-          setStudyPropertyByKey(study, setStudy, input, new StudyData({ ...currentDataBag, [StudyDataKeys.TAGS]: tags }))
-        }}
-        selectConfig={{
-          components: {
-            DropdownIndicator: null,
-            Menu: () => null,
-          },
-        }}
-      />
-      <FormField
-        id="dataTypes"
-        title="Data Types"
-        placeholder="Select or enter data types"
-        validators={[FormValidators.REQUIRED]}
-        type={FormFieldTypes.SELECT}
-        isCreatable={true}
-        isMulti={true}
-        optionsAreString={true}
-        selectOptions={DataTypes.VALUES.map(entry => (`${entry.name}` + (entry.abbreviation ? ` (${entry.abbreviation})` : '')))}
-        defaultValue={study?.dataTypes}
-        onChange={onChange}
-      />
-      {generateStudyPropertyFormTextField(study, setStudy, new PhenotypeIndication())}
-      {generateStudyPropertyFormTextField(study, setStudy, new Species())}
-      {generateStudyInputFormTextField(setStudy, 'piName', study?.piName, 'Principal Investigator Name', 'Enter the Principal Investigator\'s name', [FormValidators.REQUIRED])}
-      {generateStudyInputFormTextField(setStudy, 'piEmail', study?.piEmail, 'Principal Investigator Email Address', 'Enter the Principal Investigator\'s email address', [FormValidators.EMAIL])}
-      <FormField
-        id={DataCustodianEmail.key}
-        title="Data Custodian Email"
-        description="Data Custodian contacts will be displayed publicly in DUOS and may be contacted regarding data access questions or data quality issues. Please provide the appropriate institutional contact(s)."
-        type={FormFieldTypes.SELECT}
-        validators={[FormValidators.EMAIL]}
-        selectOptions={[]}
-        isCreatable={true}
-        isMulti={true}
-        optionsAreString={true}
-        selectConfig={{
-          components: {
-            DropdownIndicator: null,
-            Menu: () => null,
-          },
-        }}
-        placeholder="Add one or more emails"
-        defaultValue={getStudyPropertyValueByKey(study, 'dataCustodianEmail')}
-        onChange={(input: { key: string[], value: unknown, isValid: boolean }) => {
-          setStudyPropertyByKey(study, setStudy, input, new DataCustodianEmail(input.value as string[]))
-        }}
-      />
-      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-        {generateStudyPropertyFormDateField(study, setStudy, new AlternativeDataSharingPlanTargetDeliveryDate(), [FormValidators.DATE], { width: '45%' })}
-        {generateStudyPropertyFormDateField(study, setStudy, new AlternativeDataSharingPlanTargetPublicReleaseDate(), [FormValidators.DATE], { width: '45%' })}
+      <div className="dsf-group" data-cy="study-details">
+        <h3>Study Details</h3>
+        {generateStudyInputFormTextField(setStudy, 'name', study?.name, 'Study Name', 'Enter the study name', [FormValidators.REQUIRED])}
+        <FormField
+          id={StudyTypeProperty.key}
+          title={StudyTypeProperty.fieldTitle}
+          type={FormFieldTypes.BUTTONGROUP}
+          allowCustom={true}
+          options={StudyTypeProperty.STUDY_TYPE_OPTIONS}
+          defaultValue={getStudyPropertyValueByKey(study, 'studyType')}
+          onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
+            setStudyPropertyByKey(study, setStudy, input, new StudyTypeProperty(input.value as string))
+          }}
+        />
+        <FormField
+          id={StudyDataKeys.DATA_COLLECTION_METHOD}
+          title="Data Collection Method"
+          description="How the data was gathered"
+          type={FormFieldTypes.BUTTONGROUP}
+          allowCustom={true}
+          isMulti={true}
+          options={DATA_COLLECTION_METHOD_OPTIONS}
+          defaultValue={currentDataBag.dataCollectionMethod ?? []}
+          onChange={({ value }: { value: string[] }) => {
+            updateStudyData(setStudy, { [StudyDataKeys.DATA_COLLECTION_METHOD]: value?.length ? value : undefined })
+          }}
+        />
+        <FormField
+          id={StudyDataKeys.DATA_COLLECTION_MODALITY}
+          title="Data Collection Modality"
+          description="The mode the data was gathered in"
+          type={FormFieldTypes.BUTTONGROUP}
+          allowCustom={true}
+          isMulti={true}
+          options={DATA_COLLECTION_MODALITY_OPTIONS}
+          defaultValue={currentDataBag.dataCollectionModality ?? []}
+          onChange={({ value }: { value: string[] }) => {
+            updateStudyData(setStudy, { [StudyDataKeys.DATA_COLLECTION_MODALITY]: value?.length ? value : undefined })
+          }}
+        />
+        <FormField
+          id="dataTypes"
+          title="Data Types"
+          validators={[FormValidators.REQUIRED]}
+          type={FormFieldTypes.BUTTONGROUP}
+          allowCustom={true}
+          isMulti={true}
+          options={DataTypes.VALUES.map(entry => (`${entry.name}` + (entry.abbreviation ? ` (${entry.abbreviation})` : '')))}
+          defaultValue={study?.dataTypes}
+          onChange={onChange}
+        />
       </div>
-      <FormField
-        id="publicVisibility"
-        title="Public Visibility"
-        validators={[FormValidators.REQUIRED]}
-        type={FormFieldTypes.RADIOGROUP}
-        description="Please select one of the following data use permissions for your dataset"
-        name="publicVisibility"
-        options={[
-          { name: true, text: 'Yes, I want my dataset info to be visible and available for requests' },
-          { name: false, text: 'No, I do not want my dataset info to be visible and available for requests' },
-        ]}
-        defaultValue={study?.publicVisibility}
-        onChange={onChange}
-      />
-      <FormField
-        id={ThroughBioId.key}
-        title={ThroughBioId.fieldTitle}
-        helpText={
-          throughBioLink
-            ? <a href={throughBioLink} target="_blank" rel="noopener noreferrer">{throughBioLink}</a>
-            : 'Through.bio/'
-        }
-        type={FormFieldTypes.TEXT}
-        placeholder={ThroughBioId.fieldPlaceholderText}
-        defaultValue={getStudyPropertyValueByKey(study, ThroughBioId.key)}
-        validation={validation.throughBioId}
-        onChange={(input: { key: string, value: string, isValid: boolean }) => {
-          const id = extractThroughBioId(input.value)
-          if (!id && input.value) {
-            setValidation({
-              ...validation,
-              throughBioId: { valid: false, failed: ['notUri'] },
-            })
-            return
-          }
-          setValidation({ ...validation, throughBioId: undefined })
-          setStudyPropertyByKey(study, setStudy, { isValid: !!id }, new ThroughBioId(id))
-        }}
-      />
+      <div className="dsf-group" data-cy="study-description">
+        <h3>Description &amp; Context</h3>
+        <FormField
+          type={FormFieldTypes.TEXTAREA}
+          rows={6}
+          id="description"
+          title="Study Description"
+          placeholder="Description"
+          defaultValue={study?.description}
+          validators={[FormValidators.REQUIRED]}
+          onChange={onChange}
+        />
+        <FormField
+          type={FormFieldTypes.TEXTAREA}
+          rows={4}
+          id={StudyDataKeys.DATA_COLLECTION_CONTEXT}
+          title="Data Collection Context"
+          description="Describe how the data was collected, and any biases or nuances (e.g. recruitment setting, selection criteria, known gaps) a requester should understand."
+          placeholder="Data collection context"
+          defaultValue={currentDataBag.dataCollectionContext}
+          onChange={({ value }: { value: string }) => {
+            updateStudyData(setStudy, { [StudyDataKeys.DATA_COLLECTION_CONTEXT]: value || undefined })
+          }}
+        />
+        <FormField
+          id={StudyDataKeys.DOI}
+          title="Study DOI"
+          description="Digital Object Identifier for the study as a whole"
+          placeholder="e.g. 10.1000/xyz123"
+          validators={[FormValidators.DOI]}
+          defaultValue={currentDataBag.doi}
+          onChange={({ value, isValid }: { value: string, isValid: boolean }) => {
+            if (!isValid) return
+            updateStudyData(setStudy, { [StudyDataKeys.DOI]: value || undefined })
+          }}
+        />
+        <FormField
+          id={StudyDataKeys.TAGS}
+          title="Study Tags"
+          description={TAGS_ENTRY_GUIDANCE}
+          placeholder="Add tags to help others find your study (e.g. disease area, assay type, etc.)"
+          type={FormFieldTypes.SELECT}
+          isCreatable={true}
+          isMulti={true}
+          optionsAreString={true}
+          defaultValue={currentDataBag?.tags || []}
+          selectOptions={currentDataBag?.tags || []}
+          onChange={(input: { key: string[], value: unknown, isValid: boolean }) => {
+            if (!input.isValid) return
+            updateStudyData(setStudy, { [StudyDataKeys.TAGS]: input.value as string[] })
+          }}
+          selectConfig={{
+            components: {
+              DropdownIndicator: null,
+              Menu: () => null,
+            },
+          }}
+        />
+      </div>
+      <PrincipalInvestigators study={study} setStudy={setStudy} />
+      <DataCustodians study={study} setStudy={setStudy} />
+      <StudyReleaseSettings study={study} setStudy={setStudy} />
+      <ThroughBioProfile study={study} setStudy={setStudy} onRequestProfile={onRequestThroughBioProfile} />
+      <StudyPopulation study={study} setStudy={setStudy} />
     </div>
   )
 }

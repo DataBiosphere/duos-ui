@@ -23,14 +23,26 @@ const FIELD_IDS = [
   'tags',
   'dataTypes',
   'phenotypeIndication',
+  'anatomicalAreas',
   'species',
-  'piName',
-  'piEmail',
-  'dataCustodianEmail',
+  'dataCollectionContext',
+  'doi',
+  'pi-0-firstName',
+  'pi-0-lastName',
+  'pi-0-email',
+  'pi-0-orcids',
+  'custodian-0-firstName',
+  'custodian-0-lastName',
+  'custodian-0-email',
   'alternativeDataSharingPlanTargetDeliveryDate',
   'alternativeDataSharingPlanTargetPublicReleaseDate',
   'publicVisibility',
   'throughBioId',
+  'populationSameAcrossAssets',
+  'study-population-ageRange',
+  'study-population-sex',
+  'study-population-ancestry',
+  'study-population-geography',
 ]
 
 const buildProps = (overrides: Partial<GeneralStudyInformationProps> = {}): GeneralStudyInformationProps => ({
@@ -44,14 +56,14 @@ describe('GeneralStudyInformation', () => {
     vi.clearAllMocks()
   })
 
-  it('mounts with each of the 14 form fields individually present', () => {
+  it('mounts with each of the form fields individually present', () => {
     render(<GeneralStudyInformation {...buildProps()} />)
     for (const id of FIELD_IDS) {
       expect(document.querySelector(`.formField-${id}`), `missing field: ${id}`).toBeInTheDocument()
     }
   })
 
-  it('calls setStudy when each of the 13 editable fields is changed', async () => {
+  it('calls setStudy when each editable field is changed', async () => {
     const user = userEvent.setup()
     const setStudySpy = vi.fn()
     render(<GeneralStudyInformation {...buildProps({ setStudy: setStudySpy })} />)
@@ -67,47 +79,63 @@ describe('GeneralStudyInformation', () => {
     fireEvent.change(document.getElementById('name')!, { target: { value: 'Test Study' } })
     assertCalledMore('name')
 
-    // 2. studyType (SELECT creatable — type a value and confirm with Enter)
-    await user.type(
-      within(document.querySelector('.formField-studyType')!).getByRole('combobox'),
-      'Prospective{Enter}',
-    )
+    // 2. studyType (BUTTONGROUP — click an option)
+    await user.click(within(document.querySelector('.formField-studyType')!).getByRole('button', { name: 'Prospective' }))
     assertCalledMore('studyType')
 
     // 3. description (TEXTAREA)
     fireEvent.change(document.getElementById('description')!, { target: { value: 'A test description' } })
     assertCalledMore('description')
 
-    // 4. dataTypes (SELECT creatable, isMulti, optionsAreString)
-    await user.type(
-      within(document.querySelector('.formField-dataTypes')!).getByRole('combobox'),
-      'Genomic{Enter}',
-    )
+    // 4. dataTypes (BUTTONGROUP, isMulti, with Other… for a typed value)
+    await user.click(within(document.querySelector('.formField-dataTypes')!).getByRole('button', { name: 'Other…' }))
+    await user.type(document.getElementById('dataTypes-custom-input')!, 'Genomic{Enter}')
     assertCalledMore('dataTypes')
 
-    // 5. phenotypeIndication (TEXT via generateStudyPropertyFormTextField)
-    fireEvent.change(document.getElementById('phenotypeIndication')!, { target: { value: 'diabetes' } })
+    // 5. phenotypeIndication and anatomicalAreas (BUTTONGROUP, isMulti — click an option)
+    fireEvent.click(within(document.querySelector('.formField-phenotypeIndication')!).getByRole('button', { name: 'Type 2 diabetes' }))
     assertCalledMore('phenotypeIndication')
+    fireEvent.click(within(document.querySelector('.formField-anatomicalAreas')!).getByRole('button', { name: 'Pancreas' }))
+    assertCalledMore('anatomicalAreas')
 
-    // 6. species (TEXT via generateStudyPropertyFormTextField)
-    fireEvent.change(document.getElementById('species')!, { target: { value: 'Homo sapiens' } })
+    // 6. species (BUTTONGROUP, isMulti — click an option)
+    fireEvent.click(within(document.querySelector('.formField-species')!).getByRole('button', { name: 'Human (Homo sapiens)' }))
     assertCalledMore('species')
 
-    // 7. piName (TEXT input)
-    fireEvent.change(document.getElementById('piName')!, { target: { value: 'Dr. Smith' } })
-    assertCalledMore('piName')
+    // 7. PI name parts (TEXT inputs)
+    for (const id of ['pi-0-firstName', 'pi-0-lastName']) {
+      fireEvent.change(document.getElementById(id)!, { target: { value: 'Smith' } })
+      assertCalledMore(id)
+    }
 
-    // 8. piEmail (TEXT input — setStudy is called regardless of email validity)
-    fireEvent.change(document.getElementById('piEmail')!, { target: { value: 'smith@test.com' } })
-    assertCalledMore('piEmail')
-
-    // 9. dataCustodianEmail (SELECT creatable, isMulti, email-validated; use a valid email so
-    //    setStudyPropertyByKey's isValid guard is satisfied)
+    // 7a. piOrcids (SELECT creatable, isMulti, ORCID-validated; a valid checksum so the value is kept)
     await user.type(
-      within(document.querySelector('.formField-dataCustodianEmail')!).getByRole('combobox'),
-      'custodian@test.com{Enter}',
+      within(document.querySelector('.formField-pi-0-orcids')!).getByRole('combobox'),
+      '0000-0002-1825-0097{Enter}',
     )
-    assertCalledMore('dataCustodianEmail')
+    assertCalledMore('pi-0-orcids')
+
+    // 7c. Add PI appends a row
+    fireEvent.click(document.getElementById('add-pi-btn')!)
+    assertCalledMore('add-pi-btn')
+
+    // 7b. dataCollectionContext (TEXTAREA) and doi (TEXT, DOI-validated)
+    fireEvent.change(document.getElementById('dataCollectionContext')!, { target: { value: 'Clinic-recruited cohort' } })
+    assertCalledMore('dataCollectionContext')
+    fireEvent.change(document.getElementById('doi')!, { target: { value: '10.1000/xyz123' } })
+    assertCalledMore('doi')
+
+    // 8. PI email (TEXT input — setStudy is called regardless of email validity)
+    fireEvent.change(document.getElementById('pi-0-email')!, { target: { value: 'smith@test.com' } })
+    assertCalledMore('pi-0-email')
+
+    // 9. Data Custodian row (TEXT inputs) and Add Data Custodian
+    for (const [id, value] of [['custodian-0-firstName', 'Grace'], ['custodian-0-lastName', 'Hopper'], ['custodian-0-email', 'custodian@test.com']]) {
+      fireEvent.change(document.getElementById(id)!, { target: { value } })
+      assertCalledMore(id)
+    }
+    fireEvent.click(document.getElementById('add-custodian-btn')!)
+    assertCalledMore('add-custodian-btn')
 
     // 10. alternativeDataSharingPlanTargetDeliveryDate (CALENDAR, mocked to plain input)
     fireEvent.change(
