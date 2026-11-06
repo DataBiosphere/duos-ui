@@ -4,7 +4,7 @@ import '@testing-library/jest-dom/vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import BiospecimenAddEdit from 'src/components/biospecimen_list/BiospecimenAddEdit'
-import { Biospecimen, BioSpecimenPreservationMethod, BioSpecimenType, PostMortemIntervalUnit } from 'src/types/model'
+import { Biospecimen, BioSpecimenPreservationMethod, BioSpecimenType, PostMortemIntervalUnit, Sex } from 'src/types/model'
 
 const sampleBiospecimen: Biospecimen = {
   biospecimenId: 7,
@@ -16,6 +16,8 @@ const sampleBiospecimen: Biospecimen = {
 }
 
 type User = ReturnType<typeof userEvent.setup>
+
+const countries = ['Canada', 'United States of America (the)']
 
 const renderForm = (props: { biospecimen?: Biospecimen, biospecimens?: Biospecimen[], id?: number, readOnly?: boolean } = {}) => {
   const saved: Biospecimen[][] = []
@@ -29,6 +31,7 @@ const renderForm = (props: { biospecimen?: Biospecimen, biospecimens?: Biospecim
       closeAction={closeAction}
       onBiospecimensChange={items => saved.push(items)}
       readOnly={props.readOnly}
+      countries={countries}
     />,
   )
   return { ...view, saved, closeAction }
@@ -332,5 +335,128 @@ describe('BiospecimenAddEdit collection fields', () => {
     await save(user, container)
 
     expect(saved[0][0].dateOfCollection).toBe('March 2024')
+  })
+})
+
+describe('BiospecimenAddEdit donor fields', () => {
+  const donor: Biospecimen = {
+    ...sampleBiospecimen,
+    sex: Sex.FEMALE,
+    age: 54,
+    race: 'Asian',
+    countryOfOrigin: 'Canada',
+    extractedDiagnoses: ['Alzheimer\'s disease'],
+    pathology: 'Braak stage IV',
+    sourceSite: 'Toronto General',
+    optionalDataUse: 'No commercial use',
+  }
+
+  it('saves the donor and origin fields', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm()
+    await fillRequired(user, container)
+    await choose(user, container, 'sex', 'Not Reported')
+    await user.type(field(container, 'age'), '0')
+    await user.type(field(container, 'race'), 'White')
+    await choose(user, container, 'countryOfOrigin', 'United States')
+    await choose(user, container, 'extractedDiagnoses', 'Parkinson\'s disease')
+    await user.type(field(container, 'pathology'), 'Lewy bodies')
+    await user.type(field(container, 'sourceSite'), 'MGH')
+    await user.type(field(container, 'optionalDataUse'), 'Academic use only')
+    await save(user, container)
+
+    expect(saved[0][0]).toMatchObject({
+      sex: Sex.NOT_REPORTED,
+      age: 0,
+      race: 'White',
+      countryOfOrigin: 'United States of America (the)',
+      extractedDiagnoses: ['Parkinson\'s disease'],
+      pathology: 'Lewy bodies',
+      sourceSite: 'MGH',
+      optionalDataUse: 'Academic use only',
+    })
+  })
+
+  it('loads a saved biospecimen\'s donor fields', () => {
+    const { container } = renderForm({ biospecimen: donor })
+
+    expect(container.querySelector('#sex')).toHaveTextContent('Female')
+    expect(field(container, 'age')).toHaveValue('54')
+    expect(field(container, 'race')).toHaveValue('Asian')
+    expect(container.querySelector('#countryOfOrigin')).toHaveTextContent('Canada')
+    expect(container.querySelector('#extractedDiagnoses')).toHaveTextContent('Alzheimer\'s disease')
+    expect(field(container, 'pathology')).toHaveValue('Braak stage IV')
+    expect(field(container, 'sourceSite')).toHaveValue('Toronto General')
+    expect(field(container, 'optionalDataUse')).toHaveValue('No commercial use')
+  })
+
+  it('does not save a diagnosis twice', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm({ biospecimen: { ...donor, extractedDiagnoses: ['Flu'] } })
+
+    await choose(user, container, 'extractedDiagnoses', 'Flu ')
+    await save(user, container)
+
+    expect(saved[0][0].extractedDiagnoses).toEqual(['Flu'])
+  })
+
+  it('adds to diagnoses stored as numbers', async () => {
+    const user = userEvent.setup()
+    const stored = { ...donor, extractedDiagnoses: [42, 'Flu'] } as unknown as Biospecimen
+    const { container, saved } = renderForm({ biospecimen: stored })
+    expect(container.querySelector('#extractedDiagnoses')).toHaveTextContent('42')
+
+    await choose(user, container, 'extractedDiagnoses', 'Asthma')
+    await save(user, container)
+
+    expect(saved[0][0].extractedDiagnoses).toEqual(['42', 'Flu', 'Asthma'])
+  })
+
+  it('loads a single diagnosis stored as text', async () => {
+    const user = userEvent.setup()
+    const stored = { ...donor, extractedDiagnoses: 'Cancer' } as unknown as Biospecimen
+    const { container, saved } = renderForm({ biospecimen: stored })
+    expect(container.querySelector('#extractedDiagnoses')).toHaveTextContent('Cancer')
+
+    await save(user, container)
+
+    expect(saved[0][0].extractedDiagnoses).toEqual(['Cancer'])
+  })
+
+  it('drops a stored sex that is not listed', async () => {
+    const user = userEvent.setup()
+    const unlisted = { ...donor, sex: 'F' } as unknown as Biospecimen
+    const { container, saved } = renderForm({ biospecimen: unlisted })
+    expect(container.querySelector('#sex')).not.toHaveTextContent('F')
+
+    await save(user, container)
+
+    expect(saved[0][0]).not.toHaveProperty('sex')
+  })
+
+  it('drops the donor fields that are cleared', async () => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm({ biospecimen: donor })
+    for (const id of ['age', 'race', 'pathology', 'sourceSite', 'optionalDataUse']) {
+      await user.clear(field(container, id))
+    }
+    for (const id of ['sex', 'countryOfOrigin', 'extractedDiagnoses']) {
+      await user.click(field(container, `${id} input`))
+      await user.keyboard('{Backspace}')
+    }
+    await save(user, container)
+
+    expect(saved[0][0]).toStrictEqual(sampleBiospecimen)
+  })
+
+  it.each(['-3', 'old'])('does not save an age of "%s"', async (age) => {
+    const user = userEvent.setup()
+    const { container, saved } = renderForm()
+    await fillRequired(user, container)
+    await user.type(field(container, 'age'), age)
+    await save(user, container)
+
+    expect(saved).toHaveLength(0)
+    expect(container).toHaveTextContent('Please enter an age of 0 or more')
   })
 })

@@ -7,6 +7,7 @@ import {
   BioSpecimenType,
   Biospecimen,
   PostMortemIntervalUnit,
+  Sex,
 } from 'src/types/model'
 
 const specimenTypeLabels: Record<BioSpecimenType, string> = {
@@ -36,11 +37,19 @@ const postMortemIntervalUnitLabels: Record<PostMortemIntervalUnit, string> = {
   [PostMortemIntervalUnit.WEEKS]: 'Weeks',
 }
 
+const sexLabels: Record<Sex, string> = {
+  [Sex.FEMALE]: 'Female',
+  [Sex.MALE]: 'Male',
+  [Sex.UNKNOWN]: 'Unknown',
+  [Sex.NOT_REPORTED]: 'Not Reported',
+}
+
 // The selects show labels; the draft keeps the enum values they stand for.
 const labelsByField: Partial<Record<keyof Draft, Record<string, string>>> = {
   specimenType: specimenTypeLabels,
   preservationMethod: preservationMethodLabels,
   postMortemIntervalUnit: postMortemIntervalUnitLabels,
+  sex: sexLabels,
 }
 
 const valueForLabel = (labels: Record<string, string>, label: unknown) =>
@@ -56,11 +65,23 @@ interface Draft {
   dateOfCollection: string
   postMortemIntervalValue: string
   postMortemIntervalUnit: string
+  sex: string
+  age: string
+  race: string
+  countryOfOrigin: string
+  extractedDiagnoses: string[]
+  pathology: string
   organization: string
+  sourceSite: string
+  optionalDataUse: string
 }
 
 // Biospecimens added through the API may hold numbers where the type says string, so the draft coerces them.
 const asText = (value: unknown) => (value === undefined || value === null ? '' : String(value))
+
+// A single value stored where a list is expected becomes a one-item list.
+const asTextList = (value: unknown): string[] =>
+  (Array.isArray(value) ? value : [value]).map(asText).filter(Boolean)
 
 // Inputs start from the coerced draft; an empty value leaves the input at its own default.
 const seed = (value: string) => value || undefined
@@ -80,10 +101,26 @@ const toDraft = (b?: Biospecimen): Draft => ({
   dateOfCollection: asText(b?.dateOfCollection),
   postMortemIntervalValue: asText(b?.postMortemInterval?.value),
   postMortemIntervalUnit: asOption(postMortemIntervalUnitLabels, b?.postMortemInterval?.unit),
+  sex: asOption(sexLabels, b?.sex),
+  age: asText(b?.age),
+  race: asText(b?.race),
+  countryOfOrigin: asText(b?.countryOfOrigin),
+  extractedDiagnoses: asTextList(b?.extractedDiagnoses),
+  pathology: asText(b?.pathology),
   organization: asText(b?.organization),
+  sourceSite: asText(b?.sourceSite),
+  optionalDataUse: asText(b?.optionalDataUse),
 })
 
-const optionalTextFields = ['preservationDetails', 'dateOfCollection'] as const
+const optionalTextFields = [
+  'preservationDetails',
+  'dateOfCollection',
+  'race',
+  'countryOfOrigin',
+  'pathology',
+  'sourceSite',
+  'optionalDataUse',
+] as const
 
 const setOrDelete = <K extends keyof Biospecimen>(b: Biospecimen, key: K, value: Biospecimen[K] | undefined) => {
   if (value === undefined) delete b[key]
@@ -111,6 +148,10 @@ const toBiospecimen = (draft: Draft, original?: Biospecimen): Biospecimen => {
   setOrDelete(result, 'postMortemInterval', intervalValue
     ? { value: Number(intervalValue), unit: draft.postMortemIntervalUnit as PostMortemIntervalUnit }
     : undefined)
+  setOrDelete(result, 'sex', (draft.sex || undefined) as Sex | undefined)
+  setOrDelete(result, 'age', draft.age.trim() ? Number(draft.age) : undefined)
+  const diagnoses = [...new Set(draft.extractedDiagnoses.map(d => d.trim()).filter(Boolean))]
+  setOrDelete(result, 'extractedDiagnoses', diagnoses.length ? diagnoses : undefined)
   return result
 }
 
@@ -140,6 +181,7 @@ const calcErrors = (d: Draft, original?: Biospecimen): Validation => {
     v.postMortemIntervalValue = numberError('Please enter the interval for the selected unit')
   }
   if (intervalValue && !d.postMortemIntervalUnit) v.postMortemIntervalUnit = makeError('required')
+  if (d.age.trim() && !isNonNegativeNumber(d.age)) v.age = numberError('Please enter an age of 0 or more')
   return v
 }
 
@@ -157,6 +199,7 @@ interface BiospecimenAddEditProps {
   readonly closeAction: () => void
   readonly onBiospecimensChange: (biospecimens: Biospecimen[]) => void
   readonly readOnly?: boolean
+  readonly countries?: string[]
 }
 
 const getHeaderTitle = (readOnly: boolean, biospecimen?: Biospecimen) => {
@@ -166,7 +209,7 @@ const getHeaderTitle = (readOnly: boolean, biospecimen?: Biospecimen) => {
 }
 
 export default function BiospecimenAddEdit(props: BiospecimenAddEditProps): React.JSX.Element {
-  const { id, biospecimen, biospecimens, closeAction, onBiospecimensChange, readOnly = false } = props
+  const { id, biospecimen, biospecimens, closeAction, onBiospecimensChange, readOnly = false, countries = [] } = props
 
   const [initial] = useState<Draft>(() => toDraft(biospecimen))
   const [draft, setDraft] = useState<Draft>(initial)
@@ -175,7 +218,7 @@ export default function BiospecimenAddEdit(props: BiospecimenAddEditProps): Reac
   const onChange = ({ key, value }: FormFieldChange) => {
     const field = key as keyof Draft
     const labels = labelsByField[field]
-    const next = { ...draft, [field]: labels ? valueForLabel(labels, value) : value ?? '' }
+    const next = { ...draft, [field]: labels ? valueForLabel(labels, value) : value ?? (field === 'extractedDiagnoses' ? [] : '') }
     setDraft(next)
     setValidation(calcErrors(next, biospecimen))
   }
@@ -280,6 +323,62 @@ export default function BiospecimenAddEdit(props: BiospecimenAddEditProps): Reac
             {...selectProps(postMortemIntervalUnitLabels, draft.postMortemIntervalUnit)}
           />
           <FormField
+            id="sex"
+            title="Sex"
+            placeholder="Select the donor's sex"
+            {...selectProps(sexLabels, draft.sex)}
+          />
+          <FormField
+            id="age"
+            title="Age"
+            defaultValue={draft.age}
+            placeholder="Donor's age"
+            onChange={onChange}
+            validation={validation.age}
+            disabled={readOnly}
+          />
+          <FormField
+            id="race"
+            title="Race"
+            defaultValue={seed(initial.race)}
+            placeholder="Donor's race"
+            onChange={onChange}
+            disabled={readOnly}
+          />
+          <FormField
+            id="countryOfOrigin"
+            title="Country of Origin"
+            type={FormFieldTypes.SELECT}
+            optionsAreString={true}
+            selectOptions={countries}
+            defaultValue={seed(initial.countryOfOrigin)}
+            placeholder="Select the donor's country of origin"
+            onChange={onChange}
+            disabled={readOnly}
+          />
+          <FormField
+            id="extractedDiagnoses"
+            title="Extracted Diagnoses"
+            type={FormFieldTypes.SELECT}
+            isCreatable={true}
+            isMulti={true}
+            optionsAreString={true}
+            selectOptions={[]}
+            defaultValue={initial.extractedDiagnoses.length ? initial.extractedDiagnoses : undefined}
+            placeholder="Enter diagnoses, e.g. Alzheimer's disease"
+            onChange={onChange}
+            disabled={readOnly}
+          />
+          <FormField
+            id="pathology"
+            title="Pathology"
+            defaultValue={seed(initial.pathology)}
+            placeholder="Pathology information for the specimen"
+            type={FormFieldTypes.TEXTAREA}
+            onChange={onChange}
+            disabled={readOnly}
+          />
+          <FormField
             id="organization"
             title="Organization"
             defaultValue={seed(initial.organization)}
@@ -287,6 +386,23 @@ export default function BiospecimenAddEdit(props: BiospecimenAddEditProps): Reac
             validators={[FormValidators.REQUIRED]}
             onChange={onChange}
             validation={validation.organization}
+            disabled={readOnly}
+          />
+          <FormField
+            id="sourceSite"
+            title="Source Site"
+            defaultValue={seed(initial.sourceSite)}
+            placeholder="Clinic, hospital or collection site"
+            onChange={onChange}
+            disabled={readOnly}
+          />
+          <FormField
+            id="optionalDataUse"
+            title="Data Use"
+            defaultValue={seed(initial.optionalDataUse)}
+            placeholder="Additional data use terms for this specimen"
+            type={FormFieldTypes.TEXTAREA}
+            onChange={onChange}
             disabled={readOnly}
           />
         </div>
