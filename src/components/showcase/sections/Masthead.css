@@ -7,8 +7,9 @@
   border-bottom: 1px solid var(--showcase-border);
 }
 
-/* D8: sticky on tablet and desktop only. */
-@media (min-width: 768px) {
+/* D8: sticky on tablet and desktop only. A landscape phone is 844-932px wide but about 400px
+ * tall, so the height condition keeps it from sticking there and covering much of the screen. */
+@media (min-width: 768px) and (min-height: 600px) {
   .showcase-masthead {
     position: sticky;
     top: 0;
