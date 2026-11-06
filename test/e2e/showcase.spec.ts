@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect, type Page, type Route } from '@playwright/test'
 import { E2E_FLAGSHIP, E2E_HIDDEN, E2E_PARTNER } from './showcase/entries'
 import { bannerFeed, collectViolations, drainViolations, expectServerPolicy } from './support/csp'
 
@@ -89,6 +89,49 @@ test.describe('the partner hero (S3.3)', () => {
     await page.goto(`/showcase/${E2E_PARTNER.key}`)
     await expect(page.getByRole('link', { name: 'Browse the data library' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Start in a workspace' })).toHaveCount(0)
+  })
+})
+
+test.describe('the latest data releases shelf (S3.3)', () => {
+  const datasets = [
+    { identifier: 'DUOS-000901', title: 'Synthetic Newest Cohort', accessManagement: 'controlled', dacName: 'Synthetic DAC', consentCodes: ['GRU'], participantCount: 1200, availableDate: '2026-10-01', accessUrl: null },
+    { identifier: 'DUOS-000902', title: 'Synthetic Open Cohort', accessManagement: 'open', dacName: null, consentCodes: ['GRU'], participantCount: null, availableDate: '2026-09-01', accessUrl: 'https://example.org/open-cohort' },
+  ]
+
+  // The ranking lookup: same-origin `/public/showcase/datasets` in BFF mode, and the configured
+  // `showcaseApiUrl` cross-origin in legacy mode, which also needs CORS and a preflight answer.
+  const stubLatest = (page: Page, answer: () => { status: number, body: unknown }) =>
+    page.route(url => url.pathname.endsWith('/showcase/datasets'), async (route: Route) => {
+      const request = route.request()
+      const origin = await request.headerValue('origin')
+      const cors: Record<string, string> = origin === null ? {} : { 'access-control-allow-origin': origin, 'vary': 'Origin' }
+      if (request.method() === 'OPTIONS') {
+        return route.fulfill({ status: 204, headers: { ...cors, 'access-control-allow-methods': 'POST', 'access-control-allow-headers': 'content-type, accept' } })
+      }
+      if (!(request.postData() ?? '').includes('"latest-data-releases"')) return route.fallback()
+      const { status, body } = answer()
+      return route.fulfill({ status, headers: cors, contentType: 'application/json', body: JSON.stringify(body) })
+    })
+
+  const shelf = (page: Page) => page.locator('#latest-data-releases')
+
+  test('shows a card for each dataset, with its action', async ({ page }) => {
+    await stubLatest(page, () => ({ status: 200, body: { datasets } }))
+    await page.goto(`/showcase/${E2E_PARTNER.key}`)
+    await expect(shelf(page).getByRole('heading', { level: 2, name: 'Latest data releases' })).toBeVisible()
+    await expect(shelf(page).getByRole('article')).toHaveCount(2)
+    await expect(shelf(page).getByRole('link', { name: /Request access/ })).toHaveAttribute('href', '/dataset/DUOS-000901')
+    await expect(shelf(page).getByRole('link', { name: 'Open provider site' })).toHaveAttribute('href', 'https://example.org/open-cohort')
+  })
+
+  test('says the datasets can\'t load, and tries again', async ({ page }) => {
+    let fail = true
+    await stubLatest(page, () => (fail ? { status: 503, body: { message: 'down' } } : { status: 200, body: { datasets } }))
+    await page.goto(`/showcase/${E2E_PARTNER.key}`)
+    await expect(shelf(page).getByText('These datasets can\'t be loaded right now.')).toBeVisible()
+    fail = false
+    await shelf(page).getByRole('button', { name: 'Try again' }).click()
+    await expect(shelf(page).getByRole('article')).toHaveCount(2)
   })
 })
 

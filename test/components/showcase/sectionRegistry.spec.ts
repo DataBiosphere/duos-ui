@@ -76,7 +76,7 @@ describe('sectionDomId', () => {
 
 describe('visibleSections', () => {
   it('renders only the implemented sections with the real registry', () => {
-    expect(keys(visibleSections(configWith(sections)))).toEqual(['hero'])
+    expect(keys(visibleSections(configWith(sections)))).toEqual(['hero', 'latest-data-releases'])
   })
 
   it('lists enabled sections with content, in fixed order', () => {
