@@ -75,7 +75,9 @@
   width: 280px;
   max-width: 100%;
   padding: 8px 12px;
-  border: 1px solid var(--showcase-border-strong);
+  /* WCAG 1.4.11: a field's edge needs 3:1 against the surface; muted text gives 4.88:1 on white,
+   * and --showcase-border-strong only about 1.6:1. */
+  border: 1px solid var(--showcase-muted-text);
   border-radius: 4px;
   background: var(--showcase-surface);
   font: inherit;
