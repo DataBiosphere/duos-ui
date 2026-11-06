@@ -24,7 +24,8 @@ import { DuosUser } from 'src/types/model'
 export interface CompleteSignInOptions {
   navigate: NavigateFunction
   queryClient: QueryClient
-  /** The path the /auth/callback redirect landed on (location.pathname). */
+  /** Where to go after sign-in: the path and query string the /auth/callback redirect landed on,
+   * or the legacy flow's ?redirectTo= value. */
   redirectPath: string
   /**
    * Polled before every side-effecting step. When a newer reconciliation has
@@ -102,8 +103,11 @@ const syncSignInOrRegistrationEvent = (event: MetricsEventName) => {
 export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCancelled, latestJoinedProfile, sessionReportsNoProfile }: CompleteSignInOptions): Promise<CompleteSignInOutcome> => {
   const cancelled = () => isCancelled?.() === true
   // '/' and '/home' are landing pages, not destinations worth returning to —
-  // signed-in users on those go to their console instead.
-  const shouldRedirect = redirectPath !== '/' && redirectPath !== '/home'
+  // signed-in users on those go to their console instead. Compare the path
+  // only: a landing page with a query (?utm_source=x) or a #fragment is still
+  // a landing page.
+  const landingPath = redirectPath.split(/[?#]/, 1)[0]
+  const shouldRedirect = landingPath !== '/' && landingPath !== '/home'
   const redirectTo = shouldRedirect ? redirectPath : null
 
   // Check for ToS acceptance — redirect the user if not accepted yet. The
@@ -117,7 +121,7 @@ export const completeSignIn = async ({ navigate, queryClient, redirectPath, isCa
       if (redirectPath === null) {
         await Navigation.console(Storage.getCurrentUser(), navigate)
       }
-      else if (globalThis.location.pathname !== redirectPath) {
+      else if (globalThis.location.pathname + globalThis.location.search !== redirectPath) {
         navigate(redirectPath)
       }
     }

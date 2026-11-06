@@ -12,9 +12,11 @@ const Authenticated = () => {
     return null
   }
 
+  // The query string goes along, so a search handed off from a public page (`/datalibrary?query=…`)
+  // survives sign-in. Encoded, or a destination with its own '&' would split into sibling params.
   return isLogged
     ? <Outlet />
-    : <Navigate to={location.pathname ? `/?redirectTo=${location.pathname}` : '/'} />
+    : <Navigate to={location.pathname ? `/?redirectTo=${encodeURIComponent(location.pathname + location.search)}` : '/'} />
 }
 
 export default Authenticated
