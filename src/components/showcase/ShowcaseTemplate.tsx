@@ -20,6 +20,7 @@ import {
   type VisibleSection,
   visibleSections,
 } from 'src/components/showcase/sectionRegistry'
+import { type ShowcaseHandoffs, ShowcaseHandoffsContext } from 'src/components/showcase/handoffs'
 import {
   accessibleThemeColors,
   SHOWCASE_MAIN_HEADING_ID,
@@ -56,11 +57,17 @@ const skipToMain = (event: MouseEvent<HTMLAnchorElement>) => {
 export interface ShowcaseTemplateProps {
   entry: RegistryEntry
   config: ShowcaseConfig
+  /** Whether handoffs to signed-in DUOS pages open, and whether the visitor is signed in. */
+  handoffs: ShowcaseHandoffs
   /** For tests only; pages use the real registry. */
   registry?: SectionRegistry
 }
 
-export const ShowcaseTemplate = ({ entry, config, registry = sectionRegistry }: ShowcaseTemplateProps) => {
+/** Provisional copy (S3.2): why search, dataset and request links don't open in a preview. */
+export const PREVIEW_NOTICE = 'This is a content preview with production data. Search, dataset details and access requests are '
+  + 'turned off here, because a production dataset ID can name a different dataset in this environment.'
+
+export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRegistry }: ShowcaseTemplateProps) => {
   const lookups = useShowcaseLookups(config, Object.keys(registry) as SectionKey[])
   const sections = visibleSections(config, registry)
   const masthead = sections.filter(section => section.key === 'masthead')
@@ -72,15 +79,18 @@ export const ShowcaseTemplate = ({ entry, config, registry = sectionRegistry }: 
       <a className="showcase-template__skip-link" href={`#${SHOWCASE_MAIN_HEADING_ID}`} onClick={skipToMain}>
         Skip to main content
       </a>
-      <ShowcaseLookupsContext.Provider value={lookups}>
-        {masthead.map(renderSection)}
-        <main className="showcase-template__main">
-          {!hasHero && (
-            <h1 id={SHOWCASE_MAIN_HEADING_ID} className="showcase-template__title" tabIndex={-1}>{entry.title}</h1>
-          )}
-          {content.map(renderSection)}
-        </main>
-      </ShowcaseLookupsContext.Provider>
+      <ShowcaseHandoffsContext.Provider value={handoffs}>
+        <ShowcaseLookupsContext.Provider value={lookups}>
+          {masthead.map(renderSection)}
+          <main className="showcase-template__main">
+            {!handoffs.enabled && <p className="showcase-template__preview-notice" role="note">{PREVIEW_NOTICE}</p>}
+            {!hasHero && (
+              <h1 id={SHOWCASE_MAIN_HEADING_ID} className="showcase-template__title" tabIndex={-1}>{entry.title}</h1>
+            )}
+            {content.map(renderSection)}
+          </main>
+        </ShowcaseLookupsContext.Provider>
+      </ShowcaseHandoffsContext.Provider>
     </div>
   )
 }

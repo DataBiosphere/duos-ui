@@ -116,9 +116,9 @@ describe('findShowcase', () => {
 })
 
 describe('loadShowcase', () => {
-  const loadWith = async (isShowcaseEnabled: () => Promise<boolean>) => {
+  const loadWith = async (isShowcaseEnabled: () => Promise<boolean>, isShowcaseHandoffsEnabled = () => Promise.resolve(false)) => {
     vi.resetModules()
-    vi.doMock('src/libs/config', () => ({ isShowcaseEnabled }))
+    vi.doMock('src/libs/config', () => ({ isShowcaseEnabled, isShowcaseHandoffsEnabled }))
     vi.doMock('src/showcases', () => ({
       showcaseEntries: [partner],
       showcaseConfigs: { 'example-partner': partnerConfig },
@@ -135,7 +135,21 @@ describe('loadShowcase', () => {
   })
 
   it('finds a showcase in the index when config.json turns the flag on', async () => {
-    expect(await loadWith(() => Promise.resolve(true))).toEqual({ status: 'found', entry: partner, config: ShowcaseConfigSchema.parse(resolveShowcase(partnerConfig)) })
+    expect(await loadWith(() => Promise.resolve(true))).toEqual({
+      status: 'found',
+      entry: partner,
+      config: ShowcaseConfigSchema.parse(resolveShowcase(partnerConfig)),
+      handoffsEnabled: false,
+    })
+  })
+
+  it.each([
+    ['on', () => Promise.resolve(true), true],
+    ['off', () => Promise.resolve(false), false],
+    ['unreadable', () => Promise.reject(new Error('config.json unavailable')), false],
+  ])('reports handoffs %s from the environment binding', async (_label, isShowcaseHandoffsEnabled, expected) => {
+    const result = await loadWith(() => Promise.resolve(true), isShowcaseHandoffsEnabled)
+    expect(result.status === 'found' && result.handoffsEnabled).toBe(expected)
   })
 
   it('finds nothing when config.json leaves the flag off', async () => {

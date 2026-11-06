@@ -78,3 +78,13 @@
 .showcase-template__main > * {
   scroll-margin-top: var(--showcase-anchor-offset);
 }
+
+/* Provisional (S3.2): the notice that handoffs are off in a production-data preview. */
+.showcase-template__preview-notice {
+  margin: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--showcase-border-strong);
+  border-radius: 4px;
+  background: var(--showcase-surface);
+  color: var(--showcase-muted-text);
+}
