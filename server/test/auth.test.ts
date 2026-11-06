@@ -555,6 +555,48 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       expect(errorLog.join('\n')).not.toMatch(/already sent|ERR_HTTP_HEADERS_SENT|FST_ERR_REP/i)
     })
 
+    describe('a login whose session changes while it is prepared', () => {
+      async function signedInApp() {
+        const errorLog: string[] = []
+        const fake = makeInMemoryPg()
+        const guarded = await buildAuthApp(fake.pg, { errorLog })
+        const login = await guarded.inject({ method: 'POST', url: '/auth/login' })
+        const cb = await guarded.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie: sessionCookieHeader(login) } })
+        return { fake, guarded, errorLog, cookie: sessionCookieHeader(cb) }
+      }
+
+      it('answers once, with a 502 and a cleared cookie, when a logout ended the session', async () => {
+        const { fake, guarded, errorLog, cookie } = await signedInApp()
+        fake.hooks.beforeUpdate = async () => {
+          fake.rows.clear()
+        }
+
+        const res = await guarded.inject({ method: 'POST', url: '/auth/login', headers: { cookie } })
+        await guarded.close()
+
+        expect(res.statusCode).toBe(502)
+        expect(res.cookies.find(c => c.name === 'sessionId')?.value).toBe('')
+        expect(errorLog.join('\n')).not.toMatch(/already sent|ERR_HTTP_HEADERS_SENT|FST_ERR_REP/i)
+      })
+
+      it('answers once, with a 502 and no cookie change, when another tab\'s sign-in took the row', async () => {
+        const { fake, guarded, errorLog, cookie } = await signedInApp()
+        const [sid] = fake.rows.keys()
+        fake.hooks.beforeUpdate = async () => {
+          const row = fake.rows.get(sid)!
+          fake.rows.set(sid, { ...row, sess: { ...(row.sess as object), __fastifySessionMetadata: { generation: 'other-tab' } } })
+        }
+
+        const res = await guarded.inject({ method: 'POST', url: '/auth/login', headers: { cookie } })
+        await guarded.close()
+
+        expect(res.statusCode).toBe(502)
+        expect(res.cookies.find(c => c.name === 'sessionId')).toBeUndefined()
+        expect([...fake.rows.keys()]).toEqual([sid])
+        expect(errorLog.join('\n')).not.toMatch(/already sent|ERR_HTTP_HEADERS_SENT|FST_ERR_REP/i)
+      })
+    })
+
     it('leaves a later sign-in on the same row signed in when the earlier one gets an upstream 401', async () => {
       const { cookie: first } = await authenticate()
       const [sid] = rows.keys()
