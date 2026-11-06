@@ -23,9 +23,11 @@ import {
 import 'src/components/forms/forms.css'
 import {
   dateValidator,
+  doiValidator,
   emailValidator,
   isValid,
   NotUrlValidator,
+  orcidValidator,
   requiredValidator,
   urlValidator,
   Validation,
@@ -292,6 +294,8 @@ export const FormValidators = {
   NOTURL: NotUrlValidator,
   EMAIL: emailValidator,
   DATE: dateValidator,
+  DOI: doiValidator,
+  ORCID: orcidValidator,
 } as const satisfies Record<string, Validator>
 
 // ----------------------------------------------------------------------------------------------------- //
