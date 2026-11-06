@@ -8,7 +8,6 @@
   "ecmApiUrl": "https://ecmApiUrl.org",
   "bffEnabled": false,
   "showcaseEnabled": false,
-  "showcaseHandoffsEnabled": false,
   "features": {
     "featureX" : true,
     "featureY" : false

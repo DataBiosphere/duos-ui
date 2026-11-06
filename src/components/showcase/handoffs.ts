@@ -9,8 +9,9 @@
  * Environment binding (delivery plan section 3, "Dataset identifiers across environments"): a
  * config lists production `DUOS-` identifiers, and a content preview reads them from production.
  * The same identifier can name a different dataset in this environment's DUOS, so a handoff opens
- * only when config.json sets `showcaseHandoffsEnabled`, which says that the showcase lookup reads
- * this environment's own catalog. Anything else turns every handoff off, and the page says why.
+ * only when config.json has `showcaseHandoffsEnabled`. The server sets it to `true` only when the
+ * showcase lookup reads this environment's own Consent (server/src/config.ts). Anything else
+ * turns every handoff off, and the page says why.
  */
 import { createContext } from 'react'
 import { DUOS_IDENTIFIER_PATTERN } from 'src/types/showcase'

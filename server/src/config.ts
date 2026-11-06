@@ -18,7 +18,8 @@ export function configPath(projectRoot: string, isDev: boolean): string {
  * environments set DUOS_API_URL too (terra-helmfile envSecrets) — it MUST be
  * the downstream consent API base URL, the same value the ConfigMap's
  * config.json already carries as `apiUrl`, so the override is consistent there.
- * Also fills in `bannersUrl` from `env` when the file leaves it unset.
+ * Also fills in `bannersUrl` from `env` when the file leaves it unset, and
+ * derives `showcaseHandoffsEnabled` from the URLs (see showcaseHandoffsEnabled).
  *
  * The merged result is cached for the life of the process — both inputs (the
  * deploy-time config file and DUOS_API_URL) are fixed at startup, and this is
@@ -41,6 +42,7 @@ async function loadAndMerge(configPath: string): Promise<Record<string, unknown>
   if (process.env.DUOS_API_URL) {
     config.apiUrl = process.env.DUOS_API_URL
   }
+  config.showcaseHandoffsEnabled = showcaseHandoffsEnabled(config)
   if (!isConfiguredString(config.bannersUrl)) {
     const bannersUrl = defaultBannersUrl(config.env)
     if (bannersUrl) {
@@ -52,6 +54,35 @@ async function loadAndMerge(configPath: string): Promise<Record<string, unknown>
 
 const isConfiguredString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim() !== ''
+
+/** The http(s) origin of a configured URL, or undefined for anything else. */
+function httpOrigin(value: unknown): string | undefined {
+  if (!isConfiguredString(value)) return undefined
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.origin : undefined
+  }
+  catch {
+    return undefined
+  }
+}
+
+/**
+ * The showcase environment binding (DT-4354, delivery plan section 3, "Dataset identifiers across
+ * environments"). Showcase configs list production `DUOS-` identifiers, and the same identifier
+ * can name a different dataset in another environment. So a showcase may hand visitors off to
+ * this environment's search, dataset and request pages only when its lookup reads the Consent
+ * that those pages use.
+ *
+ * The value is derived, never read from the file, so it cannot contradict the URLs. The lookup
+ * goes to DUOS_SHOWCASE_API_URL through the public proxy in BFF mode, and to `showcaseApiUrl`
+ * from the browser in legacy mode. The signed-in pages use `apiUrl`, which DUOS_API_URL has
+ * already replaced. The origins must be equal. A missing or invalid value turns handoffs off.
+ */
+export function showcaseHandoffsEnabled(config: Record<string, unknown>): boolean {
+  const lookup = httpOrigin(config.bffEnabled === true ? process.env.DUOS_SHOWCASE_API_URL : config.showcaseApiUrl)
+  return lookup !== undefined && lookup === httpOrigin(config.apiUrl)
+}
 
 /**
  * The public GCS object holding the environment's notification banners, when

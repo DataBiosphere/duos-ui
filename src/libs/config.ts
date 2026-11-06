@@ -206,7 +206,8 @@ export const isShowcaseEnabled = async (): Promise<boolean> => {
 /**
  * The showcase environment binding (DT-4354). `true` says the showcase lookup reads this
  * environment's own catalog, so a showcase may hand visitors off to this environment's search,
- * dataset and request pages. A content preview that reads production leaves it unset: its
+ * dataset and request pages. The server derives it from the lookup and API URLs
+ * (server/src/config.ts), so a content preview that reads production gets `false`: its
  * production `DUOS-` identifiers can name other datasets here. Absent or any other value keeps
  * every handoff off.
  */
