@@ -58,10 +58,16 @@ for (const { entry, path } of SHOWCASES) {
 
     // 390px is a common phone width; 640px is a 1280px window at 200% zoom.
     for (const width of [390, 640]) {
-      test(`does not scroll sideways at ${width}px`, async ({ page }) => {
+      test(`does not scroll sideways at ${width}px`, async ({ page, request }) => {
+        // The header renders the banner feed after the page loads, and a long
+        // banner can be the widest thing on it, so measure once it's in.
+        const bannersLoaded = page.waitForResponse(await bannerFeed(request))
         await page.setViewportSize({ width, height: 800 })
         await page.goto(path)
         await expect(showcaseHeading(page)).toBeVisible()
+        await bannersLoaded
+        // Two frames: React renders the fetched banners, then the browser lays them out.
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
         expect(await overflowsSideways(page)).toBe(false)
       })
     }
