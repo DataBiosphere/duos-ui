@@ -1,0 +1,278 @@
+/*
+ * Shared look for every base input FormField renders: text, textarea, number, select, checkbox,
+ * radio and date picker. Scoped to .formField-container (and .radio-button-input for the shared
+ * RadioButton) so inputs outside the form system keep their own styling.
+ */
+
+:root {
+  --duos-input-radius: 8px;
+  --duos-input-height: 44px;
+  --duos-input-border: #b8c2cc;
+  --duos-input-border-hover: #8a96a3;
+  --duos-input-accent: #00609f;
+  --duos-input-focus-ring: 0 0 0 3px rgba(0, 96, 159, 0.22);
+  --duos-input-error: #db3214;
+  --duos-input-error-ring: 0 0 0 3px rgba(219, 50, 20, 0.18);
+  --duos-input-disabled-bg: #f2f4f6;
+  --duos-input-text: #1f2d3a;
+  --duos-input-placeholder: #7a8691;
+}
+
+/* ---------- Text, number, textarea ---------- */
+
+.formField-container .form-control {
+  height: auto;
+  min-height: var(--duos-input-height);
+  padding: 10px 14px;
+  font-size: 15px;
+  color: var(--duos-input-text);
+  background-color: #ffffff;
+  border: 1px solid var(--duos-input-border);
+  border-radius: var(--duos-input-radius);
+  box-shadow: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.formField-container .form-control::placeholder {
+  color: var(--duos-input-placeholder);
+}
+
+.formField-container .form-control:hover:not(:disabled, [readonly]) {
+  border-color: var(--duos-input-border-hover);
+}
+
+.formField-container .form-control:focus {
+  border-color: var(--duos-input-accent);
+  box-shadow: var(--duos-input-focus-ring);
+  outline: none;
+}
+
+.formField-container .form-control:disabled,
+.formField-container .form-control[readonly] {
+  background-color: var(--duos-input-disabled-bg);
+  color: #5f6b76;
+  cursor: not-allowed;
+}
+
+.formField-container .form-control.errored {
+  border-color: var(--duos-input-error);
+  box-shadow: var(--duos-input-error-ring);
+  border-bottom-left-radius: var(--duos-input-radius);
+}
+
+/* ---------- Select (react-select, classNamePrefix="form-select") ---------- */
+
+.formField-container .form-select__control {
+  min-height: var(--duos-input-height);
+  border: 1px solid var(--duos-input-border);
+  border-radius: var(--duos-input-radius);
+  box-shadow: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.formField-container .form-select__control:hover {
+  border-color: var(--duos-input-border-hover);
+}
+
+.formField-container .form-select__control--is-focused,
+.formField-container .form-select__control--is-focused:hover {
+  border-color: var(--duos-input-accent);
+  box-shadow: var(--duos-input-focus-ring);
+}
+
+.formField-container .form-select__control--is-disabled {
+  background-color: var(--duos-input-disabled-bg);
+}
+
+.formField-container .form-select.errored .form-select__control {
+  border-color: var(--duos-input-error);
+  box-shadow: var(--duos-input-error-ring);
+}
+
+.formField-container .form-select input {
+  height: auto;
+}
+
+.formField-container .form-select__placeholder {
+  color: var(--duos-input-placeholder);
+}
+
+.formField-container .form-select__multi-value {
+  background-color: rgba(0, 96, 159, 0.1);
+  border-radius: 999px;
+  padding-left: 4px;
+}
+
+.formField-container .form-select__multi-value__label {
+  color: var(--duos-input-accent);
+  font-size: 13px;
+}
+
+.formField-container .form-select__multi-value__remove {
+  border-radius: 999px;
+  color: var(--duos-input-accent);
+}
+
+.formField-container .form-select__multi-value__remove:hover {
+  background-color: rgba(0, 96, 159, 0.2);
+  color: var(--duos-input-accent);
+}
+
+.formField-container .form-select__menu {
+  border-radius: var(--duos-input-radius);
+  box-shadow: 0 6px 20px rgba(31, 45, 58, 0.14);
+  overflow: hidden;
+}
+
+.formField-container .form-select__option--is-focused {
+  background-color: rgba(0, 96, 159, 0.08);
+}
+
+.formField-container .form-select__option--is-selected {
+  background-color: var(--duos-input-accent);
+}
+
+/* ---------- Checkbox ---------- */
+
+/* Visually hidden rather than display:none, so the checkbox stays keyboard-focusable. */
+.formField-container .checkbox input[type=checkbox] {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  opacity: 0;
+}
+
+.formField-container .checkbox .regular-checkbox {
+  display: inline-block;
+  min-height: 20px;
+  padding-left: 30px !important;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--duos-input-text);
+}
+
+.formField-container .checkbox .regular-checkbox:before {
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--duos-input-border-hover);
+  border-radius: 5px;
+  background-color: #ffffff;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.formField-container .checkbox input[type=checkbox]:hover + .regular-checkbox:before,
+.formField-container .checkbox .regular-checkbox:hover:before {
+  border-color: var(--duos-input-accent);
+}
+
+.formField-container .checkbox input[type=checkbox]:checked + .regular-checkbox:before {
+  content: "\2713";
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+  text-shadow: none;
+  background: var(--duos-input-accent);
+  border-color: var(--duos-input-accent);
+}
+
+.formField-container .checkbox input[type=checkbox]:focus-visible + .regular-checkbox:before {
+  box-shadow: var(--duos-input-focus-ring);
+}
+
+.formField-container .checkbox input[type=checkbox]:disabled + .regular-checkbox {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.formField-container .checkbox input[type=checkbox]:disabled + .regular-checkbox:before {
+  background-color: var(--duos-input-disabled-bg);
+  border-color: #cfd6dc;
+}
+
+.formField-container .checkbox .regular-checkbox.errored:before {
+  border-color: var(--duos-input-error);
+}
+
+/* ---------- Radio (shared RadioButton) ---------- */
+
+.radio-button-input {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+}
+
+.radio-button-input input[type=radio] {
+  position: absolute;
+  inset: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.radio-button-input .radio-button-dot {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border: 1.5px solid var(--duos-input-border-hover);
+  border-radius: 50%;
+  background-color: #ffffff;
+  transition: border-color 0.15s ease, border-width 0.15s ease, box-shadow 0.15s ease;
+  pointer-events: none;
+}
+
+.radio-button-input:hover .radio-button-dot {
+  border-color: var(--duos-input-accent);
+}
+
+.radio-button-input input[type=radio]:checked + .radio-button-dot {
+  border: 6px solid var(--duos-input-accent);
+}
+
+.radio-button-input input[type=radio]:focus-visible + .radio-button-dot {
+  box-shadow: var(--duos-input-focus-ring);
+}
+
+.radio-button-input input[type=radio]:disabled + .radio-button-dot {
+  background-color: var(--duos-input-disabled-bg);
+  border-color: #cfd6dc;
+}
+
+.radio-button-input input[type=radio]:disabled:checked + .radio-button-dot {
+  border-color: #9fb3c4;
+}
+
+.radio-group.errored .radio-button-dot {
+  border-color: var(--duos-input-error);
+}
+
+.radio-button-container {
+  margin: 0.6rem 0;
+}
+
+/* ---------- Date picker (MUI) ---------- */
+
+.formField-container .form-calendar .MuiPickersInputBase-root {
+  min-height: var(--duos-input-height);
+  border-radius: var(--duos-input-radius);
+}
+
+.formField-container .form-calendar .MuiPickersOutlinedInput-notchedOutline {
+  border-color: var(--duos-input-border);
+  border-radius: var(--duos-input-radius);
+}
+
+.formField-container .form-calendar .MuiPickersInputBase-root.Mui-focused .MuiPickersOutlinedInput-notchedOutline {
+  border-color: var(--duos-input-accent);
+  border-width: 1px;
+  box-shadow: var(--duos-input-focus-ring);
+}

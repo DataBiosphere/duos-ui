@@ -15,11 +15,13 @@
   Form Field
 ------------------------------------------------------*/
 .formField-container .dropdown-toggle {
-  padding: 25px 15px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   box-shadow: none;
-  border: 1px solid #999999;
+  border: 1px solid #b8c2cc;
 }
 
 .formField-container .dropdown-toggle > div {

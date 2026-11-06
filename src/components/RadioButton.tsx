@@ -1,5 +1,6 @@
 import React, { CSSProperties } from 'react'
 import { merge } from 'src/utils/NodashUtil'
+import 'src/components/forms/formTheme.css'
 
 interface RadioButtonProps {
   id?: string
@@ -30,22 +31,6 @@ export const RadioButton = (props: Readonly<RadioButtonProps>) => {
     position: 'relative',
   }
 
-  const basicUnchecked: CSSProperties = {
-    fontSize: 15,
-    lineHeight: '1.5rem',
-    color: '#333',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    boxSizing: 'border-box',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    height: 20,
-    width: 20,
-    backgroundColor: 'white',
-    borderRadius: '50%',
-    border: '1px solid #999999',
-  }
-
   const basicLabelStyle: CSSProperties = {
     cursor: disabled ? 'not-allowed' : 'pointer',
     color: '#603B9B',
@@ -54,18 +39,13 @@ export const RadioButton = (props: Readonly<RadioButtonProps>) => {
   }
 
   const wrapperStyle: CSSProperties = style ? merge({}, basicWrapperStyle, style) : basicWrapperStyle
-  const uncheckedStyle: CSSProperties = style ? merge({}, basicUnchecked, style) : basicUnchecked
-  const checkedStyle: CSSProperties = merge({}, uncheckedStyle, {
-    boxShadow: 'rgb(0, 0, 0) 0 0 0 1px',
-    backgroundColor: '#2196F3',
-    border: '2px solid white',
-  })
   const labelStyle: CSSProperties = style ? merge({}, basicLabelStyle, style) : basicLabelStyle
 
   return (
     <div style={style}>
       <label htmlFor={id} style={wrapperStyle} aria-label={label}>
-        <div style={{ float: 'left' }}>
+        {/* The circle is drawn by formTheme.css from the input's own :checked/:disabled/:focus-visible state. */}
+        <span className="radio-button-input" style={{ float: 'left' }}>
           <input
             id={id}
             type="radio"
@@ -76,8 +56,8 @@ export const RadioButton = (props: Readonly<RadioButtonProps>) => {
             disabled={disabled}
             onChange={onChange ?? (() => {})}
           />
-          <span style={defaultChecked ? checkedStyle : uncheckedStyle} />
-        </div>
+          <span className="radio-button-dot" />
+        </span>
         <div style={{ marginLeft: '3rem' }}>
           <span style={labelStyle}>{label}</span>
           <span style={DESCRIPTION_STYLE}>{description}</span>

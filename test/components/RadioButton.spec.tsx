@@ -1,81 +1,53 @@
 import React from 'react'
-import { describe, it, expect } from 'vitest'
-import { render } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import '@testing-library/jest-dom/vitest'
+import { fireEvent, render } from '@testing-library/react'
 import { RadioButton } from 'src/components/RadioButton'
 
 describe('RadioButton', () => {
-  it('renders correctly and does not mutate shared styles', () => {
+  it('draws its circle from the input state, with no per-instance inline styles to share', () => {
     const { container } = render(
       <div>
-        <RadioButton
-          id="radio-1"
-          name="test-group"
-          value="val-1"
-          defaultChecked={true}
-          label="Label 1"
-        />
-        <RadioButton
-          id="radio-2"
-          name="test-group"
-          value="val-2"
-          defaultChecked={false}
-          label="Label 2"
-        />
+        <RadioButton id="radio-1" name="test-group" value="val-1" defaultChecked={true} label="Label 1" />
+        <RadioButton id="radio-2" name="test-group" value="val-2" defaultChecked={false} label="Label 2" />
       </div>,
     )
 
-    // The checked radio button should have the blue background
-    // In RadioButton.jsx: backgroundColor: '#2196F3'
-    const radio1 = container.querySelector('#radio-1')
-    const checkedSpan = radio1?.nextElementSibling as HTMLElement | null
-    expect(checkedSpan?.style.backgroundColor).toBe('rgb(33, 150, 243)')
-
-    // The unchecked radio button should have white background
-    // In RadioButton.jsx basicUnchecked: backgroundColor: 'white'
-    const radio2 = container.querySelector('#radio-2')
-    const uncheckedSpan = radio2?.nextElementSibling as HTMLElement | null
-    expect(uncheckedSpan?.style.backgroundColor).toBe('white')
+    const radio1 = container.querySelector('#radio-1') as HTMLInputElement
+    const radio2 = container.querySelector('#radio-2') as HTMLInputElement
+    expect(radio1).toBeChecked()
+    expect(radio2).not.toBeChecked()
+    for (const radio of [radio1, radio2]) {
+      const dot = radio.nextElementSibling as HTMLElement
+      expect(dot).toHaveClass('radio-button-dot')
+      expect(dot.getAttribute('style')).toBeNull()
+      expect(radio.parentElement).toHaveClass('radio-button-input')
+    }
   })
 
-  it('maintains independent styles for multiple instances', () => {
+  it('keeps each instance independent', () => {
     const { container } = render(
       <div>
-        <RadioButton
-          id="radio-a"
-          name="group-a"
-          value="a"
-          defaultChecked={true}
-          label="A"
-        />
-        <RadioButton
-          id="radio-b"
-          name="group-b"
-          value="b"
-          defaultChecked={false}
-          label="B"
-        />
-        <RadioButton
-          id="radio-c"
-          name="group-c"
-          value="c"
-          defaultChecked={false}
-          label="C"
-        />
+        <RadioButton id="radio-a" name="group-a" value="a" defaultChecked={true} label="A" />
+        <RadioButton id="radio-b" name="group-b" value="b" defaultChecked={false} label="B" />
+        <RadioButton id="radio-c" name="group-c" value="c" defaultChecked={false} label="C" />
       </div>,
     )
+    expect(container.querySelector('#radio-a')).toBeChecked()
+    expect(container.querySelector('#radio-b')).not.toBeChecked()
+    expect(container.querySelector('#radio-c')).not.toBeChecked()
+  })
 
-    // Verify checked one is blue
-    const radioA = container.querySelector('#radio-a')
-    const checkedSpan = radioA?.nextElementSibling as HTMLElement | null
-    expect(checkedSpan?.style.backgroundColor).toBe('rgb(33, 150, 243)')
-
-    // Verify others are white (not mutated by the first one)
-    const radioB = container.querySelector('#radio-b')
-    const uncheckedSpanB = radioB?.nextElementSibling as HTMLElement | null
-    expect(uncheckedSpanB?.style.backgroundColor).toBe('white')
-
-    const radioC = container.querySelector('#radio-c')
-    const uncheckedSpanC = radioC?.nextElementSibling as HTMLElement | null
-    expect(uncheckedSpanC?.style.backgroundColor).toBe('white')
+  it('stays clickable and reports disabled through the native input', () => {
+    const onClick = vi.fn()
+    const { container } = render(
+      <div>
+        <RadioButton id="radio-on" name="g" value="on" onClick={onClick} label="On" />
+        <RadioButton id="radio-off" name="g2" value="off" disabled label="Off" />
+      </div>,
+    )
+    fireEvent.click(container.querySelector('#radio-on')!)
+    expect(onClick).toHaveBeenCalledTimes(1)
+    expect(container.querySelector('#radio-off')).toBeDisabled()
   })
 })

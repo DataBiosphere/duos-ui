@@ -1,5 +1,6 @@
 import PublishIcon from '@mui/icons-material/Publish'
 import 'src/components/forms/formComponents.css'
+import 'src/components/forms/formTheme.css'
 import { cloneDeep, isArray, isEmpty, isNil, isString } from 'src/utils/NodashUtil'
 import React, { useState } from 'react'
 import Select from 'react-select'
@@ -129,9 +130,9 @@ export interface FormDatePickerConfig extends BaseFormComponentConfig {
   readOnly?: boolean
 }
 
+// Padding, height, border and focus ring come from formTheme.css, so a page can restyle inputs.
 const styles = {
   inputStyle: {
-    padding: '25px 15px',
     width: '100%',
   },
 }
@@ -424,6 +425,8 @@ export const FormInputSelect = (config: FormInputSelectConfig): React.ReactEleme
     isDisabled: disabled,
     placeholder: placeholder ?? `Search for ${title}...`,
     className: `form-select ${isValid(validation) ? '' : 'errored'}`,
+    // Stable class names (form-select__control, __multi-value, ...) for formTheme.css to target.
+    classNamePrefix: 'form-select',
     onChange: handleChange,
     onMenuOpen: () => setValidation({ valid: true }),
     getOptionLabel: (option: SelectOption) => option.displayText,
