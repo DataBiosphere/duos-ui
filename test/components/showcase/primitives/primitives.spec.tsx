@@ -3,14 +3,23 @@ import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
+import { type ShowcaseHandoffs, ShowcaseHandoffsContext } from 'src/components/showcase/handoffs'
 import { Card } from 'src/components/showcase/primitives/Card'
 import { FeaturedCard } from 'src/components/showcase/primitives/FeaturedCard'
+import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
 import { StructuredPanel } from 'src/components/showcase/primitives/StructuredPanel'
 import { datasetCardEntries } from 'src/showcases/datasetCardLabels'
 import { DatasetSummarySchema } from 'src/showcases/schema'
 import type { DatasetSummaryInput } from 'src/types/showcase'
 
-const renderInRouter = (ui: React.ReactElement) => render(<MemoryRouter>{ui}</MemoryRouter>)
+/** Signed in, with handoffs on, so a handoff link reads as its label alone. */
+const SIGNED_IN: ShowcaseHandoffs = { enabled: true, signedIn: true }
+
+const renderInRouter = (ui: React.ReactElement, handoffs = SIGNED_IN) => render(
+  <MemoryRouter>
+    <ShowcaseHandoffsContext.Provider value={handoffs}>{ui}</ShowcaseHandoffsContext.Provider>
+  </MemoryRouter>,
+)
 
 const controlledCohort: DatasetSummaryInput = {
   identifier: 'DUOS-000790',
@@ -152,5 +161,61 @@ describe('StructuredPanel', () => {
   it('renders the heading at the level the caller passes', () => {
     renderInRouter(<StructuredPanel title="Get started" headingLevel={3} />)
     expect(screen.getByRole('heading', { level: 3, name: 'Get started' })).toBeInTheDocument()
+  })
+})
+
+describe('ShowcaseLink handoffs (S3.2)', () => {
+  it('labels a signed-in destination for a visitor who is not signed in', () => {
+    renderInRouter(<ShowcaseLink href="/datalibrary?query=heart">Search</ShowcaseLink>, { enabled: true, signedIn: false })
+    expect(screen.getByRole('link', { name: 'Search (Sign-in required)' })).toHaveAttribute('href', '/datalibrary?query=heart')
+  })
+
+  it('drops the label once the visitor is signed in', () => {
+    renderInRouter(<ShowcaseLink href="/dataset/DUOS-000790">View dataset</ShowcaseLink>)
+    expect(screen.getByRole('link', { name: 'View dataset' })).toHaveAttribute('href', '/dataset/DUOS-000790')
+  })
+
+  it.each(['/data', '/showcase/example-partner', '/privacy', '/', '/tos'])('opens the public path %s without a sign-in label', (href) => {
+    renderInRouter(<ShowcaseLink href={href}>Public page</ShowcaseLink>, { enabled: true, signedIn: false })
+    expect(screen.getByRole('link', { name: 'Public page' })).toHaveAttribute('href', href)
+  })
+
+  it('treats an internal path missing from the public list as signed-in', () => {
+    renderInRouter(<ShowcaseLink href="/some_new_page">New page</ShowcaseLink>, { enabled: true, signedIn: false })
+    expect(screen.getByRole('link', { name: 'New page (Sign-in required)' })).toBeInTheDocument()
+  })
+
+  describe('in a production-data preview', () => {
+    const PREVIEW: ShowcaseHandoffs = { enabled: false, signedIn: true }
+
+    it.each(['/datalibrary?query=heart', '/dataset/DUOS-000790', '/dar_application/abc'])('renders %s as text, not a link', (href) => {
+      const { container } = renderInRouter(<ShowcaseLink href={href}>Handoff</ShowcaseLink>, PREVIEW)
+      expect(screen.queryByRole('link')).toBeNull()
+      expect(container.querySelector('a')).toBeNull()
+      expect(container).toHaveTextContent('Handoff (not available in this preview)')
+    })
+
+    it('never links a production identifier to this environment, even when it names a dataset here too', () => {
+      // DUOS-000790 is a production identifier; this environment's own DUOS-000790 is another
+      // dataset. The preview renders no href that could open it.
+      const { container } = renderInRouter(<Card title="Example Cohort" actions={[{ label: 'Request access', href: '/dataset/DUOS-000790' }]} />, PREVIEW)
+      expect(container.querySelector('[href*="DUOS-000790"]')).toBeNull()
+    })
+
+    it('still opens public pages and external links', () => {
+      renderInRouter(
+        <>
+          <ShowcaseLink href="/data">Flagship</ShowcaseLink>
+          <ShowcaseLink href="https://example.org">Provider</ShowcaseLink>
+        </>,
+        PREVIEW,
+      )
+      expect(screen.getAllByRole('link')).toHaveLength(2)
+    })
+  })
+
+  it('turns handoffs off when no provider says otherwise', () => {
+    const { container } = render(<MemoryRouter><ShowcaseLink href="/datalibrary">Search</ShowcaseLink></MemoryRouter>)
+    expect(container.querySelector('a')).toBeNull()
   })
 })
