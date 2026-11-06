@@ -686,6 +686,17 @@ export interface DatasetStatisticsDar {
   /** Absent when the dataset has no study: see DarMetric.yaml. The requester's name is never sent. */
   institutionName?: string
   submissionDate?: number
+  /** When the DAC approved the original DAR, as epoch millis. Absent until consent sends it. */
+  approvalDate?: number
+  /** When each progress report renewing this DAR was approved, oldest first. */
+  progressReportApprovalDates?: number[]
+  /**
+   * When access ends or ended without a closeout: 365 days from the newest approval, original or
+   * renewal. Sent by consent rather than derived here, so the rule lives in one place.
+   */
+  expirationDate?: number
+  /** When access was ended early by a closeout; absent while the DAR is not closed out. */
+  closeoutDate?: number
 }
 
 /**

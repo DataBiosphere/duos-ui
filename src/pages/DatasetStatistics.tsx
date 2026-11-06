@@ -6,6 +6,7 @@ import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { Notifications } from 'src/libs/utils'
 import { Styles, Theme } from 'src/libs/theme'
 import DarSummaryCard from 'src/components/DarSummaryCard'
+import DarTrends from 'src/components/dar_analytics/DarTrends'
 import { DatasetExportButton } from 'src/components/data_search/DatasetExportButton'
 import { Button, Stack, Tooltip } from '@mui/material'
 import {
@@ -330,7 +331,9 @@ export default function DatasetStatistics() {
             </div>
           </div>
           <div style={{ paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%' }} />
-          <div style={Styles.SUB_HEADER}>Data Access Requests for this dataset</div>
+          <div style={Styles.SUB_HEADER}>
+            Data Access Requests for this dataset{!darsRestricted && dars ? ` (${dars.length})` : ''}
+          </div>
           {darsRestricted && (
             // <output> carries an implicit status role and is announced more reliably than a div
             // wearing role="status". It is inline by default, so the block display keeps the
@@ -351,6 +354,14 @@ export default function DatasetStatistics() {
             <Stack spacing={2} sx={{ pt: '20px' }}>
               {dars.map((dar: DatasetStatisticsDar) => <DarSummaryCard key={dar.referenceId} dar={dar} />)}
             </Stack>
+          )}
+          {/* Only once the history has loaded: the trends share its access rule, so a refusal or
+              failure there would only repeat as four failed reports. */}
+          {!darsRestricted && dars && (
+            <>
+              <div style={{ ...Styles.SUB_HEADER, paddingTop: '30px' }}>Data Access Request Trends</div>
+              <DarTrends subject={{ type: 'dataset', id: datasetTerm.datasetId }} />
+            </>
           )}
         </div>
       </div>

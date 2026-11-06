@@ -58,6 +58,22 @@ vi.mock('src/libs/ajax/DatasetMetrics', () => ({
   },
 }))
 
+// The trends are covered by their own specs; here they only need to answer.
+vi.mock('src/libs/ajax/DarMetrics', () => {
+  const report = () => Promise.resolve({ from: '2026-01-01', to: '2026-03-31', bucket: 'QUARTER', total: 0, unmeasured: 0, buckets: [], rows: [] })
+  return {
+    DarMetrics: {
+      getVolume: vi.fn(report),
+      getDecisions: vi.fn(report),
+      getDatasetDecisions: vi.fn(report),
+      getDecisionTurnaround: vi.fn(report),
+      getDatasetDecisionTurnaround: vi.fn(report),
+      getExpirations: vi.fn(report),
+      getRenewals: vi.fn(report),
+    },
+  }
+})
+
 vi.mock('src/libs/ajax/StudyRecommendations', () => ({
   StudyRecommendations: {
     getSimilar: vi.fn().mockResolvedValue([]),
@@ -86,6 +102,7 @@ vi.mock('src/utils/accessUtils', () => ({
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Study } from 'src/libs/ajax/Study'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 
 const datasets = [
@@ -611,7 +628,7 @@ describe('Study details test', () => {
     mountComponent()
     await screen.findByText(datasets[0].datasetName)
 
-    expect(screen.getByRole('heading', { name: 'Data Access Requests for this Study' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Data Access Requests for this Study (0)' })).toBeInTheDocument()
     expect(screen.getByText('No granted data access requests yet.')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Primary Study Publications' })).toBeInTheDocument()
     expect(screen.getByText('No primary study publications have been added yet.')).toBeInTheDocument()
@@ -833,6 +850,27 @@ describe('Study details test', () => {
       .toBeInTheDocument()
     expect(screen.queryByText('Unable to load data access requests.')).not.toBeInTheDocument()
     expect(screen.queryByText('No granted data access requests yet.')).not.toBeInTheDocument()
+    // Neither a count nor the trends for history the reader may not see.
+    expect(screen.getByRole('heading', { name: 'Data Access Requests for this Study' })).toBeInTheDocument()
+    expect(screen.getByText(/Trends are shown to those who can see/)).toBeInTheDocument()
+    expect(DarMetrics.getVolume).not.toHaveBeenCalled()
+  })
+
+  it('counts the granted requests in the heading and charts the study\'s trends', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValue([
+      { projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1', nonTechRus: '', expired: false, updateDate: 1 },
+      { projectTitle: 'Rare disease', referenceId: 'dar-2', darCode: 'DAR-2', nonTechRus: '', expired: true, updateDate: 1 },
+    ])
+    mountComponent()
+
+    expect(await screen.findByRole('heading', { name: 'Data Access Requests for this Study (2)' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Data Access Request Trends' })).toBeInTheDocument()
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toBeInTheDocument()
+    await waitFor(() => expect(DarMetrics.getVolume).toHaveBeenCalledWith(
+      expect.objectContaining({ subject: { type: 'study', id: '1' }, limit: 1 }),
+    ))
+    // The table of contents keeps the heading alone, so its entry doesn't change as the count loads.
+    expect(screen.getByRole('link', { name: 'Data Access Requests for this Study' })).toBeInTheDocument()
   })
 
   /**
@@ -854,6 +892,29 @@ describe('Study details test', () => {
 
     await waitFor(() => expect(screen.getByText('Cancer genomics')).toBeInTheDocument())
     expect(screen.queryByText('Unable to load data access requests.')).not.toBeInTheDocument()
+  })
+
+  it('dates each granted request\'s approval, renewals, expiration and closeout', async () => {
+    const day = (iso: string) => Date.parse(`${iso}T12:00:00Z`)
+    const shown = (iso: string) => new Date(day(iso)).toLocaleDateString()
+    vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValue([
+      {
+        projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1', nonTechRus: '', expired: true, updateDate: 1,
+        submissionDate: day('2024-01-10'), approvalDate: day('2024-02-01'),
+        progressReportApprovalDates: [day('2025-01-20')], expirationDate: day('2026-01-20'),
+      },
+      {
+        projectTitle: 'Rare disease', referenceId: 'dar-2', darCode: 'DAR-2', nonTechRus: '', expired: true, updateDate: 1,
+        submissionDate: day('2025-03-01'), approvalDate: day('2025-04-01'), closeoutDate: day('2025-10-01'),
+      },
+    ])
+    mountComponent()
+
+    expect(await screen.findByText(`Approved ${shown('2024-02-01')}`)).toBeInTheDocument()
+    expect(screen.getByText(`Renewed ${shown('2025-01-20')}`)).toBeInTheDocument()
+    expect(screen.getByText(`Expired ${shown('2026-01-20')}`)).toBeInTheDocument()
+    expect(screen.getByText(`Approved ${shown('2025-04-01')}`)).toBeInTheDocument()
+    expect(screen.getByText(`Closed out ${shown('2025-10-01')}`)).toBeInTheDocument()
   })
 
   /** A refusal is different: once the server says no, the cached history comes off the page. */

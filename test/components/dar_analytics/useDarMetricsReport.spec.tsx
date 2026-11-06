@@ -2,7 +2,7 @@ import React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
-import { DarMetricsScope, useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
+import { DarMetricsScope, DarMetricsSubjectScope, useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
 
 const range: DarAnalyticsRange = { from: '2026-01-01', to: '2026-03-31', bucket: 'month' }
@@ -62,6 +62,39 @@ describe('useDarMetricsReport', () => {
 
     await waitFor(() => expect(fetchReport).toHaveBeenCalledTimes(2))
     expect(result.current.data).toEqual({ dac: 4 })
+  })
+
+  it('sends a study or dataset in place of the DAC scope', async () => {
+    const fetchReport = vi.fn().mockResolvedValue({})
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={new QueryClient()}>
+        <DarMetricsScope.Provider value={[4]}>
+          <DarMetricsSubjectScope.Provider value={{ type: 'study', id: 7 }}>{children}</DarMetricsSubjectScope.Provider>
+        </DarMetricsScope.Provider>
+      </QueryClientProvider>
+    )
+    renderHook(() => useDarMetricsReport('decisions', fetchReport, range, { limit: 1 }), { wrapper })
+
+    await waitFor(() => expect(fetchReport).toHaveBeenCalledWith({ ...range, limit: 1, subject: { type: 'study', id: 7 } }))
+  })
+
+  it('drops the previous figures when the study or dataset changes', async () => {
+    const fetchReport = vi.fn().mockResolvedValueOnce({ study: 7 }).mockReturnValue(new Promise(() => undefined))
+    const client = new QueryClient()
+    let id = 7
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={client}>
+        <DarMetricsSubjectScope.Provider value={{ type: 'study', id }}>{children}</DarMetricsSubjectScope.Provider>
+      </QueryClientProvider>
+    )
+    const { result, rerender } = renderHook(() => useDarMetricsReport('decisions', fetchReport, range), { wrapper })
+    await waitFor(() => expect(result.current.data).toEqual({ study: 7 }))
+
+    id = 8
+    rerender()
+
+    await waitFor(() => expect(fetchReport).toHaveBeenCalledTimes(2))
+    expect(result.current.data).toBeUndefined()
   })
 
   it('leaves the scope out when the page sets none', async () => {

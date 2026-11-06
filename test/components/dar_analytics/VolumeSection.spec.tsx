@@ -5,6 +5,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { VolumeSection } from 'src/components/dar_analytics/VolumeSection'
+import { DarMetricsSubjectScope } from 'src/components/dar_analytics/useDarMetricsReport'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
 import { DarVolumeReport } from 'src/types/darMetrics'
 
@@ -113,6 +114,30 @@ describe('VolumeSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Go to next page' }))
     expect(await within(grid).findByRole('gridcell', { name: 'Institution 11' })).toBeInTheDocument()
     expect(within(grid).queryByRole('gridcell', { name: 'Institution 1' })).not.toBeInTheDocument()
+  })
+
+  it('counts a study\'s or dataset\'s DARs without saying who made them', async () => {
+    const { institutions: _i, researchers: _r, ...scoped } = report({
+      total: 2,
+      buckets: [{ bucketStart: Q1, darCount: 2, researcherCount: 2, institutionCount: 1, datasetCount: 2 }],
+    })
+    vi.mocked(DarMetrics.getVolume).mockResolvedValue(scoped)
+
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <DarMetricsSubjectScope.Provider value={{ type: 'dataset', id: 42 }}>
+          <VolumeSection range={range} />
+        </DarMetricsSubjectScope.Provider>
+      </QueryClientProvider>,
+    )
+
+    expect(await screen.findByText('DARs submitted', { selector: 'dt' })).toBeInTheDocument()
+    expect(figure('DARs submitted')).toHaveTextContent('2')
+    expect(figure('Dataset requests')).toHaveTextContent('2')
+    expect(screen.queryByText('Researchers', { selector: 'dt' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Institutions', { selector: 'dt' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('grid', { name: 'DARs by institution' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/institution recorded when it was submitted/)).not.toBeInTheDocument()
   })
 
   it('shows a failed report as an error', async () => {

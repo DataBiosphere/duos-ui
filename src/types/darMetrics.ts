@@ -13,6 +13,21 @@ export interface DarMetricsQuery {
   offset?: number
   /** Limits the report to these DACs' datasets; omitted, consent picks the caller's default scope. */
   dacIds?: number[]
+  /** Limits the report to one study's or dataset's DARs, read under the DAR history's access rules instead of a DAC role. */
+  subject?: DarMetricsSubject
+}
+
+/**
+ * The study or dataset a study or dataset page reports on. Consent serves these reports at
+ * `/api/metrics/{report}/study/{studyId}` and `/api/metrics/{report}/dataset/{datasetId}`, to
+ * whoever may read that study's or dataset's DAR history, with `dacId` ignored. They count only
+ * DARs requesting the subject's datasets, and only those datasets in any dataset-level figure.
+ * They are aggregate only: `rows` is always empty, and the volume report leaves out `institutions`
+ * and `researchers`, so a page open to researchers never lists who requested a dataset.
+ */
+export interface DarMetricsSubject {
+  type: 'study' | 'dataset'
+  id: number | string
 }
 
 export interface DarMetricsReport<B, R> {
@@ -62,8 +77,10 @@ export interface DarVolume {
 }
 
 export interface DarVolumeReport extends DarMetricsReport<VolumeBucketCount, DarVolume> {
-  institutions: InstitutionDarCount[]
-  researchers: ResearcherDarCount[]
+  /** Omitted from study- and dataset-scoped reports. */
+  institutions?: InstitutionDarCount[]
+  /** Omitted from study- and dataset-scoped reports. */
+  researchers?: ResearcherDarCount[]
 }
 
 export type DecisionState = 'APPROVED' | 'DENIED' | 'MIXED' | 'PENDING' | 'CANCELED' | 'NO_ELECTION'

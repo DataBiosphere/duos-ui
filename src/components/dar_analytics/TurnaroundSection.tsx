@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { LineChart } from '@mui/x-charts/LineChart'
@@ -8,7 +8,7 @@ import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
 import { bucketStartsInRange, describePeriods, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
-import { useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
+import { DarMetricsSubjectScope, useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
 
 type Level = 'dar' | 'dataset'
 
@@ -36,7 +36,11 @@ const COLUMNS: GridColDef<TurnaroundRow>[] = [
 ]
 
 export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
-  const [level, setLevel] = useState<Level>('dar')
+  // A study or dataset page measures only its own datasets' decisions: a DAR's turnaround runs to
+  // its last decision, which may be on another study's dataset.
+  const datasetOnly = useContext(DarMetricsSubjectScope) !== undefined
+  const [chosenLevel, setLevel] = useState<Level>('dar')
+  const level: Level = datasetOnly ? 'dataset' : chosenLevel
   const report = useDarMetricsReport(
     `${level}-turnaround`,
     level === 'dar' ? DarMetrics.getDecisionTurnaround : DarMetrics.getDatasetDecisionTurnaround,
@@ -73,7 +77,7 @@ export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
         ? ['Decisions with no usable vote date (votes cast before March 2021, or dated before a backfilled '
           + `submission) are left out of these figures: ${data.unmeasured} in this range.`]
         : []}
-      actions={(
+      actions={!datasetOnly && (
         <ToggleButtonGroup
           aria-label="Measure turnaround per"
           size="small"

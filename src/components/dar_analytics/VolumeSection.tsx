@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Box } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { BarChart } from '@mui/x-charts/BarChart'
@@ -8,7 +8,7 @@ import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
 import { bucketStartsInRange, describePeriods, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
-import { useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
+import { DarMetricsSubjectScope, useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
 
 const layoutStyle = {
   display: 'grid',
@@ -35,6 +35,8 @@ export const VolumeSection = ({ range }: { range: DarAnalyticsRange }) => {
     : range
   const byStart = new Map((data?.buckets ?? []).map(bucket => [bucket.bucketStart, bucket]))
   const starts = bucketStartsInRange(shown)
+  // A study or dataset page's report counts DARs without saying who made them.
+  const identified = useContext(DarMetricsSubjectScope) === undefined
   const institutions = data?.institutions ?? []
   const rows: InstitutionRow[] = institutions.map((institution, index) => ({
     ...institution,
@@ -47,13 +49,15 @@ export const VolumeSection = ({ range }: { range: DarAnalyticsRange }) => {
   return (
     <AnalyticsSection
       title="Volume"
-      description={'Original DARs submitted in the range, who submitted them and from where. Progress '
+      description={`Original DARs submitted in the range${identified ? ', who submitted them and from where' : ''}. Progress `
         + 'reports, closeouts, drafts, and canceled or archived DARs are left out.'}
-      caveats={[
-        'A DAR shows the institution recorded when it was submitted. DARs submitted before DUOS recorded '
-        + 'one show the researcher\'s current institution instead, so a researcher who has moved takes '
-        + 'those DARs with them.',
-      ]}
+      caveats={identified
+        ? [
+            'A DAR shows the institution recorded when it was submitted. DARs submitted before DUOS recorded '
+            + 'one show the researcher\'s current institution instead, so a researcher who has moved takes '
+            + 'those DARs with them.',
+          ]
+        : []}
       isLoading={report.isPending}
       isRefreshing={report.isPlaceholderData}
       error={report.error}
@@ -63,15 +67,19 @@ export const VolumeSection = ({ range }: { range: DarAnalyticsRange }) => {
       <HeadlineFigures
         figures={[
           { label: 'DARs submitted', value: data?.total ?? 0 },
-          { label: 'Researchers', value: data?.researchers.length ?? 0 },
-          { label: 'Institutions', value: new Set(institutions.map(i => i.institutionId).filter(id => id != null)).size },
+          ...(identified
+            ? [
+                { label: 'Researchers', value: data?.researchers?.length ?? 0 },
+                { label: 'Institutions', value: new Set(institutions.map(i => i.institutionId).filter(id => id != null)).size },
+              ]
+            : []),
           {
             label: 'Dataset requests',
             value: (data?.buckets ?? []).reduce((sum, bucket) => sum + bucket.datasetCount, 0),
           },
         ]}
       />
-      <Box sx={layoutStyle}>
+      <Box sx={identified ? layoutStyle : undefined}>
         <BarChart
           title="DARs submitted per period"
           desc={describePeriods(labels, series)}
@@ -79,17 +87,19 @@ export const VolumeSection = ({ range }: { range: DarAnalyticsRange }) => {
           xAxis={[{ scaleType: 'band', data: labels }]}
           series={series}
         />
-        <DataGrid
-          aria-label="DARs by institution"
-          rows={rows}
-          columns={COLUMNS}
-          autoHeight
-          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-          pageSizeOptions={[10]}
-          disableColumnMenu
-          disableRowSelectionOnClick
-          disableVirtualization
-        />
+        {identified && (
+          <DataGrid
+            aria-label="DARs by institution"
+            rows={rows}
+            columns={COLUMNS}
+            autoHeight
+            initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+            pageSizeOptions={[10]}
+            disableColumnMenu
+            disableRowSelectionOnClick
+            disableVirtualization
+          />
+        )}
       </Box>
     </AnalyticsSection>
   )

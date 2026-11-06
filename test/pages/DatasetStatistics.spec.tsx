@@ -10,6 +10,7 @@ import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { DAC } from 'src/libs/ajax/DAC'
+import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { Storage } from 'src/libs/storage'
 import { DatasetStatisticsDar, DatasetTerm, DataUseSummary } from 'src/types/model'
 import { SnapshotSummaryModel } from 'src/types/tdrModel'
@@ -19,6 +20,21 @@ vi.mock('src/libs/ajax/DataSet')
 vi.mock('src/libs/ajax/DatasetMetrics')
 vi.mock('src/libs/ajax/TerraDataRepo')
 vi.mock('src/libs/ajax/DAC')
+// The trends are covered by their own specs; here they only need to answer.
+vi.mock('src/libs/ajax/DarMetrics', () => {
+  const report = () => Promise.resolve({ from: '2026-01-01', to: '2026-03-31', bucket: 'QUARTER', total: 0, unmeasured: 0, buckets: [], rows: [] })
+  return {
+    DarMetrics: {
+      getVolume: vi.fn(report),
+      getDecisions: vi.fn(report),
+      getDatasetDecisions: vi.fn(report),
+      getDecisionTurnaround: vi.fn(report),
+      getDatasetDecisionTurnaround: vi.fn(report),
+      getExpirations: vi.fn(report),
+      getRenewals: vi.fn(report),
+    },
+  }
+})
 
 // Mock fetch for config.json
 const mockConfig = {
@@ -295,6 +311,16 @@ describe('DatasetStatistics', () => {
     expect(screen.getByText('Current')).toBeTruthy()
   })
 
+  it('counts the requests after the heading and charts the dataset\'s trends', async () => {
+    renderDatasetStatistics({ dars: [...mockDarsResponse, { ...mockDarsResponse[0], referenceId: '67890' }] })
+
+    expect(await screen.findByText('Data Access Requests for this dataset (2)')).toBeInTheDocument()
+    expect(screen.getByText('Data Access Request Trends')).toBeInTheDocument()
+    await waitFor(() => expect(DarMetrics.getVolume).toHaveBeenCalledWith(
+      expect.objectContaining({ subject: { type: 'dataset', id: mockDatasetTerm.datasetId } }),
+    ))
+  })
+
   /**
    * consent gates GET /api/metrics/dar-summaries/{datasetId} on being able to read the dataset, so
    * a dataset whose study is unpublished answers 403 to everyone but its owners. The dataset
@@ -320,6 +346,10 @@ describe('DatasetStatistics', () => {
     ).not.toBeInTheDocument()
     // The rest of the page is unaffected
     expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeTruthy()
+    // Neither a count nor trends for history the reader may not see
+    expect(screen.getByText('Data Access Requests for this dataset')).toBeInTheDocument()
+    expect(screen.queryByText('Data Access Request Trends')).not.toBeInTheDocument()
+    expect(DarMetrics.getVolume).not.toHaveBeenCalled()
   })
 
   /**
@@ -418,6 +448,8 @@ describe('DatasetStatistics', () => {
     expect(
       screen.queryByText(/do not have access to this dataset's data access request history/),
     ).not.toBeInTheDocument()
+    // A failed load is not zero requests
+    expect(screen.getByText('Data Access Requests for this dataset')).toBeInTheDocument()
   })
 
   it('displays empty message when no data access requests exist', async () => {
@@ -426,6 +458,7 @@ describe('DatasetStatistics', () => {
     expect(
       await screen.findByText(/No Data Access Requests have been created for this dataset/),
     ).toBeTruthy()
+    expect(screen.getByText('Data Access Requests for this dataset (0)')).toBeInTheDocument()
   })
 })
 

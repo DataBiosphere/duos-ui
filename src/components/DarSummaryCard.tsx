@@ -13,11 +13,38 @@ const DarText = ({ label, text }: { label: string, text: string }) => (
   </Box>
 )
 
+const formatDate = (date: number) => new Date(date).toLocaleDateString()
+
+/**
+ * Submission, approval, each renewal, and how access ends, in the order they happen. A closeout
+ * ends access early, so a closed-out DAR shows its closeout in place of an expiration.
+ */
+const darTimeline = (dar: DatasetStatisticsDar): string[] => {
+  let accessEnd: string[] = []
+  if (dar.closeoutDate) {
+    accessEnd = [`Closed out ${formatDate(dar.closeoutDate)}`]
+  }
+  else if (dar.expirationDate) {
+    accessEnd = [`${dar.expired ? 'Expired' : 'Expires'} ${formatDate(dar.expirationDate)}`]
+  }
+  return [
+    `Submitted ${dar.submissionDate ? formatDate(dar.submissionDate) : 'date not available'}`,
+    ...(dar.approvalDate ? [`Approved ${formatDate(dar.approvalDate)}`] : []),
+    ...(dar.progressReportApprovalDates?.length
+      ? [`Renewed ${dar.progressReportApprovalDates.map(formatDate).join(', ')}`]
+      : []),
+    ...accessEnd,
+  ]
+}
+
+const accessStatus = (dar: DatasetStatisticsDar): { label: string, color: 'default' | 'success' } => {
+  if (dar.closeoutDate) return { label: 'Closed out', color: 'default' }
+  return dar.expired ? { label: 'Expired', color: 'default' } : { label: 'Current', color: 'success' }
+}
+
 const DarSummaryCard = ({ dar }: { dar: DatasetStatisticsDar }) => {
   const [expanded, setExpanded] = useState(false)
-  const submissionDate = dar.submissionDate
-    ? new Date(dar.submissionDate).toLocaleDateString()
-    : 'date not available'
+  const status = accessStatus(dar)
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
@@ -28,13 +55,15 @@ const DarSummaryCard = ({ dar }: { dar: DatasetStatisticsDar }) => {
           </Typography>
           {/* Institution, not the requester's name: the section says where a grant went. */}
           <Typography variant="body2">Institution: {dar.institutionName || 'Not provided'}</Typography>
-          <Typography variant="caption" color="text.secondary">Submitted {submissionDate}</Typography>
+          <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0 }}>
+            {darTimeline(dar).map(event => (
+              <Typography key={event} component="li" variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                {event}
+              </Typography>
+            ))}
+          </Box>
         </Box>
-        <Chip
-          size="small"
-          color={dar.expired ? 'default' : 'success'}
-          label={dar.expired ? 'Expired' : 'Current'}
-        />
+        <Chip size="small" color={status.color} label={status.label} />
       </Stack>
       {(dar.rus || dar.nonTechRus) && (
         <>

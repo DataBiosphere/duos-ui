@@ -95,6 +95,27 @@ describe('DarMetrics', () => {
     })
   })
 
+  it.each([
+    ['study', 7, 'dar-volume/study/7'],
+    ['dataset', 42, 'dar-volume/dataset/42'],
+  ] as const)('scopes a report to a %s by path, and leaves out any DAC scope', async (type, id, path) => {
+    await DarMetrics.getVolume({ ...query, dacIds: [3], subject: { type, id } })
+
+    expect(fetchGet).toHaveBeenCalledWith(`https://duos.example.org/api/metrics/${path}`, {
+      ...headers,
+      params: query,
+    })
+  })
+
+  it('encodes a subject id taken from the route', async () => {
+    await DarMetrics.getRenewals({ ...query, subject: { type: 'study', id: '1/../2' } })
+
+    expect(fetchGet).toHaveBeenCalledWith('https://duos.example.org/api/metrics/dar-renewals/study/1%2F..%2F2', {
+      ...headers,
+      params: query,
+    })
+  })
+
   it('propagates a rejection with its status intact', async () => {
     const badRequest = { message: 'to must not be before from', code: 400 }
     vi.mocked(fetchGet).mockRejectedValueOnce(badRequest)
