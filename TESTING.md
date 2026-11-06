@@ -47,7 +47,7 @@ No database or credentials required. Use a fresh shell without `DUOS_TEST_SIGNIN
 
 ```sh
 cp config/dev.json public/config.json
-CI=false pnpm run build
+CI=false pnpm run build:e2e
 pnpm exec playwright test about.spec.ts home.spec.ts status.spec.ts liveness.spec.ts
 pnpm exec playwright test csp.spec.ts --grep-invert signed-in
 ```
@@ -107,10 +107,14 @@ export DUOS_TEST_SIGNIN_EMAILS
 #### 4. Build and run
 
 ```sh
-jq '.bffEnabled = true' config/dev.json > public/config.json
-CI=false pnpm run build
+jq '.bffEnabled = true | .showcaseEnabled = true' config/dev.json > public/config.json
+CI=false pnpm run build:e2e
 pnpm run test:e2e
 ```
+
+`build:e2e` compiles in the synthetic showcases (`test/e2e/showcase/`) that `showcase.spec.ts`
+loads, in place of the real index; no deployed build uses it. `showcaseEnabled` is the rollout flag
+that turns the showcase routes on.
 
 See the [CI workflow](.github/workflows/integration-tests.yml) and
 [dev/BEE deployment settings](docs/testing/e2e-role-fixture.md).
@@ -243,12 +247,12 @@ a plain-HTTP URL. It answers a preflight from the legacy origin only, and a POST
 `test/fixtures/showcase/contracts.ts` gets that example's response, another request with a known
 mode gets `catalogMock.ts`'s answer, and a request with an `Authorization` header or a cookie is a 400.
 
-`legacyMode.spec.ts` proves the project works. Any built `config.json` will do; no database or
-credentials are needed:
+`legacyMode.spec.ts` proves the project works, and `showcase.spec.ts` runs here as well as in
+`chromium`, so the showcase pages are checked in both modes. No credentials are needed:
 
 ```sh
-cp config/dev.json public/config.json
-CI=false pnpm run build
+jq '.showcaseEnabled = true' config/dev.json > public/config.json
+CI=false pnpm run build:e2e
 pnpm exec playwright test --project=legacy
 ```
 
