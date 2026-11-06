@@ -17,6 +17,7 @@ interface BiospecimenRowProps {
   readonly viewAction?: () => void
   readonly onBiospecimensChange: (models: Biospecimen[]) => void
   readonly disabled: boolean
+  readonly countries?: string[]
 }
 
 export default function BiospecimenRow(props: BiospecimenRowProps): React.JSX.Element {
@@ -33,6 +34,7 @@ export default function BiospecimenRow(props: BiospecimenRowProps): React.JSX.El
     viewAction,
     onBiospecimensChange,
     disabled,
+    countries,
   } = props
 
   return (
@@ -57,6 +59,7 @@ export default function BiospecimenRow(props: BiospecimenRowProps): React.JSX.El
         biospecimens,
         closeAction,
         onBiospecimensChange,
+        countries,
       }}
       summaryProps={{
         biospecimen,

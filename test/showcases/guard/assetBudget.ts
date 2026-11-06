@@ -7,6 +7,7 @@
  */
 import { statSync } from 'node:fs'
 import { isAbsolute, relative, resolve, sep } from 'node:path'
+import { isShowcaseImagePath, SHOWCASE_IMAGE_EXTENSIONS } from 'src/showcases/images'
 
 const KB = 1024
 
@@ -75,6 +76,10 @@ export const checkAssetBudget = (config: unknown, readSize: ReadSize = readImage
   const errors: string[] = []
   const distinct = new Map<string, number>()
   collectImages(config, '').forEach((image) => {
+    if (!isShowcaseImagePath(image.src)) {
+      errors.push(`${image.path}: "${image.src}" must be a file below src/images/showcase/<key>/ with one of the extensions ${SHOWCASE_IMAGE_EXTENSIONS.join(', ')}`)
+      return
+    }
     const size = readSize(image.src)
     if (size === undefined) {
       errors.push(`${image.path}: "${image.src}" not found below src/images`)

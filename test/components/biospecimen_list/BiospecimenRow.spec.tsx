@@ -3,7 +3,6 @@ import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
 import BiospecimenRow from 'src/components/biospecimen_list/BiospecimenRow'
 import { Biospecimen, BioSpecimenPreservationMethod, BioSpecimenType } from 'src/types/model'
 
@@ -39,46 +38,45 @@ describe('BiospecimenRow', () => {
     expect(editFn).toHaveBeenCalledTimes(1)
   })
 
-  it('does not render edit form when editMode true (redirects)', async () => {
-    const { container } = render(
-      <MemoryRouter>
-        <BiospecimenRow
-          id={0}
-          editMode={true}
-          biospecimen={sampleBiospecimen}
-          biospecimens={[sampleBiospecimen]}
-          columnsToShow={['specimenType']}
-          editAction={vi.fn()}
-          deleteAction={vi.fn()}
-          closeAction={vi.fn()}
-          onBiospecimensChange={vi.fn()}
-          disabled={false}
-        />
-      </MemoryRouter>,
+  it('shows the edit form in edit mode', () => {
+    render(
+      <BiospecimenRow
+        id={0}
+        editMode={true}
+        biospecimen={sampleBiospecimen}
+        biospecimens={[sampleBiospecimen]}
+        columnsToShow={['specimenType']}
+        editAction={vi.fn()}
+        deleteAction={vi.fn()}
+        closeAction={vi.fn()}
+        onBiospecimensChange={vi.fn()}
+        disabled={false}
+      />,
     )
-    expect(container.querySelector('[data-cy="biospecimen-add-edit"]')).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Edit Biospecimen from donor DONOR-001' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
   })
 
-  it('does not render view form when viewMode true (redirects)', async () => {
+  it('shows the form read-only in view mode', () => {
     const { container } = render(
-      <MemoryRouter>
-        <BiospecimenRow
-          id={0}
-          editMode={false}
-          viewMode={true}
-          biospecimen={sampleBiospecimen}
-          biospecimens={[sampleBiospecimen]}
-          columnsToShow={['specimenType']}
-          editAction={vi.fn()}
-          deleteAction={vi.fn()}
-          closeAction={vi.fn()}
-          viewAction={vi.fn()}
-          onBiospecimensChange={vi.fn()}
-          disabled={false}
-        />
-      </MemoryRouter>,
+      <BiospecimenRow
+        id={0}
+        editMode={false}
+        viewMode={true}
+        biospecimen={sampleBiospecimen}
+        biospecimens={[sampleBiospecimen]}
+        columnsToShow={['specimenType']}
+        editAction={vi.fn()}
+        deleteAction={vi.fn()}
+        closeAction={vi.fn()}
+        viewAction={vi.fn()}
+        onBiospecimensChange={vi.fn()}
+        disabled={false}
+      />,
     )
-    expect(container.querySelector('[data-cy="biospecimen-add-edit"]')).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Biospecimen from donor DONOR-001' })).toBeInTheDocument()
+    expect(container.querySelector('#donorId')).toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'Save' })).toBeNull()
   })
 
   it('triggers viewAction when view button is clicked', async () => {

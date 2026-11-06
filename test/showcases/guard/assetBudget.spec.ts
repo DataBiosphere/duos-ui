@@ -101,6 +101,19 @@ describe('checkAssetBudget', () => {
     const errors = checkAssetBudget(withImages(), src => (src === 'showcase/flagship/tool.png' ? undefined : 1))
     expect(errors).toEqual([expect.stringContaining('not found')])
   })
+
+  it.each([
+    'anvil-logo.svg',
+    'showcase/logo.svg',
+    'showcase/flagship/../../anvil-logo.svg',
+    'showcase//flagship/logo.svg',
+    'showcase/flagship/logo.bmp',
+    'showcase/flagship/logo.SVG',
+    '/src/images/showcase/flagship/logo.svg',
+  ])('fails %j, which the page could not load, even when the file exists', (src) => {
+    const errors = checkAssetBudget(withLogo(src), () => 1)
+    expect(errors).toEqual([expect.stringContaining(`"${src}" must be a file below src/images/showcase/<key>/`)])
+  })
 })
 
 describe('readImageSize', () => {
