@@ -15,22 +15,28 @@ const PROVIDER_CONFLICT_FALLBACK_MESSAGE
   = 'You may have previously signed in with a different authentication provider (Google or Microsoft). Please sign in with that provider.'
 
 /**
- * Ends a session that can no longer be used, recording why. Returns false, and
- * answers 502 itself, when a later sign-in holds the row: this request's
- * sign-in is over but the browser's is not, and a 401 would make the client
- * sign the browser out. A destroy that failed answers the same way, because it
- * can't tell whether a later sign-in holds the row; the next request retries it.
+ * Ends a session that can no longer be used, recording why. 'failed' means the
+ * destroy threw, so it can't tell whether a later sign-in holds the row; the
+ * cookie must stay, as for 'superseded', and the next request retries.
  */
-async function destroySession(request: FastifyRequest, reply: FastifyReply, reason: SessionDestroyReason): Promise<boolean> {
-  let superseded: boolean
+async function tryEndSession(request: FastifyRequest, reason: SessionDestroyReason): Promise<'ended' | 'superseded' | 'failed'> {
   try {
-    superseded = await endSession(request, reason) === 'superseded'
+    return await endSession(request, reason) === 'superseded' ? 'superseded' : 'ended'
   }
   catch (err: unknown) {
-    request.log.error({ err }, '[auth] upstream rejected the session but it could not be destroyed — answering 502 and keeping the cookie')
-    superseded = true
+    request.log.error({ err }, '[auth] upstream rejected the session but it could not be destroyed — keeping the cookie')
+    return 'failed'
   }
-  if (superseded) {
+}
+
+/**
+ * Ends a session that can no longer be used. Returns false, and answers 502
+ * itself, when a later sign-in holds the row or the destroy failed: this
+ * request's sign-in is over but the browser's may not be, and a 401 would make
+ * the client sign the browser out.
+ */
+async function destroySession(request: FastifyRequest, reply: FastifyReply, reason: SessionDestroyReason): Promise<boolean> {
+  if (await tryEndSession(request, reason) !== 'ended') {
     reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
     return false
   }
@@ -162,7 +168,14 @@ export async function getMe(request: FastifyRequest, reply: FastifyReply): Promi
     // upstream's actionable message (sign in with the other provider, plus the support link) instead
     // of a generic failure.
     const message = await providerConflictMessage(res)
-    if (!(await destroySession(request, reply, 'provider_conflict'))) return
+    const ended = await tryEndSession(request, 'provider_conflict')
+    if (ended === 'superseded') {
+      reply.status(502).send({ authenticated: false, error: 'upstream_unavailable' })
+      return
+    }
+    // A failed destroy still forwards the message, since only it tells the user
+    // what to do, but keeps the cookie in case a later sign-in holds the row.
+    if (ended === 'ended') reply.clearCookie(SESSION_COOKIE_NAME)
     reply.status(409).send({ authenticated: false, error: 'provider_conflict', message })
     return
   }

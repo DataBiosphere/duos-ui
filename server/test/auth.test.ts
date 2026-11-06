@@ -6,7 +6,7 @@ import fastifyCsrf from '@fastify/csrf-protection'
 import type { PostgresDb } from '@fastify/postgres'
 import type { Configuration } from 'openid-client'
 import { createPgSessionStore } from '../src/session/pgStore.js'
-import { compareAndSetRow, deleteGenerationRow, sessionGeneration, stored } from './sessionTable.js'
+import { compareAndSetRow, deleteGenerationRow, liveRowRows, sessionGeneration, stored } from './sessionTable.js'
 import { sessionPluginOptions } from '../src/session/sessionOptions.js'
 import { csrfPluginOptions, handleCsrfToken } from '../src/auth/csrf.js'
 import { fetchMetadataGuard } from '../src/security/fetchMetadata.js'
@@ -99,7 +99,7 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
       return deleteGenerationRow(rows, params)
     }
     if (sql.includes('SELECT 1 FROM user_sessions')) {
-      return { rows: rows.has(params[0] as string) ? [{}] : [] }
+      return liveRowRows(rows, params)
     }
     if (sql.includes('DELETE FROM user_sessions')) {
       rows.delete(params[0] as string)
@@ -563,6 +563,35 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       const me = await app.inject({ method: 'GET', url: '/auth/me', headers: { cookie: second } })
       vi.unstubAllGlobals()
       expect(me.statusCode).toBe(200)
+    })
+
+    it('signs the browser out when the later sign-in on the row has expired too', async () => {
+      const { cookie: first } = await authenticate()
+      const [sid] = rows.keys()
+
+      let answer!: (res: unknown) => void
+      vi.stubGlobal('fetch', vi.fn(() => new Promise((resolve) => {
+        answer = resolve
+      })))
+      const stale = app.inject({ method: 'GET', url: '/auth/me', headers: { cookie: first } })
+      await vi.waitFor(() => expect(answer).toBeDefined())
+
+      const relogin = await app.inject({ method: 'POST', url: '/auth/login', headers: { cookie: first } })
+      await app.inject({
+        method: 'GET',
+        url: '/auth/callback?code=test-code&state=test-state',
+        headers: { cookie: sessionCookieHeader(relogin) },
+      })
+      // The later sign-in's row expires before the stale request ends.
+      rows.get(sid)!.expire = new Date(Date.now() - 1000)
+
+      answer({ status: 401, ok: false, json: async () => ({}) })
+      const res = await stale
+      vi.unstubAllGlobals()
+
+      // The row is no one's live session, so its dead cookie is cleared.
+      expect(res.statusCode).toBe(401)
+      expect(res.cookies.find(c => c.name === 'sessionId')?.value).toBe('')
     })
   })
 
