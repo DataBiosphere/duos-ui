@@ -18,6 +18,7 @@ const makeBucket = (
   studyId: number,
   models: Array<{
     modelId?: number
+    duosIdentifier?: string
     name?: string
     format?: string
     license?: string
@@ -41,6 +42,7 @@ const makeBucket = (
               assets: {
                 models: models.map(m => ({
                   modelId: m.modelId,
+                  duosIdentifier: m.duosIdentifier,
                   name: m.name,
                   format: m.format,
                   license: m.license,
@@ -505,5 +507,17 @@ describe('modelAsset — indexed values are normalized', () => {
     const result = modelAsset.transformResponse(response, pagination)
 
     expect((result.items[0] as ModelAsset).cloud).toEqual(['AWS', 'GCP'])
+  })
+})
+
+describe('modelAsset — duosIdentifier', () => {
+  it('is searchable', () => {
+    expect(modelAsset.searchFields).toContain('study.assets.models.duosIdentifier')
+  })
+
+  it('carries the served identifier onto its row, and none when the index has none', () => {
+    const response = makeResponse([makeBucket(42, [{ modelId: 45, duosIdentifier: 'DUOS-M-000045' }, { modelId: 46 }])])
+    const rows = modelAsset.transformResponse(response, pagination).items as ModelAsset[]
+    expect(rows.map(row => row.duosIdentifier)).toEqual(['DUOS-M-000045', ''])
   })
 })
