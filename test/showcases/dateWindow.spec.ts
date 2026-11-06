@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { type Clock, filterByDateWindow, isInDateWindow, utcToday } from 'src/showcases/dateWindow'
+import { type Clock, filterByDateWindow, isInDateWindow, isNewInDuos, utcToday } from 'src/showcases/dateWindow'
 
 const at = (iso: string): Clock => () => new Date(iso)
 
@@ -65,5 +65,27 @@ describe('filterByDateWindow', () => {
     const result = filterByDateWindow(items, at('2026-03-10T00:00:00Z'))
     expect(result).not.toBe(items)
     expect(items).toHaveLength(4)
+  })
+})
+
+describe('isNewInDuos', () => {
+  const today = at('2026-11-10T12:00:00Z')
+
+  it.each([
+    ['2026-11-10', true, 'today'],
+    ['2026-10-11', true, '30 days ago, the last day of the window'],
+    ['2026-10-10', false, '31 days ago'],
+    ['2026-11-11', false, 'a future date'],
+  ])('%s is %s (%s)', (date, expected) => {
+    expect(isNewInDuos(date, today)).toBe(expected)
+  })
+
+  it('is false with no date', () => {
+    expect(isNewInDuos(null, today)).toBe(false)
+  })
+
+  it('counts UTC days across a month and year boundary', () => {
+    expect(isNewInDuos('2025-12-02', at('2026-01-01T00:00:00Z'))).toBe(true)
+    expect(isNewInDuos('2025-12-01', at('2026-01-01T00:00:00Z'))).toBe(false)
   })
 })
