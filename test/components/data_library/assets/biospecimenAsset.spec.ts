@@ -20,6 +20,7 @@ const makeBucket = (
   studyId: number,
   biospecimens: Array<{
     biospecimenId?: number
+    duosIdentifier?: string
     sampleId?: string | number
     donorId?: string
     specimenType?: BioSpecimenType
@@ -45,6 +46,7 @@ const makeBucket = (
               assets: {
                 biospecimens: biospecimens.map(b => ({
                   biospecimenId: b.biospecimenId,
+                  duosIdentifier: b.duosIdentifier,
                   sampleId: b.sampleId,
                   donorId: b.donorId,
                   specimenType: b.specimenType,
@@ -412,5 +414,17 @@ describe('biospecimenAsset — makeColumns', () => {
     const a = biospecimenAsset.makeColumns()
     const b = biospecimenAsset.makeColumns({})
     expect(a.map(c => c.field)).toEqual(b.map(c => c.field))
+  })
+})
+
+describe('biospecimenAsset — duosIdentifier', () => {
+  it('is searchable', () => {
+    expect(biospecimenAsset.searchFields).toContain('study.assets.biospecimens.duosIdentifier')
+  })
+
+  it('carries the served identifier onto its row, and none when the index has none', () => {
+    const response = makeResponse([makeBucket(42, [{ biospecimenId: 301, duosIdentifier: 'DUOS-B-000301' }, { biospecimenId: 302 }])])
+    const rows = biospecimenAsset.transformResponse(response, pagination).items as BiospecimenAsset[]
+    expect(rows.map(row => row.duosIdentifier)).toEqual(['DUOS-B-000301', ''])
   })
 })

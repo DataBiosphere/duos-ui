@@ -17,13 +17,18 @@
  * loads or is empty, the template gives it no sub-nav link and hides same-page links to it (D11).
  */
 import React, { useContext, useEffect, useId, useRef } from 'react'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import MuiSkeleton from '@mui/material/Skeleton'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import { DatasetCard } from 'src/components/showcase/primitives/DatasetCard'
 import { Shelf } from 'src/components/showcase/primitives/Shelf'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
+import { datasetShelfSx } from 'src/components/showcase/sections/datasetShelfStyles'
 import type { SectionRendererProps } from 'src/components/showcase/sectionRegistry'
 import { ShowcaseLookupsContext } from 'src/components/showcase/showcaseTemplateContract'
 import type { DatasetSectionKey } from 'src/types/showcase'
-import './DatasetShelf.css'
 
 /** Provisional copy (S3.3; D11 and D12 wording from the contracts record). */
 export const DATASETS_LOADING_TEXT = 'Loading datasets'
@@ -48,17 +53,17 @@ const Frame = ({ headingId, title, children }: { headingId: string, title: strin
 const Skeleton = () => (
   <>
     <p role="status" className="showcase-visually-hidden">{DATASETS_LOADING_TEXT}</p>
-    <div className="showcase-dataset-shelf__skeleton" aria-hidden="true">
-      {Array.from({ length: SKELETON_CARDS }, (_, i) => <div key={i} className="showcase-dataset-shelf__skeleton-card" />)}
-    </div>
+    <Stack direction="row" aria-hidden="true" sx={datasetShelfSx.skeleton}>
+      {Array.from({ length: SKELETON_CARDS }, (_, i) => <MuiSkeleton key={i} variant="rounded" sx={datasetShelfSx.skeletonCard} />)}
+    </Stack>
   </>
 )
 
 const Failed = ({ onRetry }: { onRetry: () => void }) => (
-  <div className="showcase-dataset-shelf__failed">
-    <p>{DATASETS_FAILED_TEXT}</p>
-    <button type="button" className="showcase-dataset-shelf__retry" onClick={onRetry}>{TRY_AGAIN_LABEL}</button>
-  </div>
+  <Stack direction="row" sx={datasetShelfSx.failed}>
+    <Typography variant="inherit" sx={datasetShelfSx.message}>{DATASETS_FAILED_TEXT}</Typography>
+    <Button variant="outlined" disableRipple onClick={onRetry} sx={datasetShelfSx.retry}>{TRY_AGAIN_LABEL}</Button>
+  </Stack>
 )
 
 export const DatasetShelf = <K extends DatasetSectionKey>({ sectionKey, section, id, title = '' }: SectionRendererProps<K>) => {
@@ -101,5 +106,5 @@ export const DatasetShelf = <K extends DatasetSectionKey>({ sectionKey, section,
     )
   }
 
-  return <div id={id} className="showcase-dataset-shelf">{body}</div>
+  return <Box id={id} sx={datasetShelfSx.root}>{body}</Box>
 }

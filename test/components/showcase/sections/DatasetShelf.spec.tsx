@@ -78,8 +78,9 @@ describe('latest-data-releases loading (D11)', () => {
   it('hides the skeleton cards from assistive technology', () => {
     lookup.mockImplementation(pending)
     renderShelf()
-    const skeleton = shelf()!.querySelector('.showcase-dataset-shelf__skeleton')
-    expect(skeleton).toHaveAttribute('aria-hidden', 'true')
+    const skeletons = shelf()!.querySelectorAll('.MuiSkeleton-root')
+    expect(skeletons.length).toBeGreaterThan(0)
+    skeletons.forEach(skeleton => expect(skeleton.closest('[aria-hidden="true"]')).not.toBeNull())
   })
 })
 
