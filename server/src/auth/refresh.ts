@@ -3,6 +3,7 @@ import type { FastifyRequest, Session } from 'fastify'
 import { hashValue } from '../logging.js'
 import { endSession, logAuthEvent, sessionIdp } from './authEvents.js'
 import { sessionGeneration } from '../session/pgStore.js'
+import { failedSaveOutcome } from '../session/sessionEnded.js'
 import { getOidcConfig } from './oidcClient.js'
 
 /**
@@ -184,7 +185,7 @@ async function endSessionOrThrowSuperseded(request: FastifyRequest): Promise<voi
 /** Terminal when B2C rejected the token and the session is gone; anything else is transient. */
 function logRefreshFailure(request: FastifyRequest, idp: 'google' | 'microsoft' | 'unknown', err: unknown): void {
   if (err instanceof RefreshFailedError) {
-    logAuthEvent(request, 'auth.refresh.completed', { outcome: 'terminal', reason: 'refresh_failed', idp }, 'warn')
+    logAuthEvent(request, 'auth.refresh.completed', { outcome: 'terminal', reason: err.message, idp }, 'warn')
     return
   }
   logAuthEvent(request, 'auth.refresh.completed', { outcome: 'transient', err, idp }, 'warn')
@@ -316,7 +317,18 @@ async function applyTokens(request: FastifyRequest, tokens: RefreshedTokens): Pr
   request.session.refreshToken = tokens.refreshToken
   request.session.idToken = tokens.idToken
   request.session.tokenExpiry = tokens.tokenExpiry
-  await request.session.save()
+  try {
+    await request.session.save()
+  }
+  catch (err: unknown) {
+    // compareAndSet refused the write: the session ended during the flight
+    // (terminal), or a later sign-in took the row (transient, so the caller
+    // leaves that sign-in's cookie alone).
+    const outcome = await failedSaveOutcome(request, err)
+    if (outcome === 'ended') throw new RefreshFailedError('session_ended')
+    if (outcome === 'superseded') throw new Error('the session was replaced by a later sign-in')
+    throw err
+  }
 }
 
 /**

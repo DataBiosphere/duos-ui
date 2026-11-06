@@ -73,6 +73,8 @@ const SECRET = 'test-secret-that-is-at-least-32-characters'
 // ---------------------------------------------------------------------------
 function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>()) {
   const setSids: string[] = []
+  // A test can hold the next compareAndSet open to race it against another request.
+  const hooks: { beforeUpdate?: () => Promise<void> } = {}
   const auditUpdates: Array<{ reason: string, sid: string }> = []
   const query = async (sql: string, params: unknown[] = []) => {
     if (sql.includes('SELECT sess FROM user_sessions')) {
@@ -91,6 +93,9 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
     if (sql.includes('UPDATE user_sessions')) {
       // compareAndSet: write only an unexpired row that holds the expected generation.
       await new Promise(resolve => setTimeout(resolve, 0)) // simulate DB latency
+      const hold = hooks.beforeUpdate
+      hooks.beforeUpdate = undefined
+      await hold?.()
       const result = compareAndSetRow(rows, params)
       if (result.rowCount === 1) setSids.push(params[0] as string)
       return result
@@ -114,7 +119,7 @@ function makeInMemoryPg(rows = new Map<string, { sess: unknown, expire: Date }>(
     }
     return { rows: [] }
   }
-  return { pg: { query } as unknown as PostgresDb, rows, setSids, auditUpdates }
+  return { pg: { query } as unknown as PostgresDb, rows, setSids, auditUpdates, hooks }
 }
 
 interface AuthAppOptions {
@@ -530,6 +535,68 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
   })
 
   describe('a request that outlives its sign-in (DT-4420)', () => {
+    it('answers a CSRF-token request whose session a logout ended mid-save once, with a 401', async () => {
+      const errorLog: string[] = []
+      const fake = makeInMemoryPg()
+      const guarded = await buildAuthApp(fake.pg, { errorLog })
+      const login = await guarded.inject({ method: 'POST', url: '/auth/login' })
+      const cb = await guarded.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie: sessionCookieHeader(login) } })
+      const cookie = sessionCookieHeader(cb)
+
+      // The first token writes a CSRF secret, so the request saves; a logout lands before the save.
+      fake.hooks.beforeUpdate = async () => {
+        fake.rows.clear()
+      }
+      const res = await guarded.inject({ method: 'GET', url: '/auth/csrf-token', headers: { cookie } })
+      await guarded.close()
+
+      expect(res.statusCode).toBe(401)
+      expect(res.cookies.find(c => c.name === 'sessionId')?.value).toBe('')
+      expect(errorLog.join('\n')).not.toMatch(/already sent|ERR_HTTP_HEADERS_SENT|FST_ERR_REP/i)
+    })
+
+    describe('a login whose session changes while it is prepared', () => {
+      async function signedInApp() {
+        const errorLog: string[] = []
+        const fake = makeInMemoryPg()
+        const guarded = await buildAuthApp(fake.pg, { errorLog })
+        const login = await guarded.inject({ method: 'POST', url: '/auth/login' })
+        const cb = await guarded.inject({ method: 'GET', url: '/auth/callback?code=c&state=s', headers: { cookie: sessionCookieHeader(login) } })
+        return { fake, guarded, errorLog, cookie: sessionCookieHeader(cb) }
+      }
+
+      it('answers once, with a 502 and a cleared cookie, when a logout ended the session', async () => {
+        const { fake, guarded, errorLog, cookie } = await signedInApp()
+        fake.hooks.beforeUpdate = async () => {
+          fake.rows.clear()
+        }
+
+        const res = await guarded.inject({ method: 'POST', url: '/auth/login', headers: { cookie } })
+        await guarded.close()
+
+        expect(res.statusCode).toBe(502)
+        expect(res.cookies.find(c => c.name === 'sessionId')?.value).toBe('')
+        expect(errorLog.join('\n')).not.toMatch(/already sent|ERR_HTTP_HEADERS_SENT|FST_ERR_REP/i)
+      })
+
+      it('answers once, with a 502 and no cookie change, when another tab\'s sign-in took the row', async () => {
+        const { fake, guarded, errorLog, cookie } = await signedInApp()
+        const [sid] = fake.rows.keys()
+        fake.hooks.beforeUpdate = async () => {
+          const row = fake.rows.get(sid)!
+          fake.rows.set(sid, { ...row, sess: { ...(row.sess as object), __fastifySessionMetadata: { generation: 'other-tab' } } })
+        }
+
+        const res = await guarded.inject({ method: 'POST', url: '/auth/login', headers: { cookie } })
+        await guarded.close()
+
+        expect(res.statusCode).toBe(502)
+        expect(res.cookies.find(c => c.name === 'sessionId')).toBeUndefined()
+        expect([...fake.rows.keys()]).toEqual([sid])
+        expect(errorLog.join('\n')).not.toMatch(/already sent|ERR_HTTP_HEADERS_SENT|FST_ERR_REP/i)
+      })
+    })
+
     it('leaves a later sign-in on the same row signed in when the earlier one gets an upstream 401', async () => {
       const { cookie: first } = await authenticate()
       const [sid] = rows.keys()
