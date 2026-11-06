@@ -1,4 +1,5 @@
-/* The showcase hero (S3.3). Provisional (D15): spacing. The background is a static decoration made from the theme colors, with no image (MVP). */
+/* The showcase hero (S3.3). Provisional (D15): spacing, the column split and the 980px stack
+ * point. The background is a static decoration made from the theme colors, with no image (MVP). */
 .showcase-hero {
   background:
     radial-gradient(circle at 100% 0%, var(--showcase-accent-tint) 0, transparent 60%),
@@ -12,6 +13,15 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 32px 16px;
+}
+
+@media (min-width: 980px) {
+  .showcase-hero__inner {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 48px;
+    padding: 48px 16px;
+  }
 }
 
 .showcase-hero__title {
@@ -56,5 +66,50 @@
   font-size: var(--showcase-font-size-label);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  color: var(--showcase-muted-text);
+}
+
+.showcase-hero__announcements {
+  padding: 16px;
+  border: 1px solid var(--showcase-border);
+  border-radius: 8px;
+  background: var(--showcase-surface);
+}
+
+.showcase-hero__announcement {
+  min-height: 3em;
+}
+
+.showcase-hero__announcement-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.showcase-hero__announcement-button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--showcase-border-strong);
+  border-radius: 4px;
+  background: var(--showcase-surface);
+  color: var(--showcase-primary);
+  cursor: pointer;
+}
+
+.showcase-hero__announcement-button,
+.showcase-hero__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.showcase-hero__chevron {
+  width: 20px;
+  height: 20px;
+}
+
+.showcase-hero__announcement-position {
+  font-size: var(--showcase-font-size-label);
   color: var(--showcase-muted-text);
 }

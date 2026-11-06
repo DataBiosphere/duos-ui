@@ -27,11 +27,13 @@ import {
   accessibleThemeColors,
   SHOWCASE_MAIN_HEADING_ID,
   SHOWCASE_NEUTRALS,
+  ShowcaseClockContext,
   ShowcaseLookupsContext,
   type ShowcasePageInfo,
   ShowcasePageInfoContext,
 } from 'src/components/showcase/showcaseTemplateContract'
 import { useShowcaseLookups } from 'src/components/showcase/useShowcaseLookups'
+import { type Clock, systemClock } from 'src/showcases/dateWindow'
 import type { RegistryEntry, SectionKey, ShowcaseConfig } from 'src/types/showcase'
 import './ShowcaseTemplate.css'
 
@@ -65,13 +67,15 @@ export interface ShowcaseTemplateProps {
   handoffs: ShowcaseHandoffs
   /** For tests only; pages use the real registry. */
   registry?: SectionRegistry
+  /** For tests only; pages use the system clock. */
+  clock?: Clock
 }
 
 /** Provisional copy (S3.2): why search, dataset and request links don't open in a preview. */
 export const PREVIEW_NOTICE = 'This is a content preview with production data. Search, dataset details and access requests are '
   + 'turned off here, because a production dataset ID can name a different dataset in this environment.'
 
-export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRegistry }: ShowcaseTemplateProps) => {
+export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRegistry, clock = systemClock }: ShowcaseTemplateProps) => {
   const lookups = useShowcaseLookups(config, Object.keys(registry) as SectionKey[])
   const sections = visibleSections(config, registry)
   const masthead = sections.filter(section => section.key === 'masthead')
@@ -94,14 +98,16 @@ export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRe
       <ShowcaseHandoffsContext.Provider value={handoffs}>
         <ShowcaseLookupsContext.Provider value={lookups}>
           <ShowcasePageInfoContext.Provider value={pageInfo}>
-            {masthead.map(renderSection)}
-            <main className="showcase-template__main">
-              {!handoffs.enabled && <p className="showcase-template__preview-notice" role="note">{PREVIEW_NOTICE}</p>}
-              {!hasHero && (
-                <h1 id={SHOWCASE_MAIN_HEADING_ID} className="showcase-template__title" tabIndex={-1}>{entry.title}</h1>
-              )}
-              {content.map(renderSection)}
-            </main>
+            <ShowcaseClockContext.Provider value={clock}>
+              {masthead.map(renderSection)}
+              <main className="showcase-template__main">
+                {!handoffs.enabled && <p className="showcase-template__preview-notice" role="note">{PREVIEW_NOTICE}</p>}
+                {!hasHero && (
+                  <h1 id={SHOWCASE_MAIN_HEADING_ID} className="showcase-template__title" tabIndex={-1}>{entry.title}</h1>
+                )}
+                {content.map(renderSection)}
+              </main>
+            </ShowcaseClockContext.Provider>
           </ShowcasePageInfoContext.Provider>
         </ShowcaseLookupsContext.Provider>
       </ShowcaseHandoffsContext.Provider>

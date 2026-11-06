@@ -75,6 +75,16 @@ for (const { entry, path } of SHOWCASES) {
 }
 
 test.describe('the partner hero (S3.3)', () => {
+  test('shows one announcement at a time, and the controls move between them', async ({ page }) => {
+    await page.goto(`/showcase/${E2E_PARTNER.key}`)
+    const announcements = page.getByRole('region', { name: 'Announcements' })
+    await expect(announcements.getByRole('link')).toHaveText('First synthetic announcement')
+    await expect(announcements.getByText('1 of 2')).toBeVisible()
+    await announcements.getByRole('button', { name: 'Next announcement' }).click()
+    await expect(announcements.getByRole('link')).toHaveText('Second synthetic announcement')
+    await expect(announcements.getByText('2 of 2')).toBeVisible()
+  })
+
   test('hides the onboarding link whose target section is not on the page', async ({ page }) => {
     await page.goto(`/showcase/${E2E_PARTNER.key}`)
     await expect(page.getByRole('link', { name: 'Browse the data library' })).toBeVisible()
