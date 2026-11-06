@@ -13,7 +13,7 @@
  * renders the registry entry's title as the `h1`. The app shell has no `<main>`, so the template
  * provides it.
  */
-import React, { type ComponentType, type CSSProperties, type MouseEvent } from 'react'
+import React, { type ComponentType, type CSSProperties, type MouseEvent, useMemo } from 'react'
 import {
   type SectionRegistry,
   type SectionRendererProps,
@@ -77,11 +77,12 @@ export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRe
   const masthead = sections.filter(section => section.key === 'masthead')
   const content = sections.filter(section => section.key !== 'masthead')
   const hasHero = content.some(section => section.key === 'hero')
-  // `subNavSections` reads the same visible list, so a hidden or empty section gets no link.
-  const pageInfo: ShowcasePageInfo = {
+  // `subNavSections` reads the same visible list, so a hidden or empty section gets no link. A new
+  // object on every render would re-render every context consumer (Sonar S6481).
+  const pageInfo = useMemo<ShowcasePageInfo>(() => ({
     title: entry.title,
     subNav: subNavSections(config, registry).flatMap(section => (section.navLabel === undefined ? [] : [{ id: section.id, label: section.navLabel }])),
-  }
+  }), [entry.title, config, registry])
 
   return (
     <div className="showcase-template" style={themeStyle(config.branding)}>
