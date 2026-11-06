@@ -192,7 +192,8 @@ describe('createPgSessionStore', () => {
       expect(await promisifyOutcome(cb => store.destroyGeneration('sid-1', 'gen-1', cb))).toBe(outcome)
 
       const [sql, params] = query.mock.calls[1]
-      expect(sql).toBe('SELECT 1 FROM user_sessions WHERE sid = $1')
+      // An expired row reads as gone, so its dead cookie is cleared.
+      expect(sql).toBe('SELECT 1 FROM user_sessions WHERE sid = $1 AND expire > NOW()')
       expect(params).toEqual(['sid-1'])
     })
 

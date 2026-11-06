@@ -27,6 +27,15 @@ export function compareAndSetRow(rows: SessionRows, params: unknown[]): { rows: 
 }
 
 /**
+ * destroyGeneration's re-read, `SELECT 1 ... AND expire > NOW()`: an expired row
+ * reads as gone.
+ */
+export function liveRowRows(rows: SessionRows, params: unknown[]): { rows: object[] } {
+  const row = rows.get(params[0] as string)
+  return { rows: row && row.expire.getTime() > Date.now() ? [{}] : [] }
+}
+
+/**
  * destroyGeneration's `DELETE ... AND <generation> = $2`: deletes the row only
  * while it holds the given generation.
  */
