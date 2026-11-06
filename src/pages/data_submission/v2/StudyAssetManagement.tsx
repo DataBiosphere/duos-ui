@@ -5,6 +5,7 @@ import PresentationList from 'src/components/presentations_list/PresentationList
 import IntellectualPropertyList from 'src/components/intellectual_property_list/IntellectualPropertyList'
 import {
   AiModel,
+  Biospecimen,
   ClinicalTrial,
   FundingResource,
   IntellectualProperty,
@@ -29,17 +30,15 @@ import DatasetIcon from '@mui/icons-material/Dataset'
 import LaptopMacIcon from '@mui/icons-material/LaptopMac'
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
 import BiotechIcon from '@mui/icons-material/Biotech'
-import { Button } from '@mui/material'
 
 export interface StudyAssetManagementProps {
   study: Study
   setStudy: React.Dispatch<React.SetStateAction<Study>>
   isEditingExistingStudy?: boolean
-  onOpenContactUs: () => void
 }
 
 export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
-  const { setStudy, study, isEditingExistingStudy, onOpenContactUs } = props
+  const { setStudy, study, isEditingExistingStudy } = props
 
   const onAssetChange = <K extends keyof NonNullable<Study['assets']>>(
     assetType: K,
@@ -65,8 +64,7 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
     <div className="data-submitter-section">
       <h2>Study Assets</h2>
       <p>
-        Add datasets, models, workspaces, and other resources associated with this study. To add biospecimen data,
-        <Button onClick={onOpenContactUs} style={{ cursor: 'pointer' }}>contact the DUOS Team.</Button>
+        Add datasets, models, workspaces, biospecimens, and other resources associated with this study.
       </p>
 
       <ConsentGroupList
@@ -205,25 +203,22 @@ export const StudyAssetManagement = (props: StudyAssetManagementProps) => {
         )}
       />
 
-      {/* Only show biospecimen section if there are biospecimens to display */}
-      {biospecimens.length > 0 && (
-        <BiospecimenList
-          biospecimens={biospecimens}
-          onBiospecimenChange={() => {}} // Biospecimens are not editable through the UI, so we pass an empty change handler
-          disabled={false}
-          studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
-            <StudyAsset
-              config={{
-                icon: <BiotechIcon fontSize="large" />,
-                title: 'Biospecimens',
-                description: 'View total biospecimens for this study',
-                children: content,
-                button: button,
-              }}
-            />
-          )}
-        />
-      )}
+      <BiospecimenList
+        biospecimens={biospecimens}
+        onBiospecimenChange={(biospecimens: Biospecimen[]) => onAssetChange('biospecimens', biospecimens)}
+        disabled={false}
+        studyAssetWrapper={(content: ReactNode, button: ReactNode) => (
+          <StudyAsset
+            config={{
+              icon: <BiotechIcon fontSize="large" />,
+              title: 'Biospecimens',
+              description: 'Add biospecimens collected for this study, one entry per vial or sample',
+              children: content,
+              button: button,
+            }}
+          />
+        )}
+      />
     </div>
   )
 }
