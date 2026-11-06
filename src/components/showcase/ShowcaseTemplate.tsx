@@ -17,6 +17,7 @@ import {
   type SectionRegistry,
   type SectionRendererProps,
   sectionRegistry,
+  subNavSections,
   type VisibleSection,
   visibleSections,
 } from 'src/components/showcase/sectionRegistry'
@@ -75,7 +76,11 @@ export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRe
   const masthead = sections.filter(section => section.key === 'masthead')
   const content = sections.filter(section => section.key !== 'masthead')
   const hasHero = content.some(section => section.key === 'hero')
-  const pageInfo: ShowcasePageInfo = { title: entry.title }
+  // `subNavSections` reads the same visible list, so a hidden or empty section gets no link.
+  const pageInfo: ShowcasePageInfo = {
+    title: entry.title,
+    subNav: subNavSections(config, registry).flatMap(section => (section.navLabel === undefined ? [] : [{ id: section.id, label: section.navLabel }])),
+  }
 
   return (
     <div className="showcase-template" style={themeStyle(config.branding)}>

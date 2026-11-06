@@ -88,3 +88,10 @@
   background: var(--showcase-surface);
   color: var(--showcase-muted-text);
 }
+
+/* Sub-nav and same-page links scroll smoothly, unless the visitor asks for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.showcase-template) {
+    scroll-behavior: smooth;
+  }
+}

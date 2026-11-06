@@ -2,8 +2,17 @@
 .showcase-masthead {
   --showcase-logo-height: 48px;
 
+  z-index: 10;
   background: var(--showcase-surface);
   border-bottom: 1px solid var(--showcase-border);
+}
+
+/* D8: sticky on tablet and desktop only. */
+@media (min-width: 768px) {
+  .showcase-masthead {
+    position: sticky;
+    top: 0;
+  }
 }
 
 .showcase-masthead__bar {
@@ -116,4 +125,28 @@
   .showcase-masthead__search-input {
     width: auto;
   }
+}
+
+/* The sub-nav scrolls sideways when its links don't fit, rather than widening the page. */
+.showcase-masthead__sub-nav {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 16px;
+  overflow-x: auto;
+}
+
+.showcase-masthead__sub-nav ul {
+  display: flex;
+  gap: 24px;
+  margin: 0;
+  padding: 8px 0 12px;
+  list-style: none;
+  white-space: nowrap;
+}
+
+.showcase-masthead__sub-nav a {
+  color: var(--showcase-primary);
+  font-size: var(--showcase-font-size-label);
+  font-weight: 600;
+  text-decoration: underline !important;
 }

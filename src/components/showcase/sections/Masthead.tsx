@@ -1,21 +1,26 @@
 /**
- * The showcase masthead (DT-4354, S3.2): the showcase's own logo, up to three partner logos and the
- * data library search, below the DUOS header. The DUOS header has the DUOS logo and Sign in, so
- * the masthead has neither (contracts record, D10).
+ * The showcase masthead (DT-4354, S3.2): the showcase's own logo, up to three partner logos, the
+ * data library search and the sub-nav, below the DUOS header. The DUOS header has the DUOS logo and
+ * Sign in, so the masthead has neither (contracts record, D10).
+ *
+ * It sticks to the top of the window on tablet and desktop, and not on phones (D8). While it
+ * sticks, it sets `--showcase-anchor-offset` on the template root to its own height, so a section
+ * heading that a sub-nav link scrolls to is not hidden under it.
  */
-import React, { type FormEvent, useContext, useId, useState } from 'react'
+import React, { type FormEvent, useContext, useId, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { librarySearchPath, ShowcaseHandoffsContext } from 'src/components/showcase/handoffs'
 import { ShowcaseLink, SIGN_IN_REQUIRED_TEXT } from 'src/components/showcase/primitives/ShowcaseLink'
 import type { SectionRendererProps } from 'src/components/showcase/sectionRegistry'
 import { type Logo, shownLogos } from 'src/components/showcase/sections/mastheadLogos'
-import { ShowcasePageInfoContext } from 'src/components/showcase/showcaseTemplateContract'
+import { ShowcasePageInfoContext, type SubNavLink } from 'src/components/showcase/showcaseTemplateContract'
 import { imageLoading } from 'src/showcases/imageLoading'
 import './Masthead.css'
 
 /** Provisional copy (S3.2). */
 export const SEARCH_LABEL = 'Search DUOS datasets'
 export const SEARCH_UNAVAILABLE_TEXT = 'Search is not available in this preview.'
+export const SUB_NAV_LABEL = 'Sections on this page'
 
 /** A logo image that shows its alt text, at the same height, when it can't load. */
 const LogoImage = ({ src, alt }: { src: string | undefined, alt: string }) => {
@@ -79,15 +84,52 @@ const LibrarySearch = () => {
   )
 }
 
+const SubNav = ({ links }: { links: readonly SubNavLink[] }) => {
+  if (links.length === 0) return null
+  return (
+    <nav className="showcase-masthead__sub-nav" aria-label={SUB_NAV_LABEL}>
+      <ul>
+        {links.map(link => <li key={link.id}><a href={`#${link.id}`}>{link.label}</a></li>)}
+      </ul>
+    </nav>
+  )
+}
+
+/** Keeps `--showcase-anchor-offset` on the template root equal to the masthead's height while it
+ * sticks, and 0 when it doesn't (phones, D8). */
+const useAnchorOffset = (ref: React.RefObject<HTMLElement | null>) => {
+  useLayoutEffect(() => {
+    const masthead = ref.current
+    const root = masthead?.closest<HTMLElement>('.showcase-template')
+    if (!masthead || !root) return
+    const update = () => {
+      const sticks = getComputedStyle(masthead).position === 'sticky'
+      root.style.setProperty('--showcase-anchor-offset', `${sticks ? masthead.offsetHeight : 0}px`)
+    }
+    update()
+    const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(update)
+    observer?.observe(masthead)
+    globalThis.addEventListener('resize', update)
+    return () => {
+      observer?.disconnect()
+      globalThis.removeEventListener('resize', update)
+      root.style.removeProperty('--showcase-anchor-offset')
+    }
+  }, [ref])
+}
+
 export const Masthead = ({ section, id }: SectionRendererProps<'masthead'>) => {
-  const { title } = useContext(ShowcasePageInfoContext)
+  const { title, subNav } = useContext(ShowcasePageInfoContext)
+  const ref = useRef<HTMLElement>(null)
+  useAnchorOffset(ref)
 
   return (
-    <section id={id} className="showcase-masthead" aria-label={title}>
+    <section ref={ref} id={id} className="showcase-masthead" aria-label={title}>
       <div className="showcase-masthead__bar">
         <LogoList logos={section.logos} title={title} />
         <LibrarySearch />
       </div>
+      <SubNav links={subNav} />
     </section>
   )
 }
