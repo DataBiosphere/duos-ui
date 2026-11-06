@@ -13,6 +13,7 @@ interface ConfigType {
   bffEnabled?: boolean
   showcaseApiUrl?: string
   showcaseEnabled?: boolean
+  showcaseHandoffsEnabled?: boolean
 }
 
 let configPromise: Promise<ConfigType> | null = null
@@ -75,6 +76,10 @@ class ConfigClass {
 
   async isShowcaseEnabled(): Promise<boolean> {
     return isShowcaseEnabled()
+  }
+
+  async isShowcaseHandoffsEnabled(): Promise<boolean> {
+    return isShowcaseHandoffsEnabled()
   }
 
   async getTag(): Promise<string> {
@@ -196,6 +201,19 @@ export const isBffEnabled = async (): Promise<boolean> => {
 export const isShowcaseEnabled = async (): Promise<boolean> => {
   const config = await loadConfig()
   return config.showcaseEnabled === true
+}
+
+/**
+ * The showcase environment binding (DT-4354). `true` says the showcase lookup reads this
+ * environment's own catalog, so a showcase may hand visitors off to this environment's search,
+ * dataset and request pages. The server derives it from the lookup and API URLs
+ * (server/src/config.ts), so a content preview that reads production gets `false`: its
+ * production `DUOS-` identifiers can name other datasets here. Absent or any other value keeps
+ * every handoff off.
+ */
+export const isShowcaseHandoffsEnabled = async (): Promise<boolean> => {
+  const config = await loadConfig()
+  return config.showcaseHandoffsEnabled === true
 }
 
 export const getProject = async (): Promise<string> => {

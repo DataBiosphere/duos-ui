@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
-import { Config, getEnv, getApiUrl, getBannersUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, getUpstreamApiUrl, isBffEnabled, isShowcaseEnabled, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
+import { Config, getEnv, getApiUrl, getBannersUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, getUpstreamApiUrl, isBffEnabled, isShowcaseEnabled, isShowcaseHandoffsEnabled, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 
 const mockConfig = {
@@ -59,6 +59,7 @@ describe('Config', () => {
       // bffEnabled is absent from mockConfig — the fail-safe default is false
       ['isBffEnabled', false],
       ['isShowcaseEnabled', false],
+      ['isShowcaseHandoffsEnabled', false],
     ] as const)('should get %s', async (method, expected) => {
       // oxlint-disable-next-line @typescript-eslint/no-explicit-any
       expect(await (Config[method] as any)()).toBe(expected)
@@ -82,6 +83,8 @@ describe('Config', () => {
       ['isBffEnabled', isBffEnabled, false],
       // showcaseEnabled is absent from mockConfig: the showcase pages stay off
       ['isShowcaseEnabled', isShowcaseEnabled, false],
+      // showcaseHandoffsEnabled is absent from mockConfig: every showcase handoff stays off
+      ['isShowcaseHandoffsEnabled', isShowcaseHandoffsEnabled, false],
     ] as const)('%s should return correct value', async (_name, fn, expected) => {
       expect(await fn()).toBe(expected)
     })
@@ -108,6 +111,21 @@ describe('Config', () => {
       const freshConfig = await import('src/libs/config')
       expect(await freshConfig.isShowcaseEnabled()).toBe(expected)
       expect(await freshConfig.Config.isShowcaseEnabled()).toBe(expected)
+    })
+  })
+
+  describe('isShowcaseHandoffsEnabled', () => {
+    it.each([
+      [true, true],
+      [false, false],
+      ['true', false],
+      [1, false],
+    ])('returns %j as %j, so only a boolean true opens showcase handoffs', async (showcaseHandoffsEnabled, expected) => {
+      vi.resetModules()
+      stubConfigFetch({ ...mockConfig, showcaseHandoffsEnabled })
+      const freshConfig = await import('src/libs/config')
+      expect(await freshConfig.isShowcaseHandoffsEnabled()).toBe(expected)
+      expect(await freshConfig.Config.isShowcaseHandoffsEnabled()).toBe(expected)
     })
   })
 

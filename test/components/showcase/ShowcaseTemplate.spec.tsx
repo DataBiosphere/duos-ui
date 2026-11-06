@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ShowcaseTemplate } from 'src/components/showcase/ShowcaseTemplate'
+import { PREVIEW_NOTICE, ShowcaseTemplate } from 'src/components/showcase/ShowcaseTemplate'
 import { SHOWCASE_MAIN_HEADING_ID } from 'src/components/showcase/showcaseTemplateContract'
 import type { SectionRegistry, SectionRegistryEntry, SectionRendererProps } from 'src/components/showcase/sectionRegistry'
 import { lookupShowcaseDatasets } from 'src/libs/ajax/ShowcaseCatalog'
@@ -62,8 +62,10 @@ const registry: SectionRegistry = {
   'notebooks': testEntry({ defaultLabels: { title: 'Notebooks' } }),
 }
 
-const renderTemplate = (config = configWith(sections), testRegistry = registry) =>
-  render(<ShowcaseTemplate entry={showcase} config={config} registry={testRegistry} />)
+const LIVE_HANDOFFS = { enabled: true, signedIn: false }
+
+const renderTemplate = (config = configWith(sections), testRegistry = registry, handoffs = LIVE_HANDOFFS) =>
+  render(<ShowcaseTemplate entry={showcase} config={config} handoffs={handoffs} registry={testRegistry} />)
 
 const root = (container: HTMLElement) => container.querySelector('.showcase-template') as HTMLElement
 
@@ -93,6 +95,18 @@ describe('ShowcaseTemplate', () => {
     renderTemplate()
     expect(lookup).toHaveBeenCalledTimes(1)
     expect(lookup.mock.calls[0][0]).toMatchObject({ mode: 'ranking', section: 'latest-data-releases' })
+  })
+
+  it('shows no preview notice when handoffs open', () => {
+    renderTemplate()
+    expect(screen.queryByRole('note')).toBeNull()
+  })
+
+  it('says why handoffs are off in a production-data preview, inside main', () => {
+    renderTemplate(configWith(sections), registry, { enabled: false, signedIn: false })
+    const notice = screen.getByRole('note')
+    expect(notice).toHaveTextContent(PREVIEW_NOTICE)
+    expect(notice.closest('main')).not.toBeNull()
   })
 
   it('puts the masthead after the skip link and outside main', () => {

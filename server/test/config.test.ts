@@ -3,7 +3,7 @@ import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import Fastify from 'fastify'
-import { configPath, defaultBannersUrl, readConfig, resetConfigCache, TRUST_PROXY_ENV_VAR, trustedProxies } from '../src/config.js'
+import { configPath, defaultBannersUrl, readConfig, showcaseHandoffsEnabled, resetConfigCache, TRUST_PROXY_ENV_VAR, trustedProxies } from '../src/config.js'
 
 describe('configPath', () => {
   afterEach(() => {
@@ -30,6 +30,7 @@ describe('readConfig', () => {
 
   afterEach(() => {
     delete process.env.DUOS_API_URL
+    delete process.env.DUOS_SHOWCASE_API_URL
     resetConfigCache()
     log.error.mockClear()
     // Guarded: rmSync(undefined) throws and would mask the real failure of a
@@ -52,6 +53,7 @@ describe('readConfig', () => {
       apiUrl: 'https://consent.dsde-dev.broadinstitute.org',
       env: 'dev',
       bannersUrl: DEV_BANNERS_URL,
+      showcaseHandoffsEnabled: false,
     })
   })
 
@@ -62,7 +64,19 @@ describe('readConfig', () => {
       apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443',
       env: 'dev',
       bannersUrl: DEV_BANNERS_URL,
+      showcaseHandoffsEnabled: false,
     })
+  })
+
+  it('derives showcaseHandoffsEnabled from the URLs, and ignores a value in the file', async () => {
+    const file = writeFixture({ apiUrl: 'https://consent.dsde-dev.broadinstitute.org', showcaseApiUrl: 'https://consent.dsde-prod.broadinstitute.org', showcaseHandoffsEnabled: true })
+    expect((await readConfig(file, log)).showcaseHandoffsEnabled).toBe(false)
+  })
+
+  it('derives showcaseHandoffsEnabled after DUOS_API_URL replaces apiUrl', async () => {
+    const file = writeFixture({ apiUrl: 'https://consent.dsde-dev.broadinstitute.org', showcaseApiUrl: 'https://local.dsde-dev.broadinstitute.org:27443' })
+    process.env.DUOS_API_URL = 'https://local.dsde-dev.broadinstitute.org:27443'
+    expect((await readConfig(file, log)).showcaseHandoffsEnabled).toBe(true)
   })
 
   it('keeps a bannersUrl the file names, so the feed can move without a code change', async () => {
@@ -88,7 +102,7 @@ describe('readConfig', () => {
     expect(log.error).toHaveBeenCalledTimes(1)
 
     // The failure must not poison the cache: a subsequent read of a good path succeeds.
-    expect(await readConfig(file, log)).toEqual({ env: 'dev', bannersUrl: DEV_BANNERS_URL })
+    expect(await readConfig(file, log)).toEqual({ env: 'dev', bannersUrl: DEV_BANNERS_URL, showcaseHandoffsEnabled: false })
   })
 })
 
@@ -167,5 +181,37 @@ describe('trustedProxies', () => {
       vi.stubEnv(TRUST_PROXY_ENV_VAR, 'loopback,uniquelocal')
       expect(await probe('172.18.0.3')).toEqual({ ip: '198.51.100.7', protocol: 'https' })
     })
+  })
+})
+
+describe('showcaseHandoffsEnabled', () => {
+  const DEV = 'https://consent.dsde-dev.broadinstitute.org'
+  const PROD = 'https://consent.dsde-prod.broadinstitute.org'
+
+  afterEach(() => {
+    delete process.env.DUOS_SHOWCASE_API_URL
+  })
+
+  it.each([
+    ['the same origin', DEV, DEV, true],
+    ['the same origin with a path on apiUrl', DEV, `${DEV}/api`, true],
+    ['a production lookup in a dev preview', PROD, DEV, false],
+    ['no lookup URL', undefined, DEV, false],
+    ['a lookup URL that is not a URL', 'consent', DEV, false],
+    ['a non-http lookup URL', 'ftp://consent.dsde-dev.broadinstitute.org', DEV, false],
+    ['no apiUrl', DEV, undefined, false],
+  ])('in legacy mode, compares showcaseApiUrl with apiUrl: %s', (_label, showcaseApiUrl, apiUrl, expected) => {
+    expect(showcaseHandoffsEnabled({ bffEnabled: false, showcaseApiUrl, apiUrl })).toBe(expected)
+  })
+
+  it('in BFF mode, compares DUOS_SHOWCASE_API_URL with apiUrl and ignores showcaseApiUrl', () => {
+    process.env.DUOS_SHOWCASE_API_URL = DEV
+    expect(showcaseHandoffsEnabled({ bffEnabled: true, showcaseApiUrl: PROD, apiUrl: DEV })).toBe(true)
+    process.env.DUOS_SHOWCASE_API_URL = PROD
+    expect(showcaseHandoffsEnabled({ bffEnabled: true, showcaseApiUrl: DEV, apiUrl: DEV })).toBe(false)
+  })
+
+  it('in BFF mode, turns handoffs off when DUOS_SHOWCASE_API_URL is not set', () => {
+    expect(showcaseHandoffsEnabled({ bffEnabled: true, showcaseApiUrl: DEV, apiUrl: DEV })).toBe(false)
   })
 })

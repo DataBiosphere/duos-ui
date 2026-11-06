@@ -389,6 +389,7 @@ describe('GET /config.json', () => {
       apiUrl: 'https://local.dsde-dev.broadinstitute.org:27443',
       env: 'dev',
       bannersUrl: 'https://storage.googleapis.com/duos-banners-dev/dev_notifications.json',
+      showcaseHandoffsEnabled: false,
     })
 
     // HEAD must serve the same (overridden) resource, not fall through to the

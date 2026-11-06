@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
-import { loadShowcase, type ShowcaseLoadResult } from 'src/components/showcase/loadShowcase'
+import { loadShowcase, type ShowcasePageResult } from 'src/components/showcase/loadShowcase'
 import { ShowcasePage } from 'src/components/showcase/ShowcasePage'
 import { resolveShowcase } from 'src/showcases/defaults'
 import { ShowcaseConfigSchema } from 'src/showcases/schema'
@@ -11,6 +11,7 @@ import type { RegistryEntry } from 'src/types/showcase'
 
 vi.mock('src/components/showcase/loadShowcase', () => ({ loadShowcase: vi.fn() }))
 vi.mock('src/pages/NotFound', () => ({ default: () => <div>Not found</div> }))
+vi.mock('src/hooks/useSession', () => ({ useUserIsLogged: vi.fn(() => false) }))
 
 const partner: RegistryEntry = { key: 'example-partner', title: 'Example Partner Data', status: 'live', flagship: false, order: 1 }
 
@@ -20,7 +21,7 @@ const config = ShowcaseConfigSchema.parse(resolveShowcase({
   },
 }))
 
-const found: ShowcaseLoadResult = { status: 'found', entry: partner, config }
+const found: ShowcasePageResult = { status: 'found', entry: partner, config, handoffsEnabled: true }
 
 let navigate: ReturnType<typeof useNavigate>
 const keepNavigate = (next: ReturnType<typeof useNavigate>) => {
@@ -63,6 +64,19 @@ describe('ShowcasePage', () => {
       expect(document.title).toBe('Example Partner Data | DUOS')
       expect(description()).toBe('Explore Example Partner data')
     })
+  })
+
+  it('shows the preview notice when the environment binding turns handoffs off', async () => {
+    vi.mocked(loadShowcase).mockResolvedValue({ ...found, handoffsEnabled: false })
+    renderAt('/showcase/example-partner')
+    expect(await screen.findByRole('note')).toHaveTextContent('content preview with production data')
+  })
+
+  it('shows no preview notice when handoffs open', async () => {
+    vi.mocked(loadShowcase).mockResolvedValue(found)
+    renderAt('/showcase/example-partner')
+    await screen.findByRole('heading', { level: 1, name: 'Example Partner Data' })
+    expect(screen.queryByRole('note')).toBeNull()
   })
 
   it('asks for the flagship at /data', async () => {
@@ -109,7 +123,7 @@ describe('ShowcasePage', () => {
   })
 
   it('loads again when the key changes, and ignores the earlier answer', async () => {
-    let answerFirst: (result: ShowcaseLoadResult) => void = () => {}
+    let answerFirst: (result: ShowcasePageResult) => void = () => {}
     vi.mocked(loadShowcase)
       .mockReturnValueOnce(new Promise((resolve) => { answerFirst = resolve }))
       .mockResolvedValueOnce({ status: 'not-found' })

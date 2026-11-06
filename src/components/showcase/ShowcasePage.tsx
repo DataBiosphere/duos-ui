@@ -5,9 +5,10 @@
  */
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
-import { loadShowcase, type ShowcaseLoadResult, type ShowcaseRouteMatch } from 'src/components/showcase/loadShowcase'
+import { loadShowcase, type ShowcasePageResult, type ShowcaseRouteMatch } from 'src/components/showcase/loadShowcase'
 import { ShowcaseTemplate } from 'src/components/showcase/ShowcaseTemplate'
 import { useMetaDescription } from 'src/hooks/useMetaDescription'
+import { useUserIsLogged } from 'src/hooks/useSession'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import NotFound from 'src/pages/NotFound'
 import type { ShowcaseConfig } from 'src/types/showcase'
@@ -27,7 +28,7 @@ export const ShowcasePage = ({ route }: ShowcasePageProps) => {
   const match: ShowcaseRouteMatch = route === 'flagship' ? { route } : { route, key }
   const matchId = JSON.stringify(match)
   // Each answer records the match it is for, so a previous key's answer never shows for this one.
-  const [loaded, setLoaded] = useState<{ matchId: string, result: ShowcaseLoadResult }>()
+  const [loaded, setLoaded] = useState<{ matchId: string, result: ShowcasePageResult }>()
 
   useEffect(() => {
     let current = true
@@ -39,6 +40,8 @@ export const ShowcasePage = ({ route }: ShowcasePageProps) => {
     }
   }, [matchId])
 
+  // One session probe for the page; each handoff link reads the answer from context.
+  const signedIn = useUserIsLogged() === true
   const result = loaded?.matchId === matchId ? loaded.result : undefined
   const found = result?.status === 'found' ? result : undefined
   usePageTitle(found?.entry.title ?? '')
@@ -47,5 +50,5 @@ export const ShowcasePage = ({ route }: ShowcasePageProps) => {
   // Loading reads config.json, usually cached; render nothing for that moment rather than a spinner.
   if (!result) return null
   if (!found) return <NotFound />
-  return <ShowcaseTemplate entry={found.entry} config={found.config} />
+  return <ShowcaseTemplate entry={found.entry} config={found.config} handoffs={{ enabled: found.handoffsEnabled, signedIn }} />
 }
