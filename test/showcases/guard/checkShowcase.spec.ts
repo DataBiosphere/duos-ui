@@ -107,11 +107,29 @@ describe('checkShowcase', () => {
   })
 
   describe('logo alt text', () => {
-    it.each(['', '   '])('fails a masthead logo with alt text "%s"', (alt) => {
+    const own = { src: 'showcase/flagship/logo.svg', alt: 'Flagship Data' }
+
+    it.each(['', '   '])('fails a partner logo with alt text "%s"', (alt) => {
       const config = broken((c) => {
-        c.sections.masthead = { enabled: true, logos: [{ src: 'showcase/flagship/logo.svg', alt }] }
+        c.sections.masthead = { enabled: true, logos: [own, { src: 'showcase/flagship/partner.svg', alt }] }
       })
-      expectErrors(guard(config), 'sections.masthead.logos.0.alt')
+      expectErrors(guard(config), 'sections.masthead.logos.1.alt')
+    })
+
+    it.each(['', '   '])('passes the showcase\'s own logo with alt text "%s", which falls back to the title', (alt) => {
+      const config = broken((c) => {
+        c.sections.masthead = { enabled: true, logos: [{ ...own, alt }] }
+      })
+      expect(guard(config)).toEqual([])
+    })
+
+    it('passes four logos and fails a fifth', () => {
+      const logo = (i: number) => ({ src: `showcase/flagship/logo-${i}.svg`, alt: `Logo ${i}` })
+      const withLogos = (count: number) => broken((c) => {
+        c.sections.masthead = { enabled: true, logos: Array.from({ length: count }, (_, i) => logo(i)) }
+      })
+      expect(guard(withLogos(4))).toEqual([])
+      expectErrors(guard(withLogos(5)), 'sections.masthead.logos: 5 logos')
     })
 
     it('passes empty alt text on a decorative image that is not a logo', () => {
@@ -270,7 +288,7 @@ describe('checkShowcase', () => {
 
   it('reports every broken rule at once', () => {
     const config = broken((c) => {
-      c.sections.masthead = { enabled: true, logos: [{ src: 'showcase/flagship/logo.svg', alt: '' }] }
+      c.sections.masthead = { enabled: true, logos: [{ src: 'showcase/flagship/logo.svg', alt: 'Flagship' }, { src: 'showcase/flagship/partner.svg', alt: '' }] }
       Object.assign(c.sections['featured-tools'], { cta: { label: 'More', url: '//evil.example' } })
     })
     expect(guard(config)).toHaveLength(2)

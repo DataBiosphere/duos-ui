@@ -51,12 +51,29 @@ const checkUrls = (config: unknown): string[] => {
   return errors
 }
 
-/** Logos need alt text. Other images may use empty alt when they are decorative. */
-const checkLogoAlt = (config: unknown): string[] => {
+/** The showcase's own logo and up to three partners (contracts record, D10). */
+export const MAX_MASTHEAD_LOGOS = 4
+
+const mastheadLogos = (config: unknown): unknown[] => {
   const logos = (sectionsOf(config).masthead as { logos?: unknown } | undefined)?.logos
-  return (Array.isArray(logos) ? logos : [])
-    .map((logo: { alt?: unknown }, i) => (typeof logo?.alt === 'string' && logo.alt.trim() ? undefined : `sections.masthead.logos.${i}.alt: a logo needs alt text`))
+  return Array.isArray(logos) ? logos : []
+}
+
+/** Partner logos need alt text. The showcase's own logo (`logos[0]`) may leave it empty, and the
+ * template then uses the registry title (D10). Other images may use empty alt when decorative. */
+const checkLogoAlt = (config: unknown): string[] =>
+  mastheadLogos(config)
+    .map((logo, i) => {
+      const alt = (logo as { alt?: unknown } | null)?.alt
+      return i === 0 || (typeof alt === 'string' && alt.trim()) ? undefined : `sections.masthead.logos.${i}.alt: a partner logo needs alt text`
+    })
     .filter(error => error !== undefined)
+
+const checkLogoCount = (config: unknown): string[] => {
+  const count = mastheadLogos(config).length
+  return count > MAX_MASTHEAD_LOGOS
+    ? [`sections.masthead.logos: ${count} logos; the masthead shows the showcase's own logo and at most ${MAX_MASTHEAD_LOGOS - 1} partners`]
+    : []
 }
 
 const isDate = (value: unknown): value is string => typeof value === 'string' && DATE_PATTERN.test(value)
@@ -130,6 +147,7 @@ export const checkShowcase = (config: unknown, options: GuardOptions = {}): stri
     ...checkImplemented(config, implemented),
     ...checkUrls(config),
     ...checkLogoAlt(config),
+    ...checkLogoCount(config),
     ...checkDateRanges(config),
     ...checkItemIds(config),
     ...checkContrast(config),
