@@ -54,10 +54,17 @@ vi.mock('src/components/funding_resource_list/FundingResourceList', () => ({
   ),
 }))
 
+const biospecimenListProps = vi.hoisted(() => ({ current: undefined as undefined | { biospecimens: unknown[], onBiospecimenChange: (b: unknown[]) => void } }))
+
 vi.mock('src/components/biospecimen_list/BiospecimenList', () => ({
-  default: ({ studyAssetWrapper }: { studyAssetWrapper?: (c: React.ReactNode, b: React.ReactNode) => React.ReactNode }) => (
-    <>{studyAssetWrapper?.(null, null)}</>
-  ),
+  default: (props: {
+    biospecimens: unknown[]
+    onBiospecimenChange: (b: unknown[]) => void
+    studyAssetWrapper?: (c: React.ReactNode, b: React.ReactNode) => React.ReactNode
+  }) => {
+    biospecimenListProps.current = props
+    return <>{props.studyAssetWrapper?.(null, null)}</>
+  },
 }))
 
 const sampleBiospecimen: Biospecimen = {
@@ -88,13 +95,12 @@ describe('StudyAssetManagement', () => {
       <StudyAssetManagement
         study={baseStudy}
         setStudy={vi.fn()}
-        onOpenContactUs={vi.fn()}
       />,
     )
 
     expect(screen.getByRole('heading', { level: 2, name: 'Study Assets' })).toBeInTheDocument()
-    expect(screen.getByText(/Add datasets, models, workspaces, and other resources associated with this study/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /contact the DUOS Team/i })).toBeInTheDocument()
+    expect(screen.getByText(/Add datasets, models, workspaces, biospecimens, and other resources associated with this study/)).toBeInTheDocument()
+    expect(screen.queryByText(/contact the DUOS Team/i)).toBeNull()
 
     expect(screen.getByRole('heading', { level: 3, name: 'Datasets' })).toBeInTheDocument()
     expect(screen.getByText('Add datasets associated with this study')).toBeInTheDocument()
@@ -121,10 +127,10 @@ describe('StudyAssetManagement', () => {
     expect(screen.getByText('Add grants and funding sources for this study')).toBeInTheDocument()
 
     expect(screen.getByRole('heading', { level: 3, name: 'Biospecimens' })).toBeInTheDocument()
-    expect(screen.getByText('View total biospecimens for this study')).toBeInTheDocument()
+    expect(screen.getByText('Add biospecimens collected for this study, one entry per vial or sample')).toBeInTheDocument()
   })
 
-  it('does not render biospecimens section when biospecimens array is empty', () => {
+  it('renders the biospecimens section for a study without biospecimens', () => {
     const studyWithoutBiospecimens: Study = {
       ...baseStudy,
       assets: { ...baseStudy.assets, biospecimens: [] },
@@ -134,20 +140,24 @@ describe('StudyAssetManagement', () => {
       <StudyAssetManagement
         study={studyWithoutBiospecimens}
         setStudy={vi.fn()}
-        onOpenContactUs={vi.fn()}
       />,
     )
 
-    expect(screen.queryByRole('heading', { level: 3, name: 'Biospecimens' })).toBeNull()
-    expect(screen.queryByText('View total biospecimens for this study')).toBeNull()
+    expect(screen.getByRole('heading', { level: 3, name: 'Biospecimens' })).toBeInTheDocument()
+    expect(biospecimenListProps.current?.biospecimens).toEqual([])
+  })
 
-    expect(screen.getByRole('heading', { level: 3, name: 'Datasets' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Models' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Featured Workspaces' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Publications' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Presentations' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Clinical Trials' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Intellectual Property' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 3, name: 'Funding Resources' })).toBeInTheDocument()
+  it('stores biospecimen changes in the study assets', () => {
+    let study: Study = baseStudy
+    const setStudy = vi.fn((update: React.SetStateAction<Study>) => {
+      study = typeof update === 'function' ? update(study) : update
+    })
+    render(<StudyAssetManagement study={baseStudy} setStudy={setStudy} />)
+    expect(biospecimenListProps.current?.biospecimens).toEqual([sampleBiospecimen])
+
+    const added = { ...sampleBiospecimen, biospecimenId: undefined, donorId: 'donor-2' }
+    biospecimenListProps.current?.onBiospecimenChange([sampleBiospecimen, added])
+
+    expect(study.assets?.biospecimens).toEqual([sampleBiospecimen, added])
   })
 })

@@ -15,7 +15,6 @@ vi.mock('src/pages/data_submission/v2/NihAnvilUseRelated', () => ({ NihAnvilUseR
 vi.mock('src/pages/data_submission/v2/NihAdministrativeInformation', () => ({ NihAdministrativeInformation: () => null }))
 vi.mock('src/pages/data_submission/v2/NihDataManagement', () => ({ NihDataManagement: () => null }))
 vi.mock('src/pages/data_submission/v2/StudyAssetManagement', () => ({ StudyAssetManagement: () => null }))
-vi.mock('src/components/modals/SupportRequestModal', () => ({ SupportRequestModal: () => null }))
 vi.mock('src/components/TableHeaderSection', () => ({ default: () => null }))
 
 const mockUseParams = vi.fn()
