@@ -65,18 +65,25 @@ const Skeleton = () => (
 const waitSeconds = (error: ShowcaseLookupError) =>
   error.status === 429 ? Math.max(0, error.retryAfterSeconds ?? RETRY_FALLBACK_SECONDS) : 0
 
-/** Whole seconds left until `seconds` from mount have passed. A new failure mounts a new `Failed`. */
+/**
+ * Whole seconds left until `seconds` from mount have passed. A new failure mounts a new `Failed`.
+ * Each timeout ends when the shown number must drop, measured from the deadline, so a late or early
+ * timer never keeps the button off for an extra second.
+ */
 const useCountdown = (seconds: number) => {
   const [left, setLeft] = useState(seconds)
   useEffect(() => {
     if (seconds <= 0) return
     const deadline = Date.now() + seconds * 1000
-    const timer = setInterval(() => {
-      const next = Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
+    let timer: ReturnType<typeof setTimeout>
+    const step = () => {
+      const ms = deadline - Date.now()
+      const next = Math.max(0, Math.ceil(ms / 1000))
       setLeft(next)
-      if (next === 0) clearInterval(timer)
-    }, 1000)
-    return () => clearInterval(timer)
+      if (next > 0) timer = setTimeout(step, ms - (next - 1) * 1000)
+    }
+    timer = setTimeout(step, 1000)
+    return () => clearTimeout(timer)
   }, [seconds])
   return left
 }
