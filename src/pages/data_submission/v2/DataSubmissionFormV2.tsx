@@ -330,10 +330,11 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
         </header>
 
         <GeneralStudyInformation study={study} setStudy={setStudy} onRequestThroughBioProfile={() => setShowThroughBioRequest(true)} />
+        <StudyAssetManagement study={study} setStudy={setStudy} isEditingExistingStudy={isEditing} onOpenContactUs={() => setShowContactModal(true)} />
+        {/* Last, just above submit: most studies answer No, and a Yes opens the NIH sections below it. */}
         <NihAnvilUseRelated study={study} setStudy={setStudy} />
         <NihAdministrativeInformation study={study} setStudy={setStudy} />
         <NihDataManagement study={study} setStudy={setStudy} />
-        <StudyAssetManagement study={study} setStudy={setStudy} isEditingExistingStudy={isEditing} onOpenContactUs={() => setShowContactModal(true)} />
         <SupportRequestModal showModal={showContactModal} onCloseRequest={() => setShowContactModal(false)} />
         <SupportRequestModal
           showModal={showThroughBioRequest}

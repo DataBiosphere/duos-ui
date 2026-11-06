@@ -34,10 +34,10 @@ vi.mock('src/libs/storage', () => ({
 vi.mock('src/pages/data_submission/v2/GeneralStudyInformation', () => ({
   GeneralStudyInformation: ({ study }: { study: Study }) => <div data-testid="study-name">{study?.name}</div>,
 }))
-vi.mock('src/pages/data_submission/v2/NihAnvilUseRelated', () => ({ NihAnvilUseRelated: () => <div /> }))
+vi.mock('src/pages/data_submission/v2/NihAnvilUseRelated', () => ({ NihAnvilUseRelated: () => <div data-testid="nih-question" /> }))
 vi.mock('src/pages/data_submission/v2/NihAdministrativeInformation', () => ({ NihAdministrativeInformation: () => <div /> }))
 vi.mock('src/pages/data_submission/v2/NihDataManagement', () => ({ NihDataManagement: () => <div /> }))
-vi.mock('src/pages/data_submission/v2/StudyAssetManagement', () => ({ StudyAssetManagement: () => <div /> }))
+vi.mock('src/pages/data_submission/v2/StudyAssetManagement', () => ({ StudyAssetManagement: () => <div data-testid="study-assets" /> }))
 
 const DRAFT_ID = '0393c587-343b-4c85-8969-e69e3f4f5aa8'
 const DRAFT_ROUTE = `/data_submission_form/draft/study-dataset/${DRAFT_ID}`
@@ -150,6 +150,10 @@ describe('DataSubmissionFormV2 outside draft mode', () => {
     expect(Draft.getDraft).not.toHaveBeenCalled()
     expect(DataSet.getStudyById).not.toHaveBeenCalled()
     expect(screen.getByText('Create Study')).toBeInTheDocument()
+    // The NIH question sits at the bottom: after the assets, before the submit button.
+    const follows = (a: Element, b: Element) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0
+    expect(follows(screen.getByTestId('study-assets'), screen.getByTestId('nih-question'))).toBe(true)
+    expect(follows(screen.getByTestId('nih-question'), screen.getByText('Create Study'))).toBe(true)
   })
 
   it('deletes no draft when a study is created without one', async () => {
