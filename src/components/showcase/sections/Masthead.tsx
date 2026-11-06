@@ -86,9 +86,14 @@ const searchFieldSx = {
   'maxWidth': '100%',
   'minWidth': 0,
   '& .MuiInputBase-root': { font: 'inherit', bgcolor: 'var(--showcase-surface)' },
+  '& .MuiInputBase-input': { py: 1, px: 1.5, height: 'auto' },
   // WCAG 1.4.11: a field's edge needs 3:1 against the surface. Muted text gives 4.88:1 on white;
-  // the MUI default outline gives about 1.6:1.
-  '& .MuiOutlinedInput-notchedOutline, & .Mui-disabled .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--showcase-muted-text)' },
+  // the MUI default outline gives about 1.6:1. Focus keeps the same edge: the showcase focus ring
+  // (D9) marks it, so the MUI focus border would draw a second ring.
+  '& .MuiOutlinedInput-notchedOutline, & .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline, & .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline, & .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+    borderColor: 'var(--showcase-muted-text)',
+    borderWidth: 1,
+  },
   '& .MuiFormHelperText-root': { mx: 0, color: 'var(--showcase-muted-text)', fontSize: 'var(--showcase-font-size-label)' },
   [NARROW]: { flex: '1 1 100%', width: 'auto' },
 }
@@ -96,6 +101,7 @@ const searchFieldSx = {
 const searchButtonSx = {
   'font': 'inherit',
   'fontWeight': 600,
+  'minHeight': 40,
   'textTransform': 'none',
   'bgcolor': 'var(--showcase-primary)',
   'color': '#ffffff',
