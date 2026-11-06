@@ -49,143 +49,145 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
     }
   }
 
+  // Nothing at all unless the NIH answers call for it, so no empty section is left in the page.
+  if (!NihAnvilUse.requiresNIHAdministrativeInformation(getStudyPropertyValueByKey(study, NihAnvilUse.key) as string | undefined)) {
+    return null
+  }
+
   return (
     <div className="data-submitter-section">
-      {(
-        NihAnvilUse.requiresNIHAdministrativeInformation(getStudyPropertyValueByKey(study, NihAnvilUse.key) as string | undefined) && (
-          <>
-            <h2>NIH Data Management & Sharing Policy Details</h2>
+      <>
+        <h2>NIH Data Management & Sharing Policy Details</h2>
+        <FormField
+          id={AlternativeDataSharingPlan.key}
+          title={AlternativeDataSharingPlan.fieldTitle}
+          type={FormFieldTypes.YESNORADIOGROUP}
+          defaultValue={getStudyPropertyValueByKey(study, AlternativeDataSharingPlan.key)}
+          onChange={({ _key, value }: { _key: string, value: boolean }) => {
+            setStudyPropertyByKey(study, setStudy, { isValid: true }, new AlternativeDataSharingPlan(value))
+            if (!value) {
+              setStudy((val) => {
+                const newVal = structuredClone(val)
+                removeStudyPropertiesByKeys(newVal, new Set([AlternativeDataSharingPlanReasons.key,
+                  AlternativeDataSharingPlanExplanation.key,
+                  AlternativeDataSharingPlanDataSubmitted.key,
+                  AlternativeDataSharingPlanDataReleased.key]))
+                unset(study, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
+                return newVal
+              })
+            }
+          }}
+        />
+        {(getStudyPropertyValueByKey(study, AlternativeDataSharingPlan.key) === true) && (
+          <div>
+            <h3>Please mark the reasons for which you are requesting an Alternative Data Sharing plan (check all that apply)*</h3>
             <FormField
-              id={AlternativeDataSharingPlan.key}
-              title={AlternativeDataSharingPlan.fieldTitle}
-              type={FormFieldTypes.YESNORADIOGROUP}
-              defaultValue={getStudyPropertyValueByKey(study, AlternativeDataSharingPlan.key)}
-              onChange={({ _key, value }: { _key: string, value: boolean }) => {
-                setStudyPropertyByKey(study, setStudy, { isValid: true }, new AlternativeDataSharingPlan(value))
-                if (!value) {
-                  setStudy((val) => {
-                    const newVal = structuredClone(val)
-                    removeStudyPropertiesByKeys(newVal, new Set([AlternativeDataSharingPlanReasons.key,
-                      AlternativeDataSharingPlanExplanation.key,
-                      AlternativeDataSharingPlanDataSubmitted.key,
-                      AlternativeDataSharingPlanDataReleased.key]))
-                    unset(study, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
-                    return newVal
-                  })
-                }
-              }}
+              id="legalRestrictions"
+              defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.legalRestrictions)}
+              type={FormFieldTypes.CHECKBOX}
+              onChange={onAlternativeDataSharingPlanReasonsChange}
+              toggleText="Legal Restrictions"
             />
-            {(getStudyPropertyValueByKey(study, AlternativeDataSharingPlan.key) === true) && (
-              <div>
-                <h3>Please mark the reasons for which you are requesting an Alternative Data Sharing plan (check all that apply)*</h3>
+            <FormField
+              id="isInformedConsentProcessesInadequate"
+              defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.isInformedConsentProcessesInadequate)}
+              type={FormFieldTypes.CHECKBOX}
+              onChange={onAlternativeDataSharingPlanReasonsChange}
+              toggleText="Informed consent processes are inadequate to support data for sharing for the following reasons:"
+            />
+            {(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.isInformedConsentProcessesInadequate) && (
+              <div style={{ marginLeft: '2rem' }}>
                 <FormField
-                  id="legalRestrictions"
-                  defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.legalRestrictions)}
+                  id="consentFormsUnavailable"
+                  defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentFormsUnavailable)}
                   type={FormFieldTypes.CHECKBOX}
                   onChange={onAlternativeDataSharingPlanReasonsChange}
-                  toggleText="Legal Restrictions"
+                  toggleText="The consent forms are unavailable or non-existant for samples collected after January 25, 2015"
                 />
                 <FormField
-                  id="isInformedConsentProcessesInadequate"
-                  defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.isInformedConsentProcessesInadequate)}
+                  id="consentProcessDidNotAddressFutureUseOrBroadSharing"
+                  defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentProcessDidNotAddressFutureUseOrBroadSharing)}
                   type={FormFieldTypes.CHECKBOX}
                   onChange={onAlternativeDataSharingPlanReasonsChange}
-                  toggleText="Informed consent processes are inadequate to support data for sharing for the following reasons:"
+                  toggleText="The consent process did not specifically address future use or broad data sharing for samples collected after January 25, 2015"
                 />
-                {(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.isInformedConsentProcessesInadequate) && (
-                  <div style={{ marginLeft: '2rem' }}>
-                    <FormField
-                      id="consentFormsUnavailable"
-                      defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentFormsUnavailable)}
-                      type={FormFieldTypes.CHECKBOX}
-                      onChange={onAlternativeDataSharingPlanReasonsChange}
-                      toggleText="The consent forms are unavailable or non-existant for samples collected after January 25, 2015"
-                    />
-                    <FormField
-                      id="consentProcessDidNotAddressFutureUseOrBroadSharing"
-                      defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentProcessDidNotAddressFutureUseOrBroadSharing)}
-                      type={FormFieldTypes.CHECKBOX}
-                      onChange={onAlternativeDataSharingPlanReasonsChange}
-                      toggleText="The consent process did not specifically address future use or broad data sharing for samples collected after January 25, 2015"
-                    />
-                    <FormField
-                      id="consentProcessInadequatelyAddressesRisk"
-                      defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentProcessInadequatelyAddressesRisk)}
-                      type={FormFieldTypes.CHECKBOX}
-                      onChange={onAlternativeDataSharingPlanReasonsChange}
-                      toggleText="The consent processes inadequately addresses risks related to future use or broad data sharing for samples collected after January 25, 2015"
-                    />
-                    <FormField
-                      id="consentProcessPrecludesFutureUseOrBroadSharing"
-                      defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentProcessPrecludesFutureUseOrBroadSharing)}
-                      type={FormFieldTypes.CHECKBOX}
-                      onChange={onAlternativeDataSharingPlanReasonsChange}
-                      toggleText="The consent specifically precludes future use or broad sharing (including a statement that use of data will be limited to the original researchers)"
-                    />
-                    <FormField
-                      id="otherInformedConsentLimitationsOrConcerns"
-                      defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.otherInformedConsentLimitationsOrConcerns)}
-                      type={FormFieldTypes.CHECKBOX}
-                      onChange={onAlternativeDataSharingPlanReasonsChange}
-                      toggleText="Other informed consent limitations or concerns"
-                    />
-                    <FormField
-                      id="otherReasonForRequest"
-                      defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.otherReasonForRequest)}
-                      type={FormFieldTypes.CHECKBOX}
-                      onChange={onAlternativeDataSharingPlanReasonsChange}
-                      toggleText="Other"
-                    />
-                  </div>
-                )}
-                {generateStudyPropertyFormTextField(study, setStudy, new AlternativeDataSharingPlanExplanation(), [FormValidators.REQUIRED])}
-                <FileInput
-                  id={ALTERNATIVE_DATA_SHARING_PLAN_FILE}
-                  onAddFile={function (file: File, id: string): void {
-                    setStudy((val) => {
-                      const newVal = structuredClone(val)
-                      set(newVal, id, file)
-                      return newVal
-                    })
-                  }}
-                  onDeleteFile={function (id: string): void {
-                    setStudy((val) => {
-                      const newVal = structuredClone(val)
-                      unset(newVal, id)
-                      return newVal
-                    })
-                  }}
-                  defaultValue={study.alternativeDataSharingPlanFile}
-                  storedValue={study.alternativeDataSharingPlan}
-                  title="Upload your alternative sharing plan."
-                />
-
                 <FormField
-                  type={FormFieldTypes.RADIOGROUP}
-                  title={AlternativeDataSharingPlanDataSubmitted.fieldTitle}
-                  id={AlternativeDataSharingPlanDataSubmitted.key}
-                  defaultValue={getStudyPropertyValueByKey(study, AlternativeDataSharingPlanDataSubmitted.key)}
-                  options={[
-                    {
-                      text: 'Within 3 months of the last data generated or last clinical visit',
-                      name: 'Within 3 months of the last data generated or last clinical visit',
-                      id: 'withinThreeMonths',
-                    },
-                    {
-                      text: 'By batches over Study Timeline (e.g. based on clinical trial enrollment benchmarks)',
-                      name: 'By batches over Study Timeline (e.g. based on clinical trial enrollment benchmarks)',
-                      id: 'batches',
-                    },
-                  ]}
-                  onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
-                    setStudyPropertyByKey(study, setStudy, input, new AlternativeDataSharingPlanDataSubmitted(input.value as string))
-                  }}
+                  id="consentProcessInadequatelyAddressesRisk"
+                  defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentProcessInadequatelyAddressesRisk)}
+                  type={FormFieldTypes.CHECKBOX}
+                  onChange={onAlternativeDataSharingPlanReasonsChange}
+                  toggleText="The consent processes inadequately addresses risks related to future use or broad data sharing for samples collected after January 25, 2015"
                 />
-                {generateStudyPropertyYesNoField(study, setStudy, new AlternativeDataSharingPlanDataReleased())}
+                <FormField
+                  id="consentProcessPrecludesFutureUseOrBroadSharing"
+                  defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.consentProcessPrecludesFutureUseOrBroadSharing)}
+                  type={FormFieldTypes.CHECKBOX}
+                  onChange={onAlternativeDataSharingPlanReasonsChange}
+                  toggleText="The consent specifically precludes future use or broad sharing (including a statement that use of data will be limited to the original researchers)"
+                />
+                <FormField
+                  id="otherInformedConsentLimitationsOrConcerns"
+                  defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.otherInformedConsentLimitationsOrConcerns)}
+                  type={FormFieldTypes.CHECKBOX}
+                  onChange={onAlternativeDataSharingPlanReasonsChange}
+                  toggleText="Other informed consent limitations or concerns"
+                />
+                <FormField
+                  id="otherReasonForRequest"
+                  defaultValue={(getStudyPropertyValueByKey(study, AlternativeDataSharingPlanReasons.key) as string[] ?? []).includes(AlternativeDataSharingPlanReasons.VALUES.otherReasonForRequest)}
+                  type={FormFieldTypes.CHECKBOX}
+                  onChange={onAlternativeDataSharingPlanReasonsChange}
+                  toggleText="Other"
+                />
               </div>
             )}
-          </>
-        ))}
+            {generateStudyPropertyFormTextField(study, setStudy, new AlternativeDataSharingPlanExplanation(), [FormValidators.REQUIRED])}
+            <FileInput
+              id={ALTERNATIVE_DATA_SHARING_PLAN_FILE}
+              onAddFile={function (file: File, id: string): void {
+                setStudy((val) => {
+                  const newVal = structuredClone(val)
+                  set(newVal, id, file)
+                  return newVal
+                })
+              }}
+              onDeleteFile={function (id: string): void {
+                setStudy((val) => {
+                  const newVal = structuredClone(val)
+                  unset(newVal, id)
+                  return newVal
+                })
+              }}
+              defaultValue={study.alternativeDataSharingPlanFile}
+              storedValue={study.alternativeDataSharingPlan}
+              title="Upload your alternative sharing plan."
+            />
+
+            <FormField
+              type={FormFieldTypes.RADIOGROUP}
+              title={AlternativeDataSharingPlanDataSubmitted.fieldTitle}
+              id={AlternativeDataSharingPlanDataSubmitted.key}
+              defaultValue={getStudyPropertyValueByKey(study, AlternativeDataSharingPlanDataSubmitted.key)}
+              options={[
+                {
+                  text: 'Within 3 months of the last data generated or last clinical visit',
+                  name: 'Within 3 months of the last data generated or last clinical visit',
+                  id: 'withinThreeMonths',
+                },
+                {
+                  text: 'By batches over Study Timeline (e.g. based on clinical trial enrollment benchmarks)',
+                  name: 'By batches over Study Timeline (e.g. based on clinical trial enrollment benchmarks)',
+                  id: 'batches',
+                },
+              ]}
+              onChange={(input: { key: string, value: unknown, isValid: boolean }) => {
+                setStudyPropertyByKey(study, setStudy, input, new AlternativeDataSharingPlanDataSubmitted(input.value as string))
+              }}
+            />
+            {generateStudyPropertyYesNoField(study, setStudy, new AlternativeDataSharingPlanDataReleased())}
+          </div>
+        )}
+      </>
     </div>
   )
 }

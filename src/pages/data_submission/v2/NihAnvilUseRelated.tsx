@@ -132,24 +132,30 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
     }
   }, [handlePreSelectorChange, preSelectorValue, study])
 
+  const enteringNihInfo = preSelectorValue === NihAnvilUsePreSelectOptions.YES
+
+  // A No answer needs no section of its own: just the question, with its answers on the same line.
   return (
-    <div className="data-submitter-section">
-      <h2>NIH and AnVIL use</h2>
-      <FormField
-        id="nihAnvilUse_pre_selector"
-        title="Input NIH Registration Info?"
-        type={FormFieldTypes.RADIOGROUP}
-        options={[
-          { text: NihAnvilUsePreSelectOptions.YES, name: NihAnvilUsePreSelectOptions.YES },
-          { text: NihAnvilUsePreSelectOptions.NO, name: NihAnvilUsePreSelectOptions.NO },
-        ]}
-        defaultValue={preSelectorValue}
-        validators={[FormValidators.REQUIRED]}
-        onChange={(input: { key: string, value: string | undefined, isValid: boolean }) => {
-          handlePreSelectorChange(input.value as string)
-        }}
-      />
-      {preSelectorValue === NihAnvilUsePreSelectOptions.YES && (
+    <div className={enteringNihInfo ? 'data-submitter-section' : undefined} data-cy="nih-anvil-use">
+      {enteringNihInfo && <h2>NIH and AnVIL use</h2>}
+      <div className="dsf-group dsf-inline-question">
+        <FormField
+          id="nihAnvilUse_pre_selector"
+          title="Input NIH Registration Info?"
+          type={FormFieldTypes.RADIOGROUP}
+          orientation="horizontal"
+          options={[
+            { text: NihAnvilUsePreSelectOptions.YES, name: NihAnvilUsePreSelectOptions.YES },
+            { text: NihAnvilUsePreSelectOptions.NO, name: NihAnvilUsePreSelectOptions.NO },
+          ]}
+          defaultValue={preSelectorValue}
+          validators={[FormValidators.REQUIRED]}
+          onChange={(input: { key: string, value: string | undefined, isValid: boolean }) => {
+            handlePreSelectorChange(input.value as string)
+          }}
+        />
+      </div>
+      {enteringNihInfo && (
         <FormField
           id="nihAnvilUse"
           title="Will you or did you submit data to the NIH?"
@@ -166,7 +172,7 @@ export const NihAnvilUseRelated = (props: NihAnvilUseRelatedProps) => {
           }}
         />
       )}
-      {preSelectorValue === NihAnvilUsePreSelectOptions.YES
+      {enteringNihInfo
         && getStudyPropertyValueByKey(study, 'nihAnvilUse') === NihAnvilUse.YES_NHGRI_YES_PHS_ID
         && (
           <>

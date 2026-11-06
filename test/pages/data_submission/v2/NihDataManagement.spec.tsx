@@ -104,3 +104,10 @@ describe('NihDataManagement', () => {
     expect(queryById('alternativeDataSharingPlan')).toBeNull()
   })
 })
+
+describe('NihDataManagement when not called for', () => {
+  it('renders nothing, leaving no empty section behind', () => {
+    const { container } = render(<NihDataManagement study={{ properties: [] } as unknown as Study} setStudy={vi.fn()} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+})

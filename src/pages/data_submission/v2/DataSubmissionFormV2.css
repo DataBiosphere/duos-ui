@@ -198,6 +198,62 @@
   font-size: 1.3rem;
 }
 
+/* A short question with its answers on the same line, e.g. "Input NIH Registration Info?  ○ Yes  ○ No". */
+.data-submission-form .dsf-inline-question {
+  padding: 12px 20px;
+}
+
+.data-submission-form .dsf-inline-question > .formField-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 24px;
+}
+
+.data-submission-form .dsf-inline-question .control-label {
+  margin: 0;
+  /* .control-label carries a 10px top padding meant for stacked layouts; inline it pushes the text down. */
+  padding: 0;
+  line-height: 20px;
+}
+
+/* The answers on the question's line: each a centered row of circle and text, no stray margins. */
+.data-submission-form .dsf-inline-question .radio-group.horizontal {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  margin: 0;
+}
+
+/* RadioButton wraps each answer in a plain block; as a line box it leaves descender space below the row. */
+.data-submission-form .dsf-inline-question .radio-button-container > div {
+  display: flex;
+  align-items: center;
+}
+
+.data-submission-form .dsf-inline-question .radio-group.horizontal .radio-button-container {
+  margin: 0;
+}
+
+.data-submission-form .dsf-inline-question .radio-button-container label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  line-height: 20px;
+}
+
+/* RadioButton floats its circle with an inline style; in a flex row it must sit in line instead. */
+.data-submission-form .dsf-inline-question .radio-button-input {
+  float: none !important;
+  flex-shrink: 0;
+}
+
+.data-submission-form .dsf-inline-question .radio-button-container label > div {
+  margin-left: 0 !important;
+}
+
 /* An input with a fixed leading part of its value, e.g. "through.bio/" before a profile ID. */
 .data-submission-form .dsf-prefixed-input {
   display: flex;

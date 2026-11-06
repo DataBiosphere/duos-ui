@@ -139,3 +139,20 @@ describe('NihAnvilUseRelated', () => {
     expect(nextStudy.properties?.some(prop => prop.key === PiInstitution.key)).toBe(false)
   })
 })
+
+describe('NIH registration question layout', () => {
+  it('shows only the question, answers inline, with no section heading when the answer is No', () => {
+    renderComponent(NihAnvilUse.NO_NHGRI_NO_ANVIL)
+    const wrapper = document.querySelector('[data-cy="nih-anvil-use"]')!
+    expect(wrapper).not.toHaveClass('data-submitter-section')
+    expect(screen.queryByRole('heading', { name: 'NIH and AnVIL use' })).toBeNull()
+    expect(queryById(NIH_ANVIL_PRE_SELECTOR_ID)).toHaveClass('horizontal')
+    expect(queryById(NIH_ANVIL_PRE_SELECTOR_ID)?.closest('.dsf-inline-question')).not.toBeNull()
+  })
+
+  it('opens the NIH and AnVIL use section once the answer is Yes', () => {
+    renderComponent(NihAnvilUse.YES_NHGRI_YES_PHS_ID)
+    expect(document.querySelector('[data-cy="nih-anvil-use"]')).toHaveClass('data-submitter-section')
+    expect(screen.getByRole('heading', { level: 2, name: 'NIH and AnVIL use' })).toBeInTheDocument()
+  })
+})
