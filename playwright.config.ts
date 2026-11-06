@@ -14,7 +14,7 @@ import {
 // rejects the mock's tokens, so they run against the mock Consent upstream.
 // Naming a spec here keeps it out of `chromium`, where real Consent would reject
 // every mock token.
-const MOCK_SPECS = ['auth.spec.ts', 'session.spec.ts', 'mockHarness.spec.ts']
+const MOCK_SPECS = ['auth.spec.ts', 'session.spec.ts', 'mockHarness.spec.ts', 'showcaseHandoff.spec.ts']
 // Specs that need a server of their own, because they change its rate limits.
 const THROTTLE_SPECS = ['authThrottle.spec.ts']
 // Specs that need a server of their own, because they change its session lifetime.
@@ -117,6 +117,8 @@ export default defineConfig({
         PORT: '3001',
         ...oidcEnv(MOCK_BASE_URL),
         DUOS_API_URL: MOCK_CONSENT_URL,
+        // The same Consent as DUOS_API_URL, so the server turns showcase handoffs on (DT-4354).
+        DUOS_SHOWCASE_API_URL: MOCK_CONSENT_URL,
         // The mock provider replaces the role fixture here.
         DUOS_TEST_SIGNIN_ENABLED: 'false',
         // Every mock spec signs in from one IP. Raise the limits so that
