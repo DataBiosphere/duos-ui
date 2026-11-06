@@ -18,7 +18,9 @@ export function safeReturnTo(value: unknown): string {
   if (typeof value !== 'string' || !value.startsWith('/')) return '/'
   try {
     const url = new URL(value, RETURN_TO_BASE)
-    if (url.origin !== RETURN_TO_BASE) return '/'
+    // A same-origin input can still normalize to '//host/...' ('/a/..//host'),
+    // which a browser reads as a protocol-relative URL to another site.
+    if (url.origin !== RETURN_TO_BASE || url.pathname.startsWith('//')) return '/'
     return url.pathname + url.search + url.hash
   }
   catch {
