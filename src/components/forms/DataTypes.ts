@@ -43,6 +43,12 @@ export class DataTypes {
     name: 'Whole Exome',
   }
 
+  static readonly BGE: SelectOptionWithKeyNameAndAbbreviation = {
+    key: 'BGE',
+    abbreviation: 'BGE',
+    name: 'Blended Genome Exome',
+  }
+
   static readonly VALUES: SelectOptionWithKeyNameAndAbbreviation[] = [DataTypes.CITE,
     DataTypes.HYB,
     DataTypes.RNA,
@@ -50,5 +56,6 @@ export class DataTypes {
     DataTypes.SPT,
     DataTypes.SNRNA,
     DataTypes.WGS,
-    DataTypes.WES]
+    DataTypes.WES,
+    DataTypes.BGE]
 }
