@@ -12,7 +12,9 @@
  * - Ready with no datasets: nothing renders.
  *
  * "Try again" moves focus to the heading first, so focus is not lost when the button goes away;
- * the heading keeps it while the shelf loads and when the cards arrive.
+ * the heading keeps it while the shelf loads and when the cards arrive. If the retry finds no
+ * datasets, the shelf goes away and focus moves to the page's `h1`. Focus moves only while the
+ * shelf still has it: a visitor who moved on keeps their place.
  *
  * The section's DOM id is on the root `div`, the target of `#<section key>` links. While the shelf
  * loads or is empty, the template gives it no sub-nav link and hides same-page links to it (D11).
@@ -28,7 +30,7 @@ import { Shelf } from 'src/components/showcase/primitives/Shelf'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
 import { datasetShelfSx } from 'src/components/showcase/sections/datasetShelfStyles'
 import type { SectionRendererProps } from 'src/components/showcase/sectionRegistry'
-import { ShowcaseLookupsContext } from 'src/components/showcase/showcaseTemplateContract'
+import { SHOWCASE_MAIN_HEADING_ID, ShowcaseLookupsContext } from 'src/components/showcase/showcaseTemplateContract'
 import type { ShowcaseLookupError } from 'src/libs/ajax/ShowcaseCatalog'
 import type { DatasetSectionKey } from 'src/types/showcase'
 
@@ -116,20 +118,33 @@ const Failed = ({ error, onRetry }: { error: ShowcaseLookupError, onRetry: () =>
   )
 }
 
+/**
+ * After a retry settles, focus the shelf heading, or the page `h1` when the shelf went away. Only
+ * when the shelf still has focus, or lost it to the page body because its focused element left
+ * the DOM.
+ */
+const restoreFocus = (root: HTMLElement | null, headingId: string, shelfGone: boolean) => {
+  const active = document.activeElement
+  const lost = active === null || active === document.body
+  if (!lost && !(root?.contains(active) ?? false)) return
+  document.getElementById(shelfGone ? SHOWCASE_MAIN_HEADING_ID : headingId)?.focus()
+}
+
 export const DatasetShelf = <K extends DatasetSectionKey>({ sectionKey, section, id, title = '' }: SectionRendererProps<K>) => {
   const state = useContext(ShowcaseLookupsContext).datasets[sectionKey]
   const headingId = useId()
   const retried = useRef(false)
+  const root = useRef<HTMLDivElement>(null)
+  const empty = state?.status === 'ready' && state.data.length === 0
 
   // After "Try again", the ready shelf renders a new heading element; move focus to it too.
   useEffect(() => {
-    if (retried.current && state?.status === 'ready') {
-      retried.current = false
-      document.getElementById(headingId)?.focus()
-    }
-  }, [state?.status, headingId])
+    if (!retried.current || state?.status === 'loading') return
+    retried.current = false
+    restoreFocus(root.current, headingId, empty)
+  }, [state?.status, empty, headingId])
 
-  if (state === undefined || (state.status === 'ready' && state.data.length === 0)) return null
+  if (state === undefined || empty) return null
 
   const retry = () => {
     retried.current = true
@@ -156,5 +171,5 @@ export const DatasetShelf = <K extends DatasetSectionKey>({ sectionKey, section,
     )
   }
 
-  return <Box id={id} sx={datasetShelfSx.root}>{body}</Box>
+  return <Box ref={root} id={id} sx={datasetShelfSx.root}>{body}</Box>
 }
