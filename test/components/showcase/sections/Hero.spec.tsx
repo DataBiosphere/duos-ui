@@ -1,9 +1,8 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ShowcaseHandoffs } from 'src/components/showcase/handoffs'
 import {
   ANNOUNCEMENTS_LABEL,
@@ -21,6 +20,7 @@ import type { Clock } from 'src/showcases/dateWindow'
 import { resolveShowcase } from 'src/showcases/defaults'
 import { ShowcaseConfigSchema } from 'src/showcases/schema'
 import type { RegistryEntry, SectionKey, ShowcaseConfig, ShowcasePartialInput } from 'src/types/showcase'
+import { renderWithRouter } from '../../../test-utils'
 
 vi.mock('src/libs/ajax/ShowcaseCatalog', async importOriginal => ({
   ...await importOriginal<typeof import('src/libs/ajax/ShowcaseCatalog')>(),
@@ -65,10 +65,9 @@ const LIVE: ShowcaseHandoffs = { enabled: true, signedIn: true }
 const clockAt = (day: string): Clock => () => new Date(`${day}T12:00:00Z`)
 const NOV_10 = clockAt('2026-11-10')
 
-const renderHero = (config: ShowcaseConfig, { clock = NOV_10, handoffs = LIVE }: { clock?: Clock, handoffs?: ShowcaseHandoffs } = {}) => render(
-  <MemoryRouter initialEntries={['/showcase/quillmere']}>
-    <ShowcaseTemplate entry={showcase} config={config} handoffs={handoffs} registry={registry} clock={clock} />
-  </MemoryRouter>,
+const renderHero = (config: ShowcaseConfig, { clock = NOV_10, handoffs = LIVE }: { clock?: Clock, handoffs?: ShowcaseHandoffs } = {}) => renderWithRouter(
+  <ShowcaseTemplate entry={showcase} config={config} handoffs={handoffs} registry={registry} clock={clock} />,
+  { route: '/showcase/quillmere' },
 )
 
 const announcement = (id: string, startDate: string, endDate: string, url = `https://example.org/${id}`) =>
@@ -218,10 +217,56 @@ describe('Hero announcements', () => {
     expect(screen.queryByText('Announcement ws')).toBeNull()
   })
 
+  it('uses two desktop columns only when an announcement shows', () => {
+    // The grid is the h1's grandparent; its two-column rule lives in the Emotion stylesheet.
+    const hasColumns = () => {
+      const grid = screen.getByRole('heading', { level: 1 }).parentElement!.parentElement!
+      const css = [...document.querySelectorAll('style')].map(style => style.textContent).join('\n')
+      return [...grid.classList].some(name => css.includes(`.${name}{grid-template-columns`))
+    }
+    const { unmount } = renderHero(configWith({ intro: 'Hi', announcements: three }))
+    expect(hasColumns()).toBe(true)
+    unmount()
+    renderHero(configWith({ intro: 'Hi', announcements: [announcement('old', '2026-01-01', '2026-01-31')] }))
+    expect(hasColumns()).toBe(false)
+  })
+
   it('announces the new announcement politely when it changes', () => {
     renderHero(configWith({ announcements: three }))
     const link = within(announcements()!).getByRole('link', { name: 'Announcement a' })
     expect(link.closest('[aria-live]')).toHaveAttribute('aria-live', 'polite')
+  })
+})
+
+describe('Hero announcements across UTC midnight', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  const ending = announcement('ending', '2026-11-01', '2026-11-10')
+  const starting = announcement('starting', '2026-11-11', '2026-11-30')
+  const systemTime: Clock = () => new Date()
+
+  it('swaps the announcements at midnight on an open page', async () => {
+    vi.useFakeTimers({ now: new Date('2026-11-10T23:59:30Z') })
+    renderHero(configWith({ intro: 'Hi', announcements: [ending, starting] }), { clock: systemTime })
+    expect(screen.getByText('Announcement ending')).toBeInTheDocument()
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(31_000)
+    })
+    expect(screen.queryByText('Announcement ending')).toBeNull()
+    expect(screen.getByText('Announcement starting')).toBeInTheDocument()
+  })
+
+  it('checks the day again when a hidden tab shows, as its timer can be late', () => {
+    let now = new Date('2026-11-10T23:00:00Z')
+    renderHero(configWith({ intro: 'Hi', announcements: [ending, starting] }), { clock: () => now })
+    expect(screen.getByText('Announcement ending')).toBeInTheDocument()
+    now = new Date('2026-11-11T08:00:00Z')
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+    expect(screen.getByText('Announcement starting')).toBeInTheDocument()
   })
 })
 
@@ -330,10 +375,9 @@ describe('Hero with the real masthead (D7)', () => {
       },
       { 'masthead': { enabled: true, logos: [] }, 'featured-workspaces': { enabled: true, items: [workspace] } },
     )
-    render(
-      <MemoryRouter initialEntries={['/showcase/quillmere']}>
-        <ShowcaseTemplate entry={showcase} config={config} handoffs={LIVE} registry={withMasthead} clock={NOV_10} />
-      </MemoryRouter>,
+    renderWithRouter(
+      <ShowcaseTemplate entry={showcase} config={config} handoffs={LIVE} registry={withMasthead} clock={NOV_10} />,
+      { route: '/showcase/quillmere' },
     )
     expect(screen.getAllByRole('region', { name: showcase.title })).toHaveLength(1)
 

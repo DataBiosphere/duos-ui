@@ -1,8 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ShowcaseHandoffs } from 'src/components/showcase/handoffs'
 import {
@@ -12,11 +11,13 @@ import {
   TRY_AGAIN_LABEL,
 } from 'src/components/showcase/sections/DatasetShelf'
 import { type SectionRegistry, sectionRegistry } from 'src/components/showcase/sectionRegistry'
+import { SHOWCASE_MAIN_HEADING_ID } from 'src/components/showcase/showcaseTemplateContract'
 import { ShowcaseTemplate } from 'src/components/showcase/ShowcaseTemplate'
 import { lookupShowcaseDatasets, ShowcaseLookupError } from 'src/libs/ajax/ShowcaseCatalog'
 import { resolveShowcase } from 'src/showcases/defaults'
 import { ShowcaseConfigSchema } from 'src/showcases/schema'
 import type { DatasetSummaryInput, RegistryEntry, ShowcaseConfig, ShowcasePartialInput } from 'src/types/showcase'
+import { renderWithRouter } from '../../../test-utils'
 
 vi.mock('src/libs/ajax/ShowcaseCatalog', async importOriginal => ({
   ...await importOriginal<typeof import('src/libs/ajax/ShowcaseCatalog')>(),
@@ -49,10 +50,12 @@ const configWith = (latest: Partial<Latest> = {}): ShowcaseConfig =>
     sections: { 'latest-data-releases': { enabled: true, ranking: 'newest', ...latest } } as ShowcasePartialInput['sections'],
   }))
 
-const renderShelf = (config = configWith()) => render(
-  <MemoryRouter>
+/** The shelf, and a button outside it, for focus that moves on. */
+const renderShelf = (config = configWith()) => renderWithRouter(
+  <>
     <ShowcaseTemplate entry={showcase} config={config} handoffs={LIVE} registry={registry} />
-  </MemoryRouter>,
+    <button type="button">Elsewhere</button>
+  </>,
 )
 
 const shelf = () => document.getElementById('latest-data-releases')
@@ -163,5 +166,39 @@ describe('latest-data-releases lookup failed (D12)', () => {
     answer({ datasets: [dataset(1)] })
     await waitFor(() => expect(cardTitles()).toEqual(['Cohort 1']))
     expect(heading()).toHaveFocus()
+  })
+
+  /** Fails the first lookup, presses "Try again", and returns the function that answers the retry. */
+  const retryPending = async (user: ReturnType<typeof userEvent.setup>) => {
+    lookup.mockRejectedValueOnce(new ShowcaseLookupError('network', 'down'))
+    renderShelf()
+    const retry = await screen.findByRole('button', { name: TRY_AGAIN_LABEL })
+    let answer: (value: unknown) => void = () => {}
+    lookup.mockImplementationOnce(() => new Promise((resolve) => {
+      answer = resolve
+    }) as never)
+    await user.click(retry)
+    return answer
+  }
+
+  it('leaves focus where the visitor moved it while the retry loads', async () => {
+    const user = userEvent.setup()
+    const answer = await retryPending(user)
+    const elsewhere = screen.getByRole('button', { name: 'Elsewhere' })
+    await user.click(elsewhere)
+
+    answer({ datasets: [dataset(1)] })
+    await waitFor(() => expect(cardTitles()).toEqual(['Cohort 1']))
+    expect(elsewhere).toHaveFocus()
+  })
+
+  it('moves focus to the page h1 when the retry finds no datasets and the shelf goes away', async () => {
+    const user = userEvent.setup()
+    const answer = await retryPending(user)
+    expect(heading()).toHaveFocus()
+
+    answer({ datasets: [] })
+    await waitFor(() => expect(shelf()).toBeNull())
+    expect(document.getElementById(SHOWCASE_MAIN_HEADING_ID)).toHaveFocus()
   })
 })
