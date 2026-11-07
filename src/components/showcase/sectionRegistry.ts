@@ -16,6 +16,7 @@
  * Lookup state (a shelf that is loading or whose lookup failed) is not modelled here.
  */
 import type { ComponentType } from 'react'
+import { DatasetShelf } from 'src/components/showcase/sections/DatasetShelf'
 import { Hero } from 'src/components/showcase/sections/Hero'
 import { heroHasContent } from 'src/components/showcase/sections/heroContent'
 import { Masthead } from 'src/components/showcase/sections/Masthead'
@@ -57,9 +58,11 @@ export type SectionRegistry = { readonly [K in SectionKey]?: SectionRegistryEntr
 /** The real registry. Each E3 story adds its type here and to `IMPLEMENTED_SECTION_KEYS`. */
 export const sectionRegistry: SectionRegistry = {
   // Search always renders, so an enabled masthead always has content, with or without logos.
-  masthead: { component: Masthead, defaultLabels: {}, navigable: false, hasRenderableContent: () => true },
+  'masthead': { component: Masthead, defaultLabels: {}, navigable: false, hasRenderableContent: () => true },
   // The hero's heading falls back to the showcase title, so it needs no default title.
-  hero: { component: Hero, defaultLabels: {}, navigable: false, hasRenderableContent: heroHasContent },
+  'hero': { component: Hero, defaultLabels: {}, navigable: false, hasRenderableContent: heroHasContent },
+  // Provisional title. A computed shelf's content depends on its lookup, which the shelf renders.
+  'latest-data-releases': { component: DatasetShelf, defaultLabels: { title: 'Latest data releases' }, navigable: true, hasRenderableContent: () => true },
 }
 
 export interface VisibleSectionOf<K extends SectionKey> {
