@@ -1,7 +1,8 @@
-import React, { Children, useId } from 'react'
+import React, { Children, useContext, useId } from 'react'
 import type { HeadingLevel } from 'src/components/showcase/primitives/Card'
-import { isSafeHref, ShowcaseAction } from 'src/components/showcase/primitives/safeHref'
+import { isShownHref, ShowcaseAction } from 'src/components/showcase/primitives/safeHref'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
+import { ShowcasePageInfoContext } from 'src/components/showcase/showcaseTemplateContract'
 // The panel shares the card's stylesheet and its provisional values.
 import './Card.css'
 
@@ -17,7 +18,9 @@ export type StructuredPanelProps = {
 export const StructuredPanel = ({ title, headingLevel = 2, children, actions = [] }: StructuredPanelProps) => {
   const headingId = useId()
   const Heading = `h${headingLevel}` as const
-  const links = actions.filter(action => isSafeHref(action.href))
+  // ShowcaseLink renders nothing for a hidden same-page link, so leave those out of the list too.
+  const { visibleSectionIds } = useContext(ShowcasePageInfoContext)
+  const links = actions.filter(action => isShownHref(action.href, visibleSectionIds))
   return (
     <section className="showcase-panel" aria-labelledby={headingId}>
       <Heading className="showcase-panel__title" id={headingId}>{title}</Heading>
