@@ -28,5 +28,8 @@ export const datasetShelfSx = {
     'fontWeight': 600,
     'textTransform': 'none',
     '&:hover': { borderColor: 'var(--showcase-primary)', bgcolor: 'var(--showcase-accent-tint)' },
+    // D13: off while the 429 countdown runs, but still focusable.
+    '&[aria-disabled="true"]': { borderColor: 'var(--showcase-border)', bgcolor: 'var(--showcase-surface)', color: 'var(--showcase-muted-text)', cursor: 'not-allowed' },
   },
+  wait: { fontSize: 'var(--showcase-font-size-label)', color: 'var(--showcase-muted-text)' },
 } satisfies Record<string, SxProps<Theme>>

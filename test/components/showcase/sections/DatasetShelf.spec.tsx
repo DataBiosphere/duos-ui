@@ -1,12 +1,14 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
-import { screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ShowcaseHandoffs } from 'src/components/showcase/handoffs'
 import {
   DATASETS_FAILED_TEXT,
   DATASETS_LOADING_TEXT,
+  RETRY_FALLBACK_SECONDS,
+  retryWaitText,
   SEE_ALL_LABEL,
   TRY_AGAIN_LABEL,
 } from 'src/components/showcase/sections/DatasetShelf'
@@ -200,5 +202,79 @@ describe('latest-data-releases lookup failed (D12)', () => {
     answer({ datasets: [] })
     await waitFor(() => expect(shelf()).toBeNull())
     expect(document.getElementById(SHOWCASE_MAIN_HEADING_ID)).toHaveFocus()
+  })
+})
+
+describe('latest-data-releases too many requests (D13)', () => {
+  const tooMany = (retryAfterSeconds?: number) => new ShowcaseLookupError('http', 'Too many requests', { status: 429, retryAfterSeconds })
+
+  // Every timer is fake and real time never moves the clock, so a slow machine can't reach the
+  // deadline early. findBy/waitFor need real timers, so these tests settle promises with
+  // advanceTimersByTimeAsync instead.
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  const tick = (seconds: number) => act(async () => {
+    await vi.advanceTimersByTimeAsync(seconds * 1000)
+  })
+
+  /** Lets the lookup settle and React render, then returns "Try again". */
+  const retryButton = async () => {
+    await tick(0)
+    return screen.getByRole('button', { name: TRY_AGAIN_LABEL })
+  }
+
+  it('turns "Try again" off for the Retry-After seconds, with a countdown, then back on', async () => {
+    lookup.mockRejectedValueOnce(tooMany(3))
+    renderShelf()
+    const retry = await retryButton()
+    expect(retry).toHaveAttribute('aria-disabled', 'true')
+    expect(retry).toHaveAccessibleDescription(retryWaitText(3))
+
+    await tick(1)
+    expect(retry).toHaveAccessibleDescription(retryWaitText(2))
+
+    await tick(2)
+    expect(retry).not.toHaveAttribute('aria-disabled', 'true')
+    expect(screen.queryByText(retryWaitText(1))).toBeNull()
+  })
+
+  it('ignores a press while the countdown runs, and tries again after it', async () => {
+    lookup.mockRejectedValueOnce(tooMany(2))
+    renderShelf()
+    const retry = await retryButton()
+    fireEvent.click(retry)
+    expect(lookup).toHaveBeenCalledTimes(1)
+
+    await tick(2)
+    lookup.mockResolvedValueOnce({ datasets: [dataset(1)] } as never)
+    fireEvent.click(retry)
+    expect(lookup).toHaveBeenCalledTimes(2)
+    await tick(0)
+    expect(cardTitles()).toEqual(['Cohort 1'])
+  })
+
+  it(`counts down ${RETRY_FALLBACK_SECONDS} seconds when the browser can't read Retry-After`, async () => {
+    lookup.mockRejectedValueOnce(tooMany(undefined))
+    renderShelf()
+    const retry = await retryButton()
+    expect(retry).toHaveAccessibleDescription(retryWaitText(RETRY_FALLBACK_SECONDS))
+    await tick(RETRY_FALLBACK_SECONDS - 1)
+    expect(retry).toHaveAttribute('aria-disabled', 'true')
+    await tick(1)
+    expect(retry).not.toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('keeps "Try again" on for any other failure', async () => {
+    lookup.mockRejectedValueOnce(new ShowcaseLookupError('http', 'Server error', { status: 503 }))
+    renderShelf()
+    const retry = await retryButton()
+    expect(retry).not.toHaveAttribute('aria-disabled', 'true')
+    expect(retry).not.toHaveAccessibleDescription()
   })
 })
