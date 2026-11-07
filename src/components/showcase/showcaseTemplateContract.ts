@@ -43,7 +43,9 @@ export interface SubNavLink {
 export interface ShowcasePageInfo {
   title: string
   subNav: readonly SubNavLink[]
-  /** Undefined outside a template, where no same-page link is hidden. */
+  /** The ids that same-page links may target (`linkTargetSections`): visible sections, less a
+   * dataset shelf that is loading or empty (D11). Undefined outside a template, where no same-page
+   * link is hidden. */
   visibleSectionIds?: readonly string[]
   /** The items in the config's enabled tool sections, for the hero `tools` stat. */
   toolCount?: number

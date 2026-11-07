@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  linkTargetSections,
   type SectionRegistry,
   type SectionRegistryEntry,
   sectionDomId,
@@ -7,6 +8,8 @@ import {
   subNavSections,
   visibleSections,
 } from 'src/components/showcase/sectionRegistry'
+import type { LookupState, ShowcaseLookups } from 'src/components/showcase/useShowcaseLookups'
+import { ShowcaseLookupError } from 'src/libs/ajax/ShowcaseCatalog'
 import { resolveShowcase } from 'src/showcases/defaults'
 import { ShowcaseConfigSchema } from 'src/showcases/schema'
 import {
@@ -14,6 +17,7 @@ import {
   IMPLEMENTED_SECTION_KEYS,
   SECTION_KEYS,
   type SectionKey,
+  type DatasetSummary,
   type ShowcaseConfig,
   type ShowcasePartialInput,
 } from 'src/types/showcase'
@@ -184,5 +188,44 @@ describe('subNavSections', () => {
     const all = Object.fromEntries(SECTION_KEYS.map(key => [key, testEntry()])) as SectionRegistry
     const config = configWith(sections)
     expect(keys(visibleSections(config, all))).toEqual(SECTION_KEYS.filter(key => key in sections))
+  })
+})
+
+describe('linkTargetSections (D11)', () => {
+  const retry = () => {}
+  const withLatest = (state: LookupState<DatasetSummary[]> | undefined): ShowcaseLookups => ({ datasets: state === undefined ? {} : { 'latest-data-releases': state } })
+  type State = LookupState<DatasetSummary[]>
+  const READY: State = { status: 'ready', data: [{ identifier: 'DUOS-000001' }] as unknown as DatasetSummary[], retry }
+  const EMPTY: State = { status: 'ready', data: [], retry }
+  const LOADING: State = { status: 'loading', retry }
+  const FAILED: State = { status: 'error', error: new ShowcaseLookupError('network', 'down'), retry }
+  const config = () => configWith(sections)
+
+  it.each([
+    ['has datasets', READY, true],
+    ['failed, so people can reach "Try again" (D12)', FAILED, true],
+    ['is loading', LOADING, false],
+    ['is ready with no datasets', EMPTY, false],
+    ['has no lookup', undefined, false],
+  ])('keeps a dataset shelf that %s as a link target', (_, state, linkable) => {
+    expect(keys(linkTargetSections(config(), registry, withLatest(state))).includes('latest-data-releases')).toBe(linkable)
+  })
+
+  it('keeps every other visible section, which has no lookup', () => {
+    expect(keys(linkTargetSections(config(), registry, withLatest(LOADING)))).toEqual(['hero', 'featured-tools'])
+  })
+
+  it('keeps every visible section when the lookups are unknown', () => {
+    expect(linkTargetSections(config(), registry)).toEqual(visibleSections(config(), registry))
+  })
+
+  it('gives the sub-nav a shelf only once it has content', () => {
+    expect(keys(subNavSections(config(), registry, withLatest(LOADING)))).toEqual(['featured-tools'])
+    expect(keys(subNavSections(config(), registry, withLatest(READY)))).toEqual(['latest-data-releases', 'featured-tools'])
+    expect(keys(subNavSections(config(), registry, withLatest(FAILED)))).toEqual(['latest-data-releases', 'featured-tools'])
+  })
+
+  it('still renders a loading shelf, so its skeleton shows', () => {
+    expect(keys(visibleSections(config(), registry))).toContain('latest-data-releases')
   })
 })
