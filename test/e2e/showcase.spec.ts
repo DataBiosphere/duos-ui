@@ -98,26 +98,29 @@ test.describe('the partner hero (S3.3)', () => {
   })
 })
 
+// A showcase lookup for one section: same-origin `/public/showcase/datasets` in BFF mode, and the
+// configured `showcaseApiUrl` cross-origin in legacy mode, which also needs CORS and a preflight
+// answer. Other lookups go on to the catalog the build reaches.
+const stubLookup = (page: Page, section: string, answer: () => { status: number, body: unknown }) =>
+  page.route(url => url.pathname.endsWith('/showcase/datasets'), async (route: Route) => {
+    const request = route.request()
+    const origin = await request.headerValue('origin')
+    const cors: Record<string, string> = origin === null ? {} : { 'access-control-allow-origin': origin, 'vary': 'Origin' }
+    if (request.method() === 'OPTIONS') {
+      return route.fulfill({ status: 204, headers: { ...cors, 'access-control-allow-methods': 'POST', 'access-control-allow-headers': 'content-type, accept' } })
+    }
+    if (!(request.postData() ?? '').includes(`"${section}"`)) return route.fallback()
+    const { status, body } = answer()
+    return route.fulfill({ status, headers: cors, contentType: 'application/json', body: JSON.stringify(body) })
+  })
+
 test.describe('the latest data releases shelf (S3.3)', () => {
   const datasets = [
     { identifier: 'DUOS-000901', title: 'Synthetic Newest Cohort', accessManagement: 'controlled', dacName: 'Synthetic DAC', consentCodes: ['GRU'], participantCount: 1200, availableDate: '2026-10-01', accessUrl: null },
     { identifier: 'DUOS-000902', title: 'Synthetic Open Cohort', accessManagement: 'open', dacName: null, consentCodes: ['GRU'], participantCount: null, availableDate: '2026-09-01', accessUrl: 'https://example.org/open-cohort' },
   ]
 
-  // The ranking lookup: same-origin `/public/showcase/datasets` in BFF mode, and the configured
-  // `showcaseApiUrl` cross-origin in legacy mode, which also needs CORS and a preflight answer.
-  const stubLatest = (page: Page, answer: () => { status: number, body: unknown }) =>
-    page.route(url => url.pathname.endsWith('/showcase/datasets'), async (route: Route) => {
-      const request = route.request()
-      const origin = await request.headerValue('origin')
-      const cors: Record<string, string> = origin === null ? {} : { 'access-control-allow-origin': origin, 'vary': 'Origin' }
-      if (request.method() === 'OPTIONS') {
-        return route.fulfill({ status: 204, headers: { ...cors, 'access-control-allow-methods': 'POST', 'access-control-allow-headers': 'content-type, accept' } })
-      }
-      if (!(request.postData() ?? '').includes('"latest-data-releases"')) return route.fallback()
-      const { status, body } = answer()
-      return route.fulfill({ status, headers: cors, contentType: 'application/json', body: JSON.stringify(body) })
-    })
+  const stubLatest = (page: Page, answer: () => { status: number, body: unknown }) => stubLookup(page, 'latest-data-releases', answer)
 
   const shelf = (page: Page) => page.locator('#latest-data-releases')
 
@@ -139,6 +142,18 @@ test.describe('the latest data releases shelf (S3.3)', () => {
     fail = false
     await shelf(page).getByRole('button', { name: 'Try again' }).click()
     await expect(shelf(page).getByRole('article')).toHaveCount(2)
+  })
+})
+
+test.describe('the open access datasets shelf (S3.3)', () => {
+  test('shows the curated open dataset, linked straight to its provider', async ({ page }) => {
+    const openCohort = { identifier: 'DUOS-000902', title: 'Synthetic Open Cohort', accessManagement: 'open', dacName: null, consentCodes: ['GRU'], participantCount: null, availableDate: '2026-09-01', accessUrl: 'https://example.org/open-cohort' }
+    await stubLookup(page, 'open-access-datasets', () => ({ status: 200, body: { datasets: [openCohort] } }))
+    await page.goto(`/showcase/${E2E_PARTNER.key}`)
+    const shelf = page.locator('#open-access-datasets')
+    await expect(shelf.getByRole('heading', { level: 2, name: 'Open access datasets' })).toBeVisible()
+    await expect(shelf.getByRole('article')).toHaveCount(1)
+    await expect(shelf.getByRole('link', { name: 'Open provider site' })).toHaveAttribute('href', 'https://example.org/open-cohort')
   })
 })
 

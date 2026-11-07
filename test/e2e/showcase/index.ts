@@ -38,6 +38,8 @@ export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {
       },
       // S3.3. The spec stubs its lookup, so the shelf doesn't depend on the catalog it reaches.
       'latest-data-releases': { enabled: true, ranking: 'newest' },
+      // S3.3, curated. The spec stubs its lookup too.
+      'open-access-datasets': { enabled: true, items: ['DUOS-000902'] },
     },
   },
   'e2e-hidden': {},
