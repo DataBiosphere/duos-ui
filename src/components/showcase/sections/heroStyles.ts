@@ -32,6 +32,16 @@ export const heroSx = {
   // Body text color, not the muted text: muted text is under 4.5:1 on the accent tint behind it.
   subtitle: { mt: '8px', mb: 0, fontSize: 'var(--showcase-font-size-card-title)' },
   text: { mt: '16px', mb: 0, maxWidth: '70ch', whiteSpace: 'pre-line' },
+  // Provisional (D15): the strip stacks at 480px.
+  stats: { 'm': '24px 0 0', 'p': 0, 'listStyle': 'none', 'gap': '16px 40px', 'flexWrap': 'wrap', '@media (max-width: 480px)': { flexDirection: 'column' } },
+  statValue: {
+    fontFamily: 'var(--showcase-font-heading)',
+    fontSize: 'var(--showcase-font-size-page-title)',
+    fontWeight: 'var(--showcase-font-weight-heading)',
+    lineHeight: 'var(--showcase-line-height-heading)',
+    color: 'var(--showcase-primary)',
+  },
+  statLabel: { fontSize: 'var(--showcase-font-size-label)', color: 'var(--showcase-muted-text)' },
   ctas: { ...linkRow, mt: '24px', fontWeight: 600 },
   onboarding: { mt: '24px' },
   onboardingLinks: linkRow,
