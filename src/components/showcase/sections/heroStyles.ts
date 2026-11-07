@@ -25,7 +25,8 @@ export const heroSx = {
     '@media (min-width: 980px)': { gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', alignItems: 'start', gap: '48px', py: '48px' },
   },
   title: { m: 0, color: 'var(--showcase-primary)' },
-  subtitle: { mt: '8px', mb: 0, fontSize: 'var(--showcase-font-size-card-title)', color: 'var(--showcase-muted-text)' },
+  // Body text color, not the muted text: muted text is under 4.5:1 on the accent tint behind it.
+  subtitle: { mt: '8px', mb: 0, fontSize: 'var(--showcase-font-size-card-title)' },
   text: { mt: '16px', mb: 0, maxWidth: '70ch', whiteSpace: 'pre-line' },
   // Provisional (D15): the strip stacks at 480px.
   stats: { 'm': '24px 0 0', 'p': 0, 'listStyle': 'none', 'gap': '16px 40px', 'flexWrap': 'wrap', '@media (max-width: 480px)': { flexDirection: 'column' } },
