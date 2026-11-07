@@ -1,7 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
-import { render, screen, within } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import { screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { type ShowcaseHandoffs, ShowcaseHandoffsContext } from 'src/components/showcase/handoffs'
 import { DatasetCard, NEW_IN_DUOS_LABEL, OPEN_PROVIDER_LABEL, REQUEST_ACCESS_LABEL } from 'src/components/showcase/primitives/DatasetCard'
@@ -9,6 +8,7 @@ import { ShowcaseClockContext } from 'src/components/showcase/showcaseTemplateCo
 import type { Clock } from 'src/showcases/dateWindow'
 import { DatasetSummarySchema } from 'src/showcases/schema'
 import type { DatasetSummaryInput } from 'src/types/showcase'
+import { renderWithRouter } from '../../../test-utils'
 
 const NOV_10: Clock = () => new Date('2026-11-10T12:00:00Z')
 const SIGNED_IN: ShowcaseHandoffs = { enabled: true, signedIn: true }
@@ -35,14 +35,12 @@ const open: DatasetSummaryInput = {
   accessUrl: 'https://data.example.org/open-cohort',
 }
 
-const renderCard = (input: DatasetSummaryInput, handoffs = SIGNED_IN) => render(
-  <MemoryRouter>
-    <ShowcaseHandoffsContext.Provider value={handoffs}>
-      <ShowcaseClockContext.Provider value={NOV_10}>
-        <DatasetCard summary={DatasetSummarySchema.parse(input)} />
-      </ShowcaseClockContext.Provider>
-    </ShowcaseHandoffsContext.Provider>
-  </MemoryRouter>,
+const renderCard = (input: DatasetSummaryInput, handoffs = SIGNED_IN) => renderWithRouter(
+  <ShowcaseHandoffsContext.Provider value={handoffs}>
+    <ShowcaseClockContext.Provider value={NOV_10}>
+      <DatasetCard summary={DatasetSummarySchema.parse(input)} />
+    </ShowcaseClockContext.Provider>
+  </ShowcaseHandoffsContext.Provider>,
 )
 
 const card = () => screen.getByRole('article')
