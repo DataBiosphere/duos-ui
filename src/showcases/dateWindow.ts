@@ -31,3 +31,21 @@ export const filterByDateWindow = <T extends DateWindow>(items: readonly T[], cl
   const today = utcToday(clock)
   return items.filter(item => includesDay(item, today))
 }
+
+/** The "New in DUOS" window: a dataset is new for 30 days after its available date (contracts
+ * record), counting that day as day 0. */
+export const NEW_IN_DUOS_DAYS = 30
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
+/**
+ * True when a dataset's "New in DUOS" date (`DatasetSummary.availableDate`, a UTC calendar date) is
+ * today or up to `NEW_IN_DUOS_DAYS` days before it. A future date is not new: it is a data error,
+ * and a badge on it would last longer than the window.
+ */
+export const isNewInDuos = (availableDate: string | null, clock: Clock = systemClock): boolean => {
+  if (availableDate === null) return false
+  const today = utcToday(clock)
+  const first = new Date(Date.parse(`${today}T00:00:00Z`) - NEW_IN_DUOS_DAYS * DAY_MS).toISOString().slice(0, 10)
+  return first <= availableDate && availableDate <= today
+}
