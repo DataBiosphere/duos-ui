@@ -19,7 +19,7 @@ export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {
   // The guard rejects an enabled section with no renderer yet, so each section PR turns its
   // section on here along with its Playwright checks. The masthead is S3.2 (showcaseHandoff.spec).
   'e2e-flagship': { sections: { masthead: { enabled: true, logos: [] } } },
-  // The hero is S3.3.
+  // The hero is S3.3. Its announcement dates are wide, so the build doesn't go stale.
   'quillmere': {
     branding: { theme: 'teal' },
     sections: {
@@ -31,7 +31,10 @@ export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {
         primaryCtas: [{ label: 'Browse the data library', url: '/datalibrary' }, { label: 'About DUOS', url: '/' }],
         // Hidden until a workspaces shelf renders (S3.4).
         onboarding: [{ label: 'Start in a workspace', url: '#featured-workspaces' }],
-        announcements: [],
+        announcements: [
+          { id: 'one', text: 'First synthetic announcement', url: 'https://example.org/one', startDate: '2026-01-01', endDate: '2099-12-31' },
+          { id: 'two', text: 'Second synthetic announcement', url: 'https://example.org/two', startDate: '2026-01-01', endDate: '2099-12-31' },
+        ],
       },
     },
   },

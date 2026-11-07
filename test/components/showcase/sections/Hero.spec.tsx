@@ -1,18 +1,24 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
-import { render, screen, within } from '@testing-library/react'
+import { act, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ShowcaseHandoffs } from 'src/components/showcase/handoffs'
-import { ONBOARDING_LABEL } from 'src/components/showcase/sections/Hero'
+import {
+  ANNOUNCEMENTS_LABEL,
+  NEXT_ANNOUNCEMENT_LABEL,
+  ONBOARDING_LABEL,
+  PREVIOUS_ANNOUNCEMENT_LABEL,
+} from 'src/components/showcase/sections/Hero'
 import { heroHasContent } from 'src/components/showcase/sections/heroContent'
 import { type SectionRegistry, type SectionRegistryEntry, type SectionRendererProps, sectionRegistry } from 'src/components/showcase/sectionRegistry'
 import { SHOWCASE_MAIN_HEADING_ID } from 'src/components/showcase/showcaseTemplateContract'
 import { ShowcaseTemplate } from 'src/components/showcase/ShowcaseTemplate'
+import type { Clock } from 'src/showcases/dateWindow'
 import { resolveShowcase } from 'src/showcases/defaults'
 import { ShowcaseConfigSchema } from 'src/showcases/schema'
 import type { RegistryEntry, SectionKey, ShowcaseConfig, ShowcasePartialInput } from 'src/types/showcase'
+import { renderWithRouter } from '../../../test-utils'
 
 vi.mock('src/libs/ajax/ShowcaseCatalog', async importOriginal => ({
   ...await importOriginal<typeof import('src/libs/ajax/ShowcaseCatalog')>(),
@@ -53,13 +59,20 @@ const configWith = (hero: Partial<HeroInput>, sections: ShowcasePartialInput['se
 
 const LIVE: ShowcaseHandoffs = { enabled: true, signedIn: true }
 
-const renderHero = (config: ShowcaseConfig, handoffs = LIVE) => render(
-  <MemoryRouter initialEntries={['/showcase/quillmere']}>
-    <ShowcaseTemplate entry={showcase} config={config} handoffs={handoffs} registry={registry} />
-  </MemoryRouter>,
+/** 2026-11-10, midday UTC. */
+const clockAt = (day: string): Clock => () => new Date(`${day}T12:00:00Z`)
+const NOV_10 = clockAt('2026-11-10')
+
+const renderHero = (config: ShowcaseConfig, { clock = NOV_10, handoffs = LIVE }: { clock?: Clock, handoffs?: ShowcaseHandoffs } = {}) => renderWithRouter(
+  <ShowcaseTemplate entry={showcase} config={config} handoffs={handoffs} registry={registry} clock={clock} />,
+  { route: '/showcase/quillmere' },
 )
 
+const announcement = (id: string, startDate: string, endDate: string, url = `https://example.org/${id}`) =>
+  ({ id, text: `Announcement ${id}`, url, startDate, endDate }) as HeroInput['announcements'][number]
+
 const heroRegion = () => document.getElementById('hero')!
+const announcements = () => screen.queryByRole('region', { name: ANNOUNCEMENTS_LABEL })
 
 describe('Hero heading', () => {
   it('is the page h1 and the skip link target, with the config title', () => {
@@ -130,15 +143,141 @@ describe('Hero copy and links', () => {
   })
 })
 
+describe('Hero announcements', () => {
+  const three = [
+    announcement('a', '2026-11-01', '2026-11-30'),
+    announcement('b', '2026-11-05', '2026-11-20'),
+    announcement('c', '2026-10-01', '2026-12-31'),
+  ]
+
+  it.each([
+    ['the day before the window', '2026-11-09', false],
+    ['the first day of the window', '2026-11-10', true],
+    ['the last day of the window', '2026-11-12', true],
+    ['the day after the window', '2026-11-13', false],
+  ])('on %s, shown is %s', (_, day, shown) => {
+    renderHero(configWith({ intro: 'Hi', announcements: [announcement('a', '2026-11-10', '2026-11-12')] }), { clock: clockAt(day) })
+    expect(screen.queryByText('Announcement a') !== null).toBe(shown)
+  })
+
+  it('shows no panel when no announcement is current', () => {
+    renderHero(configWith({ intro: 'Hi', announcements: [announcement('a', '2026-01-01', '2026-01-31')] }))
+    expect(announcements()).toBeNull()
+  })
+
+  it('shows one announcement as a link, with no controls', () => {
+    renderHero(configWith({ announcements: [announcement('a', '2026-11-01', '2026-11-30')] }))
+    const panel = announcements()!
+    expect(within(panel).getByRole('link', { name: 'Announcement a' })).toHaveAttribute('href', 'https://example.org/a')
+    expect(within(panel).queryByRole('button')).toBeNull()
+    expect(within(panel).queryByText(/of/)).toBeNull()
+  })
+
+  it('shows one announcement at a time, with its position', () => {
+    renderHero(configWith({ announcements: three }))
+    const panel = announcements()!
+    expect(within(panel).getByText('1 of 3')).toBeInTheDocument()
+    expect(within(panel).getByRole('link', { name: 'Announcement a' })).toBeInTheDocument()
+    // Inactive announcements leave the tab order and the accessibility tree (D6).
+    expect(screen.queryByText('Announcement b')).toBeNull()
+    expect(screen.queryByText('Announcement c')).toBeNull()
+  })
+
+  it('moves forward and back, and wraps at both ends', async () => {
+    const user = userEvent.setup()
+    renderHero(configWith({ announcements: three }))
+    const panel = announcements()!
+    const next = within(panel).getByRole('button', { name: NEXT_ANNOUNCEMENT_LABEL })
+    const previous = within(panel).getByRole('button', { name: PREVIOUS_ANNOUNCEMENT_LABEL })
+
+    await user.click(next)
+    expect(within(panel).getByText('2 of 3')).toBeInTheDocument()
+    expect(within(panel).getByRole('link', { name: 'Announcement b' })).toBeInTheDocument()
+    await user.click(next)
+    await user.click(next)
+    expect(within(panel).getByText('1 of 3')).toBeInTheDocument()
+    await user.click(previous)
+    expect(within(panel).getByText('3 of 3')).toBeInTheDocument()
+    expect(within(panel).getByRole('link', { name: 'Announcement c' })).toBeInTheDocument()
+  })
+
+  it('counts only current announcements', () => {
+    renderHero(configWith({ announcements: [...three, announcement('old', '2026-01-01', '2026-01-31')] }))
+    expect(within(announcements()!).getByText('1 of 3')).toBeInTheDocument()
+  })
+
+  it('leaves out an announcement whose same-page target is not visible', () => {
+    renderHero(configWith({
+      announcements: [announcement('a', '2026-11-01', '2026-11-30'), announcement('ws', '2026-11-01', '2026-11-30', '#featured-workspaces')],
+    }))
+    const panel = announcements()!
+    expect(within(panel).queryByRole('button')).toBeNull()
+    expect(screen.queryByText('Announcement ws')).toBeNull()
+  })
+
+  it('uses two desktop columns only when an announcement shows', () => {
+    // The grid is the h1's grandparent; its two-column rule lives in the Emotion stylesheet.
+    const hasColumns = () => {
+      const grid = screen.getByRole('heading', { level: 1 }).parentElement!.parentElement!
+      const css = [...document.querySelectorAll('style')].map(style => style.textContent).join('\n')
+      return [...grid.classList].some(name => css.includes(`.${name}{grid-template-columns`))
+    }
+    const { unmount } = renderHero(configWith({ intro: 'Hi', announcements: three }))
+    expect(hasColumns()).toBe(true)
+    unmount()
+    renderHero(configWith({ intro: 'Hi', announcements: [announcement('old', '2026-01-01', '2026-01-31')] }))
+    expect(hasColumns()).toBe(false)
+  })
+
+  it('announces the new announcement politely when it changes', () => {
+    renderHero(configWith({ announcements: three }))
+    const link = within(announcements()!).getByRole('link', { name: 'Announcement a' })
+    expect(link.closest('[aria-live]')).toHaveAttribute('aria-live', 'polite')
+  })
+})
+
+describe('Hero announcements across UTC midnight', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  const ending = announcement('ending', '2026-11-01', '2026-11-10')
+  const starting = announcement('starting', '2026-11-11', '2026-11-30')
+  const systemTime: Clock = () => new Date()
+
+  it('swaps the announcements at midnight on an open page', async () => {
+    vi.useFakeTimers({ now: new Date('2026-11-10T23:59:30Z') })
+    renderHero(configWith({ intro: 'Hi', announcements: [ending, starting] }), { clock: systemTime })
+    expect(screen.getByText('Announcement ending')).toBeInTheDocument()
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(31_000)
+    })
+    expect(screen.queryByText('Announcement ending')).toBeNull()
+    expect(screen.getByText('Announcement starting')).toBeInTheDocument()
+  })
+
+  it('checks the day again when a hidden tab shows, as its timer can be late', () => {
+    let now = new Date('2026-11-10T23:00:00Z')
+    renderHero(configWith({ intro: 'Hi', announcements: [ending, starting] }), { clock: () => now })
+    expect(screen.getByText('Announcement ending')).toBeInTheDocument()
+    now = new Date('2026-11-11T08:00:00Z')
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+    expect(screen.getByText('Announcement starting')).toBeInTheDocument()
+  })
+})
+
 describe('Hero keyboard order (D7)', () => {
-  it('goes from the skip link to the calls to action, then onboarding', async () => {
+  it('goes intro links, calls to action, onboarding, then the announcement and its controls', async () => {
     const user = userEvent.setup()
     renderHero(configWith({
       primaryCtas: [{ label: 'Browse data', url: 'https://example.org/browse' }],
       onboarding: [{ label: 'Take the tour', url: 'https://example.org/tour' }],
+      announcements: [announcement('a', '2026-11-01', '2026-11-30'), announcement('b', '2026-11-01', '2026-11-30')],
     }))
     const order: string[] = []
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 6; i++) {
       await user.tab()
       const focused = document.activeElement as HTMLElement
       order.push(focused.getAttribute('aria-label') ?? focused.textContent ?? '')
@@ -147,6 +286,9 @@ describe('Hero keyboard order (D7)', () => {
       'Skip to main content',
       'Browse data',
       'Take the tour',
+      'Announcement a',
+      PREVIOUS_ANNOUNCEMENT_LABEL,
+      NEXT_ANNOUNCEMENT_LABEL,
     ])
   })
 })
@@ -157,18 +299,20 @@ describe('Hero with the real masthead (D7)', () => {
   it('keeps one landmark named for the showcase, and tabs from the masthead into the hero', async () => {
     const user = userEvent.setup()
     const config = configWith(
-      { primaryCtas: [{ label: 'Browse data', url: 'https://example.org/browse' }] },
+      {
+        primaryCtas: [{ label: 'Browse data', url: 'https://example.org/browse' }],
+        announcements: [announcement('a', '2026-11-01', '2026-11-30'), announcement('b', '2026-11-01', '2026-11-30')],
+      },
       { 'masthead': { enabled: true, logos: [] }, 'featured-workspaces': { enabled: true, items: [workspace] } },
     )
-    render(
-      <MemoryRouter initialEntries={['/showcase/quillmere']}>
-        <ShowcaseTemplate entry={showcase} config={config} handoffs={LIVE} registry={withMasthead} />
-      </MemoryRouter>,
+    renderWithRouter(
+      <ShowcaseTemplate entry={showcase} config={config} handoffs={LIVE} registry={withMasthead} clock={NOV_10} />,
+      { route: '/showcase/quillmere' },
     )
     expect(screen.getAllByRole('region', { name: showcase.title })).toHaveLength(1)
 
     const order: string[] = []
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 8; i++) {
       await user.tab()
       const focused = document.activeElement as HTMLElement
       order.push(focused.getAttribute('aria-label') ?? focused.getAttribute('placeholder') ?? focused.textContent ?? '')
@@ -179,6 +323,9 @@ describe('Hero with the real masthead (D7)', () => {
       'Search',
       'Starter workspaces',
       'Browse data',
+      'Announcement a',
+      PREVIOUS_ANNOUNCEMENT_LABEL,
+      NEXT_ANNOUNCEMENT_LABEL,
     ])
   })
 })
@@ -190,6 +337,7 @@ describe('heroHasContent', () => {
     ['intro text', { intro: 'Data for everyone' }],
     ['a call to action', { primaryCtas: [{ label: 'Go', url: '/datalibrary' as const }] }],
     ['an onboarding link', { onboarding: [{ label: 'Go', url: '/datalibrary' as const }] }],
+    ['an announcement', { announcements: [announcement('a', '2026-01-01', '2026-01-02')] }],
     ['a stat', { stats: ['datasets' as const] }],
   ])('is true with %s', (_, overrides) => {
     expect(heroHasContent(hero(overrides))).toBe(true)
