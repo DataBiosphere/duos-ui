@@ -1,7 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
-import { render, screen, waitFor, within } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import { screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { OPEN_PROVIDER_LABEL } from 'src/components/showcase/primitives/DatasetCard'
 import { type SectionRegistry, sectionRegistry } from 'src/components/showcase/sectionRegistry'
@@ -10,6 +9,7 @@ import { lookupShowcaseDatasets } from 'src/libs/ajax/ShowcaseCatalog'
 import { resolveShowcase } from 'src/showcases/defaults'
 import { ShowcaseConfigSchema } from 'src/showcases/schema'
 import type { DatasetSummaryInput, RegistryEntry, ShowcaseConfig, ShowcasePartialInput } from 'src/types/showcase'
+import { renderWithRouter } from '../../../test-utils'
 
 // `open-access-datasets` is curated (`items`) or computed (`ranking`), chosen per showcase. It
 // renders with the same DatasetShelf as `latest-data-releases`, whose states DatasetShelf.spec covers.
@@ -41,10 +41,8 @@ const configWith = (openAccess: Record<string, unknown>): ShowcaseConfig =>
     sections: { 'open-access-datasets': { enabled: true, ...openAccess } } as ShowcasePartialInput['sections'],
   }))
 
-const renderShelf = (config: ShowcaseConfig) => render(
-  <MemoryRouter>
-    <ShowcaseTemplate entry={showcase} config={config} handoffs={{ enabled: true, signedIn: true }} registry={registry} />
-  </MemoryRouter>,
+const renderShelf = (config: ShowcaseConfig) => renderWithRouter(
+  <ShowcaseTemplate entry={showcase} config={config} handoffs={{ enabled: true, signedIn: true }} registry={registry} />,
 )
 
 const shelf = () => document.getElementById('open-access-datasets')
