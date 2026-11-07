@@ -1,7 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import { screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SUB_NAV_LABEL } from 'src/components/showcase/sections/Masthead'
 import { type SectionRegistry, sectionRegistry } from 'src/components/showcase/sectionRegistry'
@@ -10,6 +9,7 @@ import { lookupShowcaseDatasets, ShowcaseLookupError } from 'src/libs/ajax/Showc
 import { resolveShowcase } from 'src/showcases/defaults'
 import { ShowcaseConfigSchema } from 'src/showcases/schema'
 import type { RegistryEntry, ShowcasePartialInput } from 'src/types/showcase'
+import { renderWithRouter } from '../../test-utils'
 
 // The D11 link rules with the real masthead, hero and shelf: a shelf's sub-nav link and the
 // same-page links to it appear only once it has content, and stay when its lookup fails (D12).
@@ -46,10 +46,8 @@ const config = ShowcaseConfigSchema.parse(resolveShowcase({
 
 const dataset = { identifier: 'DUOS-000001', title: 'Cohort 1', accessManagement: 'controlled', dacName: 'DAC', consentCodes: [], participantCount: null, availableDate: null, accessUrl: null }
 
-const renderPage = () => render(
-  <MemoryRouter>
-    <ShowcaseTemplate entry={showcase} config={config} handoffs={{ enabled: true, signedIn: true }} registry={registry} />
-  </MemoryRouter>,
+const renderPage = () => renderWithRouter(
+  <ShowcaseTemplate entry={showcase} config={config} handoffs={{ enabled: true, signedIn: true }} registry={registry} />,
 )
 
 const subNavLink = () => screen.queryByRole('navigation', { name: SUB_NAV_LABEL })?.querySelector('a[href="#latest-data-releases"]') ?? null
