@@ -14,7 +14,6 @@ export const heroSx = {
     background: 'radial-gradient(circle at 100% 0%, var(--showcase-accent-tint) 0, transparent 60%), var(--showcase-surface)',
     borderBottom: '1px solid var(--showcase-border)',
   },
-  // The intro column sits beside the announcements on desktop and stacks below 980px.
   inner: {
     'display': 'grid',
     'gap': '24px',
@@ -22,7 +21,12 @@ export const heroSx = {
     'mx': 'auto',
     'px': '16px',
     'py': '32px',
-    '@media (min-width: 980px)': { gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', alignItems: 'start', gap: '48px', py: '48px' },
+    '@media (min-width: 980px)': { gap: '48px', py: '48px' },
+  },
+  // With announcements, the intro column sits beside them on desktop and stacks below 980px.
+  // Without them, the intro takes the full width.
+  innerWithAnnouncements: {
+    '@media (min-width: 980px)': { gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', alignItems: 'start' },
   },
   title: { m: 0, color: 'var(--showcase-primary)' },
   // Body text color, not the muted text: muted text is under 4.5:1 on the accent tint behind it.

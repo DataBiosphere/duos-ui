@@ -29,6 +29,7 @@ import type { EnabledSection, SectionRendererProps } from 'src/components/showca
 import { currentAnnouncements } from 'src/components/showcase/sections/heroContent'
 import { heroSx } from 'src/components/showcase/sections/heroStyles'
 import { SHOWCASE_MAIN_HEADING_ID, ShowcaseClockContext, ShowcasePageInfoContext } from 'src/components/showcase/showcaseTemplateContract'
+import { useUtcDay } from 'src/components/showcase/useUtcDay'
 
 /** Provisional copy (S3.3). */
 export const ONBOARDING_LABEL = 'Get started'
@@ -99,10 +100,13 @@ export const Hero = ({ section, id, title }: SectionRendererProps<'hero'>) => {
   const shown = (links: readonly HeroLink[]) => links.filter(link => isShownHref(link.url, page.visibleSectionIds))
   const ctas = shown(section.primaryCtas)
   const intro = section.intro.trim()
+  // Re-renders at UTC midnight, so the announcements follow their date windows on an open page.
+  useUtcDay(clock)
+  const announcements = currentAnnouncements(section.announcements, clock, page.visibleSectionIds)
 
   return (
     <Box component="section" id={id} sx={heroSx.root}>
-      <Box sx={heroSx.inner}>
+      <Box sx={announcements.length > 0 ? [heroSx.inner, heroSx.innerWithAnnouncements] : heroSx.inner}>
         <div>
           <Typography variant="inherit" component="h1" id={SHOWCASE_MAIN_HEADING_ID} tabIndex={-1} sx={heroSx.title}>{title ?? page.title}</Typography>
           {section.subtitle !== undefined && section.subtitle.trim() !== '' && <Typography variant="inherit" sx={heroSx.subtitle}>{section.subtitle}</Typography>}
@@ -110,7 +114,7 @@ export const Hero = ({ section, id, title }: SectionRendererProps<'hero'>) => {
           {ctas.length > 0 && <LinkList links={ctas} sx={heroSx.ctas} />}
           <Onboarding links={shown(section.onboarding)} />
         </div>
-        <Announcements announcements={currentAnnouncements(section.announcements, clock, page.visibleSectionIds)} />
+        <Announcements announcements={announcements} />
       </Box>
     </Box>
   )
