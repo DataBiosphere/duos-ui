@@ -243,3 +243,31 @@ describe('ShowcaseLink same-page targets (S3.3)', () => {
     expect(screen.getByRole('link', { name: 'Workspaces' })).toBeInTheDocument()
   })
 })
+
+describe('Card and StructuredPanel actions to hidden sections (S3.3)', () => {
+  const onPage = (ui: React.ReactElement) => renderInRouter(
+    <ShowcasePageInfoContext.Provider value={{ title: 'Showcase', subNav: [], visibleSectionIds: ['hero'] }}>{ui}</ShowcasePageInfoContext.Provider>,
+  )
+  const hidden = { label: 'Workspaces', href: '#featured-workspaces' }
+  const shown = { label: 'About', href: 'https://example.org/about' }
+
+  it('leaves no empty list item for a hidden action, and no list when every action is hidden', () => {
+    onPage(
+      <>
+        <Card title="Mixed" actions={[hidden, shown]} />
+        <Card title="Hidden only" actions={[hidden]} metadata={[{ label: 'Shelf', value: 'Workspaces', href: '#featured-workspaces' }]} />
+      </>,
+    )
+    const [mixed, hiddenOnly] = screen.getAllByRole('article')
+    expect(within(mixed).getAllByRole('listitem').map(item => item.textContent)).toEqual(['About'])
+    expect(within(hiddenOnly).queryByRole('list')).toBeNull()
+    // A metadata value whose link target is hidden stays, as text.
+    expect(within(hiddenOnly).getByText('Workspaces')).toBeInTheDocument()
+    expect(within(hiddenOnly).queryByRole('link')).toBeNull()
+  })
+
+  it('leaves no action list in a panel whose actions are all hidden', () => {
+    onPage(<StructuredPanel title="Announcements" actions={[hidden]} />)
+    expect(screen.queryByRole('list')).toBeNull()
+  })
+})
