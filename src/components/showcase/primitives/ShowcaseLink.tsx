@@ -1,7 +1,8 @@
 import React, { useContext } from 'react'
 import { Link as RouterLink } from 'react-router'
 import { isPublicPath, ShowcaseHandoffsContext } from 'src/components/showcase/handoffs'
-import { isSafeHref } from 'src/components/showcase/primitives/safeHref'
+import { isShownHref } from 'src/components/showcase/primitives/safeHref'
+import { ShowcasePageInfoContext } from 'src/components/showcase/showcaseTemplateContract'
 import './ShowcaseLink.css'
 
 type ShowcaseLinkProps = {
@@ -17,7 +18,7 @@ export const UNAVAILABLE_IN_PREVIEW_TEXT = 'not available in this preview'
 
 /**
  * A link that applies the showcase URL policy again before it renders, and renders nothing for an
- * href that fails it. Same-origin paths use the router; https and same-page links are plain links
+ * href that fails it, or for a same-page link whose target section is not visible (S3.3). Same-origin paths use the router; https and same-page links are plain links
  * that open in the same tab.
  *
  * An internal path to a signed-in page is a handoff (`handoffs.ts`). It says "Sign-in required"
@@ -26,7 +27,8 @@ export const UNAVAILABLE_IN_PREVIEW_TEXT = 'not available in this preview'
  */
 export const ShowcaseLink = ({ href, children, ...rest }: ShowcaseLinkProps) => {
   const handoffs = useContext(ShowcaseHandoffsContext)
-  if (!isSafeHref(href)) {
+  const { visibleSectionIds } = useContext(ShowcasePageInfoContext)
+  if (!isShownHref(href, visibleSectionIds)) {
     return null
   }
   if (!href.startsWith('/')) {

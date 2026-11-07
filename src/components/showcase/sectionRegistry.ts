@@ -16,6 +16,8 @@
  * Lookup state (a shelf that is loading or whose lookup failed) is not modelled here.
  */
 import type { ComponentType } from 'react'
+import { Hero } from 'src/components/showcase/sections/Hero'
+import { heroHasContent } from 'src/components/showcase/sections/heroContent'
 import { Masthead } from 'src/components/showcase/sections/Masthead'
 import { NO_ANCHOR_SECTION_KEYS, SECTION_KEYS, type SectionConfigs, type SectionKey, type ShowcaseConfig } from 'src/types/showcase'
 
@@ -56,6 +58,8 @@ export type SectionRegistry = { readonly [K in SectionKey]?: SectionRegistryEntr
 export const sectionRegistry: SectionRegistry = {
   // Search always renders, so an enabled masthead always has content, with or without logos.
   masthead: { component: Masthead, defaultLabels: {}, navigable: false, hasRenderableContent: () => true },
+  // The hero's heading falls back to the showcase title, so it needs no default title.
+  hero: { component: Hero, defaultLabels: {}, navigable: false, hasRenderableContent: heroHasContent },
 }
 
 export interface VisibleSectionOf<K extends SectionKey> {

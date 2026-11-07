@@ -82,6 +82,8 @@ export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRe
   const pageInfo = useMemo<ShowcasePageInfo>(() => ({
     title: entry.title,
     subNav: subNavSections(config, registry).flatMap(section => (section.navLabel === undefined ? [] : [{ id: section.id, label: section.navLabel }])),
+    // Recomputed here rather than read from `sections`, which is a new array on every render.
+    visibleSectionIds: visibleSections(config, registry).map(section => section.id),
   }), [entry.title, config, registry])
 
   return (
@@ -91,14 +93,16 @@ export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRe
       </a>
       <ShowcaseHandoffsContext.Provider value={handoffs}>
         <ShowcaseLookupsContext.Provider value={lookups}>
-          <ShowcasePageInfoContext.Provider value={pageInfo}>{masthead.map(renderSection)}</ShowcasePageInfoContext.Provider>
-          <main className="showcase-template__main">
-            {!handoffs.enabled && <p className="showcase-template__preview-notice" role="note">{PREVIEW_NOTICE}</p>}
-            {!hasHero && (
-              <h1 id={SHOWCASE_MAIN_HEADING_ID} className="showcase-template__title" tabIndex={-1}>{entry.title}</h1>
-            )}
-            {content.map(renderSection)}
-          </main>
+          <ShowcasePageInfoContext.Provider value={pageInfo}>
+            {masthead.map(renderSection)}
+            <main className="showcase-template__main">
+              {!handoffs.enabled && <p className="showcase-template__preview-notice" role="note">{PREVIEW_NOTICE}</p>}
+              {!hasHero && (
+                <h1 id={SHOWCASE_MAIN_HEADING_ID} className="showcase-template__title" tabIndex={-1}>{entry.title}</h1>
+              )}
+              {content.map(renderSection)}
+            </main>
+          </ShowcasePageInfoContext.Provider>
         </ShowcaseLookupsContext.Provider>
       </ShowcaseHandoffsContext.Provider>
     </div>
