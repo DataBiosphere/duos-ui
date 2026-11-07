@@ -16,7 +16,8 @@ export const heroSx = {
   },
   inner: { display: 'grid', gap: '24px', maxWidth: '1400px', mx: 'auto', px: '16px', py: '32px' },
   title: { m: 0, color: 'var(--showcase-primary)' },
-  subtitle: { mt: '8px', mb: 0, fontSize: 'var(--showcase-font-size-card-title)', color: 'var(--showcase-muted-text)' },
+  // Body text color, not the muted text: muted text is under 4.5:1 on the accent tint behind it.
+  subtitle: { mt: '8px', mb: 0, fontSize: 'var(--showcase-font-size-card-title)' },
   text: { mt: '16px', mb: 0, maxWidth: '70ch', whiteSpace: 'pre-line' },
   ctas: { ...linkRow, mt: '24px', fontWeight: 600 },
   onboarding: { mt: '24px' },
