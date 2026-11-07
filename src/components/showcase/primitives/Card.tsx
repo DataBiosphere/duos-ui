@@ -1,6 +1,7 @@
-import React, { Children, useId } from 'react'
-import { isSafeHref, isSafeImageSrc, ShowcaseAction } from 'src/components/showcase/primitives/safeHref'
+import React, { Children, useContext, useId } from 'react'
+import { isSafeImageSrc, isShownHref, ShowcaseAction } from 'src/components/showcase/primitives/safeHref'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
+import { ShowcasePageInfoContext } from 'src/components/showcase/showcaseTemplateContract'
 import './Card.css'
 
 export type HeadingLevel = 2 | 3 | 4 | 5 | 6
@@ -39,7 +40,9 @@ export const Card = ({ title, headingLevel = 3, media, children, metadata = [], 
   const headingId = useId()
   const Heading = `h${headingLevel}` as const
   const entries = metadata.filter(hasValue)
-  const links = actions.filter(action => isSafeHref(action.href))
+  // ShowcaseLink renders nothing for a hidden same-page link, so leave those out of the list too.
+  const { visibleSectionIds } = useContext(ShowcasePageInfoContext)
+  const links = actions.filter(action => isShownHref(action.href, visibleSectionIds))
   const showMedia = media !== undefined && isSafeImageSrc(media.src)
 
   return (
@@ -63,7 +66,7 @@ export const Card = ({ title, headingLevel = 3, media, children, metadata = [], 
               <React.Fragment key={`${i} ${entry.label}`}>
                 <dt className="showcase-card__term">{entry.label}</dt>
                 <dd className="showcase-card__value">
-                  {entry.href !== undefined && isSafeHref(entry.href)
+                  {entry.href !== undefined && isShownHref(entry.href, visibleSectionIds)
                     ? <ShowcaseLink href={entry.href}>{entry.value}</ShowcaseLink>
                     : entry.value}
                 </dd>
