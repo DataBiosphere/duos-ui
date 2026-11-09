@@ -90,6 +90,8 @@ For `/showcase/*` only, the proxy:
   out for any other origin, so the browser fails the preflight;
 - sets `Access-Control-Allow-Methods: POST, OPTIONS`, `Access-Control-Allow-Headers: Content-Type`
   and `Vary: Origin`, and no `Access-Control-Allow-Credentials`;
+- sets `Access-Control-Expose-Headers: Retry-After` on every response, so the client can read
+  `Retry-After` on a 429. Browsers hide that header from a cross-origin page unless it is exposed;
 - answers `OPTIONS` with 204 itself. The preflight does not reach Consent, so it does not use a
   request of the client's showcase rate limit.
 

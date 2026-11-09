@@ -245,29 +245,20 @@ describe('ShowcaseLink same-page targets (S3.3)', () => {
 })
 
 describe('Card and StructuredPanel actions to hidden sections (S3.3)', () => {
-  const onPage = (ui: React.ReactElement) => renderInRouter(
-    <ShowcasePageInfoContext.Provider value={{ title: 'Showcase', subNav: [], visibleSectionIds: ['hero'] }}>{ui}</ShowcasePageInfoContext.Provider>,
-  )
-  const hidden = { label: 'Workspaces', href: '#featured-workspaces' }
-  const shown = { label: 'About', href: 'https://example.org/about' }
-
   it('leaves no empty list item for a hidden action, and no list when every action is hidden', () => {
-    onPage(
-      <>
-        <Card title="Mixed" actions={[hidden, shown]} />
+    const hidden = { label: 'Workspaces', href: '#featured-workspaces' }
+    renderInRouter(
+      <ShowcasePageInfoContext.Provider value={{ title: 'Showcase', subNav: [], visibleSectionIds: ['hero'] }}>
+        <Card title="Mixed" actions={[hidden, { label: 'About', href: 'https://example.org/about' }]} />
         <Card title="Hidden only" actions={[hidden]} metadata={[{ label: 'Shelf', value: 'Workspaces', href: '#featured-workspaces' }]} />
-      </>,
+        <StructuredPanel title="Announcements" actions={[hidden]} />
+      </ShowcasePageInfoContext.Provider>,
     )
     const [mixed, hiddenOnly] = screen.getAllByRole('article')
     expect(within(mixed).getAllByRole('listitem').map(item => item.textContent)).toEqual(['About'])
-    expect(within(hiddenOnly).queryByRole('list')).toBeNull()
-    // A metadata value whose link target is hidden stays, as text.
+    // The metadata value stays, as text. Only the mixed card has an action list.
     expect(within(hiddenOnly).getByText('Workspaces')).toBeInTheDocument()
     expect(within(hiddenOnly).queryByRole('link')).toBeNull()
-  })
-
-  it('leaves no action list in a panel whose actions are all hidden', () => {
-    onPage(<StructuredPanel title="Announcements" actions={[hidden]} />)
-    expect(screen.queryByRole('list')).toBeNull()
+    expect(screen.getAllByRole('list')).toHaveLength(1)
   })
 })
