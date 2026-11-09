@@ -16,9 +16,9 @@ export const showcaseEntries: readonly RegistryEntry[] = [E2E_FLAGSHIP, E2E_PART
 export const retiredShowcaseKeys: readonly string[] = []
 
 export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {
-  // The guard rejects an enabled section with no renderer yet, so these set branding only; each
-  // section PR (S3.3 onward) turns its section on here along with its Playwright checks.
-  'e2e-flagship': {},
+  // The guard rejects an enabled section with no renderer yet, so each section PR turns its
+  // section on here along with its Playwright checks. The masthead is S3.2 (showcaseHandoff.spec).
+  'e2e-flagship': { sections: { masthead: { enabled: true, logos: [] } } },
   'quillmere': { branding: { theme: 'teal' } },
   'e2e-hidden': {},
 }

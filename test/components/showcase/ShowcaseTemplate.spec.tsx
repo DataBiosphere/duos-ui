@@ -1,11 +1,11 @@
 import '@testing-library/jest-dom/vitest'
-import React from 'react'
+import React, { useContext } from 'react'
 import { readFileSync } from 'node:fs'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PREVIEW_NOTICE, ShowcaseTemplate } from 'src/components/showcase/ShowcaseTemplate'
-import { SHOWCASE_MAIN_HEADING_ID } from 'src/components/showcase/showcaseTemplateContract'
+import { SHOWCASE_MAIN_HEADING_ID, type ShowcasePageInfo, ShowcasePageInfoContext } from 'src/components/showcase/showcaseTemplateContract'
 import type { SectionRegistry, SectionRegistryEntry, SectionRendererProps } from 'src/components/showcase/sectionRegistry'
 import { lookupShowcaseDatasets } from 'src/libs/ajax/ShowcaseCatalog'
 import { resolveShowcase } from 'src/showcases/defaults'
@@ -177,5 +177,20 @@ describe('ShowcaseTemplate', () => {
     expect(css).toMatch(/@media \(forced-colors: active\) \{\s*\.showcase-template :is\(a, button, input, select, textarea, summary, \[tabindex\]\):focus-visible \{\s*outline-color: Highlight;/)
     expect(css.replace(/\/\*[\s\S]*?\*\//g, '')).not.toMatch(/!important|box-shadow/)
     expect(css).toMatch(/scroll-margin-top: var\(--showcase-anchor-offset\)/)
+  })
+
+  it('gives the masthead the same page info object on a re-render with the same props', () => {
+    const seen: ShowcasePageInfo[] = []
+    const RecordingMasthead = () => {
+      seen.push(useContext(ShowcasePageInfoContext))
+      return <header>Masthead</header>
+    }
+    const config = configWith(sections)
+    const testRegistry: SectionRegistry = { ...registry, masthead: testEntry<'masthead'>({ component: RecordingMasthead, navigable: false }) }
+    const ui = () => <ShowcaseTemplate entry={showcase} config={config} handoffs={LIVE_HANDOFFS} registry={testRegistry} />
+    const { rerender } = render(ui())
+    rerender(ui())
+    expect(seen.length).toBeGreaterThan(1)
+    expect(new Set(seen).size).toBe(1)
   })
 })
