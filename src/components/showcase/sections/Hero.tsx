@@ -28,7 +28,7 @@ import type { SxProps, Theme } from '@mui/material/styles'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
 import { isShownHref } from 'src/components/showcase/primitives/safeHref'
 import type { EnabledSection, SectionRendererProps } from 'src/components/showcase/sectionRegistry'
-import { currentAnnouncements, HERO_STAT_LABELS, type HeroStatKey, heroStats } from 'src/components/showcase/sections/heroContent'
+import { currentAnnouncements, type HeroStatKey, heroStatLabel, heroStats } from 'src/components/showcase/sections/heroContent'
 import { heroSx } from 'src/components/showcase/sections/heroStyles'
 import {
   SHOWCASE_MAIN_HEADING_ID,
@@ -65,7 +65,7 @@ const Stats = ({ stats }: { stats: readonly HeroStatKey[] }) => {
         <Stack component="li" key={key}>
           <Typography variant="inherit" component="span" sx={heroSx.statValue}>{value.toLocaleString('en-US')}</Typography>
           {' '}
-          <Typography variant="inherit" component="span" sx={heroSx.statLabel}>{HERO_STAT_LABELS[key]}</Typography>
+          <Typography variant="inherit" component="span" sx={heroSx.statLabel}>{heroStatLabel(key, value)}</Typography>
         </Stack>
       ))}
     </Stack>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { countToolItems, heroStats } from 'src/components/showcase/sections/heroContent'
+import { countToolItems, heroStatLabel, heroStats } from 'src/components/showcase/sections/heroContent'
 import type { LookupState } from 'src/components/showcase/useShowcaseLookups'
 import { ShowcaseLookupError } from 'src/libs/ajax/ShowcaseCatalog'
 import { resolveShowcase } from 'src/showcases/defaults'
@@ -74,5 +74,18 @@ describe('heroStats', () => {
 
   it('shows the tools count without a lookup when the hero asks for no catalog counts', () => {
     expect(heroStats(['tools'], undefined, 4)).toEqual([{ key: 'tools', value: 4 }])
+  })
+})
+
+describe('heroStatLabel', () => {
+  it.each([
+    ['studies', 1, 'Study'],
+    ['studies', 2, 'Studies'],
+    ['datasets', 1, 'Dataset'],
+    ['datasets', 1234, 'Datasets'],
+    ['tools', 1, 'Tool'],
+    ['tools', 3, 'Tools'],
+  ] as const)('labels %s with a count of %i as "%s"', (key, value, label) => {
+    expect(heroStatLabel(key, value)).toBe(label)
   })
 })
