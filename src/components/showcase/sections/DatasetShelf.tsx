@@ -15,8 +15,8 @@
  * datasets, the shelf goes away and focus moves to the page's `h1`. Focus moves only while the
  * shelf still has it: a visitor who moved on keeps their place.
  *
- * The section's DOM id is on the root `div`, the target of `#<section key>` links. Hiding the
- * sub-nav and same-page links while the shelf loads or is empty (D11) comes in the next PR.
+ * The section's DOM id is on the root `div`, the target of `#<section key>` links. While the shelf
+ * loads or is empty, the template gives it no sub-nav link and hides same-page links to it (D11).
  */
 import React, { useContext, useEffect, useId, useRef } from 'react'
 import Box from '@mui/material/Box'

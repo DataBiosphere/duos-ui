@@ -17,7 +17,8 @@ import type { RegistryEntry, SectionKey, ShowcaseConfig, ShowcasePartialInput } 
 vi.mock('src/showcases/images', () => ({ resolveShowcaseImage: vi.fn() }))
 vi.mock('src/libs/ajax/ShowcaseCatalog', async importOriginal => ({
   ...await importOriginal<typeof import('src/libs/ajax/ShowcaseCatalog')>(),
-  lookupShowcaseDatasets: vi.fn(() => new Promise(() => {})),
+  // A dataset shelf gets a sub-nav link once it has content (D11), so the lookup answers.
+  lookupShowcaseDatasets: vi.fn(async () => ({ datasets: [{ identifier: 'DUOS-000001' }] })),
 }))
 
 const showcase: RegistryEntry = { key: 'quillmere', title: 'Quillmere Data Showcase', status: 'live', flagship: false, order: 1 }
@@ -214,8 +215,10 @@ describe('Masthead', () => {
 
     const subNav = () => within(masthead()).queryByRole('navigation', { name: SUB_NAV_LABEL })
 
-    it('links visible, navigable, labelled content sections in page order, with short labels', () => {
+    it('links visible, navigable, labelled content sections in page order, with short labels', async () => {
       renderMasthead(configWith([], allSections))
+      // The dataset shelf's link waits for its lookup (D11).
+      await screen.findByRole('link', { name: 'Latest' })
       const links = within(subNav() as HTMLElement).getAllByRole('link')
       // Hero is never in the sub-nav; a blank navLabel falls back; empty, disabled and unlabelled
       // sections have no link.
@@ -240,7 +243,7 @@ describe('Masthead', () => {
     })
   })
 
-  it('keeps the D7 tab order: skip link, logos, search, then the sub-nav', () => {
+  it('keeps the D7 tab order: skip link, logos, search, then the sub-nav', async () => {
     renderMasthead(configWith([{ src: 'showcase/quillmere/logo.svg', alt: 'Quillmere', url: '/data' }], {
       'latest-data-releases': { enabled: true, ranking: 'newest' },
     }))
@@ -249,7 +252,7 @@ describe('Masthead', () => {
       screen.getByRole('link', { name: 'Quillmere' }),
       screen.getByRole('searchbox', { name: SEARCH_LABEL }),
       screen.getByRole('button', { name: 'Search' }),
-      screen.getByRole('link', { name: 'Latest' }),
+      await screen.findByRole('link', { name: 'Latest' }),
     ]
     order.slice(1).forEach((element, i) => {
       expect(order[i].compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
