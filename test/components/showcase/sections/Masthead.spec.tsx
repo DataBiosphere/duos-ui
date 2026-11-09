@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ShowcaseHandoffs } from 'src/components/showcase/handoffs'
-import { SEARCH_LABEL, SEARCH_UNAVAILABLE_TEXT } from 'src/components/showcase/sections/Masthead'
+import { SEARCH_LABEL, SEARCH_UNAVAILABLE_TEXT, SUB_NAV_LABEL } from 'src/components/showcase/sections/Masthead'
 import { MAX_LOGOS } from 'src/components/showcase/sections/mastheadLogos'
 import { type SectionRegistry, type SectionRegistryEntry, type SectionRendererProps, sectionRegistry } from 'src/components/showcase/sectionRegistry'
 import { ShowcaseTemplate } from 'src/components/showcase/ShowcaseTemplate'
@@ -37,6 +37,7 @@ const contentEntry = <K extends SectionKey>(overrides: Partial<SectionRegistryEn
 })
 
 const hasItems = (section: { items?: readonly unknown[] }) => (section.items ?? []).length > 0
+const tool = { id: 'tool-1', name: 'Tool', description: 'A tool', tags: [], launchUrl: 'https://example.org/tool' as const }
 
 /** The real masthead, with test renderers for the content sections the sub-nav links to. */
 const registry: SectionRegistry = {
@@ -194,16 +195,95 @@ describe('Masthead', () => {
     })
   })
 
-  it('keeps the D7 tab order: skip link, logos, then search', () => {
-    renderMasthead(configWith([{ src: 'showcase/quillmere/logo.svg', alt: 'Quillmere', url: '/data' }]))
+  describe('sub-nav', () => {
+    const allSections: ShowcasePartialInput['sections'] = {
+      'hero': { enabled: true, subtitle: 'Hello', intro: 'Intro', stats: [], announcements: [], onboarding: [], primaryCtas: [] },
+      'latest-data-releases': { enabled: true, ranking: 'newest', navLabel: '  ' },
+      'featured-tools': { enabled: true, items: [tool], navLabel: 'Tools' },
+      'featured-workspaces': { enabled: true, items: [] },
+      'notebooks': { enabled: false, items: [tool] },
+      'ai-models': { enabled: true, items: [tool] },
+    }
+
+    const subNav = () => within(masthead()).queryByRole('navigation', { name: SUB_NAV_LABEL })
+
+    it('links visible, navigable, labelled content sections in page order, with short labels', () => {
+      renderMasthead(configWith([], allSections))
+      const links = within(subNav() as HTMLElement).getAllByRole('link')
+      // Hero is never in the sub-nav; a blank navLabel falls back; empty, disabled and unlabelled
+      // sections have no link.
+      expect(links.map(link => [link.textContent, link.getAttribute('href')])).toEqual([
+        ['Latest', '#latest-data-releases'],
+        ['Tools', '#featured-tools'],
+      ])
+    })
+
+    it('has no dead anchors: every link targets a rendered section', () => {
+      renderMasthead(configWith([], allSections))
+      within(subNav() as HTMLElement).getAllByRole('link').forEach((link) => {
+        const target = document.getElementById((link.getAttribute('href') ?? '').slice(1))
+        expect(target).not.toBeNull()
+        expect(target?.closest('main')).not.toBeNull()
+      })
+    })
+
+    it('renders no nav when no section gets a link', () => {
+      renderMasthead()
+      expect(subNav()).toBeNull()
+    })
+  })
+
+  it('keeps the D7 tab order: skip link, logos, search, then the sub-nav', () => {
+    renderMasthead(configWith([{ src: 'showcase/quillmere/logo.svg', alt: 'Quillmere', url: '/data' }], {
+      'latest-data-releases': { enabled: true, ranking: 'newest' },
+    }))
     const order = [
       screen.getByRole('link', { name: 'Skip to main content' }),
       screen.getByRole('link', { name: 'Quillmere' }),
       screen.getByRole('searchbox', { name: SEARCH_LABEL }),
       screen.getByRole('button', { name: 'Search' }),
+      screen.getByRole('link', { name: 'Latest' }),
     ]
     order.slice(1).forEach((element, i) => {
       expect(order[i].compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+  })
+
+  describe('scroll padding', () => {
+    const page = document.documentElement
+    const stickyMasthead = () => {
+      const realStyle = globalThis.getComputedStyle
+      vi.spyOn(globalThis, 'getComputedStyle').mockImplementation((element) => {
+        const style = realStyle(element)
+        return (element as HTMLElement).classList.contains('showcase-masthead') ? { ...style, position: 'sticky' } as CSSStyleDeclaration : style
+      })
+    }
+
+    beforeEach(() => {
+      vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(120)
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+      page.style.scrollPaddingTop = ''
+    })
+
+    it('pads the page by the masthead height while it sticks, so focus and anchors clear it', () => {
+      stickyMasthead()
+      renderMasthead()
+      expect(page.style.scrollPaddingTop).toBe('120px')
+    })
+
+    it('sets no padding when the masthead does not stick (phones)', () => {
+      renderMasthead()
+      expect(page.style.scrollPaddingTop).toBe('')
+    })
+
+    it('clears the padding when the showcase unmounts, so other pages are not affected', () => {
+      stickyMasthead()
+      const { unmount } = renderMasthead()
+      unmount()
+      expect(page.style.scrollPaddingTop).toBe('')
     })
   })
 })

@@ -4,8 +4,9 @@
  *
  * Each section renderer owns its own `<section id={id} aria-labelledby=...>` and heading, as
  * `SectionRendererProps.id` and the Shelf primitive do; the template adds no wrapper, so there is
- * one region per section. The renderer's root element must carry the id, so the anchor offset
- * (`scroll-margin-top`) applies to it.
+ * one region per section. The renderer's root element must carry the id, since it is the target
+ * of `#<section key>` links. The masthead keeps the page's `scroll-padding-top` equal to its height
+ * while it sticks, so a target is not hidden under it.
  *
  * The page has one `h1`, which is also the skip link's target. When the hero renders, its renderer
  * puts `id={SHOWCASE_MAIN_HEADING_ID}` and `tabIndex={-1}` on its heading; otherwise the template
@@ -17,6 +18,7 @@ import {
   type SectionRegistry,
   type SectionRendererProps,
   sectionRegistry,
+  subNavSections,
   type VisibleSection,
   visibleSections,
 } from 'src/components/showcase/sectionRegistry'
@@ -75,8 +77,12 @@ export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRe
   const masthead = sections.filter(section => section.key === 'masthead')
   const content = sections.filter(section => section.key !== 'masthead')
   const hasHero = content.some(section => section.key === 'hero')
-  // A new object on every render would re-render every context consumer (Sonar S6481).
-  const pageInfo = useMemo<ShowcasePageInfo>(() => ({ title: entry.title }), [entry.title])
+  // `subNavSections` reads the same visible list, so a hidden or empty section gets no link. A new
+  // object on every render would re-render every context consumer (Sonar S6481).
+  const pageInfo = useMemo<ShowcasePageInfo>(() => ({
+    title: entry.title,
+    subNav: subNavSections(config, registry).flatMap(section => (section.navLabel === undefined ? [] : [{ id: section.id, label: section.navLabel }])),
+  }), [entry.title, config, registry])
 
   return (
     <div className="showcase-template" style={themeStyle(config.branding)}>
