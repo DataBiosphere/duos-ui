@@ -128,6 +128,13 @@ describe('Masthead', () => {
       expect(within(masthead()).queryByRole('link', { name: 'Quillmere' })).toBeNull()
     })
 
+    it('keeps a logo, without its link, when the logo links to a section that is not visible', () => {
+      const logos = [{ src: 'showcase/quillmere/logo.svg', alt: 'Quillmere', url: '#featured-tools' }]
+      renderMasthead(configWith(logos, { 'featured-tools': { enabled: true, items: [] } }))
+      expect(within(masthead()).getByRole('img', { name: 'Quillmere' })).toBeInTheDocument()
+      expect(within(masthead()).queryByRole('link', { name: 'Quillmere' })).toBeNull()
+    })
+
     it('shows the alt text for a logo path that resolves to no bundled image', () => {
       vi.mocked(resolveShowcaseImage).mockReturnValue(undefined)
       renderMasthead(configWith([{ src: 'showcase/quillmere/missing.svg', alt: 'Quillmere' }]))
