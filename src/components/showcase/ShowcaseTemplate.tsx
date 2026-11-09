@@ -32,6 +32,7 @@ import {
   type ShowcasePageInfo,
   ShowcasePageInfoContext,
 } from 'src/components/showcase/showcaseTemplateContract'
+import { countToolItems } from 'src/components/showcase/sections/heroContent'
 import { useShowcaseLookups } from 'src/components/showcase/useShowcaseLookups'
 import { type Clock, systemClock } from 'src/showcases/dateWindow'
 import type { RegistryEntry, SectionKey, ShowcaseConfig } from 'src/types/showcase'
@@ -88,6 +89,7 @@ export const ShowcaseTemplate = ({ entry, config, handoffs, registry = sectionRe
     subNav: subNavSections(config, registry).flatMap(section => (section.navLabel === undefined ? [] : [{ id: section.id, label: section.navLabel }])),
     // Recomputed here rather than read from `sections`, which is a new array on every render.
     visibleSectionIds: visibleSections(config, registry).map(section => section.id),
+    toolCount: countToolItems(config.sections),
   }), [entry.title, config, registry])
 
   return (

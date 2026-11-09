@@ -45,6 +45,8 @@ export interface ShowcasePageInfo {
   subNav: readonly SubNavLink[]
   /** Undefined outside a template, where no same-page link is hidden. */
   visibleSectionIds?: readonly string[]
+  /** The items in the config's enabled tool sections, for the hero `tools` stat. */
+  toolCount?: number
 }
 
 export const ShowcasePageInfoContext = createContext<ShowcasePageInfo>({ title: '', subNav: [] })

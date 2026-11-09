@@ -1,11 +1,12 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
-import { act, screen, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ShowcaseHandoffs } from 'src/components/showcase/handoffs'
 import {
   ANNOUNCEMENTS_LABEL,
+  HERO_STATS_LABEL,
   NEXT_ANNOUNCEMENT_LABEL,
   ONBOARDING_LABEL,
   PREVIOUS_ANNOUNCEMENT_LABEL,
@@ -14,6 +15,7 @@ import { heroHasContent } from 'src/components/showcase/sections/heroContent'
 import { type SectionRegistry, type SectionRegistryEntry, type SectionRendererProps, sectionRegistry } from 'src/components/showcase/sectionRegistry'
 import { SHOWCASE_MAIN_HEADING_ID } from 'src/components/showcase/showcaseTemplateContract'
 import { ShowcaseTemplate } from 'src/components/showcase/ShowcaseTemplate'
+import { lookupShowcaseDatasets, ShowcaseLookupError } from 'src/libs/ajax/ShowcaseCatalog'
 import type { Clock } from 'src/showcases/dateWindow'
 import { resolveShowcase } from 'src/showcases/defaults'
 import { ShowcaseConfigSchema } from 'src/showcases/schema'
@@ -324,6 +326,74 @@ describe('Hero keyboard order (D7)', () => {
       PREVIOUS_ANNOUNCEMENT_LABEL,
       NEXT_ANNOUNCEMENT_LABEL,
     ])
+  })
+})
+
+describe('Hero stats', () => {
+  const tool = { id: 'tool-1', name: 'Tool', description: 'A tool', tags: [], launchUrl: 'https://example.org/tool' as const }
+  const stats = () => screen.queryByRole('list', { name: HERO_STATS_LABEL })
+  const statValues = () => within(stats()!).getAllByRole('listitem').map(item => item.textContent)
+
+  it('shows the live counts for the hero scope, labeled distinctly, between the intro and the calls to action', async () => {
+    vi.mocked(lookupShowcaseDatasets).mockResolvedValueOnce({ studyCount: 1234, datasetCount: 56 } as never)
+    renderHero(configWith(
+      {
+        intro: 'Data for everyone',
+        stats: ['studies', 'datasets', 'tools'],
+        scope: { dac: ['DAC-1'] },
+        primaryCtas: [{ label: 'Browse data', url: 'https://example.org/browse' }],
+      },
+      { 'featured-tools': { enabled: true, items: [tool] } },
+    ))
+    await waitFor(() => expect(stats()).not.toBeNull())
+    expect(statValues()).toEqual(['1,234 Studies', '56 Datasets', '1 Tool'])
+    expect(lookupShowcaseDatasets).toHaveBeenCalledWith({ mode: 'stats', scope: { dac: ['DAC-1'] } }, expect.anything())
+
+    const intro = screen.getByText('Data for everyone')
+    const cta = screen.getByRole('link', { name: 'Browse data' })
+    expect(intro.compareDocumentPosition(stats()!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(stats()!.compareDocumentPosition(cta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('asks for the whole public catalog when the hero has no scope', async () => {
+    vi.mocked(lookupShowcaseDatasets).mockResolvedValueOnce({ studyCount: 1, datasetCount: 2 } as never)
+    renderHero(configWith({ stats: ['datasets'] }))
+    await waitFor(() => expect(stats()).not.toBeNull())
+    expect(lookupShowcaseDatasets).toHaveBeenLastCalledWith({ mode: 'stats' }, expect.anything())
+  })
+
+  it('hides a stat that is 0', async () => {
+    vi.mocked(lookupShowcaseDatasets).mockResolvedValueOnce({ studyCount: 0, datasetCount: 7 } as never)
+    renderHero(configWith({ stats: ['studies', 'datasets', 'tools'] }))
+    await waitFor(() => expect(stats()).not.toBeNull())
+    expect(statValues()).toEqual(['7 Datasets'])
+  })
+
+  it('removes the whole strip, tools included, when the lookup fails (D14)', async () => {
+    vi.mocked(lookupShowcaseDatasets).mockRejectedValueOnce(new ShowcaseLookupError('network', 'down'))
+    renderHero(
+      configWith(
+        { stats: ['studies', 'tools'], primaryCtas: [{ label: 'Browse data', url: 'https://example.org/browse' }] },
+        { 'featured-tools': { enabled: true, items: [tool] } },
+      ),
+    )
+    await waitFor(() => expect(lookupShowcaseDatasets).toHaveBeenCalled())
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(stats()).toBeNull()
+    expect(screen.queryByText(/^[0-9]/)).toBeNull()
+    expect(screen.getByRole('link', { name: 'Browse data' })).toBeInTheDocument()
+  })
+
+  it('shows nothing while the lookup is loading', () => {
+    renderHero(configWith({ stats: ['datasets'], intro: 'Hi' }))
+    expect(stats()).toBeNull()
+  })
+
+  it('shows the tools count without a lookup when the hero asks only for tools', () => {
+    vi.mocked(lookupShowcaseDatasets).mockClear()
+    renderHero(configWith({ stats: ['tools'] }, { notebooks: { enabled: true, items: [tool, { ...tool, id: 'tool-2' }] } }))
+    expect(statValues()).toEqual(['2 Tools'])
+    expect(lookupShowcaseDatasets).not.toHaveBeenCalled()
   })
 })
 

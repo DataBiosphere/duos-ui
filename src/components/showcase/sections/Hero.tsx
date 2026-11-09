@@ -12,7 +12,9 @@
  * same name would be ambiguous in a landmark list. The hero is the top of `<main>`, and the `h1`
  * is what the skip link reaches.
  *
- * The live stats come in a later PR; this renderer shows none yet.
+ * The live stats sit between the intro and the calls to action, inside the hero (D14). A stat that
+ * is 0 is hidden, and when the counts can't load the whole strip goes and the calls to action move
+ * up. There is no data-size stat: DUOS has no trusted byte-size source (contracts record).
  */
 import React, { type FocusEvent, useContext, useEffect, useId, useRef, useState } from 'react'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
@@ -26,9 +28,14 @@ import type { SxProps, Theme } from '@mui/material/styles'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
 import { isShownHref } from 'src/components/showcase/primitives/safeHref'
 import type { EnabledSection, SectionRendererProps } from 'src/components/showcase/sectionRegistry'
-import { currentAnnouncements } from 'src/components/showcase/sections/heroContent'
+import { currentAnnouncements, type HeroStatKey, heroStatLabel, heroStats } from 'src/components/showcase/sections/heroContent'
 import { heroSx } from 'src/components/showcase/sections/heroStyles'
-import { SHOWCASE_MAIN_HEADING_ID, ShowcaseClockContext, ShowcasePageInfoContext } from 'src/components/showcase/showcaseTemplateContract'
+import {
+  SHOWCASE_MAIN_HEADING_ID,
+  ShowcaseClockContext,
+  ShowcaseLookupsContext,
+  ShowcasePageInfoContext,
+} from 'src/components/showcase/showcaseTemplateContract'
 import { useUtcDay } from 'src/components/showcase/useUtcDay'
 
 /** Provisional copy (S3.3). */
@@ -36,6 +43,7 @@ export const ONBOARDING_LABEL = 'Get started'
 export const ANNOUNCEMENTS_LABEL = 'Announcements'
 export const PREVIOUS_ANNOUNCEMENT_LABEL = 'Previous announcement'
 export const NEXT_ANNOUNCEMENT_LABEL = 'Next announcement'
+export const HERO_STATS_LABEL = 'Showcase totals'
 
 type HeroLink = EnabledSection<'hero'>['primaryCtas'][number]
 type Announcement = EnabledSection<'hero'>['announcements'][number]
@@ -45,6 +53,24 @@ const LinkList = ({ links, sx, labelledBy }: { links: readonly HeroLink[], sx: S
     {links.map(link => <li key={`${link.label}-${link.url}`}><ShowcaseLink href={link.url}>{link.label}</ShowcaseLink></li>)}
   </Box>
 )
+
+const Stats = ({ stats }: { stats: readonly HeroStatKey[] }) => {
+  const lookups = useContext(ShowcaseLookupsContext)
+  const { toolCount = 0 } = useContext(ShowcasePageInfoContext)
+  const shown = heroStats(stats, lookups.hero, toolCount)
+  if (shown === undefined) return null
+  return (
+    <Stack component="ul" direction="row" aria-label={HERO_STATS_LABEL} sx={heroSx.stats}>
+      {shown.map(({ key, value }) => (
+        <Stack component="li" key={key}>
+          <Typography variant="inherit" component="span" sx={heroSx.statValue}>{value.toLocaleString('en-US')}</Typography>
+          {' '}
+          <Typography variant="inherit" component="span" sx={heroSx.statLabel}>{heroStatLabel(key, value)}</Typography>
+        </Stack>
+      ))}
+    </Stack>
+  )
+}
 
 const Onboarding = ({ links }: { links: readonly HeroLink[] }) => {
   const headingId = useId()
@@ -147,6 +173,7 @@ export const Hero = ({ section, id, title }: SectionRendererProps<'hero'>) => {
           <Typography variant="inherit" component="h1" id={SHOWCASE_MAIN_HEADING_ID} tabIndex={-1} sx={heroSx.title}>{title ?? page.title}</Typography>
           {section.subtitle !== undefined && section.subtitle.trim() !== '' && <Typography variant="inherit" sx={heroSx.subtitle}>{section.subtitle}</Typography>}
           {intro !== '' && <Typography variant="inherit" sx={heroSx.text}>{intro}</Typography>}
+          <Stats stats={section.stats} />
           {ctas.length > 0 && <LinkList links={ctas} sx={heroSx.ctas} />}
           <Onboarding links={shown(section.onboarding)} />
         </div>
