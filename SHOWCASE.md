@@ -136,6 +136,8 @@ Rules that CI checks in the config (`test/showcases/guard/checkShowcase.ts`):
 | Implemented sections only | You can enable only the keys in `IMPLEMENTED_SECTION_KEYS` (`src/types/showcase.ts`). When this guide was written they were `masthead`, `hero`, `latest-data-releases` and `open-access-datasets`; the code has the current list. |
 | URLs | Each `url` or `...Url` field is an `https://` URL, a same-origin path that starts with one `/`, or `#<section key>` for a section that has an anchor (not `masthead` or `hero`). No bare `#`, `//host`, whitespace, backslash or credentials. |
 | Logos | At most 4 masthead logos: the showcase's own and three partners. Partner logos need alt text. |
+| Featured apps | At most 1 item in `featured-tools` has `featured: true`. CI counts it in a disabled section also. |
+| Launch links | A `launchUrl` opens the resource. It cannot be a `#section` link. |
 | Dates | `YYYY-MM-DD`, and `endDate` is not before `startDate`. A range includes both ends, in UTC. |
 | Item IDs | Each `id` is unique in the whole showcase. IDs are analytics keys; do not change one later. |
 | Identifiers | `DUOS-` and exactly six digits, or seven or more digits with no leading zero. For example `DUOS-000123`. |
