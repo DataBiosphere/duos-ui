@@ -194,7 +194,8 @@ describe('checkShowcase', () => {
     const withLaunchUrl = (launchUrl: string) => broken((c) => {
       const workspaces = c.sections['featured-workspaces']
       if (workspaces.enabled) {
-        workspaces.items[0].launchUrl = launchUrl
+        // Object.assign, as `withCta` does: the guard must see URLs that the config type rejects.
+        Object.assign(workspaces.items[0], { launchUrl })
       }
     })
 
