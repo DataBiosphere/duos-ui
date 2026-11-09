@@ -2,7 +2,8 @@
 
 A Data Showcase is a public page for one program or partner: `/data` for the flagship and
 `/showcase/<key>` for every other showcase. Each showcase is code in this repository. You add or
-change one through a pull request (PR), and CI checks every rule in this guide.
+change one through a pull request (PR). CI checks the rules in this guide; where it cannot, the
+guide says that the reviewer does.
 
 This guide is for an engineer who did not build the first showcase. The design decisions are in
 consent `docs/plans/data-showcase-delivery-plan.md` (section 3). The lookup that supplies dataset
@@ -57,7 +58,8 @@ identifiers, so only production Consent resolves them.
 ## Step 3: Add the images
 
 Put every image in `src/images/showcase/<key>/`. A config names an image by its path below
-`src/images`, for example `showcase/example-partner/logo.svg`.
+`src/images`, for example `showcase/example-partner/logo.svg`. CI checks that an image is below
+`src/images/showcase/`. It does not check that the directory matches the key; the reviewer does.
 
 Logos follow the standards in [DATA-LIBRARY.md](DATA-LIBRARY.md) (Step 1): SVG preferred,
 transparent PNG as the fallback, a 256 × 256 canvas, optimized. Hero and card images do not need
@@ -74,7 +76,8 @@ the square canvas. CI enforces these limits (`test/showcases/guard/assetBudget.t
 Other rules:
 
 - Allowed extensions: `svg`, `png`, `jpg`, `jpeg`, `webp`, `gif`, `avif`.
-- A partner logo needs alt text. The showcase's own logo (`logos[0]`) can have an empty `alt`; the
+- The first masthead logo (`logos[0]`) is the showcase's own logo.
+- A partner logo needs alt text. The showcase's own logo can have an empty `alt`; the
   page then uses the index title. Other images can use `alt: ''` only when they are decorative.
 - A reviewer reads each SVG in the PR. The page shows an SVG through `<img>` and never inlines it.
 - The image of a disabled section still counts toward the budget, because it still ships.
@@ -119,7 +122,10 @@ How the merge works (`resolveShowcase`):
 
 - A section that you list replaces the default section whole. An enabled section must have every
   required field of its type; `src/showcases/schema.ts` has each shape.
-- `branding` merges field by field, so you can override one color.
+- `branding` takes `theme`, and optional `primary` and `accent` colors in `#rrggbb` form, for
+  example `branding: { theme: 'teal', accent: '#0f766e' }`. It merges field by field, so you can
+  override one color.
+- A flagship config has the same shape as a partner config.
 - You can list sections in any order. The merge puts all 23 keys in the fixed order.
 - A misspelt section key is kept, so that CI reports it.
 
@@ -127,12 +133,12 @@ Rules that CI checks in the config (`test/showcases/guard/checkShowcase.ts`):
 
 | Rule | Detail |
 | ---- | ------ |
-| Implemented sections only | You can enable only the keys in `IMPLEMENTED_SECTION_KEYS` (`src/types/showcase.ts`). Today these are `masthead`, `hero` and `latest-data-releases`. |
+| Implemented sections only | You can enable only the keys in `IMPLEMENTED_SECTION_KEYS` (`src/types/showcase.ts`). When this guide was written they were `masthead`, `hero`, `latest-data-releases` and `open-access-datasets`; the code has the current list. |
 | URLs | Each `url` or `...Url` field is an `https://` URL, a same-origin path that starts with one `/`, or `#<section key>` for a section that has an anchor (not `masthead` or `hero`). No bare `#`, `//host`, whitespace, backslash or credentials. |
 | Logos | At most 4 masthead logos: the showcase's own and three partners. Partner logos need alt text. |
 | Dates | `YYYY-MM-DD`, and `endDate` is not before `startDate`. A range includes both ends, in UTC. |
 | Item IDs | Each `id` is unique in the whole showcase. IDs are analytics keys; do not change one later. |
-| Identifiers | `DUOS-` and six or more digits, for example `DUOS-000123`. |
+| Identifiers | `DUOS-` and exactly six digits, or seven or more digits with no leading zero. For example `DUOS-000123`. |
 | Contrast | Primary and accent colors need a contrast of 4.5:1 or more on the white background. |
 | Images | See Step 3. |
 
@@ -142,7 +148,9 @@ daily release.
 ### Lookup and config limits
 
 Consent and the BFF proxy enforce these limits on the public lookup, and the config schema has the
-same values (`LOOKUP_LIMITS` in `src/types/showcase.ts`). A config over a limit fails CI.
+same values (`LOOKUP_LIMITS` in `src/types/showcase.ts`). A config over a limit fails CI. A list
+over its limit can fail with only `Invalid input` at the section, so check the list lengths against
+this table.
 
 | Field | Maximum |
 | ----- | ------- |
@@ -162,14 +170,15 @@ client. See [docs/data-showcase-lookup.md](docs/data-showcase-lookup.md).
 
 ### 5.1 Register the config
 
-In `src/showcases/index.ts`, import the config and add it to `showcaseConfigs` under its key:
+In `src/showcases/index.ts`, add one import line and one line to the existing `showcaseConfigs`
+object, under the key. Keep everything else in the file.
 
 ```typescript
 import { examplePartner } from './example-partner'
+```
 
-export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {
+```typescript
   'example-partner': examplePartner,
-}
 ```
 
 Import config files with a relative path here. Other code imports the index as `src/showcases`
@@ -187,14 +196,19 @@ Add an entry to `entries` in `src/showcases/registry.json`:
 | ----- | ---- |
 | `key` | See the key rules below. The route comes from the key; there is no `route` field. |
 | `title` | The display title. Not empty. You can change it at any time. |
-| `status` | `live` or `hidden`. A `hidden` entry renders the not-found page. |
+| `status` | `live` or `hidden`. A `hidden` entry renders the not-found page. Start with `hidden`. Change it to `live` for a preview (Step 6), or when the program owner clears the launch. |
 | `flagship` | Exactly one entry is the flagship, served at `/data` only. Every other entry is `false`. |
-| `order` | A whole number, 0 or more. Use one higher than the current highest. |
+| `order` | A whole number, 0 or more. Use 0 for the first entry, then one higher than the current highest. CI does not check that it is unique; the reviewer does. |
 
 Every entry needs a config, and every config needs an entry. CI fails if one has no match.
 
 **The flagship comes first.** CI fails an index that has entries but not exactly one flagship. A
-partner showcase cannot merge before the flagship is in the index.
+partner showcase cannot merge before the flagship is in the index. A flagship entry differs only in
+`flagship`:
+
+```json
+{ "key": "example-flagship", "title": "Example Data", "status": "hidden", "flagship": true, "order": 0 }
+```
 
 ### Key rules
 
@@ -203,6 +217,7 @@ partner showcase cannot merge before the flagship is in the index.
 - Unique, and not in `retiredKeys`.
 - **Permanent.** The key identifies the showcase in routes, analytics and future subscriptions.
   Never rename a key and never reuse one. To change what visitors see, change `title`.
+- A bad key fails three tests at once, and the message is the key pattern. Fix the key first.
 
 ---
 
@@ -233,8 +248,17 @@ the delivery plan. This section changes when that story lands.
 ```sh
 git fetch origin
 pnpm exec vitest run test/showcases
+pnpm run type-check
 pnpm run lint
 ```
+
+How to read the results:
+
+- Each broken rule is one `+ "<path>: <message>"` line in the test failure output.
+- If the test summary shows `1 skipped`, the key history check did not run. Run `git fetch origin`
+  and run the tests again. A full run shows no skipped tests.
+- `pnpm run lint` prints warnings from other files. It passes when it exits with code 0 and reports
+  no errors.
 
 `git fetch origin` matters. The key history check compares your `registry.json` with the one on the
 PR's base branch. If your machine does not have that revision, the check is **skipped** locally. CI
@@ -316,7 +340,8 @@ A showcase PR is ready to merge when both roles approve. The PR template has a s
 - [ ] The program owner confirmed that all content is cleared for public disclosure
 - [ ] The key follows the key rules and is not in `retiredKeys`
 - [ ] The index has exactly one flagship
-- [ ] `order` is one higher than the previous highest
+- [ ] `order` is unique, and one higher than the previous highest
+- [ ] The image directory name is the key
 - [ ] Images are in `src/images/showcase/<key>/`, optimized, and within the limits
 - [ ] Each partner logo has alt text
 - [ ] Each link is `https://`, a `/path` or a `#section`
@@ -328,6 +353,7 @@ A showcase PR is ready to merge when both roles approve. The PR template has a s
 
 - [ ] `git fetch origin` ran before the tests, and the key history test was not skipped
 - [ ] `pnpm exec vitest run test/showcases` passes
+- [ ] `pnpm run type-check` passes
 - [ ] `pnpm run lint` passes
 
 ### Preview
