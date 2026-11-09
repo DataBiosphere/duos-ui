@@ -39,9 +39,38 @@
 
 .showcase-card--featured .showcase-card__media { max-width: 50%; }
 
+/* Provisional (design review D18): the reserved media box of a resource card (S3.4). The image
+   fills a fixed 16:9 box, so a card without one keeps the same height; an image that fails to
+   load shows its alt text in the box. */
+.showcase-card__media-frame {
+  flex-shrink: 0;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--showcase-border, rgba(33, 43, 54, 0.12));
+}
+
+.showcase-card__media-frame .showcase-card__media {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+}
+
+.showcase-card__media-alt {
+  display: block;
+  padding: 0.75rem;
+  color: var(--showcase-primary, #1f3b50);
+  overflow-wrap: anywhere;
+}
+
+.showcase-card--featured .showcase-card__media-frame { width: 50%; }
+
 @media (max-width: 640px) {
   .showcase-card--featured { flex-direction: column; }
   .showcase-card--featured .showcase-card__media { max-width: 100%; }
+  .showcase-card--featured .showcase-card__media-frame { width: 100%; }
 }
 
 .showcase-card__body {
@@ -96,3 +125,5 @@
 }
 
 .showcase-card__actions { margin-top: auto; }
+
+.showcase-card__description { margin: 0; }

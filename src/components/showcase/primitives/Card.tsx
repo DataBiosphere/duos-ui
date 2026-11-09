@@ -27,6 +27,10 @@ export type CardProps = {
   badges?: readonly string[]
   actions?: readonly ShowcaseAction[]
   variant?: 'default' | 'featured'
+  /** Keep a fixed-ratio media box even when there is no image, so cards in a row line up. Media
+   * whose source can't be shown leaves its alt text in the box; with no media, or no alt text, the
+   * empty box is decorative and hidden from assistive technology. */
+  reserveMedia?: boolean
 }
 
 const hasValue = (entry: CardMetadataEntry): entry is CardMetadataEntry & { value: string } =>
@@ -36,7 +40,7 @@ const hasValue = (entry: CardMetadataEntry): entry is CardMetadataEntry & { valu
  * The base showcase card. The title is a real heading, and each action is its own named link that
  * the title describes; the card itself is not a click target, so links in the body still work.
  */
-export const Card = ({ title, headingLevel = 3, media, children, metadata = [], badges = [], actions = [], variant = 'default' }: CardProps) => {
+export const Card = ({ title, headingLevel = 3, media, children, metadata = [], badges = [], actions = [], variant = 'default', reserveMedia = false }: CardProps) => {
   const headingId = useId()
   const Heading = `h${headingLevel}` as const
   const entries = metadata.filter(hasValue)
@@ -44,6 +48,7 @@ export const Card = ({ title, headingLevel = 3, media, children, metadata = [], 
   const { visibleSectionIds } = useContext(ShowcasePageInfoContext)
   const links = actions.filter(action => isShownHref(action.href, visibleSectionIds))
   const showMedia = media !== undefined && isSafeImageSrc(media.src)
+  const mediaAlt = media?.alt.trim() ?? ''
 
   return (
     <article
@@ -51,7 +56,15 @@ export const Card = ({ title, headingLevel = 3, media, children, metadata = [], 
       aria-labelledby={headingId}
       data-variant={variant}
     >
-      {showMedia && <img className="showcase-card__media" src={media.src} alt={media.alt} loading={media.loading ?? 'lazy'} />}
+      {reserveMedia
+        ? (
+            <div className="showcase-card__media-frame" aria-hidden={showMedia || mediaAlt !== '' ? undefined : true}>
+              {showMedia
+                ? <img className="showcase-card__media" src={media.src} alt={media.alt} loading={media.loading ?? 'lazy'} />
+                : mediaAlt !== '' && <span className="showcase-card__media-alt">{mediaAlt}</span>}
+            </div>
+          )
+        : showMedia && <img className="showcase-card__media" src={media.src} alt={media.alt} loading={media.loading ?? 'lazy'} />}
       <div className="showcase-card__body">
         <Heading className="showcase-card__title" id={headingId}>{title}</Heading>
         {badges.length > 0 && (
