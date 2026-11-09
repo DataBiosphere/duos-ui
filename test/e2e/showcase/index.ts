@@ -23,7 +23,7 @@ export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {
   'quillmere': {
     branding: { theme: 'teal' },
     sections: {
-      hero: {
+      'hero': {
         enabled: true,
         subtitle: 'A synthetic partner showcase',
         intro: 'Fictional cohorts for testing the showcase template.',
@@ -36,6 +36,8 @@ export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {
           { id: 'two', text: 'Second synthetic announcement', url: 'https://example.org/two', startDate: '2026-01-01', endDate: '2099-12-31' },
         ],
       },
+      // S3.3. The spec stubs its lookup, so the shelf doesn't depend on the catalog it reaches.
+      'latest-data-releases': { enabled: true, ranking: 'newest' },
     },
   },
   'e2e-hidden': {},
