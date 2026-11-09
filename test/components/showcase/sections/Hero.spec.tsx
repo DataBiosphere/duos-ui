@@ -281,7 +281,7 @@ describe('Hero announcements across UTC midnight', () => {
 
   it('leaves focus where the visitor moved it', async () => {
     vi.useFakeTimers({ now: new Date('2026-11-10T23:59:30Z') })
-    const ctas = [{ label: 'Browse data', url: 'https://example.org/browse' }]
+    const ctas = [{ label: 'Browse data', url: 'https://example.org/browse' as const }]
     renderHero(configWith({ intro: 'Hi', primaryCtas: ctas, announcements: [ending, lasting] }), { clock: systemTime })
     act(() => screen.getByRole('button', { name: NEXT_ANNOUNCEMENT_LABEL }).focus())
     const browse = screen.getByRole('link', { name: 'Browse data' })
