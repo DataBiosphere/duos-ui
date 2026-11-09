@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
-import { screen, within } from '@testing-library/react'
+import { fireEvent, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { type ShowcaseHandoffs, ShowcaseHandoffsContext } from 'src/components/showcase/handoffs'
 import { DOCUMENTATION_LABEL, LAUNCH_LABEL, ResourceCard, type ResourceItem } from 'src/components/showcase/primitives/ResourceCard'
@@ -91,8 +91,36 @@ describe('ResourceCard (S3.4)', () => {
     expect(within(card()).queryByRole('img')).not.toBeInTheDocument()
   })
 
+  it('shows the alt text in the media box when the thumbnail fails to load', () => {
+    renderCard({ ...app, thumbnail: { src: 'showcase/e2e-flagship/logo.svg', alt: 'Notebook screenshot' } })
+    fireEvent.error(within(card()).getByRole('img', { name: 'Notebook screenshot' }))
+    expect(within(card()).queryByRole('img')).not.toBeInTheDocument()
+    expect(mediaFrame()).toHaveTextContent('Notebook screenshot')
+    expect(mediaFrame()).not.toHaveAttribute('aria-hidden')
+  })
+
+  it('leaves the media box empty and hidden when a thumbnail with no alt text fails to load', () => {
+    renderCard({ ...app, thumbnail: { src: 'showcase/e2e-flagship/logo.svg', alt: '' } })
+    fireEvent.error(card().querySelector('img') as HTMLImageElement)
+    expect(mediaFrame()).toBeEmptyDOMElement()
+    expect(mediaFrame()).toHaveAttribute('aria-hidden', 'true')
+  })
+
   it('renders the featured variant when asked', () => {
     renderCard(app, { featured: true })
     expect(card()).toHaveAttribute('data-variant', 'featured')
+  })
+
+  it('reserves no media box on a featured card without a thumbnail, and keeps it for one with a thumbnail', () => {
+    const { unmount } = renderCard(app, { featured: true })
+    expect(mediaFrame()).toBeNull()
+    unmount()
+    renderCard({ ...app, thumbnail: { src: 'showcase/e2e-flagship/logo.svg', alt: 'Notebook screenshot' } }, { featured: true })
+    expect(mediaFrame()).toContainElement(within(card()).getByRole('img', { name: 'Notebook screenshot' }))
+  })
+
+  it('reserves no media box on a featured card whose thumbnail names no bundled image and has no alt text', () => {
+    renderCard({ ...app, thumbnail: { src: 'showcase/e2e-flagship/missing.png', alt: '' } }, { featured: true })
+    expect(mediaFrame()).toBeNull()
   })
 })

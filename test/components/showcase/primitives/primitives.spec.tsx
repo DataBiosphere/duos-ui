@@ -1,7 +1,7 @@
 import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { type ShowcaseHandoffs, ShowcaseHandoffsContext } from 'src/components/showcase/handoffs'
 import { Card } from 'src/components/showcase/primitives/Card'
@@ -105,6 +105,19 @@ describe('Card', () => {
     renderInRouter(<Card title="Example Cohort" badges={['New in DUOS']} media={{ src: '/images/cohort.png', alt: 'Cohort map', loading: 'eager' }} />)
     expect(within(screen.getByRole('list')).getByText('New in DUOS')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Cohort map' })).toHaveAttribute('loading', 'eager')
+  })
+
+  it('shows the alt text in place of an image that fails to load', () => {
+    renderInRouter(<Card title="Example Cohort" media={{ src: '/images/cohort.png', alt: 'Cohort map' }} />)
+    fireEvent.error(screen.getByRole('img', { name: 'Cohort map' }))
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    expect(screen.getByRole('article')).toHaveTextContent('Cohort map')
+  })
+
+  it('caps the width of a failed featured image\'s alt text, as it capped the image', () => {
+    renderInRouter(<FeaturedCard title="Example App" media={{ src: '/images/app.png', alt: 'A long description of the app screenshot' }} />)
+    fireEvent.error(screen.getByRole('img'))
+    expect(screen.getByText('A long description of the app screenshot')).toHaveStyle({ flex: '0 0 50%' })
   })
 
   it('leaves out media whose source breaks the URL policy', () => {

@@ -10,10 +10,13 @@
  * scrolls the page; DT-4356 adds a CI guard rule that rejects one as well. "Documentation" may be
  * a same-page link, which shows only while its section is visible.
  *
- * The media box is always reserved, so cards without a thumbnail keep the same layout. A thumbnail
- * that names no bundled image shows its alt text in the box, as `images.ts` describes.
+ * Grid and shelf cards always reserve the media box, so cards without a thumbnail line up with
+ * those with one. A featured card is alone in its row, so without a thumbnail its text takes the
+ * full width. A thumbnail that names no bundled image, or fails to load, shows its alt text in the
+ * box, as `images.ts` describes.
  */
 import React from 'react'
+import Box from '@mui/material/Box'
 import { Card, type HeadingLevel } from 'src/components/showcase/primitives/Card'
 import type { ShowcaseAction } from 'src/components/showcase/primitives/safeHref'
 import type { EnabledSection } from 'src/components/showcase/sectionRegistry'
@@ -49,13 +52,15 @@ export const ResourceCard = ({ item, sectionKey, headingLevel = 3, featured = fa
       title={item.name}
       headingLevel={headingLevel}
       variant={featured ? 'featured' : 'default'}
-      reserveMedia
+      // A featured card has no row to line up with, so it reserves the box only for a thumbnail
+      // that can show something: a bundled image, or alt text in its place.
+      reserveMedia={!featured || (thumbnail !== undefined && (src !== undefined || thumbnail.alt.trim() !== ''))}
       // An unresolved thumbnail keeps its alt text; Card shows it when the empty `src` fails its check.
       media={thumbnail === undefined ? undefined : { src: src ?? '', alt: thumbnail.alt, loading: imageLoading(sectionKey) }}
       badges={item.tags}
       actions={resourceActions(item)}
     >
-      <p className="showcase-card__description">{item.description}</p>
+      <Box component="p" sx={{ m: 0 }}>{item.description}</Box>
     </Card>
   )
 }
