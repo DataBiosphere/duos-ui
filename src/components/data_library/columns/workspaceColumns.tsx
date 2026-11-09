@@ -43,6 +43,11 @@ export const makeWorkspaceColumns = (): GridColDef<WorkspaceAsset>[] => [
       </Link>
     ),
   },
+  {
+    field: 'duosIdentifier',
+    headerName: 'Identifier',
+    width: 150,
+  },
   truncatedTextColumn<WorkspaceAsset>('platform', 'Platform', 150),
   {
     field: 'url',

@@ -76,6 +76,7 @@ export const biospecimenAsset: AssetDefinition = {
     'study.assets.biospecimens.sampleId',
     'study.assets.biospecimens.specimenType',
     'study.assets.biospecimens.donorId',
+    'study.assets.biospecimens.duosIdentifier',
   ],
 
   buildQuery(
@@ -113,6 +114,7 @@ export const biospecimenAsset: AssetDefinition = {
           sampleId: sampleIdOf(biospecimen),
           studyId: bucket.key,
           studyName: studyData.studyName || '',
+          duosIdentifier: biospecimen.duosIdentifier || '',
           donorId: biospecimen.donorId || '',
           specimenType: biospecimen.specimenType as BioSpecimenType || '',
           preservationMethod: biospecimen.preservationMethod as BioSpecimenPreservationMethod || '',
