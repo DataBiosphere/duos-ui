@@ -17,7 +17,7 @@
     "@fastify/csrf-protection": "8.0.2",
     "@fastify/helmet": "13.2.0",
     "@fastify/postgres": "6.1.1",
-    "@fastify/rate-limit": "11.2.1",
+    "@fastify/rate-limit": "11.2.2",
     "@fastify/reply-from": "12.8.1",
     "@fastify/session": "11.1.6",
     "@fastify/static": "10.1.8",
@@ -29,10 +29,10 @@
   "devDependencies": {
     "@types/autocannon": "7.12.7",
     "@types/node": "26.6.6",
-    "@vitest/coverage-v8": "5.0.5",
+    "@vitest/coverage-v8": "5.1.0",
     "autocannon": "8.0.0",
     "jose": "6.2.15",
     "typescript": "6.0.3",
-    "vitest": "5.0.5"
+    "vitest": "5.1.0"
   }
 }
