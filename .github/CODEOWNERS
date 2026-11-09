@@ -5,9 +5,3 @@
 
 # These owners will be the default owners for everything in the repo.
 *       @DataBiosphere/dsp-data-team-eng
-
-# Data Showcase configs and images (see SHOWCASE.md). The last pattern that matches a file wins, so
-# these lines name the engineering team again. The program owner approves copy and claims in the PR.
-/src/showcases/        @DataBiosphere/dsp-data-team-eng
-/src/images/showcase/  @DataBiosphere/dsp-data-team-eng
-/SHOWCASE.md           @DataBiosphere/dsp-data-team-eng

@@ -334,7 +334,7 @@ They are compiled only by `pnpm run build:e2e` and never reach a deployed build.
 
 | Role | Who | Approves |
 | ---- | --- | -------- |
-| Engineer | `@DataBiosphere/dsp-data-team-eng`, the code owner of `src/showcases/` and `src/images/showcase/` (`.github/CODEOWNERS`) | Code, config, images and CI results. Two approvals, as for every PR. |
+| Engineer | `@DataBiosphere/dsp-data-team-eng`. The default rule in `.github/CODEOWNERS` makes this team the code owner of every path, which includes `src/showcases/` and `src/images/showcase/`. | Code, config, images and CI results. Two approvals, as for every PR. |
 | Program owner | The owner named at intake | Copy, claims, logos and public clearance, by a review or a comment in the PR. |
 
 A showcase PR is ready to merge when both roles approve. The PR template has a section for this.
