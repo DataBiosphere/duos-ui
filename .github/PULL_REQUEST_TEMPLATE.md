@@ -4,7 +4,7 @@
 
 ### Showcase changes
 
-Delete this section if the PR does not change `src/showcases/` or `src/images/showcase/`. See [SHOWCASE.md](https://github.com/DataBiosphere/duos-ui/blob/develop/SHOWCASE.md).
+Delete this section if the PR does not change `src/showcases/` or `src/images/showcase/`. See [docs/data-showcase.md](https://github.com/DataBiosphere/duos-ui/blob/develop/docs/data-showcase.md).
 
 - [ ] The program owner approved the copy, claims and logos in this PR
 - [ ] All content is cleared for public disclosure (`hidden` is not a privacy control)

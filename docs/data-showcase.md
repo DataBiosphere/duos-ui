@@ -7,7 +7,7 @@ guide says that the reviewer does.
 
 This guide is for an engineer who did not build the first showcase. The design decisions are in
 consent `docs/plans/data-showcase-delivery-plan.md` (section 3). The lookup that supplies dataset
-cards is in [docs/data-showcase-lookup.md](docs/data-showcase-lookup.md).
+cards is in [docs/data-showcase-lookup.md](data-showcase-lookup.md).
 
 A showcase PR changes three things only:
 
@@ -61,7 +61,7 @@ Put every image in `src/images/showcase/<key>/`. A config names an image by its 
 `src/images`, for example `showcase/example-partner/logo.svg`. CI checks that an image is below
 `src/images/showcase/`. It does not check that the directory matches the key; the reviewer does.
 
-Logos follow the standards in [DATA-LIBRARY.md](DATA-LIBRARY.md) (Step 1): SVG preferred,
+Logos follow the standards in [adding-a-data-library.md](adding-a-data-library.md) (Step 1): SVG preferred,
 transparent PNG as the fallback, a 256 × 256 canvas, optimized. Hero and card images do not need
 the square canvas. CI enforces these limits (`test/showcases/guard/assetBudget.ts`):
 
@@ -164,7 +164,7 @@ this table.
 | Identifier length | 32 characters |
 
 The lookup also refuses a request body over 64 KiB and more than 120 requests a minute from one
-client. See [docs/data-showcase-lookup.md](docs/data-showcase-lookup.md).
+client. See [docs/data-showcase-lookup.md](data-showcase-lookup.md).
 
 ---
 
@@ -239,7 +239,7 @@ partner showcase cannot merge before the flagship is in the index. A flagship en
 Dataset cards and hero counts come from the lookup. To see real cards, point the lookup at
 production Consent: `DUOS_SHOWCASE_API_URL` in BFF mode, `showcaseApiUrl` in legacy mode. A preview
 that reads production is read-only: the handoffs to search, dataset and request pages stay off. See
-the configuration table in [docs/data-showcase-lookup.md](docs/data-showcase-lookup.md).
+the configuration table in [docs/data-showcase-lookup.md](data-showcase-lookup.md).
 
 A dataset shelf shows its unavailable state when the lookup fails. This is what you see until the
 Consent that you point at has the public lookup on ("Not done yet" in that document). The masthead,
