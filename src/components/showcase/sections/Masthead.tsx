@@ -68,7 +68,8 @@ const LogoImage = ({ src, alt }: { src: string | undefined, alt: string }) => {
 }
 
 const LogoList = ({ logos, title }: { logos: readonly Logo[], title: string }) => {
-  const shown = shownLogos(logos, title)
+  const { visibleSectionIds } = useContext(ShowcasePageInfoContext)
+  const shown = shownLogos(logos, title, visibleSectionIds)
   if (shown.length === 0) {
     return <Typography component="p" sx={logoTextSx}>{title}</Typography>
   }

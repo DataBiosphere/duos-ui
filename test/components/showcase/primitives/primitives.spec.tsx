@@ -8,6 +8,7 @@ import { Card } from 'src/components/showcase/primitives/Card'
 import { FeaturedCard } from 'src/components/showcase/primitives/FeaturedCard'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
 import { StructuredPanel } from 'src/components/showcase/primitives/StructuredPanel'
+import { ShowcasePageInfoContext } from 'src/components/showcase/showcaseTemplateContract'
 import { datasetCardEntries } from 'src/showcases/datasetCardLabels'
 import { DatasetSummarySchema } from 'src/showcases/schema'
 import type { DatasetSummaryInput } from 'src/types/showcase'
@@ -217,5 +218,47 @@ describe('ShowcaseLink handoffs (S3.2)', () => {
   it('turns handoffs off when no provider says otherwise', () => {
     const { container } = render(<MemoryRouter><ShowcaseLink href="/datalibrary">Search</ShowcaseLink></MemoryRouter>)
     expect(container.querySelector('a')).toBeNull()
+  })
+})
+
+describe('ShowcaseLink same-page targets (S3.3)', () => {
+  const renderOnPage = (visibleSectionIds: readonly string[] | undefined) => renderInRouter(
+    <ShowcasePageInfoContext.Provider value={{ title: 'Showcase', subNav: [], visibleSectionIds }}>
+      <ShowcaseLink href="#featured-workspaces">Workspaces</ShowcaseLink>
+    </ShowcasePageInfoContext.Provider>,
+  )
+
+  it('links to a visible section', () => {
+    renderOnPage(['hero', 'featured-workspaces'])
+    expect(screen.getByRole('link', { name: 'Workspaces' })).toHaveAttribute('href', '#featured-workspaces')
+  })
+
+  it('renders nothing when the target section is not visible', () => {
+    const { container } = renderOnPage(['hero'])
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('keeps the link outside a template, where the visible sections are unknown', () => {
+    renderOnPage(undefined)
+    expect(screen.getByRole('link', { name: 'Workspaces' })).toBeInTheDocument()
+  })
+})
+
+describe('Card and StructuredPanel actions to hidden sections (S3.3)', () => {
+  it('leaves no empty list item for a hidden action, and no list when every action is hidden', () => {
+    const hidden = { label: 'Workspaces', href: '#featured-workspaces' }
+    renderInRouter(
+      <ShowcasePageInfoContext.Provider value={{ title: 'Showcase', subNav: [], visibleSectionIds: ['hero'] }}>
+        <Card title="Mixed" actions={[hidden, { label: 'About', href: 'https://example.org/about' }]} />
+        <Card title="Hidden only" actions={[hidden]} metadata={[{ label: 'Shelf', value: 'Workspaces', href: '#featured-workspaces' }]} />
+        <StructuredPanel title="Announcements" actions={[hidden]} />
+      </ShowcasePageInfoContext.Provider>,
+    )
+    const [mixed, hiddenOnly] = screen.getAllByRole('article')
+    expect(within(mixed).getAllByRole('listitem').map(item => item.textContent)).toEqual(['About'])
+    // The metadata value stays, as text. Only the mixed card has an action list.
+    expect(within(hiddenOnly).getByText('Workspaces')).toBeInTheDocument()
+    expect(within(hiddenOnly).queryByRole('link')).toBeNull()
+    expect(screen.getAllByRole('list')).toHaveLength(1)
   })
 })
