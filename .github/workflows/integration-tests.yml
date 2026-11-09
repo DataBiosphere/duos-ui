@@ -95,8 +95,9 @@ jobs:
           DUOS_AUTOMATION_MEMBER_SA: ${{ secrets.DUOS_AUTOMATION_MEMBER_SA }}
           DUOS_AUTOMATION_RESEARCHER_SA: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
           DUOS_AUTOMATION_SIGNING_OFFICIAL_SA: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
-      # test-results/ holds each failed test's error-context.md and, for the mock
-      # projects, its trace and screenshot. Kept for a short time: this repository is public.
+      # test-results/ holds each failed mock test's error-context.md, trace and screenshot.
+      # Not chromium's output, which can hold an access token. Kept for a short time:
+      # this repository is public.
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: failure()
         with:

@@ -70,6 +70,9 @@ export default defineConfig({
       testIgnore: [...MOCK_SPECS, ...THROTTLE_SPECS, ...SHORT_SESSION_SPECS, ...LEGACY_SPECS],
       // Up to three sign-in attempts, each as long as 8 seconds, plus the waits between them.
       timeout: 60_000,
+      // Not test-results/, which CI uploads to a public repository: a failed test's
+      // error-context.md can show the access token on /backgroundsignin.
+      outputDir: 'test-results-chromium',
       use: { ...devices['Desktop Chrome'] },
       retries: process.env.CI ? 1 : 0,
     },
