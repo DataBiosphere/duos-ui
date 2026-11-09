@@ -82,11 +82,12 @@ jobs:
         run: CI=false pnpm run build:e2e
       # playwright.config.ts starts the mock OIDC provider and Consent upstream
       # beside two servers: one on dev Consent, one on the mock (DT-4069).
-      - name: Run Playwright integration tests
+      - name: Run Playwright role tests against dev Consent
+        id: role-tests
         run: |
           DUOS_TEST_SIGNIN_EMAILS=$(node scripts/e2e-fixture-emails.mjs)
           export DUOS_TEST_SIGNIN_EMAILS
-          pnpm run test:e2e
+          pnpm run test:e2e --project=chromium
         env:
           # The servers reach the mock provider over HTTPS, and this certificate is self-signed.
           NODE_EXTRA_CA_CERTS: ${{ github.workspace }}/server.crt
@@ -95,6 +96,14 @@ jobs:
           DUOS_AUTOMATION_MEMBER_SA: ${{ secrets.DUOS_AUTOMATION_MEMBER_SA }}
           DUOS_AUTOMATION_RESEARCHER_SA: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
           DUOS_AUTOMATION_SIGNING_OFFICIAL_SA: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
+      # No DUOS_AUTOMATION_* secrets in this step, so no real access token can reach
+      # these projects. Their failure output is uploaded to a public repository.
+      # Runs after a failure of the role tests too.
+      - name: Run Playwright mock and legacy tests
+        if: success() || steps.role-tests.outcome == 'failure'
+        run: pnpm run test:e2e --project=mock --project=mock-throttle --project=mock-short-session --project=legacy
+        env:
+          NODE_EXTRA_CA_CERTS: ${{ github.workspace }}/server.crt
       # test-results/ holds each failed mock test's error-context.md, trace and screenshot.
       # Not chromium's output, which can hold an access token. Kept for a short time:
       # this repository is public.
