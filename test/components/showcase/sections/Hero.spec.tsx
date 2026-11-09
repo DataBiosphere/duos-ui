@@ -312,7 +312,7 @@ describe('Hero stats', () => {
       { 'featured-tools': { enabled: true, items: [tool] } },
     ))
     await waitFor(() => expect(stats()).not.toBeNull())
-    expect(statValues()).toEqual(['1,234 Studies', '56 Datasets', '1 Tools'])
+    expect(statValues()).toEqual(['1,234 Studies', '56 Datasets', '1 Tool'])
     expect(lookupShowcaseDatasets).toHaveBeenCalledWith({ mode: 'stats', scope: { dac: ['DAC-1'] } }, expect.anything())
 
     const intro = screen.getByText('Data for everyone')
