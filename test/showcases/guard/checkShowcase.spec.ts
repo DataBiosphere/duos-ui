@@ -143,6 +143,84 @@ describe('checkShowcase', () => {
     })
   })
 
+  describe('featured apps', () => {
+    const withFeatured = (...featured: (boolean | undefined)[]) => broken((c) => {
+      const tools = c.sections['featured-tools']
+      if (tools.enabled) {
+        tools.items = featured.map((flag, i) => ({
+          id: `tool-${i + 1}`,
+          name: `Example App ${i + 1}`,
+          description: 'Example',
+          tags: [],
+          launchUrl: `https://example.org/app-${i + 1}`,
+          ...(flag === undefined ? {} : { featured: flag }),
+        }))
+      }
+    })
+
+    it.each([
+      ['no featured app', [undefined, false]],
+      ['one featured app', [true, false, undefined]],
+    ])('passes %s', (_, featured) => {
+      expect(guard(withFeatured(...featured))).toEqual([])
+    })
+
+    it('fails two featured apps', () => {
+      expectErrors(guard(withFeatured(true, false, true)), 'sections.featured-tools.items: 2 featured apps')
+    })
+
+    it('fails two featured apps in a disabled section', () => {
+      const config = broken((c) => {
+        c.sections['featured-tools'] = {
+          enabled: false,
+          items: [1, 2].map(i => ({ id: `tool-${i}`, name: `App ${i}`, description: 'Example', tags: [], launchUrl: 'https://example.org/app', featured: true })),
+        }
+      })
+      expectErrors(guard(config), 'sections.featured-tools.items: 2 featured apps')
+    })
+
+    it('fails a featured flag on a section other than Analysis Apps, as a schema error', () => {
+      const config = broken((c) => {
+        const workspaces = c.sections['featured-workspaces']
+        if (workspaces.enabled) {
+          Object.assign(workspaces.items[0], { featured: true })
+        }
+      })
+      expect(guard(config)).toEqual(['sections.featured-workspaces.items.0: Unrecognized key: "featured"'])
+    })
+  })
+
+  describe('launch links', () => {
+    const withLaunchUrl = (launchUrl: string) => broken((c) => {
+      const workspaces = c.sections['featured-workspaces']
+      if (workspaces.enabled) {
+        workspaces.items[0].launchUrl = launchUrl
+      }
+    })
+
+    it.each(['https://example.org/workspace', '/datalibrary'])('passes %s', (url) => {
+      expect(guard(withLaunchUrl(url))).toEqual([])
+    })
+
+    it('fails a link to a section of this page', () => {
+      expectErrors(guard(withLaunchUrl('#featured-tools')), 'sections.featured-workspaces.items.0.launchUrl: "#featured-tools" is a link to a section')
+    })
+
+    it('reports a launch link that fails the URL policy once', () => {
+      expectErrors(guard(withLaunchUrl('#hero')), 'sections.featured-workspaces.items.0.launchUrl: "#hero"')
+    })
+
+    it('passes a same-page docs link', () => {
+      const config = broken((c) => {
+        const workspaces = c.sections['featured-workspaces']
+        if (workspaces.enabled) {
+          workspaces.items[0].docsUrl = '#featured-tools'
+        }
+      })
+      expect(guard(config)).toEqual([])
+    })
+  })
+
   describe('date ranges', () => {
     it('fails an announcement that ends before it starts', () => {
       const config = broken((c) => {
