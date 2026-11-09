@@ -10,8 +10,16 @@ type Announcement = Hero['announcements'][number]
 export type HeroStatKey = Hero['stats'][number]
 
 /** Provisional copy (S3.3). Each count has its own label, so studies, datasets and tools are never
- * confused. */
-export const HERO_STAT_LABELS: Record<HeroStatKey, string> = { studies: 'Studies', datasets: 'Datasets', tools: 'Tools' }
+ * confused. Both forms are given, not made by adding an 's', as in `StudyAssetCountBadges`. */
+export const HERO_STAT_LABELS: Record<HeroStatKey, { singular: string, plural: string }> = {
+  studies: { singular: 'Study', plural: 'Studies' },
+  datasets: { singular: 'Dataset', plural: 'Datasets' },
+  tools: { singular: 'Tool', plural: 'Tools' },
+}
+
+/** The label for a count: "1 Study", "2 Studies". */
+export const heroStatLabel = (key: HeroStatKey, value: number): string =>
+  value === 1 ? HERO_STAT_LABELS[key].singular : HERO_STAT_LABELS[key].plural
 
 /** One stat the hero shows: which count, and its value. */
 export interface HeroStatValue {
