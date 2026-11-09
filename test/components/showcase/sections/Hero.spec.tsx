@@ -258,6 +258,40 @@ describe('Hero announcements across UTC midnight', () => {
     expect(screen.getByText('Announcement starting')).toBeInTheDocument()
   })
 
+  const lasting = announcement('lasting', '2026-11-01', '2026-11-30')
+  const pastMidnight = () => act(async () => {
+    await vi.advanceTimersByTimeAsync(31_000)
+  })
+
+  it('moves focus to the panel heading when the focused control goes away', async () => {
+    vi.useFakeTimers({ now: new Date('2026-11-10T23:59:30Z') })
+    renderHero(configWith({ intro: 'Hi', announcements: [ending, lasting] }), { clock: systemTime })
+    act(() => screen.getByRole('button', { name: NEXT_ANNOUNCEMENT_LABEL }).focus())
+    await pastMidnight()
+    expect(screen.queryByRole('button', { name: NEXT_ANNOUNCEMENT_LABEL })).toBeNull()
+    expect(screen.getByRole('heading', { level: 2, name: ANNOUNCEMENTS_LABEL })).toHaveFocus()
+  })
+
+  it('moves focus to the page h1 when the panel goes away', async () => {
+    vi.useFakeTimers({ now: new Date('2026-11-10T23:59:30Z') })
+    renderHero(configWith({ intro: 'Hi', announcements: [ending] }), { clock: systemTime })
+    act(() => screen.getByRole('link', { name: 'Announcement ending' }).focus())
+    await pastMidnight()
+    expect(announcements()).toBeNull()
+    expect(screen.getByRole('heading', { level: 1 })).toHaveFocus()
+  })
+
+  it('leaves focus where the visitor moved it', async () => {
+    vi.useFakeTimers({ now: new Date('2026-11-10T23:59:30Z') })
+    const ctas = [{ label: 'Browse data', url: 'https://example.org/browse' }]
+    renderHero(configWith({ intro: 'Hi', primaryCtas: ctas, announcements: [ending, lasting] }), { clock: systemTime })
+    act(() => screen.getByRole('button', { name: NEXT_ANNOUNCEMENT_LABEL }).focus())
+    const browse = screen.getByRole('link', { name: 'Browse data' })
+    act(() => browse.focus())
+    await pastMidnight()
+    expect(browse).toHaveFocus()
+  })
+
   it('checks the day again when a hidden tab shows, as its timer can be late', () => {
     let now = new Date('2026-11-10T23:00:00Z')
     renderHero(configWith({ intro: 'Hi', announcements: [ending, starting] }), { clock: () => now })

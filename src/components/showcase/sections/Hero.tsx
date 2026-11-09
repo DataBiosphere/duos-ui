@@ -16,7 +16,7 @@
  * is 0 is hidden, and when the counts can't load the whole strip goes and the calls to action move
  * up. There is no data-size stat: DUOS has no trusted byte-size source (contracts record).
  */
-import React, { useContext, useId, useState } from 'react'
+import React, { type FocusEvent, useContext, useEffect, useId, useRef, useState } from 'react'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import Box from '@mui/material/Box'
@@ -89,9 +89,15 @@ const Onboarding = ({ links }: { links: readonly HeroLink[] }) => {
  * a disabled button. Only the active announcement is rendered, so the others leave the tab order
  * and the accessibility tree. With one announcement there are no controls; with none, no panel.
  */
-const Announcements = ({ announcements }: { announcements: readonly Announcement[] }) => {
+type AnnouncementsProps = {
+  announcements: readonly Announcement[]
+  headingId: string
+  onFocusIn: () => void
+  onFocusOut: (event: FocusEvent) => void
+}
+
+const Announcements = ({ announcements, headingId, onFocusIn, onFocusOut }: AnnouncementsProps) => {
   const [index, setIndex] = useState(0)
-  const headingId = useId()
   const count = announcements.length
   if (count === 0) return null
   // The list can shrink between renders (a window ends), so keep the index in range.
@@ -100,8 +106,8 @@ const Announcements = ({ announcements }: { announcements: readonly Announcement
   const move = (step: number) => setIndex((active + step + count) % count)
 
   return (
-    <Paper component="section" variant="outlined" aria-labelledby={headingId} sx={heroSx.announcements}>
-      <Typography variant="inherit" component="h2" id={headingId} sx={heroSx.subheading}>{ANNOUNCEMENTS_LABEL}</Typography>
+    <Paper component="section" variant="outlined" aria-labelledby={headingId} onFocus={onFocusIn} onBlur={onFocusOut} sx={heroSx.announcements}>
+      <Typography variant="inherit" component="h2" id={headingId} tabIndex={-1} sx={heroSx.subheading}>{ANNOUNCEMENTS_LABEL}</Typography>
       <Box aria-live="polite" sx={heroSx.announcement}>
         <ShowcaseLink key={current.id} href={current.url}>{current.text}</ShowcaseLink>
       </Box>
@@ -120,6 +126,34 @@ const Announcements = ({ announcements }: { announcements: readonly Announcement
   )
 }
 
+/**
+ * Keeps keyboard focus when the announcements change at UTC midnight. A focused control or link can
+ * go away (the list shrinks, or the active announcement ends), and focus would fall to the page
+ * body. Then focus moves to the panel heading, or to the page `h1` when the panel goes away. Focus
+ * that the visitor moved somewhere else stays there.
+ */
+const useAnnouncementsFocus = (announcements: readonly Announcement[], headingId: string) => {
+  const hasFocus = useRef(false)
+  const ids = announcements.map(announcement => announcement.id).join('\n')
+  useEffect(() => {
+    const active = document.activeElement
+    if (!hasFocus.current || (active !== null && active !== document.body)) return
+    hasFocus.current = ids !== ''
+    document.getElementById(ids === '' ? SHOWCASE_MAIN_HEADING_ID : headingId)?.focus()
+  }, [ids, headingId])
+  return {
+    onFocusIn: () => {
+      hasFocus.current = true
+    },
+    // A blur to nowhere (an element that unmounts, or a click on the page) keeps the flag, so the
+    // effect above can tell; a move to another element clears it.
+    onFocusOut: (event: FocusEvent) => {
+      const next = event.relatedTarget
+      if (next !== null && !event.currentTarget.contains(next)) hasFocus.current = false
+    },
+  }
+}
+
 export const Hero = ({ section, id, title }: SectionRendererProps<'hero'>) => {
   const page = useContext(ShowcasePageInfoContext)
   const clock = useContext(ShowcaseClockContext)
@@ -129,6 +163,8 @@ export const Hero = ({ section, id, title }: SectionRendererProps<'hero'>) => {
   // Re-renders at UTC midnight, so the announcements follow their date windows on an open page.
   useUtcDay(clock)
   const announcements = currentAnnouncements(section.announcements, clock, page.visibleSectionIds)
+  const announcementsHeadingId = useId()
+  const announcementsFocus = useAnnouncementsFocus(announcements, announcementsHeadingId)
 
   return (
     <Box component="section" id={id} sx={heroSx.root}>
@@ -141,7 +177,7 @@ export const Hero = ({ section, id, title }: SectionRendererProps<'hero'>) => {
           {ctas.length > 0 && <LinkList links={ctas} sx={heroSx.ctas} />}
           <Onboarding links={shown(section.onboarding)} />
         </div>
-        <Announcements announcements={announcements} />
+        <Announcements announcements={announcements} headingId={announcementsHeadingId} {...announcementsFocus} />
       </Box>
     </Box>
   )
