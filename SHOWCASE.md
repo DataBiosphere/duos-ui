@@ -225,15 +225,23 @@ partner showcase cannot merge before the flagship is in the index. A flagship en
 
 1. Set the entry to `"status": "live"` on your branch. A `hidden` entry is not routable in any
    build today.
-2. Turn the rollout flag on in your local `public/config.json`: `"showcaseEnabled": true`. Only the
-   boolean `true` works. Do not commit this file.
+2. Make a local `public/config.json` with the rollout flag on. Only the boolean `true` works. Git
+   ignores this file.
+
+   ```sh
+   jq '.showcaseEnabled = true' config/dev.json > public/config.json
+   ```
 3. Run `pnpm start`. To preview BFF mode, run `pnpm run start:server` also.
 4. Open `/showcase/<key>`, or `/data` for the flagship.
 
 Dataset cards and hero counts come from the lookup. To see real cards, point the lookup at
 production Consent: `DUOS_SHOWCASE_API_URL` in BFF mode, `showcaseApiUrl` in legacy mode. A preview
-that reads production is read-only. See the configuration table in
-[docs/data-showcase-lookup.md](docs/data-showcase-lookup.md).
+that reads production is read-only: the handoffs to search, dataset and request pages stay off. See
+the configuration table in [docs/data-showcase-lookup.md](docs/data-showcase-lookup.md).
+
+A dataset shelf shows its unavailable state when the lookup fails. This is what you see until the
+Consent that you point at has the public lookup on ("Not done yet" in that document). The masthead,
+the hero copy and the links do not need the lookup.
 
 If the showcase must not be public at merge, set `status` back to `"hidden"` before you ask for
 review, and attach screenshots of the live preview to the PR.
