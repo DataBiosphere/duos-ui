@@ -76,6 +76,30 @@ const checkLogoCount = (config: unknown): string[] => {
     : []
 }
 
+/** Analysis Apps show one full-width featured card above the app grid (original Story 14). */
+export const MAX_FEATURED_TOOLS = 1
+
+/** Counted in disabled sections too, so turning the section on can't break the guard. */
+const checkFeaturedTools = (config: unknown): string[] => {
+  const items = (sectionsOf(config)['featured-tools'] as { items?: unknown } | undefined)?.items
+  const count = Array.isArray(items) ? items.filter(item => (item as { featured?: unknown } | null)?.featured === true).length : 0
+  return count > MAX_FEATURED_TOOLS
+    ? [`sections.featured-tools.items: ${count} featured apps; Analysis Apps show at most ${MAX_FEATURED_TOOLS} featured card`]
+    : []
+}
+
+/** A resource card's launch link opens the resource, so it can't be a `#section` link on this page.
+ * A link that fails the URL policy is already reported by `checkUrls`. */
+const checkLaunchUrls = (config: unknown): string[] => {
+  const errors: string[] = []
+  walkObjects(config, ({ launchUrl }, path) => {
+    if (typeof launchUrl === 'string' && launchUrl.startsWith('#') && urlProblem(launchUrl) === undefined) {
+      errors.push(`${path}.launchUrl: "${launchUrl}" is a link to a section of this page; a launch link opens the resource`)
+    }
+  })
+  return errors
+}
+
 const isDate = (value: unknown): value is string => typeof value === 'string' && DATE_PATTERN.test(value)
 
 /** Date ranges include both ends, so a one-day range has equal dates. */
@@ -148,6 +172,8 @@ export const checkShowcase = (config: unknown, options: GuardOptions = {}): stri
     ...checkUrls(config),
     ...checkLogoAlt(config),
     ...checkLogoCount(config),
+    ...checkFeaturedTools(config),
+    ...checkLaunchUrls(config),
     ...checkDateRanges(config),
     ...checkItemIds(config),
     ...checkContrast(config),
