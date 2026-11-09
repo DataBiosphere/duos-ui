@@ -228,12 +228,18 @@ partner showcase cannot merge before the flagship is in the index. A flagship en
 1. Set the entry to `"status": "live"` on your branch. A `hidden` entry is not routable in any
    build today.
 2. Make a local `public/config.json` with the rollout flag on. Only the boolean `true` works. Git
-   ignores this file.
+   ignores this file. `config/dev.json` has no `bffEnabled`, so choose the mode here:
 
    ```sh
+   # Legacy mode
    jq '.showcaseEnabled = true' config/dev.json > public/config.json
+   # BFF mode
+   jq '.bffEnabled = true | .showcaseEnabled = true' config/dev.json > public/config.json
    ```
-3. Run `pnpm start`. To preview BFF mode, run `pnpm run start:server` also.
+3. Start one server. Both use port 3000, so do not run them together.
+   - Legacy mode: `pnpm start` (Vite only).
+   - BFF mode: `pnpm run start:server` (the Fastify server with Vite embedded). It needs
+     `.env.local`; see [DEVNOTES.md](../DEVNOTES.md).
 4. Open `/showcase/<key>`, or `/data` for the flagship.
 
 Dataset cards and hero counts come from the lookup. To see real cards, point the lookup at
@@ -336,7 +342,7 @@ They are compiled only by `pnpm run build:e2e` and never reach a deployed build.
 
 | Role | Who | Approves |
 | ---- | --- | -------- |
-| Engineer | `@DataBiosphere/dsp-data-team-eng`. The default rule in `.github/CODEOWNERS` makes this team the code owner of every path, which includes `src/showcases/` and `src/images/showcase/`. | Code, config, images and CI results. Two approvals, as for every PR. |
+| Engineer | `@DataBiosphere/dsp-data-team-eng`. The default rule in `.github/CODEOWNERS` makes this team the code owner of every path, which includes `src/showcases/` and `src/images/showcase/`. | Code, config, images and CI results. The branch protection of `develop` sets the number of approvals. |
 | Program owner | The owner named at intake | Copy, claims, logos and public clearance, by a review or a comment in the PR. |
 
 A showcase PR is ready to merge when both roles approve. The PR template has a section for this.
