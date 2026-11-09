@@ -4,6 +4,7 @@
  */
 import { createContext } from 'react'
 import type { ShowcaseLookups } from 'src/components/showcase/useShowcaseLookups'
+import { type Clock, systemClock } from 'src/showcases/dateWindow'
 import { contrastProblems, THEME_PRESETS, type ThemeColors, themeColors } from 'src/showcases/themes'
 import type { ShowcaseConfig } from 'src/types/showcase'
 
@@ -47,6 +48,9 @@ export interface ShowcasePageInfo {
 }
 
 export const ShowcasePageInfoContext = createContext<ShowcasePageInfo>({ title: '', subNav: [] })
+
+/** The clock that date-bounded content (hero announcements) reads. Tests pass a fixed one. */
+export const ShowcaseClockContext = createContext<Clock>(systemClock)
 
 /** The config's colors, with any override that fails its contrast check replaced by the preset's
  * own color, so a failing color is never rendered. */
