@@ -19,6 +19,7 @@
  */
 import type { ComponentType } from 'react'
 import type { ShowcaseLookups } from 'src/components/showcase/useShowcaseLookups'
+import { AnalysisApps } from 'src/components/showcase/sections/AnalysisApps'
 import { DatasetShelf } from 'src/components/showcase/sections/DatasetShelf'
 import { Hero } from 'src/components/showcase/sections/Hero'
 import { heroHasContent } from 'src/components/showcase/sections/heroContent'
@@ -82,6 +83,8 @@ export const sectionRegistry: SectionRegistry = {
     navigable: true,
     hasRenderableContent: section => section.ranking !== undefined || (section.items ?? []).length > 0,
   },
+  // Provisional title (S3.4).
+  'featured-tools': { component: AnalysisApps, defaultLabels: { title: 'Analysis Apps' }, navigable: true, hasRenderableContent: section => section.items.length > 0 },
 }
 
 export interface VisibleSectionOf<K extends SectionKey> {

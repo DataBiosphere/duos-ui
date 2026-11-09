@@ -40,6 +40,16 @@ export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {
       'latest-data-releases': { enabled: true, ranking: 'newest' },
       // S3.3, curated. The spec stubs its lookup too.
       'open-access-datasets': { enabled: true, items: ['DUOS-000902'] },
+      // S3.4. The featured app is listed second, so the spec checks that it still comes first.
+      'featured-tools': {
+        enabled: true,
+        items: [
+          { id: 'app-viewer', name: 'Synthetic Viewer', description: 'A fictional data viewer.', tags: ['visualization'], launchUrl: 'https://example.org/viewer' },
+          { id: 'app-notebooks', name: 'Synthetic Notebooks', description: 'A fictional notebook service.', tags: ['analysis'], launchUrl: 'https://example.org/notebooks', docsUrl: 'https://example.org/notebooks/docs', featured: true },
+          // A public DUOS path, so its link opens whether or not this build turns the handoffs on.
+          { id: 'app-status', name: 'DUOS status', description: 'The DUOS status page.', tags: [], launchUrl: '/status' },
+        ],
+      },
     },
   },
   'e2e-hidden': {},

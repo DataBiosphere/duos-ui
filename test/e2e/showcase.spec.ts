@@ -157,6 +157,39 @@ test.describe('the open access datasets shelf (S3.3)', () => {
   })
 })
 
+test.describe('the analysis apps (S3.4)', () => {
+  const apps = (page: Page) => page.locator('#featured-tools')
+
+  test('shows the featured app first, then the app grid', async ({ page }) => {
+    await page.goto(`/showcase/${E2E_PARTNER.key}`)
+    await expect(apps(page).getByRole('heading', { level: 2, name: 'Analysis Apps' })).toBeVisible()
+    await expect(apps(page).getByRole('heading', { level: 3 })).toHaveText(['Synthetic Notebooks', 'Synthetic Viewer', 'DUOS status'])
+    await expect(apps(page).locator('[data-variant="featured"]')).toHaveCount(1)
+  })
+
+  test('opens the intended resource from each launch link', async ({ page }) => {
+    await page.route('https://example.org/**', route => route.fulfill({ status: 200, contentType: 'text/html', body: '<title>Synthetic resource</title>' }))
+    await page.goto(`/showcase/${E2E_PARTNER.key}`)
+    await apps(page).getByRole('article', { name: 'Synthetic Notebooks' }).getByRole('link', { name: 'Launch' }).click()
+    await expect(page).toHaveURL('https://example.org/notebooks')
+    await page.goBack()
+    await apps(page).getByRole('article', { name: 'DUOS status' }).getByRole('link', { name: 'Launch' }).click()
+    await expect(page).toHaveURL(/\/status$/)
+  })
+
+  test('moves with Tab from the featured app\'s links to the grid\'s', async ({ page }) => {
+    await page.goto(`/showcase/${E2E_PARTNER.key}`)
+    await apps(page).getByRole('heading', { level: 2, name: 'Analysis Apps' }).scrollIntoViewIfNeeded()
+    const links = apps(page).getByRole('link')
+    await links.first().focus()
+    await expect(links.first()).toHaveAttribute('href', 'https://example.org/notebooks')
+    await page.keyboard.press('Tab')
+    await expect(page.locator(':focus')).toHaveAttribute('href', 'https://example.org/notebooks/docs')
+    await page.keyboard.press('Tab')
+    await expect(page.locator(':focus')).toHaveAttribute('href', 'https://example.org/viewer')
+  })
+})
+
 test.describe('refused showcase URLs', () => {
   /** The visible not-found text and the document title, the two places a refused key could show. */
   const notFoundPage = async (page: Page, path: string) => {
