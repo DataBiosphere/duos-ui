@@ -73,6 +73,12 @@ API_URL_DEFAULT="https://consent.dsde-dev.broadinstitute.org"
 ECM_URL_DEFAULT="https://externalcreds.dsde-dev.broadinstitute.org"
 TDR_URL_DEFAULT="https://jade.datarepo-dev.broadinstitute.org"
 BARD_URL_DEFAULT="https://terra-bard-dev.appspot.com"
+# The Consent that answers the anonymous showcase lookup. The server never
+# takes it from DUOS_API_URL, and answers 503 without it. The default is the
+# same Consent as API_URL_DEFAULT, so a new setup looks up its own catalog and
+# the server keeps the showcase handoffs on. Set production Consent by hand to
+# preview a showcase with its real datasets.
+SHOWCASE_API_URL_DEFAULT="$API_URL_DEFAULT"
 # Every deployed environment enforces the Content Security Policy
 # (terra-helmfile#6500), so local dev enforces it too.
 CSP_REPORT_ONLY_DEFAULT="false"
@@ -158,7 +164,8 @@ MANAGED_VARS=" HOST HTTPS SSL_CRT_FILE SSL_KEY_FILE DUOS_SESSION_SECRET
  DUOS_DB_HOST DUOS_DB_NAME DUOS_DB_PORT DUOS_DB_USER DUOS_DB_PASSWORD
  DUOS_AZURE_CLIENT_ID DUOS_AZURE_CLIENT_SECRET DUOS_AZURE_ISSUER_URL
  DUOS_OAUTH_REDIRECT_URI DUOS_POST_LOGOUT_REDIRECT_URI DUOS_API_URL
- DUOS_ECM_URL DUOS_TDR_URL DUOS_BARD_URL DUOS_CSP_REPORT_ONLY "
+ DUOS_ECM_URL DUOS_TDR_URL DUOS_BARD_URL DUOS_SHOWCASE_API_URL
+ DUOS_CSP_REPORT_ONLY "
 
 # Echo every VAR=value line of an existing .env.local whose VAR is not in
 # MANAGED_VARS, byte for byte.
@@ -230,6 +237,7 @@ write_env() {
   ECM_URL=$(existing_env DUOS_ECM_URL)
   TDR_URL=$(existing_env DUOS_TDR_URL)
   BARD_URL=$(existing_env DUOS_BARD_URL)
+  SHOWCASE_API_URL=$(existing_env DUOS_SHOWCASE_API_URL)
   CSP_REPORT_ONLY=$(existing_env DUOS_CSP_REPORT_ONLY)
   # Read before the redirect below truncates the file.
   EXTRA_LINES=$(extra_env_lines)
@@ -276,6 +284,7 @@ DUOS_API_URL=${API_URL:-$API_URL_DEFAULT}
 DUOS_ECM_URL=${ECM_URL:-$ECM_URL_DEFAULT}
 DUOS_TDR_URL=${TDR_URL:-$TDR_URL_DEFAULT}
 DUOS_BARD_URL=${BARD_URL:-$BARD_URL_DEFAULT}
+DUOS_SHOWCASE_API_URL=${SHOWCASE_API_URL:-$SHOWCASE_API_URL_DEFAULT}
 
 # false enforces the Content Security Policy, as every deployed environment
 # does. Set true to only report violations while you debug the policy.
