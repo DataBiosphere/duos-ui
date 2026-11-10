@@ -256,13 +256,16 @@ Add an entry to `entries` in `src/showcases/registry.json`:
 
 Every entry needs a config, and every config needs an entry. CI fails if one has no match.
 
-**The flagship comes first.** CI fails an index that has entries but not exactly one flagship. A
-partner showcase cannot merge before the flagship is in the index. A flagship entry differs only in
-`flagship`:
+**The flagship comes first.** The flagship is a real showcase: the main DUOS data page at `/data`.
+It is not an example. CI fails an index that has entries but not exactly one flagship, so a partner
+cannot merge before the flagship is in the index.
 
-```json
-{ "key": "example-flagship", "title": "Example Data", "status": "hidden", "flagship": true, "order": 0 }
-```
+- If the index has the flagship, add your partner entry after it. Do not change the flagship.
+- If the index is empty, the first showcase that merges must be the flagship. Its entry has
+  `"flagship": true` and `"order": 0`, and it needs its own config. Its key follows the key rules,
+  so it cannot be `flagship`.
+- To try a partner on your computer before the flagship is merged, add a temporary flagship entry
+  and config. Do not commit them.
 
 ### Key rules
 
