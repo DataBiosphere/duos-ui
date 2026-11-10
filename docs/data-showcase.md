@@ -9,6 +9,10 @@ This guide is for an engineer who did not build the first showcase. The design d
 consent `docs/plans/data-showcase-delivery-plan.md` (section 3). The lookup that supplies dataset
 cards is in [docs/data-showcase-lookup.md](data-showcase-lookup.md).
 
+Before you start, set up a local checkout. [DEVNOTES.md](../DEVNOTES.md) gives the steps (see
+"Local Setup"): install the modules and render the config files. The checks in Step 7 need the
+modules. The preview in Step 6 needs the config files.
+
 A showcase PR changes three things only:
 
 | What | Where |
