@@ -90,11 +90,13 @@ test.describe('the partner hero (S3.3)', () => {
     await expect(announcements.getByText('2 of 2')).toBeVisible()
   })
 
-  test('hides the onboarding link whose target section is not on the page', async ({ page }) => {
+  test('shows the onboarding link once its target section is on the page, and it jumps there', async ({ page }) => {
     await page.goto(`/showcase/${E2E_PARTNER.key}`)
     // A public link, so it opens whether or not this build turns the DUOS handoffs on.
     await expect(page.getByRole('link', { name: 'About DUOS' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Start in a workspace' })).toHaveCount(0)
+    await page.getByRole('link', { name: 'Start in a workspace' }).click()
+    await expect(page).toHaveURL(/#featured-workspaces$/)
+    await expect(page.locator('#featured-workspaces')).toBeInViewport()
   })
 })
 
@@ -187,6 +189,33 @@ test.describe('the analysis apps (S3.4)', () => {
     await expect(page.locator(':focus')).toHaveAttribute('href', 'https://example.org/notebooks/docs')
     await page.keyboard.press('Tab')
     await expect(page.locator(':focus')).toHaveAttribute('href', 'https://example.org/viewer')
+    })
+  })
+
+test.describe('the workspaces shelf (S3.4)', () => {
+  const shelf = (page: Page) => page.locator('#featured-workspaces')
+
+  test('shows each workspace in config order, in its own shelf', async ({ page }) => {
+    await page.goto(`/showcase/${E2E_PARTNER.key}`)
+    await expect(shelf(page).getByRole('heading', { level: 2, name: 'Workspaces' })).toBeVisible()
+    await expect(shelf(page).getByRole('heading', { level: 3 })).toHaveText(['Synthetic GWAS Workspace', 'Synthetic RNA Workspace', 'Synthetic Imaging Workspace'])
+  })
+
+  test('opens the intended workspace from its launch link', async ({ page }) => {
+    await page.route('https://example.org/**', route => route.fulfill({ status: 200, contentType: 'text/html', body: '<title>Synthetic workspace</title>' }))
+    await page.goto(`/showcase/${E2E_PARTNER.key}`)
+    await shelf(page).getByRole('article', { name: 'Synthetic GWAS Workspace' }).getByRole('link', { name: 'Launch' }).click()
+    await expect(page).toHaveURL('https://example.org/workspaces/gwas')
+  })
+
+  test('gives a workspace card without an image the same media box as one with an image', async ({ page }) => {
+    await page.goto(`/showcase/${E2E_PARTNER.key}`)
+    const frames = shelf(page).locator('.showcase-card__media-frame')
+    await expect(frames).toHaveCount(3)
+    await expect(frames.first().locator('img')).toHaveCount(1)
+    const heights = await frames.evaluateAll(elements => elements.map(element => Math.round(element.getBoundingClientRect().height)))
+    expect(heights[0]).toBeGreaterThan(0)
+    expect(new Set(heights).size).toBe(1)
   })
 })
 
