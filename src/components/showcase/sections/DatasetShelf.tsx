@@ -20,7 +20,7 @@
  * The section's DOM id is on the root `div`, the target of `#<section key>` links. While the shelf
  * loads or is empty, the template gives it no sub-nav link and hides same-page links to it (D11).
  */
-import React, { useContext, useEffect, useId, useRef, useState } from 'react'
+import React, { useContext, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import MuiSkeleton from '@mui/material/Skeleton'
@@ -138,8 +138,10 @@ export const DatasetShelf = <K extends DatasetSectionKey>({ sectionKey, section,
   const root = useRef<HTMLDivElement>(null)
   const empty = state?.status === 'ready' && state.data.length === 0
 
-  // After "Try again", the ready shelf renders a new heading element; move focus to it too.
-  useEffect(() => {
+  // After "Try again", the ready shelf renders a new heading element; move focus to it too. A
+  // layout effect, so focus moves in the same commit that removes the old heading: with a passive
+  // effect, the page can paint, and a screen reader or test can read focus, while it is on <body>.
+  useLayoutEffect(() => {
     if (!retried.current || state?.status === 'loading') return
     retried.current = false
     restoreFocus(root.current, headingId, empty)

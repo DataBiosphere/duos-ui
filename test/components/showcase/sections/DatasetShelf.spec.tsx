@@ -66,6 +66,23 @@ const cardTitles = () => (shelf() === null ? [] : within(shelf()!).queryAllByRol
 
 const pending = () => new Promise<never>(() => {})
 
+/**
+ * Watches the DOM, and returns a function that gives the focused element at the first change after
+ * which `appeared()` holds. `waitFor` can poll after or before React's effects run, so a focus check
+ * after it passes or fails by timing (DT-4458); this one reads focus as the change lands.
+ */
+const focusWhen = (appeared: () => boolean) => {
+  let focused: Element | null | undefined
+  const observer = new MutationObserver(() => {
+    if (focused === undefined && appeared()) focused = document.activeElement
+  })
+  observer.observe(document.body, { childList: true, subtree: true })
+  return () => {
+    observer.disconnect()
+    return focused
+  }
+}
+
 beforeEach(() => {
   lookup.mockReset()
 })
@@ -165,8 +182,10 @@ describe('latest-data-releases lookup failed (D12)', () => {
     expect(heading()).toHaveFocus()
     expect(screen.getByRole('status')).toHaveTextContent(DATASETS_LOADING_TEXT)
 
+    const focusOnCards = focusWhen(() => cardTitles().length > 0)
     answer({ datasets: [dataset(1)] })
     await waitFor(() => expect(cardTitles()).toEqual(['Cohort 1']))
+    expect(focusOnCards()).toBe(heading())
     expect(heading()).toHaveFocus()
   })
 
@@ -199,8 +218,10 @@ describe('latest-data-releases lookup failed (D12)', () => {
     const answer = await retryPending(user)
     expect(heading()).toHaveFocus()
 
+    const focusOnGone = focusWhen(() => shelf() === null)
     answer({ datasets: [] })
     await waitFor(() => expect(shelf()).toBeNull())
+    expect(focusOnGone()).toBe(document.getElementById(SHOWCASE_MAIN_HEADING_ID))
     expect(document.getElementById(SHOWCASE_MAIN_HEADING_ID)).toHaveFocus()
   })
 })
