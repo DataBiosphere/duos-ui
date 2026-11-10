@@ -224,12 +224,15 @@ client. See [docs/data-showcase-lookup.md](data-showcase-lookup.md).
 
 ### 5.1 Register the config
 
-In `src/showcases/index.ts`, add one import line and one line to the existing `showcaseConfigs`
-object, under the key. Keep everything else in the file.
+Make two changes in `src/showcases/index.ts`. Keep everything else in the file.
+
+First, add one import line:
 
 ```typescript
 import { examplePartner } from './example-partner'
 ```
+
+Then add one line to the existing `showcaseConfigs` object, under the key:
 
 ```typescript
   'example-partner': examplePartner,
