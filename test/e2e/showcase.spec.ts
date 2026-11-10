@@ -189,8 +189,8 @@ test.describe('the analysis apps (S3.4)', () => {
     await expect(page.locator(':focus')).toHaveAttribute('href', 'https://example.org/notebooks/docs')
     await page.keyboard.press('Tab')
     await expect(page.locator(':focus')).toHaveAttribute('href', 'https://example.org/viewer')
-    })
   })
+})
 
 test.describe('the workspaces shelf (S3.4)', () => {
   const shelf = (page: Page) => page.locator('#featured-workspaces')
