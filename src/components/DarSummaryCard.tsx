@@ -13,11 +13,44 @@ const DarText = ({ label, text }: { label: string, text: string }) => (
   </Box>
 )
 
+interface LifecycleDate {
+  label: string
+  date: number
+}
+
+// Consent's dates are external data. One it leaves out, or sends as anything a Date can't hold, is
+// left off the card rather than shown as "Invalid Date".
+const isDate = (value: unknown): value is number =>
+  typeof value === 'number' && !Number.isNaN(new Date(value).getTime())
+
+/** A closeout ends access before its term runs out, so its date stands in for the expiration. */
+const accessEnd = (dar: DatasetStatisticsDar): { label: string, date: unknown } =>
+  isDate(dar.closeoutDate)
+    ? { label: 'Closed out', date: dar.closeoutDate }
+    : { label: dar.expired ? 'Expired' : 'Expires', date: dar.expirationDate }
+
+/** The dates consent sent, in the order they happened. */
+const lifecycleDates = (dar: DatasetStatisticsDar): LifecycleDate[] => {
+  const renewals: unknown[] = Array.isArray(dar.progressReportApprovalDates) ? dar.progressReportApprovalDates : []
+  return [
+    { label: 'Submitted', date: dar.submissionDate },
+    { label: 'Approved', date: dar.approvalDate },
+    ...renewals.map(date => ({ label: 'Renewed', date })),
+    accessEnd(dar),
+  ].filter((entry): entry is LifecycleDate => isDate(entry.date))
+}
+
+const statusOf = (dar: DatasetStatisticsDar): { label: string, color: 'default' | 'success' } => {
+  if (isDate(dar.closeoutDate)) {
+    return { label: 'Closed out', color: 'default' }
+  }
+  return dar.expired ? { label: 'Expired', color: 'default' } : { label: 'Current', color: 'success' }
+}
+
 const DarSummaryCard = ({ dar }: { dar: DatasetStatisticsDar }) => {
   const [expanded, setExpanded] = useState(false)
-  const submissionDate = dar.submissionDate
-    ? new Date(dar.submissionDate).toLocaleDateString()
-    : 'date not available'
+  const dates = lifecycleDates(dar)
+  const status = statusOf(dar)
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
@@ -28,13 +61,24 @@ const DarSummaryCard = ({ dar }: { dar: DatasetStatisticsDar }) => {
           </Typography>
           {/* Institution, not the requester's name: the section says where a grant went. */}
           <Typography variant="body2">Institution: {dar.institutionName || 'Not provided'}</Typography>
-          <Typography variant="caption" color="text.secondary">Submitted {submissionDate}</Typography>
+          {dates.length > 0 && (
+            <Box
+              component="dl"
+              sx={{ display: 'grid', gridTemplateColumns: 'max-content 1fr', columnGap: 1.5, m: 0, mt: 0.5 }}
+            >
+              {dates.map(({ label, date }, index) => (
+                // Renewals repeat their label and can share a date, so only the position is unique.
+                <React.Fragment key={index}>
+                  <Typography component="dt" variant="caption" color="text.secondary">{label}</Typography>
+                  <Typography component="dd" variant="caption" color="text.secondary" sx={{ m: 0 }}>
+                    {new Date(date).toLocaleDateString()}
+                  </Typography>
+                </React.Fragment>
+              ))}
+            </Box>
+          )}
         </Box>
-        <Chip
-          size="small"
-          color={dar.expired ? 'default' : 'success'}
-          label={dar.expired ? 'Expired' : 'Current'}
-        />
+        <Chip size="small" color={status.color} label={status.label} sx={{ flexShrink: 0 }} />
       </Stack>
       {(dar.rus || dar.nonTechRus) && (
         <>

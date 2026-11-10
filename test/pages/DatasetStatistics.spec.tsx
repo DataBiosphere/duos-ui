@@ -724,7 +724,7 @@ describe('DatasetStatistics', () => {
     expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeInTheDocument()
     expect(await screen.findByText('Test Project')).toBeInTheDocument()
     expect(screen.getByText('Expired')).toBeInTheDocument()
-    expect(screen.getByText(`Submitted ${expired.toLocaleDateString()}`)).toBeInTheDocument()
+    expect(screen.getByText('Submitted').nextElementSibling).toHaveTextContent(expired.toLocaleDateString())
     // Hidden until asked for, as on the study page, then each under its own label
     expect(screen.queryByText('Test research use statement')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Show research use statement and summary' }))
