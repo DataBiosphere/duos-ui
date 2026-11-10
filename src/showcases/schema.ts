@@ -127,7 +127,9 @@ const RESOURCE_ITEM_FIELDS = {
   docsUrl: SafeUrlSchema.optional(),
 }
 
-const resourceShelf = <S extends z.ZodRawShape>(extra: S = {} as S) =>
+/** `S` defaults to no fields: inferred from the `{}` default it would be `ZodRawShape`, whose index
+ * signature types every item field as `unknown`. */
+const resourceShelf = <S extends z.ZodRawShape = Record<never, never>>(extra: S = {} as S) =>
   section({ items: z.array(z.strictObject({ ...RESOURCE_ITEM_FIELDS, ...extra })) })
 
 const PublicationItemSchema = z.strictObject({

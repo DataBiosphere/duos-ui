@@ -1,10 +1,11 @@
 import React, { Children, useContext, useId } from 'react'
+import Box from '@mui/material/Box'
 import type { HeadingLevel } from 'src/components/showcase/primitives/Card'
 import { isShownHref, ShowcaseAction } from 'src/components/showcase/primitives/safeHref'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
 import { ShowcasePageInfoContext } from 'src/components/showcase/showcaseTemplateContract'
-// The panel shares the card's stylesheet and its provisional values.
-import './Card.css'
+// The panel shares the card's provisional frame, title and link-row styles.
+import { panelSx } from 'src/components/showcase/primitives/cardStyles'
 
 export type StructuredPanelProps = {
   title: string
@@ -22,18 +23,18 @@ export const StructuredPanel = ({ title, headingLevel = 2, children, actions = [
   const { visibleSectionIds } = useContext(ShowcasePageInfoContext)
   const links = actions.filter(action => isShownHref(action.href, visibleSectionIds))
   return (
-    <section className="showcase-panel" aria-labelledby={headingId}>
-      <Heading className="showcase-panel__title" id={headingId}>{title}</Heading>
+    <Box component="section" sx={panelSx.panel} aria-labelledby={headingId}>
+      <Box component={Heading} id={headingId} sx={panelSx.title}>{title}</Box>
       {Children.toArray(children).length > 0 && <div>{children}</div>}
       {links.length > 0 && (
-        <ul className="showcase-panel__actions">
+        <Box component="ul" sx={panelSx.actions}>
           {links.map((action, i) => (
             <li key={`${i} ${action.label}`}>
               <ShowcaseLink href={action.href}>{action.label}</ShowcaseLink>
             </li>
           ))}
-        </ul>
+        </Box>
       )}
-    </section>
+    </Box>
   )
 }
