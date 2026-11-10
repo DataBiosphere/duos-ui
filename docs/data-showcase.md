@@ -49,7 +49,7 @@ in the PR (see [Review roles](#review-roles)).
 - [ ] **Key**: see the [key rules](#key-rules); it is permanent
 - [ ] **Title**: the display title for the index entry; it can change later
 - [ ] **Flagship or partner**: the flagship is at `/data`; a partner is at `/showcase/<key>`. The
-      first showcase in an empty index must be the flagship (see [Step 5](#step-5-register-the-showcase))
+      first showcase in an empty index must be the flagship (see [Step 5](#step-5-register-the-config-and-add-the-index-entry))
 - [ ] **Logos**: the showcase's own logo and at most three partner logos, each with alt text
 - [ ] **Colors**: a theme preset (`default`, `blue` or `teal`), and optional `#rrggbb` primary and
       accent overrides. Each override needs a contrast of 4.5:1 or more on white, or CI fails
