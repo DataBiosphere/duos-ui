@@ -316,7 +316,7 @@ describe('DatasetStatistics', () => {
     expect(notice.textContent).toMatch(/While a study is unpublished/)
     // Distinct from a study that simply has no requests yet
     expect(
-      screen.queryByText(/No Data Access Requests have been created for this dataset/),
+      screen.queryByText(/No granted data access requests yet/),
     ).not.toBeInTheDocument()
     // The rest of the page is unaffected
     expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeTruthy()
@@ -424,9 +424,34 @@ describe('DatasetStatistics', () => {
     renderDatasetStatistics({ dars: [] })
 
     expect(
-      await screen.findByText(/No Data Access Requests have been created for this dataset/),
+      await screen.findByText(/No granted data access requests yet/),
     ).toBeTruthy()
   })
+
+  const historyHeading = () => screen.findByText(/^Data Access Requests for this dataset/)
+  it('counts the data access requests in the heading once they load', async () => {
+    renderDatasetStatistics()
+
+    expect((await historyHeading()).textContent).toBe('Data Access Requests for this dataset (1)')
+  })
+
+  it('counts none when the dataset has no data access requests', async () => {
+    renderDatasetStatistics({ dars: [] })
+
+    expect((await historyHeading()).textContent).toBe('Data Access Requests for this dataset (0)')
+  })
+
+  /** A refusal or a failure is not "no requests", so neither may read as "(0)". */
+  it.each([['is refused', 403], ['fails to load', 500]])(
+    'shows no count when the request history %s',
+    async (_outcome, status) => {
+      renderDatasetStatistics({
+        darsError: Object.assign(new Error('nope'), { response: { status } }),
+      })
+
+      expect((await historyHeading()).textContent).toBe('Data Access Requests for this dataset')
+    },
+  )
 })
 
 // access management, field display, identifier variants
@@ -688,7 +713,7 @@ describe('DatasetStatistics', () => {
 
   it('Displays message when no DARs exist', async () => {
     mount(mockDataset)
-    expect(await screen.findByText(/No Data Access Requests have been created for this dataset/)).toBeInTheDocument()
+    expect(await screen.findByText(/No granted data access requests yet/)).toBeInTheDocument()
   })
 
   it('Displays DAR section with expired data', async () => {

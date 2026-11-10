@@ -330,7 +330,11 @@ export default function DatasetStatistics() {
             </div>
           </div>
           <div style={{ paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%' }} />
-          <div style={Styles.SUB_HEADER}>Data Access Requests for this dataset</div>
+          <div style={Styles.SUB_HEADER}>
+            Data Access Requests for this dataset
+            {/* Counted only once the history has loaded, so a refusal or a failure never reads as "(0)". */}
+            {!darsRestricted && dars !== undefined && ` (${dars.length})`}
+          </div>
           {darsRestricted && (
             // <output> carries an implicit status role and is announced more reliably than a div
             // wearing role="status". It is inline by default, so the block display keeps the
@@ -344,7 +348,7 @@ export default function DatasetStatistics() {
           {!darsRestricted && dars?.length === 0
             && (
               <div style={{ paddingTop: '20px', fontStyle: 'italic' }}>
-                No Data Access Requests have been created for this dataset.
+                No granted data access requests yet.
               </div>
             )}
           {!darsRestricted && dars && dars.length > 0 && (

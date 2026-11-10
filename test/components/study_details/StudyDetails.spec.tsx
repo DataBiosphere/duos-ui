@@ -274,6 +274,9 @@ beforeEach(() => {
     },
   })
   vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(makeSearchResponse() as never)
+  // Nothing resets mocks between tests here, so a history one test refuses would stay refused for
+  // the next.
+  vi.mocked(DatasetMetrics.getStudyStats).mockReset().mockResolvedValue([])
   vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({
     userId: 42,
     libraryCard: {} as LibraryCard,
@@ -611,7 +614,7 @@ describe('Study details test', () => {
     mountComponent()
     await screen.findByText(datasets[0].datasetName)
 
-    expect(screen.getByRole('heading', { name: 'Data Access Requests for this Study' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Data Access Requests for this Study (0)' })).toBeInTheDocument()
     expect(screen.getByText('No granted data access requests yet.')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Primary Study Publications' })).toBeInTheDocument()
     expect(screen.getByText('No primary study publications have been added yet.')).toBeInTheDocument()
@@ -833,6 +836,44 @@ describe('Study details test', () => {
       .toBeInTheDocument()
     expect(screen.queryByText('Unable to load data access requests.')).not.toBeInTheDocument()
     expect(screen.queryByText('No granted data access requests yet.')).not.toBeInTheDocument()
+  })
+
+  const grantedDar = (referenceId: string) => ({
+    projectTitle: `Project ${referenceId}`, referenceId, darCode: referenceId.toUpperCase(),
+    nonTechRus: '', expired: false, updateDate: Date.now(),
+  })
+  const darHistoryHeading = () => screen.getByRole('heading', { name: /^Data Access Requests for this Study/ })
+
+  it('counts the granted requests in the section heading, and not in the table of contents', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([grantedDar('dar-1'), grantedDar('dar-2')])
+    mountComponent()
+
+    expect(await screen.findByRole('heading', { name: 'Data Access Requests for this Study (2)' }))
+      .toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Data Access Requests for this Study' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /\(2\)/ })).not.toBeInTheDocument()
+  })
+
+  it('shows no count while the request history is loading', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockReturnValueOnce(new Promise(() => {}))
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+
+    expect(darHistoryHeading().textContent).toBe('Data Access Requests for this Study')
+  })
+
+  /** A refusal or a failure is not "no requests", so neither may read as "(0)". */
+  it.each([
+    ['is refused', 403, /do not have access to this study's data access request history/i],
+    ['fails to load', 500, 'Unable to load data access requests.'],
+  ])('shows no count when the request history %s', async (_outcome, status, message) => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(
+      Object.assign(new Error('nope'), { response: { status } }),
+    )
+    mountComponent()
+
+    expect(await screen.findByText(message)).toBeInTheDocument()
+    expect(darHistoryHeading().textContent).toBe('Data Access Requests for this Study')
   })
 
   /**
