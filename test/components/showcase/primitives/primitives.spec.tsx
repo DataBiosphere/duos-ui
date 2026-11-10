@@ -5,6 +5,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { type ShowcaseHandoffs, ShowcaseHandoffsContext } from 'src/components/showcase/handoffs'
 import { Card } from 'src/components/showcase/primitives/Card'
+import { cardSx } from 'src/components/showcase/primitives/cardStyles'
 import { FeaturedCard } from 'src/components/showcase/primitives/FeaturedCard'
 import { ShowcaseLink } from 'src/components/showcase/primitives/ShowcaseLink'
 import { StructuredPanel } from 'src/components/showcase/primitives/StructuredPanel'
@@ -117,7 +118,29 @@ describe('Card', () => {
   it('caps the width of a failed featured image\'s alt text, as it capped the image', () => {
     renderInRouter(<FeaturedCard title="Example App" media={{ src: '/images/app.png', alt: 'A long description of the app screenshot' }} />)
     fireEvent.error(screen.getByRole('img'))
-    expect(screen.getByText('A long description of the app screenshot')).toHaveStyle({ flex: '0 0 50%' })
+    expect(screen.getByText('A long description of the app screenshot').parentElement).toHaveStyle({ flex: '0 0 50%' })
+  })
+
+  it('shows the alt text in the reserved box for media with no source', () => {
+    renderInRouter(<Card title="Example App" reserveMedia media={{ alt: 'App screenshot' }} />)
+    const frame = screen.getByRole('article').querySelector('.showcase-card__media-frame')
+    expect(frame).toHaveTextContent('App screenshot')
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
+
+  it('clamps alt text on an element inside its padding, so the padding shows no extra line', () => {
+    renderInRouter(<Card title="Example App" reserveMedia media={{ alt: 'App screenshot' }} />)
+    const lines = screen.getByText('App screenshot')
+    expect(lines).toHaveStyle({ overflow: 'hidden' })
+    // jsdom resolves the rem padding to px.
+    expect(getComputedStyle(lines).paddingBottom).toBe('0')
+    expect(getComputedStyle(lines.parentElement as HTMLElement).paddingBottom).toBe('12px')
+  })
+
+  it('builds the card styles once per variant', () => {
+    expect(cardSx(false)).toBe(cardSx(false))
+    expect(cardSx(true)).toBe(cardSx(true))
+    expect(cardSx(true)).not.toBe(cardSx(false))
   })
 
   it('leaves out media whose source breaks the URL policy', () => {

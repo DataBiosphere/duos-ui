@@ -30,11 +30,11 @@ const row: SxProps<Theme> = { display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1r
 /** The image fills the reserved box, cropped to its 16:9 ratio. */
 const framedImage: SxProps<Theme> = { display: 'block', width: '100%', height: '100%', objectFit: 'cover' }
 
-/** Alt text shown in place of an image. It is clamped with an ellipsis so it stays inside its box;
- * screen readers still read all of it. */
-const altText: SxProps<Theme> = {
-  p: '0.75rem',
-  color: 'var(--showcase-primary, #1f3b50)',
+/** Alt text shown in place of an image: an outer box for the padding and an inner one clamped to four
+ * lines with an ellipsis. The clamp sits inside the padding, so no part of a fifth line shows in
+ * it. Screen readers still read all of the text. */
+const altText: SxProps<Theme> = { display: 'block', p: '0.75rem', color: 'var(--showcase-primary, #1f3b50)' }
+const altTextLines: SxProps<Theme> = {
   overflowWrap: 'anywhere',
   display: '-webkit-box',
   WebkitBoxOrient: 'vertical',
@@ -42,7 +42,7 @@ const altText: SxProps<Theme> = {
   overflow: 'hidden',
 }
 
-export const cardSx = (featured: boolean) => ({
+const buildCardSx = (featured: boolean) => ({
   card: {
     ...frame,
     height: '100%',
@@ -76,6 +76,7 @@ export const cardSx = (featured: boolean) => ({
   },
   framedImage,
   mediaAlt: altText,
+  altTextLines,
   body: { display: 'flex', flexDirection: 'column', gap: '0.6rem', flex: 1, minWidth: 0 },
   title,
   badges: row,
@@ -91,6 +92,12 @@ export const cardSx = (featured: boolean) => ({
   value: { m: 0, minWidth: 0, overflowWrap: 'anywhere' },
   actions: { ...row, mt: 'auto' },
 }) satisfies Record<string, SxProps<Theme>>
+
+const DEFAULT_CARD_SX = buildCardSx(false)
+const FEATURED_CARD_SX = buildCardSx(true)
+
+/** The styles for a default or featured card, built once rather than on every render. */
+export const cardSx = (featured: boolean) => (featured ? FEATURED_CARD_SX : DEFAULT_CARD_SX)
 
 export const panelSx = {
   panel: frame,
