@@ -75,7 +75,8 @@ Put every image in `src/images/showcase/<key>/`. A config names an image by its 
 
 Logos follow the standards in [adding-a-data-library.md](adding-a-data-library.md) (Step 1): SVG preferred,
 transparent PNG as the fallback, a 256 × 256 canvas, optimized. Hero and card images do not need
-the square canvas. CI enforces these limits (`test/showcases/guard/assetBudget.ts`):
+the square canvas. CI does not check the canvas or the optimization; the reviewer does. CI enforces
+these limits (`test/showcases/guard/assetBudget.ts`):
 
 | Image | Limit |
 | ----- | ----- |
