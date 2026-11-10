@@ -48,13 +48,18 @@ in the PR (see [Review roles](#review-roles)).
 - [ ] **Owners**: the program owner who approves content, and a contact for later changes
 - [ ] **Key**: see the [key rules](#key-rules); it is permanent
 - [ ] **Title**: the display title for the index entry; it can change later
+- [ ] **Flagship or partner**: the flagship is at `/data`; a partner is at `/showcase/<key>`. The
+      first showcase in an empty index must be the flagship (see [Step 5](#step-5-register-the-showcase))
 - [ ] **Logos**: the showcase's own logo and at most three partner logos, each with alt text
 - [ ] **Colors**: a theme preset (`default`, `blue` or `teal`), and optional `#rrggbb` primary and
-      accent overrides
+      accent overrides. Each override needs a contrast of 4.5:1 or more on white, or CI fails
 - [ ] **Dataset identifiers**: production `DUOS-` identifiers, for example `DUOS-000123`
 - [ ] **Tools and workspaces**: name, description, tags, launch URL and optional documentation URL
+      (record them, but you can add them only after their section type is implemented; see the
+      "Implemented sections only" rule in Step 4)
 - [ ] **Copy**: subtitle, intro, calls to action (label and URL), announcements
-- [ ] **Dates**: a `startDate` and an `endDate` (`YYYY-MM-DD`, UTC) for each announcement or event
+- [ ] **Dates**: a `startDate` and an `endDate` (`YYYY-MM-DD`, UTC) for each announcement or event.
+      A showcase has no dates of its own; skip this item if there is no announcement or event
 - [ ] **Clearance**: confirmation that all of the above is cleared for public disclosure
 
 `DUOS-` identifiers come from a sequence in each environment. A showcase config lists **production**
