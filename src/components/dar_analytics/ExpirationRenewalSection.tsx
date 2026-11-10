@@ -9,7 +9,9 @@ import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
 import { bucketStartsInRange, describePeriods, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
-import { coverSameRange, useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
+import {
+  coverSameRange, describeTarget, useDarMetricsReport, useDarMetricsTarget,
+} from 'src/components/dar_analytics/useDarMetricsReport'
 
 const layoutStyle = {
   display: 'grid',
@@ -34,6 +36,7 @@ const COLUMNS: GridColDef<PeriodRow>[] = [
 ]
 
 export const ExpirationRenewalSection = ({ range }: { range: DarAnalyticsRange }) => {
+  const target = useDarMetricsTarget()
   const expirations = useDarMetricsReport('expirations', DarMetrics.getExpirations, range, { limit: 1 })
   const renewals = useDarMetricsReport('renewals', DarMetrics.getRenewals, range, { limit: 1 })
   const data = expirations.data
@@ -65,9 +68,16 @@ export const ExpirationRenewalSection = ({ range }: { range: DarAnalyticsRange }
   return (
     <AnalyticsSection
       title="Expiration and renewal"
-      description={'DAR collections whose access ended in the range, dated by when it ended, and datasets '
-        + 'renewed by approved progress reports submitted in the range. Access runs 365 days from the '
-        + 'newest approval on a dataset; a closeout ends it early.'}
+      description={target
+        // Beside DAR cards that show both dates, so the term is stated exactly: it runs from the
+        // submission that was approved, not from the day it was approved.
+        ? `DAR collections whose access to ${describeTarget(target)} ended in the range, dated by when `
+        + 'it ended, and datasets renewed by approved progress reports submitted in the range. Access '
+        + 'runs 365 days from the submission of the newest approved request or progress report; a '
+        + 'closeout ends it early.'
+        : 'DAR collections whose access ended in the range, dated by when it ended, and datasets '
+          + 'renewed by approved progress reports submitted in the range. Access runs 365 days from the '
+          + 'newest approval on a dataset; a closeout ends it early.'}
       isLoading={expirations.isPending || renewals.isPending || !coverSameRange(expirations.data, renewals.data)}
       isRefreshing={expirations.isPlaceholderData || renewals.isPlaceholderData}
       error={expirations.error ?? renewals.error}

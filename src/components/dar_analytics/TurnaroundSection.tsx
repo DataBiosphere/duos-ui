@@ -8,7 +8,7 @@ import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
 import { bucketStartsInRange, describePeriods, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
-import { useDarMetricsReport } from 'src/components/dar_analytics/useDarMetricsReport'
+import { describeTarget, useDarMetricsReport, useDarMetricsTarget } from 'src/components/dar_analytics/useDarMetricsReport'
 
 type Level = 'dar' | 'dataset'
 
@@ -36,7 +36,12 @@ const COLUMNS: GridColDef<TurnaroundRow>[] = [
 ]
 
 export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
-  const [level, setLevel] = useState<Level>('dar')
+  // A DAR's turnaround runs to its last decision, which can be on another study's dataset, so for
+  // one study or dataset only the per-dataset figures apply and there is no level to choose.
+  const target = useDarMetricsTarget()
+  const [chosenLevel, setLevel] = useState<Level>('dar')
+  const level: Level = target ? 'dataset' : chosenLevel
+  const decided = target ? `request for ${describeTarget(target)}` : 'dataset'
   const report = useDarMetricsReport(
     `${level}-turnaround`,
     level === 'dar' ? DarMetrics.getDecisionTurnaround : DarMetrics.getDatasetDecisionTurnaround,
@@ -68,12 +73,12 @@ export const TurnaroundSection = ({ range }: { range: DarAnalyticsRange }) => {
       description={level === 'dar'
         ? 'Days from submission to the DAC decision, for DARs submitted in the range. A DAR counts once '
         + 'every dataset on it is decided, measured to the last decision.'
-        : 'Days from submission to the DAC decision on each dataset, for DARs submitted in the range.'}
+        : `Days from submission to the DAC decision on each ${decided}, for DARs submitted in the range.`}
       caveats={data
         ? ['Decisions with no usable vote date (votes cast before March 2021, or dated before a backfilled '
           + `submission) are left out of these figures: ${data.unmeasured} in this range.`]
         : []}
-      actions={(
+      actions={!target && (
         <ToggleButtonGroup
           aria-label="Measure turnaround per"
           size="small"

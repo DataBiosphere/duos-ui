@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { AnalyticsSection } from 'src/components/dar_analytics/AnalyticsSection'
+import { DarMetricsTargetContext } from 'src/components/dar_analytics/useDarMetricsReport'
 
 const baseProps = {
   title: 'Decision funnel',
@@ -17,6 +18,27 @@ describe('AnalyticsSection', () => {
 
     expect(screen.getByRole('region', { name: 'Decision funnel' })).toBeInTheDocument()
     expect(screen.getByText('Figures').closest('[aria-busy="true"]')).not.toBeNull()
+  })
+
+  it('titles the section with a second-level heading on the Metrics page', () => {
+    render(<AnalyticsSection {...baseProps}><p>Figures</p></AnalyticsSection>)
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Decision funnel' })).toBeInTheDocument()
+  })
+
+  /**
+   * A study's page puts its sections under sixth-level headings, so a heading here would outrank
+   * the section it is in and adopt every section after it. The title still names the region.
+   */
+  it('titles the section without a heading on a study\'s or dataset\'s page', () => {
+    render(
+      <DarMetricsTargetContext.Provider value={{ kind: 'study', id: '12' }}>
+        <AnalyticsSection {...baseProps}><p>Figures</p></AnalyticsSection>
+      </DarMetricsTargetContext.Provider>,
+    )
+
+    expect(screen.getByRole('region', { name: 'Decision funnel' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument()
   })
 
   it('shows the empty text instead of the figures, keeping caveats visible', () => {

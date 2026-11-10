@@ -6,7 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { VolumeSection } from 'src/components/dar_analytics/VolumeSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
-import { DarVolumeReport } from 'src/types/darMetrics'
+import { DarMetricsTargetContext } from 'src/components/dar_analytics/useDarMetricsReport'
+import { DarMetricsTarget, DarVolumeReport } from 'src/types/darMetrics'
 
 vi.mock('src/libs/ajax/DarMetrics', () => ({
   DarMetrics: { getVolume: vi.fn() },
@@ -131,5 +132,83 @@ describe('VolumeSection', () => {
 
     expect(await screen.findByText('No DARs were submitted in this range.')).toBeInTheDocument()
     expect(screen.getByText(/shows the institution recorded when it was submitted/)).toBeInTheDocument()
+  })
+
+  describe('on a study\'s or dataset\'s page', () => {
+    const renderFor = (target: DarMetricsTarget) => render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <DarMetricsTargetContext.Provider value={target}>
+          <VolumeSection range={range} />
+        </DarMetricsTargetContext.Provider>
+      </QueryClientProvider>,
+    )
+    // As consent sends it: no rows, nobody named, and no researcher or institution counts
+    const scoped = report({
+      total: 5,
+      buckets: [
+        { bucketStart: Q1, darCount: 3, datasetCount: 4 },
+        { bucketStart: Q2, darCount: 2, datasetCount: 3 },
+      ],
+    })
+
+    /** The page is open beyond the DAC roles, so nothing on it says who asked or from where. */
+    it('charts a study\'s DARs and dataset requests without researchers or institutions', async () => {
+      vi.mocked(DarMetrics.getVolume).mockResolvedValue(scoped)
+
+      renderFor({ kind: 'study', id: '12' })
+
+      await screen.findByText('DARs submitted', { selector: 'dt' })
+      expect(screen.getByText(/request this study's datasets/)).toBeInTheDocument()
+      expect(figure('DARs submitted')).toHaveTextContent('5')
+      expect(figure('Dataset requests')).toHaveTextContent('7')
+      expect(screen.queryByText('Researchers')).not.toBeInTheDocument()
+      expect(screen.queryByText('Institutions')).not.toBeInTheDocument()
+      expect(screen.queryByRole('grid')).not.toBeInTheDocument()
+      expect(screen.queryByText(/shows the institution recorded/)).not.toBeInTheDocument()
+      expect(document.querySelector('[aria-label="DARs submitted per period"]'))
+        .toHaveAccessibleDescription('2026 Q1: DARs submitted 3; 2026 Q2: DARs submitted 2')
+      expect(DarMetrics.getVolume).toHaveBeenCalledWith({ ...range, limit: 1, target: { kind: 'study', id: '12' } })
+    })
+
+    it('shows them even if consent were to send who requested', async () => {
+      vi.mocked(DarMetrics.getVolume).mockResolvedValue({
+        ...scoped,
+        institutions: [{ institutionId: 7, institutionName: 'Broad Institute', darCount: 5, researcherCount: 2 }],
+        researchers: [{ userId: 1, darCount: 5 }],
+      })
+
+      renderFor({ kind: 'study', id: '12' })
+
+      await screen.findByText('DARs submitted', { selector: 'dt' })
+      expect(screen.getByText(/request this study's datasets/)).toBeInTheDocument()
+      expect(figure('DARs submitted')).toHaveTextContent('5')
+      expect(screen.queryByText('Broad Institute')).not.toBeInTheDocument()
+      expect(screen.queryByText('Researchers')).not.toBeInTheDocument()
+    })
+
+    /** One dataset is requested once per DAR, so the dataset count would only repeat the DARs. */
+    it('shows a dataset\'s DARs alone', async () => {
+      vi.mocked(DarMetrics.getVolume).mockResolvedValue(scoped)
+
+      renderFor({ kind: 'dataset', id: 7 })
+
+      await screen.findByText('DARs submitted', { selector: 'dt' })
+      expect(screen.getByText(/request this dataset\./)).toBeInTheDocument()
+      expect(figure('DARs submitted')).toHaveTextContent('5')
+      expect(screen.queryByText('Dataset requests')).not.toBeInTheDocument()
+    })
+
+    it('survives a report with no institution or researcher lists at all', async () => {
+      const bare = { ...scoped } as Partial<DarVolumeReport>
+      delete bare.institutions
+      delete bare.researchers
+      vi.mocked(DarMetrics.getVolume).mockResolvedValue(bare as DarVolumeReport)
+
+      renderFor({ kind: 'study', id: '12' })
+
+      await screen.findByText('DARs submitted', { selector: 'dt' })
+      expect(screen.getByText(/request this study's datasets/)).toBeInTheDocument()
+      expect(figure('DARs submitted')).toHaveTextContent('5')
+    })
   })
 })
