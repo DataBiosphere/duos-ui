@@ -36,7 +36,9 @@ is **not** a privacy control: the title, copy and image names of a hidden showca
 JavaScript for anyone to read.
 
 Merge only content that is cleared for public disclosure. This includes the name of a partner that
-is not yet announced. If content is not cleared, keep the PR open until it is.
+is not yet announced. A branch and a PR are public also, because duos-ui is a public repository. Do
+not push content, logos or screenshots that are not cleared. Get the clearance before you push the
+branch or open the PR.
 
 ---
 
@@ -137,16 +139,20 @@ export const examplePartner: ShowcasePartialInput = {
       subtitle: 'Genomic data from the Example Partner program',
       intro: 'Cohorts that researchers can request through DUOS.',
       stats: ['studies', 'datasets'],
+      scope: { dac: ['Example Partner DAC'] },
       primaryCtas: [{ label: 'Browse the data library', url: '/datalibrary' }],
       onboarding: [],
       announcements: [
         { id: 'spring-release', text: 'Spring data release is available', url: 'https://example.org/release', startDate: '2027-03-01', endDate: '2027-04-30' },
       ],
     },
-    'latest-data-releases': { enabled: true, ranking: 'newest', limit: 12 },
+    'latest-data-releases': { enabled: true, ranking: 'newest', scope: { dac: ['Example Partner DAC'] }, limit: 12 },
   },
 }
 ```
+
+`scope` limits the hero counts or a computed shelf to the datasets of the DACs with exactly these
+names. With no `scope`, they cover the whole public catalog, which is not correct for a partner.
 
 How the merge works (`resolveShowcase`):
 
@@ -200,7 +206,7 @@ daily release.
 
 ### Lookup and config limits
 
-Consent and the BFF proxy enforce these limits on the public lookup, and the config schema has the
+Consent enforces these limits on the public lookup, and the config schema has the
 same values (`LOOKUP_LIMITS` in `src/types/showcase.ts`). A config over a limit fails CI. A list
 over its limit can fail with only `Invalid input` at the section, so check the list lengths against
 this table.
@@ -290,14 +296,15 @@ cannot merge before the flagship is in the index.
 
    ```sh
    # Legacy mode
-   jq '.bffEnabled = false | .showcaseEnabled = true' public/config.json > config.tmp && mv config.tmp public/config.json
+   jq '.bffEnabled = false | .showcaseEnabled = true | .showcaseHandoffsEnabled = false' public/config.json > config.tmp && mv config.tmp public/config.json
    # BFF mode
    jq '.bffEnabled = true | .showcaseEnabled = true' public/config.json > config.tmp && mv config.tmp public/config.json
    ```
 3. Start one server. Both use port 3000, so do not run them together.
    - Legacy mode: `pnpm start` (Vite only).
    - BFF mode: `pnpm run start:server` (the Fastify server with Vite embedded). It needs
-     `.env.local`; see [DEVNOTES.md](../DEVNOTES.md).
+     `.env.local`; see [DEVNOTES.md](../DEVNOTES.md). Add `DUOS_SHOWCASE_API_URL` to that file by
+     hand. The setup does not write it, and without it each lookup gets HTTP 503.
 4. Open `/showcase/<key>`, or `/data` for the flagship.
 
 Dataset cards and hero counts come from the lookup. To see real cards, point the lookup at
@@ -305,16 +312,18 @@ production Consent: `DUOS_SHOWCASE_API_URL` in BFF mode, `showcaseApiUrl` in leg
 that reads production is read-only: the handoffs to search, dataset and request pages stay off. See
 the configuration table in [docs/data-showcase-lookup.md](data-showcase-lookup.md).
 
-With `pnpm start`, the page always shows the "content preview with production data" notice and
-keeps the handoffs off, also when the lookup reads your local Consent. Only the Fastify server
-turns the handoffs on.
+The legacy command sets `showcaseHandoffsEnabled` to `false`. Vite uses the value in the file, and
+the rendered file can have `true`: production identifiers then link to pages of a different
+environment. With `false`, the page shows the "content preview with production data" notice. The
+Fastify server ignores the file and compares the lookup URL with `apiUrl` itself.
 
-Until Consent has the public lookup on ("Not done yet" in that document), each dataset shelf shows
-"These datasets can't be loaded right now" in every environment, production also. This is not a
-defect in your config. The masthead, the hero copy and the links do not need the lookup.
+Each dataset shelf shows "These datasets can't be loaded right now" in every environment, production
+also, until Consent has the public lookup on ("Not done yet" in that document) and
+DataBiosphere/consent#3263 is deployed. This is not a defect in your config. The masthead, the hero copy and the links do not need the lookup.
 
-If the showcase must not be public at merge, set `status` back to `"hidden"` before you ask for
-review, and attach screenshots of the live preview to the PR.
+If the showcase must not have a page at merge (for example, the launch date is later), set `status`
+back to `"hidden"` before you ask for review, and attach screenshots of the live preview to the PR.
+The content must be cleared in each case (Step 1).
 
 The full preview procedure (staging, and hidden entries in non-production builds) is story S4.2 of
 the delivery plan. This section changes when that story lands.
@@ -369,9 +378,12 @@ flagship, `/data` shows that page.
 1. Remove the entry from `entries` in `registry.json`.
 2. Add the key to `retiredKeys` in the same file. This is the tombstone. Add only the key, as a
    string, not the entry: `"retiredKeys": ["example-partner"]`.
-3. Remove the config from `showcaseConfigs`, and delete `src/showcases/<key>.ts` and
-   `src/images/showcase/<key>/`.
+3. Remove the config from `showcaseConfigs` and its import from `index.ts`, and delete
+   `src/showcases/<key>.ts` and `src/images/showcase/<key>/`.
 4. Run the checks (Step 7).
+
+You cannot retire the flagship while other entries stay: CI fails an index that has entries and no
+flagship.
 
 A tombstone is permanent. CI fails a PR that removes an entry without a tombstone, deletes a
 tombstone, or gives an entry a retired key. A replacement showcase gets a new key; it must not take
