@@ -368,9 +368,11 @@ flagship, `/data` shows that page.
 ### Retire a key
 
 1. Remove the entry from `entries` in `registry.json`.
-2. Add the key to `retiredKeys` in the same file. This is the tombstone.
+2. Add the key to `retiredKeys` in the same file. This is the tombstone. Add only the key, as a
+   string, not the entry: `"retiredKeys": ["example-partner"]`.
 3. Remove the config from `showcaseConfigs`, and delete `src/showcases/<key>.ts` and
    `src/images/showcase/<key>/`.
+4. Run the checks (Step 7).
 
 A tombstone is permanent. CI fails a PR that removes an entry without a tombstone, deletes a
 tombstone, or gives an entry a retired key. A replacement showcase gets a new key; it must not take
