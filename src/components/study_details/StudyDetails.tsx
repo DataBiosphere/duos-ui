@@ -44,6 +44,7 @@ import StudyInfoTable from 'src/components/study_details/StudyInfoTable'
 import PiExternalProfileIcons from 'src/components/study_details/PiExternalProfileIcons'
 import { getPiProfileLinks } from 'src/components/study_details/piProfileLinks'
 import StudyDarHistory from 'src/components/study_details/StudyDarHistory'
+import StudyDarTrends from 'src/components/study_details/StudyDarTrends'
 import StudySecondaryResearchOutputs from 'src/components/study_details/StudySecondaryResearchOutputs'
 import StudyPublicationCards from 'src/components/study_details/StudyPublicationCards'
 import StudyAssetTable from 'src/components/study_details/StudyAssetTable'
@@ -266,6 +267,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             </div>
           </StudyPageSection>
           <StudyDarHistory studyId={studyId} />
+          <StudyDarTrends studyId={studyId} />
           <StudyAssetTable<ModelAsset>
             id="models"
             heading="AI Models"

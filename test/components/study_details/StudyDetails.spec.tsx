@@ -58,6 +58,24 @@ vi.mock('src/libs/ajax/DatasetMetrics', () => ({
   },
 }))
 
+// The trend reports the page asks consent for, each empty unless a test says otherwise
+vi.mock('src/libs/ajax/DarMetrics', () => {
+  const emptyReport = () => Promise.resolve({
+    from: '2026-01-01', to: '2026-03-31', bucket: 'QUARTER', total: 0, unmeasured: 0, buckets: [], rows: [],
+  })
+  return {
+    DarMetrics: {
+      getVolume: vi.fn(emptyReport),
+      getDecisions: vi.fn(emptyReport),
+      getDatasetDecisions: vi.fn(emptyReport),
+      getDecisionTurnaround: vi.fn(emptyReport),
+      getDatasetDecisionTurnaround: vi.fn(emptyReport),
+      getExpirations: vi.fn(emptyReport),
+      getRenewals: vi.fn(emptyReport),
+    },
+  }
+})
+
 vi.mock('src/libs/ajax/StudyRecommendations', () => ({
   StudyRecommendations: {
     getSimilar: vi.fn().mockResolvedValue([]),
@@ -86,6 +104,7 @@ vi.mock('src/utils/accessUtils', () => ({
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Study } from 'src/libs/ajax/Study'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 
 const datasets = [
@@ -843,6 +862,7 @@ describe('Study details test', () => {
     nonTechRus: '', expired: false, updateDate: Date.now(),
   })
   const darHistoryHeading = () => screen.getByRole('heading', { name: /^Data Access Requests for this Study/ })
+  const forbidden = () => Object.assign(new Error('User does not have permission'), { response: { status: 403 } })
 
   it('counts the granted requests in the section heading, and not in the table of contents', async () => {
     vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([grantedDar('dar-1'), grantedDar('dar-2')])
@@ -873,6 +893,135 @@ describe('Study details test', () => {
     mountComponent()
 
     expect(await screen.findByText(message)).toBeInTheDocument()
+    expect(darHistoryHeading().textContent).toBe('Data Access Requests for this Study')
+  })
+
+  it('shows the study\'s DAR trends once its request history has loaded', async () => {
+    mountComponent()
+
+    expect(await screen.findByRole('heading', { name: 'Data Access Request Trends' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Data Access Request Trends' })).toHaveAttribute('href', '#dar-trends')
+    await waitFor(() => expect(DarMetrics.getVolume).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 1, target: { kind: 'study', id: '1' } }),
+    ))
+    expect(await screen.findByRole('tab', { name: 'Decisions' })).toBeInTheDocument()
+    // The trends follow the history in the table of contents, as they do on the page
+    const contents = screen.getAllByRole('link').map(link => link.textContent)
+    expect(contents.indexOf('Data Access Request Trends'))
+      .toBe(contents.indexOf('Data Access Requests for this Study') + 1)
+  })
+
+  /**
+   * Consent gates the trends as it gates the history. Whoever is refused the history is not shown
+   * trends, and is not the cause of requests that could only be refused too.
+   */
+  it('asks for no trends, and says who can see them, when the request history is refused', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(forbidden())
+    mountComponent()
+
+    const note = await screen.findByText(
+      /Trends are shown to those who can see this study's data access request history/,
+    )
+    expect(screen.queryByRole('tab', { name: 'Volume' })).not.toBeInTheDocument()
+    expect(Object.values(DarMetrics).every(report => vi.mocked(report).mock.calls.length === 0)).toBe(true)
+    // The history section announces the refusal; the trends note must not announce it a second time
+    expect(note.closest('[role="alert"], [role="status"], output')).toBeNull()
+  })
+
+  it('asks for no trends when the request history fails to load', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(
+      Object.assign(new Error('boom'), { response: { status: 500 } }),
+    )
+    mountComponent()
+
+    const note = await screen.findByText(
+      /Trends are unavailable because this study's data access request history could not be loaded just now/,
+    )
+    expect(screen.queryByRole('tab', { name: 'Volume' })).not.toBeInTheDocument()
+    expect(Object.values(DarMetrics).every(report => vi.mocked(report).mock.calls.length === 0)).toBe(true)
+    // The history section announces the failure; the trends note must not announce it a second time
+    expect(screen.getByText('Unable to load data access requests.')).toHaveAttribute('role', 'alert')
+    expect(note.closest('[role="alert"], [role="status"], output')).toBeNull()
+  })
+
+  /**
+   * A failure may keep an earlier history on the page, but it is not an answer that the reader
+   * may see it now, so the trends go and are not asked for again until the history loads.
+   */
+  it.each([
+    ['requests', [grantedDar('dar-1')]],
+    ['no requests', []],
+  ])('takes the trends off the page when a refetch of a history with %s fails', async (_what, history) => {
+    vi.mocked(DatasetMetrics.getStudyStats)
+      .mockResolvedValueOnce(history)
+      .mockRejectedValue(Object.assign(new Error('boom'), { response: { status: 500 } }))
+    mountComponent()
+    await screen.findByRole('tab', { name: 'Volume' })
+    await waitFor(() => expect(DarMetrics.getVolume).toHaveBeenCalled())
+    vi.mocked(DarMetrics.getVolume).mockClear()
+
+    await queryClient.invalidateQueries({ queryKey: ['study-dar-history'] })
+
+    expect(await screen.findByText(/Trends are unavailable because this study's data access request history could not be loaded just now/))
+      .toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Volume' })).not.toBeInTheDocument()
+    expect(DarMetrics.getVolume).not.toHaveBeenCalled()
+  })
+
+  /** A refetch that hasn't answered is not a failure: the open tab and its figures stay put. */
+  it('keeps the trends, and the open tab, up while the history refetches', async () => {
+    let answer: (history: never[]) => void = () => {}
+    vi.mocked(DatasetMetrics.getStudyStats)
+      .mockResolvedValueOnce([])
+      .mockReturnValueOnce(new Promise((resolve) => {
+        answer = resolve
+      }))
+    mountComponent()
+    fireEvent.click(await screen.findByRole('tab', { name: 'Decisions' }))
+    const refetch = queryClient.invalidateQueries({ queryKey: ['study-dar-history'] })
+    await waitFor(() => expect(DatasetMetrics.getStudyStats).toHaveBeenCalledTimes(2))
+
+    // In flight: nothing has been taken down
+    expect(screen.getByRole('tab', { name: 'Decisions' })).toHaveAttribute('aria-selected', 'true')
+
+    answer([])
+    await refetch
+    expect(screen.getByRole('tab', { name: 'Decisions' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('brings the trends back once the history loads again after a failure', async () => {
+    let failNext = false
+    vi.mocked(DatasetMetrics.getStudyStats).mockImplementation(() =>
+      (failNext ? Promise.reject(Object.assign(new Error('boom'), { response: { status: 500 } })) : Promise.resolve([])))
+    mountComponent()
+    await screen.findByRole('tab', { name: 'Volume' })
+
+    failNext = true
+    await queryClient.invalidateQueries({ queryKey: ['study-dar-history'] })
+    await waitFor(() => expect(screen.queryByRole('tab', { name: 'Volume' })).not.toBeInTheDocument())
+
+    failNext = false
+    await queryClient.invalidateQueries({ queryKey: ['study-dar-history'] })
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toBeInTheDocument()
+  })
+
+  it('takes the trends off the page when the server refuses the history on refetch', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats)
+      .mockResolvedValueOnce([grantedDar('dar-1')])
+      .mockRejectedValue(forbidden())
+    mountComponent()
+    await screen.findByRole('tab', { name: 'Volume' })
+    await waitFor(() => expect(DarMetrics.getVolume).toHaveBeenCalled())
+    vi.mocked(DarMetrics.getVolume).mockClear()
+
+    await queryClient.invalidateQueries({ queryKey: ['study-dar-history'] })
+
+    const note = await screen.findByText(
+      /Trends are shown to those who can see this study's data access request history/,
+    )
+    expect(note.closest('[role="alert"], [role="status"], output')).toBeNull()
+    expect(screen.queryByRole('tab', { name: 'Volume' })).not.toBeInTheDocument()
+    expect(DarMetrics.getVolume).not.toHaveBeenCalled()
     expect(darHistoryHeading().textContent).toBe('Data Access Requests for this Study')
   })
 
