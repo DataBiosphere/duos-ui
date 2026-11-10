@@ -193,7 +193,7 @@ Rules that CI checks in the config (`test/showcases/guard/checkShowcase.ts`):
 | Dates | `YYYY-MM-DD`, and `endDate` is not before `startDate`. A range includes both ends, in UTC. |
 | Item IDs | Each `id` is unique in the whole showcase. IDs are analytics keys; do not change one later. |
 | Identifiers | `DUOS-` and exactly six digits, or seven or more digits with no leading zero. For example `DUOS-000123`. |
-| Contrast | Primary and accent colors need a contrast of 4.5:1 or more on the white background. |
+| Contrast | Primary and accent colors need a contrast of 4.5:1 or more on the white background. In a preview, the page shows the preset color in place of an override that fails, so the preview does not show your color. |
 | Images | See Step 3. |
 
 Dated content appears and expires without a release. Every other change needs a merge and the
@@ -303,9 +303,9 @@ production Consent: `DUOS_SHOWCASE_API_URL` in BFF mode, `showcaseApiUrl` in leg
 that reads production is read-only: the handoffs to search, dataset and request pages stay off. See
 the configuration table in [docs/data-showcase-lookup.md](data-showcase-lookup.md).
 
-A dataset shelf shows its unavailable state when the lookup fails. This is what you see until the
-Consent that you point at has the public lookup on ("Not done yet" in that document). The masthead,
-the hero copy and the links do not need the lookup.
+Until Consent has the public lookup on ("Not done yet" in that document), each dataset shelf shows
+"These datasets can't be loaded right now" in every environment, production also. This is not a
+defect in your config. The masthead, the hero copy and the links do not need the lookup.
 
 If the showcase must not be public at merge, set `status` back to `"hidden"` before you ask for
 review, and attach screenshots of the live preview to the PR.
