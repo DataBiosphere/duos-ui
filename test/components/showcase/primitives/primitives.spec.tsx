@@ -135,6 +135,10 @@ describe('Card', () => {
     // jsdom resolves the rem padding to px.
     expect(getComputedStyle(lines).paddingBottom).toBe('0')
     expect(getComputedStyle(lines.parentElement as HTMLElement).paddingBottom).toBe('12px')
+    // jsdom doesn't apply -webkit-line-clamp, so check the clamp on the styles both card variants use.
+    for (const featured of [false, true]) {
+      expect(cardSx(featured).altTextLines).toMatchObject({ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 4, overflow: 'hidden' })
+    }
   })
 
   it('builds the card styles once per variant', () => {
