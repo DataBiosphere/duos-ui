@@ -142,6 +142,27 @@ How the merge works (`resolveShowcase`):
 - You can list sections in any order. The merge puts all 23 keys in the fixed order.
 - A misspelt section key is kept, so that CI reports it.
 
+### Where the dataset identifiers go
+
+A dataset shelf gets its cards from the public lookup. There are two types:
+
+| Type | Sections | What you write |
+| ---- | -------- | -------------- |
+| Computed | `latest-data-releases`, and other shelves when they are implemented | A `ranking`. Consent selects the datasets. Optional `pin` puts identifiers first, and `exclude` removes identifiers. |
+| Curated | `open-access-datasets` only | `items`: the list of identifiers from Step 2, in the order to show. |
+
+```typescript
+'open-access-datasets': {
+  enabled: true,
+  title: 'Example Partner datasets', // optional; the default title is "Open access datasets"
+  items: ['DUOS-000123', 'DUOS-000124'],
+},
+```
+
+`open-access-datasets` is the only section that accepts a list of identifiers. Consent applies
+eligibility, so this shelf shows open datasets only. An identifier that is not eligible gives no
+card. If the datasets of the partner are not open, use a computed shelf and `pin`.
+
 Rules that CI checks in the config (`test/showcases/guard/checkShowcase.ts`):
 
 | Rule | Detail |
