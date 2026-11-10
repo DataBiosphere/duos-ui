@@ -282,14 +282,15 @@ cannot merge before the flagship is in the index.
 
 1. Set the entry to `"status": "live"` on your branch. A `hidden` entry is not routable in any
    build today.
-2. Make a local `public/config.json` with the rollout flag on. Only the boolean `true` works. Git
-   ignores this file. `config/dev.json` has no `bffEnabled`, so choose the mode here:
+2. Turn the rollout flag on in your local `public/config.json`, the file that the local setup
+   renders. Git ignores it. Only the boolean `true` works. Change the file in place: a copy made
+   from `config/dev.json` loses fields such as `showcaseApiUrl`. Choose the mode here:
 
    ```sh
    # Legacy mode
-   jq '.showcaseEnabled = true' config/dev.json > public/config.json
+   jq '.bffEnabled = false | .showcaseEnabled = true' public/config.json > config.tmp && mv config.tmp public/config.json
    # BFF mode
-   jq '.bffEnabled = true | .showcaseEnabled = true' config/dev.json > public/config.json
+   jq '.bffEnabled = true | .showcaseEnabled = true' public/config.json > config.tmp && mv config.tmp public/config.json
    ```
 3. Start one server. Both use port 3000, so do not run them together.
    - Legacy mode: `pnpm start` (Vite only).
