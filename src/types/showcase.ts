@@ -103,7 +103,7 @@ export const ANCHOR_SECTION_KEYS = SECTION_KEYS.filter(
  * Section types with a renderer. Only these can be enabled; the CI guard rejects any other enabled
  * section. Each E3 story adds its type here with its renderer, guard rules and fixtures.
  */
-export const IMPLEMENTED_SECTION_KEYS: readonly SectionKey[] = ['masthead', 'hero', 'latest-data-releases', 'open-access-datasets', 'featured-workspaces']
+export const IMPLEMENTED_SECTION_KEYS: readonly SectionKey[] = ['masthead', 'hero', 'latest-data-releases', 'open-access-datasets', 'featured-tools', 'featured-workspaces']
 
 /**
  * The public lookup's bounds (S2.2). Consent and the BFF proxy enforce them, and the schemas mirror
