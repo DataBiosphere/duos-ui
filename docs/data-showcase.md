@@ -22,11 +22,14 @@ field, file a ticket for a product decision.
 
 ---
 
-## Step 1: Read the public-bundle rule
+## Step 1: Confirm that the content is public
 
-Everything merged to `develop` ships in the public JavaScript bundle. `status: "hidden"` keeps a
-route off. It is **not** a privacy control: the title, copy and image names of a hidden showcase are
-in the bundle for anyone to read.
+There is no other document to read for this step. The rule is this section.
+
+DUOS sends its JavaScript to every browser that opens the site, with no sign-in. All showcase
+content that you merge to `develop` is in that JavaScript. `status: "hidden"` keeps a route off. It
+is **not** a privacy control: the title, copy and image names of a hidden showcase are in the
+JavaScript for anyone to read.
 
 Merge only content that is cleared for public disclosure. This includes the name of a partner that
 is not yet announced. If content is not cleared, keep the PR open until it is.
