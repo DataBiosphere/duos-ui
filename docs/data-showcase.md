@@ -102,6 +102,24 @@ Other rules:
 Create `src/showcases/<key>.ts`. The config lists only what differs from `defaultShowcase`
 (`src/showcases/defaults.ts`), where every one of the 23 sections is off.
 
+Not every item from Step 2 goes in the config. This table shows where each one goes:
+
+| Item from Step 2 | Where it goes |
+| ---------------- | ------------- |
+| Owners | The PR only: the program owner approves there. Not in the code. |
+| Key | The file name `src/showcases/<key>.ts`, the image directory, and `key` in the index entry (Step 5) |
+| Title | `title` in the index entry (Step 5), not the config. The hero uses it as the page heading, and the masthead shows it when there is no logo. |
+| Flagship or partner | `flagship` in the index entry (Step 5) |
+| Logos | `sections.masthead.logos`; the first is the showcase's own logo |
+| Colors | `branding`: `theme`, and optional `primary` and `accent` |
+| Dataset identifiers | `sections['open-access-datasets'].items`; see [Where the dataset identifiers go](#where-the-dataset-identifiers-go) |
+| Tools and workspaces | Nowhere until their section type is implemented |
+| Copy | `sections.hero`: `subtitle`, `intro`, `primaryCtas` (calls to action) and `announcements` |
+| Dates | `startDate` and `endDate` in each item of `sections.hero.announcements` |
+| Clearance | The PR checklist. Not in the code. |
+
+The example below is a partner. It uses a computed shelf and has no list of identifiers.
+
 ```typescript
 import type { ShowcasePartialInput } from 'src/types/showcase'
 
