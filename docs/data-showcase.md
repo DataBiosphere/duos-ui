@@ -55,8 +55,7 @@ in the PR (see [Review roles](#review-roles)).
       accent overrides. Each override needs a contrast of 4.5:1 or more on white, or CI fails
 - [ ] **Dataset identifiers**: production `DUOS-` identifiers, for example `DUOS-000123`
 - [ ] **Tools and workspaces**: name, description, tags, launch URL and optional documentation URL
-      (record them, but you can add them only after their section type is implemented; see the
-      "Implemented sections only" rule in Step 4)
+      and thumbnail
 - [ ] **Copy**: subtitle, intro, calls to action (label and URL), announcements
 - [ ] **Dates**: a `startDate` and an `endDate` (`YYYY-MM-DD`, UTC) for each announcement or event.
       A showcase has no dates of its own; skip this item if there is no announcement or event
@@ -113,7 +112,7 @@ Not every item from Step 2 goes in the config. This table shows where each one g
 | Logos | `sections.masthead.logos`; the first is the showcase's own logo |
 | Colors | `branding`: `theme`, and optional `primary` and `accent` |
 | Dataset identifiers | `sections['open-access-datasets'].items`; see [Where the dataset identifiers go](#where-the-dataset-identifiers-go) |
-| Tools and workspaces | Nowhere until their section type is implemented |
+| Tools and workspaces | `sections['featured-tools'].items` (tools) and `sections['featured-workspaces'].items` (workspaces), each with `enabled: true`. An item has `id`, `name`, `description`, `tags` and `launchUrl`, and optional `docsUrl` and `thumbnail`. The page does not show a section that has no items. |
 | Copy | `sections.hero`: `subtitle`, `intro`, `primaryCtas` (calls to action) and `announcements` |
 | Dates | `startDate` and `endDate` in each item of `sections.hero.announcements` |
 | Clearance | The PR checklist. Not in the code. |
@@ -185,7 +184,7 @@ Rules that CI checks in the config (`test/showcases/guard/checkShowcase.ts`):
 
 | Rule | Detail |
 | ---- | ------ |
-| Implemented sections only | You can enable only the keys in `IMPLEMENTED_SECTION_KEYS` (`src/types/showcase.ts`). When this guide was written they were `masthead`, `hero`, `latest-data-releases` and `open-access-datasets`; the code has the current list. |
+| Implemented sections only | You can enable only the keys in `IMPLEMENTED_SECTION_KEYS` (`src/types/showcase.ts`). When this guide was written they were `masthead`, `hero`, `latest-data-releases`, `open-access-datasets`, `featured-tools` and `featured-workspaces`; the code has the current list. |
 | URLs | Each `url` or `...Url` field is an `https://` URL, a same-origin path that starts with one `/`, or `#<section key>` for a section that has an anchor (not `masthead` or `hero`). No bare `#`, `//host`, whitespace, backslash or credentials. |
 | Logos | At most 4 masthead logos: the showcase's own and three partners. Partner logos need alt text. |
 | Featured apps | At most 1 item in `featured-tools` has `featured: true`. CI counts it in a disabled section also. |
