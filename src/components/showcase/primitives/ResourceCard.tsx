@@ -55,8 +55,8 @@ export const ResourceCard = ({ item, sectionKey, headingLevel = 3, featured = fa
       // A featured card has no row to line up with, so it reserves the box only for a thumbnail
       // that can show something: a bundled image, or alt text in its place.
       reserveMedia={!featured || (thumbnail !== undefined && (src !== undefined || thumbnail.alt.trim() !== ''))}
-      // An unresolved thumbnail keeps its alt text; Card shows it when the empty `src` fails its check.
-      media={thumbnail === undefined ? undefined : { src: src ?? '', alt: thumbnail.alt, loading: imageLoading(sectionKey) }}
+      // An unresolved thumbnail has no `src`; Card shows its alt text in the box instead.
+      media={thumbnail === undefined ? undefined : { src, alt: thumbnail.alt, loading: imageLoading(sectionKey) }}
       badges={item.tags}
       actions={resourceActions(item)}
     >

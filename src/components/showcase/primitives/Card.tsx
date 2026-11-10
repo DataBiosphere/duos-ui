@@ -11,7 +11,9 @@ export type HeadingLevel = 2 | 3 | 4 | 5 | 6
 export type CardMetadataEntry = { label: string, value: string | null | undefined, href?: string }
 
 export type CardMedia = {
-  src: string
+  /** Missing for an image that can't be resolved, such as a config path that names no bundled
+   * file. The card then shows the alt text where it reserves a media box. */
+  src?: string
   /** Empty for a decorative image. */
   alt: string
   /** From `imageLoading(section)`: the card doesn't know which section it renders in. */
@@ -37,19 +39,28 @@ export type CardProps = {
 const hasValue = (entry: CardMetadataEntry): entry is CardMetadataEntry & { value: string } =>
   typeof entry.value === 'string' && entry.value.trim() !== ''
 
+type CardSx = ReturnType<typeof cardSx>
+
+/** Alt text in place of an image, clamped to four lines inside its padding. */
+const AltText = ({ text, outer, sx }: { text: string, outer: CardSx['mediaAlt'], sx: CardSx }) => (
+  <Box component="span" sx={outer}>
+    <Box component="span" sx={sx.altTextLines}>{text}</Box>
+  </Box>
+)
+
 /**
  * The image, or its alt text once it fails to load, as the masthead logos do. The caller keys it by
  * `src`, so a new source gets a fresh attempt.
  */
-const CardImage = ({ media, framed, sx }: { media: CardMedia, framed: boolean, sx: ReturnType<typeof cardSx> }) => {
+const CardImage = ({ src, media, framed, sx }: { src: string, media: CardMedia, framed: boolean, sx: CardSx }) => {
   const [failed, setFailed] = useState(false)
   if (failed) {
-    return media.alt.trim() === '' ? null : <Box component="span" sx={framed ? sx.mediaAlt : sx.imageAlt}>{media.alt}</Box>
+    return media.alt.trim() === '' ? null : <AltText text={media.alt} outer={framed ? sx.mediaAlt : sx.imageAlt} sx={sx} />
   }
   return (
     <Box
       component="img"
-      src={media.src}
+      src={src}
       alt={media.alt}
       loading={media.loading ?? 'lazy'}
       onError={() => setFailed(true)}
@@ -71,17 +82,18 @@ export const Card = ({ title, headingLevel = 3, media, children, metadata = [], 
   // ShowcaseLink renders nothing for a hidden same-page link, so leave those out of the list too.
   const { visibleSectionIds } = useContext(ShowcasePageInfoContext)
   const links = actions.filter(action => isShownHref(action.href, visibleSectionIds))
-  const showMedia = media !== undefined && isSafeImageSrc(media.src)
+  const src = media?.src
   const mediaAlt = media?.alt.trim() ?? ''
   const sx = cardSx(variant === 'featured')
-  const image = showMedia && <CardImage key={media.src} media={media} framed={reserveMedia} sx={sx} />
+  const image = media !== undefined && src !== undefined && isSafeImageSrc(src)
+    && <CardImage key={src} src={src} media={media} framed={reserveMedia} sx={sx} />
 
   return (
     <Box component="article" className="showcase-card" sx={sx.card} aria-labelledby={headingId} data-variant={variant}>
       {reserveMedia
         ? (
             <Box className="showcase-card__media-frame" sx={sx.mediaFrame} aria-hidden={mediaAlt === '' ? true : undefined}>
-              {image || (mediaAlt !== '' && <Box component="span" sx={sx.mediaAlt}>{mediaAlt}</Box>)}
+              {image || (mediaAlt !== '' && <AltText text={mediaAlt} outer={sx.mediaAlt} sx={sx} />)}
             </Box>
           )
         : image}
