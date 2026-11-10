@@ -29,7 +29,7 @@ export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {
         intro: 'Fictional cohorts for testing the showcase template.',
         stats: [],
         primaryCtas: [{ label: 'Browse the data library', url: '/datalibrary' }, { label: 'About DUOS', url: '/' }],
-        // Hidden until a workspaces shelf renders (S3.4).
+        // Jumps to the workspaces shelf (S3.4).
         onboarding: [{ label: 'Start in a workspace', url: '#featured-workspaces' }],
         announcements: [
           { id: 'one', text: 'First synthetic announcement', url: 'https://example.org/one', startDate: '2026-01-01', endDate: '2099-12-31' },
@@ -40,6 +40,16 @@ export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {
       'latest-data-releases': { enabled: true, ranking: 'newest' },
       // S3.3, curated. The spec stubs its lookup too.
       'open-access-datasets': { enabled: true, items: ['DUOS-000902'] },
+      // S3.4. Enough workspaces to overflow the shelf on a phone. Only the first has a thumbnail, so
+      // the spec can compare a card with an image against cards without one.
+      'featured-workspaces': {
+        enabled: true,
+        items: [
+          { id: 'ws-gwas', name: 'Synthetic GWAS Workspace', description: 'A fictional starter workspace.', tags: ['GWAS'], thumbnail: { src: 'showcase/e2e-flagship/logo.svg', alt: '' }, launchUrl: 'https://example.org/workspaces/gwas', docsUrl: 'https://example.org/workspaces/gwas/docs' },
+          { id: 'ws-rna', name: 'Synthetic RNA Workspace', description: 'A fictional starter workspace.', tags: ['RNA-seq'], launchUrl: 'https://example.org/workspaces/rna' },
+          { id: 'ws-imaging', name: 'Synthetic Imaging Workspace', description: 'A fictional starter workspace.', tags: [], launchUrl: 'https://example.org/workspaces/imaging' },
+        ],
+      },
     },
   },
   'e2e-hidden': {},

@@ -23,6 +23,7 @@ import { DatasetShelf } from 'src/components/showcase/sections/DatasetShelf'
 import { Hero } from 'src/components/showcase/sections/Hero'
 import { heroHasContent } from 'src/components/showcase/sections/heroContent'
 import { Masthead } from 'src/components/showcase/sections/Masthead'
+import { WorkspaceShelf } from 'src/components/showcase/sections/WorkspaceShelf'
 import {
   DATASET_SECTION_KEYS,
   type DatasetSectionKey,
@@ -82,6 +83,8 @@ export const sectionRegistry: SectionRegistry = {
     navigable: true,
     hasRenderableContent: section => section.ranking !== undefined || (section.items ?? []).length > 0,
   },
+  // Provisional title (S3.4).
+  'featured-workspaces': { component: WorkspaceShelf, defaultLabels: { title: 'Workspaces' }, navigable: true, hasRenderableContent: section => section.items.length > 0 },
 }
 
 export interface VisibleSectionOf<K extends SectionKey> {
