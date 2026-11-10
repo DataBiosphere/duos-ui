@@ -12,9 +12,9 @@ import Box from '@mui/material/Box'
 import { Grid } from 'src/components/showcase/primitives/Grid'
 import { ResourceCard } from 'src/components/showcase/primitives/ResourceCard'
 import type { SectionRendererProps } from 'src/components/showcase/sectionRegistry'
-
-/** Provisional (D15): the section frame the dataset shelves use. */
-const rootSx = { maxWidth: '1400px', mx: 'auto', px: '16px', py: '32px' }
+import { datasetShelfSx } from 'src/components/showcase/sections/datasetShelfStyles'
+// The section uses the shelf header classes, so it loads their stylesheet itself.
+import 'src/components/showcase/primitives/Shelf.css'
 
 export const AnalysisApps = ({ sectionKey, section, id, title = '' }: SectionRendererProps<'featured-tools'>) => {
   const headingId = useId()
@@ -22,7 +22,7 @@ export const AnalysisApps = ({ sectionKey, section, id, title = '' }: SectionRen
   const others = section.items.filter(item => item !== featured)
 
   return (
-    <Box id={id} sx={rootSx}>
+    <Box id={id} sx={datasetShelfSx.root}>
       <section className="showcase-shelf" aria-labelledby={headingId}>
         <div className="showcase-shelf__header">
           <h2 id={headingId} className="showcase-shelf__title">{title}</h2>
