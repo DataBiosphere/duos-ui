@@ -358,6 +358,9 @@ current index. If another showcase PR merges first, update your branch.
 | Replace a showcase with a new identity | Retire the old key, then add a new entry with a new key | No |
 | Turn every showcase off | Set `showcaseEnabled` off in the deployed `config.json` | Yes |
 
+A hidden showcase stays in the index, but its route shows the "Not Found" page. If you hide the
+flagship, `/data` shows that page.
+
 ### Retire a key
 
 1. Remove the entry from `entries` in `registry.json`.
