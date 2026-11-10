@@ -306,6 +306,10 @@ production Consent: `DUOS_SHOWCASE_API_URL` in BFF mode, `showcaseApiUrl` in leg
 that reads production is read-only: the handoffs to search, dataset and request pages stay off. See
 the configuration table in [docs/data-showcase-lookup.md](data-showcase-lookup.md).
 
+With `pnpm start`, the page always shows the "content preview with production data" notice and
+keeps the handoffs off, also when the lookup reads your local Consent. Only the Fastify server
+turns the handoffs on.
+
 Until Consent has the public lookup on ("Not done yet" in that document), each dataset shelf shows
 "These datasets can't be loaded right now" in every environment, production also. This is not a
 defect in your config. The masthead, the hero copy and the links do not need the lookup.
