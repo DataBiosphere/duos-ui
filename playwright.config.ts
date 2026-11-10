@@ -36,6 +36,15 @@ const oidcEnv = (baseUrl: string): Record<string, string> => ({
   DUOS_POST_LOGOUT_REDIRECT_URI: postLogoutUri(baseUrl),
 })
 
+// Failure evidence for the projects that use only mock data: a trace and a
+// screenshot of each failed try, kept in test-results/. Not for `chromium`:
+// it types a real access token into the page, and CI uploads test-results/
+// to a public repository.
+const failureEvidence = {
+  trace: 'retain-on-failure',
+  screenshot: 'only-on-failure',
+} as const
+
 const serverDefaults = {
   command: 'pnpm run serve',
   ignoreHTTPSErrors: true,
@@ -61,6 +70,9 @@ export default defineConfig({
       testIgnore: [...MOCK_SPECS, ...THROTTLE_SPECS, ...SHORT_SESSION_SPECS, ...LEGACY_SPECS],
       // Up to three sign-in attempts, each as long as 8 seconds, plus the waits between them.
       timeout: 60_000,
+      // Not test-results/, which CI uploads to a public repository: a failed test's
+      // error-context.md can show the access token on /backgroundsignin.
+      outputDir: 'test-results-chromium',
       use: { ...devices['Desktop Chrome'] },
       retries: process.env.CI ? 1 : 0,
     },
@@ -68,7 +80,7 @@ export default defineConfig({
       // OAuth flow and session lifecycle specs, against the mock Consent upstream.
       name: 'mock',
       testMatch: MOCK_SPECS,
-      use: { ...devices['Desktop Chrome'], baseURL: MOCK_BASE_URL },
+      use: { ...devices['Desktop Chrome'], ...failureEvidence, baseURL: MOCK_BASE_URL },
       retries: process.env.CI ? 1 : 0,
     },
     {
@@ -76,20 +88,20 @@ export default defineConfig({
       // would meet a server that the first attempt already spent.
       name: 'mock-throttle',
       testMatch: THROTTLE_SPECS,
-      use: { ...devices['Desktop Chrome'], baseURL: THROTTLE_BASE_URL },
+      use: { ...devices['Desktop Chrome'], ...failureEvidence, baseURL: THROTTLE_BASE_URL },
     },
     {
       // Session expiry, on a server whose sessions last 10 seconds.
       name: 'mock-short-session',
       testMatch: SHORT_SESSION_SPECS,
-      use: { ...devices['Desktop Chrome'], baseURL: SHORT_SESSION_BASE_URL },
+      use: { ...devices['Desktop Chrome'], ...failureEvidence, baseURL: SHORT_SESSION_BASE_URL },
       retries: process.env.CI ? 1 : 0,
     },
     {
       // Legacy mode: no BFF routes; the showcase lookup goes to the mock upstream over CORS.
       name: 'legacy',
       testMatch: [...LEGACY_SPECS, ...BOTH_MODES_SPECS],
-      use: { ...devices['Desktop Chrome'], baseURL: LEGACY_BASE_URL },
+      use: { ...devices['Desktop Chrome'], ...failureEvidence, baseURL: LEGACY_BASE_URL },
       retries: process.env.CI ? 1 : 0,
     },
   ],
