@@ -63,6 +63,51 @@ describe('findShowcase', () => {
     expect(findShowcase({ route: 'flagship' }, sources({ entries }))).toEqual(NOT_FOUND)
   })
 
+  describe('in a non-production preview (showHidden)', () => {
+    it('finds a hidden entry', () => {
+      expect(findShowcase({ route: 'key', key: 'hidden-partner' }, sources({ showHidden: true }))).toEqual({
+        status: 'found',
+        entry: hidden,
+        config: ShowcaseConfigSchema.parse(resolveShowcase({})),
+      })
+    })
+
+    it('finds a hidden flagship at /data, and still not at /showcase/<flagship key>', () => {
+      const hiddenFlagship = { ...flagship, status: 'hidden' as const }
+      const entries = [hiddenFlagship, partner]
+      expect(findShowcase({ route: 'flagship' }, sources({ entries, showHidden: true }))).toMatchObject({ status: 'found', entry: hiddenFlagship })
+      expect(findShowcase({ route: 'key', key: 'flagship-data' }, sources({ entries, showHidden: true }))).toEqual(NOT_FOUND)
+    })
+
+    it.each([
+      ['absent', undefined],
+      ['false', false],
+      ['the string "true"', 'true'],
+      ['1', 1],
+    ])('finds no hidden entry when showHidden is %s, as in production', (_label, showHidden) => {
+      expect(findShowcase({ route: 'key', key: 'hidden-partner' }, sources({ showHidden }))).toEqual(NOT_FOUND)
+    })
+
+    it('finds nothing while the rollout flag is off', () => {
+      expect(findShowcase({ route: 'key', key: 'hidden-partner' }, sources({ enabled: false, showHidden: true }))).toEqual(NOT_FOUND)
+    })
+
+    it('finds no retired key, even if its entry is hidden', () => {
+      const retired: RegistryEntry = { key: 'retired-partner', title: 'Retired Partner Data', status: 'hidden', flagship: false, order: 4 }
+      const result = findShowcase({ route: 'key', key: 'retired-partner' }, sources({
+        entries: [flagship, retired],
+        configs: { 'retired-partner': {} },
+        showHidden: true,
+      }))
+      expect(result).toEqual(NOT_FOUND)
+    })
+
+    it('finds no hidden entry without a config', () => {
+      const entries = [flagship, { ...unconfigured, status: 'hidden' as const }]
+      expect(findShowcase({ route: 'key', key: 'unconfigured-partner' }, sources({ entries, showHidden: true }))).toEqual(NOT_FOUND)
+    })
+  })
+
   it('finds no retired key, even if an entry still lists it', () => {
     const retired: RegistryEntry = { key: 'retired-partner', title: 'Retired Partner Data', status: 'live', flagship: false, order: 4 }
     const result = findShowcase({ route: 'key', key: 'retired-partner' }, sources({
@@ -116,16 +161,21 @@ describe('findShowcase', () => {
 })
 
 describe('loadShowcase', () => {
-  const loadWith = async (isShowcaseEnabled: () => Promise<boolean>, isShowcaseHandoffsEnabled = () => Promise.resolve(false)) => {
+  const loadWith = async (
+    isShowcaseEnabled: () => Promise<boolean>,
+    isShowcaseHandoffsEnabled = () => Promise.resolve(false),
+    isShowcaseHiddenPreviewEnabled = () => Promise.resolve(false),
+    key = 'example-partner',
+  ) => {
     vi.resetModules()
-    vi.doMock('src/libs/config', () => ({ isShowcaseEnabled, isShowcaseHandoffsEnabled }))
+    vi.doMock('src/libs/config', () => ({ isShowcaseEnabled, isShowcaseHandoffsEnabled, isShowcaseHiddenPreviewEnabled }))
     vi.doMock('src/showcases', () => ({
-      showcaseEntries: [partner],
-      showcaseConfigs: { 'example-partner': partnerConfig },
+      showcaseEntries: [partner, hidden],
+      showcaseConfigs: { 'example-partner': partnerConfig, 'hidden-partner': {} },
       retiredShowcaseKeys: [],
     }))
     const { loadShowcase } = await import('src/components/showcase/loadShowcase')
-    return loadShowcase({ route: 'key', key: 'example-partner' })
+    return loadShowcase({ route: 'key', key })
   }
 
   afterEach(() => {
@@ -154,6 +204,15 @@ describe('loadShowcase', () => {
 
   it('finds nothing when config.json leaves the flag off', async () => {
     expect(await loadWith(() => Promise.resolve(false))).toEqual(NOT_FOUND)
+  })
+
+  it.each([
+    ['a non-production environment', () => Promise.resolve(true), 'found'],
+    ['production', () => Promise.resolve(false), 'not-found'],
+    ['an unreadable config', () => Promise.reject(new Error('config.json unavailable')), 'not-found'],
+  ])('answers a hidden key in %s with %s', async (_label, isShowcaseHiddenPreviewEnabled, expected) => {
+    const result = await loadWith(() => Promise.resolve(true), undefined, isShowcaseHiddenPreviewEnabled, 'hidden-partner')
+    expect(result.status).toBe(expected)
   })
 
   it('treats a config that fails to load as the flag being off', async () => {

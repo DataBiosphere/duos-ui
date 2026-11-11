@@ -5,7 +5,8 @@
  *
  * The CI guard parses `registry.json` with `ShowcaseRegistrySchema` and checks every entry, so this
  * module reads it without a runtime parse. Showcase keys are permanent: never rename or reuse a key,
- * and add a removed key to `retiredKeys`. Use `status: 'hidden'` for a reversible withdrawal.
+ * and add a removed key to `retiredKeys`. Use `status: 'hidden'` for a reversible withdrawal from
+ * production. Local, dev and staging still render a hidden entry as a preview (DT-4358).
  */
 import registryJson from './registry.json'
 import type { RegistryEntry, ShowcasePartialInput, ShowcaseRegistry } from 'src/types/showcase'
