@@ -210,10 +210,33 @@ export const isShowcaseEnabled = async (): Promise<boolean> => {
  * (server/src/config.ts), so a content preview that reads production gets `false`: its
  * production `DUOS-` identifiers can name other datasets here. Absent or any other value keeps
  * every handoff off.
+ *
+ * Legacy mode also checks the URLs here (DT-4358): `pnpm start` serves `public/config.json` as it
+ * is, with no server to derive the value, so a file copied from a deployed environment can say
+ * `true` while `showcaseApiUrl` points at production. The handoffs open only when the file says
+ * `true` and `showcaseApiUrl` has the `apiUrl` origin, the server's own rule. In BFF mode the
+ * lookup origin is a server setting the browser can't see, so the served value stands. That value
+ * is derived only when the Fastify server serves the file (`start:server` or a deployment); a raw
+ * file with `bffEnabled: true` under `pnpm start` is not checked, and BFF routes don't exist there.
  */
 export const isShowcaseHandoffsEnabled = async (): Promise<boolean> => {
   const config = await loadConfig()
-  return config.showcaseHandoffsEnabled === true
+  if (config.showcaseHandoffsEnabled !== true) return false
+  if (config.bffEnabled === true) return true
+  const lookup = httpOrigin(config.showcaseApiUrl)
+  return lookup !== undefined && lookup === httpOrigin(config.apiUrl)
+}
+
+/** The http(s) origin of a configured URL, or undefined for anything else (server/src/config.ts). */
+const httpOrigin = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') return undefined
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.origin : undefined
+  }
+  catch {
+    return undefined
+  }
 }
 
 export const getProject = async (): Promise<string> => {

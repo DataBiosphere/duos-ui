@@ -122,10 +122,46 @@ describe('Config', () => {
       [1, false],
     ])('returns %j as %j, so only a boolean true opens showcase handoffs', async (showcaseHandoffsEnabled, expected) => {
       vi.resetModules()
-      stubConfigFetch({ ...mockConfig, showcaseHandoffsEnabled })
+      // The lookup reads this environment's Consent, so the flag alone decides (see the legacy cases below).
+      stubConfigFetch({ ...mockConfig, showcaseApiUrl: mockConfig.apiUrl, showcaseHandoffsEnabled })
       const freshConfig = await import('src/libs/config')
       expect(await freshConfig.isShowcaseHandoffsEnabled()).toBe(expected)
       expect(await freshConfig.Config.isShowcaseHandoffsEnabled()).toBe(expected)
+    })
+  })
+
+  describe('isShowcaseHandoffsEnabled in legacy mode (DT-4358)', () => {
+    // A config.json copied from a deployed environment says `true`; `pnpm start` serves it as it is.
+    const DEV = 'https://consent.dsde-dev.broadinstitute.org'
+    const PROD = 'https://consent.dsde-prod.broadinstitute.org'
+
+    it.each([
+      ['the lookup reads this environment\'s Consent', DEV, DEV, true],
+      ['apiUrl has a path on the same origin', DEV, `${DEV}/api`, true],
+      ['the lookup reads production', PROD, DEV, false],
+      ['no lookup URL is configured', undefined, DEV, false],
+      ['the lookup URL is not a URL', 'consent.dsde-dev', DEV, false],
+      ['the lookup URL is not http(s)', 'ftp://consent.dsde-dev.broadinstitute.org', DEV, false],
+      ['the lookup URL is not a string', ['https://consent.dsde-dev.broadinstitute.org'], DEV, false],
+    ])('opens handoffs only when %s', async (_label, showcaseApiUrl, apiUrl, expected) => {
+      vi.resetModules()
+      stubConfigFetch({ ...mockConfig, apiUrl, showcaseApiUrl, showcaseHandoffsEnabled: true })
+      const freshConfig = await import('src/libs/config')
+      expect(await freshConfig.isShowcaseHandoffsEnabled()).toBe(expected)
+    })
+
+    it('keeps handoffs off when the file says so, even with matching URLs', async () => {
+      vi.resetModules()
+      stubConfigFetch({ ...mockConfig, apiUrl: DEV, showcaseApiUrl: DEV, showcaseHandoffsEnabled: false })
+      const freshConfig = await import('src/libs/config')
+      expect(await freshConfig.isShowcaseHandoffsEnabled()).toBe(false)
+    })
+
+    it('takes the served value in BFF mode, where the server derived it', async () => {
+      vi.resetModules()
+      stubConfigFetch({ ...mockConfig, bffEnabled: true, apiUrl: DEV, showcaseApiUrl: PROD, showcaseHandoffsEnabled: true })
+      const freshConfig = await import('src/libs/config')
+      expect(await freshConfig.isShowcaseHandoffsEnabled()).toBe(true)
     })
   })
 

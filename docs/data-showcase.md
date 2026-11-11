@@ -312,10 +312,14 @@ production Consent: `DUOS_SHOWCASE_API_URL` in BFF mode, `showcaseApiUrl` in leg
 that reads production is read-only: the handoffs to search, dataset and request pages stay off. See
 the configuration table in [docs/data-showcase-lookup.md](data-showcase-lookup.md).
 
-The legacy command sets `showcaseHandoffsEnabled` to `false`. Vite uses the value in the file, and
-the rendered file can have `true`: production identifiers then link to pages of a different
-environment. With `false`, the page shows the "content preview with production data" notice. The
-Fastify server ignores the file and compares the lookup URL with `apiUrl` itself.
+Vite serves the file as it is, so in legacy mode the browser checks it too: the handoffs open only
+when the file says `true` and `showcaseApiUrl` has the `apiUrl` origin. A preview that reads
+production shows the "content preview with production data" notice, even if the rendered file says
+`true`, so production identifiers don't link to pages of a different environment. This check runs
+in legacy mode only: with `bffEnabled: true` the browser can't see the lookup URL and takes the
+file's value, which is why BFF mode needs `pnpm run start:server`, whose server derives it. The legacy
+command's `showcaseHandoffsEnabled = false` is no longer needed, and does no harm. The Fastify
+server ignores the file's value and compares the lookup URL with `apiUrl` itself.
 
 Each dataset shelf shows "These datasets can't be loaded right now" in every environment, production
 also, until Consent has the public lookup on ("Not done yet" in that document) and
