@@ -1,7 +1,8 @@
 /**
  * A synthetic showcase index for the Playwright specs (DT-4424). `pnpm run build:e2e` sets
  * DUOS_E2E_SHOWCASES, and `vite.config.ts` then resolves `src/showcases` to this module instead of
- * the real index. No other build sets that variable, so these entries never reach a deployed build
+ * the real index. A developer can also set it with `pnpm start` for the local request-flow test
+ * below. No deployed build sets that variable, so these entries never reach a deployed build
  * (`test/showcases/e2eShowcases.spec.ts` checks both).
  *
  * The content is fictional. It passes the same schema and CI-guard rules as a real entry.

@@ -17,7 +17,10 @@ export const aliases_from_tsconfig = () => {
   return aliases
 }
 
-/** Set by `pnpm run build:e2e` only (DT-4424); no deployed build sets it. */
+/**
+ * Set by `pnpm run build:e2e` (DT-4424), and by hand with `pnpm start` for the local request-flow test
+ * (DT-4358). No deployed build sets it.
+ */
 export const E2E_SHOWCASES_ENV = 'DUOS_E2E_SHOWCASES'
 
 /**
