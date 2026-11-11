@@ -5,13 +5,19 @@
  * (`test/showcases/e2eShowcases.spec.ts` checks both).
  *
  * The content is fictional. It passes the same schema and CI-guard rules as a real entry.
+ *
+ * `request-flow-fixture` is for request-flow testing by hand, not for the Playwright specs
+ * (DT-4358). It names the synthetic datasets that consent's `scripts/seed-showcase-fixture.sh`
+ * seeds in a local database, DUOS-990001 to DUOS-990005, so a local build with this variable,
+ * pointed at that local Consent, runs the real lookup, sign-in, dataset page and access request on
+ * records that belong to that database. Production identifiers name other datasets there.
  */
 import type { RegistryEntry, ShowcasePartialInput } from 'src/types/showcase'
-import { E2E_FLAGSHIP, E2E_HIDDEN, E2E_PARTNER } from './entries'
+import { E2E_FLAGSHIP, E2E_HIDDEN, E2E_PARTNER, E2E_REQUEST_FLOW } from './entries'
 
-export { E2E_FLAGSHIP, E2E_HIDDEN, E2E_PARTNER }
+export { E2E_FLAGSHIP, E2E_HIDDEN, E2E_PARTNER, E2E_REQUEST_FLOW }
 
-export const showcaseEntries: readonly RegistryEntry[] = [E2E_FLAGSHIP, E2E_PARTNER, E2E_HIDDEN]
+export const showcaseEntries: readonly RegistryEntry[] = [E2E_FLAGSHIP, E2E_PARTNER, E2E_HIDDEN, E2E_REQUEST_FLOW]
 
 export const retiredShowcaseKeys: readonly string[] = []
 
@@ -63,6 +69,17 @@ export const showcaseConfigs: Readonly<Record<string, ShowcasePartialInput>> = {
     },
   },
   'e2e-hidden': {},
+  'request-flow-fixture': {
+    sections: {
+      // Scoped to the seeded DAC, so the shelf shows the fixture's three eligible datasets
+      // (DUOS-990001 controlled, -990002 open, -990003 external) whatever else the database holds.
+      // The name must match consent's scripts/sql/showcase-fixture.sql.
+      'latest-data-releases': { enabled: true, ranking: 'newest', scope: { dac: ['Showcase Fixture DAC'] } },
+      // Curated: DUOS-990004 (not DAC-approved) and DUOS-990005 (private study) are not eligible,
+      // so the lookup leaves them out and the shelf shows DUOS-990002 only.
+      'open-access-datasets': { enabled: true, items: ['DUOS-990002', 'DUOS-990004', 'DUOS-990005'] },
+    },
+  },
 }
 
 export { showcaseRoute } from '../../../src/showcases/index'
