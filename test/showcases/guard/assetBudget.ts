@@ -1,7 +1,7 @@
 /**
  * CI guard rule: the asset budget for one showcase (DT-4273, S1.2; values set in S1.3, DT-4276).
  *
- * The logo limits are the recommended sizes in `DATA-LIBRARY.md`, not its hard limits, so an
+ * The logo limits are the recommended sizes in `docs/adding-a-data-library.md`, not its hard limits, so an
  * unoptimized logo fails CI. No document sets the total or per-image limits; they are the values
  * S1.2 chose. Images load lazily except above the fold: see `src/showcases/imageLoading.ts`.
  */
