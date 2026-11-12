@@ -55,7 +55,7 @@ measurements and interpretation are recorded below.
 ## Test topology
 
 ```text
-process 1: autocannon worker threads
+process 1: load driver worker threads (driver.ts)
       │  seeded sessions, each with its own cookie and CSRF token
       ▼
 process 2: Fastify — cookie → session → CSRF → apiProxy
@@ -69,6 +69,21 @@ The driver, BFF, and stub upstream do not share a Node event loop. This matters
 because parsing requests and writing responses consume event-loop time even
 when response bodies are pre-allocated. An earlier single-process harness made
 the stub's work look like proxy overhead and produced misleading conclusions.
+
+`driver.ts` is a small `node:http` load generator. Each connection is a
+keep-alive socket that sends one request at a time, rotating through the
+per-session request templates. It counts results the way autocannon did when
+the reference results below were recorded:
+
+- req/s counts every response; latency and MB/s count only 2xx responses;
+- MB/s includes response headers, not just bodies;
+- latency runs from sending the request to the end of the response body and is
+  reported in whole milliseconds, rounded down; and
+- a request that has not finished within 30 seconds counts as a timeout and as
+  an error.
+
+Unlike autocannon, the driver checks TLS certificates in remote mode, because
+it sends a real session cookie. Use `NODE_EXTRA_CA_CERTS` for a private CA.
 
 The Fastify target registers Postgres, cookies, sessions, CSRF protection, and
 `apiProxy` in the same order as `index.ts`. It omits components that are not on
@@ -300,5 +315,5 @@ That queue belongs in front of the pod, where horizontal scaling can address it.
 - **A production network:** local runs do not include TLS termination, ingress,
   or a sidecar. Use remote mode to measure an actual environment.
 - **Every response during the timed run:** the harness verifies one response
-  per scenario byte-for-byte before measuring. Autocannon's `expectBody` cannot
-  be combined with the per-session request templates used here.
+  per scenario byte-for-byte before measuring. The timed run counts response
+  bytes but does not compare them, so `bad body` is always 0.

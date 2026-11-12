@@ -1,14 +1,14 @@
-import type autocannon from 'autocannon'
 import { PROXY_PREFIX } from '../../src/proxy/apiProxy.js'
 import { BLOB_PATH } from './upstream.js'
 import type { SeededSession } from './harness.js'
+import type { LoadRequest } from './driver.js'
 
 export interface Scenario {
   name: string
   description: string
   defaultConnections: number
   p99BudgetMs: number
-  request: (session: SeededSession) => autocannon.Request
+  request: (session: SeededSession) => LoadRequest
   needsSession: boolean
 }
 
