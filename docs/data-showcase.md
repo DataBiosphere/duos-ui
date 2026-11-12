@@ -95,6 +95,7 @@ Other rules:
   page then uses the index title. Other images can use `alt: ''` only when they are decorative.
 - A reviewer reads each SVG in the PR. The page shows an SVG through `<img>` and never inlines it.
 - The image of a disabled section still counts toward the budget, because it still ships.
+- The file must exist. A path with no file fails with `"<path>" not found below src/images`.
 
 ---
 
@@ -199,6 +200,8 @@ Rules that CI checks in the config (`test/showcases/guard/checkShowcase.ts`):
 | Item IDs | Each `id` is unique in the whole showcase. IDs are analytics keys; do not change one later. |
 | Identifiers | `DUOS-` and exactly six digits, or seven or more digits with no leading zero. For example `DUOS-000123`. |
 | Contrast | Primary and accent colors need a contrast of 4.5:1 or more on the white background. In a preview, the page shows the preset color in place of an override that fails, so the preview does not show your color. |
+| Dataset shelves | An enabled dataset shelf has `items` or a `ranking`: not both, and not neither. Only `open-access-datasets` accepts `items`. The `ranking` must be one that `SECTION_RANKINGS` (`src/types/showcase.ts`) allows for the section, and `scope` accepts only `dac`. A shelf with both, with neither, or with a wrong `ranking` fails with only `sections.<key>: Invalid input`, so check these three points. |
+| Field names | A field that the schema does not have fails with `Unrecognized key: "<name>"`. Check the spelling. |
 | Images | See Step 3. |
 
 Dated content appears and expires without a release. Every other change needs a merge and the
@@ -245,6 +248,9 @@ Then add one line to the existing `showcaseConfigs` object, under the key:
 
 Import config files with a relative path here. Other code imports the index as `src/showcases`
 only; a test fails any other path to it.
+
+Each index entry needs a config here, and each config here needs an index entry (5.2). CI fails
+with `entries: "<key>" has no config` or `configs: "<key>" has no index entry`.
 
 ### 5.2 Add the index entry
 

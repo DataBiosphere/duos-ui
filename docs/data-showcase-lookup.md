@@ -35,7 +35,7 @@ Two settings name the Consent that answers lookups. Both are separate from the a
 
 | Setting | Where | Used in | Value |
 | ------- | ----- | ------- | ----- |
-| `DUOS_SHOWCASE_API_URL` | Server environment (`.env.local`, terra-helmfile) | BFF mode | A bare origin, for example `https://consent.dsde-prod.broadinstitute.org`. A path or credentials stop the server at startup. |
+| `DUOS_SHOWCASE_API_URL` | Server environment (`.env.local`, terra-helmfile) | BFF mode | A bare origin, for example `https://consent.dsde-prod.broadinstitute.org`. A path or credentials stop the server at startup. For a local setup, `scripts/render-configs.sh --write_env true` writes the dev Consent origin and keeps a value that is already in `.env.local`. |
 | `showcaseApiUrl` | `config.json` | Legacy mode | An http(s) Consent URL with no wildcard host. The client and the Content Security Policy use its origin only. |
 
 Set them for each kind of environment as follows:
