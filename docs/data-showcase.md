@@ -296,7 +296,7 @@ cannot merge before the flagship is in the index.
 
    ```sh
    # Legacy mode
-   jq '.bffEnabled = false | .showcaseEnabled = true | .showcaseHandoffsEnabled = false' public/config.json > config.tmp && mv config.tmp public/config.json
+   jq '.bffEnabled = false | .showcaseEnabled = true' public/config.json > config.tmp && mv config.tmp public/config.json
    # BFF mode
    jq '.bffEnabled = true | .showcaseEnabled = true' public/config.json > config.tmp && mv config.tmp public/config.json
    ```
@@ -317,9 +317,8 @@ when the file says `true` and `showcaseApiUrl` has the `apiUrl` origin. A previe
 production shows the "content preview with production data" notice, even if the rendered file says
 `true`, so production identifiers don't link to pages of a different environment. This check runs
 in legacy mode only: with `bffEnabled: true` the browser can't see the lookup URL and takes the
-file's value, which is why BFF mode needs `pnpm run start:server`, whose server derives it. The legacy
-command's `showcaseHandoffsEnabled = false` is no longer needed, and does no harm. The Fastify
-server ignores the file's value and compares the lookup URL with `apiUrl` itself.
+file's value, which is why BFF mode needs `pnpm run start:server`, whose server derives it. The
+Fastify server ignores the file's value and compares the lookup URL with `apiUrl` itself.
 
 Each dataset shelf shows "These datasets can't be loaded right now" in every environment, production
 also, until Consent has the public lookup on ("Not done yet" in that document) and
