@@ -289,8 +289,9 @@ describe('VotingHistory', () => {
   it('labels each tab with the number of rows it holds', () => {
     render(<VotingHistory darCollection={darCollection} dacIds={dacIds} />)
     // two chair votes (FINAL + RADAR_APPROVE) and one member-vote election survive the DAC filter
-    expect(screen.getByRole('tab', { name: 'Chair Votes2 items' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Member Votes1 item' })).toBeInTheDocument()
+    // The badge is a flex item, so it is block-level and its name is set apart from the label.
+    expect(screen.getByRole('tab', { name: 'Chair Votes 2 items' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Member Votes 1 item' })).toBeInTheDocument()
   })
 
   it('renders with correct elections and votes filtered by DAC IDs and election type', async () => {
