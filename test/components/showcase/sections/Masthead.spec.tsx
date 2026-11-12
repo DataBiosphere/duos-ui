@@ -261,13 +261,15 @@ describe('Masthead', () => {
 
   describe('scroll padding', () => {
     const page = document.documentElement
-    const stickyMasthead = () => {
+    // jsdom's default 1024x768 window matches the sticky media query, so each test sets the position.
+    const mastheadPosition = (position: 'sticky' | 'static') => {
       const realStyle = globalThis.getComputedStyle
       vi.spyOn(globalThis, 'getComputedStyle').mockImplementation((element) => {
         const style = realStyle(element)
-        return (element as HTMLElement).classList.contains('showcase-masthead') ? { ...style, position: 'sticky' } as CSSStyleDeclaration : style
+        return (element as HTMLElement).classList.contains('showcase-masthead') ? { ...style, position } as CSSStyleDeclaration : style
       })
     }
+    const stickyMasthead = () => mastheadPosition('sticky')
 
     beforeEach(() => {
       vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(120)
@@ -285,6 +287,9 @@ describe('Masthead', () => {
     })
 
     it('sets no padding when the masthead does not stick (phones)', () => {
+      mastheadPosition('static')
+      // Left over from a wider window, so the test sees the hook clear it.
+      page.style.scrollPaddingTop = '120px'
       renderMasthead()
       expect(page.style.scrollPaddingTop).toBe('')
     })

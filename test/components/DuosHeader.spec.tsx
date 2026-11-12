@@ -43,7 +43,8 @@ vi.mock('src/libs/auth/auth', () => ({
 }))
 
 vi.mock('src/components/NavigationTabsComponent', () => ({
-  NavigationTabsComponent: ({ tabs, initialTab, isLogged, DuosLogo, orientation, contactUsButton, signOut }: {
+  NavigationTabsComponent: ({ makeNotifications, tabs, initialTab, isLogged, DuosLogo, orientation, contactUsButton, signOut }: {
+    makeNotifications: () => React.ReactNode
     tabs: Array<{ label: string, children?: Array<{ label: string }> }>
     initialTab: number
     isLogged: boolean
@@ -53,6 +54,8 @@ vi.mock('src/components/NavigationTabsComponent', () => ({
     signOut: () => void
   }) => (
     <div>
+      {/* Like the real component; without it the only banners are the mobile ones, hidden at jsdom's 1024px width. */}
+      {makeNotifications()}
       {orientation === 'horizontal' && <img src={DuosLogo} alt="DUOS Logo" />}
       {orientation === 'horizontal' && isLogged && (
         <button onClick={signOut}>header sign out</button>
@@ -526,7 +529,7 @@ describe('DuosHeader', () => {
 
       await mountHeader('/home')
 
-      expect(screen.getByText('Still active')).toBeInTheDocument()
+      expect(screen.getByRole('alert')).toHaveTextContent('Still active')
     })
 
     it('dismisses a banner and removes it from view when its close button is clicked', async () => {
@@ -536,7 +539,7 @@ describe('DuosHeader', () => {
       vi.mocked(isBannerVisible).mockReturnValue(true)
 
       await mountHeader('/home')
-      expect(screen.getByText('Dismiss me')).toBeInTheDocument()
+      expect(screen.getByRole('alert')).toHaveTextContent('Dismiss me')
 
       fireEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
 
@@ -557,7 +560,7 @@ describe('DuosHeader', () => {
 
       expect(dismissBanner).toHaveBeenCalledExactlyOnceWith('banner-4')
       expect(screen.queryByText('Dismiss me')).not.toBeInTheDocument()
-      expect(screen.getByText('Keep me')).toBeInTheDocument()
+      expect(screen.getByRole('alert')).toHaveTextContent('Keep me')
     })
 
     it('skips a feed entry that carries no id, and keeps the rest', async () => {
@@ -570,7 +573,7 @@ describe('DuosHeader', () => {
       await mountHeader('/home')
 
       expect(screen.queryByText('No id here')).not.toBeInTheDocument()
-      expect(screen.getByText('Well formed')).toBeInTheDocument()
+      expect(screen.getByRole('alert')).toHaveTextContent('Well formed')
     })
 
     // useUserIsLogged is undefined until the session probe lands; filtering then would read the

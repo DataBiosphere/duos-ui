@@ -1,4 +1,5 @@
 import { Storage } from 'src/libs/storage'
+import { envGroups } from 'src/utils/EnvironmentUtils'
 
 interface ConfigType {
   env: string
@@ -237,6 +238,17 @@ const httpOrigin = (value: unknown): string | undefined => {
   catch {
     return undefined
   }
+}
+
+/**
+ * True when `status: 'hidden'` showcase entries may render, so a reviewer can preview one before
+ * it goes live (DT-4358, S4.2). One image is deployed to every environment, so this reads `env`
+ * from config.json, not the build. Only `local`, `dev` and `staging` (`envGroups.NON_PROD`) turn it
+ * on; `prod`, any other value, or none keeps hidden entries not found, as in production.
+ */
+export const isShowcaseHiddenPreviewEnabled = async (): Promise<boolean> => {
+  const config = await loadConfig()
+  return (envGroups.NON_PROD as readonly unknown[]).includes(config.env)
 }
 
 export const getProject = async (): Promise<string> => {

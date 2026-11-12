@@ -230,12 +230,29 @@ test.describe('refused showcase URLs', () => {
     return { text: await notFound.innerText(), title: await page.title() }
   }
 
-  test('a hidden key, an unknown key and the flagship\'s own key give the same not-found page', async ({ page }) => {
+  test('an unknown key and the flagship\'s own key give the same not-found page', async ({ page }) => {
     const unknown = await notFoundPage(page, '/showcase/no-such-showcase')
     expect(unknown.title).toBe('DUOS')
-    expect(await notFoundPage(page, `/showcase/${E2E_HIDDEN.key}`)).toEqual(unknown)
     // The flagship is served at /data only.
     expect(await notFoundPage(page, `/showcase/${E2E_FLAGSHIP.key}`)).toEqual(unknown)
+  })
+
+  // A hidden entry renders only where config.json names a non-production env (DT-4358). `legacy`
+  // serves `env: 'prod'` (writeLegacyConfig.ts) and `chromium` the build's `dev`, so the two
+  // projects check the two sides of the rule.
+  test('a hidden key is not found in production, and previews elsewhere', async ({ page, request }, testInfo) => {
+    const { env } = await (await request.get('/config.json')).json() as { env?: string }
+    const production = testInfo.project.name === 'legacy'
+    if (production) {
+      expect(env).toBe('prod')
+      const unknown = await notFoundPage(page, '/showcase/no-such-showcase')
+      expect(await notFoundPage(page, `/showcase/${E2E_HIDDEN.key}`)).toEqual(unknown)
+    }
+    else {
+      expect(['local', 'dev', 'staging']).toContain(env)
+      await page.goto(`/showcase/${E2E_HIDDEN.key}`)
+      await expect(showcaseHeading(page)).toHaveText(E2E_HIDDEN.title)
+    }
   })
 
   test('/showcase with no key, or with extra segments, reaches the app\'s not-found route', async ({ page }) => {

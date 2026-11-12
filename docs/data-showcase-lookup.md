@@ -35,7 +35,7 @@ Two settings name the Consent that answers lookups. Both are separate from the a
 
 | Setting | Where | Used in | Value |
 | ------- | ----- | ------- | ----- |
-| `DUOS_SHOWCASE_API_URL` | Server environment (`.env.local`, terra-helmfile) | BFF mode | A bare origin, for example `https://consent.dsde-prod.broadinstitute.org`. A path or credentials stop the server at startup. |
+| `DUOS_SHOWCASE_API_URL` | Server environment (`.env.local`, terra-helmfile) | BFF mode | A bare origin, for example `https://consent.dsde-prod.broadinstitute.org`. A path or credentials stop the server at startup. For a local setup, `scripts/render-configs.sh --write_env true` writes the dev Consent origin and keeps a value that is already in `.env.local`. |
 | `showcaseApiUrl` | `config.json` | Legacy mode | An http(s) Consent URL with no wildcard host. The client and the Content Security Policy use its origin only. |
 
 Set them for each kind of environment as follows:
@@ -56,7 +56,10 @@ In legacy mode the client fails with `not_configured` before it sends a request.
 a missing key or any other value leaves them off. While it is off, `/data` and every
 `/showcase/:key` render the not-found page, whatever the index says. With it on, a route renders only
 a `live`, unretired entry that has a config; the flagship renders at `/data` only. A hidden or
-unknown key gets the same not-found page. `loadShowcase` in
+unknown key gets the same not-found page. The exception is a preview: when `env` in `config.json` is
+`local`, `dev` or `staging`, a `hidden` entry renders as if it were `live`, so a reviewer can see it
+before it goes live. Any other `env`, `prod` or a missing one included, keeps hidden entries not
+found. `loadShowcase` in
 `src/components/showcase/loadShowcase.ts` applies these rules. Enabling the flag is the public
 launch, and turning it off is the rollback (delivery plan, S5.1).
 

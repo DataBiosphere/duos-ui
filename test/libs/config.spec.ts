@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
-import { Config, getEnv, getApiUrl, getBannersUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, getUpstreamApiUrl, isBffEnabled, isShowcaseEnabled, isShowcaseHandoffsEnabled, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
+import { Config, getEnv, getApiUrl, getBannersUrl, getBardApiUrl, getEcmApiUrl, getECMUrl, getHash, getProject, getTag, getTdrApiUrl, getTerraUrl, getUpstreamApiUrl, isBffEnabled, isShowcaseEnabled, isShowcaseHandoffsEnabled, isShowcaseHiddenPreviewEnabled, Token, authOpts, jsonBody, multiPartOpts, textPlain } from 'src/libs/config'
 import { Storage } from 'src/libs/storage'
 
 const mockConfig = {
@@ -85,6 +85,8 @@ describe('Config', () => {
       ['isShowcaseEnabled', isShowcaseEnabled, false],
       // showcaseHandoffsEnabled is absent from mockConfig: every showcase handoff stays off
       ['isShowcaseHandoffsEnabled', isShowcaseHandoffsEnabled, false],
+      // env is 'test' in mockConfig, which is not a non-production preview environment
+      ['isShowcaseHiddenPreviewEnabled', isShowcaseHiddenPreviewEnabled, false],
     ] as const)('%s should return correct value', async (_name, fn, expected) => {
       expect(await fn()).toBe(expected)
     })
@@ -96,6 +98,26 @@ describe('Config', () => {
       stubConfigFetch({ ...mockConfig, bffEnabled: true })
       const freshConfig = await import('src/libs/config')
       expect(await freshConfig.isBffEnabled()).toBe(true)
+    })
+  })
+
+  describe('isShowcaseHiddenPreviewEnabled', () => {
+    it.each([
+      ['local', true],
+      ['dev', true],
+      ['staging', true],
+      ['prod', false],
+      ['alpha', false],
+      ['', false],
+      ['Dev', false],
+      [undefined, false],
+      [null, false],
+      [['dev'], false],
+    ])('returns env %j as %j, so only a non-production environment previews hidden showcases', async (env, expected) => {
+      vi.resetModules()
+      stubConfigFetch({ ...mockConfig, env })
+      const freshConfig = await import('src/libs/config')
+      expect(await freshConfig.isShowcaseHiddenPreviewEnabled()).toBe(expected)
     })
   })
 

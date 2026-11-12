@@ -31,9 +31,9 @@ field, file a ticket for a product decision.
 There is no other document to read for this step. The rule is this section.
 
 DUOS sends its JavaScript to every browser that opens the site, with no sign-in. All showcase
-content that you merge to `develop` is in that JavaScript. `status: "hidden"` keeps a route off. It
-is **not** a privacy control: the title, copy and image names of a hidden showcase are in the
-JavaScript for anyone to read.
+content that you merge to `develop` is in that JavaScript. `status: "hidden"` keeps a route off in
+production (local, dev and staging still render it as a preview). It is **not** a privacy control:
+the title, copy and image names of a hidden showcase are in the JavaScript for anyone to read.
 
 Merge only content that is cleared for public disclosure. This includes the name of a partner that
 is not yet announced. A branch and a PR are public also, because duos-ui is a public repository. Do
@@ -95,6 +95,7 @@ Other rules:
   page then uses the index title. Other images can use `alt: ''` only when they are decorative.
 - A reviewer reads each SVG in the PR. The page shows an SVG through `<img>` and never inlines it.
 - The image of a disabled section still counts toward the budget, because it still ships.
+- The file must exist. A path with no file fails with `"<path>" not found below src/images`.
 
 ---
 
@@ -199,6 +200,8 @@ Rules that CI checks in the config (`test/showcases/guard/checkShowcase.ts`):
 | Item IDs | Each `id` is unique in the whole showcase. IDs are analytics keys; do not change one later. |
 | Identifiers | `DUOS-` and exactly six digits, or seven or more digits with no leading zero. For example `DUOS-000123`. |
 | Contrast | Primary and accent colors need a contrast of 4.5:1 or more on the white background. In a preview, the page shows the preset color in place of an override that fails, so the preview does not show your color. |
+| Dataset shelves | An enabled dataset shelf has `items` or a `ranking`: not both, and not neither. Only `open-access-datasets` accepts `items`. The `ranking` must be one that `SECTION_RANKINGS` (`src/types/showcase.ts`) allows for the section, and `scope` accepts only `dac`. A shelf with both, with neither, or with a wrong `ranking` fails with only `sections.<key>: Invalid input`, so check these three points. |
+| Field names | A field that the schema does not have fails with `Unrecognized key: "<name>"`. Check the spelling. |
 | Images | See Step 3. |
 
 Dated content appears and expires without a release. Every other change needs a merge and the
@@ -246,6 +249,9 @@ Then add one line to the existing `showcaseConfigs` object, under the key:
 Import config files with a relative path here. Other code imports the index as `src/showcases`
 only; a test fails any other path to it.
 
+Each index entry needs a config here, and each config here needs an index entry (5.2). CI fails
+with `entries: "<key>" has no config` or `configs: "<key>" has no index entry`.
+
 ### 5.2 Add the index entry
 
 Add an entry to `entries` in `src/showcases/registry.json`:
@@ -258,7 +264,7 @@ Add an entry to `entries` in `src/showcases/registry.json`:
 | ----- | ---- |
 | `key` | See the key rules below. The route comes from the key; there is no `route` field. |
 | `title` | The display title. Not empty. You can change it at any time. |
-| `status` | `live` or `hidden`. A `hidden` entry renders the not-found page. Start with `hidden`. Change it to `live` for a preview (Step 6), or when the program owner clears the launch. |
+| `status` | `live` or `hidden`. In production a `hidden` entry renders the not-found page; local, dev and staging render it as a preview (Step 6). Start with `hidden`. Change it to `live` when the program owner clears the launch. |
 | `flagship` | Exactly one entry is the flagship, served at `/data` only. Every other entry is `false`. |
 | `order` | A whole number, 0 or more. Use 0 for the first entry, then one higher than the current highest. CI does not check that it is unique; the reviewer does. |
 
@@ -288,8 +294,8 @@ cannot merge before the flagship is in the index.
 
 ## Step 6: Preview
 
-1. Set the entry to `"status": "live"` on your branch. A `hidden` entry is not routable in any
-   build today.
+1. Keep the entry `"status": "hidden"`. A hidden entry renders when `env` in `public/config.json` is
+   `local`, `dev` or `staging`, and shows the not-found page for any other value, `prod` included.
 2. Turn the rollout flag on in your local `public/config.json`, the file that the local setup
    renders. Git ignores it. Only the boolean `true` works. Change the file in place: a copy made
    from `config/dev.json` loses fields such as `showcaseApiUrl`. Choose the mode here:
@@ -324,12 +330,8 @@ Each dataset shelf shows "These datasets can't be loaded right now" in every env
 also, until Consent has the public lookup on ("Not done yet" in that document) and
 DataBiosphere/consent#3263 is deployed. This is not a defect in your config. The masthead, the hero copy and the links do not need the lookup.
 
-If the showcase must not have a page at merge (for example, the launch date is later), set `status`
-back to `"hidden"` before you ask for review, and attach screenshots of the live preview to the PR.
-The content must be cleared in each case (Step 1).
-
-The full preview procedure (staging, and hidden entries in non-production builds) is story S4.2 of
-the delivery plan. This section changes when that story lands.
+Keep `status` `"hidden"` until the program owner clears the launch, and attach screenshots of the
+preview to the PR. The content must be cleared in each case (Step 1).
 
 ---
 
@@ -368,13 +370,14 @@ current index. If another showcase PR merges first, update your branch.
 
 | You want to | Do this | Reversible |
 | ----------- | ------- | ---------- |
-| Take a showcase offline for a time | Set `"status": "hidden"` | Yes: set it back to `live` |
+| Take a showcase offline in production for a time | Set `"status": "hidden"` | Yes: set it back to `live` |
 | Remove a showcase for good | Retire its key (below) | **No** |
 | Replace a showcase with a new identity | Retire the old key, then add a new entry with a new key | No |
 | Turn every showcase off | Set `showcaseEnabled` off in the deployed `config.json` | Yes |
 
-A hidden showcase stays in the index, but its route shows the "Not Found" page. If you hide the
-flagship, `/data` shows that page.
+A hidden showcase stays in the index, but in production its route shows the "Not Found" page. If you
+hide the flagship, `/data` shows that page. Local, dev and staging still render a hidden showcase as
+a preview, so hiding takes it off production only.
 
 ### Retire a key
 
@@ -460,7 +463,7 @@ A showcase PR is ready to merge when both roles approve. The PR template has a s
 - [ ] Logos, colors and copy match what the program owner supplied
 - [ ] Each link and call to action opens the correct page
 - [ ] The page works with a keyboard and at phone, tablet and desktop widths
-- [ ] A hidden or unknown key shows the not-found page
+- [ ] An unknown key shows the not-found page
 - [ ] `status` in the PR is the value that must ship
 
 ### Pull request
