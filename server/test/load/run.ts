@@ -1,5 +1,6 @@
 import { parseArgs } from 'node:util'
-import autocannon from 'autocannon'
+import { runLoad, sendOnce } from './driver.js'
+import type { LoadResult } from './driver.js'
 import { BLOB_PATH, blobBody, forkStubUpstream, jsonBody } from './upstream.js'
 import { startLoadTarget } from './harness.js'
 import type { LoadTarget, PoolSnapshot, SeededSession } from './harness.js'
@@ -18,7 +19,7 @@ interface PoolHighWater {
 
 interface Verdict {
   scenario: string
-  result: autocannon.Result
+  result: LoadResult
   pool: PoolHighWater | undefined
   failures: string[]
 }
@@ -110,16 +111,14 @@ function samplePool(target: LoadTarget | undefined): () => PoolHighWater | undef
   }
 }
 
-// autocannon cannot combine expectBody with per-session request templates.
+// The timed run does not compare bodies, so check one per scenario first. This
+// uses node:http like the driver: Node's fetch sends Sec-Fetch-Mode without
+// Sec-Fetch-Site, which the BFF's Fetch Metadata guard rejects with a 403.
 async function verifyScenarioBody(scenario: Scenario, origin: string, session: SeededSession): Promise<void> {
   const template = scenario.request(session)
-  const response = await fetch(`${origin}${template.path}`, {
-    method: template.method,
-    headers: template.headers as Record<string, string>,
-    body: template.body as string | undefined,
-  })
-  const expected = template.path?.includes(BLOB_PATH) ? blobBody(blobBytes) : jsonBody(jsonBytes)
-  const received = Buffer.from(await response.arrayBuffer())
+  const response = await sendOnce(origin, template)
+  const expected = template.path.includes(BLOB_PATH) ? blobBody(blobBytes) : jsonBody(jsonBytes)
+  const received = response.body
   if (response.status !== 200) {
     throw new Error(`${scenario.name}: proxy answered ${response.status}, so the run would have measured an error path`)
   }
@@ -134,14 +133,13 @@ async function runScenario(scenario: Scenario, loadRun: LoadRun): Promise<Verdic
   const requests = (scenario.needsSession ? loadRun.sessions : [{ cookie: '', csrfToken: '' }])
     .map(session => scenario.request(session))
 
-  const run = (duration: number): Promise<autocannon.Result> => autocannon({
-    url: loadRun.origin,
+  const run = (durationSeconds: number): Promise<LoadResult> => runLoad({
+    origin: loadRun.origin,
     connections,
-    duration,
-    workers: workers > 0 ? workers : undefined,
+    durationSeconds,
+    workers,
     requests,
-    title: scenario.name,
-    timeout: 30,
+    timeoutSeconds: 30,
   })
 
   // Exclude JIT and connection-pool startup from steady-state measurements.

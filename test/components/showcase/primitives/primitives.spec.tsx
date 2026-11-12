@@ -132,8 +132,8 @@ describe('Card', () => {
     renderInRouter(<Card title="Example App" reserveMedia media={{ alt: 'App screenshot' }} />)
     const lines = screen.getByText('App screenshot')
     expect(lines).toHaveStyle({ overflow: 'hidden' })
-    // jsdom resolves the rem padding to px.
-    expect(getComputedStyle(lines).paddingBottom).toBe('0')
+    // jsdom resolves computed lengths to px, as browsers do.
+    expect(getComputedStyle(lines).paddingBottom).toBe('0px')
     expect(getComputedStyle(lines.parentElement as HTMLElement).paddingBottom).toBe('12px')
     // jsdom doesn't apply -webkit-line-clamp, so check the clamp on the styles both card variants use.
     for (const featured of [false, true]) {

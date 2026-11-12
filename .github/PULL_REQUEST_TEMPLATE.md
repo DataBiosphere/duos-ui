@@ -2,6 +2,15 @@
 
 ### Summary
 
+### Showcase changes
+
+Delete this section if the PR does not change `src/showcases/` or `src/images/showcase/`. See [docs/data-showcase.md](https://github.com/DataBiosphere/duos-ui/blob/develop/docs/data-showcase.md).
+
+- [ ] The program owner approved the copy, claims and logos in this PR
+- [ ] All content is cleared for public disclosure (`hidden` is not a privacy control)
+- [ ] Preview link or screenshots:
+- [ ] Health check result (after S4.3 lands):
+
 ----
 Have you read [Terra's Contributing Guide](https://github.com/DataBiosphere/terra-ui/wiki/Contributor-Guide) lately? If not, do that first.
 
