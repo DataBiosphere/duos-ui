@@ -324,9 +324,6 @@ DataBiosphere/consent#3263 is deployed. This is not a defect in your config. The
 Keep `status` `"hidden"` until the program owner clears the launch, and attach screenshots of the
 preview to the PR. The content must be cleared in each case (Step 1).
 
-The full preview procedure (staging, and hidden entries in non-production builds) is story S4.2 of
-the delivery plan. This section changes when that story lands.
-
 ---
 
 ## Step 7: Run the checks
