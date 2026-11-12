@@ -227,7 +227,8 @@ export const ShowcaseConfigSchema = z.strictObject({
 export const RegistryEntrySchema = z.strictObject({
   key: z.string().regex(SHOWCASE_KEY_PATTERN),
   title: z.string().min(1),
-  /** `hidden` keeps the route off; it is not a privacy control. */
+  /** `hidden` keeps the route off in production. Local, dev and staging still render it as a
+   * preview (DT-4358). It is not a privacy control. */
   status: z.enum(['live', 'hidden']),
   flagship: z.boolean(),
   order: z.number().int().nonnegative(),

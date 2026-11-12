@@ -56,7 +56,10 @@ In legacy mode the client fails with `not_configured` before it sends a request.
 a missing key or any other value leaves them off. While it is off, `/data` and every
 `/showcase/:key` render the not-found page, whatever the index says. With it on, a route renders only
 a `live`, unretired entry that has a config; the flagship renders at `/data` only. A hidden or
-unknown key gets the same not-found page. `loadShowcase` in
+unknown key gets the same not-found page. The exception is a preview: when `env` in `config.json` is
+`local`, `dev` or `staging`, a `hidden` entry renders as if it were `live`, so a reviewer can see it
+before it goes live. Any other `env`, `prod` or a missing one included, keeps hidden entries not
+found. `loadShowcase` in
 `src/components/showcase/loadShowcase.ts` applies these rules. Enabling the flag is the public
 launch, and turning it off is the rollback (delivery plan, S5.1).
 
