@@ -55,7 +55,8 @@ const getReport = async <T>(path: string, { dacIds, target, ...query }: DarMetri
 /**
  * DAR reporting for admins, and for DAC chairs and members over their DACs. Every call needs an
  * inclusive `from`/`to` range. With a `target`, the reports in TARGET_REPORTS cover that study or
- * dataset instead, for whoever can read its DAR history.
+ * dataset instead: expirations and renewals for whoever can read its DAR history, and the rest,
+ * which count denied and pending requests, for admins and the DAC in charge.
  */
 export const DarMetrics = {
   getVolume: (query: DarMetricsQuery) => getReport<DarVolumeReport>('dar-volume', query),

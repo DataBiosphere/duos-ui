@@ -449,6 +449,15 @@ describe('DatasetStatistics', () => {
   const historyHeading = () => screen.findByText(/^Data Access Requests for this dataset/)
   const noTrendRequests = () =>
     Object.values(DarMetrics).every(report => vi.mocked(report).mock.calls.length === 0)
+  // The dataset is under DAC 1. Set for each test: nothing here restores a spy between tests.
+  const viewAs = (user: object) => vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(user as never)
+  const viewAsAdmin = () => viewAs({ isAdmin: true, roles: [] })
+  const viewAsChairOf = (dacId: number) =>
+    viewAs({ isAdmin: false, roles: [{ name: 'Chairperson', dacId, roleId: 2, userId: 42 }] })
+  const viewAsResearcher = () => viewAs({ isAdmin: false, roles: [{ name: 'Researcher', roleId: 5, userId: 42 }] })
+  const requestActivityReports = [
+    DarMetrics.getVolume, DarMetrics.getDatasetDecisions, DarMetrics.getDatasetDecisionTurnaround,
+  ]
 
   it('counts the data access requests in the heading once they load', async () => {
     renderDatasetStatistics()
@@ -474,7 +483,8 @@ describe('DatasetStatistics', () => {
     },
   )
 
-  it('shows the dataset\'s DAR trends once its request history has loaded', async () => {
+  it('shows an admin the dataset\'s DAR trends once its request history has loaded', async () => {
+    viewAsAdmin()
     renderDatasetStatistics()
 
     expect(await screen.findByText('Data Access Request Trends')).toBeInTheDocument()
@@ -489,6 +499,7 @@ describe('DatasetStatistics', () => {
   })
 
   it('shows trends for a dataset nobody has requested yet', async () => {
+    viewAsAdmin()
     renderDatasetStatistics({ dars: [] })
 
     expect(await screen.findByRole('tab', { name: 'Volume' })).toBeInTheDocument()
@@ -501,6 +512,7 @@ describe('DatasetStatistics', () => {
   it.each([['is refused', 403], ['fails to load', 500]])(
     'shows and asks for no trends when the request history %s',
     async (_outcome, status) => {
+      viewAsAdmin()
       renderDatasetStatistics({
         darsError: Object.assign(new Error('nope'), { response: { status } }),
       })
@@ -511,6 +523,56 @@ describe('DatasetStatistics', () => {
       expect(noTrendRequests()).toBe(true)
     },
   )
+
+  /**
+   * Volume, decisions and turnaround count requests that were denied or are still pending. Those
+   * are for admins and the dataset's DAC; reading the dataset is not enough to be offered them.
+   */
+  it('offers a reader who is neither an admin nor on the dataset\'s DAC only the report on granted access', async () => {
+    viewAsResearcher()
+    renderDatasetStatistics()
+
+    expect(await screen.findByRole('region', { name: 'Expiration and renewal' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    await waitFor(() => expect(DarMetrics.getRenewals).toHaveBeenCalledWith(
+      expect.objectContaining({ target: { kind: 'dataset', id: mockDatasetTerm.datasetId } }),
+    ))
+    expect(DarMetrics.getExpirations).toHaveBeenCalled()
+    requestActivityReports.forEach(report => expect(report).not.toHaveBeenCalled())
+  })
+
+  it('offers every report to a chair of the dataset\'s DAC', async () => {
+    viewAsChairOf(mockDatasetTerm.dacId)
+    renderDatasetStatistics()
+
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getAllByRole('tab')).toHaveLength(4)
+    // One DAC is in charge of a dataset, so there is no narrower scope to state
+    expect(screen.queryByText(/datasets your DACs are in charge of/)).not.toBeInTheDocument()
+  })
+
+  /** A dataset no DAC is in charge of, such as an open-access one, has no DAC to offer them to. */
+  it('offers the reports on a dataset with no DAC to an admin alone', async () => {
+    const noDac = { ...mockDatasetTerm, dacId: undefined } as unknown as DatasetTerm
+    viewAsChairOf(mockDatasetTerm.dacId)
+    const { unmount } = renderDatasetStatistics({ dataset: noDac })
+    expect(await screen.findByRole('region', { name: 'Expiration and renewal' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    unmount()
+
+    viewAsAdmin()
+    renderDatasetStatistics({ dataset: noDac })
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toBeInTheDocument()
+  })
+
+  it('offers a chair of another DAC only the report on granted access', async () => {
+    viewAsChairOf(mockDatasetTerm.dacId + 1)
+    renderDatasetStatistics()
+
+    expect(await screen.findByRole('region', { name: 'Expiration and renewal' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    requestActivityReports.forEach(report => expect(report).not.toHaveBeenCalled())
+  })
 })
 
 // access management, field display, identifier variants

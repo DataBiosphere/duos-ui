@@ -30,8 +30,8 @@ const COLUMNS: GridColDef<InstitutionRow>[] = [
 const LEFT_OUT = 'Progress reports, closeouts, drafts, and canceled or archived DARs are left out.'
 
 export const VolumeSection = ({ range }: { range: DarAnalyticsRange }) => {
-  // A study's or dataset's page is open beyond the DAC roles, so there the section never says who
-  // requested the data or from where; consent doesn't send it either.
+  // For a study or dataset consent sends totals alone, to whoever it serves the report to, so there
+  // the section never says who requested the data or from where.
   const target = useDarMetricsTarget()
   const report = useDarMetricsReport('volume', DarMetrics.getVolume, range, { limit: 1 })
   const data = report.data
