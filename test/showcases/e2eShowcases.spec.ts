@@ -36,6 +36,11 @@ describe('synthetic e2e showcases', () => {
     expect(findShowcase({ route: 'key', key: synthetic.E2E_PARTNER.key }, sources)).toMatchObject({ status: 'found', entry: synthetic.E2E_PARTNER })
     expect(findShowcase({ route: 'key', key: synthetic.E2E_HIDDEN.key }, sources)).toEqual({ status: 'not-found' })
   })
+
+  it('serve the hidden entry in a non-production preview', () => {
+    const sources = { entries: synthetic.showcaseEntries, configs: synthetic.showcaseConfigs, retiredKeys: synthetic.retiredShowcaseKeys, enabled: true, showHidden: true }
+    expect(findShowcase({ route: 'key', key: synthetic.E2E_HIDDEN.key }, sources)).toMatchObject({ status: 'found', entry: synthetic.E2E_HIDDEN })
+  })
 })
 
 describe('the e2e showcase build switch', () => {

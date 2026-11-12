@@ -2,10 +2,6 @@ packages:
   - server
 
 overrides:
-  # autocannon@8 asks for hyperid ^3, whose uuid@8 dependency is flagged by
-  # GHSA-w5hq-g745-h8pq. hyperid 4 drops uuid (and uuid-parse) for the native
-  # crypto.randomUUID; its API is unchanged, so it is a drop-in for autocannon.
-  hyperid@3: 4.0.0
   # @fastify/static@10 asks for glob ^13, which is flagged by GHSA-3g3m-2fjr-6pw4
   # and pulls minimatch@10 (GHSA-g3hv-75wg-m249). glob 14 fixes both, and the
   # glob() options that @fastify/static uses are unchanged. Remove this once
