@@ -24,7 +24,7 @@ jobs:
     if: github.actor != 'dependabot[bot]'
     services:
       postgres:
-        image: postgres:16.13-alpine
+        image: postgres:18.7-alpine
         env:
           POSTGRES_DB: consent
           POSTGRES_USER: consent
