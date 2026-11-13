@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DatasetStatistics from 'src/pages/DatasetStatistics'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
@@ -19,6 +20,23 @@ vi.mock('src/libs/ajax/DataSet')
 vi.mock('src/libs/ajax/DatasetMetrics')
 vi.mock('src/libs/ajax/TerraDataRepo')
 vi.mock('src/libs/ajax/DAC')
+// The trend reports the page asks consent for, each empty
+vi.mock('src/libs/ajax/DarMetrics', () => {
+  const emptyReport = () => Promise.resolve({
+    from: '2026-01-01', to: '2026-03-31', bucket: 'QUARTER', total: 0, unmeasured: 0, buckets: [], rows: [],
+  })
+  return {
+    DarMetrics: {
+      getVolume: vi.fn(emptyReport),
+      getDecisions: vi.fn(emptyReport),
+      getDatasetDecisions: vi.fn(emptyReport),
+      getDecisionTurnaround: vi.fn(emptyReport),
+      getDatasetDecisionTurnaround: vi.fn(emptyReport),
+      getExpirations: vi.fn(emptyReport),
+      getRenewals: vi.fn(emptyReport),
+    },
+  }
+})
 
 // Mock fetch for config.json
 const mockConfig = {
@@ -429,6 +447,9 @@ describe('DatasetStatistics', () => {
   })
 
   const historyHeading = () => screen.findByText(/^Data Access Requests for this dataset/)
+  const noTrendRequests = () =>
+    Object.values(DarMetrics).every(report => vi.mocked(report).mock.calls.length === 0)
+
   it('counts the data access requests in the heading once they load', async () => {
     renderDatasetStatistics()
 
@@ -450,6 +471,44 @@ describe('DatasetStatistics', () => {
       })
 
       expect((await historyHeading()).textContent).toBe('Data Access Requests for this dataset')
+    },
+  )
+
+  it('shows the dataset\'s DAR trends once its request history has loaded', async () => {
+    renderDatasetStatistics()
+
+    expect(await screen.findByText('Data Access Request Trends')).toBeInTheDocument()
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toHaveAttribute('aria-selected', 'true')
+    await waitFor(() => expect(DarMetrics.getVolume).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 1, target: { kind: 'dataset', id: mockDatasetTerm.datasetId } }),
+    ))
+    // The per-DAR reports reflect a DAR's other datasets, so the page never asks for them
+    fireEvent.click(screen.getByRole('tab', { name: 'Decisions' }))
+    await waitFor(() => expect(DarMetrics.getDatasetDecisions).toHaveBeenCalled())
+    expect(DarMetrics.getDecisions).not.toHaveBeenCalled()
+  })
+
+  it('shows trends for a dataset nobody has requested yet', async () => {
+    renderDatasetStatistics({ dars: [] })
+
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toBeInTheDocument()
+  })
+
+  /**
+   * Consent gates the trends as it gates the history. Whoever is refused the history is not shown
+   * trends, and is not the cause of requests that could only be refused too.
+   */
+  it.each([['is refused', 403], ['fails to load', 500]])(
+    'shows and asks for no trends when the request history %s',
+    async (_outcome, status) => {
+      renderDatasetStatistics({
+        darsError: Object.assign(new Error('nope'), { response: { status } }),
+      })
+
+      await historyHeading()
+      expect(screen.queryByText('Data Access Request Trends')).not.toBeInTheDocument()
+      expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+      expect(noTrendRequests()).toBe(true)
     },
   )
 })

@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { DarTrends } from 'src/components/dar_analytics/DarTrends'
+import { DarMetricsTarget } from 'src/types/darMetrics'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DAR } from 'src/libs/ajax/DAR'
@@ -57,6 +59,11 @@ export default function DatasetStatistics() {
   const [exportableSnapshots, setExportableSnapshots] = useState<SnapshotSummaryModel[]>([])
 
   const instantApprovalEligible = datasetTerm?.instantApprovalEligible === true
+  const datasetId = datasetTerm?.datasetId
+  const trendsTarget = useMemo<DarMetricsTarget | undefined>(
+    () => (datasetId === undefined ? undefined : { kind: 'dataset', id: datasetId }),
+    [datasetId],
+  )
 
   const showError = (message: string) => {
     Notifications.showError({
@@ -355,6 +362,14 @@ export default function DatasetStatistics() {
             <Stack spacing={2} sx={{ pt: '20px' }}>
               {dars.map((dar: DatasetStatisticsDar) => <DarSummaryCard key={dar.referenceId} dar={dar} />)}
             </Stack>
+          )}
+          {/* Consent gates the trends as it gates the history, so they are asked for only once the
+              history has loaded: never after a refusal, and never after a failure. */}
+          {!darsRestricted && dars !== undefined && trendsTarget && (
+            <>
+              <div style={{ ...Styles.SUB_HEADER, marginTop: 40 }}>Data Access Request Trends</div>
+              <DarTrends target={trendsTarget} />
+            </>
           )}
         </div>
       </div>
