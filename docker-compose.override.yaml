@@ -22,7 +22,7 @@ services:
       DUOS_DB_HOST: db
 
   db:
-    image: postgres:16.13-alpine
+    image: postgres:18.7-alpine
     container_name: duos-db
     ports:
       - 5432:5432
