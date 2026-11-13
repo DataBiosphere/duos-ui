@@ -294,44 +294,93 @@ cannot merge before the flagship is in the index.
 
 ## Step 6: Preview
 
-1. Keep the entry `"status": "hidden"`. A hidden entry renders when `env` in `public/config.json` is
-   `local`, `dev` or `staging`, and shows the not-found page for any other value, `prod` included.
-2. Turn the rollout flag on in your local `public/config.json`, the file that the local setup
-   renders. Git ignores it. Only the boolean `true` works. Change the file in place: a copy made
-   from `config/dev.json` loses fields such as `showcaseApiUrl`. Choose the mode here:
+Preview a showcase on your own machine, before you open the PR. A pending showcase has no preview
+in a shared environment: dev and staging deploy only merged code, and there are no PR preview
+deployments. A preview shows the showcase's real dataset cards from production, read-only.
+
+1. Keep the entry `"status": "hidden"`. Local, dev and staging render a hidden entry; production
+   shows the not-found page.
+2. In your local `public/config.json` (Git ignores it), turn the showcase pages on and point the
+   lookup at production Consent. Only the boolean `true` turns the pages on. Change the file in
+   place: a copy made from `config/dev.json` loses fields that the local setup wrote.
 
    ```sh
    # Legacy mode
-   jq '.bffEnabled = false | .showcaseEnabled = true' public/config.json > config.tmp && mv config.tmp public/config.json
-   # BFF mode
-   jq '.bffEnabled = true | .showcaseEnabled = true' public/config.json > config.tmp && mv config.tmp public/config.json
+   jq '.env = "local" | .bffEnabled = false | .showcaseEnabled = true | .showcaseApiUrl = "https://consent.dsde-prod.broadinstitute.org"' public/config.json > config.tmp && mv config.tmp public/config.json
+   # BFF mode: the lookup URL is DUOS_SHOWCASE_API_URL in .env.local instead (step 3)
+   jq '.env = "local" | .bffEnabled = true | .showcaseEnabled = true' public/config.json > config.tmp && mv config.tmp public/config.json
    ```
+
+   `env` must be `local`, `dev` or `staging`, or the hidden entry shows the not-found page.
+   Keep `apiUrl` on dev or your local Consent, and in BFF mode `DUOS_API_URL` in `.env.local`
+   too, because it replaces `apiUrl`. If either names production, the lookup and the signed-in
+   pages match, the handoffs open, and a request you start from the page is a real production
+   request.
 3. Start one server. Both use port 3000, so do not run them together.
    - Legacy mode: `pnpm start` (Vite only).
    - BFF mode: `pnpm run start:server` (the Fastify server with Vite embedded). It needs
-     `.env.local`; see [DEVNOTES.md](../DEVNOTES.md). Add `DUOS_SHOWCASE_API_URL` to that file by
-     hand. The setup does not write it, and without it each lookup gets HTTP 503.
+     `.env.local`; see [DEVNOTES.md](../DEVNOTES.md). Set
+     `DUOS_SHOWCASE_API_URL=https://consent.dsde-prod.broadinstitute.org` in that file. The setup
+     writes the dev Consent there, and keeps your value when it runs again.
 4. Open `/showcase/<key>`, or `/data` for the flagship.
 
-Dataset cards and hero counts come from the lookup. To see real cards, point the lookup at
-production Consent: `DUOS_SHOWCASE_API_URL` in BFF mode, `showcaseApiUrl` in legacy mode. A preview
-that reads production is read-only: the handoffs to search, dataset and request pages stay off. See
-the configuration table in [docs/data-showcase-lookup.md](data-showcase-lookup.md).
+The page is a content preview with production data. The lookup reads production, and the dataset,
+search and request pages read your local `apiUrl`, so the same `DUOS-` identifier can name a
+different dataset there. The page therefore shows the "content preview with production data"
+notice, and the links to signed-in DUOS pages show as text. Links to other websites still open, so
+you can check them. In legacy mode the browser compares `showcaseApiUrl` with `apiUrl` itself; in
+BFF mode the server does. See the configuration table in
+[docs/data-showcase-lookup.md](data-showcase-lookup.md).
 
-Vite serves the file as it is, so in legacy mode the browser checks it too: the handoffs open only
-when the file says `true` and `showcaseApiUrl` has the `apiUrl` origin. A preview that reads
-production shows the "content preview with production data" notice, even if the rendered file says
-`true`, so production identifiers don't link to pages of a different environment. This check runs
-in legacy mode only: with `bffEnabled: true` the browser can't see the lookup URL and takes the
-file's value, which is why BFF mode needs `pnpm run start:server`, whose server derives it. The
-Fastify server ignores the file's value and compares the lookup URL with `apiUrl` itself.
+Each dataset shelf shows "These datasets can't be loaded right now" until production Consent has the
+public lookup on ("Not done yet" in that document). This is not a defect in your config. The
+masthead, the hero copy and the links do not need the lookup.
 
-Each dataset shelf shows "These datasets can't be loaded right now" in every environment, production
-also, until Consent has the public lookup on ("Not done yet" in that document) and
-DataBiosphere/consent#3263 is deployed. This is not a defect in your config. The masthead, the hero copy and the links do not need the lookup.
+Attach screenshots of the preview to the PR. Keep `status` `"hidden"` until the program owner clears
+the launch; the content must be cleared in each case (Step 1).
 
-Keep `status` `"hidden"` until the program owner clears the launch, and attach screenshots of the
-preview to the PR. The content must be cleared in each case (Step 1).
+### Test a request from a showcase
+
+A content preview can't open the dataset or request pages. To test that flow, use synthetic
+datasets that belong to your local database, with a local Consent:
+
+Sign-in to a local Consent needs configs rendered after 2026-10-30. Consent trusts the proxy's claim
+headers only on loopback (DT-4419), so the proxy must share the app's network
+(`network_mode: service:app`) and forward to `localhost:8080`. With an older render, every signed-in
+request gets a 401 and DUOS returns you to the home page. Re-run consent's
+`scripts/render-configs.sh --write_compose true --write_chart_configs true`.
+
+1. In consent, start the local stack, run `scripts/seed-showcase-fixture.sh` and then
+   `scripts/index-es.sh`. The first adds DUOS-990001 to DUOS-990005 to the local database; see
+   "Data Showcase fixture" in consent's DEVNOTES.md. Add this block to the rendered
+   `config/consent.yaml`, and restart the `consent` container. A dotted
+   `showcase.publicLookupEnabled` key is ignored. Rendering the chart configs again replaces this
+   file, so add the block again afterwards.
+
+   ```yaml
+   showcase:
+     publicLookupEnabled: true
+   ```
+2. In `public/config.json`, set `env` to `local`, `bffEnabled` to `false`, `showcaseEnabled` and
+   `showcaseHandoffsEnabled` to `true`, and both `apiUrl` and `showcaseApiUrl` to the local Consent:
+
+   ```sh
+   jq '.env = "local" | .bffEnabled = false | .showcaseEnabled = true | .showcaseHandoffsEnabled = true | .apiUrl = "https://local.dsde-dev.broadinstitute.org:27443" | .showcaseApiUrl = .apiUrl' public/config.json > config.tmp && mv config.tmp public/config.json
+   ```
+
+   `pnpm start` has no server to derive `showcaseHandoffsEnabled`, so the file must say `true`. The
+   browser still opens the handoffs only because both URLs name the same Consent, so the lookup and
+   the signed-in pages read the same database.
+3. Start the app with the synthetic showcases: `DUOS_E2E_SHOWCASES=true pnpm start`. This variable
+   swaps the real index for `test/e2e/showcase/index.ts`. No deployed build sets it.
+4. Open `/showcase/request-flow-fixture` and sign in. "Latest data releases" shows DUOS-990001
+   (controlled), DUOS-990002 (open) and DUOS-990003 (external). "Open access datasets" shows
+   DUOS-990002 only: the lookup leaves out DUOS-990004 and DUOS-990005, which are not eligible.
+5. Choose "Request access" on DUOS-990001. The dataset page opens, and "Apply for Access" starts a
+   data access request. The button is turned off unless your user has a library card in the local
+   database. To review the request, add yourself to "Showcase Fixture DAC" as its chair.
+
+Running the seed again restores the fixture and keeps the requests you made.
 
 ---
 
@@ -419,7 +468,8 @@ Add a partner with the key `example-partner` to an index that already has the fl
    approve.
 
 The synthetic showcases in `test/e2e/showcase/index.ts` are a second example that passes every rule.
-They are compiled only by `pnpm run build:e2e` and never reach a deployed build.
+Only `DUOS_E2E_SHOWCASES=true` compiles them in (`pnpm run build:e2e`, or a local `pnpm start` for
+the request-flow test in Step 6), so they never reach a deployed build.
 
 ---
 
@@ -459,9 +509,10 @@ A showcase PR is ready to merge when both roles approve. The PR template has a s
 
 ### Preview
 
-- [ ] The page renders at `/showcase/<key>` (or `/data`) with `showcaseEnabled: true`
+- [ ] The page renders at `/showcase/<key>` (or `/data`) with `showcaseEnabled: true` and `env: local`
+- [ ] The page shows the content preview notice, and the dataset shelves show production cards (or "These datasets can't be loaded right now" until production has the lookup on)
 - [ ] Logos, colors and copy match what the program owner supplied
-- [ ] Each link and call to action opens the correct page
+- [ ] Each link to another website opens the correct page
 - [ ] The page works with a keyboard and at phone, tablet and desktop widths
 - [ ] An unknown key shows the not-found page
 - [ ] `status` in the PR is the value that must ship

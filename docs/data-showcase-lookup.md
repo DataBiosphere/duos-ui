@@ -43,8 +43,8 @@ Set them for each kind of environment as follows:
 | Environment | Points to | Why |
 | ----------- | --------- | --- |
 | Production | Production Consent | Showcase configs list production identifiers. |
-| Content preview (dev, staging or local, to review a showcase PR) | Production Consent | `DUOS-` identifiers come from a sequence in each environment, so only production resolves them. The preview is read-only: authenticated DUOS handoffs (search, dataset detail, data access requests) must stay off, so a reviewer never sends a production identifier to a dev or staging backend. E3 implements that rule. |
-| Functional test (end-to-end request flows) | That environment's own Consent | The tests use a synthetic showcase fixture with datasets seeded in the same environment, so the lookup and the handoffs agree. |
+| Content preview (local, to review a showcase PR) | Production Consent | `DUOS-` identifiers come from a sequence in each environment, so only production resolves them. The preview is read-only: authenticated DUOS handoffs (search, dataset detail, data access requests) stay off, because the lookup and `apiUrl` name different Consents (`showcaseHandoffsEnabled`). A reviewer never sends a production identifier to another backend. See Step 6 in [data-showcase.md](data-showcase.md). |
+| Functional test (request flows) | The local Consent | Synthetic datasets seeded in the local database (consent's `scripts/seed-showcase-fixture.sh`) and the `request-flow-fixture` showcase. The lookup and the handoffs read the same database. Dev and staging have no seeded fixture. |
 | Local development | Dev Consent (`.env.example`) | Change it to production to preview real content. |
 
 A missing setting fails visibly. In BFF mode the route answers 503 `{"error":"upstream_not_configured"}`.
@@ -162,4 +162,5 @@ The mock does not check Consent's input limits. Test those against Consent.
 - The browser address on the BFF-to-Consent hop. Consent's load balancer overwrites `X-Real-IP` on
   that hop, so Consent puts all BFF traffic in one rate-limit bucket. A follow-up ticket from DT-4374
   covers the design.
-- End-to-end tests against a seeded environment.
+- End-to-end request tests in a shared environment. The seeded fixture is local only (Step 6 in
+  data-showcase.md).
