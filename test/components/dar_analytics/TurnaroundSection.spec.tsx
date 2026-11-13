@@ -6,7 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { TurnaroundSection } from 'src/components/dar_analytics/TurnaroundSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
-import { TurnaroundBucket, TurnaroundReport } from 'src/types/darMetrics'
+import { DarMetricsTargetContext } from 'src/components/dar_analytics/useDarMetricsReport'
+import { DarMetricsTarget, TurnaroundBucket, TurnaroundReport } from 'src/types/darMetrics'
 
 vi.mock('src/libs/ajax/DarMetrics', () => ({
   DarMetrics: {
@@ -154,5 +155,46 @@ describe('TurnaroundSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Per dataset' }))
 
     await waitFor(() => expect(screen.queryByText(/left out of these figures/)).not.toBeInTheDocument())
+  })
+
+  /**
+   * A DAR's turnaround runs to its last decision, which can be on another study's dataset, and
+   * consent doesn't serve it for one study or dataset. Only the per-dataset figures apply there.
+   */
+  describe('on a study\'s or dataset\'s page', () => {
+    const target: DarMetricsTarget = { kind: 'dataset', id: 7 }
+    const renderForTarget = () => render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <DarMetricsTargetContext.Provider value={target}>
+          <TurnaroundSection range={range} />
+        </DarMetricsTargetContext.Provider>
+      </QueryClientProvider>,
+    )
+
+    it('shows per-dataset turnaround with no per-DAR choice', async () => {
+      vi.mocked(DarMetrics.getDatasetDecisionTurnaround).mockResolvedValue(buildReport([
+        { bucketStart: Q1, count: 4, unmeasured: 1, meanDays: 6.5, medianDays: 5, modeDays: 4 },
+      ], 1))
+
+      renderForTarget()
+
+      expect(await screen.findByRole('grid', { name: 'Turnaround per bucket' })).toBeInTheDocument()
+      expect(cellsFor('2026 Q1')).toEqual(['2026 Q1', '4', '6.5', '5.0', '4'])
+      expect(screen.queryByRole('group', { name: 'Measure turnaround per' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Per DAR' })).not.toBeInTheDocument()
+      expect(screen.getByText(/DAC decision on each request for this dataset/)).toBeInTheDocument()
+      expect(DarMetrics.getDatasetDecisionTurnaround).toHaveBeenCalledWith({ ...range, limit: 1, target })
+      expect(DarMetrics.getDecisionTurnaround).not.toHaveBeenCalled()
+    })
+
+    it('offers no per-DAR choice when the report is empty or fails either', async () => {
+      vi.mocked(DarMetrics.getDatasetDecisionTurnaround).mockRejectedValue({ message: 'Forbidden', code: 403 })
+
+      renderForTarget()
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('Forbidden')
+      expect(screen.queryByRole('button', { name: 'Per DAR' })).not.toBeInTheDocument()
+      expect(DarMetrics.getDecisionTurnaround).not.toHaveBeenCalled()
+    })
   })
 })

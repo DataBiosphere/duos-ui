@@ -1,6 +1,7 @@
 import React from 'react'
 import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material'
 import { descriptionStyle, headingStyle } from 'src/components/dashboard/dashboardStyles'
+import { useDarMetricsTarget } from 'src/components/dar_analytics/useDarMetricsReport'
 import { extractError } from 'src/utils/ErrorUtils'
 
 interface AnalyticsSectionProps {
@@ -25,6 +26,10 @@ export const AnalyticsSection = ({
   title, description, caveats = [], actions, isLoading, isRefreshing = false, error, onRetry, isEmpty, emptyText, children,
 }: AnalyticsSectionProps) => {
   const headingId = `${title.toLowerCase().replaceAll(/\W+/g, '-')}-heading`
+  // On a study's or dataset's page the section sits under that page's own headings, the lowest of
+  // which leaves no level beneath it, and an h2 there would turn every later section into its
+  // child. The open tab names the report, so the title is plain text that still labels the section.
+  const titleComponent = useDarMetricsTarget() ? 'div' : 'h2'
 
   const content = () => (isEmpty ? <Typography sx={descriptionStyle}>{emptyText}</Typography> : children)
   // A failed report shows at once, even while another is still loading.
@@ -40,7 +45,7 @@ export const AnalyticsSection = ({
 
   return (
     <Box component="section" aria-labelledby={headingId}>
-      <Typography component="h2" id={headingId} sx={{ ...headingStyle, maxWidth: 'none', mt: '2rem' }}>{title}</Typography>
+      <Typography component={titleComponent} id={headingId} sx={{ ...headingStyle, maxWidth: 'none', mt: '2rem' }}>{title}</Typography>
       {description && <Typography sx={{ ...descriptionStyle, mb: '1rem' }}>{description}</Typography>}
       {caveats.map(caveat => <Alert key={caveat} severity="info" sx={{ mb: '1rem' }}>{caveat}</Alert>)}
       {actions}
