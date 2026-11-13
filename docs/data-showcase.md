@@ -415,6 +415,46 @@ current index. If another showcase PR merges first, update your branch.
 
 ---
 
+## Health check
+
+[![Showcase health check](https://github.com/DataBiosphere/duos-ui/actions/workflows/showcase-health.yml/badge.svg?event=schedule)](https://github.com/DataBiosphere/duos-ui/actions/workflows/showcase-health.yml?query=event%3Aschedule)
+
+`.github/workflows/showcase-health.yml` runs `scripts/showcase-health.ts`. It looks up every
+configured identifier and pin in production Consent's public lookup, runs every computed shelf, and
+requests every external link. The page itself never waits for it: it hides unavailable records on
+its own.
+
+| When | Checks | Fails when |
+| ---- | ------ | ---------- |
+| Daily, and on demand from the Actions tab | Every registered showcase, `hidden` ones included | Any failing problem is open, every day it stays open |
+| A PR that changes a showcase, its images, or the check | Only the showcases the PR changes; all of them when it changes a shared file | Any failing problem in those showcases |
+
+| Problem | Fails the run |
+| ------- | ------------- |
+| Unavailable identifier or pin | Yes |
+| Broken link: 404, 410, or no answer, 5xx, 408 or timeout after retries | Yes |
+| Lookup failed after retries. The check then skips the remaining dataset checks, and says so | Yes |
+| Empty computed shelf | No |
+| Link that could not be verified: any other 4xx, such as 401, 403, 429 or 451. Sites answer automated requests this way, so open these in a browser | No |
+| Lookup turned off (Consent answered 405); the dataset checks are skipped | No |
+
+Read the report in the run's job summary. Problems first seen that day are listed above those still
+open; Monday's run is the weekly digest and shows how long each problem has been open.
+
+The lookup gives a private, removed and nonexistent identifier the same `unavailable` answer, and
+the check can't tell them apart. Look the identifier up in the DUOS catalog with an authorized
+account, then fix the config or tell the program owner. The engineering team reads the reports and
+passes problems on to program owners. A failed scheduled run emails only the person who last edited
+the workflow's cron line; everyone else watches the badge above.
+
+To run it locally, against production by default:
+
+```sh
+pnpm exec tsx scripts/showcase-health.ts
+```
+
+---
+
 ## Hiding, retiring and rolling back
 
 | You want to | Do this | Reversible |
@@ -506,6 +546,7 @@ A showcase PR is ready to merge when both roles approve. The PR template has a s
 - [ ] `pnpm exec vitest run test/showcases` passes
 - [ ] `pnpm run type-check` passes
 - [ ] `pnpm run lint` passes
+- [ ] The showcase health check passes on the PR, or the PR explains each failure
 
 ### Preview
 

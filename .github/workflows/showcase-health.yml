@@ -1,0 +1,115 @@
+# The showcase health check (DT-4359, S4.3). It looks up every configured dataset identifier and pin
+# in the public showcase lookup of production Consent and requests every external link, then writes
+# a report to the job summary. See "Health check" in docs/data-showcase.md.
+#
+# - Daily: checks every registered showcase and fails while a failing problem is open. The history
+#   artifact carries each problem's first-seen date to the next run; Monday's run is the digest.
+# - Pull requests that touch showcases: check only the showcases the PR changes, with no history.
+# - Manual: like the daily run, optionally against another Consent and with the digest forced.
+#
+# A failed scheduled run emails only the person who last edited the cron line below.
+name: Showcase health check
+on:
+  schedule:
+    - cron: '17 12 * * *'
+  workflow_dispatch:
+    inputs:
+      lookup_url:
+        description: Consent origin to look identifiers up in (empty for production)
+        required: false
+        default: ''
+      digest:
+        description: Weekly digest
+        type: choice
+        options: [auto, always, never]
+        default: auto
+  pull_request:
+    paths:
+      - 'src/showcases/**'
+      - 'src/images/showcase/**'
+      - 'src/types/showcase.ts'
+      - 'scripts/showcase-health.ts'
+      - '.github/workflows/showcase-health.yml'
+# A new push supersedes a PR's run; a manual run never cancels the daily one, or the reverse.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  health:
+    name: Showcase health check
+    runs-on: ubuntu-latest
+    # A link that never answers takes about three minutes of timeouts and retries, four at a time.
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      # Reads the PR's changed files and the previous run's history artifact.
+      pull-requests: read
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: echo "NODE_VERSION=$(sed -n 's/FROM node:\([0-9.]*\).*/\1/p' Dockerfile)" >> $GITHUB_ENV
+      - name: Install pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          version: 11.1.2
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm ci --ignore-scripts
+      # A renamed file lists its old path too, so the showcase it left is checked. The base branch's
+      # registry tells which entries the PR changes; without it, a registry change checks everything.
+      - name: List the PR's changes
+        if: github.event_name == 'pull_request'
+        run: |
+          gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/files" --jq '.[] | .filename, (.previous_filename // empty)' > "${RUNNER_TEMP}/changed-files.txt"
+          echo "SHOWCASE_HEALTH_CHANGED_FILES=${RUNNER_TEMP}/changed-files.txt" >> "$GITHUB_ENV"
+          git fetch --no-tags --depth=1 origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+          if git show "origin/${BASE_REF}:src/showcases/registry.json" > "${RUNNER_TEMP}/base-registry.json"; then
+            echo "SHOWCASE_HEALTH_BASE_REGISTRY=${RUNNER_TEMP}/base-registry.json" >> "$GITHUB_ENV"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_REF: ${{ github.base_ref }}
+      # The newest history from this workflow's own scheduled runs on develop, never from a PR run,
+      # whose workflow file the PR controls. Without one, every problem counts as new, so a failure
+      # here only warns.
+      - name: Download the previous history
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        run: |
+          run_ids=$(gh api "repos/${REPO}/actions/workflows/showcase-health.yml/runs?event=schedule&branch=develop&status=completed&per_page=10" \
+            --jq ".workflow_runs[] | select(.head_repository.full_name == \"${REPO}\") | .id")
+          for run_id in $run_ids; do
+            if gh run download "$run_id" --repo "$REPO" --name showcase-health-history --dir "${RUNNER_TEMP}/history-in"; then
+              echo "SHOWCASE_HEALTH_HISTORY_IN=${RUNNER_TEMP}/history-in/history.json" >> "$GITHUB_ENV"
+              exit 0
+            fi
+          done
+          echo "::warning::No previous showcase health history; every problem counts as new."
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+      - name: Run the health check
+        run: pnpm exec tsx scripts/showcase-health.ts
+        env:
+          SHOWCASE_HEALTH_LOOKUP_URL: ${{ inputs.lookup_url || vars.SHOWCASE_HEALTH_LOOKUP_URL }}
+          # PR runs have no history, so a Monday digest would show every problem as open for 0 days.
+          SHOWCASE_HEALTH_DIGEST: ${{ github.event_name == 'pull_request' && 'never' || inputs.digest || 'auto' }}
+          SHOWCASE_HEALTH_HISTORY_OUT: ${{ github.event_name == 'schedule' && format('{0}/history.json', runner.temp) || '' }}
+      # Only scheduled runs keep history, so a manual run against another Consent can't change it.
+      - name: Upload the history
+        if: always() && github.event_name == 'schedule'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.0
+        with:
+          name: showcase-health-history
+          path: ${{ runner.temp }}/history.json
+          if-no-files-found: ignore
+          retention-days: 35

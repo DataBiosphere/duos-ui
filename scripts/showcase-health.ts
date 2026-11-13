@@ -6,6 +6,9 @@
  *
  * Settings, all optional, from the environment:
  * - SHOWCASE_HEALTH_LOOKUP_URL: the Consent origin to look identifiers up in; production by default.
+ * - SHOWCASE_HEALTH_CHANGED_FILES: a file listing a PR's changed paths, one per line. Set, only the
+ *   showcases they change are checked (src/showcases/health/scope.ts); unset, every registered one is.
+ * - SHOWCASE_HEALTH_BASE_REGISTRY: the PR base branch's `registry.json`, to tell which entries changed.
  * - SHOWCASE_HEALTH_HISTORY_IN / SHOWCASE_HEALTH_HISTORY_OUT: the previous run's history file, and
  *   where to write this run's.
  * - SHOWCASE_HEALTH_DIGEST: `always`, `never`, or `auto` (the default: Mondays, UTC).
@@ -13,11 +16,13 @@
  */
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { retiredShowcaseKeys, showcaseConfigs, showcaseEntries } from 'src/showcases'
+import registry from 'src/showcases/registry.json'
 import { resolveShowcase } from 'src/showcases/defaults'
 import { checkIdentifiers, type CheckedShowcase } from 'src/showcases/health/checkIdentifiers'
 import { checkLinks } from 'src/showcases/health/checkLinks'
 import { createHealthLookup, lookupUrl } from 'src/showcases/health/lookup'
 import { collectFindings, nextHistory, parseHistory, renderSummary, runFails, uncheckedPrefixes } from 'src/showcases/health/report'
+import { changedRegistryKeys, selectShowcases } from 'src/showcases/health/scope'
 import { ShowcaseConfigSchema } from 'src/showcases/schema'
 
 const env = (name: string) => process.env[name]?.trim() || undefined
@@ -30,9 +35,20 @@ async function main(): Promise<number> {
   if (!['auto', 'always', 'never'].includes(digestSetting)) throw new Error(`SHOWCASE_HEALTH_DIGEST is "${digestSetting}"; use auto, always or never`)
   const digest = digestSetting === 'always' || (digestSetting === 'auto' && now.getUTCDay() === 1)
 
+  const changedFilesPath = env('SHOWCASE_HEALTH_CHANGED_FILES')
+  const baseRegistry = readIfPresent(env('SHOWCASE_HEALTH_BASE_REGISTRY'))
+  const changed = changedFilesPath === undefined
+    ? undefined
+    : {
+        files: readFileSync(changedFilesPath, 'utf8').split('\n').map(line => line.trim()).filter(Boolean),
+        registryKeys: baseRegistry === undefined ? undefined : changedRegistryKeys(JSON.parse(baseRegistry) as typeof registry, registry),
+      }
+
+  const registered = showcaseEntries.filter(entry => !retiredShowcaseKeys.includes(entry.key) && Object.hasOwn(showcaseConfigs, entry.key))
+  const selected = new Set(selectShowcases(registered.map(entry => entry.key), changed, retiredShowcaseKeys))
   // The CI guard rejects a config that fails the schema, so a parse failure here is a bug: let it throw.
-  const showcases: CheckedShowcase[] = showcaseEntries
-    .filter(entry => !retiredShowcaseKeys.includes(entry.key) && Object.hasOwn(showcaseConfigs, entry.key))
+  const showcases: CheckedShowcase[] = registered
+    .filter(entry => selected.has(entry.key))
     .map(entry => ({ entry, config: ShowcaseConfigSchema.parse(resolveShowcase(showcaseConfigs[entry.key])) }))
 
   const url = lookupUrl(env('SHOWCASE_HEALTH_LOOKUP_URL'))
