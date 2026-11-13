@@ -18,9 +18,11 @@ export interface DarMetricsQuery {
 }
 
 /**
- * The study or dataset a page reports on. Consent serves its reports to whoever can read that
- * page's DAR history, not to DAC roles, so they carry totals only: `rows` is always empty, and a
- * volume report names no institutions or researchers and doesn't count them.
+ * The study or dataset a page reports on. Consent serves the expiration and renewal reports to
+ * whoever can read that page's DAR history. The volume, decision and turnaround reports count
+ * denied and pending requests, so it serves those to admins and the DAC in charge alone. All carry
+ * totals only: `rows` is always empty, and a volume report names no institutions or researchers
+ * and doesn't count them.
  */
 export interface DarMetricsTarget {
   kind: 'study' | 'dataset'

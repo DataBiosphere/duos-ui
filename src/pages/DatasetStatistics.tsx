@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { DarTrends } from 'src/components/dar_analytics/DarTrends'
+import { requestActivityAccess } from 'src/components/dar_analytics/requestActivityAccess'
+import { Storage } from 'src/libs/storage'
 import { DarMetricsTarget } from 'src/types/darMetrics'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { DataSet } from 'src/libs/ajax/DataSet'
@@ -64,6 +66,9 @@ export default function DatasetStatistics() {
     () => (datasetId === undefined ? undefined : { kind: 'dataset', id: datasetId }),
     [datasetId],
   )
+  // The reports on denied and pending requests are for admins and this dataset's DAC alone.
+  const [currentUser] = useState(() => Storage.getCurrentUser())
+  const requestActivity = requestActivityAccess(currentUser, [datasetTerm?.dacId])
 
   const showError = (message: string) => {
     Notifications.showError({
@@ -368,7 +373,7 @@ export default function DatasetStatistics() {
           {!darsRestricted && dars !== undefined && trendsTarget && (
             <>
               <div style={{ ...Styles.SUB_HEADER, marginTop: 40 }}>Data Access Request Trends</div>
-              <DarTrends target={trendsTarget} />
+              <DarTrends target={trendsTarget} requestActivity={requestActivity} />
             </>
           )}
         </div>

@@ -29,6 +29,7 @@ import {
   useStudyModels,
   useStudyPresentations,
   useStudyPublications,
+  useStudyRequestActivityAccess,
   useStudySelectableDatasetIds,
   useStudyWorkspaces,
 } from 'src/hooks/useStudyDetailsData'
@@ -108,7 +109,9 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const sort: SortState | undefined = sortModel[0]?.sort
     ? { field: sortModel[0].field, order: sortModel[0].sort }
     : undefined
-  const { data = EMPTY_PAGE, isFetching: loading, error } = useStudyDatasets(studyId, paginationModel, sort)
+  const {
+    data = EMPTY_PAGE, isFetching: loading, isPending: datasetsPending, error,
+  } = useStudyDatasets(studyId, paginationModel, sort)
   const datasets = data.items
   const study = data.study
   const participantCount = data.participantCount
@@ -154,6 +157,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const selectableDatasetIds = needsStudyWideIds
     ? studyWideIds.data
     : pageSelectableIds
+  const requestActivity = useStudyRequestActivityAccess(studyId, datasets, data.total, !datasetsPending)
 
   // Seed the default selection once, on the first render where the ids are known. Adjusting
   // state during render rather than from an effect: React re-runs the component before it
@@ -267,7 +271,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             </div>
           </StudyPageSection>
           <StudyDarHistory studyId={studyId} />
-          <StudyDarTrends studyId={studyId} />
+          <StudyDarTrends studyId={studyId} requestActivity={requestActivity} />
           <StudyAssetTable<ModelAsset>
             id="models"
             heading="AI Models"

@@ -7,6 +7,7 @@ import dayjs from 'dayjs'
 import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { DarTrends } from 'src/components/dar_analytics/DarTrends'
 import { defaultRange } from 'src/components/dar_analytics/darAnalyticsRange'
+import { RequestActivityAccess } from 'src/components/dar_analytics/requestActivityAccess'
 import { DarMetricsTarget } from 'src/types/darMetrics'
 
 vi.mock('src/libs/ajax/DarMetrics', () => ({
@@ -35,14 +36,17 @@ const empty = {
 }
 const study: DarMetricsTarget = { kind: 'study', id: '12' }
 
-const trends = (target: DarMetricsTarget) => (
-  <DarTrends target={target} />
-)
-const renderTrends = (target: DarMetricsTarget = study) => render(
-  <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-    {trends(target)}
-  </QueryClientProvider>,
-)
+/** As an admin sees it, unless told what else the reader is offered. */
+const renderTrends = (target: DarMetricsTarget = study, requestActivity: RequestActivityAccess = 'all') => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const trends = (offered: RequestActivityAccess) => (
+    <QueryClientProvider client={client}>
+      <DarTrends target={target} requestActivity={offered} />
+    </QueryClientProvider>
+  )
+  const view = render(trends(requestActivity))
+  return { ...view, offer: (offered: RequestActivityAccess) => view.rerender(trends(offered)) }
+}
 
 const openTab = (name: string) => fireEvent.click(screen.getByRole('tab', { name }))
 
@@ -107,6 +111,103 @@ describe('DarTrends', () => {
     await waitFor(() => expect(DarMetrics.getVolume).toHaveBeenCalledWith({ ...monthly, limit: 1, target: study }))
     openTab('Expiration & Renewal')
     await waitFor(() => expect(DarMetrics.getRenewals).toHaveBeenCalledWith({ ...monthly, limit: 1, target: study }))
+  })
+
+  /**
+   * Volume, decisions and turnaround count requests that were denied or are still pending. Consent
+   * serves them to admins and the DAC in charge alone, so no one else is offered them or asks.
+   */
+  describe('for a reader who is neither an admin nor on the DAC in charge', () => {
+    it('shows when granted access ended or was renewed, with no tabs to choose from', async () => {
+      renderTrends(study, 'none')
+
+      expect(await screen.findByRole('region', { name: 'Expiration and renewal' })).toBeInTheDocument()
+      expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
+      expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+      await waitFor(() => expect(DarMetrics.getExpirations).toHaveBeenCalledWith({ ...range, limit: 1, target: study }))
+      expect(DarMetrics.getRenewals).toHaveBeenCalledWith({ ...range, limit: 1, target: study })
+      // The range and grouping still apply
+      expect(screen.getByLabelText('From')).toHaveValue(range.from)
+      expect(screen.getByRole('button', { name: 'Month' })).toBeInTheDocument()
+    })
+
+    it('never asks consent for the reports on denied and pending requests', async () => {
+      renderTrends(study, 'none')
+      await waitFor(() => expect(DarMetrics.getRenewals).toHaveBeenCalled())
+      fireEvent.click(screen.getByRole('button', { name: 'Month' }))
+      await waitFor(() => expect(DarMetrics.getRenewals).toHaveBeenCalledTimes(2))
+
+      expect(DarMetrics.getVolume).not.toHaveBeenCalled()
+      expect(DarMetrics.getDatasetDecisions).not.toHaveBeenCalled()
+      expect(DarMetrics.getDatasetDecisionTurnaround).not.toHaveBeenCalled()
+      expect(DarMetrics.getDecisions).not.toHaveBeenCalled()
+      expect(DarMetrics.getDecisionTurnaround).not.toHaveBeenCalled()
+    })
+
+    /** Roles are read once the page's datasets load, so the answer can change under an open tab. */
+    it('closes an open report on denied and pending requests when it is withdrawn', async () => {
+      const { offer } = renderTrends(study, 'all')
+      openTab('Decisions')
+      await waitFor(() => expect(DarMetrics.getDatasetDecisions).toHaveBeenCalled())
+
+      offer('none')
+
+      expect(await screen.findByRole('region', { name: 'Expiration and renewal' })).toBeInTheDocument()
+      expect(screen.queryByRole('region', { name: 'Decision funnel' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    })
+
+    it('opens on volume once the other reports are on offer, when none was chosen', async () => {
+      const { offer } = renderTrends(study, 'none')
+      await screen.findByRole('region', { name: 'Expiration and renewal' })
+
+      offer('own-dacs')
+
+      expect(await screen.findByRole('tab', { name: 'Volume' })).toHaveAttribute('aria-selected', 'true')
+      expect(screen.getAllByRole('tab')).toHaveLength(4)
+    })
+  })
+
+  /**
+   * Consent narrows a chair's or member's request-activity reports to the datasets their own DACs
+   * are in charge of, and says nothing in the response. A study can be shared between DACs, so
+   * the page says what those figures cover, beside a report that covers the whole study.
+   */
+  describe('the scope of a chair\'s or member\'s figures', () => {
+    const scopeNote = /count requests for the datasets your DACs are in charge of/
+
+    it('is stated on a study\'s page', async () => {
+      renderTrends(study, 'own-dacs')
+
+      expect(await screen.findByText(scopeNote)).toHaveTextContent(
+        'Expiration & Renewal covers every dataset in the study.',
+      )
+      // Read in place, not announced: it reports nothing that just happened
+      expect(screen.getByRole('note').textContent).toMatch(scopeNote)
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+      expect(screen.getAllByRole('tab')).toHaveLength(4)
+    })
+
+    it('needs no stating for an admin, whose figures cover the whole study', async () => {
+      renderTrends(study, 'all')
+      await screen.findByRole('tab', { name: 'Volume' })
+
+      expect(screen.queryByText(scopeNote)).not.toBeInTheDocument()
+    })
+
+    it('needs no stating for a reader who is offered none of them', async () => {
+      renderTrends(study, 'none')
+      await screen.findByRole('region', { name: 'Expiration and renewal' })
+
+      expect(screen.queryByText(scopeNote)).not.toBeInTheDocument()
+    })
+
+    it('needs no stating on a dataset\'s page, which one DAC is in charge of', async () => {
+      renderTrends({ kind: 'dataset', id: 7 }, 'own-dacs')
+      await screen.findByRole('tab', { name: 'Volume' })
+
+      expect(screen.queryByText(scopeNote)).not.toBeInTheDocument()
+    })
   })
 
   it('reports on a dataset when the page is a dataset\'s', async () => {
