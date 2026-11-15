@@ -1,4 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { DarTrends } from 'src/components/dar_analytics/DarTrends'
+import { requestActivityAccess } from 'src/components/dar_analytics/requestActivityAccess'
+import { Storage } from 'src/libs/storage'
+import { DarMetricsTarget } from 'src/types/darMetrics'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DAR } from 'src/libs/ajax/DAR'
@@ -57,6 +61,14 @@ export default function DatasetStatistics() {
   const [exportableSnapshots, setExportableSnapshots] = useState<SnapshotSummaryModel[]>([])
 
   const instantApprovalEligible = datasetTerm?.instantApprovalEligible === true
+  const datasetId = datasetTerm?.datasetId
+  const trendsTarget = useMemo<DarMetricsTarget | undefined>(
+    () => (datasetId === undefined ? undefined : { kind: 'dataset', id: datasetId }),
+    [datasetId],
+  )
+  // The reports on denied and pending requests are for admins and this dataset's DAC alone.
+  const [currentUser] = useState(() => Storage.getCurrentUser())
+  const requestActivity = requestActivityAccess(currentUser, [datasetTerm?.dacId])
 
   const showError = (message: string) => {
     Notifications.showError({
@@ -330,7 +342,11 @@ export default function DatasetStatistics() {
             </div>
           </div>
           <div style={{ paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%' }} />
-          <div style={Styles.SUB_HEADER}>Data Access Requests for this dataset</div>
+          <div style={Styles.SUB_HEADER}>
+            Data Access Requests for this dataset
+            {/* Counted only once the history has loaded, so a refusal or a failure never reads as "(0)". */}
+            {!darsRestricted && dars !== undefined && ` (${dars.length})`}
+          </div>
           {darsRestricted && (
             // <output> carries an implicit status role and is announced more reliably than a div
             // wearing role="status". It is inline by default, so the block display keeps the
@@ -344,13 +360,21 @@ export default function DatasetStatistics() {
           {!darsRestricted && dars?.length === 0
             && (
               <div style={{ paddingTop: '20px', fontStyle: 'italic' }}>
-                No Data Access Requests have been created for this dataset.
+                No granted data access requests yet.
               </div>
             )}
           {!darsRestricted && dars && dars.length > 0 && (
             <Stack spacing={2} sx={{ pt: '20px' }}>
               {dars.map((dar: DatasetStatisticsDar) => <DarSummaryCard key={dar.referenceId} dar={dar} />)}
             </Stack>
+          )}
+          {/* Consent gates the trends as it gates the history, so they are asked for only once the
+              history has loaded: never after a refusal, and never after a failure. */}
+          {!darsRestricted && dars !== undefined && trendsTarget && (
+            <>
+              <div style={{ ...Styles.SUB_HEADER, marginTop: 40 }}>Data Access Request Trends</div>
+              <DarTrends target={trendsTarget} requestActivity={requestActivity} />
+            </>
           )}
         </div>
       </div>

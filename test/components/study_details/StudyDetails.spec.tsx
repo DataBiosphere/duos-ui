@@ -58,6 +58,24 @@ vi.mock('src/libs/ajax/DatasetMetrics', () => ({
   },
 }))
 
+// The trend reports the page asks consent for, each empty unless a test says otherwise
+vi.mock('src/libs/ajax/DarMetrics', () => {
+  const emptyReport = () => Promise.resolve({
+    from: '2026-01-01', to: '2026-03-31', bucket: 'QUARTER', total: 0, unmeasured: 0, buckets: [], rows: [],
+  })
+  return {
+    DarMetrics: {
+      getVolume: vi.fn(emptyReport),
+      getDecisions: vi.fn(emptyReport),
+      getDatasetDecisions: vi.fn(emptyReport),
+      getDecisionTurnaround: vi.fn(emptyReport),
+      getDatasetDecisionTurnaround: vi.fn(emptyReport),
+      getExpirations: vi.fn(emptyReport),
+      getRenewals: vi.fn(emptyReport),
+    },
+  }
+})
+
 vi.mock('src/libs/ajax/StudyRecommendations', () => ({
   StudyRecommendations: {
     getSimilar: vi.fn().mockResolvedValue([]),
@@ -86,6 +104,7 @@ vi.mock('src/utils/accessUtils', () => ({
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { Study } from 'src/libs/ajax/Study'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 
 const datasets = [
@@ -274,6 +293,9 @@ beforeEach(() => {
     },
   })
   vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(makeSearchResponse() as never)
+  // Nothing resets mocks between tests here, so a history one test refuses would stay refused for
+  // the next.
+  vi.mocked(DatasetMetrics.getStudyStats).mockReset().mockResolvedValue([])
   vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({
     userId: 42,
     libraryCard: {} as LibraryCard,
@@ -611,7 +633,7 @@ describe('Study details test', () => {
     mountComponent()
     await screen.findByText(datasets[0].datasetName)
 
-    expect(screen.getByRole('heading', { name: 'Data Access Requests for this Study' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Data Access Requests for this Study (0)' })).toBeInTheDocument()
     expect(screen.getByText('No granted data access requests yet.')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Primary Study Publications' })).toBeInTheDocument()
     expect(screen.getByText('No primary study publications have been added yet.')).toBeInTheDocument()
@@ -833,6 +855,314 @@ describe('Study details test', () => {
       .toBeInTheDocument()
     expect(screen.queryByText('Unable to load data access requests.')).not.toBeInTheDocument()
     expect(screen.queryByText('No granted data access requests yet.')).not.toBeInTheDocument()
+  })
+
+  const grantedDar = (referenceId: string) => ({
+    projectTitle: `Project ${referenceId}`, referenceId, darCode: referenceId.toUpperCase(),
+    nonTechRus: '', expired: false, updateDate: Date.now(),
+  })
+  const darHistoryHeading = () => screen.getByRole('heading', { name: /^Data Access Requests for this Study/ })
+  const forbidden = () => Object.assign(new Error('User does not have permission'), { response: { status: 403 } })
+  // The page's datasets are under DAC 0. The signed-in user of these tests holds no role at all.
+  const viewAs = (user: Partial<DuosUser>) =>
+    vi.mocked(Storage.getCurrentUser).mockReturnValue({ userId: 42, libraryCard: {} as LibraryCard, ...user } as DuosUser)
+  const viewAsAdmin = () => viewAs({ isAdmin: true })
+  const viewAsChairOf = (dacId: number) =>
+    viewAs({ isAdmin: false, roles: [{ name: 'Chairperson', dacId, roleId: 2, userId: 42 }] })
+  const requestActivityReports = [
+    DarMetrics.getVolume, DarMetrics.getDatasetDecisions, DarMetrics.getDatasetDecisionTurnaround,
+  ]
+
+  it('counts the granted requests in the section heading, and not in the table of contents', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([grantedDar('dar-1'), grantedDar('dar-2')])
+    mountComponent()
+
+    expect(await screen.findByRole('heading', { name: 'Data Access Requests for this Study (2)' }))
+      .toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Data Access Requests for this Study' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /\(2\)/ })).not.toBeInTheDocument()
+  })
+
+  it('shows no count while the request history is loading', async () => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockReturnValueOnce(new Promise(() => {}))
+    mountComponent()
+    await screen.findByText(datasets[0].datasetName)
+
+    expect(darHistoryHeading().textContent).toBe('Data Access Requests for this Study')
+  })
+
+  /** A refusal or a failure is not "no requests", so neither may read as "(0)". */
+  it.each([
+    ['is refused', 403, /do not have access to this study's data access request history/i],
+    ['fails to load', 500, 'Unable to load data access requests.'],
+  ])('shows no count when the request history %s', async (_outcome, status, message) => {
+    vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(
+      Object.assign(new Error('nope'), { response: { status } }),
+    )
+    mountComponent()
+
+    expect(await screen.findByText(message)).toBeInTheDocument()
+    expect(darHistoryHeading().textContent).toBe('Data Access Requests for this Study')
+  })
+
+  it('shows an admin the study\'s DAR trends once its request history has loaded', async () => {
+    viewAsAdmin()
+    mountComponent()
+
+    expect(await screen.findByRole('heading', { name: 'Data Access Request Trends' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Data Access Request Trends' })).toHaveAttribute('href', '#dar-trends')
+    await waitFor(() => expect(DarMetrics.getVolume).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 1, target: { kind: 'study', id: '1' } }),
+    ))
+    expect(await screen.findByRole('tab', { name: 'Decisions' })).toBeInTheDocument()
+    // The trends follow the history in the table of contents, as they do on the page
+    const contents = screen.getAllByRole('link').map(link => link.textContent)
+    expect(contents.indexOf('Data Access Request Trends'))
+      .toBe(contents.indexOf('Data Access Requests for this Study') + 1)
+  })
+
+  /**
+   * Consent gates the trends as it gates the history. Whoever is refused the history is not shown
+   * trends, and is not the cause of requests that could only be refused too.
+   */
+  it('asks for no trends, and says who can see them, when the request history is refused', async () => {
+    viewAsAdmin()
+    vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(forbidden())
+    mountComponent()
+
+    const note = await screen.findByText(
+      /Trends are shown to those who can see this study's data access request history/,
+    )
+    expect(screen.queryByRole('tab', { name: 'Volume' })).not.toBeInTheDocument()
+    expect(Object.values(DarMetrics).every(report => vi.mocked(report).mock.calls.length === 0)).toBe(true)
+    // The history section announces the refusal; the trends note must not announce it a second time
+    expect(note.closest('[role="alert"], [role="status"], output')).toBeNull()
+  })
+
+  it('asks for no trends when the request history fails to load', async () => {
+    viewAsAdmin()
+    vi.mocked(DatasetMetrics.getStudyStats).mockRejectedValue(
+      Object.assign(new Error('boom'), { response: { status: 500 } }),
+    )
+    mountComponent()
+
+    const note = await screen.findByText(
+      /Trends are unavailable because this study's data access request history could not be loaded just now/,
+    )
+    expect(screen.queryByRole('tab', { name: 'Volume' })).not.toBeInTheDocument()
+    expect(Object.values(DarMetrics).every(report => vi.mocked(report).mock.calls.length === 0)).toBe(true)
+    // The history section announces the failure; the trends note must not announce it a second time
+    expect(screen.getByText('Unable to load data access requests.')).toHaveAttribute('role', 'alert')
+    expect(note.closest('[role="alert"], [role="status"], output')).toBeNull()
+  })
+
+  /**
+   * A failure may keep an earlier history on the page, but it is not an answer that the reader
+   * may see it now, so the trends go and are not asked for again until the history loads.
+   */
+  it.each([
+    ['requests', [grantedDar('dar-1')]],
+    ['no requests', []],
+  ])('takes the trends off the page when a refetch of a history with %s fails', async (_what, history) => {
+    viewAsAdmin()
+    vi.mocked(DatasetMetrics.getStudyStats)
+      .mockResolvedValueOnce(history)
+      .mockRejectedValue(Object.assign(new Error('boom'), { response: { status: 500 } }))
+    mountComponent()
+    await screen.findByRole('tab', { name: 'Volume' })
+    await waitFor(() => expect(DarMetrics.getVolume).toHaveBeenCalled())
+    vi.mocked(DarMetrics.getVolume).mockClear()
+
+    await queryClient.invalidateQueries({ queryKey: ['study-dar-history'] })
+
+    expect(await screen.findByText(/Trends are unavailable because this study's data access request history could not be loaded just now/))
+      .toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Volume' })).not.toBeInTheDocument()
+    expect(DarMetrics.getVolume).not.toHaveBeenCalled()
+  })
+
+  /** A refetch that hasn't answered is not a failure: the open tab and its figures stay put. */
+  it('keeps the trends, and the open tab, up while the history refetches', async () => {
+    viewAsAdmin()
+    let answer: (history: never[]) => void = () => {}
+    vi.mocked(DatasetMetrics.getStudyStats)
+      .mockResolvedValueOnce([])
+      .mockReturnValueOnce(new Promise((resolve) => {
+        answer = resolve
+      }))
+    mountComponent()
+    fireEvent.click(await screen.findByRole('tab', { name: 'Decisions' }))
+    const refetch = queryClient.invalidateQueries({ queryKey: ['study-dar-history'] })
+    await waitFor(() => expect(DatasetMetrics.getStudyStats).toHaveBeenCalledTimes(2))
+
+    // In flight: nothing has been taken down
+    expect(screen.getByRole('tab', { name: 'Decisions' })).toHaveAttribute('aria-selected', 'true')
+
+    answer([])
+    await refetch
+    expect(screen.getByRole('tab', { name: 'Decisions' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('brings the trends back once the history loads again after a failure', async () => {
+    viewAsAdmin()
+    let failNext = false
+    vi.mocked(DatasetMetrics.getStudyStats).mockImplementation(() =>
+      (failNext ? Promise.reject(Object.assign(new Error('boom'), { response: { status: 500 } })) : Promise.resolve([])))
+    mountComponent()
+    await screen.findByRole('tab', { name: 'Volume' })
+
+    failNext = true
+    await queryClient.invalidateQueries({ queryKey: ['study-dar-history'] })
+    await waitFor(() => expect(screen.queryByRole('tab', { name: 'Volume' })).not.toBeInTheDocument())
+
+    failNext = false
+    await queryClient.invalidateQueries({ queryKey: ['study-dar-history'] })
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toBeInTheDocument()
+  })
+
+  it('takes the trends off the page when the server refuses the history on refetch', async () => {
+    viewAsAdmin()
+    vi.mocked(DatasetMetrics.getStudyStats)
+      .mockResolvedValueOnce([grantedDar('dar-1')])
+      .mockRejectedValue(forbidden())
+    mountComponent()
+    await screen.findByRole('tab', { name: 'Volume' })
+    await waitFor(() => expect(DarMetrics.getVolume).toHaveBeenCalled())
+    vi.mocked(DarMetrics.getVolume).mockClear()
+
+    await queryClient.invalidateQueries({ queryKey: ['study-dar-history'] })
+
+    const note = await screen.findByText(
+      /Trends are shown to those who can see this study's data access request history/,
+    )
+    expect(note.closest('[role="alert"], [role="status"], output')).toBeNull()
+    expect(screen.queryByRole('tab', { name: 'Volume' })).not.toBeInTheDocument()
+    expect(DarMetrics.getVolume).not.toHaveBeenCalled()
+    expect(darHistoryHeading().textContent).toBe('Data Access Requests for this Study')
+  })
+
+  /**
+   * Volume, decisions and turnaround count requests that were denied or are still pending. Those
+   * are for admins and the DAC in charge; reading the study is not enough to be offered them.
+   */
+  it('offers a reader who is neither an admin nor on the DAC only the report on granted access', async () => {
+    mountComponent()
+
+    expect(await screen.findByRole('region', { name: 'Expiration and renewal' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    await waitFor(() => expect(DarMetrics.getRenewals).toHaveBeenCalledWith(
+      expect.objectContaining({ target: { kind: 'study', id: '1' } }),
+    ))
+    expect(DarMetrics.getExpirations).toHaveBeenCalled()
+    requestActivityReports.forEach(report => expect(report).not.toHaveBeenCalled())
+  })
+
+  it('offers every report to a chair of the DAC in charge of the study\'s datasets', async () => {
+    viewAsChairOf(0)
+    mountComponent()
+
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getAllByRole('tab').map(tab => tab.textContent))
+      .toEqual(['Volume', 'Decisions', 'Expiration & Renewal', 'DAC Turnaround'])
+    await waitFor(() => expect(DarMetrics.getVolume).toHaveBeenCalled())
+    // A study can be shared between DACs, so the page says whose datasets a chair's figures cover
+    expect(screen.getByText(/count requests for the datasets your DACs are in charge of/)).toBeInTheDocument()
+    // The section waited to learn which DAC is in charge: it never showed the open report first
+    expect(DarMetrics.getExpirations).not.toHaveBeenCalled()
+  })
+
+  it('says nothing about scope to an admin, whose figures cover the whole study', async () => {
+    viewAsAdmin()
+    mountComponent()
+    await screen.findByRole('tab', { name: 'Volume' })
+
+    expect(screen.queryByText(/count requests for the datasets your DACs are in charge of/)).not.toBeInTheDocument()
+  })
+
+  /**
+   * Only a chair or member has to wait on which DACs are in charge. Until the study's datasets
+   * load, the section shows neither the tabs they may get nor the single report they may be left
+   * with, so it never shows one and then the other.
+   */
+  it('waits for the study\'s datasets before deciding what to offer a chair', async () => {
+    let answer: (response: never) => void = () => {}
+    vi.mocked(DataSet.searchDatasetIndexV2).mockReturnValue(new Promise((resolve) => {
+      answer = resolve
+    }))
+    viewAsChairOf(0)
+    mountComponent()
+    await screen.findByRole('heading', { name: 'Data Access Requests for this Study (0)' })
+
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Expiration and renewal' })).not.toBeInTheDocument()
+    expect(Object.values(DarMetrics).every(report => vi.mocked(report).mock.calls.length === 0)).toBe(true)
+
+    answer(makeSearchResponse() as never)
+
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toBeInTheDocument()
+  })
+
+  it('does not make a reader on no DAC wait for the study\'s datasets', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockReturnValue(new Promise(() => {}))
+    mountComponent()
+
+    expect(await screen.findByRole('region', { name: 'Expiration and renewal' })).toBeInTheDocument()
+  })
+
+  it('offers a chair of another DAC only the report on granted access', async () => {
+    viewAsChairOf(9)
+    mountComponent()
+
+    expect(await screen.findByRole('region', { name: 'Expiration and renewal' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    requestActivityReports.forEach(report => expect(report).not.toHaveBeenCalled())
+  })
+
+  /**
+   * The grid holds one page of the study. A DAC in charge of a dataset on a later page is still in
+   * charge, so a chair or member is checked against the whole study.
+   */
+  it('finds the DAC in charge on a later page of a study larger than one page', async () => {
+    const onLaterPage = { ...datasets[0], datasetId: 999, datasetIdentifier: 'DUOS-000999', dacId: 7 }
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) =>
+      (query.size === 30
+        ? makeSearchResponse([...datasets, onLaterPage], 30)
+        : makeSearchResponse(datasets, 30)) as never)
+    viewAsChairOf(7)
+    mountComponent()
+
+    expect(await screen.findByRole('tab', { name: 'Decisions' })).toBeInTheDocument()
+  })
+
+  /** The answer can only change for a chair or member, so no one else pays for the lookup. */
+  it.each([
+    ['an admin', { isAdmin: true }],
+    ['a reader on no DAC', { isAdmin: false, roles: [] }],
+  ])('does not look across a larger study for %s', async (_who, user) => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async () => makeSearchResponse(datasets, 30) as never)
+    viewAs(user as Partial<DuosUser>)
+    mountComponent()
+    await screen.findByRole('region', { name: user.isAdmin ? 'Volume' : 'Expiration and renewal' })
+
+    const studyWide = vi.mocked(DataSet.searchDatasetIndexV2).mock.calls
+      .filter(([query]) => (query as ElasticsearchQuery).size === 30)
+    // The one study-wide request is the selection's, which every reader makes
+    expect(studyWide).toHaveLength(1)
+  })
+
+  /** A lookup that fails leaves the reports unoffered; consent would have been asked otherwise. */
+  it('offers a chair only the report on granted access when the study-wide lookup fails', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockImplementation(async (query: ElasticsearchQuery) => {
+      if (query.size === 30) throw new Error('lookup failed')
+      return makeSearchResponse(datasets, 30) as never
+    })
+    // In charge of the datasets on the grid page, so only the failed lookup withholds the reports
+    viewAsChairOf(0)
+    mountComponent()
+
+    expect(await screen.findByRole('region', { name: 'Expiration and renewal' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    requestActivityReports.forEach(report => expect(report).not.toHaveBeenCalled())
   })
 
   /**

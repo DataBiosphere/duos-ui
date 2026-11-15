@@ -29,6 +29,7 @@ import {
   useStudyModels,
   useStudyPresentations,
   useStudyPublications,
+  useStudyRequestActivityAccess,
   useStudySelectableDatasetIds,
   useStudyWorkspaces,
 } from 'src/hooks/useStudyDetailsData'
@@ -44,6 +45,7 @@ import StudyInfoTable from 'src/components/study_details/StudyInfoTable'
 import PiExternalProfileIcons from 'src/components/study_details/PiExternalProfileIcons'
 import { getPiProfileLinks } from 'src/components/study_details/piProfileLinks'
 import StudyDarHistory from 'src/components/study_details/StudyDarHistory'
+import StudyDarTrends from 'src/components/study_details/StudyDarTrends'
 import StudySecondaryResearchOutputs from 'src/components/study_details/StudySecondaryResearchOutputs'
 import StudyPublicationCards from 'src/components/study_details/StudyPublicationCards'
 import StudyAssetTable from 'src/components/study_details/StudyAssetTable'
@@ -107,7 +109,9 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const sort: SortState | undefined = sortModel[0]?.sort
     ? { field: sortModel[0].field, order: sortModel[0].sort }
     : undefined
-  const { data = EMPTY_PAGE, isFetching: loading, error } = useStudyDatasets(studyId, paginationModel, sort)
+  const {
+    data = EMPTY_PAGE, isFetching: loading, isPending: datasetsPending, error,
+  } = useStudyDatasets(studyId, paginationModel, sort)
   const datasets = data.items
   const study = data.study
   const participantCount = data.participantCount
@@ -153,6 +157,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
   const selectableDatasetIds = needsStudyWideIds
     ? studyWideIds.data
     : pageSelectableIds
+  const requestActivity = useStudyRequestActivityAccess(studyId, datasets, data.total, !datasetsPending)
 
   // Seed the default selection once, on the first render where the ids are known. Adjusting
   // state during render rather than from an effect: React re-runs the component before it
@@ -266,6 +271,7 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
             </div>
           </StudyPageSection>
           <StudyDarHistory studyId={studyId} />
+          <StudyDarTrends studyId={studyId} requestActivity={requestActivity} />
           <StudyAssetTable<ModelAsset>
             id="models"
             heading="AI Models"

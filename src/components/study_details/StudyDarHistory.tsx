@@ -12,8 +12,15 @@ const StudyDarHistory = ({ studyId }: { studyId: string }) => {
   // load", so the two surfaces described one authorization decision in two different ways - which
   // is the reason extractStatus exists.
   const restricted = extractStatus(error) === 403
+  // Counted only when the requests themselves are on the page, so a refusal or a failed load never
+  // reads as "(0)". A study with no requests has loaded, and does.
+  const listed = !isPending && !restricted && (!error || data.length > 0)
   return (
-    <StudyPageSection id="dar-history" heading="Data Access Requests for this Study">
+    <StudyPageSection
+      id="dar-history"
+      heading="Data Access Requests for this Study"
+      count={listed ? data.length : undefined}
+    >
       <StudyQueryResult
         isPending={isPending}
         // A refusal still blocks: once the server says no, cached request history should come off

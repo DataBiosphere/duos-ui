@@ -6,7 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { DecisionFunnelSection } from 'src/components/dar_analytics/DecisionFunnelSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
-import { DecisionBucketCount, DarMetricsReport } from 'src/types/darMetrics'
+import { DarMetricsTargetContext } from 'src/components/dar_analytics/useDarMetricsReport'
+import { DecisionBucketCount, DarMetricsReport, DarMetricsTarget } from 'src/types/darMetrics'
 
 vi.mock('src/libs/ajax/DarMetrics', () => ({
   DarMetrics: {
@@ -106,5 +107,73 @@ describe('DecisionFunnelSection', () => {
     rerender(section(queryClient, { ...range, bucket: 'month' }))
 
     expect(await screen.findByLabelText('Loading Decision funnel')).toBeInTheDocument()
+  })
+
+  /**
+   * A DAR's overall decision also reflects its datasets in other studies, and consent doesn't
+   * serve it for one study or dataset. So the per-DAR report is never asked for there, and nothing
+   * on the page is counted per DAR.
+   */
+  describe('on a study\'s or dataset\'s page', () => {
+    const target: DarMetricsTarget = { kind: 'study', id: '12' }
+    const renderForTarget = () => render(
+      <QueryClientProvider client={client()}>
+        <DarMetricsTargetContext.Provider value={target}>
+          <DecisionFunnelSection range={range} />
+        </DarMetricsTargetContext.Provider>
+      </QueryClientProvider>,
+    )
+
+    it('reports the decision on each dataset and never asks for the per-DAR report', async () => {
+      vi.mocked(DarMetrics.getDatasetDecisions).mockResolvedValue(buildReport([
+        { bucketStart: Q1, state: 'APPROVED', decidedVia: 'MANUAL', count: 4 },
+        { bucketStart: Q1, state: 'APPROVED', decidedVia: 'RADAR', count: 2 },
+        { bucketStart: Q1, state: 'DENIED', decidedVia: 'MANUAL', count: 1 },
+        { bucketStart: Q2, state: 'PENDING', count: 3 },
+        { bucketStart: Q2, state: 'NO_ELECTION', count: 2 },
+      ]))
+
+      renderForTarget()
+
+      const grid = await screen.findByRole('grid', { name: 'Decision counts' })
+      expect(within(grid).getAllByRole('columnheader').map(header => header.textContent))
+        .toEqual(['State', 'Datasets on DARs'])
+      expect(countsFor('Approved')).toEqual(['6'])
+      expect(countsFor('Denied')).toEqual(['1'])
+      expect(countsFor('Pending')).toEqual(['3'])
+      expect(countsFor('No election yet')).toEqual(['2'])
+      expect(countsFor('Canceled')).toEqual(['0'])
+      expect(countsFor('Total')).toEqual(['12'])
+      // "Mixed" is a DAR's state, never a dataset's
+      expect(within(grid).queryByRole('gridcell', { name: 'Mixed' })).not.toBeInTheDocument()
+      expect(screen.getByText('Dataset requests', { selector: 'dt' }).nextSibling).toHaveTextContent('12')
+      expect(screen.getByText('Approved', { selector: 'dt' }).nextSibling).toHaveTextContent('6')
+      expect(screen.queryByText('DARs submitted')).not.toBeInTheDocument()
+      expect(document.querySelector('[aria-label="Dataset requests by decision state per period"]'))
+        .toHaveAccessibleDescription(
+          '2026 Q1: Pending 0, No election yet 0, Approved 6, Denied 1, Canceled 0; '
+          + '2026 Q2: Pending 3, No election yet 2, Approved 0, Denied 0, Canceled 0')
+      expect(screen.getByText(/Requests for this study's datasets/)).toBeInTheDocument()
+      expect(DarMetrics.getDatasetDecisions).toHaveBeenCalledWith({ ...range, limit: 1, target })
+      expect(DarMetrics.getDecisions).not.toHaveBeenCalled()
+    })
+
+    it('shows the empty state without waiting on the per-DAR report it never asks for', async () => {
+      vi.mocked(DarMetrics.getDatasetDecisions).mockResolvedValue(buildReport([]))
+
+      renderForTarget()
+
+      expect(await screen.findByText('No DARs were submitted in this range.')).toBeInTheDocument()
+      expect(DarMetrics.getDecisions).not.toHaveBeenCalled()
+    })
+
+    it('shows a failed report as an error', async () => {
+      vi.mocked(DarMetrics.getDatasetDecisions).mockRejectedValue({ message: 'Forbidden', code: 403 })
+
+      renderForTarget()
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('Forbidden')
+      expect(DarMetrics.getDecisions).not.toHaveBeenCalled()
+    })
   })
 })

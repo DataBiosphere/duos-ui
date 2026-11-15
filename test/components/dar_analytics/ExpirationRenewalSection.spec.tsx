@@ -6,7 +6,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { ExpirationRenewalSection } from 'src/components/dar_analytics/ExpirationRenewalSection'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
-import { DarExpirationReport, DarRenewalReport, ExpirationBucket, RenewalBucket } from 'src/types/darMetrics'
+import { DarMetricsTargetContext } from 'src/components/dar_analytics/useDarMetricsReport'
+import {
+  DarExpirationReport, DarMetricsTarget, DarRenewalReport, ExpirationBucket, RenewalBucket,
+} from 'src/types/darMetrics'
 
 vi.mock('src/libs/ajax/DarMetrics', () => ({
   DarMetrics: { getExpirations: vi.fn(), getRenewals: vi.fn() },
@@ -141,5 +144,43 @@ describe('ExpirationRenewalSection', () => {
     renderSection()
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Forbidden')
+  })
+
+  it('says the term runs from the newest approval on the Metrics page', async () => {
+    vi.mocked(DarMetrics.getExpirations).mockResolvedValue(expirations([]))
+    vi.mocked(DarMetrics.getRenewals).mockResolvedValue(renewals([]))
+
+    renderSection()
+
+    expect(await screen.findByText(/DAR collections whose access ended in the range/)).toBeInTheDocument()
+    expect(screen.getByText(/365 days from the newest approval on a dataset/)).toBeInTheDocument()
+  })
+
+  it('covers one study\'s datasets on that study\'s page, stating the term as its DAR cards date it', async () => {
+    const target: DarMetricsTarget = { kind: 'study', id: '12' }
+    vi.mocked(DarMetrics.getExpirations).mockResolvedValue(expirations([
+      { bucketStart: Q1, reason: 'EXPIRED', count: 2 },
+      { bucketStart: Q2, reason: 'CLOSED_OUT', count: 1 },
+    ]))
+    vi.mocked(DarMetrics.getRenewals).mockResolvedValue(renewals([
+      { bucketStart: Q2, renewalCount: 3, collectionCount: 2 },
+    ]))
+
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <DarMetricsTargetContext.Provider value={target}>
+          <ExpirationRenewalSection range={range} />
+        </DarMetricsTargetContext.Provider>
+      </QueryClientProvider>,
+    )
+
+    expect(await screen.findByRole('grid', { name: 'Expiration and renewal per period' })).toBeInTheDocument()
+    expect(cellsFor('2026 Q1')).toEqual(['2026 Q1', '2', '0', '0'])
+    expect(cellsFor('2026 Q2')).toEqual(['2026 Q2', '0', '1', '3'])
+    expect(screen.getByText(/whose access to this study's datasets ended in the range/)).toBeInTheDocument()
+    expect(screen.getByText(/365 days from the submission of the newest approved request or progress report/))
+      .toBeInTheDocument()
+    expect(DarMetrics.getExpirations).toHaveBeenCalledWith({ ...range, limit: 1, target })
+    expect(DarMetrics.getRenewals).toHaveBeenCalledWith({ ...range, limit: 1, target })
   })
 })

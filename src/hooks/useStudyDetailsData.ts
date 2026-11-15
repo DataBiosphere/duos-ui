@@ -1,4 +1,8 @@
+import { useState } from 'react'
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import {
+  chairOrMemberDacIds, RequestActivityAccess, requestActivityAccess,
+} from 'src/components/dar_analytics/requestActivityAccess'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
@@ -6,6 +10,7 @@ import { Study } from 'src/libs/ajax/Study'
 import { StudyComments } from 'src/libs/ajax/StudyComments'
 import { StudyRecommendations } from 'src/libs/ajax/StudyRecommendations'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
+import { Storage } from 'src/libs/storage'
 import { chain, intersection } from 'src/utils/NodashUtil'
 import { AggregationResult, ElasticsearchQuery } from 'src/types/elastic'
 import { ExportableDatasets, PaginationState, SortState, StudyCardData } from 'src/types/library'
@@ -272,6 +277,55 @@ export const useStudySelectableDatasetIds = (studyId: string, total: number, ena
   },
   staleTime: STUDY_STALE_TIME,
 })
+
+export const STUDY_DAC_IDS_QUERY_KEY = 'study-details-dac-ids'
+
+/**
+ * The DAC in charge of each dataset in the study, across the whole study rather than the visible
+ * grid page. As for the selectable ids above, `enabled` is the caller's job: the grid page already
+ * covers the whole study whenever `total` fits in one page.
+ */
+export const useStudyDacIds = (studyId: string, total: number, enabled: boolean) => useQuery({
+  queryKey: [STUDY_DAC_IDS_QUERY_KEY, studyId, total],
+  enabled: enabled && studyId.length > 0 && total > 0,
+  queryFn: async (): Promise<Array<number | undefined>> => {
+    const pagination = { page: 0, pageSize: total }
+    // The query the grid and the selectable ids run, so none can disagree about the study's datasets.
+    const response = await DataSet.searchDatasetIndexV2(buildStudyDatasetsQuery(studyId, pagination))
+    const page = datasetAsset.transformResponse(response, pagination)
+    return (page.items as DatasetTerm[]).map(dataset => dataset.dacId)
+  },
+  staleTime: STUDY_STALE_TIME,
+})
+
+/**
+ * What to offer the signed-in user of the study's reports on denied and pending requests: see
+ * `requestActivityAccess`. Undefined while that isn't known yet, so the page can wait instead of
+ * showing one answer and then another.
+ *
+ * Only a chair or member has to wait, since the answer turns on which DACs are in charge of the
+ * study's datasets: an admin is always offered them and anyone else never is. Those DACs are read
+ * off the grid page once it has `settled`, when it holds the whole study, and from one more
+ * request for a larger study. A lookup that fails leaves them unoffered.
+ */
+export const useStudyRequestActivityAccess = (
+  studyId: string,
+  page: DatasetTerm[],
+  total: number,
+  settled: boolean,
+): RequestActivityAccess | undefined => {
+  const [user] = useState(() => Storage.getCurrentUser())
+  const mayBeInCharge = user?.isAdmin !== true && chairOrMemberDacIds(user).length > 0
+  const pageHoldsStudy = total <= page.length
+  const studyWide = useStudyDacIds(studyId, total, mayBeInCharge && settled && !pageHoldsStudy)
+  if (!mayBeInCharge) {
+    return requestActivityAccess(user, [])
+  }
+  if (!settled || (!pageHoldsStudy && studyWide.isPending)) {
+    return undefined
+  }
+  return requestActivityAccess(user, pageHoldsStudy ? page.map(dataset => dataset.dacId) : studyWide.data ?? [])
+}
 
 export const useStudyExportableDatasets = (
   studyId: string,

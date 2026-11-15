@@ -685,7 +685,16 @@ export interface DatasetStatisticsDar {
   expired: boolean
   /** Absent when the dataset has no study: see DarMetric.yaml. The requester's name is never sent. */
   institutionName?: string
+  /** When access began: the collection's earliest approved submission. Every date here is epoch millis. */
   submissionDate?: number
+  /** When the DAC first approved the original DAR. Left out when that approval has no recorded date. */
+  approvalDate?: number
+  /** When the DAC approved each progress report that renewed access, oldest first. */
+  progressReportApprovalDates?: number[]
+  /** When the term runs out: 365 days after the newest approved submission was submitted. */
+  expirationDate?: number
+  /** When a closeout ended access before the term ran out. Left out for a closeout filed after it had. */
+  closeoutDate?: number
 }
 
 /**

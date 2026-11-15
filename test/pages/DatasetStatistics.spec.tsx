@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import DatasetStatistics from 'src/pages/DatasetStatistics'
 import { DataSet } from 'src/libs/ajax/DataSet'
 import { DatasetMetrics } from 'src/libs/ajax/DatasetMetrics'
+import { DarMetrics } from 'src/libs/ajax/DarMetrics'
 import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { DAC } from 'src/libs/ajax/DAC'
 import { Storage } from 'src/libs/storage'
@@ -19,6 +20,23 @@ vi.mock('src/libs/ajax/DataSet')
 vi.mock('src/libs/ajax/DatasetMetrics')
 vi.mock('src/libs/ajax/TerraDataRepo')
 vi.mock('src/libs/ajax/DAC')
+// The trend reports the page asks consent for, each empty
+vi.mock('src/libs/ajax/DarMetrics', () => {
+  const emptyReport = () => Promise.resolve({
+    from: '2026-01-01', to: '2026-03-31', bucket: 'QUARTER', total: 0, unmeasured: 0, buckets: [], rows: [],
+  })
+  return {
+    DarMetrics: {
+      getVolume: vi.fn(emptyReport),
+      getDecisions: vi.fn(emptyReport),
+      getDatasetDecisions: vi.fn(emptyReport),
+      getDecisionTurnaround: vi.fn(emptyReport),
+      getDatasetDecisionTurnaround: vi.fn(emptyReport),
+      getExpirations: vi.fn(emptyReport),
+      getRenewals: vi.fn(emptyReport),
+    },
+  }
+})
 
 // Mock fetch for config.json
 const mockConfig = {
@@ -316,7 +334,7 @@ describe('DatasetStatistics', () => {
     expect(notice.textContent).toMatch(/While a study is unpublished/)
     // Distinct from a study that simply has no requests yet
     expect(
-      screen.queryByText(/No Data Access Requests have been created for this dataset/),
+      screen.queryByText(/No granted data access requests yet/),
     ).not.toBeInTheDocument()
     // The rest of the page is unaffected
     expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeTruthy()
@@ -424,8 +442,136 @@ describe('DatasetStatistics', () => {
     renderDatasetStatistics({ dars: [] })
 
     expect(
-      await screen.findByText(/No Data Access Requests have been created for this dataset/),
+      await screen.findByText(/No granted data access requests yet/),
     ).toBeTruthy()
+  })
+
+  const historyHeading = () => screen.findByText(/^Data Access Requests for this dataset/)
+  const noTrendRequests = () =>
+    Object.values(DarMetrics).every(report => vi.mocked(report).mock.calls.length === 0)
+  // The dataset is under DAC 1. Set for each test: nothing here restores a spy between tests.
+  const viewAs = (user: object) => vi.spyOn(Storage, 'getCurrentUser').mockReturnValue(user as never)
+  const viewAsAdmin = () => viewAs({ isAdmin: true, roles: [] })
+  const viewAsChairOf = (dacId: number) =>
+    viewAs({ isAdmin: false, roles: [{ name: 'Chairperson', dacId, roleId: 2, userId: 42 }] })
+  const viewAsResearcher = () => viewAs({ isAdmin: false, roles: [{ name: 'Researcher', roleId: 5, userId: 42 }] })
+  const requestActivityReports = [
+    DarMetrics.getVolume, DarMetrics.getDatasetDecisions, DarMetrics.getDatasetDecisionTurnaround,
+  ]
+
+  it('counts the data access requests in the heading once they load', async () => {
+    renderDatasetStatistics()
+
+    expect((await historyHeading()).textContent).toBe('Data Access Requests for this dataset (1)')
+  })
+
+  it('counts none when the dataset has no data access requests', async () => {
+    renderDatasetStatistics({ dars: [] })
+
+    expect((await historyHeading()).textContent).toBe('Data Access Requests for this dataset (0)')
+  })
+
+  /** A refusal or a failure is not "no requests", so neither may read as "(0)". */
+  it.each([['is refused', 403], ['fails to load', 500]])(
+    'shows no count when the request history %s',
+    async (_outcome, status) => {
+      renderDatasetStatistics({
+        darsError: Object.assign(new Error('nope'), { response: { status } }),
+      })
+
+      expect((await historyHeading()).textContent).toBe('Data Access Requests for this dataset')
+    },
+  )
+
+  it('shows an admin the dataset\'s DAR trends once its request history has loaded', async () => {
+    viewAsAdmin()
+    renderDatasetStatistics()
+
+    expect(await screen.findByText('Data Access Request Trends')).toBeInTheDocument()
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toHaveAttribute('aria-selected', 'true')
+    await waitFor(() => expect(DarMetrics.getVolume).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 1, target: { kind: 'dataset', id: mockDatasetTerm.datasetId } }),
+    ))
+    // The per-DAR reports reflect a DAR's other datasets, so the page never asks for them
+    fireEvent.click(screen.getByRole('tab', { name: 'Decisions' }))
+    await waitFor(() => expect(DarMetrics.getDatasetDecisions).toHaveBeenCalled())
+    expect(DarMetrics.getDecisions).not.toHaveBeenCalled()
+  })
+
+  it('shows trends for a dataset nobody has requested yet', async () => {
+    viewAsAdmin()
+    renderDatasetStatistics({ dars: [] })
+
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toBeInTheDocument()
+  })
+
+  /**
+   * Consent gates the trends as it gates the history. Whoever is refused the history is not shown
+   * trends, and is not the cause of requests that could only be refused too.
+   */
+  it.each([['is refused', 403], ['fails to load', 500]])(
+    'shows and asks for no trends when the request history %s',
+    async (_outcome, status) => {
+      viewAsAdmin()
+      renderDatasetStatistics({
+        darsError: Object.assign(new Error('nope'), { response: { status } }),
+      })
+
+      await historyHeading()
+      expect(screen.queryByText('Data Access Request Trends')).not.toBeInTheDocument()
+      expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+      expect(noTrendRequests()).toBe(true)
+    },
+  )
+
+  /**
+   * Volume, decisions and turnaround count requests that were denied or are still pending. Those
+   * are for admins and the dataset's DAC; reading the dataset is not enough to be offered them.
+   */
+  it('offers a reader who is neither an admin nor on the dataset\'s DAC only the report on granted access', async () => {
+    viewAsResearcher()
+    renderDatasetStatistics()
+
+    expect(await screen.findByRole('region', { name: 'Expiration and renewal' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    await waitFor(() => expect(DarMetrics.getRenewals).toHaveBeenCalledWith(
+      expect.objectContaining({ target: { kind: 'dataset', id: mockDatasetTerm.datasetId } }),
+    ))
+    expect(DarMetrics.getExpirations).toHaveBeenCalled()
+    requestActivityReports.forEach(report => expect(report).not.toHaveBeenCalled())
+  })
+
+  it('offers every report to a chair of the dataset\'s DAC', async () => {
+    viewAsChairOf(mockDatasetTerm.dacId)
+    renderDatasetStatistics()
+
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getAllByRole('tab')).toHaveLength(4)
+    // One DAC is in charge of a dataset, so there is no narrower scope to state
+    expect(screen.queryByText(/datasets your DACs are in charge of/)).not.toBeInTheDocument()
+  })
+
+  /** A dataset no DAC is in charge of, such as an open-access one, has no DAC to offer them to. */
+  it('offers the reports on a dataset with no DAC to an admin alone', async () => {
+    const noDac = { ...mockDatasetTerm, dacId: undefined } as unknown as DatasetTerm
+    viewAsChairOf(mockDatasetTerm.dacId)
+    const { unmount } = renderDatasetStatistics({ dataset: noDac })
+    expect(await screen.findByRole('region', { name: 'Expiration and renewal' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    unmount()
+
+    viewAsAdmin()
+    renderDatasetStatistics({ dataset: noDac })
+    expect(await screen.findByRole('tab', { name: 'Volume' })).toBeInTheDocument()
+  })
+
+  it('offers a chair of another DAC only the report on granted access', async () => {
+    viewAsChairOf(mockDatasetTerm.dacId + 1)
+    renderDatasetStatistics()
+
+    expect(await screen.findByRole('region', { name: 'Expiration and renewal' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    requestActivityReports.forEach(report => expect(report).not.toHaveBeenCalled())
   })
 })
 
@@ -688,7 +834,7 @@ describe('DatasetStatistics', () => {
 
   it('Displays message when no DARs exist', async () => {
     mount(mockDataset)
-    expect(await screen.findByText(/No Data Access Requests have been created for this dataset/)).toBeInTheDocument()
+    expect(await screen.findByText(/No granted data access requests yet/)).toBeInTheDocument()
   })
 
   it('Displays DAR section with expired data', async () => {
@@ -724,7 +870,7 @@ describe('DatasetStatistics', () => {
     expect(await screen.findByText(/Data Access Requests for this dataset/)).toBeInTheDocument()
     expect(await screen.findByText('Test Project')).toBeInTheDocument()
     expect(screen.getByText('Expired')).toBeInTheDocument()
-    expect(screen.getByText(`Submitted ${expired.toLocaleDateString()}`)).toBeInTheDocument()
+    expect(screen.getByText('Submitted').nextElementSibling).toHaveTextContent(expired.toLocaleDateString())
     // Hidden until asked for, as on the study page, then each under its own label
     expect(screen.queryByText('Test research use statement')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Show research use statement and summary' }))
