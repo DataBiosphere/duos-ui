@@ -131,6 +131,9 @@ Standalone mode requires a consent database dump (which includes the BFF `user_s
 missing, Docker silently creates a directory at that path and the stack comes up green with an *empty* database;
 the first session write then fails with "relation user_sessions does not exist".
 
+The bundled `db` service runs `postgres:18.7-alpine`. Consent's `scripts/export-db.sh` makes the dump with the
+`pg_dump` 18 client. Postgres 16 cannot load that dump, because the dump sets `transaction_timeout`.
+
 **Against a local `consent` compose stack instead** (see below for the full walkthrough):
 
 First, ensure that the consent stack is up and running separately, then run this repo's stack with the consent overlay.
