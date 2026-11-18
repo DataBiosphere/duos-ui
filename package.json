@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@emotion/styled": "11.14.1",
-    "@stylistic/eslint-plugin": "6.0.0",
+    "@stylistic/eslint-plugin": "6.0.1",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.8",
