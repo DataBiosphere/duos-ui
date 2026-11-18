@@ -44,7 +44,9 @@ export const DAA = {
   bulkAddUsersToDaa: async (daaId: number, userList: number[]): Promise<DaaBulkRelationResult> => {
     const url = `${await Config.getApiUrl()}/api/daa/bulk/${daaId}`
     const res = await fetchPost<DaaBulkRelationResult, { users: number[] }>(
-      url, { users: userList }, Config.authOpts(),
+      url,
+      { users: userList },
+      Config.authOpts(),
     )
     return res.data
   },
@@ -59,7 +61,9 @@ export const DAA = {
   bulkAddDaasToUser: async (userId: number, daaList: number[]): Promise<DaaBulkRelationResult> => {
     const url = `${await Config.getApiUrl()}/api/daa/bulk/user/${userId}`
     const res = await fetchPost<DaaBulkRelationResult, { daaList: number[] }>(
-      url, { daaList }, Config.authOpts(),
+      url,
+      { daaList },
+      Config.authOpts(),
     )
     return res.data
   },

@@ -81,10 +81,12 @@ describe('ResearcherDashboard', () => {
     // tile is hidden for a researcher who is not a data submitter.
     expect(screen.getAllByText('–')).toHaveLength(11)
     expect(screen.getByRole('link', { name: /Data Access Requests/ })).toHaveAttribute(
-      'href', '/researcher_console',
+      'href',
+      '/researcher_console',
     )
     expect(screen.getByRole('link', { name: /My Dataset Approvals/ })).toHaveAttribute(
-      'href', '/datasets',
+      'href',
+      '/datasets',
     )
 
     resolveSummary(summary)
@@ -121,7 +123,8 @@ describe('ResearcherDashboard', () => {
     renderDashboard()
 
     expect(await screen.findByRole('link', { name: /Data Submissions/ })).toHaveAttribute(
-      'href', '/dataset_submissions',
+      'href',
+      '/dataset_submissions',
     )
   })
 
@@ -214,7 +217,8 @@ describe('ResearcherDashboard', () => {
     renderDashboard()
 
     expect(await screen.findByRole('link', { name: /Promote Your Publications/ })).toHaveAttribute(
-      'href', '/dataset_submissions?tab=publications',
+      'href',
+      '/dataset_submissions?tab=publications',
     )
   })
 

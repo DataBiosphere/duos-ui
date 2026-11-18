@@ -10,7 +10,10 @@ import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRang
 import { bucketStartsInRange, describePeriods, formatBucketStart } from 'src/components/dar_analytics/bucketAxis'
 import { HeadlineFigures } from 'src/components/dar_analytics/HeadlineFigures'
 import {
-  coverSameRange, describeTarget, useDarMetricsReport, useDarMetricsTarget,
+  coverSameRange,
+  describeTarget,
+  useDarMetricsReport,
+  useDarMetricsTarget,
 } from 'src/components/dar_analytics/useDarMetricsReport'
 
 const layoutStyle = {

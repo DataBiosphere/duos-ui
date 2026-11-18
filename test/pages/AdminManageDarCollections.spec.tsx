@@ -44,9 +44,7 @@ vi.mock('src/hooks/useResponsiveDarCollectionColumns', () => ({
 
 vi.mock('src/components/TableHeaderSection', () => ({
   default: ({ title, description }: { title: string, description: string }) =>
-    React.createElement('div', null,
-      React.createElement('h1', null, title),
-      React.createElement('p', null, description)),
+    React.createElement('div', null, React.createElement('h1', null, title), React.createElement('p', null, description)),
 }))
 
 vi.mock('src/components/SearchBar', () => ({
@@ -63,8 +61,7 @@ vi.mock('src/components/dar_collection_table/DarCollectionTable', () => ({
       'div',
       { 'data-testid': 'dar-collection-table', 'data-loading': String(isLoading) },
       (collections ?? []).map(c =>
-        React.createElement('span', { key: c.darCollectionId }, c.darCode),
-      ),
+        React.createElement('span', { key: c.darCollectionId }, c.darCode)),
     ),
 }))
 

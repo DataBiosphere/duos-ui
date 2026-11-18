@@ -98,12 +98,12 @@ export const partnerConfig: ShowcaseConfigInput = {
 // Lookup contract: POST /showcase/datasets (consent), proxied by the BFF as
 // POST /public/showcase/datasets. The schemas are in `src/showcases/schema.ts`.
 
-export type LookupExample
-  = | { name: string, request: Extract<LookupRequestInput, { mode: 'identifiers' }>, status: 200, response: IdentifiersResponseInput }
-    | { name: string, request: Extract<LookupRequestInput, { mode: 'ranking' }>, status: 200, response: RankingResponseInput }
-    | { name: string, request: Extract<LookupRequestInput, { mode: 'all' }>, status: 200, response: AllResponseInput }
-    | { name: string, request: Extract<LookupRequestInput, { mode: 'stats' }>, status: 200, response: StatsResponse }
-    | { name: string, request: unknown, status: 400 | 413, response: ErrorResponse }
+export type LookupExample =
+  | { name: string, request: Extract<LookupRequestInput, { mode: 'identifiers' }>, status: 200, response: IdentifiersResponseInput }
+  | { name: string, request: Extract<LookupRequestInput, { mode: 'ranking' }>, status: 200, response: RankingResponseInput }
+  | { name: string, request: Extract<LookupRequestInput, { mode: 'all' }>, status: 200, response: AllResponseInput }
+  | { name: string, request: Extract<LookupRequestInput, { mode: 'stats' }>, status: 200, response: StatsResponse }
+  | { name: string, request: unknown, status: 400 | 413, response: ErrorResponse }
 
 const OPEN_COHORT: DatasetSummaryInput = {
   identifier: 'DUOS-000123',

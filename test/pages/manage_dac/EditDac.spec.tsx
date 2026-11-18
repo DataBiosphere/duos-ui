@@ -190,21 +190,34 @@ const existingDac = {
   description: 'Test DAC',
   email: 'grushton@broadinstitute.org',
   chairpersons: [{
-    userId: 1, email: 'test@broadinstitute.org', displayName: 'Chairperson',
-    createDate: 1704827256598, roles: [{ userId: 1, roleId: 2, name: 'Chairperson', dacId: 1 }],
+    userId: 1,
+    email: 'test@broadinstitute.org',
+    displayName: 'Chairperson',
+    createDate: 1704827256598,
+    roles: [{ userId: 1, roleId: 2, name: 'Chairperson', dacId: 1 }],
     emailPreference: true,
   }],
   members: [{
-    userId: 2, email: 'test2@broadinstitute.org', displayName: 'Member',
-    createDate: 1704827256598, roles: [{ userId: 2, roleId: 1, name: 'Member', dacId: 1 }],
+    userId: 2,
+    email: 'test2@broadinstitute.org',
+    displayName: 'Member',
+    createDate: 1704827256598,
+    roles: [{ userId: 2, roleId: 1, name: 'Member', dacId: 1 }],
     emailPreference: true,
   }],
   associatedDaa: {
-    daaId: 1, createUserId: 5146, createDate: '2024-04-17', initialDacId: 8,
+    daaId: 1,
+    createUserId: 5146,
+    createDate: '2024-04-17',
+    initialDacId: 8,
     file: {
-      fileStorageObjectId: 216, entityId: '1', fileName: 'test_daa.txt',
-      category: 'dataAccessAgreement', mediaType: 'application/octet-stream',
-      createUserId: 5146, createDate: 1713386755554,
+      fileStorageObjectId: 216,
+      entityId: '1',
+      fileName: 'test_daa.txt',
+      category: 'dataAccessAgreement',
+      mediaType: 'application/octet-stream',
+      createUserId: 5146,
+      createDate: 1713386755554,
     },
   },
 } as unknown as DacObject
@@ -816,7 +829,8 @@ describe('EditDAC Tests', () => {
 
     it('defaults to owned tab if selected DAA is owned by this DAC', async () => {
       const ownedDaa = createMockDaa({
-        daaId: 2, initialDacId: existingDac.dacId as number,
+        daaId: 2,
+        initialDacId: existingDac.dacId as number,
         file: { fileStorageObjectId: 2, entityId: '2', fileName: 'custom-daa.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
       })
       const daasWithSelection = [...mockDaaList, ownedDaa]
@@ -837,7 +851,8 @@ describe('EditDAC Tests', () => {
 
     it('defaults to shared tab if selected DAA is shared from another DAC', async () => {
       const sharedDaa = createMockDaa({
-        daaId: 5, initialDacId: 99,
+        daaId: 5,
+        initialDacId: 99,
         file: { fileStorageObjectId: 5, entityId: '5', fileName: 'shared-daa.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
       })
       const daasWithSelection = [...buildExistingDaas(), sharedDaa]
@@ -880,7 +895,8 @@ describe('EditDAC Tests', () => {
 
     it('can select DAA from shared tab', async () => {
       const sharedDaa = createMockDaa({
-        daaId: 5, initialDacId: 99,
+        daaId: 5,
+        initialDacId: 99,
         file: { fileStorageObjectId: 5, entityId: '5', fileName: 'shared-daa.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
       })
       const daasWithSelection = [...buildExistingDaas(), sharedDaa]
@@ -962,7 +978,8 @@ describe('EditDAC Tests', () => {
       const daasAllOwned = [
         createMockDaa({ daaId: 1, initialDacId: existingDac.dacId as number }),
         createMockDaa({
-          daaId: 2, initialDacId: existingDac.dacId as number,
+          daaId: 2,
+          initialDacId: existingDac.dacId as number,
           file: { fileStorageObjectId: 2, entityId: '2', fileName: 'custom.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
         }),
       ]
@@ -985,7 +1002,8 @@ describe('EditDAC Tests', () => {
     it('download button works for DAA in owned tab', async () => {
       const ownedDaas = [
         createMockDaa({
-          daaId: 2, initialDacId: existingDac.dacId as number,
+          daaId: 2,
+          initialDacId: existingDac.dacId as number,
           file: { fileStorageObjectId: 2, entityId: '2', fileName: 'custom-daa.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
         }),
       ]
@@ -1006,7 +1024,8 @@ describe('EditDAC Tests', () => {
 
     it('download button works for DAA in shared tab', async () => {
       const sharedDaa = createMockDaa({
-        daaId: 5, initialDacId: 99,
+        daaId: 5,
+        initialDacId: 99,
         file: { fileStorageObjectId: 5, entityId: '5', fileName: 'shared-daa.pdf', category: 'dataAccessAgreement' as const, mediaType: 'application/octet-stream', createUserId: 3479, createDate: 1722023675199 },
       })
       const daasWithSelection = [...buildExistingDaas(), sharedDaa]

@@ -30,17 +30,25 @@ vi.mock('src/libs/utils', async (importOriginal) => {
 vi.mock('src/components/manage_dac_table/ManageDacTableCellData', () => ({
   default: {
     nameCellData: ({ name, dacId }: { name?: string, dacId?: number }) => ({
-      id: dacId, label: 'dac-name', data: <span data-testid={`dac-name-${dacId}`}>{name ?? '- -'}</span>,
+      id: dacId,
+      label: 'dac-name',
+      data: <span data-testid={`dac-name-${dacId}`}>{name ?? '- -'}</span>,
     }),
     descriptionCellData: ({ description, dacId }: { description?: string, dacId?: number }) => ({
-      id: dacId, label: 'dac-description', data: <span>{description ?? '- -'}</span>,
+      id: dacId,
+      label: 'dac-description',
+      data: <span>{description ?? '- -'}</span>,
     }),
     datasetsCellData: ({ dac, viewDatasets }: { dac: DacObject, viewDatasets: (d: DacObject) => void }) => ({
-      id: dac.dacId, label: 'dac-datasets', isComponent: true,
+      id: dac.dacId,
+      label: 'dac-datasets',
+      isComponent: true,
       data: <button data-testid={`view-datasets-${dac.dacId}`} onClick={() => viewDatasets(dac)}>Datasets</button>,
     }),
     actionsCellData: ({ dac, deleteDac }: { dac: DacObject, deleteDac: (d: DacObject) => void }) => ({
-      id: dac.dacId, label: 'table-actions', isComponent: true,
+      id: dac.dacId,
+      label: 'table-actions',
+      isComponent: true,
       data: <button data-testid={`delete-dac-${dac.dacId}`} onClick={() => deleteDac(dac)}>Delete</button>,
     }),
   },

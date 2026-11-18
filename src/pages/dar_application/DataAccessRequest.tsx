@@ -65,7 +65,8 @@ const autocompleteOntologies = (query: string | string[], callback: (options: On
   DAR.getAutoCompleteOT(query).then(
     (items) => {
       callback(items.map(formatOntologyForSelect))
-    })
+    },
+  )
 }
 
 interface FieldChange {

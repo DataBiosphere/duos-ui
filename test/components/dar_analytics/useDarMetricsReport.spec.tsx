@@ -3,7 +3,9 @@ import { describe, expect, it, vi } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import {
-  DarMetricsScope, DarMetricsTargetContext, useDarMetricsReport,
+  DarMetricsScope,
+  DarMetricsTargetContext,
+  useDarMetricsReport,
 } from 'src/components/dar_analytics/useDarMetricsReport'
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
 import { DarMetricsTarget } from 'src/types/darMetrics'

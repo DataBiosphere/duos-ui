@@ -39,7 +39,11 @@ describe('DACBotComponent', () => {
       vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ roles: [{ dacId: 1, name: 'Chairperson' }] } as never)
       vi.spyOn(DAC, 'fetchDACbotRules').mockResolvedValue(mockRules as never)
       vi.spyOn(DAC, 'toggleDACbotRule').mockResolvedValue({
-        ruleId: 1, isRuleEnabled: true, enabledTime: Date.now(), displayName: 'Test User', email: 'test@example.com',
+        ruleId: 1,
+        isRuleEnabled: true,
+        enabledTime: Date.now(),
+        displayName: 'Test User',
+        email: 'test@example.com',
       } as never)
       vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
       const result = render(

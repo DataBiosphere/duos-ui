@@ -815,8 +815,7 @@ describe('retryFetchPost', () => {
           status: 503,
           headers: { 'content-type': 'application/json' },
         }),
-      ),
-    )
+      ))
 
     const promise = retryFetchPost('/api/test', { data: 'value' })
     const settled = promise.catch(e => e) // prevent unhandled rejection during timer advancement
@@ -837,8 +836,7 @@ describe('retryFetchPost', () => {
           status: 503,
           headers: { 'content-type': 'application/json' },
         }),
-      ),
-    )
+      ))
 
     const promise = retryFetchPost('/api/test', { data: 'value' })
     const settled = promise.catch(() => {}) // prevent unhandled rejection during timer advancement

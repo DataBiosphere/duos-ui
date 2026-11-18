@@ -48,7 +48,16 @@ export const datasetPath = (identifier: string): string | undefined =>
 /** Routes outside `Authenticated` in `AppRoutes`. Any other internal path counts as signed-in, so
  * a route that this list leaves out is labeled and blocked, never opened by mistake. */
 const PUBLIC_PATHS: ReadonlySet<string> = new Set([
-  '/', '/home', '/status', '/nih_pilot_info', '/privacy', '/cookie_policy', '/tos', '/nih_dms_policy', '/anvil_dms_policy', '/data',
+  '/',
+  '/home',
+  '/status',
+  '/nih_pilot_info',
+  '/privacy',
+  '/cookie_policy',
+  '/tos',
+  '/nih_dms_policy',
+  '/anvil_dms_policy',
+  '/data',
 ])
 
 /**

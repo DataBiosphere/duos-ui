@@ -20,7 +20,10 @@
  * @returns A boolean indicating whether to skip the 401 redirect.
  */
 export const shouldSkip401Redirect = (
-  url: string, method: string, apiUrl: string): boolean => {
+  url: string,
+  method: string,
+  apiUrl: string,
+): boolean => {
   // Both URLs are resolved against the app origin: post-cutover apiUrl is the
   // relative BFF proxy prefix ('/duos-api'), which a bare `new URL()` rejects.
   const requestUrl = new URL(url, globalThis.location.origin)

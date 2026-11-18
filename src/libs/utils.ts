@@ -258,8 +258,7 @@ export const Notifications = {
 export const PromiseSerial = (funcs: Array<() => Promise<unknown>>): Promise<unknown[]> =>
   funcs.reduce((promise: Promise<unknown[]>, func: () => Promise<unknown>) =>
     promise.then((result: unknown[]) =>
-      func().then((res: unknown) => [...result, res])),
-  Promise.resolve([]))
+      func().then((res: unknown) => [...result, res])), Promise.resolve([]))
 
 //////////////////////////////////
 // DAR CONSOLES UTILITY FUNCTIONS//
@@ -386,7 +385,8 @@ const filterDar = (term: string, targetList: ElectionData[]): ElectionData[] => 
                   datasetName: ds.label,
                 } as Dataset))
               : []),
-            dar.datasetIds)),
+            dar.datasetIds,
+          )),
         ])
     const targetDacAttrs = isNil(dac) ? [] : JSON.stringify([toLower(dac.name || dac.dacName || '')])
     const targetElectionAttrs = isNil(election)
@@ -446,8 +446,7 @@ const filterDarCollections = (term: string, targetList: DarCollectionSummary[]):
     ]
     const termArr = term.split(' ')
     return searchableValues.some(value =>
-      termArr.some(t => includes(toLower(String(value ?? '')), toLower(t))),
-    )
+      termArr.some(t => includes(toLower(String(value ?? '')), toLower(t))))
   })
 }
 
@@ -577,13 +576,13 @@ export const getSearchFilterFunctions = (): SearchFilterFunctions => {
 type ListTypeForModel<T extends keyof SearchFilterFunctions>
   = T extends 'dar' ? ElectionData[]
     : T extends 'libraryCard' ? LibraryCard[]
-      : T extends 'signingOfficialResearchers' ? Researcher[]
-        : T extends 'darCollections' ? DarCollectionSummary[]
-          : T extends 'users' ? DuosUser[]
-            : T extends 'datasets' ? Dataset[]
-              : T extends 'datasetTerms' ? DatasetTerm[]
-                : T extends 'institutions' ? InstitutionInterface[]
-                  : unknown[]
+    : T extends 'signingOfficialResearchers' ? Researcher[]
+    : T extends 'darCollections' ? DarCollectionSummary[]
+    : T extends 'users' ? DuosUser[]
+    : T extends 'datasets' ? Dataset[]
+    : T extends 'datasetTerms' ? DatasetTerm[]
+    : T extends 'institutions' ? InstitutionInterface[]
+    : unknown[]
 
 export const tableSearchHandler = <T extends keyof SearchFilterFunctions>(
   list: ListTypeForModel<T>,
@@ -663,7 +662,8 @@ export const searchOntologies = (
         options = [{ key: query, value: query, label: query, id: query }]
       }
       callback(options)
-    })
+    },
+  )
 }
 
 export const searchOntologyTerm = async (
@@ -681,7 +681,8 @@ export const searchOntologyTerm = async (
         options = [{ displayText: query, id: query }]
       }
       callback(options)
-    })
+    },
+  )
 }
 
 export const findOntologyTerms = async (

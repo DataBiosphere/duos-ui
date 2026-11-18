@@ -119,7 +119,12 @@ const filterFn = getSearchFilterFunctions().users
 const EMPTY_DAA_LABELS: Map<number, string> = new Map()
 
 export const ManageUsersTable = function ManageUsersTable({
-  isLoading, userList, dacList = [], searchText, role, daaLabelsById = EMPTY_DAA_LABELS,
+  isLoading,
+  userList,
+  dacList = [],
+  searchText,
+  role,
+  daaLabelsById = EMPTY_DAA_LABELS,
 }: ManageUsersTableProps) {
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: PAGE_SIZE_OPTIONS[0] })
   const [lastFilters, setLastFilters] = useState({ searchText, role })

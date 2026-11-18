@@ -92,26 +92,39 @@ export const MAX_REQUESTS_PER_WINDOW = 30
  * body. Anything outside this set is dropped rather than logged.
  */
 const ALLOWED_REPORT_FIELDS: ReadonlySet<string> = new Set([
-  'blocked-uri', 'blockedURL',
-  'column-number', 'columnNumber',
+  'blocked-uri',
+  'blockedURL',
+  'column-number',
+  'columnNumber',
   'disposition',
-  'document-uri', 'documentURL',
-  'effective-directive', 'effectiveDirective',
-  'line-number', 'lineNumber',
-  'original-policy', 'originalPolicy',
+  'document-uri',
+  'documentURL',
+  'effective-directive',
+  'effectiveDirective',
+  'line-number',
+  'lineNumber',
+  'original-policy',
+  'originalPolicy',
   'referrer',
-  'sample', 'script-sample',
-  'source-file', 'sourceFile',
-  'status-code', 'statusCode',
-  'violated-directive', 'violatedDirective',
+  'sample',
+  'script-sample',
+  'source-file',
+  'sourceFile',
+  'status-code',
+  'statusCode',
+  'violated-directive',
+  'violatedDirective',
 ])
 
 // CSP reports preserve query strings, including OAuth callback code and state.
 const URL_REPORT_FIELDS: ReadonlySet<string> = new Set([
-  'blocked-uri', 'blockedURL',
-  'document-uri', 'documentURL',
+  'blocked-uri',
+  'blockedURL',
+  'document-uri',
+  'documentURL',
   'referrer',
-  'source-file', 'sourceFile',
+  'source-file',
+  'sourceFile',
 ])
 
 // Avoid URL parsing because these fields may contain CSP keywords such as `inline`.

@@ -98,8 +98,7 @@ describe('ERA Commons Component', () => {
     const user = userEvent.setup()
     mountComponent()
     await waitFor(() =>
-      expect(document.querySelector('[data-cy=era-commons-authenticate-link]')).toBeInTheDocument(),
-    )
+      expect(document.querySelector('[data-cy=era-commons-authenticate-link]')).toBeInTheDocument())
     await user.click(document.querySelector('[data-cy=era-commons-authenticate-link]')!)
     await waitFor(() => expect(document.querySelector('[data-cy=era-commons-error-span]')).toBeVisible())
   })

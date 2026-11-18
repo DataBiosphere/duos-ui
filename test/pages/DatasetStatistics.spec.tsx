@@ -23,7 +23,13 @@ vi.mock('src/libs/ajax/DAC')
 // The trend reports the page asks consent for, each empty
 vi.mock('src/libs/ajax/DarMetrics', () => {
   const emptyReport = () => Promise.resolve({
-    from: '2026-01-01', to: '2026-03-31', bucket: 'QUARTER', total: 0, unmeasured: 0, buckets: [], rows: [],
+    from: '2026-01-01',
+    to: '2026-03-31',
+    bucket: 'QUARTER',
+    total: 0,
+    unmeasured: 0,
+    buckets: [],
+    rows: [],
   })
   return {
     DarMetrics: {
@@ -456,7 +462,9 @@ describe('DatasetStatistics', () => {
     viewAs({ isAdmin: false, roles: [{ name: 'Chairperson', dacId, roleId: 2, userId: 42 }] })
   const viewAsResearcher = () => viewAs({ isAdmin: false, roles: [{ name: 'Researcher', roleId: 5, userId: 42 }] })
   const requestActivityReports = [
-    DarMetrics.getVolume, DarMetrics.getDatasetDecisions, DarMetrics.getDatasetDecisionTurnaround,
+    DarMetrics.getVolume,
+    DarMetrics.getDatasetDecisions,
+    DarMetrics.getDatasetDecisionTurnaround,
   ]
 
   it('counts the data access requests in the heading once they load', async () => {

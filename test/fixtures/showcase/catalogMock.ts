@@ -25,8 +25,7 @@ const isSummary = (row: object): row is DatasetSummaryInput => 'title' in row
 
 // The contract examples' summaries, so the mock and contracts.ts cannot drift.
 const exampleSummaries = lookupExamples.flatMap(example =>
-  example.status === 200 && 'datasets' in example.response ? (example.response.datasets as object[]).filter(isSummary) : [],
-)
+  example.status === 200 && 'datasets' in example.response ? (example.response.datasets as object[]).filter(isSummary) : [])
 
 /** The dataset the ranking example excludes. */
 const EXCLUDED: DatasetSummaryInput = { identifier: 'DUOS-000111', title: 'Example Excluded Cohort', accessManagement: 'controlled', dacName: 'Example DAC', consentCodes: ['GRU'], participantCount: 800, availableDate: '2026-10-10', accessUrl: null }

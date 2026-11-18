@@ -63,11 +63,11 @@ const attempt = <T>(action: () => T): T | undefined => {
   }
 }
 
-export type BaseRegistry
-  = | { status: 'ok', registry: KeyHistory }
-    | { status: 'absent' }
-    | { status: 'unavailable' }
-    | { status: 'invalid' }
+export type BaseRegistry =
+  | { status: 'ok', registry: KeyHistory }
+  | { status: 'absent' }
+  | { status: 'unavailable' }
+  | { status: 'invalid' }
 
 /** Reads the registry at `ref`. `absent`: the revision has no registry file. `unavailable`: git does
  * not have the revision, as in a shallow checkout that didn't fetch it. */

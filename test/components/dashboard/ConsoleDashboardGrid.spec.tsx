@@ -51,7 +51,8 @@ describe('ConsoleDashboardGrid', () => {
     expect(screen.getAllByRole('link')).toHaveLength(2)
     expect(screen.getByRole('link', { name: /Data Library/ })).toHaveAttribute('href', '/datalibrary')
     expect(screen.getByRole('link', { name: /Data Access Requests/ })).toHaveAttribute(
-      'href', '/researcher_console',
+      'href',
+      '/researcher_console',
     )
   })
 

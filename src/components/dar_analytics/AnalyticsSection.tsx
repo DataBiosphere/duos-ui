@@ -23,7 +23,17 @@ interface AnalyticsSectionProps {
 }
 
 export const AnalyticsSection = ({
-  title, description, caveats = [], actions, isLoading, isRefreshing = false, error, onRetry, isEmpty, emptyText, children,
+  title,
+  description,
+  caveats = [],
+  actions,
+  isLoading,
+  isRefreshing = false,
+  error,
+  onRetry,
+  isEmpty,
+  emptyText,
+  children,
 }: AnalyticsSectionProps) => {
   const headingId = `${title.toLowerCase().replaceAll(/\W+/g, '-')}-heading`
   // On a study's or dataset's page the section sits under that page's own headings, the lowest of

@@ -16,10 +16,21 @@ const range: DarAnalyticsRange = { from: '2026-01-01', to: '2026-06-30', bucket:
 const Q2 = Date.parse('2026-04-01T00:00:00Z')
 
 const datasetReport = (overrides: Partial<DatasetReport> = {}): DatasetReport => ({
-  from: range.from, to: range.to, bucket: 'QUARTER', total: 0, dacApproved: 0, buckets: [], ...overrides,
+  from: range.from,
+  to: range.to,
+  bucket: 'QUARTER',
+  total: 0,
+  dacApproved: 0,
+  buckets: [],
+  ...overrides,
 })
 const studyReport = (overrides: Partial<StudyReport> = {}): StudyReport => ({
-  from: range.from, to: range.to, bucket: 'QUARTER', total: 0, buckets: [], ...overrides,
+  from: range.from,
+  to: range.to,
+  bucket: 'QUARTER',
+  total: 0,
+  buckets: [],
+  ...overrides,
 })
 
 const renderSection = () => render(

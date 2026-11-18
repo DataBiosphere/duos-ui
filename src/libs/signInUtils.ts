@@ -9,8 +9,7 @@ export const handleSignIn = (redirectPath: string, navigate: NavigateFunction) =
   // This will trigger the existing authentication flow with all proper session handling
   const signInButtons = document.querySelectorAll('button')
   const signInButton = Array.from(signInButtons).find(button =>
-    button.textContent?.trim() === 'Sign In',
-  )
+    button.textContent?.trim() === 'Sign In')
   if (signInButton) {
     signInButton.click()
   }

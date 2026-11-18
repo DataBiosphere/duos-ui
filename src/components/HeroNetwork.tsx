@@ -80,8 +80,7 @@ const makeLayer = (count: number, spread: [number, number], size: [number, numbe
       { x: ((i + between(0.1, 0.9)) / count) * WIDTH, y: between(40, HEIGHT - 40) },
       between(...spread),
       Math.round(between(...size)),
-    ),
-  )
+    ))
 
 const backLayer = makeLayer(6, [110, 170], [4, 6])
 const frontLayer = makeLayer(11, [50, 110], [3, 6])

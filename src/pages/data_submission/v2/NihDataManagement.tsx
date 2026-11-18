@@ -1,8 +1,10 @@
 import React from 'react'
 import {
   AlternativeDataSharingPlan,
-  AlternativeDataSharingPlanDataReleased, AlternativeDataSharingPlanDataSubmitted,
-  AlternativeDataSharingPlanExplanation, AlternativeDataSharingPlanReasons,
+  AlternativeDataSharingPlanDataReleased,
+  AlternativeDataSharingPlanDataSubmitted,
+  AlternativeDataSharingPlanExplanation,
+  AlternativeDataSharingPlanReasons,
   NihAnvilUse,
   Study,
 } from 'src/pages/data_submission/v2/v2-models'
@@ -10,7 +12,8 @@ import {
   generateStudyPropertyFormTextField,
   generateStudyPropertyYesNoField,
   getStudyPropertyValueByKey,
-  removeStudyPropertiesByKeys, setStudyPropertyByKey,
+  removeStudyPropertiesByKeys,
+  setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import { set, unset } from 'src/utils/NodashUtil'
@@ -65,10 +68,7 @@ export const NihDataManagement = (props: NihDataManagementProps) => {
                 if (!value) {
                   setStudy((val) => {
                     const newVal = structuredClone(val)
-                    removeStudyPropertiesByKeys(newVal, new Set([AlternativeDataSharingPlanReasons.key,
-                      AlternativeDataSharingPlanExplanation.key,
-                      AlternativeDataSharingPlanDataSubmitted.key,
-                      AlternativeDataSharingPlanDataReleased.key]))
+                    removeStudyPropertiesByKeys(newVal, new Set([AlternativeDataSharingPlanReasons.key, AlternativeDataSharingPlanExplanation.key, AlternativeDataSharingPlanDataSubmitted.key, AlternativeDataSharingPlanDataReleased.key]))
                     unset(study, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
                     return newVal
                   })

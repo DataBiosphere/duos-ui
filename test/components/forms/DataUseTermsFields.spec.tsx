@@ -61,7 +61,14 @@ describe('dataUseTermsErrors when the terms are optional', () => {
 describe('dataUseFromTerms and termsFromDataUse', () => {
   it('writes only the terms that are set', () => {
     expect(dataUseFromTerms({
-      accessManagement: 'controlled', generalResearchUse: false, hmb: true, nmds: true, npu: true, gso: false, gs: ' ', mor: true,
+      accessManagement: 'controlled',
+      generalResearchUse: false,
+      hmb: true,
+      nmds: true,
+      npu: true,
+      gso: false,
+      gs: ' ',
+      mor: true,
     })).toEqual({ hmbResearch: true, methodsResearch: false, nonProfitUse: true })
   })
 
@@ -71,8 +78,12 @@ describe('dataUseFromTerms and termsFromDataUse', () => {
 
   it('reads back what it writes', () => {
     const dataUse = {
-      diseaseRestrictions: ['DOID_1'], methodsResearch: false, geographicalRestrictions: 'USA',
-      publicationMoratorium: '2027-01-01', secondaryOther: 'No resale', publicationResults: true,
+      diseaseRestrictions: ['DOID_1'],
+      methodsResearch: false,
+      geographicalRestrictions: 'USA',
+      publicationMoratorium: '2027-01-01',
+      secondaryOther: 'No resale',
+      publicationResults: true,
     }
     expect(dataUseFromTerms(termsFromDataUse(dataUse))).toEqual(dataUse)
   })

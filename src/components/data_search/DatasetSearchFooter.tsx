@@ -14,7 +14,8 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
   const { selectedDatasets, datasets, onClick } = props
   const selectedStudies = uniq(
     filter(datasets, dataset => selectedDatasets.includes(dataset.datasetId))
-      .map(dataset => dataset.study.studyId))
+      .map(dataset => dataset.study.studyId),
+  )
   const datasetText = selectedDatasets.length > 1 ? 'datasets' : 'dataset'
   const studyText = selectedStudies.length > 1 ? 'studies' : 'study'
   // The shared predicate rather than a local copy, so this footer cannot drift from the other

@@ -89,7 +89,13 @@ async function runInThread(options: LoadOptions, firstConnection: number): Promi
   const send = requestFn(origin)
   const timeoutMs = options.timeoutSeconds * 1000
   const totals: ThreadTotals = {
-    responses: 0, bytes: 0, non2xx: 0, errors: 0, timeouts: 0, elapsedMs: 0, latencyUs: histogram(),
+    responses: 0,
+    bytes: 0,
+    non2xx: 0,
+    errors: 0,
+    timeouts: 0,
+    elapsedMs: 0,
+    latencyUs: histogram(),
   }
   // Keep-alive sockets carry one request at a time, so bytesRead deltas are per response, headers included.
   const bytesSeen = new WeakMap<Socket, number>()

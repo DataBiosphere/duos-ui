@@ -93,8 +93,7 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
     // Check if name already exists (excluding current institution in edit mode)
     const existingInstitution = institutionList.find(inst =>
       inst.name.toLowerCase() === normalizedName.toLowerCase()
-      && inst.id !== institution?.id,
-    )
+      && inst.id !== institution?.id)
 
     if (existingInstitution) {
       return 'An institution with this name already exists'
@@ -153,7 +152,8 @@ export const InstitutionDetails = (props: InstitutionDetailsProps) => {
       }
       else {
         Notifications.showError({
-          text: `An error occurred when trying to create the institution: ${consentError ? consentError.message : extractError(error)}` })
+          text: `An error occurred when trying to create the institution: ${consentError ? consentError.message : extractError(error)}`,
+        })
       }
     }
     finally {

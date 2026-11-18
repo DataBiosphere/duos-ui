@@ -42,8 +42,7 @@ export const processVotesForBucket = (darElections: Election[] = []): ProcessedV
       votes[vote.voteId] = vote
     })
     const dateSortedVotes = [...updatedVotes].sort((a, b) =>
-      (a.updateDate ?? '') < (b.updateDate ?? '') ? -1 : 1,
-    )
+      (a.updateDate ?? '') < (b.updateDate ?? '') ? -1 : 1)
     dateSortedVotes.forEach((vote) => {
       const lowerCaseType = vote.type?.toLowerCase() ?? ''
       switch (lowerCaseType) {
@@ -349,7 +348,8 @@ export const styles = {
     margin: '0.5% 0',
   },
   columnStyle: {
-    ...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between',
+    ...Styles.TABLE.HEADER_ROW,
+    justifyContent: 'space-between',
     color: '#7B7B7B',
     fontFamily: 'Montserrat',
     fontSize: '1.2rem',

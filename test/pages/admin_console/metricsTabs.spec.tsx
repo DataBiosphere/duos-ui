@@ -40,7 +40,13 @@ describe('metricsTabs', () => {
   it('renders the Elections & Votes section for the range on the elections tab', async () => {
     const range = { from: '2026-01-01', to: '2026-03-31', bucket: 'month' as const }
     vi.mocked(DarMetrics.getElections).mockResolvedValue({
-      from: range.from, to: range.to, bucket: 'MONTH', electionsOpened: 0, votesCast: 0, elections: [], votes: [],
+      from: range.from,
+      to: range.to,
+      bucket: 'MONTH',
+      electionsOpened: 0,
+      votesCast: 0,
+      elections: [],
+      votes: [],
     })
     const tab = METRICS_TABS.find(({ key }) => key === 'elections')
 

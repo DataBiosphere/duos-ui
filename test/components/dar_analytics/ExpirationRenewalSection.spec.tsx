@@ -8,7 +8,11 @@ import { ExpirationRenewalSection } from 'src/components/dar_analytics/Expiratio
 import { DarAnalyticsRange } from 'src/components/dar_analytics/darAnalyticsRange'
 import { DarMetricsTargetContext } from 'src/components/dar_analytics/useDarMetricsReport'
 import {
-  DarExpirationReport, DarMetricsTarget, DarRenewalReport, ExpirationBucket, RenewalBucket,
+  DarExpirationReport,
+  DarMetricsTarget,
+  DarRenewalReport,
+  ExpirationBucket,
+  RenewalBucket,
 } from 'src/types/darMetrics'
 
 vi.mock('src/libs/ajax/DarMetrics', () => ({
@@ -56,7 +60,8 @@ describe('ExpirationRenewalSection', () => {
     expect(cellsFor('2026 Q1')).toEqual(['2026 Q1', '2', '1', '0'])
     expect(cellsFor('2026 Q2')).toEqual(['2026 Q2', '3', '0', '4'])
     expect(document.querySelector('[aria-label="Access ended and datasets renewed per period"]')).toHaveAccessibleDescription(
-      '2026 Q1: Expired 2, Closed out 1, Datasets renewed 0; 2026 Q2: Expired 3, Closed out 0, Datasets renewed 4')
+      '2026 Q1: Expired 2, Closed out 1, Datasets renewed 0; 2026 Q2: Expired 3, Closed out 0, Datasets renewed 4',
+    )
     expect(screen.getByRole('group', { name: 'Expired' })).toHaveTextContent('5')
     expect(screen.getByRole('group', { name: 'Closed out' })).toHaveTextContent('1')
     expect(screen.getByRole('group', { name: 'Datasets renewed' })).toHaveTextContent('4')
@@ -68,7 +73,8 @@ describe('ExpirationRenewalSection', () => {
     const week: DarAnalyticsRange = { from: '2026-01-01', to: '2026-01-14', bucket: 'week' }
     const weekly = { from: week.from, to: week.to, bucket: 'WEEK' as const }
     vi.mocked(DarMetrics.getExpirations).mockResolvedValue({
-      ...expirations([{ bucketStart: Date.parse('2026-01-05T00:00:00Z'), reason: 'EXPIRED', count: 2 }]), ...weekly,
+      ...expirations([{ bucketStart: Date.parse('2026-01-05T00:00:00Z'), reason: 'EXPIRED', count: 2 }]),
+      ...weekly,
     })
     vi.mocked(DarMetrics.getRenewals).mockResolvedValue({ ...renewals([]), ...weekly })
 
@@ -84,7 +90,8 @@ describe('ExpirationRenewalSection', () => {
     const year: DarAnalyticsRange = { from: '2026-01-01', to: '2026-12-31', bucket: 'month' }
     const monthly = { from: year.from, to: year.to, bucket: 'MONTH' as const }
     vi.mocked(DarMetrics.getExpirations).mockResolvedValue({
-      ...expirations([{ bucketStart: Date.parse('2026-12-01T00:00:00Z'), reason: 'CLOSED_OUT', count: 1 }]), ...monthly,
+      ...expirations([{ bucketStart: Date.parse('2026-12-01T00:00:00Z'), reason: 'CLOSED_OUT', count: 1 }]),
+      ...monthly,
     })
     vi.mocked(DarMetrics.getRenewals).mockResolvedValue({ ...renewals([]), ...monthly })
 

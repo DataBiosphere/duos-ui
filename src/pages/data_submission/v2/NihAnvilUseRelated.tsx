@@ -45,29 +45,29 @@ export interface NihAnvilUseVisibleOptions {
 }
 
 const cleanDownstreamProperties = (newVal: Study) => {
-  removeStudyPropertiesByKeys(newVal,
-    new Set(
-      [
-        PiInstitution.key,
-        NihGrantContractNumber.key,
-        NihICsSupportingStudy.key,
-        NihProgramOfficerName.key,
-        NihInstitutionCenterSubmission.key,
-        NihGenomicProgramAdministratorName.key,
-        MultiCenterStudy.key,
-        CollaboratingSites.key,
-        ControlledAccessRequiredForGenomicSummaryResultsGSR.key,
-        ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key,
-        AlternativeDataSharingPlan.key,
-        AlternativeDataSharingPlanReasons.key,
-        AlternativeDataSharingPlanExplanation.key,
-        AlternativeDataSharingPlanDataSubmitted.key,
-        AlternativeDataSharingPlanDataReleased.key,
-        DbGaPPhsID.key,
-        DbGaPStudyRegistrationName.key,
-        EmbargoReleaseDate.key,
-        SequencingCenter.key,
-      ]))
+  removeStudyPropertiesByKeys(newVal, new Set(
+    [
+      PiInstitution.key,
+      NihGrantContractNumber.key,
+      NihICsSupportingStudy.key,
+      NihProgramOfficerName.key,
+      NihInstitutionCenterSubmission.key,
+      NihGenomicProgramAdministratorName.key,
+      MultiCenterStudy.key,
+      CollaboratingSites.key,
+      ControlledAccessRequiredForGenomicSummaryResultsGSR.key,
+      ControlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation.key,
+      AlternativeDataSharingPlan.key,
+      AlternativeDataSharingPlanReasons.key,
+      AlternativeDataSharingPlanExplanation.key,
+      AlternativeDataSharingPlanDataSubmitted.key,
+      AlternativeDataSharingPlanDataReleased.key,
+      DbGaPPhsID.key,
+      DbGaPStudyRegistrationName.key,
+      EmbargoReleaseDate.key,
+      SequencingCenter.key,
+    ],
+  ))
   unset(newVal, ALTERNATIVE_DATA_SHARING_PLAN_FILE)
 }
 

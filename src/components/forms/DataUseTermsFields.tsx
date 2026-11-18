@@ -60,9 +60,20 @@ const DATA_USE_CLEARED: DataUseTerms = {
 }
 
 const EDITOR_KEYS: (keyof DataUse)[] = [
-  'generalUse', 'hmbResearch', 'diseaseRestrictions', 'populationOriginsAncestry', 'other', 'methodsResearch',
-  'geneticStudiesOnly', 'publicationResults', 'collaboratorRequired', 'ethicsApprovalRequired',
-  'geographicalRestrictions', 'publicationMoratorium', 'nonProfitUse', 'secondaryOther',
+  'generalUse',
+  'hmbResearch',
+  'diseaseRestrictions',
+  'populationOriginsAncestry',
+  'other',
+  'methodsResearch',
+  'geneticStudiesOnly',
+  'publicationResults',
+  'collaboratorRequired',
+  'ethicsApprovalRequired',
+  'geographicalRestrictions',
+  'publicationMoratorium',
+  'nonProfitUse',
+  'secondaryOther',
 ]
 
 const PRIMARY_KEYS = new Set<keyof DataUse>(['generalUse', 'hmbResearch', 'diseaseRestrictions', 'populationOriginsAncestry', 'other'])

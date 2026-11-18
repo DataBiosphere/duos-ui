@@ -44,10 +44,10 @@ export type ParsedDACbotRule = DACbotRule & {
  */
 const DEFAULT_MUTUALLY_EXCLUSIVE_RULES: { [key: string]: string } = {}
 
-type RuleGroupLabel
-  = | 'Automatically approve DARs when...'
-    | 'Send DARs to the entire DAC on submission by researchers?'
-    | 'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?'
+type RuleGroupLabel =
+  | 'Automatically approve DARs when...'
+  | 'Send DARs to the entire DAC on submission by researchers?'
+  | 'Require researchers\' Signing Officials to sign-off on DARs and DAAs, prior to the DAC recieving the DAR?'
 
 const AUTO_APPROVE_GROUP: RuleGroupLabel = 'Automatically approve DARs when...'
 
@@ -149,7 +149,8 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
             vertical: 'bottom',
             horizontal: 'right',
           },
-        })
+        },
+      )
     }
     finally {
       setIsLoading(false)
@@ -180,8 +181,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
           return (r: DACbotRule) => updatedRuleIds.includes(r.id) ? rulesMap.get(r.id) || r : r
         }
         setDACbotRules(prevRules =>
-          prevRules.map(createUpdatedRulesMap(allRules, updatedRuleIds)),
-        )
+          prevRules.map(createUpdatedRulesMap(allRules, updatedRuleIds)))
       }
       catch {
         Notifications.showError({ text: 'Failed to refresh DAC rules.' })

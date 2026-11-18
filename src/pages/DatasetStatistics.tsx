@@ -26,7 +26,8 @@ import { validateHttpUrl } from 'src/utils/UrlUtils'
 import { intersection } from 'src/utils/NodashUtil'
 import InstantApprovalBadge from 'src/components/data_library/InstantApprovalBadge'
 import {
-  ACTIVE_RESEARCHER_STATUS_REQUIRED, hasActiveResearcherStatus,
+  ACTIVE_RESEARCHER_STATUS_REQUIRED,
+  hasActiveResearcherStatus,
 } from 'src/hooks/useApplyForAccessEligibility'
 
 enum AccessManagement {

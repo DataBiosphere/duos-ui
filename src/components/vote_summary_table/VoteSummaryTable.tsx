@@ -22,7 +22,8 @@ const defaultStyles = {
     whiteSpace: 'pre-line' as const,
   },
   columnStyle: {
-    ...Styles.TABLE.HEADER_ROW, fontFamily: 'Montserrat',
+    ...Styles.TABLE.HEADER_ROW,
+    fontFamily: 'Montserrat',
     fontSize: '1.2rem',
     color: '#333F52',
     justifyContent: 'space-between',

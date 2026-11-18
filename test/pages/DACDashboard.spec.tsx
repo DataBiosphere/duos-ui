@@ -70,10 +70,12 @@ describe('DACDashboard', () => {
 
     expect(screen.getAllByText('–')).toHaveLength(23)
     expect(screen.getByRole('link', { name: /Data Access Requests/ })).toHaveAttribute(
-      'href', '/dac_console_dar_requests',
+      'href',
+      '/dac_console_dar_requests',
     )
     expect(screen.getByRole('link', { name: /Manage DACs/ })).toHaveAttribute(
-      'href', '/dac_console/manage_dac',
+      'href',
+      '/dac_console/manage_dac',
     )
     expect(screen.getByRole('link', { name: /My DAC's Datasets/ })).toHaveAttribute('href', '/dac_datasets')
 
@@ -91,7 +93,8 @@ describe('DACDashboard', () => {
     expect(await screen.findByLabelText('Median Days: 11.2')).toBeInTheDocument()
     expect(screen.getByLabelText('Renewals: 2')).toBeInTheDocument()
     await waitFor(() => expect(screen.getByRole('link', { name: /^Decisions/ })).toHaveAttribute(
-      'href', '/dac_console/metrics?tab=decisions&from=2026-07-04&to=2026-10-01&bucket=week',
+      'href',
+      '/dac_console/metrics?tab=decisions&from=2026-07-04&to=2026-10-01&bucket=week',
     ))
     expect(screen.getByRole('link', { name: /^Expiration & Renewal/ })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /^SO Approvals/ })).not.toBeInTheDocument()

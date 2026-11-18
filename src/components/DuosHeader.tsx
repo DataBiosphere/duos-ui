@@ -110,8 +110,7 @@ export const headerTabsConfig: Tab[] = [
       // Data Library has a tab of its own. It stays registered so its URL still resolves here
       // rather than to that tab.
       ...SO_CONSOLE_SECTIONS.map(section =>
-        section.link === MY_INSTITUTION_LIBRARY_ROUTE ? { ...section, isRendered: () => false } : section,
-      ),
+        section.link === MY_INSTITUTION_LIBRARY_ROUTE ? { ...section, isRendered: () => false } : section),
     ],
     isRendered: user => user.isSigningOfficial,
     isConsole: true,

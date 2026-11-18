@@ -81,8 +81,7 @@ describe('DataAccessAgreements Component Tests', () => {
     }] as never)
     mountComponent({ datasets: [{ dataSetId: 1, datasetId: 1, dacId: 2 }] })
     await waitFor(() =>
-      expect(document.body).toHaveTextContent('By submitting this data access request you agree to the data access agreements below'),
-    )
+      expect(document.body).toHaveTextContent('By submitting this data access request you agree to the data access agreements below'))
   })
 
   it('shows the Signing Official approval message when the researcher is missing a required DAA', async () => {
@@ -96,8 +95,7 @@ describe('DataAccessAgreements Component Tests', () => {
     })
     await waitFor(() => expect(container.querySelector('.dar-step-card')).toBeInTheDocument())
     await waitFor(() =>
-      expect(document.body).toHaveTextContent('Your Institutional Signing Official must approve you'),
-    )
+      expect(document.body).toHaveTextContent('Your Institutional Signing Official must approve you'))
   })
 
   it('hides the Signing Official approval message when the researcher is already approved for all required DAAs', async () => {

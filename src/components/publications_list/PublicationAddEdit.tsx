@@ -170,9 +170,9 @@ export default function PublicationAddEdit(props: PublicationAddEditProps): Reac
   const [newPublication, setNewPublication] = useState<Publication>({
     ...initialPublication,
     authors:
-        Array.isArray(initialPublication.authors) && initialPublication.authors.length > 0
-          ? initialPublication.authors
-          : [{ name: '', orcId: '' }],
+      Array.isArray(initialPublication.authors) && initialPublication.authors.length > 0
+        ? initialPublication.authors
+        : [{ name: '', orcId: '' }],
   })
 
   const [validation, setValidation] = useState<Validation>({})

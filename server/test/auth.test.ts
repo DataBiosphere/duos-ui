@@ -482,7 +482,9 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       const { cookie } = await authenticate()
 
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        status: 200, ok: true, json: async () => ({ email: 'user@example.com' }),
+        status: 200,
+        ok: true,
+        json: async () => ({ email: 'user@example.com' }),
       }))
       const me = await app.inject({ method: 'GET', url: '/auth/me', headers: { cookie } })
       vi.unstubAllGlobals()
@@ -670,7 +672,9 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       const { cookie } = await authenticate()
 
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        status: 200, ok: true, json: async () => ({ email: 'user@example.com' }),
+        status: 200,
+        ok: true,
+        json: async () => ({ email: 'user@example.com' }),
       }))
       const me = await app.inject({ method: 'GET', url: '/auth/me', headers: { cookie } })
       vi.unstubAllGlobals()
@@ -711,7 +715,9 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
       const { cookie } = await authenticate()
 
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        status: 200, ok: true, json: async () => ({ email: 'user@example.com', displayName: 'Test User' }),
+        status: 200,
+        ok: true,
+        json: async () => ({ email: 'user@example.com', displayName: 'Test User' }),
       }))
       const res = await app.inject({ method: 'GET', url: '/auth/me', headers: { cookie } })
       vi.unstubAllGlobals()
@@ -905,7 +911,9 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     it('serves a legitimate same-origin fetch', async () => {
       const cookie = await authenticatedCookie()
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        status: 200, ok: true, json: async () => ({ email: 'user@example.com' }),
+        status: 200,
+        ok: true,
+        json: async () => ({ email: 'user@example.com' }),
       }))
 
       const res = await app.inject({
@@ -922,7 +930,9 @@ describe('BFF OAuth flow (integration, openid-client mocked at the function boun
     it('serves a request without Fetch Metadata headers (older browsers) — documented allow', async () => {
       const cookie = await authenticatedCookie()
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        status: 200, ok: true, json: async () => ({ email: 'user@example.com' }),
+        status: 200,
+        ok: true,
+        json: async () => ({ email: 'user@example.com' }),
       }))
 
       const res = await app.inject({ method: 'GET', url: '/auth/me', headers: { cookie } })

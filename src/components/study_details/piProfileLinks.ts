@@ -63,7 +63,10 @@ const isServedBy = (href: string, domain: string): boolean => {
  * page an unauthenticated visitor can read and the label is what they would be trusting.
  */
 const profileLink = (
-  href: string | undefined, domain: string, label: string, kind: PiProfileLinkKind,
+  href: string | undefined,
+  domain: string,
+  label: string,
+  kind: PiProfileLinkKind,
 ): PiProfileLink | undefined => {
   if (!href) {
     return undefined

@@ -168,8 +168,12 @@ describe('LibraryDataGrid', () => {
       // the button is disabled for want of Active Researcher Status and this proves nothing.
       vi.spyOn(Storage, 'getCurrentUser').mockReturnValue({ libraryCard: {} } as never)
       const pending = makeDatasetTerm({
-        datasetId: 203, datasetName: 'Pending Dataset', datasetIdentifier: 'DUOS-000203',
-        participantCount: 10, accessManagement: 'controlled', dacApproval: false,
+        datasetId: 203,
+        datasetName: 'Pending Dataset',
+        datasetIdentifier: 'DUOS-000203',
+        participantCount: 10,
+        accessManagement: 'controlled',
+        dacApproval: false,
       })
       mountGrid(
         <LibraryDataGrid assetType={AssetType.DATASETS} data={[pending]} total={1} {...baseProps} />,

@@ -111,8 +111,7 @@ describe('CollectionSubmitVoteBox - Tests', () => {
 
     await user.click(container.querySelector('[data-cy="yes-collection-vote-button"]')!)
     await waitFor(() =>
-      expect(container.querySelector('[data-cy="yes-collection-vote-button"]')).toHaveStyle({ backgroundColor: votingColors.yes }),
-    )
+      expect(container.querySelector('[data-cy="yes-collection-vote-button"]')).toHaveStyle({ backgroundColor: votingColors.yes }))
 
     await user.type(textarea, '{Backspace}{Backspace}')
     await act(async () => fireEvent.blur(textarea))

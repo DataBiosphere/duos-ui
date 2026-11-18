@@ -60,7 +60,11 @@ export const Email = {
    * @param signal Cancels the remaining page reads, as a newer search does
    */
   getSendsByDateRange: async (
-    from: string, to: string, search = '', searchTypes: number[] = [], signal?: AbortSignal,
+    from: string,
+    to: string,
+    search = '',
+    searchTypes: number[] = [],
+    signal?: AbortSignal,
   ): Promise<EmailLog> => {
     const url = `${await Config.getApiUrl()}/api/mail/sends`
     const start = dayjs(from).startOf('day')

@@ -31,8 +31,7 @@ vi.mock('src/components/library_card_table/LibraryCardTable', () => ({
       'div',
       { 'data-testid': 'library-card-table' },
       (libraryCards ?? []).map(c =>
-        React.createElement('span', { key: c.id }, c.userEmail),
-      ),
+        React.createElement('span', { key: c.id }, c.userEmail)),
     ),
 }))
 

@@ -459,10 +459,19 @@ describe('darFormUtils - DAR Form Validation', () => {
 
     it('should validate gender when oneGender is true', () => {
       const formData = {
-        oneGender: true, gender: 'X',
-        aiLlmUse: false, controls: false, population: false, forProfit: false,
-        pediatric: false, vulnerablePopulation: false, illegalBehavior: false,
-        sexualDiseases: false, psychiatricTraits: false, notHealth: false, stigmatizedDiseases: false,
+        oneGender: true,
+        gender: 'X',
+        aiLlmUse: false,
+        controls: false,
+        population: false,
+        forProfit: false,
+        pediatric: false,
+        vulnerablePopulation: false,
+        illegalBehavior: false,
+        sexualDiseases: false,
+        psychiatricTraits: false,
+        notHealth: false,
+        stigmatizedDiseases: false,
       }
 
       const result = validateDARFormData({
@@ -482,10 +491,19 @@ describe('darFormUtils - DAR Form Validation', () => {
 
     it('should not error on valid gender value', () => {
       const formData = {
-        oneGender: true, gender: 'M',
-        aiLlmUse: false, controls: false, population: false, forProfit: false,
-        pediatric: false, vulnerablePopulation: false, illegalBehavior: false,
-        sexualDiseases: false, psychiatricTraits: false, notHealth: false, stigmatizedDiseases: false,
+        oneGender: true,
+        gender: 'M',
+        aiLlmUse: false,
+        controls: false,
+        population: false,
+        forProfit: false,
+        pediatric: false,
+        vulnerablePopulation: false,
+        illegalBehavior: false,
+        sexualDiseases: false,
+        psychiatricTraits: false,
+        notHealth: false,
+        stigmatizedDiseases: false,
       }
 
       const result = validateDARFormData({
@@ -543,8 +561,12 @@ describe('darFormUtils - DAR Form Validation', () => {
   describe('Cloud use validation', () => {
     it('should require cloud provider when cloudUse is true and anvilUse is false', () => {
       const formData = {
-        anvilUse: false, cloudUse: true, localUse: false,
-        cloudProvider: '', cloudProviderType: '', cloudProviderDescription: '',
+        anvilUse: false,
+        cloudUse: true,
+        localUse: false,
+        cloudProvider: '',
+        cloudProviderType: '',
+        cloudProviderDescription: '',
       }
 
       const result = validateDARFormData({

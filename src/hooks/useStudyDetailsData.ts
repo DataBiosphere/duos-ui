@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import {
-  chairOrMemberDacIds, RequestActivityAccess, requestActivityAccess,
+  chairOrMemberDacIds,
+  RequestActivityAccess,
+  requestActivityAccess,
 } from 'src/components/dar_analytics/requestActivityAccess'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import { DataSet } from 'src/libs/ajax/DataSet'

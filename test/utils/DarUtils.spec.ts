@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import {
   convertFormStateToDAR,
-  ElectionStatus, ElectionType,
+  ElectionStatus,
+  ElectionType,
   getApprovedElectionDatasetIds,
   getCloseoutInfo,
-  getDataManagementIncidents, getIntellectualPropertyList,
+  getDataManagementIncidents,
+  getIntellectualPropertyList,
   getPresentationList,
   getPublicationList,
   userHasOpenDataAccessElection,
@@ -22,15 +24,21 @@ describe('DarUtils', () => {
     it('should return only dataset IDs from DataAccess elections with approved votes', () => {
       const elections: Election[] = [
         {
-          electionId: 1, electionType: 'DataAccess', datasetId: 101,
+          electionId: 1,
+          electionType: 'DataAccess',
+          datasetId: 101,
           votes: { 1: { voteId: 1, type: VOTE_TYPES.FINAL, vote: true, userId: 10, electionId: 1 } as Vote } as object,
         } as Election,
         {
-          electionId: 2, electionType: 'DataAccess', datasetId: 102,
+          electionId: 2,
+          electionType: 'DataAccess',
+          datasetId: 102,
           votes: { 2: { voteId: 2, type: VOTE_TYPES.RADAR_APPROVE, userId: 11, electionId: 2 } as Vote } as object,
         } as Election,
         {
-          electionId: 3, electionType: 'DataAccess', datasetId: 103,
+          electionId: 3,
+          electionType: 'DataAccess',
+          datasetId: 103,
           votes: { 3: { voteId: 3, type: VOTE_TYPES.FINAL, vote: false, userId: 12, electionId: 3 } as Vote } as object,
         } as Election,
       ]
@@ -40,11 +48,15 @@ describe('DarUtils', () => {
     it('should ignore non-DataAccess elections', () => {
       const elections: Election[] = [
         {
-          electionId: 1, electionType: 'DataAccess', datasetId: 101,
+          electionId: 1,
+          electionType: 'DataAccess',
+          datasetId: 101,
           votes: { 1: { voteId: 1, type: VOTE_TYPES.FINAL, vote: true, userId: 10, electionId: 1 } as Vote } as object,
         } as Election,
         {
-          electionId: 2, electionType: 'RP', datasetId: 102,
+          electionId: 2,
+          electionType: 'RP',
+          datasetId: 102,
           votes: { 2: { voteId: 2, type: VOTE_TYPES.FINAL, vote: true, userId: 11, electionId: 2 } as Vote } as object,
         } as Election,
       ]
@@ -54,14 +66,18 @@ describe('DarUtils', () => {
     it('should handle multiple votes per election', () => {
       const elections: Election[] = [
         {
-          electionId: 1, electionType: 'DataAccess', datasetId: 101,
+          electionId: 1,
+          electionType: 'DataAccess',
+          datasetId: 101,
           votes: {
             1: { voteId: 1, type: VOTE_TYPES.RADAR_APPROVE, vote: true, userId: 10, electionId: 1 } as Vote,
             2: { voteId: 2, type: 'Chairperson', vote: false, userId: 11, electionId: 1 } as Vote,
           } as object,
         } as Election,
         {
-          electionId: 2, electionType: 'DataAccess', datasetId: 102,
+          electionId: 2,
+          electionType: 'DataAccess',
+          datasetId: 102,
           votes: {
             3: { voteId: 3, type: 'DAC', vote: true, userId: 12, electionId: 2 } as Vote,
             4: { voteId: 4, type: VOTE_TYPES.FINAL, vote: false, userId: 13, electionId: 2 } as Vote,
@@ -74,15 +90,21 @@ describe('DarUtils', () => {
     it('should only consider VOTE_TYPES.FINAL vote types', () => {
       const elections: Election[] = [
         {
-          electionId: 1, electionType: 'DataAccess', datasetId: 101,
+          electionId: 1,
+          electionType: 'DataAccess',
+          datasetId: 101,
           votes: { 1: { voteId: 1, type: 'DAC', vote: true, userId: 10, electionId: 1 } as Vote } as object,
         } as Election,
         {
-          electionId: 2, electionType: 'DataAccess', datasetId: 102,
+          electionId: 2,
+          electionType: 'DataAccess',
+          datasetId: 102,
           votes: { 2: { voteId: 2, type: 'Chairperson', vote: true, userId: 11, electionId: 2 } as Vote } as object,
         } as Election,
         {
-          electionId: 3, electionType: 'DataAccess', datasetId: 103,
+          electionId: 3,
+          electionType: 'DataAccess',
+          datasetId: 103,
           votes: { 3: { voteId: 3, type: VOTE_TYPES.FINAL, vote: true, userId: 12, electionId: 3 } as Vote } as object,
         } as Election,
       ]
@@ -92,11 +114,15 @@ describe('DarUtils', () => {
     it('should handle elections with no votes', () => {
       const elections: Election[] = [
         {
-          electionId: 1, electionType: 'DataAccess', datasetId: 101,
+          electionId: 1,
+          electionType: 'DataAccess',
+          datasetId: 101,
           votes: {} as object,
         } as Election,
         {
-          electionId: 2, electionType: 'DataAccess', datasetId: 102,
+          electionId: 2,
+          electionType: 'DataAccess',
+          datasetId: 102,
           votes: { 1: { voteId: 1, type: VOTE_TYPES.FINAL, vote: true, userId: 10, electionId: 2 } as Vote } as object,
         } as Election,
       ]
@@ -106,11 +132,15 @@ describe('DarUtils', () => {
     it('should return unique dataset IDs even if duplicated in multiple elections', () => {
       const elections: Election[] = [
         {
-          electionId: 1, electionType: 'DataAccess', datasetId: 101,
+          electionId: 1,
+          electionType: 'DataAccess',
+          datasetId: 101,
           votes: { 1: { voteId: 1, type: VOTE_TYPES.FINAL, vote: true, userId: 10, electionId: 1 } as Vote } as object,
         } as Election,
         {
-          electionId: 2, electionType: 'DataAccess', datasetId: 101,
+          electionId: 2,
+          electionType: 'DataAccess',
+          datasetId: 101,
           votes: { 2: { voteId: 2, type: VOTE_TYPES.RADAR_APPROVE, vote: true, userId: 11, electionId: 2 } as Vote } as object,
         } as Election,
       ]
@@ -124,43 +154,76 @@ describe('DarUtils', () => {
         progressReportSummary: 'Test summary',
         intellectualPropertiesYesNo: true,
         intellectualProperties: [{
-          ipId: 'ip-1', studyId: 'study-1', type: 'Patent', title: 'IP 1',
-          assignee: 'Inventor A', patentNumber: 'App123', filingDate: '2023-01-01',
-          status: 'Filed', url: 'https://example.com/ip', contact: 'contact@example.com', tags: [],
+          ipId: 'ip-1',
+          studyId: 'study-1',
+          type: 'Patent',
+          title: 'IP 1',
+          assignee: 'Inventor A',
+          patentNumber: 'App123',
+          filingDate: '2023-01-01',
+          status: 'Filed',
+          url: 'https://example.com/ip',
+          contact: 'contact@example.com',
+          tags: [],
         }],
         datasetIds: [1, 2],
         publicationsYesNo: true,
         publications: [{
-          title: 'Publication 1', pubmedId: '12345', date: '2023-01-01',
-          authors: ['Author A'], bibliographicCitation: 'Citation 1',
-          datasetCitation: 'Dataset 1', citation: true,
+          title: 'Publication 1',
+          pubmedId: '12345',
+          date: '2023-01-01',
+          authors: ['Author A'],
+          bibliographicCitation: 'Citation 1',
+          datasetCitation: 'Dataset 1',
+          citation: true,
         }],
         presentationsYesNo: true,
         presentations: [{
-          title: 'Presentation 1', pubmedId: '67890', date: '2023-02-01',
-          authors: ['Author B'], bibliographicCitation: 'Citation 2',
-          datasetCitation: 'Dataset 2', citation: true,
+          title: 'Presentation 1',
+          pubmedId: '67890',
+          date: '2023-02-01',
+          authors: ['Author B'],
+          bibliographicCitation: 'Citation 2',
+          datasetCitation: 'Dataset 2',
+          citation: true,
         }],
         labCollaborators: [{
-          approverStatus: true, countryOfOperation: 'USA', email: 'email',
-          eraCommonsId: 'test_era', name: 'Collaborator A',
-          title: 'Collaborator Title', uuid: 'collab-uuid',
+          approverStatus: true,
+          countryOfOperation: 'USA',
+          email: 'email',
+          eraCommonsId: 'test_era',
+          name: 'Collaborator A',
+          title: 'Collaborator Title',
+          uuid: 'collab-uuid',
         } as Collaborator],
         internalCollaborators: [{
-          approverStatus: true, countryOfOperation: 'USA', email: 'email',
-          eraCommonsId: 'test_era', name: 'Internal Collaborator A',
-          title: 'Internal Collaborator Title', uuid: 'collab-uuid-internal',
+          approverStatus: true,
+          countryOfOperation: 'USA',
+          email: 'email',
+          eraCommonsId: 'test_era',
+          name: 'Internal Collaborator A',
+          title: 'Internal Collaborator Title',
+          uuid: 'collab-uuid-internal',
         } as Collaborator],
         externalCollaborators: [{
-          approverStatus: true, countryOfOperation: 'USA', email: 'email',
-          eraCommonsId: 'test_era', name: 'External Collaborator A',
-          title: 'External Collaborator Title', uuid: 'collab-uuid-external',
+          approverStatus: true,
+          countryOfOperation: 'USA',
+          email: 'email',
+          eraCommonsId: 'test_era',
+          name: 'External Collaborator A',
+          title: 'External Collaborator Title',
+          uuid: 'collab-uuid-external',
         } as Collaborator],
-        dmiYesNo: true, closeoutYesNo: true,
-        dsAcknowledgement: true, gsoAcknowledgement: true, pubAcknowledgement: true,
-        irbDocumentLocation: 'location', irbDocumentName: 'IRB Document',
+        dmiYesNo: true,
+        closeoutYesNo: true,
+        dsAcknowledgement: true,
+        gsoAcknowledgement: true,
+        pubAcknowledgement: true,
+        irbDocumentLocation: 'location',
+        irbDocumentName: 'IRB Document',
         irbProtocolExpiration: '2024-01-01',
-        collaborationLetterLocation: 'collab_location', collaborationLetterName: 'Collaboration Letter',
+        collaborationLetterLocation: 'collab_location',
+        collaborationLetterName: 'Collaboration Letter',
         daaIds: [101, '102', 101, 'bad-id'] as unknown as number[],
       } as unknown as FormState
 
@@ -222,27 +285,37 @@ describe('DarUtils', () => {
     const baseVote = { voteId: 1, userId: 42, electionStatus: ElectionStatus.OPEN } as Vote
 
     const openElection = {
-      electionId: 1, status: ElectionStatus.OPEN, electionType: ElectionType.DATA_ACCESS,
+      electionId: 1,
+      status: ElectionStatus.OPEN,
+      electionType: ElectionType.DATA_ACCESS,
       votes: { 1: { ...baseVote } } as object,
     } as Election
 
     const closedElection = {
-      electionId: 2, status: ElectionStatus.CLOSED, electionType: ElectionType.DATA_ACCESS,
+      electionId: 2,
+      status: ElectionStatus.CLOSED,
+      electionType: ElectionType.DATA_ACCESS,
       votes: { 1: { ...baseVote } } as object,
     } as Election
 
     const nonMatchingVote = {
-      electionId: 3, status: ElectionStatus.OPEN, electionType: ElectionType.DATA_ACCESS,
+      electionId: 3,
+      status: ElectionStatus.OPEN,
+      electionType: ElectionType.DATA_ACCESS,
       votes: { 1: { ...baseVote, userId: 99 } } as object,
     } as Election
 
     const nonOpenVote = {
-      electionId: 4, status: ElectionStatus.OPEN, electionType: ElectionType.DATA_ACCESS,
+      electionId: 4,
+      status: ElectionStatus.OPEN,
+      electionType: ElectionType.DATA_ACCESS,
       votes: { 1: { ...baseVote, electionStatus: ElectionStatus.CLOSED } } as object,
     } as Election
 
     const nonDataAccessElection = {
-      electionId: 5, status: ElectionStatus.OPEN, electionType: 'OtherType',
+      electionId: 5,
+      status: ElectionStatus.OPEN,
+      electionType: 'OtherType',
       votes: { 1: { ...baseVote } } as object,
     } as Election
 

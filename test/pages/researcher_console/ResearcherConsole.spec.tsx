@@ -81,9 +81,7 @@ vi.mock('src/components/SearchBar', () => ({
 
 vi.mock('src/components/TableHeaderSection', () => ({
   default: ({ title, description }: { title: string, description: string }) =>
-    React.createElement('div', null,
-      React.createElement('h1', null, title),
-      React.createElement('p', null, description)),
+    React.createElement('div', null, React.createElement('h1', null, title), React.createElement('p', null, description)),
 }))
 
 const { useResponsiveDarCollectionColumns } = await import('src/hooks/useResponsiveDarCollectionColumns')
@@ -169,8 +167,7 @@ describe('ResearcherConsole', () => {
     vi.mocked(Collections.getCollectionSummariesByRoleName).mockRejectedValue(new Error('network'))
     await act(async () => render(<ResearcherConsole />))
     await waitFor(() =>
-      expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Error: Failed to load Data Access Requests' }),
-    )
+      expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Error: Failed to load Data Access Requests' }))
   })
 
   it('does not render table when no responsive columns are returned', async () => {
@@ -192,8 +189,7 @@ describe('ResearcherConsole', () => {
       await capturedCancelCollection!(original)
     })
     await waitFor(() =>
-      expect(Notifications.showSuccess).toHaveBeenCalledWith({ text: 'Deleted Data Access Request DAR-001' }),
-    )
+      expect(Notifications.showSuccess).toHaveBeenCalledWith({ text: 'Deleted Data Access Request DAR-001' }))
   })
 
   it('cancelCollection shows error notification on failure', async () => {
@@ -205,8 +201,7 @@ describe('ResearcherConsole', () => {
       await capturedCancelCollection!(collection)
     })
     await waitFor(() =>
-      expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Error: Cannot cancel target Data Access Request' }),
-    )
+      expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Error: Cannot cancel target Data Access Request' }))
   })
 
   it('reviseCollection shows success notification after revising', async () => {
@@ -220,8 +215,7 @@ describe('ResearcherConsole', () => {
       await capturedReviseCollection!(collection)
     })
     await waitFor(() =>
-      expect(Notifications.showSuccess).toHaveBeenCalledWith({ text: 'Revising Data Access Request DAR-001' }),
-    )
+      expect(Notifications.showSuccess).toHaveBeenCalledWith({ text: 'Revising Data Access Request DAR-001' }))
   })
 
   it('reviseCollection shows error notification on failure', async () => {
@@ -233,8 +227,7 @@ describe('ResearcherConsole', () => {
       await capturedReviseCollection!(collection)
     })
     await waitFor(() =>
-      expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Error: Cannot revise target Data Access Request' }),
-    )
+      expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Error: Cannot revise target Data Access Request' }))
   })
 
   it('deleteDraft removes draft from collections and shows success', async () => {
@@ -246,8 +239,7 @@ describe('ResearcherConsole', () => {
       await capturedDeleteDraft!({ referenceIds: ['ref-001'], darCode: 'DAR-DRAFT' })
     })
     await waitFor(() =>
-      expect(Notifications.showSuccess).toHaveBeenCalledWith({ text: 'Deleted Data Access Request Draft DAR-DRAFT' }),
-    )
+      expect(Notifications.showSuccess).toHaveBeenCalledWith({ text: 'Deleted Data Access Request Draft DAR-DRAFT' }))
   })
 
   it('deleteDraft shows error notification on failure', async () => {
@@ -259,7 +251,6 @@ describe('ResearcherConsole', () => {
       await capturedDeleteDraft!({ referenceIds: ['ref-001'], darCode: 'DAR-DRAFT' })
     })
     await waitFor(() =>
-      expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Failed to delete Data Access Request Draft DAR-DRAFT' }),
-    )
+      expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Failed to delete Data Access Request Draft DAR-DRAFT' }))
   })
 })

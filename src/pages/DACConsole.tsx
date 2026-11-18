@@ -72,8 +72,7 @@ export default function DACConsole() {
     const init = async () => {
       try {
         const summariesByRole = await Promise.all(roles.map(collectionRole =>
-          Collections.getCollectionSummariesByRoleName(collectionRole),
-        ))
+          Collections.getCollectionSummariesByRoleName(collectionRole)))
         const cols = mergeCollectionSummaries(summariesByRole)
         setCollections(cols)
         setFilteredList(cols)

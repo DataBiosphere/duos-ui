@@ -14,8 +14,10 @@ import {
   Study,
 } from 'src/pages/data_submission/v2/v2-models'
 import {
-  generateStudyPropertyFormTextField, getStudyPropertyValueByKey,
-  removeStudyPropertiesByKeys, setStudyPropertyByKey,
+  generateStudyPropertyFormTextField,
+  getStudyPropertyValueByKey,
+  removeStudyPropertiesByKeys,
+  setStudyPropertyByKey,
 } from 'src/pages/data_submission/v2/v2-common-functions'
 import { FormField, FormFieldTypes, FormValidators } from 'src/components/forms/forms'
 import {

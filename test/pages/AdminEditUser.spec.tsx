@@ -45,9 +45,7 @@ vi.mock('src/components/ResearcherReview', () => ({
 
 vi.mock('src/components/PageHeading', () => ({
   PageHeading: ({ title, description }: { title: string, description: string }) =>
-    React.createElement('div', null,
-      React.createElement('h1', null, title),
-      React.createElement('p', null, description)),
+    React.createElement('div', null, React.createElement('h1', null, title), React.createElement('p', null, description)),
 }))
 
 vi.mock('src/pages/user_profile/ExternalProfile', () => ({

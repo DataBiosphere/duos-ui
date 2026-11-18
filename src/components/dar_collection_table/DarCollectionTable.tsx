@@ -135,8 +135,16 @@ const LoadingOverlay = () => (
 
 export const DarCollectionTable = function DarCollectionTable(props: DarCollectionTableProps) {
   const {
-    collections, columns = defaultColumns, isLoading, cancelCollection, reviseCollection,
-    openCollection, goToVote, consoleType = '', deleteDraft, approveCollection,
+    collections,
+    columns = defaultColumns,
+    isLoading,
+    cancelCollection,
+    reviseCollection,
+    openCollection,
+    goToVote,
+    consoleType = '',
+    deleteDraft,
+    approveCollection,
   } = props
 
   const [sortModel, setSortModel] = useState<GridSortModel>(() => getInitialSortModel(columns))

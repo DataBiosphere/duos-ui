@@ -164,7 +164,8 @@ describe('ConsoleDashboardResources', () => {
     renderResources([gated])
 
     expect(screen.getByRole('link', { name: /Promote Your Publications/ })).toHaveAttribute(
-      'href', '/dataset_submissions?tab=publications',
+      'href',
+      '/dataset_submissions?tab=publications',
     )
   })
 

@@ -729,7 +729,10 @@ describe('MultiDatasetVoteSlab', () => {
     )
 
     const { rerender } = render(element({
-      key: 'group-1', datasets: [], elections: [openElection2], votes: [votesForOpenElection2],
+      key: 'group-1',
+      datasets: [],
+      elections: [openElection2],
+      votes: [votesForOpenElection2],
     }))
     await waitFor(() => expect(screen.getByTestId('no-collection-vote-button')).toBeInTheDocument())
 
