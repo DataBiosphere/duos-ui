@@ -1,12 +1,14 @@
 packages:
   - server
 
-overrides:
-  # @fastify/static@10 asks for glob ^13, which is flagged by GHSA-3g3m-2fjr-6pw4
-  # and pulls minimatch@10 (GHSA-g3hv-75wg-m249). glob 14 fixes both, and the
-  # glob() options that @fastify/static uses are unchanged. Remove this once
-  # @fastify/static asks for glob ^14.
-  "@fastify/static>glob": 14.0.3
+auditConfig:
+  ignoreGhsas:
+    # This ReDoS affects all picomatch releases through 4.0.7, the latest release.
+    # Only build, test, and lint tools use picomatch (Vite, Vitest, tinyglobby,
+    # and ESLint plugins). They use glob patterns from our own configuration,
+    # and the production server never loads Vite.
+    # Remove this exception once a patched release is available.
+    - GHSA-fc5q-39xc-vjpf
 
 allowBuilds:
   esbuild: false
