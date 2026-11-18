@@ -23,7 +23,8 @@ const commonStyles: TableStyles = {
     borderWidth: '1px 0 1px 0',
   },
   columnStyle: {
-    ...Styles.TABLE.HEADER_ROW, justifyContent: 'space-between',
+    ...Styles.TABLE.HEADER_ROW,
+    justifyContent: 'space-between',
     color: '#7B7B7B',
     fontFamily: 'Montserrat',
     fontSize: '1.2rem',

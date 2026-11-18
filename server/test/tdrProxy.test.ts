@@ -103,8 +103,7 @@ describe('tdrProxy', () => {
       const localApp = app
 
       const responses = await Promise.all(Array.from({ length: 5 }, (_, i) =>
-        localApp.inject({ method: 'GET', url: `${TDR_PROXY_PREFIX}${SNAPSHOTS_PATH}?limit=1000&duosDatasetIds=DUOS-${i}` }),
-      ))
+        localApp.inject({ method: 'GET', url: `${TDR_PROXY_PREFIX}${SNAPSHOTS_PATH}?limit=1000&duosDatasetIds=DUOS-${i}` })))
 
       expect(responses.map(r => r.statusCode)).toEqual([200, 200, 200, 200, 200])
       expect(upstream.received).toHaveLength(5)

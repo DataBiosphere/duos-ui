@@ -165,8 +165,15 @@ describe('makeFundingResourceColumns — column structure', () => {
   it('defines expected fields in correct order', () => {
     const fields = makeFundingResourceColumns().map(c => c.field)
     expect(fields).toEqual([
-      'studyName', 'fundingId', 'funderName', 'funderProgram',
-      'grantNumber', 'projectTitle', 'startDate', 'url', 'tags',
+      'studyName',
+      'fundingId',
+      'funderName',
+      'funderProgram',
+      'grantNumber',
+      'projectTitle',
+      'startDate',
+      'url',
+      'tags',
     ])
   })
 

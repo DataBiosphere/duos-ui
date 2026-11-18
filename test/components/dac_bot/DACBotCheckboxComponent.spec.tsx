@@ -86,8 +86,7 @@ describe('DACBotCheckboxComponent', () => {
     await waitFor(() =>
       expect(Notifications.showSuccess).toHaveBeenCalledWith(
         expect.objectContaining({ text: 'Automation rule successfully saved.' }),
-      ),
-    )
+      ))
   })
 
   it('should revert checkbox if onRuleChange fails', async () => {
@@ -97,8 +96,7 @@ describe('DACBotCheckboxComponent', () => {
     await waitFor(() =>
       expect(Notifications.showError).toHaveBeenCalledWith(
         expect.objectContaining({ text: 'Error: Unable to change automation rule. Please try this operation again.' }),
-      ),
-    )
+      ))
     expect(document.getElementById('1_checkbox')).not.toBeChecked()
   })
 })

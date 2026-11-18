@@ -208,7 +208,9 @@ describe('useConsoleDashboardSummary', () => {
 
     resolveSummary(summary)
     await waitFor(() => expect(statValues(result.current.tiles)).toEqual({
-      Studies: 7, Datasets: 12, Total: 8,
+      Studies: 7,
+      Datasets: 12,
+      Total: 8,
     }))
     expect(Notifications.showError).toHaveBeenCalledTimes(1)
   })

@@ -3,7 +3,8 @@ import {
   Biospecimen,
   ClinicalTrial,
   FileStorageObject,
-  FundingResource, IntellectualProperty,
+  FundingResource,
+  IntellectualProperty,
   Presentation,
   Publication,
   Workspace,
@@ -332,11 +333,11 @@ export class NihAnvilUse extends StudyProperty {
   }
 }
 
-export type NiHAnvilUseValues
-  = | typeof NihAnvilUse.YES_NHGRI_YES_PHS_ID
-    | typeof NihAnvilUse.YES_NHGRI_NO_PHS_ID
-    | typeof NihAnvilUse.NO_NHGRI_YES_ANVIL
-    | typeof NihAnvilUse.NO_NHGRI_NO_ANVIL
+export type NiHAnvilUseValues =
+  | typeof NihAnvilUse.YES_NHGRI_YES_PHS_ID
+  | typeof NihAnvilUse.YES_NHGRI_NO_PHS_ID
+  | typeof NihAnvilUse.NO_NHGRI_YES_ANVIL
+  | typeof NihAnvilUse.NO_NHGRI_NO_ANVIL
 
 export enum NihAnvilUsePreSelectOptions {
   YES = 'Yes',

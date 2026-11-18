@@ -95,8 +95,7 @@ export const EmailLogTable = function EmailLogTable({ isLoading, sends, emailTyp
     send,
   })), [sends])
 
-  const rows = useMemo(() => allRows.filter(row => isNil(emailType) || row.send.emailType === emailType),
-    [allRows, emailType])
+  const rows = useMemo(() => allRows.filter(row => isNil(emailType) || row.send.emailType === emailType), [allRows, emailType])
 
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: PAGE_SIZE_OPTIONS[0] })
   const [lastFilters, setLastFilters] = useState({ sends, emailType })

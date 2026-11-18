@@ -219,14 +219,12 @@ describe('ElectionWithMemberVotesTable', () => {
 
     await user.click(container.querySelector('[data-testid="ExpandMoreIcon"]')!)
     await waitFor(() =>
-      expect(container.querySelector('[data-testid="ExpandLessIcon"]')).toBeInTheDocument(),
-    )
+      expect(container.querySelector('[data-testid="ExpandLessIcon"]')).toBeInTheDocument())
     expect(container.querySelectorAll('.table-data').length).toBeGreaterThan(1)
 
     await user.click(container.querySelector('[data-testid="ExpandLessIcon"]')!)
     await waitFor(() =>
-      expect(container.querySelector('[data-testid="ExpandMoreIcon"]')).toBeInTheDocument(),
-    )
+      expect(container.querySelector('[data-testid="ExpandMoreIcon"]')).toBeInTheDocument())
     expect(container.querySelectorAll('.table-data')).toHaveLength(1)
   })
 

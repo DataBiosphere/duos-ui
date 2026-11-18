@@ -110,7 +110,10 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
     ? { field: sortModel[0].field, order: sortModel[0].sort }
     : undefined
   const {
-    data = EMPTY_PAGE, isFetching: loading, isPending: datasetsPending, error,
+    data = EMPTY_PAGE,
+    isFetching: loading,
+    isPending: datasetsPending,
+    error,
   } = useStudyDatasets(studyId, paginationModel, sort)
   const datasets = data.items
   const study = data.study

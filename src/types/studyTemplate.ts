@@ -26,6 +26,6 @@ export interface StudyDatasetDraftReference {
  * `truncated` reports that the 100-error cap was reached. Consent also appends a trailing
  * message-only error saying so, so it is optional here: the notice renders either way.
  */
-export type TemplateValidationResponse
-  = | { valid: false, errors: TemplateValidationError[], truncated?: boolean }
-    | { valid: true, errors: TemplateValidationError[], truncated?: boolean, draft: StudyDatasetDraftReference }
+export type TemplateValidationResponse =
+  | { valid: false, errors: TemplateValidationError[], truncated?: boolean }
+  | { valid: true, errors: TemplateValidationError[], truncated?: boolean, draft: StudyDatasetDraftReference }

@@ -186,8 +186,7 @@ describe('ExternalProfile', () => {
     await user.clear(screen.getByLabelText('LinkedIn'))
     await user.type(screen.getByLabelText('LinkedIn'), 'testing')
     await waitFor(() =>
-      expect(screen.getByRole('link', { name: 'https://www.linkedin.com/in/testing' })).toHaveAttribute('href', 'https://www.linkedin.com/in/testing'),
-    )
+      expect(screen.getByRole('link', { name: 'https://www.linkedin.com/in/testing' })).toHaveAttribute('href', 'https://www.linkedin.com/in/testing'))
   })
 
   it('performs URL validation for ORCID', async () => {
@@ -197,8 +196,7 @@ describe('ExternalProfile', () => {
     await user.clear(screen.getByLabelText('ORCID iD'))
     await user.type(screen.getByLabelText('ORCID iD'), 'testing')
     await waitFor(() =>
-      expect(screen.getByRole('link', { name: 'https://orcid.org/testing' })).toHaveAttribute('href', 'https://orcid.org/testing'),
-    )
+      expect(screen.getByRole('link', { name: 'https://orcid.org/testing' })).toHaveAttribute('href', 'https://orcid.org/testing'))
   })
 
   it('performs URL validation for Through.bio', async () => {
@@ -208,8 +206,7 @@ describe('ExternalProfile', () => {
     await user.clear(screen.getByLabelText('Through.bio'))
     await user.type(screen.getByLabelText('Through.bio'), 'testing')
     await waitFor(() =>
-      expect(screen.getByRole('link', { name: 'https://through.bio/testing' })).toHaveAttribute('href', 'https://through.bio/testing'),
-    )
+      expect(screen.getByRole('link', { name: 'https://through.bio/testing' })).toHaveAttribute('href', 'https://through.bio/testing'))
   })
 
   it('performs URL validation for Institutional Website', async () => {
@@ -219,8 +216,7 @@ describe('ExternalProfile', () => {
     await user.clear(screen.getByLabelText('Institutional Website'))
     await user.type(screen.getByLabelText('Institutional Website'), 'https://www.institution.edu/~username')
     await waitFor(() =>
-      expect(screen.getByRole('link', { name: 'https://www.institution.edu/~username' })).toHaveAttribute('href', 'https://www.institution.edu/~username'),
-    )
+      expect(screen.getByRole('link', { name: 'https://www.institution.edu/~username' })).toHaveAttribute('href', 'https://www.institution.edu/~username'))
   })
 
   it('performs URL validation for Other URLs', async () => {
@@ -232,8 +228,7 @@ describe('ExternalProfile', () => {
     await user.clear(otherUrlInput)
     await user.type(otherUrlInput, 'https://www.test.com')
     await waitFor(() =>
-      expect(screen.getByRole('link', { name: 'https://www.test.com' })).toHaveAttribute('href', 'https://www.test.com'),
-    )
+      expect(screen.getByRole('link', { name: 'https://www.test.com' })).toHaveAttribute('href', 'https://www.test.com'))
   })
 
   it('labels a newly added Other URL row before a value is entered', async () => {

@@ -14,7 +14,8 @@ interface CloseoutReviewProps {
 }
 
 export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
-  dar, onReturn,
+  dar,
+  onReturn,
 }) => {
   const [acknowledged, setAcknowledged] = useState<boolean | undefined>(undefined)
 

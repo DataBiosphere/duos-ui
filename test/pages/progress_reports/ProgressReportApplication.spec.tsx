@@ -509,12 +509,28 @@ describe('ProgressReportApplication', () => {
 
   it('sets intellectualPropertiesYesNo to true when dar.intellectualProperties has items', async () => {
     const ip1 = {
-      ipId: '1', studyId: '1', type: 'patent', title: 'IP 1',
-      assignee: '', patentNumber: '', filingDate: '', status: '', url: '', contact: '',
+      ipId: '1',
+      studyId: '1',
+      type: 'patent',
+      title: 'IP 1',
+      assignee: '',
+      patentNumber: '',
+      filingDate: '',
+      status: '',
+      url: '',
+      contact: '',
     }
     const ip2 = {
-      ipId: '2', studyId: '1', type: 'patent', title: 'IP 2',
-      assignee: '', patentNumber: '', filingDate: '', status: '', url: '', contact: '',
+      ipId: '2',
+      studyId: '1',
+      type: 'patent',
+      title: 'IP 2',
+      assignee: '',
+      patentNumber: '',
+      filingDate: '',
+      status: '',
+      url: '',
+      contact: '',
     }
     await mountComponent({ intellectualProperties: [ip1, ip2] })
     expect(
@@ -542,14 +558,26 @@ describe('ProgressReportApplication', () => {
 
   it('sets publicationsYesNo to true when dar.publications has items', async () => {
     const pub1 = {
-      title: 'Publication 1', publishedDate: '', authors: [],
-      datasetCitation: '', citation: false, publicationId: '1', studyId: '1',
-      journal: '', doi: '',
+      title: 'Publication 1',
+      publishedDate: '',
+      authors: [],
+      datasetCitation: '',
+      citation: false,
+      publicationId: '1',
+      studyId: '1',
+      journal: '',
+      doi: '',
     }
     const pub2 = {
-      title: 'Publication 2', publishedDate: '', authors: [],
-      datasetCitation: '', citation: false, publicationId: '2', studyId: '1',
-      journal: '', doi: '',
+      title: 'Publication 2',
+      publishedDate: '',
+      authors: [],
+      datasetCitation: '',
+      citation: false,
+      publicationId: '2',
+      studyId: '1',
+      journal: '',
+      doi: '',
     }
     await mountComponent({ publications: [pub1, pub2] })
     expect(
@@ -561,9 +589,15 @@ describe('ProgressReportApplication', () => {
 
   it('displays publications in read-only when they exist', async () => {
     const pub = {
-      title: 'Test Publication', publishedDate: '', authors: [],
-      datasetCitation: '', citation: false, publicationId: '1', studyId: '1',
-      journal: '', doi: '',
+      title: 'Test Publication',
+      publishedDate: '',
+      authors: [],
+      datasetCitation: '',
+      citation: false,
+      publicationId: '1',
+      studyId: '1',
+      journal: '',
+      doi: '',
     }
     await mountComponent({ publications: [pub] })
     expect(screen.getByText('Test Publication')).toBeVisible()
@@ -587,12 +621,18 @@ describe('ProgressReportApplication', () => {
 
   it('sets presentationsYesNo to true when dar.presentations has items', async () => {
     const p1 = {
-      title: 'Presentation 1', date: '', citation: false,
-      presentationId: '1', studyId: '1',
+      title: 'Presentation 1',
+      date: '',
+      citation: false,
+      presentationId: '1',
+      studyId: '1',
     }
     const p2 = {
-      title: 'Presentation 2', date: '', citation: false,
-      presentationId: '2', studyId: '1',
+      title: 'Presentation 2',
+      date: '',
+      citation: false,
+      presentationId: '2',
+      studyId: '1',
     }
     await mountComponent({ presentations: [p1, p2] })
     expect(

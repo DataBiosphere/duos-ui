@@ -32,7 +32,8 @@ const DEFAULT_DUOS_USER: DuosUser = {
 }
 
 const DEFAULT_OIDC_USER: OidcUserType = {
-  access_token: '', get expires_in(): number | undefined {
+  access_token: '',
+  get expires_in(): number | undefined {
     return undefined
   },
   session_state: null,

@@ -30,7 +30,14 @@ vi.mock('src/components/email_log_table/EmailLogTable', () => ({
 }))
 
 const send = (sendId: number, emailType: number, createDate: number): MailSend => ({
-  sendId, emailType, createDate, lastCreateDate: createDate, recipientCount: 1, recipients: [], darCode: null, datasetIdentifiers: [],
+  sendId,
+  emailType,
+  createDate,
+  lastCreateDate: createDate,
+  recipientCount: 1,
+  recipients: [],
+  darCode: null,
+  datasetIdentifiers: [],
 })
 
 const sends: MailSend[] = [send(1, 4, 1), send(2, 19, 2)]

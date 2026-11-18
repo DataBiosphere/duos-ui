@@ -22,7 +22,10 @@ const mockOidcUser = {
   get scopes() { return [] as string[] },
   toStorageString() { return '' },
   profile: {
-    sub: '', iss: '', aud: '', iat: 0,
+    sub: '',
+    iss: '',
+    aud: '',
+    iat: 0,
     exp: Math.floor(Date.now() / 1000) + 3600, // valid for 1 hour
   },
 }

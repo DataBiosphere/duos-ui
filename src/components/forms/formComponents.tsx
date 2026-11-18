@@ -179,11 +179,18 @@ const errorMessages = (validation: Validation | undefined): React.ReactNode => {
 // ---------------------------------------------
 export const FormInputGeneric = (config: FormInputGenericConfig): React.ReactElement => {
   const {
-    id, name, title, disabled,
-    placeholder, type,
-    inputStyle, ariaDescribedby,
+    id,
+    name,
+    title,
+    disabled,
+    placeholder,
+    type,
+    inputStyle,
+    ariaDescribedby,
     readOnly,
-    formValue, validation, setValidation,
+    formValue,
+    validation,
+    setValidation,
   } = config
 
   return (
@@ -210,11 +217,18 @@ export const FormInputGeneric = (config: FormInputGenericConfig): React.ReactEle
 
 export const FormInputTextarea = (config: FormInputTextareaConfig): React.ReactElement => {
   const {
-    id, name, title, disabled,
+    id,
+    name,
+    title,
+    disabled,
     placeholder,
-    inputStyle, ariaDescribedby,
-    rows, maxLength,
-    formValue, validation, setValidation,
+    inputStyle,
+    ariaDescribedby,
+    rows,
+    maxLength,
+    formValue,
+    validation,
+    setValidation,
   } = config
 
   return (
@@ -241,9 +255,16 @@ export const FormInputTextarea = (config: FormInputTextareaConfig): React.ReactE
 
 export const FormInputMultiText = (config: FormInputMultiTextConfig): React.ReactElement => {
   const {
-    id, name, title, disabled,
-    placeholder, ariaDescribedby, validators,
-    inputStyle, formValue, validation,
+    id,
+    name,
+    title,
+    disabled,
+    placeholder,
+    ariaDescribedby,
+    validators,
+    inputStyle,
+    formValue,
+    validation,
     setValidation,
   } = config
 
@@ -364,11 +385,22 @@ const getSelectOptionValue = (option: SelectOption, optionsAreString: boolean): 
 
 export const FormInputSelect = (config: FormInputSelectConfig): React.ReactElement => {
   const {
-    id, title, disabled, validation, setValidation,
-    selectOptions, placeholder, ariaDescribedby,
-    formValue, isCreatable = false, isMulti = false, isClearable = true,
-    isAsync = false, setFormValue,
-    exclusiveValues, loadOptions,
+    id,
+    title,
+    disabled,
+    validation,
+    setValidation,
+    selectOptions,
+    placeholder,
+    ariaDescribedby,
+    formValue,
+    isCreatable = false,
+    isMulti = false,
+    isClearable = true,
+    isAsync = false,
+    setFormValue,
+    exclusiveValues,
+    loadOptions,
     selectConfig = {},
   } = config
 
@@ -474,9 +506,12 @@ export const FormInputSelect = (config: FormInputSelectConfig): React.ReactEleme
 
 export const FormInputRadioGroup = (config: FormInputRadioGroupConfig): React.ReactElement => {
   const {
-    id, disabled,
+    id,
+    disabled,
     orientation = 'vertical',
-    formValue, options, validation,
+    formValue,
+    options,
+    validation,
   } = config
 
   return (
@@ -503,9 +538,11 @@ export const FormInputRadioGroup = (config: FormInputRadioGroupConfig): React.Re
 
 export const FormInputYesNoRadioGroup = (config: FormInputYesNoRadioGroupConfig): React.ReactElement => {
   const {
-    id, disabled,
+    id,
+    disabled,
     orientation = 'vertical',
-    formValue, validation,
+    formValue,
+    validation,
   } = config
 
   return (
@@ -540,8 +577,13 @@ export const FormInputYesNoRadioGroup = (config: FormInputYesNoRadioGroupConfig)
 
 export const FormInputRadioButton = (config: FormInputRadioButtonConfig): React.ReactElement => {
   const {
-    id, name, disabled, value, toggleText,
-    formValue, validation,
+    id,
+    name,
+    disabled,
+    value,
+    toggleText,
+    formValue,
+    validation,
   } = config
 
   return (
@@ -561,8 +603,13 @@ export const FormInputRadioButton = (config: FormInputRadioButtonConfig): React.
 
 export const FormInputCheckbox = (config: FormInputCheckboxConfig): React.ReactElement => {
   const {
-    id, name, disabled, validation, toggleText,
-    formValue, ariaDescribedby,
+    id,
+    name,
+    disabled,
+    validation,
+    toggleText,
+    formValue,
+    ariaDescribedby,
   } = config
 
   return (
@@ -590,7 +637,11 @@ export const FormInputCheckbox = (config: FormInputCheckboxConfig): React.ReactE
 
 export const FormInputSlider = (config: FormInputSliderConfig): React.ReactElement => {
   const {
-    id, name, disabled, toggleText, formValue,
+    id,
+    name,
+    disabled,
+    toggleText,
+    formValue,
   } = config
 
   return (

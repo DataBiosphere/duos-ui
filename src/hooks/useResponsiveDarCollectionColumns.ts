@@ -10,8 +10,7 @@ import { getDarCollectionColumns } from 'src/utils/darCollectionColumns'
  */
 export function useResponsiveDarCollectionColumns(consoleType: string): string[] {
   const [responsiveColumns, setResponsiveColumns] = useState<string[]>(() =>
-    getDarCollectionColumns(consoleType, window.innerWidth),
-  )
+    getDarCollectionColumns(consoleType, window.innerWidth))
 
   useEffect(() => {
     const handleResize = (): void => {

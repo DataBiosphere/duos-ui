@@ -103,7 +103,10 @@ describe('VolumeSection', () => {
     vi.mocked(DarMetrics.getVolume).mockResolvedValue(report({
       total: 12,
       institutions: Array.from({ length: 12 }, (_, i) => ({
-        institutionId: i, institutionName: `Institution ${i + 1}`, darCount: 1, researcherCount: 1,
+        institutionId: i,
+        institutionName: `Institution ${i + 1}`,
+        darCount: 1,
+        researcherCount: 1,
       })),
     }))
 

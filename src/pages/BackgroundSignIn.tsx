@@ -76,7 +76,8 @@ export default function BackgroundSignIn({ onSignIn, onError, bearerToken }: Rea
         () => {
           Storage.clearStorage()
           setLoading(false)
-        })
+        },
+      )
     }
 
     const performLogin = () => {
@@ -137,7 +138,8 @@ export default function BackgroundSignIn({ onSignIn, onError, bearerToken }: Rea
               setLoading(false)
               break
           }
-        })
+        },
+      )
     }
 
     if (accessToken)

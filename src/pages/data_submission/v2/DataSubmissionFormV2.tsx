@@ -32,8 +32,7 @@ export type DataSubmissionFormV2Props = {
 export const ALTERNATIVE_DATA_SHARING_PLAN_FILE = 'alternativeDataSharingPlanFile'
 
 // The form has no fields for these, but the update replaces every study property, so they are sent back as loaded.
-type UneditedRegistrationFields = Pick<DatasetRegistrationSchemaV1,
-  'externalIdentifier' | 'externalIdentifierType' | 'alternativeDataSharingPlanAccessManagement'
+type UneditedRegistrationFields = Pick<DatasetRegistrationSchemaV1, 'externalIdentifier' | 'externalIdentifierType' | 'alternativeDataSharingPlanAccessManagement'
   | 'alternativeDataSharingPlanFileName'>
 
 const pickUneditedFields = (registration: DatasetRegistrationSchemaV1): UneditedRegistrationFields => ({

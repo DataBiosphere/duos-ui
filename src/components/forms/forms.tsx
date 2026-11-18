@@ -338,10 +338,20 @@ export const FormFieldTitle = (props: FormFieldTitleProps): React.JSX.Element =>
 
 export const FormField = (config: FormFieldConfig): React.JSX.Element => {
   const {
-    id, name, type = FormFieldTypes.TEXT, ariaLevel,
-    title, hideTitle, description, helpText,
-    defaultValue, style, titleStyle, validators,
-    validation, onValidationChange,
+    id,
+    name,
+    type = FormFieldTypes.TEXT,
+    ariaLevel,
+    title,
+    hideTitle,
+    description,
+    helpText,
+    defaultValue,
+    style,
+    titleStyle,
+    validators,
+    validation,
+    onValidationChange,
   } = config
 
   // if the user specifies the 'errors' prop, we should use that as the source of truth.
@@ -415,10 +425,17 @@ export const FormField = (config: FormFieldConfig): React.JSX.Element => {
 */
 export const FormTable = (config: FormTableConfig): React.JSX.Element => {
   const {
-    id, formFields,
-    enableAddingRow, addRowLabel,
-    disabled, onChange, minLength,
-    validation, onValidationChange, defaultValue, styleProps = {},
+    id,
+    formFields,
+    enableAddingRow,
+    addRowLabel,
+    disabled,
+    onChange,
+    minLength,
+    validation,
+    onValidationChange,
+    defaultValue,
+    styleProps = {},
   } = config
   const {
     enableAddingRowStyle = { display: 'flex', width: '100%', justifyContent: 'flex-end', marginTop: 10 },

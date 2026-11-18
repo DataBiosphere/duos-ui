@@ -48,7 +48,11 @@ describe('load driver', () => {
     posted.length = 0
     sockets = 0
     return runLoad({
-      origin, connections: 2, durationSeconds: 0.3, workers: 0, timeoutSeconds: 30,
+      origin,
+      connections: 2,
+      durationSeconds: 0.3,
+      workers: 0,
+      timeoutSeconds: 30,
       requests: [{ method: 'GET', path: '/a' }, { method: 'GET', path: '/b' }],
       ...overrides,
     })

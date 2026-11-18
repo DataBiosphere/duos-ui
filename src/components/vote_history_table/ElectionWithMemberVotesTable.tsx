@@ -105,16 +105,7 @@ const ElectionWithMemberVotesTable: React.FC<ElectionWithMemberVotesTableProps> 
             />
             {election.requestType}
           </div>
-        ),
-        // The cell renders an icon too, so sort on the label alone
-        value: election.requestType,
-        cellStyle: { width: '10%' },
-        label: 'Request Type',
-        id: i,
-        electionId: election.electionId,
-        memberVotes: election.memberVotes,
-        onClick: () => toggleElectionExpansion(election.electionId),
-        },
+        ), value: election.requestType, cellStyle: { width: '10%' }, label: 'Request Type', id: i, electionId: election.electionId, memberVotes: election.memberVotes, onClick: () => toggleElectionExpansion(election.electionId)},
         { data: election.datasetIdentifier, cellStyle: { width: '20%' }, label: 'Dataset ID', id: i },
         { data: formatDate(election.createDate), cellStyle: { width: '10%' }, label: 'Election Date', id: i },
         { data: election.status, cellStyle: { width: '10%' }, label: 'Election Status', id: i },

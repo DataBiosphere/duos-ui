@@ -285,8 +285,7 @@ const calcDmiErrors = (formData: FormDataBase, errors: FormValidationErrors): vo
   if (isNil(formData.dmiYesNo)) {
     errors.dmiYesNo = requiredError
   }
-  const dmiFields = [formData.dmiAcknowledgement, formData.dmiCombination, formData.dmiFalsification,
-    formData.dmiIdentification, formData.dmiOther, formData.dmiPublication, formData.dmiSecurity, formData.dmiSharing]
+  const dmiFields = [formData.dmiAcknowledgement, formData.dmiCombination, formData.dmiFalsification, formData.dmiIdentification, formData.dmiOther, formData.dmiPublication, formData.dmiSecurity, formData.dmiSharing]
   if (formData.dmiYesNo && !dmiFields.some(Boolean)) {
     errors.dmiAcknowledgement = requiredError
     errors.dmiCombination = requiredError

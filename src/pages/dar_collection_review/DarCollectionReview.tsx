@@ -65,8 +65,7 @@ const getApprovedDatasetsFromLatestDar = (darCollection: DarCollection, dacIds: 
     const submittedDars = dars.filter(d => !d.draft)
     if (submittedDars.length === 0) return submittedDars[0]
     return submittedDars.reduce((latest, current) =>
-      new Date(current.submissionDate ?? 0) > new Date(latest.submissionDate ?? 0) ? current : latest,
-    submittedDars[0])
+      new Date(current.submissionDate ?? 0) > new Date(latest.submissionDate ?? 0) ? current : latest, submittedDars[0])
   }
 
   const getClosedDataAccessElections = (mostRecentDar: ReturnType<typeof getMostRecentSubmittedDar>) => {

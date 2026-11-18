@@ -462,7 +462,8 @@ export default function EditDac({ dacId: dacIdProp, onClose, hideHeader = false,
       },
       (error_: unknown) => {
         handleErrors(String(error_))
-      })
+      },
+    )
   }
 
   const onChairSearchChange = (data: MultiValue<UserSelectOption>): void => {

@@ -434,9 +434,15 @@ describe('FormField - Tests', () => {
 
   describe('Form Control - Select Tests', () => {
     const selectOptions = [
-      'Observational', 'Interventional', 'Descriptive',
-      'Analytical', 'Prospective', 'Retrospective',
-      'Case report', 'Case series', 'Cross-sectional',
+      'Observational',
+      'Interventional',
+      'Descriptive',
+      'Analytical',
+      'Prospective',
+      'Retrospective',
+      'Case report',
+      'Case series',
+      'Cross-sectional',
       'Cohort study',
     ].map(opt => ({ displayName: opt, displayText: opt }))
 

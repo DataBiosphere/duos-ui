@@ -127,7 +127,8 @@ describe('BackgroundSignIn', () => {
     await act(async () => renderComponent({ bearerToken: 'legacy-token', onSignIn }))
     expect(fetch).not.toHaveBeenCalled()
     expect(Storage.setOidcUser).toHaveBeenCalledWith({
-      id_token: 'legacy-token', profile: { exp: expect.any(Number) },
+      id_token: 'legacy-token',
+      profile: { exp: expect.any(Number) },
     })
     const stored = vi.mocked(Storage.setOidcUser).mock.calls[0][0]
     expect(stored.profile.exp).toBeGreaterThanOrEqual(before + 3600)

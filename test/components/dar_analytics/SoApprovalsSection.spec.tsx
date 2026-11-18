@@ -89,7 +89,11 @@ describe('SoApprovalsSection', () => {
 
   it('offers a retry when a later page fails, rather than stranding the user', async () => {
     const rows: SoApproval[] = Array.from({ length: 25 }, (_, i) => ({
-      referenceId: `ref-${i}`, collectionId: i, kind: 'ORIGINAL', submissionDate: new Date(2026, 1, 1, 12).getTime(), status: 'PENDING',
+      referenceId: `ref-${i}`,
+      collectionId: i,
+      kind: 'ORIGINAL',
+      submissionDate: new Date(2026, 1, 1, 12).getTime(),
+      status: 'PENDING',
     }))
     const firstPage = buildReport([bucket('ORIGINAL', 'PENDING', 30)], rows)
     vi.mocked(DarMetrics.getSoApprovals)
@@ -117,7 +121,11 @@ describe('SoApprovalsSection', () => {
 
   it('pages through submissions and starts again from the first page when the range changes', async () => {
     const rows: SoApproval[] = Array.from({ length: 25 }, (_, i) => ({
-      referenceId: `ref-${i}`, collectionId: i, kind: 'ORIGINAL', submissionDate: new Date(2026, 1, 1, 12).getTime(), status: 'PENDING',
+      referenceId: `ref-${i}`,
+      collectionId: i,
+      kind: 'ORIGINAL',
+      submissionDate: new Date(2026, 1, 1, 12).getTime(),
+      status: 'PENDING',
     }))
     vi.mocked(DarMetrics.getSoApprovals).mockResolvedValue(buildReport([bucket('ORIGINAL', 'PENDING', 30)], rows))
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })

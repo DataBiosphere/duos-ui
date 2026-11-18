@@ -72,10 +72,12 @@ describe('SigningOfficialDashboard', () => {
 
     expect(screen.getAllByText('–')).toHaveLength(13)
     expect(screen.getByRole('link', { name: /Researcher Status/ })).toHaveAttribute(
-      'href', '/signing_official_console/library_cards',
+      'href',
+      '/signing_official_console/library_cards',
     )
     expect(screen.getByRole('link', { name: /DAA Associations/ })).toHaveAttribute(
-      'href', '/signing_official_console/researchers_daa_associations',
+      'href',
+      '/signing_official_console/researchers_daa_associations',
     )
 
     resolveSummary(summary)

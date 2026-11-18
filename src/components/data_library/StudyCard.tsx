@@ -17,8 +17,8 @@ import { getAccessManagementColor, getAccessManagementLabel } from 'src/componen
 const MAX_VISIBLE_DATA_TYPES = 3
 
 /** Omit both where there is nothing to select into, and the card renders without its checkbox. */
-type SelectionProps
-  = | {
+type SelectionProps =
+  | {
     /** True only when every one of the study's datasets is selected. */
     selected: boolean
     /** Some but not all of the study's datasets are selected. */

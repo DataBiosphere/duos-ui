@@ -43,12 +43,5 @@ export class DataTypes {
     name: 'Whole Exome',
   }
 
-  static readonly VALUES: SelectOptionWithKeyNameAndAbbreviation[] = [DataTypes.CITE,
-    DataTypes.HYB,
-    DataTypes.RNA,
-    DataTypes.SCRNA,
-    DataTypes.SPT,
-    DataTypes.SNRNA,
-    DataTypes.WGS,
-    DataTypes.WES]
+  static readonly VALUES: SelectOptionWithKeyNameAndAbbreviation[] = [DataTypes.CITE, DataTypes.HYB, DataTypes.RNA, DataTypes.SCRNA, DataTypes.SPT, DataTypes.SNRNA, DataTypes.WGS, DataTypes.WES]
 }

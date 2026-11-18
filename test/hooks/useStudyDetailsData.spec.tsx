@@ -229,7 +229,8 @@ describe.each([
 ])('$name', ({ useList, endpoint }) => {
   it('maps each recommendation onto a study card, in recommended order', async () => {
     vi.mocked(StudyRecommendations[endpoint]).mockResolvedValue([
-      recommendation(9, [901]), recommendation(3, [301, 302]),
+      recommendation(9, [901]),
+      recommendation(3, [301, 302]),
     ])
 
     const { result } = renderHook(() => useList('1'), { wrapper })
@@ -259,7 +260,8 @@ describe.each([
 
   it('does not recommend the study being viewed', async () => {
     vi.mocked(StudyRecommendations[endpoint]).mockResolvedValue([
-      recommendation(1, [101]), recommendation(7, [701]),
+      recommendation(1, [101]),
+      recommendation(7, [701]),
     ])
 
     const { result } = renderHook(() => useList('1'), { wrapper })

@@ -110,7 +110,11 @@ describe('LookupRequestSchema', () => {
 
   it('accepts the same ranking fields as the config shelf', () => {
     const shelf: Omit<Extract<LookupRequestInput, { section: 'latest-data-releases' }>, 'mode' | 'section'> = {
-      ranking: 'newest', scope: { dac: ['Example DAC'] }, limit: 12, pin: ['DUOS-000789'], exclude: ['DUOS-000111'],
+      ranking: 'newest',
+      scope: { dac: ['Example DAC'] },
+      limit: 12,
+      pin: ['DUOS-000789'],
+      exclude: ['DUOS-000111'],
     }
     const request: LookupRequestInput = { mode: 'ranking', section: 'latest-data-releases', ...shelf }
     const config: Extract<ShowcaseConfigInput['sections']['latest-data-releases'], { enabled: true }> = { enabled: true, ...shelf }

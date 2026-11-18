@@ -40,8 +40,7 @@ const CancelSelectActionBar = (props: PickersActionBarProps) => {
   // Quirk of this control's usage pattern is the need to destructure the unused onSetToday and onClear from 'other'
   // props.  This is in part because per mockup, this control does not support 'clear' or 'go to today' style buttons.
   const { actions, ...other } = props
-  const { acceptValueChanges,
-    cancelValueChanges } = usePickerContext()
+  const { acceptValueChanges, cancelValueChanges } = usePickerContext()
   const buttons = actions?.map((actionType: React.Key | null | undefined) => {
     switch (actionType) {
       case 'cancel':

@@ -16,16 +16,16 @@ export interface ConsentError {
   readonly code?: number
 }
 
-export type UserRoleName
-  = | 'Admin'
-    | 'Chairperson'
-    | 'Member'
-    | 'Researcher'
-    | 'Alumni'
-    | 'SigningOfficial'
-    | 'DataSubmitter'
-    | 'ServiceAccount'
-    | 'All'
+export type UserRoleName =
+  | 'Admin'
+  | 'Chairperson'
+  | 'Member'
+  | 'Researcher'
+  | 'Alumni'
+  | 'SigningOfficial'
+  | 'DataSubmitter'
+  | 'ServiceAccount'
+  | 'All'
 
 export interface UserRole {
   roleId: number
@@ -633,13 +633,13 @@ export interface StudyProperty {
   type: string
 }
 
-export type FileStorageCategory
-  = | 'irbCollaborationLetter'
-    | 'dataUseLetter'
-    | 'alternativeDataSharingPlan'
-    | 'nihInstitutionalCertification'
-    | 'dataAccessAgreement'
-    | 'draftUploadedFile'
+export type FileStorageCategory =
+  | 'irbCollaborationLetter'
+  | 'dataUseLetter'
+  | 'alternativeDataSharingPlan'
+  | 'nihInstitutionalCertification'
+  | 'dataAccessAgreement'
+  | 'draftUploadedFile'
 
 export interface FileStorageObject {
   fileStorageObjectId: number

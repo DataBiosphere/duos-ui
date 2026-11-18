@@ -41,10 +41,10 @@ export type SignOutResult = { status: 'confirmed' } | { status: 'unconfirmed' }
 const CONFIRMED: SignOutResult = { status: 'confirmed' }
 const UNCONFIRMED: SignOutResult = { status: 'unconfirmed' }
 
-type LogoutReading
-  = | { outcome: 'b2c', redirectUrl: string }
-    | { outcome: 'local' }
-    | { outcome: 'unconfirmed' }
+type LogoutReading =
+  | { outcome: 'b2c', redirectUrl: string }
+  | { outcome: 'local' }
+  | { outcome: 'unconfirmed' }
 
 // The server validates the B2C origin; the client can only validate structure.
 const wellFormedRedirectUrl = (value: unknown): value is string => {

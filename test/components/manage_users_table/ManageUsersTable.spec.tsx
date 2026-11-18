@@ -133,8 +133,15 @@ describe('ManageUsersTable', () => {
     renderTable()
 
     for (const label of [
-      'User Name', 'Email', 'Institution', 'Registration Date', 'Roles', 'Pre-Auth',
-      'DACs', 'Researcher Status', 'Data Submitter Status',
+      'User Name',
+      'Email',
+      'Institution',
+      'Registration Date',
+      'Roles',
+      'Pre-Auth',
+      'DACs',
+      'Researcher Status',
+      'Data Submitter Status',
     ]) {
       expect(columnHeader(label)).toBeInTheDocument()
     }

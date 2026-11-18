@@ -114,8 +114,15 @@ const mockTdrSnapshotResponse = (id: string, role: string) => ({
 
 // Mock fetch for /config.json (replaces cy.initApplicationConfig())
 const mockConfig = {
-  env: 'ci', hash: '', tag: '', bardApiUrl: '', apiUrl: '',
-  terraUrl: '', tdrApiUrl: '', ecmApiUrl: '', features: {},
+  env: 'ci',
+  hash: '',
+  tag: '',
+  bardApiUrl: '',
+  apiUrl: '',
+  terraUrl: '',
+  tdrApiUrl: '',
+  ecmApiUrl: '',
+  features: {},
 }
 const originalFetch = globalThis.fetch
 globalThis.fetch = vi.fn((...args: Parameters<typeof fetch>) => {
@@ -407,8 +414,7 @@ describe('DataLibrary', () => {
 
     // Studies is the default tab.
     await waitFor(() =>
-      expect(screen.getByRole('tab', { name: /Studies/i })).toHaveAttribute('aria-selected', 'true'),
-    )
+      expect(screen.getByRole('tab', { name: /Studies/i })).toHaveAttribute('aria-selected', 'true'))
 
     await user.click(screen.getByRole('tab', { name: /Datasets/i }))
 
@@ -646,7 +652,8 @@ describe('DataLibrary', () => {
 
     it('does not show export buttons when on the Studies tab', async () => {
       vi.mocked(TerraDataRepo.listSnapshotsByDatasetIds).mockResolvedValue({
-        filteredTotal: 1, total: 1,
+        filteredTotal: 1,
+        total: 1,
         items: [{ id: 'snap-1', name: 'Snap', duosId: 'DUOS-000001', cloudPlatform: 'gcp', resourceLocks: {} }],
         roleMap: { 'snap-1': ['reader'] },
         errors: [],

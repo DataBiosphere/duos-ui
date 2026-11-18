@@ -232,7 +232,9 @@ describe('DuosHeader', () => {
 
       expect(adminConsole?.link).toEqual('/admin_console/dashboard')
       expect(adminConsole?.children?.[0]).toEqual({
-        label: 'Dashboard', link: '/admin_console/dashboard', hideSubTabBar: true,
+        label: 'Dashboard',
+        link: '/admin_console/dashboard',
+        hideSubTabBar: true,
       })
     })
 

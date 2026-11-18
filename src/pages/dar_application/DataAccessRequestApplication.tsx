@@ -656,14 +656,16 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
           {
             text: <ReactMarkdown>{responseError.response.data.message}</ReactMarkdown>,
             timeout: 6000,
-          })
+          },
+        )
       }
       else {
         Notifications.showError(
           {
             text: 'Error saving Data Access Request. Please try again in a few moments.',
             timeout: 6000,
-          })
+          },
+        )
       }
     }
   }

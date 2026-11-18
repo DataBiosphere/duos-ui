@@ -43,7 +43,10 @@ vi.mock('src/libs/ajax/StudyComments', () => ({
   MAX_COMMENT_LENGTH: 2000,
   StudyComments: {
     listComments: vi.fn().mockResolvedValue({
-      comments: [], averageRating: undefined, total: 0, yourComment: undefined,
+      comments: [],
+      averageRating: undefined,
+      total: 0,
+      yourComment: undefined,
     }),
     postComment: vi.fn(),
     deleteComment: vi.fn(),
@@ -61,7 +64,13 @@ vi.mock('src/libs/ajax/DatasetMetrics', () => ({
 // The trend reports the page asks consent for, each empty unless a test says otherwise
 vi.mock('src/libs/ajax/DarMetrics', () => {
   const emptyReport = () => Promise.resolve({
-    from: '2026-01-01', to: '2026-03-31', bucket: 'QUARTER', total: 0, unmeasured: 0, buckets: [], rows: [],
+    from: '2026-01-01',
+    to: '2026-03-31',
+    bucket: 'QUARTER',
+    total: 0,
+    unmeasured: 0,
+    buckets: [],
+    rows: [],
   })
   return {
     DarMetrics: {
@@ -668,12 +677,21 @@ describe('Study details test', () => {
   it('shows primary study publications as cards, linking only plain http urls', async () => {
     vi.mocked(Study.getPublications).mockResolvedValueOnce([
       {
-        publicationId: 'pub-1', title: 'Genomic variation at scale', authorNames: ['Ada Lovelace', 'Alan Turing'],
-        journal: 'Nature Genetics', publishedDate: '2025-04-01', doi: '10.1000/xyz123', url: 'https://example.org/pub-1',
+        publicationId: 'pub-1',
+        title: 'Genomic variation at scale',
+        authorNames: ['Ada Lovelace', 'Alan Turing'],
+        journal: 'Nature Genetics',
+        publishedDate: '2025-04-01',
+        doi: '10.1000/xyz123',
+        url: 'https://example.org/pub-1',
       },
       {
-        publicationId: 'pub-2', title: 'Follow-up analysis', authorNames: [],
-        journal: 'Cell', publishedDate: '2026-01-15', url: 'javascript:alert(document.cookie)',
+        publicationId: 'pub-2',
+        title: 'Follow-up analysis',
+        authorNames: [],
+        journal: 'Cell',
+        publishedDate: '2026-01-15',
+        url: 'javascript:alert(document.cookie)',
       },
     ] as never)
     mountComponent()
@@ -858,8 +876,12 @@ describe('Study details test', () => {
   })
 
   const grantedDar = (referenceId: string) => ({
-    projectTitle: `Project ${referenceId}`, referenceId, darCode: referenceId.toUpperCase(),
-    nonTechRus: '', expired: false, updateDate: Date.now(),
+    projectTitle: `Project ${referenceId}`,
+    referenceId,
+    darCode: referenceId.toUpperCase(),
+    nonTechRus: '',
+    expired: false,
+    updateDate: Date.now(),
   })
   const darHistoryHeading = () => screen.getByRole('heading', { name: /^Data Access Requests for this Study/ })
   const forbidden = () => Object.assign(new Error('User does not have permission'), { response: { status: 403 } })
@@ -870,7 +892,9 @@ describe('Study details test', () => {
   const viewAsChairOf = (dacId: number) =>
     viewAs({ isAdmin: false, roles: [{ name: 'Chairperson', dacId, roleId: 2, userId: 42 }] })
   const requestActivityReports = [
-    DarMetrics.getVolume, DarMetrics.getDatasetDecisions, DarMetrics.getDatasetDecisionTurnaround,
+    DarMetrics.getVolume,
+    DarMetrics.getDatasetDecisions,
+    DarMetrics.getDatasetDecisionTurnaround,
   ]
 
   it('counts the granted requests in the section heading, and not in the table of contents', async () => {
@@ -1172,9 +1196,14 @@ describe('Study details test', () => {
   it('keeps loaded request history when a background refetch fails', async () => {
     vi.mocked(DatasetMetrics.getStudyStats)
       .mockResolvedValueOnce([{
-        projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
-        nonTechRus: 'Study cancer outcomes.', expired: false,
-        institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+        projectTitle: 'Cancer genomics',
+        referenceId: 'dar-1',
+        darCode: 'DAR-1',
+        nonTechRus: 'Study cancer outcomes.',
+        expired: false,
+        institutionName: 'Research University',
+        submissionDate: Date.now(),
+        updateDate: Date.now(),
       }] as never)
       .mockRejectedValue(Object.assign(new Error('boom'), { response: { status: 500 } }))
     mountComponent()
@@ -1190,9 +1219,14 @@ describe('Study details test', () => {
   it('drops loaded request history when the server refuses on refetch', async () => {
     vi.mocked(DatasetMetrics.getStudyStats)
       .mockResolvedValueOnce([{
-        projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
-        nonTechRus: 'Study cancer outcomes.', expired: false,
-        institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+        projectTitle: 'Cancer genomics',
+        referenceId: 'dar-1',
+        darCode: 'DAR-1',
+        nonTechRus: 'Study cancer outcomes.',
+        expired: false,
+        institutionName: 'Research University',
+        submissionDate: Date.now(),
+        updateDate: Date.now(),
       }] as never)
       .mockRejectedValue(Object.assign(new Error('nope'), { response: { status: 403 } }))
     mountComponent()
@@ -1231,7 +1265,10 @@ describe('Study details test', () => {
   it('keeps loaded recommendations when a background refetch fails', async () => {
     vi.mocked(StudyRecommendations.getSimilar)
       .mockResolvedValueOnce([recommendation({
-        studyDescription: 'About genes', piName: 'Dr Adjacent', datasetCount: 2, datasetIds: [1, 2],
+        studyDescription: 'About genes',
+        piName: 'Dr Adjacent',
+        datasetCount: 2,
+        datasetIds: [1, 2],
       })])
       .mockRejectedValue(new Error('boom'))
     mountComponent()
@@ -1246,7 +1283,9 @@ describe('Study details test', () => {
   it('keeps loaded research outputs when a background refetch fails', async () => {
     vi.mocked(DatasetMetrics.getResearchOutputs)
       .mockResolvedValueOnce({
-        presentations: [{ title: 'ASHG 2025 talk' }], publications: [], intellectualProperties: [],
+        presentations: [{ title: 'ASHG 2025 talk' }],
+        publications: [],
+        intellectualProperties: [],
       } as never)
       .mockRejectedValue(new Error('boom'))
     mountComponent()
@@ -1311,9 +1350,15 @@ describe('Study details test', () => {
       averageRating: 4,
       yourComment: undefined,
       comments: ids.map(id => ({
-        studyCommentId: id, studyId: 1, userId: 100 + id, rating: 4,
-        commentText: `Comment ${id}`, createDate: '', updateDate: '',
-        displayName: `Reviewer ${id}`, institutionName: 'Broad',
+        studyCommentId: id,
+        studyId: 1,
+        userId: 100 + id,
+        rating: 4,
+        commentText: `Comment ${id}`,
+        createDate: '',
+        updateDate: '',
+        displayName: `Reviewer ${id}`,
+        institutionName: 'Broad',
       })),
     })
     vi.mocked(StudyComments.listComments)
@@ -1339,9 +1384,15 @@ describe('Study details test', () => {
    */
   it('asks only for the next page, and survives a repeated boundary comment', async () => {
     const comment = (id: number) => ({
-      studyCommentId: id, studyId: 1, userId: 100 + id, rating: 4,
-      commentText: `Comment ${id}`, createDate: '', updateDate: '',
-      displayName: `Reviewer ${id}`, institutionName: 'Broad',
+      studyCommentId: id,
+      studyId: 1,
+      userId: 100 + id,
+      rating: 4,
+      commentText: `Comment ${id}`,
+      createDate: '',
+      updateDate: '',
+      displayName: `Reviewer ${id}`,
+      institutionName: 'Broad',
     })
     vi.mocked(StudyComments.listComments)
       .mockResolvedValueOnce({ comments: [comment(2)], averageRating: 4, total: 3 } as never)
@@ -1370,15 +1421,24 @@ describe('Study details test', () => {
    */
   it('keeps loaded comments and the draft when a background refetch fails', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue({
-      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+      userId: 42,
+      isResearcher: true,
+      libraryCard: {} as LibraryCard,
     } as DuosUser)
     vi.mocked(StudyComments.listComments)
       .mockResolvedValueOnce({
         total: 2,
         averageRating: 4,
         comments: [{
-          studyCommentId: 1, studyId: 1, userId: 7, rating: 4, commentText: 'Comment 1',
-          createDate: '', updateDate: '', displayName: 'Reviewer', institutionName: 'Broad',
+          studyCommentId: 1,
+          studyId: 1,
+          userId: 7,
+          rating: 4,
+          commentText: 'Comment 1',
+          createDate: '',
+          updateDate: '',
+          displayName: 'Reviewer',
+          institutionName: 'Broad',
         }],
       } as never)
       .mockRejectedValueOnce(new Error('refresh failed'))
@@ -1398,7 +1458,9 @@ describe('Study details test', () => {
   /** onSuccess re-seeds both fields from the saved copy, so typing mid-flight was thrown away. */
   it('freezes the composer while the comment is being posted', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue({
-      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+      userId: 42,
+      isResearcher: true,
+      libraryCard: {} as LibraryCard,
     } as DuosUser)
     vi.mocked(StudyComments.postComment).mockReturnValue(new Promise(() => {}) as never)
     const user = userEvent.setup()
@@ -1418,12 +1480,21 @@ describe('Study details test', () => {
       averageRating: 4,
       comments: [],
       yourComment: {
-        studyCommentId: 99, studyId: 1, userId: 42, rating: 3, commentText: 'Mine',
-        createDate: '', updateDate: '', displayName: 'Me', institutionName: 'Broad',
+        studyCommentId: 99,
+        studyId: 1,
+        userId: 42,
+        rating: 3,
+        commentText: 'Mine',
+        createDate: '',
+        updateDate: '',
+        displayName: 'Me',
+        institutionName: 'Broad',
       },
     } as never)
     vi.mocked(Storage.getCurrentUser).mockReturnValue({
-      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+      userId: 42,
+      isResearcher: true,
+      libraryCard: {} as LibraryCard,
     } as DuosUser)
     mountComponent()
 
@@ -1434,7 +1505,9 @@ describe('Study details test', () => {
 
   it('stops the composer at the length the backend accepts', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue({
-      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+      userId: 42,
+      isResearcher: true,
+      libraryCard: {} as LibraryCard,
     } as DuosUser)
     mountComponent()
 
@@ -1454,10 +1527,15 @@ describe('Study details test', () => {
 
   it('shows granted DAR details and expands the research use statement and summary', async () => {
     vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([{
-      projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+      projectTitle: 'Cancer genomics',
+      referenceId: 'dar-1',
+      darCode: 'DAR-1',
       rus: 'Whole-genome association analysis of tumour samples.',
-      nonTechRus: 'Study cancer outcomes.', expired: false,
-      institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+      nonTechRus: 'Study cancer outcomes.',
+      expired: false,
+      institutionName: 'Research University',
+      submissionDate: Date.now(),
+      updateDate: Date.now(),
     }])
     const user = userEvent.setup()
     mountComponent()
@@ -1479,10 +1557,15 @@ describe('Study details test', () => {
 
   it('offers the research use statement when a grant has no non-technical summary', async () => {
     vi.mocked(DatasetMetrics.getStudyStats).mockResolvedValueOnce([{
-      projectTitle: 'Cancer genomics', referenceId: 'dar-1', darCode: 'DAR-1',
+      projectTitle: 'Cancer genomics',
+      referenceId: 'dar-1',
+      darCode: 'DAR-1',
       rus: 'Whole-genome association analysis of tumour samples.',
-      nonTechRus: '', expired: false,
-      institutionName: 'Research University', submissionDate: Date.now(), updateDate: Date.now(),
+      nonTechRus: '',
+      expired: false,
+      institutionName: 'Research University',
+      submissionDate: Date.now(),
+      updateDate: Date.now(),
     }])
     const user = userEvent.setup()
     mountComponent()
@@ -1494,7 +1577,9 @@ describe('Study details test', () => {
 
   it('shows the public identity disclosure to active researchers before posting', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue({
-      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+      userId: 42,
+      isResearcher: true,
+      libraryCard: {} as LibraryCard,
     } as DuosUser)
     mountComponent()
 
@@ -1510,7 +1595,9 @@ describe('Study details test', () => {
   /** The core write path: nothing else in the suite invokes the mutation. */
   it('posts a new comment with the rating and text the composer holds', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue({
-      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+      userId: 42,
+      isResearcher: true,
+      libraryCard: {} as LibraryCard,
     } as DuosUser)
     vi.mocked(StudyComments.postComment).mockResolvedValue({} as never)
     const user = userEvent.setup()
@@ -1533,11 +1620,20 @@ describe('Study details test', () => {
    */
   it('saves an edit and re-seeds the composer from the refreshed comment', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue({
-      userId: 42, isResearcher: true, libraryCard: {} as LibraryCard,
+      userId: 42,
+      isResearcher: true,
+      libraryCard: {} as LibraryCard,
     } as DuosUser)
     const mine = {
-      studyCommentId: 7, studyId: 1, userId: 42, rating: 3, commentText: 'First take',
-      createDate: '', updateDate: '', displayName: 'Me', institutionName: 'Broad',
+      studyCommentId: 7,
+      studyId: 1,
+      userId: 42,
+      rating: 3,
+      commentText: 'First take',
+      createDate: '',
+      updateDate: '',
+      displayName: 'Me',
+      institutionName: 'Broad',
     }
     vi.mocked(StudyComments.listComments)
       .mockResolvedValueOnce({ comments: [mine], averageRating: 3, total: 1, yourComment: mine } as never)
@@ -1569,7 +1665,9 @@ describe('Study details test', () => {
 
   it('names the missing role when the card is held', async () => {
     vi.mocked(Storage.getCurrentUser).mockReturnValue({
-      userId: 42, isResearcher: false, libraryCard: {} as LibraryCard,
+      userId: 42,
+      isResearcher: false,
+      libraryCard: {} as LibraryCard,
     } as DuosUser)
     mountComponent()
 
@@ -1663,7 +1761,9 @@ describe('Study details test', () => {
    */
   it('shows every asset rather than the first page of them', async () => {
     const many = Array.from({ length: 120 }, (_, i) => ({
-      modelId: `m${i}`, name: `Model ${i}`, tags: [],
+      modelId: `m${i}`,
+      name: `Model ${i}`,
+      tags: [],
     }))
     vi.mocked(Study.getModels).mockResolvedValueOnce(many as never)
     const { container } = mountComponent()

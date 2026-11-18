@@ -144,7 +144,13 @@ describe('Support Request Modal Tests', () => {
 
     await user.click(document.querySelector('[data-cy="supportFormSubmit"]')!)
     await waitFor(() => expect(vi.mocked(Support.createTicket)).toHaveBeenCalledWith(
-      mockUser.displayName, expect.anything(), mockUser.email, 'Subject', 'Description', expect.anything(), expect.anything(),
+      mockUser.displayName,
+      expect.anything(),
+      mockUser.email,
+      'Subject',
+      'Description',
+      expect.anything(),
+      expect.anything(),
     ))
   })
 
@@ -224,8 +230,7 @@ describe('Support Request Modal Tests', () => {
       const input = document.querySelector('[data-cy="supportFormAttachment"]') as HTMLInputElement
       fireEvent.change(input, { target: { files: [attachment] } })
       await waitFor(() =>
-        expect(document.querySelector('[data-cy="supportFormAttachmentContainer"]')).toHaveTextContent('example.json'),
-      )
+        expect(document.querySelector('[data-cy="supportFormAttachmentContainer"]')).toHaveTextContent('example.json'))
     })
 
     it('Multiple attachments displayed', async () => {

@@ -75,11 +75,20 @@ it('rotates a real session in place and persists it with verified expiry', async
 })
 
 it.each([
-  { email: 'outsider@automation.iam.gserviceaccount.com' }, { email: undefined },
-  { email_verified: false }, { email_verified: 'false' }, { email_verified: undefined },
-  { scope: 'email' }, { scope: 'profile' }, { scope: 'openid' },
-  { expires_in: '299' }, { expires_in: '-1' }, { expires_in: 'Infinity' },
-  { expires_in: undefined }, { expires_in: true }, { expires_in: 301.5 },
+  { email: 'outsider@automation.iam.gserviceaccount.com' },
+  { email: undefined },
+  { email_verified: false },
+  { email_verified: 'false' },
+  { email_verified: undefined },
+  { scope: 'email' },
+  { scope: 'profile' },
+  { scope: 'openid' },
+  { expires_in: '299' },
+  { expires_in: '-1' },
+  { expires_in: 'Infinity' },
+  { expires_in: undefined },
+  { expires_in: true },
+  { expires_in: 301.5 },
 ])('rejects invalid claims %j without creating a session', async (overrides) => {
   vi.mocked(fetch).mockResolvedValue(response({ ...claims(), ...overrides }))
   const res = await signIn()

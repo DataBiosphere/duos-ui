@@ -1,11 +1,15 @@
 import {
   Author,
   Closeout,
-  CombinedDataAccessRequest, DarCollection, DataAccessRequest,
+  CombinedDataAccessRequest,
+  DarCollection,
+  DataAccessRequest,
   DataManagementIncident,
-  Election, IntellectualProperty,
+  Election,
+  IntellectualProperty,
   Presentation,
-  Publication, Vote,
+  Publication,
+  Vote,
 } from 'src/types/model'
 import { CLOSEOUT_KEYS, DMI_INCIDENT_KEYS, FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 
@@ -183,6 +187,5 @@ export function userHasOpenDataAccessElection(collection: DarCollection, userId:
           (vote: Vote) =>
             vote.userId === userId && vote.electionStatus === ElectionStatus.OPEN,
         ),
-    ),
-  )
+    ))
 }

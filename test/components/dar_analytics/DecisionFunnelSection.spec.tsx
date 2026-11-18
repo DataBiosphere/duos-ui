@@ -71,7 +71,8 @@ describe('DecisionFunnelSection', () => {
     expect(countsFor('Canceled')).toEqual(['1', '0'])
     expect(countsFor('Total')).toEqual(['8', '9'])
     expect(document.querySelector('[aria-label="DARs by decision state per period"]')).toHaveAccessibleDescription(
-      '2026 Q1: Pending 0, Approved 4, Denied 0, Mixed 1, Canceled 0; 2026 Q2: Pending 2, Approved 0, Denied 0, Mixed 0, Canceled 1')
+      '2026 Q1: Pending 0, Approved 4, Denied 0, Mixed 1, Canceled 0; 2026 Q2: Pending 2, Approved 0, Denied 0, Mixed 0, Canceled 1',
+    )
   })
 
   it('asks for one row per report and shows the empty state when no DARs were submitted', async () => {
@@ -152,7 +153,8 @@ describe('DecisionFunnelSection', () => {
       expect(document.querySelector('[aria-label="Dataset requests by decision state per period"]'))
         .toHaveAccessibleDescription(
           '2026 Q1: Pending 0, No election yet 0, Approved 6, Denied 1, Canceled 0; '
-          + '2026 Q2: Pending 3, No election yet 2, Approved 0, Denied 0, Canceled 0')
+          + '2026 Q2: Pending 3, No election yet 2, Approved 0, Denied 0, Canceled 0',
+        )
       expect(screen.getByText(/Requests for this study's datasets/)).toBeInTheDocument()
       expect(DarMetrics.getDatasetDecisions).toHaveBeenCalledWith({ ...range, limit: 1, target })
       expect(DarMetrics.getDecisions).not.toHaveBeenCalled()

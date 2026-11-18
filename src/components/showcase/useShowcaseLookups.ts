@@ -22,10 +22,10 @@ import {
  * `retry()`; nothing substitutes mock or cached data.
  */
 
-export type LookupState<T>
-  = | { status: 'loading', retry: () => void }
-    | { status: 'ready', data: T, retry: () => void }
-    | { status: 'error', error: ShowcaseLookupError, retry: () => void }
+export type LookupState<T> =
+  | { status: 'loading', retry: () => void }
+  | { status: 'ready', data: T, retry: () => void }
+  | { status: 'error', error: ShowcaseLookupError, retry: () => void }
 
 export interface ShowcaseLookups {
   /** Dataset shelves that make a lookup. Editorial shelves share the one batch's status. */
@@ -40,10 +40,10 @@ interface PlannedRequest {
   request: LookupRequestInput
 }
 
-type RawState
-  = | { status: 'loading' }
-    | { status: 'ready', data: unknown }
-    | { status: 'error', error: ShowcaseLookupError }
+type RawState =
+  | { status: 'loading' }
+  | { status: 'ready', data: unknown }
+  | { status: 'error', error: ShowcaseLookupError }
 
 /** The fields the planner reads; the schema guarantees their types for the section that has them. */
 interface LooseSection {
