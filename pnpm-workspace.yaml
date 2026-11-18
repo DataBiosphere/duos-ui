@@ -8,6 +8,15 @@ overrides:
   # @fastify/static asks for glob ^14.
   "@fastify/static>glob": 14.0.3
 
+auditConfig:
+  ignoreGhsas:
+    # This ReDoS affects all picomatch releases through 4.0.7, the latest release.
+    # Only build, test, and lint tools use picomatch (Vite, Vitest, tinyglobby,
+    # and ESLint plugins). They use glob patterns from our own configuration,
+    # and the production server never loads Vite.
+    # Remove this exception once a patched release is available.
+    - GHSA-fc5q-39xc-vjpf
+
 allowBuilds:
   esbuild: false
 allowedDeprecatedVersions:
