@@ -4,9 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@fastify/static>glob': 14.0.3
-
 importers:
 
   .:
