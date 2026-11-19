@@ -5,19 +5,31 @@ const LIST_ITEM = /^\s*(?:[-*+]|\d+[.)])\s/
 // is not taken for a pair.
 const BOLD_PAIR = /\*\*(?!\s)([^*\n]+?)\*\*([\p{L}\p{N}[])?/gu
 
+const ENDS_WITH_PUNCTUATION = /[\p{P}\p{S}]$/u
+
 const isListItem = (line: string | undefined): boolean => line !== undefined && LIST_ITEM.test(line)
+
+const indentOf = (line: string): number => line.length - line.trimStart().length
 
 /**
  * CommonMark does not let `**` close bold text when it comes after punctuation and directly
  * before a letter, so `**Study ID:**E5204` stays on the page as raw asterisks. A space after the
- * pair lets it close, and also keeps a label apart from a link that follows it. The end of the text in the pair is trimmed for the same reason: `**Label: **`
- * does not close either.
+ * pair lets it close, and also keeps a label apart from a link that follows it. A space at the
+ * end of the text in the pair stops the close too, so `**Label: **value` gets the same repair.
+ *
+ * A pair that closes without help is left as it is: a space in `**BRCA**1` would change the name.
  */
 const repairBold = (line: string): string =>
   line.replace(BOLD_PAIR, (_match: string, inner: string, next: string | undefined) => {
     const label = inner.trimEnd()
-    return next === undefined ? `**${label}**` : `**${label}** ${next}`
+    const cannotClose = label !== inner || ENDS_WITH_PUNCTUATION.test(label)
+    const separator = next !== undefined && cannotClose ? ' ' : ''
+    return `**${label}**${separator}${next ?? ''}`
   })
+
+// Each line stands alone after the clean-up, so a line that starts with `>` would become a block
+// quote and lose the sign. In a description that line is a comparison, such as `> 50% of cells`.
+const keepLeadingComparison = (line: string): string => line.replace(/^>/, '\\>')
 
 /**
  * Prepares a description for a Markdown renderer.
@@ -30,12 +42,16 @@ const repairBold = (line: string): string =>
  */
 export const normalizeMarkdown = (text: string): string => {
   const lines = text.split(/\r?\n/).filter(line => line.trim() !== '')
+  // The indentation of the first item of the current list. After a blank line, four spaces of
+  // indentation start a code block, so no line keeps its own. An item that continues a list
+  // keeps only what it has beyond the first item, which is what nests it.
+  let listIndent = 0
   return lines
     .map((line, index) => {
       const continuesList = isListItem(line) && isListItem(lines[index - 1])
-      // After a blank line, four spaces of indentation start a code block. Only an item that
-      // continues a list keeps its indentation, which is what nests it.
-      const repaired = repairBold(continuesList ? line : line.trimStart())
+      if (!continuesList) listIndent = indentOf(line)
+      const unindented = line.slice(Math.min(listIndent, indentOf(line)))
+      const repaired = repairBold(keepLeadingComparison(unindented))
       if (index === lines.length - 1) return repaired
       return isListItem(line) && isListItem(lines[index + 1]) ? `${repaired}\n` : `${repaired}\n\n`
     })

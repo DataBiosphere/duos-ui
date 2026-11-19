@@ -65,6 +65,18 @@ describe('normalizeMarkdown', () => {
       .toBe('**Lieu:** État **Link:** [text](https://example.org)')
   })
 
+  it.each(['**BRCA**1', '**see**[link](https://example.org)', '**Table**[2]'])('leaves "%s" alone, because it closes without help', (text) => {
+    expect(normalizeMarkdown(text)).toBe(text)
+  })
+
+  it('keeps list items with the same indentation at the same level', () => {
+    expect(normalizeMarkdown('Cohorts:\n  - Cohort A\n  - Cohort B\n    - Arm 1')).toBe('Cohorts:\n\n- Cohort A\n- Cohort B\n  - Arm 1')
+  })
+
+  it('escapes a comparison sign at the start of a line', () => {
+    expect(normalizeMarkdown('Criteria:\n> 50% tumor cellularity')).toBe('Criteria:\n\n\\> 50% tumor cellularity')
+  })
+
   it('removes indentation, which would otherwise start a code block', () => {
     expect(normalizeMarkdown('intro\n    indented\n\tand a tab\n    - first item')).toBe('intro\n\nindented\n\nand a tab\n\n- first item')
   })
@@ -174,6 +186,33 @@ describe('MarkdownText', () => {
     })
   })
 
+  it('shows a comparison at the start of a line as text, not as a block quote', () => {
+    const container = renderText('Criteria:\n> 50% tumor cellularity')
+
+    expect(container.querySelector('blockquote')).toBeNull()
+    expect(texts(container, 'p')).toEqual(['Criteria:', '> 50% tumor cellularity'])
+  })
+
+  it('renders equally indented list items as one flat list', () => {
+    const container = renderText('  - Cohort A\n  - Cohort B')
+
+    expect(container.querySelectorAll('ul')).toHaveLength(1)
+    expect(texts(container, 'li')).toEqual(['Cohort A', 'Cohort B'])
+  })
+
+  it('does not put a space in a name that has a bold part', () => {
+    expect(renderText('**BRCA**1 carriers').textContent).toBe('BRCA1 carriers')
+  })
+
+  it('keeps an email link, so that its address is not lost', () => {
+    const container = renderText('Contact [the study team](mailto:team@example.org).')
+    const link = container.querySelector('a')
+
+    expect(link).toHaveTextContent('the study team')
+    expect(link).toHaveAttribute('href', 'mailto:team@example.org')
+    expect(link).not.toHaveAttribute('target')
+  })
+
   describe('content the page must not take from a description', () => {
     it('does not create elements from raw HTML', () => {
       const container = renderText('<script>window.__pwned = true</script>\n<iframe src="https://evil.test"></iframe>')
@@ -183,11 +222,11 @@ describe('MarkdownText', () => {
       expect(container.textContent).toContain('<script>')
     })
 
-    it('does not load images', () => {
-      const container = renderText('Before ![alt](https://example.org/tracker.png) after')
+    it('does not load images, and shows their alternative text', () => {
+      const container = renderText('Before ![Figure 1](https://example.org/tracker.png) after ![](https://example.org/b.png)')
 
       expect(container.querySelector('img')).toBeNull()
-      expect(container.textContent).toContain('Before')
+      expect(container.textContent).toBe('Before Figure 1 after ')
     })
 
     it('does not link to a javascript: URL', () => {
