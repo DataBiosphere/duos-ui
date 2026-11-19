@@ -10,7 +10,6 @@ type SortOrder = 'asc' | 'desc'
 type Falsey = false | '' | 0 | null | undefined
 type Truthy<T> = T extends Falsey ? never : T
 
-// Array segments are coerced up front so key checks see the same name that property access uses.
 const toPath = (path: string | string[]) =>
   Array.isArray(path) ? path.map(String) : String(path).replaceAll(/\[(\d+)]/g, '.$1').split('.')
 
@@ -37,8 +36,6 @@ const collectionValues = <T>(collection: Collection<T>): T[] =>
 const isPlainObject = (value: any): value is Record<string, any> =>
   Object.prototype.toString.call(value) === '[object Object]'
 
-// Writing through these keys reaches a prototype rather than the object itself, so helpers that
-// copy keys or walk paths from untrusted data (such as DAR JSON) must never follow them.
 const UNSAFE_KEYS: ReadonlySet<string> = new Set(['__proto__', 'constructor', 'prototype'])
 
 const isUnsafeKey = (key: PropertyKey) => typeof key === 'string' && UNSAFE_KEYS.has(key)
@@ -256,7 +253,6 @@ export const get = getAtPath
 
 export const groupBy = <T>(collection: Collection<T>, iteratee: string | ((value: T) => string | number)): Record<string, T[]> => {
   const getKey = typeof iteratee === 'function' ? iteratee : (item: any) => getAtPath(item, iteratee)
-  // Group keys come from data, so use a prototype-free result where "__proto__" is an ordinary key.
   return collectionValues(collection).reduce((result: Record<string, T[]>, item) => {
     const key = getKey(item);
     (result[key] || (result[key] = [])).push(item)
@@ -389,7 +385,6 @@ export const set = (obj: any, path: string | string[], value: any) => {
   let current = obj
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i]
-    // Only descend into own properties, so a path never writes into a shared inherited object.
     if (!Object.hasOwn(current, key)) {
       // Look ahead to determine if we need an array or object
       current[key] = /^\d+$/.test(keys[i + 1]) ? [] : {}
@@ -407,11 +402,9 @@ export const sortedUniq = uniq
 export const unset = (obj: any, path: string | string[]) => {
   if (obj == null) return true
   const keys = toPath(path)
-  // Report false when refusing a path that could reach a prototype.
   if (keys.some(isUnsafeKey)) return false
   let current = obj
   for (let i = 0; i < keys.length - 1; i++) {
-    // An inherited property is not part of obj, so there is nothing of obj's to remove.
     if (!Object.hasOwn(current, keys[i])) return true
     current = current[keys[i]]
     if (current == null) return true
