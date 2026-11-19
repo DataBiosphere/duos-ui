@@ -29,7 +29,7 @@ const repairBold = (line: string): string =>
 
 // Each line stands alone after the clean-up, so a line that starts with `>` would become a block
 // quote and lose the sign. In a description that line is a comparison, such as `> 50% of cells`.
-const keepLeadingComparison = (line: string): string => line.replace(/^>/, '\\>')
+const keepLeadingComparison = (line: string): string => line.replace(/^>/, String.raw`\>`)
 
 /**
  * Prepares a description for a Markdown renderer.
