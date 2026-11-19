@@ -36,6 +36,12 @@ const collectionValues = <T>(collection: Collection<T>): T[] =>
 const isPlainObject = (value: any): value is Record<string, any> =>
   Object.prototype.toString.call(value) === '[object Object]'
 
+// Writing through these keys reaches a prototype rather than the object itself, so helpers that
+// copy keys or walk paths from untrusted data (such as DAR JSON) must never follow them.
+const UNSAFE_KEYS: ReadonlySet<string> = new Set(['__proto__', 'constructor', 'prototype'])
+
+const isUnsafeKey = (key: PropertyKey) => typeof key === 'string' && UNSAFE_KEYS.has(key)
+
 const deepEqual = (value: any, other: any): boolean => {
   if (value === other) return true
   if (value == null || other == null) return value === other
@@ -302,8 +308,10 @@ export const matches = (source: any) => predicateFor(source)
 
 const mergeInto = (target: Record<string, any>, source: Record<string, any>) => {
   Object.entries(source).forEach(([key, sourceValue]) => {
+    if (isUnsafeKey(key)) return
+
     if (isPlainObject(sourceValue)) {
-      const existing = target[key]
+      const existing = Object.hasOwn(target, key) ? target[key] : undefined
       const targetValue = isPlainObject(existing) ? existing : {}
       target[key] = mergeInto(targetValue, sourceValue)
       return

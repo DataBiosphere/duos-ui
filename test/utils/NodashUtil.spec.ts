@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { afterEach, describe, it, expect, vi } from 'vitest'
 import {
   assign,
   capitalize,
@@ -295,5 +295,50 @@ describe('NodashUtil', () => {
 
     const result = chain([1, 2, 2, 3]).uniq().without(2).concat([4]).value()
     expect(result).toEqual([1, 3, 4])
+  })
+})
+
+describe('NodashUtil prototype pollution guards', () => {
+  const pollutedKeys = ['polluted', 'data', 'params']
+
+  // A failing guard would leak onto every object in later tests, so always clean up.
+  afterEach(() => {
+    pollutedKeys.forEach(key => delete (Object.prototype as Record<string, unknown>)[key])
+  })
+
+  const expectPrototypeUnchanged = () => {
+    const probe: Record<string, unknown> = {}
+    pollutedKeys.forEach(key => expect(probe[key]).toBeUndefined())
+  }
+
+  it('merge ignores __proto__ in DAR-shaped API data', () => {
+    const dar = JSON.parse(`{
+      "referenceId": "ref",
+      "data": {
+        "projectTitle": "Title",
+        "restriction": { "__proto__": { "data": { "x": 1 }, "params": { "x": "y" } } }
+      }
+    }`)
+
+    const combined = merge({}, dar.data, dar)
+
+    expectPrototypeUnchanged()
+    expect(combined.projectTitle).toBe('Title')
+    expect(combined.referenceId).toBe('ref')
+    expect(Object.hasOwn(combined.restriction, '__proto__')).toBe(false)
+  })
+
+  it.each([
+    ['a top-level __proto__ key', '{"__proto__": {"polluted": true}}'],
+    ['a constructor.prototype chain', '{"constructor": {"prototype": {"polluted": true}}}'],
+    ['a nested constructor.prototype chain', '{"a": {"constructor": {"prototype": {"polluted": true}}}}'],
+  ])('merge leaves Object.prototype unchanged for %s', (_label, json) => {
+    merge({}, JSON.parse(json))
+    expectPrototypeUnchanged()
+  })
+
+  it('merge still deep merges ordinary keys next to unsafe ones', () => {
+    const result = merge({ a: { b: 1 } }, JSON.parse('{"a": {"c": 2}, "__proto__": {"polluted": true}, "prototype": 3}'))
+    expect(result).toEqual({ a: { b: 1, c: 2 } })
   })
 })
