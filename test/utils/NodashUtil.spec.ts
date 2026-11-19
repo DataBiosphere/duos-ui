@@ -411,6 +411,22 @@ describe('NodashUtil prototype pollution guards', () => {
     })
   })
 
+  it.each(['__proto__', 'constructor', 'hasOwnProperty'])('groupBy treats a %s group key as an ordinary key', (type) => {
+    const items = [{ type }, { type: 'a' }, { type }]
+
+    const groups = groupBy(items, 'type')
+
+    expect(Object.keys(groups).sort()).toEqual([type, 'a'].sort())
+    expect(groups[type]).toEqual([{ type }, { type }])
+    expect(groups.a).toEqual([{ type: 'a' }])
+    expectPrototypeUnchanged()
+  })
+
+  it('groupBy groups a __proto__ key through chain', () => {
+    const groups = chain([{ id: '__proto__' }]).groupBy('id').value()
+    expect(Object.keys(groups)).toEqual(['__proto__'])
+  })
+
   it('set and unset still handle ordinary nested and array paths', () => {
     const obj: Record<string, unknown> = { a: { b: [{ c: 1 }] } }
     set(obj, 'a.b[0].d', 2)

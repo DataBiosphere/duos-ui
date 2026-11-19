@@ -256,11 +256,12 @@ export const get = getAtPath
 
 export const groupBy = <T>(collection: Collection<T>, iteratee: string | ((value: T) => string | number)): Record<string, T[]> => {
   const getKey = typeof iteratee === 'function' ? iteratee : (item: any) => getAtPath(item, iteratee)
+  // Group keys come from data, so use a prototype-free result where "__proto__" is an ordinary key.
   return collectionValues(collection).reduce((result: Record<string, T[]>, item) => {
     const key = getKey(item);
     (result[key] || (result[key] = [])).push(item)
     return result
-  }, {})
+  }, Object.create(null) as Record<string, T[]>)
 }
 
 export const intersection = <T>(...arrays: T[][]): T[] => {
