@@ -1,4 +1,11 @@
-const LIST_ITEM = /^\s*(?:[-*+]|\d+[.)])\s/
+// `+` and a number of three or more digits are not list markers here: in a description they are
+// `+ 5 participants` and `2007. The survey started.`
+const LIST_ITEM = /^\s*(?:[-*]|\d{1,2}[.)])\s/
+
+// A line start that Markdown would take for a block quote, a `+` list item or a code fence.
+const LITERAL_LINE_START = /^(?:>|\+|`{3,}|~{3,})/
+
+const LARGE_NUMBER_MARKER = /^(\d{3,})([.)])/
 
 // A `**…**` pair on one line, and the character directly after it when that is a letter, a digit
 // or the start of a link. The opening marker must touch its text, so that `2 ** 3` in a formula
@@ -29,7 +36,12 @@ const repairBold = (line: string): string =>
 
 // Each line stands alone after the clean-up, so a line that starts with `>` would become a block
 // quote and lose the sign. In a description that line is a comparison, such as `> 50% of cells`.
-const keepLeadingComparison = (line: string): string => line.replace(/^>/, String.raw`\>`)
+// A `+` and a year would become list items in the same way, and a stray code fence would turn
+// the remainder of the description into a code block. An escape keeps each of them as text.
+const keepLiteralLineStart = (line: string): string =>
+  line
+    .replace(LITERAL_LINE_START, start => start.replaceAll(/./g, String.raw`\$&`))
+    .replace(LARGE_NUMBER_MARKER, String.raw`$1\$2`)
 
 /**
  * Prepares a description for a Markdown renderer.
@@ -51,7 +63,7 @@ export const normalizeMarkdown = (text: string): string => {
       const continuesList = isListItem(line) && isListItem(lines[index - 1])
       if (!continuesList) listIndent = indentOf(line)
       const unindented = line.slice(Math.min(listIndent, indentOf(line)))
-      const repaired = repairBold(keepLeadingComparison(unindented))
+      const repaired = repairBold(keepLiteralLineStart(unindented))
       if (index === lines.length - 1) return repaired
       return isListItem(line) && isListItem(lines[index + 1]) ? `${repaired}\n` : `${repaired}\n\n`
     })

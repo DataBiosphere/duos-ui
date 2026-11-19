@@ -77,6 +77,20 @@ describe('normalizeMarkdown', () => {
     expect(normalizeMarkdown('Criteria:\n> 50% tumor cellularity')).toBe('Criteria:\n\n\\> 50% tumor cellularity')
   })
 
+  it.each([
+    ['+ 5 participants', String.raw`\+ 5 participants`],
+    ['2007. The survey started.', String.raw`2007\. The survey started.`],
+    ['100) samples', String.raw`100\) samples`],
+    ['```', '\\`\\`\\`'],
+    ['~~~~ text', String.raw`\~\~\~\~ text`],
+  ])('escapes the start of "%s"', (text, expected) => {
+    expect(normalizeMarkdown(text)).toBe(expected)
+  })
+
+  it.each(['10. tenth item', '1) first item', '`code` at the start', '~5 years'])('leaves the start of "%s" alone', (text) => {
+    expect(normalizeMarkdown(text)).toBe(text)
+  })
+
   it('removes indentation, which would otherwise start a code block', () => {
     expect(normalizeMarkdown('intro\n    indented\n\tand a tab\n    - first item')).toBe('intro\n\nindented\n\nand a tab\n\n- first item')
   })
@@ -191,6 +205,21 @@ describe('MarkdownText', () => {
 
     expect(container.querySelector('blockquote')).toBeNull()
     expect(texts(container, 'p')).toEqual(['Criteria:', '> 50% tumor cellularity'])
+  })
+
+  it('shows a plus sign and a year at the start of a line as text, not as list items', () => {
+    const container = renderText('+ 5 participants\n2007. The survey started.')
+
+    expect(container.querySelector('ul, ol')).toBeNull()
+    expect(texts(container, 'p')).toEqual(['+ 5 participants', '2007. The survey started.'])
+  })
+
+  it('does not let a stray code fence take the text after it', () => {
+    const container = renderText('before\n```\nafter with [link](https://example.org)\n~~~\nlast')
+
+    expect(container.querySelector('pre, code')).toBeNull()
+    expect(texts(container, 'p')).toEqual(['before', '```', 'after with link', '~~~', 'last'])
+    expect(container.querySelector('a')).toHaveAttribute('href', 'https://example.org')
   })
 
   it('renders equally indented list items as one flat list', () => {
