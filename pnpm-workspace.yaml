@@ -10,6 +10,12 @@ auditConfig:
     # Remove this exception once a patched release is available.
     - GHSA-fc5q-39xc-vjpf
 
+overrides:
+  # @fastify/vite asks for @fastify/static ^10.1.2 and would keep 10.1.10, which
+  # GHSA-7533-p376-8gg5 affects. Remove this once the lockfile resolves
+  # @fastify/vite's @fastify/static to 10.1.12 or later on its own.
+  "@fastify/vite>@fastify/static": 10.1.12
+
 allowBuilds:
   esbuild: false
 allowedDeprecatedVersions:
