@@ -10,8 +10,9 @@ type SortOrder = 'asc' | 'desc'
 type Falsey = false | '' | 0 | null | undefined
 type Truthy<T> = T extends Falsey ? never : T
 
+// Array segments are coerced up front so key checks see the same name that property access uses.
 const toPath = (path: string | string[]) =>
-  Array.isArray(path) ? path : String(path).replaceAll(/\[(\d+)]/g, '.$1').split('.')
+  Array.isArray(path) ? path.map(String) : String(path).replaceAll(/\[(\d+)]/g, '.$1').split('.')
 
 const getAtPath = (obj: any, path: string | string[], defaultValue?: any) => {
   if (obj == null) return defaultValue
@@ -383,10 +384,12 @@ export const sortBy = <T>(
 export const set = (obj: any, path: string | string[], value: any) => {
   if (typeof obj !== 'object' || obj === null) return obj
   const keys = toPath(path)
+  if (keys.some(isUnsafeKey)) return obj
   let current = obj
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i]
-    if (!(key in current)) {
+    // Only descend into own properties, so a path never writes into a shared inherited object.
+    if (!Object.hasOwn(current, key)) {
       // Look ahead to determine if we need an array or object
       current[key] = /^\d+$/.test(keys[i + 1]) ? [] : {}
     }
@@ -403,8 +406,12 @@ export const sortedUniq = uniq
 export const unset = (obj: any, path: string | string[]) => {
   if (obj == null) return true
   const keys = toPath(path)
+  // Report false when refusing a path that could reach a prototype.
+  if (keys.some(isUnsafeKey)) return false
   let current = obj
   for (let i = 0; i < keys.length - 1; i++) {
+    // An inherited property is not part of obj, so there is nothing of obj's to remove.
+    if (!Object.hasOwn(current, keys[i])) return true
     current = current[keys[i]]
     if (current == null) return true
   }

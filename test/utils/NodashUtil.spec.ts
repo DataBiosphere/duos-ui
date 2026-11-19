@@ -341,4 +341,84 @@ describe('NodashUtil prototype pollution guards', () => {
     const result = merge({ a: { b: 1 } }, JSON.parse('{"a": {"c": 2}, "__proto__": {"polluted": true}, "prototype": 3}'))
     expect(result).toEqual({ a: { b: 1, c: 2 } })
   })
+
+  it.each([
+    '__proto__.polluted',
+    'constructor.prototype.polluted',
+    'a.__proto__.polluted',
+    'a.constructor.prototype.polluted',
+    'constructor.polluted',
+    'a.prototype.polluted',
+  ])('set leaves Object.prototype and the target unchanged for %s', (path) => {
+    const obj = { a: {} }
+    expect(set(obj, path, true)).toBe(obj)
+    expectPrototypeUnchanged()
+    expect(obj).toEqual({ a: {} })
+  })
+
+  it('set refuses unsafe keys given as an array path', () => {
+    const obj = {}
+    set(obj, ['__proto__', 'polluted'], true)
+    expectPrototypeUnchanged()
+    expect(obj).toEqual({})
+  })
+
+  it('set and unset refuse non-string array segments that coerce to unsafe keys', () => {
+    // String(['__proto__']) is '__proto__', so property access would reach the prototype.
+    const sneaky = [['__proto__'], 'polluted'] as unknown as string[]
+    const obj = {}
+
+    set(obj, sneaky, true)
+    expect(Object.getPrototypeOf(obj)).toBe(Object.prototype)
+    expect(obj).toEqual({})
+    expect(unset(obj, sneaky)).toBe(false)
+  })
+
+  it('set writes inherited names as own properties instead of into shared built-ins', () => {
+    const obj: Record<string, unknown> = {}
+    set(obj, 'toString.polluted', true)
+    expect((Object.prototype.toString as unknown as Record<string, unknown>).polluted).toBeUndefined()
+    expect(obj).toEqual({ toString: { polluted: true } })
+  })
+
+  // A regression would delete these built-in properties, so restore them for later tests.
+  const withRestoredProperty = (target: object, key: string, check: () => void) => {
+    const descriptor = Object.getOwnPropertyDescriptor(target, key)!
+    try {
+      check()
+    }
+    finally {
+      Object.defineProperty(target, key, descriptor)
+    }
+  }
+
+  it('unset leaves Object.prototype unchanged for unsafe paths', () => {
+    withRestoredProperty(Object.prototype, 'hasOwnProperty', () => {
+      const original = Object.prototype.hasOwnProperty
+      expect(unset({}, '__proto__.hasOwnProperty')).toBe(false)
+      expect(unset({}, 'constructor.prototype.hasOwnProperty')).toBe(false)
+      expect(unset({}, ['__proto__', 'hasOwnProperty'])).toBe(false)
+      expect(Object.prototype.hasOwnProperty).toBe(original)
+    })
+  })
+
+  it('unset does not delete from inherited built-ins', () => {
+    withRestoredProperty(Object.prototype.toString, 'name', () => {
+      const toStringName = Object.prototype.toString.name
+      expect(unset({}, 'toString.name')).toBe(true)
+      expect(Object.prototype.toString.name).toBe(toStringName)
+      expect(Object.hasOwn(Object.prototype.toString, 'name')).toBe(true)
+    })
+  })
+
+  it('set and unset still handle ordinary nested and array paths', () => {
+    const obj: Record<string, unknown> = { a: { b: [{ c: 1 }] } }
+    set(obj, 'a.b[0].d', 2)
+    set(obj, ['x', 'y'], 3)
+    expect(obj).toEqual({ a: { b: [{ c: 1, d: 2 }] }, x: { y: 3 } })
+
+    expect(unset(obj, 'a.b[0].c')).toBe(true)
+    expect(unset(obj, 'missing.path')).toBe(true)
+    expect(obj).toEqual({ a: { b: [{ d: 2 }] }, x: { y: 3 } })
+  })
 })
