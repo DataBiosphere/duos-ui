@@ -58,8 +58,8 @@ const plainTextStyle = { overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }
 
 // The time to parse Markdown grows faster than its length: 140,000 characters take seconds.
 const MAX_MARKDOWN_LENGTH = 50_000
-// Twenty list or quote markers in a row: no real description nests that deep.
-const DEEP_NESTING = /(?:(?:[-*+>]|\d+[.)])[ \t]+){20}/
+// Twenty list or quote markers at the start of one line: no real description nests that deep.
+const DEEP_NESTING = /^[ \t]*(?:(?:[-*+>]|\d+[.)])[ \t]+){20}/m
 
 // The Markdown renderer calls itself for each level of a nested list or quote, so thousands of
 // levels end in a stack overflow. That error would unmount the page; this shows plain text.
