@@ -174,11 +174,13 @@ export const DAR = {
   /**
    * Approve the closeout of a DAR.
    * @param referenceId The DAR reference ID
+   * @param submissionDate The submission date of the closeout the signing official reviewed;
+   *   Consent answers 409 when the closeout is no longer that submission
    * @returns 200 on success; throws on error so callers can catch the error code and message
    */
-  approveCloseout: async (referenceId: string): Promise<number> => {
+  approveCloseout: async (referenceId: string, submissionDate: number): Promise<number> => {
     const url = `${await Config.getApiUrl()}/api/dar/${referenceId}/approveCloseout`
-    await fetchPut<void>(url, {}, Config.authOpts())
+    await fetchPut<void>(url, { submissionDate }, Config.authOpts())
     return 200
   },
 }

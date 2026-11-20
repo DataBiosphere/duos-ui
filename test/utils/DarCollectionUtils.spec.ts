@@ -4,6 +4,7 @@ import {
   cancelCollectionFn,
   openCollectionFn,
   approveCollectionFn,
+  APPROVAL_CHANGED_MESSAGE,
   extractDacDataAccessVotesFromBucket,
   extractUserDataAccessVotesFromBucket,
   collapseVotesByUser,
@@ -589,10 +590,46 @@ describe('approveCollectionFn', () => {
     vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => {})
 
     const callback = approveCollectionFn({ updateCollections, role: 'Admin' })
-    await callback({ darCode: 'DAR-1', darCollectionId: 1 })
+    await callback({ darCode: 'DAR-1', darCollectionId: 1, latestReferenceId: 'ref-1', submissionDate: 1700000000123 })
 
+    expect(Collections.approveCollectionById).toHaveBeenCalledWith(1, {
+      referenceId: 'ref-1',
+      submissionDate: 1700000000123,
+    })
     expect(collections[0].status).toBe('Complete')
     expect(Notifications.showSuccess).toHaveBeenCalledWith({ text: 'Successfully approved DAR-1' })
+  })
+
+  // Consent answers 409 when the latest submission isn't the one on screen.
+  it('reloads the row and asks for a new review when the request changed', async () => {
+    let collections = asCollections([{ status: 'In Progress', darCode: 'DAR-1', darCollectionId: 1 }])
+    const current = asCollection({ status: 'Unreviewed', darCode: 'DAR-1', darCollectionId: 1 })
+    const updateCollections = (collection: DarCollectionSummary) => {
+      collections = [collection]
+    }
+    vi.spyOn(Collections, 'approveCollectionById').mockRejectedValue({ response: { status: 409 } })
+    vi.spyOn(Collections, 'getCollectionSummaryByRoleNameAndId').mockResolvedValue(current as never)
+    vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
+    vi.spyOn(Notifications, 'showSuccess').mockImplementation(() => {})
+
+    const callback = approveCollectionFn({ updateCollections, role: 'SigningOfficial' })
+    await callback({ darCode: 'DAR-1', darCollectionId: 1, latestReferenceId: 'ref-1', submissionDate: 1 })
+
+    expect(collections[0].status).toBe('Unreviewed')
+    expect(Notifications.showError).toHaveBeenCalledWith({ text: APPROVAL_CHANGED_MESSAGE })
+    expect(APPROVAL_CHANGED_MESSAGE).toBe('This request changed since you opened it. Review it again before approving.')
+    expect(Notifications.showSuccess).not.toHaveBeenCalled()
+  })
+
+  it('still asks for a new review when reloading the changed row fails', async () => {
+    vi.spyOn(Collections, 'approveCollectionById').mockRejectedValue({ response: { status: 409 } })
+    vi.spyOn(Collections, 'getCollectionSummaryByRoleNameAndId').mockRejectedValue(new Error('down'))
+    vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
+
+    const callback = approveCollectionFn({ updateCollections: () => {}, role: 'SigningOfficial' })
+    await callback({ darCode: 'DAR-1', darCollectionId: 1, latestReferenceId: 'ref-1', submissionDate: 1 })
+
+    expect(Notifications.showError).toHaveBeenCalledWith({ text: APPROVAL_CHANGED_MESSAGE })
   })
 
   it('shows error notification on approval failure', async () => {
@@ -600,7 +637,7 @@ describe('approveCollectionFn', () => {
     vi.spyOn(Notifications, 'showError').mockImplementation(() => {})
 
     const callback = approveCollectionFn({ updateCollections: () => {}, role: 'Admin' })
-    await callback({ darCode: 'DAR-2', darCollectionId: 2 })
+    await callback({ darCode: 'DAR-2', darCollectionId: 2, latestReferenceId: 'ref-2', submissionDate: 2 })
 
     expect(Notifications.showError).toHaveBeenCalledWith({ text: 'Error approving DAR-2' })
   })
