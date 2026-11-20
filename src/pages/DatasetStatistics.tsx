@@ -10,6 +10,7 @@ import { TerraDataRepo } from 'src/libs/ajax/TerraDataRepo'
 import { Notifications } from 'src/libs/utils'
 import { Styles, Theme } from 'src/libs/theme'
 import DarSummaryCard from 'src/components/DarSummaryCard'
+import MarkdownText from 'src/components/MarkdownText'
 import { DatasetExportButton } from 'src/components/data_search/DatasetExportButton'
 import { Button, Stack, Tooltip } from '@mui/material'
 import {
@@ -339,7 +340,7 @@ export default function DatasetStatistics() {
               {datasetTerm.study?.dataCustodianEmail?.join(', ') ?? 'N/A'}
             </LabeledField>
             <div style={{ paddingTop: '20px' }}>
-              {datasetTerm.study?.description}
+              <MarkdownText text={datasetTerm.study?.description} />
             </div>
           </div>
           <div style={{ paddingTop: 20, marginTop: 20, borderTop: '1px solid black', width: '100%' }} />
