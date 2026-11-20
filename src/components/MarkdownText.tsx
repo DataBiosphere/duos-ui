@@ -54,19 +54,41 @@ const textStyle = {
   '& > :last-child': { mb: 0 },
 }
 
+const plainTextStyle = { overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }
+
+// The time to parse Markdown grows faster than its length: 140,000 characters take seconds.
+const MAX_MARKDOWN_LENGTH = 50_000
+// Twenty list or quote markers at the start of one line: no real description nests that deep.
+const DEEP_NESTING = /^[ \t]*(?:(?:[-*+]|\d+[.)])[ \t]+|>[ \t]*){20}/m
+
+// The Markdown renderer calls itself for each level of a nested list or quote, so thousands of
+// levels end in a stack overflow. That error would unmount the page; this shows plain text.
+class PlainTextOnError extends React.Component<React.PropsWithChildren<{ fallback: React.ReactNode }>, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError = () => ({ failed: true })
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children
+  }
+}
+
 /**
- * Shows a description as formatted text rather than as raw Markdown.
+ * Shows a description as formatted text, or as plain text when it is too long or too nested.
  *
  * Raw HTML in the text is shown as text: do not add `rehype-raw` here.
  */
 export default function MarkdownText({ text }: Readonly<MarkdownTextProps>) {
-  const markdown = useMemo(() => (text ? normalizeMarkdown(text) : ''), [text])
+  const tooComplex = !!text && (text.length > MAX_MARKDOWN_LENGTH || DEEP_NESTING.test(text))
+  const markdown = useMemo(() => (text && !tooComplex ? normalizeMarkdown(text) : ''), [text, tooComplex])
+  const plainText = <Box sx={plainTextStyle}>{text}</Box>
+  if (tooComplex) return plainText
   if (markdown === '') return null
   return (
-    <Box sx={textStyle}>
-      <ReactMarkdown components={components}>
-        {markdown}
-      </ReactMarkdown>
-    </Box>
+    <PlainTextOnError key={markdown} fallback={plainText}>
+      <Box sx={textStyle}>
+        <ReactMarkdown components={components}>
+          {markdown}
+        </ReactMarkdown>
+      </Box>
+    </PlainTextOnError>
   )
 }

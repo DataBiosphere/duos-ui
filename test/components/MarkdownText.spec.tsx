@@ -242,6 +242,16 @@ describe('MarkdownText', () => {
     expect(link).not.toHaveAttribute('target')
   })
 
+  it.each(['- ', '1. ', '- > '])('shows a list nested thousands of levels deep ("%s") as plain text', (marker) => {
+    const text = `${marker.repeat(2000)}x`
+    expect(renderText(text).textContent).toBe(text)
+  })
+
+  it('shows a very long description as plain text', () => {
+    const text = '**bold** text\n'.repeat(4000)
+    expect(renderText(text).textContent).toBe(text)
+  })
+
   describe('content the page must not take from a description', () => {
     it('does not create elements from raw HTML', () => {
       const container = renderText('<script>window.__pwned = true</script>\n<iframe src="https://evil.test"></iframe>')

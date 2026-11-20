@@ -25,6 +25,7 @@ const indentOf = (line: string): number => line.length - line.trimStart().length
  * end of the text in the pair stops the close too, so `**Label: **value` gets the same repair.
  *
  * A pair that closes without help is left as it is: a space in `**BRCA**1` would change the name.
+ * Known limit: a pair in a code span or a URL gets the space too.
  */
 const repairBold = (line: string): string =>
   line.replace(BOLD_PAIR, (_match: string, inner: string, next: string | undefined) => {
