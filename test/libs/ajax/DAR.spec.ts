@@ -453,25 +453,15 @@ describe('DAR', () => {
       )
     })
 
-    it('sends an empty body when the closeout has no submission date', async () => {
-      await DAR.approveCloseout('ref-001')
-
-      expect(fetchPut).toHaveBeenCalledWith(
-        'https://duos.example.org/api/dar/ref-001/approveCloseout',
-        {},
-        headers,
-      )
-    })
-
     it('propagates fetch failures', async () => {
       vi.mocked(fetchPut).mockRejectedValueOnce(new Error('forbidden'))
-      await expect(DAR.approveCloseout('ref-001')).rejects.toThrow('forbidden')
+      await expect(DAR.approveCloseout('ref-001', 1)).rejects.toThrow('forbidden')
     })
 
     it('propagates ConsentError rejections so callers can extract a useful error', async () => {
       const consentError = { message: 'Closeout not permitted for this DAR', code: 403 }
       vi.mocked(fetchPut).mockRejectedValueOnce(consentError)
-      const error = await DAR.approveCloseout('ref-001').then(
+      const error = await DAR.approveCloseout('ref-001', 1).then(
         () => { throw new Error('expected rejection') },
         e => e,
       )

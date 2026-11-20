@@ -9,6 +9,9 @@ import { DAR } from 'src/libs/ajax/DAR'
 import { DataAccessRequest, ResponseError } from 'src/types/model'
 import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton'
 
+/** The closeout on screen can't be approved as shown; handled like Consent's 409. */
+class SubmissionChangedError extends Error {}
+
 interface CloseoutReviewProps {
   dar: DataAccessRequest
   onReturn?: () => void
@@ -20,11 +23,22 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
 }) => {
   const [acknowledged, setAcknowledged] = useState<boolean | undefined>(undefined)
 
+  // The closeout on screen isn't the current submission. The console shows the current one.
+  const onChanged = () => {
+    setAcknowledged(false)
+    Notifications.showError({ text: APPROVAL_CHANGED_MESSAGE })
+    onReturn?.()
+  }
+
   const onApprove = async (): Promise<void> => {
     const user = Storage.getCurrentUser()
     const isCloseoutApproved = dar.approvingSigningOfficialApprovedDate !== undefined
 
     if (user.isSigningOfficial && !isCloseoutApproved) {
+      // Without its submission date the approval can't name what was reviewed.
+      if (dar.submissionDate === undefined) {
+        throw new SubmissionChangedError()
+      }
       await DAR.approveCloseout(dar.referenceId, dar.submissionDate)
     }
     else {
@@ -36,11 +50,11 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
   }
 
   const onError = (error: unknown) => {
-    setAcknowledged(false)
-    if (extractStatus(error) === 409) {
-      Notifications.showError({ text: APPROVAL_CHANGED_MESSAGE })
+    if (error instanceof SubmissionChangedError || extractStatus(error) === 409) {
+      onChanged()
       return
     }
+    setAcknowledged(false)
     Notifications.showError({ text: 'Error approving closeout review: ' + extractError(error) })
   }
 

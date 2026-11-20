@@ -99,12 +99,13 @@ describe('CloseoutReview', () => {
     expect(DAR.approveCloseout).toHaveBeenCalledWith('DAR-UUID', 1700000000123)
   })
 
-  // Consent answers 409 when the closeout isn't the submission on screen.
-  it('asks for a new review when the closeout changed', async () => {
+  // Consent answers 409 when the closeout isn't the submission on screen; the console shows the
+  // current one.
+  it('asks for a new review and returns to the console when the closeout changed', async () => {
     vi.mocked(User.getAcknowledgement).mockResolvedValue(false as unknown as Acknowledgement)
     vi.mocked(DAR.approveCloseout).mockRejectedValue({ response: { status: 409 } })
 
-    renderComponent()
+    const { onReturn } = renderComponent()
 
     const approveButton = await screen.findByRole('button', { name: 'Approve closeout' })
     await act(async () => {
@@ -114,6 +115,25 @@ describe('CloseoutReview', () => {
     await waitFor(() => {
       expect(Notifications.showError).toHaveBeenCalledWith({ text: 'This request changed since you opened it. Review it again before approving.' })
     })
+    expect(onReturn).toHaveBeenCalled()
+    expect(Notifications.showSuccess).not.toHaveBeenCalled()
+  })
+
+  it('does not approve a closeout without its submission date', async () => {
+    vi.mocked(User.getAcknowledgement).mockResolvedValue(false as unknown as Acknowledgement)
+
+    const { onReturn } = renderComponent({ dar: { referenceId: 'DAR-UUID' } as DataAccessRequest })
+
+    const approveButton = await screen.findByRole('button', { name: 'Approve closeout' })
+    await act(async () => {
+      fireEvent.click(approveButton)
+    })
+
+    await waitFor(() => {
+      expect(Notifications.showError).toHaveBeenCalledWith({ text: 'This request changed since you opened it. Review it again before approving.' })
+    })
+    expect(DAR.approveCloseout).not.toHaveBeenCalled()
+    expect(onReturn).toHaveBeenCalled()
     expect(Notifications.showSuccess).not.toHaveBeenCalled()
   })
 
