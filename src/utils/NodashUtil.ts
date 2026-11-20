@@ -11,7 +11,7 @@ type Falsey = false | '' | 0 | null | undefined
 type Truthy<T> = T extends Falsey ? never : T
 
 const toPath = (path: string | string[]) =>
-  Array.isArray(path) ? path : String(path).replaceAll(/\[(\d+)]/g, '.$1').split('.')
+  Array.isArray(path) ? path.map(String) : String(path).replaceAll(/\[(\d+)]/g, '.$1').split('.')
 
 const getAtPath = (obj: any, path: string | string[], defaultValue?: any) => {
   if (obj == null) return defaultValue
@@ -35,6 +35,10 @@ const collectionValues = <T>(collection: Collection<T>): T[] =>
 
 const isPlainObject = (value: any): value is Record<string, any> =>
   Object.prototype.toString.call(value) === '[object Object]'
+
+const UNSAFE_KEYS: ReadonlySet<string> = new Set(['__proto__', 'constructor', 'prototype'])
+
+const isUnsafeKey = (key: PropertyKey) => typeof key === 'string' && UNSAFE_KEYS.has(key)
 
 const deepEqual = (value: any, other: any): boolean => {
   if (value === other) return true
@@ -253,7 +257,7 @@ export const groupBy = <T>(collection: Collection<T>, iteratee: string | ((value
     const key = getKey(item);
     (result[key] || (result[key] = [])).push(item)
     return result
-  }, {})
+  }, Object.create(null) as Record<string, T[]>)
 }
 
 export const intersection = <T>(...arrays: T[][]): T[] => {
@@ -302,8 +306,10 @@ export const matches = (source: any) => predicateFor(source)
 
 const mergeInto = (target: Record<string, any>, source: Record<string, any>) => {
   Object.entries(source).forEach(([key, sourceValue]) => {
+    if (isUnsafeKey(key)) return
+
     if (isPlainObject(sourceValue)) {
-      const existing = target[key]
+      const existing = Object.hasOwn(target, key) ? target[key] : undefined
       const targetValue = isPlainObject(existing) ? existing : {}
       target[key] = mergeInto(targetValue, sourceValue)
       return
@@ -375,10 +381,11 @@ export const sortBy = <T>(
 export const set = (obj: any, path: string | string[], value: any) => {
   if (typeof obj !== 'object' || obj === null) return obj
   const keys = toPath(path)
+  if (keys.some(isUnsafeKey)) return obj
   let current = obj
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i]
-    if (!(key in current)) {
+    if (!Object.hasOwn(current, key)) {
       // Look ahead to determine if we need an array or object
       current[key] = /^\d+$/.test(keys[i + 1]) ? [] : {}
     }
@@ -395,8 +402,10 @@ export const sortedUniq = uniq
 export const unset = (obj: any, path: string | string[]) => {
   if (obj == null) return true
   const keys = toPath(path)
+  if (keys.some(isUnsafeKey)) return false
   let current = obj
   for (let i = 0; i < keys.length - 1; i++) {
+    if (!Object.hasOwn(current, keys[i])) return true
     current = current[keys[i]]
     if (current == null) return true
   }

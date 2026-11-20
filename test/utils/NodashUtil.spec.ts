@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { afterEach, describe, it, expect, vi } from 'vitest'
 import {
   assign,
   capitalize,
@@ -295,5 +295,146 @@ describe('NodashUtil', () => {
 
     const result = chain([1, 2, 2, 3]).uniq().without(2).concat([4]).value()
     expect(result).toEqual([1, 3, 4])
+  })
+})
+
+describe('NodashUtil prototype pollution guards', () => {
+  const pollutedKeys = ['polluted', 'data', 'params']
+
+  // A failing guard would leak onto every object in later tests, so always clean up.
+  afterEach(() => {
+    pollutedKeys.forEach(key => delete (Object.prototype as Record<string, unknown>)[key])
+  })
+
+  const expectPrototypeUnchanged = () => {
+    const probe: Record<string, unknown> = {}
+    pollutedKeys.forEach(key => expect(probe[key]).toBeUndefined())
+  }
+
+  it('merge ignores __proto__ in DAR-shaped API data', () => {
+    const dar = JSON.parse(`{
+      "referenceId": "ref",
+      "data": {
+        "projectTitle": "Title",
+        "restriction": { "__proto__": { "data": { "x": 1 }, "params": { "x": "y" } } }
+      }
+    }`)
+
+    const combined = merge({}, dar.data, dar)
+
+    expectPrototypeUnchanged()
+    expect(combined.projectTitle).toBe('Title')
+    expect(combined.referenceId).toBe('ref')
+    expect(Object.hasOwn(combined.restriction, '__proto__')).toBe(false)
+  })
+
+  it.each([
+    ['a top-level __proto__ key', '{"__proto__": {"polluted": true}}'],
+    ['a constructor.prototype chain', '{"constructor": {"prototype": {"polluted": true}}}'],
+    ['a nested constructor.prototype chain', '{"a": {"constructor": {"prototype": {"polluted": true}}}}'],
+  ])('merge leaves Object.prototype unchanged for %s', (_label, json) => {
+    merge({}, JSON.parse(json))
+    expectPrototypeUnchanged()
+  })
+
+  it('merge still deep merges ordinary keys next to unsafe ones', () => {
+    const result = merge({ a: { b: 1 } }, JSON.parse('{"a": {"c": 2}, "__proto__": {"polluted": true}, "prototype": 3}'))
+    expect(result).toEqual({ a: { b: 1, c: 2 } })
+  })
+
+  it.each([
+    '__proto__.polluted',
+    'constructor.prototype.polluted',
+    'a.__proto__.polluted',
+    'a.constructor.prototype.polluted',
+    'constructor.polluted',
+    'a.prototype.polluted',
+  ])('set leaves Object.prototype and the target unchanged for %s', (path) => {
+    const obj = { a: {} }
+    expect(set(obj, path, true)).toBe(obj)
+    expectPrototypeUnchanged()
+    expect(obj).toEqual({ a: {} })
+  })
+
+  it('set refuses unsafe keys given as an array path', () => {
+    const obj = {}
+    set(obj, ['__proto__', 'polluted'], true)
+    expectPrototypeUnchanged()
+    expect(obj).toEqual({})
+  })
+
+  it('set and unset refuse non-string array segments that coerce to unsafe keys', () => {
+    // String(['__proto__']) is '__proto__', so property access would reach the prototype.
+    const sneaky = [['__proto__'], 'polluted'] as unknown as string[]
+    const obj = {}
+
+    set(obj, sneaky, true)
+    expect(Object.getPrototypeOf(obj)).toBe(Object.prototype)
+    expect(obj).toEqual({})
+    expect(unset(obj, sneaky)).toBe(false)
+  })
+
+  it('set writes inherited names as own properties instead of into shared built-ins', () => {
+    const obj: Record<string, unknown> = {}
+    set(obj, 'toString.polluted', true)
+    expect((Object.prototype.toString as unknown as Record<string, unknown>).polluted).toBeUndefined()
+    expect(obj).toEqual({ toString: { polluted: true } })
+  })
+
+  // A regression would delete these built-in properties, so restore them for later tests.
+  const withRestoredProperty = (target: object, key: string, check: () => void) => {
+    const descriptor = Object.getOwnPropertyDescriptor(target, key)!
+    try {
+      check()
+    }
+    finally {
+      Object.defineProperty(target, key, descriptor)
+    }
+  }
+
+  it('unset leaves Object.prototype unchanged for unsafe paths', () => {
+    withRestoredProperty(Object.prototype, 'hasOwnProperty', () => {
+      const original = Object.prototype.hasOwnProperty
+      expect(unset({}, '__proto__.hasOwnProperty')).toBe(false)
+      expect(unset({}, 'constructor.prototype.hasOwnProperty')).toBe(false)
+      expect(unset({}, ['__proto__', 'hasOwnProperty'])).toBe(false)
+      expect(Object.prototype.hasOwnProperty).toBe(original)
+    })
+  })
+
+  it('unset does not delete from inherited built-ins', () => {
+    withRestoredProperty(Object.prototype.toString, 'name', () => {
+      const toStringName = Object.prototype.toString.name
+      expect(unset({}, 'toString.name')).toBe(true)
+      expect(Object.prototype.toString.name).toBe(toStringName)
+      expect(Object.hasOwn(Object.prototype.toString, 'name')).toBe(true)
+    })
+  })
+
+  it.each(['__proto__', 'constructor', 'hasOwnProperty'])('groupBy treats a %s group key as an ordinary key', (type) => {
+    const items = [{ type }, { type: 'a' }, { type }]
+
+    const groups = groupBy(items, 'type')
+
+    expect(Object.keys(groups).sort()).toEqual([type, 'a'].sort())
+    expect(groups[type]).toEqual([{ type }, { type }])
+    expect(groups.a).toEqual([{ type: 'a' }])
+    expectPrototypeUnchanged()
+  })
+
+  it('groupBy groups a __proto__ key through chain', () => {
+    const groups = chain([{ id: '__proto__' }]).groupBy('id').value()
+    expect(Object.keys(groups)).toEqual(['__proto__'])
+  })
+
+  it('set and unset still handle ordinary nested and array paths', () => {
+    const obj: Record<string, unknown> = { a: { b: [{ c: 1 }] } }
+    set(obj, 'a.b[0].d', 2)
+    set(obj, ['x', 'y'], 3)
+    expect(obj).toEqual({ a: { b: [{ c: 1, d: 2 }] }, x: { y: 3 } })
+
+    expect(unset(obj, 'a.b[0].c')).toBe(true)
+    expect(unset(obj, 'missing.path')).toBe(true)
+    expect(obj).toEqual({ a: { b: [{ d: 2 }] }, x: { y: 3 } })
   })
 })
