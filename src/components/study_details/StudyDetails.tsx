@@ -6,6 +6,7 @@ import { Theme } from 'src/libs/theme'
 import { applyForAccess } from 'src/utils/accessUtils'
 import { usePageTitle } from 'src/hooks/usePageTitle'
 import LibraryDataGrid from 'src/components/data_library/LibraryDataGrid'
+import MarkdownText from 'src/components/MarkdownText'
 import LibraryFooter from 'src/components/data_library/LibraryFooter'
 import { datasetAsset } from 'src/components/data_library/assets/datasetAsset'
 import {
@@ -219,8 +220,8 @@ const StudyDetailsContent = ({ studyId }: StudyDetailsContentProps) => {
                 { singular: 'Publication', plural: 'Publications', count: publications.data?.length ?? 0 },
               ]}
             />
-            <Typography variant="body1" sx={{ pt: 2.5 }}>
-              {studyDescription}
+            <Typography variant="body1" component="div" sx={{ pt: 2.5 }}>
+              <MarkdownText text={studyDescription} />
             </Typography>
             <StudyInfoTable
               rows={[

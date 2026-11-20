@@ -222,6 +222,15 @@ describe('DatasetStatistics', () => {
     expect(await screen.findByText('Dr. Test PI')).toBeTruthy()
   })
 
+  it('formats Markdown in the study description', async () => {
+    renderDatasetStatistics({
+      dataset: { ...mockDatasetTerm, study: { ...mockDatasetTerm.study, description: '**Study ID:**E5204' } },
+    })
+
+    expect((await screen.findByText('Study ID:')).tagName).toBe('STRONG')
+    expect(screen.queryByText(/\*\*/)).toBeNull()
+  })
+
   it('shows the instant approval badge when the search index marked the dataset eligible', async () => {
     renderDatasetStatistics({
       dataset: { ...mockDatasetTerm, instantApprovalEligible: true },
