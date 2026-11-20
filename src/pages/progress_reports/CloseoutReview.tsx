@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import InfoIcon from '@mui/icons-material/Info'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
-import { extractError } from 'src/utils/ErrorUtils'
+import { extractError, extractStatus } from 'src/utils/ErrorUtils'
+import { APPROVAL_CHANGED_MESSAGE } from 'src/utils/DarCollectionUtils'
 import { Storage } from 'src/libs/storage'
 import { DAR } from 'src/libs/ajax/DAR'
 import { DataAccessRequest, ResponseError } from 'src/types/model'
@@ -24,7 +25,7 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
     const isCloseoutApproved = dar.approvingSigningOfficialApprovedDate !== undefined
 
     if (user.isSigningOfficial && !isCloseoutApproved) {
-      await DAR.approveCloseout(dar.referenceId)
+      await DAR.approveCloseout(dar.referenceId, dar.submissionDate)
     }
     else {
       const acknowledgement = 'dar_closeout_chair_ref_' + dar.referenceId
@@ -36,6 +37,10 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
 
   const onError = (error: unknown) => {
     setAcknowledged(false)
+    if (extractStatus(error) === 409) {
+      Notifications.showError({ text: APPROVAL_CHANGED_MESSAGE })
+      return
+    }
     Notifications.showError({ text: 'Error approving closeout review: ' + extractError(error) })
   }
 

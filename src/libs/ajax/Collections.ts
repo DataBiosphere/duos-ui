@@ -46,9 +46,16 @@ export const Collections = {
     return res.data
   },
 
-  approveCollectionById: async (id: number): Promise<DarCollection> => {
+  /**
+   * Approve a collection as its signing official. The body names the submission the official
+   * reviewed; Consent answers 409 when the collection's latest submission is no longer that one.
+   */
+  approveCollectionById: async (
+    id: number,
+    submission: { referenceId: string, submissionDate: number },
+  ): Promise<DarCollection> => {
     const url = `${await Config.getApiUrl()}/api/collections/${id}/approve`
-    const res = await fetchPost<DarCollection>(url, {}, Config.authOpts())
+    const res = await fetchPost<DarCollection>(url, submission, Config.authOpts())
     return res.data
   },
 }

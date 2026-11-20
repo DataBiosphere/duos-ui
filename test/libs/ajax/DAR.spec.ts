@@ -443,7 +443,17 @@ describe('DAR', () => {
   })
 
   describe('approveCloseout', () => {
-    it('puts to the approveCloseout endpoint', async () => {
+    it('puts to the approveCloseout endpoint naming the reviewed submission date', async () => {
+      await DAR.approveCloseout('ref-001', 1700000000123)
+
+      expect(fetchPut).toHaveBeenCalledWith(
+        'https://duos.example.org/api/dar/ref-001/approveCloseout',
+        { submissionDate: 1700000000123 },
+        headers,
+      )
+    })
+
+    it('sends an empty body when the closeout has no submission date', async () => {
       await DAR.approveCloseout('ref-001')
 
       expect(fetchPut).toHaveBeenCalledWith(

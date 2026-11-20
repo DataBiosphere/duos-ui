@@ -31,6 +31,7 @@ import { Notifications } from 'src/libs/utils'
 
 const mockDar: DataAccessRequest = {
   referenceId: 'DAR-UUID',
+  submissionDate: 1700000000123,
 } as DataAccessRequest
 
 const mockUser = { isSigningOfficial: true }
@@ -95,6 +96,25 @@ describe('CloseoutReview', () => {
     await waitFor(() => {
       expect(Notifications.showSuccess).toHaveBeenCalledWith({ text: 'Closeout review approved successfully.' })
     })
+    expect(DAR.approveCloseout).toHaveBeenCalledWith('DAR-UUID', 1700000000123)
+  })
+
+  // Consent answers 409 when the closeout isn't the submission on screen.
+  it('asks for a new review when the closeout changed', async () => {
+    vi.mocked(User.getAcknowledgement).mockResolvedValue(false as unknown as Acknowledgement)
+    vi.mocked(DAR.approveCloseout).mockRejectedValue({ response: { status: 409 } })
+
+    renderComponent()
+
+    const approveButton = await screen.findByRole('button', { name: 'Approve closeout' })
+    await act(async () => {
+      fireEvent.click(approveButton)
+    })
+
+    await waitFor(() => {
+      expect(Notifications.showError).toHaveBeenCalledWith({ text: 'This request changed since you opened it. Review it again before approving.' })
+    })
+    expect(Notifications.showSuccess).not.toHaveBeenCalled()
   })
 
   it('calls onReturn when Go to Data Access Requests button is clicked', async () => {
