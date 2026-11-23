@@ -5,7 +5,14 @@ import Fastify, { type FastifyInstance } from 'fastify'
 import fastifyCookie from '@fastify/cookie'
 import { RefreshFailedError } from '../src/auth/refresh.js'
 import { buildLoggerOptions } from '../src/logging.js'
-import { CSRF_ERROR_CODE, CSRF_EXEMPT_UNSAFE_REQUESTS, PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, upstreamPath } from '../src/proxy/apiProxy.js'
+import { CSRF_ERROR_CODE, CSRF_EXEMPT_UNSAFE_REQUESTS, PROXY_PREFIX, REFRESH_WINDOW_SECONDS, UNAUTHENTICATED_PATHS, apiProxy, isSupportFormPath, upstreamPath } from '../src/proxy/apiProxy.js'
+import {
+  CLIENT_IP_HEADER,
+  CLIENT_IP_SIGNATURE_HEADER,
+  CLIENT_IP_TIMESTAMP_HEADER,
+  CONSENT_PROXY_SECRET_ENV_VAR,
+  signClientIp,
+} from '../src/proxy/clientIpSignature.js'
 import {
   SESSION_COOKIE,
   type SessionSeed,
@@ -83,6 +90,147 @@ describe('apiProxy', () => {
       expect(destroy).toHaveBeenCalledOnce()
       expect([res.headers['set-cookie']].flat().join(';')).toMatch(/^sessionId=;/)
     }
+  })
+
+  // Consent limits the support form per client IP (DT-4496). It sees this pod's
+  // egress address in X-Real-IP, so the BFF signs the browser's IP instead.
+  describe('the signed client IP on the support form', () => {
+    const PROXY_SECRET = 'test-consent-proxy-secret-0123456789abcdef'
+    const NOW = new Date('2026-10-30T16:00:00Z')
+    const SIGNED_HEADERS = [CLIENT_IP_HEADER, CLIENT_IP_TIMESTAMP_HEADER, CLIENT_IP_SIGNATURE_HEADER]
+    const FORGED = { [CLIENT_IP_HEADER]: '198.51.100.1', [CLIENT_IP_TIMESTAMP_HEADER]: '1', [CLIENT_IP_SIGNATURE_HEADER]: 'forged' }
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'], now: NOW })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+      delete process.env[CONSENT_PROXY_SECRET_ENV_VAR]
+    })
+
+    const expectSignedFor = (ip: string) => {
+      const forwarded = upstream.last().headers
+      expect(forwarded[CLIENT_IP_HEADER]).toBe(ip)
+      expect(forwarded[CLIENT_IP_TIMESTAMP_HEADER]).toBe('1793376000')
+      expect(forwarded[CLIENT_IP_SIGNATURE_HEADER])
+        .toBe(signClientIp(PROXY_SECRET, ip, NOW.getTime() / 1000)[CLIENT_IP_SIGNATURE_HEADER])
+    }
+
+    const expectUnsigned = () => {
+      for (const name of SIGNED_HEADERS) {
+        expect(upstream.last().headers[name]).toBeUndefined()
+      }
+    }
+
+    it.each(['/support/request', '/support/upload'])('signs the open POST %s, replacing a caller\'s values', async (path) => {
+      process.env[CONSENT_PROXY_SECRET_ENV_VAR] = PROXY_SECRET
+      app = await buildProxyApp()
+
+      await app.inject({ method: 'POST', url: `${PROXY_PREFIX}${path}`, headers: { 'x-forwarded-for': '203.0.113.7', ...FORGED }, payload: '{}' })
+
+      expectSignedFor('203.0.113.7')
+    })
+
+    // What is signed is the path that is forwarded: Consent reads the spelling
+    // and a fragment never reaches it.
+    it.each(['/%73upport;x=1/request', '/api/support#x', '/support#x'])('signs %s as it arrives at Consent', async (path) => {
+      process.env[CONSENT_PROXY_SECRET_ENV_VAR] = PROXY_SECRET
+      app = await buildProxyApp(freshSession())
+
+      await injectWithCsrf(app, { method: 'POST', url: `${PROXY_PREFIX}${path}`, headers: { 'x-forwarded-for': '203.0.113.7' }, payload: '{}' })
+
+      expectSignedFor('203.0.113.7')
+    })
+
+    // Consent counts any method on a support path, so the BFF signs any method.
+    it('signs a signed-out GET on a support path too', async () => {
+      process.env[CONSENT_PROXY_SECRET_ENV_VAR] = PROXY_SECRET
+      app = await buildProxyApp()
+
+      await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/support/request`, headers: { 'x-forwarded-for': '203.0.113.7', ...FORGED } })
+
+      expectSignedFor('203.0.113.7')
+    })
+
+    it('signs the signed-in POST /api/support/request', async () => {
+      process.env[CONSENT_PROXY_SECRET_ENV_VAR] = PROXY_SECRET
+      app = await buildProxyApp(freshSession())
+
+      await injectWithCsrf(app, { method: 'POST', url: `${PROXY_PREFIX}/api/support/request`, headers: { 'x-forwarded-for': '203.0.113.7' }, payload: '{}' })
+
+      expectSignedFor('203.0.113.7')
+      expect(upstream.last().headers.authorization).toBe('Bearer session-access-token')
+    })
+
+    it('signs no other request, and forwards no caller values on it', async () => {
+      process.env[CONSENT_PROXY_SECRET_ENV_VAR] = PROXY_SECRET
+      app = await buildProxyApp(freshSession())
+
+      await app.inject({ method: 'GET', url: `${PROXY_PREFIX}/api/dataset/1`, headers: FORGED })
+
+      expectUnsigned()
+    })
+
+    it('signs nothing, and forwards no caller values, when the secret is unset', async () => {
+      app = await buildProxyApp()
+
+      await app.inject({ method: 'POST', url: `${PROXY_PREFIX}/support/upload`, headers: FORGED, payload: '{}' })
+
+      expectUnsigned()
+    })
+
+    it('warns at startup when the secret is unset', async () => {
+      const lines: string[] = []
+      const stream = {
+        write: (line: string) => {
+          lines.push(line)
+        },
+      }
+      app = await buildAppShell({ level: 'warn', stream })
+      await app.register(apiProxy)
+      await app.ready()
+
+      expect(lines.some(line => line.includes(`${CONSENT_PROXY_SECRET_ENV_VAR} is not set`))).toBe(true)
+    })
+
+    it('does not warn at startup when the secret is set', async () => {
+      process.env[CONSENT_PROXY_SECRET_ENV_VAR] = PROXY_SECRET
+      const lines: string[] = []
+      const stream = {
+        write: (line: string) => {
+          lines.push(line)
+        },
+      }
+      app = await buildAppShell({ level: 'warn', stream })
+      await app.register(apiProxy)
+      await app.ready()
+
+      expect(lines.some(line => line.includes(CONSENT_PROXY_SECRET_ENV_VAR))).toBe(false)
+    })
+
+    // The same paths Consent's PublicRateLimitFilter counts, however they are spelled.
+    it.each([
+      '/support/request',
+      '/support/upload',
+      '/api/support/request',
+      '/support/request/',
+      '/%73upport/request',
+      '/support;x=1/request',
+      '//support/request',
+      '/api//support/request',
+      '/api;x=1/support/request',
+      '/api/%73upport/request',
+    ])('treats %s as a support-form path', (path) => {
+      expect(isSupportFormPath(path)).toBe(true)
+    })
+
+    it.each(['/', '/api', '/api/supporting', '/api/dar/support', '/supporting', '/support%2Frequest', '/support%3Bx/request', '/%E0%A4%A'])(
+      'does not treat %s as a support-form path',
+      (path) => {
+        expect(isSupportFormPath(path)).toBe(false)
+      },
+    )
   })
 
   describe('upstreamPath', () => {
