@@ -270,7 +270,8 @@ export const approveCollectionFn = ({
   role: UserRoleName
 }) =>
   async ({ darCode, darCollectionId, latestReferenceId, submissionDate }: Pick<
-    DarCollectionSummary, 'darCode' | 'darCollectionId' | 'latestReferenceId' | 'submissionDate'
+    DarCollectionSummary,
+    'darCode' | 'darCollectionId' | 'latestReferenceId' | 'submissionDate'
   >): Promise<void> => {
     const reloadRow = async () => {
       const summary = await Collections.getCollectionSummaryByRoleNameAndId({
