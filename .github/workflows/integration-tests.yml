@@ -24,8 +24,8 @@ jobs:
     if: github.actor != 'dependabot[bot]'
     services:
       postgres:
-        # Stays on Postgres 16 until DT-4324 upgrades prod, so CI tests the version that prod runs.
-        image: postgres:16.13-alpine
+        # The same major version as the Consent database in prod.
+        image: postgres:18.7-alpine
         env:
           POSTGRES_DB: consent
           POSTGRES_USER: consent
