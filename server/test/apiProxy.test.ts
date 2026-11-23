@@ -132,9 +132,10 @@ describe('apiProxy', () => {
       expectSignedFor('203.0.113.7')
     })
 
-    // What is signed is the path that is forwarded: Consent reads the spelling
-    // and a fragment never reaches it.
-    it.each(['/%73upport;x=1/request', '/api/support#x', '/support#x'])('signs %s as it arrives at Consent', async (path) => {
+    // What is signed is the path that is forwarded, however it is spelled. (A
+    // fragment can't be tested here: inject drops it; upstreamPath's table
+    // below covers the cut.)
+    it.each(['/%73upport;x=1/request', '//api/support/request'])('signs %s as it arrives at Consent', async (path) => {
       process.env[CONSENT_PROXY_SECRET_ENV_VAR] = PROXY_SECRET
       app = await buildProxyApp(freshSession())
 
@@ -238,6 +239,10 @@ describe('apiProxy', () => {
       [`${PROXY_PREFIX}/api/dataset/1`, '/api/dataset/1'],
       [`${PROXY_PREFIX}/status`, '/status'],
       [`${PROXY_PREFIX}/api/dar/v2?open=true`, '/api/dar/v2'],
+      // A raw `#…` is never forwarded, so it never reaches a decision on the
+      // path either, such as which requests are signed (DT-4496).
+      [`${PROXY_PREFIX}/support#x`, '/support'],
+      [`${PROXY_PREFIX}/api/support/request#x?y=1`, '/api/support/request'],
       [`${PROXY_PREFIX}/`, '/'],
       // Defensive only. `/duos-api/*` does not match the bare prefix, so the
       // router 404s `/duos-api` rather than delivering it here (the trailing

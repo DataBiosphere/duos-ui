@@ -100,10 +100,12 @@ describe('ecmProxy', () => {
         url: `${ECM_PROXY_PREFIX}${OAUTHCODE_PATH}?state=s&oauthcode=c`,
         // The legacy client constructed its own bearer header; whatever a
         // client sends must never reach ECM.
-        headers: { authorization: 'Bearer browser-held-token' },
+        headers: { 'authorization': 'Bearer browser-held-token', 'x-duos-client-ip': '198.51.100.1', 'x-duos-client-ip-timestamp': '1', 'x-duos-client-ip-signature': 'forged' },
       })
 
       const forwarded = upstream.last().headers
+      // Only the DUOS API proxy signs a client IP; no caller's value is forwarded (DT-4496).
+      expect(Object.keys(forwarded).filter(name => name.startsWith('x-duos-client-ip'))).toEqual([])
       expect(forwarded.cookie).toBeUndefined()
       expect(forwarded['x-csrf-token']).toBeUndefined()
       expect(forwarded.authorization).toBe('Bearer the-session-token')
