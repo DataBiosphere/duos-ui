@@ -62,6 +62,16 @@ const isValidationRejection = (error: unknown): boolean => {
   return response?.status === 400 && !isEmpty(response.data?.message?.trim())
 }
 
+/**
+ * A 413: a file or the whole request is over the upload limit, so nothing was saved and the
+ * submitter can remove or shrink a file. Consent's message says which limit, when one is readable.
+ */
+const tooLargeMessage = (error: unknown): string | undefined => {
+  const response = (error as ResponseError)?.response
+  if (response?.status !== 413) return undefined
+  return response.data?.message?.trim() || 'A file or the request is over the upload limit'
+}
+
 /** A rejection reaches us either as a thrown Error or as the raw response it was built from. */
 const errorMessage = (error: unknown): string => {
   if (error instanceof Error) return error.message
@@ -196,6 +206,11 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
 
   const onUpdateStudyError = (error: unknown) => {
     // Nothing persisted, so reloading would discard the user's edits along with the violations.
+    const tooLarge = tooLargeMessage(error)
+    if (tooLarge) {
+      Notifications.showError({ text: `Study update failed: ${tooLarge}` })
+      return
+    }
     if (isValidationRejection(error)) {
       Notifications.showError({ text: renderViolations('Study update failed:', error) })
       return
@@ -236,6 +251,11 @@ export const DataSubmissionFormV2 = (props: DataSubmissionFormV2Props) => {
   }
 
   const onError = (error: unknown) => {
+    const tooLarge = tooLargeMessage(error)
+    if (tooLarge) {
+      Notifications.showError({ text: `Study creation failed: ${tooLarge}` })
+      return
+    }
     if (isValidationRejection(error)) {
       Notifications.showError({ text: renderViolations('Study creation failed:', error) })
       return
