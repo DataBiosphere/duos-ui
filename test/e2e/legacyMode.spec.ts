@@ -49,3 +49,12 @@ test('serves legacy mode, and the browser reaches the showcase lookup directly',
   // The legacy client never asks the BFF for a session, before or after the lookup.
   expect(paths).not.toContain('/auth/me')
 })
+
+test('renders the app and says the server is unreachable when the OAuth configuration fails', async ({ page }) => {
+  await page.route('**/oauth2/configuration', route => route.fulfill({ status: 502, body: 'Bad Gateway' }))
+
+  await page.goto('/')
+
+  await expect(page.getByText('DUOS cannot reach its server right now', { exact: false })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Sign In' }).first()).toBeVisible()
+})

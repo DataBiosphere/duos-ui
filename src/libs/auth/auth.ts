@@ -162,6 +162,39 @@ const legacySignOut = async (redirectTo: string): Promise<SignOutResult> => {
   return CONFIRMED
 }
 
+const startLegacyAuth = async (): Promise<void> => {
+  await OidcBroker.initialize()
+  const um: UserManager = OidcBroker.getUserManager()
+  // UserManager events.
+  // For details of each event, see https://authts.github.io/oidc-client-ts/classes/UserManagerEvents.html
+  um.events.addUserLoaded((_: OidcUser) => {
+    // TODO: DUOS-3072 Add metrics for user loaded
+  })
+  um.events.addAccessTokenExpiring((): void => {
+    // TODO: DUOS-3082 Add an alert that session will expire soon
+  })
+  um.events.addAccessTokenExpired((): void => {
+    void Auth.signOut()
+    // TODO: DUOS-3082 Add an alert that session has expired
+  })
+}
+
+let legacyAuthStarted: Promise<void> | null = null
+
+// A failed start is forgotten so that sign-in can retry it once Consent is reachable again.
+const ensureLegacyAuth = (): Promise<void> => {
+  legacyAuthStarted ??= startLegacyAuth().catch((error: unknown) => {
+    legacyAuthStarted = null
+    throw error
+  })
+  return legacyAuthStarted
+}
+
+/** Test seam: forgets a started legacy flow. */
+export const resetLegacyAuthState = (): void => {
+  legacyAuthStarted = null
+}
+
 export const Auth = {
   signInError: () => {
     return 'Unexpected error, please contact customer support.'
@@ -172,20 +205,7 @@ export const Auth = {
       purgeLegacyOidcKeys()
       return
     }
-    await OidcBroker.initialize()
-    const um: UserManager = OidcBroker.getUserManager()
-    // UserManager events.
-    // For details of each event, see https://authts.github.io/oidc-client-ts/classes/UserManagerEvents.html
-    um.events.addUserLoaded((_: OidcUser) => {
-      // TODO: DUOS-3072 Add metrics for user loaded
-    })
-    um.events.addAccessTokenExpiring((): void => {
-      // TODO: DUOS-3082 Add an alert that session will expire soon
-    })
-    um.events.addAccessTokenExpired((): void => {
-      void Auth.signOut()
-      // TODO: DUOS-3082 Add an alert that session has expired
-    })
+    await ensureLegacyAuth()
   },
   signIn: async (returnTo?: string): Promise<OidcUser> => {
     if (await Config.isBffEnabled()) {
@@ -203,6 +223,7 @@ export const Auth = {
       // must not observe a user-less "success".
       return new Promise<OidcUser>(() => {})
     }
+    await ensureLegacyAuth()
     const user: OidcUser | null = await OidcBroker.signIn()
     if (user === null) {
       throw new Error(Auth.signInError())
