@@ -179,20 +179,52 @@ const startLegacyAuth = async (): Promise<void> => {
   })
 }
 
-let legacyAuthStarted: Promise<void> | null = null
+export const AUTH_UNAVAILABLE_MESSAGE
+  = 'DUOS cannot reach its server right now, so sign-in and some pages may not work. Please try again in a few minutes.'
 
-// A failed start is forgotten so that sign-in can retry it once Consent is reachable again.
+/** Sign-in was refused because the legacy flow could not be set up. */
+export class AuthUnavailableError extends Error {
+  constructor() {
+    super(AUTH_UNAVAILABLE_MESSAGE)
+    this.name = 'AuthUnavailableError'
+  }
+}
+
+export const LEGACY_AUTH_RETRY_MS = 30_000
+
+let legacyAuthStarted: Promise<void> | null = null
+let legacyAuthReady = false
+let legacyAuthRetry: ReturnType<typeof setTimeout> | null = null
+
+const scheduleLegacyAuthRetry = (): void => {
+  legacyAuthRetry ??= setTimeout(() => {
+    legacyAuthRetry = null
+    ensureLegacyAuth().catch(() => {})
+  }, LEGACY_AUTH_RETRY_MS)
+}
+
+// Retried in the background rather than from a click, which would delay the sign-in popup past the browser's
+// user-activation window, and so a stored session regains token renewal once Consent answers.
 const ensureLegacyAuth = (): Promise<void> => {
-  legacyAuthStarted ??= startLegacyAuth().catch((error: unknown) => {
-    legacyAuthStarted = null
-    throw error
-  })
+  legacyAuthStarted ??= startLegacyAuth().then(
+    () => {
+      legacyAuthReady = true
+    },
+    (error: unknown) => {
+      legacyAuthStarted = null
+      scheduleLegacyAuthRetry()
+      throw error
+    },
+  )
   return legacyAuthStarted
 }
 
-/** Test seam: forgets a started legacy flow. */
+/** Test seam: forgets a started legacy flow and any pending retry. */
 export const resetLegacyAuthState = (): void => {
+  if (legacyAuthRetry !== null) clearTimeout(legacyAuthRetry)
+  legacyAuthRetry = null
   legacyAuthStarted = null
+  legacyAuthReady = false
 }
 
 export const Auth = {
@@ -223,7 +255,9 @@ export const Auth = {
       // must not observe a user-less "success".
       return new Promise<OidcUser>(() => {})
     }
-    await ensureLegacyAuth()
+    if (!legacyAuthReady) {
+      throw new AuthUnavailableError()
+    }
     const user: OidcUser | null = await OidcBroker.signIn()
     if (user === null) {
       throw new Error(Auth.signInError())

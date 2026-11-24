@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { isEmpty } from 'src/utils/NodashUtil'
 import { Alert } from 'src/components/Alert'
-import { Auth, Redirect } from 'src/libs/auth/auth'
+import { Auth, AuthUnavailableError, Redirect } from 'src/libs/auth/auth'
 import { Storage } from 'src/libs/storage'
 import loadingIndicator from 'src/images/loading-indicator.svg'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
@@ -65,6 +65,9 @@ export const SignInButton = () => {
           title: 'Sign in cancelled',
           description: 'Sign in cancelled by closing the sign in window',
         })
+      }
+      else if (error instanceof AuthUnavailableError) {
+        setErrorDisplay({ show: true, title: 'Sign in unavailable', description: error.message })
       }
       else {
         setErrorDisplay({ show: true, title: 'Error', description: Auth.signInError() })

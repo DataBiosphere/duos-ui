@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SignInButton from 'src/components/SignInButton'
-import { Auth, Redirect } from 'src/libs/auth/auth'
+import { Auth, AuthUnavailableError, Redirect } from 'src/libs/auth/auth'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import { Storage } from 'src/libs/storage'
 import type { OidcUser } from 'src/libs/auth/oidcBroker'
@@ -20,6 +20,11 @@ import type { OidcUser } from 'src/libs/auth/oidcBroker'
 const signInError = 'Unexpected error, please contact customer support.'
 
 vi.mock('src/libs/auth/auth', () => ({
+  AuthUnavailableError: class AuthUnavailableError extends Error {
+    constructor() {
+      super('DUOS cannot reach its server right now')
+    }
+  },
   Auth: {
     signIn: vi.fn(),
     signInError: vi.fn(() => signInError),
@@ -92,6 +97,18 @@ describe('SignInButton', () => {
 
     expect(await screen.findByText(signInError)).toBeInTheDocument()
     expect(vi.mocked(Redirect.reload)).not.toHaveBeenCalled()
+  })
+
+  it('shows the outage message, not the support line, when sign-in is unavailable', async () => {
+    vi.mocked(Auth.signIn).mockRejectedValue(new AuthUnavailableError())
+    mountComponent()
+    await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
+
+    await userEvent.click(screen.getByRole('button'))
+
+    expect(await screen.findByText('Sign in unavailable')).toBeInTheDocument()
+    expect(screen.getByText('DUOS cannot reach its server right now')).toBeInTheDocument()
+    expect(screen.queryByText(signInError)).not.toBeInTheDocument()
   })
 
   it('shows the cancel message when the user closes the legacy popup', async () => {

@@ -1,6 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { OidcBroker } from 'src/libs/auth/oidcBroker'
-import { Auth, Redirect, redirectOnLogout, resetLegacyAuthState } from 'src/libs/auth/auth'
+import {
+  Auth,
+  AuthUnavailableError,
+  LEGACY_AUTH_RETRY_MS,
+  Redirect,
+  redirectOnLogout,
+  resetLegacyAuthState,
+} from 'src/libs/auth/auth'
 import { getSessionInfo, resetSessionProbeState } from 'src/libs/auth/session'
 import { resetCsrfToken } from 'src/libs/ajax/csrf'
 import { POST_LOGOUT_PATH, takePostLogoutTarget } from 'src/libs/auth/postLogout'
@@ -49,44 +56,61 @@ describe('Auth Failure', () => {
 
   it('Sign In error throws expected message', async () => {
     vi.spyOn(OidcBroker, 'signIn').mockResolvedValue(null as never)
+    await Auth.initialize()
     await expect(Auth.signIn()).rejects.toThrow(Auth.signInError())
     expect(Storage.userIsLogged()).toBe(false)
   })
 })
 
 describe('Auth (legacy mode, Consent unreachable at load)', () => {
+  const consentDown = () => new Error('Request failed with status 502')
+
   beforeEach(() => {
+    vi.useFakeTimers()
     vi.spyOn(Config, 'isBffEnabled').mockResolvedValue(false)
     stubUserManager()
   })
 
   afterEach(() => {
+    resetLegacyAuthState()
+    vi.useRealTimers()
     vi.restoreAllMocks()
     localStorage.clear()
-    resetLegacyAuthState()
   })
 
-  it('initialize rejects, and sign-in starts the flow again once Consent answers', async () => {
-    const brokerInit = vi.spyOn(OidcBroker, 'initialize')
-      .mockRejectedValueOnce(new Error('Request failed with status 502'))
-      .mockResolvedValue(undefined)
-    vi.spyOn(OidcBroker, 'signIn').mockResolvedValue(mockOidcUser as never)
-
-    await expect(Auth.initialize()).rejects.toThrow('502')
-    await expect(Auth.signIn()).resolves.toBe(mockOidcUser)
-
-    expect(brokerInit).toHaveBeenCalledTimes(2)
-    expect(Storage.userIsLogged()).toBe(true)
-  })
-
-  it('sign-in rejects without opening a popup while Consent is still down', async () => {
-    vi.spyOn(OidcBroker, 'initialize').mockRejectedValue(new Error('Request failed with status 502'))
+  it('refuses sign-in without a network call or a popup while the setup has failed', async () => {
+    const brokerInit = vi.spyOn(OidcBroker, 'initialize').mockRejectedValue(consentDown())
     const popup = vi.spyOn(OidcBroker, 'signIn')
 
     await expect(Auth.initialize()).rejects.toThrow('502')
-    await expect(Auth.signIn()).rejects.toThrow('502')
+    await expect(Auth.signIn()).rejects.toBeInstanceOf(AuthUnavailableError)
 
+    expect(brokerInit).toHaveBeenCalledTimes(1)
     expect(popup).not.toHaveBeenCalled()
+  })
+
+  it('retries the setup in the background, so a later sign-in opens the popup straight from the click', async () => {
+    const brokerInit = vi.spyOn(OidcBroker, 'initialize')
+      .mockRejectedValueOnce(consentDown())
+      .mockResolvedValue(undefined)
+    const popup = vi.spyOn(OidcBroker, 'signIn').mockResolvedValue(mockOidcUser as never)
+
+    await expect(Auth.initialize()).rejects.toThrow('502')
+    await vi.advanceTimersByTimeAsync(LEGACY_AUTH_RETRY_MS)
+    await expect(Auth.signIn()).resolves.toBe(mockOidcUser)
+
+    expect(brokerInit).toHaveBeenCalledTimes(2)
+    expect(popup).toHaveBeenCalledTimes(1)
+    expect(Storage.userIsLogged()).toBe(true)
+  })
+
+  it('keeps retrying while Consent stays down', async () => {
+    const brokerInit = vi.spyOn(OidcBroker, 'initialize').mockRejectedValue(consentDown())
+
+    await expect(Auth.initialize()).rejects.toThrow('502')
+    await vi.advanceTimersByTimeAsync(LEGACY_AUTH_RETRY_MS * 2)
+
+    expect(brokerInit).toHaveBeenCalledTimes(3)
   })
 
   it('does not start the flow again once it has started', async () => {
