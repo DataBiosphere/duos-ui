@@ -108,19 +108,24 @@ export const SignInButton = () => {
   useEffect(() => {
     let recheck: ReturnType<typeof setTimeout> | undefined
     let active = true
+    // Each probe is its own /status request, so one failing must not discard the other's answer.
+    const probe = async (check: () => Promise<boolean>, setDown: (down: boolean) => void): Promise<boolean> => {
+      try {
+        const healthy = await check()
+        if (active) setDown(!healthy)
+        return healthy
+      }
+      catch {
+        return false
+      }
+    }
     // Re-checked while anything is down or unknown, so the button recovers without a reload.
     const checkHealth = async () => {
-      let healthy = false
-      try {
-        const consentHealthy = await ServiceStatus.isConsentHealthy()
-        const samHealthy = await ServiceStatus.isSamHealthy()
-        if (!active) return
-        setIsConsentDown(!consentHealthy)
-        setIsSamDown(!samHealthy)
-        healthy = consentHealthy && samHealthy
+      const consentHealthy = await probe(() => ServiceStatus.isConsentHealthy(), setIsConsentDown)
+      const samHealthy = await probe(() => ServiceStatus.isSamHealthy(), setIsSamDown)
+      if (active && !(consentHealthy && samHealthy)) {
+        recheck = setTimeout(() => void checkHealth(), HEALTH_RECHECK_MS)
       }
-      catch {}
-      if (active && !healthy) recheck = setTimeout(() => void checkHealth(), HEALTH_RECHECK_MS)
     }
     void checkHealth()
     return () => {

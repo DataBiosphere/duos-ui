@@ -223,6 +223,14 @@ describe('SignInButton', () => {
       await waitFor(() => expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(2))
     })
 
+    it('stays disabled for a Consent outage when the SAM probe fails', async () => {
+      vi.mocked(ServiceStatus.isConsentHealthy).mockResolvedValue(false)
+      vi.mocked(ServiceStatus.isSamHealthy).mockRejectedValue(new Error('Request failed with status 502'))
+      mountComponent()
+
+      await waitFor(() => expect(screen.getByRole('button')).toBeDisabled())
+    })
+
     it('stops checking once everything is healthy', async () => {
       mountComponent()
       await waitFor(() => expect(ServiceStatus.isSamHealthy).toHaveBeenCalledTimes(1))
