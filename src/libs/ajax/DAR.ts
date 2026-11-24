@@ -126,17 +126,6 @@ export const DAR = {
   },
 
   /**
-   * Fetch a DAR-attached document as a Blob for programmatic use (e.g. opening in a new tab).
-   * @param referenceId The DAR reference ID
-   * @param fileType The document type slug (e.g. 'irbDocument', 'collaborationDocument')
-   * @returns The document as a Blob
-   */
-  getDARDocumentAsBlob: async (referenceId: string, fileType: string): Promise<Blob> => {
-    const url = `${await Config.getApiUrl()}/api/dar/v2/${referenceId}/${fileType}`
-    return fetchBlob(url, Config.authOpts())
-  },
-
-  /**
    * Fetch the dataset–DAA relationship snapshots for a submitted DAR.
    * Each element may use a flat shape (datasetId/daaId/daaFileName) or a nested shape
    * (dataset.datasetId / daa.daaId / daa.file.fileName).

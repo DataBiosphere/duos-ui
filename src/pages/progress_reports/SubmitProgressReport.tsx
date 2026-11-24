@@ -5,7 +5,6 @@ import { FormState } from 'src/pages/progress_reports/ProgressReportFormState'
 import { CombinedDataAccessRequest } from 'src/types/model'
 import { convertFormStateToDAR } from 'src/utils/DarUtils'
 import { extractError } from 'src/utils/ErrorUtils'
-import { DAR } from 'src/libs/ajax/DAR'
 import AsyncSpinnerButton from 'src/components/AsyncSpinnerButton'
 
 interface SubmitProgressReportProps {
@@ -16,32 +15,14 @@ interface SubmitProgressReportProps {
   readonly isValid?: boolean
   readonly onValidate?: () => void
   readonly uploadedIrbDocument?: File | null
-  readonly parentDar?: CombinedDataAccessRequest
 }
 
 export default function SubmitProgressReport(props: SubmitProgressReportProps) {
-  const { formState, parentReferenceId, onSuccess, onCancel, isValid, onValidate, uploadedIrbDocument, parentDar } = props
+  const { formState, parentReferenceId, onSuccess, onCancel, isValid, onValidate, uploadedIrbDocument } = props
 
   const submit = async () => {
     try {
-      let irbDocumentToSubmit = uploadedIrbDocument
-
-      // If no new IRB document was uploaded, but parent DAR has an IRB document, use that
-      if (!uploadedIrbDocument && parentDar?.irbDocumentLocation && parentDar?.irbDocumentName) {
-        try {
-          const parentIrbBlob = await DAR.getDARDocumentAsBlob(parentReferenceId, 'irbDocument')
-          // Convert blob to File object
-          irbDocumentToSubmit = new File([parentIrbBlob], parentDar.irbDocumentName, {
-            type: parentIrbBlob.type,
-          })
-        }
-        catch (error) {
-          console.warn('Failed to fetch parent IRB document:', error)
-          // Continue without IRB document if fetch fails
-        }
-      }
-
-      const multiPartFormData = createMultiPartFormData(convertFormStateToDAR(formState), irbDocumentToSubmit)
+      const multiPartFormData = createMultiPartFormData(convertFormStateToDAR(formState), uploadedIrbDocument)
       const submittedPR = await ProgressReport.submitProgressReport(multiPartFormData, parentReferenceId)
       onSuccess(submittedPR)
     }
@@ -59,7 +40,8 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
     // leaving them empty until we provide these fields in the application form
     multiPartFormData.append('collaboratorRequiredFile', '')
 
-    // Use provided IRB document if available, otherwise empty string
+    // Only a newly chosen IRB document is sent. Without one, consent gives the report its own copy
+    // of the parent's document.
     if (irbDocument) {
       multiPartFormData.append('ethicsApprovalRequiredFile', irbDocument)
     }

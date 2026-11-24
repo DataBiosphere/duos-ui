@@ -5,6 +5,7 @@ import {
   type UpstreamProxyOptions,
 } from './upstreamProxy.js'
 import { UNAUTHENTICATED_PATHS } from './unauthenticatedPaths.js'
+import { CONSENT_PROXY_SECRET_ENV_VAR, consentProxySecretFromEnv } from './clientIpSignature.js'
 
 /**
  * The DUOS API proxy (Phase 3).
@@ -64,6 +65,35 @@ export const CSRF_EXEMPT_UNSAFE_REQUESTS: ReadonlySet<string> = new Set([
   'POST /support/upload',
 ])
 
+/**
+ * Whether Consent counts a path against its per-IP support-form limit
+ * (DT-4496): `support/...` (the open Contact Us form) or `api/support/...`
+ * (the signed-in request), any method. Consent sees this pod's egress address
+ * in `X-Real-IP`, so these requests carry a signed client IP instead; without
+ * it every user would share one Consent bucket. See clientIpSignature.ts.
+ *
+ * Reads the path the way Consent's PublicRateLimitFilter does: segments split
+ * on `/`, matrix parameters (`;...`) dropped, then percent-decoded, and empty
+ * segments skipped. Dot segments and backslashes don't need handling here:
+ * reply-from rejects such paths with a 400 before anything is forwarded.
+ */
+export function isSupportFormPath(upstreamPath: string): boolean {
+  const segments = upstreamPath
+    .split('/')
+    .map(segment => decodeSegment(segment.split(';')[0]))
+    .filter(segment => segment !== '')
+  return segments[0] === 'support' || (segments[0] === 'api' && segments[1] === 'support')
+}
+
+function decodeSegment(segment: string): string {
+  try {
+    return decodeURIComponent(segment)
+  }
+  catch {
+    return segment
+  }
+}
+
 /** `upstreamPath` bound to this proxy's prefix, kept for the tests' table cases. */
 export function upstreamPath(url: string): string {
   return stripPrefix(url, PROXY_PREFIX)
@@ -75,6 +105,10 @@ export function upstreamPath(url: string): string {
  * overrides stay encapsulated in this scope — see upstreamProxy.ts.
  */
 export async function apiProxy(app: FastifyInstance, options: ApiProxyOptions = {}): Promise<void> {
+  const clientIpSecret = consentProxySecretFromEnv()
+  if (!clientIpSecret) {
+    app.log.warn(`[proxy] ${CONSENT_PROXY_SECRET_ENV_VAR} is not set — support requests go to Consent without a signed client IP, so all of them share one Consent rate-limit bucket`)
+  }
   await registerUpstreamProxy(app, {
     prefix: PROXY_PREFIX,
     upstreamEnvVar: 'DUOS_API_URL',
@@ -85,5 +119,7 @@ export async function apiProxy(app: FastifyInstance, options: ApiProxyOptions = 
     // The DUOS API validates the same B2C access token the BFF refreshes, so
     // its 401 on a token-carrying request means the session is unusable.
     destroySessionOnUpstream401: true,
+    signsClientIp: isSupportFormPath,
+    clientIpSecret,
   }, options)
 }
