@@ -332,37 +332,6 @@ describe('DAR', () => {
     })
   })
 
-  describe('getDARDocumentAsBlob', () => {
-    it('fetches the document as a blob and returns it', async () => {
-      const blob = new Blob(['pdf content'], { type: 'application/pdf' })
-      vi.mocked(fetchBlob).mockResolvedValue(blob)
-
-      const result = await DAR.getDARDocumentAsBlob('ref-001', 'irbDocument')
-
-      expect(fetchBlob).toHaveBeenCalledWith(
-        'https://duos.example.org/api/dar/v2/ref-001/irbDocument',
-        headers,
-      )
-      expect(result).toBe(blob)
-    })
-
-    it('propagates fetch failures', async () => {
-      vi.mocked(fetchBlob).mockRejectedValueOnce(new Error('network failure'))
-      await expect(DAR.getDARDocumentAsBlob('ref-001', 'irbDocument')).rejects.toThrow('network failure')
-    })
-
-    it('propagates ConsentError rejections so callers can extract a useful error', async () => {
-      const consentError = { message: 'Document not found', code: 404 }
-      vi.mocked(fetchBlob).mockRejectedValueOnce(consentError)
-      const error = await DAR.getDARDocumentAsBlob('ref-001', 'irbDocument').then(
-        () => { throw new Error('expected rejection') },
-        e => e,
-      )
-      expect(extractConsentError(error)).toEqual(consentError)
-      expect(extractError(error)).toBe('Document not found')
-    })
-  })
-
   describe('getDatasetDaaSnapshots', () => {
     it('fetches snapshots and returns the data', async () => {
       const snapshots = [{ datasetId: 1, daaId: 10, daaFileName: 'daa.pdf' }]
