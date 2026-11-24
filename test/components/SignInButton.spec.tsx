@@ -3,7 +3,7 @@ import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import SignInButton from 'src/components/SignInButton'
+import SignInButton, { HEALTH_RECHECK_MS } from 'src/components/SignInButton'
 import { Auth, AuthUnavailableError, Redirect } from 'src/libs/auth/auth'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import { Storage } from 'src/libs/storage'
@@ -192,5 +192,44 @@ describe('SignInButton', () => {
     vi.mocked(ServiceStatus.isConsentHealthy).mockResolvedValue(false)
     mountComponent()
     await waitFor(() => expect(screen.getByRole('button')).toBeDisabled())
+  })
+
+  describe('health re-checks', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('enables the button once Consent is healthy again, without a remount', async () => {
+      vi.mocked(ServiceStatus.isConsentHealthy).mockResolvedValueOnce(false).mockResolvedValue(true)
+      mountComponent()
+      await waitFor(() => expect(screen.getByRole('button')).toBeDisabled())
+
+      await vi.advanceTimersByTimeAsync(HEALTH_RECHECK_MS)
+
+      await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
+    })
+
+    it('retries a failed health probe rather than leaving it unhandled', async () => {
+      vi.mocked(ServiceStatus.isConsentHealthy).mockRejectedValueOnce(new Error('Request failed with status 502'))
+      mountComponent()
+      await waitFor(() => expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(1))
+
+      await vi.advanceTimersByTimeAsync(HEALTH_RECHECK_MS)
+
+      await waitFor(() => expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(2))
+    })
+
+    it('stops checking once everything is healthy', async () => {
+      mountComponent()
+      await waitFor(() => expect(ServiceStatus.isSamHealthy).toHaveBeenCalledTimes(1))
+
+      await vi.advanceTimersByTimeAsync(HEALTH_RECHECK_MS * 2)
+
+      expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(1)
+    })
   })
 })

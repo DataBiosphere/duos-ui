@@ -17,6 +17,8 @@ interface ErrorInfo {
 
 type ErrorDisplay = ErrorInfo | React.JSX.Element
 
+export const HEALTH_RECHECK_MS = 30_000
+
 /**
  * A single sign-in button that starts the BFF login flow: POST /auth/login
  * returns the B2C authorization URL and the whole page redirects there. The
@@ -104,11 +106,27 @@ export const SignInButton = () => {
   }
 
   useEffect(() => {
-    const init = async () => {
-      setIsConsentDown(!(await ServiceStatus.isConsentHealthy()))
-      setIsSamDown(!(await ServiceStatus.isSamHealthy()))
+    let recheck: ReturnType<typeof setTimeout> | undefined
+    let active = true
+    // Re-checked while anything is down or unknown, so the button recovers without a reload.
+    const checkHealth = async () => {
+      let healthy = false
+      try {
+        const consentHealthy = await ServiceStatus.isConsentHealthy()
+        const samHealthy = await ServiceStatus.isSamHealthy()
+        if (!active) return
+        setIsConsentDown(!consentHealthy)
+        setIsSamDown(!samHealthy)
+        healthy = consentHealthy && samHealthy
+      }
+      catch {}
+      if (active && !healthy) recheck = setTimeout(() => void checkHealth(), HEALTH_RECHECK_MS)
     }
-    init()
+    void checkHealth()
+    return () => {
+      active = false
+      clearTimeout(recheck)
+    }
   }, [])
 
   const signInElement = (): React.JSX.Element => {
