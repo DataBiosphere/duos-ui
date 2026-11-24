@@ -351,7 +351,6 @@ export const ProgressReportApplication = ({ dar, datasets, readOnlyMode = true, 
             isValid={!isFormEmpty()}
             onValidate={handleValidate}
             uploadedIrbDocument={uploadedIrbDocument}
-            parentDar={dar}
           />
         </div>
       )}
