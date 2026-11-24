@@ -4,6 +4,7 @@ import {
   Auth,
   AuthUnavailableError,
   LEGACY_AUTH_RETRY_MS,
+  onLegacyAuthRecovered,
   Redirect,
   redirectOnLogout,
   resetLegacyAuthState,
@@ -113,14 +114,30 @@ describe('Auth (legacy mode, Consent unreachable at load)', () => {
     expect(brokerInit).toHaveBeenCalledTimes(3)
   })
 
-  it('does not start the flow again once it has started', async () => {
+  it('tells recovery listeners once, when a background retry succeeds', async () => {
+    vi.spyOn(OidcBroker, 'initialize')
+      .mockRejectedValueOnce(consentDown())
+      .mockResolvedValue(undefined)
+    const recovered = vi.fn()
+
+    await expect(Auth.initialize()).rejects.toThrow('502')
+    onLegacyAuthRecovered(recovered)
+    await vi.advanceTimersByTimeAsync(LEGACY_AUTH_RETRY_MS)
+    await Auth.initialize()
+
+    expect(recovered).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not start the flow again, or register its handlers twice, once it has started', async () => {
     const brokerInit = vi.spyOn(OidcBroker, 'initialize').mockResolvedValue(undefined)
-    vi.spyOn(OidcBroker, 'signIn').mockResolvedValue(mockOidcUser as never)
+    const userManager = stubUserManager()
 
     await Auth.initialize()
-    await Auth.signIn()
+    await Auth.initialize()
+    await vi.advanceTimersByTimeAsync(LEGACY_AUTH_RETRY_MS)
 
     expect(brokerInit).toHaveBeenCalledTimes(1)
+    expect(userManager.mock.results[0].value.events.addAccessTokenExpired).toHaveBeenCalledTimes(1)
   })
 })
 

@@ -23,6 +23,8 @@ interface NotificationProps {
   layout?: ToastPosition | SnackbarOrigin
   /** Called when the toast closes, excluding clickaway events. */
   onDismiss?: () => void
+  /** Takes the toast down when this settles. */
+  dismissWhen?: Promise<unknown>
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
 }
@@ -65,6 +67,7 @@ export const ToastNotifications = {
     timeout = defaultProps.timeout,
     layout = defaultProps.layout,
     onDismiss,
+    dismissWhen,
     ...props
   }: NotificationProps): void => {
     const snackbarLayout = convertToSnackbarOrigin(layout)
@@ -82,6 +85,7 @@ export const ToastNotifications = {
       notificationRoot.remove()
     }
     activeNotifications.add(teardown)
+    dismissWhen?.finally(teardown).catch(() => {})
 
     const NotificationComponent = (): React.JSX.Element => {
       const [open, setOpen] = React.useState(true)

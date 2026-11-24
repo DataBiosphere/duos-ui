@@ -195,6 +195,12 @@ export const LEGACY_AUTH_RETRY_MS = 30_000
 let legacyAuthStarted: Promise<void> | null = null
 let legacyAuthReady = false
 let legacyAuthRetry: ReturnType<typeof setTimeout> | null = null
+const legacyAuthReadyListeners = new Set<() => void>()
+
+/** Calls the listener once, when a failed legacy setup later succeeds. */
+export const onLegacyAuthRecovered = (listener: () => void): void => {
+  legacyAuthReadyListeners.add(listener)
+}
 
 const scheduleLegacyAuthRetry = (): void => {
   legacyAuthRetry ??= setTimeout(() => {
@@ -209,6 +215,8 @@ const ensureLegacyAuth = (): Promise<void> => {
   legacyAuthStarted ??= startLegacyAuth().then(
     () => {
       legacyAuthReady = true
+      for (const listener of legacyAuthReadyListeners) listener()
+      legacyAuthReadyListeners.clear()
     },
     (error: unknown) => {
       legacyAuthStarted = null
@@ -225,6 +233,7 @@ export const resetLegacyAuthState = (): void => {
   legacyAuthRetry = null
   legacyAuthStarted = null
   legacyAuthReady = false
+  legacyAuthReadyListeners.clear()
 }
 
 export const Auth = {

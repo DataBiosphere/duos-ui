@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import 'src/index.css'
 import 'src/styles/bootstrap_replacement.css'
 import App from 'src/App'
-import { AUTH_UNAVAILABLE_MESSAGE, Auth } from 'src/libs/auth/auth'
+import { AUTH_UNAVAILABLE_MESSAGE, Auth, onLegacyAuthRecovered } from 'src/libs/auth/auth'
 import { Config } from 'src/libs/config'
 import { OidcBroker } from 'src/libs/auth/oidcBroker'
 import { BrowserRouter } from 'react-router'
@@ -36,7 +36,11 @@ const load = async () => {
   const root = createRoot(container!)
   root.render(<BrowserRouter><ScrollToTopOnNavigate /><App /></BrowserRouter>)
   if (!authReady) {
-    ToastNotifications.showError({ text: AUTH_UNAVAILABLE_MESSAGE, timeout: null })
+    ToastNotifications.showError({
+      text: AUTH_UNAVAILABLE_MESSAGE,
+      timeout: null,
+      dismissWhen: new Promise<void>(resolve => onLegacyAuthRecovered(resolve)),
+    })
   }
 }
 
