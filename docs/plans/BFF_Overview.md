@@ -350,10 +350,11 @@ report-only header passes through untouched, which is what makes that quiet.
   another reason the edge is the real control. A caller on the app port
   cannot: in k8s the app trusts `X-Forwarded-*` from loopback only
   (`trustedProxies()` in `server/src/config.ts`, DT-4381). On the hop to Consent, the load balancer rewrites `X-Real-IP` to
-  this pod's egress address, so the showcase route also sends the browser key
-  with a timestamp and an HMAC made with `DUOS_CONSENT_PROXY_SECRET`
+  this pod's egress address, so the showcase route and the support form's
+  requests through the API proxy (DT-4496) also send the browser key with a
+  timestamp and an HMAC made with `DUOS_CONSENT_PROXY_SECRET`
   (`server/src/proxy/clientIpSignature.ts`, DT-4379). Consent keys its
-  anonymous limit on that IP only when the HMAC checks out.
+  per-IP limits on that IP only when the HMAC checks out.
 
 ## Target Architecture Sequence Diagrams
 
