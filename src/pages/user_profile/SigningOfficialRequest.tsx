@@ -114,7 +114,7 @@ export default function SigningOfficialRequest({ user, institutionHasSigningOffi
         'User Profile Page',
       )
 
-      await Support.createSupportRequest(ticket)
+      await Support.createSupportRequest(ticket, true)
       setRequestedAt(await recordAttestation())
       collapse()
       Notifications.showSuccess({

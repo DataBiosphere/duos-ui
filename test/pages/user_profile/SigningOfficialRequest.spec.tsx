@@ -154,6 +154,7 @@ describe('SigningOfficialRequest', () => {
     fireEvent.click(submitButton())
 
     await waitFor(() => expect(Support.createSupportRequest).toHaveBeenCalledOnce())
+    expect(Support.createSupportRequest).toHaveBeenCalledWith(expect.anything(), true)
     const description = vi.mocked(Support.createTicket).mock.calls[0][4]
     expect(description).toContain('https://www.linkedin.com/in/test-user')
     expect(description).toContain('https://orcid.org/0000-0000-0000-0001')
