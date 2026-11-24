@@ -58,6 +58,12 @@ export const SignInButton = () => {
       // Mirror the old onFailure: drop whatever partial auth state the popup
       // left behind, and tell a deliberate cancel apart from a real failure —
       // oidc-client-ts PopupWindow rejects with "Popup closed by user".
+      if (error instanceof AuthUnavailableError) {
+        // No popup ran, so there is no partial state to drop.
+        setErrorDisplay({ show: true, title: 'Sign in unavailable', description: error.message })
+        setIsLoading(false)
+        return
+      }
       Storage.clearStorage()
       if (String(error).includes('Popup closed by user')) {
         setErrorDisplay({
@@ -65,9 +71,6 @@ export const SignInButton = () => {
           title: 'Sign in cancelled',
           description: 'Sign in cancelled by closing the sign in window',
         })
-      }
-      else if (error instanceof AuthUnavailableError) {
-        setErrorDisplay({ show: true, title: 'Sign in unavailable', description: error.message })
       }
       else {
         setErrorDisplay({ show: true, title: 'Error', description: Auth.signInError() })

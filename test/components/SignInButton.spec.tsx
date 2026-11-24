@@ -99,7 +99,8 @@ describe('SignInButton', () => {
     expect(vi.mocked(Redirect.reload)).not.toHaveBeenCalled()
   })
 
-  it('shows the outage message, not the support line, when sign-in is unavailable', async () => {
+  it('shows the outage message, not the support line, and keeps storage when sign-in is unavailable', async () => {
+    const clearStorage = vi.spyOn(Storage, 'clearStorage')
     vi.mocked(Auth.signIn).mockRejectedValue(new AuthUnavailableError())
     mountComponent()
     await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
@@ -109,6 +110,7 @@ describe('SignInButton', () => {
     expect(await screen.findByText('Sign in unavailable')).toBeInTheDocument()
     expect(screen.getByText('DUOS cannot reach its server right now')).toBeInTheDocument()
     expect(screen.queryByText(signInError)).not.toBeInTheDocument()
+    expect(clearStorage).not.toHaveBeenCalled()
   })
 
   it('shows the cancel message when the user closes the legacy popup', async () => {

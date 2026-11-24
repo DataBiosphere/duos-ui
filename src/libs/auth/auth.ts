@@ -197,26 +197,41 @@ let legacyAuthReady = false
 let legacyAuthRetry: ReturnType<typeof setTimeout> | null = null
 const legacyAuthReadyListeners = new Set<() => void>()
 
-/** Calls the listener once, when a failed legacy setup later succeeds. */
+/** Calls the listener once the legacy setup has succeeded, at once if it already has. */
 export const onLegacyAuthRecovered = (listener: () => void): void => {
+  if (legacyAuthReady) {
+    listener()
+    return
+  }
   legacyAuthReadyListeners.add(listener)
+}
+
+const notifyLegacyAuthRecovered = (): void => {
+  const listeners = [...legacyAuthReadyListeners]
+  legacyAuthReadyListeners.clear()
+  for (const listener of listeners) {
+    try {
+      listener()
+    }
+    catch (error) {
+      console.error('Sign-in recovery listener failed', error)
+    }
+  }
 }
 
 const scheduleLegacyAuthRetry = (): void => {
   legacyAuthRetry ??= setTimeout(() => {
     legacyAuthRetry = null
-    ensureLegacyAuth().catch(() => {})
+    ensureLegacyAuth().catch((error: unknown) => console.error('Sign-in setup retry failed', error))
   }, LEGACY_AUTH_RETRY_MS)
 }
 
-// Retried in the background rather than from a click, which would delay the sign-in popup past the browser's
-// user-activation window, and so a stored session regains token renewal once Consent answers.
+// Retried in the background so that a sign-in click opens its popup within the user-activation window.
 const ensureLegacyAuth = (): Promise<void> => {
   legacyAuthStarted ??= startLegacyAuth().then(
     () => {
       legacyAuthReady = true
-      for (const listener of legacyAuthReadyListeners) listener()
-      legacyAuthReadyListeners.clear()
+      notifyLegacyAuthRecovered()
     },
     (error: unknown) => {
       legacyAuthStarted = null

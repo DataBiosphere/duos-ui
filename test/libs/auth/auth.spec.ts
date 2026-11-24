@@ -128,6 +128,34 @@ describe('Auth (legacy mode, Consent unreachable at load)', () => {
     expect(recovered).toHaveBeenCalledTimes(1)
   })
 
+  it('calls a listener registered after the setup has already succeeded at once', async () => {
+    vi.spyOn(OidcBroker, 'initialize').mockResolvedValue(undefined)
+    const recovered = vi.fn()
+
+    await Auth.initialize()
+    onLegacyAuthRecovered(recovered)
+
+    expect(recovered).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps the recovered setup, and calls the other listeners, when one listener throws', async () => {
+    vi.spyOn(OidcBroker, 'initialize')
+      .mockRejectedValueOnce(consentDown())
+      .mockResolvedValue(undefined)
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const second = vi.fn()
+
+    await expect(Auth.initialize()).rejects.toThrow('502')
+    onLegacyAuthRecovered(() => {
+      throw new Error('listener failed')
+    })
+    onLegacyAuthRecovered(second)
+    await vi.advanceTimersByTimeAsync(LEGACY_AUTH_RETRY_MS)
+
+    await expect(Auth.initialize()).resolves.toBeUndefined()
+    expect(second).toHaveBeenCalledTimes(1)
+  })
+
   it('does not start the flow again, or register its handlers twice, once it has started', async () => {
     const brokerInit = vi.spyOn(OidcBroker, 'initialize').mockResolvedValue(undefined)
     const userManager = stubUserManager()
