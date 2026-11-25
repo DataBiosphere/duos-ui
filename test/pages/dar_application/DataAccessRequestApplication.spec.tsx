@@ -649,6 +649,43 @@ describe('DataAccessRequestApplication - supporting documents', () => {
     expect(DAR.uploadDARDocument).toHaveBeenCalledWith(expect.any(File), 'ref-123', 'collaborationDocument')
   })
 
+  // The upload, not the DAR itself, is what Consent refuses as too large (413).
+  it('reopens the form for editing when a document is over the upload limit', async () => {
+    const message = 'File size is invalid. Max size is: 25 MB'
+    vi.mocked(DAR.uploadDARDocument).mockRejectedValue({ response: { status: 413, data: { code: 413, message } } })
+    await renderDraft()
+    await uploadTo('irbDocument', 'irb.pdf')
+    await uploadTo('collaborationLetter', 'collab.pdf')
+    await completeTheForm()
+
+    await clickById('btn_attest')
+    await clickById('btn_openSubmitModal')
+    await clickDialogYes()
+
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalled())
+    const call = vi.mocked(Notifications.showError).mock.calls[0][0] as { text: React.ReactElement<{ children: string }> }
+    expect(call.text.props.children).toBe(message)
+    expect(screen.queryByRole('button', { name: 'Submit' })).not.toBeInTheDocument()
+    expect(DAR.postDar).not.toHaveBeenCalled()
+  })
+
+  it('names the upload limit when a 413 carries no message', async () => {
+    vi.mocked(DAR.uploadDARDocument).mockRejectedValue({ response: { status: 413 } })
+    await renderDraft()
+    await uploadTo('irbDocument', 'irb.pdf')
+    await uploadTo('collaborationLetter', 'collab.pdf')
+    await completeTheForm()
+
+    await clickById('btn_attest')
+    await clickById('btn_openSubmitModal')
+    await clickDialogYes()
+
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalledWith({
+      text: 'A document is over the upload limit. Please upload a smaller file.',
+      timeout: 6000,
+    }))
+  })
+
   it('uploads the documents again when the DAR is submitted', async () => {
     await renderDraft()
     await uploadTo('irbDocument', 'irb.pdf')

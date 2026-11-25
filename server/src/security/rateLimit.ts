@@ -140,7 +140,7 @@ function isLoopback(address: string | undefined): boolean {
 }
 
 /** One IP literal without a zone, or undefined. See "Keying" above. */
-function realIpHeader(request: FastifyRequest): string | undefined {
+function realIpHeader(request: KeyedRequest): string | undefined {
   const value = request.headers[REAL_IP_HEADER]
   if (typeof value !== 'string') return undefined
   const literal = value.trim()
@@ -159,8 +159,14 @@ export function trustRealIpFromEnv(): boolean {
   throw new Error(`${TRUST_REAL_IP_ENV_VAR} is set to '${raw}', which is not true or false — unset it to leave X-Real-IP untrusted`)
 }
 
+/**
+ * What `rateLimitKey` reads. Narrower than `FastifyRequest`, so a proxy's
+ * header hook, which is typed for either server kind, can key a request too.
+ */
+type KeyedRequest = Pick<FastifyRequest, 'headers' | 'ip' | 'socket'>
+
 /** The rate-limit key for every limited route. See "Keying" above. */
-export function rateLimitKey(request: FastifyRequest): string {
+export function rateLimitKey(request: KeyedRequest): string {
   const trusted = trustRealIpFromEnv() && isLoopback(request.socket.remoteAddress)
   const realIp = trusted ? realIpHeader(request) : undefined
   return normalizeIP(realIp ?? request.ip)

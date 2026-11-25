@@ -118,10 +118,12 @@ describe('tdrProxy', () => {
         url: `${TDR_PROXY_PREFIX}${SNAPSHOTS_PATH}?limit=1000`,
         // The legacy client constructed its own bearer header; whatever a
         // client sends must never reach TDR.
-        headers: { cookie, authorization: 'Bearer browser-held-token' },
+        headers: { cookie, 'authorization': 'Bearer browser-held-token', 'x-duos-client-ip': '198.51.100.1', 'x-duos-client-ip-timestamp': '1', 'x-duos-client-ip-signature': 'forged' },
       })
 
       const forwarded = upstream.last().headers
+      // Only the DUOS API proxy signs a client IP; no caller's value is forwarded (DT-4496).
+      expect(Object.keys(forwarded).filter(name => name.startsWith('x-duos-client-ip'))).toEqual([])
       expect(forwarded.cookie).toBeUndefined()
       expect(forwarded.authorization).toBe('Bearer the-session-token')
     })
