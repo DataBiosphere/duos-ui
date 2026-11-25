@@ -373,15 +373,17 @@ describe('useResponsiveDarCollectionColumns', () => {
       expect(result.current).not.toContain('datasetCount')
     })
 
-    it('hides dataUse below 1650px for ADMIN', () => {
-      setViewportWidth(1700)
+    it('shows dataUse whenever datasetCount is shown for ADMIN', () => {
+      setViewportWidth(1450)
       const { result } = renderHook(() => useResponsiveDarCollectionColumns(consoleTypes.ADMIN))
+      expect(result.current).toContain('datasetCount')
       expect(result.current).toContain('dataUse')
 
       act(() => {
-        setViewportWidth(1600)
+        setViewportWidth(1449)
         window.dispatchEvent(new Event('resize'))
       })
+      expect(result.current).not.toContain('datasetCount')
       expect(result.current).not.toContain('dataUse')
     })
 

@@ -44,7 +44,6 @@ describe('darCollectionColumns', () => {
 
       it('includes VOTES right after DATA_USE for chair and member consoles', () => {
         for (const consoleType of [consoleTypes.CHAIR, consoleTypes.MEMBER]) {
-          // Above every console's DATA_USE breakpoint, so DATA_USE itself isn't hidden here.
           const columns = getDarCollectionColumns(consoleType, 2000)
           const dataUseIndex = columns.indexOf(DarCollectionTableColumnOptions.DATA_USE)
           expect(columns.indexOf(DarCollectionTableColumnOptions.VOTES)).toBe(dataUseIndex + 1)
@@ -66,7 +65,7 @@ describe('darCollectionColumns', () => {
       })
     })
 
-    describe('Admin/Chair Breakpoints (1450px for DATASET_COUNT, 1250px for EXPIRES_AT)', () => {
+    describe('Admin/Chair Breakpoints (1450px for DATASET_COUNT and DATA_USE, 1250px for EXPIRES_AT)', () => {
       it('includes both DATASET_COUNT and EXPIRES_AT above breakpoints', () => {
         const columns = getDarCollectionColumns(consoleTypes.ADMIN, 1500)
 
@@ -104,7 +103,7 @@ describe('darCollectionColumns', () => {
       })
     })
 
-    describe('Researcher Breakpoints (1200px for DATASET_COUNT, 1000px for EXPIRES_AT)', () => {
+    describe('Researcher Breakpoints (1200px for DATASET_COUNT and DATA_USE, 1000px for EXPIRES_AT)', () => {
       it('includes both DATASET_COUNT and EXPIRES_AT above breakpoints', () => {
         const columns = getDarCollectionColumns(consoleTypes.RESEARCHER, 1300)
 
@@ -124,6 +123,29 @@ describe('darCollectionColumns', () => {
 
         expect(columns).not.toContain(DarCollectionTableColumnOptions.DATASET_COUNT)
         expect(columns).not.toContain(DarCollectionTableColumnOptions.EXPIRES_AT)
+      })
+    })
+
+    describe('Datasets and Data Use pairing', () => {
+      const consoles = [consoleTypes.ADMIN, consoleTypes.CHAIR, consoleTypes.MEMBER, consoleTypes.SIGNING_OFFICIAL, consoleTypes.RESEARCHER]
+
+      it('never shows DATASET_COUNT without DATA_USE, or DATA_USE without DATASET_COUNT', () => {
+        for (const consoleType of consoles) {
+          for (let width = 0; width <= 2000; width += 10) {
+            const columns = getDarCollectionColumns(consoleType, width)
+            expect(columns.includes(DarCollectionTableColumnOptions.DATA_USE))
+              .toBe(columns.includes(DarCollectionTableColumnOptions.DATASET_COUNT))
+          }
+        }
+      })
+
+      it('shows both from the DATASET_COUNT breakpoint up', () => {
+        expect(getDarCollectionColumns(consoleTypes.ADMIN, 1450)).toEqual(expect.arrayContaining([
+          DarCollectionTableColumnOptions.DATASET_COUNT,
+          DarCollectionTableColumnOptions.DATA_USE,
+        ]))
+        expect(getDarCollectionColumns(consoleTypes.CHAIR, 1450)).toContain(DarCollectionTableColumnOptions.VOTES)
+        expect(getDarCollectionColumns(consoleTypes.CHAIR, 1449)).not.toContain(DarCollectionTableColumnOptions.VOTES)
       })
     })
 

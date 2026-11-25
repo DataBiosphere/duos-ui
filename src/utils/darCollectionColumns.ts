@@ -42,34 +42,35 @@ function getBaseColumns(consoleType: string): string[] {
 
 // Responsive breakpoints for each console type
 interface Breakpoint {
-  datasetCount: number
+  datasetsAndDataUse: number
   expiresAt: number
-  dataUse: number
 }
 
 const breakpoints: Record<string, Breakpoint> = {
-  [consoleTypes.ADMIN]: { datasetCount: 1450, expiresAt: 1250, dataUse: 1650 },
-  [consoleTypes.CHAIR]: { datasetCount: 1450, expiresAt: 1250, dataUse: 1650 },
-  [consoleTypes.MEMBER]: { datasetCount: 1450, expiresAt: 1250, dataUse: 1650 },
-  [consoleTypes.SIGNING_OFFICIAL]: { datasetCount: 1450, expiresAt: 1250, dataUse: 1650 },
-  [consoleTypes.RESEARCHER]: { datasetCount: 1200, expiresAt: 1000, dataUse: 1450 },
+  [consoleTypes.ADMIN]: { datasetsAndDataUse: 1450, expiresAt: 1250 },
+  [consoleTypes.CHAIR]: { datasetsAndDataUse: 1450, expiresAt: 1250 },
+  [consoleTypes.MEMBER]: { datasetsAndDataUse: 1450, expiresAt: 1250 },
+  [consoleTypes.SIGNING_OFFICIAL]: { datasetsAndDataUse: 1450, expiresAt: 1250 },
+  [consoleTypes.RESEARCHER]: { datasetsAndDataUse: 1200, expiresAt: 1000 },
 }
+
+// A dataset count means little without its data use, and votes are cast per data-use group.
+const dataUseGroupColumns = new Set<string>([
+  DarCollectionTableColumnOptions.DATASET_COUNT,
+  DarCollectionTableColumnOptions.DATA_USE,
+  DarCollectionTableColumnOptions.VOTES,
+])
 
 export function getDarCollectionColumns(consoleType: string, windowWidth: number): string[] {
   const baseColumns = getBaseColumns(consoleType)
-  const { datasetCount, expiresAt, dataUse } = breakpoints[consoleType] || breakpoints[consoleTypes.ADMIN]
+  const { datasetsAndDataUse, expiresAt } = breakpoints[consoleType] || breakpoints[consoleTypes.ADMIN]
   let columns = [...baseColumns]
 
-  if (windowWidth < datasetCount) {
-    columns = columns.filter(col => col !== DarCollectionTableColumnOptions.DATASET_COUNT)
+  if (windowWidth < datasetsAndDataUse) {
+    columns = columns.filter(col => !dataUseGroupColumns.has(col))
   }
   if (windowWidth < expiresAt) {
     columns = columns.filter(col => col !== DarCollectionTableColumnOptions.EXPIRES_AT)
-  }
-  if (windowWidth < dataUse) {
-    // Votes are shown per data-use group, so hide them together with DATA_USE - otherwise
-    // Votes would be left with no data-use label to sit next to.
-    columns = columns.filter(col => col !== DarCollectionTableColumnOptions.DATA_USE && col !== DarCollectionTableColumnOptions.VOTES)
   }
   return columns
 }
