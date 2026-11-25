@@ -182,7 +182,10 @@ describe('SigningOfficialDarRequests', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Approve DAR-1' }))
 
     await waitFor(() => {
-      expect(Collections.approveCollectionById).toHaveBeenCalledWith(1)
+      expect(Collections.approveCollectionById).toHaveBeenCalledWith(1, {
+        referenceId: approvedCollection.latestReferenceId,
+        submissionDate: approvedCollection.submissionDate,
+      })
       expect(Collections.getCollectionSummaryByRoleNameAndId).toHaveBeenCalledWith({
         id: 1,
         roleName: USER_ROLES.signingOfficial,
