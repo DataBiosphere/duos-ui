@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@fastify/vite>@fastify/static': 10.1.12
+
 importers:
 
   .:
@@ -181,14 +184,14 @@ importers:
         specifier: 11.2.2
         version: 11.2.2
       '@fastify/reply-from':
-        specifier: 12.8.2
-        version: 12.8.2
+        specifier: 12.8.4
+        version: 12.8.4
       '@fastify/session':
         specifier: 11.1.6
         version: 11.1.6
       '@fastify/static':
-        specifier: 10.1.11
-        version: 10.1.11
+        specifier: 10.1.12
+        version: 10.1.12
       '@fastify/vite':
         specifier: 10.0.0
         version: 10.0.0(fastify@5.12.8)(vite@8.1.6(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
@@ -634,8 +637,8 @@ packages:
   '@fastify/rate-limit@11.2.2':
     resolution: {integrity: sha512-Ynxk9BU82Y5Ux7NOk9NqyZpTMdFes8EY8quXrN6ePDsbtG4G9Afb3l9mD8Vw2nv0hXg0iFjV+gkdABReFPlShw==}
 
-  '@fastify/reply-from@12.8.2':
-    resolution: {integrity: sha512-m2Cgo+QyJhHdj1diUq8liHo8mkJsPP7etaSgoNzYKlewD6cIiO3VAk4wXIUJ1v+tiyfj7q2h5tX9VnQEYRWcGg==}
+  '@fastify/reply-from@12.8.4':
+    resolution: {integrity: sha512-5z0030rSvlcCP4FFZR0diT15hEwldRoFEXaTSnM6NoQtgfOqcLSDhMzljgfOrL18iBAtyoG2j5MU3TTX3m0asA==}
 
   '@fastify/send@4.2.1':
     resolution: {integrity: sha512-zOB8L9z444PnGbd1Nd7gNXPz/7bnDR8Z4KNTNSwLVQuE3cTGsU9qUj1N4SjXKK0Tq4cauZYTwB+tqvlqosuKsw==}
@@ -643,8 +646,8 @@ packages:
   '@fastify/session@11.1.6':
     resolution: {integrity: sha512-ggv3aRRQGPwPGLurZnKQiJu4cRa5Mnnf41gFeK9lo1tvaMFwqO70Nhx2tS/lREMdLZbwxBW2tRxVUaz0qMEguA==}
 
-  '@fastify/static@10.1.11':
-    resolution: {integrity: sha512-WjEpDqkzOziIipghh4ki3ZNfLCmI1kRWlYKar3+9FiuY2LzoeogKiDqxIH68r6vYUSxvUzyEiV1BOP0yfW+glQ==}
+  '@fastify/static@10.1.12':
+    resolution: {integrity: sha512-D0pmf8OgurIsKiIjxC8ZJP/bCYnUSAiU6PS/se/6Me63UoliAu8FqrzDRX8FdgJMqFMXy45ISlfUZ1Gi6AJnqA==}
 
   '@fastify/vite@10.0.0':
     resolution: {integrity: sha512-YgLsEIcZzzPDu70ycIZ0Q/DQlGyfvbuh8nBhRJ5fuNDdq1HyOVjHjFUgKO+TOkOafsfDtGMo+SVh047J/4w9QA==}
@@ -3636,7 +3639,7 @@ snapshots:
       ip-address: 10.7.6
       toad-cache: 3.7.4
 
-  '@fastify/reply-from@12.8.2':
+  '@fastify/reply-from@12.8.4':
     dependencies:
       '@fastify/error': 4.2.1
       end-of-stream: 1.4.5
@@ -3659,7 +3662,7 @@ snapshots:
       fastify-plugin: 6.0.1
       safe-stable-stringify: 2.5.0
 
-  '@fastify/static@10.1.11':
+  '@fastify/static@10.1.12':
     dependencies:
       '@fastify/accept-negotiator': 2.1.2
       '@fastify/error': 4.2.1
@@ -3673,7 +3676,7 @@ snapshots:
     dependencies:
       '@fastify/deepmerge': 3.2.1
       '@fastify/middie': 9.3.3
-      '@fastify/static': 10.1.11
+      '@fastify/static': 10.1.12
       fastify: 5.12.8
       fastify-plugin: 5.1.0
       fs-extra: 11.4.0
