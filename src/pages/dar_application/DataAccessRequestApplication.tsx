@@ -644,9 +644,10 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
 
       const responseError = error as { response?: { status?: number, data?: { code?: string, message?: string } } }
 
-      // Make DAR editable if we get a 400 status (Bad Request) error. The addendum tab goes with
-      // the attestation, as it does on cancel - otherwise it lingers pointing at nothing.
-      if (responseError.response?.status === 400) {
+      // Make DAR editable if we get a 400 (Bad Request) or a 413 (a document over the upload limit).
+      // The addendum tab goes with the attestation, as it does on cancel - otherwise it lingers
+      // pointing at nothing.
+      if (responseError.response?.status === 400 || responseError.response?.status === 413) {
         setIsAttested(false)
         removeAddendumTab()
       }
@@ -655,6 +656,15 @@ const DataAccessRequestApplication = (props: Readonly<DataAccessRequestApplicati
         Notifications.showError(
           {
             text: <ReactMarkdown>{responseError.response.data.message}</ReactMarkdown>,
+            timeout: 6000,
+          },
+        )
+      }
+      else if (responseError.response?.status === 413) {
+        // A proxy's 413 has no message of Consent's; trying again would only send the same file.
+        Notifications.showError(
+          {
+            text: 'A document is over the upload limit. Please upload a smaller file.',
             timeout: 6000,
           },
         )

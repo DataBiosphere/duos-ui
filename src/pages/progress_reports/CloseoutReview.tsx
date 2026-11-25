@@ -2,11 +2,15 @@ import React, { useEffect, useState } from 'react'
 import InfoIcon from '@mui/icons-material/Info'
 import { User } from 'src/libs/ajax/User'
 import { Notifications } from 'src/libs/utils'
-import { extractError } from 'src/utils/ErrorUtils'
+import { extractError, extractStatus } from 'src/utils/ErrorUtils'
+import { APPROVAL_CHANGED_MESSAGE } from 'src/utils/DarCollectionUtils'
 import { Storage } from 'src/libs/storage'
 import { DAR } from 'src/libs/ajax/DAR'
 import { DataAccessRequest, ResponseError } from 'src/types/model'
 import { AsyncSpinnerButton } from 'src/components/AsyncSpinnerButton'
+
+/** The closeout on screen can't be approved as shown; handled like Consent's 409. */
+class SubmissionChangedError extends Error {}
 
 interface CloseoutReviewProps {
   dar: DataAccessRequest
@@ -19,12 +23,23 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
 }) => {
   const [acknowledged, setAcknowledged] = useState<boolean | undefined>(undefined)
 
+  // The closeout on screen isn't the current submission. The console shows the current one.
+  const onChanged = () => {
+    setAcknowledged(false)
+    Notifications.showError({ text: APPROVAL_CHANGED_MESSAGE })
+    onReturn?.()
+  }
+
   const onApprove = async (): Promise<void> => {
     const user = Storage.getCurrentUser()
     const isCloseoutApproved = dar.approvingSigningOfficialApprovedDate !== undefined
 
     if (user.isSigningOfficial && !isCloseoutApproved) {
-      await DAR.approveCloseout(dar.referenceId)
+      // Without its submission date the approval can't name what was reviewed.
+      if (dar.submissionDate === undefined) {
+        throw new SubmissionChangedError()
+      }
+      await DAR.approveCloseout(dar.referenceId, dar.submissionDate)
     }
     else {
       const acknowledgement = 'dar_closeout_chair_ref_' + dar.referenceId
@@ -35,6 +50,10 @@ export const CloseoutReview: React.FC<CloseoutReviewProps> = ({
   }
 
   const onError = (error: unknown) => {
+    if (error instanceof SubmissionChangedError || extractStatus(error) === 409) {
+      onChanged()
+      return
+    }
     setAcknowledged(false)
     Notifications.showError({ text: 'Error approving closeout review: ' + extractError(error) })
   }
