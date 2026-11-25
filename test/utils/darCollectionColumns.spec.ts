@@ -66,10 +66,11 @@ describe('darCollectionColumns', () => {
     })
 
     describe('Admin/Chair Breakpoints (1450px for DATASET_COUNT and DATA_USE, 1250px for EXPIRES_AT)', () => {
-      it('includes both DATASET_COUNT and EXPIRES_AT above breakpoints', () => {
+      it('includes DATASET_COUNT, DATA_USE and EXPIRES_AT above breakpoints', () => {
         const columns = getDarCollectionColumns(consoleTypes.ADMIN, 1500)
 
         expect(columns).toContain(DarCollectionTableColumnOptions.DATASET_COUNT)
+        expect(columns).toContain(DarCollectionTableColumnOptions.DATA_USE)
         expect(columns).toContain(DarCollectionTableColumnOptions.EXPIRES_AT)
       })
 
@@ -104,10 +105,11 @@ describe('darCollectionColumns', () => {
     })
 
     describe('Researcher Breakpoints (1200px for DATASET_COUNT and DATA_USE, 1000px for EXPIRES_AT)', () => {
-      it('includes both DATASET_COUNT and EXPIRES_AT above breakpoints', () => {
+      it('includes DATASET_COUNT, DATA_USE and EXPIRES_AT above breakpoints', () => {
         const columns = getDarCollectionColumns(consoleTypes.RESEARCHER, 1300)
 
         expect(columns).toContain(DarCollectionTableColumnOptions.DATASET_COUNT)
+        expect(columns).toContain(DarCollectionTableColumnOptions.DATA_USE)
         expect(columns).toContain(DarCollectionTableColumnOptions.EXPIRES_AT)
       })
 
@@ -127,7 +129,13 @@ describe('darCollectionColumns', () => {
     })
 
     describe('Datasets and Data Use pairing', () => {
-      const consoles = [consoleTypes.ADMIN, consoleTypes.CHAIR, consoleTypes.MEMBER, consoleTypes.SIGNING_OFFICIAL, consoleTypes.RESEARCHER]
+      const consoles = [
+        consoleTypes.ADMIN,
+        consoleTypes.CHAIR,
+        consoleTypes.MEMBER,
+        consoleTypes.SIGNING_OFFICIAL,
+        consoleTypes.RESEARCHER,
+      ]
 
       it('never shows DATASET_COUNT without DATA_USE, or DATA_USE without DATASET_COUNT', () => {
         for (const consoleType of consoles) {
