@@ -3,6 +3,7 @@ import { formatDate, Notifications } from 'src/libs/utils'
 import { Collections } from 'src/libs/ajax/Collections'
 import { DarCollectionSummary, Election, UserRoleName, Vote } from 'src/types/model'
 import { groupBy, isNil, cloneDeep } from 'src/utils/NodashUtil'
+import { extractStatus } from 'src/utils/ErrorUtils'
 
 interface VotesByType {
   chairpersonVotes: Vote[]
@@ -258,6 +259,9 @@ export const openCollectionFn = ({
     }
   }
 
+/** Shown when the request changed between loading it and approving it (Consent answered 409). */
+export const APPROVAL_CHANGED_MESSAGE = 'This request changed since you opened it. Review it again before approving.'
+
 export const approveCollectionFn = ({
   updateCollections,
   role,
@@ -265,17 +269,33 @@ export const approveCollectionFn = ({
   updateCollections: (collection: DarCollectionSummary) => void
   role: UserRoleName
 }) =>
-  async ({ darCode, darCollectionId }: { darCode: string, darCollectionId: number }): Promise<void> => {
-    try {
-      await Collections.approveCollectionById(darCollectionId)
+  async ({ darCode, darCollectionId, latestReferenceId, submissionDate }: Pick<
+    DarCollectionSummary,
+    'darCode' | 'darCollectionId' | 'latestReferenceId' | 'submissionDate'
+  >): Promise<void> => {
+    const reloadRow = async () => {
       const summary = await Collections.getCollectionSummaryByRoleNameAndId({
         id: darCollectionId,
         roleName: role,
       })
       updateCollections(summary)
+    }
+    try {
+      // The approval names the submission on screen, so it can't land on one the official hasn't seen.
+      await Collections.approveCollectionById(darCollectionId, {
+        referenceId: latestReferenceId,
+        submissionDate,
+      })
+      await reloadRow()
       Notifications.showSuccess({ text: `Successfully approved ${darCode}` })
     }
-    catch {
+    catch (error) {
+      if (extractStatus(error) === 409) {
+        // Show the current submission, so the official reviews what they would approve.
+        await reloadRow().catch(() => undefined)
+        Notifications.showError({ text: APPROVAL_CHANGED_MESSAGE })
+        return
+      }
       Notifications.showError({ text: `Error approving ${darCode}` })
     }
   }

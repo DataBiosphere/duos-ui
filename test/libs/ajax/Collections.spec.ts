@@ -186,19 +186,22 @@ describe('Collections ajax', () => {
   })
 
   describe('approveCollectionById', () => {
-    it('sends a POST request to the approve endpoint with empty body', async () => {
+    it('sends a POST request to the approve endpoint naming the reviewed submission', async () => {
       vi.mocked(fetchPost).mockResolvedValue({ data: mockCollection } as FetchData<DarCollection>)
+      const submission = { referenceId: 'ref-1', submissionDate: 1700000000123 }
 
-      const result = await Collections.approveCollectionById(1)
+      const result = await Collections.approveCollectionById(1, submission)
 
       expect(result).toEqual(mockCollection)
-      expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/collections/1/approve`, {}, authHeaders)
+      expect(fetchPost).toHaveBeenCalledWith(`${apiUrl}/api/collections/1/approve`, submission, authHeaders)
     })
 
     it('throws on a 403 response', async () => {
       vi.mocked(fetchPost).mockRejectedValue(new Error('Forbidden'))
 
-      await expect(Collections.approveCollectionById(1)).rejects.toThrow('Forbidden')
+      await expect(
+        Collections.approveCollectionById(1, { referenceId: 'ref-1', submissionDate: 1 }),
+      ).rejects.toThrow('Forbidden')
     })
   })
 })
