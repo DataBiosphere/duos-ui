@@ -14,9 +14,11 @@ import { endSession, logAuthEvent, sessionIdp } from '../auth/authEvents.js'
 import type { SessionDestroyReason } from '../auth/authEvents.js'
 import { requireEnv } from '../auth/oidcClient.js'
 import { RefreshFailedError, refreshAccessToken, tokenDisposition } from '../auth/refresh.js'
+import { SIGNED_CLIENT_IP_HEADERS, signClientIp } from './clientIpSignature.js'
 import { recordBffError, registerProxyCompletedEvent } from './proxyEvents.js'
 import type { ProxyUpstream } from './proxyEvents.js'
 import { fetchMetadataGuard } from '../security/fetchMetadata.js'
+import { rateLimitKey } from '../security/rateLimit.js'
 import { SESSION_COOKIE_NAME } from '../session/sessionOptions.js'
 
 /**
@@ -90,6 +92,14 @@ export interface UpstreamProxyConfig {
    * subsystem disagreed.
    */
   destroySessionOnUpstream401: boolean
+  /**
+   * Upstream paths whose requests get a signed client IP for the upstream's
+   * per-IP rate limit (see clientIpSignature.ts), when `clientIpSecret` is
+   * set. Unset for upstreams without such a limit.
+   */
+  signsClientIp?: (upstreamPath: string) => boolean
+  /** The secret shared with the upstream for `signsClientIp`. */
+  clientIpSecret?: string
 }
 
 // Re-exported for existing consumers; the constant is refresh policy and
@@ -155,7 +165,12 @@ const CONNECTION_SPECIFIC_RESPONSE_HEADERS: ReadonlySet<string> = new Set([
  */
 export function upstreamPath(url: string, prefix: string): string {
   const queryIndex = url.indexOf('?')
-  const path = queryIndex === -1 ? url : url.slice(0, queryIndex)
+  const withoutQuery = queryIndex === -1 ? url : url.slice(0, queryIndex)
+  // A raw `#…` never reaches the upstream (reply-from drops it), so it must not
+  // reach any decision made on this path either, such as which requests are
+  // signed (DT-4496).
+  const fragmentIndex = withoutQuery.indexOf('#')
+  const path = fragmentIndex === -1 ? withoutQuery : withoutQuery.slice(0, fragmentIndex)
   // The `|| '/'` is defensive, not a routing case: `<prefix>/*` does not match
   // the bare prefix, so `/duos-api` 404s before reaching here and `/duos-api/`
   // already slices to '/'. It only guarantees this exported helper never hands
@@ -199,6 +214,12 @@ export async function registerUpstreamProxy(
   registerProxyCompletedEvent(app, config.upstream)
 
   const pathFor = (url: string): string => upstreamPath(url, prefix)
+
+  const signedClientIp = (request: ProxyRequest): Record<string, string> => {
+    const signs = config.clientIpSecret !== undefined
+      && config.signsClientIp?.(pathFor(request.url))
+    return signs ? signClientIp(config.clientIpSecret!, rateLimitKey(request), Date.now() / 1000) : {}
+  }
 
   const injectedAccessToken = (request: ProxyRequest): string | undefined => {
     if (config.unauthenticatedPaths.has(pathFor(request.url))) {
@@ -330,12 +351,18 @@ export async function registerUpstreamProxy(
     //                  browser sent is replaced below with the session's token,
     //                  or omitted entirely on an allowlisted path.
     //   x-csrf-token — consumed by the BFF (story 3-D); meaningless upstream.
-    const { cookie, authorization, 'x-csrf-token': csrfToken, ...forwarded } = headers
+    const { cookie, authorization, 'x-csrf-token': csrfToken, ...rest } = headers
+    //   x-duos-client-ip* — only the BFF signs a client IP; a caller's values
+    //                  never reach the upstream, signed route or not.
+    const forwarded: IncomingHttpHeaders = Object.fromEntries(
+      Object.entries(rest).filter(([name]) => !SIGNED_CLIENT_IP_HEADERS.includes(name)),
+    )
 
     const accessToken = injectedAccessToken(request)
 
     return {
       ...forwarded,
+      ...signedClientIp(request),
       // Sent by the client on every call today (Config.authOpts / textPlain), so
       // the upstream already expects it. Injected rather than merely forwarded so
       // it is true of every proxied request regardless of what the caller set.

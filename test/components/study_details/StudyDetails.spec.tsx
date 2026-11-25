@@ -446,6 +446,20 @@ describe('Study details test', () => {
     expect(screen.getByText('No datasets found matching your criteria')).toBeInTheDocument()
   })
 
+  it('formats Markdown in the study description', async () => {
+    vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValueOnce(makeSearchResponse([]) as never)
+    vi.mocked(Study.getById).mockResolvedValueOnce({
+      studyId: 1,
+      name: 'Study with a Markdown description',
+      description: '**Study ID:**E5204',
+    } as never)
+
+    mountComponent()
+
+    expect((await screen.findByText('Study ID:')).tagName).toBe('STRONG')
+    expect(screen.queryByText(/\*\*/)).toBeNull()
+  })
+
   it('requests server-side pages for the current study without a fixed result cap', async () => {
     const user = userEvent.setup()
     vi.mocked(DataSet.searchDatasetIndexV2).mockResolvedValue(makeSearchResponse(datasets, 26) as never)

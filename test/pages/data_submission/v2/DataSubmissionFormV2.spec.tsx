@@ -127,6 +127,38 @@ describe('DataSubmissionFormV2 Data Use validation errors', () => {
     expect(DataSet.getStudyDatasets).toHaveBeenCalledTimes(1)
   })
 
+  it('shows the upload limit when study creation is refused as too large', async () => {
+    const user = userEvent.setup()
+    mockUseParams.mockReturnValue({})
+    vi.mocked(DataSet.registerDataset).mockRejectedValue({ response: { status: 413, data: {} } })
+
+    renderForm()
+    await user.click(await screen.findByRole('button', { name: /create study/i }))
+
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalledWith({
+      text: 'Study creation failed: A file or the request is over the upload limit',
+    }))
+  })
+
+  // A file over the upload limit is the submitter's to fix too, so the edits must survive it,
+  // whether or not the 413 carries Consent's message (a proxy's doesn't).
+  it.each([
+    [{ message: 'File size is invalid. Max size is: 25 MB', code: 413 }, 'Study update failed: File size is invalid. Max size is: 25 MB'],
+    [{}, 'Study update failed: A file or the request is over the upload limit'],
+  ])('does not reload the study after a 413 on update (%o)', async (data, shown) => {
+    const user = userEvent.setup()
+    mockUseParams.mockReturnValue({ studyId: '42' })
+    vi.mocked(DataSet.getStudyById).mockResolvedValue({ data: {} } as Study)
+    vi.mocked(DataSet.updateStudy).mockRejectedValue({ response: { status: 413, data } })
+
+    renderForm()
+    await waitFor(() => expect(DataSet.getStudyById).toHaveBeenCalledTimes(1))
+    await user.click(await screen.findByRole('button', { name: /update study/i }))
+
+    await waitFor(() => expect(Notifications.showError).toHaveBeenCalledWith({ text: shown }))
+    expect(DataSet.getStudyById).toHaveBeenCalledTimes(1)
+  })
+
   // The form is the only copy of the edits after a 400, so it must still hold the attachments
   it('resubmits both attachments after a 400 rather than dropping them', async () => {
     const user = userEvent.setup()

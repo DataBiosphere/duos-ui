@@ -2,8 +2,9 @@ import { createHmac } from 'node:crypto'
 
 /**
  * Signed client IP for Consent's anonymous per-IP rate limits (DT-4379).
- * Only the showcase route signs today; another anonymous route can opt in by
- * spreading `signClientIp(...)` into its request headers.
+ * The showcase route and the support form's requests (apiProxy.ts) sign
+ * today; another route can opt in by spreading `signClientIp(...)` into its
+ * request headers.
  *
  * The BFF calls Consent at its public URL, and Consent's load balancer
  * overwrites `X-Real-IP` with this pod's egress address, so every BFF-proxied
