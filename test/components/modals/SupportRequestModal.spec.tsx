@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router'
 import { Storage } from 'src/libs/storage'
 import { Support } from 'src/libs/ajax/Support'
 import { useUserIsLogged } from 'src/hooks/useSession'
+import { revalidateSessionInfo } from 'src/libs/auth/session'
 import { SupportRequestModal } from 'src/components/modals/SupportRequestModal'
 
 vi.mock('src/libs/storage')
@@ -19,6 +20,7 @@ vi.mock('src/libs/utils', async (importOriginal) => {
   return { ...actual, Notifications: { showError: vi.fn(), showSuccess: vi.fn() } }
 })
 vi.mock('src/libs/signInUtils', () => ({ handleSignIn: vi.fn() }))
+vi.mock('src/libs/auth/session', () => ({ revalidateSessionInfo: vi.fn() }))
 
 const mockUser = { displayName: 'Display Name', email: 'email@test.com' }
 // getCurrentUser never returns undefined — signed-out storage usually holds
@@ -36,11 +38,13 @@ const mountModal = () =>
 
 const setupLoggedIn = () => {
   vi.mocked(useUserIsLogged).mockReturnValue(true)
+  vi.mocked(revalidateSessionInfo).mockResolvedValue({ authenticated: true })
   vi.mocked(Storage.getCurrentUser).mockReturnValue(mockUser as never)
 }
 
 const setupLoggedOut = () => {
   vi.mocked(useUserIsLogged).mockReturnValue(false)
+  vi.mocked(revalidateSessionInfo).mockResolvedValue({ authenticated: false })
   vi.mocked(Storage.getCurrentUser).mockReturnValue(signedOutUser as never)
 }
 
@@ -55,8 +59,8 @@ const attachFile = () => {
   fireEvent.change(input, { target: { files: [attachment] } })
 }
 
-const expectSubmitSuccess = async () => {
-  await waitFor(() => expect(vi.mocked(Support.createSupportRequest)).toHaveBeenCalled())
+const expectSubmitSuccess = async (signedIn: boolean) => {
+  await waitFor(() => expect(vi.mocked(Support.createSupportRequest)).toHaveBeenCalledWith(expect.anything(), signedIn))
   await waitFor(() => expect(vi.mocked(Support.uploadAttachment)).toHaveBeenCalled())
 }
 
@@ -65,6 +69,7 @@ describe('Support Request Modal Tests', () => {
     vi.mocked(Support.createSupportRequest).mockResolvedValue(undefined)
     vi.mocked(Support.uploadAttachment).mockResolvedValue({ data: { token: 'token_string' } } as never)
     vi.mocked(Support.createTicket).mockReturnValue({} as never)
+    vi.mocked(revalidateSessionInfo).mockResolvedValue({ authenticated: false })
   })
 
   afterEach(() => {
@@ -194,7 +199,41 @@ describe('Support Request Modal Tests', () => {
       expect(document.querySelector('[data-cy="supportFormCancel"]')).not.toBeDisabled()
       attachFile()
       await user.click(document.querySelector('[data-cy="supportFormSubmit"]')!)
-      await expectSubmitSuccess()
+      await expectSubmitSuccess(true)
+    })
+  })
+
+  describe('Choosing the endpoint at submit time:', () => {
+    const fillAndSubmit = async () => {
+      const user = userEvent.setup()
+      mountModal()
+      await user.type(document.querySelector('[data-cy="supportFormSubject"] input')!, 'Subject')
+      await user.type(document.querySelector('[data-cy="supportFormDescription"] textarea')!, 'Description')
+      await selectType(user, 'Bug')
+      await user.click(document.querySelector('[data-cy="supportFormSubmit"]')!)
+    }
+
+    it('files an unverified ticket when the session ended while the form was open', async () => {
+      setupLoggedIn()
+      vi.mocked(revalidateSessionInfo).mockResolvedValue({ authenticated: false })
+      await fillAndSubmit()
+      await waitFor(() => expect(vi.mocked(Support.createSupportRequest)).toHaveBeenCalledWith(expect.anything(), false))
+      expect(revalidateSessionInfo).toHaveBeenCalledOnce()
+    })
+
+    it('files a signed-in ticket when the session probe had not answered before submit', async () => {
+      vi.mocked(useUserIsLogged).mockReturnValue(undefined)
+      vi.mocked(Storage.getCurrentUser).mockReturnValue(signedOutUser as never)
+      vi.mocked(revalidateSessionInfo).mockResolvedValue({ authenticated: true })
+      const user = userEvent.setup()
+      mountModal()
+      await user.type(document.querySelector('[data-cy="supportFormName"] input')!, 'Name')
+      await user.type(document.querySelector('[data-cy="supportFormEmail"] input')!, mockUser.email)
+      await user.type(document.querySelector('[data-cy="supportFormSubject"] input')!, 'Subject')
+      await user.type(document.querySelector('[data-cy="supportFormDescription"] textarea')!, 'Description')
+      await selectType(user, 'Bug')
+      await user.click(document.querySelector('[data-cy="supportFormSubmit"]')!)
+      await waitFor(() => expect(vi.mocked(Support.createSupportRequest)).toHaveBeenCalledWith(expect.anything(), true))
     })
   })
 
@@ -217,7 +256,7 @@ describe('Support Request Modal Tests', () => {
       expect(document.querySelector('[data-cy="supportFormCancel"]')).not.toBeDisabled()
       attachFile()
       await user.click(document.querySelector('[data-cy="supportFormSubmit"]')!)
-      await expectSubmitSuccess()
+      await expectSubmitSuccess(false)
     })
   })
 
@@ -310,6 +349,7 @@ describe('Support Request Modal Tests', () => {
       await user.click(document.querySelector('[data-cy="supportFormSubmit"]')!)
       await waitFor(() => expect(vi.mocked(Support.createSupportRequest)).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'DAC_USAGE' }),
+        true,
       ))
     })
   })

@@ -50,13 +50,22 @@ export const Support = {
 
   /**
    * Submits a support request ticket to the DUOS support endpoint.
+   *
+   * A signed-in user's ticket goes to the authenticated endpoint, so support staff can see who
+   * sent it; anyone else's goes to the open endpoint, and the ticket says the requester is unverified.
    * @param ticket The support ticket created by {@link Support.createTicket}
+   * @param signedIn Whether the user is signed in
    * @returns Promise that resolves when the request is submitted successfully
    */
-  createSupportRequest: async (ticket: SupportTicket): Promise<void> => {
-    const url = `${await Config.getApiUrl()}/support/request`
+  createSupportRequest: async (ticket: SupportTicket, signedIn: boolean): Promise<void> => {
+    const apiUrl = await Config.getApiUrl()
     try {
-      await fetchPost<void>(url, ticket)
+      if (signedIn) {
+        await fetchPost<void>(`${apiUrl}/api/support/request`, ticket, Config.authOpts())
+      }
+      else {
+        await fetchPost<void>(`${apiUrl}/support/request`, ticket)
+      }
     }
     catch (error) {
       throw extractConsentError(error) || new Error(extractError(error))

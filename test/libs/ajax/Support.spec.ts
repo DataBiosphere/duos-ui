@@ -76,27 +76,46 @@ describe('Support', () => {
       uploads: [],
     }
 
-    it('posts the ticket to the support request endpoint', async () => {
-      await Support.createSupportRequest(ticket)
+    it('posts a signed-out ticket to the open support request endpoint, without auth', async () => {
+      await Support.createSupportRequest(ticket, false)
 
       expect(Config.getApiUrl).toHaveBeenCalledOnce()
+      expect(Config.authOpts).not.toHaveBeenCalled()
       expect(fetchPost).toHaveBeenCalledWith(
         'https://duos.example.org/support/request',
         ticket,
       )
     })
 
+    it('posts a signed-in ticket to the authenticated support request endpoint', async () => {
+      await Support.createSupportRequest(ticket, true)
+
+      expect(Config.getApiUrl).toHaveBeenCalledOnce()
+      expect(fetchPost).toHaveBeenCalledWith(
+        'https://duos.example.org/api/support/request',
+        ticket,
+        headers,
+      )
+    })
+
+    it('does not retry a rejected signed-in request on the open endpoint', async () => {
+      vi.mocked(fetchPost).mockRejectedValueOnce({ message: 'Unauthorized', code: 401 })
+
+      await expect(Support.createSupportRequest(ticket, true)).rejects.toBeDefined()
+      expect(fetchPost).toHaveBeenCalledOnce()
+    })
+
     it('propagates fetch failures from the API call', async () => {
       vi.mocked(fetchPost).mockRejectedValueOnce(new Error('network failure'))
 
-      await expect(Support.createSupportRequest(ticket)).rejects.toThrow('network failure')
+      await expect(Support.createSupportRequest(ticket, false)).rejects.toThrow('network failure')
     })
 
     it('propagates ConsentError rejections so callers can extract a useful error', async () => {
       const consentError = { message: 'Support request submission failed', code: 400 }
       vi.mocked(fetchPost).mockRejectedValueOnce(consentError)
 
-      const error = await Support.createSupportRequest(ticket).then(
+      const error = await Support.createSupportRequest(ticket, true).then(
         () => {
           throw new Error('expected createSupportRequest to reject')
         },

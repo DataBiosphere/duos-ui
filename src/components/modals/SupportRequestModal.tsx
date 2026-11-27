@@ -28,6 +28,7 @@ import { Storage } from 'src/libs/storage'
 import { Notifications, isEmailAddress } from 'src/libs/utils'
 import { handleSignIn } from 'src/libs/signInUtils'
 import { useUserIsLogged } from 'src/hooks/useSession'
+import { revalidateSessionInfo } from 'src/libs/auth/session'
 import { AsyncSpinnerMuiButton } from 'src/components/AsyncSpinnerMuiButton'
 
 interface SupportRequestModalProps {
@@ -156,7 +157,12 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = (props) =
         url,
       )
 
-      await Support.createSupportRequest(ticket)
+      // Ask again rather than trust isLogged: the session can end while the form is open, and a
+      // signed-in request would then 401 and sign the user out, losing the form. This catches
+      // most ended sessions, which then file an unverified ticket; it can still miss one when the
+      // probe answers from its short throttle cache or holds its last answer after a failed probe.
+      const { authenticated } = await revalidateSessionInfo()
+      await Support.createSupportRequest(ticket, authenticated)
       Notifications.showSuccess({
         text: 'Sent Successfully',
         layout: 'topRight',
