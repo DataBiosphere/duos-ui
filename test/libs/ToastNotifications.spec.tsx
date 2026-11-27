@@ -143,6 +143,23 @@ describe('ToastNotifications', () => {
       }
     })
 
+    it('should remove a persistent notification when dismissWhen settles', async () => {
+      let settle = (): void => {}
+      const dismissWhen = new Promise<void>((resolve) => {
+        settle = resolve
+      })
+      await act(async () => {
+        ToastNotifications.showNotification({ text: 'Persistent notification', timeout: null, dismissWhen })
+      })
+      expect(document.querySelector('[data-cy="notification-alert"]')).toBeVisible()
+
+      await act(async () => {
+        settle()
+      })
+
+      expect(document.querySelector('[data-cy="notification-alert"]')).not.toBeInTheDocument()
+    })
+
     it('should call onDismiss when the close button closes the notification', async () => {
       const onDismiss = vi.fn()
       vi.useFakeTimers()

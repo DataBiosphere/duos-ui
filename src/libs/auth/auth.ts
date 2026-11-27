@@ -162,6 +162,102 @@ const legacySignOut = async (redirectTo: string): Promise<SignOutResult> => {
   return CONFIRMED
 }
 
+const startLegacyAuth = async (): Promise<void> => {
+  await OidcBroker.initialize()
+  const um: UserManager = OidcBroker.getUserManager()
+  // UserManager events.
+  // For details of each event, see https://authts.github.io/oidc-client-ts/classes/UserManagerEvents.html
+  um.events.addUserLoaded((_: OidcUser) => {
+    // TODO: DUOS-3072 Add metrics for user loaded
+  })
+  um.events.addAccessTokenExpiring((): void => {
+    // TODO: DUOS-3082 Add an alert that session will expire soon
+  })
+  um.events.addAccessTokenExpired((): void => {
+    void Auth.signOut()
+    // TODO: DUOS-3082 Add an alert that session has expired
+  })
+}
+
+export const AUTH_UNAVAILABLE_MESSAGE
+  = 'DUOS cannot reach its server right now, so sign-in and some pages may not work. Please try again in a few minutes.'
+
+/** Sign-in was refused because the legacy flow could not be set up. */
+export class AuthUnavailableError extends Error {
+  constructor() {
+    super(AUTH_UNAVAILABLE_MESSAGE)
+    this.name = 'AuthUnavailableError'
+  }
+}
+
+export const LEGACY_AUTH_RETRY_MS = 30_000
+/** Each failed retry doubles the wait, up to this, so a long outage costs each open tab little. */
+export const LEGACY_AUTH_RETRY_MAX_MS = 300_000
+
+let legacyAuthStarted: Promise<void> | null = null
+let legacyAuthReady = false
+let legacyAuthRetry: ReturnType<typeof setTimeout> | null = null
+let legacyAuthRetryDelay = LEGACY_AUTH_RETRY_MS
+const legacyAuthReadyListeners = new Set<() => void>()
+
+/** Calls the listener once the legacy setup has succeeded, at once if it already has. */
+export const onLegacyAuthRecovered = (listener: () => void): void => {
+  if (legacyAuthReady) {
+    listener()
+    return
+  }
+  legacyAuthReadyListeners.add(listener)
+}
+
+const notifyLegacyAuthRecovered = (): void => {
+  const listeners = [...legacyAuthReadyListeners]
+  legacyAuthReadyListeners.clear()
+  for (const listener of listeners) {
+    try {
+      listener()
+    }
+    catch (error) {
+      console.error('Sign-in recovery listener failed', error)
+    }
+  }
+}
+
+const scheduleLegacyAuthRetry = (): void => {
+  if (legacyAuthRetry !== null) return
+  const delay = legacyAuthRetryDelay
+  legacyAuthRetryDelay = Math.min(delay * 2, LEGACY_AUTH_RETRY_MAX_MS)
+  legacyAuthRetry = setTimeout(() => {
+    legacyAuthRetry = null
+    ensureLegacyAuth().catch((error: unknown) => console.error('Sign-in setup retry failed', error))
+  }, delay)
+}
+
+// Retried in the background so that a sign-in click opens its popup within the user-activation window.
+const ensureLegacyAuth = (): Promise<void> => {
+  legacyAuthStarted ??= startLegacyAuth().then(
+    () => {
+      legacyAuthReady = true
+      notifyLegacyAuthRecovered()
+    },
+    (error: unknown) => {
+      legacyAuthStarted = null
+      scheduleLegacyAuthRetry()
+      throw error
+    },
+  )
+  return legacyAuthStarted
+}
+
+/** Test seam: forgets a started legacy flow and any pending retry. */
+export const resetLegacyAuthState = (): void => {
+  if (legacyAuthRetry !== null) clearTimeout(legacyAuthRetry)
+  legacyAuthRetry = null
+  legacyAuthRetryDelay = LEGACY_AUTH_RETRY_MS
+  legacyAuthStarted = null
+  legacyAuthReady = false
+  legacyAuthReadyListeners.clear()
+}
+
 export const Auth = {
   signInError: () => {
     return 'Unexpected error, please contact customer support.'
@@ -172,20 +268,7 @@ export const Auth = {
       purgeLegacyOidcKeys()
       return
     }
-    await OidcBroker.initialize()
-    const um: UserManager = OidcBroker.getUserManager()
-    // UserManager events.
-    // For details of each event, see https://authts.github.io/oidc-client-ts/classes/UserManagerEvents.html
-    um.events.addUserLoaded((_: OidcUser) => {
-      // TODO: DUOS-3072 Add metrics for user loaded
-    })
-    um.events.addAccessTokenExpiring((): void => {
-      // TODO: DUOS-3082 Add an alert that session will expire soon
-    })
-    um.events.addAccessTokenExpired((): void => {
-      void Auth.signOut()
-      // TODO: DUOS-3082 Add an alert that session has expired
-    })
+    await ensureLegacyAuth()
   },
   signIn: async (returnTo?: string): Promise<OidcUser> => {
     if (await Config.isBffEnabled()) {
@@ -202,6 +285,9 @@ export const Auth = {
       // intentionally never settles — callers expecting the legacy OidcUser
       // must not observe a user-less "success".
       return new Promise<OidcUser>(() => {})
+    }
+    if (!legacyAuthReady) {
+      throw new AuthUnavailableError()
     }
     const user: OidcUser | null = await OidcBroker.signIn()
     if (user === null) {

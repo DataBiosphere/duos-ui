@@ -3,8 +3,8 @@ import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import SignInButton from 'src/components/SignInButton'
-import { Auth, Redirect } from 'src/libs/auth/auth'
+import SignInButton, { HEALTH_RECHECK_MS } from 'src/components/SignInButton'
+import { Auth, AuthUnavailableError, Redirect } from 'src/libs/auth/auth'
 import { ServiceStatus } from 'src/libs/ajax/ServiceStatus'
 import { Storage } from 'src/libs/storage'
 import type { OidcUser } from 'src/libs/auth/oidcBroker'
@@ -20,6 +20,11 @@ import type { OidcUser } from 'src/libs/auth/oidcBroker'
 const signInError = 'Unexpected error, please contact customer support.'
 
 vi.mock('src/libs/auth/auth', () => ({
+  AuthUnavailableError: class AuthUnavailableError extends Error {
+    constructor() {
+      super('DUOS cannot reach its server right now')
+    }
+  },
   Auth: {
     signIn: vi.fn(),
     signInError: vi.fn(() => signInError),
@@ -92,6 +97,20 @@ describe('SignInButton', () => {
 
     expect(await screen.findByText(signInError)).toBeInTheDocument()
     expect(vi.mocked(Redirect.reload)).not.toHaveBeenCalled()
+  })
+
+  it('shows the outage message, not the support line, and keeps storage when sign-in is unavailable', async () => {
+    const clearStorage = vi.spyOn(Storage, 'clearStorage')
+    vi.mocked(Auth.signIn).mockRejectedValue(new AuthUnavailableError())
+    mountComponent()
+    await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
+
+    await userEvent.click(screen.getByRole('button'))
+
+    expect(await screen.findByText('Sign in unavailable')).toBeInTheDocument()
+    expect(screen.getByText('DUOS cannot reach its server right now')).toBeInTheDocument()
+    expect(screen.queryByText(signInError)).not.toBeInTheDocument()
+    expect(clearStorage).not.toHaveBeenCalled()
   })
 
   it('shows the cancel message when the user closes the legacy popup', async () => {
@@ -173,5 +192,66 @@ describe('SignInButton', () => {
     vi.mocked(ServiceStatus.isConsentHealthy).mockResolvedValue(false)
     mountComponent()
     await waitFor(() => expect(screen.getByRole('button')).toBeDisabled())
+  })
+
+  describe('health re-checks', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('enables the button once Consent is healthy again, without a remount', async () => {
+      vi.mocked(ServiceStatus.isConsentHealthy).mockResolvedValueOnce(false).mockResolvedValue(true)
+      mountComponent()
+      await waitFor(() => expect(screen.getByRole('button')).toBeDisabled())
+
+      await vi.advanceTimersByTimeAsync(HEALTH_RECHECK_MS)
+
+      await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
+    })
+
+    it('retries a failed health probe rather than leaving it unhandled', async () => {
+      vi.mocked(ServiceStatus.isConsentHealthy).mockRejectedValueOnce(new Error('Request failed with status 502'))
+      mountComponent()
+      await waitFor(() => expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(1))
+
+      await vi.advanceTimersByTimeAsync(HEALTH_RECHECK_MS)
+
+      await waitFor(() => expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(2))
+    })
+
+    it('stays disabled for a Consent outage when the SAM probe fails', async () => {
+      vi.mocked(ServiceStatus.isConsentHealthy).mockResolvedValue(false)
+      vi.mocked(ServiceStatus.isSamHealthy).mockRejectedValue(new Error('Request failed with status 502'))
+      mountComponent()
+
+      await waitFor(() => expect(screen.getByRole('button')).toBeDisabled())
+    })
+
+    it('waits twice as long before each further re-check', async () => {
+      vi.mocked(ServiceStatus.isConsentHealthy).mockResolvedValue(false)
+      mountComponent()
+      await waitFor(() => expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(1))
+
+      await vi.advanceTimersByTimeAsync(HEALTH_RECHECK_MS)
+      await waitFor(() => expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(2))
+      await vi.advanceTimersByTimeAsync(HEALTH_RECHECK_MS)
+      expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(2)
+      await vi.advanceTimersByTimeAsync(HEALTH_RECHECK_MS)
+
+      await waitFor(() => expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(3))
+    })
+
+    it('stops checking once everything is healthy', async () => {
+      mountComponent()
+      await waitFor(() => expect(ServiceStatus.isSamHealthy).toHaveBeenCalledTimes(1))
+
+      await vi.advanceTimersByTimeAsync(HEALTH_RECHECK_MS * 2)
+
+      expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(1)
+    })
   })
 })

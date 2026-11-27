@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { isEmpty } from 'src/utils/NodashUtil'
 import { Alert } from 'src/components/Alert'
-import { Auth, Redirect } from 'src/libs/auth/auth'
+import { Auth, AuthUnavailableError, Redirect } from 'src/libs/auth/auth'
 import { Storage } from 'src/libs/storage'
 import loadingIndicator from 'src/images/loading-indicator.svg'
 import { Tooltip as ReactTooltip } from 'react-tooltip'
@@ -16,6 +16,9 @@ interface ErrorInfo {
 }
 
 type ErrorDisplay = ErrorInfo | React.JSX.Element
+
+export const HEALTH_RECHECK_MS = 30_000
+export const HEALTH_RECHECK_MAX_MS = 300_000
 
 /**
  * A single sign-in button that starts the BFF login flow: POST /auth/login
@@ -58,6 +61,12 @@ export const SignInButton = () => {
       // Mirror the old onFailure: drop whatever partial auth state the popup
       // left behind, and tell a deliberate cancel apart from a real failure —
       // oidc-client-ts PopupWindow rejects with "Popup closed by user".
+      if (error instanceof AuthUnavailableError) {
+        // No popup ran, so there is no partial state to drop.
+        setErrorDisplay({ show: true, title: 'Sign in unavailable', description: error.message })
+        setIsLoading(false)
+        return
+      }
       Storage.clearStorage()
       if (String(error).includes('Popup closed by user')) {
         setErrorDisplay({
@@ -98,11 +107,34 @@ export const SignInButton = () => {
   }
 
   useEffect(() => {
-    const init = async () => {
-      setIsConsentDown(!(await ServiceStatus.isConsentHealthy()))
-      setIsSamDown(!(await ServiceStatus.isSamHealthy()))
+    let recheck: ReturnType<typeof setTimeout> | undefined
+    let recheckDelay = HEALTH_RECHECK_MS
+    let active = true
+    // Each probe is its own /status request, so one failing must not discard the other's answer.
+    const probe = async (check: () => Promise<boolean>, setDown: (down: boolean) => void): Promise<boolean> => {
+      try {
+        const healthy = await check()
+        if (active) setDown(!healthy)
+        return healthy
+      }
+      catch {
+        return false
+      }
     }
-    init()
+    // Re-checked while anything is down or unknown, so the button recovers without a reload.
+    const checkHealth = async () => {
+      const consentHealthy = await probe(() => ServiceStatus.isConsentHealthy(), setIsConsentDown)
+      const samHealthy = await probe(() => ServiceStatus.isSamHealthy(), setIsSamDown)
+      if (active && !(consentHealthy && samHealthy)) {
+        recheck = setTimeout(() => void checkHealth(), recheckDelay)
+        recheckDelay = Math.min(recheckDelay * 2, HEALTH_RECHECK_MAX_MS)
+      }
+    }
+    void checkHealth()
+    return () => {
+      active = false
+      clearTimeout(recheck)
+    }
   }, [])
 
   const signInElement = (): React.JSX.Element => {
