@@ -3,6 +3,7 @@ import { OidcBroker } from 'src/libs/auth/oidcBroker'
 import {
   Auth,
   AuthUnavailableError,
+  LEGACY_AUTH_RETRY_MAX_MS,
   LEGACY_AUTH_RETRY_MS,
   onLegacyAuthRecovered,
   Redirect,
@@ -105,13 +106,31 @@ describe('Auth (legacy mode, Consent unreachable at load)', () => {
     expect(Storage.userIsLogged()).toBe(true)
   })
 
-  it('keeps retrying while Consent stays down', async () => {
+  it('keeps retrying while Consent stays down, doubling the wait each time', async () => {
     const brokerInit = vi.spyOn(OidcBroker, 'initialize').mockRejectedValue(consentDown())
+    vi.spyOn(console, 'error').mockImplementation(() => {})
 
     await expect(Auth.initialize()).rejects.toThrow('502')
-    await vi.advanceTimersByTimeAsync(LEGACY_AUTH_RETRY_MS * 2)
+    await vi.advanceTimersByTimeAsync(LEGACY_AUTH_RETRY_MS)
+    expect(brokerInit).toHaveBeenCalledTimes(2)
+    await vi.advanceTimersByTimeAsync(LEGACY_AUTH_RETRY_MS * 2 - 1)
+    expect(brokerInit).toHaveBeenCalledTimes(2)
+    await vi.advanceTimersByTimeAsync(1)
 
     expect(brokerInit).toHaveBeenCalledTimes(3)
+  })
+
+  it('caps the wait between retries', async () => {
+    const brokerInit = vi.spyOn(OidcBroker, 'initialize').mockRejectedValue(consentDown())
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    await expect(Auth.initialize()).rejects.toThrow('502')
+    // The retries wait 30s, 60s, 120s and 240s, then 300s each.
+    await vi.advanceTimersByTimeAsync(30_000 + 60_000 + 120_000 + 240_000)
+    expect(brokerInit).toHaveBeenCalledTimes(5)
+    await vi.advanceTimersByTimeAsync(LEGACY_AUTH_RETRY_MAX_MS)
+
+    expect(brokerInit).toHaveBeenCalledTimes(6)
   })
 
   it('tells recovery listeners once, when a background retry succeeds', async () => {

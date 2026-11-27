@@ -18,6 +18,7 @@ interface ErrorInfo {
 type ErrorDisplay = ErrorInfo | React.JSX.Element
 
 export const HEALTH_RECHECK_MS = 30_000
+export const HEALTH_RECHECK_MAX_MS = 300_000
 
 /**
  * A single sign-in button that starts the BFF login flow: POST /auth/login
@@ -107,6 +108,7 @@ export const SignInButton = () => {
 
   useEffect(() => {
     let recheck: ReturnType<typeof setTimeout> | undefined
+    let recheckDelay = HEALTH_RECHECK_MS
     let active = true
     // Each probe is its own /status request, so one failing must not discard the other's answer.
     const probe = async (check: () => Promise<boolean>, setDown: (down: boolean) => void): Promise<boolean> => {
@@ -124,7 +126,8 @@ export const SignInButton = () => {
       const consentHealthy = await probe(() => ServiceStatus.isConsentHealthy(), setIsConsentDown)
       const samHealthy = await probe(() => ServiceStatus.isSamHealthy(), setIsSamDown)
       if (active && !(consentHealthy && samHealthy)) {
-        recheck = setTimeout(() => void checkHealth(), HEALTH_RECHECK_MS)
+        recheck = setTimeout(() => void checkHealth(), recheckDelay)
+        recheckDelay = Math.min(recheckDelay * 2, HEALTH_RECHECK_MAX_MS)
       }
     }
     void checkHealth()

@@ -191,10 +191,13 @@ export class AuthUnavailableError extends Error {
 }
 
 export const LEGACY_AUTH_RETRY_MS = 30_000
+/** Each failed retry doubles the wait, up to this, so a long outage costs each open tab little. */
+export const LEGACY_AUTH_RETRY_MAX_MS = 300_000
 
 let legacyAuthStarted: Promise<void> | null = null
 let legacyAuthReady = false
 let legacyAuthRetry: ReturnType<typeof setTimeout> | null = null
+let legacyAuthRetryDelay = LEGACY_AUTH_RETRY_MS
 const legacyAuthReadyListeners = new Set<() => void>()
 
 /** Calls the listener once the legacy setup has succeeded, at once if it already has. */
@@ -220,10 +223,13 @@ const notifyLegacyAuthRecovered = (): void => {
 }
 
 const scheduleLegacyAuthRetry = (): void => {
-  legacyAuthRetry ??= setTimeout(() => {
+  if (legacyAuthRetry !== null) return
+  const delay = legacyAuthRetryDelay
+  legacyAuthRetryDelay = Math.min(delay * 2, LEGACY_AUTH_RETRY_MAX_MS)
+  legacyAuthRetry = setTimeout(() => {
     legacyAuthRetry = null
     ensureLegacyAuth().catch((error: unknown) => console.error('Sign-in setup retry failed', error))
-  }, LEGACY_AUTH_RETRY_MS)
+  }, delay)
 }
 
 // Retried in the background so that a sign-in click opens its popup within the user-activation window.
@@ -246,6 +252,7 @@ const ensureLegacyAuth = (): Promise<void> => {
 export const resetLegacyAuthState = (): void => {
   if (legacyAuthRetry !== null) clearTimeout(legacyAuthRetry)
   legacyAuthRetry = null
+  legacyAuthRetryDelay = LEGACY_AUTH_RETRY_MS
   legacyAuthStarted = null
   legacyAuthReady = false
   legacyAuthReadyListeners.clear()

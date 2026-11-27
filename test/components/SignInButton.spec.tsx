@@ -231,6 +231,20 @@ describe('SignInButton', () => {
       await waitFor(() => expect(screen.getByRole('button')).toBeDisabled())
     })
 
+    it('waits twice as long before each further re-check', async () => {
+      vi.mocked(ServiceStatus.isConsentHealthy).mockResolvedValue(false)
+      mountComponent()
+      await waitFor(() => expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(1))
+
+      await vi.advanceTimersByTimeAsync(HEALTH_RECHECK_MS)
+      await waitFor(() => expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(2))
+      await vi.advanceTimersByTimeAsync(HEALTH_RECHECK_MS)
+      expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(2)
+      await vi.advanceTimersByTimeAsync(HEALTH_RECHECK_MS)
+
+      await waitFor(() => expect(ServiceStatus.isConsentHealthy).toHaveBeenCalledTimes(3))
+    })
+
     it('stops checking once everything is healthy', async () => {
       mountComponent()
       await waitFor(() => expect(ServiceStatus.isSamHealthy).toHaveBeenCalledTimes(1))
